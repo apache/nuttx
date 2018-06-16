@@ -1,0 +1,592 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32H7
+
+comment "STM32 H7 Configuration Options"
+
+choice
+	prompt "STM32 H7 Chip Selection"
+	default ARCH_CHIP_STM32H743ZI
+	depends on ARCH_CHIP_STM32H7
+
+config ARCH_CHIP_STM32H743ZI
+	bool "STM32H743ZI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+# TODO: IO_CONFIG
+	---help---
+		STM32 H7 Cortex M7, 2048 FLASH, 1024K Kb SRAM
+
+endchoice # STM32 H7 Chip Selection
+
+config STM32H7_STM32H7X3XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32H7_HAVE_SPI4
+	select STM32H7_HAVE_SPI5
+	select STM32H7_HAVE_SPI6
+	bool
+	default n
+
+config STM32H7_FLASH_CONFIG_I
+	bool
+	default n
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32H7
+	default STM32H7_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32H7 series parts numbering (sans the package type) ends with a
+		letter that designates the FLASH size.
+
+			Designator  Size in KiB
+				I	2048
+
+		This configuration option defaults to using the configuration based
+		on that designator or the default smaller size if there is no last
+		character designator is present in the STM32 Chip Selection.
+
+		Examples:
+
+			If the STM32H743ZI is chosen, the Flash configuration would be
+			'I', if a variant of the part is released in the future one
+			could simply select another designator here.
+
+			If an STM32H7xxx Series parts is chosen the default Flash
+			configuration will be set herein and can be changed.
+
+config STM32H7_FLASH_OVERRIDE_DEFAULT
+			bool "Default"
+
+config STM32H7_FLASH_OVERRIDE_I
+			bool "I 2048KiB"
+
+endchoice # "Override Flash Size Designator"
+
+menu "STM32H7 Peripheral Selection"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config STM32H7_HAVE_SPI4
+	bool
+	default n
+
+config STM32H7_HAVE_SPI5
+	bool
+	default n
+
+config STM32H7_HAVE_SPI6
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capability is required.
+
+config STM32H7_I2C
+	bool
+	default n
+
+config STM32H7_SPI
+	bool
+	default n
+
+config STM32H7_USART
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+menu "STM32H7 I2C Selection"
+
+config STM32H7_I2C1
+	bool "I2C1"
+	default n
+	select STM32H7_I2C
+
+config STM32H7_I2C2
+	bool "I2C2"
+	default n
+	select STM32H7_I2C
+
+config STM32H7_I2C3
+	bool "I2C3"
+	default n
+	select STM32H7_I2C
+
+config STM32H7_I2C4
+	bool "I2C4"
+	default n
+	select STM32H7_I2C
+
+endmenu # STM32H7 I2C Selection
+
+menu "STM32H7 SPI Selection"
+
+config STM32H7_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32H7_SPI
+
+config STM32H7_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32H7_SPI
+
+config STM32H7_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32H7_SPI
+
+config STM32H7_SPI4
+	bool "SPI4"
+	default n
+	depends on STM32H7_HAVE_SPI4
+	select SPI
+	select STM32H7_SPI
+
+config STM32H7_SPI5
+	bool "SPI5"
+	default n
+	depends on STM32H7_HAVE_SPI5
+	select SPI
+	select STM32H7_SPI
+
+config STM32H7_SPI6
+	bool "SPI6"
+	default n
+	depends on STM32H7_HAVE_SPI6
+	select SPI
+	select STM32H7_SPI
+
+endmenu # STM32H7 SPI Selection
+
+menu "STM32H7 U[S]ART Selection"
+
+config STM32H7_USART1
+	bool "USART1"
+	default n
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H7_USART
+
+config STM32H7_USART2
+	bool "USART2"
+	default n
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H7_USART
+
+config STM32H7_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select USART3_SERIALDRIVER
+	select STM32H7_USART
+
+config STM32H7_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select UART4_SERIALDRIVER
+	select STM32H7_USART
+
+config STM32H7_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select UART5_SERIALDRIVER
+	select STM32H7_USART
+
+config STM32H7_USART6
+	bool "USART6"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select USART6_SERIALDRIVER
+	select STM32H7_USART
+
+config STM32H7_UART7
+	bool "UART7"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select UART7_SERIALDRIVER
+	select STM32H7_USART
+
+config STM32H7_UART8
+	bool "UART8"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select UART8_SERIALDRIVER
+	select STM32H7_USART
+
+endmenu # STM32H7 U[S]ART Selection
+endmenu # STM32H7 Peripheral Selection
+
+menu "I2C Configuration"
+	depends on STM32H7_I2C
+
+config STM32H7_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32H7_I2C
+
+config STM32H7_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32H7_I2C_DYNTIMEO
+
+config STM32H7_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32H7_I2C_DYNTIMEO
+
+config STM32H7_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32H7_I2C
+
+config STM32H7_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32H7_I2C && !STM32H7_I2C_DYNTIMEO
+
+config STM32H7_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32H7_I2C && !STM32H7_I2C_DYNTIMEO
+
+endmenu # "I2C Configuration"
+
+menu "SPI Configuration"
+	depends on STM32H7_SPI
+
+config STM32H7_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32H7_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT.
+
+endmenu # "SPI Configuration"
+
+menu "U[S]ART Configuration"
+	depends on STM32H7_USART
+
+if STM32H7_USART1
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on STM32H7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_USART1
+
+if STM32H7_USART2
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on STM32H7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_USART2
+
+if STM32H7_USART3
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 Rx DMA"
+	default n
+	depends on STM32H7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+
+endif # STM32H7_USART3
+
+if STM32H7_UART4
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on STM32H7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_UART4
+
+if STM32H7_UART5
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on STM32H7_DMA1
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_UART5
+
+if STM32H7_USART6
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	default n
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
+		used with USART6_RXDMA.
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART6_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART6_RXDMA
+	bool "USART6 Rx DMA"
+	default n
+	depends on STM32H7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_USART
+
+if STM32H7_UART7
+
+config UART7_RS485
+	bool "RS-485 on UART7"
+	default n
+	---help---
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
+
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART7_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART7_RXDMA
+	bool "UART7 Rx DMA"
+	default n
+	depends on STM32H7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_UART7
+
+if STM32H7_UART8
+
+config UART8_RS485
+	bool "RS-485 on UART8"
+	default n
+	---help---
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
+
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART8_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART8_RXDMA
+	bool "UART8 Rx DMA"
+	default n
+	depends on STM32H7_DMA2
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32H7_UART8
+
+config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+config SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some configs and a serial console in other configs, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32H7_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on SERIAL_IFLOWCONTROL_WATERMARKS
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by useing software based management of RTS
+
+config STM32H7_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32H7_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32H7_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+if PM
+
+config PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif # PM
+endmenu # U[S]ART Configuration
+
+config STM32H7_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+endif # ARCH_CHIP_STM32H7
