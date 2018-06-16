@@ -1,8 +1,8 @@
-/****************************************************************************
+ystim****************************************************************************
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -237,7 +237,7 @@
  * NuttX configuration.
  */
 
-#define SYS_clock_systimer             (__SYS_clock+0)
+#define SYS_clock                      (__SYS_clock+0)
 #define SYS_clock_getres               (__SYS_clock+1)
 #define SYS_clock_gettime              (__SYS_clock+2)
 #define SYS_clock_settime              (__SYS_clock+3)

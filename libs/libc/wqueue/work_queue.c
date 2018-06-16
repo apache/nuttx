@@ -114,7 +114,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Now, time-tag that entry and put it in the work queue. */
 
-  work->qtime  = clock_systimer(); /* Time work queued */
+  work->qtime  = clock(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
   kill(wqueue->pid, SIGWORK);   /* Wake up the worker thread */

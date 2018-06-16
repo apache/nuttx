@@ -160,7 +160,7 @@ uintptr_t STUB_clock_nanosleep(int nbr, uintptr_t parm1, uintptr_t parm2,
  * NuttX configuration.
  */
 
-uintptr_t STUB_clock_systimer(int nbr);
+uintptr_t STUB_clock(int nbr);
 uintptr_t STUB_clock_getres(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_gettime(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_clock_settime(int nbr, uintptr_t parm1, uintptr_t parm2);

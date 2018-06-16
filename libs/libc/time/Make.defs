@@ -38,7 +38,7 @@
 
 CSRCS += lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
 CSRCS += lib_gettimeofday.c lib_isleapyear.c lib_settimeofday.c lib_time.c
-CSRCS += lib_difftime.c lib_clock.c
+CSRCS += lib_difftime.c
 
 ifndef CONFIG_DISABLE_SIGNALS
 CSRCS += lib_nanosleep.c

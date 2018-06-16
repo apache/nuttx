@@ -141,7 +141,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
   /* Get the time that we started this polling cycle in clock ticks. */
 
-  stick = clock_systimer();
+  stick = clock();
 
   /* And check each entry in the work queue.  Since we have locked the
    * work queue we know:  (1) we will not be suspended unless we do
@@ -157,7 +157,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
        * zero.  Therefore a delay of zero will always execute immediately.
        */
 
-      ctick   = clock_systimer();
+      ctick   = clock();
       elapsed = ctick - work->qtime;
       if (elapsed >= work->delay)
         {
@@ -251,7 +251,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
   /* Get the delay (in clock ticks) since we started the sampling */
 
-  elapsed = clock_systimer() - stick;
+  elapsed = clock() - stick;
   if (elapsed < wqueue->delay && next > 0)
     {
       /* How must time would we need to delay to get to the end of the
