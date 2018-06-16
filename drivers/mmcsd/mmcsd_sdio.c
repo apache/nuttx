@@ -1126,8 +1126,8 @@ static int mmcsd_eventwait(FAR struct mmcsd_state_s *priv,
 
 static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 {
-  systime_t starttime;
-  systime_t elapsed;
+  clock_t starttime;
+  clock_t elapsed;
   uint32_t r1;
   int ret;
 
@@ -2767,9 +2767,9 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 {
   uint32_t response;
   uint32_t sdcapacity = MMCSD_ACMD41_STDCAPACITY;
-  systime_t start;
-  systime_t elapsed;
-  int      ret;
+  clock_t start;
+  clock_t elapsed;
+  int ret;
 
   /* Assume failure to identify the card */
 

@@ -89,7 +89,7 @@ struct icmp_sendto_s
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   FAR struct socket *snd_sock; /* IPPROTO_ICMP socket structure */
   sem_t snd_sem;               /* Use to manage the wait for send complete */
-  systime_t snd_time;          /* Start time for determining timeouts */
+  clock_t snd_time;            /* Start time for determining timeouts */
   in_addr_t snd_toaddr;        /* The peer to send the request to */
   FAR const uint8_t *snd_buf;  /* ICMP header + data payload */
   uint16_t snd_buflen;         /* Size of the ICMP header + data payload */

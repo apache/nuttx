@@ -71,7 +71,7 @@ struct icmp_recvfrom_s
   FAR struct devif_callback_s *recv_cb; /* Reference to callback instance */
   FAR struct socket *recv_sock; /* IPPROTO_ICMP socket structure */
   sem_t recv_sem;               /* Use to manage the wait for the response */
-  systime_t recv_time;          /* Start time for determining timeouts */
+  clock_t recv_time;            /* Start time for determining timeouts */
   in_addr_t recv_from;          /* The peer we received the request from */
   FAR uint8_t *recv_buf;        /* Location to return the response */
   uint16_t recv_buflen;         /* Size of the response */

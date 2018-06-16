@@ -640,9 +640,9 @@ int spirit_update_status(FAR struct spirit_library_s *spirit)
 int spirit_waitstatus(FAR struct spirit_library_s *spirit,
                       enum spirit_state_e state, unsigned int msec)
 {
-  systime_t start;
-  systime_t ticks;
-  systime_t elapsed;
+  clock_t start;
+  clock_t ticks;
+  clock_t elapsed;
   int ret;
 
 #ifdef CONFIG_DEBUG_SPI_INFO
@@ -664,7 +664,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
   ticks = (msec + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
 #else
-  ticks = ((systime_t)msec * USEC_PER_MSEC + (USEC_PER_TICK - 1)) /
+  ticks = ((clock_t)msec * USEC_PER_MSEC + (USEC_PER_TICK - 1)) /
            USEC_PER_TICK;
 #endif
 

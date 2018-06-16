@@ -98,10 +98,10 @@ void weak_function clock_timer(void);
 
 int  clock_abstime2ticks(clockid_t clockid,
                          FAR const struct timespec *abstime,
-                         FAR ssystime_t *ticks);
+                         FAR sclock_t *ticks);
 int  clock_time2ticks(FAR const struct timespec *reltime,
-                      FAR ssystime_t *ticks);
-int  clock_ticks2time(ssystime_t ticks, FAR struct timespec *reltime);
+                      FAR sclock_t *ticks);
+int  clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
 void clock_timespec_add(FAR const struct timespec *ts1,
                         FAR const struct timespec *ts2,
                         FAR struct timespec *ts3);

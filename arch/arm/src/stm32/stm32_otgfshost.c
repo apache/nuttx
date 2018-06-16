@@ -1607,8 +1607,8 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
                                 FAR const struct usb_ctrlreq_s *req)
 {
   FAR struct stm32_chan_s *chan;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int ret;
 
   /* Loop while the device reports NAK (and a timeout is not exceeded */
@@ -1837,7 +1837,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
-  systime_t start;
+  clock_t start;
   ssize_t xfrd;
   int ret;
 
@@ -1909,7 +1909,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                    * if not then try again.
                    */
 
-                  systime_t elapsed = clock_systimer() - start;
+                  clock_t elapsed = clock_systimer() - start;
                   if (elapsed >= STM32_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -2195,8 +2195,8 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                                   FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct stm32_chan_s *chan;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
@@ -4410,8 +4410,8 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
   FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int retries;
   int ret;
 
@@ -4495,8 +4495,8 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
   FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int retries;
   int ret;
 

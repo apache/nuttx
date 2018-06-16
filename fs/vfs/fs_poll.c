@@ -408,7 +408,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
       else if (timeout > 0)
         {
-          systime_t ticks;
+          clock_t ticks;
 
           /* "Implementations may place limitations on the granularity of
            * timeout intervals. If the requested timeout interval requires

@@ -88,7 +88,7 @@
 
 static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
                         FAR struct work_s *work, worker_t worker,
-                        FAR void *arg, systime_t delay)
+                        FAR void *arg, clock_t delay)
 {
   irqstate_t flags;
 
@@ -160,7 +160,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, systime_t delay)
+               FAR void *arg, clock_t delay)
 {
   /* Queue the new work */
 

@@ -119,11 +119,11 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
   volatile FAR struct work_s *work;
   worker_t  worker;
   FAR void *arg;
-  systime_t elapsed;
-  systime_t remaining;
-  systime_t stick;
-  systime_t ctick;
-  systime_t next;
+  clock_t elapsed;
+  clock_t remaining;
+  clock_t stick;
+  clock_t ctick;
+  clock_t next;
   int ret;
 
   /* Then process queued work.  Lock the work queue while we process items

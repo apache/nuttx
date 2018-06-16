@@ -321,7 +321,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
  *
  ****************************************************************************/
 
-int nxsem_tickwait(FAR sem_t *sem, systime_t start, uint32_t delay);
+int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay);
 
 /****************************************************************************
  * Name: nxsem_post

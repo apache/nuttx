@@ -998,7 +998,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
-  systime_t now;
+  clock_t now;
   uint32_t unrealized;
   uint32_t last;
 

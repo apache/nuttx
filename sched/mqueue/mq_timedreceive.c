@@ -207,7 +207,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   if (mqdes->msgq->msglist.head == NULL)
     {
-      ssystime_t ticks;
+      sclock_t ticks;
 
       /* Convert the timespec to clock ticks.  We must have interrupts
        * disabled here so that this time stays valid until the wait begins.

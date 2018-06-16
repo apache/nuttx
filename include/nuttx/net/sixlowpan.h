@@ -439,7 +439,7 @@ struct sixlowpan_reassbuf_s
    * be cancelled.
    */
 
-  systime_t rb_time;
+  clock_t rb_time;
 };
 
 /****************************************************************************

@@ -169,8 +169,8 @@ static const struct file_operations g_ft80x_fops =
 static int ft80x_fade(FAR struct ft80x_dev_s *priv,
                       FAR const struct ft80x_fade_s *fade)
 {
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int32_t delay;
   int32_t duty;
   int16_t endduty;

@@ -1744,9 +1744,9 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
 static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
                            uint32_t arg)
 {
-  systime_t timeout;
-  systime_t start;
-  systime_t elapsed;
+  clock_t timeout;
+  clock_t start;
+  clock_t elapsed;
   uint32_t regval;
   uint32_t cmdidx;
 
@@ -2066,9 +2066,9 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 
 static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
-  systime_t timeout;
-  systime_t start;
-  systime_t elapsed;
+  clock_t timeout;
+  clock_t start;
+  clock_t elapsed;
   uint32_t errors;
   int ret = OK;
 

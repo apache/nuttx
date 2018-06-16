@@ -253,7 +253,7 @@ FAR const struct sock_intf_s *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SOCKOPTS
-int net_timeo(systime_t start_time, socktimeo_t timeo);
+int net_timeo(clock_t start_time, socktimeo_t timeo);
 #endif
 
 /****************************************************************************

@@ -136,7 +136,7 @@ static void sixlowpan_reass_expire(void)
 {
   FAR struct sixlowpan_reassbuf_s *reass;
   FAR struct sixlowpan_reassbuf_s *next;
-  systime_t elapsed;
+  clock_t elapsed;
 
   /* If reassembly timed out, cancel it */
 

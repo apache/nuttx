@@ -84,7 +84,7 @@
 void pm_activity(int domain, int priority)
 {
   FAR struct pm_domain_s *pdom;
-  systime_t now;
+  clock_t now;
   uint32_t accum;
   irqstate_t flags;
 

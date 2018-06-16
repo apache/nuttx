@@ -188,7 +188,7 @@ static void clock_inittime(void)
     {
       struct timespec ts;
 
-      (void)clock_ticks2time((ssystime_t)g_system_timer, &ts);
+      (void)clock_ticks2time((sclock_t)g_system_timer, &ts);
 
       /* Adjust base time to hide initial timer ticks. */
 

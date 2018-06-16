@@ -352,8 +352,8 @@ static inline int lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv
 static inline int lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv)
 {
   uint32_t timeout;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int ret;
 
   /* Get the timeout value */

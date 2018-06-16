@@ -305,7 +305,7 @@ int timer_settime(timer_t timerid, int flags,
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
   irqstate_t intflags;
-  ssystime_t delay;
+  sclock_t delay;
   int ret = OK;
 
   /* Some sanity checks */
@@ -335,7 +335,7 @@ int timer_settime(timer_t timerid, int flags,
     {
       (void)clock_time2ticks(&value->it_interval, &delay);
 
-      /* REVISIT: Should pt_delay be ssystime_t? */
+      /* REVISIT: Should pt_delay be sclock_t? */
 
       timer->pt_delay = (int)delay;
     }
@@ -384,8 +384,8 @@ int timer_settime(timer_t timerid, int flags,
 
   if (delay > 0)
     {
-      /* REVISIT: Should pt_last be ssystime_t? Should wd_start delay be
-       *          ssystime_t?
+      /* REVISIT: Should pt_last be sclock_t? Should wd_start delay be
+       *          sclock_t?
        */
 
       timer->pt_last = delay;

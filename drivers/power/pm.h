@@ -138,7 +138,7 @@ struct pm_domain_s
 
   /* stime - The time (in ticks) at the start of the current time slice */
 
-  systime_t stime;
+  clock_t stime;
 };
 
 /* This structure encapsulates all of the global data used by the PM module */

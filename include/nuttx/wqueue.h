@@ -292,8 +292,8 @@ struct work_s
   struct dq_entry_s dq;  /* Implements a doubly linked list */
   worker_t  worker;      /* Work callback */
   FAR void *arg;         /* Callback argument */
-  systime_t qtime;       /* Time work queued */
-  systime_t delay;       /* Delay until work performed */
+  clock_t qtime;         /* Time work queued */
+  clock_t delay;         /* Delay until work performed */
 };
 
 /****************************************************************************
@@ -361,7 +361,7 @@ int work_usrstart(void);
  ****************************************************************************/
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, systime_t delay);
+               FAR void *arg, clock_t delay);
 
 /****************************************************************************
  * Name: work_cancel

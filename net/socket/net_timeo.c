@@ -69,10 +69,10 @@
  *
  ****************************************************************************/
 
-int net_timeo(systime_t start_time, socktimeo_t timeo)
+int net_timeo(clock_t start_time, socktimeo_t timeo)
 {
-  systime_t timeo_ticks =  DSEC2TICK(timeo);
-  systime_t elapsed     =  clock_systimer() - start_time;
+  clock_t timeo_ticks =  DSEC2TICK(timeo);
+  clock_t elapsed     =  clock_systimer() - start_time;
 
   if (elapsed >= timeo_ticks)
     {

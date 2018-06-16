@@ -107,7 +107,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
                     FAR struct timespec *rmtp)
 {
   irqstate_t flags;
-  systime_t starttick;
+  clock_t starttick;
   sigset_t set;
   int ret;
 
@@ -158,9 +158,9 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
   if (rmtp)
     {
-      systime_t elapsed;
-      systime_t remaining;
-      ssystime_t ticks;
+      clock_t elapsed;
+      clock_t remaining;
+      sclock_t ticks;
 
       /* REVISIT: The conversion from time to ticks and back could
        * be avoided.  clock_timespec_subtract() would be used instead
@@ -182,16 +182,16 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
        * amount of time that we failed to wait.
        */
 
-      if (elapsed >= (systime_t)ticks)
+      if (elapsed >= (clock_t)ticks)
         {
           remaining = 0;
         }
       else
         {
-          remaining = (systime_t)ticks - elapsed;
+          remaining = (clock_t)ticks - elapsed;
         }
 
-      (void)clock_ticks2time((ssystime_t)remaining, rmtp);
+      (void)clock_ticks2time((sclock_t)remaining, rmtp);
     }
 
   leave_critical_section(flags);

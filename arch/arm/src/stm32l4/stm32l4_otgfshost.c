@@ -1610,8 +1610,8 @@ static int stm32l4_ctrl_sendsetup(FAR struct stm32l4_usbhost_s *priv,
                                   FAR const struct usb_ctrlreq_s *req)
 {
   FAR struct stm32l4_chan_s *chan;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int ret;
 
   /* Loop while the device reports NAK (and a timeout is not exceeded */
@@ -1841,7 +1841,7 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                                    size_t buflen)
 {
   FAR struct stm32l4_chan_s *chan;
-  systime_t start;
+  clock_t start;
   ssize_t xfrd;
   int ret;
 
@@ -1913,7 +1913,7 @@ static ssize_t stm32l4_in_transfer(FAR struct stm32l4_usbhost_s *priv,
                    * if not then try again.
                    */
 
-                  systime_t elapsed = clock_systimer() - start;
+                  clock_t elapsed = clock_systimer() - start;
                   if (elapsed >= STM32L4_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -2200,8 +2200,8 @@ static ssize_t stm32l4_out_transfer(FAR struct stm32l4_usbhost_s *priv,
                                     size_t buflen)
 {
   FAR struct stm32l4_chan_s *chan;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   size_t xfrlen;
   ssize_t xfrd;
   int ret;
@@ -4415,8 +4415,8 @@ static int stm32l4_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32l4_usbhost_s *priv = (FAR struct stm32l4_usbhost_s *)drvr;
   FAR struct stm32l4_ctrlinfo_s *ep0info = (FAR struct stm32l4_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int retries;
   int ret;
 
@@ -4500,8 +4500,8 @@ static int stm32l4_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   FAR struct stm32l4_usbhost_s *priv = (FAR struct stm32l4_usbhost_s *)drvr;
   FAR struct stm32l4_ctrlinfo_s *ep0info = (FAR struct stm32l4_ctrlinfo_s *)ep0;
   uint16_t buflen;
-  systime_t start;
-  systime_t elapsed;
+  clock_t start;
+  clock_t elapsed;
   int retries;
   int ret;
 

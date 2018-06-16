@@ -63,9 +63,9 @@
  *
  ****************************************************************************/
 
-int clock_ticks2time(ssystime_t ticks, FAR struct timespec *reltime)
+int clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime)
 {
-  ssystime_t remainder;
+  sclock_t remainder;
 
   reltime->tv_sec  = ticks / TICK_PER_SEC;
   remainder        = ticks - TICK_PER_SEC * reltime->tv_sec;

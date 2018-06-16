@@ -178,7 +178,7 @@ struct tiva_trace_s
   uint32_t count;           /* Interrupt count when status change */
   enum tiva_trace_e event;  /* Last event that occurred with this status */
   uint32_t parm;            /* Parameter associated with the event */
-  systime_t time;           /* First of event or first status */
+  clock_t time;             /* First of event or first status */
 };
 
 /* I2C Device hardware configuration */
@@ -235,7 +235,7 @@ struct tiva_i2c_priv_s
 
   int tndx;                     /* Trace array index */
   int tcount;                   /* Number of events with this status */
-  systime_t ttime;              /* Time when the trace was started */
+  clock_t ttime;                /* Time when the trace was started */
   uint32_t tstatus;             /* Last status read */
 
   /* The actual trace data */
@@ -786,9 +786,9 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 #else
 static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 {
-  systime_t timeout;
-  systime_t start;
-  systime_t elapsed;
+  clock_t timeout;
+  clock_t start;
+  clock_t elapsed;
   uint32_t status;
   int ret;
 

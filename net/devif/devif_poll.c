@@ -82,7 +82,7 @@ enum devif_packet_type
 
 /* Time of last poll */
 
-systime_t g_polltime;
+clock_t g_polltime;
 
 /****************************************************************************
  * Private Functions
@@ -708,8 +708,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
 int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
-  systime_t now;
-  systime_t elapsed;
+  clock_t now;
+  clock_t elapsed;
   int bstop = false;
 
   /* Get the elapsed time since the last poll in units of half seconds
@@ -733,7 +733,7 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
        * boundary to avoid error build-up).
        */
 
-      g_polltime += (TICK_PER_HSEC * (systime_t)hsec);
+      g_polltime += (TICK_PER_HSEC * (clock_t)hsec);
 
       /* Perform periodic activitives that depend on hsec > 0 */
 

@@ -107,7 +107,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  ssystime_t ticks;
+  sclock_t ticks;
   int status;
   int ret = ERROR;
 

@@ -373,12 +373,12 @@ uint64_t sddep_set_timeout(uint64_t t)
 SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status,
                          struct SdDrCfg_s *cfg)
 {
-  systime_t tick0 = clock_systimer();
+  clock_t tick0 = clock_systimer();
   int ret = 0;
 
   while (1)
     {
-      systime_t tick1 = clock_systimer();
+      clock_t tick1 = clock_systimer();
       *status = sdif_get_status(cfg->regbase);
       if (req_status & (*status))
         {

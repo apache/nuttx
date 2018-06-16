@@ -87,7 +87,7 @@
 enum pm_state_e pm_checkstate(int domain)
 {
   FAR struct pm_domain_s *pdom;
-  systime_t now;
+  clock_t now;
   irqstate_t flags;
 
   /* Get a convenience pointer to minimize all of the indexing */

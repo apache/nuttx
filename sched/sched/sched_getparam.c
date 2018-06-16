@@ -134,9 +134,9 @@ int nxsched_getparam (pid_t pid, FAR struct sched_param *param)
               param->sched_ss_low_priority = (int)sporadic->low_priority;
               param->sched_ss_max_repl     = (int)sporadic->max_repl;
 
-              clock_ticks2time((ssystime_t)sporadic->repl_period,
+              clock_ticks2time((sclock_t)sporadic->repl_period,
                                &param->sched_ss_repl_period);
-              clock_ticks2time((ssystime_t)sporadic->budget,
+              clock_ticks2time((sclock_t)sporadic->budget,
                                &param->sched_ss_init_budget);
             }
           else

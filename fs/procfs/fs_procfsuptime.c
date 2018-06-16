@@ -208,7 +208,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   size_t linesize;
   off_t offset;
   ssize_t ret;
-  systime_t ticktime;
+  clock_t ticktime;
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
   double now;

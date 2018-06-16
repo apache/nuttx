@@ -86,7 +86,7 @@
 int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  ssystime_t ticks;
+  sclock_t ticks;
 
   if (!timer || !value)
     {

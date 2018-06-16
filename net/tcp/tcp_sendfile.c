@@ -106,7 +106,7 @@ struct sendfile_s
   uint32_t           snd_isn;     /* Initial sequence number */
   uint32_t           snd_acked;   /* The number of bytes acked */
 #ifdef CONFIG_NET_SOCKOPTS
-  systime_t          snd_time;    /* Last send time for determining timeout */
+  clock_t            snd_time;    /* Last send time for determining timeout */
 #endif
 };
 

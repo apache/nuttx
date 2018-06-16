@@ -148,7 +148,7 @@ struct udp_wrbuffer_s
   sq_entry_t wb_node;              /* Supports a singly linked list */
   struct sockaddr_storage wb_dest; /* Destination address */
 #ifdef CONFIG_NET_SOCKOPTS
-  systime_t wb_start;              /* Start time for timeout calculation */
+  clock_t wb_start;                /* Start time for timeout calculation */
 #endif
   struct iob_s *wb_iob;            /* Head of the I/O buffer chain */
 };

@@ -43,8 +43,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <time.h>
+
 #include <nuttx/compiler.h>
 
 /****************************************************************************
@@ -215,6 +217,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This structure is used to report CPU usage for a particular thread */
 
 #ifdef CONFIG_SCHED_CPULOAD
@@ -225,20 +228,15 @@ struct cpuload_s
 };
 #endif
 
-/* This type is the natural with of the system timer */
+/* This non-standard type used to hold relative clock ticks that may take
+ * negative values.  Because of its non-portable nature the type sclock_t
+ * should be used only within the OS proper and not by portable applications.
+ */
 
 #ifdef CONFIG_SYSTEM_TIME64
-typedef uint64_t systime_t;
+typedef int64_t sclock_t;
 #else
-typedef uint32_t systime_t;
-#endif
-
-/* This type used to hold relative ticks that may have negative value */
-
-#ifdef CONFIG_SYSTEM_TIME64
-typedef int64_t ssystime_t;
-#else
-typedef int32_t ssystime_t;
+typedef int32_t sclock_t;
 #endif
 
 /****************************************************************************
@@ -261,7 +259,7 @@ extern "C"
  */
 
 #ifdef __HAVE_KERNEL_GLOBALS
-EXTERN volatile systime_t g_system_timer;
+EXTERN volatile clock_t g_system_timer;
 
 #ifndef CONFIG_SYSTEM_TIME64
 #  define clock_systimer() g_system_timer
@@ -361,7 +359,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
  ****************************************************************************/
 
 #if !defined(__HAVE_KERNEL_GLOBALS) || defined(CONFIG_SYSTEM_TIME64)
-systime_t clock_systimer(void);
+clock_t clock_systimer(void);
 #endif
 
 /****************************************************************************

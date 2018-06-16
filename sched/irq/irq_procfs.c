@@ -157,8 +157,8 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
   FAR struct irq_file_s *irqfile = (FAR struct irq_file_s *)arg;
   struct irq_info_s copy;
   irqstate_t flags;
-  systime_t elapsed;
-  systime_t now;
+  clock_t elapsed;
+  clock_t now;
   size_t linesize;
   size_t copysize;
   unsigned long intpart;

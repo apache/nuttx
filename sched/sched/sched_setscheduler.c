@@ -185,8 +185,8 @@ int nxsched_setscheduler(pid_t pid, int policy,
       case SCHED_SPORADIC:
         {
           FAR struct sporadic_s *sporadic;
-          ssystime_t repl_ticks;
-          ssystime_t budget_ticks;
+          sclock_t repl_ticks;
+          sclock_t budget_ticks;
 
           if (param->sched_ss_max_repl < 1 ||
               param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)

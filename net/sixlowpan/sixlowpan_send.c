@@ -82,7 +82,7 @@ struct sixlowpan_send_s
   sem_t                        s_waitsem; /* Supports waiting for driver events */
   int                          s_result;  /* The result of the transfer */
   uint16_t                     s_timeout; /* Send timeout in deciseconds */
-  systime_t                    s_time;    /* Last send time for determining timeout */
+  clock_t                      s_time;    /* Last send time for determining timeout */
   FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or ICMP header. */
   FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
@@ -120,8 +120,8 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
     {
       /* Check if the configured timeout has elapsed */
 
-      systime_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
-      systime_t elapsed     =  clock_systimer() - sinfo->s_time;
+      clock_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
+      clock_t elapsed     =  clock_systimer() - sinfo->s_time;
 
       if (elapsed >= timeo_ticks)
         {

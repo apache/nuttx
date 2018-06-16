@@ -110,7 +110,7 @@ static void    uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset);
 static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock);
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
                                     size_t buflen);
-static int     uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout);
+static int     uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout);
 
 /* Character driver methods */
 
@@ -397,7 +397,7 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
  *
  ************************************************************************************/
 
-static int uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout)
+static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
 {
   int ret;
 
@@ -412,7 +412,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout)
   if (ret >= 0)
     {
       irqstate_t flags;
-      systime_t start;
+      clock_t start;
 
       /* Trigger emission to flush the contents of the tx buffer */
 
@@ -487,7 +487,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, systime_t timeout)
         {
           while (!uart_txempty(dev))
             {
-              systime_t elapsed;
+              clock_t elapsed;
 
 #ifndef CONFIG_DISABLE_SIGNALS
               nxsig_usleep(POLL_DELAY_USEC);

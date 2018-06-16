@@ -75,7 +75,7 @@ struct irq_info_s
   xcpt_t handler;    /* Address of the interrupt handler */
   FAR void *arg;     /* The argument provided to the interrupt handler. */
 #ifdef CONFIG_SCHED_IRQMONITOR
-  systime_t start;   /* Time interrupt attached */
+  clock_t start;     /* Time interrupt attached */
 #ifdef CONFIG_HAVE_LONG_LONG
   uint64_t count;    /* Number of interrupts on this IRQ */
 #else

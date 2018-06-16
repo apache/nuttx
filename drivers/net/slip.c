@@ -433,8 +433,8 @@ static void slip_txtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  systime_t start_ticks;
-  systime_t now_ticks;
+  clock_t start_ticks;
+  clock_t now_ticks;
   unsigned int hsec;
 
   nerr("index: %d\n", index);

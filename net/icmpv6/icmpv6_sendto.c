@@ -89,7 +89,7 @@ struct icmpv6_sendto_s
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   FAR struct socket *snd_sock; /* IPPROTO_ICMP6 socket structure */
   sem_t snd_sem;               /* Use to manage the wait for send complete */
-  systime_t snd_time;          /* Start time for determining timeouts */
+  clock_t snd_time;            /* Start time for determining timeouts */
   struct in6_addr snd_toaddr;  /* The peer to send the request to */
   FAR const uint8_t *snd_buf;  /* ICMPv6 header + data payload */
   uint16_t snd_buflen;         /* Size of the ICMPv6 header + data payload */

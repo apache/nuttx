@@ -297,7 +297,7 @@ EXTERN uint8_t g_reassembly_timer;
 
 /* Time of last poll */
 
-EXTERN systime_t g_polltime;
+EXTERN clock_t g_polltime;
 
 /****************************************************************************
  * Public Function Prototypes
