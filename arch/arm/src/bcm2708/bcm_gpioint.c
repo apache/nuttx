@@ -61,7 +61,7 @@ static void bcm_gpio_risingedge(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPREN(pin);
   uint32_t mask = BCM_GPIO_GPREN_REN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_RISING
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_RISING)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -84,7 +84,7 @@ static void bcm_gpio_fallingedge(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPFEN(pin);
   uint32_t mask = BCM_GPIO_GPFEN_FEN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_FALLING
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_FALLING)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -107,7 +107,7 @@ static void bcm_gpio_highlevel(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPHEN(pin);
   uint32_t mask = BCM_GPIO_GPHEN_HEN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_HIGHLEVEL
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_HIGHLEVEL)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -130,7 +130,7 @@ static void bcm_gpio_lowlevel(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPLEN(pin);
   uint32_t mask = BCM_GPIO_GPHEN_HEN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_LOWLEVEL
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_LOWLEVEL)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -153,7 +153,7 @@ static void bcm_gpio_async_risingedge(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPAREN(pin);
   uint32_t mask = BCM_GPIO_GPAREN_AREN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHRISING
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHRISING)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -176,7 +176,7 @@ static void bcm_gpio_async_fallingedge(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPAFEN(pin);
   uint32_t mask = BCM_GPIO_GPAFEN_AFEN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHFALLING
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHFALLING)
     {
       modifiyreg32(regaddr, 0, mask);
     }
@@ -199,7 +199,7 @@ static void bcm_gpio_async_fallingedge(unsigned int pin, gpio_pinset_t pinset)
   uintptr_t regaddr = BCM_GPIO_GPAFEN(pin);
   uint32_t mask = BCM_GPIO_GPAFEN_AFEN(pin;
 
-  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHFALLING
+  if ((pinset & GPIO_INT_MASK) == GPIO_INT_ASYNCHFALLING)
     {
       modifiyreg32(regaddr, 0, mask);
     }
