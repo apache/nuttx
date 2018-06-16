@@ -75,7 +75,8 @@ void weak_function xmc4_spidev_initialize(void)
 
   /* Configure SPI2 chip selects */
 
-#ifdef CONFIG_XMC4_SPI2
+#ifdef CONFIG_XMC4_SPI2  && defined(CONFIG_SENSORS_MAX6675)
+  (void)xmc4_gpio_config(GPIO_CS_MAX6675);
 #endif
 
   /* Configure SPI3 chip selects */
@@ -161,6 +162,14 @@ void xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_SENSORS_MAX6675)
+  if (devid == SPIDEV_TEMPERATURE(0))
+    {
+      xmc4_gpio_write(GPIO_CS_MAX6675, !selected);
+    }
+#endif
+
 }
 #endif
 

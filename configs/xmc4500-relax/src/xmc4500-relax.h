@@ -76,6 +76,12 @@
 #define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PINCTRL_SOFTWARE | \
                       GPIO_PORT1 | GPIO_PIN15)
 
+/* SPIs Chip select */
+
+#define GPIO_CS_MAX6675 (GPIO_OUTPUT | GPIO_OUTPUT_PUSHPULL | \
+                         GPIO_PADA1P_STRONGSOFT | GPIO_PINCTRL_SOFTWARE | \
+                         GPIO_OUTPUT_SET | GPIO_PORT0 | GPIO_PIN2)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

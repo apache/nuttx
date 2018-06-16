@@ -127,7 +127,7 @@ static void max6675_lock(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
-  SPI_SETFREQUENCY(spi, 400000);
+  SPI_SETFREQUENCY(spi, 4000000);
 }
 
 /****************************************************************************

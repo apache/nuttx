@@ -162,3 +162,24 @@ Configurations
 
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
+
+SPI
+===
+
+  Using MAX6675 Thermocouple
+  --------------------------
+
+  There is a board support to use a MAX6675 connected to SPI2. In other to use
+  it you need to enable these options:
+
+    CONFIG_XMC4_USIC=y
+    CONFIG_XMC4_USCI_UART=y
+    CONFIG_XMC4_USCI_SPI=y
+    CONFIG_XMC4_SPI2=y
+    CONFIG_XMC4_USIC1=y
+    CONFIG_XMC4_USIC1_CHAN0_ISSPI=y
+    CONFIG_XMC4_USIC1_CHAN1_ISUART=y
+    CONFIG_UART3_SERIAL_CONSOLE=y
+    CONFIG_SENSORS_MAX6675=y
+
+  These are the used SPI pins: SCLK = P0.11, MISO = P0.4 and CS = P0.2

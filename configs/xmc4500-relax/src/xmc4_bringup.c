@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <debug.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,5 +64,15 @@
 
 int xmc4_bringup(void)
 {
-  return OK;
+  int ret = OK;
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = xmc4_max6675initialize("/dev/temp0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
+#endif
+
+  return ret;
 }
