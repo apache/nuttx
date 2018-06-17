@@ -156,7 +156,7 @@ static int dma_interrupt_core(void *context)
 
   flags = spin_lock_irqsave();
   q_ent = pdmach->req_q.tail;
-  DEBUGASSERT(q_ent);
+  DEBUGASSERT(q_ent != NULL);
   dmach = (struct lc823450_dmach_s *)q_ent;
 
   if (dmach->nxfrs == 0)
@@ -461,7 +461,7 @@ void lc823450_dmarequest(DMA_HANDLE handle, uint8_t dmarequest)
         break;
       default:
         dmaerr("ERROR: Not implemetned\n");
-        DEBUGASSERT(0);
+        DEBUGPANIC();
     }
 
   putreg32(val, DMACCFG(dmach->chn));
@@ -545,7 +545,8 @@ void lc823450_dmafree(DMA_HANDLE handle)
 {
   struct lc823450_dmach_s *dmach = (DMA_HANDLE)handle;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT(dmach != NULL);
+  UNUSED(dmach);
 
   /* Make sure that the DMA channel was properly stopped */
 
@@ -571,7 +572,7 @@ int lc823450_dmasetup(DMA_HANDLE handle, uint32_t control,
 {
   struct lc823450_dmach_s *dmach = (DMA_HANDLE)handle;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT(dmach != NULL);
 
   dmach->srcaddr = srcaddr;
   dmach->destaddr = destaddr;
@@ -587,7 +588,7 @@ int lc823450_dmallsetup(DMA_HANDLE handle, uint32_t control,
 {
   struct lc823450_dmach_s *dmach = (DMA_HANDLE)handle;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT(dmach != NULL);
 
   dmach->srcaddr = srcaddr;
   dmach->destaddr = destaddr;
@@ -618,7 +619,7 @@ int lc823450_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   struct lc823450_dmach_s *dmach = (DMA_HANDLE)handle;
   irqstate_t flags;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT(dmach != NULL);
 
   /* select physical channel */
 
@@ -651,7 +652,7 @@ void lc823450_dmastop(DMA_HANDLE handle)
   struct lc823450_phydmach_s *pdmach;
   irqstate_t flags;
 
-  DEBUGASSERT(dmach);
+  DEBUGASSERT(dmach != NULL);
 
   flags = spin_lock_irqsave();
 

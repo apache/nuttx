@@ -149,7 +149,9 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
 {
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
-  DEBUGASSERT(priv && apb);
+  DEBUGASSERT(priv != NULL && apb != NULL);
+  UNUSED(priv);
+
   i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
   /* REVISIT: If you want this to actually do something other than
@@ -184,7 +186,9 @@ static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
 {
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
-  DEBUGASSERT(priv && apb);
+  DEBUGASSERT(priv != NULL && apb != NULL);
+  UNUSED(priv);
+
   i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
   /* REVISIT: If you want this to actually do something other than
@@ -221,13 +225,13 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep && buffer);
+  DEBUGASSERT(filep != NULL && buffer != NULL);
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode);
+  DEBUGASSERT(inode != NULL);
 
   priv = (FAR struct i2schar_dev_s *)inode->i_private;
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv != NULL);
 
   /* Verify that the buffer refers to one, correctly sized audio buffer */
 
@@ -363,13 +367,13 @@ static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get our private data structure */
 
-  DEBUGASSERT(filep);
+  DEBUGASSERT(filep != NULL);
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode);
+  DEBUGASSERT(inodei != NULL);
 
   priv = (FAR struct i2schar_dev_s *)inode->i_private;
-  DEBUGASSERT(priv && priv->i2s && priv->i2s->ops);
+  DEBUGASSERT(priv != NULL && priv->i2s && priv->i2s->ops);
 
   if (priv->i2s->ops->i2s_ioctl)
     {

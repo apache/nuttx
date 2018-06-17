@@ -343,6 +343,7 @@ static void lc823450_extint_initialize(void)
 
   ret = irq_attach(LC823450_IRQ_EXTINT5, lc823450_extint_isr, NULL);
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 
   up_enable_irq(LC823450_IRQ_EXTINT0);
   up_enable_irq(LC823450_IRQ_EXTINT1);
