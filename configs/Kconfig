@@ -462,6 +462,13 @@ config ARCH_BOARD_MICROPENDOUS3
 		be populated with either an AVR AT90USB646, 647, 1286, or 1287 MCU.
 		Support is configured for the AT90USB647.
 
+config ARCH_BOARD_MISOC
+	bool "Qemu LM32 demo"
+	depends on ARCH_CHIP_LM32
+	---help---
+		This configuration is port to NuttX running on a Qemu LM32 system.
+		You can find the Qemu setup at https://bitbucket.org/key2/qemu
+
 config ARCH_BOARD_MOTEINO_MEGA
 	bool "LowPowerLab MoteinoMEGA"
 	depends on ARCH_CHIP_ATMEGA1284P
@@ -1686,6 +1693,7 @@ config ARCH_BOARD
 	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
 	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
+	default "misoc"                    if ARCH_BOARD_MISOC
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "nrf52-pca10040"           if ARCH_BOARD_NRF52_PCA10040
@@ -1974,6 +1982,9 @@ source "configs/mikroe-stm32f4/Kconfig"
 endif
 if ARCH_BOARD_MIRTOO
 source "configs/mirtoo/Kconfig"
+endif
+if ARCH_BOARD_MISOC
+source "configs/misoc/Kconfig"
 endif
 if ARCH_BOARD_MOTEINO_MEGA
 source "configs/moteino-mega/Kconfig"

@@ -369,6 +369,10 @@ configs/mikroe-stm32f4
   This is the port of NuttX to the MikroElektronika Mikromedia for STM32F4
   development board.  Contributed by Ken Petit.
 
+configs/misoc
+  This directory holds the port to NuttX running on a Qemu LM32 system.
+  You can find the Qemu setup at https://bitbucket.org/key2/qemu
+
 configs/mcu123-lpc214x
   This port is for the NXP LPC2148 as provided on the mcu123.com
   lpc214x development board. This OS is also built with the arm-nuttx-elf
