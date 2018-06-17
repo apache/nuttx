@@ -1,29 +1,29 @@
-COPYING -- Describes the terms under which Nuttx is distributed. A
-copy of the BSD-style licensing is included in this file. In my
-words -- I believe that you should free to use NuttX in any
-environment, private, private, commercial, open, closed, etc.
-provided only that you repect the modest copyright notices as
-described in license (below), respect Trademarks, and include a
-copy of the BSD license.  Please feel free to contact me if you
+COPYING -- Describes the terms under which Nuttx is distributed. A copy of
+the BSD-style licensing is included in this file. In my words -- I believe
+that you should free to use NuttX in any environment, private, private,
+commercial, open, closed, etc. provided only that you respect the modest
+copyright notices as described in license (below), respect Trademarks, and
+include a copy of the BSD license.  Please feel free to contact me if you
 have any licensing concerns.
 
 Copyright Date Notation:  Copyright information is provided in the header
-of each file.  This copyright information includes the year(s) in which
-copyrighted additions to the file were made.  A comma ('.') is used to
-separate years in the list of years.  A hyphen ('-') is used as a more
-compact notation when additions were made over several consecutive years.
-So for example, "2007, 2011" would mean that copyrighted addtiions
-were made during the years of 2007 and 2011.  Whereas "2007-2011"
-would indicate copyrighted additions in the years 2007, 2008, 2009,
-2010, and 2011.
+of each file.  This copyright information includes the name of the copyright
+holder and the year(s) in which copyrighted additions to the file were made
+to the file.  A comma (',') is used to separate years in the list of years.
+A hyphen ('-') is used as a more compact notation when additions were made
+over several consecutive years.  So for example, "2007, 2011" would mean
+that copyrighted additions were made during the years of 2007 and 2011
+whereas "2007-2011" would indicate copyrighted additions in the years 2007,
+2008, 2009, 2010, and 2011.
 
 NuttX
 ^^^^^
 
-License for NuttX in general (authorship and copyright dates on
-individual files will vary):
+License for NuttX in general (authorship and copyright dates on individual
+files will vary):
 
-/*************************************************************************
+/****************************************************************************
+ * directory path/filename
  *
  *   Copyright (C) 2007-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@ individual files will vary):
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *************************************************************************/
+ ****************************************************************************/
 
 FAT Long File Names
 ^^^^^^^^^^^^^^^^^^^
@@ -205,8 +205,8 @@ libc/string/lib_vikmemcpy.c
   3. This notice may not be removed or altered from any source
      distribution.
 
-libc/math
-^^^^^^^^^
+libs/libc/math
+^^^^^^^^^^^^^^
 
   If you enable CONFIG_LIB, you will build the math library at libc/math.
   This library was taken from the math library developed for the Rhombus
