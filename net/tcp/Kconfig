@@ -24,7 +24,6 @@ config NET_TCP_KEEPALIVE
 	bool "TCP/IP Keep-alive support"
 	default n
 	select NET_TCPPROTO_OPTIONS
-	depends on EXPERIMENTAL
 	---help---
 		Enable support for the SO_KEEPALIVE socket option
 
@@ -206,7 +205,7 @@ endif # NET_TCP && !NET_TCP_NO_STACK
 config NET_TCP_RWND_CONTROL
 	bool "Receive window control based on IOBuffer"
 	default n
-	depends on MM_IOB && EXPERIMENTAL
+	depends on MM_IOB
 	---help---
 		Support receive window control based on I/O buffer.  This feature
 		is still experimental.

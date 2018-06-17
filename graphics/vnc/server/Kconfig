@@ -6,7 +6,7 @@
 menuconfig VNCSERVER
 	bool "VNC server"
 	default n
-	depends on NET_TCP && !NX_LCDDRIVER && EXPERIMENTAL
+	depends on NET_TCP && !NX_LCDDRIVER
 	select NET_TCP_READAHEAD
 	select NX_UPDATE
 	---help---

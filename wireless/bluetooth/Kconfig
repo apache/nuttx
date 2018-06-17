@@ -45,7 +45,6 @@ menuconfig WIRELESS_BLUETOOTH
 	select MM_IOB
 	select SCHED_HPWORK
 	select SCHED_LPWORK
-	depends on EXPERIMENTAL
 	---help---
 		This option enables Bluetooth Low Energy support.
 
