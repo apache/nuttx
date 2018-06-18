@@ -76,7 +76,7 @@ up_fetchadd32:
 	add		r2, r2, r1			/* Add the addend */
 
 	strex	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strex failed */
+	teq		r3, #0				/* r3 will be 1 if strex failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
@@ -110,7 +110,7 @@ up_fetchsub32:
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
 	strex	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strex failed */
+	teq		r3, #0				/* r3 will be 1 if strex failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
@@ -144,7 +144,7 @@ up_fetchadd16:
 	add		r2, r2, r1			/* Add the addend */
 
 	strexh	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strexh failed */
+	teq		r3, #0				/* r3 will be 1 if strexh failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
@@ -180,7 +180,7 @@ up_fetchsub16:
 	/* Attempt to save the decremented value */
 
 	strexh	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strexh failed */
+	teq		r3, #0				/* r3 will be 1 if strexh failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
@@ -214,7 +214,7 @@ up_fetchadd8:
 	add		r2, r2, r1			/* Add the addend */
 
 	strexb	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strexb failed */
+	teq		r3, #0				/* r3 will be 1 if strexb failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
@@ -248,7 +248,7 @@ up_fetchsub8:
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
 	strexb	r3, r2, [r0]		/* Attempt to save the result */
-	teq		r3, #0				/* r2 will be 1 is strexb failed */
+	teq		r3, #0				/* r3 will be 1 if strexb failed */
 	bne		1b					/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
