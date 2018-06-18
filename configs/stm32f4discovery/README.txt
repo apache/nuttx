@@ -2210,6 +2210,54 @@ Configuration Sub-directories
     This configuration uses the example at apps/examples/rgbled to drive the
     external RGB LED>
 
+  rndis:
+  ------
+
+    This is a board configuration to demonstrate how to use Ethernet-over-USB,
+    in this case using the RNDIS protocol. Using it you can get access to your
+    board using Telnet or you can use transfer file to it. Both steps will be
+    explained below.
+
+    Your board will be get IP address from a DHCP server. If you want to use a
+    fixed IP instead using DHCP, you need to disable the DHCP Client and set
+    up its IP. For more info watch: www.youtube.com/watch?v=8noH8v7xNgs
+
+    You can access the board's NuttShell just typing in the Linux terminal:
+
+      $ telnet 10.0.0.2
+
+    You should see something like this:
+
+      Trying 10.0.0.2...
+      Connected to 10.0.0.2.
+      Escape character is '^]'.
+
+      NuttShell (NSH)
+      nsh>
+
+    This board configuration has support to RAMDISK because we need a writable
+    filesystem to get files from the computer. Then you need to create first a
+    RAMDISK and mount it using these steps:
+
+      nsh> mkrd 64
+      nsh> mkfatfs /dev/ram0
+      nsh> mount -t vfat /dev/ram0 /mnt
+
+    Open a new Linux terminal and start a webserver, Python one embedded:
+
+      $ python -m SimpleHTTPServer
+
+    It will create a webserver serving in the port 8000 and will share files
+    in the current directory where it was executed.
+
+    Then in the NuttShell you can run these commands to download a small file:
+
+      nsh> cd /mnt
+      nsh> wget http://10.0.0.1:8000/test.txt
+      nsh> ls -l
+      /mnt:
+       -rw-rw-rw-      23 test.txt
+
   usbnsh:
   -------
 
