@@ -88,14 +88,14 @@ FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
 #ifdef CONFIG_NET_IPv4
       case AF_INET:
         ai->sa.sin.sin_family = AF_INET;
-        ai->sa.sin.sin_port = HTONS(port);
+        ai->sa.sin.sin_port = port;  /* Already network order */
         memcpy(&ai->sa.sin.sin_addr, addr, sizeof(ai->sa.sin.sin_addr));
         break;
 #endif
 #ifdef CONFIG_NET_IPv6
       case AF_INET6:
         ai->sa.sin6.sin6_family = AF_INET6;
-        ai->sa.sin6.sin6_port = HTONS(port);
+        ai->sa.sin6.sin6_port = port;  /* Already network order */
         memcpy(&ai->sa.sin6.sin6_addr, addr, sizeof(ai->sa.sin6.sin6_addr));
         break;
 #endif
@@ -153,7 +153,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         }
     }
 
-  if (servname)
+  if (servname != NULL)
     {
       char *endp;
       struct servent *sp;
@@ -161,14 +161,20 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       port = strtol(servname, &endp, 10);
       if (port > 0 && port <= 65535 && *endp == '\0')
         {
+          /* Force network byte order */
+
           port = HTONS(port);
         }
-      else if (flags & AI_NUMERICSERV)
+      else if ((flags & AI_NUMERICSERV) != 0)
         {
           return EAI_NONAME;
         }
       else if ((sp = getservbyname(servname, NULL)) != NULL)
         {
+          /* The sp_port field of struct servent is required to
+           * be in network byte order (per OpenGroup.org)
+           */
+
           port = sp->s_port;
         }
       else
@@ -177,7 +183,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         }
     }
 
-  if (flags & AI_PASSIVE)
+  if ((flags & AI_PASSIVE) != 0)
     {
       in_addr_t addr;
 
@@ -197,7 +203,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
   *res = NULL;
 
-  if (!hostname)
+  if (hostname == NULL)
     {
 #ifdef CONFIG_NET_LOOPBACK
       /* Local service. */
@@ -289,7 +295,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
            * TODO: RFC 3484/6724 destination address sort not implemented.
            */
 
-          if (prev_ai)
+          if (prev_ai != NULL)
             {
               prev_ai->ai.ai_next = (struct addrinfo *)ai;
             }
