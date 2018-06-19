@@ -48,22 +48,19 @@
 
 #include <arch/efm32/chip.h>
 
-/* Include the chip pin configuration file */
+/* Include the chip interrupt definition file */
 
-#ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(CONFIG_EFM32_EFM32TG)
-#    include "chip/efm32tg_vectors.h"
-#  elif defined(CONFIG_EFM32_EFM32G)
-#    include "chip/efm32g_vectors.h"
-#  elif defined(CONFIG_EFM32_EFM32GG)
-#    include "chip/efm32gg_vectors.h"
-#  else
-#    error "No vector file for this EFM32 family"
-#  endif
-#endif
+#include <arch/efm32/irq.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* Provide the required number of peripheral interrupt vector definitions as well.
+ * The definition EFM32_PERIPH_INTS simply comes from the chip-specific IRQ header
+ * file included by arch/efm32/irq.h.
+ */
+
+#define ARMV7M_PERIPHERAL_INTERRUPTS  EFM32_PERIPH_INTS
 
 #endif /* __ARCH_ARM_SRC_EFM32_CHIP_H */

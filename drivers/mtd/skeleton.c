@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/skeleton.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -339,3 +339,4 @@ FAR struct mtd_dev_s *skel_initialize(void)
 
   return (FAR struct mtd_dev_s *)&g_skeldev;
 }
+

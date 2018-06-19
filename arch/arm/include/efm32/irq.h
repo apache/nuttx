@@ -95,26 +95,26 @@
  * 16-additional interrupts generated from a second level of decoding.
  */
 
-#  define EFM32_IRQ_EXTI0     (NR_VECTORS+0)  /* Port[n], pin0 external interrupt */
-#  define EFM32_IRQ_EXTI1     (NR_VECTORS+1)  /* Port[n], pin1 external interrupt */
-#  define EFM32_IRQ_EXTI2     (NR_VECTORS+2)  /* Port[n], pin2 external interrupt */
-#  define EFM32_IRQ_EXTI3     (NR_VECTORS+3)  /* Port[n], pin3 external interrupt */
-#  define EFM32_IRQ_EXTI4     (NR_VECTORS+4)  /* Port[n], pin4 external interrupt */
-#  define EFM32_IRQ_EXTI5     (NR_VECTORS+5)  /* Port[n], pin5 external interrupt */
-#  define EFM32_IRQ_EXTI6     (NR_VECTORS+6)  /* Port[n], pin6 external interrupt */
-#  define EFM32_IRQ_EXTI7     (NR_VECTORS+7)  /* Port[n], pin7 external interrupt */
-#  define EFM32_IRQ_EXTI8     (NR_VECTORS+8)  /* Port[n], pin8 external interrupt */
-#  define EFM32_IRQ_EXTI9     (NR_VECTORS+9)  /* Port[n], pin9 external interrupt */
-#  define EFM32_IRQ_EXTI10    (NR_VECTORS+10) /* Port[n], pin10 external interrupt */
-#  define EFM32_IRQ_EXTI11    (NR_VECTORS+11) /* Port[n], pin11 external interrupt */
-#  define EFM32_IRQ_EXTI12    (NR_VECTORS+12) /* Port[n], pin12 external interrupt */
-#  define EFM32_IRQ_EXTI13    (NR_VECTORS+13) /* Port[n], pin13 external interrupt */
-#  define EFM32_IRQ_EXTI14    (NR_VECTORS+14) /* Port[n], pin14 external interrupt */
-#  define EFM32_IRQ_EXTI15    (NR_VECTORS+15) /* Port[n], pin15 external interrupt */
+#  define EFM32_IRQ_EXTI0   (NR_VECTORS + 0)  /* Port[n], pin0 external interrupt */
+#  define EFM32_IRQ_EXTI1   (NR_VECTORS + 1)  /* Port[n], pin1 external interrupt */
+#  define EFM32_IRQ_EXTI2   (NR_VECTORS + 2)  /* Port[n], pin2 external interrupt */
+#  define EFM32_IRQ_EXTI3   (NR_VECTORS + 3)  /* Port[n], pin3 external interrupt */
+#  define EFM32_IRQ_EXTI4   (NR_VECTORS + 4)  /* Port[n], pin4 external interrupt */
+#  define EFM32_IRQ_EXTI5   (NR_VECTORS + 5)  /* Port[n], pin5 external interrupt */
+#  define EFM32_IRQ_EXTI6   (NR_VECTORS + 6)  /* Port[n], pin6 external interrupt */
+#  define EFM32_IRQ_EXTI7   (NR_VECTORS + 7)  /* Port[n], pin7 external interrupt */
+#  define EFM32_IRQ_EXTI8   (NR_VECTORS + 8)  /* Port[n], pin8 external interrupt */
+#  define EFM32_IRQ_EXTI9   (NR_VECTORS + 9)  /* Port[n], pin9 external interrupt */
+#  define EFM32_IRQ_EXTI10  (NR_VECTORS + 10) /* Port[n], pin10 external interrupt */
+#  define EFM32_IRQ_EXTI11  (NR_VECTORS + 11) /* Port[n], pin11 external interrupt */
+#  define EFM32_IRQ_EXTI12  (NR_VECTORS + 12) /* Port[n], pin12 external interrupt */
+#  define EFM32_IRQ_EXTI13  (NR_VECTORS + 13) /* Port[n], pin13 external interrupt */
+#  define EFM32_IRQ_EXTI14  (NR_VECTORS + 14) /* Port[n], pin14 external interrupt */
+#  define EFM32_IRQ_EXTI15  (NR_VECTORS + 15) /* Port[n], pin15 external interrupt */
 
-#  define NR_IRQS             (NR_VECTORS+16) /* Total number of interrupts */
+#  define NR_IRQS           (NR_VECTORS + 16) /* Total number of interrupts */
 #else
-#  define NR_IRQS             NR_VECTORS      /* Total number of interrupts */
+#  define NR_IRQS           NR_VECTORS        /* Total number of interrupts */
 #endif
 
 /************************************************************************************

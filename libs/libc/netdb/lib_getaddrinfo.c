@@ -79,8 +79,8 @@ FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
       return ai;
     }
 
-  ai->ai.ai_addr = (struct sockaddr *)&ai->sa;
-  ai->ai.ai_addrlen = addrlen;
+  ai->ai.ai_addr            = (struct sockaddr *)&ai->sa;
+  ai->ai.ai_addrlen         = addrlen;
   ai->ai.ai_addr->sa_family = ai->ai.ai_family = family;
 
   switch (family)
@@ -88,14 +88,14 @@ FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
 #ifdef CONFIG_NET_IPv4
       case AF_INET:
         ai->sa.sin.sin_family = AF_INET;
-        ai->sa.sin.sin_port = port;  /* Already network order */
+        ai->sa.sin.sin_port   = port;  /* Already network order */
         memcpy(&ai->sa.sin.sin_addr, addr, sizeof(ai->sa.sin.sin_addr));
         break;
 #endif
 #ifdef CONFIG_NET_IPv6
       case AF_INET6:
         ai->sa.sin6.sin6_family = AF_INET6;
-        ai->sa.sin6.sin6_port = port;  /* Already network order */
+        ai->sa.sin6.sin6_port   = port;  /* Already network order */
         memcpy(&ai->sa.sin6.sin6_addr, addr, sizeof(ai->sa.sin6.sin6_addr));
         break;
 #endif
