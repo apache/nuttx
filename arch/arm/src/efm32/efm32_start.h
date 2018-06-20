@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_start.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
  * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
  * The IDLE thread is the thread that the system boots on and, eventually,
  * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory. 
+ * else to run.  The heap continues from there until the end of memory.
  * g_idle_topstack is a read-only variable the provides this computed
  * address.
  */

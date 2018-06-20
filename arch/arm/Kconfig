@@ -259,6 +259,7 @@ config ARCH_CHIP_SAM34
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
+	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures

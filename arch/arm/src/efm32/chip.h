@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/efm32/chip.h
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014, 2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Pierre-noel Bouteville <pnb990@gmail.com>

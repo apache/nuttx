@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam34/chip.h
  *
- *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,42 +49,19 @@
 #include <arch/sam34/chip.h>
 #include "chip/sam_memorymap.h"
 
-/* If the common ARMv7-M vector handling logic is used, then include the required
- * vector definitions as well.
- */
+/* Include the chip interrupt definition file */
 
-#ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
-#    include "chip/sam3u_vectors.h"
-#  elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#    include "chip/sam3x_vectors.h"
-#  elif defined(CONFIG_ARCH_CHIP_SAM4CM)
-#    include "chip/sam4cm_vectors.h"
-#  elif defined(CONFIG_ARCH_CHIP_SAM4E)
-#    include "chip/sam4e_vectors.h"
-#  elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#    include "chip/sam4l_vectors.h"
-#  elif defined(CONFIG_ARCH_CHIP_SAM4S)
-#    include "chip/sam4s_vectors.h"
-#  else
-#    error Unrecognized SAM architecture
-#  endif
-#endif
+#include <arch/sam34/irq.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* Provide the required number of peripheral interrupt vector definitions as well.
+ * The definition SAM_IRQ_NEXTINT simply comes from the chip-specific IRQ header
+ * file included by arch/sam34/irq.h.
+ */
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#define ARMV7M_PERIPHERAL_INTERRUPTS  SAM_IRQ_NEXTINT
 
 #endif /* __ARCH_ARM_SRC_SAM34_CHIP_H */
