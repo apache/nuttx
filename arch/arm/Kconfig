@@ -134,6 +134,7 @@ config ARCH_CHIP_LM
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_CMNVECTOR
 	---help---
 		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
