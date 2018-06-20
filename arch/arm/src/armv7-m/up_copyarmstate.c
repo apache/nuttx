@@ -45,8 +45,7 @@
 
 #include "up_internal.h"
 
-#if defined(CONFIG_ARCH_FPU) && \
-    (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
 
 /****************************************************************************
  * Public Functions
@@ -103,4 +102,4 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
     }
 }
 
-#endif /* CONFIG_ARCH_FPU && (!CONFIG_ARMV7M_CMNVECTOR || CONFIG_ARMV7M_LAZYFPU) */
+#endif /* CONFIG_ARCH_FPU && CONFIG_ARMV7M_LAZYFPU */

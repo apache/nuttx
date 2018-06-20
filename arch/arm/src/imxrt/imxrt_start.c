@@ -132,7 +132,7 @@ void __start(void) __attribute__ ((no_instrument_function));
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
+#ifndef CONFIG_ARMV7M_LAZYFPU
 
 static inline void imxrt_fpuconfig(void)
 {

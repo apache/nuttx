@@ -120,8 +120,7 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 #endif /* CONFIG_PIC */
 
-#if (defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)) || \
-    defined(CONFIG_BUILD_PROTECTED)
+#if !defined(CONFIG_ARMV7M_LAZYFPU) || defined(CONFIG_BUILD_PROTECTED)
   /* All tasks start via a stub function in kernel space.  So all
    * tasks must start in privileged thread mode.  If CONFIG_BUILD_PROTECTED
    * is defined, then that stub function will switch to unprivileged
@@ -130,15 +129,14 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
-#endif /* (CONFIG_ARMV7M_CMNVECTOR && !CONFIG_ARMV7M_LAZYFPU) || CONFIG_BUILD_PROTECTED */
+#endif /* !CONFIG_ARMV7M_LAZYFPU || CONFIG_BUILD_PROTECTED */
 
-#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU) && \
-    defined(CONFIG_ARCH_FPU)
+#if !defined(CONFIG_ARMV7M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
 
   xcp->regs[REG_FPSCR] = 0;      /* REVISIT: Initial FPSCR should be configurable */
   xcp->regs[REG_FPReserved] = 0;
 
-#endif /* CONFIG_ARMV7M_CMNVECTOR && !CONFIG_ARMV7M_LAZYFPU && CONFIG_ARCH_FPU */
+#endif /* !CONFIG_ARMV7M_LAZYFPU && CONFIG_ARCH_FPU */
 
   /* Enable or disable interrupts, based on user configuration */
 

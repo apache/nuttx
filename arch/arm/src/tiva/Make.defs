@@ -52,14 +52,12 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += up_idle.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S
 endif
 CMN_CSRCS += up_vectors.c
-endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S

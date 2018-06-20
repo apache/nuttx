@@ -56,10 +56,8 @@ CMN_CSRCS += up_allocateheap.c
 # CMN_CSRCS += up_dwt.c
 
 CMN_CSRCS += up_stackframe.c
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_ASRCS += up_exception.S
 CMN_CSRCS += up_vectors.c
-endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c

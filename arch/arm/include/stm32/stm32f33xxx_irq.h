@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/include/stm32/stm32f33xxx_irq.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *   Modified for STM32F334 by Mateusz Szafoni <raiden00@railab.me>
  *
@@ -152,7 +152,7 @@
 #define STM32_IRQ_RESERVED80  (STM32_IRQ_FIRST+80) /* 80: Reserved */
 #define STM32_IRQ_FPU         (STM32_IRQ_FIRST+81) /* 81: FPU global interrupt */
 
-#define NR_VECTORS            (STM32_IRQ_FIRST+82)
+#define STM32_IRQ_NEXTINT     (82)
 #define NR_IRQS               (STM32_IRQ_FIRST+82)
 
 /****************************************************************************************************

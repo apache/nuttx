@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip.h
  *
- *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,10 @@
 /* Include the chip capabilities file */
 
 #include <arch/stm32/chip.h>
+
+/* Include the chip interrupt definition file */
+ 
+#include <arch/stm32/irq.h>
 
 /* Include the chip pin configuration file */
 
@@ -140,30 +144,6 @@
 #  error "No pinmap file for this STM32 chip"
 #endif
 
-/* If the common ARMv7-M vector handling logic is used, then include the
- * required vector definitions as well.
- */
-
-#ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(CONFIG_STM32_STM32L15XX)
-#    include "chip/stm32l15xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F10XX)
-#    include "chip/stm32f10xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F20XX)
-#    include "chip/stm32f20xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F30XX)
-#    include "chip/stm32f30xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F33XX)
-#    include "chip/stm32f33xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F37XX)
-#    include "chip/stm32f37xxx_vectors.h"
-#  elif defined(CONFIG_STM32_STM32F4XXX)
-#    include "chip/stm32f40xxx_vectors.h"
-#  else
-#    error "No vector file for this STM32 family"
-#  endif
-#endif
-
 /* Include the chip memory map. */
 
 #include "chip/stm32_memorymap.h"
@@ -171,6 +151,13 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* Provide the required number of peripheral interrupt vector definitions as well.
+ * The definition STM32_IRQ_NEXTINT simply comes from the chip-specific IRQ header
+ * file included by arch/stm32/irq.h.
+ */
+
+#define ARMV7M_PERIPHERAL_INTERRUPTS  STM32_IRQ_NEXTINT
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_H */
 

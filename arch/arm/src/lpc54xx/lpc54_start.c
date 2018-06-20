@@ -120,7 +120,7 @@ static const struct pll_setup_s g_initial_pll_setup =
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
+#ifndef CONFIG_ARMV7M_LAZYFPU
 static inline void lpc54_fpuconfig(void)
 {
   uint32_t regval;

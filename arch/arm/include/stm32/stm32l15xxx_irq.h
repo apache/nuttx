@@ -2,7 +2,7 @@
  * arch/arm/include/stm32/stm32l15xxx_irq.h
  * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based 32-bit MCUs
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@
 #  define STM32_IRQ_TIM6        (STM32_IRQ_FIRST+43) /* 43: TIM6 global interrupt */
 #  define STM32_IRQ_TIM7        (STM32_IRQ_FIRST+44) /* 44: TIM7 global interrupt */
 
-#  define NR_VECTORS            (STM32_IRQ_FIRST+45)
+#  define STM32_IRQ_NEXTINT     (45)
 #  define NR_IRQS               (STM32_IRQ_FIRST+45)
 
 /* External interrupts (vectors >= 16) medium+ density devices */
@@ -171,7 +171,7 @@
 #  define STM32_IRQ_AES         (STM32_IRQ_FIRST+52) /* 52: AES global interrupt */
 #  define STM32_IRQ_COMPACQ     (STM32_IRQ_FIRST+53) /* 53: Comparator Channel Acquisition Interrupt */
 
-#  define NR_VECTORS            (STM32_IRQ_FIRST+54)
+#  define STM32_IRQ_NEXTINT     (54)
 #  define NR_IRQS               (STM32_IRQ_FIRST+54)
 
 /* External interrupts (vectors >= 16) high density devices */
@@ -237,7 +237,7 @@
 #  define STM32_IRQ_AES         (STM32_IRQ_FIRST+55) /* 55: AES global interrupt */
 #  define STM32_IRQ_COMPACQ     (STM32_IRQ_FIRST+56) /* 56: Comparator Channel Acquisition Interrupt */
 
-#  define NR_VECTORS            (STM32_IRQ_FIRST+57)
+#  define STM32_IRQ_NEXTINT     (57)
 #  define NR_IRQS               (STM32_IRQ_FIRST+57)
 #else
 #  error "Unknown STM32L density"

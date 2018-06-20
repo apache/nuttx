@@ -49,9 +49,7 @@ config ARCH_CHIP_DM320
 
 config ARCH_CHIP_EFM32
 	bool "Energy Micro"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_SPI_BITORDER
-	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_FETCHADD
 	---help---
 		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
@@ -81,7 +79,6 @@ config ARCH_CHIP_IMX6
 
 config ARCH_CHIP_IMXRT
 	bool "NXP/Freescale iMX.RT"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
@@ -90,7 +87,6 @@ config ARCH_CHIP_IMXRT
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		NXP i.MX RT (ARM Cortex-M7) architectures
@@ -103,56 +99,46 @@ config ARCH_CHIP_KINETIS
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_I2CRESET
-	select ARMV7M_CMNVECTOR
 	---help---
 		Freescale Kinetis Architectures (ARM Cortex-M4)
 
 config ARCH_CHIP_KL
 	bool "NXP/Freescale Kinetis L"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		Freescale Kinetis L Architectures (ARM Cortex-M0+)
 
 config ARCH_CHIP_LC823450
 	bool "ON Semiconductor LC823450"
 	select ARCH_CORTEXM3
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_GLOBAL_IRQDISABLE
-	select ARMV7M_CMNVECTOR
 	---help---
 		ON Semiconductor LC823450 architectures (ARM dual Cortex-M3)
 
 config ARCH_CHIP_LM
 	bool "TI/Luminary Stellaris"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	---help---
 		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
 config ARCH_CHIP_LPC11XX
 	bool "NXP LPC11xx"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		NXP LPC11xx architectures (ARM Cortex-M0)
 
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"
 	select ARCH_CORTEXM3
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)
@@ -181,8 +167,6 @@ config ARCH_CHIP_LPC31XX
 config ARCH_CHIP_LPC43XX
 	bool "NXP LPC43XX"
 	select ARCH_CORTEXM4
-	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
@@ -193,8 +177,6 @@ config ARCH_CHIP_LPC43XX
 config ARCH_CHIP_LPC54XX
 	bool "NXP LPC54XX"
 	select ARCH_CORTEXM4
-	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
@@ -213,8 +195,6 @@ config ARCH_CHIP_MOXART
 config ARCH_CHIP_NRF52
 	bool "Nordic NRF52"
 	select ARCH_CORTEXM4
-	select ARCH_HAVE_CMNVECTOR
-	select ARMV7M_CMNVECTOR
 	#select ARCH_HAVE_MPU
 	#select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
@@ -224,7 +204,6 @@ config ARCH_CHIP_NRF52
 config ARCH_CHIP_NUC1XX
 	bool "Nuvoton NUC100/120"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
@@ -245,32 +224,27 @@ config ARCH_CHIP_SAMA5
 config ARCH_CHIP_SAMD
 	bool "Atmel SAMD"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		Atmel SAMD (ARM Cortex-M0+)
 
 config ARCH_CHIP_SAML
 	bool "Atmel SAML"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		Atmel SAML (ARM Cortex-M0+)
 
 config ARCH_CHIP_SAM34
 	bool "Atmel SAM3/SAM4"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
 
 config ARCH_CHIP_SAMV7
 	bool "Atmel SAMV7"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
@@ -279,14 +253,12 @@ config ARCH_CHIP_SAMV7
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
 config ARCH_CHIP_STM32
 	bool "STMicro STM32 F1/F2/F3/F4/L1"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
@@ -303,13 +275,11 @@ config ARCH_CHIP_STM32
 config ARCH_CHIP_STM32F0
 	bool "STMicro STM32 F0"
 	select ARCH_CORTEXM0
-	select ARCH_HAVE_CMNVECTOR
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M0).
 
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
@@ -317,21 +287,18 @@ config ARCH_CHIP_STM32F7
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
 
 config ARCH_CHIP_STM32H7
 	bool "STMicro STM32 H7"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 #	select ARCH_HAVE_I2CRESET
 #	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 #	select ARMV7M_HAVE_STACKCHECK
 	depends on EXPERIMENTAL # Remove when the port is stable
 	---help---
@@ -344,7 +311,6 @@ config ARCH_CHIP_STM32H7
 config ARCH_CHIP_STM32L4
 	bool "STMicro STM32 L4"
 	select ARCH_CORTEXM4
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
@@ -353,7 +319,6 @@ config ARCH_CHIP_STM32L4
 	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_TICKLESS
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M4).
@@ -378,25 +343,21 @@ config ARCH_CHIP_TMS570
 
 config ARCH_CHIP_TIVA
 	bool "TI Tiva"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
-	select ARMV7M_CMNVECTOR
 	---help---
 		TI Tiva TM4C architectures (ARM Cortex-M4)
 
 config ARCH_CHIP_XMC4
 	bool "Infineon XMC4xxx"
-	select ARCH_HAVE_CMNVECTOR
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
@@ -491,6 +452,7 @@ config ARCH_CORTEXM3
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_LAZYFPU
 	select ARCH_HAVE_HIPRI_INTERRUPT
 	select ARCH_HAVE_RESET
 
@@ -503,6 +465,7 @@ config ARCH_CORTEXM4
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_LAZYFPU
 	select ARCH_HAVE_HIPRI_INTERRUPT
 	select ARCH_HAVE_RESET
 
@@ -512,6 +475,7 @@ config ARCH_CORTEXM7
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_LAZYFPU
 	select ARCH_HAVE_HIPRI_INTERRUPT
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_COHERENT_DCACHE if ELF || MODULE
@@ -634,23 +598,13 @@ config ARMV7M_USEBASEPRI
 		register, these hardfaults, will be avoided. For more details see
 		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
 
-config ARCH_HAVE_CMNVECTOR
+config ARCH_HAVE_LAZYFPU
 	bool
-
-config ARMV7M_CMNVECTOR
-	bool "Use common ARMv7-M vectors"
-	default n
-	depends on ARCH_HAVE_CMNVECTOR
-	---help---
-		Some architectures use their own, built-in vector logic.  Some use only
-		the common vector logic.  Some can use either their own built-in vector
-		logic or the common vector logic.  This applies only to ARMv7-M
-		architectures.
 
 config ARMV7M_LAZYFPU
 	bool "Lazy FPU storage"
 	default n
-	depends on ARCH_HAVE_CMNVECTOR
+	depends on ARCH_HAVE_LAZYFPU
 	---help---
 		There are two forms of the common vector logic.  There are pros and
 		cons to each option:

@@ -179,8 +179,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
         {
           DEBUGASSERT(regs[REG_R1] != 0);
           memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-#if defined(CONFIG_ARCH_FPU) && \
-    (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
           up_savefpu((uint32_t *)regs[REG_R1]);
 #endif
         }
@@ -228,8 +227,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-#if defined(CONFIG_ARCH_FPU) && \
-    (!defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_ARMV7M_LAZYFPU))
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
           up_savefpu((uint32_t *)regs[REG_R1]);
 #endif
           CURRENT_REGS = (uint32_t *)regs[REG_R2];

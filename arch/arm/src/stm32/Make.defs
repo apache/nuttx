@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32/Make.defs
 #
-#   Copyright (C) 2009, 2011-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011-2016, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 HEAD_ASRC =
-else
-HEAD_ASRC = stm32_vectors.S
-endif
 
 CMN_UASRCS =
 CMN_UCSRCS =
@@ -58,14 +54,12 @@ ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += up_stackcheck.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S
 endif
 CMN_CSRCS += up_vectors.c
-endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
@@ -85,11 +79,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
-ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_CSRCS += up_copyarmstate.c
-else ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_CSRCS += up_copyarmstate.c
-endif
 endif
 
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
@@ -120,10 +110,6 @@ endif
 
 ifeq ($(CONFIG_STM32_FREERUN),y)
 CHIP_CSRCS += stm32_freerun.c
-endif
-
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-CHIP_ASRCS += stm32_vectors.S
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

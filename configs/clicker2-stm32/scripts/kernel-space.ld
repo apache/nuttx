@@ -38,6 +38,7 @@
  */
 
 OUTPUT_ARCH(arm)
+EXTERN(_vectors)
 ENTRY(_stext)
 SECTIONS
 {

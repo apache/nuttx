@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/include/stm32/stm32f20xxx_irq.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@
 #define STM32_IRQ_HASH        (STM32_IRQ_FIRST+80) /* 80: Hash and Rng global interrupt */
 #define STM32_IRQ_RNG         (STM32_IRQ_FIRST+80) /* 80: Hash and Rng global interrupt */
 
-#define NR_VECTORS            (STM32_IRQ_FIRST+81)
+#define STM32_IRQ_NEXTINT     (81)
 #define NR_IRQS               (STM32_IRQ_FIRST+81)
 
 /****************************************************************************************************
