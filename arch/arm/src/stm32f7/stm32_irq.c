@@ -134,37 +134,37 @@ static void stm32_dumpnvic(const char *msg, int irq)
   irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
           getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-#if NR_INTERRUPTS > 15
+#if STM32_IRQ_NEXTINTS > 15
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
           getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 31
+#if STM32_IRQ_NEXTINTS > 31
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
           getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 47
+#if STM32_IRQ_NEXTINTS > 47
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 63
+#if STM32_IRQ_NEXTINTS > 63
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
           getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 79
+#if STM32_IRQ_NEXTINTS > 79
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
           getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 95
+#if STM32_IRQ_NEXTINTS > 95
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
           getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
 #endif
-#if NR_INTERRUPTS > 111
+#if STM32_IRQ_NEXTINTS > 111
 #  warning Missing logic
 #endif
 
@@ -278,26 +278,26 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= STM32_IRQ_FIRST)
     {
-#if NR_INTERRUPTS <= 32
-      if (extint < NR_INTERRUPTS)
+#if STM32_IRQ_NEXTINTS <= 32
+      if (extint < STM32_IRQ_NEXTINTS)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
       else
-#elif NR_INTERRUPTS <= 64
+#elif STM32_IRQ_NEXTINTS <= 64
       if (extint < 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
-      else if (extint < NR_INTERRUPTS)
+      else if (extint < STM32_IRQ_NEXTINTS)
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
       else
-#elif NR_INTERRUPTS <= 96
+#elif STM32_IRQ_NEXTINTS <= 96
       if (extint < 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
@@ -308,13 +308,13 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
-      else if (extint < NR_INTERRUPTS)
+      else if (extint < STM32_IRQ_NEXTINTS)
         {
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
            *bit     = 1 << (extint - 64);
         }
       else
-#elif NR_INTERRUPTS <= 128
+#elif STM32_IRQ_NEXTINTS <= 128
       if (extint < 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
@@ -330,7 +330,7 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
            *bit     = 1 << (extint - 64);
         }
-      else if (extint < NR_INTERRUPTS)
+      else if (extint < STM32_IRQ_NEXTINTS)
         {
            *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
            *bit     = 1 << (extint - 96);

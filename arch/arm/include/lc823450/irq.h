@@ -258,7 +258,6 @@
 #define LC823450_IRQ_NVIRTUALIRQS   (0)
 #endif /* CONFIG_LC823450_VIRQ */
 
-#define NR_VECTORS                  (LC823450_IRQ_NIRQS)
 #define NR_IRQS                     (LC823450_IRQ_NIRQS + LC823450_IRQ_NGPIOIRQS + \
                                      LC823450_IRQ_NVIRTUALIRQS)
 

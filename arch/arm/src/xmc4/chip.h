@@ -56,7 +56,7 @@
  * header file.
  */
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
+#define ARMV7M_PERIPHERAL_INTERRUPTS XMC4_IRQ_NEXTINTS
 
 /************************************************************************************
  * Pre-processor Definitions

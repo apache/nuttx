@@ -108,7 +108,6 @@
 #define STM32F0_IRQ_CEC_CAN       (46) /* Vector 46: HDMI CEC and CAN */
 #define STM32F0_IRQ_USB           (47) /* Vector 47: USB */
 
-#define NR_VECTORS                (48) /* 48 vectors */
 #define NR_IRQS                   (48) /* 32 interrupts plus 16 exceptions */
 
 /****************************************************************************

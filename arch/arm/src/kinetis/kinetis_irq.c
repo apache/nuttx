@@ -147,7 +147,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
           getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
-#if NR_VECTORS > 111
+#if KINETIS_IRQ_NVECTORS > 111
   irqinfo("              %08x %08x\n",
           getreg32(NVIC_IRQ112_115_PRIORITY), getreg32(NVIC_IRQ116_119_PRIORITY));
 #endif

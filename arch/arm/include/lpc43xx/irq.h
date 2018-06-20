@@ -133,7 +133,6 @@
  * supported)
  */
 
-#define NR_VECTORS                LPC43M4_IRQ_NIRQS
 #define NR_IRQS                   LPC43M4_IRQ_NIRQS
 
 /* Cortex-M0 External interrupts (vectors >= 16) */
@@ -184,7 +183,6 @@
  */
 
 #if 0
-#define NR_VECTORS                LPC43M0_IRQ_NIRQS
 #define NR_IRQS                   LPC43M0_IRQ_NIRQS
 #endif
 

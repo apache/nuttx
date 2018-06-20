@@ -122,7 +122,6 @@
  * now) seems to justify the waste.
  */
 
-#  define NR_VECTORS           (64) /* 64 vectors */
 #  define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
 
 #elif defined(CONFIG_ARCH_CHIP_MKL26Z128)
@@ -168,7 +167,6 @@
  * now) seems to justify the waste.
  */
 
-#  define NR_VECTORS           (64) /* 64 vectors */
 #  define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
 
 #else

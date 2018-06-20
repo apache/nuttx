@@ -91,7 +91,6 @@
 
 /* Total number of IRQ numbers */
 
-#define NR_VECTORS              NRF52_IRQ_NIRQS
 #define NR_IRQS                 NRF52_IRQ_NIRQS
 
 #endif /* __ARCH_ARM_INCLUDE_NRF52_NRF52_IRQ_H */

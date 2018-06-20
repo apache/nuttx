@@ -249,7 +249,6 @@
 
 /* Total number of IRQ numbers */
 
-#define NR_VECTORS           SAM_IRQ_NIRQS
 #define NR_IRQS              (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + \
                               SAM_NGPIOAIRQS + SAM_NGPIOBIRQS + SAM_NGPIOCIRQS)
 

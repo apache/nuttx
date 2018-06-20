@@ -214,9 +214,8 @@
 #define STM32_IRQ_RESERVED148  (STM32_IRQ_FIRST + 148)  /* 148: Reserved */
 #define STM32_IRQ_WKUP         (STM32_IRQ_FIRST + 149)  /* 149: WKUP1 to WKUP6 pins */
 
-#define NR_INTERRUPTS          150
-#define NR_VECTORS             (STM32_IRQ_FIRST + NR_INTERRUPTS)
-#define NR_IRQS                NR_VECTORS
+#define STM32_IRQ_NEXTINTS     150
+#define NR_IRQS                (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************************************
  * Public Types

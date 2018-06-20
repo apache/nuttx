@@ -109,7 +109,6 @@
 
 /* Total number of IRQ numbers */
 
-#define NR_VECTORS              LPC54_IRQ_NIRQS
 #define NR_IRQS                 LPC54_IRQ_NIRQS
 
 #endif /* __ARCH_ARM_INCLUDE_LPC54XX_LPC543X_IRQ_H */

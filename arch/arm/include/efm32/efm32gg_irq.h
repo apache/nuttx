@@ -99,7 +99,7 @@
 #define EFM32_IRQ_EMI           (EFM32_IRQ_INTERRUPTS + 38)
 
 #define EFM32_PERIPH_INTS       (39)
-#define NR_VECTORS              (EFM32_IRQ_INTERRUPTS + EFM32_PERIPH_INTS)
+#define EFM32_IRQ_NVECTORS      (EFM32_IRQ_INTERRUPTS + EFM32_PERIPH_INTS)
 
 /****************************************************************************
  * Public Types

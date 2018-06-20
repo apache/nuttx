@@ -130,15 +130,15 @@ static void efm32_dumpnvic(const char *msg, int irq)
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
           getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
+#if EFM32_IRQ_NVECTORS >= (EFM32_IRQ_INTERRUPTS + 32)
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
           getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 48)
+#if EFM32_IRQ_NVECTORS >= (EFM32_IRQ_INTERRUPTS + 48)
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
-#if NR_VECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
+#if EFM32_IRQ_NVECTORS >= (EFM32_IRQ_INTERRUPTS + 64)
   irqinfo("              %08x\n",
           getreg32(NVIC_IRQ64_67_PRIORITY));
 #endif
@@ -255,7 +255,7 @@ static int efm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= EFM32_IRQ_INTERRUPTS)
     {
-      if (irq < NR_VECTORS)
+      if (irq < EFM32_IRQ_NVECTORS)
         {
           n        = irq - EFM32_IRQ_INTERRUPTS;
           *regaddr = NVIC_IRQ_ENABLE(n) + offset;
@@ -314,7 +314,7 @@ void up_irqinitialize(void)
 
   /* Disable all interrupts */
 
-  for (i = 0; i < NR_VECTORS - EFM32_IRQ_INTERRUPTS; i += 32)
+  for (i = 0; i < EFM32_IRQ_NVECTORS - EFM32_IRQ_INTERRUPTS; i += 32)
     {
       putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
     }
@@ -404,7 +404,7 @@ void up_irqinitialize(void)
   irq_attach(EFM32_IRQ_RESERVED, efm32_reserved, NULL);
 #endif
 
-  efm32_dumpnvic("initial", NR_VECTORS);
+  efm32_dumpnvic("initial", EFM32_IRQ_NVECTORS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 #ifdef CONFIG_EFM32_GPIO_IRQ
@@ -541,7 +541,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= EFM32_IRQ_MEMFAULT && irq < NR_VECTORS &&
+  DEBUGASSERT(irq >= EFM32_IRQ_MEMFAULT && irq < EFM32_IRQ_NVECTORS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < EFM32_IRQ_INTERRUPTS)
@@ -553,7 +553,7 @@ int up_prioritize_irq(int irq, int priority)
       regaddr = NVIC_SYSH_PRIORITY(irq);
       irq    -= 4;
     }
-  else (irq < NR_VECTORS)
+  else (irq < EFM32_IRQ_NVECTORS)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 

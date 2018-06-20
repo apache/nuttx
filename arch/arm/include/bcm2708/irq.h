@@ -186,24 +186,24 @@
 #define IPR2_IRQ_LAST            BCM_IRQ_AVSPMON       /* IRQ of last defined bit */
 #define IPR2_BIT_LAST            (31)                  /* Last defined bit */
 
-/* Number of interrupts */
+/* Number of hardware interrupt vectors */
 
-#define NR_INTERRUPTS            (IPR2_IRQ_LAST + 1)
+#define BCM_IRQ_NVECTORS         (IPR2_IRQ_LAST + 1)
 
 /* Second level GPIO interrupts */
 
 #ifdef CONFIG_BCM2708_GPIO_IRQ
-#  define BCM_IRQ_GPIO(n)        (NR_INTERRUPTS + (n))   /* IRQ number of pin n */
-#  define BCM_IRQ_GPIO0_FIRST    (NR_INTERRUPTS)         /* IRQ number of first GPIO0 interrupt */
-#  define BCM_IRQ_GPIO1_FIRST    (NR_INTERRUPTS + 32)    /* IRQ number of first GPIO1 interrupt */
-#  define NR_GPIOINTS            (54)
+#  define BCM_IRQ_GPIO(n)        (BCM_IRQ_NVECTORS + (n)) /* IRQ number of pin n */
+#  define BCM_IRQ_GPIO0_FIRST    (BCM_IRQ_NVECTORS)       /* IRQ number of first GPIO0 interrupt */
+#  define BCM_IRQ_GPIO1_FIRST    (BCM_IRQ_NVECTORS + 32)  /* IRQ number of first GPIO1 interrupt */
+#  define BCM_IRQ_NGPIOINTS      (54)
 #else
-#  define NR_GPIOINTS            (0)
+#  define BCM_IRQ_NGPIOINTS      (0)
 #endif
 
 /* Number of supported IRQs */
 
-#define NR_IRQS                  (NR_INTERRUPTS + NR_GPIOINTS)
+#define NR_IRQS                  (BCM_IRQ_NVECTORS + BCM_IRQ_NGPIOINTS)
 
 #else
 #  error Unrecognized BCM2708 chip

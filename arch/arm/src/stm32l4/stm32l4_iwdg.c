@@ -165,7 +165,7 @@ static struct stm32l4_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_IWDG_REGDEBUG
+#ifdef CONFIG_STM32L4_IWDG_REGDEBUG
 static uint16_t stm32l4_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;

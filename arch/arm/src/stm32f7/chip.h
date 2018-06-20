@@ -57,7 +57,7 @@
  * header file.
  */
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
+#define ARMV7M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
 /* Cache line sizes (in bytes)for the STM32F7 */
 

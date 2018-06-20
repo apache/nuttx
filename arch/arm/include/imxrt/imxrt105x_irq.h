@@ -482,7 +482,6 @@
 
 /* Total number of IRQ numbers **********************************************************/
 
-#define NR_VECTORS             IMXRT_IRQ_NIRQS
 #define NR_IRQS                (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT + IMXRT_GPIO_NIRQS)
 
 /****************************************************************************************

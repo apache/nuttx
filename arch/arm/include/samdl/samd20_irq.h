@@ -105,7 +105,6 @@
 
 /* Total number of IRQ numbers */
 
-#define NR_VECTORS         SAM_IRQ_NIRQS
 #define NR_IRQS            (SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS + SAM_IRQ_NEXTINTS)
 
 /****************************************************************************************

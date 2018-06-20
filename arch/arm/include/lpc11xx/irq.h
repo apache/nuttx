@@ -109,7 +109,6 @@
 #define LPC11_IRQ_PIO0          (47) /* Vector 47: PIO0 */
 #endif
 
-#define NR_VECTORS              (48) /* 48 vectors */
 #define NR_IRQS                 (48) /* 32 interrupts plus 16 exceptions */
 
 /****************************************************************************
