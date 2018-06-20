@@ -105,6 +105,7 @@ config ARCH_CHIP_KINETIS
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_I2CRESET
+	select ARMV7M_CMNVECTOR
 	---help---
 		Freescale Kinetis Architectures (ARM Cortex-M4)
 
@@ -149,6 +150,7 @@ config ARCH_CHIP_LPC17XX
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FETCHADD
+	select ARMV7M_CMNVECTOR
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)

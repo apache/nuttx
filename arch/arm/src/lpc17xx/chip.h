@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx/chip.h
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,29 +47,9 @@
 
 #include <arch/lpc17xx/chip.h>
 
-/* If the common ARMv7-M vector handling logic is used, then include the
- * required vector definitions as well.
- */
+/* Include the chip interrupt definition file */
 
-#ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(LPC176x)
-#    include "chip/lpc176x_vectors.h"
-#  elif defined(LPC178x)
-#    include "chip/lpc178x_vectors.h"
-#  else
-#    error "No vector file for this LPC17xx family"
-#  endif
-#endif
-
-/* Vector Table Offset Register (VECTAB).  Redefine the mask defined in
- * arch/arm/src/armv7-m/nvic.h; The LPC178x/7x User manual definitions
- * do not match the ARMv7M field definitions.  Any bits set above bit
- * 29 would be an error and apparently the register wants 8- not 6-bit
- * alignment.
- */
-
-#undef  NVIC_VECTAB_TBLOFF_MASK
-#define NVIC_VECTAB_TBLOFF_MASK         (0x3fffff00)
+#include <arch/lpc17xx/irq.h>
 
 /* Include the memory map file.  Other chip hardware files should then include
  * this file for the proper setup.
@@ -81,16 +61,21 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* Provide the required number of peripheral interrupt vector definitions as well.
+ * The definition LPC17_IRQ_NEXTINT simply comes from the chip-specific IRQ header
+ * file included by arch/lpc17xx/irq.h.
+ */
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#define ARMV7M_PERIPHERAL_INTERRUPTS  LPC17_IRQ_NEXTINT
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/* Vector Table Offset Register (VECTAB).  Redefine the mask defined in
+ * arch/arm/src/armv7-m/nvic.h; The LPC178x/7x User manual definitions
+ * do not match the ARMv7M field definitions.  Any bits set above bit
+ * 29 would be an error and apparently the register wants 8- not 6-bit
+ * alignment.
+ */
+
+#undef  NVIC_VECTAB_TBLOFF_MASK
+#define NVIC_VECTAB_TBLOFF_MASK         (0x3fffff00)
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_H */

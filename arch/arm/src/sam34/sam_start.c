@@ -67,7 +67,7 @@
 /* .data is positioned first in the primary RAM followed immediately by .bss.
  * The IDLE thread stack lies just after .bss and has size give by
  * CONFIG_IDLETHREAD_STACKSIZE;  The heap then begins just after the IDLE.
- * ARM EBI requires 64 bit stack alignment.
+ * ARM EABI requires 64 bit stack alignment.
  */
 
 #define IDLE_STACKSIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)

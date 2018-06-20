@@ -153,7 +153,7 @@
                                                        * Capture 0-1 of PWM0 */
 #define LPC17_IRQ_EEPROM        (LPC17_IRQ_EXTINT+40) /* EEPROM Interrupt
                                                        * EE_PROG_DONE, EE_RW_DONE */
-#define LPC17_IRQ_NEXTINT       (40)
+#define LPC17_IRQ_NEXTINT       (41)
 #define LPC17_IRQ_NIRQS         (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT)
 
 /* GPIO interrupts.  The LPC177x_8x supports several interrupts on ports 0 and

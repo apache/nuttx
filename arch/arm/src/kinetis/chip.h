@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/kinetis/chip.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,28 +50,16 @@
 #include <arch/kinetis/chip.h>
 #include "chip/kinetis_memorymap.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external
  * interrupts which, for this architecture, is provided in the arch/kinetis/chip.h
  * header file.
  */
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS NR_INTERRUPTS
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#define ARMV7M_PERIPHERAL_INTERRUPTS  NR_INTERRUPTS
 
 #endif /* __ARCH_ARM_SRC_KINETIS_CHIP_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_start.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,11 +89,14 @@ static void go_os_start(void *pv, unsigned int nbytes)
  *               start of heap. NOTE that the ARM uses a decrement before
  *               store stack so that the correct initial value is the end of
  *               the stack + 4;
- * 0x2002:ffff - End of internal SRAM and end of heap (a
+ * 0x2002:ffff - End of internal SRAM and end of heap.
+ *
+ * NOTE:  ARM EABI requires 64 bit stack alignment.
  */
 
-#define IDLE_STACK ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACKSIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)
+#define IDLE_STACK     ((uintptr_t)&_ebss + IDLE_STACKSIZE)
+#define HEAP_BASE      ((uintptr_t)&_ebss + IDLE_STACKSIZE)
 
 /****************************************************************************
  * Public Data
@@ -108,9 +111,8 @@ static void go_os_start(void *pv, unsigned int nbytes)
  * g_idle_topstack is a read-only variable the provides this computed
  * address.
  */
-#if defined(CONFIG_ARMV7M_CMNVECTOR)
+
 const uintptr_t g_idle_topstack = HEAP_BASE;
-#endif
 
 /****************************************************************************
  * Private Data
@@ -155,7 +157,7 @@ void __start(void) __attribute__ ((no_instrument_function));
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-#if defined(CONFIG_ARMV7M_CMNVECTOR) && !defined(CONFIG_ARMV7M_LAZYFPU)
+#ifndef CONFIG_ARMV7M_LAZYFPU
 
 static inline void kinetis_fpuconfig(void)
 {
