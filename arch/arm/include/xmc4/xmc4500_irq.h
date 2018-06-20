@@ -189,7 +189,7 @@
 #define XMC4_IRQ_RESVD111   (XMC4_IRQ_FIRST+111) /* 111: Reserved */
 
 #define NR_INTERRUPTS       112                  /* 112 Non core IRQs*/
-#define NR_VECTORS          (XMC4_IRQ_FIRST+NR_INTERRUPTS) /* 118 vectors */
+#define NR_VECTORS          (XMC4_IRQ_FIRST+NR_INTERRUPTS) /* 128 vectors */
 
 /* GPIO IRQ interrupts -- To be provided */
 

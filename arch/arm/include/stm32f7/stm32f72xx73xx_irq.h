@@ -159,8 +159,8 @@
 #define STM32_IRQ_LPTIMER1    (STM32_IRQ_FIRST+93) /* 93: LP Timer1 global interrupt */
 
 #define STM32_IRQ_SDMMC2      (STM32_IRQ_FIRST+103) /* 103: SDMMC2 global interrupt */
-#define NR_INTERRUPTS         103
 
+#define NR_INTERRUPTS         103
 #define NR_VECTORS            (STM32_IRQ_FIRST+NR_INTERRUPTS)
 
 /* EXTI interrupts (Do not use IRQ numbers) */

@@ -44,6 +44,7 @@
 #include <arch/irq.h>
 
 #include "up_internal.h"
+#include "chip.h"
 
 #ifdef CONFIG_ARCH_RAMVECTORS
 
@@ -57,7 +58,7 @@
  * table.
  */
 
-#define ARMV7M_VECTAB_SIZE (NR_VECTORS + 16)
+#define ARMV7M_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS + 16)
 
 /****************************************************************************
  * Public Data
