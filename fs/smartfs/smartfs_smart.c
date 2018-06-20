@@ -181,6 +181,9 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
   uint16_t                  parentdirsector;
   const char               *filename;
   struct smartfs_ofile_s   *sf;
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  struct smart_read_write_s readwrite;
+#endif
 
   /* Sanity checks */
 
@@ -317,12 +320,35 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* Now perform the "open" on the file in direntry */
 
-  sf->oflags = oflags;
-  sf->crefs = 1;
-  sf->filepos = 0;
-  sf->curroffset = sizeof(struct smartfs_chain_header_s);
-  sf->currsector = sf->entry.firstsector;
+  sf->oflags       = oflags;
+  sf->crefs        = 1;
+  sf->filepos      = 0;
+  sf->curroffset   = sizeof(struct smartfs_chain_header_s);
+  sf->currsector   = sf->entry.firstsector;
   sf->byteswritten = 0;
+
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+
+  /* When using sector buffering, current sector with its header should always
+   * be present in sf->buffer. Otherwise data corruption may arise when writing.
+   */
+
+  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
+    {
+      readwrite.logsector = sf->currsector;
+      readwrite.offset    = 0;
+      readwrite.count     = fs->fs_llformat.availbytes;
+      readwrite.buffer    = (uint8_t *) sf->buffer;
+
+      ret = FS_IOCTL(fs, BIOC_READSECT, (unsigned long) &readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error %d reading sector %d header\n",
+               ret, sf->currsector);
+          goto errout_with_buffer;
+        }
+    }
+#endif
 
   /* Test if we opened for APPEND mode.  If we did, then seek to the
    * end of the file.
