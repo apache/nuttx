@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/tiva/chip.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <arch/tiva/chip.h>
+#include <arch/tiva/irq.h>
 
 /* Then get all of the register definitions */
 
@@ -56,5 +57,16 @@
 #include "chip/tiva_eeprom.h"     /* EEPROM */
 #include "chip/tiva_timer.h"      /* Timer */
 #include "chip/tiva_adc.h"        /* ADC */
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Provide the required number of peripheral interrupt vector definitions as well.
+ * The definition TIVA_IRQ_NEXTINT simply comes from the chip-specific IRQ header
+ * file included by arch/tiva/irq.h.
+ */
+
+#define ARMV7M_PERIPHERAL_INTERRUPTS  TIVA_IRQ_NEXTINT
 
 #endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */

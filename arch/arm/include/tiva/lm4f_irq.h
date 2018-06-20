@@ -214,7 +214,7 @@
 #  define NR_IRQS             (155) /* (Really fewer because of reserved vectors) */
 
 #else
-#  error "IRQ Numbers not known for this Stellaris chip"
+#  error "IRQ Numbers not known for this Tiva chip"
 #endif
 
 /************************************************************************************

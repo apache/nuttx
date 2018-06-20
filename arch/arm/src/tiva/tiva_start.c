@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_start.c
  *
- *   Copyright (C) 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,10 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_ARCH_FPU
+#  include "nvic.h"
+#endif
+
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -54,6 +58,36 @@
 #include "tiva_userspace.h"
 #include "tiva_eeprom.h"
 #include "tiva_start.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* .data is positioned first in the primary RAM followed immediately by .bss.
+ * The IDLE thread stack lies just after .bss and has size give by
+ * CONFIG_IDLETHREAD_STACKSIZE;  The heap then begins just after the IDLE.
+ * ARM EABI requires 64 bit stack alignment.
+ */
+
+#define IDLE_STACKSIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)
+#define IDLE_STACK     ((uintptr_t)&_ebss + IDLE_STACKSIZE)
+#define HEAP_BASE      ((uintptr_t)&_ebss + IDLE_STACKSIZE)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
+ * linker script. _ebss lies at the end of the BSS region. The idle task
+ * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
+ * The IDLE thread is the thread that the system boots on and, eventually,
+ * becomes the IDLE, do nothing task that runs only when there is nothing
+ * else to run.  The heap continues from there until the end of memory.
+ * g_idle_topstack is a read-only variable the provides this computed
+ * address.
+ */
+
+const uintptr_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
  * Private Functions
@@ -71,6 +105,96 @@
 #  define showprogress(c) up_lowputc(c)
 #else
 #  define showprogress(c)
+#endif
+
+/****************************************************************************
+ * Name: tiva_fpuconfig
+ *
+ * Description:
+ *   Configure the FPU.  Relative bit settings:
+ *
+ *     CPACR:  Enables access to CP10 and CP11
+ *     CONTROL.FPCA: Determines whether the FP extension is active in the
+ *       current context:
+ *     FPCCR.ASPEN:  Enables automatic FP state preservation, then the
+ *       processor sets this bit to 1 on successful completion of any FP
+ *       instruction.
+ *     FPCCR.LSPEN:  Enables lazy context save of FP state. When this is
+ *       done, the processor reserves space on the stack for the FP state,
+ *       but does not save that state information to the stack.
+ *
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *   - the CPACR permits access to CP10 and CP11, that give access to the FP
+ *     extension, or
+ *   - the CONTROL.FPCA bit is set to 1
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+#ifndef CONFIG_ARMV7M_LAZYFPU
+
+static inline void tiva_fpuconfig(void)
+{
+  uint32_t regval;
+
+  /* Set CONTROL.FPCA so that we always get the extended context frame
+   * with the volatile FP registers stacked above the basic context.
+   */
+
+  regval = getcontrol();
+  regval |= (1 << 2);
+  setcontrol(regval);
+
+  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
+   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
+   * are going to turn on CONTROL.FPCA for all contexts.
+   */
+
+  regval = getreg32(NVIC_FPCCR);
+  regval &= ~((1 << 31) | (1 << 30));
+  putreg32(regval, NVIC_FPCCR);
+
+  /* Enable full access to CP10 and CP11 */
+
+  regval = getreg32(NVIC_CPACR);
+  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  putreg32(regval, NVIC_CPACR);
+}
+
+#else
+
+static inline void tiva_fpuconfig(void)
+{
+  uint32_t regval;
+
+  /* Clear CONTROL.FPCA so that we do not get the extended context frame
+   * with the volatile FP registers stacked in the saved context.
+   */
+
+  regval = getcontrol();
+  regval &= ~(1 << 2);
+  setcontrol(regval);
+
+  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
+   * with the lazy FP context save behavior.  Clear FPCCR.ASPEN since we
+   * are going to keep CONTROL.FPCA off for all contexts.
+   */
+
+  regval = getreg32(NVIC_FPCCR);
+  regval &= ~((1 << 31) | (1 << 30));
+  putreg32(regval, NVIC_FPCCR);
+
+  /* Enable full access to CP10 and CP11 */
+
+  regval = getreg32(NVIC_CPACR);
+  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  putreg32(regval, NVIC_CPACR);
+}
+
+#endif
+
+#else
+#  define tiva_fpuconfig()
 #endif
 
 /****************************************************************************
@@ -100,6 +224,7 @@ void __start(void)
   up_clockconfig();
   up_lowsetup();
 #endif
+  tiva_fpuconfig();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -110,6 +235,7 @@ void __start(void)
     {
       *dest++ = 0;
     }
+
   showprogress('B');
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -123,6 +249,7 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+
   showprogress('C');
 #endif
 

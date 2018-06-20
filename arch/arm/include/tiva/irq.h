@@ -185,7 +185,7 @@
 #  error "Unsupported Stellaris IRQ file"
 #endif
 
-#define NR_VECTORS (NR_IRQS - 16)
+#define TIVA_IRQ_NEXTINT   (NR_IRQS - 16)
 
 /* GPIO IRQs -- Note that support for individual GPIO ports can
  * be disabled in order to reduce the size of the implementation.

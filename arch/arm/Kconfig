@@ -381,6 +381,7 @@ config ARCH_CHIP_TIVA
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
+	select ARMV7M_CMNVECTOR
 	---help---
 		TI Tiva TM4C architectures (ARM Cortex-M4)
 

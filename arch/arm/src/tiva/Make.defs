@@ -34,7 +34,7 @@
 #
 ############################################################################
 
-HEAD_ASRC  = tiva_vectors.S
+HEAD_ASRC  =
 
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S up_fetchadd.S  vfork.S
@@ -50,6 +50,20 @@ CMN_CSRCS += up_svcall.c up_vfork.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += up_idle.c
+endif
+
+ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_ASRCS += up_lazyexception.S
+else
+CMN_ASRCS += up_exception.S
+endif
+CMN_CSRCS += up_vectors.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += up_fpu.S
+CMN_CSRCS += up_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
