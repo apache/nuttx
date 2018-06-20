@@ -35,11 +35,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 HEAD_ASRC =
-else
-HEAD_ASRC = lc823450_vectors.S
-endif
 
 CMN_UASRCS =
 CMN_UCSRCS =

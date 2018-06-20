@@ -202,7 +202,7 @@ static inline void kinetis_fpuconfig(void)
   setcontrol(regval);
 
   /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
+   * with the lazy FP context save behavior.  Clear FPCCR.ASPEN since we
    * are going to keep CONTROL.FPCA off for all contexts.
    */
 

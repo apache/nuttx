@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lc823450/chip.h
  *
- *   Copyright 2014,2017 Sony Video & Sound Products Inc.
+ *   Copyright 2014, 2017 Sony Video & Sound Products Inc.
  *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
@@ -43,17 +43,24 @@
 
 #include <sys/types.h>
 #include <arch/lc823450/chip.h>
+#include <arch/lc823450/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Provide the required number of peripheral interrupt vector definitions.
+ * The definition LC823450_IRQ_NEXTINT simply comes from the chip-specific
+ * IRQ header file included by arch/lc823450/irq.h.
+ */
+
+#define ARMV7M_PERIPHERAL_INTERRUPTS  LC823450_IRQ_NEXTINT
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
 
 /****************************************************************************
  * Public Data

@@ -154,6 +154,7 @@
 #define LC823450_IRQ_EXTINT4        (LC823450_IRQ_INTERRUPTS+63)  /* 79: ExternalINT4 interrupt */
 #define LC823450_IRQ_EXTINT5        (LC823450_IRQ_INTERRUPTS+64)  /* 80: ExternalINT5 interrupt */
 
+#define LC823450_IRQ_NEXTINT        (65)
 #define LC823450_IRQ_NIRQS          (LC823450_IRQ_EXTINT5 + 1)
 
 #define LC823450_IRQ_GPIO00         (LC823450_IRQ_NIRQS + 0)      /* 81: GPIO00 */
@@ -258,7 +259,8 @@
 #endif /* CONFIG_LC823450_VIRQ */
 
 #define NR_VECTORS                  (LC823450_IRQ_NIRQS)
-#define NR_IRQS                     (LC823450_IRQ_NIRQS + LC823450_IRQ_NGPIOIRQS + LC823450_IRQ_NVIRTUALIRQS)
+#define NR_IRQS                     (LC823450_IRQ_NIRQS + LC823450_IRQ_NGPIOIRQS + \
+                                     LC823450_IRQ_NVIRTUALIRQS)
 
 /****************************************************************************
  * Public Types
