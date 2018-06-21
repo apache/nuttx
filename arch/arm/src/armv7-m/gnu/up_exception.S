@@ -44,9 +44,6 @@
 #include "exc_return.h"
 
 #include "chip.h"
-#ifdef CONFIG_SMP
-#  include "smp_macros.h"
-#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -96,8 +93,17 @@
  * Macro Definitions
  ************************************************************************************/
 
+/************************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
+ *   case.  Must be provided by MCU-specific logic in the SMP case.
+ *
+ ************************************************************************************/
+
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setintstack, tmp
+	.macro	setintstack, tmp1, tmp2
 	ldr		sp, =g_intstackbase
 	.endm
 #endif
@@ -206,7 +212,7 @@ exception_common:
 	 * here prohibits nested interrupts without some additional logic!
 	 */
 
-	setintstack	r2
+	setintstack	r2, r3
 
 #else
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may

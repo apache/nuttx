@@ -52,14 +52,17 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "sched/sched.h"
 #include "irq/irq.h"
+
+#include "up_arch.h"
 #include "up_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* USB trace dumping */
 
 #ifndef CONFIG_USBDEV_TRACE
@@ -210,7 +213,7 @@ static void up_dumpstate(void)
   uint32_t sp   = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
@@ -233,11 +236,15 @@ static void up_dumpstate(void)
 
   _alert("Current sp: %08x\n", sp);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
   /* Get the limits on the interrupt stack memory */
 
+#ifdef CONFIG_SMP
+  istackbase = (uint32_t)up_intstack_base();
+#else
   istackbase = (uint32_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+#endif
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~7);
 
   /* Show interrupt stack info */
 
@@ -271,11 +278,13 @@ static void up_dumpstate(void)
     }
 #endif
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
   /* Does the current stack pointer lie within the interrupt stack? */
 
   if (sp > istackbase - istacksize && sp < istackbase)
     {
+      uint32_t *stackbase;
+
       /* Yes.. dump the interrupt stack */
 
       _alert("Interrupt Stack\n", sp);
@@ -285,7 +294,12 @@ static void up_dumpstate(void)
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+#ifdef CONFIG_SMP
+      stackbase = (uint32_t *)up_intstack_base();
+#else
+      stackbase = (uint32_t *)&g_intstackbase;
+#endif
+      sp        = *stackbase;
       _alert("User sp: %08x\n", sp);
     }
 #endif
@@ -399,12 +413,22 @@ void up_assert(const uint8_t *filename, int lineno)
 
   (void)syslog_flush();
 
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
+        up_cpu_index(), filename, lineno, rtcb->name);
+#else
+  _alert("Assertion failed CPU%d at file:%s line: %d\n",
+        up_cpu_index(), filename, lineno);
+#endif
+#else
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
+#endif
 #endif
 
   up_dumpstate();

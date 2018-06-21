@@ -80,20 +80,9 @@
 #define NVIC_ENA_OFFSET    (0)
 #define NVIC_CLRENA_OFFSET (NVIC_IRQ0_31_CLEAR - NVIC_IRQ0_31_ENABLE)
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* Size of the interrupt stack allocation */
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-/* In the SMP configuration, we will need two custom interrupt stacks.
- * These definitions provide the aligned stack allocations.
- */
-
-static uint64_t g_cpu0_instack_alloc[CONFIG_ARCH_INTERRUPTSTACK >> 3];
-#if CONFIG_SMP_NCPUS > 1
-static uint64_t g_cpu1_instack_alloc[CONFIG_ARCH_INTERRUPTSTACK >> 3];
-#endif
-#endif
+#define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
 
 /****************************************************************************
  * Public Data
@@ -111,14 +100,19 @@ volatile uint32_t *g_current_regs[1];
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 /* In the SMP configuration, we will need two custom interrupt stacks.
- * These defintions provide the "top" of the push-down stacks.
+ * These definitions provide the aligned stack allocations.
  */
 
-const uint32_t g_cpu0_instack_base = (uint32_t)g_cpu0_instack_alloc +
-                                     sizeof(g_cpu0_instack_alloc);
+uint64_t g_instack_alloc[INTSTACK_ALLOC >> 3];
+
+/* These definitions provide the "top" of the push-down stacks. */
+
+const uint32_t g_cpu0_instack_base =
+  (uint32_t)g_instack_alloc + INTSTACK_SIZE)
+
 #if CONFIG_SMP_NCPUS > 1
-const uint32_t g_cpu1_instack_base = (uint32_t)g_cpu1_instack_alloc +
-                                     sizeof(g_cpu1_instack_alloc);
+const uint32_t g_cpu1_instack_base =
+  (uint32_t)g_instack_alloc + 2 * INTSTACK_SIZE)
 #endif
 #endif
 

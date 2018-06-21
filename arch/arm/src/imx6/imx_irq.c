@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_irq.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,15 @@
 #include "up_internal.h"
 #include "sctlr.h"
 #include "gic.h"
+#include "imx_irq.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Size of the interrupt stack allocation */
+
+#define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
 
 /****************************************************************************
  * Public Data
@@ -65,6 +74,46 @@
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 #else
 volatile uint32_t *g_current_regs[1];
+#endif
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+/* In the SMP configuration, we will need custom IRQ and FIQ stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+uint64_t g_irqstack_alloc[INTSTACK_ALLOC >> 3];
+uint64_t g_fiqstack_alloc[INTSTACK_ALLOC >> 3];
+
+/* These are arrays that point to the top of each interrupt stack */
+
+uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uintptr_t)g_irqstack_alloc + INTSTACK_SIZE,
+#if CONFIG_SMP_NCPUS > 1
+  (uintptr_t)g_irqstack_alloc + 2 * INTSTACK_SIZE,
+#endif
+#if CONFIG_SMP_NCPUS > 2
+  (uintptr_t)g_irqstack_alloc + 3 * INTSTACK_SIZE,
+#endif
+#if CONFIG_SMP_NCPUS > 3
+  (uintptr_t)g_irqstack_alloc + 4 * INTSTACK_SIZE
+#endif
+};
+
+uintptr_t g_fiqstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uintptr_t)g_fiqstack_alloc + INTSTACK_SIZE,
+#if CONFIG_SMP_NCPUS > 1
+  (uintptr_t)g_fiqstack_alloc + 2 * INTSTACK_SIZE,
+#endif
+#if CONFIG_SMP_NCPUS > 2
+  (uintptr_t)g_fiqstack_alloc + 3 * INTSTACK_SIZE,
+#endif
+#if CONFIG_SMP_NCPUS > 3
+  (uintptr_t)g_fiqstack_alloc + 4 * INTSTACK_SIZE
+#endif
+};
+
 #endif
 
 /* Symbols defined via the linker script */

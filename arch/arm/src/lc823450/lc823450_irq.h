@@ -1,7 +1,7 @@
-/************************************************************************************
- * arch/arm/src/a1x/chip.h
+/****************************************************************************
+ * arch/arm/src/lc823450/lc823450_irq.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,66 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_H
-#define __ARCH_ARM_SRC_A1X_CHIP_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_IRQ_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_IRQ_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "chip/a1x_memorymap.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* The size of one interrupt stack.  This is the configured value aligned
+ * the 8-bytes as required by the ARM EABI.
+ */
+
+#define INTSTACK_SIZE  (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+/* In the SMP configuration, we will need two custom interrupt stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+EXTERN uint64_t g_instack_alloc[];
+
+/* These definitions provide the "top" of the push-down stacks. */
+
+EXTERN const uint32_t g_cpu0_instack_base;
+#if CONFIG_SMP_NCPUS > 1
+EXTERN const uint32_t g_cpu1_instack_base;
+#endif
+
+#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_H */
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_IRQ_H */

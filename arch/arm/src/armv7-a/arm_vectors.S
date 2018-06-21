@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/armv7-a/arm_vectors.S
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 
 #include "arm.h"
 #include "cp15.h"
+#include "chip.h"
 
 	.file	"arm_vectors.S"
 
@@ -53,20 +54,81 @@
 g_irqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+
 g_undeftmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+
 g_aborttmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+    
 #ifdef CONFIG_ARMV7A_DECODEFIQ
 g_fiqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
 #endif
-#if CONFIG_ARCH_INTERRUPTSTACK > 3 && defined(CONFIG_ARMV7A_HAVE_GICv2)
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7 && defined(CONFIG_ARMV7A_HAVE_GICv2)
+
 g_nestlevel:
+#ifdef CONFIG_SMP
+	.rept	CONFIG_SMP_NCPUS
+	.word	0		/* CPUn Interrupt nesting level */
+	.endr
+#else
 	.word	0		/* Interrupt nesting level */
+#endif
+
+#endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 && CONFIG_ARMV7A_HAVE_GICv2 */
+
+/************************************************************************************
+ * Macro Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: cpuindex
+ *
+ * Description:
+ *   Return an index idenifying the current CPU.  Single CPU case.  Must be
+ *   provided by MCU-specific logic in chip.h for the SMP case.
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+	.macro	cpuindex, index
+	.mov	\index, #0
+	.endm
+#endif
+
+/************************************************************************************
+ * Name: setirqstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" of the IRQ interrupt stack.  Single
+ *   CPU case.  Must be provided by MCU-specific logic in chip.h for the SMP case.
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+	.macro	setirqstack, tmp1, tmp2
+	ldr		sp, .Lirqstackbase		/* SP = IRQ stack top */
+	.endm
+#endif
+
+/************************************************************************************
+ * Name: setfiqstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" of the FIQ interrupt stack.  Single
+ *   CPU case.  Must be provided by MCU-specific logic in chip.h for the SMP case.
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+	.macro	setfiqstack, tmp1, tmp2
+	ldr		sp, .Lfiqstackbase		/* SP = FIQ stack top */
+	.endm
 #endif
 
 /************************************************************************************
@@ -175,14 +237,19 @@ arm_vectorirq:
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 	/* We will switch to the interrupt stack, UNLESS we are processing a
 	 * nested interrupt in which case we are already using the interrupt
 	 * stack.  SGI interrupts may be nested because they are non-maskable.
 	 */
 
-	ldr		r5, .Lirqnestlevel		/* r1=Points to interrupt nesting level */
+	ldr		r5, .Lirqnestlevel		/* r5=Points to interrupt nesting level */
+#ifdef CONFIG_SMP
+	cpuindex r1						/* r1=cpu index */
+	lsls	r1, r1, #2				/* r1=array byte offset */
+	add		r5, r5, r1				/* Indexed interrupt nesting level */
+#endif
 	ldr		r1, [r5]				/* Get r1= nesting level */
 	add		r1, r1, #1				/* Increment nesting level */
 	str		r1, [r5]				/* Save r1= nesting level */
@@ -193,7 +260,7 @@ arm_vectorirq:
 
 	/* Call arm_decodeirq() on the interrupt stack */
 
-	ldr		sp, .Lirqstackbase		/* SP = interrupt stack base */
+	setirqstack r1, r5				/* SP = IRQ stack top */
 	str		r0, [sp]				/* Save the user stack pointer */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
@@ -268,14 +335,19 @@ arm_vectorirq:
 
 .Lirqtmp:
 	.word	g_irqtmp
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifndef CONFIG_SMP
 .Lirqstackbase:
 	.word	g_intstackbase
+#endif
+
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 .Lirqnestlevel:
 	.word	g_nestlevel
 #endif
-#endif
+#endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
+
 	.size	arm_vectorirq, . - arm_vectorirq
 	.align	5
 
@@ -930,8 +1002,8 @@ arm_vectorfiq:
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr		sp, .Lfiqstackbase		/* SP = interrupt stack base */
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	setfiqstack r1, r4				/* SP = FIQ stack top */
 	str		r0, [sp]				/* Save the user stack pointer */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */
@@ -983,7 +1055,8 @@ arm_vectorfiq:
 
 .Lfiqtmp:
 	.word	g_fiqtmp
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lfiqstackbase:
 	.word	g_fiqstackbase
 #endif
@@ -997,7 +1070,7 @@ arm_vectorfiq:
  *  Name: g_intstackalloc/g_intstackbase
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
 	.align	4
 
@@ -1007,27 +1080,27 @@ arm_vectorfiq:
 	.type	g_intstackbase, object
 
 g_intstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~7) - 4)
 g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4
-	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+
+/************************************************************************************
+ *  Name: g_fiqstackalloc/g_fiqstackbase
+ ************************************************************************************/
 
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object
 	.globl	g_fiqstackbase
 	.type	g_fiqstackbase, object
 
-/************************************************************************************
- *  Name: g_fiqstackalloc/g_fiqstackbase
- ************************************************************************************/
-
 g_fiqstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~7) - 4)
 g_fiqstackbase:
 	.skip	4
 	.size	g_fiqstackbase, 4
-	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 3 */
+#endif /* !CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 	.end

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lc823450/smp_macros.h
+ * arch/arm/src/imx6/imx_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_SMP_MACROS_H
-#define __ARCH_ARM_SRC_LC823450_SMP_MACROS_H
+#ifndef __ARCH_ARM_SRC_IMX6_IMX_IRQ_H
+#define __ARCH_ARM_SRC_IMX6_IMX_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -42,45 +42,54 @@
 
 #include <nuttx/config.h>
 
-#if defined(__ASSEMBLY__) && defined(CONFIG_SMP)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define COREID_REG 0xe00fe000
+/* The size of one interrupt stack.  This is the configured value aligned
+ * the 8-bytes as required by the ARM EABI.
+ */
+
+#define INTSTACK_SIZE  (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 /****************************************************************************
- * Imported Public Data
+ * Public Data
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-	.globl	g_cpu0_instack_base
-	.globl	g_cpu1_instack_base
-#endif
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Macro Definitions
- ****************************************************************************/
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setintstack, tmp
-#if CONFIG_SMP_NCPUS > 1
-	ldr		\tmp, =COREID_REG
-	ldr		\tmp, [\tmp, 0]     /* \tmp = getreg32(coreid_reg) */
-	and		\tmp, \tmp, 1       /* \tmp = COREID */
-	cmp		\tmp, #0
-	bne		1f
-	ldr		sp, =g_cpu0_instack_base
-	b		2f
-1:
-	ldr		sp, =g_cpu1_instack_base
-2:
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-	ldr		sp, =g_cpu0_instack_base
-#endif
-	.endm
+#define EXTERN extern
 #endif
 
-#endif /* __ASSEMBLY__ && CONFIG_SMP */
-#endif /* __ARCH_ARM_SRC_LC823450_SMP_MACROS_H */
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+/* In the SMP configuration, we will need custom IRQ and FIQ stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+EXTERN uint64_t g_irqstack_alloc[];
+EXTERN uint64_t g_fiqstack_alloc[];
+
+/* These are arrays that point to the top of each interrupt stack */
+
+EXTERN uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS];
+EXTERN uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS];
+
+#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_IMX6_IMX_IRQ_H */
