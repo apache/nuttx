@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/up_vectors.c
+ * arch/arm/src/lc823450/smp_macros.h
  *
- *   Copyright (C) 2012 Michael Smith. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,65 +33,54 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_LC823450_SMP_MACROS_H
+#define __ARCH_ARM_SRC_LC823450_SMP_MACROS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "chip.h"
+#if defined(__ASSEMBLY__) && defined(CONFIG_SMP)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-#define IDLE_STACK      ((unsigned)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define COREID_REG 0xe00fe000
 
-#ifndef ARMV7M_PERIPHERAL_INTERRUPTS
-#  error ARMV7M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
+/****************************************************************************
+ * Imported Public Data
+ ****************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	.globl	g_cpu0_instack_base
+	.globl	g_cpu1_instack_base
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Macro Definitions
  ****************************************************************************/
 
-/* Chip-specific entrypoint */
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	.macro	setintstack, tmp
+#if CONFIG_SMP_NCPUS > 1
+	ldr		\tmp, =COREID_REG
+	ldr		\tmp, [\tmp, 0]     /* \tmp = getreg32(coreid_reg) */
+	and		\tmp, \tmp, 1       /* \tmp = COREID */
+	cmp		\tmp, #0
+	bne		1f
+	ldr		sp, =g_cpu0_instack_base
+	b		2f
+1:
+	ldr		sp, =g_cpu1_instack_base
+2:
+#else
+	ldr		sp, =g_cpu0_instack_base
+#endif
+	.endm
+#endif
 
-extern void __start(void);
-
-/* Common exception entrypoint */
-
-extern void exception_common(void);
-
-/************************************************************************************
- * Public data
- ************************************************************************************/
-
-/* Provided by the linker script to indicate the end of the BSS */
-
-extern char _ebss;
-
-/* The v7m vector table consists of an array of function pointers, with the first
- * slot (vector zero) used to hold the initial stack pointer.
- *
- * As all exceptions (interrupts) are routed via exception_common, we just need to
- * fill this array with pointers to it.
- *
- * Note that the [ ... ] designated initialiser is a GCC extension.
- */
-
-unsigned _vectors[] __attribute__((section(".vectors"))) =
-{
-  /* Initial stack */
-
-  IDLE_STACK,
-
-  /* Reset exception handler */
-
-  (unsigned)&__start,
-
-  /* Vectors 2 - n point directly at the generic handler */
-
-  [2 ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)] = (unsigned)&exception_common
-};
-
+#endif /* __ASSEMBLY__ && CONFIG_SMP */
+#endif /* __ARCH_ARM_SRC_LC823450_SMP_MACROS_H */

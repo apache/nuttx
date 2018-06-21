@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 16, 2018)
+NuttX TODO List (Last updated June 20, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (15)  Task/Scheduler (sched/)
-  (3)  SMP
+  (4)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -481,6 +481,13 @@ o SMP
                SGI implementation.  This change would, however, lead to
                simplification in the design and permit commonality with
                other, non-GIC imoplementations.
+
+  Title:       BAD INTERRUPTSTACK LOGIC FOR ARMv7-A IN SMP CONFIGURATION
+  Description: The handler at arch/arm/src/armv7-a/arm_vectors.S supports
+               only a single interrupt stack.  In SMP mode, that same
+               interrupt stack is used for all CPUs.  That cannot work.
+  Status:      Open
+  Priority:    High
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^

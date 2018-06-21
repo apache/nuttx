@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/armv7-m/gnu/up_lazyexcption.S
  *
- *   Copyright (C) 2009-2010, 2013-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,9 @@
 #include "exc_return.h"
 
 #include "chip.h"
+#ifdef CONFIG_SMP
+#  include "smp_macros.h"
+#endif
 
 /************************************************************************************************
  * Pre-processor Definitions
@@ -85,6 +88,16 @@
 	.syntax		unified
 	.thumb
 	.file		"up_lazyexception.S"
+
+/************************************************************************************************
+ * Macro Definitions
+ ************************************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+	.macro	setintstack, tmp
+	ldr		sp, =g_intstackbase
+	.endm
+#endif
 
 /************************************************************************************************
  * .text
@@ -201,7 +214,7 @@ exception_common:
 	 * here prohibits nested interrupts without some additional logic!
 	 */
 
-	ldr		sp, =g_intstackbase
+	setintstack	r2
 
 #else
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may
@@ -349,7 +362,7 @@ exception_common:
  *
  ************************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
 	.global	g_intstackalloc
 	.global	g_intstackbase
