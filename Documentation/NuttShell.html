@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: May 11, 2018</p>
+      <p>Last Updated:  June 22, 2018</p>
     </td>
   </tr>
 </table>
@@ -2387,8 +2387,8 @@ mkrd [-m &lt;minor&gt;] [-s &lt;sector-size&gt;] &lt;nsectors&gt;
   <b>Synopsis</b>.
   Create a ramdisk consisting of <code>&lt;nsectors&gt;</code>, each of size
   <code>&lt;sector-size&gt;</code> (or 512 bytes if <code>&lt;sector-size&gt;</code> is not specified.
-  The ramdisk will be registered as <code>/dev/ram&lt;n&gt;</code> (if <code>&lt;n&gt;</code> is not
-  specified, mkrd will attempt to register the ramdisk as <code>/dev/ram0</code>.
+  The ramdisk will be registered as <code>/dev/ram&lt;minor&gt;</code>.  If <code>&lt;minor&gt;</code> is not
+  specified, <code>mkrd</code> will attempt to register the ramdisk as <code>/dev/ram0</code>.
 </p>
 <p><b>Example</b></p>
 <ul><pre>
