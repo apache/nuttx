@@ -151,8 +151,8 @@
  * Name: up_intstack_base
  *
  * Description:
- *   Return a pointer to the "base" the correct interrupt stack for the
- *   current CPU.
+ *   Return a pointer to the "base" the correct interrupt stack allocation
+ *   for the  current CPU.
  *
  ****************************************************************************/
 

@@ -135,8 +135,8 @@ extern "C"
  * Name: up_intstack_base
  *
  * Description:
- *   Set the current stack pointer to the  "top" the correct interrupt stack
- *   for the current CPU.
+ *   Set the current stack pointer to the "base" the correct interrupt stack
+ *   allocation for the current CPU.
  *
  ****************************************************************************/
 
