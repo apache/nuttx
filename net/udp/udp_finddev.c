@@ -199,7 +199,25 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
       if (conn->domain == PF_INET)
 #endif
         {
-          return udp_find_ipv4_device(conn, conn->u.ipv4.raddr);
+          /* Check if the remote, destination address is the broadcast
+           * or multicast address.  In this is the case select the device
+           * using the locally bound address.
+           *
+           * REVISIT:  This logic is to handle the case where UDP broadcast
+           * is used when there are multiple devices.  In this case we can
+           * select the device using the bound address address.  It is a
+           * kludge for the unsupported SO_BINDTODEVICE socket option
+           */
+
+          if (conn->u.ipv4.raddr == INADDR_BROADCAST ||
+              IN_MULTICAST(conn->u.ipv4.raddr))
+            {
+              return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
+            }
+          else
+            {
+              return udp_find_ipv4_device(conn, conn->u.ipv4.raddr);
+            }
         }
 #endif
 
@@ -208,7 +226,28 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          return udp_find_ipv6_device(conn, conn->u.ipv6.raddr);
+          /* Check if the remote, destination address is a multicast
+           * address.  In this is the case select the device
+           * using the locally bound address.  The general form of an
+           * reserved IPv6 multicast address is:  ff0x::xx/16.
+           *
+           * REVISIT:  This logic is to handle the case where UDP broadcast
+           * is used when there are multiple devices.  In this case we can
+           * select the device using the bound address address.  It is a
+           * kludge for the unsupported SO_BINDTODEVICE socket option
+           */
+
+          if ((conn->u.ipv6.laddr[0] & HTONS(0xfff0)) == HTONS(0xff00) &&
+              conn->u.ipv6.laddr[1] == 0 && conn->u.ipv6.laddr[2] == 0 &&
+              conn->u.ipv6.laddr[3] == 0 && conn->u.ipv6.laddr[4] == 0 &&
+              conn->u.ipv6.laddr[5] == 0 && conn->u.ipv6.laddr[6] == 0)
+            {
+              return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
+            }
+          else
+            {
+              return udp_find_ipv6_device(conn, conn->u.ipv6.raddr);
+            }
         }
 #endif
 }
