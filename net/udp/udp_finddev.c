@@ -54,91 +54,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_find_ipv4_device
- *
- * Description:
- *   Select the network driver to use with the IPv4 UDP transaction.
- *
- * Input Parameters:
- *   conn - UDP connection structure (not currently used).
- *   ipv4addr - The IPv4 address to use in the device selection.
- *
- * Returned Value:
- *   A pointer to the network driver to use.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-FAR struct net_driver_s *udp_find_ipv4_device(FAR struct udp_conn_s *conn,
-                                              in_addr_t ipv4addr)
-{
-  /* Return NULL if the address is INADDR_ANY.  In this case, there may
-   * be multiple devices that can provide data so the exceptional events
-   * from any particular device are not important.
-   *
-   * Of course, it would be a problem if this is the remote address of
-   * sendto().
-   */
-
-  if (net_ipv4addr_cmp(ipv4addr, INADDR_ANY))
-    {
-      return NULL;
-    }
-
-  /* We need to select the device that is going to route the UDP packet
-   * based on the provided IP address.
-   */
-
-  return netdev_findby_ipv4addr(conn->u.ipv4.laddr, ipv4addr);
-}
-#endif /* CONFIG_NET_IPv4 */
-
-/****************************************************************************
- * Name: udp_find_ipv6_device
- *
- * Description:
- *   Select the network driver to use with the IPv6 UDP transaction.
- *
- * Input Parameters:
- *   conn - UDP connection structure (not currently used).
- *   ipv6addr - The IPv6 address to use in the device selection.
- *
- * Returned Value:
- *   A pointer to the network driver to use.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *udp_find_ipv6_device(FAR struct udp_conn_s *conn,
-                                              net_ipv6addr_t ipv6addr)
-{
-  /* Return NULL if the address is IN6ADDR_ANY.  In this case, there may
-   * be multiple devices that can provide data so the exceptional events
-   * from any particular device are not important.
-   *
-   * Of course, it would be a problem if this is the remote address of
-   * sendto().
-   */
-
-  if (net_ipv6addr_cmp(ipv6addr, g_ipv6_allzeroaddr))
-    {
-      return NULL;
-    }
-
-  /* We need to select the device that is going to route the UDP packet
-   * based on the provided IP address.
-   */
-
-  return netdev_findby_ipv6addr(conn->u.ipv6.laddr, ipv6addr);
-}
-#endif /* CONFIG_NET_IPv6 */
-
-/****************************************************************************
  * Name: udp_find_laddr_device
  *
  * Description:
  *   Select the network driver to use with the UDP transaction using the
  *   locally bound IP address.
+ *
+ *   This is currently used in the UDP network poll setup to determine
+ *   which device is being polled.
  *
  * Input Parameters:
  *   conn - UDP connection structure (not currently used).
@@ -159,7 +82,20 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
       if (conn->domain == PF_INET)
 #endif
         {
-          return udp_find_ipv4_device(conn, conn->u.ipv4.laddr);
+          /* Make sure that the socket is bound to some non-zero, local
+           * address.  Zero is used as an indication that the laddr is
+           * uninitialized and that the socket is, hence, not bound.
+           */
+
+          if (conn->u.ipv4.laddr == 0)
+            {
+              return NULL;
+            }
+          else
+            {
+              return netdev_findby_ipv4addr(conn->u.ipv4.laddr,
+                                            conn->u.ipv4.laddr);
+            }
         }
 #endif
 
@@ -168,7 +104,20 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
       else
 #endif
         {
-          return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
+          /* Make sure that the socket is bound to some non-zero, local
+           * address.  Zero is used as an indication that the laddr is
+           * uninitialized and that the socket is, hence, not bound.
+           */
+
+          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+            {
+              return NULL;
+            }
+          else
+            {
+              return netdev_findby_ipv6addr(conn->u.ipv6.laddr,
+                                            conn->u.ipv6.laddr);
+            }
         }
 #endif
 }
@@ -179,6 +128,9 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
  * Description:
  *   Select the network driver to use with the UDP transaction using the
  *   remote IP address.
+ *
+ *   This function is called for UDP sendto() in order to determine which
+ *   network device that the UDP pack should be sent on.
  *
  * Input Parameters:
  *   conn - UDP connection structure.
@@ -201,22 +153,34 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
         {
           /* Check if the remote, destination address is the broadcast
            * or multicast address.  In this is the case select the device
-           * using the locally bound address.
-           *
-           * REVISIT:  This logic is to handle the case where UDP broadcast
-           * is used when there are multiple devices.  In this case we can
-           * select the device using the bound address address.  It is a
-           * kludge for the unsupported SO_BINDTODEVICE socket option
+           * using the locally bound address (assuming that there is one).
            */
 
           if (conn->u.ipv4.raddr == INADDR_BROADCAST ||
               IN_MULTICAST(conn->u.ipv4.raddr))
             {
-              return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
+              /* Make sure that the socket is bound to some non-zero, local
+               * address.  Zero is used as an indication that the laddr is
+               * uninitialized and that the socket is, hence, not bound.
+               */
+
+              if (conn->u.ipv4.laddr == 0)
+                {
+                  return NULL;
+                }
+              else
+                {
+                  return netdev_findby_ipv4addr(conn->u.ipv4.laddr,
+                                                conn->u.ipv4.laddr);
+                }
             }
+
+          /* Normal lookup using the remote address */
+
           else
             {
-              return udp_find_ipv4_device(conn, conn->u.ipv4.raddr);
+              return netdev_findby_ipv4addr(conn->u.ipv4.laddr,
+                                            conn->u.ipv4.raddr);
             }
         }
 #endif
@@ -228,13 +192,11 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
         {
           /* Check if the remote, destination address is a multicast
            * address.  In this is the case select the device
-           * using the locally bound address.  The general form of an
-           * reserved IPv6 multicast address is:  ff0x::xx/16.
+           * using the locally bound address (assuming that there is one).
            *
-           * REVISIT:  This logic is to handle the case where UDP broadcast
-           * is used when there are multiple devices.  In this case we can
-           * select the device using the bound address address.  It is a
-           * kludge for the unsupported SO_BINDTODEVICE socket option
+           * The general form of all well-known, reserved IPv6 multicast
+           * addresses is:  ff0x::xx/16 (which does not include all possible
+           * multicast addresses).
            */
 
           if ((conn->u.ipv6.laddr[0] & HTONS(0xfff0)) == HTONS(0xff00) &&
@@ -242,11 +204,28 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
               conn->u.ipv6.laddr[3] == 0 && conn->u.ipv6.laddr[4] == 0 &&
               conn->u.ipv6.laddr[5] == 0 && conn->u.ipv6.laddr[6] == 0)
             {
-              return udp_find_ipv6_device(conn, conn->u.ipv6.laddr);
+              /* Make sure that the socket is bound to some non-zero, local
+               * address.  Zero is used as an indication that the laddr is
+               * uninitialized and that the socket is, hence, not bound.
+               */
+
+              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+                {
+                  return NULL;
+                }
+              else
+                {
+                  return netdev_findby_ipv6addr(conn->u.ipv6.laddr,
+                                                conn->u.ipv6.laddr);
+                }
             }
+
+          /* Normal lookup using the remote address */
+
           else
             {
-              return udp_find_ipv6_device(conn, conn->u.ipv6.raddr);
+              return netdev_findby_ipv6addr(conn->u.ipv6.laddr,
+                                            conn->u.ipv6.raddr);
             }
         }
 #endif
