@@ -134,13 +134,19 @@
 
 #ifdef CONFIG_SMALL_MEMORY
 
-#define _POSIX_SSIZE_MAX      32767       /* See sys/types.h */
+#define _POSIX_SIZE_MAX       65535         /* See sys/types.h */
+#define _POSIX_SIZE_MIN       0
+
+#define _POSIX_SSIZE_MAX      32767         /* See sys/types.h */
 #define _POSIX_SSIZE_MIN      -32768
 
 #else /* CONFIG_SMALL_MEMORY */
 
-#define _POSIX_SSIZE_MAX      2147483647  /* See sys/types.h */
-#define _POSIX_SSIZE_MIN      -2147483648
+#define _POSIX_SIZE_MAX       4294967295L   /* See sys/types.h */
+#define _POSIX_SIZE_MIN       0
+
+#define _POSIX_SSIZE_MAX      2147483647UL  /* See sys/types.h */
+#define _POSIX_SSIZE_MIN      -2147483648UL
 
 #endif /* CONFIG_SMALL_MEMORY */
 
@@ -205,6 +211,8 @@
 #define OPEN_MAX       _POSIX_OPEN_MAX
 #define PATH_MAX       _POSIX_PATH_MAX
 #define PIPE_BUF       _POSIX_PIPE_BUF
+#define SIZE_MAX       _POSIX_SIZE_MAX
+#define SIZE_MIN       _POSIX_SIZE_MIN
 #define SSIZE_MAX      _POSIX_SSIZE_MAX
 #define SSIZE_MIN      _POSIX_SSIZE_MIN
 #define STREAM_MAX     _POSIX_STREAM_MAX
@@ -237,6 +245,7 @@
 #define SEM_VALUE_MAX  _POSIX_SEM_VALUE_MAX
 
 /* Required for readv() and writev() */
+/* There really is no upper limit on the number of vectors */
 
 #define IOV_MAX        INT_MAX
 

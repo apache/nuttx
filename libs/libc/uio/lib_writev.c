@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdio/lib_writev.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,20 +51,20 @@
  *
  * Description:
  *   The writev() function is equivalent to write(), except as described
- *   below. The writev() function will gather output data from the iovcnt
- *   buffers specified by the members of the iov array: iov[0], iov[1], ...,
- *   iov[iovcnt-1]. The iovcnt argument is valid if greater than 0 and less
+ *   below. The writev() function will gather output data from the 'iovcnt'
+ *   buffers specified by the members of the 'iov' array: iov[0], iov[1], ...,
+ *   iov[iovcnt-1]. The 'iovcnt' argument is valid if greater than 0 and less
  *   than or equal to IOV_MAX, as defined in limits.h.
  *
  *   Each iovec entry specifies the base address and length of an area in
  *   memory from which data should be written. The writev() function always
  *   writes a complete area before proceeding to the next.
  *
- *   If fildes refers to a regular file and all of the iov_len members in
+ *   If 'filedes' refers to a regular file and all of the iov_len members in
  *   the array pointed to by iov are 0, writev() will return 0 and have no
  *   other effect. For other file types, the behavior is unspecified.
  *
- *   If the sum of the iov_len values is greater than SSIZE_MAX, the
+ *   TODO: If the sum of the iov_len values is greater than SSIZE_MAX, the
  *   operation will fail and no data will be transferred.
  *
  * Input Parameters:
@@ -76,7 +76,13 @@
  *   Upon successful completion, writev() shall return the number of bytes
  *   actually written. Otherwise, it shall return a value of -1, the file-
  *   pointer shall remain unchanged, and errno shall be set to indicate an
- *   error.
+ *   error. See write for the list of returned errno values. In addition,
+ *   the readv() function will fail if:
+ *
+ *    EINVAL.
+ *      The sum of the iov_len values in the iov array overflowed an ssize_t
+ *      or The 'iovcnt' argument was less than or equal to 0, or greater than
+ *      IOV_MAX (Not implemented).
  *
  ****************************************************************************/
 

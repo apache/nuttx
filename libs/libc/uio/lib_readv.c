@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdio/lib_readv.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017=-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,17 +50,17 @@
  *
  * Description:
  *   The readv() function is equivalent to read(), except as described below.
- *   The readv() function places the input data into the iovcnt buffers
- *   specified by the members of the iov array: iov[0], iov[1], ...,
- *   iov[iovcnt-1].  The iovcnt argument is valid if greater than 0 and less
- *   than or equal to IOV_MAX as defined in limits.h.
+ *   The readv() function places the input data into the 'iovcnt' buffers
+ *   specified by the members of the 'iov' array: iov[0], iov[1], ...,
+ *   iov['iovcnt'-1].  The 'iovcnt' argument is valid if greater than 0 and
+ *   less than or equal to IOV_MAX as defined in limits.h.
  *
  *   Each iovec entry specifies the base address and length of an area in
  *   memory where data should be placed.  The readv() function will always
  *   fill an area completely before proceeding to the next.
  *
- *   Upon successful completion, readv() will mark for update the st_atime
- *   field of the file.
+ *   TODO: pon successful completion, readv() will mark for update the
+ *   st_atime field of the file.
  *
  * Input Parameters:
  *   filedes - The open file descriptor for the file to be read
@@ -70,7 +70,14 @@
  * Returned Value:
  *   Upon successful completion, readv() will return a non-negative integer
  *   indicating the number of bytes actually read.  Otherwise, the functions
- *   will return -1 and set errno to indicate the error.  See read().
+ *   will return -1 and set errno to indicate the error.  See read() for the
+ *   list of returned errno values.  In addition, the readv() function will
+ *   fail if:
+ *
+ *    EINVAL.
+ *      The sum of the iov_len values in the iov array overflowed an ssize_t
+ *      or The 'iovcnt' argument was less than or equal to 0, or greater than
+ *      IOV_MAX (Not implemented).
  *
  ****************************************************************************/
 
