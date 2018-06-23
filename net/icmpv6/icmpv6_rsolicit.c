@@ -115,7 +115,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   ipv6->ttl     = 255;                     /* Hop limit */
 
   /* Set the multicast destination IP address to the IPv6 all link-
-   * loocal routers address: ff02::2
+   * local routers address: ff02::2
    */
 
   net_ipv6addr_copy(ipv6->destipaddr, g_ipv6_allrouters);

@@ -587,7 +587,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_mcast
  *
  * Description:
- *   s address a multicast address? see RFC 3513.
+ *   Is address a multicast address? see RFC 3513.
  *
  ****************************************************************************/
 

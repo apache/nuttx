@@ -218,7 +218,7 @@ static int inet_setup(FAR struct socket *psock, int protocol)
    * the connection structure is is unallocated at this point.  It will
    * not actually be initialized until the socket is connected.
    *
-   * Only SOCK_STREAM and SOCK_DGRAM and possible SOCK_RAW are supported.
+   * REVISIT:  Only SOCK_STREAM and SOCK_DGRAM are supported.
    */
 
   switch (psock->s_type)

@@ -152,7 +152,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 #endif
         {
           /* Check if the remote, destination address is the broadcast
-           * or multicast address.  In this is the case select the device
+           * or multicast address.  If this is the case, select the device
            * using the locally bound address (assuming that there is one).
            */
 
@@ -191,7 +191,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 #endif
         {
           /* Check if the remote, destination address is a multicast
-           * address.  In this is the case select the device
+           * address.  If this is the case, select the device
            * using the locally bound address (assuming that there is one).
            *
            * The general form of all well-known, reserved IPv6 multicast

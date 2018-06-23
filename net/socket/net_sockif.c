@@ -78,7 +78,11 @@ FAR const struct sock_intf_s *
 {
   FAR const struct sock_intf_s *sockif = NULL;
 
-  /* Get the socket interface */
+  /* Get the socket interface.
+   *
+   * REVISIT:  Should also support PF_UNSPEC which would permit the socket
+   * to be used for anything.
+   */
 
   switch (family)
     {
