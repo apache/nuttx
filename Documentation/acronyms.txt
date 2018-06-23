@@ -5,6 +5,7 @@ AIC    Advanced Interrupt Controller (Atmel SAM)
 ARP    Address Resolution Protocol (networking)
 BCH    Block to Character
 BINFMT Binary Format (Dynamic Loader)
+BLE    Bluetooth4 Low Energy
 BPP    Bits Per Pixel
 CAN    Controller Area Network
 CDC    Communication Device Class (USB)
@@ -79,13 +80,16 @@ OTP    One-Time Programmable
 PWM    Pulse Width Modulation
 PKT    "Raw" Packet socket (networking)
 PRNG   Pseudo-Random Number Generator
+QSPI   Quad SPI
 RAM    Random Access Memory
 RNG    Random Number Generator
 ROM    Read-Only Memory
+RNDIS  Remote Network Driver Interface Specification (USB, networking)
 RTC    Real Time Clock
 RTCC   Real Time Clock/Calendar
 RTOS   Real Time Operating System
 SAIC   Secure Advanced Interrupt Controller (Atmel SAM)
+SCI    Serial Communications Inteface
 SD     Secure Digital (flash memory)
 SDHC   Secure Digital High Capacity (flash memory),
        Secure Digital Host Controller (hardware)
@@ -98,6 +102,7 @@ SPRNG  Scalable Parallel Random Number Generator
 SRAM   Static RAM
 SYSLOG System Log
 TCP    Transmission Control Protocol (networking)
+TRNG   True Random Number Generator
 TSC    Touchscreen Controller
 TUN    network TUNnel
 TWI    Two-Wire Interface (serial interface)
@@ -105,6 +110,7 @@ UDP    User Datagram Protocol (networking)
 UART   Universal Asynchronous Receiver/Transmitter
 USB    Universal Serial Bus (serial interface)
 USART  Universal Synchronous/Asynchronous Receiver/Transmitter
+VNC    Virtual Network Computing (graphics, remote desktop)
 WAN    Wide Area Network (networking)
 WLAN   Wireless Local Area Network (networking)
 WPAN   Wireless Personal Area Network (networking)

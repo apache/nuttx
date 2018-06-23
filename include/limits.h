@@ -134,19 +134,19 @@
 
 #ifdef CONFIG_SMALL_MEMORY
 
-#define _POSIX_SIZE_MAX       65535         /* See sys/types.h */
+#define _POSIX_SIZE_MAX       65535        /* See sys/types.h */
 #define _POSIX_SIZE_MIN       0
 
-#define _POSIX_SSIZE_MAX      32767         /* See sys/types.h */
+#define _POSIX_SSIZE_MAX      32767        /* See sys/types.h */
 #define _POSIX_SSIZE_MIN      -32768
 
 #else /* CONFIG_SMALL_MEMORY */
 
-#define _POSIX_SIZE_MAX       4294967295L   /* See sys/types.h */
+#define _POSIX_SIZE_MAX       4294967295UL /* See sys/types.h */
 #define _POSIX_SIZE_MIN       0
 
-#define _POSIX_SSIZE_MAX      2147483647UL  /* See sys/types.h */
-#define _POSIX_SSIZE_MIN      -2147483648UL
+#define _POSIX_SSIZE_MAX      2147483647L  /* See sys/types.h */
+#define _POSIX_SSIZE_MIN      -2147483648L
 
 #endif /* CONFIG_SMALL_MEMORY */
 
