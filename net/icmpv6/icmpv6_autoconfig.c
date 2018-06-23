@@ -133,7 +133,7 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
         }
 
       /* Check if the outgoing packet is available. It may have been claimed
-       * by a send interrupt serving a different thread -OR- if the output
+       * by a send event handler serving a different thread -OR- if the output
        * buffer currently contains unprocessed incoming data. In these cases
        * we will just have to wait for the next polling cycle.
        */
@@ -204,11 +204,10 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   struct icmpv6_router_s state;
   int ret;
 
-  /* Initialize the state structure. This is done with interrupts
-   * disabled
-   */
-
-  /* This semaphore is used for signaling and, hence, should not have
+  /* Initialize the state structure with the network locked.
+   *
+   *
+   * This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
@@ -246,10 +245,8 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 
   dev->d_txavail(dev);
 
-  /* Wait for the send to complete or an error to occur: NOTES: (1)
-   * net_lockedwait will also terminate if a signal is received, (2)
-   * interrupts may be disabled! They will be re-enabled while the
-   * task sleeps and automatically re-enabled when the task restarts.
+  /* Wait for the send to complete or an error to occur
+   * net_lockedwait will also terminate if a signal is received.
    */
 
   do

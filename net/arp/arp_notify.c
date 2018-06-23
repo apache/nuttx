@@ -113,7 +113,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
  *   is called (arp_wait() will automatically cancel the wait).
  *
  * Assumptions:
- *   This function may execute in the interrupt context when called from
+ *   This function may execute with interrupts disabled when called from
  *   arp_wait().
  *
  ****************************************************************************/

@@ -88,6 +88,10 @@ uint8_t g_reassembly_timer;
  * Returned Value:
  *   None
  *
+ * Assumptions:
+ *   Called early in the initialization sequence so that no special
+ *   protection is required.
+ *
  ****************************************************************************/
 
 void devif_initialize(void)

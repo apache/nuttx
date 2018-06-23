@@ -296,7 +296,7 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
 
 static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
 {
-  /* Check for a error/timeout detected by the interrupt handler.  Errors are
+  /* Check for a error/timeout detected by the event handler.  Errors are
    * signaled by negative errno values for the rcv length
    */
 

@@ -286,9 +286,8 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Perform the send operation */
 
-  /* Initialize the state structure. This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure. This is done with the network locked
+   * because we don't want anything to happen until we are ready.
    */
 
   net_lock();
@@ -328,15 +327,13 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
           netdev_txnotify_dev(&radio->r_dev);
 
-          /* Wait for the send to complete or an error to occur: NOTES: (1)
-           * net_lockedwait will also terminate if a signal is received, (2)
-           * interrupts may be disabled! They will be re-enabled while the
-           * task sleeps and automatically re-enabled when the task restarts.
+          /* Wait for the send to complete or an error to occur.
+           * net_lockedwait will also terminate if a signal is received.
            */
 
           ret = net_lockedwait(&state.is_sem);
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           bluetooth_callback_free(&radio->r_dev, conn, state.is_cb);
         }

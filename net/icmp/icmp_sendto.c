@@ -477,10 +477,8 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
 
       netdev_txnotify_dev(dev);
 
-      /* Wait for either the send to complete or for timeout to occur. (1)
-       * net_lockedwait will also terminate if a signal is received, (2)
-       * interrupts may be disabled!  They will be re-enabled while the
-       * task sleeps and automatically re-enabled when the task restarts.
+      /* Wait for either the send to complete or for timeout to occur.
+       * net_lockedwait will also terminate if a signal is received.
        */
 
       ninfo("Start time: 0x%08x\n", state.snd_time);

@@ -521,7 +521,7 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock, FAR const void *buf,
 
           ret = net_lockedwait(&state.is_sem);
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           ieee802154_callback_free(&radio->r_dev, conn, state.is_cb);
         }

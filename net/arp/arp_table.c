@@ -258,9 +258,8 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
  *
- * Assumptions
- *   Interrupts are disabled; Returned value will become unstable when
- *   interrupts are re-enabled or if any other network APIs are called.
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 

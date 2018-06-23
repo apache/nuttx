@@ -260,7 +260,7 @@ struct iob_s;               /* Forward reference */
  *
  * Input Parameters:
  *   dev     - The IEEE802.15.4 MAC network driver interface.
- *   list    - Head of callback list for send interrupt
+ *   list    - Head of callback list for send event handler
  *   ipv6hdr - IPv6 header followed by UDP or ICMPv6 header.
  *   buf     - Data to send
  *   len     - Length of data to send
@@ -360,7 +360,7 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   Process an outgoing UDP or TCP packet.  This function is called from
- *   send interrupt logic when a TX poll is received.  It formates the
+ *   the send event handler when a TX poll is received.  It formates the
  *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.

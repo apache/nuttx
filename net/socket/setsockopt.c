@@ -154,8 +154,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           setting = *(FAR int *)value;
 
-          /* Disable interrupts so that there is no conflict with interrupt
-           * level access to options.
+          /* Lock the network so that we have exclusive access to the socket
+           * options.
            */
 
            net_lock();
@@ -251,11 +251,11 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           setting = (FAR struct linger *)value;
 
-          /* Disable interrupts so that there is no conflict with interrupt
-           * level access to options.
+          /* Lock the network so that we have exclusive access to the socket
+           * options.
            */
 
-           net_lock();
+          net_lock();
 
           /* Set or clear the linger option bit and linger time (in deciseconds) */
 

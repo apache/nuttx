@@ -213,7 +213,8 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  *   Configure the pre-allocated callback structures into a free list.
  *
  * Assumptions:
- *   This function is called with interrupts disabled.
+ *   Called early in the initialization sequence so that no special
+ *   protection is required.
  *
  ****************************************************************************/
 

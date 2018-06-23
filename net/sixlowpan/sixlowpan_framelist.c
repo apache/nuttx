@@ -341,7 +341,7 @@ static int sixlowpan_pktradio_metadata(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   Process an outgoing UDP, TCP, or ICMPv6 packet.  This function is
- *   called from send interrupt logic when a TX poll is received.  It
+ *   called from send event handler when a TX poll is received.  It
  *   formats the list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
