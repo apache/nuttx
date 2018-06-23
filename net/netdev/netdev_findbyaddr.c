@@ -304,9 +304,11 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
 
   if (net_is_addr_mcast(ripaddr))
     {
-      /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
+      /* Yes.. Check the local, bound address.  Is it the IPv6 unspecified
+       * address?
+       */
 
-      if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
+      if (net_ipv6addr_cmp(lipaddr, g_ipv6_unspecaddr))
         {
           /* Yes.. In this case, I think we are supposed to send the
            * broadcast packet out ALL locally available networks.  I am not

@@ -879,7 +879,7 @@ static void w25_cacheflush(struct w25_dev_s *priv)
       /* Write entire erase block to FLASH */
 
       w25_pagewrite(priv, priv->sector, (off_t)priv->esectno << W25_SECTOR_SHIFT,
-                      W25_SECTOR_SIZE);
+                    W25_SECTOR_SIZE);
 
       /* The case is no long dirty and the FLASH is no longer erased */
 
@@ -905,8 +905,8 @@ static FAR uint8_t *w25_cacheread(struct w25_dev_s *priv, off_t sector)
    * shift to the right by 3 to get the sector number in 4096 increments.
    */
 
-  shift    = W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT;
-  esectno  = sector >> shift;
+  shift   = W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT;
+  esectno = sector >> shift;
   finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
 
   /* Check if the requested erase block is already in the cache */

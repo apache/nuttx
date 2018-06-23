@@ -177,7 +177,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
         {
           if (conn->lport == portno &&
               (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6.laddr) ||
-               net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr)))
+               net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr)))
             {
               return conn;
             }
@@ -463,10 +463,11 @@ static inline FAR struct udp_conn_s *
           /* Check if the local port accepts any address on this port or
            * that there is an exact match between the destipaddr and the
            * bound local address.  This catches the case of the all nodes
-           * multicast when the socket is bound to INADDR6_ANY.
+           * multicast when the socket is bound to the IPv6 unspecified
+           * address.
            */
 
-          (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
+          (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) ||
            net_ipv6addr_hdrcmp(ip->destipaddr, conn->u.ipv6.laddr))))
         {
           /* Check if the socket is connection mode.  In this case, only
@@ -489,7 +490,7 @@ static inline FAR struct udp_conn_s *
                * address, then accept the packet.
                */
 
-                  (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_allzeroaddr) ||
+                  (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_unspecaddr) ||
 #ifdef CONFIG_NET_BROADCAST
                    net_ipv6addr_hdrcmp(ip->destipaddr, g_ipv6_allnodes) ||
 #endif
@@ -887,7 +888,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
       else
 #endif
         {
-          net_ipv6addr_copy(conn->u.ipv6.raddr, g_ipv6_allzeroaddr);
+          net_ipv6addr_copy(conn->u.ipv6.raddr, g_ipv6_unspecaddr);
         }
 #endif /* CONFIG_NET_IPv6 */
     }

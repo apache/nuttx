@@ -183,7 +183,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
    * state.
    */
 
-  if (!net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_allzeroaddr) &&
+  if (!net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_unspecaddr) &&
       (dev->d_flags & IFF_UP) != 0)
     {
       /* Check if we would exceed the buffer space provided by the caller.

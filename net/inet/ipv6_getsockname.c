@@ -132,12 +132,12 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
         return -EOPNOTSUPP;
     }
 
-  /* Check if bound to local INADDR6_ANY */
+  /* Check if bound to the IPv6 unspecified address */
 
-  if (net_ipv6addr_cmp(lipaddr, g_ipv6_allzeroaddr))
+  if (net_ipv6addr_cmp(lipaddr, g_ipv6_unspecaddr))
     {
       outaddr->sin6_family = AF_INET6;
-      memcpy(outaddr->sin6_addr.in6_u.u6_addr8, g_ipv6_allzeroaddr, 16);
+      memcpy(outaddr->sin6_addr.in6_u.u6_addr8, g_ipv6_unspecaddr, 16);
       *addrlen = sizeof(struct sockaddr_in6);
 
       return OK;
@@ -146,17 +146,16 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   net_lock();
 
   /* Find the device matching the IPv6 address in the connection structure.
-   * NOTE: listening sockets have no ripaddr.  Work around is to use the
+   * NOTE:  listening sockets have no ripaddr.  Work around is to use the
    * lipaddr when ripaddr is not available.
    */
 
-  if (net_ipv6addr_cmp(ripaddr, g_ipv6_allzeroaddr))
+  if (net_ipv6addr_cmp(ripaddr, g_ipv6_unspecaddr))
     {
       ripaddr = lipaddr;
     }
 
   dev = netdev_findby_ipv6addr(*lipaddr, *ripaddr);
-
   if (!dev)
     {
       net_unlock();

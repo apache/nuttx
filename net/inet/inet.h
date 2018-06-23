@@ -91,7 +91,7 @@ EXTERN uint16_t g_ipid;
 /* Well-known IPv6 addresses */
 
 #ifdef CONFIG_NET_IPv6
-EXTERN const net_ipv6addr_t g_ipv6_allzeroaddr; /* An address of all zeroes */
+EXTERN const net_ipv6addr_t g_ipv6_unspecaddr;  /* An address of all zeroes */
 EXTERN const net_ipv6addr_t g_ipv6_allnodes;    /* All link local nodes */
 #if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
 EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */

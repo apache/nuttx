@@ -220,7 +220,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   /* Copy the source and destination addresses */
 
   net_ipv6addr_hdrcopy(ipv6tcp->ipv6.destipaddr, conn->u.ipv6.raddr);
-  if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+  if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
     {
       net_ipv6addr_hdrcopy(ipv6tcp->ipv6.srcipaddr, conn->u.ipv6.laddr);
     }

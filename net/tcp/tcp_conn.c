@@ -179,13 +179,13 @@ tcp_ipv6_listener(const net_ipv6addr_t ipaddr, uint16_t portno)
       if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno)
         {
           /* If there are multiple interface devices, then the local IP
-           * address of the connection must also match.  INADDR_ANY is a
-           * special case:  There can only be instance of a port number
-           * with INADDR_ANY.
+           * address of the connection must also match.  The IPv6
+           * unspecified address is a special case:  There can only be
+           * one instance of a port number with the unspecified address.
            */
 
           if (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr) ||
-              net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+              net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
             {
               /* The port number is in use, return the connection */
 
@@ -408,8 +408,8 @@ static inline FAR struct tcp_conn_s *
        * - The remote port number is checked if the connection is bound
        *   to a remote port.
        * - Insist that the destination IP matches the bound address. If
-       *   a socket is bound to INADDRY_ANY, then it should receive all
-       *   packets directed to the port.
+       *   a socket is bound to the IPv6 unspecified address, then it
+       *   should receive all packets directed to the port.
        * - Finally, if the connection is bound to a remote IP address,
        *   the source IP address of the packet is checked.
        *
@@ -420,7 +420,7 @@ static inline FAR struct tcp_conn_s *
       if (conn->tcpstateflags != TCP_CLOSED &&
           tcp->destport == conn->lport &&
           tcp->srcport  == conn->rport &&
-          (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr) ||
+          (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) ||
            net_ipv6addr_cmp(*destipaddr, conn->u.ipv6.laddr)) &&
           net_ipv6addr_cmp(*srcipaddr, conn->u.ipv6.raddr))
         {
@@ -563,7 +563,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       /* Back out the local address setting */
 
       conn->lport = 0;
-      net_ipv6addr_copy(conn->u.ipv6.laddr, g_ipv6_allzeroaddr);
+      net_ipv6addr_copy(conn->u.ipv6.laddr, g_ipv6_unspecaddr);
       return ret;
     }
 

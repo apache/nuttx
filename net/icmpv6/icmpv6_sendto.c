@@ -388,7 +388,8 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Get the device that will be used to route this ICMPv6 ECHO request */
 
-  dev = netdev_findby_ipv6addr(g_ipv6_allzeroaddr, inaddr->sin6_addr.s6_addr16);
+  dev = netdev_findby_ipv6addr(g_ipv6_unspecaddr,
+                               inaddr->sin6_addr.s6_addr16);
   if (dev == NULL)
     {
       nerr("ERROR: Not reachable\n");

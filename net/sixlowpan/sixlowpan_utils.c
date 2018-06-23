@@ -274,7 +274,7 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
 
    /* Check for a multicast address */
 
-   if (net_is_addr_mcast(ipaddr[0]))
+   if (net_is_addr_mcast(ipaddr))
      {
         DEBUGASSERT(radio->r_properties != NULL);
         ret = radio->r_properties(radio, &properties);

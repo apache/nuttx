@@ -61,12 +61,14 @@ uint16_t g_ipid;
 
 #ifdef CONFIG_NET_IPv6
 
-const net_ipv6addr_t g_ipv6_allzeroaddr = /* An address of all zeroes */
+/* Unspecified address (all zero).  See RFC 4291 (replaces 3513) */
+
+const net_ipv6addr_t g_ipv6_unspecaddr =  /* An address of all zeroes */
 {
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
-/* IPv6 Multi-cast IP addresses */
+/* IPv6 Multi-cast IP addresses.  See RFC 2375 */
 
 const net_ipv6addr_t g_ipv6_allnodes =    /* All link local nodes */
 {

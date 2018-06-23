@@ -105,11 +105,12 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn)
 #endif
         {
           /* Make sure that the socket is bound to some non-zero, local
-           * address.  Zero is used as an indication that the laddr is
-           * uninitialized and that the socket is, hence, not bound.
+           * address.  The IPv6 unspecified address is used as an indication
+           * that the laddr is uninitialized and that the socket is, hence,
+           * not bound.
            */
 
-          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
             {
               return NULL;
             }
@@ -198,11 +199,12 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
           if (net_is_addr_mcast(conn->u.ipv6.raddr))
             {
               /* Make sure that the socket is bound to some non-zero, local
-               * address.  Zero is used as an indication that the laddr is
-               * uninitialized and that the socket is, hence, not bound.
+               * address.  The IPv6 unspecified address is used as an
+               * indication that the laddr is uninitialized and that the
+               * socket is, hence, not bound.
                */
 
-              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_allzeroaddr))
+              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
                 {
                   return NULL;
                 }

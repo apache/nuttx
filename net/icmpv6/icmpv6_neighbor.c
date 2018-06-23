@@ -212,8 +212,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    *   addresses=0xff (ff00::/8.)
    */
 
-  if (net_ipv6addr_cmp(ipaddr, g_ipv6_allzeroaddr) ||
-      (ipaddr[0] & NTOHS(0xff00)) == NTOHS(0xff00))
+  if (net_ipv6addr_cmp(ipaddr, g_ipv6_unspecaddr) ||
+      net_is_addr_mcast(ipaddr))
     {
       /* We don't need to send the Neighbor Solicitation */
 
@@ -222,7 +222,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-  dev = netdev_findby_ipv6addr(g_ipv6_allzeroaddr, ipaddr);
+  dev = netdev_findby_ipv6addr(g_ipv6_unspecaddr, ipaddr);
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);

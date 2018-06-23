@@ -43,6 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/net/arp.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
 #include "route/route.h"
@@ -159,12 +160,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
    * packet with an Neighbor Solicitation Request for the IPv6 address.
    */
 
-  /* First check if destination is a IPv6 multicast address.  IPv6
-   * multicast addresses in IPv6 have the prefix ff00::/8
-   *
-   *   Bits 120-127: Prefix
-   *   Bits 116-119: Flags (1, 2, or 3 defined)
-   *   Bits 112-115: Scope
+  /* First check if destination is a IPv6 multicast address.
    *
    * REVISIT: Need to revisit IPv6 broadcast support.  Broadcast
    * IP addresses are not used with IPv6; multicast is used instead.
@@ -172,7 +168,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
    * broadcast Ethernet address?
    */
 
-  if ((ip->destipaddr[0] & HTONS(0xff00)) == HTONS(0xff00))
+  if (net_is_addr_mcast(ip->destipaddr))
     {
       memcpy(eth->dest, g_broadcast_ethaddr.ether_addr_octet,
              ETHER_ADDR_LEN);

@@ -131,12 +131,12 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
     }
 
   /* Return success without using device notification if the locally bound
-   * address is IN6ADDR_ANY.  In this case, there may be multiple devices
-   * that can provide data so the exceptional events from any particular
-   * device are not important.
+   * address is the IPv6 unspecified address.  In this case, there may be
+   * multiple devices* that can provide data so the exceptional events from
+   * any particular device are not important.
    */
 
-  if (net_ipv6addr_cmp(addr, g_ipv6_allzeroaddr))
+  if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
     {
       return OK;
     }

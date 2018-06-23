@@ -324,12 +324,14 @@ int ipv6_input(FAR struct net_driver_s *dev)
       return udp_ipv6_input(dev);
     }
 
-  /* In other cases, the device must be assigned a non-zero IP address. */
+  /* In other cases, the device must be assigned a non-zero IP address
+   * (the all zero address is the "unspecified" address.
+   */
 
   else
 #endif
 #ifdef CONFIG_NET_ICMPv6
-  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_allzeroaddr))
+  if (net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_unspecaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP
