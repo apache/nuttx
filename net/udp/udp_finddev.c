@@ -193,16 +193,9 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
           /* Check if the remote, destination address is a multicast
            * address.  If this is the case, select the device
            * using the locally bound address (assuming that there is one).
-           *
-           * The general form of all well-known, reserved IPv6 multicast
-           * addresses is:  ff0x::xx/16 (which includes most, but not all
-           * possible multicast addresses).
            */
 
-          if ((conn->u.ipv6.raddr[0] & HTONS(0xfff0)) == HTONS(0xff00) &&
-              conn->u.ipv6.raddr[1] == 0 && conn->u.ipv6.raddr[2] == 0 &&
-              conn->u.ipv6.raddr[3] == 0 && conn->u.ipv6.raddr[4] == 0 &&
-              conn->u.ipv6.raddr[5] == 0 && conn->u.ipv6.raddr[6] == 0)
+          if (net_is_addr_mcast(conn->u.ipv6.raddr))
             {
               /* Make sure that the socket is bound to some non-zero, local
                * address.  Zero is used as an indication that the laddr is

@@ -587,7 +587,19 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_mcast
  *
  * Description:
- *   Is address a multicast address? see RFC 3513.
+ *   Is address a multicast address?  See RFC 3513:
+ *
+ *   An IPv6 multicast address is an identifier for a group of interfaces
+ *   (typically on different nodes).  An interface may belong to any number
+ *   of multicast groups.  Multicast addresses have the following format:
+ *
+ *     |   8    |  4 |  4 |                  112 bits                   |
+ *     +------ -+----+----+---------------------------------------------+
+ *     |11111111|flgs|scop|                  group ID                   |
+ *     +--------+----+----+---------------------------------------------+
+ *
+ *   binary 11111111 at the start of the address identifies the address as
+ *   being a multicast address.
  *
  ****************************************************************************/
 

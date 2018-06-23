@@ -300,13 +300,9 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
   int ret;
 #endif
 
-  /* First, check if this is the multicast IP address  We should actually
-   * pick off certain multicast address (all hosts multicast address, and
-   * the solicited-node multicast address).  We will cheat here and accept
-   * all multicast packets that are destined for the ff02::/16 addresses.
-   */
+  /* First, check if this is the multicast IP address */
 
-  if (ripaddr[0] == HTONS(0xff02))
+  if (net_is_addr_mcast(ripaddr))
     {
       /* Yes.. Check the local, bound address.  Is it INADDR_ANY? */
 

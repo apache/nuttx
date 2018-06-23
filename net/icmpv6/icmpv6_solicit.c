@@ -67,7 +67,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* First 6 swords of the multi-cast address in network byte order */
+
+/* First 6 hwords of the multi-cast address in network byte order */
 
 static const uint16_t g_icmpv_mcastaddr[6] =
 {
