@@ -150,7 +150,7 @@ static inline void inet_update_recvlen(FAR struct inet_recvfrom_s *pstate,
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that generated the event.
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -198,7 +198,7 @@ static size_t inet_recvfrom_newdata(FAR struct net_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that generated the event
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -270,7 +270,7 @@ static inline void inet_tcp_newdata(FAR struct net_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The sructure of the network driver that generated the event
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -611,11 +611,11 @@ static inline void inet_tcp_sender(FAR struct net_driver_s *dev,
  * Name: inet_tcp_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   TCP receive operation via by the lower, device interfacing layer.
  *
  * Input Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that generated the event.
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -974,11 +974,11 @@ static void inet_udp_terminate(FAR struct inet_recvfrom_s *pstate, int result)
  * Name: inet_udp_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   UDP receive operation via by the lower, device interfacing layer.
  *
  * Input Parameters:
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that generated the event.
  *   pvconn   The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -1141,7 +1141,7 @@ static void inet_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
 #if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
 static ssize_t inet_recvfrom_result(int result, struct inet_recvfrom_s *pstate)
 {
-  /* Check for a error/timeout detected by the interrupt handler.  Errors are
+  /* Check for a error/timeout detected by the event handler.  Errors are
    * signaled by negative errno values for the rcv length
    */
 
@@ -1198,9 +1198,8 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
 
   /* Perform the UDP recvfrom() operation */
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network locked
+   * because we don't want anything to happen until we are ready.
    */
 
   net_lock();
@@ -1273,15 +1272,13 @@ static ssize_t inet_udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
           state.ir_cb->event   = inet_udp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur. NOTES:  (1) net_lockedwait will also terminate if a
-           * signal is received, (2) interrupts are disabled!  They will be
-           * re-enabled while the task sleeps and automatically re-enabled
-           * when the task restarts.
+           * to occur.  net_lockedwait will also terminate if a signal is
+           * received.
            */
 
           ret = net_lockedwait(&state. ir_sem);
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           udp_callback_free(dev, conn, state.ir_cb);
           ret = inet_recvfrom_result(ret, &state);
@@ -1325,9 +1322,8 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
   struct inet_recvfrom_s state;
   int               ret;
 
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
+  /* Initialize the state structure.  This is done with the network locked
+   * because we don't want anything to happen until we are ready.
    */
 
   net_lock();
@@ -1449,17 +1445,13 @@ static ssize_t inet_tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t
           state.ir_cb->event   = inet_tcp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.
-           *
-           * NOTES:  (1) net_lockedwait will also terminate if a signal is
-           * received, (2) interrupts may be disabled!  They will be re-
-           * enabled while the task sleeps and automatically re-enabled when
-           * the task restarts.
+           * to occur.  net_lockedwait will also terminate if a signal isi
+           * received.
            */
 
           ret = net_lockedwait(&state.ir_sem);
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           tcp_callback_free(conn, state.ir_cb);
           ret = inet_recvfrom_result(ret, &state);

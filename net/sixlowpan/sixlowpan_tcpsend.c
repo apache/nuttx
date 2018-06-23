@@ -83,7 +83,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This is the state data provided to the send interrupt logic.  No actions
+/* This is the state data provided to the send event handler.  No actions
  * can be taken until the until we receive the TX poll, then we can call
  * sixlowpan_queue_frames() with this data strurcture.
  */
@@ -325,13 +325,13 @@ static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
  * Name: tcp_send_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   TCP send operation when polled by the lower, device interfacing layer.
  *
  * Input Parameters:
- *   dev    - The structure of the network driver that caused the interrupt
+ *   dev    - The structure of the network driver that generated the event.
  *   pvconn - The connection structure associated with the socket
- *   pvpriv - The interrupt handler's private data argument
+ *   pvpriv - The event handler's private data argument
  *   flags  - Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -463,7 +463,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
     }
 
   /* Check if the outgoing packet is available (it may have been claimed
-   * by a sendto interrupt serving a different thread).
+   * by a sendto event handler serving a different thread).
    */
 
 #if 0 /* We can't really support multiple senders on the same TCP socket */
@@ -708,10 +708,8 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           netdev_txnotify_dev(dev);
 
-          /* Wait for the send to complete or an error to occur:  NOTES: (1)
-           * net_lockedwait will also terminate if a signal is received, (2)
-           * interrupts may be disabled!  They will be re-enabled while the
-           * task sleeps and automatically re-enabled when the task restarts.
+          /* Wait for the send to complete or an error to occur.
+           * net_lockedwait will also terminate if a signal is received.
            */
 
           ninfo("Wait for send complete\n");
@@ -722,7 +720,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
               sinfo.s_result = ret;
             }
 
-          /* Make sure that no further interrupts are processed */
+          /* Make sure that no further events are processed */
 
           tcp_callback_free(conn, sinfo.s_cb);
         }

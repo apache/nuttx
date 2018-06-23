@@ -63,8 +63,7 @@
  *   in an I/O buffer chain, rather than a flat buffer.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 

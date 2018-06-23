@@ -130,13 +130,14 @@ static inline int recvfrom_timeout(FAR struct icmpv6_recvfrom_s *pstate)
  * Name: recvfrom_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   ECHO request and/or ECHO reply actions when polled by the lower, device
  *   interfacing layer.
  *
  * Input Parameters:
- *   dev        The structure of the network driver that caused the interrupt
- *   conn       The received packet, cast to void *
+ *   dev        The structure of the network driver that generated the
+ *              event
+ *   conn       The received packet, cast to (void *)
  *   pvpriv     An instance of struct icmpv6_recvfrom_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
@@ -277,7 +278,7 @@ end_wait:
  * Input Parameters:
  *   conn  - IPPROTO_ICMP6 socket connection structure containing the read-
  *           ahead data.
- *   dev      The structure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that generated the event.
  *   pstate   recvfrom state structure
  *
  * Returned Value:

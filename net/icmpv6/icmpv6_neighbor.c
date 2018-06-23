@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 /* This structure holds the state of the send operation until it can be
- * operated upon from the interrupt level.
+ * operated upon from the event handler.
  */
 
 struct icmpv6_neighbor_s

@@ -121,9 +121,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
 {
   FAR struct usrsock_conn_s *conn;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _usrsock_semtake(&g_free_sem);
   conn = (FAR struct usrsock_conn_s *)dq_remfirst(&g_free_usrsock_connections);
@@ -158,9 +156,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
 
 void usrsock_free(FAR struct usrsock_conn_s *conn)
 {
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   DEBUGASSERT(conn->crefs == 0);
 

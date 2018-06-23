@@ -91,8 +91,7 @@
  *   no header on the data.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
+ *   Called with the network locked.
  *
  ****************************************************************************/
 

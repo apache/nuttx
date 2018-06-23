@@ -122,9 +122,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 {
   FAR struct ieee802154_conn_s *conn;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by the network lock. */
 
   net_lock();
   conn = (FAR struct ieee802154_conn_s *)
@@ -156,9 +154,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
   FAR struct ieee802154_container_s *container;
   FAR struct ieee802154_container_s *next;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by the network lock. */
 
   DEBUGASSERT(conn->crefs == 0);
 

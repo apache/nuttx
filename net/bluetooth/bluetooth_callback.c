@@ -63,7 +63,7 @@
  *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ *   This function is called at the with the network disabled.
  *
  ****************************************************************************/
 

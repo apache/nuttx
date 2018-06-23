@@ -189,13 +189,14 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
  * Name: ipfwd_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   send operation when polled by the lower, device interfacing layer.
  *
  * Input Parameters:
- *   dev        The structure of the network driver that caused the interrupt
- *   conn       An instance of the forwarding structure cast to void *
- *   pvpriv     An instance of struct forward_s cast to void*
+ *   dev        The structure of the network driver that generated the
+ *              event
+ *   conn       An instance of the forwarding structure cast to (void *)
+ *   pvpriv     An instance of struct forward_s cast to (void *)
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:

@@ -226,14 +226,15 @@ static void sendto_request(FAR struct net_driver_s *dev,
  * Name: sendto_eventhandler
  *
  * Description:
- *   This function is called from the interrupt level to perform the actual
+ *   This function is called with the network locked to perform the actual
  *   ECHO request and/or ECHO reply actions when polled by the lower, device
  *   interfacing layer.
  *
  * Input Parameters:
- *   dev        The structure of the network driver that caused the interrupt
- *   conn       The received packet, cast to void *
- *   pvpriv     An instance of struct icmp_sendto_s cast to void*
+ *   dev        The structure of the network driver that generated the
+ *              event.
+ *   conn       The received packet, cast to (void *)
+ *   pvpriv     An instance of struct icmp_sendto_s cast to (void *)
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -265,7 +266,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check:
        *   If the outgoing packet is available (it may have been claimed
-       *   by a sendto interrupt serving a different thread)
+       *   by a sendto event handler serving a different thread)
        * -OR-
        *   If the output buffer currently contains unprocessed incoming
        *   data.

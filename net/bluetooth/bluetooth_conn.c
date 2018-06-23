@@ -128,9 +128,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
 {
   FAR struct bluetooth_conn_s *conn;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by the network lock */
 
   net_lock();
   conn = (FAR struct bluetooth_conn_s *)
@@ -162,9 +160,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
   FAR struct bluetooth_container_s *container;
   FAR struct bluetooth_container_s *next;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by the network lock. */
 
   DEBUGASSERT(conn->bc_crefs == 0);
 

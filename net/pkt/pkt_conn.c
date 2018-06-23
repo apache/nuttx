@@ -152,9 +152,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
 {
   FAR struct pkt_conn_s *conn;
 
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _pkt_semtake(&g_free_sem);
   conn = (FAR struct pkt_conn_s *)dq_remfirst(&g_free_pkt_connections);
@@ -184,9 +182,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
 
 void pkt_free(FAR struct pkt_conn_s *conn)
 {
-  /* The free list is only accessed from user, non-interrupt level and
-   * is protected by a semaphore (that behaves like a mutex).
-   */
+  /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   DEBUGASSERT(conn->crefs == 0);
 
