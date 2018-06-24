@@ -66,7 +66,7 @@ struct net_stats_s g_netstats;
 #endif
 
 
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_TCP_REASSEMBLY)
+#ifdef CONFIG_NET_IPv4_REASSEMBLY
 /* Reassembly timer (units: deci-seconds) */
 
 uint8_t g_reassembly_timer;

@@ -737,11 +737,11 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 
       /* Perform periodic activitives that depend on hsec > 0 */
 
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && defined(CONFIG_NET_IPv4)
+#ifdef CONFIG_NET_IPv4_REASSEMBLY
       /* Increment the timer used by the IP reassembly logic */
 
       if (g_reassembly_timer != 0 &&
-          g_reassembly_timer < CONFIG_NET_TCP_REASS_MAXAGE)
+          g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
         {
           g_reassembly_timer += hsec;
         }

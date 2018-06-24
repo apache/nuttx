@@ -111,7 +111,13 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
   tcp = (FAR struct tcp_hdr_s *)&dev->d_buf[iplen + NET_LL_HDRLEN(dev)];
 
-  /* Get the size of the IP header and the TCP header */
+  /* Get the size of the IP header and the TCP header.
+   *
+   * REVISIT:  TCP header is *not* a constant!  It can be larger if the
+   * TCP header includes options.  The constand TCP_HDRLEN should be
+   * replaced with the macro TCP_OPT_HDRLEN(n) which will calculate the
+   * correct header length in all cases.
+   */
 
   tcpiplen = iplen + TCP_HDRLEN;
 

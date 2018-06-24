@@ -2,7 +2,8 @@
  * net/devif/ipv4_input.c
  * Device driver IPv4 packet receipt interface
  *
- *   Copyright (C) 2007-2009, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -112,20 +113,29 @@
 #define BUF                  ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define FBUF                 ((FAR struct ipv4_hdr_s *)&g_reassembly_buffer[0])
 
-/* IP fragment re-assembly */
+/* IP fragment re-assembly.
+ *
+ * REVISIT:  There are multiple issues with the current implementation:
+ * 1. IPv4 reassembly is untested.
+ * 2. Currently can only work with Ethernet due to the definition of
+ *    IPv4_REASS_BUFSIZE.
+ * 3. Since there is only a single reassembly buffer, IPv4 reassembly cannot
+ *    be used in a context where multiple network devices may be concurrently
+ *    re-assemblying packets.
+ */
 
 #define IP_MF                0x20  /* See IP_FLAG_MOREFRAGS */
-#define TCP_REASS_BUFSIZE    (NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev))
-#define TCP_REASS_LASTFRAG   0x01
+#define IPv4_REASS_BUFSIZE   (CONFIG_NET_ETH_MTU - ETH_HDRLEN)
+#define IPv4_REASS_LASTFRAG  0x01
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_IPv4_REASSEMBLY
 
-static uint8_t g_reassembly_buffer[TCP_REASS_BUFSIZE];
-static uint8_t g_reassembly_bitmap[TCP_REASS_BUFSIZE / (8 * 8)];
+static uint8_t g_reassembly_buffer[IPv4_REASS_BUFSIZE];
+static uint8_t g_reassembly_bitmap[IPv4_REASS_BUFSIZE / (8 * 8)];
 
 static const uint8_t g_bitmap_bits[8] =
 {
@@ -135,7 +145,7 @@ static const uint8_t g_bitmap_bits[8] =
 static uint16_t g_reassembly_len;
 static uint8_t g_reassembly_flags;
 
-#endif /* CONFIG_NET_TCP_REASSEMBLY */
+#endif /* CONFIG_NET_IPv4_REASSEMBLY */
 
 /****************************************************************************
  * Private Functions
@@ -151,8 +161,8 @@ static uint8_t g_reassembly_flags;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
-static uint8_t devif_reassembly(void)
+#ifdef CONFIG_NET_IPv4_REASSEMBLY
+static uint8_t devif_reassembly(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4  = BUF;
   FAR struct ipv4_hdr_s *fipv4 = FBUF;
@@ -168,7 +178,7 @@ static uint8_t devif_reassembly(void)
   if (!g_reassembly_timer)
     {
       memcpy(g_reassembly_buffer, &ipv4->vhl, IPv4_HDRLEN);
-      g_reassembly_timer = CONFIG_NET_TCP_REASS_MAXAGE;
+      g_reassembly_timer = CONFIG_NET_IPv4_REASS_MAXAGE;
       g_reassembly_flags = 0;
 
       /* Clear the bitmap. */
@@ -183,16 +193,17 @@ static uint8_t devif_reassembly(void)
 
   if (net_ipv4addr_hdrcmp(ipv4->srcipaddr, fipv4->srcipaddr) &&
       net_ipv4addr_hdrcmp(ipv4->destipaddr, fipv4->destipaddr) &&
-      ipv4->g_ipid[0] == fipv4->g_ipid[0] && ipv4->g_ipid[1] == fipv4->g_ipid[1])
+      ipv4->ipid[0] == fipv4->ipid[0] && ipv4->ipid[1] == fipv4->ipid[1])
     {
-      len = (ipv4->len[0] << 8) + ipv4->len[1] - (ipv4->vhl & 0x0f) * 4;
+      len    = ((uint16_t)ipv4->len[0] << 8) + (uint16_t)ipv4->len[1] -
+               (uint16_t)(ipv4->vhl & 0x0f) * 4;
       offset = (((ipv4->ipoffset[0] & 0x3f) << 8) + ipv4->ipoffset[1]) * 8;
 
       /* If the offset or the offset + fragment length overflows the
        * reassembly buffer, we discard the entire packet.
        */
 
-      if (offset > TCP_REASS_BUFSIZE || offset + len > TCP_REASS_BUFSIZE)
+      if (offset > IPv4_REASS_BUFSIZE || offset + len > IPv4_REASS_BUFSIZE)
         {
           g_reassembly_timer = 0;
           goto nullreturn;
@@ -240,7 +251,7 @@ static uint8_t devif_reassembly(void)
 
       if ((ipv4->ipoffset[0] & IP_MF) == 0)
         {
-          g_reassembly_flags |= TCP_REASS_LASTFRAG;
+          g_reassembly_flags |= IPv4_REASS_LASTFRAG;
           g_reassembly_len = offset + len;
         }
 
@@ -249,7 +260,7 @@ static uint8_t devif_reassembly(void)
        * are set.
        */
 
-      if (g_reassembly_flags & TCP_REASS_LASTFRAG)
+      if (g_reassembly_flags & IPv4_REASS_LASTFRAG)
         {
           /* Check all bytes up to and including all but the last byte in
            * the bitmap.
@@ -298,7 +309,7 @@ static uint8_t devif_reassembly(void)
 nullreturn:
   return 0;
 }
-#endif /* CONFIG_NET_TCP_REASSEMBLY */
+#endif /* CONFIG_NET_IPv4_REASSEMBLY */
 
 /****************************************************************************
  * Public Functions
@@ -380,20 +391,18 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
   if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
     {
-#if defined(CONFIG_NET_TCP_REASSEMBLY)
-      dev->d_len = devif_reassembly();
+#ifdef CONFIG_NET_IPv4_REASSEMBLY
+      dev->d_len = devif_reassembly(dev);
       if (dev->d_len == 0)
+#endif
         {
+#ifdef CONFIG_NET_STATISTICS
+          g_netstats.ipv4.drop++;
+          g_netstats.ipv4.fragerr++;
+#endif
+          nwarn("WARNING: IP fragment dropped\n");
           goto drop;
         }
-#else /* CONFIG_NET_TCP_REASSEMBLY */
-#ifdef CONFIG_NET_STATISTICS
-      g_netstats.ipv4.drop++;
-      g_netstats.ipv4.fragerr++;
-#endif
-      nwarn("WARNING: IP fragment dropped\n");
-      goto drop;
-#endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
 
   /* Get the destination IP address in a friendlier form */
