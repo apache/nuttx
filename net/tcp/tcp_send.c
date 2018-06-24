@@ -376,7 +376,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
        * link-layer, IP, and TCP headers.  This logic here assumes that
        * all IOBs are available for TCP buffering.
        *
-       * REVISIT:  In an environment with mutliple, active read-ahead TCP
+       * REVISIT:  In an environment with multiple, active read-ahead TCP
        * sockets (and perhaps multiple network devices) or if there are
        * other consumers of IOBs (such as for TCP write buffering) then the
        * total number of IOBs will all not be available for read-ahead

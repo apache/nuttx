@@ -121,7 +121,7 @@
  *    IPv4_REASS_BUFSIZE.
  * 3. Since there is only a single reassembly buffer, IPv4 reassembly cannot
  *    be used in a context where multiple network devices may be concurrently
- *    re-assemblying packets.
+ *    re-assembling packets.
  */
 
 #define IP_MF                0x20  /* See IP_FLAG_MOREFRAGS */
@@ -228,7 +228,7 @@ static uint8_t devif_reassembly(FAR struct net_driver_s *dev)
       else
         {
           /* If the two endpoints are in different bytes, we update the bytes
-           * in the endpoints and fill the stuff inbetween with 0xff.
+           * in the endpoints and fill the stuff in between with 0xff.
            */
 
           g_reassembly_bitmap[offset / (8 * 8)] |=

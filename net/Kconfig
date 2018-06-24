@@ -72,6 +72,11 @@ config NET_ETH_TCP_RECVWNDO
 		buffering via IOBs.  To include IOB aware windowing logic also
 		enable CONFIG_NET_TCP_RWND_CONTROL.
 
+		The default values correspond to the MSS associated with the
+		minimum MSS: IPv4 hosts are required to be able to handle an MSS
+		of at least 536 octets; IPv6 hosts are required to be able to handle
+		an MSS of 1220 octets.
+
 config NET_SLIP_MTU
 	int # "SLIP packet buffer size (MTU)"
 	default 296
@@ -83,7 +88,7 @@ config NET_SLIP_MTU
 		This value is normally referred to as the MTU (Maximum Transmission Unit);
 		the payload payload is the MSS (Maximum Segment Size).
 
-		SLIP is required to support at lest 256+20+20 = 296.  Values other than
+		SLIP is required to support at least 256+20+20 = 296.  Values other than
 		296 are not recommended.
 
 		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
