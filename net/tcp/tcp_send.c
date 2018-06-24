@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_send.c
  *
- *   Copyright (C) 2007-2010, 2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -314,9 +315,10 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_hdr_s *tcp)
 {
 #ifdef CONFIG_NET_TCP_RWND_CONTROL
-  extern sem_t g_qentry_sem;
-  int  qentry_sem_count;
   uint32_t rwnd;
+  uint16_t iplen;
+  uint16_t overhead;
+  int  navail;
 #endif
 
   /* Copy the IP address into the IPv6 header */
@@ -327,8 +329,13 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 #endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
       net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
       net_ipv6addr_hdrcopy(ipv6->destipaddr, conn->u.ipv6.raddr);
+
+#ifdef CONFIG_NET_TCP_RWND_CONTROL
+      iplen = IPv6_HDRLEN;
+#endif
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -338,8 +345,13 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 #endif
     {
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
       net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
       net_ipv4addr_hdrcopy(ipv4->destipaddr, &conn->u.ipv4.raddr);
+
+#ifdef CONFIG_NET_TCP_RWND_CONTROL
+      iplen = IPv4_HDRLEN;
+#endif
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -352,15 +364,63 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   tcp->destport = conn->rport;
 
 #ifdef CONFIG_NET_TCP_RWND_CONTROL
-  /* Update the TCP received window based on I/O buffer */
+  /* Update the TCP received window based on I/O buffer availability */
   /* NOTE: This algorithm is still experimental */
 
-  if (OK == nxsem_getvalue(&g_qentry_sem, &qentry_sem_count))
+  overhead = NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN;
+  navail   = iob_navail();
+  if (navail > 0)
     {
-      rwnd = (qentry_sem_count * CONFIG_NET_ETH_TCP_RECVWNDO)
-             / CONFIG_IOB_NCHAINS;
+      /* The optimal TCP window size is the amount of TCP data that we can
+       * currently buffer via TCP read-ahead buffering minus overhead for the
+       * link-layer, IP, and TCP headers.  This logic here assumes that
+       * all IOBs are available for TCP buffering.
+       *
+       * REVISIT:  In an environment with mutliple, active read-ahead TCP
+       * sockets (and perhaps multiple network devices) or if there are
+       * other consumers of IOBs (such as for TCP write buffering) then the
+       * total number of IOBs will all not be available for read-ahead
+       * buffering for this connection.
+       */
+
+#if 0
+      /* REVISIT:  (1)CONFIG_NET_ETH_TCP_RECVWNDO will typically be larger
+       * than the IOB payload size.  (2) Why divide by CONFIG_IOB_NCHAINS?
+       * (3) CONFIG_NET_ETH_TCP_RECVWNDO includes the header overhead
+       * penalty.  But we only have to pay the header overhead penalty
+       * once.  (4) This logic needs to work even if Ethernet is not
+       * enabled (and hence CONFIG_NET_ETH_TCP_RECVWNDO is not defined).
+       */
+
+      rwnd = (navail * CONFIG_NET_ETH_TCP_RECVWNDO) / CONFIG_IOB_NCHAINS;
+#else
+      /* Assume that all of the available IOBs are can be used for buffering
+       * on this connection.
+       */
+
+      rwnd = (navail * CONFIG_IOB_BUFSIZE) - overhead;
+#endif
+
+      /* Save the new receive window size */
+
+      if (rwnd > UINT16_MAX)
+        {
+          rwnd = UINT16_MAX;
+        }
 
       NET_DEV_RCVWNDO(dev) = (uint16_t)rwnd;
+    }
+  else /* (navail == 0) */
+    {
+      /* No IOBs are available... fall back to the configured default
+       * which assumes no write buffering.  The only buffering available
+       * is the packet itself.
+       *
+       * NOTE:  If no IOBs are available, then the next packet will be
+       * lost will be be lost if there is no listener on the connection.
+       */
+
+      NET_DEV_RCVWNDO(dev) = dev->d_mtu - overhead;
     }
 #endif
 

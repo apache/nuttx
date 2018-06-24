@@ -61,11 +61,16 @@ config NET_ETH_TCP_RECVWNDO
 	default 1220 if NET_IPv6
 	default 536 if !NET_IPv6
 	depends on NET_ETHERNET && NET_TCP
+	range 536 65535
 	---help---
 		The size of the advertised receiver's window.   Should be set low
 		(i.e., to the size of the MSS) if the application is slow to process
-		incoming data, or high (32768 bytes) if the application processes
+		incoming data, or high (65,535 bytes) if the application processes
 		data quickly.
+
+		This value does not account for buffering provided for read-ahead
+		buffering via IOBs.  To include IOB aware windowing logic also
+		enable CONFIG_NET_TCP_RWND_CONTROL.
 
 config NET_SLIP_MTU
 	int # "SLIP packet buffer size (MTU)"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mm/iob.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,6 +182,16 @@ FAR struct iob_s *iob_alloc(bool throttled);
  ****************************************************************************/
 
 FAR struct iob_s *iob_tryalloc(bool throttled);
+
+/****************************************************************************
+ * Name: iob_navail
+ *
+ * Description:
+ *   Return the number of of available IOBs.
+ *
+ ****************************************************************************/
+
+int iob_navail(void);
 
 /****************************************************************************
  * Name: iob_free
