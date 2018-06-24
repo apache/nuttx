@@ -315,7 +315,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_hdr_s *tcp)
 {
 #ifdef CONFIG_NET_TCP_RWND_CONTROL
-  uint32_t rwnd;
   uint16_t iplen;
   uint16_t overhead;
   int  navail;
@@ -371,10 +370,16 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   navail   = iob_navail();
   if (navail > 0)
     {
+      uint32_t rwnd;
+
       /* The optimal TCP window size is the amount of TCP data that we can
        * currently buffer via TCP read-ahead buffering minus overhead for the
        * link-layer, IP, and TCP headers.  This logic here assumes that
        * all IOBs are available for TCP buffering.
+       *
+       * Assume that all of the available IOBs are can be used for buffering
+       * on this connection.  Also assume that at least one chain is available
+       * concatenate the IOBs.
        *
        * REVISIT:  In an environment with multiple, active read-ahead TCP
        * sockets (and perhaps multiple network devices) or if there are
@@ -383,41 +388,24 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
        * buffering for this connection.
        */
 
-#if 0
-      /* REVISIT:  (1)CONFIG_NET_ETH_TCP_RECVWNDO will typically be larger
-       * than the IOB payload size.  (2) Why divide by CONFIG_IOB_NCHAINS?
-       * (3) CONFIG_NET_ETH_TCP_RECVWNDO includes the header overhead
-       * penalty.  But we only have to pay the header overhead penalty
-       * once.  (4) This logic needs to work even if Ethernet is not
-       * enabled (and hence CONFIG_NET_ETH_TCP_RECVWNDO is not defined).
-       */
-
-      rwnd = (navail * CONFIG_NET_ETH_TCP_RECVWNDO) / CONFIG_IOB_NCHAINS;
-#else
-      /* Assume that all of the available IOBs are can be used for buffering
-       * on this connection.
-       */
-
       rwnd = (navail * CONFIG_IOB_BUFSIZE) - overhead;
-#endif
-
-      /* Save the new receive window size */
-
       if (rwnd > UINT16_MAX)
         {
           rwnd = UINT16_MAX;
         }
 
+      /* Save the new receive window size */
+
       NET_DEV_RCVWNDO(dev) = (uint16_t)rwnd;
     }
-  else /* (navail == 0) */
+  else /* if (navail == 0) */
     {
       /* No IOBs are available... fall back to the configured default
        * which assumes no write buffering.  The only buffering available
-       * is the packet itself.
+       * is within the packet buffer itself.
        *
        * NOTE:  If no IOBs are available, then the next packet will be
-       * lost will be be lost if there is no listener on the connection.
+       * lost if there is no listener on the connection.
        */
 
       NET_DEV_RCVWNDO(dev) = dev->d_mtu - overhead;
