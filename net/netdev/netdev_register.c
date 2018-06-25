@@ -221,7 +221,8 @@ static int get_ifindex(void)
  *   0:Success; negated errno on failure
  *
  * Assumptions:
- *   Called during system initialization from normal user mode
+ *   Called during system bring-up, but also when a removable network
+ *   device is installed.
  *
  ****************************************************************************/
 

@@ -276,7 +276,7 @@ unsigned int if_nametoindex(FAR const char *ifname);
  * Returned Value:
  *   If ifindex is an interface index, then the function will return the value supplied by
  *   ifname. Otherwise, the function returns a NULL pointer and sets errno to indicate the
-*    error.
+ *   error.
  *
  *******************************************************************************************/
 

@@ -42,6 +42,10 @@ ifneq ($(CONFIG_NET_UDP_NO_STACK),y)
 
 SOCK_CSRCS += udp_psock_send.c
 
+ifeq ($(CONFIG_NET_UDPPROTO_OPTIONS),y)
+SOCK_CSRCS += udp_setsockopt.c
+endif
+
 ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
 SOCK_CSRCS += udp_psock_sendto_buffered.c
 else

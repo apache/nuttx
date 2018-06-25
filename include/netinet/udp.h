@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_findbyname.c
+ * include/netinet/udp.h
  *
- *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,60 +33,21 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NETINET_UDP_H
+#define __INCLUDE_NETINET_UDP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
-#include <string.h>
-#include <errno.h>
-
-#include <nuttx/net/netdev.h>
-
-#include "utils/utils.h"
-#include "netdev/netdev.h"
+#include <sys/socket.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: netdev_findbyname
- *
- * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
- *
- * Input Parameters:
- *   ifname The interface name of the device of interest
- *
- * Returned Value:
- *  Pointer to driver on success; null on failure
- *
- ****************************************************************************/
+#define UDP_BINDTODEVICE   (__SO_PROTOCOL + 0) /* Bind this UDP socket to a
+                                                * specific network device.
+                                                */
 
-FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
-{
-  FAR struct net_driver_s *dev;
-
-  if (ifname)
-    {
-      net_lock();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              net_unlock();
-              return dev;
-            }
-        }
-
-      net_unlock();
-    }
-
-  return NULL;
-}
-
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* __INCLUDE_NETINET_UDP_H */

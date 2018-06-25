@@ -74,9 +74,6 @@
  * Returned Value:
  *  Pointer to driver on success; null on failure
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
@@ -126,9 +123,6 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
@@ -184,9 +178,6 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
@@ -284,9 +275,6 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 

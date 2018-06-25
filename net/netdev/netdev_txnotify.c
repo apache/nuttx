@@ -68,9 +68,6 @@
  * Returned Value:
  *  None
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
@@ -105,9 +102,6 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
  * Returned Value:
  *  None
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
@@ -141,9 +135,6 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *
  * Returned Value:
  *  None
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 

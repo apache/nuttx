@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_findbyname.c
+ * net/netdev/netdev_indextoname.c
  *
- *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,55 +38,97 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 
-#include <nuttx/net/netdev.h>
+#include <net/if.h>
 
-#include "utils/utils.h"
+#include "nuttx/net/net.h"
+#include "nuttx/net/netdev.h"
+
 #include "netdev/netdev.h"
+
+#ifdef CONFIG_NETDEV_IFINDEX
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_findbyname
+ * Name: netdev_indextoname
  *
  * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
+ *   The if_indextoname() function maps an interface index to its
+ *   corresponding name.
  *
  * Input Parameters:
- *   ifname The interface name of the device of interest
+ *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
+ *             if_indextoname() will place in this buffer the name of the
+ *             interface with index ifindex.
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   If ifindex is an interface index, then the function will return zero
+ *   (OK). Otherwise, the function returns a negated errno value;
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
+int netdev_indextoname(unsigned int ifindex, FAR char *ifname)
 {
   FAR struct net_driver_s *dev;
+  int ret = -ENODEV;
 
-  if (ifname)
+  DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
+  DEBUGASSERT(ifname != NULL);
+
+  /* Find the driver with this name */
+
+  net_lock();
+  dev = netdev_findbyindex(ifindex);
+  if (dev != NULL)
     {
-      net_lock();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              net_unlock();
-              return dev;
-            }
-        }
-
-      net_unlock();
+      memcpy(ifname, dev->d_ifname, IF_NAMESIZE);
+      ret = OK;
     }
 
-  return NULL;
+  net_unlock();
+  return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+/****************************************************************************
+ * Name: if_indextoname
+ *
+ * Description:
+ *   The if_indextoname() function maps an interface index to its
+ *   corresponding name.
+ *
+ * Input Parameters:
+ *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
+ *             if_indextoname() will place in this buffer the name of the
+ *             interface with index ifindex.
+ *
+ * Returned Value:
+ *   If ifindex is an interface index, then the function will return the
+ *   value supplied by ifname. Otherwise, the function returns a NULL pointer
+ *   and sets errno to indicate the error.
+ *
+ ****************************************************************************/
+
+FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname)
+{
+  int ret;
+
+  /* Let netdev_indextoname to the work */
+
+  ret = netdev_indextoname(ifindex, ifname);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return NULL;
+    }
+
+  return ifname;
+}
+
+#endif /* CONFIG_NETDEV_IFINDEX */

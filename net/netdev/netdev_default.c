@@ -68,9 +68,6 @@
  * Returned Value:
  *  Pointer to default network driver on success; null on failure
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 FAR struct net_driver_s *netdev_default(void)

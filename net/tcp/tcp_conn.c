@@ -581,7 +581,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
  *
  * Description:
  *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the UIP layer at start-up in normal user mode.
+ *   from the network layer at start-up.
  *
  ****************************************************************************/
 

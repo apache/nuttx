@@ -64,9 +64,6 @@
  * Returned Value:
  *   The number of network devices
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 int netdev_count(void)

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev/netdev_findbyname.c
+ * net/netdev/netdev_nametoindex.c
  *
- *   Copyright (C) 2007, 2008, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,55 +38,87 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <string.h>
+#include <assert.h>
 #include <errno.h>
 
-#include <nuttx/net/netdev.h>
+#include <net/if.h>
 
-#include "utils/utils.h"
+#include "nuttx/net/net.h"
+#include "nuttx/net/netdev.h"
+
 #include "netdev/netdev.h"
+
+#ifdef CONFIG_NETDEV_IFINDEX
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_findbyname
+ * Name: netdev_nametoindex
  *
  * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
+ *   The if_nametoindex() function returns the interface index corresponding
+ *   to name ifname.
  *
  * Input Parameters:
- *   ifname The interface name of the device of interest
+ *   ifname - The interface name
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   The corresponding index if ifname is the name of an interface;
+ *   otherwise, a negated errno value is returned.
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
+unsigned int netdev_nametoindex(FAR const char *ifname)
 {
   FAR struct net_driver_s *dev;
+  unsigned int ifindex = -ENODEV;
 
-  if (ifname)
+  /* Find the driver with this name */
+
+  net_lock();
+  dev = netdev_findbyname(ifname);
+  if (dev != NULL)
     {
-      net_lock();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              net_unlock();
-              return dev;
-            }
-        }
-
-      net_unlock();
+      ifindex = dev->d_ifindex;
     }
 
-  return NULL;
+  net_unlock();
+  return ifindex;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+/****************************************************************************
+ * Name: if_nametoindex
+ *
+ * Description:
+ *   The if_nametoindex() function returns the interface index corresponding
+ *   to name ifname.
+ *
+ * Input Parameters:
+ *   ifname - The interface name
+ *
+ * Returned Value:
+ *   The corresponding index if ifname is the name of an interface;
+ *   otherwise, zero.  Although not specified, the errno value will be set.
+ *
+ ****************************************************************************/
+
+unsigned int if_nametoindex(FAR const char *ifname)
+{
+  int ret;
+
+  /* Let netdev_nametoindex to the work */
+
+  ret = netdev_nametoindex(ifname);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return 0;
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_NETDEV_IFINDEX */
