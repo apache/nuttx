@@ -377,7 +377,7 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
       /* Only Ethernet is supported */
 
-      if (d_lltype != NET_LL_ETHERNET)
+      if (dev->d_lltype != NET_LL_ETHERNET)
         {
           return -EAFNOSUPPORT;
         }

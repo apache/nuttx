@@ -108,11 +108,11 @@ uint64_t g_instack_alloc[INTSTACK_ALLOC >> 3];
 /* These definitions provide the "top" of the push-down stacks. */
 
 const uint32_t g_cpu0_instack_base =
-  (uint32_t)g_instack_alloc + INTSTACK_SIZE)
+  (uint32_t)g_instack_alloc + INTSTACK_SIZE);
 
 #if CONFIG_SMP_NCPUS > 1
 const uint32_t g_cpu1_instack_base =
-  (uint32_t)g_instack_alloc + 2 * INTSTACK_SIZE)
+  (uint32_t)g_instack_alloc + 2 * INTSTACK_SIZE);
 #endif
 #endif
 
