@@ -93,6 +93,10 @@ ifeq ($(CONFIG_AUDIO_I2S),y)
 CSRCS += audio_i2s.c
 endif
 
+ifeq ($(CONFIG_AUDIO_DMA),y)
+CSRCS += audio_dma.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio
