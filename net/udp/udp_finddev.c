@@ -165,7 +165,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
                * uninitialized and that the socket is, hence, not bound.
                */
 
-              if (conn->u.ipv4.laddr == 0)
+              if (conn->u.ipv4.laddr == 0) /* INADDR_ANY */
                 {
                   return NULL;
                 }
@@ -176,12 +176,22 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
                 }
             }
 
-          /* Normal lookup using the remote address */
+          /* There is no unique device associated with the unspecified
+           * address.
+           */
 
-          else
+          else if (conn->u.ipv4.raddr != INADDR_ANY)
             {
+              /* Normal lookup using the verified remote address */
+
               return netdev_findby_ipv4addr(conn->u.ipv4.laddr,
                                             conn->u.ipv4.raddr);
+            }
+          else
+            {
+              /* Not a suitable IPv4 unicast address for device lookup */
+
+              return NULL;
             }
         }
 #endif
@@ -215,12 +225,22 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
                 }
             }
 
-          /* Normal lookup using the remote address */
+          /* There is no unique device associated with the unspecified
+           * address.
+           */
 
-          else
+          else if (!net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_unspecaddr))
             {
+              /* Normal lookup using the verified remote address */
+
               return netdev_findby_ipv6addr(conn->u.ipv6.laddr,
                                             conn->u.ipv6.raddr);
+            }
+          else
+            {
+              /* Not a suitable IPv6  unicast address for device lookup */
+
+              return NULL;
             }
         }
 #endif
