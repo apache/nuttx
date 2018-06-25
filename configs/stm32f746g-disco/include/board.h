@@ -151,16 +151,16 @@
 
 /* Configure factors for  PLLSAI clock */
 
-#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(192)
+#define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
 #define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
-#define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(2)
+#define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
 
 /* Configure Dedicated Clock Configuration Register */
 
 #define STM32_RCC_DCKCFGR1_PLLI2SDIVQ  RCC_DCKCFGR1_PLLI2SDIVQ(1)
 #define STM32_RCC_DCKCFGR1_PLLSAIDIVQ  RCC_DCKCFGR1_PLLSAIDIVQ(1)
-#define STM32_RCC_DCKCFGR1_PLLSAIDIVR  RCC_DCKCFGR1_PLLSAIDIVR(0)
+#define STM32_RCC_DCKCFGR1_PLLSAIDIVR  RCC_DCKCFGR1_PLLSAIDIVR(1)
 #define STM32_RCC_DCKCFGR1_SAI1SRC     RCC_DCKCFGR1_SAI1SEL(0)
 #define STM32_RCC_DCKCFGR1_SAI2SRC     RCC_DCKCFGR1_SAI2SEL(0)
 #define STM32_RCC_DCKCFGR1_TIMPRESRC   0
@@ -373,5 +373,66 @@
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
+
+/* LCD definitions ******************************************************************/
+
+#define BOARD_LTDC_WIDTH                480
+#define BOARD_LTDC_HEIGHT               272
+
+#define BOARD_LTDC_OUTPUT_BPP           24
+#define BOARD_LTDC_HFP                  32
+#define BOARD_LTDC_HBP                  13
+#define BOARD_LTDC_VFP                  2
+#define BOARD_LTDC_VBP                  2
+#define BOARD_LTDC_HSYNC                41
+#define BOARD_LTDC_VSYNC                10
+
+#define BOARD_LTDC_PLLSAIN              192
+#define BOARD_LTDC_PLLSAIR              5
+
+/* Pixel Clock Polarity */
+#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+/* Data Enable Polarity */
+#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+/* Vertical Sync Polarity */
+#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
+/* Horicontal Sync Polarity */
+#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */ 
+
+/* GPIO pinset */
+
+#define GPIO_LTDC_PINS                  24 /* 24-bit display */
+
+#define GPIO_LTDC_R0                    GPIO_LTDC_R0_3
+#define GPIO_LTDC_R1                    GPIO_LTDC_R1_3
+#define GPIO_LTDC_R2                    GPIO_LTDC_R2_4
+#define GPIO_LTDC_R3                    GPIO_LTDC_R3_3
+#define GPIO_LTDC_R4                    GPIO_LTDC_R4_4
+#define GPIO_LTDC_R5                    GPIO_LTDC_R5_4
+#define GPIO_LTDC_R6                    GPIO_LTDC_R6_4
+#define GPIO_LTDC_R7                    GPIO_LTDC_R7_3
+
+#define GPIO_LTDC_G0                    GPIO_LTDC_G0_2
+#define GPIO_LTDC_G1                    GPIO_LTDC_G1_2
+#define GPIO_LTDC_G2                    GPIO_LTDC_G2_3
+#define GPIO_LTDC_G3                    GPIO_LTDC_G3_4
+#define GPIO_LTDC_G4                    GPIO_LTDC_G4_3
+#define GPIO_LTDC_G5                    GPIO_LTDC_G5_3
+#define GPIO_LTDC_G6                    GPIO_LTDC_G6_3
+#define GPIO_LTDC_G7                    GPIO_LTDC_G7_3
+
+#define GPIO_LTDC_B0                    GPIO_LTDC_B0_1
+#define GPIO_LTDC_B1                    GPIO_LTDC_B1_2
+#define GPIO_LTDC_B2                    GPIO_LTDC_B2_3
+#define GPIO_LTDC_B3                    GPIO_LTDC_B3_3
+#define GPIO_LTDC_B4                    GPIO_LTDC_B4_4
+#define GPIO_LTDC_B5                    GPIO_LTDC_B5_3
+#define GPIO_LTDC_B6                    GPIO_LTDC_B6_3
+#define GPIO_LTDC_B7                    GPIO_LTDC_B7_3
+
+#define GPIO_LTDC_VSYNC                 GPIO_LTDC_VSYNC_2
+#define GPIO_LTDC_HSYNC                 GPIO_LTDC_HSYNC_2
+#define GPIO_LTDC_DE                    GPIO_LTDC_DE_3
+#define GPIO_LTDC_CLK                   GPIO_LTDC_CLK_3
 
 #endif  /* __CONFIG_STM32F746G_DISCO_INCLUDE_BOARD_H */

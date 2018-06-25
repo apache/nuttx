@@ -59,6 +59,7 @@
 #include "up_internal.h"
 #include "chip/stm32_ltdc.h"
 #include "chip/stm32_dma2d.h"
+#include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_ltdc.h"
 #include "stm32_dma2d.h"
@@ -257,6 +258,7 @@
 
 #else
 #  define STM32_LTDC_L2_FBSIZE (0)
+#  define STM32_LTDC_L2_BPP 0
 #endif
 
 /* Total memory used for framebuffers */
