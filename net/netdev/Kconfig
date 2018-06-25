@@ -24,4 +24,16 @@ config NETDEV_WIRELESS_IOCTL
 	---help---
 		Enable support for wireless device ioctl() commands
 
+config NETDEV_IFINDEX
+	bool "Enable IF index support"
+	default n
+	---help---
+		Enable support for references devices by an interface index.
+
+		This feature is automatically enabled when raw, PACKET sockets
+		are enabled.
+
+		When enabled, these option also enables the user interfaces:
+		if_nametoindex() and if_indextoname().
+
 endmenu # Network Device Operations

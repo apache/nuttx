@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_unregister.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,43 @@
 #endif
 
 /****************************************************************************
+ * Name: free_ifindex
+ *
+ * Description:
+ *   Free a interface index to the assigned to device.
+ *
+ * Input Parameters:
+ *   dev - Instance of device structure for the unregistered device.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+static inline void free_ifindex(int ndx)
+{
+  uint32_t bit;
+
+  /* The bit index is the interface index minus one.  Zero is reserved in
+   * POSIX to mean no interface index.
+   */
+
+  DEBUGASSERT(ndx > 0 && ndx <= MAX_IFINDEX);
+  ndx--;
+
+  /* Set the bit in g_devset corresponding to the zero based index */
+
+  bit = 1 << ndx;
+
+  /* The bit should be in the set state */
+
+  DEBUGASSERT((g_devset & bit) != 0);
+  g_devset &= ~bit;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -124,6 +161,9 @@ int netdev_unregister(FAR struct net_driver_s *dev)
           curr->flink = NULL;
         }
 
+#ifdef CONFIG_NETDEV_IFINDEX
+      free_ifindex(dev->d_ifindex);
+#endif
       net_unlock();
 
 #ifdef CONFIG_NET_ETHERNET
@@ -135,7 +175,7 @@ int netdev_unregister(FAR struct net_driver_s *dev)
             dev->d_mac.ether.ether_addr_octet[4],
             dev->d_mac.ether.ether_addr_octet[5], dev->d_ifname);
 #else
-      ninfo("Registered dev: %s\n", dev->d_ifname);
+      ninfo("Unregistered dev: %s\n", dev->d_ifname);
 #endif
       return OK;
     }

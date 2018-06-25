@@ -48,6 +48,16 @@
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* If CONFIG_NETDEV_IFINDEX is enabled then there is limit to the number of
+ * devices that can be registered due to the nature of some static data.
+ */
+
+#define MAX_IFINDEX  32
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -68,6 +78,17 @@ extern "C"
  */
 
 EXTERN struct net_driver_s *g_netdevices;
+#endif
+
+#ifdef CONFIG_NETDEV_IFINDEX
+/* The set of network devices that have been registered.  This is used to
+ * assign a unique device index to the newly registered device.
+ *
+ * REVISIT:  The width of g_nassigned limits the number of registered
+ * devices to 32 (MAX_IFINDEX).
+ */
+
+EXTERN uint32_t g_devset;
 #endif
 
 /****************************************************************************
@@ -120,9 +141,6 @@ bool netdev_verify(FAR struct net_driver_s *dev);
  * Returned Value:
  *  Pointer to driver on success; null on failure
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -144,9 +162,6 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
  * Returned Value:
  *  0:Enumeration completed 1:Enumeration terminated early by callback
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 int netdev_foreach(netdev_callback_t callback, FAR void *arg);
@@ -164,9 +179,6 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg);
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
@@ -190,9 +202,6 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  * Returned Value:
  *  Pointer to driver on success; null on failure
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
@@ -205,25 +214,80 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
  * Name: netdev_findbyindex
  *
  * Description:
- *   Find a previously registered network device by its position in the
- *   list of registered devices.  NOTE that this function is not a safe way
- *   to enumerate network devices:  There could be changes to the list of
- *   registered device causing a given index to be meaningless (unless, of
- *   course, the caller keeps the network locked).
+ *   Find a previously registered network device by assigned interface index.
  *
  * Input Parameters:
- *   index - the index of the interface to file
+ *   ifindex - The interface index
  *
  * Returned Value:
- *  Pointer to driver on success; NULL on failure.  This function can only
- *  fail if there are fewer registered interfaces than could be indexed.
- *
- * Assumptions:
- *  Called from normal user mode
+ *  Pointer to driver on success; NULL on failure.  This function will return
+ *  NULL only if there is no device corresponding to the provided index.
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyindex(int index);
+FAR struct net_driver_s *netdev_findbyindex(int ifindex);
+
+/****************************************************************************
+ * Name: netdev_nextindex
+ *
+ * Description:
+ *   Return the interface index to the next valid device.
+ *
+ * Input Parameters:
+ *   ifindex - The first interface index to check.  Usually in a traversal
+ *             this would be the previous inteface index plus 1.
+ *
+ * Returned Value:
+ *   The interface index for the next network driver.  -ENODEV is returned if
+ *   there are no further devices with assigned interface indices.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+int netdev_nextindex(int ifindex);
+#endif
+
+/****************************************************************************
+ * Name: netdev_indextoname
+ *
+ * Description:
+ *   The if_indextoname() function maps an interface index to its
+ *   corresponding name.
+ *
+ * Input Parameters:
+ *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
+ *             if_indextoname() will place in this buffer the name of the
+ *             interface with index ifindex.
+ *
+ * Returned Value:
+ *   If ifindex is an interface index, then the function will return zero
+ *   (OK). Otherwise, the function returns a negated errno value;
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+int netdev_indextoname(unsigned int ifindex, FAR char *ifname);
+#endif
+
+/****************************************************************************
+ * Name: netdev_nametoindex
+ *
+ * Description:
+ *   The if_nametoindex() function returns the interface index corresponding
+ *   to name ifname.
+ *
+ * Input Parameters:
+ *   ifname - The interface name
+ *
+ * Returned Value:
+ *   The corresponding index if ifname is the name of an interface;
+ *   otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+unsigned int netdev_nametoindex(FAR const char *ifname);
+#endif
 
 /****************************************************************************
  * Name: netdev_default
@@ -243,9 +307,6 @@ FAR struct net_driver_s *netdev_findbyindex(int index);
  *
  * Returned Value:
  *  Pointer to default network driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
@@ -267,9 +328,6 @@ FAR struct net_driver_s *netdev_default(void);
  * Returned Value:
  *  None
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -290,9 +348,6 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
  *
  * Returned Value:
  *  None
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 
@@ -316,9 +371,6 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  * Returned Value:
  *  None
  *
- * Assumptions:
- *  Called from normal user mode
- *
  ****************************************************************************/
 
 void netdev_txnotify_dev(FAR struct net_driver_s *dev);
@@ -334,9 +386,6 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev);
  *
  * Returned Value:
  *   The number of network devices
- *
- * Assumptions:
- *  Called from normal user mode
  *
  ****************************************************************************/
 

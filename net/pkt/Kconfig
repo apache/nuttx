@@ -9,6 +9,7 @@ config NET_PKT
 	bool "Socket packet socket support"
 	default n
 	depends on NET_ETHERNET || EXPERIMENTAL
+	select NETDEV_IFINDEX
 	---help---
 		Enable or disable support for packet sockets.
 

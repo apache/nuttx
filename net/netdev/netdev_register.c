@@ -95,6 +95,17 @@
 
 struct net_driver_s *g_netdevices = NULL;
 
+#ifdef CONFIG_NETDEV_IFINDEX
+/* The set of network devices that have been registered.  This is used to
+ * assign a unique device index to the newly registered device.
+ *
+ * REVISIT:  The width of g_nassigned limits the number of registered
+ * devices to 32 (MAX_IFINDEX).
+ */
+
+uint32_t g_devset;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -147,6 +158,50 @@ static int find_devnum(FAR const char *devfmt)
 }
 
 /****************************************************************************
+ * Name: get_ifindex
+ *
+ * Description:
+ *   Assign a unique interface index to the device.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The interface index assigned to the device.  -ENOSPC is returned if
+ *   more the MAX_IFINDEX names have been assigned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+static int get_ifindex(void)
+{
+  int ndx;
+
+   /* Search for an unused index */
+
+   for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
+     {
+       uint32_t bit = 1L << ndx;
+       if ((g_devset & bit) == 0)
+         {
+           /* Indicate that this index is in use */
+
+           g_devset |= bit;
+
+           /* NOTE that the index + 1 is returned.  Zero is reserved to
+            * mean no-index in the POSIX standards.
+            */
+
+           net_unlock();
+           return ndx + 1;
+         }
+     }
+
+   return -ENOSPC;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -177,6 +232,9 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
   FAR const char devfmt_str[IFNAMSIZ];
 #endif
   int devnum;
+#ifdef CONFIG_NETDEV_IFINDEX
+  int ifindex;
+#endif
 
   if (dev != NULL)
     {
@@ -285,11 +343,23 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       dev->d_conncb = NULL;
       dev->d_devcb = NULL;
 
+      /* We need exclusive access for the following operations */
+
+      net_lock();
+
+#ifdef CONFIG_NETDEV_IFINDEX
+      ifindex = get_ifindex();
+      if (ifindex < 0)
+        {
+          return ifindex;
+        }
+
+      dev->d_ifindex = (uint8_t)ifindex;
+#endif
+
       /* Get the next available device number and assign a device name to
        * the interface
        */
-
-      net_lock();
 
 #ifdef CONFIG_NET_LOOPBACK
       /* The local loopback device is a special case:  There can be only one

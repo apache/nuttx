@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_findbyindex.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,15 +38,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/net/netdev.h>
 
 #include "utils/utils.h"
 #include "netdev/netdev.h"
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Public Functions
@@ -56,33 +58,65 @@
  * Name: netdev_findbyindex
  *
  * Description:
- *   Find a previously registered network device by its position in the
- *   list of registered devices.  NOTE that this function is not a safe way
- *   to enumerate network devices:  There could be changes to the list of
- *   registered device causing a given index to be meaningless (unless, of
- *   course, the caller keeps the network locked).
+ *   Find a previously registered network device by assigned interface index.
  *
  * Input Parameters:
- *   index - the index of the interface to file
+ *   ifindex - The interface index
  *
  * Returned Value:
- *  Pointer to driver on success; NULL on failure.  This function can only
- *  fail if there are fewer registered interfaces than could be indexed.
- *
- * Assumptions:
- *  Called from normal user mode
+ *  Pointer to driver on success; NULL on failure.  This function will return
+ *  NULL only if there is no device corresponding to the provided index.
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyindex(int index)
+FAR struct net_driver_s *netdev_findbyindex(int ifindex)
 {
   FAR struct net_driver_s *dev;
   int i;
 
+#ifdef CONFIG_NETDEV_IFINDEX
+  /* The bit index is the interface index minus one.  Zero is reserved in
+   * POSIX to mean no interface index.
+   */
+
+  DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
+  ifindex--;
+  if (ifindex < 0 || ifindex >= MAX_IFINDEX)
+    {
+      return NULL;
+    }
+#endif
+
   net_lock();
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  /* Check if this index has been assigned */
+
+  if ((g_devset & (1L << ifindex)) == 0)
+    {
+      /* This index has not been assigned */
+
+      net_unlock();
+      return NULL;
+    }
+#endif
+
   for (i = 0, dev = g_netdevices; dev; i++, dev = dev->flink)
     {
-      if (i == index)
+#ifdef CONFIG_NETDEV_IFINDEX
+      /* Check if the index matches the index assigned when the device was
+       * registered.
+       */
+
+     if (dev->d_ifindex == ifindex)
+#else
+      /* NOTE that this option is not a safe way to enumerate network
+       * devices:  There could be changes to the list of registered device
+       * causing a given index to be meaningless (unless, of course, the
+       * caller keeps the network locked).
+       */
+      if (i == ifindex)
+#endif
         {
           net_unlock();
           return dev;
@@ -93,4 +127,53 @@ FAR struct net_driver_s *netdev_findbyindex(int index)
   return NULL;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
+/****************************************************************************
+ * Name: netdev_nextindex
+ *
+ * Description:
+ *   Return the interface index to the next valid device.
+ *
+ * Input Parameters:
+ *   ifindex - The first interface index to check.  Usually in a traversal
+ *             this would be the previous inteface index plus 1.
+ *
+ * Returned Value:
+ *   The interface index for the next network driver.  -ENODEV is returned if
+ *   there are no further devices with assigned interface indices.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IFINDEX
+int netdev_nextindex(int ifindex)
+{
+  /* The bit index is the interface index minus one.  Zero is reserved in
+   * POSIX to mean no interface index.
+   */
+
+  DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
+  ifindex--;
+
+  if (ifindex >= 0 && ifindex < MAX_IFINDEX)
+    {
+      net_lock();
+      for (; ifindex < MAX_IFINDEX; ifindex++)
+        {
+          if ((g_devset & (1L << ifindex)) != 0)
+            {
+               /* NOTE that the index + 1 is returned.  Zero is reserved to
+                * mean no-index in the POSIX standards.
+                */
+
+               net_unlock();
+               return ifindex + 1;
+           }
+        }
+
+      net_unlock();
+    }
+
+  return -ENODEV;
+}
+#endif
+
+#endif /* CONFIG_NSOCKET_DESCRIPTORS */

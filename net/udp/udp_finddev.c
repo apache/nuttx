@@ -238,7 +238,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
-              /* Not a suitable IPv6  unicast address for device lookup */
+              /* Not a suitable IPv6 unicast address for device lookup */
 
               return NULL;
             }

@@ -523,6 +523,22 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
         {
           int devndx = index - DEV_INDEX;
 
+#ifdef CONFIG_NETDEV_IFINDEX
+          /* Make sure the devndx is a valid interface index.
+           *
+           * REVISIT:  That actual underlay indices may be space.  The
+           * way that level1->base.nentries is set-up assumes that
+           * the indexing is continuous and may cause entries to be lost.
+           */
+
+          devndx = netdev_nextindex(devndx);
+          if (devndx < 0)
+            {
+              /* There are no more... one must have been unregistered */
+
+              return -ENOENT;
+            }
+#endif
           /* Find the device corresponding to this device index */
 
           dev = netdev_findbyindex(devndx);

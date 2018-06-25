@@ -3,7 +3,7 @@
  * Defines architecture-specific device driver interfaces to the NuttX
  * network.
  *
- *   Copyright (C) 2007, 2009, 2011-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
@@ -241,6 +241,11 @@ struct net_driver_s
 
   uint8_t d_lltype;             /* See enum net_lltype_e */
   uint8_t d_llhdrlen;           /* Link layer header size */
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  uint8_t d_ifindex;            /* Device index */
+#endif
+
   uint16_t d_mtu;               /* Maximum packet size */
 #ifdef CONFIG_NET_TCP
   uint16_t d_recvwndo;          /* TCP receive window size */
