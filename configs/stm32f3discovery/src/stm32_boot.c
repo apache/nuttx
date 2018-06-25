@@ -48,14 +48,6 @@
 #include "stm32f3discovery.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -100,3 +92,26 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  (void)stm32_bringup();
+}
+#endif

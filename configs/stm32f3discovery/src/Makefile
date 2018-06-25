@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm32f3discovery/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,11 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
+endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -58,10 +62,6 @@ endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
-endif
-
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

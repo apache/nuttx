@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f3discovery/src/stm32_appinit.c
+ * config/stm32f3discovery/src/stm32_bringup.c
  *
  *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,49 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
 #include <nuttx/board.h>
 
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
+
+#include "stm32.h"
 #include "stm32f3discovery.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef OK
-#  define OK 0
+/* Configuration ************************************************************/
+
+#define HAVE_USBDEV     1
+#define HAVE_USBMONITOR 1
+
+/* Can't support USB device features if the STM32 USB peripheral is not
+ * enabled.
+ */
+
+#ifndef CONFIG_STM32_USB
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB device is USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
+#  undef HAVE_USBMONITOR
 #endif
 
 /****************************************************************************
@@ -56,39 +89,55 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int stm32_bringup(void)
 {
-#ifdef CONFIG_BOARD_INITIALIZE
-  /* Board initialization already performed by board_initialize() */
+  int ret = OK;
 
-  return OK;
-#else
-  /* Perform board-specific initialization */
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
 
-  return stm32_bringup();
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
 #endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_STM32F3DISCO_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+  return ret;
 }
