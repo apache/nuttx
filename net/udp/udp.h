@@ -112,6 +112,11 @@ struct udp_conn_s
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
 
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+  uint8_t  boundto;       /* Index of the interface we are bound to.
+                           * Unbound: 0, Bound: 1-MAX_IFINDEX */
+#endif
+
 #ifdef CONFIG_NET_UDP_READAHEAD
   /* Read-ahead buffering.
    *

@@ -53,6 +53,7 @@
 
 #include "socket/socket.h"
 #include "utils/utils.h"
+#include "netdev/netdev.h"
 #include "udp/udp.h"
 
 #ifdef CONFIG_NET_UDPPROTO_OPTIONS
@@ -104,27 +105,55 @@ int udp_setsockopt(FAR struct socket *psock, int option,
    * already configured.
    */
 
-  if (psock->s_type != SOCK_STREAM)
+  if (psock->s_type != SOCK_DGRAM)
     {
       nerr("ERROR:  Not a UDP socket\n");
       return -ENOTCONN;
     }
 
-  /* Handle the Keep-Alive option */
+  /* Handle the UDP-protocol options */
 
   switch (option)
     {
-      /* Handle the SO_KEEPALIVE socket-level option.
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+      /* Handle the UDP_BINDTODEVICE socket-level option.
        *
-       * NOTE: SO_KEEPALIVE is not really a socket-level option; it is a
-       * protocol-level option.  A given UDP connection may service multiple
-       * sockets (via dup'ing of the socket).  There is, however, still only
-       * one connection to be monitored and that is a global attribute across
-       * all of the clones that may use the underlying connection.
+       * NOTE: UDP_BINDTODEVICE is declared in linux as SO_BINDTODEVICE,
+       * but this option only makes sense for UDP sockets trying to broadcast
+       * while their local address is not set, eg, with DHCP requests.
+       * The problem is that we are not able to determine the interface to be
+       * used for sending packets when multiple interfaces do not have a local
+       * address yet. This option can be used to "force" the interface used to
+       * send the UDP traffic in this connection. Note that it does NOT only
+       * apply to broadcast packets.
        */
 
       case UDP_BINDTODEVICE:  /* Bind socket to a specific network device */
+        if (value == NULL || value_len == 0 ||
+           (value_len > 0 && ((FAR char *)value)[0] == 0))
+          {
+            conn->boundto = 0;  /* This interface is no longer bound */
+          }
+        else
+          {
+            int ifindex;
+
+            /* Get the interface index corresponding to the interface name */
+
+            ifindex = netdev_nametoindex(value);
+            if (ifindex >= 0)
+              {
+                DEBUGASSERT(ifindex > 0 && ifindex < MAX_IFINDEX);
+                conn->boundto = ifindex;
+              }
+            else
+              {
+                ret = ifindex;
+              }
+          }
+
         break;
+#endif
 
       default:
         nerr("ERROR: Unrecognized UDP option: %d\n", option);
@@ -139,3 +168,4 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 }
 
 #endif /* CONFIG_NET_UDPPROTO_OPTIONS */
+

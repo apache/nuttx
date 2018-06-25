@@ -167,7 +167,17 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 
               if (conn->u.ipv4.laddr == 0) /* INADDR_ANY */
                 {
-                  return NULL;
+                  FAR struct net_driver_s *dev = NULL;
+
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+                  if (conn->boundto != 0)
+                    {
+                       /* This socket has been bound to an interface */
+
+                       dev = netdev_findbyindex(conn->boundto);
+                    }
+#endif
+                  return dev;
                 }
               else
                 {
@@ -189,9 +199,19 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
+              FAR struct net_driver_s *dev = NULL;
+
               /* Not a suitable IPv4 unicast address for device lookup */
 
-              return NULL;
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+              if (conn->boundto != 0)
+                {
+                   /* This socket has been bound to an interface */
+
+                   dev = netdev_findbyindex(conn->boundto);
+                }
+#endif
+              return dev;
             }
         }
 #endif
@@ -216,7 +236,17 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 
               if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
                 {
-                  return NULL;
+                  FAR struct net_driver_s *dev = NULL;
+
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+                  if (conn->boundto != 0)
+                    {
+                       /* This socket has been bound to an interface */
+
+                       dev = netdev_findbyindex(conn->boundto);
+                    }
+#endif
+                  return dev;
                 }
               else
                 {
@@ -238,9 +268,19 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
+              FAR struct net_driver_s *dev = NULL;
+
               /* Not a suitable IPv6 unicast address for device lookup */
 
-              return NULL;
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+              if (conn->boundto != 0)
+                {
+                   /* This socket has been bound to an interface */
+
+                   dev = netdev_findbyindex(conn->boundto);
+                }
+#endif
+              return dev;
             }
         }
 #endif

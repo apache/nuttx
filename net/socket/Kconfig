@@ -30,6 +30,12 @@ config NET_TCPPROTO_OPTIONS
 	---help---
 		Enable or disable support for TCP protocol level socket options.
 
+config NET_UDPPROTO_OPTIONS
+	bool
+	default n
+	---help---
+		Enable or disable support for UDP protocol level socket options.
+
 if NET_SOCKOPTS
 
 config NET_SOLINGER
