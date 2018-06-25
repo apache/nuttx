@@ -92,7 +92,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
 #ifdef CONFIG_NETDEV_IFINDEX
   /* Check if this index has been assigned */
 
-  if ((g_devset & (1L << (ifindex-1))) == 0)
+  if ((g_devset & (1L << (ifindex - 1))) == 0)
     {
       /* This index has not been assigned */
 

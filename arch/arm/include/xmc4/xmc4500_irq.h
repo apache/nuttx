@@ -193,7 +193,7 @@
 
 /* GPIO IRQ interrupts -- To be provided */
 
-#define NR_IRQS             XM4C_IRQ_NVECTORS
+#define NR_IRQS             XMC4_IRQ_NVECTORS
 
 /*****************************************************************************
  * Public Types
