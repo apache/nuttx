@@ -97,6 +97,9 @@ struct netprocfs_level1_s
 {
   struct procfs_dir_priv_s  base;    /* Base directory private data */
   char name[NAME_MAX + 1];           /* Name of last node visited */
+#ifdef CONFIG_NETDEV_IFINDEX
+  uint8_t ifindex;                   /* Next ifindex to visit */
+#endif
 };
 
 /* Line generating function type */

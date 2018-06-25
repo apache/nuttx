@@ -521,29 +521,35 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
       else
 #endif
         {
-          int ifindex = index - DEV_INDEX;
-
-          /* Correct for the fact that the interface is not zero based */
-
-          ifindex++;
+          int ifindex;
 
 #ifdef CONFIG_NETDEV_IFINDEX
-          /* Make sure the ifindex is a valid interface index.  If not,
-           * skip to the next valid index.
-           *
-           * REVISIT:  That actual underlying indices may be sparse.  The
-           * way that level1->base.nentries is set-up assumes that
-           * the indexing is continuous and this may cause entries to be
-           * lost in the output.
+          /* For the first network device, ifindex will be zero.  We have
+           * to take some special action to get the correct starting
+           * ifindex.
            */
 
-          ifindex = netdev_nextindex(ifindex);
+          if (level1->ifindex == 0)
+            {
+              ifindex = netdev_nextindex(1);
+            }
+          else
+            {
+              ifindex = netdev_nextindex(level1->ifindex);
+            }
+
           if (ifindex < 0)
             {
               /* There are no more... one must have been unregistered */
 
               return -ENOENT;
             }
+
+          level1->ifindex = ifindex + 1;
+#else
+          /* Get the raw index, accounting for 1 based indexing */
+
+          ifindex = index - DEV_INDEX + 1;
 #endif
           /* Find the device corresponding to this device index */
 
