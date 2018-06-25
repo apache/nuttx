@@ -212,7 +212,6 @@ static int get_ifindex(void)
            * mean no-index in the POSIX standards.
            */
 
-          net_unlock();
           return ndx + 1;
         }
     }
