@@ -521,18 +521,24 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
       else
 #endif
         {
-          int devndx = index - DEV_INDEX;
+          int ifindex = index - DEV_INDEX;
+
+          /* Correct for the fact that the interface is not zero based */
+
+          ifindex++;
 
 #ifdef CONFIG_NETDEV_IFINDEX
-          /* Make sure the devndx is a valid interface index.
+          /* Make sure the ifindex is a valid interface index.  If not,
+           * skip to the next valid index.
            *
-           * REVISIT:  That actual underlay indices may be space.  The
+           * REVISIT:  That actual underlying indices may be sparse.  The
            * way that level1->base.nentries is set-up assumes that
-           * the indexing is continuous and may cause entries to be lost.
+           * the indexing is continuous and this may cause entries to be
+           * lost in the output.
            */
 
-          devndx = netdev_nextindex(devndx);
-          if (devndx < 0)
+          ifindex = netdev_nextindex(ifindex);
+          if (ifindex < 0)
             {
               /* There are no more... one must have been unregistered */
 
@@ -541,7 +547,13 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
 #endif
           /* Find the device corresponding to this device index */
 
-          dev = netdev_findbyindex(devndx);
+          dev = netdev_findbyindex(ifindex);
+          if (dev == NULL)
+            {
+              /* What happened? */
+
+              return -ENOENT;
+            }
 
           /* Copy the device statistics file entry */
 

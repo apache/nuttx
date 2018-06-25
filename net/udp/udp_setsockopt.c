@@ -143,7 +143,7 @@ int udp_setsockopt(FAR struct socket *psock, int option,
             ifindex = netdev_nametoindex(value);
             if (ifindex >= 0)
               {
-                DEBUGASSERT(ifindex > 0 && ifindex < MAX_IFINDEX);
+                DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
                 conn->boundto = ifindex;
               }
             else

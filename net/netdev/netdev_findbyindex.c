@@ -61,7 +61,8 @@
  *   Find a previously registered network device by assigned interface index.
  *
  * Input Parameters:
- *   ifindex - The interface index
+ *   ifindex - The interface index.  This is a one-based index and must be
+ *             greater than zero.
  *
  * Returned Value:
  *  Pointer to driver on success; NULL on failure.  This function will return
@@ -80,8 +81,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
    */
 
   DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
-  ifindex--;
-  if (ifindex < 0 || ifindex >= MAX_IFINDEX)
+  if (ifindex < 1 || ifindex > MAX_IFINDEX)
     {
       return NULL;
     }
@@ -92,7 +92,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
 #ifdef CONFIG_NETDEV_IFINDEX
   /* Check if this index has been assigned */
 
-  if ((g_devset & (1L << ifindex)) == 0)
+  if ((g_devset & (1L << (ifindex-1))) == 0)
     {
       /* This index has not been assigned */
 
@@ -115,7 +115,8 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
        * causing a given index to be meaningless (unless, of course, the
        * caller keeps the network locked).
        */
-      if (i == ifindex)
+
+      if (i == (ifindex - 1))
 #endif
         {
           net_unlock();
@@ -135,7 +136,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
  *
  * Input Parameters:
  *   ifindex - The first interface index to check.  Usually in a traversal
- *             this would be the previous inteface index plus 1.
+ *             this would be the previous interface index plus 1.
  *
  * Returned Value:
  *   The interface index for the next network driver.  -ENODEV is returned if
