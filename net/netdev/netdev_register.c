@@ -104,6 +104,14 @@ struct net_driver_s *g_netdevices = NULL;
  */
 
 uint32_t g_devset;
+
+/* The set of network devices that have been freed.  The purpose of this
+ * set is to postpone reuse of a interface index for as long as possible,
+ * i.e., don't reuse an interface index until all of the possible indices
+ * have been used.
+ */
+
+uint32_t g_devfreed;
 #endif
 
 /****************************************************************************
@@ -175,29 +183,41 @@ static int find_devnum(FAR const char *devfmt)
 #ifdef CONFIG_NETDEV_IFINDEX
 static int get_ifindex(void)
 {
+  uint32_t devset;
   int ndx;
 
-   /* Search for an unused index */
+  /* Try to postpone re-using interface indices as long as possible */
 
-   for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
-     {
-       uint32_t bit = 1L << ndx;
-       if ((g_devset & bit) == 0)
-         {
-           /* Indicate that this index is in use */
+  devset = g_devset | g_devfreed;
+  if (devset == 0xffffffff)
+    {
+      /* Time start re-using interface indices */
 
-           g_devset |= bit;
+      devset     = g_devset;
+      g_devfreed = 0;
+    }
 
-           /* NOTE that the index + 1 is returned.  Zero is reserved to
-            * mean no-index in the POSIX standards.
-            */
+  /* Search for an unused index */
 
-           net_unlock();
-           return ndx + 1;
-         }
-     }
+  for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
+    {
+      uint32_t bit = 1L << ndx;
+      if ((devset & bit) == 0)
+        {
+          /* Indicate that this index is in use */
 
-   return -ENOSPC;
+          g_devset |= bit;
+
+          /* NOTE that the index + 1 is returned.  Zero is reserved to
+           * mean no-index in the POSIX standards.
+           */
+
+          net_unlock();
+          return ndx + 1;
+        }
+    }
+
+  return -ENOSPC;
 }
 #endif
 

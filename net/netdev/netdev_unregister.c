@@ -97,8 +97,9 @@ static inline void free_ifindex(int ndx)
 
   /* The bit should be in the set state */
 
-  DEBUGASSERT((g_devset & bit) != 0);
-  g_devset &= ~bit;
+  DEBUGASSERT((g_devset & bit) != 0 && (g_devfreed & bit) == 0);
+  g_devset   &= ~bit;
+  g_devfreed |= bit;
 }
 #endif
 

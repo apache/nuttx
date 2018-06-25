@@ -89,6 +89,14 @@ EXTERN struct net_driver_s *g_netdevices;
  */
 
 EXTERN uint32_t g_devset;
+
+/* The set of network devices that have been freed.  The purpose of this
+ * set is to postpone reuse of a interface index for as long as possible,
+ * i.e., don't reuse an interface index until all of the possible indices
+ * have been used.
+ */
+
+EXTERN uint32_t g_devfreed;
 #endif
 
 /****************************************************************************
