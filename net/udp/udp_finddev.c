@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_BINDTODEVICE
-FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
+static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
 {
   FAR struct net_driver_s *dev = NULL;
 
@@ -90,7 +90,7 @@ FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
            * socket.
            */
 
-          conn->bounto = 0;
+          conn->boundto = 0;
         }
     }
 
