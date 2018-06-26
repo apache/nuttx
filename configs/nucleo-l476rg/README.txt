@@ -54,6 +54,7 @@ Contents
   - LQFP64
   - mbed
   - Shields
+  - Other External Hardware/Devices
   - Configurations
 
 Nucleo-64 Boards
@@ -587,6 +588,36 @@ Shields
       conflict.
     - Current showstopper: I appear to be getting infinite interrupts as
       soon as joystick button interrupts are enabled.
+
+Other External Hardware/Devices
+===============================
+
+  Using external SPI SDCard
+  -------------------------
+  It is possible to use external SDCard over SPI with the
+  nucleo-stm32l476rg Cortex-M4. This option will or can broaden the
+  functionality in your project, solution or application.
+
+  In this Nuttx project we attach an MH-SD Card Module (SPI).
+  [http://www.geeetech.com/wiki/index.php/Arduino_SD_card_Module]
+
+  Other solutions should also work.
+
+  Nucleo CN10  STM32L4x6RG
+    ----------- ------------
+    Pin 31  PB3    SLCK
+    Pin 27  PB4    MISO
+    Pin 29  PB5    MOSI
+    Pin 25  PB10   CS
+
+  Nucleo CN7  STM32L4x6RG
+    ----------- ------------
+    Pin 18  +5V    5V
+    Pin 22  GND    GND
+
+  On the board the pins are labeled and are corresponding with the functions
+  as written before.
+  Configuring can be done by using ./tools/configure.sh nucleo-l476rg/spimmcsd
 
 Configurations
 ==============

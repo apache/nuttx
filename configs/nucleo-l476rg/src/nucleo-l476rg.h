@@ -53,9 +53,11 @@
 
 /* Configuration ********************************************************************/
 
-#define HAVE_PROC             1
-#define HAVE_RTC_DRIVER       1
-#define HAVE_MMCSD 1
+#define HAVE_PROC           1
+#define HAVE_RTC_DRIVER     1
+
+#define HAVE_MMCSD_SPI      1
+#define HAVE_MMCSD          1
 
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
@@ -70,6 +72,11 @@
 
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
 #  undef HAVE_RTC_DRIVER
+#endif
+
+#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MMCSD) || \
+    !defined(CONFIG_MMCSD_SPI)
+#  undef  HAVE_MMCSD
 #endif
 
 #if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
@@ -122,15 +129,6 @@
  *  mostly from: https://mbed.org/platforms/ST-Nucleo-F401RE/
  */
 
-/* SPI1 off */
-
-#define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTB | GPIO_PIN5)
-#define GPIO_SPI1_MISO_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTB | GPIO_PIN4)
-#define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
-                            GPIO_PORTB | GPIO_PIN3)
-
 #ifdef CONFIG_WL_CC1101
 #  define GPIO_CC1101_PWR  (GPIO_PORTC | GPIO_PIN6 | GPIO_OUTPUT_SET | \
                             GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
@@ -149,10 +147,10 @@
 
 /* SPI chip selects */
 
-#ifdef HAVE_MMCSD
+#ifdef CONFIG_MMCSD_SPI
 #  define GPIO_SPI_CS_SD_CARD \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
+  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+  GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN10)
 #endif
 
 #ifdef CONFIG_LCD_PCD8544
@@ -375,6 +373,18 @@ int stm32l4_adc_setup(void);
 
 #ifdef CONFIG_AJOYSTICK
 int board_ajoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_mmcsd_initialize
+ *
+ * Description:
+ *   Initializes SPI-based SD card
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SPI
+int stm32l4_mmcsd_initialize(int minor);
 #endif
 
 /****************************************************************************

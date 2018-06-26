@@ -91,7 +91,7 @@ void weak_function stm32l4_spiinitialize(void)
       spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_MMCSD_SPI
   stm32l4_configgpio(GPIO_SPI_CS_SD_CARD);
 #endif
 
@@ -146,7 +146,7 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_MMCSD_SPI
   if (devid == SPIDEV_MMCSD(0))
     {
       stm32l4_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
@@ -163,7 +163,16 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
 
 uint8_t stm32l4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+  #ifdef HAVE_MMCSD_SPI
+  if (devid == SPIDEV_MMCSD(0))
+    {
+       status |= SPI_STATUS_PRESENT;
+    }
+  #endif
+
+  return status;
 }
 #endif
 
