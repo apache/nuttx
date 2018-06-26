@@ -50,6 +50,58 @@
 #include "udp/udp.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: upd_bound_device
+ *
+ * Description:
+ *   If the UDP socket is bound to a device, return the reference to the
+ *   bound device.
+ *
+ * Input Parameters:
+ *   conn - UDP connection structure (not currently used).
+ *
+ * Returned Value:
+ *   A reference to the bound device.  If the retained interface index no
+ *   longer refers to a valid device, this function will unbind the device
+ *   and return NULL
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP_BINDTODEVICE
+FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
+{
+  FAR struct net_driver_s *dev = NULL;
+
+  /* Is the UDP socket bound to a device? */
+
+  if (conn->boundto != 0)
+    {
+      /* Yes..This socket has been bound to an interface.  Convert the
+       * interface index into a device structure reference.
+       */
+
+      dev = netdev_findbyindex(conn->boundto);
+      if (dev == NULL)
+        {
+          /* No device?  It must have been unregistered.  Un-bind the UDP
+           * socket.
+           */
+
+          conn->bounto = 0;
+        }
+    }
+
+  return dev;
+}
+#else
+#  define upd_bound_device(c) NULL
+#endif
+
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -167,17 +219,9 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 
               if (conn->u.ipv4.laddr == 0) /* INADDR_ANY */
                 {
-                  FAR struct net_driver_s *dev = NULL;
+                  /* Return the device bound to this UDP socket, if any */
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-                  if (conn->boundto != 0)
-                    {
-                       /* This socket has been bound to an interface */
-
-                       dev = netdev_findbyindex(conn->boundto);
-                    }
-#endif
-                  return dev;
+                  return upd_bound_device(conn);
                 }
               else
                 {
@@ -199,19 +243,10 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
-              FAR struct net_driver_s *dev = NULL;
-
               /* Not a suitable IPv4 unicast address for device lookup */
+              /* Return the device bound to this UDP socket, if any */
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-              if (conn->boundto != 0)
-                {
-                   /* This socket has been bound to an interface */
-
-                   dev = netdev_findbyindex(conn->boundto);
-                }
-#endif
-              return dev;
+              return upd_bound_device(conn);
             }
         }
 #endif
@@ -236,17 +271,9 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
 
               if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
                 {
-                  FAR struct net_driver_s *dev = NULL;
+                  /* Return the device bound to this UDP socket, if any */
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-                  if (conn->boundto != 0)
-                    {
-                       /* This socket has been bound to an interface */
-
-                       dev = netdev_findbyindex(conn->boundto);
-                    }
-#endif
-                  return dev;
+                  return upd_bound_device(conn);
                 }
               else
                 {
@@ -268,19 +295,10 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
-              FAR struct net_driver_s *dev = NULL;
-
               /* Not a suitable IPv6 unicast address for device lookup */
+              /* Return the device bound to this UDP socket, if any */
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-              if (conn->boundto != 0)
-                {
-                   /* This socket has been bound to an interface */
-
-                   dev = netdev_findbyindex(conn->boundto);
-                }
-#endif
-              return dev;
+              return upd_bound_device(conn);
             }
         }
 #endif

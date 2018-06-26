@@ -470,7 +470,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
   ret = work_cancel(LPWORK, &priv->work);
   if (ret < 0)
     {
-      /* NOTE: Currently, work_cancel only returns success */
+      /* NOTE:  Probably -ENOENT which means only that work is not queued. */
 
       ferr("ERROR: Failed to cancel work: %d\n", ret);
     }
