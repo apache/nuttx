@@ -65,7 +65,7 @@
 #define DMA_STREAM6               (6)
 #define DMA_STREAM7               (7)
 
-/* 8 DMA channels (plus Chan 11?) */
+/* 16 DMA channels */
 
 #define DMA_CHAN0                 (0)
 #define DMA_CHAN1                 (1)
@@ -75,7 +75,7 @@
 #define DMA_CHAN5                 (5)
 #define DMA_CHAN6                 (6)
 #define DMA_CHAN7                 (7)
-#define DMA_CHAN11                (11) /* This is suspicious. */
+#define DMA_CHAN11                (11)
 
 /* Register Offsets *****************************************************************/
 
@@ -400,10 +400,10 @@
  * #define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
  */
 
-#define STM32_DMA_MAP(d,s,c)       ((d) << 6 | (s) << 3 | (c))
-#define STM32_DMA_CONTROLLER(m)    (((m) >> 6) & 1)
-#define STM32_DMA_STREAM(m)        (((m) >> 3) & 7)
-#define STM32_DMA_CHANNEL(m)       ((m) & 7)
+#define STM32_DMA_MAP(d,s,c)       ((d) << 7 | (s) << 4 | (c))
+#define STM32_DMA_CONTROLLER(m)    (((m) >> 7) & 1)
+#define STM32_DMA_STREAM(m)        (((m) >> 4) & 7)
+#define STM32_DMA_CHANNEL(m)       ((m) & 15)
 
 #define DMAMAP_SPI3_RX_1           STM32_DMA_MAP(DMA1,DMA_STREAM0,DMA_CHAN0)
 #define DMAMAP_SPI3_RX_2           STM32_DMA_MAP(DMA1,DMA_STREAM2,DMA_CHAN0)
