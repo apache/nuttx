@@ -47,6 +47,7 @@
 #  include <arch/lc823450/irq.h>
 #  include "up_arch.h"
 #  include "lc823450_irq.h"
+#  include "up_arch.h"
 #endif
 
 /****************************************************************************
@@ -105,13 +106,16 @@
 	and		\tmp1, \tmp1, 1       /* \tmp = COREID */
 	cmp		\tmp1, #0
 	bne		1f
-	ldr		sp, =g_cpu0_instack_base
+	ldr		\tmp1, =g_cpu0_instack_base
+	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
 	b		2f
 1:
-	ldr		sp, =g_cpu1_instack_base
+	ldr		\tmp1, =g_cpu1_instack_base
+	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu1_instack_base) */
 2:
 #else
-	ldr		sp, =g_cpu0_instack_base
+	ldr		\tmp1, =g_cpu0_instack_base
+	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
 #endif
 	.endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
