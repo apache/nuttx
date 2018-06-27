@@ -136,6 +136,15 @@ config IMXRT_SEMC
 	bool "Smart External Memory Controller (SEMC)"
 	default n
 
+config IMXRT_SNVS_LPSRTC
+	bool "LP SRTC"
+	default n
+	select IMXRT_SNVS_HPRTC
+
+config IMXRT_SNVS_HPRTC
+	bool "HP RTC"
+	default n
+
 endmenu # i.MX RT Peripheral Selection
 
 menuconfig IMXRT_GPIO_IRQ
@@ -452,4 +461,23 @@ config IMXRT_EDMA_EDBG
 		system exits debug mode or the EDBG bit is cleared
 
 endmenu # eDMA Global Configuration
+
+menu "RTC Configuration"
+	depends on IMXRT_SNVS_HPRTC
+
+config IMXRT_RTC_MAGIC_REG
+	int "RTC SNVS GPR"
+	default 0
+	range  0 3
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config IMXRT_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+endmenu
 endif # ARCH_CHIP_IMXRT

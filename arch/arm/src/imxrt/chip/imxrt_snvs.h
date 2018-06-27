@@ -47,6 +47,8 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
+#define IMXRT_SNVS_LP_MAXTAMPER       10
+
 /* Register offsets *************************************************************************/
 
 #define IMXRT_SNVS_HPLR_OFFSET        0x0000  /* SNVS_HP Lock Register */
@@ -127,7 +129,9 @@
                                                 /* Bits 0-3: Reserved */
 #define SNVS_HPCOMR_LPSWR             (1 << 4)  /* Bit 4:  LP Software Reset */
 #define SNVS_HPCOMR_LPSWRDIS          (1 << 5)  /* Bit 5:  LP Software Reset Disable */
-                                                /* Bits 6-30: Reserved */
+                                                /* Bits 6-7: Reserved */
+#define SNVS_HPCOMR_SWSV              (1 << 8)  /* Bit 8:  */
+                                                /* Bits 9-30: Reserved */
 #define SNVS_HPCOMR_NPSWAEN           (1 << 31) /* Bit 31: Non-Privileged Software Access Enable */
 
 /* SNVS_HP Control Register */
@@ -143,6 +147,7 @@
                                                 /* Bit 9:  Reserved */
 #define SNVS_HPCR_HPCALBVAL_SHIFT     (10)      /* Bits 10-14: HP Calibration Value */
 #define SNVS_HPCR_HPCALBVAL_MASK      (31 << SNVS_HPCR_HPCALBVAL_SHIFT)
+#  define SNVS_HPCR_HPCALBVAL(n)      ((uint32_t)(n) << SNVS_HPCR_HPCALBVAL_SHIFT)
 #  define SNVS_HPCR_HPCALBVAL_ZERO    (0  << SNVS_HPCR_HPCALBVAL_SHIFT) /* +0  counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_P1      (1  << SNVS_HPCR_HPCALBVAL_SHIFT) /* +1  counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_P2      (2  << SNVS_HPCR_HPCALBVAL_SHIFT) /* +2  counts per 32768 ticks */
@@ -151,7 +156,9 @@
 #  define SNVS_HPCR_HPCALBVAL_M15     (17 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -15 counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_M2      (30 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -2  counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_M1      (31 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -1  counts per 32768 ticks */
-                                                /* Bits 15-23: Reserved */
+                                                /* Bits 15: Reserved */
+#define SNVS_HPCR_HPTS                (1 << 16) /* Bit 16: LPSRTC time sychronization */
+                                                /* Bits 17-23: Reserved */
 #define SNVS_HPCR_BTNCONFIG_SHIFT     (24)      /* Bits 24-26: Button Configuration */
 #define SNVS_HPCR_BTNCONFIG_MASK      (7 << SNVS_HPCR_BTNCONFIG_SHIFT)
 #  define SNVS_HPCR_BTNCONFIG_ LOW    (0 << SNVS_HPCR_BTNCONFIG_SHIFT) /* Button signal active low */
@@ -183,8 +190,6 @@
 
 #define SNVS_HPTAMR_MASK              0x00007fff /* Bits 0-14: HP Time Alarm, most-significant 15 bits */
 
-#define SNVS_HPTALR_
-
 /* SNVS_LP Lock Register */
 
                                                 /* Bits 0-3: Reserved */
@@ -203,6 +208,20 @@
 #define SNVS_LPCR_TOP                 (1 << 6)  /* Bit 6:  Turn off System Power */
 #define SNVS_LPCR_PWRGLITCHEN         (1 << 7)  /* Bit 7:  Power Glitch Enable */
                                                 /* Bits 8-15: Reserved */
+#define SNVS_LPCR_LPCALBEN            (1 << 8)  /* Bit 8:  LP Real Time Counter Calibration Enabled */
+                                                /* Bit 9:  Reserved */
+#define SNVS_LPCR_LPCALBVAL_SHIFT     (10)      /* Bits 10-14: LP Calibration Value */
+#define SNVS_LPCR_LPCALBVAL_MASK      (31 << SNVS_LPCR_LPCALBVAL_SHIFT)
+#  define SNVS_LPCR_LPCALBVAL(n)      ((uint32_t)(n) << SNVS_LPCR_LPCALBVAL_SHIFT)
+#  define SNVS_LPCR_LPCALBVAL_ZERO    (0  << SNVS_LPCR_LPCALBVAL_SHIFT) /* +0  counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_P1      (1  << SNVS_LPCR_LPCALBVAL_SHIFT) /* +1  counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_P2      (2  << SNVS_LPCR_LPCALBVAL_SHIFT) /* +2  counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_P15     (15 << SNVS_LPCR_LPCALBVAL_SHIFT) /* +15 counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_M16     (16 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -16 counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_M15     (17 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -15 counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_M2      (30 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -2  counts per 32768 ticks */
+#  define SNVS_LPCR_LPCALBVAL_M1      (31 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -1  counts per 32768 ticks */
+                                                /* Bit 15:  Reserved */
 #define SNVS_LPCR_BTNPRESSTIME_SHIFT  (16)      /* Bits 16-17: PMIC button press time out values */
 #define SNVS_LPCR_BTNPRESSTIME_MASK   (3 << SNVS_LPCR_BTNPRESSTIME_SHIFT)
 #  define SNVS_LPCR_BTNPRESSTIME_5SEC   (0 << SNVS_LPCR_BTNPRESSTIME_SHIFT) /* 5 secs */
@@ -229,7 +248,7 @@
 
                                                 /* Bits 0-1: Reserved */
 #define SNVS_LPSR_MCR                 (1 << 2)  /* Bit 2:  Monotonic Counter Rollover */
-                                                /* Bits 3-16: Reserved */ */
+                                                /* Bits 3-16: Reserved */
 #define SNVS_LPSR_EO                  (1 << 17) /* Bit 17: Emergency Off */
 #define SNVS_LPSR_SPO                 (1 << 18) /* Bit 18: Set Power Off */
                                                 /* Bits 19-31: Reserved */

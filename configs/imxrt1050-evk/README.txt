@@ -289,10 +289,6 @@ Configuration sub-directories
          CONFIG_NSH_NETINIT_THREAD_PRIORITY=80
          CONFIG_NSH_NETINIT_THREAD_STACKSIZE=1568
 
-       STATUS: As of this writing, I get a hardfault when I enable the PHY
-       interrupt so I suspect that there is something incorrect in that
-       pin configuration.
-
   nsh:
 
     Configures the NuttShell (nsh) located at examples/nsh.  This NSH
