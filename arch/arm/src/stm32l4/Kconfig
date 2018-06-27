@@ -1426,6 +1426,27 @@ config STM32L4_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_RTC_SUBSECONDS
 	default y
 
+config STM32F4_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 31
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config STM32F4_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config STM32F4_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
 choice
 	prompt "RTC clock source"
 	default STM32L4_RTC_LSECLOCK

@@ -2052,7 +2052,7 @@ config STM32F7_HAVE_RTC_SUBSECONDS
 menu "RTC Configuration"
 	depends on RTC
 
-config RTC_MAGIC_REG
+config STM32F7_RTC_MAGIC_REG
 	int "BKP register"
 	default 0
 	range  0 31
@@ -2060,15 +2060,15 @@ config RTC_MAGIC_REG
 		The BKP register used to store/check the Magic value to determine if
 		RTC is already setup
 
-config RTC_MAGIC
+config STM32F7_RTC_MAGIC
 	hex "RTC Magic 1"
-	default 0xfacefeee
+	default 0xfacefeed
 	---help---
 		Value used as Magic to determine if the RTC is already setup
 
-config RTC_MAGIC_TIME_SET
+config STM32F7_RTC_MAGIC_TIME_SET
 	hex "RTC Magic 2"
-	default 0xfacefeef
+	default 0xf00dface
 	---help---
 		Value used as Magic to determine if the RTC has been setup and has
 		time set

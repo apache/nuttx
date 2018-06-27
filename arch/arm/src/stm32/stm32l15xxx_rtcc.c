@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32l15xxx_rtcc.c
  *
- *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Juha Niskanen <juha.niskanen@haltian.com>
  *
@@ -89,28 +89,28 @@
 #  warning "RTC with LSI clock not yet tested on STM32L15XXX"
 #endif
 
-#if !defined(CONFIG_RTC_MAGIC)
-# define CONFIG_RTC_MAGIC (0xfacefeee)
+#if !defined(CONFIG_STM32_RTC_MAGIC)
+# define CONFIG_STM32_RTC_MAGIC           (0xfacefeed)
 #endif
 
-#if !defined(CONFIG_RTC_MAGIC_TIME_SET)
-#  define CONFIG_RTC_MAGIC_TIME_SET (CONFIG_RTC_MAGIC + 1)
+#if !defined(CONFIG_STM32_RTC_MAGIC_TIME_SET)
+#  define CONFIG_STM32_RTC_MAGIC_TIME_SET (0xfoodface)
 #endif
 
-#if !defined(CONFIG_RTC_MAGIC_REG)
-# define CONFIG_RTC_MAGIC_REG (0)
+#if !defined(CONFIG_STM32_RTC_MAGIC_REG)
+# define CONFIG_STM32_RTC_MAGIC_REG       (0)
 #endif
 
-#define RTC_MAGIC            CONFIG_RTC_MAGIC
-#define RTC_MAGIC_TIME_SET   CONFIG_RTC_MAGIC_TIME_SET
-#define RTC_MAGIC_REG        STM32_RTC_BKR(CONFIG_RTC_MAGIC_REG)
+#define RTC_MAGIC                         CONFIG_STM32_RTC_MAGIC
+#define RTC_MAGIC_TIME_SET                CONFIG_STM32_RTC_MAGIC_TIME_SET
+#define RTC_MAGIC_REG                     STM32_RTC_BKR(CONFIG_STM32_RTC_MAGIC_REG)
 
 /* Constants ****************************************************************/
 
-#define SYNCHRO_TIMEOUT  (0x00020000)
-#define INITMODE_TIMEOUT (0x00010000)
+#define SYNCHRO_TIMEOUT                   (0x00020000)
+#define INITMODE_TIMEOUT                  (0x00010000)
 
-#define RTC_ALRMR_ENABLE 0
+#define RTC_ALRMR_ENABLE                  0
 
 /****************************************************************************
  * Private Types
