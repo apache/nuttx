@@ -1,7 +1,7 @@
 #!/bin/bash
 # testbuild.sh
 #
-#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,7 @@ function showusage {
     echo "     Windows 10 (u), or Windows native (n).  Default Cygwin"
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
     echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
+    echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
     echo "  -n <nxdir> provides the relative path to the NxWidgets/ directory.  Default ../NxWidgets"
     echo "  -d enables script debug output"
     echo "  -x exit on build failures"
@@ -106,6 +107,10 @@ while [ ! -z "$1" ]; do
     -a )
     shift
     APPSDIR="$1"
+    ;;
+    -t )
+    shift
+    nuttx="$1"
     ;;
     -n )
     shift
