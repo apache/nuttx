@@ -153,7 +153,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_MMCSD_SDIO
   /* First, get an instance of the SDIO interface */
 
   g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
