@@ -2581,6 +2581,9 @@ static int stm32_i2c_reset(FAR struct i2c_master_s * dev)
   scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
   sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
 
+  stm32_configgpio(sda_gpio);
+  stm32_configgpio(scl_gpio);
+
   /* Let SDA go high */
 
   stm32_gpiowrite(sda_gpio, 1);
