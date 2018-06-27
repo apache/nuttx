@@ -465,15 +465,12 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
   /* Cancel any pending work.  We could get called multiple times if, for
    * example there is bounce in the detection mechanism.  Work is performed
    * the low priority work queue if it is available.
+   *
+   * NOTE:  The return values are ignored.  The error -ENOENT means that
+   * there is no work to be canceled.  No other errors are expected.
    */
 
-  ret = work_cancel(LPWORK, &priv->work);
-  if (ret < 0)
-    {
-      /* NOTE:  Probably -ENOENT which means only that work is not queued. */
-
-      ferr("ERROR: Failed to cancel work: %d\n", ret);
-    }
+  (void)work_cancel(LPWORK, &priv->work);
 
   /* Set the media insertion/removal state */
 
