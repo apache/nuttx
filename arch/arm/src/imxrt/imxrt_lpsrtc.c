@@ -150,7 +150,7 @@ int imxrt_lpsrtc_initialize(void)
   /* Enable the LPSRTC */
 
   imxrt_lpsrtc_enable();
- 
+
   /* Synchronize HPRTC time with the LPSRTC and enable HPRTC */
 
   imxrt_hprtc_synchronize();

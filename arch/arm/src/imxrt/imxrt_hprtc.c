@@ -75,6 +75,15 @@ static hprtc_alarm_callback_t g_hprtc_alarmcb;
  * Public Data
  ************************************************************************************/
 
+/* Variable determines the state of the RTC module.
+ *
+ * After initialization value is set to 'true' if RTC starts successfully.
+ * The value can be changed to false also during operation if RTC for
+ * some reason fails.
+ */
+
+volatile bool g_rtc_enabled;
+
 #if !defined(CONFIG_IMXRT_SNVS_LPSRTC) && defined(CONFIG_RTC_DRIVER)
 bool g_hprtc_timset;  /* True:  time has been set since power up */
 #endif
@@ -234,16 +243,16 @@ time_t up_rtc_time(void)
  *
  ************************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(FAR const struct timespec *ts)
 {
   uint32_t regval;
 
-  DEBUGASSERT(tp != NULL);
+  DEBUGASSERT(ts != NULL);
 
   /* Disable the HPRTC */
 
   regval  = getreg32(IMXRT_SNVS_HPCR);
-  regval  = hcpr & ~SNVS_HPCR_RTCEN;
+  regval &= ~SNVS_HPCR_RTCEN;
   putreg32(regval, IMXRT_SNVS_HPCR);
 
   while ((getreg32(IMXRT_SNVS_HPCR) & SNVS_HPCR_RTCEN) != 0)
@@ -333,7 +342,8 @@ int up_rtc_initialize(void)
     }
 #endif
 
-  return ret;
+  g_rtc_enabled = true;
+  return OK;
 }
 
 /************************************************************************************
