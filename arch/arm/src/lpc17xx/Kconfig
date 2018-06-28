@@ -544,12 +544,6 @@ endmenu
 menu "CAN driver options"
 	depends on LPC17_CAN1 || LPC17_CAN2
 
-config CAN_EXTID
-	bool "CAN extended IDs"
-	default n
-	---help---
-		Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
-
 config CAN1_BAUD
 	int "CAN1 BAUD"
 	depends on LPC17_CAN1
