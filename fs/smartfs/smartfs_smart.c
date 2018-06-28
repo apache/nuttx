@@ -1931,7 +1931,12 @@ static void smartfs_stat_common(FAR struct smartfs_mountpt_s *fs,
     }
   else
     {
-      buf->st_mode = entry->flags & 0xFFF;
+      /* Mask out the file type */
+
+      buf->st_mode = entry->flags & ~S_IFMT;
+
+      /* Add the file type based on the SmartFS entry flags */
+
       if ((entry->flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_DIR)
         {
           buf->st_mode |= S_IFDIR;
