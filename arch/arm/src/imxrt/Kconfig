@@ -492,3 +492,4 @@ config IMXRT_RTC_MAGIC
 
 endmenu
 endif # ARCH_CHIP_IMXRT
+

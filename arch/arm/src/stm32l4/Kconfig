@@ -2970,7 +2970,7 @@ config STM32L4_HAVE_ADC1_TIMER
 
 config STM32L4_HAVE_ADC2_TIMER
 	bool
-as
+
 config STM32L4_HAVE_ADC3_TIMER
 	bool
 
