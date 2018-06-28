@@ -38,6 +38,7 @@ ADVICE="Try '$0 --help' for more information"
 unset CONFIG
 silent=n
 defaults=n
+prompt=y
 
 while [ ! -z "$1" ]; do
     case $1 in
@@ -47,6 +48,10 @@ while [ ! -z "$1" ]; do
     --silent )
         silent=y
         defaults=y
+        prompt=n
+        ;;
+    --prompt )
+        prompt=y
         ;;
     --defaults )
         defaults=y
@@ -60,7 +65,11 @@ while [ ! -z "$1" ]; do
         echo "  --debug"
         echo "     Enable script debug"
         echo "  --silent"
-        echo "     Update board configuration without interaction"
+        echo "     Update board configuration without interaction.  Implies --defaults."
+        echo "     Assumes no prompt for save.  Use --silent --prompt to prompt before saving."
+        echo "  --prompt"
+        echo "     Prompt before updating and overwriting the defconfig file.  Default is to"
+        echo "     prompt unless --silent"
         echo "  --defaults"
         echo "     Do not prompt for new default selections; accept all recommended default values"
         echo "  --help"
@@ -213,12 +222,7 @@ $CMPCONFIG $DEFCONFIG defconfig
 
 # Save the refreshed configuration
 
-if [ "X${silent}" == "Xy" ]; then
-  echo "Saving the new configuration file"
-  mv defconfig $DEFCONFIG || \
-      { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
-  chmod 644 $DEFCONFIG
-else
+if [ "X${prompt}" == "Xy" ]; then
   read -p "Save the new configuration (y/n)?" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]
@@ -228,6 +232,11 @@ else
         { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
     chmod 644 $DEFCONFIG
   fi
+else
+  echo "Saving the new configuration file"
+  mv defconfig $DEFCONFIG || \
+      { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
+  chmod 644 $DEFCONFIG
 fi
 
 # Restore any previous .config and Make.defs files

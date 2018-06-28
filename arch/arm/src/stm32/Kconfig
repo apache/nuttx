@@ -2367,14 +2367,14 @@ config STM32_HASH
 	depends on STM32_STM32F207 || STM32_STM32F4XXX
 
 config STM32_HRTIM
-	bool "HRTIM"
+	bool
 	default n
 
 config STM32_HRTIM1
 	bool "HRTIM1"
 	default n
 	depends on STM32_HAVE_HRTIM1
-	select HRTIM
+	select STM32_HRTIM
 
 if STM32_HRTIM1
 
