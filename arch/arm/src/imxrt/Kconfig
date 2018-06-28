@@ -462,6 +462,17 @@ config IMXRT_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
+if PM
+
+config IMXRT_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+
 menu "RTC Configuration"
 	depends on IMXRT_SNVS_HPRTC
 

@@ -573,7 +573,7 @@ config STM32H7_SERIALBRK_BSDCOMPAT
 
 if PM
 
-config PM_SERIAL_ACTIVITY
+config STM32H7_PM_SERIAL_ACTIVITY
 	int "PM serial activity"
 	default 10
 	---help---
