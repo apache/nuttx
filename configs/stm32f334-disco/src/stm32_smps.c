@@ -89,7 +89,7 @@
 #  warning Set CONFIG_ARCH_FPU for hardware FPU support
 #endif
 
-#if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_HRTIM)
+#if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_STM32_HRTIM)
 #  error "SMPS example requires HRTIM1 support"
 #endif
 

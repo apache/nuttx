@@ -66,7 +66,7 @@
 
 #if defined(CONFIG_EXAMPLES_POWERLED) && defined(CONFIG_DRIVERS_POWERLED)
 
-#if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_HRTIM)
+#if !defined(CONFIG_STM32_HRTIM1) || !defined(CONFIG_STM32_HRTIM)
 #  error "Powerled example requires HRTIM1 support"
 #endif
 

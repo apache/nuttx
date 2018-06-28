@@ -222,7 +222,7 @@ int stm32_opamp_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HRTIM
+#ifdef CONFIG_STM32_HRTIM
 int stm32_hrtim_setup(void);
 #endif
 

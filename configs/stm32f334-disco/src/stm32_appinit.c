@@ -148,7 +148,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_HRTIM
+#ifdef CONFIG_STM32_HRTIM
   /* Initialize HRTIM and register the HRTIM driver. */
 
   ret = stm32_hrtim_setup();

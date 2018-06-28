@@ -76,7 +76,7 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
-ifeq ($(CONFIG_HRTIM),y)
+ifeq ($(CONFIG_STM32_HRTIM),y)
 CSRCS += stm32_hrtim.c
 endif
 

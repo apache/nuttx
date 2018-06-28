@@ -218,7 +218,7 @@ ifeq ($(CONFIG_OPAMP),y)
 CHIP_CSRCS += stm32_opamp.c
 endif
 
-ifeq ($(CONFIG_HRTIM),y)
+ifeq ($(CONFIG_STM32_HRTIM),y)
 CHIP_CSRCS += stm32_hrtim.c
 endif
 
