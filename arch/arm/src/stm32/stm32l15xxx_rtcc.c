@@ -94,7 +94,7 @@
 #endif
 
 #if !defined(CONFIG_STM32_RTC_MAGIC_TIME_SET)
-#  define CONFIG_STM32_RTC_MAGIC_TIME_SET (0xfoodface)
+#  define CONFIG_STM32_RTC_MAGIC_TIME_SET (0xf00dface)
 #endif
 
 #if !defined(CONFIG_STM32_RTC_MAGIC_REG)

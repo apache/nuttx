@@ -52,6 +52,7 @@ LAN    Local Area Network (networking)
 LCD    Liquid Crystal Display
 LIBC   The "C" Library
 LIBM   The "C" Math Library
+LP     Low Power
 MAC    Media Access Control (networking, OSI model)
 MCI    Memory Card Interface
 MCU    Microcontroller Unit
@@ -77,6 +78,7 @@ PROM   Programmable Read-Only Memory
 OS     Operating System
 OTG    On-The-Go (USB)
 OTP    One-Time Programmable
+POR    Power-On Reset
 PWM    Pulse Width Modulation
 PKT    "Raw" Packet socket (networking)
 PRNG   Pseudo-Random Number Generator
@@ -115,4 +117,5 @@ WAN    Wide Area Network (networking)
 WLAN   Wireless Local Area Network (networking)
 WPAN   Wireless Personal Area Network (networking)
 WDT    Watchdog Timer (hardware)
+XIP    eExecute In Place
 XDMAC  Extended DMA Controller (Atmel)

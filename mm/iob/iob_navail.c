@@ -61,11 +61,15 @@ int iob_navail(void)
   int navail = 0;
   int ret;
 
+#if CONFIG_IOB_NCHAINS > 0
   ret = nxsem_getvalue(&g_qentry_sem, &navail);
   if (ret >= 0)
     {
       ret = navail;
     }
+#else
+  ret = navail;
+#endif
 
   return ret;
 }
