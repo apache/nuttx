@@ -270,6 +270,13 @@ if DRIVERS_AUDIO
 source drivers/audio/Kconfig
 endif # DRIVERS_AUDIO
 
+config FB_CMAP
+	bool
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		mapping.  Not directly user selectable.
+
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n

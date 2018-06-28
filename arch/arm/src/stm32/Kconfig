@@ -8197,35 +8197,35 @@ choice
 
 config STM32_LTDC_L1_L8
 	bool "8 bpp L8 (8-bit CLUT)"
-	depends on FB_CMAP
+	depends on STM32_FB_CMAP
 
 config STM32_LTDC_L1_AL44
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
-	depends on FB_CMAP
+	depends on STM32_FB_CMAP
 
 config STM32_LTDC_L1_AL88
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
-	depends on FB_CMAP
+	depends on STM32_FB_CMAP
 
 config STM32_LTDC_L1_RGB565
 	bool "16 bpp RGB 565"
-	depends on !FB_CMAP
+	depends on !STM32_FB_CMAP
 
 config STM32_LTDC_L1_ARGB4444
 	bool "16 bpp ARGB 4444"
-	depends on !FB_CMAP
+	depends on !STM32_FB_CMAP
 
 config STM32_LTDC_L1_ARGB1555
 	bool "16 bpp ARGB 1555"
-	depends on !FB_CMAP
+	depends on !STM32_FB_CMAP
 
 config STM32_LTDC_L1_RGB888
 	bool "24 bpp RGB 888"
-	depends on !FB_CMAP
+	depends on !STM32_FB_CMAP
 
 config STM32_LTDC_L1_ARGB8888
 	bool "32 bpp ARGB 8888"
-	depends on !FB_CMAP
+	depends on !STM32_FB_CMAP
 
 endchoice # Layer 1 color format
 
@@ -8287,18 +8287,19 @@ endchoice # Layer 2 color format
 
 endif # STM32_LTDC_L2
 
-config FB_CMAP
+config STM32_FB_CMAP
 	bool "Enable color map support"
 	default y
+	select FB_CMAP
 	---help---
-		Enabling color map support is neccessary for ltdc L8 format.
+		Enabling color map support is necessary for LTDC L8 format.
 
 config FB_TRANSPARENCY
 	bool "Enable transparency color map support"
-	depends on FB_CMAP
+	depends on STM32_FB_CMAP
 	default y
 	---help---
-		Enabling transparency color map support is neccessary for ltdc L8 format.
+		Enabling transparency color map support is necessary for LTDC L8 format.
 
 config STM32_LTDC_REGDEBUG
 	bool "LTDC Register level debug"
@@ -8354,17 +8355,17 @@ config STM32_DMA2D_FB_SIZE
 menu "Supported pixel format"
 
 config STM32_DMA2D_L8
-	depends on FB_CMAP && STM32_LTDC_L1_L8
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_L8
 	bool "8 bpp L8 (8-bit CLUT)"
 	default y
 
 config STM32_DMA2D_AL44
-	depends on FB_CMAP && STM32_LTDC_L1_AL44
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_AL44
 	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
 	default y
 
 config STM32_DMA2D_AL88
-	depends on FB_CMAP && STM32_LTDC_L1_AL88
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_AL88
 	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
 	default y
 

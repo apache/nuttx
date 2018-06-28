@@ -121,7 +121,7 @@ struct stm32_dma2d_s
 {
   struct dma2d_layer_s dma2d;  /* Public dma2d interface */
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   uint32_t *clut;              /* Color lookup table */
 #endif
 
@@ -186,7 +186,7 @@ static const uintptr_t stm32_color_layer_t[DMA2D_NLAYERS] =
 
 /* DMA2D clut memory address register */
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
 {
   STM32_DMA2D_FGCMAR,
@@ -204,7 +204,7 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits);
 static int stm32_dma2dirq(int irq, void *context, FAR void *arg);
 static int stm32_dma2d_waitforirq(void);
 static int stm32_dma2d_start(void);
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_loadclut(uintptr_t reg);
 #endif
 static uint32_t stm32_dma2d_memaddress(FAR struct stm32_dma2d_overlay_s *oinfo,
@@ -222,7 +222,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
 /* Public functions */
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap);
 #endif
 static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
@@ -249,7 +249,7 @@ static bool g_initialized;
 
 /* Allocate clut */
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static uint32_t g_clut[STM32_DMA2D_NCLUT *
 #  ifdef CONFIG_FB_TRANSPARENCY
                       4
@@ -257,7 +257,7 @@ static uint32_t g_clut[STM32_DMA2D_NCLUT *
                       3
 #  endif
                       / 4 ];
-#endif /* CONFIG_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /* The DMA2D semaphore that enforces mutually exclusive access */
 
@@ -280,14 +280,14 @@ static struct stm32_dma2d_s g_dma2ddev =
 {
   .dma2d =
   {
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
     .setclut   = stm32_dma2d_setclut,
 #endif
     .fillcolor = stm32_dma2d_fillcolor,
     .blit      = stm32_dma2d_blit,
     .blend     = stm32_dma2d_blend
   },
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   .clut = g_clut,
 #endif
   .lock = &g_lock
@@ -686,7 +686,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
   pfccrreg = DMA2D_xGPFCCR_CM(fmt);
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (fmt == DMA2D_PF_L8)
     {
       FAR struct stm32_dma2d_s * layer = &g_dma2ddev;
@@ -713,7 +713,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
       stm32_dma2d_loadclut(stm32_pfccr_layer_t[lid]);
     }
-#endif /* CONFIG_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
   /* Set alpha blend mode */
 
@@ -750,7 +750,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
 {
   int n;
@@ -796,7 +796,7 @@ static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
 
   return OK;
 }
-#endif /* CONFIG_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /****************************************************************************
  * Name: stm32_dma2d_fillcolor
@@ -828,7 +828,7 @@ static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
 
   lcdinfo("oinfo=%p, argb=%08x\n", oinfo, argb);
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (oinfo->fmt == DMA2D_PF_L8)
     {
       /* CLUT output not supported */
@@ -1010,7 +1010,7 @@ static int stm32_dma2d_blend(FAR struct stm32_dma2d_overlay_s *doverlay,
           "barea.h=%d\n", doverlay, destxpos, destypos, foverlay, forexpos,
           foreypos, boverlay, barea, barea->x, barea->y, barea->w, barea->h);
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (doverlay->fmt == DMA2D_PF_L8)
     {
       /* CLUT output not supported */
@@ -1113,7 +1113,7 @@ int stm32_dma2dinitialize(void)
       nxsem_init(g_interrupt.sem, 0, 0);
       nxsem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
 
-#ifdef CONFIG_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
       /* Enable dma2d transfer and clut loading interrupts only */
 
       stm32_dma2d_control(DMA2D_CR_TCIE | DMA2D_CR_CTCIE, DMA2D_CR_TEIE |
