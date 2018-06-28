@@ -202,12 +202,6 @@ config CAN_SAM
 	---help---
 		The bus is sampled 3 times (recommended for low to medium speed buses to spikes on the bus-line).
 
-config CAN_LOOPBACK
-	bool "CAN loopback mode"
-	default n
-	---help---
-		Enable CAN loopback mode
-
 config CAN_REGDEBUG
 	bool "Register level debug"
 	depends on DEBUG_CAN_INFO
