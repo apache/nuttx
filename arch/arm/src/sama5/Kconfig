@@ -946,6 +946,21 @@ config SAMA5_LCDC_BACKCOLOR
 	hex "Background color"
 	default 0x0
 
+config SAMA5_LCDC_CMAP
+	bool "Color map support"
+	default n
+	select FB_CMAP
+	---help---
+		Enables color map support
+
+config SAMA5_LCDC_TRANSPARENCY
+	bool "Transparency color map support"
+	default n
+	depends on SAMA5_LCDC_CMAP
+	select FB_TRANSPARENCY
+	---help---
+		Enables transparency color map support
+
 config SAMA5_LCDC_FB_VBASE
 	hex "Framebuffer memory start address (virtual)"
 	---help---

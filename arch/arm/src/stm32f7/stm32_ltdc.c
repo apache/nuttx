@@ -470,7 +470,7 @@
 #    error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
 #  endif
 #  ifdef STM32_LTDC_L1CMAP
-#    ifdef CONFIG_FB_TRANSPARENCY
+#    ifdef CONFIG_STM32F7_FB_TRANSPARENCY
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * sizeof(uint32_t)
 #    else
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * 3 * sizeof(uint8_t)
@@ -478,7 +478,7 @@
 #  endif
 #  ifdef STM32_LTDC_L2CMAP
 #    undef  STM32_LAYER_CLUT_SIZE
-#    ifdef CONFIG_FB_TRANSPARENCY
+#    ifdef CONFIG_STM32F7_FB_TRANSPARENCY
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * sizeof(uint32_t) * 2
 #    else
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * 3 * sizeof(uint8_t) * 2
@@ -817,7 +817,7 @@ static const uint32_t g_ltdcpins[] =
 static uint8_t g_redclut[STM32_LTDC_NCLUT];
 static uint8_t g_greenclut[STM32_LTDC_NCLUT];
 static uint8_t g_blueclut[STM32_LTDC_NCLUT];
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
 static uint8_t g_transpclut[STM32_LTDC_NCLUT];
 #  endif
 #endif /* CONFIG_STM32F7_FB_CMAP */
@@ -921,7 +921,7 @@ static struct stm32_ltdcdev_s g_vtable =
       .red             = g_redclut,
       .green           = g_greenclut,
       .blue            = g_blueclut,
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
       .transp          = g_transpclut
 #  endif
     }
@@ -2114,7 +2114,7 @@ static void stm32_ltdc_lgetclut(FAR struct stm32_ltdc_s * layer,
   for (n = cmap->first; n < cmap->len && n < STM32_LTDC_NCLUT; n++)
     {
 
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
       cmap->transp[n] = priv_cmap->transp[n];
 #  endif
       cmap->red[n]    = priv_cmap->red[n];
@@ -2122,7 +2122,7 @@ static void stm32_ltdc_lgetclut(FAR struct stm32_ltdc_s * layer,
       cmap->blue[n]   = priv_cmap->blue[n];
 
       reginfo("color = %d, transp=%02x, red=%02x, green=%02x, blue=%02x\n", n,
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
               cmap->transp[n],
 #  endif
               cmap->red[n],
@@ -2496,7 +2496,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
           priv_cmap->red[n] = cmap->red[n];
           priv_cmap->green[n] = cmap->green[n];
           priv_cmap->blue[n] = cmap->blue[n];
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
           /* Not supported by LTDC */
 
           priv_cmap->transp[n] = cmap->transp[n];
@@ -3031,7 +3031,7 @@ int stm32_ltdcinitialize(void)
   memset(&g_redclut, 0, STM32_LTDC_NCLUT);
   memset(&g_blueclut, 0, STM32_LTDC_NCLUT);
   memset(&g_greenclut, 0, STM32_LTDC_NCLUT);
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
   memset(&g_transpclut, 0, STM32_LTDC_NCLUT);
 #  endif
 #endif /* CONFIG_STM32F7_FB_CMAP */

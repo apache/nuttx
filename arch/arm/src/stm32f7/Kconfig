@@ -5060,19 +5060,19 @@ endchoice # Layer 2 color format
 endif # STM32F7_LTDC_L2
 
 config STM32F7_FB_CMAP
-	bool "Enable color map support"
+	bool "Color map support"
 	default y
 	select FB_CMAP
 	---help---
-		Enabling color map support is neccessary for ltdc L8 format.
+		EnablingEnablescolor map support is necessary for ltdc L8 format.
 
-config FB_TRANSPARENCY
-	bool "Enable transparency color map support"
+config STM32F7_FB_TRANSPARENCY
+	bool "Transparency color map support"
 	default y
 	depends on STM32F7_FB_CMAP
+	select FB_TRANSPARENCY
 	---help---
-		Enabling transparency color map support is neccessary for
-		ltdc L8 format.
+		Enables transparency color map support is necessary for ltdc L8 format.
 
 config STM32F7_LTDC_REGDEBUG
 	bool "Enable LTDC register value debug messages"

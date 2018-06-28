@@ -277,6 +277,13 @@ config FB_CMAP
 		Set by driver-specific configuration to indicate support for color
 		mapping.  Not directly user selectable.
 
+config FB_TRANSPARENCY
+	bool
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		transparency.  Not directly user selectable.
+
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n

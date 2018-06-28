@@ -1429,7 +1429,7 @@ static int sam_setclut(struct sam_layer_s *layer,
             (uint32_t)cmap->green[i] << LCDC_BASECLUT_GCLUT_SHIFT |
             (uint32_t)cmap->blue[i]  << LCDC_BASECLUT_BCLUT_SHIFT;
 
-#ifdef CONFIG_FB_TRANSPARENCY
+#ifdef CONFIG_SAMA5_LCDC_TRANSPARENCY
       if (camp->transp)
         {
           rgb |= (uint32_t)cmap->transp[i] << LCDC_OVR1CLUT_ACLUT_SHIFT;
@@ -1494,7 +1494,7 @@ static int sam_getclut(struct sam_layer_s *layer,
       cmap->blue[i] = (uint8_t)
         (regval & LCDC_BASECLUT_GCLUT_MASK) << LCDC_BASECLUT_BCLUT_SHIFT;
 
-#ifdef CONFIG_FB_TRANSPARENCY
+#ifdef CONFIG_SAMA5_LCDC_TRANSPARENCY
       cmap->transp[i] = (uint8_t)
         (regval & LCDC_OVR1CLUT_ACLUT_MASK) << LCDC_OVR1CLUT_ACLUT_SHIFT;
 #endif

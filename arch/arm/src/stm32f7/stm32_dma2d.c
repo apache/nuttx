@@ -252,7 +252,7 @@ static bool g_initialized;
 
 #ifdef CONFIG_STM32F7_FB_CMAP
 static uint32_t g_clut[STM32_DMA2D_NCLUT *
-#  ifdef CONFIG_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
                       4
 #  else
                       3
@@ -698,7 +698,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
       /* Set the CLUT color mode */
 
-#  ifndef CONFIG_FB_TRANSPARENCY
+#  ifndef CONFIG_STM32F7_FB_TRANSPARENCY
       pfccrreg |= DMA2D_xGPFCCR_CCM;
 #  endif
 
@@ -767,7 +767,7 @@ static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
        * blit operation becomes active
        */
 
-#  ifndef CONFIG_FB_TRANSPARENCY
+#  ifndef CONFIG_STM32F7_FB_TRANSPARENCY
       uint8_t *clut   = (uint8_t *)g_dma2ddev.clut;
       uint16_t offset = 3 * n;
 
