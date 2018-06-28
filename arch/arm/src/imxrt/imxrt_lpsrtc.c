@@ -131,7 +131,7 @@ int imxrt_lpsrtc_initialize(void)
    * Clock is on during all modes, except STOP mode.
    */
 
-   imxrt_clockall_snvs_lp();
+  imxrt_clockall_snvs_lp();
 
 #ifdef CONFIG_IMXRTC_LPSRTC_CALENABLE
   /* Set the LPSRTC calibration value */

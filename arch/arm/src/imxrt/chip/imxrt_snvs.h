@@ -138,6 +138,7 @@
 
 #define SNVS_HPCR_RTCEN               (1 << 0)  /* Bit 0:  HP Real Time Counter Enable */
 #define SNVS_HPCR_HPTAEN              (1 << 1)  /* Bit 1:  HP Time Alarm Enable */
+#define SNVS_HPCR_DISPI               (1 << 2)  /* Bit 2:  Disable periodic interrupt in the functional interrupt */
                                                 /* Bit 2:  Reserved */
 #define SNVS_HPCR_PIEN                (1 << 3)  /* Bit 3:  HP Periodic Interrupt Enable */
 #define SNVS_HPCR_PIFREQ_SHIFT        (4)       /* Bits 4-7:  Periodic Interrupt Frequency */
@@ -199,7 +200,6 @@
 
 /* SNVS_LP Control Register */
 
-
                                                 /* Bits 0-1: Reserved */
 #define SNVS_LPCR_MCENV               (1 << 2)  /* Bit 2:  Monotonic Counter Enabled and Valid */
 #define SNVS_LPCR_LPWUIEN             (1 << 3)  /* Bit 3:  LP Wake-Up Interrupt Enable */
@@ -207,7 +207,7 @@
 #define SNVS_LPCR_DPEN                (1 << 5)  /* Bit 5:  Dumb PMIC Enabled */
 #define SNVS_LPCR_TOP                 (1 << 6)  /* Bit 6:  Turn off System Power */
 #define SNVS_LPCR_PWRGLITCHEN         (1 << 7)  /* Bit 7:  Power Glitch Enable */
-                                                /* Bits 8-15: Reserved */
+                                                /* Bits 8-15:  Reserved for i.MX1050 family */
 #define SNVS_LPCR_LPCALBEN            (1 << 8)  /* Bit 8:  LP Real Time Counter Calibration Enabled */
                                                 /* Bit 9:  Reserved */
 #define SNVS_LPCR_LPCALBVAL_SHIFT     (10)      /* Bits 10-14: LP Calibration Value */
