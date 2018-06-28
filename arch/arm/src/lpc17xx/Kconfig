@@ -556,7 +556,7 @@ config CAN2_BAUD
 	---help---
 		CAN2 BAUD rate.  Required if LPC17_CAN2 is defined.
 
-config CAN1_DIVISOR
+config LPC17_CAN1_DIVISOR
 	int "CAN1 CCLK divisor"
 	depends on LPC17_CAN1
 	default 4
@@ -564,7 +564,7 @@ config CAN1_DIVISOR
 		CAN1 is clocked at CCLK divided by this number. (the CCLK frequency is divided
 		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
 
-config CAN2_DIVISOR
+config LPC17_CAN2_DIVISOR
 	int "CAN2 CCLK divisor"
 	depends on LPC17_CAN2
 	default 4

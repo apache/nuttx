@@ -84,22 +84,22 @@
 
    /* If no divsor is provided, use a divisor of 4 */
 
-#  ifndef CONFIG_CAN1_DIVISOR
-#    define CONFIG_CAN1_DIVISOR 4
+#  ifndef CONFIG_LPC17_CAN1_DIVISOR
+#    define CONFIG_LPC17_CAN1_DIVISOR 4
 #  endif
 
    /* Get the SYSCON_PCLKSEL value for CAN1 the implements this divisor */
 
-#  if CONFIG_CAN1_DIVISOR == 1
+#  if CONFIG_LPC17_CAN1_DIVISOR == 1
 #    define CAN1_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK
-#  elif CONFIG_CAN1_DIVISOR == 2
+#  elif CONFIG_LPC17_CAN1_DIVISOR == 2
 #    define CAN1_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK2
-#  elif CONFIG_CAN1_DIVISOR == 4
+#  elif CONFIG_LPC17_CAN1_DIVISOR == 4
 #    define CAN1_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK4
-#  elif CONFIG_CAN1_DIVISOR == 6
+#  elif CONFIG_LPC17_CAN1_DIVISOR == 6
 #    define CAN1_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK6
 #  else
-#    error "Unsupported value of CONFIG_CAN1_DIVISOR"
+#    error "Unsupported value of CONFIG_LPC17_CAN1_DIVISOR"
 #  endif
 #endif
 
@@ -113,22 +113,22 @@
 
    /* If no divsor is provided, use a divisor of 4 */
 
-#  ifndef CONFIG_CAN2_DIVISOR
-#    define CONFIG_CAN2_DIVISOR 4
+#  ifndef CONFIG_LPC17_CAN2_DIVISOR
+#    define CONFIG_LPC17_CAN2_DIVISOR 4
 #  endif
 
    /* Get the SYSCON_PCLKSEL value for CAN2 the implements this divisor */
 
-#  if CONFIG_CAN2_DIVISOR == 1
+#  if CONFIG_LPC17_CAN2_DIVISOR == 1
 #    define CAN2_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK
-#  elif CONFIG_CAN2_DIVISOR == 2
+#  elif CONFIG_LPC17_CAN2_DIVISOR == 2
 #    define CAN2_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK2
-#  elif CONFIG_CAN2_DIVISOR == 4
+#  elif CONFIG_LPC17_CAN2_DIVISOR == 4
 #    define CAN2_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK4
-#  elif CONFIG_CAN2_DIVISOR == 6
+#  elif CONFIG_LPC17_CAN2_DIVISOR == 6
 #    define CAN2_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK6
 #  else
-#    error "Unsupported value of CONFIG_CAN2_DIVISOR"
+#    error "Unsupported value of CONFIG_LPC17_CAN2_DIVISOR"
 #  endif
 #endif
 
@@ -245,7 +245,7 @@ static const struct can_ops_s g_canops =
 static struct up_dev_s g_can1priv =
 {
   .port    = 1,
-  .divisor = CONFIG_CAN1_DIVISOR,
+  .divisor = CONFIG_LPC17_CAN1_DIVISOR,
   .baud    = CONFIG_CAN1_BAUD,
   .base    = LPC17_CAN1_BASE,
 };
@@ -261,7 +261,7 @@ static struct can_dev_s g_can1dev =
 static struct up_dev_s g_can2priv =
 {
   .port    = 2,
-  .divisor = CONFIG_CAN2_DIVISOR,
+  .divisor = CONFIG_LPC17_CAN2_DIVISOR,
   .baud    = CONFIG_CAN2_BAUD,
   .base    = LPC17_CAN2_BASE,
 };
@@ -1107,7 +1107,7 @@ static int can12_interrupt(int irq, void *context, FAR void *arg)
  *   Tq = brp * Tcan
  *
  * Where:
- *   Tcan is the period of the APB clock (PCLK = CCLK / CONFIG_CAN1_DIVISOR).
+ *   Tcan is the period of the APB clock (PCLK = CCLK / CONFIG_LPC17_CAN1_DIVISOR).
  *
  * Input Parameters:
  *   priv - A reference to the CAN block status

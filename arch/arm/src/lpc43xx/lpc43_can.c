@@ -1150,7 +1150,7 @@ static void can_setuprxobj(struct up_dev_s *priv)
  *   Tq = brp * Tcan
  *
  * Where:
- *   Tcan is the period of the APB clock (PCLK = CCLK / CONFIG_CAN1_DIVISOR).
+ *   Tcan is the period of the APB clock.
  *
  * Input Parameters:
  *   priv - A reference to the CAN block status
