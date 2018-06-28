@@ -716,7 +716,7 @@ static void stm32l4_stdclockconfig(void)
       regval |= STM32L4_RCC_CFGR_PPRE1;
       putreg32(regval, STM32L4_RCC_CFGR);
 
-#ifdef CONFIG_RTC_HSECLOCK
+#ifdef CONFIG_STM32L4_RTC_HSECLOCK
       /* Set the RTC clock divisor */
 
       regval  = getreg32(STM32L4_RCC_CFGR);
@@ -863,7 +863,7 @@ static void stm32l4_stdclockconfig(void)
         {
         }
 
-#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
       stm32l4_rcc_enablelsi();

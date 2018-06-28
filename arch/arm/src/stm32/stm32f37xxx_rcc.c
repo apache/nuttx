@@ -587,7 +587,7 @@ static void stm32_stdclockconfig(void)
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
 
-#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
   /* Low speed internal clock source LSI
    *
    * TODO: There is another case where the LSI needs to
@@ -597,7 +597,7 @@ static void stm32_stdclockconfig(void)
   stm32_rcc_enablelsi();
 #endif
 
-#if defined(CONFIG_RTC_LSECLOCK)
+#if defined(CONFIG_STM32_RTC_LSECLOCK)
   /* Low speed external clock source LSE
    *
    * TODO: There is another case where the LSE needs to

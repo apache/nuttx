@@ -204,7 +204,7 @@ void stm32l4_board_clockconfig(void)
     {
     }
 
-#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_RTC_LSICLOCK)
+#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
 
   /* Low speed internal clock source LSI */
 

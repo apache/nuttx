@@ -525,7 +525,7 @@ static inline bool stm32_rcc_enablehse(void)
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
-#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   uint16_t pwrcr;
 #endif
   uint32_t pwr_vos;
@@ -576,7 +576,7 @@ static void stm32_stdclockconfig(void)
 
   stm32_pwr_setvos(pwr_vos);
 
-#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler
    * needs to be set before HSEON bit is set.
    */
@@ -756,7 +756,7 @@ static void stm32_stdclockconfig(void)
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
 
 #if defined(CONFIG_STM32_IWDG)   || \
-    defined(CONFIG_RTC_LSICLOCK) || defined(CONFIG_LCD_LSICLOCK)
+    defined(CONFIG_STM32_RTC_LSICLOCK) || defined(CONFIG_LCD_LSICLOCK)
   /* Low speed internal clock source LSI
    *
    * TODO: There is another case where the LSI needs to
@@ -767,7 +767,7 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-#if defined(CONFIG_RTC_LSECLOCK) || defined(CONFIG_LCD_LSECLOCK)
+#if defined(CONFIG_STM32_RTC_LSECLOCK) || defined(CONFIG_LCD_LSECLOCK)
   /* Low speed external clock source LSE
    *
    * TODO: There is another case where the LSE needs to

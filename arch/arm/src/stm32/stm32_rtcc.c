@@ -446,7 +446,7 @@ static int rtc_setup(void)
 
       /* Configure RTC pre-scaler with the required values */
 
-#ifdef CONFIG_RTC_HSECLOCK
+#ifdef CONFIG_STM32_RTC_HSECLOCK
       /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
        * timer - which is pretty close.
        */
@@ -556,17 +556,17 @@ int up_rtc_initialize(void)
        * rate clock
        */
 
-#ifdef CONFIG_RTC_HSECLOCK
+#ifdef CONFIG_STM32_RTC_HSECLOCK
       /* Use the HSE clock as the input to the RTC block */
 
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
 
-#elif defined(CONFIG_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
       /* Use the LSI clock as the input to the RTC block */
 
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
 
-#elif defined(CONFIG_RTC_LSECLOCK)
+#elif defined(CONFIG_STM32_RTC_LSECLOCK)
       /* Use the LSE clock as the input to the RTC block */
 
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
@@ -578,16 +578,16 @@ int up_rtc_initialize(void)
     }
   else /* The RTC is already in use: check if the clock source is changed */
     {
-#if defined(CONFIG_RTC_HSECLOCK) || defined(CONFIG_RTC_LSICLOCK) || \
-    defined(CONFIG_RTC_LSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK) || defined(CONFIG_STM32_RTC_LSICLOCK) || \
+    defined(CONFIG_STM32_RTC_LSECLOCK)
 
       uint32_t clksrc = getreg32(STM32_RCC_BDCR);
 
-#if defined(CONFIG_RTC_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK)
       if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_HSE)
-#elif defined(CONFIG_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
       if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSI)
-#elif defined(CONFIG_RTC_LSECLOCK)
+#elif defined(CONFIG_STM32_RTC_LSECLOCK)
       if ((clksrc & RCC_BDCR_RTCSEL_MASK) != RCC_BDCR_RTCSEL_LSE)
 #endif
 #endif
@@ -597,15 +597,15 @@ int up_rtc_initialize(void)
           modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
           modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
-#if defined(CONFIG_RTC_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK)
           /* Change to the new clock as the input to the RTC block */
 
           modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_HSE);
 
-#elif defined(CONFIG_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
           modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSI);
 
-#elif defined(CONFIG_RTC_LSECLOCK)
+#elif defined(CONFIG_STM32_RTC_LSECLOCK)
           modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 #endif
 
