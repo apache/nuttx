@@ -205,7 +205,7 @@ static struct stm32_can_s g_can1priv =
   .filter           = 0,
   .base             = STM32_CAN1_BASE,
   .fbase            = STM32_CAN1_BASE,
-  .baud             = CONFIG_CAN1_BAUD,
+  .baud             = CONFIG_STM32_CAN1_BAUD,
 };
 
 static struct can_dev_s g_can1dev =
@@ -228,7 +228,7 @@ static struct stm32_can_s g_can2priv =
   .filter           = CAN_NFILTERS / 2,
   .base             = STM32_CAN2_BASE,
   .fbase            = STM32_CAN1_BASE,
-  .baud             = CONFIG_CAN2_BAUD,
+  .baud             = CONFIG_STM32_CAN2_BAUD,
 };
 
 static struct can_dev_s g_can2dev =

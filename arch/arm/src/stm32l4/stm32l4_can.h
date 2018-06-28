@@ -66,8 +66,8 @@
 
 /* CAN BAUD */
 
-#if defined(CONFIG_STM32L4_CAN1) && !defined(CONFIG_CAN1_BAUD)
-#  error "CONFIG_CAN1_BAUD is not defined"
+#if defined(CONFIG_STM32L4_CAN1) && !defined(CONFIG_STM32L4_CAN1_BAUD)
+#  error "CONFIG_STM32L4_CAN1_BAUD is not defined"
 #endif
 
 /* User-defined TSEG1 and TSEG2 settings may be used.

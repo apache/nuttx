@@ -206,7 +206,7 @@ static struct stm32l4_can_s g_can1priv =
   .filter           = 0,
   .base             = STM32L4_CAN1_BASE,
   .fbase            = STM32L4_CAN1_BASE,
-  .baud             = CONFIG_CAN1_BAUD,
+  .baud             = CONFIG_STM32L4_CAN1_BAUD,
 };
 
 static struct can_dev_s g_can1dev =

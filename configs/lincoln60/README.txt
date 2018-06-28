@@ -169,8 +169,10 @@ Lincoln 60 Configuration Options
 
     CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
       Standard 11-bit IDs.
-    CONFIG_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN1 is defined.
-    CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN2 is defined.
+    CONFIG_LPC17_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN1
+      is defined.
+    CONFIG_LPC17_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC17_CAN2
+      is defined.
     CONFIG_LPC17_CAN1_DIVISOR - CAN1 is clocked at CCLK divided by this
       number. (the CCLK frequency is divided by this number to get the CAN
       clock). Options = {1,2,4,6}. Default: 4.

@@ -8082,14 +8082,14 @@ config STM32_USB_ITRMP
 menu "CAN driver configuration"
 	depends on STM32_CAN
 
-config CAN1_BAUD
+config STM32_CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
 	depends on STM32_CAN1
 	---help---
 		CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
 
-config CAN2_BAUD
+config STM32_CAN2_BAUD
 	int "CAN2 BAUD"
 	default 250000
 	depends on STM32_CAN2

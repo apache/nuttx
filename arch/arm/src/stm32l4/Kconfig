@@ -3917,14 +3917,14 @@ endmenu # SD/MMC Configuration
 menu "CAN driver configuration"
 	depends on STM32L4_CAN1 || STM32L4_CAN2
 
-config CAN1_BAUD
+config STM32L4_CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
 	depends on STM32L4_CAN1
 	---help---
 		CAN1 BAUD rate.  Required if CONFIG_STM32L4_CAN1 is defined.
 
-config CAN2_BAUD
+config STM32L4_CAN2_BAUD
 	int "CAN2 BAUD"
 	default 250000
 	depends on STM32L4_CAN2

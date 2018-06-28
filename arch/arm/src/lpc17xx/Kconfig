@@ -544,13 +544,13 @@ endmenu
 menu "CAN driver options"
 	depends on LPC17_CAN1 || LPC17_CAN2
 
-config CAN1_BAUD
+config LPC17_CAN1_BAUD
 	int "CAN1 BAUD"
 	depends on LPC17_CAN1
 	---help---
 		CAN1 BAUD rate.  Required if LPC17_CAN1 is defined.
 
-config CAN2_BAUD
+config LPC17_CAN2_BAUD
 	int "CAN2 BAUD"
 	depends on LPC17_CAN2
 	---help---

@@ -156,19 +156,19 @@ endmenu
 menu "CAN driver options"
 	depends on LPC11_CAN1 || LPC11_CAN2
 
-config CAN1_BAUD
+config LPC11_CAN1_BAUD
 	int "CAN1 BAUD"
 	depends on LPC11_CAN1
 	---help---
 		CAN1 BAUD rate.  Required if LPC11_CAN1 is defined.
 
-config CAN2_BAUD
+config LPC11_CAN2_BAUD
 	int "CAN2 BAUD"
 	depends on LPC11_CAN2
 	---help---
 		CAN2 BAUD rate.  Required if LPC11_CAN2 is defined.
 
-config CAN1_DIVISOR
+config LPC11_CAN1_DIVISOR
 	int "CAN1 CCLK divisor"
 	depends on LPC11_CAN1
 	default 4
@@ -176,7 +176,7 @@ config CAN1_DIVISOR
 		CAN1 is clocked at CCLK divided by this number. (the CCLK frequency is divided
 		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
 
-config CAN2_DIVISOR
+config LPC11_CAN2_DIVISOR
 	int "CAN2 CCLK divisor"
 	depends on LPC11_CAN2
 	default 4

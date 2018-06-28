@@ -78,8 +78,8 @@
 
    /* A CAN bit rate must be provided */
 
-#  ifndef CONFIG_CAN1_BAUD
-#    error "CONFIG_CAN1_BAUD is not defined"
+#  ifndef CONFIG_LPC17_CAN1_BAUD
+#    error "CONFIG_LPC17_CAN1_BAUD is not defined"
 #  endif
 
    /* If no divsor is provided, use a divisor of 4 */
@@ -107,8 +107,8 @@
 
    /* A CAN bit rate must be provided */
 
-#  ifndef CONFIG_CAN2_BAUD
-#    error "CONFIG_CAN2_BAUD is not defined"
+#  ifndef CONFIG_LPC17_CAN2_BAUD
+#    error "CONFIG_LPC17_CAN2_BAUD is not defined"
 #  endif
 
    /* If no divsor is provided, use a divisor of 4 */
@@ -246,7 +246,7 @@ static struct up_dev_s g_can1priv =
 {
   .port    = 1,
   .divisor = CONFIG_LPC17_CAN1_DIVISOR,
-  .baud    = CONFIG_CAN1_BAUD,
+  .baud    = CONFIG_LPC17_CAN1_BAUD,
   .base    = LPC17_CAN1_BASE,
 };
 
@@ -262,7 +262,7 @@ static struct up_dev_s g_can2priv =
 {
   .port    = 2,
   .divisor = CONFIG_LPC17_CAN2_DIVISOR,
-  .baud    = CONFIG_CAN2_BAUD,
+  .baud    = CONFIG_LPC17_CAN2_BAUD,
   .base    = LPC17_CAN2_BASE,
 };
 
