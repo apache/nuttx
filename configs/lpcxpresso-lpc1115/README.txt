@@ -501,7 +501,7 @@ LPCXpresso Configuration Options
     CONFIG_LPC11_CAN1_DIVISOR - CAN1 is clocked at CCLK divided by this
       number. (the CCLK frequency is divided by this number to get the CAN
       clock). Options = {1,2,4,6}. Default: 4.
-    CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
+    CONFIG_LPC11_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
 
 Configurations
 ^^^^^^^^^^^^^^

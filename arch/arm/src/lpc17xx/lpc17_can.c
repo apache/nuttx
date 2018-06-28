@@ -134,28 +134,28 @@
 
 /* User-defined TSEG1 and TSEG2 settings may be used.
  *
- * CONFIG_CAN_TSEG1 = the number of CAN time quanta in segment 1
- * CONFIG_CAN_TSEG2 = the number of CAN time quanta in segment 2
+ * CONFIG_LPC17_CAN_TSEG1 = the number of CAN time quanta in segment 1
+ * CONFIG_LPC17_CAN_TSEG2 = the number of CAN time quanta in segment 2
  * CAN_BIT_QUANTA   = The number of CAN time quanta in on bit time
  */
 
-#ifndef CONFIG_CAN_TSEG1
-#  define CONFIG_CAN_TSEG1 6
+#ifndef CONFIG_LPC17_CAN_TSEG1
+#  define CONFIG_LPC17_CAN_TSEG1 6
 #endif
 
-#if CONFIG_CAN_TSEG1 < 1 || CONFIG_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
-#  errror "CONFIG_CAN_TSEG1 is out of range"
+#if CONFIG_LPC17_CAN_TSEG1 < 1 || CONFIG_LPC17_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
+#  errror "CONFIG_LPC17_CAN_TSEG1 is out of range"
 #endif
 
-#ifndef CONFIG_CAN_TSEG2
-#  define CONFIG_CAN_TSEG2 7
+#ifndef CONFIG_LPC17_CAN_TSEG2
+#  define CONFIG_LPC17_CAN_TSEG2 7
 #endif
 
-#if CONFIG_CAN_TSEG2 < 1 || CONFIG_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
-#  errror "CONFIG_CAN_TSEG2 is out of range"
+#if CONFIG_LPC17_CAN_TSEG2 < 1 || CONFIG_LPC17_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
+#  errror "CONFIG_LPC17_CAN_TSEG2 is out of range"
 #endif
 
-#define CAN_BIT_QUANTA (CONFIG_CAN_TSEG1 + CONFIG_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_LPC17_CAN_TSEG1 + CONFIG_LPC17_CAN_TSEG2 + 1)
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
@@ -1164,15 +1164,15 @@ static int can_bittiming(struct up_dev_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_CAN_TSEG1, ts2 is
-   * CONFIG_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_LPC17_CAN_TSEG1, ts2 is
+   * CONFIG_LPC17_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
    * in the bit time
    */
 
   else
     {
-      ts1 = CONFIG_CAN_TSEG1;
-      ts2 = CONFIG_CAN_TSEG2;
+      ts1 = CONFIG_LPC17_CAN_TSEG1;
+      ts2 = CONFIG_LPC17_CAN_TSEG2;
       brp = (nclks + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >=1 && brp <= CAN_BTR_BRP_MAX);
     }

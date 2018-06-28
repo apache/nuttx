@@ -590,8 +590,10 @@ LPC4357-EVB Configuration Options
       is defined.
     CONFIG_LPC43_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC43_CAN1
       is defined.
-    CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
-    CONFIG_CAN_TSEG2 = the number of CAN time quanta in segment 2. Default: 7
+    CONFIG_LPC43_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+      Default: 12
+    CONFIG_LPC43_CAN_TSEG2 = the number of CAN time quanta in segment 2.
+      Default: 4
 
   LPC43xx specific PHY/Ethernet device driver settings.  These setting
   also require CONFIG_NET and CONFIG_LPC43_ETHERNET.

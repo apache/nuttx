@@ -184,13 +184,13 @@ config LPC11_CAN2_DIVISOR
 		CAN2 is clocked at CCLK divided by this number. (the CCLK frequency is divided
 		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
 
-config CAN_TSEG1
+config LPC11_CAN_TSEG1
 	int "TSEG1 quanta"
 	default 6
 	---help---
 		The number of CAN time quanta in segment 1. Default: 6
 
-config CAN_TSEG2
+config LPC11_CAN_TSEG2
 	int "TSEG2 quanta"
 	default 4
 	---help---

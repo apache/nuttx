@@ -139,8 +139,10 @@ Configuration Options:
   CONFIG_STM32_CAN2 - Enable support for CAN2
   CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2
     is defined.
-  CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
-  CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
+  CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+    Default: 6
+  CONFIG_STM32_CAN_TSEG2 - the number of CAN time quanta in segment 2.
+    Default: 7
   CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
     dump of all CAN registers.
 
@@ -563,8 +565,10 @@ STM3240G-EVAL-specific Configuration Options
       is defined.
     CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2
       is defined.
-    CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
-    CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
+    CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+      Default: 6
+    CONFIG_STM32_CAN_TSEG2 - the number of CAN time quanta in segment 2.
+      Default: 7
     CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 

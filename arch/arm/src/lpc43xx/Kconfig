@@ -807,29 +807,13 @@ config LPC43_CAN1_BAUD
 	---help---
 		CAN1 BAUD rate.
 
-config LPC43_CAN0_DIVISOR
-	int "CAN0 CCLK divisor"
-	depends on LPC43_CAN0
-	default 4
-	---help---
-		CAN0 is clocked at CCLK divided by this number. (the CCLK frequency is divided
-		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
-
-config LPC43_CAN1_DIVISOR
-	int "CAN2 CCLK divisor"
-	depends on LPC43_CAN1
-	default 4
-	---help---
-		CAN1 is clocked at CCLK divided by this number. (the CCLK frequency is divided
-		by this number to get the CAN clock). Options = {1,2,4,6}. Default: 4.
-
-config CAN_TSEG1
+config LPC43_CAN_TSEG1
 	int "TSEG1 quanta"
 	default 12
 	---help---
 		The number of CAN time quanta in segment 1. Default: 6
 
-config CAN_TSEG2
+config LPC43_CAN_TSEG2
 	int "TSEG2 quanta"
 	default 4
 	---help---

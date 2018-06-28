@@ -83,7 +83,7 @@
 
 /* Bit timing ***************************************************************/
 
-#define CAN_BIT_QUANTA (CONFIG_CAN_TSEG1 + CONFIG_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_STM32L4_CAN_TSEG1 + CONFIG_STM32L4_CAN_TSEG2 + 1)
 
 #ifndef CONFIG_DEBUG_CAN_INFO
 #  undef CONFIG_STM32L4_CAN_REGDEBUG
@@ -1682,15 +1682,15 @@ static int stm32l4can_bittiming(FAR struct stm32l4_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_CAN_TSEG1, ts2 is
-   * CONFIG_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32L4_CAN_TSEG1, ts2 is
+   * CONFIG_STM32L4_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
    * in the bit time
    */
 
   else
     {
-      ts1 = CONFIG_CAN_TSEG1;
-      ts2 = CONFIG_CAN_TSEG2;
+      ts1 = CONFIG_STM32L4_CAN_TSEG1;
+      ts2 = CONFIG_STM32L4_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }

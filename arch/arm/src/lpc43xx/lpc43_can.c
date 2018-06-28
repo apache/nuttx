@@ -99,20 +99,20 @@
 
 /* User-defined TSEG1 and TSEG2 settings may be used.
  *
- * CONFIG_CAN_TSEG1 = the number of CAN time quanta in segment 1
- * CONFIG_CAN_TSEG2 = the number of CAN time quanta in segment 2
+ * CONFIG_LPC43_CAN_TSEG1 = the number of CAN time quanta in segment 1
+ * CONFIG_LPC43_CAN_TSEG2 = the number of CAN time quanta in segment 2
  * CAN_BIT_QUANTA   = The number of CAN time quanta in on bit time
  */
 
-#ifndef CONFIG_CAN_TSEG1
-#  define CONFIG_CAN_TSEG1 12
+#ifndef CONFIG_LPC43_CAN_TSEG1
+#  define CONFIG_LPC43_CAN_TSEG1 12
 #endif
 
-#ifndef CONFIG_CAN_TSEG2
-#  define CONFIG_CAN_TSEG2 4
+#ifndef CONFIG_LPC43_CAN_TSEG2
+#  define CONFIG_LPC43_CAN_TSEG2 4
 #endif
 
-#define CAN_BIT_QUANTA (CONFIG_CAN_TSEG1 + CONFIG_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_LPC43_CAN_TSEG1 + CONFIG_LPC43_CAN_TSEG2 + 1)
 
 /* Timing *******************************************************************/
 
@@ -1162,8 +1162,8 @@ static void can_setuprxobj(struct up_dev_s *priv)
 
 static int can_bittiming(struct up_dev_s *priv)
 {
-  uint32_t ts1 = CONFIG_CAN_TSEG1;
-  uint32_t ts2 = CONFIG_CAN_TSEG2;
+  uint32_t ts1 = CONFIG_LPC43_CAN_TSEG1;
+  uint32_t ts2 = CONFIG_LPC43_CAN_TSEG2;
   uint32_t sjw = 1;
   uint32_t brp = CAN_CLOCK_FREQUENCY(priv->clkdiv) /
                  (priv->baud * CAN_BIT_QUANTA);

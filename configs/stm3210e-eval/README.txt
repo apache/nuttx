@@ -460,8 +460,10 @@ STM3210E-EVAL-specific Configuration Options
       is defined.
     CONFIG_STM32_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2
       is defined.
-    CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
-    CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
+    CONFIG_STM32_CAN_TSEG1 - The number of CAN time quanta in segment 1.
+      Default: 6
+    CONFIG_STM32_CAN_TSEG2 - the number of CAN time quanta in segment 2.
+      Default: 7
     CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
@@ -602,8 +604,8 @@ Where <subdir> is one of the following:
 
           CONFIG_CAN_EXTID=y             : Support extended IDs
           CONFIG_STM32_CAN1_BAUD=250000  : Bit rate: 250 KHz
-          CONFIG_CAN_TSEG1=12            : 80% sample point
-          CONFIG_CAN_TSEG2=3
+          CONFIG_STM32_CAN_TSEG1=12      : 80% sample point
+          CONFIG_STM32_CAN_TSEG2=3
   nx:
   ---
     An example using the NuttX graphics system (NX).  This example
