@@ -529,8 +529,8 @@ LPC4357-EVB Configuration Options
       CONFIG_LPC43_ADC0=y
       CONFIG_LPC43_ADC1=y
       CONFIG_LPC43_ATIMER=y
+      CONFIG_LPC43_CAN0=y
       CONFIG_LPC43_CAN1=y
-      CONFIG_LPC43_CAN2=y
       CONFIG_LPC43_DAC=y
       CONFIG_LPC43_EMC=y
       CONFIG_LPC43_ETHERNET=y
@@ -586,8 +586,10 @@ LPC4357-EVB Configuration Options
 
     CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
       Standard 11-bit IDs.
-    CONFIG_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC43_CAN1 is defined.
-    CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC43_CAN2 is defined.
+    CONFIG_LPC43_CAN0_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC43_CAN0
+      is defined.
+    CONFIG_LPC43_CAN1_BAUD - CAN1 BAUD rate.  Required if CONFIG_LPC43_CAN1
+      is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 = the number of CAN time quanta in segment 2. Default: 7
 
