@@ -196,7 +196,7 @@ config CAN_TSEG2
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
 
-config CAN_SAM
+config LPC11_CAN_SAM
 	bool "CAN sampling"
 	default n
 	---help---

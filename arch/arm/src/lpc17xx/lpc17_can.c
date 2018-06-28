@@ -1188,7 +1188,7 @@ static int can_bittiming(struct up_dev_s *priv)
          ((ts2 - 1) << CAN_BTR_TSEG2_SHIFT) |
          ((sjw - 1) << CAN_BTR_SJW_SHIFT));
 
-#ifdef CONFIG_CAN_SAM
+#ifdef CONFIG_LPC17_CAN_SAM
   /* The bus is sampled 3 times (recommended for low to medium speed buses
    * to spikes on the bus-line).
    */
