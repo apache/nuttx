@@ -94,3 +94,18 @@ fi
 
 ln -s "${src}" "${dest}" || \
 	{ echo "Failed to create link: $dest" ; exit 1 ; }
+
+# Verify that the link was created
+
+if [ ! -h ${dest} ]; then
+	# The MSYS 'ln' command actually does a directory copy
+
+	if [ -d ${dest} ]; then
+		# Create the .fakelnk for unlink.sh
+		touch ${dest}/.fakelnk
+	else
+		echo "Error:  link at ${dest} not created."
+		exit 1
+	if
+fi
+
