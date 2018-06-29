@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pic32mx-starterkit/nsh/mips-release.script
+ * configs/sure-pic32mx/nsh/mips-release.ld
  *
- *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,13 @@
 
 MEMORY
 {
-	/* The PIC32MX795F512L has 512Kb of program FLASH at physical address
+	/* The PIC32MX440F512H has 512Kb of program FLASH at physical address
 	 * 0x1d000000 but is always accessed at KSEG0 address 0x9d00:0000
 	 */
 
 	kseg0_progmem  (rx) : ORIGIN = 0x9d000000, LENGTH = 512K
 
-	/* The PIC32MX795F512L has 12Kb of boot FLASH at physical address
+	/* The PIC32MX440F512H has 12Kb of boot FLASH at physical address
 	 * 0x1fc00000.  The initial reset vector is in KSEG1, but all other
 	 * accesses are in KSEG0.
 	 *
@@ -78,7 +78,7 @@ MEMORY
 	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
 	kseg1_devcfg    (r) : ORIGIN = 0xbfc02ff0, LENGTH = 16
 
-	/* The PIC32MX795F512L has 128Kb of data memory at physical address
+	/* The PIC32MX440F512H has 32Kb of data memory at physical address
 	 * 0x00000000.  Since the PIC32MX has no data cache, this memory is
 	 * always accessed through KSEG1.
 	 *
@@ -86,7 +86,7 @@ MEMORY
 	 * for use by MPLAB.
 	 */
 
-	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 128K - 512
+	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 32K - 512
 }
 
 OUTPUT_FORMAT("elf32-littlemips")
@@ -208,9 +208,9 @@ SECTIONS
 /* This causes failures if there are no RAM functions
 	.ramfunc ALIGN(2K) :
 	{
-		_sramfunc =  ABSOLUTE(.);
-		*(.ramfunc	.ramfunc.*)
-		_eramfunc =  ABSOLUTE(.);
+		_sramfunc = ABSOLUTE(.);
+		*(.ramfunc .ramfunc.*)
+		_eramfunc = ABSOLUTE(.);
 	} > kseg1_datamem AT > kseg0_progmem
 
 	_ramfunc_loadaddr = LOADADDR(.ramfunc);

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pic32mx-starterkit/nsh/ld.script
+ * configs/pic32mx-starterkit/nsh/c32-release.script
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012i, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

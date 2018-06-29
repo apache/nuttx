@@ -192,7 +192,7 @@ Using MSYS
 
   Unlike Cygwin, MSYS does not support symbolic links.  The 'ln -s' commnad
   will, in fact, copy a directory!  This means that you Make.defs file will
-  have to include  defintion like:
+  have to include definitions like:
 
     ifeq ($(CONFIG_WINDOWS_MSYS),y)
       DIRLINK = $(TOPDIR)/tools/copydir.sh

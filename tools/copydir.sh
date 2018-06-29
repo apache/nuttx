@@ -85,7 +85,6 @@ else
 	fi
 fi
 
-
 # Verify that a directory exists at the source path
 
 if [ ! -d "${src}" ]; then

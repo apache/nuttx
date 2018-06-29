@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/scripts/pcblogic-pic32mx.ld
+ * configs/ubw32/scripts/c32-release.ld
  *
- *   Copyright (C) 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
