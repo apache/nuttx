@@ -2,7 +2,7 @@
 ############################################################################
 # tools/link.sh
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -102,10 +102,11 @@ if [ ! -h ${dest} ]; then
 
 	if [ -d ${dest} ]; then
 		# Create the .fakelnk for unlink.sh
+
 		touch ${dest}/.fakelnk
 	else
 		echo "Error:  link at ${dest} not created."
 		exit 1
-	if
+	fi
 fi
 
