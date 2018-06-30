@@ -529,7 +529,7 @@ config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
 
 		Value given here will be rounded up to next multiple of 32 bytes.
 
-config SERIAL_DISABLE_REORDERING
+config STM32H7_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
 	default n
 	---help---

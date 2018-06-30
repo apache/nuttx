@@ -1470,6 +1470,24 @@ config USART8_RS485_DIR_POLARITY
 
 endif # STM32F0_USART8_SERIALDRIVER
 
+menu "Serial Driver Configuration"
+	depends on STM32F0_SERIALDRIVER
+
+config STM32F0_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some configs and a serial console in other configs, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+endmenu # Serial Driver Configuration
+
 if PM
 
 config STM32F0_PM_SERIAL_ACTIVITY
