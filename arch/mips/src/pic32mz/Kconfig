@@ -372,61 +372,47 @@ config PIC32MZ_T1_SOSC
 menu "PIC32MZ PHY/Ethernet device driver settings"
 	depends on PIC32MZ_ETHERNET
 
-config PHY_AUTONEG
+config PIC32MZ_PHY_AUTONEG
 	bool "Auto-negotiation"
 	default y
 	depends on PIC32MZ_ETHERNET
 	---help---
 		Enable auto-negotiation
 
-config PHY_SPEED100
+config PIC32MZ_PHY_SPEED100
 	bool "100Mbps speed"
 	default n
-	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	depends on PIC32MZ_ETHERNET && !PIC32MZ_PHY_AUTONEG
 	---help---
 		Select 100Mbit vs. 10Mbit speed.
 
-config PHY_FDUPLEX
+config PIC32MZ_PHY_FDUPLEX
 	bool "Full duplex"
 	default n
-	depends on PIC32MZ_ETHERNET && !PHY_AUTONEG
+	depends on PIC32MZ_ETHERNET && !PIC32MZ_PHY_AUTONEG
 	---help---
 		Select full (vs. half) duplex
 
-config NET_NTXDESC
+config PIC32MZ_ETH_NTXDESC
 	int "Number Tx descriptors"
 	default 2
 	depends on PIC32MZ_ETHERNET
 	---help---
 		Configured number of Tx descriptors. Default: 2
 
-config NET_NRXDESC
+config PIC32MZ_ETH_NRXDESC
 	int "Number Rx descriptors"
 	default 4
 	depends on PIC32MZ_ETHERNET
 	---help---
 		Configured number of Rx descriptors. Default: 4
 
-config NET_PRIORITY
+config PIC32MZ_ETH_PRIORITY
 	int ""
 	default 28
 	depends on PIC32MZ_ETHERNET
 	---help---
 		Ethernet interrupt priority.  The is default is the higest priority.
-
-config NET_WOL
-	bool "Wake-up on LAN"
-	default n
-	depends on PIC32MZ_ETHERNET
-	---help---
-		Enable Wake-up on LAN (not fully implemented).
-
-config NET_HASH
-	bool "Hash"
-	default n
-	depends on PIC32MZ_ETHERNET
-	---help---
-		Enable receipt of near-perfect match frames.
 
 config PIC32MZ_MULTICAST
 	bool "Multicast"

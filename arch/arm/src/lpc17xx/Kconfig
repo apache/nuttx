@@ -653,49 +653,49 @@ endmenu
 menu "Ethernet driver options"
 	depends on LPC17_ETHERNET
 
-config PHY_AUTONEG
+config LPC17_PHY_AUTONEG
 	bool "Autonegiation"
 	---help---
 		Enable auto-negotion
 
-config PHY_SPEED100
+config LPC17_PHY_SPEED100
 	bool "100Mbit/Sec"
-	depends on !PHY_AUTONEG
+	depends on !LPC17_PHY_AUTONEG
 	---help---
 		Select 100Mbit vs. 10Mbit speed.
 
-config PHY_FDUPLEX
+config LPC17_PHY_FDUPLEX
 	bool "Full duplex"
-	depends on !PHY_AUTONEG
+	depends on !LPC17_PHY_AUTONEG
 	---help---
 		Select full (vs. half) duplex
 
-config NET_EMACRAM_SIZE
+config LPC17_EMACRAM_SIZE
 	int "EMAC RAM Size"
 	default 16384
 	---help---
 		Size of EMAC RAM.  Default: 16384 bytes
 
-config NET_NTXDESC
+config LPC17_ETH_NTXDESC
 	int "Number of Tx descriptors"
 	default 13
 	---help---
 		Configured number of Tx descriptors. Default: 13
 
-config NET_NRXDESC
+config LPC17_ETH_NRXDESC
 	int "Number of Rx descriptors"
 	default 13
 	---help---
 		Configured number of Rx descriptors. Default: 13
 
-config NET_PRIORITY
+config LPC17_ETH_PRIORITY
 	int "Ethernet interrupt priority"
 	default 128
 	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
 		Ethernet interrupt priority.  The default is the default priority (128).
 
-config NET_WOL
+config LPC17_NET_WOL
 	bool "Wake-up on LAN"
 	default n
 	---help---
@@ -708,7 +708,7 @@ config LPC17_NET_REGDEBUG
 	---help---
 		Enable low level register debug.  Also needs CONFIG_DEBUG_NET_INFO.
 
-config NET_HASH
+config LPC17_ETH_HASH
 	bool "Hashing"
 	default n
 	---help---

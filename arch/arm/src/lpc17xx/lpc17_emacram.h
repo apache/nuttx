@@ -75,14 +75,14 @@
 
 /* Number of Tx descriptors */
 
-#ifndef CONFIG_NET_NTXDESC
-#  define CONFIG_NET_NTXDESC 13
+#ifndef CONFIG_LPC17_ETH_NTXDESC
+#  define CONFIG_LPC17_ETH_NTXDESC 13
 #endif
 
 /* Number of Rx descriptors */
 
-#ifndef CONFIG_NET_NRXDESC
-#  define CONFIG_NET_NRXDESC 13
+#ifndef CONFIG_LPC17_ETH_NRXDESC
+#  define CONFIG_LPC17_ETH_NRXDESC 13
 #endif
 
 /* Size of the region at the beginning of AHB SRAM 0 set set aside for the EMAC.
@@ -90,15 +90,15 @@
  * words.
  */
 
-#ifndef CONFIG_NET_EMACRAM_SIZE
-#  define CONFIG_NET_EMACRAM_SIZE LPC17_BANK0_SIZE
+#ifndef CONFIG_LPC17_EMACRAM_SIZE
+#  define CONFIG_LPC17_EMACRAM_SIZE LPC17_BANK0_SIZE
 #endif
 
-#if CONFIG_NET_EMACRAM_SIZE > LPC17_BANK0_SIZE
+#if CONFIG_LPC17_EMACRAM_SIZE > LPC17_BANK0_SIZE
 #  error "EMAC RAM size cannot exceed the size of AHB SRAM Bank 0"
 #endif
 
-#if (CONFIG_NET_EMACRAM_SIZE & 3) != 0
+#if (CONFIG_LPC17_EMACRAM_SIZE & 3) != 0
 #  error "EMAC RAM size must be in multiples of 32-bit words"
 #endif
 
@@ -108,9 +108,9 @@
 
 #undef LPC17_BANK0_HEAPBASE
 #undef LPC17_BANK0_HEAPSIZE
-#if CONFIG_NET_EMACRAM_SIZE < (LPC17_BANK0_SIZE-128)
-#  define LPC17_BANK0_HEAPBASE (LPC17_SRAM_BANK0 + CONFIG_NET_EMACRAM_SIZE)
-#  define LPC17_BANK0_HEAPSIZE (LPC17_BANK0_SIZE - CONFIG_NET_EMACRAM_SIZE)
+#if CONFIG_LPC17_EMACRAM_SIZE < (LPC17_BANK0_SIZE-128)
+#  define LPC17_BANK0_HEAPBASE (LPC17_SRAM_BANK0 + CONFIG_LPC17_EMACRAM_SIZE)
+#  define LPC17_BANK0_HEAPSIZE (LPC17_BANK0_SIZE - CONFIG_LPC17_EMACRAM_SIZE)
 #endif
 
 /* Memory at the beginning of AHB SRAM, Bank 0 is set aside for EMAC Tx and Rx
@@ -119,14 +119,14 @@
  */
 
 #define LPC17_EMACRAM_BASE   LPC17_SRAM_BANK0
-#define LPC17_EMACRAM_SIZE   CONFIG_NET_EMACRAM_SIZE
+#define LPC17_EMACRAM_SIZE   CONFIG_LPC17_EMACRAM_SIZE
 
 /* Descriptor Memory Layout *********************************************************/
 /* EMAC DMA RAM and descriptor definitions.  The configured number of descriptors
  * will determine the organization and the size of the descriptor and status tables.
  * There is a complex interaction between the maximum packet size (CONFIG_NET_ETH_MTU)
- * and the number of Rx and Tx descriptors that can be supported (CONFIG_NET_NRXDESC
- * and CONFIG_NET_NTXDESC): Small buffers -> more packets.  This is something that
+ * and the number of Rx and Tx descriptors that can be supported (CONFIG_LPC17_ETH_NRXDESC
+ * and CONFIG_LPC17_ETH_NTXDESC): Small buffers -> more packets.  This is something that
  * needs to be tuned for you system.
  *
  * For a 16Kb SRAM region, here is the relationship:
@@ -138,12 +138,12 @@
  * 15,756 is not well aligned.).
  */
 
-#define LPC17_TXDESCTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXDESC_SIZE)
-#define LPC17_TXSTATTAB_SIZE (CONFIG_NET_NTXDESC*LPC17_TXSTAT_SIZE)
+#define LPC17_TXDESCTAB_SIZE (CONFIG_LPC17_ETH_NTXDESC*LPC17_TXDESC_SIZE)
+#define LPC17_TXSTATTAB_SIZE (CONFIG_LPC17_ETH_NTXDESC*LPC17_TXSTAT_SIZE)
 #define LPC17_TXTAB_SIZE     (LPC17_TXDESCTAB_SIZE+LPC17_TXSTATTAB_SIZE)
 
-#define LPC17_RXDESCTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXDESC_SIZE)
-#define LPC17_RXSTATTAB_SIZE (CONFIG_NET_NRXDESC*LPC17_RXSTAT_SIZE)
+#define LPC17_RXDESCTAB_SIZE (CONFIG_LPC17_ETH_NRXDESC*LPC17_RXDESC_SIZE)
+#define LPC17_RXSTATTAB_SIZE (CONFIG_LPC17_ETH_NRXDESC*LPC17_RXSTAT_SIZE)
 #define LPC17_RXTAB_SIZE     (LPC17_RXDESCTAB_SIZE+LPC17_RXSTATTAB_SIZE)
 
 #define LPC17_DESCTAB_SIZE   (LPC17_TXTAB_SIZE+LPC17_RXTAB_SIZE)
@@ -169,8 +169,8 @@
 #define LPC17_PKTMEM_END      (LPC17_EMACRAM_BASE+LPC17_PKTMEM_SIZE)
 
 #define LPC17_MAXPACKET_SIZE  ((CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE + 3) & ~3)
-#define LPC17_NTXPKTS         CONFIG_NET_NTXDESC
-#define LPC17_NRXPKTS         CONFIG_NET_NRXDESC
+#define LPC17_NTXPKTS         CONFIG_LPC17_ETH_NTXDESC
+#define LPC17_NRXPKTS         CONFIG_LPC17_ETH_NRXDESC
 
 #define LPC17_TXBUFFER_SIZE   (LPC17_NTXPKTS * LPC17_MAXPACKET_SIZE)
 #define LPC17_RXBUFFER_SIZE   (LPC17_NRXPKTS * LPC17_MAXPACKET_SIZE)

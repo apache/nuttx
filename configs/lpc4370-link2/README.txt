@@ -602,19 +602,15 @@ LPC4370-Link2 Configuration Options
   also require CONFIG_NET and CONFIG_LPC43_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_PHY_AUTONEG - Enable auto-negotion
-    CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
-    CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
+    CONFIG_LPC43_AUTONEG - Enable auto-negotion
 
-    CONFIG_NET_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
-    CONFIG_NET_NTXDESC - Configured number of Tx descriptors. Default: 18
-    CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
-    CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
+    CONFIG_LPC17_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
+    CONFIG_LPC43_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
+    CONFIG_LPC43_ETH_NRXDESC - Configured number of Rx descriptors. Default: 18
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
       CONFIG_DEBUG_FEATURES.
     CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
       Also needs CONFIG_DEBUG_FEATURES.
-    CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
 
   LPC43xx USB Device Configuration
 

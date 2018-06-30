@@ -130,16 +130,16 @@
 
 /* Use defaults if the number of discriptors is not provided */
 
-#ifndef CONFIG_NET_NTXDESC
-#  define CONFIG_NET_NTXDESC 2
+#ifndef CONFIG_PIC32MZ_ETH_NTXDESC
+#  define CONFIG_PIC32MZ_ETH_NTXDESC 2
 #endif
 
-#if CONFIG_NET_NTXDESC > 255
+#if CONFIG_PIC32MZ_ETH_NTXDESC > 255
 #  error "The number of TX descriptors exceeds the range of a uint8_t index"
 #endif
 
-#ifndef CONFIG_NET_NRXDESC
-#  define CONFIG_NET_NRXDESC 4
+#ifndef CONFIG_PIC32MZ_ETH_NRXDESC
+#  define CONFIG_PIC32MZ_ETH_NRXDESC 4
 #endif
 
 /* Make sure that the size of each buffer is a multiple of 4 bytes.  This
@@ -152,7 +152,7 @@
 
 /* The number of buffers will, then, be one for each descriptor plus one extra */
 
-#define PIC32MZ_NBUFFERS (CONFIG_NET_NRXDESC + CONFIG_NET_NTXDESC + 1)
+#define PIC32MZ_NBUFFERS (CONFIG_PIC32MZ_ETH_NRXDESC + CONFIG_PIC32MZ_ETH_NTXDESC + 1)
 
 /* Debug Configuration *****************************************************/
 /* Register/Descriptor debug -- can only happen of CONFIG_DEBUG_FEATURES is selected.
@@ -288,14 +288,14 @@
 #define PIC32MZ_100BASET_HD    (PIC32MZ_SPEED_100 | PIC32MZ_DUPLEX_HALF)
 #define PIC32MZ_100BASET_FD    (PIC32MZ_SPEED_100 | PIC32MZ_DUPLEX_FULL)
 
-#ifdef CONFIG_PHY_SPEED100
-#  ifdef CONFIG_PHY_FDUPLEX
+#ifdef CONFIG_PIC32MZ_PHY_SPEED100
+#  ifdef CONFIG_PIC32MZ_PHY_FDUPLEX
 #    define PIC32MZ_MODE_DEFLT PIC32MZ_100BASET_FD
 #  else
 #    define PIC32MZ_MODE_DEFLT PIC32MZ_100BASET_HD
 #  endif
 #else
-#  ifdef CONFIG_PHY_FDUPLEX
+#  ifdef CONFIG_PIC32MZ_PHY_FDUPLEX
 #    define PIC32MZ_MODE_DEFLT PIC32MZ_10BASET_FD
 #  else
 #    define PIC32MZ_MODE_DEFLT PIC32MZ_10BASET_HD
@@ -359,8 +359,8 @@ struct pic32mz_driver_s
 
   /* Descriptors and packet buffers */
 
-  struct pic32mz_rxdesc_s pd_rxdesc[CONFIG_NET_NRXDESC];
-  struct pic32mz_txdesc_s pd_txdesc[CONFIG_NET_NTXDESC];
+  struct pic32mz_rxdesc_s pd_rxdesc[CONFIG_PIC32MZ_ETH_NRXDESC];
+  struct pic32mz_txdesc_s pd_txdesc[CONFIG_PIC32MZ_ETH_NTXDESC];
   uint8_t pd_buffers[PIC32MZ_NBUFFERS * PIC32MZ_ALIGNED_BUFSIZE];
 };
 
@@ -460,7 +460,7 @@ static void pic32mz_phywrite(uint8_t phyaddr, uint8_t regaddr,
                              uint16_t phydata);
 static uint16_t pic32mz_phyread(uint8_t phyaddr, uint8_t regaddr);
 static inline int pic32mz_phyreset(uint8_t phyaddr);
-#  ifdef CONFIG_PHY_AUTONEG
+#  ifdef CONFIG_PIC32MZ_PHY_AUTONEG
 static inline int pic32mz_phyautoneg(uint8_t phyaddr);
 #  endif
 static int pic32mz_phymode(uint8_t phyaddr, uint8_t mode);
@@ -752,7 +752,7 @@ static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv)
    * descriptor as owned by softare andnot linked.
    */
 
-  for (i = 0; i < CONFIG_NET_NTXDESC; i++)
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
     {
       /* Point to the next entry */
 
@@ -772,7 +772,7 @@ static inline void pic32mz_txdescinit(struct pic32mz_driver_s *priv)
        * creating a ring.
        */
 
-      if (i == (CONFIG_NET_NRXDESC-1))
+      if (i == (CONFIG_PIC32MZ_ETH_NRXDESC-1))
         {
           txdesc->nexted = PHYS_ADDR(priv->pd_txdesc);
         }
@@ -823,7 +823,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
    * corresponding RX buffer.
    */
 
-  for (i = 0; i < CONFIG_NET_NRXDESC; i++)
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NRXDESC; i++)
     {
       /* Point to the next entry */
 
@@ -843,7 +843,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
        * creating a ring.
        */
 
-      if (i == (CONFIG_NET_NRXDESC-1))
+      if (i == (CONFIG_PIC32MZ_ETH_NRXDESC-1))
         {
           rxdesc->nexted = PHYS_ADDR(priv->pd_rxdesc);
         }
@@ -935,7 +935,7 @@ static inline void pic32mz_txnext(struct pic32mz_driver_s *priv)
    * for the Tx ring, then reset to first descriptor.
    */
 
-  if (txnext >= CONFIG_NET_NTXDESC)
+  if (txnext >= CONFIG_PIC32MZ_ETH_NTXDESC)
     {
       txnext = 0;
     }
@@ -999,7 +999,7 @@ static struct pic32mz_rxdesc_s *pic32mz_rxdesc(struct pic32mz_driver_s *priv)
    * RSV and PKT_CHECKSUM to get the message characteristics.
    */
 
-  for (i = 0; i < CONFIG_NET_NRXDESC; i++)
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NRXDESC; i++)
     {
       /* Check if software owns this descriptor */
 
@@ -1634,7 +1634,7 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
    * transmitted. Use TSV to check for the transmission result.
    */
 
-  for (i = 0; i < CONFIG_NET_NTXDESC; i++)
+  for (i = 0; i < CONFIG_PIC32MZ_ETH_NTXDESC; i++)
     {
       txdesc = &priv->pd_txdesc[i];
 
@@ -2353,11 +2353,11 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * priority
    */
 
-#if defined(CONFIG_NET_PRIORITY) && defined(CONFIG_ARCH_IRQPRIO)
+#if defined(CONFIG_PIC32MZ_ETH_PRIORITY) && defined(CONFIG_ARCH_IRQPRIO)
 #if CONFIG_PIC32MZ_NINTERFACES > 1
-  (void)up_prioritize_irq(priv->pd_irq, CONFIG_NET_PRIORITY);
+  (void)up_prioritize_irq(priv->pd_irq, CONFIG_PIC32MZ_ETH_PRIORITY);
 #else
-  (void)up_prioritize_irq(PIC32MZ_IRQ_ETH, CONFIG_NET_PRIORITY);
+  (void)up_prioritize_irq(PIC32MZ_IRQ_ETH, CONFIG_PIC32MZ_ETH_PRIORITY);
 #endif
 #endif
 
@@ -2780,7 +2780,7 @@ static inline int pic32mz_phyreset(uint8_t phyaddr)
  *
  ****************************************************************************/
 
-#if defined(PIC32MZ_HAVE_PHY) && defined(CONFIG_PHY_AUTONEG)
+#if defined(PIC32MZ_HAVE_PHY) && defined(CONFIG_PIC32MZ_PHY_AUTONEG)
 static inline int pic32mz_phyautoneg(uint8_t phyaddr)
 {
   int32_t timeout;
@@ -3038,7 +3038,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
    * specific register).
    */
 
-#ifdef CONFIG_PHY_AUTONEG
+#ifdef CONFIG_PIC32MZ_PHY_AUTONEG
   /* Setup the Auto-negotiation advertisement: 100 or 10, and HD or FD */
 
   pic32mz_phywrite(phyaddr, MII_ADVERTISE,

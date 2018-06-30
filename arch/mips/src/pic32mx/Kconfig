@@ -1045,61 +1045,47 @@ endmenu # SPI Driver Configuration
 menu "PIC32MX PHY/Ethernet device driver settings"
 	depends on PIC32MX_ETHERNET
 
-config PHY_AUTONEG
+config PIC32MX_PHY_AUTONEG
 	bool "Auto-negotion"
 	default y
 	depends on PIC32MX_ETHERNET
 	---help---
 		Enable auto-negotion
 
-config PHY_SPEED100
+config PIC32MX_PHY_SPEED100
 	bool "100Mbps spped"
 	default n
-	depends on PIC32MX_ETHERNET && !PHY_AUTONEG
+	depends on PIC32MX_ETHERNET && !PIC32MX_PHY_AUTONEG
 	---help---
 		Select 100Mbit vs. 10Mbit speed.
 
-config PHY_FDUPLEX
+config PIC32MX_PHY_FDUPLEX
 	bool "Full duplex"
 	default n
-	depends on PIC32MX_ETHERNET && !PHY_AUTONEG
+	depends on PIC32MX_ETHERNET && !PIC32MX_PHY_AUTONEG
 	---help---
 		Select full (vs. half) duplex
 
-config NET_NTXDESC
+config PIC32MX_ETH_NTXDESC
 	int "Number Tx descriptors"
 	default 2
 	depends on PIC32MX_ETHERNET
 	---help---
 		Configured number of Tx descriptors. Default: 2
 
-config NET_NRXDESC
+config PIC32MX_ETH_NRXDESC
 	int "Number Rx descriptors"
 	default 4
 	depends on PIC32MX_ETHERNET
 	---help---
 		Configured number of Rx descriptors. Default: 4
 
-config NET_PRIORITY
+config PIC32MX_ETH_PRIORITY
 	int ""
 	default 28
 	depends on PIC32MX_ETHERNET
 	---help---
 		Ethernet interrupt priority.  The is default is the higest priority.
-
-config NET_WOL
-	bool "Wake-up on LAN"
-	default n
-	depends on PIC32MX_ETHERNET
-	---help---
-		Enable Wake-up on LAN (not fully implemented).
-
-config NET_HASH
-	bool "Hash"
-	default n
-	depends on PIC32MX_ETHERNET
-	---help---
-		Enable receipt of near-perfect match frames.
 
 config PIC32MX_MULTICAST
 	bool "Multicast"
