@@ -1356,6 +1356,26 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
 #endif
 
 /****************************************************************************
+ * Name: tcp_update_recvwindws
+ *
+ * Description:
+ *   Update the TCP receive window for the specified device.
+ *
+ * Input Parameters:
+ *   dev - The device whose TCP receive window will be updated.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_RWND_CONTROL
+void tcp_update_recvwindws(FAR struct net_driver_s *dev);
+#else
+#  define tcp_update_recvwindws(dev)
+#endif
+
+/****************************************************************************
  * Name: psock_tcp_cansend
  *
  * Description:

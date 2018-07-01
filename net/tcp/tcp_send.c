@@ -55,10 +55,6 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
 
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-#  include <nuttx/semaphore.h>
-#endif
-
 #include "devif/devif.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
@@ -314,12 +310,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_conn_s *conn,
                            FAR struct tcp_hdr_s *tcp)
 {
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-  uint16_t iplen;
-  uint16_t overhead;
-  int  navail;
-#endif
-
   /* Copy the IP address into the IPv6 header */
 
 #ifdef CONFIG_NET_IPv6
@@ -331,10 +321,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
       net_ipv6addr_hdrcopy(ipv6->destipaddr, conn->u.ipv6.raddr);
-
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-      iplen = IPv6_HDRLEN;
-#endif
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -347,10 +333,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
       net_ipv4addr_hdrcopy(ipv4->destipaddr, &conn->u.ipv4.raddr);
-
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-      iplen = IPv4_HDRLEN;
-#endif
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -361,56 +343,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
   tcp->srcport  = conn->lport;
   tcp->destport = conn->rport;
-
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-  /* Update the TCP received window based on I/O buffer availability */
-  /* NOTE: This algorithm is still experimental */
-
-  overhead = NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN;
-  navail   = iob_navail();
-  if (navail > 0)
-    {
-      uint32_t rwnd;
-
-      /* The optimal TCP window size is the amount of TCP data that we can
-       * currently buffer via TCP read-ahead buffering minus overhead for the
-       * link-layer, IP, and TCP headers.  This logic here assumes that
-       * all IOBs are available for TCP buffering.
-       *
-       * Assume that all of the available IOBs are can be used for buffering
-       * on this connection.  Also assume that at least one chain is available
-       * concatenate the IOBs.
-       *
-       * REVISIT:  In an environment with multiple, active read-ahead TCP
-       * sockets (and perhaps multiple network devices) or if there are
-       * other consumers of IOBs (such as for TCP write buffering) then the
-       * total number of IOBs will all not be available for read-ahead
-       * buffering for this connection.
-       */
-
-      rwnd = (navail * CONFIG_IOB_BUFSIZE) - overhead;
-      if (rwnd > UINT16_MAX)
-        {
-          rwnd = UINT16_MAX;
-        }
-
-      /* Save the new receive window size */
-
-      NET_DEV_RCVWNDO(dev) = (uint16_t)rwnd;
-    }
-  else /* if (navail == 0) */
-    {
-      /* No IOBs are available... fall back to the configured default
-       * which assumes no write buffering.  The only buffering available
-       * is within the packet buffer itself.
-       *
-       * NOTE:  If no IOBs are available, then the next packet will be
-       * lost if there is no listener on the connection.
-       */
-
-      NET_DEV_RCVWNDO(dev) = dev->d_mtu - overhead;
-    }
-#endif
 
   /* Set the TCP window */
 
@@ -425,6 +357,12 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     }
   else
     {
+      /* Update the TCP received window based on I/O buffer availability */
+
+      tcp_update_recvwindws(dev);
+
+      /* Set the TCP Window */
+
       tcp->wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
       tcp->wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
     }

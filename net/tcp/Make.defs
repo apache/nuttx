@@ -62,6 +62,10 @@ ifeq ($(CONFIG_NET_TCPPROTO_OPTIONS),y)
 SOCK_CSRCS += tcp_setsockopt.c tcp_getsockopt.c
 endif
 
+ifeq ($(CONFIG_NET_TCP_RWND_CONTROL),y)
+SOCK_CSRCS += tcp_recvwindow.c
+endif
+
 # Transport layer
 
 NET_CSRCS += tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c

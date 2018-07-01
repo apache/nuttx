@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_tcpsend.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -267,6 +267,12 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
     }
   else
     {
+      /* Update the TCP received window based on I/O buffer availability */
+
+      tcp_update_recvwindws(dev);
+
+      /* Set the TCP Window */
+
       ipv6tcp->tcp.wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
       ipv6tcp->tcp.wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
     }
