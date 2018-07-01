@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_USBMONITOR
+#ifdef CONFIG_USBHOST_MAX3421E
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -308,6 +308,10 @@
 
 #define MAX3421E_SPIMODE                SPIDEV_MODE0
 
+/* The SPI clock frequency can be between DC and 26MHz. */
+
+#define MAX3421E_SPIFREQ_MAX            (26*1000*1000)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -340,5 +344,5 @@ extern "C"
 }
 #endif
 
-#endif /* CONFIG_USBMONITOR */
+#endif /* CONFIG_USBHOST_MAX3421E */
 #endif /* __INCLUDE_NUTTX_USB_MAX3421E_H */

@@ -269,7 +269,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
     {
       /* Update the TCP received window based on I/O buffer availability */
 
-      uint16 recvwndo = tcp_get_recvwindow(dev);
+      uint16_t recvwndo = tcp_get_recvwindow(dev);
 
       /* Set the TCP Window */
 
