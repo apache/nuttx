@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #ifdef CONFIG_USBHOST_MAX3421E
 
@@ -49,59 +50,75 @@
  ****************************************************************************/
 
 /* Host Mode Register Addresses *********************************************/
+/* The command byte contains the register address, a direction bit, and an
+ * ACKSTAT bit:
+ *
+ *   Bits 3-7:  Command
+ *   Bit 2:     Unused
+ *   Bit 1:     Direction (read = 0, write = 1)
+ *   Bit 0:     ACKSTAT
+ */
 
-#define MAX3421E_USBHOST_EP0FIFO        0
-#define MAX3421E_USBHOST_EP1OUTFIFO     1
-#define MAX3421E_USBHOST_EP2INFIFO      2
-#define MAX3421E_USBHOST_EP3INFIFO      3
-#define MAX3421E_USBHOST_SUDFIFO        4
-#define MAX3421E_USBHOST_EP0BC          5
-#define MAX3421E_USBHOST_EP1OUTBC       6
-#define MAX3421E_USBHOST_EP2INBC        7
-#define MAX3421E_USBHOST_EP3INBC        8
-#define MAX3421E_USBHOST_EPSTALLS       9
-#define MAX3421E_USBHOST_CLRTOGS        10
-#define MAX3421E_USBHOST_EPIRQ          11
-#define MAX3421E_USBHOST_EPIEN          12
-#define MAX3421E_USBHOST_USBIRQ         13
-#define MAX3421E_USBHOST_USBIEN         14
-#define MAX3421E_USBHOST_USBCTL         15
-#define MAX3421E_USBHOST_CPUCTL         16
-#define MAX3421E_USBHOST_PINCTL         17
-#define MAX3421E_USBHOST_REVISION       18
-#define MAX3421E_USBHOST_FNADDR         19
-#define MAX3421E_USBHOST_IOPINS1        20
-#define MAX3421E_USBHOST_IOPINS2        21
-#define MAX3421E_USBHOST_GPINIRQ        22
-#define MAX3421E_USBHOST_GPINIEN        23
-#define MAX3421E_USBHOST_GPINPOL        24
-#define MAX3421E_USBHOST_MODE           27
+#define MAX3421E_USBHOST_EP0FIFO        (0 << 3)
+#define MAX3421E_USBHOST_EP1OUTFIFO     (1 << 3)
+#define MAX3421E_USBHOST_EP2INFIFO      (2 << 3)
+#define MAX3421E_USBHOST_EP3INFIFO      (3 << 3)
+#define MAX3421E_USBHOST_SUDFIFO        (4 << 3)
+#define MAX3421E_USBHOST_EP0BC          (5 << 3)
+#define MAX3421E_USBHOST_EP1OUTBC       (6 << 3)
+#define MAX3421E_USBHOST_EP2INBC        (7 << 3)
+#define MAX3421E_USBHOST_EP3INBC        (8 << 3)
+#define MAX3421E_USBHOST_EPSTALLS       (9 << 3)
+#define MAX3421E_USBHOST_CLRTOGS        (10 << 3)
+#define MAX3421E_USBHOST_EPIRQ          (11 << 3)
+#define MAX3421E_USBHOST_EPIEN          (12 << 3)
+#define MAX3421E_USBHOST_USBIRQ         (13 << 3)
+#define MAX3421E_USBHOST_USBIEN         (14 << 3)
+#define MAX3421E_USBHOST_USBCTL         (15 << 3)
+#define MAX3421E_USBHOST_CPUCTL         (16 << 3)
+#define MAX3421E_USBHOST_PINCTL         (17 << 3)
+#define MAX3421E_USBHOST_REVISION       (18 << 3)
+#define MAX3421E_USBHOST_FNADDR         (19 << 3)
+#define MAX3421E_USBHOST_IOPINS1        (20 << 3)
+#define MAX3421E_USBHOST_IOPINS2        (21 << 3)
+#define MAX3421E_USBHOST_GPINIRQ        (22 << 3)
+#define MAX3421E_USBHOST_GPINIEN        (23 << 3)
+#define MAX3421E_USBHOST_GPINPOL        (24 << 3)
+#define MAX3421E_USBHOST_MODE           (27 << 3)
 
 /* Peripheral Mode Register Addresses ***************************************/
+/* The command byte contains the register address, a direction bit, and an
+ * ACKSTAT bit:
+ *
+ *   Bits 3-7:  Command
+ *   Bit 2:     Unused
+ *   Bit 1:     Direction (read = 0, write = 1)
+ *   Bit 0:     ACKSTAT
+ */
 
-#define MAX3421E_USBDEV_RCVFIFO         1
-#define MAX3421E_USBDEV_SNDFIFO         2
-#define MAX3421E_USBDEV_SUDFIFO         4
-#define MAX3421E_USBDEV_RCVBC           6
-#define MAX3421E_USBDEV_SNDBC           7
-#define MAX3421E_USBDEV_USBIRQ          13
-#define MAX3421E_USBDEV_USBIEN          14
-#define MAX3421E_USBDEV_USBCTL          15
-#define MAX3421E_USBDEV_CPUCTL          16
-#define MAX3421E_USBDEV_PINCTL          17
-#define MAX3421E_USBDEV_REVISION        18
-#define MAX3421E_USBDEV_IOPINS1         20
-#define MAX3421E_USBDEV_IOPINS2         21
-#define MAX3421E_USBDEV_GPINIRQ         22
-#define MAX3421E_USBDEV_GPINIEN         23
-#define MAX3421E_USBDEV_GPINPOL         24
-#define MAX3421E_USBDEV_HIRQ            25
-#define MAX3421E_USBDEV_HIEN            26
-#define MAX3421E_USBDEV_MODE            27
-#define MAX3421E_USBDEV_PERADDR         28
-#define MAX3421E_USBDEV_HCTL            29
-#define MAX3421E_USBDEV_HXFR            30
-#define MAX3421E_USBDEV_HRSL            31
+#define MAX3421E_USBDEV_RCVFIFO         (1 << 3)
+#define MAX3421E_USBDEV_SNDFIFO         (2 << 3)
+#define MAX3421E_USBDEV_SUDFIFO         (4 << 3)
+#define MAX3421E_USBDEV_RCVBC           (6 << 3)
+#define MAX3421E_USBDEV_SNDBC           (7 << 3)
+#define MAX3421E_USBDEV_USBIRQ          (13 << 3)
+#define MAX3421E_USBDEV_USBIEN          (14 << 3)
+#define MAX3421E_USBDEV_USBCTL          (15 << 3)
+#define MAX3421E_USBDEV_CPUCTL          (16 << 3)
+#define MAX3421E_USBDEV_PINCTL          (17 << 3)
+#define MAX3421E_USBDEV_REVISION        (18 << 3)
+#define MAX3421E_USBDEV_IOPINS1         (20 << 3)
+#define MAX3421E_USBDEV_IOPINS2         (21 << 3)
+#define MAX3421E_USBDEV_GPINIRQ         (22 << 3)
+#define MAX3421E_USBDEV_GPINIEN         (23 << 3)
+#define MAX3421E_USBDEV_GPINPOL         (24 << 3)
+#define MAX3421E_USBDEV_HIRQ            (25 << 3)
+#define MAX3421E_USBDEV_HIEN            (26 << 3)
+#define MAX3421E_USBDEV_MODE            (27 << 3)
+#define MAX3421E_USBDEV_PERADDR         (28 << 3)
+#define MAX3421E_USBDEV_HCTL            (29 << 3)
+#define MAX3421E_USBDEV_HXFR            (30 << 3)
+#define MAX3421E_USBDEV_HRSL            (31 << 3)
 
 /* Host Mode Register Bit-Field Definitions *********************************/
 
@@ -288,6 +305,23 @@
 
 /* Misc. Definitions ********************************************************/
 
+/* The command byte contains the register address, a direction bit, and an
+ * ACKSTAT bit:
+ *
+ *   Bits 3-7:  Command
+ *   Bit 2:     Unused
+ *   Bit 1:     Direction (read = 0, write = 1)
+ *   Bit 0:     ACKSTAT
+ */
+
+/* Read/write access to a register */
+
+#define MAX3421E_DIR_WRITE              0x02
+#define MAX3421E_DIR_READ               0x00
+
+#define MAX3421E_ACKSTAT_TRUE           0x01
+#define MAX3421E_ACKSTAT_FALSE          0x00
+
 /* Sizes and numbers of things */
 
 #define MAX3421E_NENDPOINTS             4       /* EP0..EP3 */
@@ -313,6 +347,44 @@
 #define MAX3421E_SPIFREQ_MAX            (26*1000*1000)
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This structure defines the interface provided by the max3421e lower-half
+ * driver.
+ */
+
+enum spi_mode_e;  /* Forward reference */
+struct spi_dev_s; /* Forward reference */
+
+struct m3421e_lowerhalf_s
+{
+  /* Device characterization */
+
+  FAR struct spi_dev_s *spi; /* SPI device instance */
+  uint32_t frequency;        /* SPI frequency < 26MHz */
+  enum spi_mode_e mode;      /* Either SPIDEV_MODE0 or SPIDEV_MODE3 */
+  uint8_t devid;             /* Distinguishes multiple MAX3421E on SPI bus */
+
+  /* IRQ/GPIO access callbacks.  These operations all hidden behind callbacks
+   * to isolate the driver from differences in GPIO interrupt handling
+   * by varying boards and MCUs:
+   *
+   *   attach      - Attach the interrupt handler to the GPIO interrupt
+   *   enable      - Enable or disable the GPIO interrupt
+   *   acknowledge - Acknowledge/clear any pending GPIO interrupt
+   */
+
+  CODE int (*attach)(FAR struct m3421e_lowerhalf_s *lower, xcpt_t isr,
+                     FAR void *arg);
+  CODE void (*enable)(FAR const struct m3421e_lowerhalf_s *lower,
+                      bool enable);
+  CODE void (*acknowledge)(FAR const struct m3421e_lowerhalf_s *lower);
+
+  /* Additional, driver-specific state data may follow */
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -328,16 +400,33 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+struct usbhost_connection_s; /* Forward reference */
+
 /****************************************************************************
- * Name:
+ * Name: max3421e_usbhost_initialize
  *
  * Description:
+ *   Initialize MAX3421E as USB host controller.
  *
  * Input Parameters:
+ *   lower - The interface to the lower half driver
  *
  * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
+ *
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
  *
  ****************************************************************************/
+
+FAR struct usbhost_connection_s *
+max3421e_usbhost_initialize(FAR const struct m3421e_lowerhalf_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus
