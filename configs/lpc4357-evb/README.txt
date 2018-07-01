@@ -628,23 +628,6 @@ LPC4357-EVB Configuration Options
     CONFIG_LPC43_USBDEV_NOLED
       Define if the hardware  implementation does not support the LED output
 
-  LPC43xx USB Host Configuration
-
-    CONFIG_USBHOST_OHCIRAM_SIZE
-      Total size of OHCI RAM (in AHB SRAM Bank 1)
-    CONFIG_USBHOST_NEDS
-      Number of endpoint descriptors
-    CONFIG_USBHOST_NTDS
-      Number of transfer descriptors
-    CONFIG_USBHOST_TDBUFFERS
-      Number of transfer descriptor buffers
-    CONFIG_USBHOST_TDBUFSIZE
-      Size of one transfer descriptor buffer
-    CONFIG_USBHOST_IOBUFSIZE
-      Size of one end-user I/O buffer.  This can be zero if the
-      application can guarantee that all end-user I/O buffers
-      reside in AHB SRAM.
-
 Configurations
 ==============
 

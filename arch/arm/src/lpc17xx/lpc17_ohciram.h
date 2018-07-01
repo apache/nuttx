@@ -78,23 +78,23 @@
  * bytes.
  */
 
-#ifndef CONFIG_USBHOST_OHCIRAM_SIZE
-#  define CONFIG_USBHOST_OHCIRAM_SIZE LPC17_BANK1_SIZE
+#ifndef CONFIG_LPC17_OHCIRAM_SIZE
+#  define CONFIG_LPC17_OHCIRAM_SIZE LPC17_BANK1_SIZE
 #endif
 
-#if CONFIG_USBHOST_OHCIRAM_SIZE > LPC17_BANK1_SIZE
+#if CONFIG_LPC17_OHCIRAM_SIZE > LPC17_BANK1_SIZE
 #  error "OHCI RAM size cannot exceed the size of AHB SRAM Bank 1"
 #endif
 
-#if (CONFIG_USBHOST_OHCIRAM_SIZE & 0xff) != 0
+#if (CONFIG_LPC17_OHCIRAM_SIZE & 0xff) != 0
 #  error "OHCI RAM size must be in multiples of 256 bytes"
 #endif
 
 /* Then position the OHCI RAM at the end of AHB SRAM Bank 1 */
 
 #define LPC17_OHCIRAM_END  (LPC17_SRAM_BANK1 + LPC17_BANK1_SIZE)
-#define LPC17_OHCIRAM_BASE (LPC17_OHCIRAM_END - CONFIG_USBHOST_OHCIRAM_SIZE)
-#define LPC17_OHCIRAM_SIZE  CONFIG_USBHOST_OHCIRAM_SIZE
+#define LPC17_OHCIRAM_BASE (LPC17_OHCIRAM_END - CONFIG_LPC17_OHCIRAM_SIZE)
+#define LPC17_OHCIRAM_SIZE  CONFIG_LPC17_OHCIRAM_SIZE
 
 /* Determine is there is any meaningful space left at the beginning of AHB Bank 1
  * that could be added to the heap.
@@ -124,13 +124,13 @@
  * the control endpoint that is always allocated.
  */
 
-#ifndef CONFIG_USBHOST_NEDS
-#  define CONFIG_USBHOST_NEDS 2
+#ifndef CONFIG_LP17_USBHOST_NEDS
+#  define CONFIG_LP17_USBHOST_NEDS 2
 #endif
 
 /* Derived size of user endpoint descriptor (ED) memory. */
 
-#define LPC17_EDFREE_SIZE (CONFIG_USBHOST_NEDS * LPC17_ED_SIZE)
+#define LPC17_EDFREE_SIZE (CONFIG_LP17_USBHOST_NEDS * LPC17_ED_SIZE)
 
 /* Fixed transfer descriptor size.  The actual size required by the hardware is only
  * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
@@ -142,49 +142,49 @@
 
 /* Configurable number of user transfer descriptors (TDs).  */
 
-#ifndef CONFIG_USBHOST_NTDS
-#  define CONFIG_USBHOST_NTDS 3
+#ifndef CONFIG_LP17_USBHOST_NTDS
+#  define CONFIG_LP17_USBHOST_NTDS 3
 #endif
 
-#if CONFIG_USBHOST_NTDS < 2
+#if CONFIG_LP17_USBHOST_NTDS < 2
 #  error "Insufficent TDs"
 #endif
 
 /* Derived size of user trasnfer descriptor (TD) memory. */
 
-#define LPC17_TDFREE_SIZE (CONFIG_USBHOST_NTDS * LPC17_TD_SIZE)
+#define LPC17_TDFREE_SIZE (CONFIG_LP17_USBHOST_NTDS * LPC17_TD_SIZE)
 
 /* Configurable number of request/descriptor buffers (TDBUFFER) */
 
-#ifndef CONFIG_USBHOST_TDBUFFERS
-#  define CONFIG_USBHOST_TDBUFFERS 2
+#ifndef CONFIG_LPC17_USBHOST_TDBUFFERS
+#  define CONFIG_LPC17_USBHOST_TDBUFFERS 2
 #endif
 
-#if CONFIG_USBHOST_TDBUFFERS < 2
+#if CONFIG_LPC17_USBHOST_TDBUFFERS < 2
 #  error "At least two TD buffers are required"
 #endif
 
 /* Configurable size of a TD buffer */
 
-#if CONFIG_USBHOST_TDBUFFERS > 0 && !defined(CONFIG_USBHOST_TDBUFSIZE)
-#  define CONFIG_USBHOST_TDBUFSIZE 128
+#if CONFIG_LPC17_USBHOST_TDBUFFERS > 0 && !defined(CONFIG_LPC17_USBHOST_TDBUFSIZE)
+#  define CONFIG_LPC17_USBHOST_TDBUFSIZE 128
 #endif
 
-#if (CONFIG_USBHOST_TDBUFSIZE & 3) != 0
+#if (CONFIG_LPC17_USBHOST_TDBUFSIZE & 3) != 0
 #  error "TD buffer size must be an even number of 32-bit words"
 #endif
 
-#define LPC17_TBFREE_SIZE (CONFIG_USBHOST_TDBUFFERS * CONFIG_USBHOST_TDBUFSIZE)
+#define LPC17_TBFREE_SIZE (CONFIG_LPC17_USBHOST_TDBUFFERS * CONFIG_LPC17_USBHOST_TDBUFSIZE)
 
 /* Configurable size of an IO buffer.  The number of IO buffers will be determined
  * by what is left at the end of the BANK1 memory setup aside of OHCI RAM.
  */
 
-#ifndef CONFIG_USBHOST_IOBUFSIZE
-#  define CONFIG_USBHOST_IOBUFSIZE 512
+#ifndef CONFIG_LPC17_USBHOST_IOBUFSIZE
+#  define CONFIG_LPC17_USBHOST_IOBUFSIZE 512
 #endif
 
-#if (CONFIG_USBHOST_IOBUFSIZE & 3) != 0
+#if (CONFIG_LPC17_USBHOST_IOBUFSIZE & 3) != 0
 #  error "IO buffer size must be an even number of 32-bit words"
 #endif
 
@@ -195,12 +195,12 @@
  *    LPC17_BANK1_SIZE            16384
  *
  *  Configuration:
- *    CONFIG_USBHOST_OHCIRAM_SIZE 1536
- *    CONFIG_USBHOST_NEDS         2
- *    CONFIG_USBHOST_NTDS         3
- *    CONFIG_USBHOST_TDBUFFERS    3
- *    CONFIG_USBHOST_TDBUFSIZE    128
- *    CONFIG_USBHOST_IOBUFSIZE    512
+ *    CONFIG_LPC17_OHCIRAM_SIZE   1536
+ *    CONFIG_LP17_USBHOST_NEDS    2
+ *    CONFIG_LP17_USBHOST_NTDS    3
+ *    CONFIG_LPC17_USBHOST_TDBUFFERS  3
+ *    CONFIG_LPC17_USBHOST_TDBUFSIZE  128
+ *    CONFIG_LPC17_USBHOST_IOBUFSIZE  512
  *
  *  Sizes of things
  *    LPC17_EDFREE_SIZE           64   0x00000040
@@ -241,8 +241,8 @@
 
 /* Finally, use the remainder of the allocated OHCI for IO buffers */
 
-#if CONFIG_USBHOST_IOBUFSIZE > 0
-#  define LPC17_IOBUFFERS   ((LPC17_OHCIRAM_END - LPC17_IOFREE_BASE) / CONFIG_USBHOST_IOBUFSIZE)
+#if CONFIG_LPC17_USBHOST_IOBUFSIZE > 0
+#  define LPC17_IOBUFFERS   ((LPC17_OHCIRAM_END - LPC17_IOFREE_BASE) / CONFIG_LPC17_USBHOST_IOBUFSIZE)
 #else
 #  define LPC17_IOBUFFERS 0
 #endif

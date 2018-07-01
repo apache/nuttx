@@ -1812,7 +1812,7 @@ static int lpc17_usbinterrupt(int irq, void *context, FAR void *arg)
                */
 
               if ((uintptr_t)td < LPC17_TDFREE_BASE ||
-                  (uintptr_t)td >= (LPC17_TDFREE_BASE + LPC17_TD_SIZE*CONFIG_USBHOST_NTDS))
+                  (uintptr_t)td >= (LPC17_TDFREE_BASE + LPC17_TD_SIZE*CONFIG_LP17_USBHOST_NTDS))
                 {
                   break;
                 }
@@ -2446,7 +2446,7 @@ static int lpc17_alloc(struct usbhost_driver_s *drvr,
   *buffer = lpc17_tballoc();
   if (*buffer)
     {
-      *maxlen = CONFIG_USBHOST_TDBUFSIZE;
+      *maxlen = CONFIG_LPC17_USBHOST_TDBUFSIZE;
       ret = OK;
     }
 
@@ -2523,7 +2523,7 @@ static int lpc17_ioalloc(struct usbhost_driver_s *drvr,
   DEBUGASSERT(drvr && buffer);
 
 #if LPC17_IOBUFFERS > 0
-  if (buflen <= CONFIG_USBHOST_IOBUFSIZE)
+  if (buflen <= CONFIG_LPC17_USBHOST_IOBUFSIZE)
     {
       uint8_t *alloc = lpc17_allocio();
       if (alloc)
@@ -2801,10 +2801,10 @@ static int lpc17_dma_alloc(struct lpc17_usbhost_s *priv,
     {
       /* Will the transfer fit in an IO buffer? */
 
-      if (buflen > CONFIG_USBHOST_IOBUFSIZE)
+      if (buflen > CONFIG_LPC17_USBHOST_IOBUFSIZE)
         {
           uinfo("buflen (%d) > IO buffer size (%d)\n",
-                 buflen, CONFIG_USBHOST_IOBUFSIZE);
+                 buflen, CONFIG_LPC17_USBHOST_IOBUFSIZE);
           return -ENOMEM;
         }
 
@@ -3728,7 +3728,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   uinfo("  EDFREE: %08x %d\n", LPC17_EDFREE_BASE, LPC17_ED_SIZE);
   uinfo("  TDFREE: %08x %d\n", LPC17_TDFREE_BASE, LPC17_EDFREE_SIZE);
   uinfo("  TBFREE: %08x %d\n", LPC17_TBFREE_BASE, LPC17_TBFREE_SIZE);
-  uinfo("  IOFREE: %08x %d\n", LPC17_IOFREE_BASE, LPC17_IOBUFFERS * CONFIG_USBHOST_IOBUFSIZE);
+  uinfo("  IOFREE: %08x %d\n", LPC17_IOFREE_BASE, LPC17_IOBUFFERS * CONFIG_LPC17_USBHOST_IOBUFSIZE);
 #endif
 
   /* Initialize all the TDs, EDs and HCCA to 0 */
@@ -3747,7 +3747,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Initialize user-configurable EDs */
 
   buffer = (uint8_t *)LPC17_EDFREE_BASE;
-  for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
+  for (i = 0; i < CONFIG_LP17_USBHOST_NEDS; i++)
     {
       /* Put the ED in a free list */
 
@@ -3758,7 +3758,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Initialize user-configurable TDs */
 
   buffer = (uint8_t *)LPC17_TDFREE_BASE;
-  for (i = 0; i < CONFIG_USBHOST_NTDS; i++)
+  for (i = 0; i < CONFIG_LP17_USBHOST_NTDS; i++)
     {
       /* Put the TD in a free list */
 
@@ -3769,12 +3769,12 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Initialize user-configurable request/descriptor transfer buffers */
 
   buffer = (uint8_t *)LPC17_TBFREE_BASE;
-  for (i = 0; i < CONFIG_USBHOST_TDBUFFERS; i++)
+  for (i = 0; i < CONFIG_LPC17_USBHOST_TDBUFFERS; i++)
     {
       /* Put the TD buffer in a free list */
 
       lpc17_tbfree(buffer);
-      buffer += CONFIG_USBHOST_TDBUFSIZE;
+      buffer += CONFIG_LPC17_USBHOST_TDBUFSIZE;
     }
 
 #if LPC17_IOBUFFERS > 0
@@ -3786,7 +3786,7 @@ struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
       /* Put the IO buffer in a free list */
 
       lpc17_freeio(buffer);
-      buffer += CONFIG_USBHOST_IOBUFSIZE;
+      buffer += CONFIG_LPC17_USBHOST_IOBUFSIZE;
     }
 #endif
 

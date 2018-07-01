@@ -929,37 +929,37 @@ endmenu
 menu "USB host driver options"
 	depends on LPC17_USBHOST
 
-config USBHOST_OHCIRAM_SIZE
+config LPC17_OHCIRAM_SIZE
 	int "OHCI RAM Size"
 	default 16384
 	---help---
 		Total size of OHCI RAM (in AHB SRAM Bank 1).  Default: 16384
 
-config USBHOST_NEDS
+config LPC17_USBHOST_NEDS
 	int "Number of Endpoint Descriptors"
 	default 2
 	---help---
 		Number of endpoint descriptors.  Default: 2
 
-config USBHOST_NTDS
+config LPC17_USBHOST_NTDS
 	int "Number of transfer descriptors"
 	default 3
 	---help---
 		Number of transfer descriptors. Default: 3
 
-config USBHOST_TDBUFFERS
+config LPC17_USBHOST_TDBUFFERS
 	int "Number of descriptor buffers"
 	default 2
 	---help---
 		Number of transfer descriptor buffers.  Default: 2
 
-config USBHOST_TDBUFSIZE
+config LPC17_USBHOST_TDBUFSIZE
 	int "Descriptor buffer size"
 	default 128
 	---help---
 		Size of one transfer descriptor buffer.  Default 128
 
-config USBHOST_IOBUFSIZE
+config LPC17_USBHOST_IOBUFSIZE
 	int "I/O buffer size"
 	default 512
 	---help---
@@ -974,24 +974,6 @@ config LPC17_USBHOST_NPREALLOC
 		This number represents a number of pre-allocated structures to support
 		concurrent data transfers.  This number limits that number of concurrent
 		asynchronous IN endpoint transfer that can be supported.
-
-config USBHOST_BULK_DISABLE
-	bool "Disable bulk EPs"
-	default n
-	---help---
-		Disable support for bulk endpoints.
-
-config USBHOST_INT_DISABLE
-	bool "Disable interrupt EPs"
-	default n
-	---help---
-		Disable support for interrupt endpoints.
-
-config USBHOST_ISOC_DISABLE
-	bool "Disable isochronous EPs"
-	default n
-	---help---
-		Disable support for isochronous endpoints.
 
 config LPC17_USBHOST_REGDEBUG
 	bool "Register level debug"
