@@ -302,16 +302,6 @@ config NET_6LOWPAN_MTU
 		sizes.  Without fragmentation support, the MTU is equal to the frame
 		size and that has already been selected.
 
-config NET_6LOWPAN_TCP_RECVWNDO
-	int "6LoWPAN TCP receive window size"
-	default 1220
-	depends on NET_TCP
-	---help---
-		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the IEEE802.15.4 MTU or frame payload) if
-		the application is slow to process incoming data, or high (32768
-		bytes) if the application processes data quickly.
-
 config NET_6LOWPAN_DUMPBUFFER
 	bool "Enable dumping of buffer data"
 	default n

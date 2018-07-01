@@ -56,27 +56,6 @@ config NET_ETH_MTU
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
-config NET_ETH_TCP_RECVWNDO
-	int "Ethernet TCP receive window size"
-	default 1220 if NET_IPv6
-	default 536 if !NET_IPv6
-	depends on NET_ETHERNET && NET_TCP
-	range 536 65535
-	---help---
-		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the MSS) if the application is slow to process
-		incoming data, or high (65,535 bytes) if the application processes
-		data quickly.
-
-		This value does not account for buffering provided for read-ahead
-		buffering via IOBs.  To include IOB aware windowing logic also
-		enable CONFIG_NET_TCP_RWND_CONTROL.
-
-		The default values correspond to the MSS associated with the
-		minimum MSS: IPv4 hosts are required to be able to handle an MSS
-		of at least 536 octets; IPv6 hosts are required to be able to handle
-		an MSS of 1220 octets.
-
 config NET_SLIP_MTU
 	int # "SLIP packet buffer size (MTU)"
 	default 296
@@ -102,16 +81,6 @@ config NET_SLIP_MTU
 		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
 		the MSS value in the TCP connection structure).
 
-
-config NET_SLIP_TCP_RECVWNDO
-	int "SLIP TCP receive window size"
-	default 256
-	depends on NET_SLIP && NET_TCP
-	---help---
-		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the MSS) if the application is slow to process
-		incoming data, or high (32768 bytes) if the application processes
-		data quickly.
 
 config NET_GUARDSIZE
 	int "Driver I/O guard size"
@@ -214,11 +183,6 @@ config NET_TUN_MTU
 	int "TUN packet buffer size (MTU)"
 	default 296
 	range 296 1518
-
-config NET_TUN_TCP_RECVWNDO
-	int "TUN TCP receive window size"
-	default 256
-	depends on NET_TCP
 
 choice
 	prompt "Work queue"

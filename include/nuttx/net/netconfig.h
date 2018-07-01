@@ -130,8 +130,6 @@
 
 #ifndef CONFIG_NET_6LOWPAN_MTU
 #  define CONFIG_NET_6LOWPAN_MTU          1294
-#  undef  CONFIG_NET_6LOWPAN_TCP_RECVWNDO
-#  define CONFIG_NET_6LOWPAN_TCP_RECVWNDO 1220
 #endif
 
 /* We are supporting multiple network devices using different link layer
@@ -526,40 +524,6 @@
 #  undef MIN_TCP_MSS
 #  define MIN_TCP_MSS           __MIN_TCP_MSS(__IPv6_HDRLEN)
 #endif
-
-/* The size of the advertised receiver's window.
- *
- * Should be set low (i.e., to the size of the d_buf buffer) is the
- * application is slow to process incoming data, or high (32768 bytes)
- * if the application processes data quickly.
- */
-
-#define NET_LO_TCP_RECVWNDO LO_TCP_MSS(0)
-
-#ifdef CONFIG_NET_SLIP
-#  ifndef CONFIG_NET_SLIP_TCP_RECVWNDO
-#    define CONFIG_NET_SLIP_TCP_RECVWNDO SLIP_TCP_MSS(0)
-#  endif
-#endif
-
-#ifdef CONFIG_NET_TUN
-#  ifndef CONFIG_NET_TUN_TCP_RECVWNDO
-#    define CONFIG_NET_TUN_TCP_RECVWNDO TUN_TCP_MSS(0)
-#  endif
-#endif
-
-#ifdef CONFIG_NET_ETHERNET
-#  ifndef CONFIG_NET_ETH_TCP_RECVWNDO
-#    define CONFIG_NET_ETH_TCP_RECVWNDO ETH_TCP_MSS(0)
-#  endif
-#endif
-
-/* We are supporting multiple network devices using different link layer
- * protocols.  Get the size of the receive window from the device
- * structure.
- */
-
-#define NET_DEV_RCVWNDO(d)  ((d)->d_recvwndo)
 
 /* How long a connection should stay in the TIME_WAIT state.
  *

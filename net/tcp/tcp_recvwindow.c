@@ -51,31 +51,32 @@
 
 #include "tcp/tcp.h"
 
-#ifdef CONFIG_NET_TCP_RWND_CONTROL
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_update_recvwindws
+ * Name: tcp_get_recvwindow
  *
  * Description:
- *   Update the TCP receive window for the specified device.
+ *   Calculate the TCP receive window for the specified device.
  *
  * Input Parameters:
  *   dev - The device whose TCP receive window will be updated.
  *
  * Returned Value:
- *   None.
+ *   The value of the TCP receive window to use.
  *
  ****************************************************************************/
 
-void tcp_update_recvwindws(FAR struct net_driver_s *dev)
+uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
 {
   uint16_t iplen;
-  uint16_t overhead;
+  uint16_t mss;
+  uint16_t recvwndo;
+#ifdef CONFIG_NET_TCP_READAHEAD
   int  navail;
+#endif
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
@@ -95,22 +96,49 @@ void tcp_update_recvwindws(FAR struct net_driver_s *dev)
     }
 #endif /* CONFIG_NET_IPv4 */
 
-  /* Update the TCP received window based on I/O buffer availability
+  /* Calculate the packet MSS.
    *
-   * REVISIT:  The actual TCP header length is varialble.  TCP_HDRLEN
+   * REVISIT:  The actual TCP header length is variable.  TCP_HDRLEN
    * is the minimum size.
    */
 
-  overhead = NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN;
-  navail   = iob_navail();
+  mss = dev->d_mtu - (NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN);
+
+#ifdef CONFIG_NET_TCP_READAHEAD
+  /* Update the TCP received window based on read-ahead I/O buffer
+   * availability.
+   */
+
+  navail = iob_navail();
+
+  /* Are the read-ahead allocations throttled?  If so, then not all of these
+   * IOBs are available for read-ahead buffering.
+   *
+   * REVISIT: Should also check that there is at least one available IOB
+   * chain.
+   */
+
+#if CONFIG_IOB_THROTTLE > 0
+  if (navail > CONFIG_IOB_THROTTLE)
+    {
+      navail -= CONFIG_IOB_THROTTLE;
+    }
+  else
+    {
+      navail = 0;
+    }
+#endif
+
+  /* Are there any IOBs available for read-ahead buffering? */
+
   if (navail > 0)
     {
       uint32_t rwnd;
 
       /* The optimal TCP window size is the amount of TCP data that we can
-       * currently buffer via TCP read-ahead buffering minus overhead for the
-       * link-layer, IP, and TCP headers.  This logic here assumes that
-       * all IOBs are available for TCP buffering.
+       * currently buffer via TCP read-ahead buffering plus MSS for the
+       * device packet buffer.  This logic here assumes that all IOBs are
+       * available for TCP buffering.
        *
        * Assume that all of the available IOBs are can be used for buffering
        * on this connection.  Also assume that at least one chain is available
@@ -123,7 +151,7 @@ void tcp_update_recvwindws(FAR struct net_driver_s *dev)
        * buffering for this connection.
        */
 
-      rwnd = (navail * CONFIG_IOB_BUFSIZE) - overhead;
+      rwnd = (navail * CONFIG_IOB_BUFSIZE) + mss;
       if (rwnd > UINT16_MAX)
         {
           rwnd = UINT16_MAX;
@@ -131,20 +159,21 @@ void tcp_update_recvwindws(FAR struct net_driver_s *dev)
 
       /* Save the new receive window size */
 
-      NET_DEV_RCVWNDO(dev) = (uint16_t)rwnd;
+      recvwndo = (uint16_t)rwnd;
     }
   else /* if (navail == 0) */
+#endif
     {
-      /* No IOBs are available... fall back to the configured default
-       * which assumes no write buffering.  The only buffering available
-       * is within the packet buffer itself.
+      /* No IOBs are available.  The only buffering available is within the
+       * packet buffer itself.  We can buffer no more than the MSS (unless
+       * we are very fast).
        *
        * NOTE:  If no IOBs are available, then the next packet will be
        * lost if there is no listener on the connection.
        */
 
-      NET_DEV_RCVWNDO(dev) = dev->d_mtu - overhead;
+      recvwndo = mss;
     }
-}
 
-#endif /* CONFIG_NET_TCP_RWND_CONTROL */
+  return recvwndo;
+}

@@ -359,12 +359,12 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     {
       /* Update the TCP received window based on I/O buffer availability */
 
-      tcp_update_recvwindws(dev);
+      uint16_t recvwndo = tcp_get_recvwindow(dev);
 
       /* Set the TCP Window */
 
-      tcp->wnd[0] = ((NET_DEV_RCVWNDO(dev)) >> 8);
-      tcp->wnd[1] = ((NET_DEV_RCVWNDO(dev)) & 0xff);
+      tcp->wnd[0] = recvwndo >> 8;
+      tcp->wnd[1] = recvwndo & 0xff;
     }
 
   /* Finish the IP portion of the message and calculate checksums */

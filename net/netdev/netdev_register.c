@@ -39,7 +39,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/socket.h>
 #include <stdio.h>
@@ -59,6 +58,8 @@
 #include "utils/utils.h"
 #include "igmp/igmp.h"
 #include "netdev/netdev.h"
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -268,9 +269,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_LOOPBACK:   /* Local loopback */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = NET_LO_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = NET_LO_TCP_RECVWNDO;
-#endif
             devfmt          = NETDEV_LO_FORMAT;
             break;
 #endif
@@ -279,9 +277,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_ETHERNET:   /* Ethernet */
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
-#endif
             devfmt          = NETDEV_ETH_FORMAT;
             break;
 #endif
@@ -290,9 +285,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_IEEE80211:  /* IEEE 802.11 */
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_mtu      = CONFIG_NET_ETH_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_ETH_TCP_RECVWNDO;
-#endif
             devfmt          = NETDEV_WLAN_FORMAT;
             break;
 #endif
@@ -301,12 +293,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_BLUETOOTH:  /* Bluetooth */
             dev->d_llhdrlen = BLUETOOTH_MAX_HDRLEN; /* Determined at runtime */
 #ifdef CONFIG_NET_6LOWPAN
-#  warning Missing logic
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
-#ifdef CONFIG_NET_TCP
-#  warning Missing logic
-            dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
-#endif
 #endif
             devfmt          = NETDEV_BNEP_FORMAT;
             break;
@@ -318,9 +305,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = 0;  /* Determined at runtime */
 #ifdef CONFIG_NET_6LOWPAN
             dev->d_mtu      = CONFIG_NET_6LOWPAN_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_6LOWPAN_TCP_RECVWNDO;
-#endif
 #endif
             devfmt          = NETDEV_WPAN_FORMAT;
             break;
@@ -330,9 +314,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           case NET_LL_SLIP:       /* Serial Line Internet Protocol (SLIP) */
             dev->d_llhdrlen = 0;
             dev->d_mtu      = CONFIG_NET_SLIP_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_SLIP_TCP_RECVWNDO;
-#endif
             devfmt          = NETDEV_SLIP_FORMAT;
             break;
 #endif
@@ -342,9 +323,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = 0;  /* This will be overwritten by tun_ioctl
                                    * if used as a TAP (layer 2) device */
             dev->d_mtu      = CONFIG_NET_TUN_MTU;
-#ifdef CONFIG_NET_TCP
-            dev->d_recvwndo = CONFIG_NET_TUN_TCP_RECVWNDO;
-#endif
             devfmt          = NETDEV_TUN_FORMAT;
             break;
 #endif
