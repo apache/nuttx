@@ -159,6 +159,32 @@ void weak_function stm32_spidev_initialize(void);
 void arch_sporadic_initialize(void);
 #endif
 
+/****************************************************************************
+
+ * Name: stm32_enablefmc
+ *
+ * Description:
+ *  enable clocking to the FMC module
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_FMC
+void stm32_enablefmc(void);
+#endif
+
+/****************************************************************************
+
+ * Name: stm32_disablefmc
+ *
+ * Description:
+ *  disable clocking to the FMC module
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_FMC
+void stm32_disablefmc(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __CONFIGS_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */

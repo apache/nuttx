@@ -68,4 +68,8 @@ ifeq ($(CONFIG_STM32F7_LTDC),y)
 CSRCS += stm32_lcd.c
 endif
 
+ifeq ($(CONFIG_STM32F7_FMC),y)
+CSRCS += stm32_extmem.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
