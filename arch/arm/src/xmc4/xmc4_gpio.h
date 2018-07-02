@@ -50,7 +50,7 @@
 
 /* 32-bit GIO encoding:
  *
- *   TTTT TMPD DDCC V....  .... .... PPPP BBBB
+ *   TTTT TMPD DDCC VO...  .... .... PPPP BBBB
  */
 
 
@@ -84,12 +84,12 @@
 
 /* Pin type modifier:
  *
- *   .... .M.. .... ....  .... .... .... ....
+ *   .... .M.. .... .O..  .... .... .... ....
  */
 
 #define GPIO_INPUT_INVERT          (1 << 26) /* Bit 26: Inverted direct input modifier */
 
-#define GPIO_OUTPUT_OPENDRAIN      (1 << 26) /* Bit 26: Output drain output modifier */
+#define GPIO_OUTPUT_OPENDRAIN      (1 << 18) /* Bit 18: Output drain output modifier */
 #define GPIO_OUTPUT_PUSHPULL       (0)       /*         Push-pull output is the default */
 
 /* Disable PAD:

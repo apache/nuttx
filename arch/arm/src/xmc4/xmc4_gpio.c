@@ -350,7 +350,10 @@ static inline bool xmc4_gpio_inverted(gpioconfig_t pinconfig)
  *
  ****************************************************************************/
 
-#define xmc4_gpio_opendrain(p) xmc4_gpio_inverted(p)
+static inline bool xmc4_gpio_opendrain(gpioconfig_t pinconfig)
+{
+  return ((pinconfig & GPIO_OUTPUT_OPENDRAIN) != 0);
+}
 
 /****************************************************************************
  * Public Functions
