@@ -66,6 +66,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* #define SHOW_BUFFERING */
+
 #define I2S_HAS_IOCTL
 
 #define BUFID(n) (n - 'A')
@@ -192,6 +194,9 @@ struct lc823450_i2s_s
 {
   struct i2s_dev_s  dev;        /* Externally visible I2S interface */
 };
+
+static bool     _b_input_started = false;
+static uint32_t _i2s_tx_th_bytes;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -399,12 +404,35 @@ static void lc823450_i2s_setchannel(char id, uint8_t ch)
 }
 
 /****************************************************************************
+ * Name: _setup_tx_threshold
+ ****************************************************************************/
+
+static void _setup_tx_threshold(uint32_t tx_th)
+{
+  if (0 == tx_th)
+    {
+      /* default tx threshould : 1024bytes */
+
+      _i2s_tx_th_bytes = 1024;
+    }
+  else
+    {
+      /* tx_th: 0 to 100 (%) */
+
+      _i2s_tx_th_bytes = getreg32(BUF_SIZE('C')) * tx_th / 100;
+    }
+
+  putreg32(_i2s_tx_th_bytes, BUF_ULVL('C'));
+}
+
+/****************************************************************************
  * Name: lc823450_i2s_rxdatawidth
  ****************************************************************************/
 
 static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR const struct audio_caps_desc_s *cap_desc;
+  uint32_t tx_th;
   uint32_t rate[2];
   uint8_t  ch[2];
   uint8_t  fmt[2];
@@ -415,12 +443,15 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
         cap_desc = (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
         ASSERT(NULL != cap_desc);
 
-        rate[1] = cap_desc->caps.ac_controls.w;
+        tx_th   = cap_desc->caps.ac_controls.w >> 24;
+        rate[1] = cap_desc->caps.ac_controls.w & 0xfffff;
         ch[1]   = cap_desc->caps.ac_channels;
         fmt[1]  = cap_desc->caps.ac_format.hw;
 
         if (cap_desc->caps.ac_type & AUDIO_TYPE_OUTPUT)
           {
+            _setup_tx_threshold(tx_th);
+
             rate[0] = getreg32(SSRC_FSI) >> 13;
             ch[0]   = (getreg32(BUFCTL('C')) & BUFCTL_MONO) ? 1 : 2;
             fmt[0]  = getreg32(AUDSEL) & AUDSEL_DECSEL ? AUDIO_FMT_MP3 : AUDIO_FMT_PCM;
@@ -479,8 +510,6 @@ static void _i2s_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
   sem_t *waitsem = (sem_t *)arg;
   nxsem_post(waitsem);
 }
-
-static bool _b_input_started = false;
 
 /****************************************************************************
  * Name: lc823450_i2s_receive
@@ -629,24 +658,45 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                              i2s_callback_t callback, void *arg,
                              uint32_t timeout)
 {
-  /* Enable C Buffer Under Level IRQ */
-
-  modifyreg32(ABUFIRQEN0, 0, ABUFIRQEN0_BULIRQEN('C'));
-
-  /* Wait for Audio Buffer */
-
-  _i2s_semtake(&_sem_buf_under);
-
   volatile uint32_t *ptr = (uint32_t *)&apb->samp[apb->curbyte];
   uint32_t n = apb->nbytes;
 
+  if (0 == getreg32(BUF_DTCAP('C')))
+    {
+      /* C buffer is empty. Start buffering by disabling access control */
+
+      modifyreg32(ABUFACCEN, ABUFACCEN_CDCEN('C'), 0);
+    }
+
+  if (getreg32(ABUFACCEN) & ABUFACCEN_CDCEN('C'))
+    {
+      /* Enable C Buffer Under Level IRQ */
+
+      modifyreg32(ABUFIRQEN0, 0, ABUFIRQEN0_BULIRQEN('C'));
+
+      /* Wait for Audio Buffer */
+
+      _i2s_semtake(&_sem_buf_under);
+    }
+
   /* Setup and start DMA for I2S */
 
-  lc823450_dmasetup(_htxdma,
-                    LC823450_DMA_SRCINC |
-                    LC823450_DMA_SRCWIDTH_WORD |
-                    LC823450_DMA_DSTWIDTH_WORD,
-                    (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n / 4);
+  if (0 == (n % 4))
+    {
+      lc823450_dmasetup(_htxdma,
+                        LC823450_DMA_SRCINC |
+                        LC823450_DMA_SRCWIDTH_WORD |
+                        LC823450_DMA_DSTWIDTH_WORD,
+                        (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n / 4);
+    }
+  else
+    {
+      lc823450_dmasetup(_htxdma,
+                        LC823450_DMA_SRCINC |
+                        LC823450_DMA_SRCWIDTH_BYTE |
+                        LC823450_DMA_DSTWIDTH_BYTE,
+                        (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n);
+    }
 
   lc823450_dmastart(_htxdma,
                     _i2s_txdma_callback,
@@ -654,9 +704,16 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   _i2s_semtake(&_sem_txdma);
 
-  /* Start C Buffer : TODO threshould */
+#ifdef SHOW_BUFFERING
+  if (0 == (getreg32(ABUFACCEN) & ABUFACCEN_CDCEN('C')))
+    {
+      audinfo("buffering (remain=%d) \n", getreg32(BUF_DTCAP('C')));
+    }
+#endif
 
-  if (getreg32(BUF_DTCAP('C')) >= 1024)
+  /* Start C Buffer */
+
+  if (_i2s_tx_th_bytes < getreg32(BUF_DTCAP('C')))
     {
       modifyreg32(ABUFACCEN, 0, ABUFACCEN_CDCEN('C'));
     }
@@ -804,11 +861,11 @@ static int lc823450_i2s_configure(void)
   putreg32(MCLKCNTEXT3_AUDIOBUF_CLKEN,
            MCLKCNTEXT3);
 
-  /* C Buffer : size=32KB, under level=1kB */
+  /* C Buffer : size=56KB, under level=1kB */
 
   putreg32(base, BUF_BASE('C'));
-  putreg32(4096 * 8, BUF_SIZE('C'));
-  base += 4096 * 8;
+  putreg32(1024 * 56, BUF_SIZE('C'));
+  base += 1024 * 56;
   putreg32(1024, BUF_ULVL('C'));
 
   /* Setup F Buffer : size=512B */
@@ -894,6 +951,10 @@ static int lc823450_i2s_configure(void)
   audinfo("DTCAP(C)=0x%08x \n", BUF_DTCAP('C'));
   audinfo("DTCAP(I)=0x%08x \n", BUF_DTCAP('I'));
   audinfo("DTCAP(J)=0x%08x \n", BUF_DTCAP('J'));
+
+  /* Setup default tx threshold */
+
+  _setup_tx_threshold(0);
   return 0;
 }
 
@@ -982,4 +1043,13 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   /* Success exit */
 
   return &priv->dev;
+}
+
+/****************************************************************************
+ * Name: up_audio_bufcapacity
+ ****************************************************************************/
+
+uint32_t up_audio_bufcapacity(void)
+{
+  return (100 * getreg32(BUF_DTCAP('C'))) / getreg32(BUF_SIZE('C'));
 }
