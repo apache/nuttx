@@ -4,6 +4,12 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   "MAX3421E USB Peripheral/Host Controller with SPI Interface",
+ *      19-3953, Rev 4, Maxim Integrated, July 2013 (Datasheet).
+ *   "MAX3421E Programming Guide", Maxim Integrated, December 2006
+ *      (Application Note).
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -48,6 +54,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ***************************************************************/
+/* MAX3421E USB Host Driver Support
+ *
+ * Pre-requisites
+ *
+ *  CONFIG_USBHOST - Enable general USB host support
+ *  CONFIG_USBHOST_MAX3421E - Enable the MAX3421E USB host support
+ *  CONFIG_SCHED_LPWORK - Low priority work queue support is required.
+ *
+ * Options:
+ *
+ *   CONFIG_MAX3421E_DESCSIZE - Maximum size of a descriptor.  Default: 128
+ *   CONFIG_MAX3421E_USBHOST_REGDEBUG - Enable very low-level register access
+ *     debug.  Depends on CONFIG_DEBUG_USB_INFO.
+ *   CONFIG_MAX3421E_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
+ *     packets. Depends on CONFIG_DEBUG_USB_INFO.
+ */
 
 /* Host Mode Register Addresses *********************************************/
 /* The command byte contains the register address, a direction bit, and an
@@ -137,8 +161,14 @@
 #define USBHOST_USBCTL_CHIPRES          (1 << 5)
 
 #define USBHOST_CPUCTL_IE               (1 << 0)
-#define USBHOST_CPUCTL_PULSEWID0        (1 << 6)
-#define USBHOST_CPUCTL_PULSEWID1        (1 << 7)
+#define USBHOST_CPUCTL_PULSEWID_SHIFT   (6)       /* Bits 6-7:  INT Pulsewidth */
+#define USBHOST_CPUCTL_PULSEWID_MASK    (3 << USBHOST_CPUCTL_PULSEWID_SHIFT)
+#  define USBHOST_CPUCTL_PULSEWID0      (1 << 6)
+#  define USBHOST_CPUCTL_PULSEWID1      (1 << 7)
+#  define USBHOST_CPUCTL_PULSEWID_10p6US  (0 << USBHOST_CPUCTL_PULSEWID_SHIFT) /* 10.6 uS */
+#  define USBHOST_CPUCTL_PULSEWID_5p3US   (1 << USBHOST_CPUCTL_PULSEWID_SHIFT) /* 5.3 uS */
+#  define USBHOST_CPUCTL_PULSEWID_2p6US   (2 << USBHOST_CPUCTL_PULSEWID_SHIFT) /* 2.6 uS */
+#  define USBHOST_CPUCTL_PULSEWID_1p3US   (4 << USBHOST_CPUCTL_PULSEWID_SHIFT) /* 1.3 uS */
 
 #define USBHOST_PINCTL_PXA              (1 << 0)
 #define USBHOST_PINCTL_GPXB             (1 << 1)
@@ -192,24 +222,48 @@
 #define USBHOST_HCTL_FRMRST             (1 << 1)
 #define USBHOST_HCTL_BUSSAMPLE          (1 << 2)
 #define USBHOST_HCTL_SIGRSM             (1 << 3)
-#define USBHOST_HCTL_RCVTOG0            (1 << 4)
-#define USBHOST_HCTL_RCVTOG1            (1 << 5)
-#define USBHOST_HCTL_SNDTOG0            (1 << 6)
-#define USBHOST_HCTL_SNDTOG1            (1 << 7)
+#define USBHOST_HCTL_TOGGLES_SHIFT      (4)       /* Bits 4-7: Data toggles */
+#define USBHOST_HCTL_TOGGLES_MASK       (15 << USBHOST_HCTL_TOGGLES_SHIFT)
+#  define USBHOST_HCTL_RCVTOG0          (1 << 4)
+#  define USBHOST_HCTL_RCVTOG1          (1 << 5)
+#  define USBHOST_HCTL_SNDTOG0          (1 << 6)
+#  define USBHOST_HCTL_SNDTOG1          (1 << 7)
 
-#define USBHOST_HXFR_EP0                (1 << 0)
-#define USBHOST_HXFR_EP1                (1 << 1)
-#define USBHOST_HXFR_EP2                (1 << 2)
-#define USBHOST_HXFR_EP3                (1 << 3)
-#define USBHOST_HXFR_SETUP              (1 << 4)
-#define USBHOST_HXFR_OUTNIN             (1 << 5)
-#define USBHOST_HXFR_ISO                (1 << 6)
-#define USBHOST_HXFR_HS                 (1 << 7)
+#define USBHOST_HXFR_EP_SHIFT           (0)      /* Bits 0-3:  Endpoint number */
+#define USBHOST_HXFR_EP_MASK            (15 << USBHOST_HXFR_EP_SHIFT)
+#  define USBHOST_HXFR_EP(n)            ((uint8_t)(n) << USBHOST_HXFR_EP_SHIFT)
+#define USBHOST_HXFR_TOKEN_SHIFT        (4)      /* Bits 4-7:  Token */
+#define USBHOST_HXFR_TOKEN_MASK         (15 << USBHOST_HXFR_EP_SHIFT)
+#  define USBHOST_HXFR_SETUP            (1 << 4)
+#  define USBHOST_HXFR_OUTNIN           (1 << 5)
+#  define USBHOST_HXFR_ISO              (1 << 6)
+#  define USBHOST_HXFR_HS               (1 << 7)
+#  define USBHOST_HXFR_TOKEN_IN         (0)
+#  define USBHOST_HXFR_TOKEN_SETUP      USBHOST_HXFR_SETUP
+#  define USBHOST_HXFR_TOKEN_OUT        USBHOST_HXFR_OUTNIN
+#  define USBHOST_HXFR_TOKEN_INHS       USBHOST_HXFR_HS
+#  define USBHOST_HXFR_TOKEN_OUTHS      (USBHOST_HXFR_OUTNIN | USBHOST_HXFR_HS)
+#  define USBHOST_HXFR_TOKEN_ISOIN      USBHOST_HXFR_ISO
+#  define USBHOST_HXFR_TOKEN_ISOOUT     (USBHOST_HXFR_OUTNIN | USBHOST_HXFR_ISO)
 
-#define USBHOST_HRSL_HRSLT0             (1 << 0)
-#define USBHOST_HRSL_HRSLT1             (1 << 1)
-#define USBHOST_HRSL_HRSLT2             (1 << 2)
-#define USBHOST_HRSL_HRSLT3             (1 << 3)
+#define USBHOST_HRSL_HRSLT_SHIFT        (0)       /* Bits 0-3: Host result error code */
+#define USBHOST_HRSL_HRSLT_MASK         (15 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_SUCCESS    (0  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_BUSY       (1  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_BADREQ     (2  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_UNDEF      (3  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_NAK        (4  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_STALL      (5  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_TOGERR     (6  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_WRONGPID   (7  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_BADBC      (8  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_PIDERR     (9  << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_PKTERR     (10 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_CRCERR     (11 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_KERR       (12 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_JERR       (13 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_TIMEOUT    (14 << USBHOST_HRSL_HRSLT_SHIFT)
+#  define USBHOST_HRSL_HRSLT_BABBLE     (15 << USBHOST_HRSL_HRSLT_SHIFT)
 #define USBHOST_HRSL_RCVTOGRD           (1 << 4)
 #define USBHOST_HRSL_SNDTOGRD           (1 << 5)
 #define USBHOST_HRSL_KSTATUS            (1 << 6)
@@ -312,6 +366,11 @@
  *   Bit 2:     Unused
  *   Bit 1:     Direction (read = 0, write = 1)
  *   Bit 0:     ACKSTAT
+ *
+ * The ACKSTAT bit sets the ACKSTAT bit in the EPSTALLS (R9) register
+ * (peripheral mode only). The SPI master sets this bit to indicate that it
+ * has finished servicing a CONTROL transfer.  The ACKSTAT bit is ignored in
+ * host mode.
  */
 
 /* Read/write access to a register */
@@ -322,14 +381,25 @@
 #define MAX3421E_ACKSTAT_TRUE           0x01
 #define MAX3421E_ACKSTAT_FALSE          0x00
 
-/* Sizes and numbers of things */
+/* Sizes and numbers of things -- Peripheral mode */
 
-#define MAX3421E_NENDPOINTS             4       /* EP0..EP3 */
-#define MAX3421E_DBLBUF_SET             0x06    /* EP2, EP3 double buffered */
+#define MAX3421E_NENDPOINTS             4       /* EP0-EP3 */
+#define MAX3421E_ALLEP_SET              0x0f    /* EP0-EP3 */
+#define MAX3421E_CONTROL_SET            0x01    /* EP0 is the only control EP */
+#define MAX3421E_BULK_SET               0x0e    /* EP1-3 can be bulk EPs */
+#define MAX3421E_INTERUPT_SET           0x0e    /* EP1-3 can be interrupt EPs */
+#define MAX3421E_OUTEP_SET              0x02    /* EP1 is the only OUT endpoint */
+#define MAX3421E_INEP_SET               0x0c    /* EP2-3 are IN endpoints */
+#define MAX3421E_DBLBUF_SET             0x06    /* EP1-2 are double buffered */
 
-#define MAX3421E_SNDFIFO_SIZE           64
-#define MAX3421E_RCVFIFO_SIZE           64
 #define MAX3421E_SETUPFIFO_SIZE         8
+
+/* Sizes and numbers of things -- Host mode */
+
+#define MAX3421E_NHOST_CHANNELS         16      /* Number of host channels */
+#define MAX3421E_SNDFIFO_SIZE           64      /* Send FIFO, double-buffered */
+#define MAX3421E_RCVFIFO_SIZE           64      /* Receive FIFO, double-buffered */
+#define MAX3421E_SUDFIFO_SIZE           8       /* Setup FIFO */
 
 /* Value of the MODE register HOST bit */
 
@@ -359,12 +429,28 @@ struct spi_dev_s; /* Forward reference */
 
 struct max3421e_lowerhalf_s
 {
-  /* Device characterization */
+  /* Device characterization.
+   *
+   * The interrupt configuration byte may have the following values:
+   *
+   * USBDEV_PINCTL_INTLEVEL=1 USBDEV_PINCTL_POSINT=xx (has no effect)
+   *   Open-drain, low level active interrupt.  In this mode the INT pin is
+   *   open-drain, so a pull-up resistor on the INT line is necessary.
+   *
+   * USBDEV_PINCTL_INTLEVEL=0 USBDEV_PINCTL_POSINT=0
+   *   Push-pull, falling edge-sensitive.  When POSINT=0 (and INTLEVEL=0),
+   *   the INT pin signals pending interrupts with a negative edge.
+   *
+   * USBDEV_PINCTL_INTLEVEL=0 USBDEV_PINCTL_POSINT=1
+   *   Push-pull, rising edge-sensitive.  When POSINT=1 (and INTLEVEL=0),
+   *   the INT pin signals pending interrupts with a positive edge.
+   */
 
   FAR struct spi_dev_s *spi; /* SPI device instance */
   uint32_t frequency;        /* SPI frequency < 26MHz */
   enum spi_mode_e mode;      /* Either SPIDEV_MODE0 or SPIDEV_MODE3 */
   uint8_t devid;             /* Distinguishes multiple MAX3421E on SPI bus */
+  uint8_t intconfig;         /* Interrupt configuration.  See notes above. */
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind callbacks
    * to isolate the driver from differences in GPIO interrupt handling
@@ -375,8 +461,8 @@ struct max3421e_lowerhalf_s
    *   acknowledge - Acknowledge/clear any pending GPIO interrupt
    */
 
-  CODE int (*attach)(FAR struct max3421e_lowerhalf_s *lower, xcpt_t isr,
-                     FAR void *arg);
+  CODE int (*attach)(FAR const struct max3421e_lowerhalf_s *lower,
+                     xcpt_t isr, FAR void *arg);
   CODE void (*enable)(FAR const struct max3421e_lowerhalf_s *lower,
                       bool enable);
   CODE void (*acknowledge)(FAR const struct max3421e_lowerhalf_s *lower);

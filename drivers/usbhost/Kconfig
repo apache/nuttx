@@ -553,6 +553,41 @@ config XBOXCONTROLLER_NPOLLWAITERS
 
 endif # USBHOST_XBOXCONTROLLER
 
+config USBHOST_MAX3421E
+	bool "Maxim MAX3421E FS host controller"
+	default n
+	select SPI
+	select SCHED_LPWORK
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for the Maxim MAX3421E FS host controller
+
+if USBHOST_MAX3421E
+
+config MAX3421E_DESCSIZE
+	int "Max descriptor size"
+	default 128
+	---help---
+		Maximum size of a descriptor.  Default: 128
+
+config MAX3421E_USBHOST_REGDEBUG
+	bool "MAX3421 register debug"
+	default n
+	depends on DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_USB_INFO.
+
+config MAX3421E_USBHOST_PKTDUMP
+	bool "MAX3421 packet dump"
+	default n
+	depends on DEBUG_USB_INFO
+	---help---
+		Dump all incoming and outgoing USB packets. Depends on
+		CONFIG_DEBUG_USB_INFO.
+
+endif # USBHOST_MAX3421E
+
 config USBHOST_TRACE
 	bool "Enable USB HCD tracing for debug"
 	default n
