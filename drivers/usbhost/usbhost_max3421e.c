@@ -213,6 +213,9 @@ struct max3421e_usbhost_s
   bool              connected; /* Connected to device */
   bool              change;    /* Connection change */
   bool              pscwait;   /* True: Thread is waiting for a port event */
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  bool              locked;    /* The SPI bus is locked */
+#endif
   uint8_t           smstate;   /* The state of the USB host state machine */
   uint8_t           irqset;    /* Set of enabled interrupts */
   uint8_t           xfrtype;   /* See enum mx3421e_hxfrdn_e */
@@ -661,7 +664,7 @@ static void max3421e_lock(FAR struct max3421e_usbhost_s *priv)
   FAR const struct max3421e_lowerhalf_s *lower = priv->lower;
   FAR struct spi_dev_s *spi;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && !priv->locked);
   spi = lower->spi;
 
   (void)SPI_LOCK(spi, true);
@@ -669,6 +672,12 @@ static void max3421e_lock(FAR struct max3421e_usbhost_s *priv)
   SPI_SETBITS(spi, 8);
   (void)SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, lower->frequency);
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  /* Mark the SPI bus as locked (for debug only) */
+
+  priv->locked = true;
+#endif
 }
 
 /****************************************************************************
@@ -683,9 +692,16 @@ static void max3421e_unlock(FAR struct max3421e_usbhost_s *priv)
 {
   FAR const struct max3421e_lowerhalf_s *lower = priv->lower;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
   (void)SPI_LOCK(lower->spi, false);
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  /* Mark the SPI bus as unlocked (for debug only) */
+
+  priv->locked = false;
+#endif
 }
+
 /****************************************************************************
  * Name: max3421e_printreg
  *
@@ -808,12 +824,12 @@ static uint32_t max3421e_getreg(FAR struct max3421e_usbhost_s *priv,
   uint8_t cmd;
   uint8_t value;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
   spi = lower->spi;
 
   /* Select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, true);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
   /* Send the read command byte */
 
@@ -826,7 +842,7 @@ static uint32_t max3421e_getreg(FAR struct max3421e_usbhost_s *priv,
 
   /* De-select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, false);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), false);
 
 #ifdef CONFIG_MAX3421E_USBHOST_REGDEBUG
   /* Check if we need to print this value */
@@ -855,7 +871,7 @@ static void max3421e_putreg(FAR struct max3421e_usbhost_s *priv,
   FAR struct spi_dev_s *spi;
   uint8_t cmd;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
   spi = lower->spi;
 
 #ifdef CONFIG_MAX3421E_USBHOST_REGDEBUG
@@ -866,7 +882,7 @@ static void max3421e_putreg(FAR struct max3421e_usbhost_s *priv,
 
   /* Select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, true);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
   /* Send the write command byte */
 
@@ -879,7 +895,7 @@ static void max3421e_putreg(FAR struct max3421e_usbhost_s *priv,
 
   /* De-select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, false);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), false);
 }
 
 /****************************************************************************
@@ -924,12 +940,12 @@ static void max3421e_recvblock(FAR struct max3421e_usbhost_s *priv,
   FAR struct spi_dev_s *spi;
   uint8_t cmd;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
   spi = lower->spi;
 
   /* Select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, true);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
   /* Send the read command byte */
 
@@ -942,7 +958,7 @@ static void max3421e_recvblock(FAR struct max3421e_usbhost_s *priv,
 
   /* De-select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, false);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), false);
 
 #ifdef CONFIG_MAX3421E_USBHOST_REGDEBUG
   /* Dump the block of data received */
@@ -970,7 +986,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
   FAR struct spi_dev_s *spi;
   uint8_t cmd;
 
-  DEBUGASSERT(lower != NULL && lower->spi != NULL);
+  DEBUGASSERT(lower != NULL && lower->spi != NULL && priv->locked);
   spi = lower->spi;
 
 #ifdef CONFIG_MAX3421E_USBHOST_REGDEBUG
@@ -981,7 +997,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 
   /* Select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, true);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
   /* Send the wrte command byte */
 
@@ -994,7 +1010,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 
   /* De-select the MAX4321E */
 
-  SPI_SELECT(spi, lower->devid, false);
+  SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), false);
 }
 
 /****************************************************************************
@@ -1316,6 +1332,11 @@ static inline void max3421e_restore_toggles(FAR struct max3421e_usbhost_s *priv,
  * Description:
  *   Get the end-of-transfer status from HRSLT register.
  *
+ *   REVISIT:   Currently NAKs are treated as errors.  A NAK on the first
+ *   packet can probably be treated that way.  But not NAKs after the
+ *   transfer is in progress.  We should also need to reset the peripheral
+ *   in that case.  Better to try and retry here within the driver.
+ *
  * Returned value:
  *   OK     - Transfer successful
  *  -EAGAIN - If devices NAKs the transfer.
@@ -1396,10 +1417,9 @@ static void max3421e_transfer_terminate(FAR struct max3421e_usbhost_s *priv,
 
    /* Save the endpoint toggle settings.
     *
-    * REVISIT:   Current NAKs are treated as errors.  A NAK on the first
-    * packet can probably be treated that way.  But not NAKs after the
-    * transfer is in progress.  We should also need to reset the peripheral
-    * in that case.  Better to try and retry here within the driver.
+    * REVISIT:  The MAX4321E sends fixed DATA0 and DATA1 PID tokens for the
+    * various stages of a CONTROL transfer, regardless of the setting of
+    * the internal data toggle.
     */
 
    max3421e_save_toggles(priv, chan);
@@ -1658,6 +1678,11 @@ static void max3421e_send_start(FAR struct max3421e_usbhost_s *priv,
  * Description:
  *   Transfer the 'buflen' bytes in 'buffer' through an OUT channel.
  *
+ * Assumptions:
+ *   The SPI is not locked.  This function is called only from the TRANSFER
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
+ *
  ****************************************************************************/
 
 static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
@@ -1700,7 +1725,10 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
 
       /* Set up for the transfer based on the direction and the endpoint type */
 
+      max3421e_lock(priv);
       ret = max3421e_out_setup(priv, chan);
+      max3421e_unlock(priv);
+
       if (ret < 0)
         {
           usbhost_trace1(MAX3421E_TRACE1_OUTSETUP_FAIL1, -ret);
@@ -1826,7 +1854,9 @@ static void max3421e_out_next(FAR struct max3421e_usbhost_s *priv,
  *   Initiate the first of a sequence of asynchronous transfers.
  *
  * Assumptions:
- *   This function is never called from an interrupt handler
+ *   The SPI is not locked.  This function is called only from the ASYNCH
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -1853,7 +1883,10 @@ static int max3421e_out_asynch(FAR struct max3421e_usbhost_s *priv,
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
+  max3421e_lock(priv);
   ret = max3421e_out_setup(priv, chan);
+  max3421e_unlock(priv);
+
   if (ret < 0)
     {
       usbhost_trace1(MAX3421E_TRACE1_OUTSETUP_FAIL3, -ret);
@@ -1872,7 +1905,9 @@ static int max3421e_out_asynch(FAR struct max3421e_usbhost_s *priv,
  *   Send an IN/OUT SETUP packet.
  *
  * Assumptions:
- *   Caller has the SPI locked
+ *   The SPI is not locked.  This function is called only from the CTRLIN and
+ *   CTRLOUT interfaces and must manage the SPI lock itself.  The lock, for
+ *   example, must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -1908,6 +1943,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
       /* Make sure the peripheral address is correct */
 
+      max3421e_lock(priv);
       max3421e_putreg(priv, MAX3421E_USBHOST_PERADDR, chan->funcaddr);
 
       /* Write packet into the SUDFIFO. */
@@ -1935,6 +1971,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
       /* Wait for the transfer to complete */
 
+      max3421e_unlock(priv);
       ret = max3421e_chan_wait(priv, chan);
 
       /* Return on success and for all failures other than EAGAIN.  EAGAIN
@@ -1974,7 +2011,9 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
  *   in the status phase of an IN control transfer
  *
  * Assumptions:
- *   Caller has the SPI locked
+ *   The SPI is not locked.  This function is called only from the CTRLOUT
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2007,7 +2046,9 @@ static int max3421e_ctrl_senddata(FAR struct max3421e_usbhost_s *priv,
 
   /* Start the transfer */
 
+  max3421e_lock(priv);
   max3421e_send_start(priv, chan);
+  max3421e_unlock(priv);
 
   /* Wait for the transfer to complete and return the result */
 
@@ -2022,7 +2063,9 @@ static int max3421e_ctrl_senddata(FAR struct max3421e_usbhost_s *priv,
  *   in the status phase of an OUT control transfer
  *
  * Assumptions:
- *   Caller has the SPI locked
+ *   The SPI is not locked.  This function is called only from the CTRLIN
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2055,7 +2098,9 @@ static int max3421e_ctrl_recvdata(FAR struct max3421e_usbhost_s *priv,
 
   /* Start the transfer */
 
+  max3421e_lock(priv);
   max3421e_recv_start(priv, chan);
+  max3421e_unlock(priv);
 
   /* Wait for the transfer to complete and return the result */
 
@@ -2067,6 +2112,11 @@ static int max3421e_ctrl_recvdata(FAR struct max3421e_usbhost_s *priv,
  *
  * Description:
  *   Send status to complete the status phase of a CTRLIN transfer.
+ *
+ * Assumptions:
+ *   The SPI is not locked.  This function is called only from the CTRLIN
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2084,6 +2134,7 @@ static int max3421e_ctrl_sendstatus(FAR struct max3421e_usbhost_s *priv,
 
   /* Make sure the peripheral address is correct */
 
+  max3421e_lock(priv);
   max3421e_putreg(priv, MAX3421E_USBHOST_PERADDR, chan->funcaddr);
 
   /* Write the zero byte count to the SNDBC register */
@@ -2099,6 +2150,7 @@ static int max3421e_ctrl_sendstatus(FAR struct max3421e_usbhost_s *priv,
 
   priv->xfrtype = HXFRDN_SNDZLP;
   max3421e_int_enable(priv, USBHOST_HIRQ_HXFRDNIRQ);
+  max3421e_unlock(priv);
 
   /* Wait for the transfer to complete and return the result */
 
@@ -2110,6 +2162,11 @@ static int max3421e_ctrl_sendstatus(FAR struct max3421e_usbhost_s *priv,
  *
  * Description:
  *   Receive status to complete the status phase of a CTRLOUT transfer.
+ *
+ * Assumptions:
+ *   The SPI is not locked.  This function is called only from the CTRLOUT
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2129,6 +2186,7 @@ static int max3421e_ctrl_recvstatus(FAR struct max3421e_usbhost_s *priv,
 
   /* Make sure the peripheral address is correct */
 
+  max3421e_lock(priv);
   max3421e_putreg(priv, MAX3421E_USBHOST_PERADDR, chan->funcaddr);
 
   /* Send the HS-IN token. */
@@ -2143,6 +2201,7 @@ static int max3421e_ctrl_recvstatus(FAR struct max3421e_usbhost_s *priv,
 
   priv->xfrtype = HXFRDN_RCVFIFO;
   max3421e_int_enable(priv, USBHOST_HIRQ_RCVDAVIRQ | USBHOST_HIRQ_HXFRDNIRQ);
+  max3421e_unlock(priv);
 
   /* Wait for the transfer to complete and return the result */
 
@@ -2418,6 +2477,9 @@ static void max3421e_recv_continue(FAR struct max3421e_usbhost_s *priv)
  * Description:
  *   Start at transfer on the selected IN or OUT channel.
  *
+ * Assumptions:
+ *   The caller has the SPI locked.
+ *
  ****************************************************************************/
 
 static void max3421e_recv_start(FAR struct max3421e_usbhost_s *priv,
@@ -2448,6 +2510,11 @@ static void max3421e_recv_start(FAR struct max3421e_usbhost_s *priv,
  *
  * Description:
  *   Transfer 'buflen' bytes into 'buffer' from an IN channel.
+ *
+ * Assumptions:
+ *   The SPI is not locked.  This function is called only from the TRANSFER
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2483,7 +2550,10 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
 
       /* Set up for the transfer based on the direction and the endpoint type */
 
+      max3421e_lock(priv);
       ret = max3421e_in_setup(priv, chan);
+      max3421e_unlock(priv);
+
       if (ret < 0)
         {
           usbhost_trace1(MAX3421E_TRACE1_INSETUP_FAIL1, -ret);
@@ -2695,7 +2765,9 @@ static void max3421e_in_next(FAR struct max3421e_usbhost_s *priv,
  *   Initiate the first of a sequence of asynchronous transfers.
  *
  * Assumptions:
- *   This function is never called from an interrupt handler
+ *   The SPI is not locked.  This function is called only from the ASYNCH
+ *   interface and must manage the SPI lock itself.  The lock, for example,
+ *   must be relinquished before waiting.
  *
  ****************************************************************************/
 
@@ -2722,7 +2794,10 @@ static int max3421e_in_asynch(FAR struct max3421e_usbhost_s *priv,
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
+  max3421_lock(priv);
   ret = max3421e_in_setup(priv, chan);
+  max3421_unlock(priv);
+
   if (ret < 0)
     {
       usbhost_trace1(MAX3421E_TRACE1_INSETUP_FAIL3, -ret);
@@ -3746,10 +3821,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      max3421e_lock(priv);
       ret = max3421e_ctrl_sendsetup(priv, chan, req);
-      max3421e_unlock(priv);
-
       if (ret < 0)
         {
           usbhost_trace1(MAX3421E_TRACE1_SENDSETUP_FAIL2, -ret);
@@ -3769,10 +3841,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (buflen > 0)
             {
-              max3421e_lock(priv);
               ret = max3421e_ctrl_recvdata(priv, chan, buffer, buflen);
-              max3421e_unlock(priv);
-
               if (ret < 0)
                 {
                   usbhost_trace1(MAX3421E_TRACE1_RECVDATA_FAIL2, -ret);
@@ -3783,10 +3852,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret >= OK)
             {
-              max3421e_lock(priv);
               ret = max3421e_ctrl_sendstatus(priv, chan);
-              max3421e_unlock(priv);
-
               if (ret >= OK)
                 {
                   /* All success transactions exit here */
@@ -3848,10 +3914,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
     {
       /* Send the SETUP request */
 
-      max3421e_lock(priv);
       ret = max3421e_ctrl_sendsetup(priv, chan, req);
-      max3421e_unlock(priv);
-
       if (ret < 0)
         {
           usbhost_trace1(MAX3421E_TRACE1_SENDSETUP_FAIL1, -ret);
@@ -3873,10 +3936,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
             {
               /* Start DATA out transfer (only one DATA packet) */
 
-              max3421e_lock(priv);
               ret = max3421e_ctrl_senddata(priv, chan, NULL, 0);
-              max3421e_unlock(priv);
-
               if (ret < 0)
                 {
                   usbhost_trace1(MAX3421E_TRACE1_SENDDATA_FAIL2, -ret);
@@ -3887,10 +3947,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           if (ret >= OK)
             {
-              max3421e_lock(priv);
               ret = max3421e_ctrl_recvstatus(priv, chan);
-              max3421e_unlock(priv);
-
               if (ret >= OK)
                 {
                   /* All success transactions exit here */
