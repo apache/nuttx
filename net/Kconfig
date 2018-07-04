@@ -57,6 +57,9 @@ config NET_ETH_PKTSIZE
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
+		To get an MTU of 1500, for example, you would need packet buffer of
+		size 1514.
+
 config NET_SLIP_PKTSIZE
 	int # "SLIP packet buffer size"
 	default 296
@@ -67,7 +70,8 @@ config NET_SLIP_PKTSIZE
 		the TCP/UDP payload plus the size of TCP/UDP header and the IP header.
 		This value is related to the MTU (Maximum Transmission Unit), except
 		that it includes the size of the link layer header; the payload is
-		the MSS (Maximum Segment Size).
+		the MSS (Maximum Segment Size).  SLIP has no link layer header so for
+		SLIP the MTU is the same as the PKTSIZE.
 
 		SLIP is required to support at least 256+20+20 = 296.  Values other than
 		296 are not recommended.
@@ -185,6 +189,13 @@ config NET_TUN_PKTSIZE
 	int "TUN packet buffer size"
 	default 296
 	range 296 1518
+	---help---
+		Provides the size of the TUN packet buffers.  This size includes
+		the TCP/UDP payload plus the size of TCP/UDP header and the IP header.
+		This value is related to the MTU (Maximum Transmission Unit), except
+		that it includes the size of the link layer header; the payload is
+		the MSS (Maximum Segment Size).  TUN has no link layer header so for
+		TUN the MTU is the same as the PKTSIZE.
 
 choice
 	prompt "Work queue"

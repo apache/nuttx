@@ -296,7 +296,9 @@ config NET_6LOWPAN_PKTSIZE
 		size of TCP/UDP header, the IP header, and the Ethernet header.
 		This value is related to the MTU (Maximum Transmission Unit), except
 		that it includes the size of the link layer header; the payload is
-		the MSS (Maximum Segment Size).
+		the MSS (Maximum Segment Size).  6LoWPAN has no link layer header (at
+		least in the packet buffer which is only used for re-assembly).  So
+		for 6LoWPAN the MTU is the same as the PKTSIZE.
 
 		NOTE that this option depends on fragmentation support.  By
 		supporting fragmentation, we can handle quite large "logical" packet
