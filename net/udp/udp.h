@@ -522,7 +522,8 @@ int udp_ipv6_input(FAR struct net_driver_s *dev);
  *   conn - UDP connection structure (not currently used).
  *
  * Returned Value:
- *   A pointer to the network driver to use.
+ *   A pointer to the network driver to use.  NULL is returned if driver is
+ *   not bound to any local device.
  *
  ****************************************************************************/
 

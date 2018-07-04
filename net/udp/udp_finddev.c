@@ -66,7 +66,9 @@
  * Returned Value:
  *   A reference to the bound device.  If the retained interface index no
  *   longer refers to a valid device, this function will unbind the device
- *   and return NULL
+ *   and return an arbitrary network device at the head of the list of
+ *   registered devices.  This supports legacy IPv4 DHCPD behavior when
+ *   there is only a single registered network device.
  *
  ****************************************************************************/
 
@@ -94,10 +96,16 @@ static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
         }
     }
 
-  return dev;
+  /* REVISIT:  If no device was bound or the bound device is no longer valid,
+   * then just return the arbitrary device at the head of the list of
+   * registered devices.  This is lunacy if there are multiple, registered
+   * network devices but makes perfectly good since if there is only one.
+   */
+
+  return dev == NULL ? g_netdevices : dev;
 }
 #else
-#  define upd_bound_device(c) NULL
+#  define upd_bound_device(c) g_netdevices
 #endif
 
 
@@ -119,7 +127,8 @@ static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
  *   conn - UDP connection structure (not currently used).
  *
  * Returned Value:
- *   A pointer to the network driver to use.
+ *   A pointer to the network driver to use.  NULL is returned if driver is
+ *   not bound to any local device.
  *
  ****************************************************************************/
 
