@@ -398,7 +398,7 @@
  */
 
 #define EMAC_RX_UNITSIZE    EMAC_ALIGN_UP(128)
-#define EMAC_TX_UNITSIZE    EMAC_ALIGN_UP(CONFIG_NET_ETH_MTU)
+#define EMAC_TX_UNITSIZE    EMAC_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE)
 #define DUMMY_BUFSIZE       EMAC_ALIGN_UP(128)
 #define DUMMY_NBUFFERS      2
 
@@ -852,7 +852,7 @@ static const struct sam_emacattr_s g_emac0_attr =
  * a full packet.
  */
 
-static uint8_t g_pktbuf0[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf0[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* EMAC0 peripheral state */
 
@@ -932,7 +932,7 @@ static const struct sam_emacattr_s g_emac1_attr =
  * a full packet.
  */
 
-static uint8_t g_pktbuf1[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf1[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* EMAC1 peripheral state */
 
@@ -1762,9 +1762,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
           /* Get the number of bytes to copy from the buffer */
 
           copylen = EMAC_RX_UNITSIZE;
-          if ((pktlen + copylen) > CONFIG_NET_ETH_MTU)
+          if ((pktlen + copylen) > CONFIG_NET_ETH_PKTSIZE)
             {
-              copylen = CONFIG_NET_ETH_MTU - pktlen;
+              copylen = CONFIG_NET_ETH_PKTSIZE - pktlen;
             }
 
           /* Get the data source.  Invalidate the source memory region to
@@ -1917,7 +1917,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
        * configuration (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           NETDEV_RXERRORS(&priv->dev);

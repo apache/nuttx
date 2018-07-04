@@ -9,7 +9,8 @@
  * Note: Network configuration options the netconfig.h should not be changed,
  * but rather the per-project defconfig file.
  *
- *   Copyright (C) 2007, 2011, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2014-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -111,25 +112,25 @@
  */
 
 #ifdef CONFIG_NET_SLIP
-#  ifndef CONFIG_NET_SLIP_MTU
-#    define CONFIG_NET_SLIP_MTU 296
+#  ifndef CONFIG_NET_SLIP_PKTSIZE
+#    define CONFIG_NET_SLIP_PKTSIZE 296
 #  endif
 #endif
 
 #ifdef CONFIG_NET_TUN
-#  ifndef CONFIG_NET_TUN_MTU
-#    define CONFIG_NET_TUN_MTU 296
+#  ifndef CONFIG_NET_TUN_PKTSIZE
+#    define CONFIG_NET_TUN_PKTSIZE 296
 #  endif
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
-#  ifndef CONFIG_NET_ETH_MTU
-#    define CONFIG_NET_ETH_MTU 590
+#  ifndef CONFIG_NET_ETH_PKTSIZE
+#    define CONFIG_NET_ETH_PKTSIZE 590
 #  endif
 #endif
 
-#ifndef CONFIG_NET_6LOWPAN_MTU
-#  define CONFIG_NET_6LOWPAN_MTU          1294
+#ifndef CONFIG_NET_6LOWPAN_PKTSIZE
+#  define CONFIG_NET_6LOWPAN_PKTSIZE  1294
 #endif
 
 /* We are supporting multiple network devices using different link layer
@@ -137,55 +138,55 @@
  * structure.
  */
 
-#define NET_LL_HDRLEN(d) ((d)->d_llhdrlen)
-#define NET_DEV_MTU(d)   ((d)->d_mtu)
+#define NET_LL_HDRLEN(d)       ((d)->d_llhdrlen)
+#define NETDEV_PKTSIZE(d)      ((d)->d_pktsize)
 
 #ifdef CONFIG_NET_ETHERNET
-#  define _MIN_ETH_MTU   CONFIG_NET_ETH_MTU
-#  define _MAX_ETH_MTU   CONFIG_NET_ETH_MTU
+#  define _MIN_ETH_PKTSIZE     CONFIG_NET_ETH_PKTSIZE
+#  define _MAX_ETH_PKTSIZE     CONFIG_NET_ETH_PKTSIZE
 #else
-#  define _MIN_ETH_MTU   UINT16_MAX
-#  define _MAX_ETH_MTU   0
+#  define _MIN_ETH_PKTSIZE     UINT16_MAX
+#  define _MAX_ETH_PKTSIZE     0
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define _MIN_LO_MTU    MIN(_MIN_ETH_MTU,1518)
-#  define _MAX_LO_MTU    MAX(_MAX_ETH_MTU,574)
+#  define _MIN_LO_PKTSIZE      MIN(_MIN_ETH_PKTSIZE,  1518)
+#  define _MAX_LO_PKTSIZE      MAX(_MAX_ETH_PKTSIZE, 574)
 #else
-#  define _MIN_LO_MTU   _MIN_ETH_MTU
-#  define _MAX_LO_MTU   _MAX_ETH_MTU
+#  define _MIN_LO_PKTSIZE      _MIN_ETH_PKTSIZE
+#  define _MAX_LO_PKTSIZE      _MAX_ETH_PKTSIZE
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define _MIN_SLIP_MTU  MIN(_MIN_LO_MTU,CONFIG_NET_SLIP_MTU)
-#  define _MAX_SLIP_MTU  MAX(_MAX_LO_MTU,CONFIG_NET_SLIP_MTU)
+#  define _MIN_SLIP_PKTSIZE    MIN(_MIN_LO_PKTSIZE, CONFIG_NET_SLIP_PKTSIZE)
+#  define _MAX_SLIP_PKTSIZE    MAX(_MAX_LO_PKTSIZE, CONFIG_NET_SLIP_PKTSIZE)
 #else
-#  define _MIN_SLIP_MTU  _MIN_LO_MTU
-#  define _MAX_SLIP_MTU  _MAX_LO_MTU
+#  define _MIN_SLIP_PKTSIZE    _MIN_LO_PKTSIZE
+#  define _MAX_SLIP_PKTSIZE    _MAX_LO_PKTSIZE
 #endif
 
 #ifdef CONFIG_NET_TUN
-#  define _MIN_TUN_MTU   MIN(_MIN_SLIP_MTU,CONFIG_NET_TUN_MTU)
-#  define _MAX_TUN_MTU   MAX(_MAX_SLIP_MTU,CONFIG_NET_TUN_MTU)
+#  define _MIN_TUN_PKTSIZE      MIN(_MIN_SLIP_PKTSIZE, CONFIG_NET_TUN_PKTSIZE)
+#  define _MAX_TUN_PKTSIZE      MAX(_MAX_SLIP_PKTSIZE, CONFIG_NET_TUN_PKTSIZE)
 #else
-#  define _MIN_TUN_MTU   _MIN_SLIP_MTU
-#  define _MAX_TUN_MTU   _MAX_SLIP_MTU
+#  define _MIN_TUN_PKTSIZE      _MIN_SLIP_PKTSIZE
+#  define _MAX_TUN_PKTSIZE      _MAX_SLIP_PKTSIZE
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#  define _MIN_6LOWPAN_MTU  MIN(_MIN_TUN_MTU,CONFIG_NET_6LOWPAN_MTU)
-#  define _MAX_6LOWPAN_MTU  MAX(_MAX_TUN_MTU,CONFIG_NET_6LOWPAN_MTU)
+#  define _MIN_6LOWPAN_PKTSIZE  MIN(_MIN_TUN_PKTSIZE, CONFIG_NET_6LOWPAN_PKTSIZE)
+#  define _MAX_6LOWPAN_PKTSIZE  MAX(_MAX_TUN_PKTSIZE, CONFIG_NET_6LOWPAN_PKTSIZE)
 #else
-#  define _MIN_6LOWPAN_MTU  _MIN_TUN_MTU
-#  define _MAX_6LOWPAN_MTU  _MAX_TUN_MTU
+#  define _MIN_6LOWPAN_PKTSIZE  _MIN_TUN_PKTSIZE
+#  define _MAX_6LOWPAN_PKTSIZE  _MAX_TUN_PKTSIZE
 #endif
 
-#define MIN_NET_DEV_MTU  _MIN_6LOWPAN_MTU
-#define MAX_NET_DEV_MTU  _MAX_6LOWPAN_MTU
+#define MIN_NETDEV_PKTSIZE      _MIN_6LOWPAN_PKTSIZE
+#define MAX_NETDEV_PKTSIZE      _MAX_6LOWPAN_PKTSIZE
 
 /* For the loopback device, we will use the largest MTU */
 
-#  define NET_LO_MTU        MAX_NET_DEV_MTU
+#  define NET_LO_PKTSIZE        MAX_NETDEV_PKTSIZE
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -240,29 +241,29 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than NET_DEV_MTU(d) - NET_LL_HDRLEN(dev) - __UDP_HDRLEN - IPv*_HDRLEN.
+ * than NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(dev) - __UDP_HDRLEN - IPv*_HDRLEN.
  */
 
-#define UDP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - __UDP_HDRLEN - (h))
+#define UDP_MSS(d,h)               (NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(d) - __UDP_HDRLEN - (h))
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_UDP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - __UDP_HDRLEN - (h))
+#  define ETH_UDP_MSS(h)           (CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN - __UDP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#  define IEEE802154_UDP_MSS(h) (CONFIG_NET_6LOWPAN_MTU - __UDP_HDRLEN - (h))
+#  define IEEE802154_UDP_MSS(h)    (CONFIG_NET_6LOWPAN_PKTSIZE - __UDP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define LO_UDP_MSS(h)         (NET_LO_MTU - __UDP_HDRLEN - (h))
+#  define LO_UDP_MSS(h)            (NET_LO_PKTSIZE - __UDP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define SLIP_UDP_MSS(h)       (CONFIG_NET_SLIP_MTU - __UDP_HDRLEN - (h))
+#  define SLIP_UDP_MSS(h)          (CONFIG_NET_SLIP_PKTSIZE - __UDP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_TUN
-#  define TUN_UDP_MSS(h)        (CONFIG_NET_TUN_MTU - __UDP_HDRLEN - (h))
+#  define TUN_UDP_MSS(h)           (CONFIG_NET_TUN_PKTSIZE - __UDP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_ETHERNET
@@ -405,7 +406,7 @@
 #define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than NET_DEV_MTU(dev) - NET_LL_HDRLEN(dev) - IPvN_HDRLEN - __TCP_HDRLEN.
+ * than NETDEV_PKTSIZE(dev) - NET_LL_HDRLEN(dev) - IPvN_HDRLEN - __TCP_HDRLEN.
  *
  * In the case where there are multiple network devices with different
  * link layer protocols, each network device may support a different UDP
@@ -414,28 +415,28 @@
  * REVISIT: __TCP_HDRLEN is not really a constant!
  */
 
-#define TCP_MSS(d,h)            (NET_DEV_MTU(d) - NET_LL_HDRLEN(d) - __TCP_HDRLEN - (h))
+#define TCP_MSS(d,h)            (NETDEV_PKTSIZE(d) - NET_LL_HDRLEN(d) - __TCP_HDRLEN - (h))
 
 /* Get the smallest and largest MSS */
 
 #ifdef CONFIG_NET_ETHERNET
-#  define ETH_TCP_MSS(h)        (CONFIG_NET_ETH_MTU - ETH_HDRLEN - __TCP_HDRLEN - (h))
+#  define ETH_TCP_MSS(h)        (CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN - __TCP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_6LOWPAN
-#  define IEEE802154_TCP_MSS(h) (CONFIG_NET_6LOWPAN_MTU - __TCP_HDRLEN - (h))
+#  define IEEE802154_TCP_MSS(h) (CONFIG_NET_6LOWPAN_PKTSIZE - __TCP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define LO_TCP_MSS(h)         (NET_LO_MTU - __TCP_HDRLEN - (h))
+#  define LO_TCP_MSS(h)         (NET_LO_PKTSIZE - __TCP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_SLIP
-#  define SLIP_TCP_MSS(h)       (CONFIG_NET_SLIP_MTU - __TCP_HDRLEN - (h))
+#  define SLIP_TCP_MSS(h)       (CONFIG_NET_SLIP_PKTSIZE - __TCP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_TUN
-#  define TUN_TCP_MSS(h)        (CONFIG_NET_TUN_MTU - __TCP_HDRLEN - (h))
+#  define TUN_TCP_MSS(h)        (CONFIG_NET_TUN_PKTSIZE - __TCP_HDRLEN - (h))
 #endif
 
 #ifdef CONFIG_NET_ETHERNET

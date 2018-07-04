@@ -134,7 +134,7 @@
 #  define CONFIG_LPC17_ETH_PRIORITY NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
-#define PKTBUF_SIZE (MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE)
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* Debug Configuration *****************************************************/
 /* Register debug -- can only happen of CONFIG_DEBUG_NET_INFO is selected */
@@ -860,7 +860,7 @@ static void lpc17_rxdone_work(FAR void *arg)
        * imply that the packet is too big.
        */
 
-      /* else */ if (pktlen > CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE)
+      /* else */ if (pktlen > CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
         {
           nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                 considx, prodidx, pktlen, *rxstat);

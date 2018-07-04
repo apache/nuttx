@@ -221,8 +221,8 @@
 
 /* EMAC buffer sizes, number of buffers, and number of descriptors. *********/
 
-#define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
-#define EMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
+#define EMAC_RX_UNITSIZE 128                    /* Fixed size for RX buffer  */
+#define EMAC_TX_UNITSIZE CONFIG_NET_ETH_PKTSIZE /* MAX size for Ethernet packet */
 
 /* We need at least one more free buffer than transmit buffers */
 
@@ -321,7 +321,7 @@ static struct sam_emac_s g_emac;
  * a full packet.
  */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 #ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
 /* Preallocated data */
@@ -1099,9 +1099,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
           /* Get the number of bytes to copy from the buffer */
 
           copylen = EMAC_RX_UNITSIZE;
-          if ((pktlen + copylen) > CONFIG_NET_ETH_MTU)
+          if ((pktlen + copylen) > CONFIG_NET_ETH_PKTSIZE)
             {
-              copylen = CONFIG_NET_ETH_MTU - pktlen;
+              copylen = CONFIG_NET_ETH_PKTSIZE - pktlen;
             }
 
           /* Get the data source.  Invalidate the source memory region to
@@ -1239,7 +1239,7 @@ static void sam_receive(struct sam_emac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;

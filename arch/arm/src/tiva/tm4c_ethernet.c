@@ -228,7 +228,7 @@
  * will use the 16-byte alignment in all cases.
  */
 
-#define OPTIMAL_EMAC_BUFSIZE ((CONFIG_NET_ETH_MTU + 4 + 15) & ~15)
+#define OPTIMAL_EMAC_BUFSIZE ((CONFIG_NET_ETH_PKTSIZE + 4 + 15) & ~15)
 
 #if OPTIMAL_EMAC_BUFSIZE > EMAC_TDES1_TBS1_MASK
 #  error OPTIMAL_EMAC_BUFSIZE is too large
@@ -1136,7 +1136,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
       /* Set frame size */
 
-      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_MTU);
+      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
       txdesc->tdes1 = priv->dev.d_len;
 
       /* Set the Buffer1 address pointer */
@@ -1711,7 +1711,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("DROPPED: Too big: %d\n", dev->d_len);
         }

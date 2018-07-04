@@ -341,7 +341,7 @@ struct dm9x_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* At present, only a single DM90x0 device is supported. */
 
@@ -908,7 +908,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 
       /* Also check if the packet is a valid size for the network configuration */
 
-      else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_MTU + 2))
+      else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_PKTSIZE + 2))
         {
           nerr("ERROR: RX length error\n");
           NETDEV_RXERRORS(&priv->dm_dev);

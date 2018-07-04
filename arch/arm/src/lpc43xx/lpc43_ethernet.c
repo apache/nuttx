@@ -164,7 +164,7 @@
  * will use the 16-byte alignment in all cases.
  */
 
-#define OPTIMAL_ETH_BUFSIZE ((CONFIG_NET_ETH_MTU + 4 + 15) & ~15)
+#define OPTIMAL_ETH_BUFSIZE ((CONFIG_NET_ETH_PKTSIZE + 4 + 15) & ~15)
 
 #ifndef CONFIG_LPC43_ETH_BUFSIZE
 #  define CONFIG_LPC43_ETH_BUFSIZE OPTIMAL_ETH_BUFSIZE
@@ -1028,7 +1028,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
       /* Set frame size */
 
-      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_MTU);
+      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
       txdesc->tdes1 = priv->dev.d_len;
 
       /* Set the Buffer1 address pointer */
@@ -1603,7 +1603,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           /* Free dropped packet buffer */

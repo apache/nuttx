@@ -113,10 +113,10 @@
 #  define CONFIG_ENCX24J600_NINTERFACES 1
 #endif
 
-/* CONFIG_NET_ETH_MTU must always be defined */
+/* CONFIG_NET_ETH_PKTSIZE must always be defined */
 
-#if !defined(CONFIG_NET_ETH_MTU) && (CONFIG_NET_ETH_MTU <= MAX_FRAMELEN)
-#  error "CONFIG_NET_ETH_MTU is not valid for the ENCX24J600"
+#if !defined(CONFIG_NET_ETH_PKTSIZE) && (CONFIG_NET_ETH_PKTSIZE <= MAX_FRAMELEN)
+#  error "CONFIG_NET_ETH_PKTSIZE is not valid for the ENCX24J600"
 #endif
 
 /* We need to have the work queue to handle SPI interrupts */
@@ -169,7 +169,7 @@
 
 /* Packet memory layout */
 
-#define PKTMEM_ALIGNED_BUFSIZE ((CONFIG_NET_ETH_MTU + 1) & ~1)
+#define PKTMEM_ALIGNED_BUFSIZE ((CONFIG_NET_ETH_PKTSIZE + 1) & ~1)
 #define PKTMEM_RX_START (PKTMEM_START + PKTMEM_SIZE / 2)   /* Followed by RX buffer */
 #define PKTMEM_RX_SIZE  (PKTMEM_SIZE - PKTMEM_RX_START)
 #define PKTMEM_RX_END   (PKTMEM_START + PKTMEM_SIZE)       /* RX buffer goes to the end of SRAM */
@@ -274,7 +274,7 @@ struct enc_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Driver status structure */
 
@@ -1695,7 +1695,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       /* Check for a usable packet length (4 added for the CRC) */
 
-      else if (pktlen > (CONFIG_NET_ETH_MTU + 4) || pktlen <= (ETH_HDRLEN + 4))
+      else if (pktlen > (CONFIG_NET_ETH_PKTSIZE + 4) || pktlen <= (ETH_HDRLEN + 4))
         {
           nerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
 
@@ -2748,7 +2748,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   /* Set the maximum packet size which the controller will accept */
 
-  enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_ETH_MTU + 4);
+  enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_ETH_PKTSIZE + 4);
 
   ret = enc_waitreg(priv, ENC_ESTAT, ESTAT_PHYLNK, ESTAT_PHYLNK);
 

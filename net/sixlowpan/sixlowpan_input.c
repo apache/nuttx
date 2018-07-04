@@ -340,9 +340,9 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
         /* Drop the packet if it cannot fit into the d_buf */
 
-        if (fragsize > CONFIG_NET_6LOWPAN_MTU)
+        if (fragsize > CONFIG_NET_6LOWPAN_PKTSIZE)
           {
-            nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_MTU\n");
+            nwarn("WARNING: Reassembled packet size exeeds CONFIG_NET_6LOWPAN_PKTSIZE\n");
             return -ENOSPC;
           }
 
@@ -521,10 +521,10 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
    */
 
   paysize = iob->io_len - g_frame_hdrlen;
-  if (paysize > CONFIG_NET_6LOWPAN_MTU)
+  if (paysize > CONFIG_NET_6LOWPAN_PKTSIZE)
     {
       nwarn("WARNING: Packet dropped due to payload (%u) > packet buffer (%u)\n",
-            paysize, CONFIG_NET_6LOWPAN_MTU);
+            paysize, CONFIG_NET_6LOWPAN_PKTSIZE);
       ret = -ENOSPC;
       goto errout_with_reass;
     }
@@ -532,11 +532,11 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   /* Sanity-check size of incoming packet to avoid buffer overflow */
 
   reqsize = g_uncomp_hdrlen + (fragoffset << 3) + paysize;
-  if (reqsize > CONFIG_NET_6LOWPAN_MTU)
+  if (reqsize > CONFIG_NET_6LOWPAN_PKTSIZE)
     {
       nwarn("WARNING: Required buffer size: %u+%u+%u=%u Available=%u\n",
             g_uncomp_hdrlen, (fragoffset << 3), paysize,
-            reqsize, CONFIG_NET_6LOWPAN_MTU);
+            reqsize, CONFIG_NET_6LOWPAN_PKTSIZE);
       ret = -ENOMEM;
       goto errout_with_reass;
     }
@@ -667,7 +667,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *   - The io_flink field points to the next frame in the list (if enable)
  *   - The last frame in the list will have io_flink == NULL.
  *
- *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE
+ *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_PKTSIZE + CONFIG_NET_GUARDSIZE
  *   must also be provided.  The frame will be decompressed and placed in
  *   the d_buf. Fragmented packets will also be reassembled in the d_buf as
  *   they are received (meaning for the driver, that two packet buffers are

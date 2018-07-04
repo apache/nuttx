@@ -79,7 +79,7 @@
 #define CONFIG_RNDIS_NWRREQS    (2)
 
 #define RNDIS_PACKET_HDR_SIZE   (sizeof(struct rndis_packet_msg))
-#define CONFIG_RNDIS_BULKIN_REQLEN (CONFIG_NET_ETH_MTU + RNDIS_PACKET_HDR_SIZE)
+#define CONFIG_RNDIS_BULKIN_REQLEN (CONFIG_NET_ETH_PKTSIZE + RNDIS_PACKET_HDR_SIZE)
 #define CONFIG_RNDIS_BULKOUT_REQLEN CONFIG_RNDIS_BULKIN_REQLEN
 
 #define RNDIS_NCONFIGS          (1)
@@ -100,7 +100,7 @@
 #define RNDIS_MAXSTRLEN         (RNDIS_MXDESCLEN-2)
 #define RNDIS_CTRLREQ_LEN       (512)
 
-#define RNDIS_BUFFER_SIZE       CONFIG_NET_ETH_MTU
+#define RNDIS_BUFFER_SIZE       CONFIG_NET_ETH_PKTSIZE
 #define RNDIS_BUFFER_COUNT      4
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -401,14 +401,14 @@ static const uint32_t g_rndis_supported_oids[] =
 static const struct rndis_oid_value_s g_rndis_oid_values[] =
 {
   {RNDIS_OID_GEN_SUPPORTED_LIST, sizeof(g_rndis_supported_oids), 0, g_rndis_supported_oids},
-  {RNDIS_OID_GEN_MAXIMUM_FRAME_SIZE,    4, CONFIG_NET_ETH_MTU,  NULL},
+  {RNDIS_OID_GEN_MAXIMUM_FRAME_SIZE,    4, CONFIG_NET_ETH_PKTSIZE,  NULL},
 #ifdef CONFIG_USBDEV_DUALSPEED
   {RNDIS_OID_GEN_LINK_SPEED,            4, 100000,              NULL},
 #else
   {RNDIS_OID_GEN_LINK_SPEED,            4, 2000000,             NULL},
 #endif
-  {RNDIS_OID_GEN_TRANSMIT_BLOCK_SIZE,   4, CONFIG_NET_ETH_MTU,  NULL},
-  {RNDIS_OID_GEN_RECEIVE_BLOCK_SIZE,    4, CONFIG_NET_ETH_MTU,  NULL},
+  {RNDIS_OID_GEN_TRANSMIT_BLOCK_SIZE,   4, CONFIG_NET_ETH_PKTSIZE,  NULL},
+  {RNDIS_OID_GEN_RECEIVE_BLOCK_SIZE,    4, CONFIG_NET_ETH_PKTSIZE,  NULL},
   {RNDIS_OID_GEN_VENDOR_ID,             4, 0x00FFFFFF,          NULL},
   {RNDIS_OID_GEN_VENDOR_DESCRIPTION,    6, 0,                   "RNDIS"},
   {RNDIS_OID_GEN_CURRENT_PACKET_FILTER, 4, 0,                   NULL},
@@ -651,7 +651,7 @@ static bool rndis_allocnetreq(FAR struct rndis_dev_s *priv)
   if (priv->net_req)
     {
       priv->netdev.d_buf = &priv->net_req->req->buf[RNDIS_PACKET_HDR_SIZE];
-      priv->netdev.d_len = CONFIG_NET_ETH_MTU;
+      priv->netdev.d_len = CONFIG_NET_ETH_PKTSIZE;
     }
 
   leave_critical_section(flags);
@@ -761,7 +761,7 @@ static void rndis_giverxreq(FAR struct rndis_dev_s *priv)
 
   priv->net_req      = priv->rx_req;
   priv->netdev.d_buf = &priv->net_req->req->buf[RNDIS_PACKET_HDR_SIZE];
-  priv->netdev.d_len = CONFIG_NET_ETH_MTU;
+  priv->netdev.d_len = CONFIG_NET_ETH_PKTSIZE;
   priv->rx_req       = NULL;
 }
 
@@ -1247,7 +1247,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
 
           /* Check if the received packet exceeds request buffer */
 
-          if ((RNDIS_PACKET_HDR_SIZE + index + copysize) <= CONFIG_NET_ETH_MTU)
+          if ((RNDIS_PACKET_HDR_SIZE + index + copysize) <= CONFIG_NET_ETH_PKTSIZE)
             {
               memcpy(&priv->rx_req->req->buf[RNDIS_PACKET_HDR_SIZE + index], reqbuf,
                      copysize);
@@ -1264,7 +1264,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
     {
       /* Check for a usable packet length (4 added for the CRC) */
 
-      if (priv->current_rx_datagram_size > (CONFIG_NET_ETH_MTU + 4) ||
+      if (priv->current_rx_datagram_size > (CONFIG_NET_ETH_PKTSIZE + 4) ||
           priv->current_rx_datagram_size <= (ETH_HDRLEN + 4))
         {
           uerr("ERROR: Bad packet size dropped (%d)\n",

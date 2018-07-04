@@ -99,7 +99,7 @@
 #  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
 #endif
 
-#if CONFIG_NET_ETH_MTU > 1518
+#if CONFIG_NET_ETH_PKTSIZE > 1518
 #  error "MAXF size too big for this device"
 #endif
 
@@ -360,7 +360,7 @@ struct ez80emac_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* There is only a single instance of driver private data (because there is
  * only one EMAC interface.
@@ -1272,10 +1272,10 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
        * for the network buffer configuration (I routinely see
        */
 
-      if (rxdesc->pktsize > CONFIG_NET_ETH_MTU)
+      if (rxdesc->pktsize > CONFIG_NET_ETH_PKTSIZE)
         {
-          ninfo("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_ETH_MTU);
-          pktlen = CONFIG_NET_ETH_MTU;
+          ninfo("Truncated oversize RX pkt: %d->%d\n", rxdesc->pktsize, CONFIG_NET_ETH_PKTSIZE);
+          pktlen = CONFIG_NET_ETH_PKTSIZE;
         }
       else
         {

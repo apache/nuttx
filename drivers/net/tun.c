@@ -133,9 +133,9 @@ struct tun_device_s
 
   bool              read_wait;
 
-  uint8_t           read_buf[CONFIG_NET_TUN_MTU];
+  uint8_t           read_buf[CONFIG_NET_TUN_PKTSIZE];
   size_t            read_d_len;
-  uint8_t           write_buf[CONFIG_NET_TUN_MTU];
+  uint8_t           write_buf[CONFIG_NET_TUN_PKTSIZE];
   size_t            write_d_len;
 
   sem_t             waitsem;
@@ -1338,7 +1338,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
 
   net_lock();
 
-  if (buflen > CONFIG_NET_TUN_MTU)
+  if (buflen > CONFIG_NET_TUN_PKTSIZE)
     {
       ret = -EINVAL;
     }

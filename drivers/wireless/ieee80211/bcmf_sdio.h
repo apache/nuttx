@@ -115,7 +115,7 @@ struct bcmf_sdio_frame
   struct bcmf_frame_s header;
   bool                tx;
   dq_entry_t          list_entry;
-  uint8_t             data[HEADER_SIZE + MAX_NET_DEV_MTU +
+  uint8_t             data[HEADER_SIZE + MAX_NETDEV_PKTSIZE +
                            CONFIG_NET_GUARDSIZE];
 };
 

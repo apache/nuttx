@@ -84,7 +84,7 @@
  * won't work unless there are a few more.
  */
 
-#if CONFIG_NET_6LOWPAN_MTU > (CONFIG_IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
+#if CONFIG_NET_6LOWPAN_PKTSIZE > (CONFIG_IOB_BUFSIZE * CONFIG_IOB_NBUFFERS)
 #  error Not enough IOBs to hold one full 6LoWPAN packet
 #endif
 

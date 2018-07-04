@@ -58,12 +58,12 @@
  *     threads.  Default: 2048
  *   CONFIG_NET_SLIP_DEFPRIO - Provides the priority for SLIP RX and TX
  *     threads.  Default 128.
- *   CONFIG_NET_NET_SLIP_MTU - Provides the size of the SLIP packet buffers.
+ *   CONFIG_NET_NET_SLIP_PKTSIZE - Provides the size of the SLIP packet buffers.
  *     Default 296
  *
  *     The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
  *     IP+TPC headers plus 256 bytes of data).  So you might as well set
- *     CONFIG_NET_SLIP_MTU to 296 as well.
+ *     CONFIG_NET_SLIP_PKTSIZE to 296 as well.
  *
  *     There may be an issue with this setting, however.  I see that Linux
  *     uses a MTU of 296 and window of 256, but actually only sends 168 bytes

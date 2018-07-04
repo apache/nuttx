@@ -209,7 +209,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;
   mtu->reserved     = 0;
-  mtu->mtu          = HTONL(CONFIG_NET_ETH_MTU);
+  mtu->mtu          = HTONL(CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN);
 
   /* Set up the prefix option */
 

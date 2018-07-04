@@ -245,7 +245,7 @@
  * will use the 16-byte alignment in all cases.
  */
 
-#define OPTIMAL_ETH_BUFSIZE ((CONFIG_NET_ETH_MTU + 4 + 15) & ~15)
+#define OPTIMAL_ETH_BUFSIZE ((CONFIG_NET_ETH_PKTSIZE + 4 + 15) & ~15)
 
 #ifndef CONFIG_STM32_ETH_BUFSIZE
 #  define CONFIG_STM32_ETH_BUFSIZE OPTIMAL_ETH_BUFSIZE
@@ -1134,7 +1134,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
       /* Set frame size */
 
-      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_MTU);
+      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
       txdesc->tdes1 = priv->dev.d_len;
 
       /* Set the Buffer1 address pointer */
@@ -1709,7 +1709,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nerr("ERROR: Dropped, Too big: %d\n", dev->d_len);
 

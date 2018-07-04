@@ -412,7 +412,7 @@ struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
       header_len += 2; /* Data frames need alignment padding */
     }
 
-  if (len + header_len > MAX_NET_DEV_MTU + HEADER_SIZE ||
+  if (len + header_len > MAX_NETDEV_PKTSIZE + HEADER_SIZE ||
       len > len + header_len)
     {
       wlerr("Invalid size %d\n", len);

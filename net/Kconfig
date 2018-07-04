@@ -37,8 +37,8 @@ config NET_PROMISCUOUS
 
 menu "Driver buffer configuration"
 
-config NET_ETH_MTU
-	int "Ethernet packet buffer size (MTU)"
+config NET_ETH_PKTSIZE
+	int "Ethernet packet buffer size"
 	default 1294 if NET_IPv6
 	default 590 if !NET_IPv6
 	depends on NET_ETHERNET
@@ -46,8 +46,9 @@ config NET_ETH_MTU
 	---help---
 		Packet buffer size.  This size includes the TCP/UDP payload plus the
 		size of TCP/UDP header, the IP header, and the Ethernet header.
-		This value is normally referred to as the MTU (Maximum Transmission
-		Unit); the payload is the MSS (Maximum Segment Size).
+		This value is related to the MTU (Maximum Transmission Unit), except
+		that it includes the size of the link layer header; the payload is
+		the MSS (Maximum Segment Size).
 
 		IPv4 hosts are required to be able to handle an MSS of at least
 		536 octets, resulting in a minimum buffer size of 536+20+20+14 =
@@ -56,23 +57,24 @@ config NET_ETH_MTU
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
-config NET_SLIP_MTU
-	int # "SLIP packet buffer size (MTU)"
+config NET_SLIP_PKTSIZE
+	int # "SLIP packet buffer size"
 	default 296
 	depends on NET_SLIP
 	range 296 1518
 	---help---
 		Provides the size of the SLIP packet buffers.  This size includes
 		the TCP/UDP payload plus the size of TCP/UDP header and the IP header.
-		This value is normally referred to as the MTU (Maximum Transmission Unit);
-		the payload payload is the MSS (Maximum Segment Size).
+		This value is related to the MTU (Maximum Transmission Unit), except
+		that it includes the size of the link layer header; the payload is
+		the MSS (Maximum Segment Size).
 
 		SLIP is required to support at least 256+20+20 = 296.  Values other than
 		296 are not recommended.
 
 		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
 		the IP+TPC headers plus 256 bytes of data).  So you might as well
-		set CONFIG_NET_SLIP_MTU to 296 as well.
+		set CONFIG_NET_SLIP_PKTSIZE to 296 as well.
 
 		There may be an issue with this setting, however.  I see that Linux
 		uses a MTU of 296 and window of 256, but actually only sends 168
@@ -179,8 +181,8 @@ config TUN_NINTERFACES
 		interfaces to support.
 		Default: 1
 
-config NET_TUN_MTU
-	int "TUN packet buffer size (MTU)"
+config NET_TUN_PKTSIZE
+	int "TUN packet buffer size"
 	default 296
 	range 296 1518
 

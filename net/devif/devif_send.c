@@ -67,7 +67,7 @@
 
 void devif_send(struct net_driver_s *dev, const void *buf, int len)
 {
-  DEBUGASSERT(dev != NULL && len > 0 && len < NET_DEV_MTU(dev));
+  DEBUGASSERT(dev != NULL && len > 0 && len < NETDEV_PKTSIZE(dev));
 
   memcpy(dev->d_appdata, buf, len);
   dev->d_sndlen = len;

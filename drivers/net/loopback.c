@@ -108,7 +108,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-static uint8_t g_iobuffer[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_iobuffer[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /****************************************************************************
  * Private Function Prototypes

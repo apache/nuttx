@@ -140,7 +140,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR const struct ipv6tcp_hdr_s *ipv6tcp,
 
   /* Verify some minimal assumptions */
 
-  if (upperlen > CONFIG_NET_6LOWPAN_MTU)
+  if (upperlen > CONFIG_NET_6LOWPAN_PKTSIZE)
     {
       return 0;
     }

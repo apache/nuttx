@@ -148,7 +148,7 @@
  * type).
  */
 
-#define PIC32MZ_ALIGNED_BUFSIZE ((CONFIG_NET_ETH_MTU + 3) & ~3)
+#define PIC32MZ_ALIGNED_BUFSIZE ((CONFIG_NET_ETH_PKTSIZE + 3) & ~3)
 
 /* The number of buffers will, then, be one for each descriptor plus one extra */
 
@@ -1048,7 +1048,7 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
    */
 
   DEBUGASSERT(priv->pd_dev.d_buf != NULL &&
-              priv->pd_dev.d_len < CONFIG_NET_ETH_MTU);
+              priv->pd_dev.d_len < CONFIG_NET_ETH_PKTSIZE);
 
   /* Increment statistics and dump the packet (if so configured) */
 
@@ -1420,7 +1420,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv)
        * imply that the packet is too big.
        */
 
-      else if (priv->pd_dev.d_len > CONFIG_NET_ETH_MTU)
+      else if (priv->pd_dev.d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("WARNING: Too big. packet length: %d rxdesc: %08x\n",
                 priv->pd_dev.d_len, rxdesc->status);
@@ -2235,7 +2235,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * length restriction is desired, program this 16-bit field.
    */
 
-  pic32mz_putreg(CONFIG_NET_ETH_MTU, PIC32MZ_EMAC1_MAXF);
+  pic32mz_putreg(CONFIG_NET_ETH_PKTSIZE, PIC32MZ_EMAC1_MAXF);
 
   /*  Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
    * EMAC1SA2 registers (these registers are loaded at reset from the
@@ -2305,7 +2305,7 @@ static int pic32mz_ifup(struct net_driver_s *dev)
    * noticeable impact on the performance.
    */
 
-  pic32mz_putreg(ETH_CON2_RXBUFSZ(CONFIG_NET_ETH_MTU), PIC32MZ_ETH_CON2);
+  pic32mz_putreg(ETH_CON2_RXBUFSZ(CONFIG_NET_ETH_PKTSIZE), PIC32MZ_ETH_CON2);
 
   /* Reset state varialbes */
 

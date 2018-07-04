@@ -368,7 +368,7 @@ struct sixlowpan_reassbuf_s
    * provides the full reassembly packet to the network.
    */
 
-  uint8_t rb_buf[CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE];
+  uint8_t rb_buf[CONFIG_NET_6LOWPAN_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
   /* Memory pool used to allocate this reassembly buffer */
 
@@ -467,7 +467,7 @@ struct sixlowpan_reassbuf_s
  *   - The io_flink field points to the next frame in the list (if enable)
  *   - The last frame in the list will have io_flink == NULL.
  *
- *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_MTU + CONFIG_NET_GUARDSIZE
+ *   An non-NULL d_buf of size CONFIG_NET_6LOWPAN_PKTSIZE + CONFIG_NET_GUARDSIZE
  *   must also be provided.  The frame will be decompressed and placed in
  *   the d_buf. Fragmented packets will also be reassembled in the d_buf as
  *   they are received (meaning for the driver, that two packet buffers are

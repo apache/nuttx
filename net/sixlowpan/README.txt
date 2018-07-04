@@ -95,7 +95,7 @@ Optimal 6LoWPAN Configuration
 
 5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (typically 127).
    There must be enough IOBs to decompose the largest IPv6 packet
-   (CONFIG_NET_6LOWPAN_MTU, default 1294, plus per frame overhead).
+   (CONFIG_NET_6LOWPAN_PKTSIZE, default 1294, plus per frame overhead).
 
 Fragmentation Headers
 ---------------------

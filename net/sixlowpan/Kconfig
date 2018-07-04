@@ -287,15 +287,16 @@ config NET_6LOWPAN_MAX_MACTRANSMITS
 		layer should resend packets if no link-layer ACK wasreceived. This
 		only makes sense with the csma_driver.
 
-config NET_6LOWPAN_MTU
+config NET_6LOWPAN_PKTSIZE
 	int "6LoWPAN packet buffer size"
 	default 1294
 	range 590 1518
 	---help---
 		Packet buffer size.  This size includes the TCP/UDP payload plus the
 		size of TCP/UDP header, the IP header, and the Ethernet header.
-		This value is normally referred to as the MTU (Maximum Transmission
-		Unit); the payload is the MSS (Maximum Segment Size).
+		This value is related to the MTU (Maximum Transmission Unit), except
+		that it includes the size of the link layer header; the payload is
+		the MSS (Maximum Segment Size).
 
 		NOTE that this option depends on fragmentation support.  By
 		supporting fragmentation, we can handle quite large "logical" packet

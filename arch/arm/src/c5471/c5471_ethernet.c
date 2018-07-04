@@ -301,7 +301,7 @@
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* The c5471_driver_s encapsulates all state information for a single c5471
  * hardware interface
@@ -1224,7 +1224,7 @@ static void c5471_receive(struct c5471_driver_s *priv)
 
       /* Check if the received packet will fit within the network packet buffer */
 
-      if (packetlen < (CONFIG_NET_ETH_MTU + 4))
+      if (packetlen < (CONFIG_NET_ETH_PKTSIZE + 4))
         {
           /* Get the packet memory from words #2 and #3 of descriptor */
 
@@ -1285,7 +1285,7 @@ static void c5471_receive(struct c5471_driver_s *priv)
    * to the network for processing.
    */
 
-  if (packetlen > 0 && packetlen < CONFIG_NET_ETH_MTU)
+  if (packetlen > 0 && packetlen < CONFIG_NET_ETH_PKTSIZE)
     {
       /* Set amount of data in priv->c_dev.d_len. */
 

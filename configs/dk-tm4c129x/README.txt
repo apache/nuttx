@@ -226,7 +226,7 @@ Networking Support
     CONFIG_NET=y                        : Enable Neworking
     CONFIG_NET_ETHERNET=y               : Support Ethernet data link
     CONFIG_NET_SOCKOPTS=y               : Enable socket operations
-    CONFIG_NET_ETH_MTU=590              : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_PKTSIZE=590          : Maximum packet size 1518 is more standard
     CONFIG_NET_ARP=y                    : Enable ARP
     CONFIG_NET_ARPTAB_SIZE=16           : ARP table size
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting

@@ -95,7 +95,7 @@ static uint16_t sixlowpan_udp_chksum(FAR const struct ipv6udp_hdr_s *ipv6udp,
 
   /* Verify some minimal assumptions */
 
-  if (upperlen > CONFIG_NET_6LOWPAN_MTU)
+  if (upperlen > CONFIG_NET_6LOWPAN_PKTSIZE)
     {
       return 0;
     }

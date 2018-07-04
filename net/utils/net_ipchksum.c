@@ -93,7 +93,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Verify some minimal assumptions */
 
-  if (upperlen > NET_DEV_MTU(dev))
+  if (upperlen > NETDEV_PKTSIZE(dev))
     {
       return 0;
     }
@@ -146,7 +146,7 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Verify some minimal assumptions */
 
-  if (upperlen > NET_DEV_MTU(dev))
+  if (upperlen > NETDEV_PKTSIZE(dev))
     {
       return 0;
     }

@@ -75,7 +75,7 @@
  * len should not exceed 1400 bytes
  */
 
-#define MAX_CHUNK_LEN (CONFIG_NET_ETH_MTU > 1500 ? 1400 : CONFIG_NET_ETH_MTU - 100)
+#define MAX_CHUNK_LEN (CONFIG_NET_ETH_PKTSIZE > 1500 ? 1400 : CONFIG_NET_ETH_PKTSIZE - 100)
 
 /* Helper to get iw_event size */
 

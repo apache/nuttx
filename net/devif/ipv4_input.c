@@ -125,7 +125,7 @@
  */
 
 #define IP_MF                0x20  /* See IP_FLAG_MOREFRAGS */
-#define IPv4_REASS_BUFSIZE   (CONFIG_NET_ETH_MTU - ETH_HDRLEN)
+#define IPv4_REASS_BUFSIZE   (CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN)
 #define IPv4_REASS_LASTFRAG  0x01
 
 /****************************************************************************

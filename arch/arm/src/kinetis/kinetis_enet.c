@@ -200,7 +200,7 @@
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
-#define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_MTU & 0xfffffff0) + 0x10)
+#define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_PKTSIZE & 0xfffffff0) + 0x10)
 
 /* If this SoC has the RMII Clock Source selection configure it */
 
@@ -1807,11 +1807,11 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 
 #ifdef CONFIG_KINETIS_ENETUSEMII
   rcr = ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
+        CONFIG_NET_ETH_PKTSIZE << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
 #else
   rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_MTU << ENET_RCR_MAX_FL_SHIFT |
+        CONFIG_NET_ETH_PKTSIZE << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
 #endif
   tcr = 0;

@@ -245,7 +245,7 @@ struct net_driver_s
   uint8_t d_ifindex;            /* Device index */
 #endif
 
-  uint16_t d_mtu;               /* Maximum packet size */
+  uint16_t d_pktsize;           /* Maximum packet size */
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
     defined(CONFIG_NET_BLUETOOTH) || defined(CONFIG_NET_IEEE802154)

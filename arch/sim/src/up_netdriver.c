@@ -86,7 +86,7 @@ static struct timer g_periodic_timer;
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Ethernet peripheral state */
 
@@ -180,7 +180,7 @@ void netdriver_loop(void)
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
   g_sim_dev.d_len = netdev_read((FAR unsigned char *)g_sim_dev.d_buf,
-                                CONFIG_NET_ETH_MTU);
+                                CONFIG_NET_ETH_PKTSIZE);
 
   /* Disable preemption through to the following so that it behaves a little more
    * like an interrupt (otherwise, the following logic gets pre-empted an behaves

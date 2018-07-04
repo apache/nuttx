@@ -166,7 +166,7 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
 
   /* Allocate frame for TX */
 
-  priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv, MAX_NET_DEV_MTU, true);
+  priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv, MAX_NETDEV_PKTSIZE, true);
   if (!priv->cur_tx_frame)
     {
       wlerr("ERROR: Cannot allocate TX frame\n");

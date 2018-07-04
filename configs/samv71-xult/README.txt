@@ -706,7 +706,7 @@ Selecting the GMAC peripheral
   Networking Support
     CONFIG_NET=y                         : Enable Neworking
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
-    CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_PKTSIZE=562           : Maximum packet size 1518 is more standard
     CONFIG_NET_ARP=y                     : ARP support should be enabled
     CONFIG_NET_ARP_SEND=y                : Use ARP to get peer address before sending
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
@@ -2483,7 +2483,7 @@ Configuration sub-directories
        configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
        size of update messages.  That is 1024 bytes in that configuration
        (the full message with the header will be a little larger).  The
-       MTU (CONFIG_NET_ETH_MTU) is set to 590 so that a full update will
+       CONFIG_NET_ETH_PKTSIZE is set to 590 so that a full update will
        require several packets.
 
        Write buffering also effects network performance.  This will break
@@ -2632,7 +2632,7 @@ Configuration sub-directories
        configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
        size of update messages.  That is 1024 bytes in that configuration
        (the full message with the header will be a little larger).  The
-       MTU (CONFIG_NET_ETH_MTU) is set to 590 so that a full update will
+       CONFIG_NET_ETH_PKTSIZE is set to 590 so that a full update will
        require several packets.
 
        Write buffering also effects network performance.  This will break

@@ -140,14 +140,14 @@
 
 /* GMAC buffer sizes, number of buffers, and number of descriptors. *********/
 
-#define GMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
-#define GMAC_TX_UNITSIZE CONFIG_NET_ETH_MTU  /* MAX size for Ethernet packet */
+#define GMAC_RX_UNITSIZE 128                    /* Fixed size for RX buffer  */
+#define GMAC_TX_UNITSIZE CONFIG_NET_ETH_PKTSIZE /* MAX size for Ethernet packet */
 
 /* The MAC can support frame lengths up to 1536 bytes */
 
 #define GMAC_MAX_FRAMELEN       1536
-#if CONFIG_NET_ETH_MTU >GMAC_MAX_FRAMELEN
-#  error CONFIG_NET_ETH_MTU is too large
+#if CONFIG_NET_ETH_PKTSIZE >GMAC_MAX_FRAMELEN
+#  error CONFIG_NET_ETH_PKTSIZE is too large
 #endif
 
 /* We need at least one more free buffer than transmit buffers */
@@ -247,7 +247,7 @@ static struct sam_gmac_s g_gmac;
  * a full packet.
  */
 
-static uint8_t g_pktbuf[MAX_NET_DEV_MTU + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 #ifdef CONFIG_SAMA5_GMAC_PREALLOCATE
 /* Preallocated data */
@@ -1031,9 +1031,9 @@ static int sam_recvframe(struct sam_gmac_s *priv)
           /* Get the number of bytes to copy from the buffer */
 
           copylen = GMAC_RX_UNITSIZE;
-          if ((pktlen + copylen) > CONFIG_NET_ETH_MTU)
+          if ((pktlen + copylen) > CONFIG_NET_ETH_PKTSIZE)
             {
-              copylen = CONFIG_NET_ETH_MTU - pktlen;
+              copylen = CONFIG_NET_ETH_PKTSIZE - pktlen;
             }
 
           /* Get the data source.  Invalidate the source memory region to
@@ -1169,7 +1169,7 @@ static void sam_receive(struct sam_gmac_s *priv)
        * (this should not happen)
        */
 
-      if (dev->d_len > CONFIG_NET_ETH_MTU)
+      if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
         {
           nwarn("WARNING: Dropped, Too big: %d\n", dev->d_len);
           continue;

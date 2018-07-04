@@ -889,7 +889,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev)
             {
-              req->ifr_mtu = NET_DEV_MTU(dev);
+              req->ifr_mtu = NETDEV_PKTSIZE(dev);
               ret = OK;
             }
         }

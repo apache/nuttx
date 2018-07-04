@@ -124,7 +124,7 @@
 /* Descriptor Memory Layout *********************************************************/
 /* EMAC DMA RAM and descriptor definitions.  The configured number of descriptors
  * will determine the organization and the size of the descriptor and status tables.
- * There is a complex interaction between the maximum packet size (CONFIG_NET_ETH_MTU)
+ * There is a complex interaction between the maximum packet size (CONFIG_NET_ETH_PKTSIZE)
  * and the number of Rx and Tx descriptors that can be supported (CONFIG_LPC17_ETH_NRXDESC
  * and CONFIG_LPC17_ETH_NTXDESC): Small buffers -> more packets.  This is something that
  * needs to be tuned for you system.
@@ -168,7 +168,7 @@
 #define LPC17_PKTMEM_SIZE     (LPC17_EMACRAM_SIZE-LPC17_DESCTAB_SIZE)
 #define LPC17_PKTMEM_END      (LPC17_EMACRAM_BASE+LPC17_PKTMEM_SIZE)
 
-#define LPC17_MAXPACKET_SIZE  ((CONFIG_NET_ETH_MTU + CONFIG_NET_GUARDSIZE + 3) & ~3)
+#define LPC17_MAXPACKET_SIZE  ((CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE + 3) & ~3)
 #define LPC17_NTXPKTS         CONFIG_LPC17_ETH_NTXDESC
 #define LPC17_NRXPKTS         CONFIG_LPC17_ETH_NRXDESC
 

@@ -172,7 +172,7 @@ Networking Support
     CONFIG_NET=y                        : Enable Neworking
     CONFIG_NET_ETHERNET=y               : Support Ethernet data link
     CONFIG_NET_SOCKOPTS=y               : Enable socket operations
-    CONFIG_NET_ETH_MTU=590              : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_PKTSIZE=590          : Maximum packet size 1518 is more standard
     CONFIG_NET_ARP=y                    : Enable ARP
     CONFIG_NET_ARPTAB_SIZE=16           : ARP table size
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
@@ -561,9 +561,9 @@ TWR-K64F120M-specific Configuration Options
   Kenetis ethernet controller settings
 
     CONFIG_ENET_NRXBUFFERS - Number of RX buffers.  The size of one
-        buffer is determined by CONFIG_NET_ETH_MTU.  Default: 6
+        buffer is determined by CONFIG_NET_ETH_PKTSIZE.  Default: 6
     CONFIG_ENET_NTXBUFFERS - Number of TX buffers.  The size of one
-        buffer is determined by CONFIG_NET_ETH_MTU.  Default: 2
+        buffer is determined by CONFIG_NET_ETH_PKTSIZE.  Default: 2
     CONFIG_ENET_USEMII - Use MII mode.  Default: RMII mode.
     CONFIG_ENET_PHYADDR - PHY address
 

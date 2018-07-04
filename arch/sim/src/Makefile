@@ -124,7 +124,7 @@ endif
 ifeq ($(CONFIG_SIM_NETDEV),y)
 ifeq ($(CONFIG_NET_ETHERNET),y)
   CSRCS += up_netdriver.c
-  HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
+  HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
 ifneq ($(HOSTOS),Cygwin)
   HOSTSRCS += up_tapdev.c up_netdev.c
 ifeq ($(CONFIG_SIM_NET_BRIDGE),y)

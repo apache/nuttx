@@ -137,7 +137,7 @@ struct radiodev_properties_s
  *    driver must still provide its (single) reassembly buffer in d_buf;
  *    that buffer is still used for the case where the packet is not
  *    fragmented into many frames.  In either case, the packet buffer will
- *    have a size of advertised MTU of the protocol, CONFIG_NET_6LOWPAN_MTU,
+ *    have a size of advertised MTU of the protocol, CONFIG_NET_6LOWPAN_PKTSIZE,
  *    plus CONFIG_NET_GUARDSIZE and some additional overhead for reassembly
  *    state data.
  *

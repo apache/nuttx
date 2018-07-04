@@ -362,7 +362,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        * MTU.  We provide no support for fragmenting forwarded packets.
        */
 
-      if (NET_LL_HDRLEN(fwddev) + dev->d_len > NET_DEV_MTU(fwddev))
+      if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev))
         {
           nwarn("WARNING: Packet > MTU... Dropping\n");
           ret = -EFBIG;
