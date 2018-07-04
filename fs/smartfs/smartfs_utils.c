@@ -292,11 +292,11 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
   g_mounthead = fs;
 #endif
 
-#endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
-
   fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
   fs->fs_workbuffer = (char *) kmm_malloc(256);
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR;
+
+#endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
 
   /* We did it! */
 
