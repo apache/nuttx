@@ -2226,6 +2226,63 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 }
 
 /****************************************************************************
+ * Name: mcan_start_busoff_recovery_sequence
+ *
+ * Description:
+ *   This function initiates the BUS-OFF recovery sequence.
+ *   CAN Specification Rev. 2.0 or ISO11898-1:2015
+ *   According the SAMV71 datasheet:
+ *   If the device goes Bus_Off, it will set MCAN_CCCR.INIT of its own accord,
+ *   stopping all bus activities. Once MCAN_CCCR.INIT has been cleared by the
+ *   processor (application), the device will then wait for 129 occurrences of
+ *   Bus Idle (129 * 11 consecutive recessive bits) before resuming normal
+ *   operation. At the end of the Bus_Off recovery sequence, the Error
+ *   Management Counters will be reset. During the waiting time after the
+ *   resetting of MCAN_CCCR.INIT, each time a sequence of 11 recessive bits
+ *   has been monitored, a Bit0 Error code is written to MCAN_PSR.LEC, enablin
+ *   the processor to readily check up whether the CAN bus is stuck at dominant
+ *   or continuously disturbed and to monitor the Bus_Off recovery sequence.
+ *   MCAN_ECR.REC is used to count these sequences.
+ *
+ * Input Parameters:
+ *   priv - An instance of the MCAN driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned to indicate the nature of the error.
+ *
+ ****************************************************************************/
+
+static int mcan_start_busoff_recovery_sequence(FAR struct sam_mcan_s *priv)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(priv);
+
+  /* Get exclusive access to the MCAN peripheral */
+
+  mcan_dev_lock(priv);
+
+  /* only start BUS-OFF recovery if we are in BUS-OFF state */
+
+  regval = mcan_getreg(priv, SAM_MCAN_PSR_OFFSET);
+  if (!(regval & MCAN_PSR_BO))
+    {
+      mcan_dev_unlock(priv);
+      return -EPERM;
+    }
+
+  /* Disable initialization mode to issue the recovery sequence */
+
+  regval = mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET);
+  regval &= ~MCAN_CCCR_INIT;
+  mcan_putreg(priv, SAM_MCAN_CCCR_OFFSET, regval);
+
+  mcan_dev_unlock(priv);
+  return OK;
+}
+
+/****************************************************************************
  * Name: mcan_reset
  *
  * Description:
@@ -2706,6 +2763,21 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
         {
           DEBUGASSERT(arg <= priv->config->nstdfilters);
           ret = mcan_del_stdfilter(priv, (int)arg);
+        }
+        break;
+
+      /* CANIOC_BUSOFF_RECOVERY:
+       *   Description : Initiates the BUS - OFF recovery sequence
+       *   Argument : None
+       *   Returned Value : Zero(OK) is returned on success.Otherwise - 1 (ERROR)
+       *                    is returned with the errno variable set to indicate the
+       *                    nature of the error.
+       *   Dependencies : None
+       */
+
+      case CANIOC_BUSOFF_RECOVERY:
+        {
+          ret = mcan_start_busoff_recovery_sequence(priv);
         }
         break;
 

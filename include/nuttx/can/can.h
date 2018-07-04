@@ -185,6 +185,14 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_BUSOFF_RECOVERY:
+ *   Description:    Initiates the BUS-OFF recovery sequence
+ *   Argument:       None
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -196,9 +204,10 @@
 #define CANIOC_DEL_EXTFILTER      _CANIOC(7)
 #define CANIOC_GET_CONNMODES      _CANIOC(8)
 #define CANIOC_SET_CONNMODES      _CANIOC(9)
+#define CANIOC_BUSOFF_RECOVERY    _CANIOC(10)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 9              /* Nine common commands */
+#define CAN_NCMDS                 10             /* Ten common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
