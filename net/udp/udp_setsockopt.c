@@ -133,6 +133,7 @@ int udp_setsockopt(FAR struct socket *psock, int option,
            (value_len > 0 && ((FAR char *)value)[0] == 0))
           {
             conn->boundto = 0;  /* This interface is no longer bound */
+            ret = OK;
           }
         else
           {
@@ -145,6 +146,7 @@ int udp_setsockopt(FAR struct socket *psock, int option,
               {
                 DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
                 conn->boundto = ifindex;
+                ret = OK;
               }
             else
               {
