@@ -666,6 +666,22 @@ config STM32F7_STM32F722XX
 	select STM32F7_HAVE_CRYP
 	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_R
 
+config STM32F7_STM32F723XX
+	bool
+	default n
+	select STM32F7_STM32F72XX
+	select ARCH_HAVE_FPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32F7_HAVE_FMC
+	select STM32F7_HAVE_RNG
+	select STM32F7_HAVE_SPI4 if !STM32F7_IO_CONFIG_R
+	select STM32F7_HAVE_SPI5 if !(STM32F7_IO_CONFIG_R || STM32F7_IO_CONFIG_V)
+	select STM32F7_HAVE_CRYP
+	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_R
+
 config STM32F7_STM32F745XX
 	bool
 	default n
@@ -2000,6 +2016,22 @@ config SDMMC1_WIDTH_D1_ONLY
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
+config SDMMC1_SDIO_MODE
+	bool "SDIO Card Support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC1_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
 endmenu # "SDMMC1 Configuration"
 
 menu "SDMMC2 Configuration"
@@ -2026,6 +2058,22 @@ config SDMMC2_WIDTH_D1_ONLY
 	default n
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC2_SDIO_MODE
+	bool "SDIO Card Support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC2_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
 
 endmenu # "SDMMC2 Configuration"
 endmenu # "SD/MMC Configuration"
