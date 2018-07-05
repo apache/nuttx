@@ -999,4 +999,14 @@ Configurations
     of much interest now other than for reference.
 
     This configuration targets the viewtool board with the STM32F103VCT6
-    mounted.  It uses TIM6 to generated high rate interrupts for the test.
+
+  tcpblaster:
+
+    The tcpblaster example derives from the nettest example and basicallyi
+    duplicates that application when the nettest PERFORMANCE option is selected.
+    tcpblaster has a little better reporting of performance stats, however.
+
+    This configuration derives directly from the netnsh configuration and most
+    of the notes there should applie equally here.
+
+
