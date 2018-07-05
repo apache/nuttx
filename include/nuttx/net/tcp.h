@@ -107,40 +107,51 @@
 #define TCP_MAX_HDRLEN    60                         /* Maximum size of TCP header */
 
 #ifdef CONFIG_NET_IPv4
-#  define IPv4TCP_HDRLEN (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
+#  define IPv4TCP_HDRLEN  (TCP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + TCP header */
 #endif
 
 #ifdef CONFIG_NET_IPv6
-#  define IPv6TCP_HDRLEN (TCP_HDRLEN + IPv6_HDRLEN) /* Size of IPv4 + TCP header */
+#  define IPv6TCP_HDRLEN  (TCP_HDRLEN + IPv6_HDRLEN) /* Size of IPv4 + TCP header */
 #endif
 
 /* Initial minimum MSS according to RFC 879
  *
- * There have been some assumptions made about using other than the
- * default size for datagrams with some unfortunate results.
+ * The default TCP Maximum Segment Sizes (MSS) are defined below.is 536.  If
+ * a host wishes to set the maximum segment size to a value other than the
+ * default, the maximum segment size is specified as a TCP option, initially
+ * in the TCP SYN packet during the TCP handshake.  The value cannot be
+ * changed after the connection is established.
  *
- *     HOSTS MUST NOT SEND DATAGRAMS LARGER THAN 576 OCTETS UNLESS THEY
- *     HAVE SPECIFIC KNOWLEDGE THAT THE DESTINATION HOST IS PREPARED TO
- *     ACCEPT LARGER DATAGRAMS.
+ * These defaults correspond to the minimum MTU values:
  *
- * This is a long established rule.
+ *   IPv4:  MTU=576;  MSS=536  (MTU - IPv4_HDRLEN - TCP_HDRLEN)
+ *   IPv6:  MTU=1280; MSS=1200 (MTU - IPv5_HDRLEN - TCP_HDRLEN)
  */
 
-#define TCP_INITIAL_MSS(d,h)       (TCP_MSS(d,h) > 576 ? 576 : TCP_MSS(d,h))
+#define TCP_DEFAULT_IPv4_MSS  536
+#define TCP_DEFAULT_IPv6_MSS  1200
 
-#define MIN_TCP_INITIAL_MSS(h)     (__MIN_TCP_MSS(h) > 576 ? 576 : __MIN_TCP_MSS(h))
-#define MAX_TCP_INITIAL_MSS(h)     (__MAX_TCP_MSS(h) > 576 ? 576 : __MAX_TCP_MSS(h))
+/* However, we do need to make allowance for certain links such as SLIP that
+ * have unusually small MTUs.
+ */
 
 #ifdef CONFIG_NET_IPv4
-#  define TCP_IPv4_INITIAL_MSS(d)  TCP_INITIAL_MSS(d,IPv4_HDRLEN)
-#  define MIN_IPv4_TCP_INITIAL_MSS MIN_TCP_INITIAL_MSS(IPv4_HDRLEN)
-#  define MAX_IPv4_TCP_INITIAL_MSS MAX_TCP_INITIAL_MSS(IPv4_HDRLEN)
+#  define TCP_IPv4_INITIAL_MSS(d) \
+     (TCP_MSS(d,IPv4_HDRLEN) > 536 ? 536 : TCP_MSS(d,IPv4_HDRLEN))
+
+#  define MIN_IPv4_TCP_INITIAL_MSS \
+     (__MIN_TCP_MSS(IPv4_HDRLEN) > 536 ? 536 : __MIN_TCP_MSS(IPv4_HDRLEN))
+#  define MAX_IPv4_TCP_INITIAL_MSS  \
+     (__MAX_TCP_MSS(IPv4_HDRLEN) > 536 ? 536 : __MAX_TCP_MSS(h))
 #endif
 
 #ifdef CONFIG_NET_IPv6
-#  define TCP_IPv6_INITIAL_MSS(d)  TCP_INITIAL_MSS(d,IPv6_HDRLEN)
-#  define MIN_IPv6_TCP_INITIAL_MSS MIN_TCP_INITIAL_MSS(IPv6_HDRLEN)
-#  define MAX_IPv6_TCP_INITIAL_MSS MAX_TCP_INITIAL_MSS(IPv6_HDRLEN)
+#  define TCP_IPv6_INITIAL_MSS(d) \
+     (TCP_MSS(d,IPv6_HDRLEN) > 1200 ? 1200 : TCP_MSS(d,IPv6_HDRLEN))
+#  define MIN_IPv6_TCP_INITIAL_MSS \
+     (__MIN_TCP_MSS(IPv6_HDRLEN) > 1200 ? 1200 : __MIN_TCP_MSS(IPv6_HDRLEN))
+#  define MAX_IPv6_TCP_INITIAL_MSS  \
+     (__MAX_TCP_MSS(IPv6_HDRLEN) > 1200 ? 1200 : __MAX_TCP_MSS(IPv6_HDRLEN))
 #endif
 
 /****************************************************************************

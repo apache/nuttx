@@ -343,8 +343,8 @@ void tcp_initialize(void);
  * Description:
  *   Find a free TCP/IP connection structure and allocate it
  *   for use.  This is normally something done by the implementation of the
- *   socket() API but is also called from the driver level when a TCP
- *   packet is received while "listening"
+ *   socket() API but is also called from the event processing logic when a
+ *   TCP packet is received while "listening"
  *
  ****************************************************************************/
 

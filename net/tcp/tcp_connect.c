@@ -264,36 +264,11 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 
       psock_teardown_callbacks(pstate, pstate->tc_result);
 
-      /* When we set up the connection structure, we did not know the size
-       * of the initial MSS.  Now that the connection is associated with a
-       * network device, we now know the size of link layer header and can
-       * determine the correct initial MSS.
-       */
-
-      DEBUGASSERT(pstate->tc_conn);
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      if (pstate->tc_conn->domain == PF_INET)
-#endif
-        {
-          pstate->tc_conn->mss = TCP_IPv4_INITIAL_MSS(dev);
-        }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
-        {
-          pstate->tc_conn->mss = TCP_IPv6_INITIAL_MSS(dev);
-        }
-#endif /* CONFIG_NET_IPv6 */
-
       /* We now have to filter all outgoing transfers so that they use only
        * the MSS of this device.
        */
 
+      DEBUGASSERT(pstate->tc_conn != NULL);
       DEBUGASSERT(pstate->tc_conn->dev == NULL ||
                   pstate->tc_conn->dev == dev);
       pstate->tc_conn->dev = dev;
