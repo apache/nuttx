@@ -1206,11 +1206,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_lockedwait will have returned negated errno
-   * appropriately.
-   */
-
   if (ret < 0)
     {
       goto errout;

@@ -142,7 +142,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
   /* We need to allocate two things:  (1) A write buffer structure and (2)
    * at least one I/O buffer to start the chain.
    *
-   * Allocate the write buffer structure first then the IOBG.  In order to
+   * Allocate the write buffer structure first then the IOB.  In order to
    * avoid deadlocks, we will need to free the IOB first, then the write
    * buffer
    */
