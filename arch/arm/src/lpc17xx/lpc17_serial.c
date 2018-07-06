@@ -744,7 +744,7 @@ static inline void lpc17_uart1config(void)
   lpc17_configgpio(GPIO_UART1_DCD);
   lpc17_configgpio(GPIO_UART1_DSR);
   lpc17_configgpio(GPIO_UART1_DTR);
-#ifdef CONFIG_UART1_RINGINDICATOR
+#ifdef CONFIG_LPC17_UART1_RINGINDICATOR
   lpc17_configgpio(GPIO_UART1_RI);
 #endif
 #endif

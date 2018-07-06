@@ -104,19 +104,19 @@ endmenu
 menu "ADC driver options"
 	depends on LPC11_ADC
 
-config ADC0_AVERAGE
+config LPC11_ADC0_AVERAGE
 	int "ADC0 average"
 	default 200
 
-config ADC0_MASK
+config LPC11_ADC0_MASK
 	hex "ADC0 mask"
 	default 0x01
 
-config ADC0_SPS
+config LPC11_ADC0_SPS
 	int "ADC0 SPS"
 	default 1000
 
-config ADC_CHANLIST
+config LPC11_ADC_CHANLIST
 	bool "Use ADC channel list"
 	default n
 	---help---
@@ -131,25 +131,27 @@ config ADC_CHANLIST
 		triggering interrupt from the global DONE flag).
 
 		If this option is enabled, then the platform specific code must do
-		two things:  (1) define ADC_NCHANNELS in the configuration file and
-		(2) provide an array g_adc_chanlist[] with the channel numbers
-		matching the ADC0_MASK within the board-specific library.
+		two things:  (1) define LPC11_ADC_NCHANNELS in the configuration file
+		and (2) provide an array g_adc_chanlist[] with the channel numbers
+		matching the LPC11_ADC0_MASK within the board-specific library.
 
-config ADC_BURSTMODE
+config LPC11_ADC_BURSTMODE
 	bool "One interrupt at the end of all ADC cconversions"
 	default n
 	---help---
-		Select this if you want to generate only one interrupt once all selected channels has been converted by the ADC
+		Select this if you want to generate only one interrupt once all
+		selected channels has been converted by the ADC
 
-config ADC_NCHANNELS
+config LPC11_ADC_NCHANNELS
 	int "ADC0 number of channels"
-	depends on ADC_CHANLIST
+	depends on LPC11_ADC_CHANLIST
 	default 0
 	---help---
-		If ADC_CHANLIST is enabled, then the platform specific code
-		must do two things:  (1) define ADC_NCHANNELS in the configuration
+		If LPC11_ADC_CHANLIST is enabled, then the platform specific code
+		must do two things:  (1) define LPC11_ADC_NCHANNELS in the configuration
 		file and (2) provide an array g_adc_chanlist[] with the channel
-		numbers matching the ADC0_MASK within the board-specific library.
+		numbers matching the LPC11_ADC0_MASK within the board-specific
+		library.
 
 endmenu
 

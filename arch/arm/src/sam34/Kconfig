@@ -44,10 +44,10 @@ config ARCH_CHIP_ATSAM3X8E
 	bool "ATSAMSAM3X8E"
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_SAM3X
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
+	select SAM34_HAVE_EXTNOR
+	select SAM34_HAVE_EXTNAND
+	select SAM34_HAVE_EXTSRAM0
+	select SAM34_HAVE_EXTSRAM1
 
 config ARCH_CHIP_ATSAM3X8C
 	bool "ATSAM3X8C"
@@ -58,10 +58,10 @@ config ARCH_CHIP_ATSAM3X4E
 	bool "ATSAM3X4E"
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_SAM3X
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
+	select SAM34_HAVE_EXTNOR
+	select SAM34_HAVE_EXTNAND
+	select SAM34_HAVE_EXTSRAM0
+	select SAM34_HAVE_EXTSRAM1
 
 config ARCH_CHIP_ATSAM3X4C
 	bool "ATSAM3X4C"
@@ -223,10 +223,10 @@ endchoice # AT91SAM3/4 Chip Selection
 config ARCH_CHIP_SAM3U
 	bool
 	default n
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
+	select SAM34_HAVE_EXTNOR
+	select SAM34_HAVE_EXTNAND
+	select SAM34_HAVE_EXTSRAM0
+	select SAM34_HAVE_EXTSRAM1
 
 config ARCH_CHIP_SAM3X
 	bool
@@ -257,10 +257,10 @@ config ARCH_CHIP_SAM4L
 config ARCH_CHIP_SAM4E
 	bool
 	default n
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
+	select SAM34_HAVE_EXTNOR
+	select SAM34_HAVE_EXTNAND
+	select SAM34_HAVE_EXTSRAM0
+	select SAM34_HAVE_EXTSRAM1
 	select SAM34_HAVE_GPIOD_IRQ
 	select SAM34_HAVE_GPIOE_IRQ
 	select SAM34_HAVE_GPIOF_IRQ
@@ -268,10 +268,10 @@ config ARCH_CHIP_SAM4E
 config ARCH_CHIP_SAM4S
 	bool
 	default n
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
+	select SAM34_HAVE_EXTNOR
+	select SAM34_HAVE_EXTNAND
+	select SAM34_HAVE_EXTSRAM0
+	select SAM34_HAVE_EXTSRAM1
 
 menu "AT91SAM3/4 Peripheral Support"
 
@@ -779,25 +779,25 @@ endif # ARCH_CHIP_SAM4L
 
 menu "AT91SAM3/4 External Memory Configuration"
 
-config ARCH_HAVE_EXTNAND
+config SAM34_HAVE_EXTNAND
 	bool
 
-config ARCH_HAVE_EXTNOR
+config SAM34_HAVE_EXTNOR
 	bool
 
-config ARCH_HAVE_EXTDRAM
+config SAM34_HAVE_EXTDRAM
 	bool
 
-config ARCH_HAVE_EXTSRAM0
+config SAM34_HAVE_EXTSRAM0
 	bool
 
-config ARCH_HAVE_EXTSRAM1
+config SAM34_HAVE_EXTSRAM1
 	bool
 
 config SAM34_EXTNAND
 	bool "Configure external NAND"
 	default n
-	depends on ARCH_HAVE_EXTNAND
+	depends on SAM34_HAVE_EXTNAND
 	---help---
 		Configure external NAND memory and, if applicable, map then external
 		NAND into the memory map.
@@ -815,7 +815,7 @@ endif # SAM34_EXTNAND
 config SAM34_EXTNOR
 	bool "Configure external NOR memory"
 	default n
-	depends on ARCH_HAVE_EXTNOR
+	depends on SAM34_HAVE_EXTNOR
 	---help---
 		Configure external NOR memory and, if applicable, map then external
 		NOR into the memory map.
@@ -833,7 +833,7 @@ endif # SAM34_EXTNOR
 config SAM34_EXTDRAM
 	bool "Configure external DRAM"
 	default n
-	depends on ARCH_HAVE_EXTDRAM
+	depends on SAM34_HAVE_EXTDRAM
 	select ARCH_HAVE_SDRAM
 	---help---
 		Configure external DRAM memory and, if applicable, map then external
@@ -873,7 +873,7 @@ endif # SAM34_EXTDRAM
 config SAM34_EXTSRAM0
 	bool "Configure external SRAM (Bank 0)"
 	default n
-	depends on ARCH_HAVE_EXTSRAM0
+	depends on SAM34_HAVE_EXTSRAM0
 	---help---
 		Configure external SRAM Bank 0 memory and, if applicable, map then
 		external SRAM Bank 0 into the memory map.
@@ -897,7 +897,7 @@ endif # SAM34_EXTSRAM0
 config SAM34_EXTSRAM1
 	bool "Configure external SRAM (Bank 1)"
 	default n
-	depends on ARCH_HAVE_EXTSRAM1
+	depends on SAM34_HAVE_EXTSRAM1
 	---help---
 		Configure external SRAM Bank 1 memory and, if applicable, map then
 		external SRAM Bank 1 into the memory map.

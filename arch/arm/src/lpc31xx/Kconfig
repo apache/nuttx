@@ -12,31 +12,31 @@ choice
 
 config ARCH_CHIP_LPC3130
 	bool "LPC3130"
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
-	select ARCH_HAVE_EXTDRAM
+	select LPC31_HAVE_EXTNAND
+	select LPC31_HAVE_EXTSRAM0
+	select LPC31_HAVE_EXTSRAM1
+	select LPC31_HAVE_EXTDRAM
 
 config ARCH_CHIP_LPC3131
 	bool "LPC3131"
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
-	select ARCH_HAVE_EXTDRAM
+	select LPC31_HAVE_EXTNAND
+	select LPC31_HAVE_EXTSRAM0
+	select LPC31_HAVE_EXTSRAM1
+	select LPC31_HAVE_EXTDRAM
 
 config ARCH_CHIP_LPC3152
 	bool "LPC3152"
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
-	select ARCH_HAVE_EXTDRAM
+	select LPC31_HAVE_EXTNAND
+	select LPC31_HAVE_EXTSRAM0
+	select LPC31_HAVE_EXTSRAM1
+	select LPC31_HAVE_EXTDRAM
 
 config ARCH_CHIP_LPC3154
 	bool "LPC3154"
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTSRAM1
-	select ARCH_HAVE_EXTDRAM
+	select LPC31_HAVE_EXTNAND
+	select LPC31_HAVE_EXTSRAM0
+	select LPC31_HAVE_EXTSRAM1
+	select LPC31_HAVE_EXTDRAM
 
 endchoice # LPC31xx Configuration Options
 
@@ -71,22 +71,22 @@ endmenu # LPC31xx Peripheral Support
 
 menu "External Memory Configuration"
 
-config ARCH_HAVE_EXTNAND
+config LPC31_HAVE_EXTNAND
 	bool
 
-config ARCH_HAVE_EXTDRAM
+config LPC31_HAVE_EXTDRAM
 	bool
 
-config ARCH_HAVE_EXTSRAM0
+config LPC31_HAVE_EXTSRAM0
 	bool
 
-config ARCH_HAVE_EXTSRAM1
+config LPC31_HAVE_EXTSRAM1
 	bool
 
 config LPC31_EXTNAND
 	bool "Configure external NAND"
 	default n
-	depends on ARCH_HAVE_EXTNAND
+	depends on LPC31_HAVE_EXTNAND
 	---help---
 		Configure external NAND memory and, if applicable, map then external
 		NAND into the memory map.
@@ -104,7 +104,7 @@ endif # LPC31_EXTNAND
 config LPC31_EXTDRAM
 	bool "Configure external DRAM"
 	default n
-	depends on ARCH_HAVE_EXTDRAM
+	depends on LPC31_HAVE_EXTDRAM
 	select ARCH_HAVE_SDRAM
 	---help---
 		Configure external DRAM memory and, if applicable, map then external
@@ -144,7 +144,7 @@ endif # LPC31_EXTDRAM
 config LPC31_EXTSRAM0
 	bool "Configure external SRAM (Bank 0)"
 	default n
-	depends on ARCH_HAVE_EXTSRAM0
+	depends on LPC31_HAVE_EXTSRAM0
 	---help---
 		Configure external SRAM Bank 0 memory and, if applicable, map then
 		external SRAM Bank 0 into the memory map.
@@ -168,7 +168,7 @@ endif # LPC31_EXTSRAM0
 config LPC31_EXTSRAM1
 	bool "Configure external SRAM (Bank 1)"
 	default n
-	depends on ARCH_HAVE_EXTSRAM1
+	depends on LPC31_HAVE_EXTSRAM1
 	---help---
 		Configure external SRAM Bank 1 memory and, if applicable, map then
 		external SRAM Bank 1 into the memory map.

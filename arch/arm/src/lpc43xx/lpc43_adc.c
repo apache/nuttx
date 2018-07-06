@@ -91,26 +91,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ADC0_MASK
-#  define CONFIG_ADC0_MASK       0x01
+#ifndef CONFIG_LPC43_ADC0_MASK
+#  define CONFIG_LPC43_ADC0_MASK 0x01
 #endif
-#ifndef CONFIG_ADC0_FREQ
-#  define CONFIG_ADC0_FREQ       0
+#ifndef CONFIG_LPC43_ADC0_FREQ
+#  define CONFIG_LPC43_ADC0_FREQ 0
 #endif
 
 #define LPC43_ADC_MAX_FREQUENCY  4500000
 #define LPC43_ADC_MIN_FREQUENCY  (BOARD_ABP3_FREQUENCY/256)
 
-#if defined(CONFIG_ADC0_USE_TIMER) && CONFIG_ADC0_FREQ == 0
-#  error "Set CONFIG_ADC0_FREQ != 0 if CONFIG_ADC0_USE_TIMER"
+#if defined(CONFIG_LPC43_ADC0_USE_TIMER) && CONFIG_LPC43_ADC0_FREQ == 0
+#  error "Set CONFIG_LPC43_ADC0_FREQ != 0 if CONFIG_LPC43_ADC0_USE_TIMER"
 #endif
 
-#ifndef CONFIG_ADC0_USE_TIMER
-#  if (CONFIG_ADC0_FREQ != 0 &&(CONFIG_ADC0_FREQ > LPC43_ADC_MAX_FREQUENCY || \
-       CONFIG_ADC0_FREQ < LPC43_ADC_MIN_FREQUENCY))
+#ifndef CONFIG_LPC43_ADC0_USE_TIMER
+#  if (CONFIG_LPC43_ADC0_FREQ != 0 &&(CONFIG_LPC43_ADC0_FREQ > LPC43_ADC_MAX_FREQUENCY || \
+       CONFIG_LPC43_ADC0_FREQ < LPC43_ADC_MIN_FREQUENCY))
 #    error "ADC0 sample rate can't be grater than LPC43_ADC_MAX_FREQUENCY or less than LPC43_ADC_MIN_FREQUENCY"
 #  endif
-#  define CONFIG_ADC0_USE_TIMER 0
+#  define CONFIG_LPC43_ADC0_USE_TIMER 0
 #endif
 
 /****************************************************************************
@@ -159,12 +159,12 @@ static const struct adc_ops_s g_adcops =
 
 static struct up_dev_s g_adcpriv =
 {
-  .freq        = CONFIG_ADC0_FREQ,
-  .mask        = CONFIG_ADC0_MASK,
-  .mask_int    = CONFIG_ADC0_MASK,
+  .freq        = CONFIG_LPC43_ADC0_FREQ,
+  .mask        = CONFIG_LPC43_ADC0_MASK,
+  .mask_int    = CONFIG_LPC43_ADC0_MASK,
   .irq         = LPC43M4_IRQ_ADC0,
-  .timer       = CONFIG_ADC0_USE_TIMER,
-  .m_ch        = (CONFIG_ADC0_MASK & (CONFIG_ADC0_MASK - 1)) ? true : false
+  .timer       = CONFIG_LPC43_ADC0_USE_TIMER,
+  .m_ch        = (CONFIG_LPC43_ADC0_MASK & (CONFIG_LPC43_ADC0_MASK - 1)) ? true : false
 };
 
 static struct adc_dev_s g_adcdev =

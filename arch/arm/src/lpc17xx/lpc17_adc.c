@@ -73,14 +73,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ADC0_MASK
-#define CONFIG_ADC0_MASK     0x01
+#ifndef CONFIG_LPC17_ADC0_MASK
+#  define CONFIG_LPC17_ADC0_MASK    0x01
 #endif
-#ifndef CONFIG_ADC0_SPS
-#define CONFIG_ADC0_SPS      1000
+
+#ifndef CONFIG_LPC17_ADC0_SPS
+#  define CONFIG_LPC17_ADC0_SPS     1000
 #endif
-#ifndef CONFIG_ADC0_AVERAGE
-#define CONFIG_ADC0_AVERAGE  200
+
+#ifndef CONFIG_LPC17_ADC0_AVERAGE
+#  define CONFIG_LPC17_ADC0_AVERAGE 200
 #endif
 
 /****************************************************************************
@@ -130,8 +132,8 @@ static const struct adc_ops_s g_adcops =
 
 static struct up_dev_s g_adcpriv =
 {
-  .sps         = CONFIG_ADC0_SPS,
-  .mask        = CONFIG_ADC0_MASK,
+  .sps         = CONFIG_LPC17_ADC0_SPS,
+  .mask        = CONFIG_LPC17_ADC0_MASK,
   .irq         = LPC17_IRQ_ADC,
 };
 
@@ -216,7 +218,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
-#ifdef CONFIG_ADC_BURSTMODE
+#ifdef CONFIG_LPC17_ADC_BURSTMODE
   clkdiv   = LPC17_CCLK / 3 / 65 / priv->sps;
 
 //putreg32(0x04, LPC17_ADC_INTEN);         /* Enable only last channel interrupt */
@@ -236,14 +238,14 @@ static void adc_reset(FAR struct adc_dev_s *dev)
                                             * trigger A/D conversion) */
            LPC17_ADC_CR);
 
-#else /* CONFIG_ADC_BURSTMODE */
+#else /* CONFIG_LPC17_ADC_BURSTMODE */
 
   clkdiv   = LPC17_CCLK / 8 / 65 / priv->sps;
   clkdiv <<= 8;
   clkdiv  &= 0xff00;
   putreg32(ADC_CR_PDN | ADC_CR_BURST | clkdiv | priv->mask, LPC17_ADC_CR);
 
-#endif /* CONFIG_ADC_BURSTMODE */
+#endif /* CONFIG_LPC17_ADC_BURSTMODE */
 
   if ((priv->mask & 0x01) != 0)
     {
@@ -358,24 +360,24 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
   if (enable)
     {
-#ifndef CONFIG_ADC_BURSTMODE
-#ifdef CONFIG_ADC_CHANLIST
+#ifndef CONFIG_LPC17_ADC_BURSTMODE
+#ifdef CONFIG_LPC17_ADC_CHANLIST
       /* Trigger interrupt at the end of conversion on the last A/D channel
        * in the channel list.
        */
 
-      putreg32(ADC_INTEN_CHAN(g_adc_chanlist[CONFIG_ADC_NCHANNELS - 1]),
+      putreg32(ADC_INTEN_CHAN(g_adc_chanlist[CONFIG_LPC17_ADC_NCHANNELS - 1]),
                LPC17_ADC_INTEN);
 #else
       /* Trigger interrupt using the global DONE flag. */
 
       putreg32(ADC_INTEN_GLOBAL, LPC17_ADC_INTEN);
 #endif
-#else /* CONFIG_ADC_BURSTMODE */
+#else /* CONFIG_LPC17_ADC_BURSTMODE */
       /* Enable only global interrupt */
 
       putreg32(0x100, LPC17_ADC_INTEN);
-#endif /* CONFIG_ADC_BURSTMODE */
+#endif /* CONFIG_LPC17_ADC_BURSTMODE */
     }
   else
     {
@@ -408,8 +410,8 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 static int adc_interrupt(int irq, void *context, FAR void *arg)
 {
-#ifndef CONFIG_ADC_BURSTMODE
-#ifdef CONFIG_ADC_CHANLIST
+#ifndef CONFIG_LPC17_ADC_BURSTMODE
+#ifdef CONFIG_LPC17_ADC_CHANLIST
 
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   uint32_t regval;
@@ -418,7 +420,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
   int i;
 
   regval = getreg32(LPC17_ADC_GDR);
-  for (i = 0; i < CONFIG_ADC_NCHANNELS; i++)
+  for (i = 0; i < CONFIG_LPC17_ADC_NCHANNELS; i++)
     {
       ch     = g_adc_chanlist[i];
       regval = getreg32(LPC17_ADC_DR(ch));
@@ -428,7 +430,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
           priv->count[ch]++;
           priv->buf[ch] += regval & 0xfff0;
 
-          if (priv->count[ch] >= CONFIG_ADC0_AVERAGE)
+          if (priv->count[ch] >= CONFIG_LPC17_ADC0_AVERAGE)
             {
               value           = priv->buf[ch] / priv->count[ch];
               value         <<= 15;
@@ -453,7 +455,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
   priv->buf[ch]       += regval & 0xfff0;
 
   priv->count[ch]++;
-  if (priv->count[ch] >= CONFIG_ADC0_AVERAGE)
+  if (priv->count[ch] >= CONFIG_LPC17_ADC0_AVERAGE)
     {
       value            = priv->buf[ch] / priv->count[ch];
       value          <<= 15;
@@ -465,7 +467,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
   return OK;
 
 #endif
-#else /* CONFIG_ADC_BURSTMODE */
+#else /* CONFIG_LPC17_ADC_BURSTMODE */
 
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   volatile uint32_t regVal, regVal2, regVal3;
@@ -624,7 +626,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 //lpc17_gpiowrite(LPCXPRESSO_GPIO0_21, 0); /* Reset pin P0.21 */
 //leave_critical_section(saved_state);
   return OK;
-#endif /* CONFIG_ADC_BURSTMODE */
+#endif /* CONFIG_LPC17_ADC_BURSTMODE */
 }
 
 /****************************************************************************

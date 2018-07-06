@@ -417,7 +417,7 @@ void lpc43_uart1_setup(void)
   lpc43_pin_config(PINCONF_U1_DSR);
   lpc43_pin_config(PINCONF_U1_DTR);
   lpc43_pin_config(PINCONF_U1_RTS);
-#ifdef CONFIG_UART1_RINGINDICATOR
+#ifdef CONFIG_LPC43_UART1_RINGINDICATOR
   lpc43_pin_config(PINCONF_U1_RI);
 #endif
 #endif

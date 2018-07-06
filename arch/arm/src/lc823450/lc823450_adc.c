@@ -79,8 +79,8 @@
 
 #define LC823450_MAX_ADCCLK   (5 * 1000 * 1000)   /* Hz */
 
-#ifndef CONFIG_ADC_NCHANNELS
-#  define CONFIG_ADC_NCHANNELS 6
+#ifndef CONFIG_LC823450_ADC_NCHANNELS
+#  define CONFIG_LC823450_ADC_NCHANNELS 6
 #endif
 
 #if defined(CONFIG_DVFS) && !defined(CONFIG_ADC_POLLED)
@@ -130,7 +130,7 @@ static struct lc823450_adc_inst_s *g_inst = NULL;
 
 /* IDs to recognize each AD channel */
 
-static const uint8_t lc823450_chanlist[CONFIG_ADC_NCHANNELS] =
+static const uint8_t lc823450_chanlist[CONFIG_LC823450_ADC_NCHANNELS] =
 {
   0,    /* Channel 0 */
   1,    /* Channel 1 */
@@ -250,7 +250,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
   /* Setup ADC channels */
 
   putreg32((i << rADCCTL_fADCNVCK_SHIFT) |
-           LC823450_ADCHST(CONFIG_ADC_NCHANNELS - 1) |
+           LC823450_ADCHST(CONFIG_LC823450_ADC_NCHANNELS - 1) |
            rADCCTL_fADCHSCN, rADCCTL);
 
   /* Start A/D conversion */
@@ -488,7 +488,7 @@ static int lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
         /* Get ADC data */
 
-        for (ch = 0; ch < CONFIG_ADC_NCHANNELS; ch++)
+        for (ch = 0; ch < CONFIG_LC823450_ADC_NCHANNELS; ch++)
           {
             val = getreg32(LC823450_ADC0DT(ch));
 
@@ -554,7 +554,7 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
 
       inst->dev.ad_ops = &lc823450_adc_ops;
       inst->dev.ad_priv = inst;
-      inst->nchannels = CONFIG_ADC_NCHANNELS;
+      inst->nchannels = CONFIG_LC823450_ADC_NCHANNELS;
       inst->chanlist = lc823450_chanlist;
 
       nxsem_init(&inst->sem_excl, 0, 1);
@@ -634,7 +634,7 @@ int lc823450_adc_receive(FAR struct adc_dev_s *dev, FAR struct adc_msg_s *msg)
   lc823450_adc_standby(0);
   lc823450_adc_start(inst);
 
-  for (ch = 0; ch < CONFIG_ADC_NCHANNELS; ch++)
+  for (ch = 0; ch < CONFIG_LC823450_ADC_NCHANNELS; ch++)
     {
       msg[ch].am_channel = ch;
       msg[ch].am_data = getreg32(LC823450_ADC0DT(ch));
