@@ -112,7 +112,11 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_BH1750FVI
-  stm32_bh1750initialize("/dev/light0");
+  ret = stm32_bh1750initialize("/dev/light0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_bh1750initialize() failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_SENSORS_ZEROCROSS

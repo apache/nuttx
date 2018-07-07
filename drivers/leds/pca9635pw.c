@@ -105,6 +105,7 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
                                     uint8_t const reg_val)
 {
   struct i2c_config_s config;
+  int ret;
 
   /* assemble the 2 byte message comprised of reg_addr and reg_val */
 
@@ -126,7 +127,7 @@ static int pca9635pw_i2c_write_byte(FAR struct pca9635pw_dev_s *priv,
           buffer[0], buffer[1]);
 
   ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
-  if (ret != OK)
+  if (ret < 0)
     {
       lcderr("ERROR: i2c_write returned error code %d\n", ret);
       return ret;
@@ -152,7 +153,7 @@ static int pca9635pw_set_led_mode(FAR struct pca9635pw_dev_s *priv,
     {
       int const ret = pca9635pw_i2c_write_byte(priv, current_ledout_reg,
                                                led_out_x_mode);
-      if (ret != OK)
+      if (ret < 0)
         {
           return ret;
         }
@@ -185,7 +186,7 @@ static int pca9635pw_open(FAR struct file *filep)
 
   ret = pca9635pw_i2c_write_byte(priv, PCA9635PW_MODE_1,
                                  PCA9635PW_MODE_1_INITIAL_VALUE);
-  if (ret != OK)
+  if (ret < 0)
     {
       lcderr("ERROR: Could not set initial config for PCA9635PW_MODE_1\n");
       return ret;
@@ -202,7 +203,7 @@ static int pca9635pw_open(FAR struct file *filep)
 
   ret = pca9635pw_i2c_write_byte(priv, PCA9635PW_MODE_2,
                                  PCA9635PW_MODE_2_INITIAL_VALUE);
-  if (ret != OK)
+  if (ret < 0)
     {
       lcderr("ERROR: Could not set initial config for PCA9635PW_MODE_2\n");
       return ret;
@@ -220,7 +221,7 @@ static int pca9635pw_open(FAR struct file *filep)
    */
 
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_2);
-  if (ret != OK)
+  if (ret < 0)
     {
       lcderr("ERROR: Could not set led driver outputs to MODE2 (LED's brightness are "
              "controlled by pwm registers)\n");
@@ -247,7 +248,7 @@ static int pca9635pw_close(FAR struct file *filep)
   /* Turn all led drivers off */
 
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_0);
-  if (ret != OK)
+  if (ret < 0)
     {
       lcderr("ERROR: Could not set led driver outputs to MODE0 (LED's are off)\n");
       return ret;
@@ -259,7 +260,7 @@ static int pca9635pw_close(FAR struct file *filep)
 
   ret =pca9635pw_i2c_write_byte(priv, PCA9635PW_MODE_1,
                                 PCA9635PW_MODE_1_FINAL_VALUE);
-  if (ret != OK)
+  if (ret < 0)
     {
       return ret;
     }
