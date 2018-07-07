@@ -1007,7 +1007,20 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
   /* Enable DAC Channel */
 
-  stm32_dac_modify_cr(chan, 0, DAC_CR_EN);
+#if defined(CONFIG_STM32_STM32F33XX)
+  /* For STM32F33XX we have to set BOFF/OUTEN bit for DAC1CH2 and DAC2CH1
+   * REVISIT: what if we connect DAC internally with comparator ?
+   */
+
+  if (chan->intf > 0)
+    {
+      stm32_dac_modify_cr(chan, 0, DAC_CR_EN|DAC_CR_BOFF);
+    }
+  else
+#endif
+    {
+      stm32_dac_modify_cr(chan, 0, DAC_CR_EN);
+    }
 
 #ifdef HAVE_DMA
   if (chan->hasdma)

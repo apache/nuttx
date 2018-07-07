@@ -56,7 +56,7 @@
  *   Get current sector for space vector modulation.
  *
  * Input Parameters:
- *   s - (in/out) pointer to the SVM state data
+ *   ijk - (in) pointer to the auxiliary ABC frame
  *
  * Returned Value:
  *   None
@@ -146,7 +146,8 @@ static uint8_t svm3_sector_get(FAR abc_frame_t *ijk)
  *   Calculate duty cycles for space vector modulation.
  *
  * Input Parameters:
- *   s - (in/out) pointer to the SVM state data
+ *   s   - (in/out) pointer to the SVM state data
+ *   ijk - (in) pointer to the auxiliary ABC frame
  *
  * Returned Value:
  *   None
@@ -158,9 +159,9 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
   float i = ijk->a;
   float j = ijk->b;
   float k = ijk->c;
-  float T0 = 0.0;
-  float T1 = 0.0;
-  float T2 = 0.0;
+  float T0 = 0.0f;
+  float T1 = 0.0f;
+  float T2 = 0.0f;
 
   /* Determine T1, T2 and T0 based on the sector */
 
@@ -213,7 +214,7 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
 
   /* Get null vector time */
 
-  T0 = (float)1.0 - T1 - T2;
+  T0 = 1.0f - T1 - T2;
 
   /* Calculate duty cycle for 3 phase */
 
@@ -221,44 +222,44 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
     {
       case 1:
         {
-          s->d_u = T1 + T2 + T0/2;
-          s->d_v = T2 + T0/2;
-          s->d_w = T0/2;
+          s->d_u = T1 + T2 + T0*0.5f;
+          s->d_v = T2 + T0*0.5f;
+          s->d_w = T0*0.5f;
           break;
         }
       case 2:
         {
-          s->d_u = T1 + T0/2;
-          s->d_v = T1 + T2 + T0/2;
-          s->d_w = T0/2;
+          s->d_u = T1 + T0*0.5f;
+          s->d_v = T1 + T2 + T0*0.5f;
+          s->d_w = T0*0.5f;
           break;
         }
       case 3:
         {
-          s->d_u = T0/2;
-          s->d_v = T1 + T2 + T0/2;
-          s->d_w = T2 + T0/2;
+          s->d_u = T0*0.5f;
+          s->d_v = T1 + T2 + T0*0.5f;
+          s->d_w = T2 + T0*0.5f;
           break;
         }
       case 4:
         {
-          s->d_u = T0/2;
-          s->d_v = T1 + T0/2;
-          s->d_w = T1 + T2 + T0/2;
+          s->d_u = T0*0.5f;
+          s->d_v = T1 + T0*0.5f;
+          s->d_w = T1 + T2 + T0*0.5f;
           break;
         }
       case 5:
         {
-          s->d_u = T2 + T0/2;
-          s->d_v = T0/2;
-          s->d_w = T1 + T2 + T0/2;
+          s->d_u = T2 + T0*0.5f;
+          s->d_v = T0*0.5f;
+          s->d_w = T1 + T2 + T0*0.5f;
           break;
         }
       case 6:
         {
-          s->d_u = T1 + T2 + T0/2;
-          s->d_v = T0/2;
-          s->d_w = T1 + T0/2;
+          s->d_u = T1 + T2 + T0*0.5f;
+          s->d_v = T0*0.5f;
+          s->d_w = T1 + T0*0.5f;
           break;
         }
       default:
@@ -280,6 +281,7 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
  *
  * Description:
  *   One step of the space vector modulation.
+ *   This is most common of SVM with alternate-reverse null vector.
  *
  *   Voltage vector definitions in 3-phase SVM:
  *
@@ -311,7 +313,13 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
  * Input Parameters:
  *   s    - (out) pointer to the SVM data
  *   v_ab - (in) pointer to the modulation voltage vector in alpha-beta frame,
- *          normalized to <0.0 - 1.0> range
+ *          normalized to magnitude (0.0 - 1.0)
+ *
+ * NOTE: v_ab vector magnitude must be in range <0.0, 1.0> to get correct
+ *       SVM3 results.
+ *
+ * REVISIT: not sure how we should handle invalid data from user.
+ *          For now we saturate output duty form SVM.
  *
  * REFERENCE:
  *   https://e2e.ti.com/group/motor/m/pdf_presentations/665547/download (32-34)
@@ -320,15 +328,18 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
 
 void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *v_ab)
 {
+  DEBUGASSERT(s != NULL);
+  DEBUGASSERT(v_ab != NULL);
+
   abc_frame_t ijk;
 
   /* Perform modified inverse Clarke-transformation (alpha,beta) -> (i,j,k)
-   * to obtain auxliary frame which will be used in further calculations.
+   * to obtain auxiliary frame which will be used in further calculations.
    */
 
-  ijk.a = -v_ab->b/2 + SQRT3_BY_TWO_F*v_ab->a;
+  ijk.a = -0.5f*v_ab->b + SQRT3_BY_TWO_F*v_ab->a;
   ijk.b = v_ab->b;
-  ijk.c = -v_ab->b/2 - SQRT3_BY_TWO_F*v_ab->a;
+  ijk.c = -ijk.b - ijk.a;
 
   /* Get vector sector */
 
@@ -337,4 +348,103 @@ void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *v_ab)
   /* Get duty cycle */
 
   svm3_duty_calc(s, &ijk);
+
+  /* Saturate output from SVM */
+
+  f_saturate(&s->d_u, s->d_min, s->d_max);
+  f_saturate(&s->d_v, s->d_min, s->d_max);
+  f_saturate(&s->d_w, s->d_min, s->d_max);
+}
+
+/****************************************************************************
+ * Name: svm3_current_correct
+ *
+ * Description:
+ *   Correct ADC samples (int32) according to SVM3 state.
+ *   NOTE: This works only with 3 shunt resistors configuration.
+ *
+ ****************************************************************************/
+
+void svm3_current_correct(FAR struct svm3_state_s *s,
+                              int32_t *c0, int32_t *c1, int32_t *c2)
+{
+  /* Get best ADC samples according to SVM sector.
+   *
+   * In SVM phase current can be sampled only in v0 vector state, when lower
+   * bridge transistors are turned on.
+   *
+   * We ignore sample from phase which has the shortest V0 state and
+   * estimate its value with KCL for motor phases:
+   *    i_a + i_b + i_c = 0
+   */
+
+  switch (s->sector)
+    {
+      case 1:
+      case 6:
+        {
+          /* Sector 1-6: ignore phase 1 */
+
+          *c0 = -(*c1 + *c2);
+
+          break;
+        }
+
+      case 2:
+      case 3:
+        {
+          /* Sector 2-3: ignore phase 2 */
+
+          *c1 = -(*c0 + *c2);
+
+          break;
+        }
+
+      case 4:
+      case 5:
+        {
+          /* Sector 4-5: ignore phase 3 */
+
+          *c2 = -(*c0 + *c1);
+
+          break;
+        }
+
+      default:
+        {
+          /* We should not get here. */
+
+          *c0 = 0;
+          *c1 = 0;
+          *c2 = 0;
+
+          break;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: svm3_init
+ *
+ * Description:
+ *   Initialize 3-phase SVM data.
+ *
+ * Input Parameters:
+ *   s - (in/out) pointer to the SVM state data
+ *   sat - (in)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void svm3_init(FAR struct svm3_state_s *s, float min, float max)
+{
+  DEBUGASSERT(s != NULL);
+  DEBUGASSERT(max > min);
+
+  memset(s, 0, sizeof(struct svm3_state_s));
+
+  s->d_max = max;
+  s->d_min = min;
 }

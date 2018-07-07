@@ -72,6 +72,9 @@
 void clarke_transform(FAR abc_frame_t *abc,
                       FAR ab_frame_t *ab)
 {
+  DEBUGASSERT(abc != NULL);
+  DEBUGASSERT(ab != NULL);
+
   ab->a = abc->a;
   ab->b = ONE_BY_SQRT3_F*abc->a + TWO_BY_SQRT3_F*abc->b;
 }
@@ -94,10 +97,13 @@ void clarke_transform(FAR abc_frame_t *abc,
 void inv_clarke_transform(FAR ab_frame_t *ab,
                           FAR abc_frame_t *abc)
 {
+  DEBUGASSERT(ab != NULL);
+  DEBUGASSERT(abc != NULL);
+
   /* Assume non-power-invariant transform and balanced system */
 
   abc->a = ab->a;
-  abc->b = -ab->a/2 + SQRT3_BY_TWO_F*ab->b;
+  abc->b = -0.5f*ab->a + SQRT3_BY_TWO_F*ab->b;
   abc->c = -abc->a - abc->b;
 }
 
@@ -121,6 +127,10 @@ void park_transform(FAR phase_angle_t *angle,
                     FAR ab_frame_t *ab,
                     FAR dq_frame_t *dq)
 {
+  DEBUGASSERT(angle != NULL);
+  DEBUGASSERT(ab != NULL);
+  DEBUGASSERT(dq != NULL);
+
   dq->d = angle->cos * ab->a + angle->sin * ab->b;
   dq->q = angle->cos * ab->b - angle->sin * ab->a;
 }
@@ -145,6 +155,10 @@ void inv_park_transform(FAR phase_angle_t *angle,
                         FAR dq_frame_t *dq,
                         FAR ab_frame_t *ab)
 {
+  DEBUGASSERT(angle != NULL);
+  DEBUGASSERT(dq != NULL);
+  DEBUGASSERT(ab != NULL);
+
   ab->a = angle->cos * dq->d - angle->sin * dq->q;
   ab->b = angle->cos * dq->q + angle->sin * dq->d;
 }

@@ -49,6 +49,7 @@ CSRCS += lib_transform.c
 CSRCS += lib_observer.c
 CSRCS += lib_foc.c
 CSRCS += lib_misc.c
+CSRCS += lib_motor.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

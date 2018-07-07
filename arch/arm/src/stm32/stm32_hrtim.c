@@ -254,7 +254,7 @@
 #  define HRTIM_TIME_MODE 0
 #endif
 
-#if defined(CONFIG_STM32_HRTIM_TIMA) && !defined( HRTIM_TIMA_UPDATE)
+#if defined(CONFIG_STM32_HRTIM_TIMA) && !defined(HRTIM_TIMA_UPDATE)
 #  warning "HRTIM_TIMA_UPDATE is not set. Set the default value 0"
 #  define HRTIM_TIMA_UPDATE 0
 #endif

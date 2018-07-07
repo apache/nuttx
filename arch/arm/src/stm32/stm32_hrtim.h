@@ -705,6 +705,7 @@ enum stm32_hrtim_chopper_freq_e
 
 enum stm32_hrtim_adc_trq13_e
 {
+  HRTIM_ADCTRG13_NONE  = 0,        /* No trigger */
   HRTIM_ADCTRG13_MC1   = (1 << 0), /* Trigger on Master Compare 1 */
   HRTIM_ADCTRG13_MC2   = (1 << 1), /* Trigger on Master Compare 2 */
   HRTIM_ADCTRG13_MC3   = (1 << 2), /* Trigger on Master Compare 3 */
@@ -749,6 +750,7 @@ enum stm32_hrtim_adc_trq13_e
 
 enum stm32_hrtim_adc_trq24_e
 {
+  HRTIM_ADCTRG24_NONE  = 0,        /* No trigger */
   HRTIM_ADCTRG24_MC1   = (1 << 0), /* Trigger on Master Compare 1 */
   HRTIM_ADCTRG24_MC2   = (1 << 1), /* Trigger on Master Compare 2 */
   HRTIM_ADCTRG24_MC3   = (1 << 2), /* Trigger on Master Compare 3 */

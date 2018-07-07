@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <string.h>
-
 #include <dsp.h>
 
 /****************************************************************************
@@ -70,6 +68,8 @@
 void pid_controller_init(FAR pid_controller_t *pid, float KP, float KI,
                          float KD)
 {
+  DEBUGASSERT(pid != NULL);
+
   /* Reset controller data */
 
   memset(pid, 0, sizeof(pid_controller_t));
@@ -100,6 +100,8 @@ void pid_controller_init(FAR pid_controller_t *pid, float KP, float KI,
 
 void pi_controller_init(FAR pid_controller_t *pid, float KP, float KI)
 {
+  DEBUGASSERT(pid != NULL);
+
   /* Reset controller data */
 
   memset(pid, 0, sizeof(pid_controller_t));
@@ -108,7 +110,7 @@ void pi_controller_init(FAR pid_controller_t *pid, float KP, float KI)
 
   pid->KP = KP;
   pid->KI = KI;
-  pid->KD = 0.0;
+  pid->KD = 0.0f;
 }
 
 /****************************************************************************
@@ -129,8 +131,11 @@ void pi_controller_init(FAR pid_controller_t *pid, float KP, float KI)
  *
  ****************************************************************************/
 
-void pid_saturation_set(FAR pid_controller_t* pid, float min, float max)
+void pid_saturation_set(FAR pid_controller_t *pid, float min, float max)
 {
+  DEBUGASSERT(pid != NULL);
+  DEBUGASSERT(min < max);
+
   pid->sat.max = max;
   pid->sat.min = min;
 }
@@ -150,9 +155,30 @@ void pid_saturation_set(FAR pid_controller_t* pid, float min, float max)
  *
  ****************************************************************************/
 
-void pi_saturation_set(FAR pid_controller_t* pid, float min, float max)
+void pi_saturation_set(FAR pid_controller_t *pid, float min, float max)
 {
+  DEBUGASSERT(pid != NULL);
+  DEBUGASSERT(min < max);
+
   pid_saturation_set(pid, min, max);
+}
+
+/****************************************************************************
+ * Name: pid_integral_reset
+ ****************************************************************************/
+
+void pid_integral_reset(FAR pid_controller_t *pid)
+{
+  pid->part[1] = 0.0f;
+}
+
+/****************************************************************************
+ * Name: pi_integral_reset
+ ****************************************************************************/
+
+void pi_integral_reset(FAR pid_controller_t *pid)
+{
+  pid_integral_reset(pid);
 }
 
 /****************************************************************************
@@ -172,6 +198,8 @@ void pi_saturation_set(FAR pid_controller_t* pid, float min, float max)
 
 float pi_controller(FAR pid_controller_t *pid, float err)
 {
+  DEBUGASSERT(pid != NULL);
+
   /* Store error in controller structure */
 
   pid->err = err;
@@ -188,9 +216,12 @@ float pi_controller(FAR pid_controller_t *pid, float err)
 
   pid->out = pid->part[0] + pid->part[1];
 
-  /* Saturate output only if not in PID calculation and if some limits are set */
+  /* Saturate output only if we are not in a PID calculation and only
+   * if some limits are set. Saturation for a PID controller are done later
+   * in PID routine.
+   */
 
-  if (pid->sat.max != pid->sat.min && pid->KD == 0.0)
+  if (pid->sat.max != pid->sat.min && pid->KD == 0.0f)
     {
       if (pid->out > pid->sat.max)
         {
@@ -200,9 +231,9 @@ float pi_controller(FAR pid_controller_t *pid, float err)
 
           /* Integral anti-windup - reset integral part */
 
-          if (err > 0)
+          if (err > 0.0f)
             {
-              pid->part[1] = 0;
+              pi_integral_reset(pid);
             }
         }
       else if (pid->out < pid->sat.min)
@@ -213,9 +244,9 @@ float pi_controller(FAR pid_controller_t *pid, float err)
 
           /* Integral anti-windup - reset integral part */
 
-          if (err < 0)
+          if (err < 0.0f)
             {
-              pid->part[1] = 0;
+              pi_integral_reset(pid);
             }
         }
     }
@@ -242,6 +273,8 @@ float pi_controller(FAR pid_controller_t *pid, float err)
 
 float pid_controller(FAR pid_controller_t *pid, float err)
 {
+  DEBUGASSERT(pid != NULL);
+
   /* Get PI output */
 
   pi_controller(pid, err);

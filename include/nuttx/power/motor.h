@@ -98,11 +98,20 @@ enum motor_fault_e
 {
   MOTOR_FAULT_OVERCURRENT  = (1 << 0),  /* Over-current Fault */
   MOTOR_FAULT_OVERVOLTAGE  = (1 << 1),  /* Over-voltage Fault */
-  MOTOR_FAULT_OVERPOWER    = (1 << 2),  /* Over-power Fault */
+  MOTOR_FAULT_OVERPOWER    = (1 << 2),  /* Over-power Fault (electrical) */
   MOTOR_FAULT_OVERTEMP     = (1 << 3),  /* Over-temperature Fault */
-  MOTOR_FAULT_LOCKED       = (1 << 4),  /* Motor locked Fault */
-  MOTOR_FAULT_INVAL_PARAM  = (1 << 5),  /* Invalid parameter Fault */
-  MOTOR_FAULT_OTHER        = (1 << 6)   /* Other Fault */
+  MOTOR_FAULT_OVERLOAD     = (1 << 4),  /* Motor overload Fault (mechanical) */
+  MOTOR_FAULT_LOCKED       = (1 << 5),  /* Motor locked Fault */
+  MOTOR_FAULT_INVAL_PARAM  = (1 << 6),  /* Invalid parameter Fault */
+  MOTOR_FAULT_OTHER        = (1 << 7)   /* Other Fault */
+};
+
+/* Motor direction */
+
+enum motor_direction_e
+{
+  MOTOR_DIR_CCW = -1,
+  MOTOR_DIR_CW  = 1
 };
 
 /* This structure contains feedback data from motor driver */
@@ -191,7 +200,7 @@ struct motor_params_s
                                       * parameter during run-time.
                                       */
 #ifdef CONFIG_MOTOR_HAVE_DIRECTION
-  bool  direction;                   /* Motor movement direction. We do not
+  int8_t  direction;                 /* Motor movement direction. We do not
                                       * support negative values for parameters,
                                       * so this flag can be used to allow movement
                                       * in the positive and negative direction in
@@ -214,7 +223,7 @@ struct motor_params_s
   float acceleration;                /* Motor acceleration */
 #endif
 #ifdef CONFIG_MOTOR_HAVE_DECELERATION
-  float deceleartion;                /* Motor deceleration */
+  float deceleration;                /* Motor deceleration */
 #endif
 };
 

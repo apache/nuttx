@@ -427,6 +427,20 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               goto errout;
             }
 
+#ifdef CONFIG_MOTOR_HAVE_DIRECTION
+          /* Check direction configuration */
+
+          if (params->direction != MOTOR_DIR_CCW &&
+              params->direction != MOTOR_DIR_CW)
+            {
+              pwrerr("ERROR: invalid direction value %d\n",
+                     params->direction);
+
+              ret = -EPERM;
+              goto errout;
+            }
+#endif
+
 #ifdef CONFIG_MOTOR_HAVE_POSITION
           /* Check position configuration */
 

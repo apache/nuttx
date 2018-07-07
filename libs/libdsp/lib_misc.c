@@ -81,6 +81,26 @@ void f_saturate(FAR float *val, float min, float max)
 }
 
 /****************************************************************************
+ * Name: vector2d_mag
+ *
+ * Description:
+ *   Get 2D vector magnitude.
+ *
+ * Input Parameters:
+ *   x   - (in) vector x component
+ *   y   - (in) vector y component
+ *
+ * Returned Value:
+ *   Return 2D vector magnitude
+ *
+ ****************************************************************************/
+
+float vector2d_mag(float x, float y)
+{
+  return sqrtf(x * x + y * y);
+}
+
+/****************************************************************************
  * Name: vector2d_saturate
  *
  * Description:
@@ -98,16 +118,16 @@ void f_saturate(FAR float *val, float min, float max)
 
 void vector2d_saturate(FAR float *x, FAR float *y, float max)
 {
-  float mag = 0.0;
-  float tmp = 0.0;
+  float mag = 0.0f;
+  float tmp = 0.0f;
 
   /* Get vector magnitude */
 
-  mag = sqrtf(*x * *x + *y * *y);
+  mag = vector2d_mag(*x, *y);
 
-  if (mag < (float)1e-10)
+  if (mag < 1e-10f)
     {
-      mag = (float)1e-10;
+      mag = 1e-10f;
     }
 
   if (mag > max)
@@ -118,6 +138,25 @@ void vector2d_saturate(FAR float *x, FAR float *y, float max)
       *x *= tmp;
       *y *= tmp;
     }
+}
+
+/****************************************************************************
+ * Name: dq_mag
+ *
+ * Description:
+ *   Get DQ vector magnitude.
+ *
+ * Input Parameters:
+ *   dq  - (in/out) dq frame vector
+ *
+ * Returned Value:
+ *  Return dq vector magnitude
+ *
+ ****************************************************************************/
+
+float dq_mag(FAR dq_frame_t *dq)
+{
+  return vector2d_mag(dq->d, dq->q);
 }
 
 /****************************************************************************
@@ -158,9 +197,9 @@ void dq_saturate(FAR dq_frame_t *dq, float max)
 
 float fast_sin(float angle)
 {
-  float sin = 0.0;
-  float n1 = 1.27323954;
-  float n2 = 0.405284735;
+  float sin = 0.0f;
+  float n1  = 1.27323954f;
+  float n2  = 0.405284735f;
 
   /* Normalize angle */
 
@@ -168,7 +207,7 @@ float fast_sin(float angle)
 
   /* Get estiamte sine value from quadratic equation */
 
-  if (angle < 0.0)
+  if (angle < 0.0f)
     {
       sin = n1 * angle + n2 * angle * angle;
     }
@@ -220,10 +259,10 @@ float fast_cos(float angle)
 
 float fast_sin2(float angle)
 {
-  float sin = 0.0;
-  float n1 = 1.27323954;
-  float n2 = 0.405284735;
-  float n3 = 0.225;
+  float sin = 0.0f;
+  float n1 = 1.27323954f;
+  float n2 = 0.405284735f;
+  float n3 = 0.225f;
 
   /* Normalize angle */
 
@@ -231,11 +270,11 @@ float fast_sin2(float angle)
 
   /* Get estiamte sine value from quadratic equation and do more */
 
-  if (angle < 0.0)
+  if (angle < 0.0f)
     {
       sin = n1 * angle + n2 * angle * angle;
 
-      if (sin < 0)
+      if (sin < 0.0f)
         {
           sin = n3 * (sin *(-sin) - sin) + sin;
         }
@@ -248,7 +287,7 @@ float fast_sin2(float angle)
     {
       sin = n1 * angle - n2 * angle * angle;
 
-      if (sin < 0)
+      if (sin < 0.0f)
         {
           sin = n3 * (sin *(-sin) - sin) + sin;
         }
@@ -302,35 +341,35 @@ float fast_cos2(float angle)
 
 float fast_atan2(float y, float x)
 {
-  float angle = 0.0;
-  float abs_y = 0.0;
-  float rsq = 0.0;
-  float r = 0.0;
-  float n1 = 0.1963;
-  float n2 = 0.9817;
+  float angle = 0.0f;
+  float abs_y = 0.0f;
+  float rsq   = 0.0f;
+  float r     = 0.0f;
+  float n1    = 0.1963f;
+  float n2    = 0.9817f;
 
   /* Get absolute value of y and add some small number to prevent 0/0 */
 
-  abs_y = fabsf(y)+(float)1e-10;
+  abs_y = fabsf(y)+1e-10f;
 
   /* Calculate angle */
 
-  if (x >= 0.0)
+  if (x >= 0.0f)
     {
       r = (x - abs_y) / (x + abs_y);
       rsq = r * r;
-      angle = ((n1 * rsq) - n2) * r + (float)(M_PI_F / 4.0);
+      angle = ((n1 * rsq) - n2) * r + (M_PI_F / 4.0f);
     }
   else
     {
       r = (x + abs_y) / (abs_y - x);
       rsq = r * r;
-      angle = ((n1 * rsq) - n2) * r + (float)(3.0 * M_PI_F / 4.0);
+      angle = ((n1 * rsq) - n2) * r + (3.0f * M_PI_F / 4.0f);
     }
 
   /* Get angle sign */
 
-  if (y < 0.0)
+  if (y < 0.0f)
     {
       angle = -angle;
     }
@@ -394,7 +433,7 @@ void angle_norm(FAR float *angle, float per, float bottom, float top)
 
 void angle_norm_2pi(FAR float *angle, float bottom, float top)
 {
-  angle_norm(angle, 2*M_PI_F, bottom, top);
+  angle_norm(angle, 2.0f*M_PI_F, bottom, top);
 }
 
 /****************************************************************************
@@ -417,13 +456,24 @@ void angle_norm_2pi(FAR float *angle, float bottom, float top)
 
 void phase_angle_update(FAR struct phase_angle_s *angle, float val)
 {
+  DEBUGASSERT(angle != NULL);
+
   /* Normalize angle to <0.0, 2PI> */
 
-  angle_norm_2pi(&val, 0.0, 2*M_PI_F);
+  angle_norm_2pi(&val, 0.0f, 2.0f*M_PI_F);
 
   /* Update structure */
 
   angle->angle = val;
+
+#if CONFIG_LIBDSP_PRECISION == 1
+  angle->sin = fast_sin2(val);
+  angle->cos = fast_cos2(val);
+#elif CONFIG_LIBDSP_PRECISION == 2
+  angle->sin = sin(val);
+  angle->cos = cos(val);
+#else
   angle->sin = fast_sin(val);
   angle->cos = fast_cos(val);
+#endif
 }

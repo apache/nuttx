@@ -8,3 +8,23 @@ config LIBDSP
 	default n
 	---help---
 		Enable build for various DSP functions
+
+config LIBDSP_DEBUG
+	bool "Libdsp debugging"
+	depends on LIBDSP
+	default n
+	---help---
+		Enable debugging for libdsp. This option enables additional parameters
+		checking. It can drastically reduce performance and be potentially
+		dangerous to hardware, so it should be used carefully (probably only
+		at an early stage of application development).
+
+config LIBDSP_PRECISION
+	int "Libdsp precision [0/1/2]"
+	default 0
+	---help---
+		Whith this option we can select libdsp precision for
+		some of calculations. There are 3 available options:
+		0 - the fastest calculation but the lowest precision
+		1 - a little better precision than above, but slowest
+		2 - the most accuracte but the slowest one, use standard math functions.
