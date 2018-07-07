@@ -1002,11 +1002,19 @@ Configurations
 
   tcpblaster:
 
-    The tcpblaster example derives from the nettest example and basicallyi
+    The tcpblaster example derives from the nettest example and basically
     duplicates that application when the nettest PERFORMANCE option is selected.
     tcpblaster has a little better reporting of performance stats, however.
 
     This configuration derives directly from the netnsh configuration and most
-    of the notes there should applie equally here.
+    of the notes there should apply equally here.
 
+    General usage instructions:
 
+    1. On the host:
+       a. cd to apps/examples/tcpblaster
+       b. Run the host tcpserver[.exe] program that was built in that directory
+    2. On the target:
+       a. Run the tcpclient built in application.
+    3. When you get tire of watch the numbers scroll by, just kill the tcpserver
+       on the host.
