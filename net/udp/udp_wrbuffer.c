@@ -56,6 +56,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -156,7 +157,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_alloc(false);
+  wrb->wb_iob = net_ioballoc(false);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");

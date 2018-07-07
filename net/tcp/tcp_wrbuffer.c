@@ -161,23 +161,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_tryalloc(false);
-  if (wrb->wb_iob == NULL)
-    {
-      unsigned int count;
-      int ret;
-
-      /* There are no buffers available now.  We will have to wait for one to
-       * become available. But let's not do that with the network locked.
-       */
-
-      ret = net_breaklock(&count);
-      wrb->wb_iob = iob_alloc(false);
-      if (ret >= 0)
-        {
-          net_restorelock(count);
-        }
-    }
+  wrb->wb_iob = net_ioballoc(false);
 
   /* Did we get an IOB?  We should always get one except under some really weird
    * error conditions.

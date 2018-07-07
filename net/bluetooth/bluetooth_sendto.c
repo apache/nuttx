@@ -61,6 +61,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
@@ -158,7 +159,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Allocate an IOB to hold the frame data */
 
-      iob = iob_alloc(0);
+      iob = net_ioballoc(false);
       if (iob == NULL)
         {
           nwarn("WARNING: Failed to allocate IOB\n");

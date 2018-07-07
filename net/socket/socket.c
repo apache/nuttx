@@ -212,7 +212,7 @@ int socket(int domain, int type, int protocol)
   sockfd = sockfd_allocate(0);
   if (sockfd < 0)
     {
-      nerr("ERROR: Failed to allodate a socket descriptor\n");
+      nerr("ERROR: Failed to allocate a socket descriptor\n");
       errcode = ENFILE;
       goto errout;
     }

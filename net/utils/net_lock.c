@@ -48,6 +48,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
 #include "utils/utils.h"
@@ -283,46 +284,38 @@ int net_timedwait(sem_t *sem, FAR const struct timespec *abstime)
 {
   unsigned int count;
   irqstate_t   flags;
+  int          blresult;
   int          ret;
 
   flags = enter_critical_section(); /* No interrupts */
+  sched_lock();                     /* No context switches */
 
-  pid_t        me = getpid();
+  /* Release the network lock, remembering my count.  net_breaklock will
+   * return a negated value if the caller does not hold the network lock.
+   */
 
-  sched_lock();      /* No context switches */
-  if (g_holder == me)
+  blresult = net_breaklock(&count);
+
+  /* Now take the semaphore, waiting if so requested. */
+
+  if (abstime != NULL)
     {
-      /* Release the network lock, remembering my count */
+      /* Wait until we get the lock or until the timeout expires */
 
-      count    = g_count;
-      g_holder = NO_HOLDER;
-      g_count  = 0;
-      nxsem_post(&g_netlock);
-
-      /* Now take the semaphore, waiting if so requested. */
-
-      if (abstime != NULL)
-        {
-          /* Wait until we get the lock or until the timeout expires */
-
-          ret = nxsem_timedwait(sem, abstime);
-        }
-      else
-        {
-          /* Wait as long as necessary to get the lock */
-
-          ret = nxsem_wait(sem);
-        }
-
-      /* Recover the network lock at the proper count */
-
-      _net_takesem();
-      g_holder = me;
-      g_count  = count;
+      ret = nxsem_timedwait(sem, abstime);
     }
   else
     {
+      /* Wait as long as necessary to get the lock */
+
       ret = nxsem_wait(sem);
+    }
+
+  /* Recover the network lock at the proper count (if we held it before) */
+
+  if (blresult >= 0)
+    {
+      net_restorelock(count);
     }
 
   sched_unlock();
@@ -350,3 +343,49 @@ int net_lockedwait(sem_t *sem)
   return net_timedwait(sem, NULL);
 }
 
+/****************************************************************************
+ * Name: net_ioballoc
+ *
+ * Description:
+ *   Allocate an IOB.  If no IOBs are available, then atomically wait for
+ *   for the IOB while temporarily releasing the lock on the network.
+ *
+ * Input Parameters:
+ *   throttled - An indication of the IOB allocation is "throttled"
+ *
+ * Returned Value:
+ *   A pointer to the newly allocated IOB is returned on success.  NULL is
+ *   returned on any allocation failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_IOB
+FAR struct iob_s *net_ioballoc(bool throttled)
+{
+  FAR struct iob_s *iob;
+
+  iob = iob_tryalloc(throttled);
+  if (iob == NULL)
+    {
+      irqstate_t flags;
+      unsigned int count;
+      int blresult;
+
+      /* There are no buffers available now.  We will have to wait for one to
+       * become available. But let's not do that with the network locked.
+       */
+
+      flags    = enter_critical_section();
+      blresult = net_breaklock(&count);
+      iob      = iob_alloc(throttled);
+      if (blresult >= 0)
+        {
+          net_restorelock(count);
+        }
+
+      leave_critical_section(flags);
+    }
+
+  return iob;
+}
+#endif

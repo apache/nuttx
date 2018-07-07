@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_sendto.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
@@ -345,7 +346,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Allocate an IOB to hold the frame data */
 
-      iob = iob_alloc(0);
+      iob = net_ioballoc(false);
       if (iob == NULL)
         {
           nwarn("WARNING: Failed to allocate IOB\n");

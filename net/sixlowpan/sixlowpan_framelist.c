@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_framelist.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Parts of this file derive from Contiki:
@@ -59,6 +59,7 @@
 #include <nuttx/net/radiodev.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
+#include "utils/utils.h"
 #include "sixlowpan/sixlowpan_internal.h"
 
 #ifdef CONFIG_NET_6LOWPAN
@@ -409,7 +410,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
    * necessary.
    */
 
-  iob = iob_alloc(false);
+  iob = net_ioballoc(false);
   DEBUGASSERT(iob != NULL);
 
   /* Initialize the IOB */
@@ -633,7 +634,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
            * necessary.
            */
 
-          iob = iob_alloc(false);
+          iob = net_ioballoc(false);
           DEBUGASSERT(iob != NULL);
 
           /* Initialize the IOB */
