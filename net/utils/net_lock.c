@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_lock.c
  *
- *   Copyright (C) 2011-2012, 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,6 +202,64 @@ void net_unlock(void)
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
 #endif
+}
+
+/****************************************************************************
+ * Name: net_breaklock
+ *
+ * Description:
+ *   Break the lock, return information needed to restore re-entrant lock
+ *   state.
+ *
+ ****************************************************************************/
+
+int net_breaklock(FAR unsigned int *count)
+{
+  irqstate_t flags;
+  pid_t me = getpid();
+  int ret = -EPERM;
+
+  DEBUGASSERT(count != NULL);
+
+  flags = spin_lock_irqsave(); /* No interrupts */
+  if (g_holder == me)
+    {
+      /* Return the lock setting */
+
+      *count   = g_count;
+
+      /* Release the network lock  */
+
+      g_holder = NO_HOLDER;
+      g_count  = 0;
+
+      (void)nxsem_post(&g_netlock);
+      ret      = OK;
+    }
+
+  spin_unlock_irqrestore(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: net_breaklock
+ *
+ * Description:
+ *   Restore the locked state
+ *
+ ****************************************************************************/
+
+void net_restorelock(unsigned int count)
+{
+  pid_t me = getpid();
+
+  DEBUGASSERT(g_holder != me);
+
+  /* Recover the network lock at the proper count */
+
+  _net_takesem();
+  g_holder = me;
+  g_count  = count;
 }
 
 /****************************************************************************

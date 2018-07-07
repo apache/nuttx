@@ -87,6 +87,27 @@ struct timeval;           /* Forward reference */
 void net_lockinitialize(void);
 
 /****************************************************************************
+ * Name: net_breaklock
+ *
+ * Description:
+ *   Break the lock, return information needed to restore re-entrant lock
+ *   state.
+ *
+ ****************************************************************************/
+
+int net_breaklock(FAR unsigned int *count);
+
+/****************************************************************************
+ * Name: net_breaklock
+ *
+ * Description:
+ *   Restore the locked state
+ *
+ ****************************************************************************/
+
+void net_restorelock(unsigned int count);
+
+/****************************************************************************
  * Name: net_dsec2timeval
  *
  * Description:
