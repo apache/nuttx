@@ -540,8 +540,6 @@ static int  stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
 static int  stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
-              uint32_t *rnotimpl);
 
 /* EVENT handler */
 
@@ -2674,17 +2672,6 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
       *rshort = sdmmc_getreg32(priv, STM32_SDMMC_RESP1_OFFSET);
     }
   return ret;
-}
-
-/* MMC responses not supported */
-
-static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
-                             uint32_t *rnotimpl)
-{
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR | STM32_SDMMC_CMDDONE_ICR,
-                 STM32_SDMMC_ICR_OFFSET);
-  return -ENOSYS;
 }
 
 /****************************************************************************
