@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc54628/lpc54_clockconfig.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Parts of this file were adapted from sample code provided for the LPC54xx
@@ -284,9 +284,33 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup)
 
   lpc54_set_flash_waitstates(pllsetup->pllfout);
 
-  /* Set up the PLL clock source to FRO 12MHz */
+  /* Set up the PLL clock source as specified by PLL configuration. */
 
   putreg32(pllsetup->pllclksel, LPC54_SYSCON_SYSPLLCLKSEL);
+
+  /* Check if the selected PLL clock source is clk_in, the external clock
+   * that comes from a crystal oscillator.
+   */
+
+  if (pllsetup->pllclksel == SYSCON_SYSPLLCLKSEL_CLKIN)
+    {
+      /* If so, provide power for the external clock.
+       *
+       *   VD2ANA - Analog supply for System Oscillator
+       *   SYSOSC - System oscillator power.
+       *
+       * REVISIT:  This was not necessary for the LPC54628 but kxjiang
+       * <kxjiangs@gmail.com> reports this to be necessary for the
+       * LPC54608 when the CLKIN source is selected.  This has not been
+       * re-verified on the LPC54628.
+       *
+       * REVISIT:  Note that these power supplies are not disabled if a
+       * different clock source is selected.  Should they be?
+       */
+
+      putreg32(SYSCON_PDRUNCFG0_VD2ANA, LPC54_SYSCON_PDRUNCFGCLR0);
+      putreg32(SYSCON_PDRUNCFG1_SYSOSC, LPC54_SYSCON_PDRUNCFGCLR1);
+    }
 
   /* Configure the PLL */
 
