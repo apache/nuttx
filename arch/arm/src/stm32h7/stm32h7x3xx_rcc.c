@@ -4,6 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +39,7 @@
  * Included Files
  ****************************************************************************/
 
-// TODO: #include "stm32_pwr.h"
+#include "stm32_pwr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -380,39 +381,42 @@ static void stm32_stdclockconfig(void)
 
   if (timeout > 0)
     {
-      /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 216 MHz.
-       */
-
-      regval  = getreg32(STM32_RCC_APB1ENR);
-      regval |= RCC_APB1ENR_PWREN;
-      putreg32(regval, STM32_RCC_APB1ENR);
-
-      regval  = getreg32(STM32_PWR_CR1);
-      regval &= ~PWR_CR1_VOS_MASK;
-      regval |= PWR_CR1_VOS_SCALE_1;
-      putreg32(regval, STM32_PWR_CR1);
 
       /* Set the HCLK source/divider */
 
-      regval = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_HPRE_MASK;
-      regval |= STM32_RCC_CFGR_HPRE;
-      putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_D1CFGR);
+      regval &= ~RCC_D1CFGR_HPRE_MASK;
+      regval |= STM32_RCC_D1CFGR_HPRE;
+      putreg32(regval, STM32_RCC_D1CFGR);
 
-      /* Set the PCLK2 divider */
+      /* Set PCLK1 */
 
-      regval = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_PPRE2_MASK;
-      regval |= STM32_RCC_CFGR_PPRE2;
-      putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_D2CFGR);
+      regval &= ~RCC_D2CFGR_D2PPRE2_MASK;
+      regval |= STM32_RCC_D2CFGR_D2PPRE1;
+      putreg32(regval, STM32_RCC_D2CFGR);
 
-      /* Set the PCLK1 divider */
+      /* Set PCLK2 */
 
-      regval = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_PPRE1_MASK;
-      regval |= STM32_RCC_CFGR_PPRE1;
-      putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_D2CFGR);
+      regval &= ~RCC_D2CFGR_D2PPRE2_MASK;
+      regval |= STM32_RCC_D2CFGR_D2PPRE2;
+      putreg32(regval, STM32_RCC_D2CFGR);
+
+      /* Set PCLK3 */
+
+      regval = getreg32(STM32_RCC_D1CFGR);
+      regval &= ~RCC_D1CFGR_D1PPRE_MASK;
+      regval |= STM32_RCC_D1CFGR_D1PPRE;
+      putreg32(regval, STM32_RCC_D1CFGR);
+
+      /* Set PCLK4 */
+
+      regval = getreg32(STM32_RCC_D3CFGR);
+      regval &= ~RCC_D3CFGR_D3PPRE_MASK;
+      regval |= STM32_RCC_D3CFGR_D3PPRE;
+      putreg32(regval, STM32_RCC_D3CFGR);
+
 
 #ifdef CONFIG_STM32H7_RTC_HSECLOCK
       /* Set the RTC clock divisor */
@@ -423,42 +427,65 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CFGR);
 #endif
 
-      /* Set the PLL dividers and multipliers to configure the main PLL */
+      /* Configure PLL123 clock source and multipiers */
 
 #ifdef STM32_BOARD_USEHSI
-      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP |
-                RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);
+      regval = (RCC_PLLCKSELR_PLLSRC_HSI |
+                STM32_PLLCFG_PLL1M |
+                STM32_PLLCFG_PLL2M |
+                STM32_PLLCFG_PLL3M);
 #else /* if STM32_BOARD_USEHSE */
-      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP |
-                RCC_PLLCFG_PLLSRC_HSE | STM32_PLLCFG_PLLQ);
+      regval = (RCC_PLLCKSELR_PLLSRC_HSE |
+                STM32_PLLCFG_PLL1M |
+                STM32_PLLCFG_PLL2M |
+                STM32_PLLCFG_PLL3M);
 #endif
-      putreg32(regval, STM32_RCC_PLLCFG);
+      putreg32(regval, STM32_RCC_PLLCKSELR);
 
-      /* Enable the main PLL */
+      /* Configure PLL1 dividers */
+
+      regval = (STM32_PLLCFG_PLL1N |
+                STM32_PLLCFG_PLL1P |
+                STM32_PLLCFG_PLL1Q |
+                STM32_PLLCFG_PLL1R);
+      putreg32(regval, STM32_RCC_PLL1DIVR);
+
+      /* Configure PLL2 dividers */
+
+      regval = (STM32_PLLCFG_PLL2N |
+                STM32_PLLCFG_PLL2P |
+                STM32_PLLCFG_PLL2Q |
+                STM32_PLLCFG_PLL2R);
+      putreg32(regval, STM32_RCC_PLL2DIVR);
+
+      /* Configure PLL3 dividers */
+
+      regval = (STM32_PLLCFG_PLL3N |
+                STM32_PLLCFG_PLL3P |
+                STM32_PLLCFG_PLL3Q |
+                STM32_PLLCFG_PLL3R);
+      putreg32(regval, STM32_RCC_PLL3DIVR);
+
+      /* Configure PLLs */
+
+      regval = (STM32_PLLCFG_PLL1CFG |
+                STM32_PLLCFG_PLL2CFG |
+                STM32_PLLCFG_PLL3CFG);
+      putreg32(regval, STM32_RCC_PLLCFGR);
+
+      /* Enable the PLL1 */
 
       regval = getreg32(STM32_RCC_CR);
-      regval |= RCC_CR_PLLON;
+      regval |= RCC_CR_PLL1ON;
       putreg32(regval, STM32_RCC_CR);
+
+      /* TODO: Enable the PLL2 */
+
+      /* TODO: Enable the PLL3 */
 
       /* Wait until the PLL is ready */
 
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
-        {
-        }
-
-      /* Enable the Over-drive to extend the clock frequency to 216 Mhz */
-
-      regval  = getreg32(STM32_PWR_CR1);
-      regval |= PWR_CR1_ODEN;
-      putreg32(regval, STM32_PWR_CR1);
-      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODRDY) == 0)
-        {
-        }
-
-      regval = getreg32(STM32_PWR_CR1);
-      regval |= PWR_CR1_ODSWEN;
-      putreg32(regval, STM32_PWR_CR1);
-      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ODSWRDY) == 0)
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
         {
         }
 
@@ -478,16 +505,16 @@ static void stm32_stdclockconfig(void)
 
       putreg32(regval, STM32_FLASH_ACR);
 
-      /* Select the main PLL as system clock source */
+      /* Select the PLL1 as system clock source */
 
       regval  = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_SW_MASK;
-      regval |= RCC_CFGR_SW_PLL;
+      regval |= RCC_CFGR_SW_PLL1;
       putreg32(regval, STM32_RCC_CFGR);
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL1)
         {
         }
 

@@ -4,6 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Simon Laube <simon@leitwert.ch>
+ *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,7 +113,7 @@
 
 #define STM32_PLLCFG_PLLSRC      RCC_PLLCKSELR_PLLSRC_HSE
 
-/* Wide PLL, 4 - 8 MHz input, enable DIVP */
+/* Wide PLL1, 4 - 8 MHz input, enable DIVP */
 
 #define STM32_PLLCFG_PLL1CFG     (RCC_PLLCFGR_PLL1VCOSEL_WIDE | \
                                   RCC_PLLCFGR_PLL1RGE_4_8_MHZ | \
@@ -122,6 +123,24 @@
 #define STM32_PLLCFG_PLL1P       RCC_PLL1DIVR_P1(2)
 #define STM32_PLLCFG_PLL1Q       RCC_PLL1DIVR_Q1(4)
 #define STM32_PLLCFG_PLL1R       RCC_PLL1DIVR_R1(8)
+
+/* PLL2 */
+
+#define STM32_PLLCFG_PLL2CFG 0
+#define STM32_PLLCFG_PLL2M 0
+#define STM32_PLLCFG_PLL2N 0
+#define STM32_PLLCFG_PLL2P 0
+#define STM32_PLLCFG_PLL2Q 0
+#define STM32_PLLCFG_PLL2R 0
+
+/* PLL3 */
+
+#define STM32_PLLCFG_PLL3CFG 0
+#define STM32_PLLCFG_PLL3M 0
+#define STM32_PLLCFG_PLL3N 0
+#define STM32_PLLCFG_PLL3P 0
+#define STM32_PLLCFG_PLL3Q 0
+#define STM32_PLLCFG_PLL3R 0
 
 #define STM32_VCO1_FREQUENCY     ((STM32_HSE_FREQUENCY / 4) * 200)
 #define STM32_SYSCLK_FREQUENCY   (STM32_VCO1_FREQUENCY / 1)
@@ -140,25 +159,30 @@
 
 /* AHB3 clock is SYSCLK (216 MHz) */
 
-#define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLKd2          /* HCLK  = SYSCLK / 2 */
+#define STM32_RCC_D1CFGR_HPRE   RCC_D1CFGR_HPRE_SYSCLKd2        /* HCLK  = SYSCLK / 2 */
 #define STM32_ACLK_FREQUENCY    (STM32_CPUCLK_FREQUENCY / 2)    /* ACLK in D1, HCLK3 in D1 */
 #define STM32_HCLK_FREQUENCY    (STM32_CPUCLK_FREQUENCY / 2)    /* HCLK in D2, HCLK4 in D3 */
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY            /* same as above, to satisfy compiler */
 
 /* APB3 clock (PCLK1) is HCLK/4 (54 MHz) */
 
-#define STM32_RCC_CFGR_D1PPRE   RCC_CFGR_D1PPRE_HCLK        /* PCLK1 = HCLK / 1 */
-#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
+#define STM32_RCC_D1CFGR_D1PPRE   RCC_D1CFGR_D1PPRE_HCLKd4        /* PCLK1 = HCLK / 4 */
+#define STM32_PCLK3_FREQUENCY     (STM32_HCLK_FREQUENCY/4)
 
 /* APB1 clock is HCLK/4 (54 MHz) */
 
-#define STM32_RCC_CFGR_D2PPRE1  RCC_CFGR_D2PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
-#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
+#define STM32_RCC_D2CFGR_D2PPRE1  RCC_D2CFGR_D2PPRE1_HCLKd4       /* PCLK1 = HCLK / 4 */
+#define STM32_PCLK1_FREQUENCY     (STM32_HCLK_FREQUENCY/4)
 
 /* APB2 clock is HCLK/4 (54 MHz) */
 
-#define STM32_RCC_CFGR_D2PPRE2  RCC_CFGR_D2PPRE2_HCLK       /* PCLK1 = HCLK / 1 */
-#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
+#define STM32_RCC_D2CFGR_D2PPRE2  RCC_D2CFGR_D2PPRE2_HCLKd4       /* PCLK1 = HCLK / 4 */
+#define STM32_PCLK2_FREQUENCY     (STM32_HCLK_FREQUENCY/4)
+
+/* APB4 clock is HCLK/4 (54 MHz) */
+
+#define STM32_RCC_D3CFGR_D3PPRE   RCC_D3CFGR_D3PPRE_HCLKd4       /* PCLK1 = HCLK / 4 */
+#define STM32_PCLK4_FREQUENCY     (STM32_HCLK_FREQUENCY/4)
 
 /* FLASH wait states
  *
