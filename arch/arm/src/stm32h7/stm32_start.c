@@ -54,9 +54,9 @@
 #  include "nvic.h"
 #endif
 
-// TODO: #include "stm32_rcc.h"
+#include "stm32_rcc.h"
 // TODO: #include "stm32_userspace.h"
-// TODO: #include "stm32_lowputc.h"
+#include "stm32_lowputc.h"
 #include "stm32_start.h"
 
 /****************************************************************************
@@ -107,6 +107,20 @@ static inline void stm32_fpuconfig(void);
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked, no_instrument_function, noreturn));
+#endif
+
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
 #endif
 
 /****************************************************************************
@@ -358,9 +372,10 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  // TODO: stm32_clockconfig();
+  stm32_clockconfig();
   stm32_fpuconfig();
-  // TODO: stm32_lowsetup();
+  stm32_lowsetup();
+  showprogress('A');
 
   /* Enable/disable tightly coupled memories */
 
@@ -369,18 +384,21 @@ void __start(void)
   /* Initialize onboard resources */
 
   stm32_boardinitialize();
+  showprogress('B');
 
   /* Enable I- and D-Caches */
 
   arch_dcache_writethrough();
   arch_enable_icache();
   arch_enable_dcache();
+  showprogress('C');
 
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
+  showprogress('D');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -391,8 +409,12 @@ void __start(void)
 #ifdef CONFIG_BUILD_PROTECTED
   stm32_userspace();
 #endif
+  showprogress('E');
 
   /* Then start NuttX */
+
+  showprogress('\r');
+  showprogress('\n');
 
 #ifdef CONFIG_STACK_COLORATION
   /* Set the IDLE stack to the coloration value and jump into os_start() */

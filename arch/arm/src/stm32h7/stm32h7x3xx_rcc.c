@@ -102,7 +102,9 @@ static inline void rcc_reset(void)
   /* Reset HSION, HSEON, CSSON and PLLON bits */
 
   regval  = getreg32(STM32_RCC_CR);
-  regval &= ~(RCC_CR_HSEON | RCC_CR_HSI48ON | RCC_CR_CSION | RCC_CR_PLL1ON | RCC_CR_PLL2ON | RCC_CR_PLL3ON);
+  regval &= ~(RCC_CR_HSEON | RCC_CR_HSI48ON |
+              RCC_CR_CSION | RCC_CR_PLL1ON |
+              RCC_CR_PLL2ON | RCC_CR_PLL3ON);
   putreg32(regval, STM32_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
@@ -138,7 +140,17 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-  // TODO: ...
+#ifdef CONFIG_STM32H7_DMA1
+  /* DMA 1 clock enable */
+
+  regval |= RCC_AHB1ENR_DMA1EN;
+#endif
+
+#ifdef CONFIG_STM32H7_DMA2
+  /* DMA 2 clock enable */
+
+  regval |= RCC_AHB1ENR_DMA2EN;
+#endif
 
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
@@ -190,10 +202,10 @@ static inline void rcc_enableahb3(void)
 }
 
 /****************************************************************************
- * Name: rcc_enableahb3
+ * Name: rcc_enableahb4
  *
  * Description:
- *   Enable selected AHB1 peripherals
+ *   Enable selected AHB4 peripherals
  *
  ****************************************************************************/
 
@@ -207,7 +219,54 @@ static inline void rcc_enableahb4(void)
 
   regval = getreg32(STM32_RCC_AHB4ENR);
 
-  // TODO: ...
+  /* Enable GPIO, GPIOB, ... GPIOK */
+
+#if STM32H7_NGPIO > 0
+  regval |= (RCC_AHB4ENR_GPIOAEN
+#if STM32H7_NGPIO > 1
+             | RCC_AHB4ENR_GPIOBEN
+#endif
+#if STM32H7_NGPIO > 2
+             | RCC_AHB4ENR_GPIOCEN
+#endif
+#if STM32H7_NGPIO > 3
+             | RCC_AHB4ENR_GPIODEN
+#endif
+#if STM32H7_NGPIO > 4
+             | RCC_AHB4ENR_GPIOEEN
+#endif
+#if STM32H7_NGPIO > 5
+             | RCC_AHB4ENR_GPIOFEN
+#endif
+#if STM32H7_NGPIO > 6
+             | RCC_AHB4ENR_GPIOGEN
+#endif
+#if STM32H7_NGPIO > 7
+             | RCC_AHB4ENR_GPIOHEN
+#endif
+#if STM32H7_NGPIO > 8
+             | RCC_AHB4ENR_GPIOIEN
+#endif
+#if STM32H7_NGPIO > 9
+             | RCC_AHB4ENR_GPIOJEN
+#endif
+#if STM32H7_NGPIO > 10
+             | RCC_AHB4ENR_GPIOKEN
+#endif
+    );
+#endif
+
+#ifdef CONFIG_STM32H7_CRC
+  /* CRC clock enable */
+
+  regval |= RCC_AHB4ENR_CRCEN;
+#endif
+
+#ifdef CONFIG_STM32H7_BKPSRAM
+  /* Backup SRAM clock enable */
+
+  regval |= RCC_AHB4ENR_BKPSRAMEN;
+#endif
 
   putreg32(regval, STM32_RCC_AHB4ENR);   /* Enable peripherals */
 }
@@ -507,7 +566,7 @@ static void stm32_stdclockconfig(void)
 
       /* Select the PLL1 as system clock source */
 
-      regval  = getreg32(STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_SW_MASK;
       regval |= RCC_CFGR_SW_PLL1;
       putreg32(regval, STM32_RCC_CFGR);
@@ -654,8 +713,11 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb1();
   rcc_enableahb2();
   rcc_enableahb3();
+  rcc_enableahb4();
   rcc_enableapb1();
   rcc_enableapb2();
+  rcc_enableapb3();
+  rcc_enableapb4();
 }
 
 /****************************************************************************
