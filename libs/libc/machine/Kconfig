@@ -160,4 +160,4 @@ if ARCH_X86
 source libs/libc/machine/x86/Kconfig
 endif
 
-endmenu # Architecture-Specific Spport
+endmenu # Architecture-Specific Support

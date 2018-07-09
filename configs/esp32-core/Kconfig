@@ -32,7 +32,7 @@ config ESP32CORE_RUN_IRAM
 		mapping code to run from SPI flash after initial boot. There are at
 		least two possible approaches you could take: You can add the flash
 		cache mapping code into nuttx directly, so it is self-contained -
-		early nuttx initialisation runs from IRAM and enables flash cache,
+		early nuttx initialization runs from IRAM and enables flash cache,
 		and then off you go. Or you can use the esp-idf software bootloader
 		and partition table scheme and have nuttx be an esp-idf "app" which
 		allows interoperability with the esp-idf system but makes you

@@ -245,7 +245,7 @@ void lpc54_emc_initialize(FAR const struct emc_config_s *config)
 
   lpc54_reset_emc();
 
-  /* Set the EMC sytem configure */
+  /* Set the EMC system configuration */
 
   putreg32(SYSCON_EMCCLKDIV_DIV(config->clkdiv), LPC54_SYSCON_EMCCLKDIV);
 

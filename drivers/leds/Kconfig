@@ -29,7 +29,7 @@ config USERLED_LOWER
 		2. The board.h header file must provide the definition
 		   BOARD_NLEDS, and
 		3. The board.h header file must not include any other
-		   header files that are not accessibble in this context
+		   header files that are not accessible in this context
 		   (such as those in arch/<arch>/src/<chip>) UNLESS those
 		   inclusions are conditioned on __KERNEL__.  button_lower.c
 		   will undefine __KERNEL__ before included board.h.

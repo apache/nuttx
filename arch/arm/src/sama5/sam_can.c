@@ -602,7 +602,7 @@ static int can_mballoc(FAR struct sam_can_s *priv)
 
       for (i = 0; i < SAM_CAN_NMAILBOXES; i++)
         {
-          /* Is mailbox i availalbe? */
+          /* Is mailbox i available? */
 
           uint8_t bit = (1 << i);
           if ((priv->freemb & bit) != 0)

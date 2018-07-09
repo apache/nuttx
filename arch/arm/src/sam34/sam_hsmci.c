@@ -1801,7 +1801,7 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
  * Name: sam_blocksetup
  *
  * Description:
- *   Some hardward needs to be informed of the selected blocksize.
+ *   Some hardware needs to be informed of the selected blocksize.
  *
  * Input Parameters:
  *   dev      - An instance of the SDIO device interface

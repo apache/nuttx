@@ -118,7 +118,7 @@ include tools\Directories.mk
 #
 # Extra objects used in the final link.
 #
-# Pass 1 1ncremental (relative) link objects should be put into the
+# Pass 1 Incremental (relative) link objects should be put into the
 # processor-specific source directory (where other link objects will
 # be created).  If the pass1 object is an archive, it could go anywhere.
 

@@ -807,7 +807,7 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
 
   /* SDHC ver2.x cards have fixed block transfer size of 512 bytes.  SDC
    * ver1.x cards with capacity less than 1Gb, will have sector size
-   * 512 byes. SDC ver1.x cards with capacity of 2Gb will report readbllen
+   * 512 bytes. SDC ver1.x cards with capacity of 2Gb will report readbllen
    * of 1024 but should use 512 bytes for block transfers.  SDC ver1.x 4Gb
    * cards will report readbllen of 2048 bytes -- are they also 512 bytes?
    */
@@ -1797,7 +1797,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* SDHC ver2.x cards have fixed block transfer size of 512 bytes.  SDC
    * ver1.x cards with capacity less than 1Gb, will have sector size
-   * 512 byes. SDC ver1.x cards with capacity of 2Gb will report readbllen
+   * 512 bytes. SDC ver1.x cards with capacity of 2Gb will report readbllen
    * of 1024 but should use 512 bytes for block transfers.  SDC ver1.x 4Gb
    * cards will report readbllen of 2048 bytes -- are they also 512 bytes?
    * I think that none of these high capacity cards support setting the

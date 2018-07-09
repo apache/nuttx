@@ -1766,7 +1766,7 @@ config SAMV7_HSMCI_UNALIGNED
 		beginning of a sector and at least a whole sector is being read.
 
 		This option is not recommended.  There are better ways to handle
-		the unalaigned case:
+		the unaligned case:
 
 			# CONFIG_SAMV7_HSMCI_UNALIGNED is not set
 				Just return -EFAULT if unaligned

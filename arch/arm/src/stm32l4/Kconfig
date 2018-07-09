@@ -707,7 +707,7 @@ config STM32L4_SRAM2_INIT
 		avoided by first writing to all locations to force the parity into a valid
 		state.
 		However, if the SRAM2 is being used for it's battery-backed capability,
-		this may be undesireable (because it will destroy the contents).  In that
+		this may be undesirable (because it will destroy the contents).  In that
 		case, the board should handle the initialization itself at the appropriate
 		time.
 

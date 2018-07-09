@@ -3242,7 +3242,7 @@ config SAMA5_ADC_DMASAMPLES
 			2 Buffers * Number_of_ADC_Channels * SAMA5_ADC_DMASAMPLES * sizeof(uint16_t)
 
 		So, for example, if you had 8 ADC channels and 8 triggers per DMA
-		transfer, then the total DMA buffering requirment would be:
+		transfer, then the total DMA buffering requirement would be:
 
 			2 * 8 * 8 * 2 = 256 bytes.
 
@@ -4969,7 +4969,7 @@ config SAMA5_DDRCS_PGHEAP_OFFSET
 		you must have excluding this page cache region from the heap ether
 		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
 		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
-		cache region does not overlapy the region of DRAM that is added to
+		cache region does not overlap the region of DRAM that is added to
 		the heap.
 
 config SAMA5_DDRCS_PGHEAP_SIZE
@@ -4987,7 +4987,7 @@ config SAMA5_DDRCS_PGHEAP_SIZE
 		you must have excluding this page cache region from the heap ether
 		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
 		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
-		cache region does not overlapy the region of DRAM that is added to
+		cache region does not overlap the region of DRAM that is added to
 		the heap.
 
 endif # SAMA5_DDRCS_PGHEAP

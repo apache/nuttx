@@ -136,7 +136,7 @@ config LPC11_ADC_CHANLIST
 		matching the LPC11_ADC0_MASK within the board-specific library.
 
 config LPC11_ADC_BURSTMODE
-	bool "One interrupt at the end of all ADC cconversions"
+	bool "One interrupt at the end of all ADC conversions"
 	default n
 	---help---
 		Select this if you want to generate only one interrupt once all

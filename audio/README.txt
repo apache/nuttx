@@ -1,7 +1,7 @@
 README
 ^^^^^^
 
-This directory contains the audio subsytem support for NuttX.  The contents of this
+This directory contains the audio subsystem support for NuttX.  The contents of this
 directory are only built if CONFIG_AUDIO is defined in the NuttX configuration file.
 
 Contents

@@ -15,7 +15,7 @@ Make sure that '# CONFIG_NSH_CONDEV is not set' is in the .config file - it defa
 to '/dev/console' which makes problems with the shell over USB.
 
 The following peripherals are enabled in this configuration.
- - LED:        Shows the sytem status
+ - LED:        Shows the system status
 
  - Button:     Built in app 'buttons' works.
 

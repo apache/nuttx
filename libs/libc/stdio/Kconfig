@@ -90,7 +90,7 @@ choice
 		This selection determines the line terminating character that is used.
 		Some environments may return CR as end-of-line, others LF, and others
 		both.  If not specified, the default is either CR or LF (but not both)
-		as the line terminating charactor.
+		as the line terminating character.
 
 config EOL_IS_CR
 	bool "EOL is CR"

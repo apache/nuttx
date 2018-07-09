@@ -7164,7 +7164,7 @@
 	  structures are initialized, they will not behave properly
 	  (2014-4-10).
 	* arch/arm/src/sama5/sam_twi.c: TWI data sending is fails to increment
-	  the number of byes transferred on first byte sent.  from David Sidrane
+	  the number of bytes transferred on first byte sent.  From David Sidrane
 	  (2014-4-10).
 	* configs/sama5d3x-ek/src: The red LED is controlled by PE24 which is
 	  also the camera/ISI interface reset line.  So if the a camera is
@@ -10049,7 +10049,7 @@
 	  The check on RTC_MAGIC on the BK0R register lead to rtc_setup() call
 	  that rightfully enables the lsi clock; but the next times, when the
 	  rtc is already setup, the rtc_resume() call does NOT start the lsi
-	  clock! The right place to put LSE/LSI initialisation is inside
+	  clock! The right place to put LSE/LSI initialization is inside
 	  stm32_stdclockconfig() in stm32fxxxxx_rcc.c.  Doing this I checked
 	  the possible uses of the LSI and the LSE sources: the LSI can be used
 	  for RTC and/or the IWDG, while the LSE only for the RTC (and to output
@@ -12336,7 +12336,7 @@
 	* STM32L4: Port foward bugfix from stm32 of oneshot timer.  From
 	  ziggurat29 (2016-07-13).
 	* STM32 and EFM32: I'm using syslog through ITM. In this case
-	  syslog_channel function is call before RAM initialisation in
+	  syslog_channel function is call before RAM initialization in
 	  stm32_clockconfig. But syslog channel uses a global variable that is
 	  reset to default by the RAM initialization.  From Pierre-noel
 	  Bouteville (2016-07-14).

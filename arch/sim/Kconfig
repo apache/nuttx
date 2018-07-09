@@ -210,7 +210,7 @@ config SIM_TOUCHSCREEN
 config SIM_AJOYSTICK
 	bool "X11 mouse-based analog joystick emulation"
 	---help---
-		Support an X11 mouse-based anallog joystick emulation.  Also needs INPUT=y`
+		Support an X11 mouse-based analog joystick emulation.  Also needs INPUT=y
 
 config SIM_NOINPUT
 	bool "No input device"

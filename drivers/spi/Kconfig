@@ -72,7 +72,7 @@ config SPI_HWFEATURES
 	default n
 	---help---
 		Selected only if a specific H/W feature is selected.  This is
-		basically the OR of any specific hardware feature and eanbles
+		basically the OR of any specific hardware feature and enables
 		the SPI hwfeatures() interface method.
 
 config SPI_CRCGENERATION

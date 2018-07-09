@@ -62,7 +62,7 @@ config VS1053_DEVICE_COUNT
 	int "Number of VS1053 devices attached"
 	default 1
 	---help---
-		Sets the number of VS1053 type devices availalbe to the system.
+		Sets the number of VS1053 type devices available to the system.
 		This is required to reserve global, static lower-half driver
 		context pointers for the DREQ ISR to use for lookup when it needs
 		to signal that additional data is being requested.

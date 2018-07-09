@@ -46,7 +46,7 @@ config PSEUDOFS_SOFTLINKS
 	default n
 	depends on !DISABLE_PSEUDOFS_OPERATIONS
 	---help---
-		Enable support for soft links in the pseudeo file system.  Soft
+		Enable support for soft links in the pseudo file system.  Soft
 		links are not supported within mounted volumes by any NuttX file
 		system.  However, if this option is selected, then soft links
 		may be add in the pseudo file system.  This might be useful, for

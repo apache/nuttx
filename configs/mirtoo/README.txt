@@ -952,7 +952,7 @@ Where <subdir> is one of the following:
 
       NOTES:
 
-      a) It takes many seconds to boot the sytem using the NXFFS
+      a) It takes many seconds to boot the system using the NXFFS
          file system because the entire FLASH must be verified on power up
          (and longer the first time that NXFFS comes up and has to format the
          entire FLASH).

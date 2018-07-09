@@ -364,7 +364,7 @@ static inline void memlcd_clear(FAR struct memlcd_dev_s *mlcd)
  *   the Memory LCD. Which is always used within setpower() call.
  *   Basically, the frequency shall be 1Hz~60Hz.
  *   If use hardware mode to toggle VCOM, we need to send specific command at a
- *   constant frequency to trigger the LCD intenal hardware logic.
+ *   constant frequency to trigger the LCD internal hardware logic.
  *   While use software mode, we set up a timer to toggle EXTCOMIN connected IO,
  *   basically, it is a hardware timer to ensure a constant frequency.
  *

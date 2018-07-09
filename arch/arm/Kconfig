@@ -734,7 +734,7 @@ config DEBUG_HARDFAULT
 	---help---
 		Enables verbose debug output when a hard fault is occurs.  This verbose
 		output is sometimes helpful when debugging difficult hard fault problems,
-		but may be more than you typcially want to see.
+		but may be more than you typically want to see.
 
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig

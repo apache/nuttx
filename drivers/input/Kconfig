@@ -159,7 +159,7 @@ config ADS7843E_SPIDEV
 	int "SPI bus number"
 	default 0
 	---help---
-		Selects the SPI bus number identying that SPI interface that
+		Selects the SPI bus number identifying that SPI interface that
 		connects the ADS843E to the MCU.
 
 config ADS7843E_DEVMINOR
@@ -378,7 +378,7 @@ config STMPE811_GPIOINT_DISABLE
 	default y
 	depends on !STMPE811_GPIO_DISABLE
 	---help---
-		Disable driver GPIO interrupt functionlality (ignored if GPIO functionality is
+		Disable driver GPIO interrupt functionality (ignored if GPIO functionality is
 		disabled).
 
 config STMPE811_TEMP_DISABLE
@@ -446,7 +446,7 @@ config BUTTONS_LOWER
 		3. The board.h header file must provide the definition
 		   NUM_BUTTONS, and
 		4. The board.h header file must not include any other
-		   header files that are not accessibble in this context
+		   header files that are not accessible in this context
 		   (such as those in arch/<arch>/src/<chip>) UNLESS those
 		   inclusions are conditioned on __KERNEL__.  button_lower.c
 		   will undefine __KERNEL__ before included board.h.

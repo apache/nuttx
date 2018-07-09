@@ -18,7 +18,7 @@ config CC1101_SPIDEV
 	int "SPI bus number"
 	default 2
 	---help---
-		Selects the SPI bus number identying that SPI interface that
+		Selects the SPI bus number identifying that SPI interface that
 		connects the CC1101 to the MCU.
 
 endif
@@ -79,7 +79,7 @@ config WL_NRF24L01_RXSUPPORT
 	bool "Support messages reception"
 	default y
 	---help---
-		If this opion is disabled the driver supports only the transmission of messages.
+		If this option is disabled the driver supports only the transmission of messages.
 		Reception of messages will be disabled (and corresponding functions removed).
 		Note: this option is intended to reduce driver code size for 'transmission
 		only' devices.

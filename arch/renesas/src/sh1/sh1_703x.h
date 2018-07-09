@@ -444,7 +444,7 @@
 #define SH1_ICR_IRQ2S       (0x0020)      /* Bits 5: Interrupt on falling edge of IRQ2 input */
 #define SH1_ICR_IRQ1S       (0x0040)      /* Bits 6: Interrupt on falling edge of IRQ1 input */
 #define SH1_ICR_IRQ0S       (0x0080)      /* Bits 7: Interrupt on falling edge of IRQ0 input */
-#define SH1_ICR_NMIE        (0x0100)      /* Bits 8: Interupt on rising edge of NMI input */
+#define SH1_ICR_NMIE        (0x0100)      /* Bits 8: Interrupt on rising edge of NMI input */
 #define SH1_ICR_NMIL        (0x8000)      /* Bits 15: NMI input level high */
 
 /************************************************************************************

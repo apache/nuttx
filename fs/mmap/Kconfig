@@ -21,7 +21,7 @@ config FS_RAMMAP
 		into RAM.  These copied files have some of the properties of
 		standard memory mapped files.
 
-		See nuttx/fs/mmap/README.txt for additonal information.
+		See nuttx/fs/mmap/README.txt for additional information.
 
 if FS_RAMMAP
 endif

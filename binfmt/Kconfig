@@ -4,7 +4,7 @@
 #
 
 config BINFMT_DISABLE
-	bool "Disble BINFMT support"
+	bool "Disable BINFMT support"
 	default n
 	---help---
 		By default, support for loadable binary formats is built.  This logic

@@ -245,7 +245,7 @@
 #define BMG160_INT_RST_LATCH_REG_LATCH_INT_1_bm (1 << 1) /* Latch mode selection bit 1 */
 #define BMG160_INT_RST_LATCH_REG_LATCH_INT_0_bm (1 << 0) /* Latch mode selection bit 0 */
 
-/* Interupt High Rate Configuration Register Definitions ************************************/
+/* Interrupt High Rate Configuration Register Definitions ************************************/
 
 /* BMG160 HIGH_TH_X_REG Definitions */
 

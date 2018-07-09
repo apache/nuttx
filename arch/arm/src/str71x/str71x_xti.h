@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* External Interupt Controller (XTI) registers *************************************/
+/* External Interrupt Controller (XTI) registers ************************************/
 
 #define STR71X_XTI_SR               (STR71X_XTI_BASE + 0x001c)  /* 8-bits wide */
 #define STR71X_XTI_CTRL             (STR71X_XTI_BASE + 0x0024)  /* 8-bits wide */

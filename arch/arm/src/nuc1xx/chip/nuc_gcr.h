@@ -95,7 +95,7 @@
 #define GCR_RSTSRC_LVR           (1 << 3)  /* Bit 3:  Low voltage reset controller */
 #define GCR_RSTSRC_BOD           (1 << 4)  /* Bit 4:  Brown-out detection */
 #define GCR_RSTSRC_SYS           (1 << 5)  /* Bit 5:  Software set AIRCR:SYSRESETREQ */
-#define GCR_RSTSRC_CPU           (1 << 7)  /* Bit 7:  Sofware set CPU_RST */
+#define GCR_RSTSRC_CPU           (1 << 7)  /* Bit 7:  Software set CPU_RST */
 
 /* IP Reset control register 1 */
 

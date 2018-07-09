@@ -4,11 +4,11 @@
 #
 
 config WL_SPIRIT
-	bool "STMicro Spririt Radio Library"
+	bool "STMicro Spirit Radio Library"
 	default n
 	select SPI
 	---help---
-		Enable support for the STMicro Spririt Radio Library
+		Enable support for the STMicro Spirit Radio Library
 
 if WL_SPIRIT
 
@@ -25,7 +25,7 @@ config WL_SPIRIT_REGDEBUG
 	default n
 	depends on DEBUG_WIRELESS_INFO
 	---help---
-		Enable logic to dump each value read from and written to the Sprit
+		Enable logic to dump each value read from and written to the Spirit
 		registers.
 
 config WL_SPIRIT_FIFODUMP

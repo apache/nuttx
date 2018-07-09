@@ -88,7 +88,7 @@ extern "C"
  *   are reported to the VNC framebuffer driver from the remote VNC client.
  *
  *   In the standard graphics architecture, the keyboard/mouse inputs are
- *   received by some appliation/board specific logic at the highest level
+ *   received by some application/board specific logic at the highest level
  *   in the architecture via input drivers.  The received keyboard/mouse
  *   input data must then be "injected" into NX where it can they can be
  *   assigned to the window that has focus.  They will eventually be

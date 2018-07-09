@@ -620,7 +620,7 @@ static int sam_lcd_getreg(FAR struct sam_dev_s *priv, uint8_t cmd,
 
   DEBUGASSERT(nbytes <= 4);
 
-  /* Read the request number of byes (as 16-bit values) plus a leading
+  /* Read the request number of bytes (as 16-bit values) plus a leading
    * dummy read.
    */
 

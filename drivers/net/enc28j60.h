@@ -88,7 +88,7 @@
  */
 
 #define ENC_EIE             (0x1b)   /* Ethernet Interrupt Enable Register */
-#define ENC_EIR             (0x1c)   /* Ethernet Interupt Request Register */
+#define ENC_EIR             (0x1c)   /* Ethernet Interrupt Request Register */
 #define ENC_ESTAT           (0x1d)   /* Ethernet Status Register */
 #define ENC_ECON2           (0x1e)   /* Ethernet Control 2 Register */
 #define ENC_ECON1           (0x1f)   /* Ethernet Control 1 Register */

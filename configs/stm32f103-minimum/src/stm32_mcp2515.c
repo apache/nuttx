@@ -118,7 +118,7 @@ static struct stm32_mcp2515config_s g_mcp2515config =
  * Private Functions
  ****************************************************************************/
 
-/* This is the MCP2515 Interupt handler */
+/* This is the MCP2515 Interrupt handler */
 
 int mcp2515_interrupt(int irq, FAR void *context, FAR void *arg)
 {

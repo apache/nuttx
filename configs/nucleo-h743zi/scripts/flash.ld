@@ -60,7 +60,7 @@
  *
  * TODO: Check next paragraph with nucleo schematics
  *
- * NuttX does not modify these option byes. On the unmodified NUCLEO-H743ZI
+ * NuttX does not modify these option bytes. On the unmodified NUCLEO-H743ZI
  * board, the BOOT0 pin is at ground so by default, the STM32 will boot
  * to address 0x0800:0000 in FLASH.
  *

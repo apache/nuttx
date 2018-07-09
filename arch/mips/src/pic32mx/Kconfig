@@ -1085,7 +1085,7 @@ config PIC32MX_ETH_PRIORITY
 	default 28
 	depends on PIC32MX_ETHERNET
 	---help---
-		Ethernet interrupt priority.  The is default is the higest priority.
+		Ethernet interrupt priority.  The is default is the highest priority.
 
 config PIC32MX_MULTICAST
 	bool "Multicast"

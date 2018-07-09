@@ -28,8 +28,8 @@ config LIBC_TZ_MAX_TIMES
 	int "Maximum number of times in timezone"
 	default 370
 	---help---
-		Timezone files with more than this number of times will not be usedi
-		(tmecnt).
+		Timezone files with more than this number of times will not be used
+		(timecnt).
 
 		Warning: Some files in IANA TZ database include many times.  The current
 		posixrules file, for example, has timecnt = 236.  The value of

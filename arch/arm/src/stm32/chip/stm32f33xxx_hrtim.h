@@ -1096,7 +1096,7 @@
 #define HRTIM_CR2_TDRST               (1 << 12) /* Bit 12: Timer D Counter Software Reset*/
 #define HRTIM_CR2_TERST               (1 << 13) /* Bit 13: Timer E Counter Software Reset*/
 
-/* Common Interupt Status Register */
+/* Common Interrupt Status Register */
 
 #define HRTIM_ISR_FLT1                (1 << 0) /* Bit 0: Fault 1 Interrupt Flag */
 #define HRTIM_ISR_FLT2                (1 << 1) /* Bit 1: Fault 2 Interrupt Flag */
@@ -1107,7 +1107,7 @@
 #define HRTIM_ISR_DLLRDY              (1 << 16) /* Bit 16: DLL Ready Interrupt Flag */
 #define HRTIM_ISR_BMPER               (1 << 17) /* Bit 17: Burst mode Period Interrupt Flag */
 
-/* Common Interupt Clear Register */
+/* Common Interrupt Clear Register */
 
 #define HRTIM_ICR_FLT1C                (1 << 0) /* Bit 0: Fault 1 Interrupt Flag Clear */
 #define HRTIM_ICR_FLT2C                (1 << 1) /* Bit 1: Fault 2 Interrupt Flag Clear */
@@ -1118,7 +1118,7 @@
 #define HRTIM_ICR_DLLRDYC              (1 << 16) /* Bit 16: DLL Ready Interrupt Flag Clear */
 #define HRTIM_ICR_BMPERC               (1 << 17) /* Bit 17: Burst mode Period Interrupt Flag Clear */
 
-/* Common Interupt Enable Register */
+/* Common Interrupt Enable Register */
 
 #define HRTIM_IER_FLT1IE               (1 << 0) /* Bit 0: Fault 1 Interrupt Enable */
 #define HRTIM_IER_FLT2IE               (1 << 1) /* Bit 1: Fault 2 Interrupt Enable */

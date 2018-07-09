@@ -685,7 +685,7 @@ nx
 
      This version has NO DISPLAY and is only useful for debugging NX
      internals in environments where X11 is not supported.  There is
-     and additonal configuration that may be added to include an X11-
+     and additional configuration that may be added to include an X11-
      based simulated framebuffer driver:
 
        CONFIG_SIM_X11FB    - Use X11 window for framebuffer

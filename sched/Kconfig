@@ -277,7 +277,7 @@ config SMP_NCPUS
 		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
 
-		If CONFIG_DEBUG_FEATURES is enbled, then the value one is permitted
+		If CONFIG_DEBUG_FEATURES is enabled, then the value one is permitted
 		for CONFIG_SMP_NCPUS.  This is not normally a valid setting for an
 		SMP configuration.  However, running the SMP logic in a single CPU
 		configuration is useful during certain testing.
@@ -708,7 +708,7 @@ config CPULOAD_ONESHOT
 		NOTE that in this configuration, CONFIG_SCHED_CPULOAD_TICKSPERSEC is
 		the sample rate that will be accomplished by programming the oneshot
 		time repeatedly.  If CPULOAD_ONESHOT_ENTROPY is also selected, then
-		the underly frequency driving the oneshote timer must be
+		the underly frequency driving the oneshot timer must be
 		significantly faster than CONFIG_SCHED_CPULOAD_TICKSPERSE to permit
 		precise modulation the sample periods.
 
@@ -726,7 +726,7 @@ config CPULOAD_ONESHOT_ENTROPY
 
 		Where
 
-			CPULOAD_ONESHOT_NOMINAL is the nominal sample internval implied
+			CPULOAD_ONESHOT_NOMINAL is the nominal sample interval implied
 			by CONFIG_SCHED_CPULOAD_TICKSPERSEC in units of microseconds.
 			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY),
 			and 'error' is an error value that is retained from interval to
@@ -820,7 +820,7 @@ config SCHED_INSTRUMENTATION_BUFFER
 	default n
 	---help---
 		If this option is selected, then in-memory buffering logic is
-		enabled to capature scheduler instrumentation data.  This has
+		enabled to capture scheduler instrumentation data.  This has
 		the advantage that (1) the platform logic does not have to provide
 		the sched_note_* interaces described for the previous settings.
 		Instead, the buffering logic catches all of these.  It encodes
@@ -1381,7 +1381,7 @@ config IDLETHREAD_STACKSIZE
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread
 		is the thread that (1) performs the initial boot of the system up to the
-		point where start-up appliation is spawned, and (2) there after is the
+		point where start-up application is spawned, and (2) there after is the
 		IDLE thread that executes only when there is no other thread ready to run.
 
 config USERMAIN_STACKSIZE

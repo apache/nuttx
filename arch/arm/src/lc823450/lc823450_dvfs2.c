@@ -626,7 +626,7 @@ exit_with_error:
 
 /****************************************************************************
  * Name: lc823450_dvfs_boost
- * boost the sytem clock to MAX (i.e. 160M)
+ * boost the system clock to MAX (i.e. 160M)
  * timeout in msec
  ****************************************************************************/
 

@@ -547,7 +547,7 @@ extern "C"
  *   Register the UserFS factory driver at dev/userfs.
  *
  *   NOTE:  This is an OS internal function that should not be called from
- *   appliation logic.
+ *   application logic.
  *
  * Input Parameters:
  *   None
@@ -582,7 +582,7 @@ int userfs_register(void);
  *      LocalHost client socket.
  *
  *   NOTE:  This is a user function that is implemented as part of the
- *   NuttX C library and is intended to be called by appliation logic.
+ *   NuttX C library and is intended to be called by application logic.
  *
  * Input Parameters:
  *   mountpt  - Mountpoint path

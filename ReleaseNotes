@@ -6292,7 +6292,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
       - Fix a case in the UDPHS driver where received status was not being
         cleared, causing OUT SETUP commands to fail.
-      - TWI data sending fails to increment the number of byes transferred
+      - TWI data sending fails to increment the number of bytes transferred
         on first byte sent.  from David Sidrane.
       - If running from SDRAM, then BOARD_MCK_FREQUENCY is not a constant
         and cannot be used in conditional compilation.  All drivers fixed
@@ -8783,7 +8783,7 @@ detailed bugfix information):
         register lead to rtc_setup() call that rightfully enables the LSI
         clock; but the next times, when the rtc is already setup, the
         rtc_resume() call does NOT start the LSI clock! The right place to
-        put LSE/LSI initialisation is inside stm32_stdclockconfig() in
+        put LSE/LSI initialization is inside stm32_stdclockconfig() in
         stm32fxxxxx_rcc.c.  Doing this I checked the possible uses of the
         LSI and the LSE sources: the LSI can be used for RTC and/or the
         IWDG, while the LSE only for the RTC (and to output the MCO1 pin).

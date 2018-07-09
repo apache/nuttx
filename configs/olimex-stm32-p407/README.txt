@@ -20,7 +20,7 @@ Board Support
 
 The following peripherals are available in this configuration.
 
- - LEDs:       Show the sytem status
+ - LEDs:       Show the system status
 
  - Buttons:    TAMPER-button, WKUP-button, J1-Joystick (consists of RIGHT-,
                UP-, LEFT-, DOWN-, and CENTER-button).

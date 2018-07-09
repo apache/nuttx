@@ -236,7 +236,7 @@ mksyscall.c, cvsparser.c, and cvsparser.h
   Information about the stubs and proxies is maintained in a comma separated
   value (CSV) file in the syscall/ directory.  The mksyscall program will
   accept this CVS file as input and generate all of the required proxy or
-  stub files as output.  See syscall/README.txt for additonal information.
+  stub files as output.  See syscall/README.txt for additional information.
 
 mksymtab.c, cvsparser.c, and cvsparser.h
 ----------------------------------------

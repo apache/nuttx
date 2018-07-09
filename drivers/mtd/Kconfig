@@ -210,7 +210,7 @@ config MTD_NAND_BLOCKCHECK
 		Enable support for ECC and bad block checking.
 
 config MTD_NAND_SWECC
-	bool "Sofware ECC support"
+	bool "Software ECC support"
 	default n if ARCH_NAND_HWECC
 	default y if !ARCH_NAND_HWECC
 	---help---
@@ -444,7 +444,7 @@ config M25P_MEMORY_TYPE
 		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
 		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
 		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
-		automatically be enabled when filesytems that can use it are enabled, such as SMART.
+		automatically be enabled when filesystems that can use it are enabled, such as SMART.
 
 config MT25Q_MEMORY_TYPE
 	hex "MT25Q memory type ID"

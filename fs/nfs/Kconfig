@@ -15,7 +15,7 @@ config NFS
 #if NFS
 
 config NFS_STATISTICS
-	bool "NFS Stastics"
+	bool "NFS Statics"
 	default n
 	depends on NFS
 	---help---

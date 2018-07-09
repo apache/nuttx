@@ -169,11 +169,11 @@ config SYSLOG_NONE
 endchoice
 
 config SYSLOG_FILE
-	bool "Sylog file output"
+	bool "Syslog file output"
 	default n
 	select SYSLOG_WRITE
 	---help---
-		Build in support to use a file to collect SYSOG output.  File SYSLOG
+		Build in support to use a file to collect SYSLOG output.  File SYSLOG
 		channels differ from other SYSLOG channels in that they cannot be
 		established until after fully booting and mounting the target file
 		system.  The function syslog_file_channel() would need to be called

@@ -292,7 +292,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
    *
    * "Once the client and server are sure that they’re happy to talk to one
    *  another using the agreed security type, the protocol passes to the
-   *  initialisation phase. The client sends a ClientInit message followed
+   *  initialization phase. The client sends a ClientInit message followed
    *  by the server sending a ServerInit message."
    *
    * In this implementation, the sharing flag is ignored.

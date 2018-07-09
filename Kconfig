@@ -19,7 +19,7 @@ config DEFAULT_SMALL
 	default n
 	---help---
 		When options are present, the default value for certain options will
-		be the one the results in the smallest size (at a loss of featurs).
+		be the one the results in the smallest size (at a loss of features).
 		The default is a fuller feature set at a larger size.
 
 		NOTE: This option does not prevent you from overriding the default
@@ -75,7 +75,7 @@ config WINDOWS_CYGWIN
 config WINDOWS_UBUNTU
 	bool "Ubuntu under Windows 10"
 	---help---
-		Build natively in an Unbuntu shell under Windoes 10 environment with
+		Build natively in an Ubuntu shell under Windoes 10 environment with
 		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
@@ -495,7 +495,7 @@ config DEBUG_AUDIO
 	depends on AUDIO
 	---help---
 		Enable audio device debug features.
-		Enable low level debug featurs for the audio subsystem and for audio
+		Enable low level debug features for the audio subsystem and for audio
 		device drivers. (disabled by default).  Support for this debug option
 		is architecture-specific and may not be available for some MCUs.
 
@@ -1063,7 +1063,7 @@ config DEBUG_INPUT
 	depends on INPUT
 	---help---
 		Enable input d.
-		Enable low level evice debug features for the input device drivers
+		Enable low level device debug features for the input device drivers
 		such as mice and touchscreens (disabled by default).  Support for
 		this debug option is board-specific and may not be available for
 		some boards.

@@ -1979,7 +1979,7 @@ static void stm32_ltdc_lchromakeyenable(FAR struct stm32_ltdc_s *layer,
 
   regval = getreg32(stm32_cr_layer_t[layer->layerno]);
 
-  /* Enable/Disble colorkey */
+  /* Enable/Disable colorkey */
 
   if (enable == true)
     {

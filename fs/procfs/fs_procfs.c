@@ -1151,7 +1151,7 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
    * procfs entry table.  If that table were actively in use, then that
    * could cause procfs logic to use a stale memory pointer!  We avoid that
    * problem by requiring that the procfs file be unmounted when the new
-   * entry is added.  That requirment, however, is not enforced explicitly.
+   * entry is added.  That requirement, however, is not enforced explicitly.
    *
    * Locking the scheduler as done below is insufficient.  As would be just
    * marking the entries as volatile.

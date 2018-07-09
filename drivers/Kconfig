@@ -42,7 +42,7 @@ config DEV_URANDOM
 		NOTE:  This option may not be cryptographially secure and should not
 		be enabled if you are concerned about cyptographically secure
 		pseudo-random numbers (CPRNG) and do not know the characteristics
-		of the software PRNG impelementation!
+		of the software PRNG implementation!
 
 if DEV_URANDOM
 
@@ -60,7 +60,7 @@ config DEV_URANDOM_XORSHIFT128
 		NOTE: Not cyptographically secure
 
 config DEV_URANDOM_CONGRUENTIAL
-	bool "Conguential"
+	bool "Congruential"
 	---help---
 		Use the same congruential general used with srand().  This algorithm
 		is computationally more intense and uses double precision floating

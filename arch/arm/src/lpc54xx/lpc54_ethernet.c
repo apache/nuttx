@@ -2884,7 +2884,7 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
     {
       if (timeout-- <= 0)
         {
-          nerr("ERROR: Autonegotion timed out\n");
+          nerr("ERROR: Autonegotiation timed out\n");
           return -ETIMEDOUT;
         }
 

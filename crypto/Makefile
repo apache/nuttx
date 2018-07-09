@@ -50,7 +50,7 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV),y)
   CRYPTO_CSRCS += cryptodev.c
 endif
 
-# Sofware AES library
+# Software AES library
 
 ifeq ($(CONFIG_CRYPTO_SW_AES),y)
   CRYPTO_CSRCS += aes.c

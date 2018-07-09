@@ -524,7 +524,7 @@ config LPC17_ADC_CHANLIST
 		matching the LPC17_ADC0_MASK within the board-specific library.
 
 config LPC17_ADC_BURSTMODE
-    bool "One interrupt at the end of all ADC cconversions"
+    bool "One interrupt at the end of all ADC conversions"
     default n
     ---help---
         Select this if you want to generate only one interrupt once all selected
@@ -656,9 +656,9 @@ menu "Ethernet driver options"
 	depends on LPC17_ETHERNET
 
 config LPC17_PHY_AUTONEG
-	bool "Autonegiation"
+	bool "Autonegotiation"
 	---help---
-		Enable auto-negotion
+		Enable auto-negotiation
 
 config LPC17_PHY_SPEED100
 	bool "100Mbit/Sec"

@@ -153,7 +153,7 @@ static struct kl_adxl345config_s g_adxl345config =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-/* This is the ADXL345 Interupt handler */
+/* This is the ADXL345 Interrupt handler */
 
 int adxl345_interrupt(int irq, FAR void *context)
 {

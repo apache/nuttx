@@ -23,7 +23,7 @@ config NETDEV_TELNET
 	---help---
 		The Telnet driver generates a character driver instance to support a
 		Telnet session.  This driver is used by the Telnet daemon.  The
-		Telnet daeman will instantiate a new Telnet driver to support
+		Telnet daemon will instantiate a new Telnet driver to support
 		standard I/O on the new Telnet session.
 
 if NETDEV_TELNET
@@ -149,7 +149,7 @@ choice
 	default DM9X_MODE_AUTO
 
 config DM9X_MODE_AUTO
-	bool "Autonegotion"
+	bool "Autonegotiation"
 
 config DM9X_MODE_10MHD
 	bool "10BaseT half duplex"
@@ -166,7 +166,7 @@ config DM9X_MODE_100MFD
 endchoice # DM90x0 mode
 
 config DM9X_NINTERFACES
-	int "Nubmer of DM90x0 interfaces"
+	int "Number of DM90x0 interfaces"
 	default 1
 	depends on EXPERIMENTAL
 
@@ -314,7 +314,7 @@ config ENCX24J600_NRXDESCR
 		Defines how many descriptors are preallocated for the
 		transmission and reception queues.
 		The ENC has a relative large packet buffer of 24kB which can
-		be used to buffer multiple packets silmutaneously
+		be used to buffer multiple packets simutaneously
 
 choice
 	prompt "Work queue"

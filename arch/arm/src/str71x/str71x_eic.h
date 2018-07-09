@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Enhanced Interupt Controller (EIC) register offsets ******************************/
+/* Enhanced Interrupt Controller (EIC) register offsets *****************************/
 
 #define STR71X_EIC_ICR_OFFSET      (0x0000)  /* 32-bits wide */
 #define STR71X_EIC_CICR_OFFSET     (0x0004)  /* 32-bits wide */
@@ -95,7 +95,7 @@
 #define STR71X_EIC_NCHANNELS       (32)
 #define STR71X_EIC_SIR_BASE        (STR71X_EIC_BASE + STR71X_EIC_SIR_OFFSET)
 
-/* Enhanced Interupt Controller (EIC) registers *************************************/
+/* Enhanced Interrupt Controller (EIC) registers ************************************/
 
 #define STR71X_EIC_ICR             (STR71X_EIC_BASE + STR71X_EIC_ICR_OFFSET)
 #define STR71X_EIC_CICR            (STR71X_EIC_BASE + STR71X_EIC_CICR_OFFSET)

@@ -51,7 +51,7 @@
  *   2) BOOT=1: Boot address defined by user option byte BOOT_ADD1[15:0].
  *      ST programmed value: System bootloader at 0x0010:0000
  *
- * NuttX does not modify these option byes.  On the unmodified STM32F746G
+ * NuttX does not modify these option bytes.  On the unmodified STM32F746G
  * DISCO board, the BOOT0 pin is at ground so by default, the STM32 will boot
  * to address 0x0020:0000 in ITCM FLASH.
  *

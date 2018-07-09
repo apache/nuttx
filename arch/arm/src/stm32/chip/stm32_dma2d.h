@@ -101,7 +101,7 @@
 #define DMA2D_CR_START              (1 << 0)  /* Start Bit */
 #define DMA2D_CR_SUSP               (1 << 1)  /* Suspend Bit */
 #define DMA2D_CR_ABORT              (1 << 2)  /* Abort Bit */
-#define DMA2D_CR_TEIE               (1 << 8)  /* Transfer Error Interupt Enable Bit */
+#define DMA2D_CR_TEIE               (1 << 8)  /* Transfer Error Interrupt Enable Bit */
 #define DMA2D_CR_TCIE               (1 << 9)  /* Transfer Complete Interrupt Enable Bit */
 #define DMA2D_CR_TWIE               (1 << 10) /* Transfer Watermark Interrupt Enable Bit */
 #define DMA2D_CR_CAEIE              (1 << 11) /* CLUT Access Error Interrupt Enable Bit */

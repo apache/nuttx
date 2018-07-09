@@ -496,7 +496,7 @@ configs/olimex-stm32-p407
 configs/olimexino-stm32
   This port uses the Olimexino STM32 board (STM32F103RBT6) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for further\
-  information.  Contribued by David Sidrane.
+  information.  Contributed by David Sidrane.
 
 configs/olimex-strp711
   This port uses the Olimex STR-P711 board and a GNU arm-nuttx-elf toolchain* under

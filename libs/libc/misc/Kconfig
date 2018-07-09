@@ -67,7 +67,7 @@ config LIB_KBDCODEC
 		In NuttX, a keyboard/keypad driver is simply a character driver that
 		may have an (optional) encoding/decoding layer on the data returned
 		by the character driver. A keyboard may return simple text data
-		(alphabetic, numeric, and punctuaction) or control characters
+		(alphabetic, numeric, and punctuation) or control characters
 		(enter, control-C, etc.).  However, in addition, most keyboards
 		support actions that cannot be represented as text data. Such
 		actions include things like cursor controls (home, up arrow,
@@ -89,7 +89,7 @@ config LIB_SLCDCODEC
 		In NuttX, a character-oriented, segment LCD (SLCD) driver is simply
 		a character device that may have an (optional) encoding/decoding
 		layer on the data provided to the SLCD driver.  The application may
-		provide simple text data (alphabetic, numeric, and punctuaction) or
+		provide simple text data (alphabetic, numeric, and punctuation) or
 		control characters (enter, control-C, etc.).  However, in addition,
 		most SLCDs support actions that cannot be represented as text data.
 		Such actions include things like cursor controls (home, up arrow,

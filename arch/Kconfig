@@ -427,7 +427,7 @@ config ARCH_PGPOOL_VBASE
 		environment logic.
 
 config ARCH_PGPOOL_SIZE
-	int "Page pool size (byes)"
+	int "Page pool size (bytes)"
 	default 0
 	---help---
 		The size of the page pool memory in bytes.  This setting is probably

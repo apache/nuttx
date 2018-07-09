@@ -59,7 +59,7 @@
  *   The nxsig_kill() system call can be used to send any signal to any task.
  *
  *   This is an internal OS interface.  It is functionally equivalent to
- *   the POSIX standard kill() function but does not modify the appliation
+ *   the POSIX standard kill() function but does not modify the application
  *   errno variable.
  *
  *   Limitation: Sending of signals to 'process groups' is not

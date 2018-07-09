@@ -70,22 +70,22 @@
  * registers, not the priority set by the sending Cortex-A9 processor.
  */
 
-#define IMX_IRQ_SGI0              0  /* Sofware Generated Interrupt (SGI) 0 */
-#define IMX_IRQ_SGI1              1  /* Sofware Generated Interrupt (SGI) 1 */
-#define IMX_IRQ_SGI2              2  /* Sofware Generated Interrupt (SGI) 2 */
-#define IMX_IRQ_SGI3              3  /* Sofware Generated Interrupt (SGI) 3 */
-#define IMX_IRQ_SGI4              4  /* Sofware Generated Interrupt (SGI) 4 */
-#define IMX_IRQ_SGI5              5  /* Sofware Generated Interrupt (SGI) 5 */
-#define IMX_IRQ_SGI6              6  /* Sofware Generated Interrupt (SGI) 6 */
-#define IMX_IRQ_SGI7              7  /* Sofware Generated Interrupt (SGI) 7 */
-#define IMX_IRQ_SGI8              8  /* Sofware Generated Interrupt (SGI) 8 */
-#define IMX_IRQ_SGI9              9  /* Sofware Generated Interrupt (SGI) 9 */
-#define IMX_IRQ_SGI10            10  /* Sofware Generated Interrupt (SGI) 10 */
-#define IMX_IRQ_SGI11            11  /* Sofware Generated Interrupt (SGI) 11 */
-#define IMX_IRQ_SGI12            12  /* Sofware Generated Interrupt (SGI) 12 */
-#define IMX_IRQ_SGI13            13  /* Sofware Generated Interrupt (SGI) 13 */
-#define IMX_IRQ_SGI14            14  /* Sofware Generated Interrupt (SGI) 14 */
-#define IMX_IRQ_SGI15            15  /* Sofware Generated Interrupt (SGI) 15 */
+#define IMX_IRQ_SGI0              0  /* Software Generated Interrupt (SGI) 0 */
+#define IMX_IRQ_SGI1              1  /* Software Generated Interrupt (SGI) 1 */
+#define IMX_IRQ_SGI2              2  /* Software Generated Interrupt (SGI) 2 */
+#define IMX_IRQ_SGI3              3  /* Software Generated Interrupt (SGI) 3 */
+#define IMX_IRQ_SGI4              4  /* Software Generated Interrupt (SGI) 4 */
+#define IMX_IRQ_SGI5              5  /* Software Generated Interrupt (SGI) 5 */
+#define IMX_IRQ_SGI6              6  /* Software Generated Interrupt (SGI) 6 */
+#define IMX_IRQ_SGI7              7  /* Software Generated Interrupt (SGI) 7 */
+#define IMX_IRQ_SGI8              8  /* Software Generated Interrupt (SGI) 8 */
+#define IMX_IRQ_SGI9              9  /* Software Generated Interrupt (SGI) 9 */
+#define IMX_IRQ_SGI10            10  /* Software Generated Interrupt (SGI) 10 */
+#define IMX_IRQ_SGI11            11  /* Software Generated Interrupt (SGI) 11 */
+#define IMX_IRQ_SGI12            12  /* Software Generated Interrupt (SGI) 12 */
+#define IMX_IRQ_SGI13            13  /* Software Generated Interrupt (SGI) 13 */
+#define IMX_IRQ_SGI14            14  /* Software Generated Interrupt (SGI) 14 */
+#define IMX_IRQ_SGI15            15  /* Software Generated Interrupt (SGI) 15 */
 
 #define IMX_IRQ_GTM              27  /* Global Timer (GTM) PPI(0) */
 #define IMX_IRQ_FIQ              28  /* Fast Interrupt Request (nFIQ) PPI(1) */

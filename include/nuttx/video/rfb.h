@@ -174,7 +174,7 @@ struct rfb_sectype_result_s
   uint8_t result[4];             /* U32 Security type result */
 };
 
-/* "If successful, the protocol passes to the initialisation phase (section
+/* "If successful, the protocol passes to the initialization phase (section
  *  6.3)."
  *
  * "Version 3.8 onwards If unsuccessful, the server sends a string
@@ -201,7 +201,7 @@ struct rfb_sectype_fail_s
  * "Version 3.8 onwards The protocol continues with the SecurityResult
  *  message."
  *
- * "Version 3.3 and 3.7 The protocol passes to the initialisation phase
+ * "Version 3.3 and 3.7 The protocol passes to the initialization phase
  *  (section 6.3)."
  *
  * 6.2.2 VNC Authentication
@@ -232,7 +232,7 @@ struct rfb_response_s
  *
  * "Once the client and server are sure that they’re happy to talk to one
  *  another using the agreed security type, the protocol passes to the
- *  initialisation phase. The client sends a ClientInit message followed by
+ *  initialization phase. The client sends a ClientInit message followed by
  *  the server sending a ServerInit message.
  *
  * "Shared-flag is non-zero (true) if the server should try to share the

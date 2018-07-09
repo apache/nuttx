@@ -1070,7 +1070,7 @@ config KINETIS_UART_SINGLEWIRE
 	depends on KINETIS_UART || KINETIS_LPUART
 	---help---
 		Enable single wire UART and LPUART support. The option enables support
-		for the TIOCSSINGLEWIRE ioctl in the Kineteis serial drivers.
+		for the TIOCSSINGLEWIRE ioctl in the Kinetis serial drivers.
 
 endif # KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
 

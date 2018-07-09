@@ -61,7 +61,7 @@ config ARCH_BOARD_C5471EVM
 		This port is complete and verified.
 
 config ARCH_BOARD_CLICKER2_STM32
-	bool "Mikrow Clicker2 STM32"
+	bool "Mikroe Clicker2 STM32"
 	depends on ARCH_CHIP_STM32F407VG
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
@@ -289,7 +289,7 @@ config ARCH_BOARD_IMXRT1050_EVK
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		This is the board configuratino for the port of NuttX to the NXP i.MXRT
+		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1050-EVKB.  This board features the MIMXRT1052DVL6A MCU.
 
 config ARCH_BOARD_LC823450_XGEVK
@@ -669,7 +669,7 @@ config ARCH_BOARD_OLIMEXINO_STM32
 		This port uses the Olimexino STM32 board and a GNU arm-nuttx-elf
 		toolchain under Linux or Cygwin. See the http://www.olimex.com for
 		further information. This board features the STMicro STM32F103RBT6 MCU.
-		Contribued by David Sidrane.
+		Contributed by David Sidrane.
 
 config ARCH_BOARD_OPEN1788
 	bool "Wave Share Open1788"
@@ -1519,7 +1519,7 @@ config ARCH_BOARD_Z16F2800100ZCOG
 	depends on ARCH_CHIP_Z16F2811
 	select ARCH_HAVE_LEDS
 	---help---
-		z16f Microcontroller.  This port use the ZiLIG z16f2800100zcog
+		z16f Microcontroller.  This port uses the ZiLOG z16f2800100zcog
 		development kit and the Zilog ZDS-II Windows command line tools.  The
 		development environment is Cygwin under WinXP.
 

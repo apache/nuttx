@@ -284,7 +284,7 @@ config NET_6LOWPAN_MAX_MACTRANSMITS
 	range 1 255
 	---help---
 		CONFIG_NET_6LOWPAN_MAX_MACTRANSMITS specifies how many times the MAC
-		layer should resend packets if no link-layer ACK wasreceived. This
+		layer should resend packets if no link-layer ACK was received. This
 		only makes sense with the csma_driver.
 
 config NET_6LOWPAN_PKTSIZE

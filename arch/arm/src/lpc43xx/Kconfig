@@ -427,7 +427,7 @@ config LPC43_EXTSDRAM1
 	depends on ARCH_HAVE_EXTSDRAM1
 	select ARCH_HAVE_EXTSDRAM
 	---help---
-		Configure external SDRAM memoryand, if applicable, map then external
+		Configure external SDRAM memory, if applicable, map then external
 		SDRAM into the memory map.
 
 if LPC43_EXTSDRAM1
@@ -452,7 +452,7 @@ config LPC43_EXTSDRAM2
 	depends on ARCH_HAVE_EXTSDRAM2
 	select ARCH_HAVE_EXTSDRAM
 	---help---
-		Configure external SDRAM memoryand, if applicable, map then external
+		Configure external SDRAM memory, if applicable, map then external
 		SDRAM into the memory map.
 
 if LPC43_EXTSDRAM2
@@ -477,7 +477,7 @@ config LPC43_EXTSDRAM3
 	depends on ARCH_HAVE_EXTSDRAM3
 	select ARCH_HAVE_EXTSDRAM
 	---help---
-		Configure external SDRAM memoryand, if applicable, map then external
+		Configure external SDRAM memory, if applicable, map then external
 		SDRAM into the memory map.
 
 if LPC43_EXTSDRAM3

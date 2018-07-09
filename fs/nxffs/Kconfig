@@ -77,7 +77,7 @@ config NXFFS_PREALLOCATED
 	---help---
 		If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
 		allocated NXFFS volume instance.  Currently required because full,
-		dynamic allocation of NXFFS volumes in not yet supporte.
+		dynamic allocation of NXFFS volumes in not yet supported.
 
 config NXFFS_ERASEDSTATE
 	hex "FLASH erased state"

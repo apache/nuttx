@@ -56,7 +56,7 @@ config AUDIO_DRIVER_SPECIFIC_BUFFERS
 		By default, the Audio system uses the same size and number of buffers
 		regardless of the specific audio device in use.  Specifying 'y' here
 		adds extra code which allows the lower-level audio device to specify
-		a partucular size and number of buffers.
+		a particular size and number of buffers.
 
 endmenu # Audio Buffer Configuration
 
@@ -149,7 +149,7 @@ config AUDIO_EXCLUDE_PAUSE_RESUME
 	---help---
 		Exclude building support for pausing and resuming audio files
 		once they are submitted.  If the sound system is being used to play
-		short system notification or error type sounds that typicaly only
+		short system notification or error type sounds that typically only
 		last a second or two, then there is no need (or chance) to pause or
 		resume sound playback once it has started.
 
@@ -158,7 +158,7 @@ config AUDIO_EXCLUDE_STOP
 	default n
 	---help---
 		Exclude building support for stopping audio files once they are
-		submitted.  If the sound system is being used to play short sytem
+		submitted.  If the sound system is being used to play short system
 		notification or error type sounds that typically only last a second
 		or two, then there is no need (or chance) to stop the sound
 		playback once it has started.
@@ -225,16 +225,16 @@ config AUDIO_MIXER
 		to perform audio channel or device mixing.
 
 config AUDIO_MIDI_SYNTH
-	bool "Planned - Enable support for the software-based MIDI synthisizer"
+	bool "Planned - Enable support for the software-based MIDI synthesizer"
 	default n
 	---help---
-		Builds a simple MIDI synthisizer.
+		Builds a simple MIDI synthesizer.
 
 config AUDIO_OUTPUT_JACK_CONTROL
 	bool "Planned - Enable support for output jack control"
 	default n
 	---help---
-		Builds a simple MIDI synthisizer.
+		Builds a simple MIDI synthesizer.
 
 config AUDIO_FONT
 	bool "Planned - Enable support for the Audio Font"

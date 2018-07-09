@@ -899,7 +899,7 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
  *      LocalHost client socket.
  *
  *   NOTE:  This is a user function that is implemented as part of the
- *   NuttX C library and is intended to be called by appliation logic.
+ *   NuttX C library and is intended to be called by application logic.
  *
  * Input Parameters:
  *   mountpt  - Mountpoint path

@@ -13,7 +13,7 @@ loop.
 
 The following peripherals are enabled in this configuration.
 
- - LEDs:       show the sytem status
+ - LEDs:       show the system status
 
  - Buttons:    TAMPER-button, WKUP-button, J1-Joystick (consists of RIGHT-,
                UP-, LEFT-, DOWN-, and CENTER-button). Built in app
