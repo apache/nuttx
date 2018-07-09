@@ -235,10 +235,14 @@ else
 	echo "ARCHCXXFLAGS = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 fi
 
-# Copy the system map file
+# Copy the system map file(s)
 
 if [ -r ${TOPDIR}/System.map ]; then
 	cp -a "${TOPDIR}/System.map" "${EXPORTDIR}/."
+fi
+
+if [ -r ${TOPDIR}/User.map ]; then
+        cp -a "${TOPDIR}/User.map" "${EXPORTDIR}/."
 fi
 
 # Copy the NuttX include directory (retaining attributes and following symbolic links)
