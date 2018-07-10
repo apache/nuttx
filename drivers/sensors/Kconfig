@@ -119,6 +119,61 @@ config KXTJ9_I2C_BUS_SPEED
 
 endif # SENSORS_KXTJ9
 
+config SENSOR_KX224
+	bool "Kionix KX224 Acceleration Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for the Kionix KX224 acceleration sensor.
+
+if SENSOR_KX224
+
+config SENSOR_KX224_SCU
+	bool "SCU Sequencer"
+	default y
+	depends on CXD56_SCU
+	---help---
+		Use the sensor control unit (SCU) sequencer.
+		Support only driver with the sensor control unit (SCU) sequencer.
+
+endif # SENSOR_KX224
+
+config SENSOR_BH1749NUC
+	bool "Rohm BH1749NUC Color Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for BH1749NUC color sensor.
+
+if SENSOR_BH1749NUC
+
+config SENSOR_BH1749NUC_SCU
+	bool "SCU Sequencer"
+	default y
+	depends on CXD56_SCU
+	---help---
+		Use the sensor control unit (SCU) sequencer.
+
+endif # SENSOR_BH1749NUC
+
+config SENSOR_BH1790GLC
+	bool "Rohm BH1790GLC Heartrate sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for BH1790GLC Heartrate sensor.
+
+if SENSOR_BH1790GLC
+
+config SENSOR_BH1790GLC_SCU
+	bool "SCU Sequencer"
+	default y
+	depends on CXD56_SCU
+	---help---
+		Use the sensor control unit (SCU) sequencer.
+
+endif # SENSOR_BH1790GLC
+
 config SENSORS_LIS2DH
 	bool "STMicro LIS2DH device support"
 	default n

@@ -17,7 +17,7 @@ README
     - NuttX Configuration Tool
     - Finding Selections in the Configuration Menus
     - Reveal Hidden Configuration Options
-    - Make Sure that You on on the Right Platform
+    - Make Sure that You are on the Right Platform
     - Comparing Two Configurations
     - Making defconfig Files
     - Incompatibilities with Older Configurations
@@ -1556,7 +1556,7 @@ Strange Path Problems
 
   When you install some toolchains (such as Yargarto or CodeSourcery tools),
   they may modify your PATH variable to include a path to their binaries.
-  At that location, they make have GNUWin32 versions of the tools.  So you
+  At that location, they may have GNUWin32 versions of the tools.  So you
   might actually be using a version of make that does not understand Cygwin
   paths.
 

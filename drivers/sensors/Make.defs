@@ -49,6 +49,24 @@ endif
 
 ifeq ($(CONFIG_I2C),y)
 
+ifeq ($(CONFIG_KX224),y)
+ifeq ($(CONFIG_KX224_SCU),y)
+  CSRCS += kx224_scu.c
+endif
+endif
+
+ifeq ($(CONFIG_BH1749NUC),y)
+ifeq ($(CONFIG_BH1749NUC_SCU),y)
+  CSRCS += bh1749nuc_scu.c
+endif
+endif
+
+ifeq ($(CONFIG_BH1790GLC),y)
+ifeq ($(CONFIG_BH1790GLC_SCU),y)
+  CSRCS += bh1790glc_scu.c
+endif
+endif
+
 ifeq ($(CONFIG_SENSORS_APDS9960),y)
   CSRCS += apds9960.c
 endif
