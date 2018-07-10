@@ -35,7 +35,7 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BH1749NUC_H
 #define __INCLUDE_NUTTX_SENSORS_BH1749NUC_H
 
-#include <sdk/config.h>
+#include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSOR_BH1749NUC)
 

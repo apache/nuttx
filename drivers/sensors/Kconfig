@@ -23,6 +23,13 @@ config SENSORS_AS5048B
 	---help---
 		Enable driver support for the AMS AS5048B magnetic rotary encoder.
 
+config SENSOR_BH1749NUC
+	bool "Rohm BH1749NUC Color Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for BH1749NUC color sensor.
+
 config SENSORS_BH1750FVI
 	bool "Rohm BH1750FVI Ambient Light Sensor support"
 	default n
@@ -34,6 +41,13 @@ config BH1750FVI_I2C_FREQUENCY
 	int "BH1750FVI I2C frequency"
 	default 400000
 	depends on SENSORS_BH1750FVI
+
+config SENSOR_BH1790GLC
+	bool "Rohm BH1790GLC Heartrate sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for BH1790GLC Heartrate sensor.
 
 config SENSORS_BMG160
 	bool "Bosch BMG160 Gyroscope Sensor support"
@@ -125,54 +139,6 @@ config SENSOR_KX224
 	select I2C
 	---help---
 		Enable driver for the Kionix KX224 acceleration sensor.
-
-if SENSOR_KX224
-
-config SENSOR_KX224_SCU
-	bool "SCU Sequencer"
-	default y
-	depends on CXD56_SCU
-	---help---
-		Use the sensor control unit (SCU) sequencer.
-		Support only driver with the sensor control unit (SCU) sequencer.
-
-endif # SENSOR_KX224
-
-config SENSOR_BH1749NUC
-	bool "Rohm BH1749NUC Color Sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver for BH1749NUC color sensor.
-
-if SENSOR_BH1749NUC
-
-config SENSOR_BH1749NUC_SCU
-	bool "SCU Sequencer"
-	default y
-	depends on CXD56_SCU
-	---help---
-		Use the sensor control unit (SCU) sequencer.
-
-endif # SENSOR_BH1749NUC
-
-config SENSOR_BH1790GLC
-	bool "Rohm BH1790GLC Heartrate sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver for BH1790GLC Heartrate sensor.
-
-if SENSOR_BH1790GLC
-
-config SENSOR_BH1790GLC_SCU
-	bool "SCU Sequencer"
-	default y
-	depends on CXD56_SCU
-	---help---
-		Use the sensor control unit (SCU) sequencer.
-
-endif # SENSOR_BH1790GLC
 
 config SENSORS_LIS2DH
 	bool "STMicro LIS2DH device support"

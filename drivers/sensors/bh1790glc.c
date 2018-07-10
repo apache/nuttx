@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/bh1790glc_scu.c
+ * drivers/sensors/bh1790glc.c
  *
  *   Copyright (C) 2016 Sony Corporation
  *
@@ -36,7 +36,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sdk/config.h>
+#include <nuttx/config.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,9 +50,8 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bh1790glc.h>
 #include <nuttx/irq.h>
-#include <arch/chip/cxd56_scu.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BH1790GLC) && defined(CONFIG_CXD56_SCU)
+#if defined(CONFIG_I2C) && defined(CONFIG_BH1790GLC)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -516,4 +515,4 @@ int bh1790glc_register(FAR const char *devpath, int minor,
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_BH1790GLC && CONFIG_CXD56_SCU */
+#endif /* CONFIG_I2C && CONFIG_BH1790GLC */

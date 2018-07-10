@@ -1,7 +1,7 @@
 /****************************************************************************
- * drivers/sensors/kx224_scu.c
+ * drivers/sensors/bh1749nuc.c
  *
- *   Copyright (C) 2016 Sony Corporation
+ *   Copyright (C) 2018 Sony Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,7 +36,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sdk/config.h>
+#include <nuttx/config.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -48,53 +48,48 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/sensors/kx224.h>
+#include <nuttx/sensors/bh1749nuc.h>
 #include <nuttx/irq.h>
-#include <arch/chip/cxd56_scu.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_KX224) && defined(CONFIG_CXD56_SCU)
+#if defined(CONFIG_I2C) && defined(CONFIG_BH1749NUC)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_DECI_KX224
-#  define KX224_SEQ_TYPE SEQ_TYPE_DECI
-#else
-#  define KX224_SEQ_TYPE SEQ_TYPE_NORMAL
-#endif
+#define BH1749NUC_ADDR              0x39    /* I2C Slave Address */
+#define BH1749NUC_MANUFACTID        0xE0    /* Manufact ID */
+#define BH1749NUC_PARTID            0x0D    /* Part ID */
+#define BH1749NUC_BYTESPERSAMPLE    8
+#define BH1749NUC_ELEMENTSIZE       0
 
-#define KX224_ADDR            0x1E    /* I2C Slave Address */
-#define KX224_DEVID           0x2B    /* Device ID */
+/* BH1749NUC Registers */
 
-#define KX224_BYTESPERSAMPLE    6
-#define KX224_ELEMENTSIZE       2
+#define BH1749NUC_SYSTEM_CONTROL    0x40
+#define BH1749NUC_MODE_CONTROL1     0x41
+#define BH1749NUC_MODE_CONTROL2     0x42
+#define BH1749NUC_MODE_CONTROL3     0x44
+#define BH1749NUC_RED_DATA_LSB      0x50
+#define BH1749NUC_MANUFACTURER_ID   0x92
 
-/* KX224 Registers */
+/* Register SYSTEM_CONTROL */
+#define BH1749NUC_SYSTEM_CONTROL_SW_RESET      (1 << 7)
+#define BH1749NUC_SYSTEM_CONTROL_INT_RESET     (1 << 6)
 
-#define KX224_XOUT_L            0x06
-#define KX224_WHO_AM_I          0x0F
-#define KX224_CNTL1             0x18
-#define KX224_ODCNTL            0x1B
+/* Register MODE_CONTROL1 */
 
-/* Register CNTL1 */
+#define BH1749NUC_MODE_CONTROL1_MEAS_TIME160MS (0x00)
 
-#define KX224_CNTL1_TPE         (1 << 0)
-#define KX224_CNTL1_WUFE        (1 << 1)
-#define KX224_CNTL1_TDTE        (1 << 2)
-#define KX224_CNTL1_GSELMASK    (0x18)
-#define KX224_CNTL1_GSEL_8G     (0x00)
-#define KX224_CNTL1_GSEL_16G     (0x08)
-#define KX224_CNTL1_GSEL_32G     (0x10)
-#define KX224_CNTL1_DRDYE       (1 << 5)
-#define KX224_CNTL1_RES         (1 << 6)
-#define KX224_CNTL1_PC1         (1 << 7)
+/* Register MODE_CONTROL2 */
 
-/* Register ODCNTL */
+#define BH1749NUC_MODE_CONTROL2_ADC_GAIN_X1    (0)
+#define BH1749NUC_MODE_CONTROL2_ADC_GAIN_X2    (1)
+#define BH1749NUC_MODE_CONTROL2_ADC_GAIN_X16   (2)
+#define BH1749NUC_MODE_CONTROL2_RGBC_EN        (1 << 4)
 
-#define KX224_ODCNTL_OSA_50HZ   (2)
-#define KX224_ODCNTL_LPRO       (1 << 6)
-#define KX224_ODCNTL_IIR_BYPASS (1 << 7)
+/* Register MODE_CONTROL3 */
+
+#define BH1749NUC_MODE_CONTROL3_VAL            (0x02)
 
 #ifndef itemsof
 #  define itemsof(array) (sizeof(array)/sizeof(array[0]))
@@ -104,17 +99,17 @@
  * Private Type Definitions
  ****************************************************************************/
 /**
- * @brief Structure for kx224 device
+ * @brief Structure for bh1749nuc device
  */
 
-struct kx224_dev_s
+struct bh1749nuc_dev_s
 {
   FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t       addr;           /* I2C address */
-  int           port;           /* I2C port */
+  uint8_t addr;                 /* I2C address */
+  int port;                     /* I2C port */
 
   struct seq_s *seq;            /* Sequencer instance */
-  int           fifoid;         /* FIFO ID */
+  int minor;                    /* Minor device number */
 };
 
 /****************************************************************************
@@ -123,38 +118,38 @@ struct kx224_dev_s
 
 /* Character driver methods */
 
-static int kx224_open(FAR struct file *filep);
-static int kx224_close(FAR struct file *filep);
-static ssize_t kx224_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen);
-static ssize_t kx224_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen);
-static int kx224_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int bh1749nuc_open(FAR struct file *filep);
+static int bh1749nuc_close(FAR struct file *filep);
+static ssize_t bh1749nuc_read(FAR struct file *filep, FAR char *buffer,
+                              size_t buflen);
+static ssize_t bh1749nuc_write(FAR struct file *filep, FAR const char *buffer,
+                               size_t buflen);
+static int bh1749nuc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_kx224fops =
+static const struct file_operations g_bh1749nucfops =
 {
-  kx224_open,                  /* open */
-  kx224_close,                 /* close */
-  kx224_read,                  /* read */
-  kx224_write,                 /* write */
+  bh1749nuc_open,              /* open */
+  bh1749nuc_close,             /* close */
+  bh1749nuc_read,              /* read */
+  bh1749nuc_write,             /* write */
   0,                           /* seek */
-  kx224_ioctl,                 /* ioctl */
+  bh1749nuc_ioctl,             /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   0,                           /* poll */
 #endif
   0                            /* unlink */
 };
 
-/* Take XYZ data. */
+/* Take color data. */
 
-static const uint16_t g_kx224inst[] =
+static const uint16_t g_bh1749nucinst[] =
 {
-  SCU_INST_SEND(KX224_XOUT_L),
-  SCU_INST_RECV(KX224_BYTESPERSAMPLE) | SCU_INST_LAST,
+  SCU_INST_SEND(BH1749NUC_RED_DATA_LSB),
+  SCU_INST_RECV(BH1749NUC_BYTESPERSAMPLE) | SCU_INST_LAST,
 };
 
 /* Reference count */
@@ -169,14 +164,15 @@ static struct seq_s *g_seq = NULL;
  * Private Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: kx224_getreg8
+ * Name: bh1749nuc_getreg8
  *
  * Description:
- *   Read from an 8-bit KX224 register
+ *   Read from an 8-bit BH1749NUC register
  *
  ****************************************************************************/
 
-static uint8_t kx224_getreg8(FAR struct kx224_dev_s *priv, uint8_t regaddr)
+static uint8_t bh1749nuc_getreg8(FAR struct bh1749nuc_dev_s *priv,
+                                 uint8_t regaddr)
 {
   uint8_t regval;
   uint16_t inst[2];
@@ -192,15 +188,15 @@ static uint8_t kx224_getreg8(FAR struct kx224_dev_s *priv, uint8_t regaddr)
 }
 
 /****************************************************************************
- * Name: kx224_putreg8
+ * Name: bh1749nuc_putreg8
  *
  * Description:
- *   Write to an 8-bit KX224 register
+ *   Write to an 8-bit BH1749NUC register
  *
  ****************************************************************************/
 
-static void kx224_putreg8(FAR struct kx224_dev_s *priv, uint8_t regaddr,
-                          uint8_t regval)
+static void bh1749nuc_putreg8(FAR struct bh1749nuc_dev_s *priv,
+                              uint8_t regaddr, uint8_t regval)
 {
   uint16_t inst[2];
 
@@ -213,26 +209,38 @@ static void kx224_putreg8(FAR struct kx224_dev_s *priv, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Name: kx224_checkid
+ * Name: bh1749nuc_checkid
  *
  * Description:
- *   Read and verify the KX224 chip ID
+ *   Read and verify the BH1749NUC chip ID
  *
  ****************************************************************************/
 
-static int kx224_checkid(FAR struct kx224_dev_s *priv)
+static int bh1749nuc_checkid(FAR struct bh1749nuc_dev_s *priv)
 {
-  uint8_t devid;
+  uint8_t id;
 
-  /* Read device ID */
+  /* Read Manufact ID */
 
-  devid = kx224_getreg8(priv, KX224_WHO_AM_I);
+  id = bh1749nuc_getreg8(priv, BH1749NUC_MANUFACTURER_ID);
 
-  if (devid != KX224_DEVID)
+  if (id != BH1749NUC_MANUFACTID)
     {
-      /* ID is not Correct */
+      /* Manufact ID is not Correct */
 
-      snerr("Wrong Device ID! %02x\n", devid);
+      snerr("Wrong Manufact ID! %02x\n", id);
+      return -ENODEV;
+    }
+
+  /* Read Part ID */
+
+  id = bh1749nuc_getreg8(priv, BH1749NUC_SYSTEM_CONTROL);
+
+  if ((id & 0x3F) != BH1749NUC_PARTID)
+    {
+      /* Part ID is not Correct */
+
+      snerr("Wrong Part ID! %02x\n", id);
       return -ENODEV;
     }
 
@@ -240,35 +248,20 @@ static int kx224_checkid(FAR struct kx224_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: kx224_initialize
+ * Name: bh1749nuc_seqinit
  *
  * Description:
- *   Initialize and goto stand-by mode.
+ *   Initialize SCU sequencer.
  *
  ****************************************************************************/
 
-static void kx224_initialize(FAR struct kx224_dev_s *priv)
-{
-  uint8_t val;
-
-  /* CNTL1 */
-
-  val = KX224_CNTL1_RES | KX224_CNTL1_GSEL_8G;
-  kx224_putreg8(priv, KX224_CNTL1, val);
-
-  /* ODCNTL */
-
-  val = KX224_ODCNTL_OSA_50HZ;
-  kx224_putreg8(priv, KX224_ODCNTL, val);
-}
-
-static int kx224_seqinit(FAR struct kx224_dev_s *priv)
+static int bh1749nuc_seqinit(FAR struct bh1749nuc_dev_s *priv)
 {
   DEBUGASSERT(g_seq == NULL);
 
   /* Open sequencer */
 
-  g_seq = seq_open(KX224_SEQ_TYPE, SCU_BUS_I2C0);
+  g_seq = seq_open(SEQ_TYPE_NORMAL, SCU_BUS_I2C0);
   if (!g_seq)
     {
       return -ENOENT;
@@ -279,42 +272,50 @@ static int kx224_seqinit(FAR struct kx224_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_kx224inst, itemsof(g_kx224inst));
-  seq_setsample(priv->seq, KX224_BYTESPERSAMPLE, 0, KX224_ELEMENTSIZE, false);
+  seq_setinstruction(priv->seq, g_bh1749nucinst, itemsof(g_bh1749nucinst));
+  seq_setsample(priv->seq, BH1749NUC_BYTESPERSAMPLE, 0, BH1749NUC_ELEMENTSIZE,
+                false);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: kx224_open
+ * Name: bh1749nuc_open
  *
  * Description:
- *   This function is called whenever the KX224 device is opened.
+ *   This function is called whenever the BH1749NUC device is opened.
  *
  ****************************************************************************/
 
-static int kx224_open(FAR struct file *filep)
+static int bh1749nuc_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct kx224_dev_s *priv = inode->i_private;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct bh1749nuc_dev_s *priv  = inode->i_private;
   uint8_t val;
 
   if (g_refcnt == 0)
     {
       int ret;
 
-      ret = kx224_seqinit(priv);
+      ret = bh1749nuc_seqinit(priv);
       if (ret < 0)
         {
           return ret;
         }
 
-      /* goto operating mode */
+      /* MODE_CONTROL1 */
 
-      val = kx224_getreg8(priv, KX224_CNTL1);
-      val |= KX224_CNTL1_PC1;
-      kx224_putreg8(priv, KX224_CNTL1, val);
-      up_mdelay(1);
+      val = BH1749NUC_MODE_CONTROL1_MEAS_TIME160MS;
+      bh1749nuc_putreg8(priv, BH1749NUC_MODE_CONTROL1, val);
+
+      /* MODE_CONTROL2 */
+      val = BH1749NUC_MODE_CONTROL2_RGBC_EN |
+            BH1749NUC_MODE_CONTROL2_ADC_GAIN_X16;
+      bh1749nuc_putreg8(priv, BH1749NUC_MODE_CONTROL2, val);
+
+      /* MODE_CONTROL3 */
+      val = BH1749NUC_MODE_CONTROL3_VAL;
+      bh1749nuc_putreg8(priv, BH1749NUC_MODE_CONTROL3, val);
     }
   else
     {
@@ -329,77 +330,76 @@ static int kx224_open(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: kx224_close
+ * Name: bh1749nuc_close
  *
  * Description:
- *   This routine is called when the KX224 device is closed.
+ *   This routine is called when the BH1749NUC device is closed.
  *
  ****************************************************************************/
 
-static int kx224_close(FAR struct file *filep)
+static int bh1749nuc_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct kx224_dev_s *priv = inode->i_private;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct bh1749nuc_dev_s *priv  = inode->i_private;
   uint8_t val;
 
   g_refcnt--;
 
-  (void) seq_ioctl(priv->seq, priv->fifoid, SCUIOC_STOP, 0);
+  (void) seq_ioctl(priv->seq, priv->minor, SCUIOC_STOP, 0);
 
   if (g_refcnt == 0)
     {
-      /* goto stand-by mode */
+      /* stop sampling */
 
-      val = kx224_getreg8(priv, KX224_CNTL1);
-      val &= ~KX224_CNTL1_PC1;
-      kx224_putreg8(priv, KX224_CNTL1, val);
-      up_mdelay(1);
+      val = BH1749NUC_SYSTEM_CONTROL_SW_RESET |
+            BH1749NUC_SYSTEM_CONTROL_INT_RESET;
+      bh1749nuc_putreg8(priv, BH1749NUC_SYSTEM_CONTROL, val);
 
       seq_close(g_seq);
       g_seq = NULL;
     }
   else
     {
-      (void) seq_ioctl(priv->seq, priv->fifoid, SCUIOC_FREEFIFO, 0);
+      (void) seq_ioctl(priv->seq, priv->minor, SCUIOC_FREEFIFO, 0);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: kx224_read
+ * Name: bh1749nuc_read
  ****************************************************************************/
 
-static ssize_t kx224_read(FAR struct file *filep, FAR char *buffer,
-                          size_t len)
+static ssize_t bh1749nuc_read(FAR struct file *filep, FAR char *buffer,
+                              size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct kx224_dev_s *priv = inode->i_private;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct bh1749nuc_dev_s *priv  = inode->i_private;
 
-  len = len / KX224_BYTESPERSAMPLE * KX224_BYTESPERSAMPLE;
-  len = seq_read(priv->seq, priv->fifoid, buffer, len);
+  len = len / BH1749NUC_BYTESPERSAMPLE * BH1749NUC_BYTESPERSAMPLE;
+  len = seq_read(priv->seq, priv->minor, buffer, len);
 
   return len;
 }
 
 /****************************************************************************
- * Name: kx224_write
+ * Name: bh1749nuc_write
  ****************************************************************************/
 
-static ssize_t kx224_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen)
+static ssize_t bh1749nuc_write(FAR struct file *filep, FAR const char *buffer,
+                               size_t buflen)
 {
   return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: kx224_ioctl
+ * Name: bh1749nuc_ioctl
  ****************************************************************************/
 
-static int kx224_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bh1749nuc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct kx224_dev_s *priv = inode->i_private;
+  FAR struct bh1749nuc_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -410,7 +410,7 @@ static int kx224_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               /* Redirect SCU commands */
 
-              ret = seq_ioctl(priv->seq, priv->fifoid, cmd, arg);
+              ret = seq_ioctl(priv->seq, priv->minor, cmd, arg);
             }
           else
             {
@@ -429,14 +429,14 @@ static int kx224_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kx224_init
+ * Name: bh1749nuc_init
  *
  * Description:
- *   Initialize the KX224 device
+ *   Initialize the BH1749NUC device
  *
  * Input Parameters:
  *   i2c     - An instance of the I2C interface to use to communicate with
- *             KX224
+ *             BH1749NUC
  *   port    - I2C port (0 or 1)
  *
  * Returned Value:
@@ -444,63 +444,59 @@ static int kx224_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int kx224_init(FAR struct i2c_master_s *i2c, int port)
+int bh1749nuc_init(FAR struct i2c_master_s *i2c, int port)
 {
-  FAR struct kx224_dev_s tmp;
-  FAR struct kx224_dev_s *priv = &tmp;
+  FAR struct bh1749nuc_dev_s tmp;
+  FAR struct bh1749nuc_dev_s *priv = &tmp;
   int ret;
 
   /* Setup temporary device structure for initialization */
 
   priv->i2c = i2c;
-  priv->addr = KX224_ADDR;
+  priv->addr = BH1749NUC_ADDR;
   priv->port = port;
 
   /* Check Device ID */
 
-  ret = kx224_checkid(priv);
+  ret = bh1749nuc_checkid(priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
       return ret;
     }
 
-  /* Initialize KX224 */
-
-  kx224_initialize(priv);
-
   return OK;
 }
 
 /****************************************************************************
- * Name: kx224_register
+ * Name: bh1749nuc_register
  *
  * Description:
- *   Register the KX224 character device as 'devpath'
+ *   Register the BH1749NUC character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/accel0"
- *   fifoid  - FIFO ID
+ *   devpath - The full path to the driver to register. E.g., "/dev/color0"
+ *   minor   - minor device number
  *   i2c     - An instance of the I2C interface to use to communicate with
- *             KX224
+ *             BH1749NUC
  *   port    - I2C port (0 or 1)
- *   seq     - Sequencer instance
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int kx224_register(FAR const char *devpath, int minor,
-                   FAR struct i2c_master_s *i2c, int port)
+int bh1749nuc_register(FAR const char *devpath, int minor,
+                       FAR struct i2c_master_s *i2c, int port)
 {
-  FAR struct kx224_dev_s *priv;
+  FAR struct bh1749nuc_dev_s *priv;
   char path[16];
   int ret;
 
-  /* Initialize the KX224 device structure */
+  /* Initialize the BH1749NUC device structure */
 
-  priv = (FAR struct kx224_dev_s *)kmm_malloc(sizeof(struct kx224_dev_s));
+  priv = (FAR struct bh1749nuc_dev_s *)
+    kmm_malloc(sizeof(struct bh1749nuc_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
@@ -508,24 +504,24 @@ int kx224_register(FAR const char *devpath, int minor,
     }
 
   priv->i2c = i2c;
-  priv->addr = KX224_ADDR;
+  priv->addr = BH1749NUC_ADDR;
   priv->port = port;
   priv->seq = NULL;
-  priv->fifoid = minor;
+  priv->minor = minor;
 
   /* Register the character driver */
 
   (void) snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_kx224fops, 0666, priv);
+  ret = register_driver(path, &g_bh1749nucfops, 0666, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 
-  sninfo("KX224 driver loaded successfully!\n");
+  sninfo("BH1749NUC driver loaded successfully!\n");
 
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_KX224 && CONFIG_CXD56_SCU */
+#endif /* CONFIG_I2C && CONFIG_BH1749NUC */
