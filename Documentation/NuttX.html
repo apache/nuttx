@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 3, 2018</p>
+      <p>Last Updated: July 12, 2018</p>
     </td>
   </tr>
 </table>
@@ -1514,7 +1514,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (45)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (11)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (12)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1757,7 +1757,7 @@
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f76xx77xx">STMicro STM32 F76xx/F77xx</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
-    </ul>
+      <li><a href="#stm32h7x3">STMicro STM32 H7x3</a> <small>(STM32 H7 family, ARM Cortex-M7)    </ul>
   <li>Texas Instruments (some formerly Luminary)
     <ul>
       <li><a href="#tms320c5471">TI TMS320-C5471</a> <small>(ARM7TDMI)</small></li>
@@ -5290,7 +5290,7 @@ Mem:         29232       5920      23312      23312
   <td>
     <p>
       <a name="stm32f76xx77xx"><b>STMicro STM32 F76xx/F77xx</b>.</a>
-      Architecture support for the STM32 F76xx and F77xx families was contributed by David Sidrane in NuttX 7.17.  Support is available for one board from this family:
+      Architecture support for the STM32 F76xx and F77xx families was contributed by David Sidrane in NuttX 7.17.  Support is available for two boards from this family:
     </p>
     <ul>
       <li>
@@ -5335,6 +5335,35 @@ Mem:         29232       5920      23312      23312
     <p>
       See <a href="#stm32f7drivers">above</a> for STM32 F7 driver availability.
     </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="#stm32h7x3">STMicro STM32 H7x3</a>
+      <a name="stm32f76xx77xx"><b>STMicro STM32 F76xx/F77xx</b>.</a>
+      Architecture support for the STM32 H7x3 was added through efforts of several people in NuttX-7.26.  Support is available for one board from this family:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>Nucleo-H743ZI</b>.
+          This is a member of the Nucleo-144 board family.
+          Support for this board was also added NuttX-7.26.
+          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nucleo-h743zi/README.txt">README.txt</a> file for further information.
+        <p>
+          The basic NSH configuration is fully, thanks to the bring-up efforts of Mateusz Szafoni.
+          This port is port is still a work in progress and additional drivers are being ported from the F7 family.
+          This description will be updated with more current information at the time of the NuttX-7.26 release (probably September, 2018).
+        </p>
+      </li>
+    </ul>
   </td>
 </tr>
 

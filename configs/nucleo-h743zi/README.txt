@@ -155,4 +155,5 @@ Configurations
   nsh:
 
     This configuration provides a basic NuttShell configuration (NSH)
-    for the Nucleo-H743ZI.
+    for the Nucleo-H743ZI.  The default console is the VCOM on USART3.
+
