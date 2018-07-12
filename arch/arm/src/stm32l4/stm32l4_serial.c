@@ -742,7 +742,7 @@ static struct stm32l4_serial_s g_uart5priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-FAR static struct stm32l4_serial_s * const uart_devs[STM32L4_NUSART + STM32L4_NUART] =
+FAR static struct stm32l4_serial_s * const g_uart_devs[STM32L4_NUSART + STM32L4_NUART] =
 {
 #ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
   [0] = &g_usart1priv,
@@ -1200,7 +1200,7 @@ void stm32l4serial_pm_setsuspend(bool suspend)
 
   for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
     {
-      struct stm32l4_serial_s *priv = uart_devs[n];
+      struct stm32l4_serial_s *priv = g_uart_devs[n];
 
       if (!priv || !priv->initialized)
         {
@@ -2682,7 +2682,7 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
 
       for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
         {
-          struct stm32l4_serial_s *priv = uart_devs[n];
+          struct stm32l4_serial_s *priv = g_uart_devs[n];
 
           if (!priv || !priv->initialized)
             {
@@ -2745,16 +2745,16 @@ void up_earlyserialinit(void)
 
   for (i = 0; i < STM32L4_NUSART + STM32L4_NUART; i++)
     {
-      if (uart_devs[i])
+      if (g_uart_devs[i])
         {
-          stm32l4serial_disableusartint(uart_devs[i], NULL);
+          stm32l4serial_disableusartint(g_uart_devs[i], NULL);
         }
     }
 
   /* Configure whichever one is the console */
 
 #if CONSOLE_UART > 0
-  stm32l4serial_setup(&uart_devs[CONSOLE_UART - 1]->dev);
+  stm32l4serial_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
 #endif
 #endif /* HAVE UART */
 }
@@ -2790,21 +2790,21 @@ void up_serialinit(void)
   /* Register the console */
 
 #if CONSOLE_UART > 0
-  (void)uart_register("/dev/console", &uart_devs[CONSOLE_UART - 1]->dev);
+  (void)uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
 #ifndef CONFIG_STM32L4_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
 
-  (void)uart_register("/dev/ttyS0", &uart_devs[CONSOLE_UART - 1]->dev);
+  (void)uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_UART - 1]->dev);
   minor = 1;
 #endif
 
 #ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
 
-  stm32l4serial_dmasetup(&uart_devs[CONSOLE_UART - 1]->dev);
+  stm32l4serial_dmasetup(&g_uart_devs[CONSOLE_UART - 1]->dev);
 #endif
 #endif /* CONSOLE_UART > 0 */
 
@@ -2816,7 +2816,7 @@ void up_serialinit(void)
     {
       /* Don't create a device for non-configured ports. */
 
-      if (uart_devs[i] == 0)
+      if (g_uart_devs[i] == 0)
         {
           continue;
         }
@@ -2824,7 +2824,7 @@ void up_serialinit(void)
 #ifndef CONFIG_STM32L4_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
-      if (uart_devs[i]->dev.isconsole)
+      if (g_uart_devs[i]->dev.isconsole)
         {
           continue;
         }
@@ -2833,7 +2833,7 @@ void up_serialinit(void)
       /* Register USARTs as devices in increasing order */
 
       devname[9] = '0' + minor++;
-      (void)uart_register(devname, &uart_devs[i]->dev);
+      (void)uart_register(devname, &g_uart_devs[i]->dev);
     }
 #endif /* HAVE UART */
 }
@@ -2906,7 +2906,7 @@ void stm32l4_serial_dma_poll(void)
 int up_putc(int ch)
 {
 #if CONSOLE_UART > 0
-  struct stm32l4_serial_s *priv = uart_devs[CONSOLE_UART - 1];
+  struct stm32l4_serial_s *priv = g_uart_devs[CONSOLE_UART - 1];
   uint16_t ie;
 
   stm32l4serial_disableusartint(priv, &ie);

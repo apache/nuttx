@@ -7,7 +7,7 @@ README
     - STM32F107VCT6, or
     - STM32F103VCT6
 
-  The board is vary modular with connectors for a variety of peripherals.
+  The board is very modular with connectors for a variety of peripherals.
   Features on the base board include:
 
     - User and Wake-Up Keys

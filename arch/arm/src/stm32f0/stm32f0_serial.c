@@ -719,7 +719,7 @@ static struct stm32f0_serial_s g_usart5priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-FAR static struct stm32f0_serial_s * const uart_devs[STM32F0_NUSART] =
+FAR static struct stm32f0_serial_s * const g_uart_devs[STM32F0_NUSART] =
 {
 #ifdef CONFIG_STM32F0_USART1
   [0] = &g_usart1priv,
@@ -2380,16 +2380,16 @@ void up_earlyserialinit(void)
 
   for (i = 0; i < STM32F0_NUSART; i++)
     {
-      if (uart_devs[i])
+      if (g_uart_devs[i])
         {
-          stm32f0serial_disableusartint(uart_devs[i], NULL);
+          stm32f0serial_disableusartint(g_uart_devs[i], NULL);
         }
     }
 
   /* Configure whichever one is the console */
 
 #if CONSOLE_USART > 0
-  stm32f0serial_setup(&uart_devs[CONSOLE_USART - 1]->dev);
+  stm32f0serial_setup(&g_uart_devs[CONSOLE_USART - 1]->dev);
 #endif
 #endif /* HAVE USART */
 }
@@ -2425,21 +2425,21 @@ void up_serialinit(void)
   /* Register the console */
 
 #if CONSOLE_USART > 0
-  (void)uart_register("/dev/console", &uart_devs[CONSOLE_USART - 1]->dev);
+  (void)uart_register("/dev/console", &g_uart_devs[CONSOLE_USART - 1]->dev);
 
 #ifndef CONFIG_STM32F0_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console USART to ttyS0 and exclude
    * it from initializing it further down
    */
 
-  (void)uart_register("/dev/ttyS0", &uart_devs[CONSOLE_USART - 1]->dev);
+  (void)uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_USART - 1]->dev);
   minor = 1;
 #endif
 
 #ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
 
-  stm32f0serial_dmasetup(&uart_devs[CONSOLE_USART - 1]->dev);
+  stm32f0serial_dmasetup(&g_uart_devs[CONSOLE_USART - 1]->dev);
 #endif
 #endif /* CONSOLE_USART > 0 */
 
@@ -2451,7 +2451,7 @@ void up_serialinit(void)
     {
       /* Don't create a device for non-configured ports. */
 
-      if (uart_devs[i] == 0)
+      if (g_uart_devs[i] == 0)
         {
           continue;
         }
@@ -2459,7 +2459,7 @@ void up_serialinit(void)
 #ifndef CONFIG_STM32F0_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
-      if (uart_devs[i]->dev.isconsole)
+      if (g_uart_devs[i]->dev.isconsole)
         {
           continue;
         }
@@ -2468,7 +2468,7 @@ void up_serialinit(void)
       /* Register USARTs as devices in increasing order */
 
       devname[9] = '0' + minor++;
-      (void)uart_register(devname, &uart_devs[i]->dev);
+      (void)uart_register(devname, &g_uart_devs[i]->dev);
     }
 #endif /* HAVE USART */
 }
@@ -2541,7 +2541,7 @@ void stm32f0serial_dmapoll(void)
 int up_putc(int ch)
 {
 #if CONSOLE_USART > 0
-  struct stm32f0_serial_s *priv = uart_devs[CONSOLE_USART - 1];
+  struct stm32f0_serial_s *priv = g_uart_devs[CONSOLE_USART - 1];
   uint16_t ie;
 
   stm32f0serial_disableusartint(priv, &ie);
