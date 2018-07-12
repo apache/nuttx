@@ -1901,6 +1901,14 @@ config STM32F7_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
+config STM32F7_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32F7_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32F7 serial driver.
+
 if PM
 
 config STM32F7_PM_SERIAL_ACTIVITY

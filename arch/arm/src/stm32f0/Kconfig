@@ -1486,6 +1486,14 @@ config STM32F0_SERIAL_DISABLE_REORDERING
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 
+config STM32F0_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32F0_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32F0 serial driver.
+
 endmenu # Serial Driver Configuration
 
 if PM

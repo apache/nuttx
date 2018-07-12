@@ -7376,6 +7376,14 @@ config STM32_SERIALBRK_BSDCOMPAT
 		on because the SW starts the break and then the HW automatically clears
 		the break. This makes it is difficult to sent a long break.
 
+config STM32_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
+
 endmenu # Serial Driver Configuration
 
 menu "HCI UART Driver Configuration"

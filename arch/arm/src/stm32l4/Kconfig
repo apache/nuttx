@@ -3794,7 +3794,7 @@ config STM32L4_USART_SINGLEWIRE
 	depends on STM32L4_USART
 	---help---
 		Enable single wire UART support.  The option enables support for the
-		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
+		TIOCSSINGLEWIRE ioctl in the STM32L4 serial driver.
 
 if PM
 
