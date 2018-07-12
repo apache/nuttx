@@ -142,7 +142,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 #  define showprogress(c) up_lowputc(c)
 #else
 #  define showprogress(c)
@@ -314,12 +314,12 @@ void __start(void)
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_PORT2_RSTB);
   modifyreg32(rP2DT,  0, 1 << 15  /* GPIO2F */);
   modifyreg32(rP2DRC, 0, 1 << 15  /* GPIO2F */);
-#ifdef CONFIG_DEBUG
+#ifdef CONFIG_DEBUG_FEATURES
 
   /* enable TXD0 for debug */
 
   modifyreg32(PMDCNT5, 0, 3 << 14);
-#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_DEBUG_FEATURES */
 #else  /* CONFIG_LC823450_IPL2 */
   up_init_default_mux();
 #endif /* CONFIG_LC823450_IPL2 */
