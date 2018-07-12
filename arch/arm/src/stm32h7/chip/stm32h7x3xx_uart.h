@@ -283,30 +283,30 @@
 #define USART_CR3_CTSE            (1 << 9)  /* Bit 9:  CTS Enable */
 #define USART_CR3_CTSIE           (1 << 10) /* Bit 10: CTS Interrupt Enable */
 #define USART_CR1_ONEBIT          (1 << 11) /* Bit 11: One sample bit method enable */
-#define USART_CR1_OVRDIS          (1 << 12) /* Bit 12: Overrun Disable */
-#define USART_CR1_DDRE            (1 << 13) /* Bit 13: DMA Disable on Reception Error */
-#define USART_CR1_DEM             (1 << 14) /* Bit 14: Driver enable mode */
-#define USART_CR1_DEP             (1 << 15) /* Bit 15: Driver enable polarity selection */
-#define USART_CR1_SCARCNT_SHIFT   (17)      /* Bit 17-19: Smartcard auto-retry count */
-#define USART_CR1_SCARCNT_MASK    (7 << USART_CR1_SCARCNT_SHIFT)
-#  define USART_CR1_SCARCNT(n)    ((uint32_t)(n) << USART_CR1_SCARCNT_SHIFT)
-#define USART_CR1_RXFTCFG_SHIFT   (25)      /* Bit 25-27: Receive FIFO threshold configuration */
-#define USART_CR1_RXFTCFG_MASK    (7 << USART_CR1_RXFTCFG_SHIFT)
-#  define USART_CR1_RXFTCFG_12PCT (0 << USART_CR1_RXFTCFG_SHIFT) /* RXFIFO 1/8 full */
-#  define USART_CR1_RXFTCFG_25PCT (1 << USART_CR1_RXFTCFG_SHIFT) /* RXFIFO 1/4 full */
-#  define USART_CR1_RXFTCFG_50PCT (2 << USART_CR1_RXFTCFG_SHIFT) /* RXFIFO 1/2 full */
-#  define USART_CR1_RXFTCFG_75PCT (3 << USART_CR1_RXFTCFG_SHIFT) /* RXFIFO 3/4 full */
-#  define USART_CR1_RXFTCFG_88PCT (4 << USART_CR1_RXFTCFG_SHIFT) /* RXFIFO 7/8 full */
-#  define USART_CR1_RXFTCFG_FULL  (5 << USART_CR1_RXFTCFG_SHIFT) /* RXIFO full */
-#define USART_CR1_RXFTIE          (1 << 28) /* Bit 28: RXFIFO threshold interrupt enable */
-#define USART_CR1_TXFTCFG_SHIFT   (29)      /* Bits 29-31: TXFIFO threshold configuration */
-#define USART_CR1_TXFTCFG_MASK    (7 << USART_CR1_TXFTCFG_SHIFT)
-#  define USART_CR1_TXFTCFG_12PCT (0 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO 1/8 full */
-#  define USART_CR1_TXFTCFG_24PCT (1 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO 1/4 full */
-#  define USART_CR1_TXFTCFG_50PCT (2 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO 1/2 full */
-#  define USART_CR1_TXFTCFG_75PCT (3 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO 3/4 full */
-#  define USART_CR1_TXFTCFG_88PCT (4 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO 7/8 full */
-#  define USART_CR1_TXFTCFG_EMPY  (5 << USART_CR1_TXFTCFG_SHIFT) /* TXFIFO empty */
+#define USART_CR3_OVRDIS          (1 << 12) /* Bit 12: Overrun Disable */
+#define USART_CR3_DDRE            (1 << 13) /* Bit 13: DMA Disable on Reception Error */
+#define USART_CR3_DEM             (1 << 14) /* Bit 14: Driver enable mode */
+#define USART_CR3_DEP             (1 << 15) /* Bit 15: Driver enable polarity selection */
+#define USART_CR3_SCARCNT_SHIFT   (17)      /* Bit 17-19: Smartcard auto-retry count */
+#define USART_CR3_SCARCNT_MASK    (7 << USART_CR3_SCARCNT_SHIFT)
+#  define USART_CR3_SCARCNT(n)    ((uint32_t)(n) << USART_CR3_SCARCNT_SHIFT)
+#define USART_CR3_RXFTCFG_SHIFT   (25)      /* Bit 25-27: Receive FIFO threshold configuration */
+#define USART_CR3_RXFTCFG_MASK    (7 << USART_CR3_RXFTCFG_SHIFT)
+#  define USART_CR3_RXFTCFG_12PCT (0 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/8 full */
+#  define USART_CR3_RXFTCFG_25PCT (1 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/4 full */
+#  define USART_CR3_RXFTCFG_50PCT (2 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/2 full */
+#  define USART_CR3_RXFTCFG_75PCT (3 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 3/4 full */
+#  define USART_CR3_RXFTCFG_88PCT (4 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 7/8 full */
+#  define USART_CR3_RXFTCFG_FULL  (5 << USART_CR3_RXFTCFG_SHIFT) /* RXIFO full */
+#define USART_CR3_RXFTIE          (1 << 28) /* Bit 28: RXFIFO threshold interrupt enable */
+#define USART_CR3_TXFTCFG_SHIFT   (29)      /* Bits 29-31: TXFIFO threshold configuration */
+#define USART_CR3_TXFTCFG_MASK    (7 << USART_CR3_TXFTCFG_SHIFT)
+#  define USART_CR3_TXFTCFG_12PCT (0 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/8 full */
+#  define USART_CR3_TXFTCFG_24PCT (1 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/4 full */
+#  define USART_CR3_TXFTCFG_50PCT (2 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/2 full */
+#  define USART_CR3_TXFTCFG_75PCT (3 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 3/4 full */
+#  define USART_CR3_TXFTCFG_88PCT (4 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 7/8 full */
+#  define USART_CR3_TXFTCFG_EMPY  (5 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO empty */
 
 /* Baud Rate Register */
 
@@ -382,6 +382,7 @@
 #define USART_ICR_IDLECF          (1 << 4)  /* Bit 4:  Idle line detected clear flag */
 #define USART_ICR_TXFECF          (1 << 5)  /* Bit 5:  TXFIFO empty clear flag */
 #define USART_ICR_TCCF            (1 << 6)  /* Bit 6:  Transmission complete */
+#define USART_ICR_TCBGTCF         (1 << 7)  /* Bit 7:  Transmission complete before Guard time clear flag */
 #define USART_ICR_LBDCF           (1 << 8)  /* Bit 8:  LIN break detection clear flag */
 #define USART_ICR_CTSCF           (1 << 9)  /* Bit 9:  CTS interrupt clear flag */
 #define USART_ICR_RTOCF           (1 << 11) /* Bit 11: Receiver timeout clear flag */
