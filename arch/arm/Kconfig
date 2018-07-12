@@ -300,7 +300,6 @@ config ARCH_CHIP_STM32H7
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
 #	select ARMV7M_HAVE_STACKCHECK
-	depends on EXPERIMENTAL # Remove when the port is stable
 	---help---
 		STMicro STM32H7 architectures (ARM Cortex-M7).
 
