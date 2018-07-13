@@ -701,6 +701,9 @@ FT80x Integration
 MAX3421E Integration
 ====================
 
+  Board Connections
+  -----------------
+
   Using SPI1on J8 pins 7-12, discretes on J18
   ------ ----------- -----------
   NAME   VIEWTOOL    STM32
@@ -729,6 +732,21 @@ MAX3421E Integration
   VBUS   J18 Pin 10  PA0
   3.3V   J8  Pin 1
   GND    J8  Pin 2
+
+  Configuration Options
+  ---------------------
+  These options have to be added to the basic NSH configuration in order to
+  support the MAX3421E:
+
+    CONFIG_EXPERIMENTAL=y         # EXPERIMENTAL required for now (might change)
+    CONFIG_NSH_ARCHINIT=y         # Board level initialization required
+    CONFIG_STM32_SPI1=y           # SPI for the MAX3421E (could use SPI2)
+    CONFIG_USBHOST=y              # General USB host support
+    CONFIG_USBHOST_ISOC_DISABLE=y # Does not support Isochronous endpoints
+    CONFIG_USBHOST_MAX3421E=y     # MAX3421E support
+    CONFIG_USBHOST_MSC=y          # USB MSC class
+
+  Settings not listed above can be left at their default values.
 
 Toolchains
 ==========
