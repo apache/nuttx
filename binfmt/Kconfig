@@ -111,3 +111,4 @@ config BINFMT_CONSTRUCTORS
 config SYMTAB_ORDEREDBYNAME
 	bool "Symbol Tables Ordered by Name"
 	default n
+
