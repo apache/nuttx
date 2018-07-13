@@ -1,4 +1,3 @@
-# CONFIG_EXECFUNCS_HAVE_SYMTAB is not set
 # CONFIG_NET_ETHERNET is not set
 # CONFIG_NET_IPv4 is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
