@@ -587,63 +587,63 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv);
  ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
-/* TODO:  Improve format strings so that they are self-explanatory. */
+/* Trace/debug format strings. */
 
 static const struct max3421e_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 {
-  TRENTRY(MAX3421E_TRACE1_ALLOC_FAIL,         TR_FMT1, "INIT: Failed to allocate state structure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ALLOC_FAIL,        TR_FMT1, "INIT: Failed to allocate state structure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL1,  TR_FMT1, "OUT: Asynch setup failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL2,  TR_FMT1, "IN: Asynch setup failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL1, TR_FMT1, "OUT: Asynch setup failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL2, TR_FMT1, "IN: Asynch setup failed: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE,        TR_FMT1, "StartSOF: Bad JK state: %02x\n"),
-  TRENTRY(MAX3421E_TRACE1_BADREVISION,        TR_FMT1, "INIT: Bad revision number:  %02x\n"),
-  TRENTRY(MAX3421E_TRACE1_CHANALLOC_FAIL,     TR_FMT1, "EPALLOC: Channel allocation failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_CHANWAIT_FAIL,      TR_FMT1, "OUT: Channel wait failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN1,        TR_FMT1, "OUT: Disconnected during wait: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN2,        TR_FMT1, "CTRL: Disconnected during SETUP phase: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN3,        TR_FMT1, "CTRL OUT: Disconnected during DATA phase: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN4,        TR_FMT1, "CTRL IN: Disconnected during DATA phase: %u"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN5,        TR_FMT1, "IN: Disconnected during wait: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN6,        TR_FMT1, "CONNECT: Device disconnect #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN7,        TR_FMT1, "CONNECT: Device disconnect #2: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN8,        TR_FMT1, "CONNECT: Device disconnect #3: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_ENUMERATE_FAIL,     TR_FMT1, "CONNECT: Enumeration failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL1,      TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE,       TR_FMT1, "StartSOF: Bad JK state: %02x\n"),
+  TRENTRY(MAX3421E_TRACE1_BADREVISION,       TR_FMT1, "INIT: Bad revision number:  %02x\n"),
+  TRENTRY(MAX3421E_TRACE1_CHANALLOC_FAIL,    TR_FMT1, "EPALLOC: Channel allocation failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_CHANWAIT_FAIL,     TR_FMT1, "OUT: Channel wait failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN1,       TR_FMT1, "OUT: Disconnected during wait: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN2,       TR_FMT1, "CTRL: Disconnected during SETUP phase: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN3,       TR_FMT1, "CTRL OUT: Disconnected during DATA phase: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN4,       TR_FMT1, "CTRL IN: Disconnected during DATA phase: %u"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN5,       TR_FMT1, "IN: Disconnected during wait: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN6,       TR_FMT1, "CONNECT: Device disconnect #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN7,       TR_FMT1, "CONNECT: Device disconnect #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN8,       TR_FMT1, "CONNECT: Device disconnect #3: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ENUMERATE_FAIL,    TR_FMT1, "CONNECT: Enumeration failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL1,     TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL2,      TR_FMT1, "CTRL IN: Asynch SETUP phase failure #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL3,      TR_FMT1, "CTRL IN: Asynch SETUP phase failure #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL2,     TR_FMT1, "CTRL IN: Asynch SETUP phase failure #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL3,     TR_FMT1, "CTRL IN: Asynch SETUP phase failure #2: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_IRQATTACH_FAIL,     TR_FMT1, "INIT: Failed to attach interrupt: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL1,     TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_IRQATTACH_FAIL,    TR_FMT1, "INIT: Failed to attach interrupt: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL1,    TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL2,     TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL3,     TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL2,    TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL3,    TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #2: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_RECVDATA_FAIL,      TR_FMT1, "CTRL IN: Data phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_RECVSTATUS_FAIL,    TR_FMT1, "CTRL OUT: Status phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDDATA_FAIL,      TR_FMT1, "CTRL OUT: Data phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL1,    TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL2,    TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSTATUS_FAIL,    TR_FMT1, "CTRL IN: Status phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED1,   TR_FMT1, "OUT: Transfer wait returned failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED2,   TR_FMT1, "CTRL: SETUP wait returned failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED3,   TR_FMT1, "IN: Transfer wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_RECVDATA_FAIL,     TR_FMT1, "CTRL IN: Data phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_RECVSTATUS_FAIL,   TR_FMT1, "CTRL OUT: Status phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDDATA_FAIL,     TR_FMT1, "CTRL OUT: Data phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL1,   TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL2,   TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSTATUS_FAIL,   TR_FMT1, "CTRL IN: Status phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED1,  TR_FMT1, "OUT: Transfer wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED2,  TR_FMT1, "CTRL: SETUP wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED3,  TR_FMT1, "IN: Transfer wait returned failure: %u\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-  TRENTRY(MAX3421E_VTRACE1_CANCEL,            TR_FMT1, "Transfer canceled: EP%u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED1,        TR_FMT1, "CONNECT: Connection event: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED2,        TR_FMT1, "CONNECT: Connection change detected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED3,        TR_FMT1, "CONNECT: Connected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED1,     TR_FMT1, "CONNECT: Disconnected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED2,     TR_FMT1, "CONNECT: Disconnect detected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_ENUMERATE,         TR_FMT1, "ENUMERATE: Start: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CANCEL,           TR_FMT1, "Transfer canceled: EP%u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED1,       TR_FMT1, "CONNECT: Connection event: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED2,       TR_FMT1, "CONNECT: Connection change detected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED3,       TR_FMT1, "CONNECT: Connected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED1,    TR_FMT1, "CONNECT: Disconnected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED2,    TR_FMT1, "CONNECT: Disconnect detected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_ENUMERATE,        TR_FMT1, "ENUMERATE: Start: %u\n"),
 #ifdef CONFIG_USBHOST_HUB
-  TRENTRY(MAX3421E_VTRACE1_HUB_CONNECTED,     TR_FMT1, "CONNECT: Hub connected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_HUB_CONNECTED,    TR_FMT1, "CONNECT: Hub connected: %u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE1_INITIALIZED,       TR_FMT1, "INIT: Hardware initialized: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_INITIALIZED,      TR_FMT1, "INIT: Hardware initialized: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
- TRENTRY(MAX3421E_VTRACE1_TRANSFER_COMPLETE,  TR_FMT1, "OUT: Asynch transfer complete: %u\n"),
+ TRENTRY(MAX3421E_VTRACE1_TRANSFER_COMPLETE, TR_FMT1, "OUT: Asynch transfer complete: %u\n"),
 #endif
 #endif
 };
@@ -652,28 +652,28 @@ static const struct max3421e_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_VTRACE2_ASYNCH,            TR_FMT2, "ASYNCH: Transfer started: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ASYNCH,           TR_FMT2, "ASYNCH: Transfer started: EP%u len=%u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE2_BULKIN,            TR_FMT2, "BULK IN:  SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_BULKOUT,           TR_FMT2, "BULK OUT:  SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_IN,     TR_FMT2, "IN: Channel wakeup: Chan%, result=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_OUT,    TR_FMT2, "OUT: Channel wakeup: Chan%u result=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CTRLIN,            TR_FMT2, "CTRL IN: Start: type=%u req=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CTRLOUT,           TR_FMT2, "CTRL OUT: Start: type=%u req=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_BULKIN,           TR_FMT2, "BULK IN:  SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_BULKOUT,          TR_FMT2, "BULK OUT:  SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_IN,    TR_FMT2, "IN: Channel wakeup: Chan%, result=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_OUT,   TR_FMT2, "OUT: Channel wakeup: Chan%u result=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CTRLIN,           TR_FMT2, "CTRL IN: Start: type=%u req=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CTRLOUT,          TR_FMT2, "CTRL OUT: Start: type=%u req=%u\n"),
 #ifdef CONFIG_USBHOST_HUB
-  TRENTRY(MAX3421E_VTRACE2_HUB_CONNECTED,     TR_FMT2, "CONNECT: Hub connected: port=%u, connected=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_HUB_CONNECTED,    TR_FMT2, "CONNECT: Hub connected: port=%u, connected=%u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE2_INTRIN,            TR_FMT2, "INTR IN: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_INTROUT,           TR_FMT2, "INTR OUT: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_ISOCIN,            TR_FMT2, "ISOC IN: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_ISOCOUT,           TR_FMT2, "ISOC OUT: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_RECVSTATUS,        TR_FMT2, "CTRL OUT: Receive status: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_SENDSTATUS,        TR_FMT2, "CTRL IN: Send status: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER1,    TR_FMT2, "OUT: Send start: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER2,    TR_FMT2, "IN: Receive start: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_TRANSFER,          TR_FMT2, "Transfer start: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_INTRIN,           TR_FMT2, "INTR IN: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_INTROUT,          TR_FMT2, "INTR OUT: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ISOCIN,           TR_FMT2, "ISOC IN: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ISOCOUT,          TR_FMT2, "ISOC OUT: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_RECVSTATUS,       TR_FMT2, "CTRL OUT: Receive status: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_SENDSTATUS,       TR_FMT2, "CTRL IN: Send status: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER1,   TR_FMT2, "OUT: Send start: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER2,   TR_FMT2, "IN: Receive start: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_TRANSFER,         TR_FMT2, "Transfer start: EP%u len=%u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_VTRACE2_XFRCOMPLETE,       TR_FMT2, "ASYNCH: Transfer complete: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_XFRCOMPLETE,      TR_FMT2, "ASYNCH: Transfer complete: EP%u len=%u\n"),
 #endif
 #endif
 };

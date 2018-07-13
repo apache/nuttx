@@ -38,8 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <debug.h>
+
 #include <nuttx/board.h>
+
+#include "lc823450-xgevk.h"
 
 /****************************************************************************
  * Public Functions
@@ -66,3 +70,4 @@ void board_initialize(void)
   (void)lc823450_bringup();
 }
 #endif /* CONFIG_BOARD_INITIALIZE */
+

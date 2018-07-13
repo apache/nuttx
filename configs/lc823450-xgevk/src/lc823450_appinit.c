@@ -178,6 +178,8 @@ int board_app_initialize(uintptr_t arg)
 
 #endif /* CONFIG_LC823450_MTD */
 
+  UNUSED(ret); /* May not be used */
+
 #ifndef CONFIG_BOARD_INITIALIZE
   /* Perform board initialization */
 
