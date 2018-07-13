@@ -262,8 +262,7 @@ static void ft80x_destroy(FAR const struct ft80x_config_s *lower)
  *
  * Description:
  *   This function is called by board-bringup logic to configure the
- *   touchscreen device.  This function will register the driver as
- *   /dev/inputN where N is the minor device number.
+ *   FT80x GUI device.
  *
  * Input Parameters:
  *   None

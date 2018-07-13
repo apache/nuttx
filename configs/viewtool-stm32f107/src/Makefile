@@ -88,4 +88,10 @@ else ifeq ($(CONFIG_VIEWTOOL_FT80X_SPI2),y)
 CSRCS += stm32_ft80x.c
 endif
 
+ifeq ($(CONFIG_VIEWTOOL_MAX3421E_SPI1),y)
+CSRCS += stm32_max3421e.c
+else ifeq ($(CONFIG_VIEWTOOL_MAX3421E_SPI2),y)
+CSRCS += stm32_max3421e.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

@@ -144,16 +144,13 @@ CHIP_CSRCS += stm32_otghsdev.c
 endif
 endif
 
-ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_STM32_USBHOST),y)
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32_otgfshost.c
 endif
 ifeq ($(CONFIG_STM32_OTGHS),y)
 CHIP_CSRCS += stm32_otghshost.c
 endif
-endif
-
-ifeq ($(CONFIG_USBHOST),y)
 ifeq ($(CONFIG_USBHOST_TRACE),y)
 CHIP_CSRCS += stm32_usbhost.c
 else

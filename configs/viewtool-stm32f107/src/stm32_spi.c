@@ -91,6 +91,12 @@ void weak_function stm32_spidev_initialize(void)
 
   (void)stm32_configgpio(GPIO_FT80X_CS);
 #endif
+
+#if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1) || defined(CONFIG_VIEWTOOL_MAX3421E_SPI2)
+  /* Configure the MAX3421E CS pin as an input */
+
+  (void)stm32_configgpio(GPIO_MAX3421E_CS);
+#endif
 }
 
 /****************************************************************************
@@ -132,6 +138,15 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
     }
   else
 #endif
+#ifdef CONFIG_VIEWTOOL_MAX3421E_SPI1
+  /* Select/de-select the MAX3421E */
+
+  if (devid == SPIDEV_USBHOST(0))
+    {
+      stm32_gpiowrite(GPIO_MAX3421E_CS, !selected);
+    }
+  else
+#endif
    {
     spierr("ERROR:  Unrecognized devid: %08lx\n", (unsigned long)devid);
    }
@@ -163,6 +178,15 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_FT80X_CS, !selected);
+    }
+  else
+#endif
+#ifdef CONFIG_VIEWTOOL_MAX3421E_SPI2
+  /* Select/de-select the MAX3421E */
+
+  if (devid == SPIDEV_USBHOST(0))
+    {
+      stm32_gpiowrite(GPIO_MAX3421E_CS, !selected);
     }
   else
 #endif

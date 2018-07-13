@@ -201,6 +201,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1) || defined(CONFIG_VIEWTOOL_MAX3421E_SPI2)
+  ret = stm32_max3421e_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ft80x_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

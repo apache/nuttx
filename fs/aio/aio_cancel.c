@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read
+ * Name: aio_cancel
  *
  * Description:
  *   The aio_cancel() function attempts to cancel one or more asynchronous

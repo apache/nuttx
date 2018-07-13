@@ -31,6 +31,7 @@ Contents
   o Freescale MPL115A barometer sensor
   o LCD/Touchscreen Interface
   o FT80x Integration
+  o MAX3421E Integration
   o Toolchains
     - NOTE about Windows native toolchains
   o Configurations
@@ -696,6 +697,38 @@ FT80x Integration
     CONFIG_LCD_FT80X_WQVGA=y
     CONFIG_LCD_FT80X_AUDIO_NOSHUTDOWN=y
     CONFIG_EXAMPLES_FT80X_DEVPATH="/dev/ft801"
+
+MAX3421E Integration
+====================
+
+  Using SPI1on J8 pins 7-12, discretes on J18
+  ------ ----------- -----------
+  NAME   VIEWTOOL    STM32
+  ------ ----------- -----------
+  CS#    J8  Pin 12  PA4/NSS1
+  SCK    J8  Pin 11  PA5/SCK1
+  MISO   J8  Pin  9  PA6/MISO1
+  MOSI   J8  Pin 10  PA7/MOSI1
+  INT#   J18 Pin  6  PC5
+  RST#   J18 Pin  8  PA1
+  VBUS   J18 Pin 10  PA0
+
+  3.3V   J8  Pin 7
+  GND    J8  Pin 8
+
+  Using SPI2 on J8 pins 1-6, discretes on J18
+  ------ ----------- -----------
+  NAME   VIEWTOOL    STM32
+  ------ ----------- -----------
+  CS#    J8  Pin  6  PB12/NSS2
+  SCK    J8  Pin  5  PB13/SCK2
+  MISO   J8  Pin  3  PB14/MISO2
+  MOSI   J8  Pin  4  PB15/MOSI2
+  INT#   J18 Pin  6  PC5
+  RST#   J18 Pin  8  PA1
+  VBUS   J18 Pin 10  PA0
+  3.3V   J8  Pin 1
+  GND    J8  Pin 2
 
 Toolchains
 ==========

@@ -326,6 +326,34 @@
 #define GPIO_FT80_PD      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_CLEAR | GPIO_PORTC| GPIO_PIN5)
 
+/* MAX3421E USB HOST Discrete I/O (See README.txt for details):
+ *
+ * ------ ----------- --------------------
+ * NAME   VIEWTOOL    STM32
+ * ------ ----------- --------------------
+ * CS#    J8  Pin 12  PA4/NSS1  (For SPI1)
+ * CS#    J8  Pin  6  PB12/NSS2 (For SPI2)
+ * INT#   J18 Pin  6  PC5
+ * RST#   J18 Pin  8  PA1
+ * VBUS   J18 Pin 10  PA0
+ */
+
+#if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1)
+#  define MAX3421E_SPIBUS   1
+#  define GPIO_MAX3421E_CS  (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                             GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
+#elif defined(CONFIG_VIEWTOOL_MAX3421E_SPI2)
+#  define MAX3421E_SPIBUS   2
+#  define GPIO_MAX3421E_CS  (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                             GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN12)
+#endif
+#define GPIO_MAX3421E_INT   (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                             GPIO_EXTI | GPIO_PORTC | GPIO_PIN5)
+#define GPIO_MAX3421E_RST   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                             GPIO_OUTPUT_CLEAR | GPIO_PORTA| GPIO_PIN1)
+#define GPIO_MAX3421E_VBUS  (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                             GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -448,8 +476,7 @@ int stm32_mpl115ainitialize(FAR const char *devpath);
  *
  * Description:
  *   This function is called by board-bringup logic to configure the
- *   touchscreen device.  This function will register the driver as
- *   /dev/inputN where N is the minor device number.
+ *   FT80x GUI device.
  *
  * Input Parameters:
  *   None
@@ -462,6 +489,26 @@ int stm32_mpl115ainitialize(FAR const char *devpath);
 
 #if defined(CONFIG_VIEWTOOL_FT80X_SPI1) || defined(CONFIG_VIEWTOOL_FT80X_SPI2)
 int stm32_ft80x_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_max3421e_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   MAX3421E USB host.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1) || defined(CONFIG_VIEWTOOL_MAX3421E_SPI2)
+int stm32_max3421e_setup(void);
 #endif
 
 #endif  /* __ASSEMBLY__ */

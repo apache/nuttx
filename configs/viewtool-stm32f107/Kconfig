@@ -49,7 +49,7 @@ config VIEWTOOL_FT80X_SPI1
 
 config VIEWTOOL_FT80X_SPI2
 	bool "FT80x on SPI2"
-	depends on STM32_SPI3
+	depends on STM32_SPI2
 
 endchoice # FT80x SPI Selection
 
@@ -59,9 +59,42 @@ config VIEWTOOL_FT80X_INITFREQUENCY
 	range 400000 11000000
 
 config VIEWTOOL_FT80X_OPFREQUENCY
-	int "FT80x initialization frequency"
+	int "FT80x operational frequency"
 	default 20000000
 	range 400000 30000000
 
 endif # LCD_FT80X_SPI && ((STM32_SPI1 && !STM32_SPI1_REMAP) || STM32_SPI2)
+
+if USBHOST_MAX3421E && ((STM32_SPI1 && !STM32_SPI1_REMAP) || STM32_SPI2)
+
+choice
+	prompt "MAX3421E SPI Selection"
+	default VIEWTOOL_MAX3421E_SPI1 if STM32_SPI1 && !STM32_SPI1_REMAP && !VIEWTOOL_FT80X_SPI1
+	default VIEWTOOL_MAX3421E_SPI2 if STM32_SPI2 && (!STM32_SPI1 || STM32_SPI1_REMAP) && !VIEWTOOL_FT80X_SPI2
+
+config VIEWTOOL_MAX3421E_SPI1
+	bool "MAX3421E on SPI1"
+	depends on STM32_SPI1 && !STM32_SPI1_REMAP && !VIEWTOOL_FT80X_SPI1
+
+config VIEWTOOL_MAX3421E_SPI2
+	bool "MAX3421E on SPI2"
+	depends on STM32_SPI2 && !VIEWTOOL_FT80X_SPI2
+
+endchoice # MAX3421E SPI Selection
+
+config VIEWTOOL_MAX3421E_FREQUENCY
+	int "MAX3421E operational frequency"
+	default 20000000
+	range 400000 26000000
+
+config VIEWTOOL_MAX3421E_CONNMON_STACKSIZE
+	int "MAX3421E USB connection monitor stack size"
+	default 2048
+
+config VIEWTOOL_MAX3421E_CONNMON_PRIORITY
+	int "MAX3421E USB connection monitor priority"
+	default 100
+	range 1 255
+
+endif # USBHOST_MAX3421E && ((STM32_SPI1 && !STM32_SPI1_REMAP) || STM32_SPI2)
 endif # ARCH_BOARD_VIEWTOOL_STM32F107
