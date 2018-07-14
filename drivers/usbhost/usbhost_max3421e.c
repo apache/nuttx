@@ -596,7 +596,7 @@ static const struct max3421e_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL1, TR_FMT1, "OUT: Asynch setup failed: %u\n"),
   TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL2, TR_FMT1, "IN: Asynch setup failed: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE,       TR_FMT1, "StartSOF: Bad JK state: %02x\n"),
+  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE,       TR_FMT1, "CONNECT: Bad JK state: %02x\n"),
   TRENTRY(MAX3421E_TRACE1_BADREVISION,       TR_FMT1, "INIT: Bad revision number:  %02x\n"),
   TRENTRY(MAX3421E_TRACE1_CHANALLOC_FAIL,    TR_FMT1, "EPALLOC: Channel allocation failed: %u\n"),
   TRENTRY(MAX3421E_TRACE1_CHANWAIT_FAIL,     TR_FMT1, "OUT: Channel wait failure: %u\n"),
