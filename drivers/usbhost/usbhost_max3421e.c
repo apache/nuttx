@@ -4598,12 +4598,25 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
 
   max3421e_lock(priv);
 
+  /* NOTE:  Initially, the MAX3421E operations in half-duplex mode.  MISO is
+   * tristated and there is no status response to commands.  Writes are not
+   * effected:  The MISO pin continues to be high impedance and the master
+   * continues to drive MOSI.
+   *
+   * For reads, however, after the 8-bit command, the max3421e starts driving
+   * the MOSI pin.  The  master must turn off its driver to the MOSI pin to
+   * avoid contention.
+   */
+
   /* Reset the MAX3421E by toggling the CHIPRES bit in the USBCTRL register. */
 
   max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, USBHOST_USBCTL_CHIPRES);
   max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, 0);
 
-  /* Wait for the oscillator to become stable */
+  /* Wait for the oscillator to become stable
+   *
+   * REVISIT:  This can't work in half duplex mode!
+   */
 
   while ((max3421e_getreg(priv, MAX3421E_USBHOST_USBIRQ) &
                           USBHOST_USBIRQ_OSCOKIRQ) == 0)
@@ -4612,6 +4625,8 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
 
   /* Disable interrupts, clear pending interrupts, and reset the interrupt
    * state
+   *
+   * REVISIT: modifyreg() will not work correctly in half duplex mode.
    */
 
   max3421e_modifyreg(priv, MAX3421E_USBHOST_CPUCTL, USBHOST_CPUCTL_IE, 0);
@@ -4628,6 +4643,8 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
   regval &= (USBHOST_PINCTL_INTLEVEL | USBHOST_PINCTL_POSINT);
   regval |= USBHOST_PINCTL_FDUPSPI;
   max3421e_putreg(priv, MAX3421E_USBHOST_PINCTL, regval);
+
+  /* Beyond this point the SPI is operating in full duplex */
 
   /* Configure as full-speed USB host */
 
@@ -4711,7 +4728,7 @@ max3421e_usbhost_initialize(FAR const struct max3421e_lowerhalf_s *lower)
   /* Allocate and instance of the MAX4321E state structure */
 
   alloc = (FAR struct usbhost_alloc_s *)
-    kmm_malloc(sizeof(struct usbhost_alloc_s));
+    kmm_zalloc(sizeof(struct usbhost_alloc_s));
 
   if (alloc < 0)
     {

@@ -706,33 +706,35 @@ MAX3421E Integration
 
   Using SPI1on J8 pins 7-12, discretes on J18
 
-    ------ ----------- -----------
-    NAME   VIEWTOOL    STM32
-    ------ ----------- -----------
-    CS#    J8  Pin 12  PA4/NSS1
-    SCK    J8  Pin 11  PA5/SCK1
-    MISO   J8  Pin  9  PA6/MISO1
-    MOSI   J8  Pin 10  PA7/MOSI1
-    INT#   J18 Pin  6  PC5
-    RST#   J18 Pin  8  PA1
-    VBUS   J18 Pin 10  PA0
-    3.3V   J8  Pin 7
-    GND    J8  Pin 8
+    ------ ----------- ----------- ------------------
+    NAME   VIEWTOOL    STM32       USBHostShield-v13
+    ------ ----------- ----------- ------------------
+    CS#    J8  Pin 12  PA4/NSS1    D10
+    SCK    J8  Pin 11  PA5/SCK1    D13
+    MISO   J8  Pin  9  PA6/MISO1   D12
+    MOSI   J8  Pin 10  PA7/MOSI1   D11
+    INT#   J18 Pin 10  PA0         D9
+    RST#   J18 Pin  8  PA1         D7
+    GPX                            D8
+    VBUS   J18 Pin  2  5V          VIN
+    3.3V   J8  Pin  7              N/C
+    GND    J8  Pin  8              GND
 
   Using SPI2 on J8 pins 1-6, discretes on J18
 
-    ------ ----------- -----------
-    NAME   VIEWTOOL    STM32
-    ------ ----------- -----------
-    CS#    J8  Pin  6  PB12/NSS2
-    SCK    J8  Pin  5  PB13/SCK2
-    MISO   J8  Pin  3  PB14/MISO2
-    MOSI   J8  Pin  4  PB15/MOSI2
-    INT#   J18 Pin  6  PC5
-    RST#   J18 Pin  8  PA1
-    VBUS   J18 Pin 10  PA0
-    3.3V   J8  Pin 1
-    GND    J8  Pin 2
+    ------ ----------- ----------- ------------------
+    NAME   VIEWTOOL    STM32       USBHostShield-v13
+    ------ ----------- ----------- ------------------
+    CS#    J8  Pin  6  PB12/NSS2   D10
+    SCK    J8  Pin  5  PB13/SCK2   D13
+    MISO   J8  Pin  3  PB14/MISO2  D12
+    MOSI   J8  Pin  4  PB15/MOSI2  D11
+    INT#   J18 Pin 10  PA0         D9
+    RST#   J18 Pin  8  PA1         D7
+    GPX                            D8
+    VBUS   J18 Pin  2  5V          VIN
+    3.3V   J8  Pin  1              N/C
+    GND    J8  Pin  2              GND
 
   5V VBUS power is also needed.  This might be directly connected to the USB
   host connector (as assumed here), or switched via additional logic.  Then
@@ -751,6 +753,15 @@ MAX3421E Integration
     CONFIG_USBHOST_ISOC_DISABLE=y # Does not support Isochronous endpoints
     CONFIG_USBHOST_MAX3421E=y     # MAX3421E support
     CONFIG_USBHOST_MSC=y          # USB MSC class
+
+  Using SPI1:
+
+    CONFIG_VIEWTOOL_MAX3421E_SPI1=y
+    CONFIG_VIEWTOOL_MAX3421E_FREQUENCY=20000000
+    CONFIG_VIEWTOOL_MAX3421E_RST=y
+    # CONFIG_VIEWTOOL_MAX3421E_PWR is not set
+    CONFIG_VIEWTOOL_MAX3421E_CONNMON_STACKSIZE=2048
+    CONFIG_VIEWTOOL_MAX3421E_CONNMON_PRIORITY=100
 
   Settings not listed above can be left at their default values.
 
