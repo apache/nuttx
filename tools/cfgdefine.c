@@ -63,31 +63,33 @@ static const char *dequote_list[] =
 {
   /* NuttX */
 
-  "CONFIG_USER_ENTRYPOINT",            /* Name of entry point function */
-  "CONFIG_EXECFUNCS_SYMTAB",           /* Symbol table used by exec[l|v] */
-  "CONFIG_PASS1_BUILDIR",              /* Pass1 build directory */
-  "CONFIG_PASS1_TARGET",               /* Pass1 build target */
-  "CONFIG_PASS1_OBJECT",               /* Pass1 build object */
-  "CONFIG_DEBUG_OPTLEVEL",             /* Custom debug level */
-  "CONFIG_INIT_SYMTAB",                /* Global symbol table */
-  "CONFIG_INIT_NEXPORTS",              /* Global symbol table size */
+  "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
+  "CONFIG_EXECFUNCS_SYMTAB",              /* Symbol table used by exec[l|v] */
+  "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
+  "CONFIG_PASS1_TARGET",                  /* Pass1 build target */
+  "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */
+  "CONFIG_DEBUG_OPTLEVEL",                /* Custom debug level */
+  "CONFIG_INIT_SYMTAB",                   /* Global symbol table */
+  "CONFIG_INIT_NEXPORTS",                 /* Global symbol table size */
 
   /* NxWidgets/NxWM */
 
-  "CONFIG_NXWM_BACKGROUND_IMAGE",      /* Name of bitmap image class */
-  "CONFIG_NXWM_STOP_BITMAP",           /* Name of bitmap image class */
-  "CONFIG_NXWM_MINIMIZE_BITMAP",       /* Name of bitmap image class */
-  "CONFIG_NXWM_STARTWINDOW_ICON",      /* Name of bitmap image class */
-  "CONFIG_NXWM_NXTERM_ICON",           /* Name of bitmap image class */
-  "CONFIG_NXWM_CALIBRATION_ICON",      /* Name of bitmap image class */
-  "CONFIG_NXWM_HEXCALCULATOR_ICON",    /* Name of bitmap image class */
+  "CONFIG_NXWM_BACKGROUND_IMAGE",         /* Name of bitmap image class */
+  "CONFIG_NXWM_STOP_BITMAP",              /* Name of bitmap image class */
+  "CONFIG_NXWM_MINIMIZE_BITMAP",          /* Name of bitmap image class */
+  "CONFIG_NXWM_STARTWINDOW_ICON",         /* Name of bitmap image class */
+  "CONFIG_NXWM_NXTERM_ICON",              /* Name of bitmap image class */
+  "CONFIG_NXWM_CALIBRATION_ICON",         /* Name of bitmap image class */
+  "CONFIG_NXWM_HEXCALCULATOR_ICON",       /* Name of bitmap image class */
 
   /* apps/ definitions */
 
-  "CONFIG_EXAMPLES_HELLO_PROGNAME",    /* Name of installed hello example program */
-  "CONFIG_EXAMPLES_NSH_PROGNAME",      /* Name of installed NSH example program */
-  "CONFIG_THTTPD_INDEX_NAMES",         /* List of index file names */
-  NULL                                 /* Marks the end of the list */
+  "CONFIG_EXAMPLES_HELLO_PROGNAME",       /* Name of installed hello example program */
+  "CONFIG_EXAMPLES_NSH_PROGNAME",         /* Name of installed NSH example program */
+  "CONFIG_EXAMPLES_NSH_SYMTAB_ARRAYNAME", /* Symbol table array name */
+  "CONFIG_EXAMPLES_NSH_SYMTAB_COUNTNAME", /* Name of the variable holding the number of symbols */
+  "CONFIG_THTTPD_INDEX_NAMES",            /* List of index file names */
+  NULL                                    /* Marks the end of the list */
 };
 
 /****************************************************************************
