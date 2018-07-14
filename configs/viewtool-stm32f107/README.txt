@@ -705,33 +705,39 @@ MAX3421E Integration
   -----------------
 
   Using SPI1on J8 pins 7-12, discretes on J18
-  ------ ----------- -----------
-  NAME   VIEWTOOL    STM32
-  ------ ----------- -----------
-  CS#    J8  Pin 12  PA4/NSS1
-  SCK    J8  Pin 11  PA5/SCK1
-  MISO   J8  Pin  9  PA6/MISO1
-  MOSI   J8  Pin 10  PA7/MOSI1
-  INT#   J18 Pin  6  PC5
-  RST#   J18 Pin  8  PA1
-  VBUS   J18 Pin 10  PA0
 
-  3.3V   J8  Pin 7
-  GND    J8  Pin 8
+    ------ ----------- -----------
+    NAME   VIEWTOOL    STM32
+    ------ ----------- -----------
+    CS#    J8  Pin 12  PA4/NSS1
+    SCK    J8  Pin 11  PA5/SCK1
+    MISO   J8  Pin  9  PA6/MISO1
+    MOSI   J8  Pin 10  PA7/MOSI1
+    INT#   J18 Pin  6  PC5
+    RST#   J18 Pin  8  PA1
+    VBUS   J18 Pin 10  PA0
+    3.3V   J8  Pin 7
+    GND    J8  Pin 8
 
   Using SPI2 on J8 pins 1-6, discretes on J18
-  ------ ----------- -----------
-  NAME   VIEWTOOL    STM32
-  ------ ----------- -----------
-  CS#    J8  Pin  6  PB12/NSS2
-  SCK    J8  Pin  5  PB13/SCK2
-  MISO   J8  Pin  3  PB14/MISO2
-  MOSI   J8  Pin  4  PB15/MOSI2
-  INT#   J18 Pin  6  PC5
-  RST#   J18 Pin  8  PA1
-  VBUS   J18 Pin 10  PA0
-  3.3V   J8  Pin 1
-  GND    J8  Pin 2
+
+    ------ ----------- -----------
+    NAME   VIEWTOOL    STM32
+    ------ ----------- -----------
+    CS#    J8  Pin  6  PB12/NSS2
+    SCK    J8  Pin  5  PB13/SCK2
+    MISO   J8  Pin  3  PB14/MISO2
+    MOSI   J8  Pin  4  PB15/MOSI2
+    INT#   J18 Pin  6  PC5
+    RST#   J18 Pin  8  PA1
+    VBUS   J18 Pin 10  PA0
+    3.3V   J8  Pin 1
+    GND    J8  Pin 2
+
+  5V VBUS power is also needed.  This might be directly connected to the USB
+  host connector (as assumed here), or switched via additional logic.  Then
+  GPX pin might also be necessary if VBUS detect is used with self-powered
+  devices.
 
   Configuration Options
   ---------------------
