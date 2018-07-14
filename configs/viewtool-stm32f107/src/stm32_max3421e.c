@@ -102,6 +102,8 @@ static int max3421e_attach(FAR const struct max3421e_lowerhalf_s *lower,
 static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
                             bool enable);
 static void max3421e_acknowledge(FAR const struct max3421e_lowerhalf_s *lower);
+static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
+                           bool enable);
 
 /****************************************************************************
  * Private Data
@@ -130,6 +132,7 @@ static struct viewtool_max3421elower_s g_max3421e_lower =
     .attach      = max3421e_attach,                    /* Attach interrupt handler */
     .enable      = max3421e_enable,                    /* Enable interrupt */
     .acknowledge = max3421e_acknowledge,               /* Acknowledge/clear interrupt */
+    .power       = max3421e_power,                     /* Enable VBUS power */
   },
 };
 
@@ -149,6 +152,7 @@ static FAR struct usbhost_connection_s *g_usbconn;
  *   attach      - Attach the ADS7843E interrupt handler to the GPIO interrupt
  *   enable      - Enable or disable the GPIO interrupt
  *   acknowledge - Acknowledge/clear any pending GPIO interrupt as necessary.
+ *   power       - Enable or disable 5V VBUS power
  *
  ****************************************************************************/
 
@@ -219,6 +223,14 @@ static void max3421e_acknowledge(FAR const struct max3421e_lowerhalf_s *lower)
   /* Does nothing */
 }
 
+static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
+                           bool enable)
+{
+#ifdef CONFIG_VIEWTOOL_MAX3421E_PWR
+  stm32_gpiowrite(GPIO_MAX3421E_PWR, enable);
+#endif
+}
+
 /*****************************************************************************
  * Name: usbhost_detect
  *
@@ -271,13 +283,20 @@ int stm32_max3421e_setup(void)
   pid_t monpid;
   int ret;
 
-  /* Configure the MAX3421E interrupt pin and VBUS pins as an inputs and the
-   * reset pin as an output.  Device is initially in reset.
+  /* Configure the MAX3421E interrupt pin as an input and the reset and power
+   * pins as an outputs.  Device is initially in reset and 5V power is not
+   * provided.
    */
 
   (void)stm32_configgpio(GPIO_MAX3421E_INT);
+
+#ifdef CONFIG_VIEWTOOL_MAX3421E_RST
   (void)stm32_configgpio(GPIO_MAX3421E_RST);
-  (void)stm32_configgpio(GPIO_MAX3421E_VBUS);
+#endif
+
+#ifdef CONFIG_VIEWTOOL_MAX3421E_PWR
+  (void)stm32_configgpio(GPIO_MAX3421E_PWR);
+#endif
 
   /* Get an instance of the SPI interface for the touchscreen chip select */
 
@@ -357,9 +376,11 @@ int stm32_max3421e_setup(void)
   }
 #endif
 
+#ifdef CONFIG_VIEWTOOL_MAX3421E_RST
   /* Take the MAX3412E out of reset */
 
   stm32_gpiowrite(GPIO_MAX3421E_RST, true);
+#endif
 
   /* Initialize and register the MAX3421E device */
 

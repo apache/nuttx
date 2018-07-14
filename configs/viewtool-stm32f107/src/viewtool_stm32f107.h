@@ -333,9 +333,8 @@
  * ------ ----------- --------------------
  * CS#    J8  Pin 12  PA4/NSS1  (For SPI1)
  * CS#    J8  Pin  6  PB12/NSS2 (For SPI2)
- * INT#   J18 Pin  6  PC5
+ * INT#   J18 Pin 10  PA0
  * RST#   J18 Pin  8  PA1
- * VBUS   J18 Pin 10  PA0
  */
 
 #if defined(CONFIG_VIEWTOOL_MAX3421E_SPI1)
@@ -348,11 +347,9 @@
                              GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN12)
 #endif
 #define GPIO_MAX3421E_INT   (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
-                             GPIO_EXTI | GPIO_PORTC | GPIO_PIN5)
-#define GPIO_MAX3421E_RST   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
-                             GPIO_OUTPUT_CLEAR | GPIO_PORTA| GPIO_PIN1)
-#define GPIO_MAX3421E_VBUS  (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
                              GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
+#define GPIO_MAX3421E_RST   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                             GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN1)
 
 /****************************************************************************
  * Public Functions

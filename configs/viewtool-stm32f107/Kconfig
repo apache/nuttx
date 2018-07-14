@@ -87,6 +87,14 @@ config VIEWTOOL_MAX3421E_FREQUENCY
 	default 20000000
 	range 400000 26000000
 
+config VIEWTOOL_MAX3421E_RST
+	bool "MAX3421E reset pin"
+	default y
+
+config VIEWTOOL_MAX3421E_PWR
+	bool "USB Host power control"
+	default n
+
 config VIEWTOOL_MAX3421E_CONNMON_STACKSIZE
 	int "MAX3421E USB connection monitor stack size"
 	default 2048

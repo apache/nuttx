@@ -5125,7 +5125,7 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
       stm32_putreg(STM32_OTGFS_HCINTMSK(i), 0);
     }
 
-  /* Driver Vbus +5V (the smoke test).  Should be done elsewhere in OTG
+  /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
    * mode.
    */
 

@@ -459,6 +459,7 @@ struct max3421e_lowerhalf_s
    *   attach      - Attach the interrupt handler to the GPIO interrupt
    *   enable      - Enable or disable the GPIO interrupt
    *   acknowledge - Acknowledge/clear any pending GPIO interrupt
+   *   power       - Enable or disable 5V VBUS power
    */
 
   CODE int (*attach)(FAR const struct max3421e_lowerhalf_s *lower,
@@ -466,6 +467,8 @@ struct max3421e_lowerhalf_s
   CODE void (*enable)(FAR const struct max3421e_lowerhalf_s *lower,
                       bool enable);
   CODE void (*acknowledge)(FAR const struct max3421e_lowerhalf_s *lower);
+  CODE void (*power)(FAR const struct max3421e_lowerhalf_s *lower,
+                      bool enable);
 
   /* Additional, driver-specific state data may follow */
 };
