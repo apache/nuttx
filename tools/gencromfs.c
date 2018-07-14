@@ -47,6 +47,7 @@
 
 #define _GNU_SOURCE 1
 #include <sys/stat.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <stdio.h>
