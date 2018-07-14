@@ -4598,45 +4598,10 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
 
   max3421e_lock(priv);
 
-  /* NOTE:  Initially, the MAX3421E operations in half-duplex mode.  MISO is
-   * tristated and there is no status response to commands.  Writes are not
-   * effected:  The MISO pin continues to be high impedance and the master
-   * continues to drive MOSI.
-   *
-   * For reads, however, after the 8-bit command, the max3421e starts driving
-   * the MOSI pin.  The  master must turn off its driver to the MOSI pin to
-   * avoid contention.
-   */
-
-  /* Reset the MAX3421E by toggling the CHIPRES bit in the USBCTRL register. */
-
-  max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, USBHOST_USBCTL_CHIPRES);
-  max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, 0);
-
-  /* Wait for the oscillator to become stable
-   *
-   * REVISIT:  This can't work in half duplex mode!
-   */
-
-  while ((max3421e_getreg(priv, MAX3421E_USBHOST_USBIRQ) &
-                          USBHOST_USBIRQ_OSCOKIRQ) == 0)
-    {
-    }
-
-  /* Disable interrupts, clear pending interrupts, and reset the interrupt
-   * state
-   *
-   * REVISIT: modifyreg() will not work correctly in half duplex mode.
-   */
-
-  max3421e_modifyreg(priv, MAX3421E_USBHOST_CPUCTL, USBHOST_CPUCTL_IE, 0);
-  max3421e_putreg(priv, MAX3421E_USBHOST_HIEN, 0);
-  max3421e_putreg(priv, MAX3421E_USBHOST_HIRQ, 0xff);
-
-  priv->irqset  = 0;
-
   /* Configure full duplex SPI, level or edge-active, rising- or falling
    * edge interrupt.
+   *
+   * NOTE:  Initially, the MAX3421E operations in half-duplex mode.
    */
 
   regval  = priv->lower->intconfig;
@@ -4644,7 +4609,31 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
   regval |= USBHOST_PINCTL_FDUPSPI;
   max3421e_putreg(priv, MAX3421E_USBHOST_PINCTL, regval);
 
-  /* Beyond this point the SPI is operating in full duplex */
+  /* Reset the MAX3421E by toggling the CHIPRES bit in the USBCTRL register.
+   *
+   * NOTE: The bits that control the SPI interface are not changed by
+   * CHIPRES: FDUPSPI, INTLEVEL, and POSINT.
+   */
+
+  max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, USBHOST_USBCTL_CHIPRES);
+  max3421e_putreg(priv, MAX3421E_USBHOST_USBCTL, 0);
+
+  /* Wait for the oscillator to become stable */
+
+  while ((max3421e_getreg(priv, MAX3421E_USBHOST_USBIRQ) &
+                          USBHOST_USBIRQ_OSCOKIRQ) == 0)
+    {
+    }
+
+  /* Disable interrupts, clear pending interrupts, and reset the interrupt
+   * state.
+   */
+
+  max3421e_modifyreg(priv, MAX3421E_USBHOST_CPUCTL, USBHOST_CPUCTL_IE, 0);
+  max3421e_putreg(priv, MAX3421E_USBHOST_HIEN, 0);
+  max3421e_putreg(priv, MAX3421E_USBHOST_HIRQ, 0xff);
+
+  priv->irqset  = 0;
 
   /* Configure as full-speed USB host */
 
