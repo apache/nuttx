@@ -3900,7 +3900,7 @@ Configurations
     4. A system call interface is enabled and the ELF test programs interface
        with the base RTOS code system calls.  This eliminates the need for symbol
        tables to link with the base RTOS (symbol tables are still used, however,
-       to interface with the common C library instaniation).  Relevant
+       to interface with the common C library instantiation).  Relevant
        configuration settings:
 
       RTOS Features -> System call support
@@ -4157,38 +4157,89 @@ Configurations
 
     6a. General build directions (boot from SD card):
 
+        A. Build with no symbol table
         $ cd nuttx                          : Go to the NuttX build directory
         $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ make                              : Build the kerne with a dummy ROMFS image
                                             : This should create the nuttx ELF
+
+        B. Create the export package
         $ make export                       : Create the kernel export package
                                             : You should have a file like
                                             : nuttx-export-*.zip
+
+        C. Build the file system image at apps/bin
         $ cd apps/                          : Go to the apps/ directory
         $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
         $ make import                       : This will build the file system.
 
-      You will then need to copy the files from apps/bin to an SD card to
-      create the bootable SD card.
+        D. Create the symbol table from the apps/bin
+        $ tools/mksymtab.sh bin import/symtab.c
+        $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
+
+        NOTE: There are many ways to create symbol tables.  The above will create
+        the minimal symbol tabled needed.
+
+        E. Reconfigure and rebuild NuttX
+
+          Enable the following in the configuration:
+            CONFIG_EXECFUNCS_HAVE_SYMTAB=y
+            CONFIG_EXECFUNCS_SYMTAB_ARRAY="g_symtab"
+            CONFIG_EXEDFUNCS_NSYMBOLS_VAR="g_nsymbols"
+            CONFIG_USER_INITPATH="/bin/init"
+
+        $ cd nuttx/                         : Rebuild the system with the correct
+        $ make clean_context all            : symbol table
+
+      You will then need to copy the files from apps/bin to an SD card or USB
+      FLASH drive to create the bootable SD card.
+
+      But how does the SD card/USB drive get mounted?  This must be done in
+      board-specific logic before the 'init' program is started.
 
     6b. General build directions (boot from ROMFS image):
 
+        A. Build with dummy ROMFS file system image and no symbol table
         $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch configs/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image
                                             : This should create the nuttx ELF
+
+        B. Create the export package
         $ make export                       : Create the kernel export package
                                             : You should have a file like
                                             : nuttx-export-*.zip
+        C. Build the file system image at apps/bin
         $ cd apps/                          : Go to the apps/ directory
         $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
         $ make import                       : This will build the file system
+
+        D. Create the ROMFS file system image
         $ tools/mkromfsimg.sh               : Create the real ROMFS image
         $ mv boot_romfsimg.h ../nuttx/configs/sama5d4-ek/include/boot_romfsimg.h
+
+        E. Create the symbol table from the apps/bin
+        $ tools/mksymtab.sh bin import/symtab.c
+        $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
+
+        NOTE: There are many ways to create symbol tables.  The above will create
+        the minimal symbol tabled needed.
+
+        F. Reconfigure and rebuild NuttX
+
+          Enable the following in the configuration:
+            CONFIG_EXECFUNCS_HAVE_SYMTAB=y
+            CONFIG_EXECFUNCS_SYMTAB_ARRAY="g_symtab"
+            CONFIG_EXEDFUNCS_NSYMBOLS_VAR="g_nsymbols"
+            CONFIG_USER_INITPATH="/bin/init"
+
         $ cd nuttx/                         : Rebuild the system with the correct
-        $ make clean_context all            : ROMFS file system
+        $ make clean_context all            : ROMFS file system and symbol table
+
+      But how does the ROMFS file system get mounted?  This must be done in
+      board-specific logic before the 'init' program is started.
 
     STATUS:
 
@@ -4210,14 +4261,19 @@ Configurations
        Update: I don't believe that this HSMCI error occurs if file system
        debug output is enabled.
 
-    2014-9-11: Everything seems to be working quite nicely witn the ROMFS
+    2014-9-11: Everything seems to be working quite nicely with the ROMFS
        file system.  A considerable amount of testing has been done and
        there are no known defects as of this writing.
 
     2014-9-16: After some substantial effort, I think I may have resolved
        the last of the mainstream bugs that prevented from executing other
        user processes from a user processes.  Long story but I am glad to
-       haave that done.
+       have that done.
+
+    2018-07-15:  Revisited.  It is not clear to me how, back in 2014, the
+       symbol table was created.  I have added logic to created the symbol
+       table, but I am currently stuck in the 'make import' step.  This
+       currently dies with a mysterious error '/bin/sh: -w: invalid option'
 
   nsh:
 

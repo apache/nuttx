@@ -43,7 +43,7 @@ config EXECFUNCS_HAVE_SYMTAB
 		cases in order to link executable programs to the base code.
 
 		NOTE: This option only pre-initializes the system symbol table as
-		defined by CONFIG_EXECFUNCS_SYMTAB and CONFIG_EXECFUNCS_NSYMBOLS.
+		defined by CONFIG_EXECFUNCS_SYMTAB_ARRAY and CONFIG_EXECFUNCS_NSYMBOLS_VAR.
 		This is simply an optional, automatic initialization of the
 		system symbol table.  You would need to do this, for example, in
 		in the kernel build were the first task must be run from a program
@@ -54,8 +54,8 @@ config EXECFUNCS_HAVE_SYMTAB
 		from your application initialization logic.
 
 if EXECFUNCS_HAVE_SYMTAB
-config EXECFUNCS_SYMTAB
-	string "Symbol table used by exec[l|v]"
+config EXECFUNCS_SYMTAB_ARRAY
+	string "Symbol table name used by exec[l|v]"
 	default "g_symtab"
 	---help---
 		The exec[l|v] and posix_spawn() functions are wrapper functions that
@@ -65,16 +65,16 @@ config EXECFUNCS_SYMTAB
 		symbols in that table.  This selection provides the name of that
 		symbol table.
 
-config EXECFUNCS_NSYMBOLS
-	int "Number of Symbols in the Table"
-	default 0
+config EXECFUNCS_NSYMBOLS_VAR
+	string"Name of variable holding the number of symbols"
+	default "g_nsymbols"
 	---help---
 		The exec[l|v] and posix_spawn() functions are wrapper functions that
 		call the non-standard binfmt function 'exec').  The binfmt
 		function 'exec' needs to have (1) a symbol table that provides the
 		list of symbols exported by the base code, and (2) the number of
-		symbols in that table.  This selection provides the number of
-		symbols in the symbol table.
+		symbols in that table.  This selection provides the name of an 'int'
+		variable that contains the number of symbols in the symbol table.
 
 endif # EXECFUNCS_HAVE_SYMTAB
 endif # LIBC_EXECFUNCS

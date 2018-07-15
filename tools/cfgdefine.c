@@ -64,7 +64,8 @@ static const char *dequote_list[] =
   /* NuttX */
 
   "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
-  "CONFIG_EXECFUNCS_SYMTAB",              /* Symbol table used by exec[l|v] */
+  "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */
+  "CONFIG_EXECFUNCS_NSYMBOLS_VAR",        /* Variable holding number of symbols in the table */
   "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",                  /* Pass1 build target */
   "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */

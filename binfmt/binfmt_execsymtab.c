@@ -57,14 +57,14 @@
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
   /* Symbol table used by exec[l|v] */
 
-#  ifndef CONFIG_EXECFUNCS_SYMTAB
-#    error "CONFIG_EXECFUNCS_SYMTAB must be defined"
+#  ifndef CONFIG_EXECFUNCS_SYMTAB_ARRAY
+#    error "CONFIG_EXECFUNCS_SYMTAB_ARRAY must be defined"
 #  endif
 
   /* Number of Symbols in the Table */
 
-#  ifndef CONFIG_EXECFUNCS_NSYMBOLS
-#    error "CONFIG_EXECFUNCS_NSYMBOLS must be defined"
+#  ifndef CONFIG_EXECFUNCS_NSYBOLS_VAR
+#    error "CONFIG_EXECFUNCS_NSYBOLS_VAR must be defined"
 #  endif
 #endif
 
@@ -73,7 +73,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
-extern const struct symtab_s CONFIG_EXECFUNCS_SYMTAB;
+extern const struct symtab_s CONFIG_EXECFUNCS_SYMTAB_ARRAY[];
+extern int CONFIG_EXECFUNCS_NSYBOLS_VAR;
 #endif
 
 /****************************************************************************
@@ -81,8 +82,8 @@ extern const struct symtab_s CONFIG_EXECFUNCS_SYMTAB;
  ****************************************************************************/
 
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
-static FAR const struct symtab_s *g_exec_symtab = &CONFIG_EXECFUNCS_SYMTAB;
-static int g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS;
+static FAR const struct symtab_s *g_exec_symtab = CONFIG_EXECFUNCS_SYMTAB_ARRAY;
+static int g_exec_nsymbols = CONFIG_EXECFUNCS_NSYBOLS_VAR;
 #else
 static FAR const struct symtab_s *g_exec_symtab;
 static int g_exec_nsymbols;

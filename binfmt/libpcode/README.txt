@@ -103,7 +103,7 @@ Here is a simple test configuration using the NuttX simulator:
 4. In lieu of a a real test application, this Quick'n'Dirty patch can be used
    to initialize the P-Code binary format:
 
-   @@ -115,6 +115,7 @@ const struct symtab_s CONFIG_EXECFUNCS_SYMTAB[1];
+   @@ -115,6 +115,7 @@ const struct symtab_s CONFIG_EXECFUNCS_SYMTAB_ARRAY[1];
     /****************************************************************************
      * Name: nsh_main
      ****************************************************************************/

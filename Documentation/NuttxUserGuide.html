@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: October 20, 2017</p>
+      <p>Last Updated: July 15, 2018</p>
     </td>
   </tr>
 </table>
@@ -953,12 +953,12 @@ int execv(FAR const char *path, FAR char *const argv[]);
      Enable <code>execv()</code> and <code>execl()</code> support
   </li>
   <li>
-     <code>CONFIG_EXECFUNCS_SYMTAB</code>:
-     Symbol table used by <code>execv()</code> or <code>execl()</code>.
+     <code>CONFIG_EXECFUNCS_SYMTAB_ARRAY</code>:
+     Name of the ymbol table used by <code>execv()</code> or <code>execl()</code>.
   </li>
   <li>
-     <code>CONFIG_EXECFUNCS_NSYMBOLS</code>:
-     Number of symbols in the symbol table
+     <code>CONFIG_EXECFUNCS_NSYMBOLS_VAR</code>:
+     Name of the <code>int</code> variable holding the number of symbols in the symbol table
   </li>
 </ul>
 <p>
