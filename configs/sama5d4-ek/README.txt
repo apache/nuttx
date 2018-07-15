@@ -3935,7 +3935,7 @@ Configurations
 
       2014-8-29: System call interface verified.
       2014-9-16: Reverified after fixing changes for the knsh configuration
-                 that broke this on.  All seems to be well now.
+                 that broke this one.  All seems to be well now.
 
   ipv6:
   ----
@@ -4274,6 +4274,13 @@ Configurations
        symbol table was created.  I have added logic to created the symbol
        table, but I am currently stuck in the 'make import' step.  This
        currently dies with a mysterious error '/bin/sh: -w: invalid option'
+
+       That mysterious error is comming from the COMPILE macro defined in
+       apps/import/Make.defs.  There is something lethal about CFLAGS.
+       Although I can print all of the components of CFLAGS, the use of
+       CFLAGS causes the error.  In fact, this will generate the same error;
+
+         $(warning CFLAGS=$(CFLAGS))
 
   nsh:
 
