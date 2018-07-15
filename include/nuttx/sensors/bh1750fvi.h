@@ -42,6 +42,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/sensors/ioctl.h>
 
@@ -102,6 +105,7 @@ extern "C"
  *
  ****************************************************************************/
 
+struct i2c_master_s; /* Forward reference */
 int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr);
 

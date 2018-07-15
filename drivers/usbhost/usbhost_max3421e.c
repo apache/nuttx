@@ -947,7 +947,7 @@ static inline void max3421e_modifyreg(FAR struct max3421e_usbhost_s *priv,
 {
   uint8_t value;
 
-  value = max3421e_getreg(priv, addr);
+  value  = max3421e_getreg(priv, addr);
   value &= ~clrbits;
   value |= setbits;
   max3421e_putreg(priv, addr, value);
@@ -4601,7 +4601,14 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv)
   /* Configure full duplex SPI, level or edge-active, rising- or falling
    * edge interrupt.
    *
-   * NOTE:  Initially, the MAX3421E operations in half-duplex mode.
+   * NOTE:  Initially, the MAX3421E operations in half-duplex mode.  MISO is
+   * tristated and there is no status response to commands.  Writes are not
+   * effected:  The MISO pin continues to be high impedance and the master
+   * continues to drive MOSI.
+   *
+   * For reads, however, after the 8-bit command, the max3421e starts driving
+   * the MOSI pin.  The  master must turn off its driver to the MOSI pin to
+   * avoid contention.
    */
 
   regval  = priv->lower->intconfig;
