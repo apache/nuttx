@@ -5367,7 +5367,7 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   /* Alternate function pin configuration.  Here we assume that:
    *
-   * 1. GPIOA, SYSCFG, and OTG FS peripheral clocking have already been\
+   * 1. GPIOA, SYSCFG, and OTG FS peripheral clocking have already been
    *    enabled as part of the boot sequence.
    * 2. Board-specific logic has already enabled other board specific GPIOs
    *    for things like soft pull-up, VBUS sensing, power controls, and over-

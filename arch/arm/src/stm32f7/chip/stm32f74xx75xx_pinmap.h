@@ -57,7 +57,7 @@
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
  * Drivers, however, will use the pin selection without the numeric suffix.
  * Additional definitions are required in the board.h file.  For example, if
- * CAN1_RX connects vis PA11 on some board, then the following definitions should
+ * CAN1_RX connects via PA11 on some board, then the following definitions should
  * appear inthe board.h header file for that board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
@@ -816,9 +816,14 @@
 #define GPIO_SAI2_SD_B_3      (GPIO_ALT|GPIO_AF10|GPIO_PORTF|GPIO_PIN11)
 #define GPIO_SAI2_SD_B_4      (GPIO_ALT|GPIO_AF10|GPIO_PORTG|GPIO_PIN10)
 
-/* SD/MMC */
+/* SD/MMC
+ *
+ * Note that the below configures GPIO_SPEED_50MHz I/O, that means for using
+ * the SDMMC, the board's boot code must enable I/O Compensation via the
+ * configuration option CONFIG_STM32F7_SYSCFG_IOCOMPENSATION=y.
+ */
 
-#define GPIO_SDMMC1_CK        (GPIO_ALT|GPIO_AF12|GPIO_PORTC|GPIO_PIN12)
+#define GPIO_SDMMC1_CK        (GPIO_ALT|GPIO_AF12|GPIO_SPEED_50MHz|GPIO_PORTC|GPIO_PIN12)
 #define GPIO_SDMMC1_CMD       (GPIO_ALT|GPIO_AF12|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN2)
 #define GPIO_SDMMC1_D0        (GPIO_ALT|GPIO_AF12|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN8)
 #define GPIO_SDMMC1_D1        (GPIO_ALT|GPIO_AF12|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN9)

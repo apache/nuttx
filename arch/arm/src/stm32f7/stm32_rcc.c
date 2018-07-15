@@ -51,6 +51,7 @@
 #include "up_arch.h"
 
 #include "chip/stm32_flash.h"
+#include "stm32_gpio.h"
 #include "stm32_rcc.h"
 #include "stm32_pwr.h"
 
@@ -135,6 +136,12 @@ void stm32_clockconfig(void)
 
   stm32_stdclockconfig();
 
+#endif
+
+#ifdef CONFIG_STM32F7_SYSCFG_IOCOMPENSATION
+  /* Enable I/O Compensation */
+
+  syscfg_iocompensation();
 #endif
 
   /* Enable peripheral clocking */

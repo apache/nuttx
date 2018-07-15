@@ -49,9 +49,6 @@
 #include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 
-#include "up_arch.h"
-
-#include "chip/stm32_syscfg.h"
 #include "stm32_gpio.h"
 
 /* Content of this file requires verification before it is used with other
@@ -107,25 +104,6 @@ const uint32_t g_gpiobase[STM32F7_NGPIO] =
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  stm32_gpioinit
- *
- * Description:
- *   Based on configuration within the .config file, it does:
- *    - Remaps positions of alternative functions.
- *
- *   Typically called from stm32_start().
- *
- * Assumptions:
- *   This function is called early in the initialization sequence so that
- *   no mutual exclusion is necessary.
- *
- ****************************************************************************/
-
-void stm32_gpioinit(void)
-{
-}
 
 /****************************************************************************
  * Name: stm32_configgpio
