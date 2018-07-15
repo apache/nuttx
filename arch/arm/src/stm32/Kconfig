@@ -1422,6 +1422,7 @@ config STM32_LOWDENSITY
 config STM32_STM32F20XX
 	bool
 	default n
+	select STM32_HAVE_IOCOMPENSATION
 
 config STM32_STM32F205
 	bool
@@ -1570,6 +1571,7 @@ config STM32_STM32F4XXX
 	default n
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
+	select STM32_HAVE_IOCOMPENSATION
 
 config STM32_STM32F401xBC
 	bool
@@ -1896,6 +1898,10 @@ config STM32_HAVE_OTGFS
 	default n
 
 config STM32_HAVE_FSMC
+	bool
+	default n
+
+config STM32_HAVE_IOCOMPENSATION
 	bool
 	default n
 
@@ -2751,6 +2757,19 @@ config STM32_NOEXT_VECTORS
 	---help---
 		Sometimes you may not need any Vector support beyond SysTick
 		and wish to save memory. This applies only to ARMv7-M architectures.
+
+config STM32_SYSCFG_IOCOMPENSATION
+	bool "SYSCFG I/O Compensation"
+	default n
+	depends on STM32_HAVE_IOCOMPENSATION
+	---help---
+		By default the I/O compensation cell is not used. However when the I/O
+		output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+		recommended to use the compensation cell for slew rate control on I/O
+		tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+
+		The I/O compensation cell can be used only when the supply voltage ranges
+		from 2.4 to 3.6 V.
 
 menu "Alternate Pin Mapping"
 

@@ -579,8 +579,8 @@
 /* SD/MMC
  *
  * Note that the below configures GPIO_SPEED_50MHz I/O, that means for using
- * the SDMMC, the board's boot code must enable I/O Compensation via the
- * configuration option CONFIG_STM32F7_SYSCFG_IOCOMPENSATION=y.
+ * the SDIO that you must enable I/O Compensation via the configuration option
+ * CONFIG_STM32F7_SYSCFG_IOCOMPENSATION=y.
  */
 
 #define GPIO_SDMMC1_CK        (GPIO_ALT|GPIO_AF12|GPIO_SPEED_50MHz|GPIO_PORTC|GPIO_PIN12)

@@ -49,9 +49,6 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
-
-#include "chip.h"
 #include "stm32_gpio.h"
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
