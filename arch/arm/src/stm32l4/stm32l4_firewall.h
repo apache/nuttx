@@ -47,7 +47,7 @@
 
 /* Include the correct firewall register definitions for this STM32L4 family */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
 #  include "chip/stm32l4x3xx_firewall.h"
 #elif defined(CONFIG_STM32L4_STM32L4X5)
 #  include "chip/stm32l4x5xx_firewall.h"

@@ -76,7 +76,7 @@
 #  undef HAVE_MMCSD
 #endif
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
+/* LED.  User LD3: the green LED is a user LED connected to Arduino signal D13
  * corresponding to MCU I/O PB3 (pin 26)
  * target.
  *
@@ -84,23 +84,10 @@
  * - When the I/O is LOW, the LED is off.
  */
 
-#define GPIO_LD2 \
+#define GPIO_LD3 \
   (GPIO_PORTB | GPIO_PIN3 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
 #define LED_DRIVER_PATH "/dev/userleds"
-
-/* Buttons
- *
- * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- * microcontroller.
- */
-
-#define MIN_IRQBUTTON   BUTTON_USER
-#define MAX_IRQBUTTON   BUTTON_USER
-#define NUM_IRQBUTTONS  1
-
-#define GPIO_BTN_USER \
-  (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
 /************************************************************************************
  * Public Data

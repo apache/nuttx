@@ -44,7 +44,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2)
+#  include "chip/stm32l4x2xx_pinmap.h"
+#elif defined(CONFIG_STM32L4_STM32L4X3)
 #  include "chip/stm32l4x3xx_pinmap.h"
 #elif defined(CONFIG_STM32L4_STM32L4X5)
 #  include "chip/stm32l4x5xx_pinmap.h"

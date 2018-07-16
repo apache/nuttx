@@ -66,8 +66,6 @@
 
 /* Values defined in arch/arm/src/stm32l4/chip/stm32l4x3xx_dma.h */
 
-#define DMACHAN_SDMMC DMACHAN_SDMMC_1     /* 2 choices */
-
 #define DMACHAN_SPI1_RX DMACHAN_SPI1_RX_1 /* 2 choices */
 #define DMACHAN_SPI1_TX DMACHAN_SPI1_TX_1 /* 2 choices */
 
@@ -105,21 +103,27 @@
 
 /* I2C
  *
+ * On Arduino the I2C bus is available at positions A4 and A5. On the
+ * nulceo-1432kc board the I2C bus pins (PB6 and PB7) are connected to
+ * pins A4 and A5 through the SB16 and SB18 solder bridges. In this case
+ * the pins PA5 and PA6 must be configured as input floating.
+ *
  * The optional _GPIO configurations allow the I2C driver to manually
  * reset the bus to clear stuck slaves.  They match the pin configuration,
  * but are normally-high GPIOs.
+ *
  */
 
 #define GPIO_I2C1_SCL \
-   (GPIO_I2C1_SCL_2 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
+   (GPIO_I2C1_SCL_1 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #define GPIO_I2C1_SDA \
-   (GPIO_I2C1_SDA_2 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
+   (GPIO_I2C1_SDA_1 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #define GPIO_I2C1_SCL_GPIO \
    (GPIO_OUTPUT | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET | \
-    GPIO_PORTB | GPIO_PIN8)
+    GPIO_PORTB | GPIO_PIN6)
 #define GPIO_I2C1_SDA_GPIO \
    (GPIO_OUTPUT | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET | \
-    GPIO_PORTB | GPIO_PIN9)
+    GPIO_PORTB | GPIO_PIN7)
 
 #define GPIO_I2C2_SCL \
    (GPIO_I2C2_SCL_1 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
@@ -146,7 +150,7 @@
 
 /* LEDs
  *
- * The Nucleo l432kc board provides a single user LED, LD2.  LD2
+ * The Nucleo l432kc board provides a single user LED, LD2.  LD3
  * is the green LED connected to Arduino signal D13 corresponding to
  * MCU I/O PB3 (pin 26).
  *
@@ -156,19 +160,19 @@
 
 /* LED index values for use with board_userled() */
 
-#define BOARD_LD2         0
+#define BOARD_LD3         0
 #define BOARD_NLEDS       1
 
 /* LED bits for use with board_userled_all() */
 
-#define BOARD_LD2_BIT     (1 << BOARD_LD2)
+#define BOARD_LD3_BIT     (1 << BOARD_LD3)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
  * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
  * events as follows when the red LED (PE24) is available:
  *
- *   SYMBOL                Meaning                   LD2
+ *   SYMBOL                Meaning                   LD3
  *   -------------------  -----------------------  -----------
  *   LED_STARTED          NuttX has been started     OFF
  *   LED_HEAPALLOCATE     Heap has been allocated    OFF
@@ -180,8 +184,8 @@
  *   LED_PANIC            The system has crashed     Blinking
  *   LED_IDLE             MCU is is sleep mode       Not used
  *
- * Thus if LD2, NuttX has successfully booted and is, apparently, running
- * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error
+ * Thus if LD3 NuttX has successfully booted and is, apparently, running
+ * normally.  If LD3 is flashing at approximately 2Hz, then a fatal error
  * has been detected and the system has halted.
  */
 
@@ -193,17 +197,6 @@
 #define LED_SIGNAL       2
 #define LED_ASSERTION    2
 #define LED_PANIC        1
-
-/* Buttons
- *
- *   B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
- *   microcontroller.
- */
-
-#define BUTTON_USER        0
-#define NUM_BUTTONS        1
-
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Quadrature encoder
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
