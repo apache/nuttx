@@ -53,7 +53,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/stm32_syscfg.h"
+#include "stm32_syscfg.h"
 
 #if defined(CONFIG_STM32_STM32L15XX)
 #  include "chip/stm32l15xxx_gpio.h"
