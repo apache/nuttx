@@ -202,7 +202,7 @@ void stm32_clockconfig(void)
 #ifdef CONFIG_STM32_SYSCFG_IOCOMPENSATION
   /* Enable I/O Compensation */
 
-  syscfg_iocompensation();
+  stm32_iocompensation();
 #endif
 
   /* Enable peripheral clocking */

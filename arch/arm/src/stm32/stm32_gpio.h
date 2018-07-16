@@ -51,9 +51,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
 #include "chip.h"
-#include "stm32_syscfg.h"
 
 #if defined(CONFIG_STM32_STM32L15XX)
 #  include "chip/stm32l15xxx_gpio.h"
@@ -422,49 +420,6 @@ extern "C"
 EXTERN const uint32_t g_gpiobase[STM32_NGPIO_PORTS];
 
 /************************************************************************************
- * Inline Functions
- ************************************************************************************/
-
-/****************************************************************************
- * Name: syscfg_iocompensation
- *
- * Description:
- *   Enable I/O compensation.
- *
- *   By default the I/O compensation cell is not used. However when the I/O
- *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
- *   recommended to use the compensation cell for slew rate control on I/O
- *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
- *
- *   The I/O compensation cell can be used only when the supply voltage ranges
- *   from 2.4 to 3.6 V.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void syscfg_iocompensation(void)
-{
-#ifdef STM32_SYSCFG_CMPCR
-  /* Enable I/O Compensation.  Writing '1' to the CMPCR power-down bit
-   * enables the I/O compensation cell.
-   */
-
-  putreg32(SYSCFG_CMPCR_CMPPD, STM32_SYSCFG_CMPCR);
-
-  /* Wait for compensation cell to become ready */
-
-  while ((getreg32(STM32_SYSCFG_CMPCR) & SYSCFG_CMPCR_READY) == 0)
-    {
-    }
-#endif
-}
-
-/************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
@@ -525,6 +480,32 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
  ************************************************************************************/
 
 bool stm32_gpioread(uint32_t pinset);
+
+/************************************************************************************
+ * Name: stm32_iocompensation
+ *
+ * Description:
+ *   Enable I/O compensation.
+ *
+ *   By default the I/O compensation cell is not used. However when the I/O
+ *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+ *   recommended to use the compensation cell for slew rate control on I/O
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+ *
+ *   The I/O compensation cell can be used only when the supply voltage ranges
+ *   from 2.4 to 3.6 V.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_HAVE_IOCOMPENSATION
+void stm32_iocompensation(void);
+#endif
 
 /************************************************************************************
  * Name: stm32_gpiosetevent
