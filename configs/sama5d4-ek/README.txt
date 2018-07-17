@@ -4177,9 +4177,9 @@ Configurations
         $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
         $ make import                       : This will build the file system.
 
-        D. Create the symbol table from the apps/bin
+        D. Create the symbol table from the apps/bin/content and copy back to NuttX
 
-        $ tools/mksymtab.sh bin import/symtab.c
+        $ make symtab                       : Create the symbol table
         $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
 
         NOTE: There are many ways to create symbol tables.  The above will create
@@ -4231,10 +4231,9 @@ Configurations
         $ tools/mkromfsimg.sh               : Create the real ROMFS image
         $ mv boot_romfsimg.h ../nuttx/configs/sama5d4-ek/include/boot_romfsimg.h
 
-        E. Create the symbol table from the apps/bin
+        E. Create the symbol table from the apps/bin and copy it back to NuttX
 
-        $ tools/mksymtab.sh bin import/symtab.c
-        $ make symtab                       : Compile the symbol table
+        $ make symtab                       : Create the symbol table
         $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
 
         NOTE: There are many ways to create symbol tables.  The above will create
