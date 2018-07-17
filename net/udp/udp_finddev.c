@@ -219,7 +219,7 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
            */
 
           if (conn->u.ipv4.raddr == INADDR_BROADCAST ||
-              IN_MULTICAST(conn->u.ipv4.raddr))
+              IN_MULTICAST(NTOHL(conn->u.ipv4.raddr)))
             {
               /* Make sure that the socket is bound to some non-zero, local
                * address.  Zero is used as an indication that the laddr is
