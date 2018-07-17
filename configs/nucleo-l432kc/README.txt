@@ -20,7 +20,6 @@ NucleoL432KC:
   SPIs:           Up to 2 SPIs
   SAIs:           1 dual-channel audio interface
   CAN interface
-  SDIO interface
   QSPI interface
   USB:            USB 2.0 full-speed device/host/OTG controller with on-chip PHY
   CRC calculation unit

@@ -170,37 +170,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef HAVE_MMCSD
-  /* First, get an instance of the SDIO interface */
-
-  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!g_sdio)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
-             CONFIG_NSH_MMCSDSLOTNO);
-      return -ENODEV;
-    }
-
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
-             ret);
-      return ret;
-    }
-
-  /* Then let's guess and say that there is a card in the slot. There is no
-   * card detect GPIO.
-   */
-
-  sdio_mediachange(g_sdio, true);
-
-  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
-#endif
-
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 

@@ -83,7 +83,7 @@
  *   Flash Latency(WS)             : 4
  *   Prefetch Buffer               : OFF
  *   48MHz for USB OTG FS,         : Doable if required using PLLSAI1 or MSI
- *   SDIO and RNG clock
+ *   RNG clock
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -190,7 +190,6 @@
  * UART5
  * LPUART1
  * I2C1
- * I2C2
  * I2C3
  * LPTIM1
  * LPTIM2
