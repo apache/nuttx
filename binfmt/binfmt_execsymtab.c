@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_execsymtab.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,13 +81,8 @@ extern int CONFIG_EXECFUNCS_NSYMBOLS_VAR;
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
-static FAR const struct symtab_s *g_exec_symtab = CONFIG_EXECFUNCS_SYMTAB_ARRAY;
-static int g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS_VAR;
-#else
 static FAR const struct symtab_s *g_exec_symtab;
 static int g_exec_nsymbols;
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -112,13 +107,29 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
 {
   irqstate_t flags;
 
-  DEBUGASSERT(symtab && nsymbols);
+  DEBUGASSERT(symtab != NULL && nsymbols != NULL);
 
   /* Disable interrupts very briefly so that both the symbol table and its
    * size are returned as a single atomic operation.
    */
 
   flags     = enter_critical_section();
+
+#ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
+  /* If a bring-up symbol table has been provided and if the exec symbol
+   * table has not yet been initialized, then use the provided start-up
+   * symbol table.
+   */
+
+   if (g_exec_symtab == NULL)
+     {
+       g_exec_symtab = CONFIG_EXECFUNCS_SYMTAB_ARRAY;
+       g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS_VAR;
+     }
+#endif
+
+  /* Return the symbol table and its size */
+
   *symtab   = g_exec_symtab;
   *nsymbols = g_exec_nsymbols;
   leave_critical_section(flags);
@@ -143,7 +154,7 @@ void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
   irqstate_t flags;
 
-  DEBUGASSERT(symtab);
+  DEBUGASSERT(symtab != NULL);
 
   /* Disable interrupts very briefly so that both the symbol table and its
    * size are set as a single atomic operation.

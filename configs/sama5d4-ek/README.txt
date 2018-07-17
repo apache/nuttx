@@ -4158,6 +4158,7 @@ Configurations
     6a. General build directions (boot from SD card):
 
         A. Build with no symbol table
+
         $ cd nuttx                          : Go to the NuttX build directory
         $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
@@ -4165,16 +4166,19 @@ Configurations
                                             : This should create the nuttx ELF
 
         B. Create the export package
+
         $ make export                       : Create the kernel export package
                                             : You should have a file like
                                             : nuttx-export-*.zip
 
         C. Build the file system image at apps/bin
+
         $ cd apps/                          : Go to the apps/ directory
         $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
         $ make import                       : This will build the file system.
 
         D. Create the symbol table from the apps/bin
+
         $ tools/mksymtab.sh bin import/symtab.c
         $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
 
@@ -4195,12 +4199,15 @@ Configurations
       You will then need to copy the files from apps/bin to an SD card or USB
       FLASH drive to create the bootable SD card.
 
-      But how does the SD card/USB drive get mounted?  This must be done in
-      board-specific logic before the 'init' program is started.
+      But how does the SD card/USB FLASH drive get mounted?  This must be
+      done in board-specific logic before the 'init' program is started.
+      That logic is not yet implemented for the case of SD card or USB FLASH
+      driver
 
     6b. General build directions (boot from ROMFS image):
 
         A. Build with dummy ROMFS file system image and no symbol table
+
         $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch configs/sama5d4-ek/include/boot_romfsimg.h
@@ -4208,26 +4215,32 @@ Configurations
                                             : This should create the nuttx ELF
 
         B. Create the export package
+
         $ make export                       : Create the kernel export package
                                             : You should have a file like
                                             : nuttx-export-*.zip
+
         C. Build the file system image at apps/bin
+
         $ cd apps/                          : Go to the apps/ directory
         $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
         $ make import                       : This will build the file system
 
         D. Create the ROMFS file system image
+
         $ tools/mkromfsimg.sh               : Create the real ROMFS image
         $ mv boot_romfsimg.h ../nuttx/configs/sama5d4-ek/include/boot_romfsimg.h
 
         E. Create the symbol table from the apps/bin
+
         $ tools/mksymtab.sh bin import/symtab.c
+        $ make symtab                       : Compile the symbol table
         $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
 
         NOTE: There are many ways to create symbol tables.  The above will create
         the minimal symbol tabled needed.
 
-        F. Reconfigure and rebuild NuttX
+        F. Reconfigure and rebuild NuttX/bin
 
           Enable the following in the configuration:
             CONFIG_EXECFUNCS_HAVE_SYMTAB=y
@@ -4238,8 +4251,8 @@ Configurations
         $ cd nuttx/                         : Rebuild the system with the correct
         $ make clean_context all            : ROMFS file system and symbol table
 
-      But how does the ROMFS file system get mounted?  This must be done in
-      board-specific logic before the 'init' program is started.
+      But how does the ROMFS file system get mounted?  This is done in board-
+      specific logic before the 'init' program is started.
 
     STATUS:
 
@@ -4272,15 +4285,8 @@ Configurations
 
     2018-07-15:  Revisited.  It is not clear to me how, back in 2014, the
        symbol table was created.  I have added logic to created the symbol
-       table, but I am currently stuck in the 'make import' step.  This
-       currently dies with a mysterious error '/bin/sh: -w: invalid option'
-
-       That mysterious error is comming from the COMPILE macro defined in
-       apps/import/Make.defs.  There is something lethal about CFLAGS.
-       Although I can print all of the components of CFLAGS, the use of
-       CFLAGS causes the error.  In fact, this will generate the same error;
-
-         $(warning CFLAGS=$(CFLAGS))
+       table.  After some additional fixes, the full build is again
+       successful.
 
   nsh:
 
