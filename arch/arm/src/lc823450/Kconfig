@@ -37,42 +37,11 @@ config LC823450_WDT
 config LC823450_SPIFI
 	bool "SPI Flash Interface (SPIFI)"
 	default n
-	depends on MTD
 
 if LC823450_SPIFI
-
-config LC823450_SPIFI_DEVNO
-	int "number in /dev/mtdblk?"
-	default 0
-
-config LC823450_SPIFI_SIZE
-	int "SPI FLASH size (byte)"
-	default 4194304
-
 config LC823450_SPIFI_QUADIO
 	bool "SPIFI 4bit access"
-	default n
-
-config LC823450_SPIFI_RAMFAT
-	bool "SPIFI with SRAM FAT"
-	default n
-
-config LC823450_SPIFI_RAMFAT_VOLUMELABEL
-	string "volume label for SRAM FAT"
-	depends on LC823450_SPIFI_RAMFAT
-
-config LC823450_SPIFI_BACKUP
-	bool "power dwon tolerance I/O"
-	default n
-
-config LC823450_SPIFI_BACKUP_HEAD_OFFSET
-	hex "backup header offset"
-	depends on LC823450_SPIFI_BACKUP
-
-config LC823450_SPIFI_BACKUP_VAL_OFFSET
-	hex "backup area offset"
-	depends on LC823450_SPIFI_BACKUP
-
+	default y
 endif
 
 config LC823450_SDIF

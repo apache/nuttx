@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/lc823450/Make.defs
 #
-#   Copyright 2014, 2015, 2016, 2017 Sony Video & Sound Products Inc.
+#   Copyright 2014, 2015, 2016, 2017, 2018 Sony Video & Sound Products Inc.
 #   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
 #   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
 #   Author: Yasuhiro Osaki <Yasuhiro.Osaki@jp.sony.com>
@@ -92,7 +92,7 @@ CHIP_CSRCS += lc823450_wdt.c
 endif
 
 ifeq ($(CONFIG_LC823450_SPIFI), y)
-CHIP_CSRCS += lc823450_spifi.c
+CHIP_CSRCS += lc823450_spifi2.c
 endif
 
 ifeq ($(CONFIG_LC823450_SDIF), y)
