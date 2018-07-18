@@ -1951,8 +1951,6 @@ nuttx/
  |   |   |- RIDE/README.txt
  |   |   `- README.txt
  |   |- stm3220g-eval/
- |   |   |-ide/nsh/iar/README.txt
- |   |   |-ide/nsh/uvision/README.txt
  |   |   `- README.txt
  |   |- stm3240g-eval/
  |   |   `- README.txt
@@ -1968,9 +1966,11 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32f429i-disco/
  |   |   |- fb/README.txt
- |   |   |- ide/ltcd/uvision/README.txt
  |   |   `- README.txt
  |   |- stm32f746g-disco/
+ |   |   _- fb/README.txt
+ |   |   _- nxdemo/README.txt
+ |   |   _- nxterm/README.txt
  |   |   `- README.txt
  |   |- stm32f769i-disco/
  |   |   `- README.txt
