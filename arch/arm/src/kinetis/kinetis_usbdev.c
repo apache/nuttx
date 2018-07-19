@@ -2793,6 +2793,7 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
       /* Clear all pending USB error interrupts */
 
       khci_putreg(USB_EINT_ALL, KINETIS_USB0_ERRSTAT);
+      khci_putreg(USB_INT_ERROR, KINETIS_USB0_ISTAT);
     }
 
   /* Service resume interrupts */
