@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_rand.c
  *
- *   Copyright (C) 2007, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include <nuttx/lib/lib.h>
 
@@ -59,5 +60,19 @@
 
 int rand(void)
 {
-  return (int)nrand(32768L);
+  return (int)nrand(INT_MAX);
+}
+
+/****************************************************************************
+ * Name:  random
+ *
+ * Description:
+ *   Generate a non-negative, integer random number in the range of 0 through
+ *   (LONG_MAX - 1)
+ *
+ ****************************************************************************/
+
+long random(void)
+{
+  return (long)nrand(LONG_MAX);
 }

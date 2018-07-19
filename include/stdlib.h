@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <limits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,9 +63,9 @@
  * in sys/types.h.
  */
 
-/* Maximum value returned by rand() */
+/* Maximum value returned by rand().  Must be a minimum of 32767. */
 
-#define RAND_MAX 32767
+#define RAND_MAX INT_MAX
 
 /* Integer expression whose value is the maximum number of bytes in a
  * character specified by the current locale.
@@ -143,6 +144,9 @@ extern "C"
 
 void      srand(unsigned int seed);
 int       rand(void);
+
+#define   srandom(s) srand(s)
+long      random(void);
 
 #ifndef CONFIG_DISABLE_ENVIRON
 /* Environment variable support */
