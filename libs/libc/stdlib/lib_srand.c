@@ -281,8 +281,8 @@ unsigned long nrand(unsigned long limit)
 
       result = (unsigned long)(((double_t)limit) * ratio);
 
-      /* Loop because there is a (unlikely) possibility that round could but
-       * the result at the limit value.
+      /* Loop because there is an (unlikely) possibility that rounding
+       * could increase the result at the limit value about the limit.
        */
     }
   while (result >= limit);

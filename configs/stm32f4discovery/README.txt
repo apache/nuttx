@@ -2169,7 +2169,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Builds under windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin and
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : The native Windows CodeSourcery toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : Generic ARM EABI toolchain for Windows
 
     2. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
