@@ -373,6 +373,10 @@ uintptr_t STUB_bind(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_connect(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
+uintptr_t STUB_getpeername(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+uintptr_t STUB_getsockname(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 uintptr_t STUB_getsockopt(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 uintptr_t STUB_listen(int nbr, uintptr_t parm1, uintptr_t parm2);
