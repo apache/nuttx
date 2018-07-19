@@ -70,6 +70,8 @@ static int        bluetooth_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        bluetooth_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+static int        bluetooth_getpeername(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        bluetooth_listen(FAR struct socket *psock, int backlog);
 static int        bluetooth_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
