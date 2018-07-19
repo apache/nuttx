@@ -155,6 +155,8 @@ struct sock_intf_s
                     FAR const struct sockaddr *addr, socklen_t addrlen);
   CODE int        (*si_getsockname)(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+  CODE int        (*si_getpeername)(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
   CODE int        (*si_listen)(FAR struct socket *psock, int backlog);
   CODE int        (*si_connect)(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
@@ -1067,6 +1069,44 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
 int psock_setsockopt(FAR struct socket *psock, int level, int option,
                      FAR const void *value, socklen_t value_len);
+
+/****************************************************************************
+ * Name: psock_getpeername
+ *
+ * Description:
+ *   The psock_getpeername() function retrieves the remote-connected name of
+ *   the specified socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this address
+ *   in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of socket to operate on
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address. Otherwise, -1 is returned and errno is set to indicate the error.
+ *   Possible errno values that may be returned include:
+ *
+ *   EBADF      - The socket argument is not a valid file descriptor.
+ *   ENOTSOCK   - The socket argument does not refer to a socket.
+ *   EOPNOTSUPP - The operation is not supported for this socket's protocol.
+ *   EINVAL     - The socket has been shut down.
+ *   ENOBUFS    - Insufficient resources were available in the system to
+ *                complete the function.
+ *
+ ****************************************************************************/
+
+int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
+                      FAR socklen_t *addrlen);
 
 /****************************************************************************
  * Name: psock_ioctl

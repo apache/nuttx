@@ -67,6 +67,8 @@ static int        local_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        local_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+static int        local_getpeername(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 #ifndef CONFIG_NET_LOCAL_STREAM
 static int        local_listen(FAR struct socket *psock, int backlog);
 #endif
@@ -99,6 +101,7 @@ const struct sock_intf_s g_local_sockif =
   local_addref,      /* si_addref */
   local_bind,        /* si_bind */
   local_getsockname, /* si_getsockname */
+  local_getpeername, /* si_getpeername */
   local_listen,      /* si_listen */
   local_connect,     /* si_connect */
   local_accept,      /* si_accept */
@@ -418,6 +421,41 @@ static int local_getsockname(FAR struct socket *psock,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: local_getpeername
+ *
+ * Description:
+ *   The local_getpeername() function retrieves the remote-connected name of
+ *   the specified local socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getpeername() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int local_getpeername(FAR struct socket *psock,
+                             FAR struct sockaddr *addr,
+                             FAR socklen_t *addrlen)
+{
+  return local_getsockname(psock, addr, addrlen);
 }
 
 /****************************************************************************

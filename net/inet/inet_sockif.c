@@ -69,6 +69,8 @@ static int        inet_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        inet_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+static int        inet_getpeername(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        inet_listen(FAR struct socket *psock, int backlog);
 static int        inet_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
@@ -100,6 +102,7 @@ static const struct sock_intf_s g_inet_sockif =
   inet_addref,      /* si_addref */
   inet_bind,        /* si_bind */
   inet_getsockname, /* si_getsockname */
+  inet_getpeername, /* si_getpeername */
   inet_listen,      /* si_listen */
   inet_connect,     /* si_connect */
   inet_accept,      /* si_accept */
@@ -512,6 +515,59 @@ static int inet_getsockname(FAR struct socket *psock,
 #ifdef CONFIG_NET_IPv6
     case PF_INET6:
       return ipv6_getsockname(psock, addr, addrlen);
+      break;
+#endif
+
+    default:
+      return -EAFNOSUPPORT;
+    }
+}
+
+/****************************************************************************
+ * Name: inet_getpeername
+ *
+ * Description:
+ *   The inet_getpeername() function retrieves the remote-connected name of
+ *   the specified INET socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getpeername() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int inet_getpeername(FAR struct socket *psock,
+                            FAR struct sockaddr *addr,
+                            FAR socklen_t *addrlen)
+{
+  /* Handle by address domain */
+
+  switch (psock->s_domain)
+    {
+#ifdef CONFIG_NET_IPv4
+    case PF_INET:
+      return ipv4_getpeername(psock, addr, addrlen);
+      break;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+    case PF_INET6:
+      return ipv6_getpeername(psock, addr, addrlen);
       break;
 #endif
 

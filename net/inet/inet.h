@@ -172,6 +172,35 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
+ * Name: ipv4_getpeername and ipv6_peername
+ *
+ * Description:
+ *   The ipv4_getpeername() and ipv6_getsocknam() function retrieve the
+ *   remote-connected name of the specified INET socket.
+ *
+ * Parameters:
+ *   psock    Point to the socket structure instance [in]
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getpeername() for the list of returned error values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen);
+#endif
+#ifdef CONFIG_NET_IPv6
+int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
+                     FAR socklen_t *addrlen);
+#endif
+
+/****************************************************************************
  * Name: inet_recvfrom
  *
  * Description:

@@ -98,6 +98,7 @@ const struct sock_intf_s g_bluetooth_sockif =
   bluetooth_addref,      /* si_addref */
   bluetooth_bind,        /* si_bind */
   bluetooth_getsockname, /* si_getsockname */
+  bluetooth_getpeername, /* si_getpeername */
   bluetooth_listen,      /* si_listen */
   bluetooth_connect,     /* si_connect */
   bluetooth_accept,      /* si_accept */
@@ -488,6 +489,68 @@ static int bluetooth_getsockname(FAR struct socket *psock,
 
   tmp.bt_family = AF_BLUETOOTH;
   memcpy(&tmp.bt_bdaddr, &conn->bc_laddr, sizeof(bt_addr_t));
+
+  /* Copy to the user buffer, truncating if necessary */
+
+  copylen = sizeof(struct sockaddr_bt_s);
+  if (copylen > *addrlen)
+    {
+      copylen = *addrlen;
+    }
+
+  memcpy(addr, &tmp, copylen);
+
+  /* Return the actual size transferred */
+
+  *addrlen = copylen;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bluetooth_getpeername
+ *
+ * Description:
+ *   The bluetooth_getpeername() function retrieves the remote-connected name of
+ *   the specified local socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getpeername() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int bluetooth_getpeername(FAR struct socket *psock,
+                                 FAR struct sockaddr *addr,
+                                 FAR socklen_t *addrlen)
+{
+  FAR struct bluetooth_conn_s *conn;
+  FAR struct sockaddr_bt_s tmp;
+  socklen_t copylen;
+
+  DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
+
+  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* Create a copy of the full address on the stack */
+
+  tmp.bt_family = AF_BLUETOOTH;
+  memcpy(&tmp.bt_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
 
   /* Copy to the user buffer, truncating if necessary */
 

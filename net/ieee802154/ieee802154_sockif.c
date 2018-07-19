@@ -68,6 +68,8 @@ static int        ieee802154_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        ieee802154_getsockname(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+static int        ieee802154_getpeername(FAR struct socket *psock,
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 static int        ieee802154_listen(FAR struct socket *psock, int backlog);
 static int        ieee802154_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
@@ -96,6 +98,7 @@ const struct sock_intf_s g_ieee802154_sockif =
   ieee802154_addref,      /* si_addref */
   ieee802154_bind,        /* si_bind */
   ieee802154_getsockname, /* si_getsockname */
+  ieee802154_getpeername, /* si_getpeername */
   ieee802154_listen,      /* si_listen */
   ieee802154_connect,     /* si_connect */
   ieee802154_accept,      /* si_accept */
@@ -495,6 +498,68 @@ static int ieee802154_getsockname(FAR struct socket *psock,
 
   tmp.sa_family = AF_IEEE802154;
   memcpy(&tmp.sa_addr, &conn->laddr, sizeof(struct ieee802154_saddr_s));
+
+  /* Copy to the user buffer, truncating if necessary */
+
+  copylen = sizeof(struct sockaddr_ieee802154_s);
+  if (copylen > *addrlen)
+    {
+      copylen = *addrlen;
+    }
+
+  memcpy(addr, &tmp, copylen);
+
+  /* Return the actual size transferred */
+
+  *addrlen = copylen;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ieee802154_getpeername
+ *
+ * Description:
+ *   The ieee802154_getpeername() function retrieves the remote-connectd name of the
+ *   specified packet socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this
+ *   address in the object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned, the 'addr' argument points to the address
+ *   of the socket, and the 'addrlen' argument points to the length of the
+ *   address.  Otherwise, a negated errno value is returned.  See
+ *   getpeername() for the list of appropriate error numbers.
+ *
+ ****************************************************************************/
+
+static int ieee802154_getpeername(FAR struct socket *psock,
+                                  FAR struct sockaddr *addr, FAR
+                                  socklen_t *addrlen)
+{
+  FAR struct ieee802154_conn_s *conn;
+  FAR struct sockaddr_ieee802154_s tmp;
+  socklen_t copylen;
+
+  DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
+
+  conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* Create a copy of the full address on the stack */
+
+  tmp.sa_family = PF_IEEE802154;
+  memcpy(&tmp.sa_addr, &conn->raddr, sizeof(struct ieee802154_saddr_s));
 
   /* Copy to the user buffer, truncating if necessary */
 
