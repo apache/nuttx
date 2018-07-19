@@ -1099,6 +1099,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
  *   EOPNOTSUPP - The operation is not supported for this socket's protocol.
+ *   ENOTCONN   - The socket is not connected or otherwise has not had the
+ *                peer pre-specified.
  *   EINVAL     - The socket has been shut down.
  *   ENOBUFS    - Insufficient resources were available in the system to
  *                complete the function.
