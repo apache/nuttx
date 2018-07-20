@@ -207,7 +207,7 @@
 
 /* Big DTIMER setting */
 
-#define SDMMC_DTIMER_DATATIMEOUT (0x000fffff)
+#define SDMMC_DTIMER_DATATIMEOUT (0x003d0900) /* 250 ms @ 16 MHz */
 
 /* DMA channel/stream configuration register settings.  The following
  * must be selected.  The DMA driver will select the remaining fields.
@@ -2271,8 +2271,8 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Then set up the SDIO data path */
 
   dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, nbytes, dblocksize |
-                   STM32_SDMMC_DCTRL_DTDIR);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
+                   nbytes, dblocksize | STM32_SDMMC_DCTRL_DTDIR);
 
   /* And enable interrupts */
 
@@ -2326,7 +2326,8 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
   /* Then set up the SDIO data path */
 
   dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, nbytes, dblocksize);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
+                   nbytes, dblocksize);
 
   /* Enable TX interrupts */
 
@@ -3040,8 +3041,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Then set up the SDIO data path */
 
   dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, buflen, dblocksize |
-                   STM32_SDMMC_DCTRL_DTDIR);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
+                   buflen, dblocksize | STM32_SDMMC_DCTRL_DTDIR);
 
   /* Configure the RX DMA */
 
@@ -3133,7 +3134,8 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Then set up the SDIO data path */
 
   dblocksize = stm32_log2(priv->blocksize) << STM32_SDMMC_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT, buflen, dblocksize);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
+                   buflen, dblocksize);
 
   /* Configure the TX DMA */
 
