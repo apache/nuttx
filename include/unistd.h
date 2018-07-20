@@ -290,6 +290,7 @@ void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 int     usleep(useconds_t usec);
 int     pause(void);
+int     daemon(int nochdir, int noclose);
 
 /* File descriptor operations */
 

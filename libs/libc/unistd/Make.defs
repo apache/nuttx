@@ -35,7 +35,7 @@
 
 # Add the unistd C files to the build
 
-CSRCS += lib_access.c lib_swab.c lib_sysconf.c
+CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_sysconf.c
 CSRCS += lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
