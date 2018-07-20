@@ -61,12 +61,12 @@
  *   NOTE: daemon() is a non-standard GNU C library interface (based on a
  *   BSD interface of the same way which behaves slightly differently).
  *   The interfaces defined at OpenGroup.org are the interfaces that govern
- *   NuttX.  deamon() is only described in the Linux man pages like:\
+ *   NuttX.  deamon() is only described in the Linux man pages like:
  *   http://man7.org/linux/man-pages/man3/daemon.3.html
  *
  * Limitations:
  *   NuttX does not implement controlling terminals so the primary purpose
- *   of this interface is not supported.  Additional operations controlled
+ *   of this interface cannot be supported.  Additional operations controlled
  *   by input parameters are supported, however.
  *
  *   It is not possible to support a true Linux daemon() helper function
@@ -91,7 +91,7 @@
  *
  *    This implementation begins essentially 'pretending' that we forked
  *    and that the fork was successful and that we are the child of the
- *    vim fork.
+ *    fork.
  *
  * Input Parameters:
  *   nochdir - If nochdir is zero, daemon() changes the process's current
