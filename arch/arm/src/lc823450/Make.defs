@@ -63,6 +63,14 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+endif
+endif
+
 ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += memcpy-armv7m.S
 endif
@@ -77,7 +85,7 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = lc823450_start.c lc823450_irq.c lc823450_timer.c
+CHIP_CSRCS  = lc823450_allocateheap2.c lc823450_start.c lc823450_irq.c lc823450_timer.c
 CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c
 CHIP_CSRCS += lc823450_syscontrol.c lc823450_gpio.c
 
@@ -110,10 +118,6 @@ endif
 
 ifeq ($(CONFIG_SPI), y)
 CHIP_CSRCS += lc823450_spi.c
-endif
-
-ifeq ($(CONFIG_ARMV7M_MPU),y)
-CMN_CSRCS += up_mpu.c lc823450_mpuinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_DMA), y)
@@ -154,13 +158,6 @@ CHIP_CSRCS += lc823450_pminitialize.c
 CHIP_CSRCS += lc823450_sleep.c
 endif
 
-#CHIP_CSRCS += lc823450_allocateheap.c
-
-ifeq ($(CONFIG_MM_MULTIHEAP), y)
-CHIP_CSRCS += lc823450_mm.c
-CHIP_CSRCS += lc823450_sram.c
-endif
-
 ifeq ($(CONFIG_LC823450_SPIFI_RAMFAT), y)
 CHIP_CSRCS += lc823450_ramfat.c
 endif
@@ -184,4 +181,9 @@ endif
 
 ifeq ($(CONFIG_LC823450_I2S0),y)
 CHIP_CSRCS += lc823450_i2s.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += lc823450_userspace.c
+CHIP_CSRCS += lc823450_mpuinit2.c
 endif
