@@ -1,7 +1,7 @@
 /********************************************************************************************
  * drivers/mmcsd/mmcsd_sdio.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -312,10 +312,38 @@ struct mmcsd_scr_s
   uint8_t  sdversion;          /* 59:56 SD memory card physical layer version */
   uint8_t  erasestate;         /* 55:55 Data state after erase (1 or 0) */
   uint8_t  security;           /* 54:52 SD security support */
-  uint8_t  buswidth;           /* 51:48 DAT bus widthes supported */
+  uint8_t  buswidth;           /* 51:48 DAT bus widths supported */
                                /* 47:32 SD reserved space */
   uint32_t mfgdata;            /* 31:0  Reserved for manufacturing data */
 };
+
+#if defined(CONFIG_SDIO_BLK_CALLBACK) && !defined(CONFIG_DRVR_WRITEBUFFER) && \
+   !defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#  define PERMIT_SECTOR_BUFFER_CALLBACK
+#endif
+
+#ifdef PERMIT_SECTOR_BUFFER_CALLBACK
+
+/* When CONFIG_SDIO_BLK_CALLBACK is defined and a call is made to the
+ * mmcsd_write function specifying greater than one sector to be written, the
+ * mmcsd_write function will interpret its buffer parameter as a pointer to
+ * the below structure.
+ *
+ * This structure contains the address of a user callback function that will
+ * return a pointer to the memory containing the data for next sector to be
+ * written.
+ *
+ * The address of this structure and all addresses returned by the callback
+ * function must be aligned and positioned according to the DMA transfers
+ * rules of the architecture being used.
+ */
+
+typedef FAR uint8_t *(*sdsector_callback_t)(size_t);
+struct sdsector_callback_s
+{
+  sdsector_callback_t callback;
+};
+#endif
 
 /********************************************************************************************
  * Public Data
@@ -333,7 +361,6 @@ extern "C"
 /********************************************************************************************
  * Public Functions
  ********************************************************************************************/
-
 
 #undef EXTERN
 #if defined(__cplusplus)

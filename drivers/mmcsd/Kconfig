@@ -129,4 +129,14 @@ config SDIO_BLOCKSETUP
 		number of blocks.  Others just work on the byte stream.  This option
 		enables the block setup method in the SDIO vtable.
 
+config SDIO_BLK_CALLBACK
+	bool "SDIO block callback"
+	depends on !DRVR_WRITEBUFFER && !MMCSD_MULTIBLOCK_DISABLE
+	default n
+	---help---
+		Some hardware is RAM constrained and therefore unable to utilize the more
+		efficient Multiple Block Write (CMD25) mechanism. Selecting this option
+		will permit the driver to perform Multiple Block Writes from as few as one
+		512-byte data buffer. See nuttx/drivers/mmcsd/README.txt for details.
+
 endif
