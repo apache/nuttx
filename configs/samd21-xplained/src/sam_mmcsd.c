@@ -62,7 +62,7 @@
 #  error Mountpoints are disabled (CONFIG_DISABLE_MOUNTPOINT=y)
 #endif
 
-#ifndef SAMDL_HAVE_SPI0
+#ifndef SAMD2L2_HAVE_SPI0
 #  error SERCOM0 SPI support is required
 #endif
 
@@ -70,7 +70,7 @@
 #  error MMC/SD support is required (CONFIG_MMCSD)
 #endif
 
-#define SAMDL_MMCSDSLOTNO    0 /* There is only one slot */
+#define SAMD2L2_MMCSDSLOTNO  0 /* There is only one slot */
 
 /****************************************************************************
  * Public Functions
@@ -84,7 +84,7 @@
  *   - CONFIG_SAMD21_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
- *   - SAMDL_HAVE_SPI0=y (CONFIG_SAMDL_SERCOM0 && CONFIG_SAMDL_SERCOM0_ISSPI)
+ *   - SAMD2L2_HAVE_SPI0=y (CONFIG_SAMD2L2_SERCOM0 && CONFIG_SAMD2L2_SERCOM0_ISSPI)
  *
  ****************************************************************************/
 
@@ -108,18 +108,18 @@ int sam_sdinitialize(int port, int minor)
 
   /* Bind the SPI device for the chip select to the slot */
 
-  finfo("Binding SPI%d to MMC/SD slot %d\n", port, SAMDL_MMCSDSLOTNO);
+  finfo("Binding SPI%d to MMC/SD slot %d\n", port, SAMD2L2_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(minor, SAMDL_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(minor, SAMD2L2_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       ferr("ERROR: Failed to bind SPI%d to MMC/SD slot %d: %d\n",
-            port, SAMDL_MMCSDSLOTNO, ret);
+            port, SAMD2L2_MMCSDSLOTNO, ret);
       return ret;
     }
 
   finfo("Successfuly bound SPI%d to MMC/SD slot %d\n",
-        port, SAMDL_MMCSDSLOTNO);
+        port, SAMD2L2_MMCSDSLOTNO);
 
   return OK;
 }

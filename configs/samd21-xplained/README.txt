@@ -356,7 +356,7 @@ SAMD21 Xplained Pro-specific Configuration Options
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP="samdl"
+       CONFIG_ARCH_CHIP="samd2l2"
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
@@ -409,40 +409,40 @@ SAMD21 Xplained Pro-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-    CONFIG_SAMDL_AC      - Analog Comparator
-    CONFIG_SAMDL_ADC     - Analog-to-Digital Converter
-    CONFIG_SAMDL_DAC     - Digital-to-Analog Converter
-    CONFIG_SAMDL_DMAC    - Analog Comparator
-    CONFIG_SAMDL_EVSYS   - Event System
-    CONFIG_SAMDL_NVMCTRL - Non-Volatile Memory Controller
-    CONFIG_SAMDL_PTC     - Peripheral Touch Controller
-    CONFIG_SAMDL_RTC     - Real Time Counter
-    CONFIG_SAMDL_SERCOM0 - Serial Communication Interface 0
-    CONFIG_SAMDL_SERCOM1 - Serial Communication Interface 1
-    CONFIG_SAMDL_SERCOM2 - Serial Communication Interface 2
-    CONFIG_SAMDL_SERCOM3 - Serial Communication Interface 3
-    CONFIG_SAMDL_SERCOM4 - Serial Communication Interface 4
-    CONFIG_SAMDL_SERCOM5 - Serial Communication Interface 5
-    CONFIG_SAMDL_TCC0    - Timer/Counter 0 for Control
-    CONFIG_SAMDL_TCC1    - Timer/Counter 1 for Control
-    CONFIG_SAMDL_TCC2    - Timer/Counter 2 for Control
-    CONFIG_SAMDL_TC3     - Timer/Counter 3
-    CONFIG_SAMDL_TC4     - Timer/Counter 4
-    CONFIG_SAMDL_TC5     - Timer/Counter 5
-    CONFIG_SAMDL_TC6     - Timer/Counter 6
-    CONFIG_SAMDL_TC7     - Timer/Counter 6
-    CONFIG_SAMDL_USB     - USB device or host
-    CONFIG_SAMDL_WDT     - Watchdog Timer
+    CONFIG_SAMD2L2_AC      - Analog Comparator
+    CONFIG_SAMD2L2_ADC     - Analog-to-Digital Converter
+    CONFIG_SAMD2L2_DAC     - Digital-to-Analog Converter
+    CONFIG_SAMD2L2_DMAC    - Analog Comparator
+    CONFIG_SAMD2L2_EVSYS   - Event System
+    CONFIG_SAMD2L2_NVMCTRL - Non-Volatile Memory Controller
+    CONFIG_SAMD2L2_PTC     - Peripheral Touch Controller
+    CONFIG_SAMD2L2_RTC     - Real Time Counter
+    CONFIG_SAMD2L2_SERCOM0 - Serial Communication Interface 0
+    CONFIG_SAMD2L2_SERCOM1 - Serial Communication Interface 1
+    CONFIG_SAMD2L2_SERCOM2 - Serial Communication Interface 2
+    CONFIG_SAMD2L2_SERCOM3 - Serial Communication Interface 3
+    CONFIG_SAMD2L2_SERCOM4 - Serial Communication Interface 4
+    CONFIG_SAMD2L2_SERCOM5 - Serial Communication Interface 5
+    CONFIG_SAMD2L2_TCC0    - Timer/Counter 0 for Control
+    CONFIG_SAMD2L2_TCC1    - Timer/Counter 1 for Control
+    CONFIG_SAMD2L2_TCC2    - Timer/Counter 2 for Control
+    CONFIG_SAMD2L2_TC3     - Timer/Counter 3
+    CONFIG_SAMD2L2_TC4     - Timer/Counter 4
+    CONFIG_SAMD2L2_TC5     - Timer/Counter 5
+    CONFIG_SAMD2L2_TC6     - Timer/Counter 6
+    CONFIG_SAMD2L2_TC7     - Timer/Counter 6
+    CONFIG_SAMD2L2_USB     - USB device or host
+    CONFIG_SAMD2L2_WDT     - Watchdog Timer
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_SAMDL_SERCOM0_ISI2C, CONFIG_SAMDL_SERCOM0_ISSPI, or CONFIG_SAMDL_SERCOM0_ISUSART
-    CONFIG_SAMDL_SERCOM1_ISI2C, CONFIG_SAMDL_SERCOM1_ISSPI, or CONFIG_SAMDL_SERCOM1_ISUSART
-    CONFIG_SAMDL_SERCOM2_ISI2C, CONFIG_SAMDL_SERCOM2_ISSPI, or CONFIG_SAMDL_SERCOM2_ISUSART
-    CONFIG_SAMDL_SERCOM3_ISI2C, CONFIG_SAMDL_SERCOM3_ISSPI, or CONFIG_SAMDL_SERCOM3_ISUSART
-    CONFIG_SAMDL_SERCOM4_ISI2C, CONFIG_SAMDL_SERCOM4_ISSPI, or CONFIG_SAMDL_SERCOM4_ISUSART
-    CONFIG_SAMDL_SERCOM5_ISI2C, CONFIG_SAMDL_SERCOM5_ISSPI, or CONFIG_SAMDL_SERCOM5_ISUSART
+    CONFIG_SAMD2L2_SERCOM0_ISI2C, CONFIG_SAMD2L2_SERCOM0_ISSPI, or CONFIG_SAMD2L2_SERCOM0_ISUSART
+    CONFIG_SAMD2L2_SERCOM1_ISI2C, CONFIG_SAMD2L2_SERCOM1_ISSPI, or CONFIG_SAMD2L2_SERCOM1_ISUSART
+    CONFIG_SAMD2L2_SERCOM2_ISI2C, CONFIG_SAMD2L2_SERCOM2_ISSPI, or CONFIG_SAMD2L2_SERCOM2_ISUSART
+    CONFIG_SAMD2L2_SERCOM3_ISI2C, CONFIG_SAMD2L2_SERCOM3_ISSPI, or CONFIG_SAMD2L2_SERCOM3_ISUSART
+    CONFIG_SAMD2L2_SERCOM4_ISI2C, CONFIG_SAMD2L2_SERCOM4_ISSPI, or CONFIG_SAMD2L2_SERCOM4_ISUSART
+    CONFIG_SAMD2L2_SERCOM5_ISI2C, CONFIG_SAMD2L2_SERCOM5_ISSPI, or CONFIG_SAMD2L2_SERCOM5_ISUSART
 
   SAMD21 specific device driver settings
 
@@ -503,8 +503,8 @@ Configurations
      SERCOM4:
 
        System Type -> SAMD/L Peripheral Support
-         CONFIG_SAMDL_SERCOM3=y           : Enable one or both
-         CONFIG_SAMDL_SERCOM4=n
+         CONFIG_SAMD2L2_SERCOM3=y  : Enable one or both
+         CONFIG_SAMD2L2_SERCOM4=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
          CONFIG_USART4_SERIAL_CONSOLE=y  : Select only one for the console
@@ -618,8 +618,8 @@ Configuration sub-directories
          details.
 
        System Type -> Peripherals:
-         CONFIG_SAMDL_SERCOM0=y            : Use SERCOM0 if the I/O is in EXT1
-         CONFIG_SAMDL_SERCOM0_ISSPI=y      : Configure SERCOM0 as an SPI master
+         CONFIG_SAMD2L2_SERCOM0=y          : Use SERCOM0 if the I/O is in EXT1
+         CONFIG_SAMD2L2_SERCOM0_ISSPI=y    : Configure SERCOM0 as an SPI master
 
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
@@ -678,8 +678,8 @@ Configuration sub-directories
          EXT3: SPI is provided through SERCOM5
 
        System Type -> Peripherals:
-         CONFIG_SAMDL_SERCOM1=y             : Use SERCOM1 if the I/O is in EXT2
-         CONFIG_SAMDL_SERCOM1_ISSPI=y       : Configure SERCOM1 as an SPI master
+         CONFIG_SAMD2L2_SERCOM1=y           : Use SERCOM1 if the I/O is in EXT2
+         CONFIG_SAMD2L2_SERCOM1_ISSPI=y     : Configure SERCOM1 as an SPI master
 
        Device Drivers -> SPI
          CONFIG_SPI=y                       : Enable SPI support

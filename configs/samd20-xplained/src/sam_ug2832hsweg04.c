@@ -136,8 +136,8 @@
 #  error "The OLED driver requires CONFIG_LCD_UG2832HSWEG04 in the configuration"
 #endif
 
-#ifndef SAMDL_HAVE_SPI0
-#  error "The OLED driver requires SAMDL_HAVE_SPI0 in the configuration"
+#ifndef SAMD2L2_HAVE_SPI0
+#  error "The OLED driver requires SAMD2L2_HAVE_SPI0 in the configuration"
 #endif
 
 #ifndef CONFIG_SPI_CMDDATA

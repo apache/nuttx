@@ -74,7 +74,7 @@ void sam_boardinitialize(void)
    * sam_spidev_initialize() has been brought into the link.
    */
 
-#ifdef SAMDL_HAVE_SPI
+#ifdef SAMD2L2_HAVE_SPI
   if (sam_spidev_initialize)
     {
       sam_spidev_initialize();

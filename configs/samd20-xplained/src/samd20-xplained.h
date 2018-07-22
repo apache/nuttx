@@ -115,8 +115,8 @@
 
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
 
-#  ifndef SAMDL_HAVE_SPI0
-#    error SAMDL_HAVE_SPI0 is required to use the I/O1 module
+#  ifndef SAMD2L2_HAVE_SPI0
+#    error SAMD2L2_HAVE_SPI0 is required to use the I/O1 module
 #  endif
 
 #  if defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1)
@@ -167,8 +167,8 @@
 
 #ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
 
-#  ifndef SAMDL_HAVE_SPI0
-#    error SAMDL_HAVE_SPI0 is required to use the OLED1 module
+#  ifndef SAMD2L2_HAVE_SPI0
+#    error SAMD2L2_HAVE_SPI0 is required to use the OLED1 module
 #  endif
 
 #  ifndef CONFIG_SPI_CMDDATA
