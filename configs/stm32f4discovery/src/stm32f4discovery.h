@@ -507,6 +507,18 @@ int nunchuck_initialize(FAR char *devname);
 #endif
 
 /****************************************************************************
+ * Name: stm32_max7219init
+ *
+ * Description:
+ *   Initialize and register the max7219 numeric display controller
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LEDS_MAX7219
+int stm32_max7219init(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:

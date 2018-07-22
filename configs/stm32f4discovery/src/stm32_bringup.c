@@ -125,6 +125,14 @@ int stm32_bringup(void)
   stm32_zerocross_initialize();
 #endif
 
+#ifdef CONFIG_LEDS_MAX7219
+  ret = stm32_max7219init("/dev/numdisp0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: max7219_leds_register failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RGBLED
   /* Configure the RGB LED driver */
 

@@ -105,6 +105,10 @@ ifeq ($(CONFIG_STM32_ETHMAC),y)
 CSRCS += stm32_ethernet.c
 endif
 
+ifeq ($(CONFIG_LEDS_MAX7219),y)
+  CSRCS += stm32_max7219_leds.c
+endif
+
 ifeq ($(CONFIG_RGBLED),y)
 CSRCS += stm32_rgbled.c
 endif

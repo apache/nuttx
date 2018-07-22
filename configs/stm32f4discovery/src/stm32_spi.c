@@ -75,7 +75,7 @@ void weak_function stm32_spidev_initialize(void)
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX31855)
   (void)stm32_configgpio(GPIO_MAX31855_CS); /* MAX31855 chip select */
 #endif
-#ifdef CONFIG_LCD_MAX7219
+#if defined(CONFIG_LCD_MAX7219) || defined(CONFIG_LEDS_MAX7219)
   (void)stm32_configgpio(GPIO_MAX7219_CS);  /* MAX7219 chip select */
 #endif
 #if defined(CONFIG_LCD_ST7567)
@@ -132,7 +132,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
       stm32_gpiowrite(STM32_LCD_CS, !selected);
     }
 #endif
-#ifdef CONFIG_LCD_MAX7219
+#if defined(CONFIG_LCD_MAX7219) || defined(CONFIG_LEDS_MAX7219)
   if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(GPIO_MAX7219_CS, !selected);
