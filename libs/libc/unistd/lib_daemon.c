@@ -93,6 +93,10 @@
  *    and that the fork was successful and that we are the child of the
  *    fork.
  *
+ *    REVISIT:  Ideally we should remove the parent information from the
+ *    the new daemon's group data structure.  That would have a similar
+ *    effect to the above fork() operation.
+ *
  * Input Parameters:
  *   nochdir - If nochdir is zero, daemon() changes the process's current
  *     working directory to the root directory ("/"); otherwise, the current

@@ -165,7 +165,7 @@ choice
 config RTC_DS1302
 	bool "DS1302"
 	---help---
-		Enables support for the Maxim Integrated DS1307 serial RTC timer.
+		Enables support for the Maxim Integrated DS1302 serial RTC timer.
 
 config RTC_DS1307
 	bool "DS1307"
