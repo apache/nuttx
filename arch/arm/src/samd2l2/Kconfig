@@ -7,13 +7,13 @@ comment "Atmel SAMD/L Configuration Options"
 
 choice
 	prompt "Atmel SAMD/L Chip Selection"
-	default ARCH_CHIP_SAMD20J18 if ARCH_CHIP_SAMD
-	default ARCH_CHIP_SAMD21J18 if ARCH_CHIP_SAML
-	depends on ARCH_CHIP_SAMD || ARCH_CHIP_SAML
+	default ARCH_CHIP_SAMD20J18 if ARCH_CHIP_SAMD2X
+	default ARCH_CHIP_SAMD21J18 if ARCH_CHIP_SAML2X
+	depends on ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
 
 config ARCH_CHIP_SAMD20E14
 	bool "SAMD20E14"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -21,7 +21,7 @@ config ARCH_CHIP_SAMD20E14
 
 config ARCH_CHIP_SAMD20E15
 	bool "SAMD20E15"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -29,7 +29,7 @@ config ARCH_CHIP_SAMD20E15
 
 config ARCH_CHIP_SAMD20E16
 	bool "SAMD20E16"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -37,7 +37,7 @@ config ARCH_CHIP_SAMD20E16
 
 config ARCH_CHIP_SAMD20E17
 	bool "SAMD20E17"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -45,7 +45,7 @@ config ARCH_CHIP_SAMD20E17
 
 config ARCH_CHIP_SAMD20E18
 	bool "SAMD20E18"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -53,7 +53,7 @@ config ARCH_CHIP_SAMD20E18
 
 config ARCH_CHIP_SAMD20G14
 	bool "SAMD20G14"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -61,7 +61,7 @@ config ARCH_CHIP_SAMD20G14
 
 config ARCH_CHIP_SAMD20G15
 	bool "SAMD20G15"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -69,7 +69,7 @@ config ARCH_CHIP_SAMD20G15
 
 config ARCH_CHIP_SAMD20G16
 	bool "SAMD20G16"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -77,7 +77,7 @@ config ARCH_CHIP_SAMD20G16
 
 config ARCH_CHIP_SAMD20G17
 	bool "SAMD20G17"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -85,7 +85,7 @@ config ARCH_CHIP_SAMD20G17
 
 config ARCH_CHIP_SAMD20G18
 	bool "SAMD20G18"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -93,7 +93,7 @@ config ARCH_CHIP_SAMD20G18
 
 config ARCH_CHIP_SAMD20J14
 	bool "SAMD20J14"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -101,7 +101,7 @@ config ARCH_CHIP_SAMD20J14
 
 config ARCH_CHIP_SAMD20J15
 	bool "SAMD20J15"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -109,7 +109,7 @@ config ARCH_CHIP_SAMD20J15
 
 config ARCH_CHIP_SAMD20J16
 	bool "SAMD20J16"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -117,7 +117,7 @@ config ARCH_CHIP_SAMD20J16
 
 config ARCH_CHIP_SAMD20J17
 	bool "SAMD20J17"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -125,7 +125,7 @@ config ARCH_CHIP_SAMD20J17
 
 config ARCH_CHIP_SAMD20J18
 	bool "SAMD20J18"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -133,7 +133,7 @@ config ARCH_CHIP_SAMD20J18
 
 config ARCH_CHIP_SAMD21E15A
 	bool "SAMD21E15A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -141,7 +141,7 @@ config ARCH_CHIP_SAMD21E15A
 
 config ARCH_CHIP_SAMD21E15B
 	bool "SAMD21E15B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -149,7 +149,7 @@ config ARCH_CHIP_SAMD21E15B
 
 config ARCH_CHIP_SAMD21E16A
 	bool "SAMD21E16A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -157,7 +157,7 @@ config ARCH_CHIP_SAMD21E16A
 
 config ARCH_CHIP_SAMD21E16B
 	bool "SAMD21E16B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -165,7 +165,7 @@ config ARCH_CHIP_SAMD21E16B
 
 config ARCH_CHIP_SAMD21E17A
 	bool "SAMD21E17A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -173,7 +173,7 @@ config ARCH_CHIP_SAMD21E17A
 
 config ARCH_CHIP_SAMD21E18A
 	bool "SAMD21E18A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -181,7 +181,7 @@ config ARCH_CHIP_SAMD21E18A
 
 config ARCH_CHIP_SAMD21G15A
 	bool "SAMD21G15A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
@@ -189,7 +189,7 @@ config ARCH_CHIP_SAMD21G15A
 
 config ARCH_CHIP_SAMD21G15B
 	bool "SAMD21G15B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
@@ -197,7 +197,7 @@ config ARCH_CHIP_SAMD21G15B
 
 config ARCH_CHIP_SAMD21G16A
 	bool "SAMD21G16A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
@@ -205,7 +205,7 @@ config ARCH_CHIP_SAMD21G16A
 
 config ARCH_CHIP_SAMD21G16B
 	bool "SAMD21G16B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -213,7 +213,7 @@ config ARCH_CHIP_SAMD21G16B
 
 config ARCH_CHIP_SAMD21G17A
 	bool "SAMD21G17A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
@@ -221,7 +221,7 @@ config ARCH_CHIP_SAMD21G17A
 
 config ARCH_CHIP_SAMD21G18A
 	bool "SAMD21G18A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21G
 	---help---
@@ -229,7 +229,7 @@ config ARCH_CHIP_SAMD21G18A
 
 config ARCH_CHIP_SAMD21J15A
 	bool "SAMD21J15A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
@@ -237,7 +237,7 @@ config ARCH_CHIP_SAMD21J15A
 
 config ARCH_CHIP_SAMD21J15B
 	bool "SAMD21J15B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
@@ -245,7 +245,7 @@ config ARCH_CHIP_SAMD21J15B
 
 config ARCH_CHIP_SAMD21J16A
 	bool "SAMD21J16A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
@@ -253,7 +253,7 @@ config ARCH_CHIP_SAMD21J16A
 
 config ARCH_CHIP_SAMD21J16B
 	bool "SAMD21J16B"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
@@ -261,7 +261,7 @@ config ARCH_CHIP_SAMD21J16B
 
 config ARCH_CHIP_SAMD21J17A
 	bool "SAMD21J17A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21E
 	---help---
@@ -269,7 +269,7 @@ config ARCH_CHIP_SAMD21J17A
 
 config ARCH_CHIP_SAMD21J18A
 	bool "SAMD21J18A"
-	depends on ARCH_CHIP_SAMD
+	depends on ARCH_CHIP_SAMD2X
 	select ARCH_FAMILY_SAMD21
 	select ARCH_FAMILY_SAMD21J
 	---help---
@@ -277,7 +277,7 @@ config ARCH_CHIP_SAMD21J18A
 
 config ARCH_CHIP_SAML21E15
 	bool "SAML21E15"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21E
 	---help---
@@ -285,7 +285,7 @@ config ARCH_CHIP_SAML21E15
 
 config ARCH_CHIP_SAML21E16
 	bool "SAML21E16"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21E
 	---help---
@@ -293,7 +293,7 @@ config ARCH_CHIP_SAML21E16
 
 config ARCH_CHIP_SAML21E17
 	bool "SAML21E17"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21E
 	---help---
@@ -301,7 +301,7 @@ config ARCH_CHIP_SAML21E17
 
 config ARCH_CHIP_SAML21E18
 	bool "SAML21E18"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21E
 	---help---
@@ -309,7 +309,7 @@ config ARCH_CHIP_SAML21E18
 
 config ARCH_CHIP_SAML21G16
 	bool "SAML21G16"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21G
 	---help---
@@ -317,7 +317,7 @@ config ARCH_CHIP_SAML21G16
 
 config ARCH_CHIP_SAML21G17
 	bool "SAML21G17"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21G
 	---help---
@@ -325,7 +325,7 @@ config ARCH_CHIP_SAML21G17
 
 config ARCH_CHIP_SAML21G18
 	bool "SAML21G18"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21G
 	---help---
@@ -333,7 +333,7 @@ config ARCH_CHIP_SAML21G18
 
 config ARCH_CHIP_SAML21J16
 	bool "SAML21J16"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21J
 	---help---
@@ -341,7 +341,7 @@ config ARCH_CHIP_SAML21J16
 
 config ARCH_CHIP_SAML21J17
 	bool "SAML21J17"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21J
 	---help---
@@ -349,7 +349,7 @@ config ARCH_CHIP_SAML21J17
 
 config ARCH_CHIP_SAML21J18
 	bool "SAML21J18"
-	depends on ARCH_CHIP_SAML
+	depends on ARCH_CHIP_SAML2X
 	select ARCH_FAMILY_SAML21
 	select ARCH_FAMILY_SAML21J
 	---help---
