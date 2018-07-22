@@ -101,7 +101,14 @@ static int fat_checkfsinfo(struct fat_mountpt_s *fs)
  * Name: fat_checkbootrecord
  *
  * Description:
- *   Read a sector and verify that it is a a FAT boot record.
+ *   Verify that that currently buffer sector is a valid FAT boot record.
+ *   This may refer to either the older (pre-partition) MBR sector that lies
+ *   at sector one or to the more common FBR that lies at the beginning of
+ *   the partition.
+ *
+ *   NOTE: The more common FBR naming is used in the file even when parsing
+ *   an MBR.  This is possible because the field offsets and meaning are
+ *   identical.
  *
  ****************************************************************************/
 
@@ -119,11 +126,12 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * match the reported hardware sector size.
    */
 
-  if (MBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
-      MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
+  if (FBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
+      FBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
-      ferr("ERROR: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
-            MBR_GETSIGNATURE(fs->fs_buffer), MBR_GETBYTESPERSEC(fs->fs_buffer),
+      fwarn("WARNING: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
+            FBR_GETSIGNATURE(fs->fs_buffer),
+            FBR_GETBYTESPERSEC(fs->fs_buffer),
             fs->fs_hwsectorsize);
 
       return -EINVAL;
@@ -139,7 +147,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
    * for FAT32).
    */
 
-  fs->fs_rootentcnt = MBR_GETROOTENTCNT(fs->fs_buffer);
+  fs->fs_rootentcnt = FBR_GETROOTENTCNT(fs->fs_buffer);
   if (fs->fs_rootentcnt != 0)
     {
       notfat32       = true; /* Must be zero for FAT32 */
@@ -148,58 +156,58 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   /* Determine the number of sectors in a FAT. */
 
-  fs->fs_nfatsects = MBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
+  fs->fs_nfatsects = FBR_GETFATSZ16(fs->fs_buffer); /* Should be zero */
   if (fs->fs_nfatsects)
     {
       notfat32 = true; /* Must be zero for FAT32 */
     }
   else
     {
-      fs->fs_nfatsects = MBR_GETFATSZ32(fs->fs_buffer);
+      fs->fs_nfatsects = FBR_GETFATSZ32(fs->fs_buffer);
     }
 
   if (!fs->fs_nfatsects || fs->fs_nfatsects >= fs->fs_hwnsectors)
     {
-      ferr("ERROR: fs_nfatsects %d fs_hwnsectors: %d\n",
-           fs->fs_nfatsects, fs->fs_hwnsectors);
+      fwarn("WARNING: fs_nfatsects %d fs_hwnsectors: %d\n",
+            fs->fs_nfatsects, fs->fs_hwnsectors);
 
       return -EINVAL;
     }
 
   /* Get the total number of sectors on the volume. */
 
-  fs->fs_fattotsec = MBR_GETTOTSEC16(fs->fs_buffer); /* Should be zero */
+  fs->fs_fattotsec = FBR_GETTOTSEC16(fs->fs_buffer); /* Should be zero */
   if (fs->fs_fattotsec)
     {
       notfat32 = true; /* Must be zero for FAT32 */
     }
   else
     {
-      fs->fs_fattotsec = MBR_GETTOTSEC32(fs->fs_buffer);
+      fs->fs_fattotsec = FBR_GETTOTSEC32(fs->fs_buffer);
     }
 
   if (!fs->fs_fattotsec || fs->fs_fattotsec > fs->fs_hwnsectors)
     {
-      ferr("ERROR: fs_fattotsec %d fs_hwnsectors: %d\n",
-           fs->fs_fattotsec, fs->fs_hwnsectors);
+      fwarn("WARNING: fs_fattotsec %d fs_hwnsectors: %d\n",
+            fs->fs_fattotsec, fs->fs_hwnsectors);
 
       return -EINVAL;
     }
 
   /* Get the total number of reserved sectors */
 
-  fs->fs_fatresvdseccount = MBR_GETRESVDSECCOUNT(fs->fs_buffer);
+  fs->fs_fatresvdseccount = FBR_GETRESVDSECCOUNT(fs->fs_buffer);
   if (fs->fs_fatresvdseccount > fs->fs_hwnsectors)
     {
-      ferr("ERROR: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
-           fs->fs_fatresvdseccount, fs->fs_hwnsectors);
+      fwarn("WARNING: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
+            fs->fs_fatresvdseccount, fs->fs_hwnsectors);
 
       return -EINVAL;
     }
 
   /* Get the number of FATs. This is probably two but could have other values */
 
-  fs->fs_fatnumfats = MBR_GETNUMFATS(fs->fs_buffer);
+  fs->fs_fatnumfats = FBR_GETNUMFATS(fs->fs_buffer);
   ntotalfatsects = fs->fs_fatnumfats * fs->fs_nfatsects;
 
   /* Get the total number of data sectors */
@@ -207,15 +215,15 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
-      ferr("ERROR: ndatasectors %d fs_hwnsectors: %d\n",
-           ndatasectors, fs->fs_hwnsectors);
+      fwarn("WARNING: ndatasectors %d fs_hwnsectors: %d\n",
+            ndatasectors, fs->fs_hwnsectors);
 
       return -EINVAL;
     }
 
   /* Get the sectors per cluster */
 
-  fs->fs_fatsecperclus = MBR_GETSECPERCLUS(fs->fs_buffer);
+  fs->fs_fatsecperclus = FBR_GETSECPERCLUS(fs->fs_buffer);
 
   /* Calculate the number of clusters */
 
@@ -235,13 +243,13 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else if (!notfat32)
     {
-      fs->fs_fsinfo = fs->fs_fatbase + MBR_GETFSINFO(fs->fs_buffer);
+      fs->fs_fsinfo = fs->fs_fatbase + FBR_GETFSINFO(fs->fs_buffer);
       fs->fs_type   = FSTYPE_FAT32;
     }
   else
     {
-      ferr("ERROR: notfat32: %d fs_nclusters: %d\n",
-           notfat32, fs->fs_nclusters);
+      fwarn("WARNING: notfat32: %d fs_nclusters: %d\n",
+            notfat32, fs->fs_nclusters);
 
       return -EINVAL;
     }
@@ -254,7 +262,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (fs->fs_type == FSTYPE_FAT32)
     {
-      fs->fs_rootbase = MBR_GETROOTCLUS(fs->fs_buffer);
+      fs->fs_rootbase = FBR_GETROOTCLUS(fs->fs_buffer);
     }
   else
     {
@@ -547,9 +555,9 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       goto errout;
     }
 
-  /* Search FAT boot record on the drive.  First check at sector zero.  This
-   * could be either the boot record or a partition that refers to the boot
-   * record.
+  /* Search FAT boot record on the drive.  First check the MBR at sector
+   * zero.  This could be either the boot record or a partition that refers
+   * to the boot record.
    *
    * First read sector zero.  This will be the first access to the drive and a
    * likely failure point.
@@ -562,13 +570,17 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       goto errout_with_buffer;
     }
 
+  /* Older style MBR (pre-partition table) includes boot information for the
+   * partition-less drive.  Check for that case first.
+   */
+
   ret = fat_checkbootrecord(fs);
   if (ret != OK)
     {
-      /* The contents of sector 0 is not a boot record.  It could be a DOS
-       * partition, however.  Assume it is a partition and get the offset
-       * into the partition table.  This table is at offset MBR_TABLE and is
-       * indexed by 16x the partition number.
+      /* The contents of sector 0 is not a boot record.  It could be have
+       * DOS partitions, however.  Get the offset into the partition table.
+       * This table is at offset MBR_TABLE and is indexed by 16x the
+       * partition number.
        */
 
       int i;
@@ -612,13 +624,13 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
             {
               /* Break out of the loop if a valid boot record is found */
 
-              finfo("MBR found in partition %d\n", i);
+              finfo("FBR found in partition %d\n", i);
               break;
             }
 
           /* Re-read sector 0 so that we can check the next partition */
 
-          finfo("Partition %d is not an MBR\n", i);
+          finfo("Partition %d is not an FBR\n", i);
           ret = fat_hwread(fs, fs->fs_buffer, 0, 1);
           if (ret < 0)
             {
@@ -629,7 +641,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
       if (i > 3)
         {
-          ferr("ERROR: No valid MBR\n");
+          ferr("ERROR: No valid boot record\n");
           ret = -EINVAL;
           goto errout_with_buffer;
         }
