@@ -733,7 +733,6 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
 
       putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
     }
-
 }
 
 /****************************************************************************
