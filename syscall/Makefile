@@ -86,15 +86,13 @@ $(BIN2): $(STUB_OBJS)
 
 depend: .depend
 
-$(MKSYSCALL):
-	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools -f Makefile.host mksyscall
-
 .context: syscall.csv
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools -f Makefile.host mksyscall
 	$(Q) (cd proxies; $(MKSYSCALL) -p $(CSVFILE);)
 	$(Q) (cd stubs; $(MKSYSCALL) -s $(CSVFILE);)
 	$(Q) touch $@
 
-context: $(MKSYSCALL) .context
+context: .context
 
 clean:
 	$(call DELFILE, $(BIN1))
