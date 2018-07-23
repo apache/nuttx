@@ -152,8 +152,10 @@
 #define SDHC_SNDDONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_BWR|SDHC_INT_TC)
 #define SDHC_XFRDONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_BRR|SDHC_INT_BWR|SDHC_INT_TC)
 
-#define SCHC_DMAERR_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE|SDHC_INT_DMAE)
-#define SDHC_DMADONE_INTS  (SCHC_DMAERR_INTS|SDHC_INT_DINT)
+/* For DMA operations DINT is not interesting TC will indicate completions */
+
+#define SCHC_DMAERR_INTS   (SCHC_XFRERR_INTS|SDHC_INT_DMAE)
+#define SDHC_DMADONE_INTS  (SCHC_DMAERR_INTS|SDHC_INT_TC)
 
 #define SDHC_WAITALL_INTS  (SDHC_RESPDONE_INTS|SDHC_XFRDONE_INTS|SDHC_DMADONE_INTS)
 
@@ -731,6 +733,7 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
 
       putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
     }
+
 }
 
 /****************************************************************************
@@ -1026,6 +1029,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
 {
 #ifdef CONFIG_KINETIS_SDHC_DMA
   uint32_t regval;
+  uint32_t proctl;
 #endif
 
   /* Disable all transfer related interrupts */
@@ -1039,11 +1043,16 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
 #ifdef CONFIG_KINETIS_SDHC_DMA
-  /* Stop the DMA by resetting the data path */
+  /* Stop the DMA by resetting the data path but first save the
+   * state of the SDHC_PROCTL as it will be reset (in bits 24-0)
+   * and we will loose the DTW (4bit mode) setting
+   */
 
+  proctl = getreg32(KINETIS_SDHC_PROCTL);
   regval = getreg32(KINETIS_SDHC_SYSCTL);
   regval |= SDHC_SYSCTL_RSTD;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
+  putreg32(proctl, KINETIS_SDHC_PROCTL);
 #endif
 
   /* Mark the transfer finished */
