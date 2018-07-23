@@ -3173,12 +3173,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
    */
 
   psr = mcan_getreg(priv, SAM_MCAN_PSR_OFFSET);
-  if (psr & MCAN_PSR_BO)
-    {
-      errbits |= CAN_ERROR_BUSOFF;
-    }
-
-  if (psr & MCAN_PSR_EP)
+  if ((psr & MCAN_PSR_EP) != 0)
     {
       data[1] |= (CAN_ERROR1_RXPASSIVE | CAN_ERROR1_TXPASSIVE);
     }
@@ -3199,7 +3194,11 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
     {
       /* Bus_Off Status changed */
 
-      if (!(psr & MCAN_PSR_BO))
+      if ((psr & MCAN_PSR_BO) != 0)
+        {
+          errbits |= CAN_ERROR_BUSOFF;
+        }
+      else
         {
           errbits |= CAN_ERROR_RESTARTED;
         }
