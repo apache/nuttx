@@ -497,7 +497,7 @@ SAMD20 Xplained Pro-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_SAMD
+       CONFIG_ARCH_CHIP_SAMD2X
        CONFIG_ARCH_CHIP_SAMD20
        CONFIG_ARCH_CHIP_ATSAMD20J18
 

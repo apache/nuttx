@@ -533,7 +533,7 @@ SAML21 Xplained Pro-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_SAML
+       CONFIG_ARCH_CHIP_SAML2X
        CONFIG_ARCH_CHIP_SAML21
        CONFIG_ARCH_CHIP_ATSAML21J18
 
