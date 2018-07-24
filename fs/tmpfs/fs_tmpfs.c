@@ -1733,7 +1733,7 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Recover our private data from the struct file instance */
 
-  tfo = filep->f_inode->i_private;
+  tfo = filep->f_priv;
 
   DEBUGASSERT(tfo != NULL);
 
