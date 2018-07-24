@@ -52,9 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef DEBUG_MEMFAULTS         /* Define to debug memory management faults */
-
-#ifdef DEBUG_MEMFAULTS
+#ifdef CONFIG_DEBUG_MEMFAULT
 # define mferr(format, ...)  _alert(format, ##__VA_ARGS__)
 # define mfinfo(format, ...) _alert(format, ##__VA_ARGS__)
 #else
@@ -79,11 +77,15 @@
 
 int up_memfault(int irq, FAR void *context, FAR void *arg)
 {
+#if defined(CONFIG_DEBUG_MEMFAULT)
+  uint32_t *regs = (uint32_t *)context;
+#endif
+
   /* Dump some memory management fault info */
 
   (void)up_irq_save();
   _alert("PANIC!!! Memory Management Fault:\n");
-  mfinfo("  IRQ: %d context: %p\n", irq, regs);
+  mfinfo("  IRQ: %d context: %p\n", irq, context);
   _alert("  CFAULTS: %08x MMFAR: %08x\n",
         getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
   mfinfo("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",

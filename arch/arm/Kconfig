@@ -735,6 +735,15 @@ config DEBUG_HARDFAULT
 		output is sometimes helpful when debugging difficult hard fault problems,
 		but may be more than you typically want to see.
 
+config DEBUG_MEMFAULT
+	bool "Verbose Mem-Fault Debug"
+	default n
+	depends on DEBUG_FEATURES && ARCH_USE_MPU
+	---help---
+		Enables verbose debug output when a mem fault is occurs.  This verbose
+		output is sometimes helpful when debugging difficult mem fault problems,
+		but may be more than you typically want to see.
+
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif
