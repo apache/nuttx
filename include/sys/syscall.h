@@ -555,7 +555,7 @@
 #  define SYS_getrandom                (SYS_prctl + 1)
 #  define SYS_maxsyscall               (SYS_prctl + 2)
 #else
-#  define SYS_maxsyscall               SYS_prctl
+#  define SYS_maxsyscall               (SYS_prctl + 1)
 #endif
 
 /* Note that the reported number of system calls does *NOT* include the
