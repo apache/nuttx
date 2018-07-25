@@ -241,8 +241,8 @@
 
 /* Address register */
 
-#define I2C_ADDR_SHIFT             (8)       /* Bits 8-10: Address */
-#define I2C_ADDR_MASK              (7 << I2C_ADDR_SHIFT)
+#define I2C_ADDR_SHIFT             (0)       /* Bits 0-10: Address */
+#define I2C_ADDR_MASK              (0x3ff << I2C_ADDR_SHIFT)
 #  define I2C_ADDR(n)              ((uint32-_t(n) << I2C_ADDR_SHIFT)
 #define I2C_ADDR_LENEN             (1 << 13) /* Bit 13: Transfer length enable */
 #define I2C_ADDR_HS                (1 << 14) /* Bit 14: High speed */
