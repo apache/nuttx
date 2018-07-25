@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/netdb/lib_gethostbynamer.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,19 +74,29 @@ struct hostent_info_s
  * Public Data
  ****************************************************************************/
 
-#ifndef __KERNEL__
+/* In the FLAT build, there is a single copy of this global variable that
+ * can be accessed from application or OS code.  In the protected and
+ * kernel build modes, however, there must be separate copies of OS and
+ * users spaces.
+ */
+
+#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
 /* Local loopback addresses for user mode */
 
 #ifdef CONFIG_NET_IPv4
-const in_addr_t      g_lo_ipv4addr   = HTONL(0x7f000001);
+
+const in_addr_t g_lo_ipv4addr = HTONL(0x7f000001);
+
 #else /* CONFIG_NET_IPv6 */
-const net_ipv6addr_t g_lo_ipv6addr   =
+
+const net_ipv6addr_t g_lo_ipv6addr =
 {
   HTONS(0), HTONS(0), HTONS(0), HTONS(0),
   HTONS(0), HTONS(0), HTONS(0), HTONS(1)
 };
+
 #endif
-#endif /* ifndef __KERNEL */
+#endif /* !CONFIG_BUILD_FLAT && !__KERNEL__ */
 
 /****************************************************************************
  * Private functions
