@@ -582,6 +582,20 @@ config SAMD2L2_WDT
 
 endmenu
 
+config SAMD2L2_DMAC_NDESC
+	int "Number of additional DMA Descriptors"
+	default 0
+	depends on SAMD2L2_DMAC
+	---help---
+		This provides the number of additional DMA descriptors that can be
+		use to support multi-linked DMA transfers.  A minimum of 16
+		descriptors will always be allocated (16 for the base descriptor which
+		overlap the writeback descriptors).  If this value is set to zero,
+		then only single block DMA transfers can be supported.
+
+		Each additional DMA descriptor will require 16-bytes for LPRAM
+		memory.
+
 choice
 	prompt "SERCOM0 mode"
 	default SAMD2L2_SERCOM0_ISUSART
@@ -601,20 +615,6 @@ config SAMD2L2_SERCOM0_ISUSART
 	select USART0_SERIALDRIVER
 
 endchoice
-
-config SAMD2L2_DMAC_NDESC
-	int "Number of additional DMA Descriptors"
-	default 0
-	depends on SAMD2L2_DMAC
-	---help---
-		This provides the number of additional DMA descriptors that can be
-		use to support multi-linked DMA transfers.  A minimum of 16
-		descriptors will always be allocated (16 for the base descriptor which
-		overlap the writeback descriptors).  If this value is set to zero,
-		then only single block DMA transfers can be supported.
-
-		Each additional DMA descriptor will require 16-bytes for LPRAM
-		memory.
 
 choice
 	prompt "SERCOM1 mode"
