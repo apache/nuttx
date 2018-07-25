@@ -71,6 +71,24 @@ struct hostent_info_s
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __KERNEL__
+/* Local loopback addresses for user mode */
+
+#ifdef CONFIG_NET_IPv4
+const in_addr_t      g_lo_ipv4addr   = HTONL(0x7f000001);
+#else /* CONFIG_NET_IPv6 */
+const net_ipv6addr_t g_lo_ipv6addr   =
+{
+  HTONS(0), HTONS(0), HTONS(0), HTONS(0),
+  HTONS(0), HTONS(0), HTONS(0), HTONS(1)
+};
+#endif
+#endif /* ifndef __KERNEL */
+
+/****************************************************************************
  * Private functions
  ****************************************************************************/
 
