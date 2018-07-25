@@ -72,10 +72,8 @@
 #define SAM_EVSYS_INTENSET                 (SAM_EVSYS_BASE+SAM_EVSYS_INTENSET_OFFSET
 #define SAM_EVSYS_INTFLAG                  (SAM_EVSYS_BASE+SAM_EVSYS_INTFLAG_OFFSET)
 #define SAM_EVSYS_SWEVT                    (SAM_EVSYS_BASE+SAM_EVSYS_SWEVT_OFFSET)
-#define SAM_EVSYS_CHANNEL_OFFSET(n)        (0x0020 + ((n) << 2)) /* Channel registers */
-#define SAM_EVSYS_CHANNEL_OFFSET(n)        (0x0020 + ((n) << 2)) /* Channel registers */
-#define SAM_EVSYS_USER_OFFSET(n)           (0x0080 + ((m) << 2)) /* User registers */
-#define SAM_EVSYS_USER_OFFSET(n)           (0x0080 + ((m) << 2)) /* User registers */
+#define SAM_EVSYS_CHANNEL_BASE(n)          (SAM_EVSYS_BASE+SAM_EVSYS_CHANNEL_OFFSET(n))
+#define SAM_EVSYS_USER_BASE(n)             (SAM_EVSYS_BASE+SAM_EVSYS_USER_OFFSET(n))
 
 /* EVSYS register bit definitions ***********************************************************/
 
