@@ -184,9 +184,9 @@ const struct sam_usart_config_s g_usart5config =
 
 const struct sam_usart_config_s *g_usartconfig[SAMD2L2_NSERCOM] =
 {
-#if SAMD2L2_NSERCOM > 5
-#ifdef SAMD2L2_HAVE_USART5
-  &g_usart5config,
+#if SAMD2L2_NSERCOM > 0
+#ifdef SAMD2L2_HAVE_USART0
+  &g_usart0config,
 #else
   (const struct sam_usart_config_s *)0,
 #endif

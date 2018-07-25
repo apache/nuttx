@@ -82,7 +82,7 @@
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart0port /* USART0 is console */
 #    define TTYS0_DEV           g_usart0port /* USART0 is ttyS0 */
-#    define USART0_ASSIGNED      1
+#    define USART0_ASSIGNED     1
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart1port /* USART1 is console */
 #    define TTYS0_DEV           g_usart1port /* USART1 is ttyS0 */
@@ -102,6 +102,7 @@
 #elif defined(CONFIG_USART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart5port /* USART5 is console */
 #    define TTYS0_DEV           g_usart5port /* USART5 is ttyS0 */
+#    define USART5_ASSIGNED     1
 #else
 #  undef CONSOLE_DEV                         /* No console */
 #  if defined(SAMD2L2_HAVE_USART0)
