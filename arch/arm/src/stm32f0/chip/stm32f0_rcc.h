@@ -168,14 +168,14 @@
 #define RCC_CFGR_MCOPRE_SHIFT       (28)                         /* Bits 28-30: Microcontroller Clock Output Prescaler,
                                                                   * not available on STM32F05x */
 #define RCC_CFGR_MCOPRE_MASK        (3 << RCC_CFGR_MCOPRE_SHIFT)
-#  define RCC_CFGR_MCOPRE_div1      (0 << RCC_CFGR_MCOPRE_SHIFT) /* 000: MCO is divided by 1 */
-#  define RCC_CFGR_MCOPRE_div2      (1 << RCC_CFGR_MCOPRE_SHIFT) /* 001: MCO is divided by 2 */
-#  define RCC_CFGR_MCOPRE_div4      (2 << RCC_CFGR_MCOPRE_SHIFT) /* 010: MCO is divided by 4 */
-#  define RCC_CFGR_MCOPRE_div8      (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: MCO is divided by 8 */
-#  define RCC_CFGR_MCOPRE_div16     (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: MCO is divided by 16 */
-#  define RCC_CFGR_MCOPRE_div32     (5 << RCC_CFGR_MCOPRE_SHIFT) /* 101: MCO is divided by 32 */
-#  define RCC_CFGR_MCOPRE_div64     (6 << RCC_CFGR_MCOPRE_SHIFT) /* 110: MCO is divided by 64 */
-#  define RCC_CFGR_MCOPRE_div128    (7 << RCC_CFGR_MCOPRE_SHIFT) /* 111: MCO is divided by 128 */
+#  define RCC_CFGR_MCOPRE_DIV1      (0 << RCC_CFGR_MCOPRE_SHIFT) /* 000: MCO is divided by 1 */
+#  define RCC_CFGR_MCOPRE_DIV2      (1 << RCC_CFGR_MCOPRE_SHIFT) /* 001: MCO is divided by 2 */
+#  define RCC_CFGR_MCOPRE_DIV4      (2 << RCC_CFGR_MCOPRE_SHIFT) /* 010: MCO is divided by 4 */
+#  define RCC_CFGR_MCOPRE_DIV8      (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: MCO is divided by 8 */
+#  define RCC_CFGR_MCOPRE_DIV16     (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: MCO is divided by 16 */
+#  define RCC_CFGR_MCOPRE_DIV32     (5 << RCC_CFGR_MCOPRE_SHIFT) /* 101: MCO is divided by 32 */
+#  define RCC_CFGR_MCOPRE_DIV64     (6 << RCC_CFGR_MCOPRE_SHIFT) /* 110: MCO is divided by 64 */
+#  define RCC_CFGR_MCOPRE_DIV128    (7 << RCC_CFGR_MCOPRE_SHIFT) /* 111: MCO is divided by 128 */
 
 
 /* Clock interrupt register */
