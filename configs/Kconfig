@@ -454,6 +454,16 @@ config ARCH_BOARD_MCU123_LPC214X
 		lpc214x development board. This OS is also built with the arm-nuttx-elf
 		toolchain*.  The port supports serial, timer0, spi, and usb.
 
+config ARCH_BOARD_METRO_M4
+	bool "Adafruit M4 Metro"
+	depends on ARCH_CHIP_SAMD51J19
+	select ARCH_HAVE_LEDS
+	---help---
+	---help---
+		This configuration is the port of NuttX to the Adafruit Metro M4.
+		The Metro M4 uses a Arduino form factor and and pinout.  It's powered
+		with an ATSAMD51J19
+
 config ARCH_BOARD_MICROPENDOUS3
 	bool "Opendous Micropendous 3 board"
 	depends on ARCH_CHIP_AT90USB646 || ARCH_CHIP_AT90USB647 || ARCH_CHIP_AT90USB1286 || ARCH_CHIP_AT90USB1287
@@ -1691,6 +1701,7 @@ config ARCH_BOARD
 	default "mbed"                     if ARCH_BOARD_MBED
 	default "mcb1700"                  if ARCH_BOARD_MCB1700
 	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
+	default "metro-m4"                 if ARCH_BOARD_METRO_M4
 	default "micropendous3"            if ARCH_BOARD_MICROPENDOUS3
 	default "mirtoo"                   if ARCH_BOARD_MIRTOO
 	default "misoc"                    if ARCH_BOARD_MISOC
@@ -1973,6 +1984,9 @@ source "configs/mcb1700/Kconfig"
 endif
 if ARCH_BOARD_MCU123_LPC214X
 source "configs/mcu123-lpc214x/Kconfig"
+endif
+if ARCH_BOARD_METRO_M4
+source "configs/metro-m4/Kconfig"
 endif
 if ARCH_BOARD_MICROPENDOUS3
 source "configs/micropendous3/Kconfig"

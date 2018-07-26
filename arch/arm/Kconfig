@@ -222,16 +222,28 @@ config ARCH_CHIP_SAMA5
 		Atmel SAMA5 (ARM Cortex-A5)
 
 config ARCH_CHIP_SAMD2X
-	bool "Atmel SAMD2x"
+	bool "Microchip/Atmel SAMD2x"
 	select ARCH_CORTEXM0
 	---help---
-		Atmel SAMD (ARM Cortex-M0+)
+		Microchip (formerly Atmel) SAMD2X (ARM Cortex-M0+)
 
 config ARCH_CHIP_SAML2X
-	bool "Atmel SAML2x"
+	bool "Microchip/Atmel SAML2x"
 	select ARCH_CORTEXM0
 	---help---
-		Atmel SAML (ARM Cortex-M0+)
+		Microchip (formerly Atmel) SAML2X (ARM Cortex-M0+)
+
+config ARCH_CHIP_SAMD5X
+	bool "Microchip SAMD5x"
+	select ARCH_CORTEXM4
+	---help---
+		Microchip SAMD5X (ARM Cortex-M4)
+
+config ARCH_CHIP_SAME5X
+	bool "Microchip SAME5x"
+	select ARCH_CORTEXM4
+	---help---
+		Microchip SAME5x (ARM Cortex-M4)
 
 config ARCH_CHIP_SAM34
 	bool "Atmel SAM3/SAM4"
@@ -580,6 +592,7 @@ config ARCH_CHIP
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samd2l2"	if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
+	default "samd5e5"	if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
@@ -845,6 +858,9 @@ source arch/arm/src/sama5/Kconfig
 endif
 if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
 source arch/arm/src/samd2l2/Kconfig
+endif
+if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
+source arch/arm/src/samd5e5/Kconfig
 endif
 if ARCH_CHIP_SAM34
 source arch/arm/src/sam34/Kconfig

@@ -365,6 +365,11 @@ configs/mbed
 configs/mcb1700
   Board support for the Keil MCB1700
 
+configs/metro-m4
+  Th configurations in this directory are part of the port of NuttX to the
+  Adafruit Metro M4.  The Metro M4 uses a Arduino form factor and and pinout.
+  It's powered with an ATSAMD51J19
+
 configs/mikroe-stm32f4
   This is the port of NuttX to the MikroElektronika Mikromedia for STM32F4
   development board.  Contributed by Ken Petit.

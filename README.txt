@@ -1827,6 +1827,8 @@ nuttx/
  |   |   `- README.txt
  |   |- mcu123-lpc214x/
  |   |   `- README.txt
+ |   |- metro-m4/
+ |   |   `- README.txt
  |   |- micropendous3/
  |   |   `- README.txt
  |   |- mikroe-stm32f/
