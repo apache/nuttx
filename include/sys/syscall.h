@@ -535,17 +535,16 @@
 #  define SYS_sendto                   (__SYS_network + 10)
 #  define SYS_setsockopt               (__SYS_network + 11)
 #  define SYS_socket                   (__SYS_network + 12)
-#  define SYS_nnetsocket               (__SYS_network + 13)
 #else
-#  define SYS_nnetsocket               __SYS_network
+#  define SYS_socket                    __SYS_network
 #endif
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SYS_prctl                    (SYS_nnetsocket + 1)
+#  define SYS_prctl                    (SYS_socket + 1)
 #else
-#  define SYS_prctl                    SYS_nnetsocket
+#  define SYS_prctl                    SYS_socket
 #endif
 
 /* The following is defined only if entropy pool random number generator
