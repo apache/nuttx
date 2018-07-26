@@ -116,7 +116,7 @@ void sam_eic_dumpregs(void)
  * Name: sam_eic_initialize
  *
  * Description:
- *   Initialize the external interrupt controller (EIC).
+ *   Initialize the EIC.  Called one timer during system bring-up.
  *
  * Input Parameters:
  *   None
@@ -153,10 +153,11 @@ int sam_eic_initialize(void)
  * Name: sam_eic_configure
  *
  * Description:
- *   Configure the interrupt edge sensitivity in CONFIGn register of the EIC
+ *   Configure the interrupt edge sensitivity in CONFIGn register of the
+ *   EIC.  The interrupt will be enabled at the EIC (but not at the NVIC).
  *
  * Input Parameters:
- *   eirq    - Pin to be configured
+ *   eirq    - Pin to be configured (0..15)
  *   pinset  - Configuration of the pin
  *
  * Returned Value:
@@ -177,12 +178,12 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
       reg = SAM_EIC_CONFIG0;
 
       val = EIC_CONFIG0_SENSE_BOTH(eirq);
-      if (pinset & PORT_INT_RISING)
+      if ((pinset & PORT_INT_RISING) != 0)
         {
           val = EIC_CONFIG0_SENSE_RISE(eirq);
         }
 
-      if (pinset & PORT_INT_FALLING)
+      if ((pinset & PORT_INT_FALLING) != 0)
         {
           val = EIC_CONFIG0_SENSE_FALL(eirq);
         }
@@ -194,12 +195,12 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
       reg = SAM_EIC_CONFIG1;
 
       val = EIC_CONFIG1_SENSE_BOTH(eirq);
-      if (pinset & PORT_INT_RISING)
+      if ((pinset & PORT_INT_RISING) != 0)
         {
           val = EIC_CONFIG1_SENSE_RISE(eirq);
         }
 
-      if (pinset & PORT_INT_FALLING)
+      if ((pinset & PORT_INT_FALLING) != 0)
         {
           val = EIC_CONFIG1_SENSE_FALL(eirq);
         }
@@ -222,41 +223,13 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
 }
 
 /****************************************************************************
- * Name: sam_eic_irq_enable
- *
- * Description:
- *   Enable an external interrupt.
- *
- * Input Parameters:
- *   irq - SAM_IRQ_EXTINTn IRQ to be enabled
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-int sam_eic_irq_enable(int irq)
-{
-  uint32_t config;
-  int eirq = irq - SAM_IRQ_EXTINT0;
-
-  config  = getreg32(SAM_EIC_CONFIG0);
-  config |= EIC_CONFIG0_FILTEN(eirq) | EIC_CONFIG0_SENSE_FALL(eirq);
-  putreg32(config, SAM_EIC_CONFIG0);
-
-  putreg32(EIC_EXTINT(eirq), SAM_EIC_INTENSET);
-  sam_eic_dumpregs();
-  return OK;
-}
-
-/****************************************************************************
  * Name: sam_eic_irq_ack
  *
  * Description:
  *   Acknowledge receipt of an external interrupt.
  *
  * Input Parameters:
- *   irq - SAM_IRQ_EXTINTn IRQ to be acknowledged
+ *   irq - SAM_IRQ_EXTINTn IRQ to be acknowledged, n=0-15
  *
  * Returned Value:
  *   None

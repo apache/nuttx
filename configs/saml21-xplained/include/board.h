@@ -56,7 +56,7 @@
 /* Clocking *************************************************************************/
 /* Overview
  *
- * Since there is not high speed crystal, we will run from the OSC16M clock source.
+ * Since there is no high speed crystal, we will run from the OSC16M clock source.
  * We will use its default, POR frequency of 4MHz to avoid an additional clock
  * switch.
  *
