@@ -119,7 +119,6 @@
 int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports)
 {
-#if defined(CONFIG_SCHED_ONEXIT) && defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct binary_s *bin;
   int pid;
   int errcode;
@@ -178,6 +177,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
       goto errout_with_lock;
     }
 
+#if defined(CONFIG_SCHED_ONEXIT) && defined(CONFIG_SCHED_HAVE_PARENT)
   /* Set up to unload the module (and free the binary_s structure)
    * when the task exists.
    */
@@ -187,6 +187,14 @@ int exec(FAR const char *filename, FAR char * const *argv,
     {
       berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
     }
+#else
+  /* Free the binary_s structure here */
+
+  binfmt_freeargv(bin);
+  kmm_free(bin);
+
+  /* TODO: How does the module get unloaded in this case? */
+#endif
 
   sched_unlock();
   return pid;
@@ -202,46 +210,6 @@ errout:
   set_errno(errcode);
   return ERROR;
 
-#else
-  struct binary_s bin;
-  int errcode;
-  int ret;
-
-  /* Load the module into memory */
-
-  memset(&bin, 0, sizeof(struct binary_s));
-  bin.filename = filename;
-  bin.exports  = exports;
-  bin.nexports = nexports;
-
-  ret = load_module(&bin);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
-      goto errout;
-    }
-
-  /* Then start the module */
-
-  ret = exec_module(&bin);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
-      goto errout_with_module;
-    }
-
-  /* TODO:  How does the module get unloaded in this case? */
-
-  return ret;
-
-errout_with_module:
-  (void)unload_module(&bin);
-errout:
-  set_errno(errcode);
-  return ERROR;
-#endif
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE */
