@@ -1236,10 +1236,6 @@ static int imxrt_ifup(struct net_driver_s *dev)
 
   imxrt_initbuffers(priv);
 
-  /* Reset and disable the interface */
-
-  imxrt_reset(priv);
-
   /* Configure the MII interface */
 
   imxrt_initmii(priv);
@@ -1249,13 +1245,6 @@ static int imxrt_ifup(struct net_driver_s *dev)
   putreg32((mac[0] << 24) | (mac[1] << 16) | (mac[2] << 8) | mac[3],
            IMXRT_ENET_PALR);
   putreg32((mac[4] << 24) | (mac[5] << 16), IMXRT_ENET_PAUR);
-
-  /* Clear the Individual and Group Address Hash registers */
-
-  putreg32(0, IMXRT_ENET_IALR);
-  putreg32(0, IMXRT_ENET_IAUR);
-  putreg32(0, IMXRT_ENET_GALR);
-  putreg32(0, IMXRT_ENET_GAUR);
 
   /* Configure the PHY */
 
@@ -1465,6 +1454,87 @@ static int imxrt_txavail(struct net_driver_s *dev)
 
   return OK;
 }
+/****************************************************************************
+ * Function: imxrt_calcethcrc
+ *
+ * Description:
+ *   Function to calculate the CRC used by IMXRT to check an Ethernet frame
+ *
+ * Input Parameters:
+ *   data   - the data to be checked
+ *   length - length of the data
+ *
+ * Returned Value:
+ *   crc32
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+static uint32_t  imxrt_calcethcrc(const uint8_t *data, size_t length)
+{
+  uint32_t crc    = 0xFFFFFFFFU;
+  uint32_t count1 = 0;
+  uint32_t count2 = 0;
+
+  /* Calculates the CRC-32 polynomial on the multicast group address. */
+
+  for (count1 = 0; count1 < length; count1++)
+    {
+      uint8_t c = data[count1];
+
+      for (count2 = 0; count2 < 0x08U; count2++)
+        {
+          if ((c ^ crc) & 1U)
+            {
+              crc >>= 1U;
+              c   >>= 1U;
+              crc  ^= 0xEDB88320U;
+            }
+          else
+            {
+              crc >>= 1U;
+              c   >>= 1U;
+            }
+        }
+    }
+
+  return crc;
+ }
+#endif
+
+/****************************************************************************
+ * Function: imxrt_enet_hash_index
+ *
+ * Description:
+ *   Function to find the hash index for multicast address filter
+ *
+ * Input Parameters:
+ *   mac  - The MAC address
+ *
+ * Returned Value:
+ *   hash index
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
+{
+  uint32_t crc;
+  uint32_t hashindex;
+
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  crc = imxrt_calcethcrc(mac, 6);
+  hashindex = (crc >> 26) & 0x3F;
+
+  return hashindex;
+}
+#endif
 
 /****************************************************************************
  * Function: imxrt_addmac
@@ -1487,10 +1557,28 @@ static int imxrt_txavail(struct net_driver_s *dev)
 #ifdef CONFIG_NET_IGMP
 static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
+
+  hashindex = imxrt_enet_hash_index(mac);
 
   /* Add the MAC address to the hardware multicast routing table */
+
+  if (hashindex > 31)
+    {
+      registeraddress = IMXRT_ENET_GAUR;
+      hashindex      -= 32;
+    }
+  else
+    {
+      registeraddress = IMXRT_ENET_GALR;
+    }
+
+  temp  = getreg32(registeraddress);
+  temp |= 1 << hashindex;
+  putreg32(temp, registeraddress);
 
   return OK;
 }
@@ -1517,12 +1605,29 @@ static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
 
-  /* Add the MAC address to the hardware multicast routing table */
+  /* Remove the MAC address from the hardware multicast routing table */
 
-  UNUSED(priv);
+  hashindex = imxrt_enet_hash_index(mac);
+
+  if (hashindex > 31)
+    {
+      registeraddress = IMXRT_ENET_GAUR;
+      hashindex      -= 32;
+    }
+  else
+    {
+      registeraddress = IMXRT_ENET_GALR;
+    }
+
+  temp  = getreg32(registeraddress);
+  temp &= ~(1 << hashindex);
+  putreg32(temp, registeraddress);
+
   return OK;
 }
 #endif
@@ -1826,6 +1931,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv)
 {
   uint32_t rcr;
   uint32_t tcr;
+  uint32_t racc;
   uint16_t phydata;
   uint8_t phyaddr;
   int retries;
@@ -1845,10 +1951,12 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv)
       do
         {
           nxsig_usleep(LINK_WAITUS);
+
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
+
           phydata = 0xffff;
-          ret = imxrt_readmii(priv, phyaddr, MII_PHYID1, &phydata);
+          ret     = imxrt_readmii(priv, phyaddr, MII_PHYID1, &phydata);
         }
       while ((ret < 0 || phydata == 0xffff) && ++retries < 3);
 
@@ -1965,7 +2073,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv)
       imxrt_writemii(priv, phyaddr, MII_MCR, 0);
     }
 
-  /* set ethernet led to green = activity and yellow = link and  */
+  /* set Ethernet led to green = activity and yellow = link and  */
 
   ret = imxrt_readmii(priv, phyaddr, MII_KSZ8081_PHYCTRL2, &phydata);
   if (ret < 0)
@@ -2007,6 +2115,13 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv)
 
   putreg32(rcr, IMXRT_ENET_RCR);
   putreg32(tcr, IMXRT_ENET_TCR);
+
+  /* Enable Discard Of Frames With MAC Layer Errors */
+  /* Enable Discard Of Frames With Wrong Protocol Checksum */
+  /* Bit 1: Enable discard of frames with wrong IPv4 header checksum */
+
+  racc = ENET_RACC_PRODIS | ENET_RACC_LINEDIS | ENET_RACC_IPDIS;
+  putreg32(racc, IMXRT_ENET_RACC);
 
   /* Setup half or full duplex */
 
@@ -2300,10 +2415,10 @@ int imxrt_netinitialize(int intf)
   * 1st octet)
   */
 
-  /* REVISIT: temporary hardcode mac. Use chip's uniqe ID later' */
+  /* hardcoded offset: todo: need proper header file */
 
-  uidl   = 0x11223344;
-  uidml  = 0x55667788;
+  uidl   = getreg32(IMXRT_OCOTP_BASE + 0x410);
+  uidml  = getreg32(IMXRT_OCOTP_BASE + 0x420);
   mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;
