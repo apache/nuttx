@@ -18,6 +18,15 @@ README
   o Built in crypto engines with AES (256 bit), true RNG, Pubkey controller
   o 64 QFN
 
+STATUS
+======
+
+  2018-07-26:  The basic port was merged into master.  It is still
+    incomplete and untested.  It is missing the clock configuration logic.
+    There is a placeholder from the SAML21, but it is currently stubbed out
+    in the Make.defs file).  Configuration options in the board.h header
+    file are bogus and also just cloned from the SAML21.
+
 Serial Console
 ==============
 
@@ -45,3 +54,49 @@ LEDs
     SHIELD SAMD5E5           FUNCTION
     ------ ----------------- -----------
     D13    PA16              GPIO output
+
+Configurations
+==============
+
+  Each Adafruit Metro M4 configuration is maintained in a sub-directory and
+  can be selected as follow:
+
+    tools/configure.sh [OPTIONS] metro-m4/<subdir>
+
+  Do 'tools/configure.sh -h' for the list of options.  If you are building
+  under Windows with Cygwin, you would need the -c option, for example.
+
+  Before building, make sure that the PATH environmental variable includes the
+  correct path to the directory than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of configurations listed in the following paragraph.
+
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+     change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output of on SERCOM3 which is available on a Arduino Serial
+     Shield (see the section "Serial Console" above).
+
+  3. Unless otherwise stated, the configurations are setup build under
+     Linux with a generic ARM EABI toolchain:
+
+Configuration sub-directories
+-----------------------------
+
+  nsh:
+    This configuration directory will built the NuttShell.  See NOTES above.

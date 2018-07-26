@@ -71,7 +71,7 @@
  *
  * The Adafruit Metro M4 has one on-board crystal:
  *
- *   XC101 32.768KHz XOSC32
+ *   X4 32.768KHz XOSC32
  *
  * REVISIT: Not currently used, may want to use as GCLK1 source with
  * DFLL multiplier of ((48000000+16384)/32768) = 1465 which would yield
