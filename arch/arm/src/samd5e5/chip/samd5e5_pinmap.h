@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD5E5_PINMAP_H
+#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD5E5_PINMAP_H
 
 /********************************************************************************************
  * Included Files
@@ -787,4 +787,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD5E5_PINMAP_H */

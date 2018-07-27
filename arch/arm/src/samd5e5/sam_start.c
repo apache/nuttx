@@ -94,7 +94,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-static inline void sam_fpuconfig(void);
+static inline void sam_fpu_configure(void);
 #endif
 #ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
@@ -126,7 +126,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #endif
 
 /****************************************************************************
- * Name: sam_fpuconfig
+ * Name: sam_fpu_configure
  *
  * Description:
  *   Configure the FPU.  Relative bit settings:
@@ -151,7 +151,7 @@ void __start(void) __attribute__ ((no_instrument_function));
 #ifdef CONFIG_ARCH_FPU
 #ifndef CONFIG_ARMV7M_LAZYFPU
 
-static inline void sam_fpuconfig(void)
+static inline void sam_fpu_configure(void)
 {
   uint32_t regval;
 
@@ -181,7 +181,7 @@ static inline void sam_fpuconfig(void)
 
 #else
 
-static inline void sam_fpuconfig(void)
+static inline void sam_fpu_configure(void)
 {
   uint32_t regval;
 
@@ -212,7 +212,7 @@ static inline void sam_fpuconfig(void)
 #endif
 
 #else
-#  define sam_fpuconfig()
+#  define sam_fpu_configure()
 #endif
 
 /****************************************************************************
@@ -312,10 +312,12 @@ void __start(void)
     }
 #endif
 
-  /* Configure the UART so that we can get debug output as soon as possible */
+  /* Initialize clocking and the FPU.  Configure the console UART so that
+   * we can get debug output as soon as possible.
+   */
 
-  sam_clockconfig();
-  sam_fpuconfig();
+  sam_clock_initialize();
+  sam_fpu_configure();
   sam_lowsetup();
   showprogress('A');
 

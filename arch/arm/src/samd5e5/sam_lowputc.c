@@ -293,18 +293,10 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 
   /* Configure the GCLKs for the SERCOM module */
 
-  sercom_coreclk_configure(config->sercom, config->gclkgen, false);
+  sercom_coreclk_configure(config->sercom, config->coregen, false);
 
-  if (config->sercom == 5)
-    {
-      channel = GCLK_CHAN_SERCOM5_CORE;
-    }
-  else
-    {
-      channel = config->sercom + GCLK_CHAN_SERCOM0_CORE;
-    }
-
-  sam_gclk_chan_enable(channel, config->gclkgen);
+  channel = config->sercom + GCLK_CHAN_SERCOM0_CORE;
+  sam_gclk_chan_enable(channel, config->coregen);
 
   sercom_slowclk_configure(config->sercom, config->slowgen);
 

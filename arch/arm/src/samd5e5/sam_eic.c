@@ -39,8 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #include "up_arch.h"
 #include "sam_gclk.h"
@@ -97,7 +99,7 @@ void sam_eic_dumpregs(void)
 {
   irqinfo("EIC:\n");
   irqinfo("       CTRLA:  %02x\n", getreg8(SAM_EIC_CTRLA));
-  irqinfo("     NMICTRL:  %02x\n", getreg8(SAM_EIC_NVMICTRL));
+  irqinfo("     NMICTRL:  %02x\n", getreg8(SAM_EIC_NMICTRL));
   irqinfo("     NMIFLAG:  %04x\n", getreg16(SAM_EIC_NMIFLAG));
   irqinfo("    SYNCBUSY:  %08x\n", getreg32(SAM_EIC_SYNCBUSY));
   irqinfo("      EVCTRL:  %08x\n", getreg32(SAM_EIC_EVCTRL));
@@ -128,21 +130,27 @@ void sam_eic_dumpregs(void)
 
 int sam_eic_initialize(void)
 {
-  uint16_t regval;
+  uintptr_t regaddr;
+  uint32_t regval;
 
   /* Configure the EIC APB clock */
 
   sam_apb_eic_enableperiph();
 
-  regval = GCLK_CLKCTRL_ID_EIC |
-           GCLK_CLKCTRL_GEN(CONFIG_SAMD5E5_EIC_GCLKGEN) |
-           GCLK_CLKCTRL_CLKEN;
+  /* Use the selected GCLK_EIC.  Some optional functions need a peripheral
+   * clock, which can either be a generic clock (GCLK_EIC, for wider
+   * frequency selection) or a Ultra Low Power 32KHz clock (CLK_ULP32K, for
+   * highest power efficiency). One of the clock sources must be configured
+   * and enabled before using the peripheral.
+   */
 
-  putreg16(regval, SAM_GCLK_CLKCTRL);
+  regaddr = SAM_GCLK_PCHCTRL(GCLK_CHAN_EIC);
+  regval  = GCLK_PCHCTRL_GEN(BOARD_GLCK_EIC) | GCLK_PCHCTRL_CHEN;
+  putreg32(regval, regaddr);
 
-  /* Enable the EIC APB clock */
+  /* Enable the EIC, selecting clocking via the GLCK_EIC  */
 
-  putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
+  putreg8(EIC_CTRLA_ENABLE | EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
   sam_eic_syncwait();
 
   sam_eic_dumpregs();
@@ -241,6 +249,7 @@ int sam_eic_irq_ack(int irq)
   int eirq = irq - SAM_IRQ_EXTINT0;
 
   putreg32(EIC_EXTINT(eirq), SAM_EIC_INTENCLR);
+  return OK;
 }
 
 #endif /* CONFIG_SAMD5E5_EIC */

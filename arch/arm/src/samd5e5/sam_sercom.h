@@ -47,7 +47,6 @@
 #include "up_arch.h"
 #include "sam_config.h"
 #include "sam_periphclks.h"
-#include "chip/sam_sercom.h"
 
 /****************************************************************************
  * Pre-processor Definitions

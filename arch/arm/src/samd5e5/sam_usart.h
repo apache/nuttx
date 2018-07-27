@@ -89,8 +89,9 @@ struct sam_usart_config_s
   uint8_t sercom;     /* Identifies the SERCOM peripheral */
   uint8_t parity;     /* 0=none, 1=odd, 2=even */
   uint8_t bits;       /* Number of bits (5-9) */
-  uint8_t irq;        /* SERCOM IRQ number */
-  uint8_t gclkgen;    /* Source GCLK generator */
+  uint8_t txirq;      /* Tx SERCOM IRQ number */
+  uint8_t rxirq;      /* Rx SERCOM IRQ number */
+  uint8_t coregen;    /* Core GCLK generator */
   uint8_t slowgen;    /* Slow GCLK generator */
   bool stopbits2;     /* True: Configure with 2 stop bits instead of 1 */
   uint32_t baud;      /* Configured baud */

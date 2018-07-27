@@ -782,16 +782,21 @@ static int sam_attach(struct uart_dev_s *dev)
   const struct sam_usart_config_s * const config = priv->config;
   int ret;
 
-  /* Attach and enable the IRQ */
+  /* Attach and enable the Tx and Rx IRQs */
 
-  ret = irq_attach(config->irq, sam_interrupt, dev);
+  ret = irq_attach(config->txirq, sam_interrupt, dev);
   if (ret == OK)
     {
-      /* Enable the interrupt (RX and TX interrupts are still disabled
-       * in the USART
-       */
+      ret = irq_attach(config->rxirq, sam_interrupt, dev);
+      if (ret == OK)
+        {
+          /* Enable the interrupt (RX and TX interrupts are still disabled
+           * in the USART
+           */
 
-      up_enable_irq(config->irq);
+          up_enable_irq(config->txirq);
+          up_enable_irq(config->rxirq);
+        }
     }
 
   return ret;
@@ -815,11 +820,13 @@ static void sam_detach(struct uart_dev_s *dev)
   /* Disable interrupts at the SERCOM device and at the NVIC */
 
   sam_disableallints(priv);
-  up_disable_irq(config->irq);
+  up_disable_irq(config->txirq);
+  up_disable_irq(config->rxirq);
 
   /* Detach the interrupt handler */
 
-  irq_detach(config->irq);
+  irq_detach(config->txirq);
+  irq_detach(config->rxirq);
 }
 
 /****************************************************************************

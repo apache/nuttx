@@ -47,6 +47,10 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
+#define SAM_NGLCK                    12     /* 12 Clock generators, 0-11 */
+#define SAM_NCHANNELS                48     /* 48 Clock generators, 0..47 */
+
 /* GCLK register offsets ********************************************************************/
 
 #define SAM_GCLK_CTRLA_OFFSET        0x0000 /* Control register */
@@ -61,7 +65,7 @@
 #define SAM_GCLK_SYNCHBUSY           (SAM_GCLK_BASE + SAM_GCLK_SYNCHBUSY_OFFSET)
 
 #define SAM_GCLK_GENCTRL(n)          (SAM_GCLK_BASE + SAM_GCLK_GENCTRL_OFFSET(n))
-#define SAM_GCLK_PCHCTRL(m)          (SAM_GCLK_BASE + SAM_GCLK_PCHCTRL_OFFSET(m))
+#define SAM_GCLK_PCHCTRL(n)          (SAM_GCLK_BASE + SAM_GCLK_PCHCTRL_OFFSET(n))
 
 /* GCLK register bit definitions ************************************************************/
 
@@ -84,11 +88,13 @@
 #  define GCLK_SYNCHBUSY_GENCTRL8    (1 << 10) /* Bit 10: Generator control 8 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL9    (1 << 11) /* Bit 11: Generator control 9 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL10   (1 << 12) /* Bit 12: Generator control 10 busy */
+#  define GCLK_SYNCHBUSY_GENCTRL11   (1 << 13) /* Bit 13: Generator control 11 busy */
 
 /* General clock generator n */
 
 #define GCLK_GENCTRL_SRC_SHIFT       (0)       /* Bits 0-4: Generator source selection */
 #define GCLK_GENCTRL_SRC_MASK        (31 << GCLK_GENCTRL_SRC_SHIFT)
+#  define GCLK_GENCTRL_SRC(n)        ((uint32_t)(n) << GCLK_GENCTRL_SRC_SHIFT)
 #  define GCLK_GENCTRL_SRC_XOSC0     (0 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC 0 oscillator input */
 #  define GCLK_GENCTRL_SRC_XOSC1     (1 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC 1 oscillator input */
 #  define GCLK_GENCTRL_SRC_GCLK_IN   (2 << GCLK_GENCTRL_SRC_SHIFT) /* Generator input pad */

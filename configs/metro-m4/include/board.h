@@ -52,445 +52,217 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* Overview
- *
- * Since there is no high speed crystal, we will run from the OSC16M clock source.
- * We will use its default, POR frequency of 4MHz to avoid an additional clock
- * switch.
- *
- * OSC16M               Output = 4MHz
- *  `- GCLK1            Input  = 4MHz Prescaler     = 1  output         = 4MHz
- *      `- DFLL         Input  = 4MHz  Multiplier   = 12 output         = 48MHz
- *          `- GCLK0    Input  = 48MHz Prescaler    = 1  output         = 48MHz
- *              `- MCLK Input  = 48Mhz CPU divider  = 1  CPU frequency  = 48MHz
- *                                     APBA divider = 1  APBA frequency = 48MHz
- *                                     APBB divider = 1  APBB frequency = 48MHz
- *                                     APBC divider = 1  APBC frequency = 48MHz
- *                                     APBD divider = 1  APBD frequency = 48MHz
- *                                     APBE divider = 1  APBE frequency = 48MHz
- *
- * The Adafruit Metro M4 has one on-board crystal:
- *
- *   X4 32.768KHz XOSC32
- *
- * REVISIT: Not currently used, may want to use as GCLK1 source with
- * DFLL multiplier of ((48000000+16384)/32768) = 1465 which would yield
- * a clock of 48,005,120 MHz.
- */
 
-/* XOSC Configuration -- Not available
- *
- *   BOARD_XOSC_ENABLE          - Boolean (defined / not defined)
- *   BOARD_XOSC_FREQUENCY       - In Hz
- *   BOARD_XOSC_STARTUPTIME     - See SYSCTRL_XOSC_STARTUP_* definitions
- *   BOARD_XOSC_ISCRYSTAL       - Boolean (defined / not defined)
- *   BOARD_XOSC_AMPGC           - Boolean (defined / not defined)
- *   BOARD_XOSC_ONDEMAND        - Boolean (defined / not defined)
- *   BOARD_XOSC_RUNINSTANDBY    - Boolean (defined / not defined)
- */
+#define BOARD_HAVE_CLKDEFS      1
 
-#undef  BOARD_XOSC_ENABLE
-#define BOARD_XOSC_FREQUENCY         12000000UL
-#define BOARD_XOSC_STARTUPTIME       SYSCTRL_XOSC_STARTUP_1S
-#define BOARD_XOSC_ISCRYSTAL         1
-#define BOARD_XOSC_AMPGC             1
-#define BOARD_XOSC_ONDEMAND          1
-#undef  BOARD_XOSC_RUNINSTANDBY
+/* XOSC32 */
 
-/* XOSC32 Configuration -- Not used
- *
- *   BOARD_XOSC32K_ENABLE       - Boolean (defined / not defined)
- *   BOARD_XOSC32K_FREQUENCY    - In Hz
- *   BOARD_XOSC32K_STARTUPTIME  - See SYSCTRL_XOSC32K_STARTUP_* definitions
- *   BOARD_XOSC32K_ISCRYSTAL    - Boolean (defined / not defined)
- *   BOARD_XOSC32K_AAMPEN       - Boolean (defined / not defined)
- *   BOARD_XOSC32K_EN1KHZ       - Boolean (defined / not defined)
- *   BOARD_XOSC32K_EN32KHZ      - Boolean (defined / not defined)
- *   BOARD_XOSC32K_ONDEMAND     - Boolean (defined / not defined)
- *   BOARD_XOSC32K_RUNINSTANDBY - Boolean (defined / not defined)
- *   BOARD_XOSC32K_WRITELOCK    - Boolean (defined / not defined)
- */
+#define BOARD_HAVE_XOSC32K      1         /* 32.768KHz XOSC32 crystal installed */
+#define BOARD_XOSC32K_ENABLE    false     /* Don't enable XOSC32 */
+#define BOARD_XOSC32K_XTALEN    false     /* External clock connected on XIN32 */
+#define BOARD_XOSC32K_EN32K     false     /* No 32KHz output */
+#define BOARD_XOSC32K_EN1K      false     /* No 1KHz output */
+#define BOARD_XOSC32K_HIGHSPEED true      /* High speed mode */
+#define BOARD_XOSC32K_RUNSTDBY  false     /* Don't run in standby */
+#define BOARD_XOSC32K_ONDEMAND  true      /* Enable on-demand control */
+#define BOARD_XOSC32K_CFDEN     false     /* Clock failure detector not enabled */
+#define BOARD_XOSC32K_CFDEO     false     /* No clock failure event */
+#define BOARD_XOSC32K_CALIBEN   false     /* No OSCULP32K calibration */
+#define BOARD_XOSC32K_STARTUP   0         /* Startup time: 62592us */
+#define BOARD_XOSC32K_CALIB     0         /* Dummy OSCULP32K calibration value */
+#define BOARD_XOSC32K_RTCSEL    0         /* RTC clock = ULP1K */
+#define BOARD_XOSC32K_FREQUENCY 32768     /* XOSC32K frequency 32.768 KHz */
 
-#undef BOARD_XOSC32K_ENABLE
-#ifdef CONFIG_METRO_M4_XOSC32K
-#  define BOARD_XOSC32K_ENABLE       1
-#  define BOARD_XOSC32K_FREQUENCY    32768    /* 32.768KHz XTAL */
-#  define BOARD_XOSC32K_STARTUPTIME  OSC32KCTRL_XOSC32K_STARTUP_100MS
-#  define BOARD_XOSC32K_ISCRYSTAL    1
-#  undef  BOARD_XOSC32K_EN1KHZ
-#  define BOARD_XOSC32K_EN32KHZ      1
-#  define BOARD_XOSC32K_ONDEMAND     1
-#  undef  BOARD_XOSC32K_RUNINSTANDBY
-#  undef  BOARD_XOSC32K_WRITELOCK
-#endif
+/* XOSC0 */
 
-/* OSC32 Configuration -- not used
- *
- *   BOARD_OSC32K_ENABLE        - Boolean (defined / not defined)
- *   BOARD_OSC32K_FREQUENCY     - In Hz
- *   BOARD_OSC32K_STARTUPTIME   - See SYSCTRL_OSC32K_STARTUP_* definitions
- *   BOARD_OSC32K_EN1KHZ        - Boolean (defined / not defined)
- *   BOARD_OSC32K_EN32KHZ       - Boolean (defined / not defined)
- *   BOARD_OSC32K_ONDEMAND      - Boolean (defined / not defined)
- *   BOARD_OSC32K_RUNINSTANDBY  - Boolean (defined / not defined)
- *   BOARD_OSC32K_WRITELOCK     - Boolean (defined / not defined)
- */
+#define BOARD_HAVE_XOSC0        0         /* No XOSC0 clock/crystal installed */
+#define BOARD_XOSC0_ENABLE      false     /* Don't enable XOSC0 */
+#define BOARD_XOSC0_XTALEN      false     /* External clock connected */
+#define BOARD_XOSC0_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_XOSC0_ONDEMAND    true      /* Disable on-demand control */
+#define BOARD_XOSC0_LOWGAIN     false     /* Disable low buffer gain */
+#define BOARD_XOSC0_ENALC       false     /* Disable automatic loop control */
+#define BOARD_XOSC0_CFDEN       false     /* Clock failure detector not enabled */
+#define BOARD_XOSC0_SWBEN       false     /* XOSC clock switch not enabled */
+#define BOARD_XOSC0_STARTUP     0         /* XOSC0 start-up time 31µs */
+#define BOARD_XOSC0_FREQUENCY   12000000  /* XOSC0 frequency 12MHz */
 
-#undef  BOARD_OSC32K_ENABLE
-#define BOARD_OSC32K_FREQUENCY       32768    /* 32.768kHz internal oscillator */
-#define BOARD_OSC32K_STARTUPTIME     SYSCTRL_OSC32K_STARTUP_4MS
-#define BOARD_OSC32K_EN1KHZ          1
-#define BOARD_OSC32K_EN32KHZ         1
-#define BOARD_OSC32K_ONDEMAND        1
-#undef  BOARD_OSC32K_RUNINSTANDBY
-#undef  BOARD_OSC32K_WRITELOCK
+/* XOSC1 */
 
-/* OSC16M Configuration -- always enabled
- *
- *   BOARD_OSC16M_FSEL          - See OSCCTRL_OSC16MCTRL_FSEL_* definitions
- *   BOARD_OSC16M_ONDEMAND      - Boolean (defined / not defined)
- *   BOARD_OSC16M_RUNINSTANDBY  - Boolean (defined / not defined)
- */
+#define BOARD_HAVE_XOSC1        0         /* No XOSC0 clock/crystal installed */
+#define BOARD_XOSC1_ENABLE      false     /* Don't enable XOSC1 */
+#define BOARD_XOSC1_XTALEN      true      /* External crystal connected */
+#define BOARD_XOSC1_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_XOSC1_ONDEMAND    true      /* Disable on-demand control */
+#define BOARD_XOSC1_LOWGAIN     false     /* Disable low buffer gain */
+#define BOARD_XOSC1_ENALC       false     /* Disable automatic loop control */
+#define BOARD_XOSC1_CFDEN       false     /* Clock failure detector not enabled */
+#define BOARD_XOSC1_SWBEN       false     /* XOSC clock switch not enabled */
+#define BOARD_XOSC1_STARTUP     0         /* XOSC0 start-up time 31µs */
+#define BOARD_XOSC1_FREQUENCY   12000000  /* XOSC0 frequency 12MHz */
 
+/* Master Clock (MCLK) */
 
-#if defined(CONFIG_METRO_M4_OSC16M_4MHZ)
-#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_4MHZ
-#  define BOARD_OSC16M_ONDEMAND      1
-#  undef  BOARD_OSC16M_RUNINSTANDBY
-#  define BOARD_OSC16M_FREQUENCY     4000000  /* 4MHz high-accuracy internal oscillator */
+#define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
+#define BOARD_CPU_FREQUENCY     120000000 /* CPU frequency 120MHz */
 
-#elif defined(CONFIG_METRO_M4_OSC16M_8MHZ)
-#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_8MHZ
-#  define BOARD_OSC16M_ONDEMAND      1
-#  undef  BOARD_OSC16M_RUNINSTANDBY
-#  define BOARD_OSC16M_FREQUENCY     8000000  /* 8MHz high-accuracy internal oscillator */
+/* FDPLL0/1 -- To be provided */
 
-#elif defined(CONFIG_METRO_M4_OSC16M_12MHZ)
-#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_12MHZ
-#  define BOARD_OSC16M_ONDEMAND      1
-#  undef  BOARD_OSC16M_RUNINSTANDBY
-#  define BOARD_OSC16M_FREQUENCY     12000000 /* 12MHz high-accuracy internal oscillator */
+#define BOARD_FDPLL0_FREQUENCY  0
+#define BOARD_FDPLL1_FREQUENCY  0
 
-#elif defined(CONFIG_METRO_M4_OSC16M_16MHZ)
-#  define BOARD_OSC16M_FSEL          OSCCTRL_OSC16MCTRL_FSEL_16MHZ
-#  define BOARD_OSC16M_ONDEMAND      1
-#  undef  BOARD_OSC16M_RUNINSTANDBY
-#  define BOARD_OSC16M_FREQUENCY     16000000 /* 18MHz high-accuracy internal oscillator */
+/* FDLL -- To be provided */
 
-#else
-#  error OSC16M operating freqency not defined (CONFIG_METRO_M4_OSC16M_*MHZ)
-#endif
+#define BOARD_DFLL_FREQUENCY    0
 
-/* OSCULP32K Configuration -- not used. */
+/* GCLK */
 
-#define BOARD_OSCULP32K_FREQUENCY    32000    /* 32kHz ultra-low-power internal oscillator */
+#define BOARD_GCLK_SET1         0x0000    /* The empty set */
+#define BOARD_GCLK_SET2         0x0fff    /* All GCLKs */
 
-/* Digital Frequency Locked Loop configuration.  In closed-loop mode, the
- * DFLL output frequency (Fdfll) is given by:
- *
- *  Fdfll = DFLLmul * Frefclk
- *        = 12 * 4000000 = 48MHz
- *
- * Where the reference clock is Generic Clock Channel 0 output of GLCK1.
- * GCLCK1 provides OSC16M, undivided.
- *
- * When operating in open-loop mode, the output frequency of the DFLL will
- * be determined by the values written to the DFLL Coarse Value bit group
- * and the DFLL Fine Value bit group in the DFLL Value register.
- *
- *   BOARD_DFLL48M_CLOSEDLOOP          - Boolean (defined / not defined)
- *   BOARD_DFLL48M_OPENLOOP            - Boolean (defined / not defined)
- *   BOARD_DFLL48M_RECOVERY            - Boolean (defined / not defined)
- *   BOARD_DFLL48M_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
- *   BOARD_DFLL48M_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
- *   BOARD_DFLL48M_ENABLECHILLCYCLE    - Boolean (defined / not defined)
- *   BOARD_DFLL48M_QUICKLOCK           - Boolean (defined / not defined)
- *   BOARD_DFLL48M_RUNINSTDBY          - Boolean (defined / not defined)
- *   BOARD_DFLL48M_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_DFLL48M_COARSEVALUE         - Value
- *   BOARD_DFLL48M_FINEVALUE           - Value
- *
- * Open Loop mode only:
- *   BOARD_DFLL48M_COARSEVALUE         - Value
- *   BOARD_DFLL48M_FINEVALUE           - Value
- *
- * Closed loop mode only:
- *   BOARD_DFLL48M_REFCLK_CLKGEN       - GCLK index in the range {0..8}
- *   BOARD_DFLL48M_MULTIPLIER          - Value
- *   BOARD_DFLL48M_MAXCOARSESTEP       - Value
- *   BOARD_DFLL48M_MAXFINESTEP         - Value
- *
- *   BOARD_DFLL48M_FREQUENCY           - The resulting frequency
- */
+#define BOARD_GCLK0_ENABLE      true      /* Enable GCLK0 */
+#define BOARD_GCLK0_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK0_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK0_OE          true      /* Generate output on GCLK_IO */
+#define BOARD_GCLK0_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK0_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK0_SOURCE      7         /* Select DPLL0 output as GLCK0 source */
+#define BOARD_GCLK0_DIV         1         /* Division factor */
+#define BOARD_GCLK0_FREQUENCY   BOARD_DPLL0_FREQUENCY
 
-#undef BOARD_DFLL48M_ENABLE                1  /* Assume not using the DFLL48M */
-#undef BOARD_DFLL48M_CLOSEDLOOP
-#undef BOARD_DFLL48M_OPENLOOP
-#undef BOARD_DFLL48M_RECOVERY
+#define BOARD_GCLK1_ENABLE      true      /* Enable GCLK1 */
+#define BOARD_GCLK1_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK1_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK1_OE          true      /* Generate output on GCLK_IO */
+#define BOARD_GCLK1_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK1_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK1_SOURCE      6         /* Select DFLL output as GLCK1 source */
+#define BOARD_GCLK1_DIV         1         /* Division factor */
+#define BOARD_GCLK1_FREQUENCY   BOARD_DFLL_FREQUENCY
 
-#ifdef CONFIG_METRO_M4_DFLL
-#  define BOARD_DFLL48M_ENABLE             1  /* Using the DFLL48M */
+#define BOARD_GCLK2_ENABLE      false     /* Don't enable GCLK2 */
+#define BOARD_GCLK2_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK2_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK2_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK2_DIVSEL      1         /* GCLK frequency is source/(2^(N+1) */
+#define BOARD_GCLK2_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GLCK2 source */
+#define BOARD_GCLK2_DIV         1         /* Division factor */
+#define BOARD_GCLK2_FREQUENCY   (BOARD_XOSC32K_FREQUENCY / 4)
 
-/* DFLL mode of operation */
+#define BOARD_GCLK3_ENABLE      false     /* Don't enable GCLK3 */
+#define BOARD_GCLK3_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK3_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK3_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK3_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK3_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GLCK3 source */
+#define BOARD_GCLK3_DIV         1         /* Division factor */
+#define BOARD_GCLK3_FREQUENCY   BOARD_XOSC32K_FREQUENCY
 
-#  if defined(CONFIG_METRO_M4_DFLL_OPENLOOP)
-#    define BOARD_DFLL48M_OPENLOOP         1  /* In open loop mode */
-#  elif defined(CONFIG_METRO_M4_DFLL_CLOSEDLOOP)
-#    define BOARD_DFLL48M_CLOSEDLOOP       1  /* In closed loop mode */
-#  elif defined(CONFIG_METRO_M4_DFLL_RECOVERY)
-#    define BOARD_DFLL48M_RECOVERY         1  /* In USB recover mode */
-#  else
-#    error DFLL mode not provided
-#  endif
+#define BOARD_GCLK4_ENABLE      true      /* Enable GCLK4 */
+#define BOARD_GCLK4_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK4_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK4_OE          true      /* Generate output on GCLK_IO */
+#define BOARD_GCLK4_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK4_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK4_SOURCE      7         /* Select DPLL0 output as GLCK4 source */
+#define BOARD_GCLK4_DIV         1         /* Division factor */
+#define BOARD_GCLK4_FREQUENCY   BOARD_DPLL0_FREQUENCY
 
-/* DFLL source clock selection */
+#define BOARD_GCLK5_ENABLE      true      /* Enable GCLK5 */
+#define BOARD_GCLK5_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK5_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK5_OE          true      /* Generate output on GCLK_IO */
+#define BOARD_GCLK5_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK5_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GLCK5 source */
+#define BOARD_GCLK5_DIV         24        /* Division factor */
+#define BOARD_GCLK5_FREQUENCY   BOARD_DFLL_FREQUENCY
 
-#  if defined(CONFIG_METRO_M4_DFLL_OSC16MSRC)
-#    define BOARD_DFLL_SRC_FREQUENCY       BOARD_OSC16M_FREQUENCY
-#  elif defined(CONFIG_METRO_M4_DFLL_XOSC32KSRC)
-#    define BOARD_DFLL_SRC_FREQUENCY       BOARD_XOSC32K_FREQUENCY
-#  else
-#    error DFLL clock source not provided
-#  endif
+#define BOARD_GCLK6_ENABLE      false     /* Don't enable GCLK6 */
+#define BOARD_GCLK6_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK6_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK6_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK6_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK6_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK6_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK6_DIV         1         /* Division factor */
+#define BOARD_GCLK6_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
-/* Mode-independent options */
+#define BOARD_GCLK7_ENABLE      false     /* Don't enable GCLK7 */
+#define BOARD_GCLK7_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK7_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK7_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK7_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK7_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK7_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK7_DIV         1         /* Division factor */
+#define BOARD_GCLK7_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
-#  undef  BOARD_DFLL48M_RUNINSTDBY
-#  undef  BOARD_DFLL48M_ONDEMAND
+#define BOARD_GCLK8_ENABLE      false     /* Don't enable GCLK8 */
+#define BOARD_GCLK8_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK8_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK8_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK8_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK8_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK8_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK8_DIV         1         /* Division factor */
+#define BOARD_GCLK8_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
-/* DFLL open loop mode configuration */
+#define BOARD_GCLK9_ENABLE      false     /* Don't enable GCLK9 */
+#define BOARD_GCLK9_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK9_OOV         false     /* Clock output will be LOW */
+#define BOARD_GCLK9_OE          false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK9_DIVSEL      0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK9_RUNSTDBY    false     /* Don't run in standby */
+#define BOARD_GCLK9_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK9_DIV         1         /* Division factor */
+#define BOARD_GCLK10_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
-#  define BOARD_DFLL48M_COARSEVALUE        (0x1f / 4)
-#  define BOARD_DFLL48M_FINEVALUE          (0xff / 4)
+#define BOARD_GCLK10_ENABLE     false     /* Don't enable GCLK10 */
+#define BOARD_GCLK10_IDC        false     /* Don't improve duty cycle */
+#define BOARD_GCLK10_OOV        false     /* Clock output will be LOW */
+#define BOARD_GCLK10_OE         false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK10_DIVSEL     0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK10_RUNSTDBY   false     /* Don't run in standby */
+#define BOARD_GCLK10_SOURCE     1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK10_DIV        1         /* Division factor */
+#define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
-/* DFLL closed loop mode configuration */
+#define BOARD_GCLK11_ENABLE     false     /* Don't enable GCLK11 */
+#define BOARD_GCLK11_IDC        false     /* Don't improve duty cycle */
+#define BOARD_GCLK11_OOV        false     /* Clock output will be LOW */
+#define BOARD_GCLK11_OE         false     /* No generator output of GCLK_IO */
+#define BOARD_GCLK11_DIVSEL     0         /* GCLK frequency is source/DIV */
+#define BOARD_GCLK11_RUNSTDBY   false     /* Don't run in standby */
+#define BOARD_GCLK11_SOURCE     1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK11_DIV        1         /* Division factor */
+#define BOARD_GCLK0_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
-#  define BOARD_DFLL48M_REFCLK_CLKGEN      1
-#  define BOARD_DFLL48M_MULTIPLIER         (48000000 / BOARD_DFLL_SRC_FREQUENCY)
-#  define BOARD_DFLL48M_QUICKLOCK          1
-#  define BOARD_DFLL48M_TRACKAFTERFINELOCK 1
-#  define BOARD_DFLL48M_KEEPLOCKONWAKEUP   1
-#  define BOARD_DFLL48M_ENABLECHILLCYCLE   1
-#  define BOARD_DFLL48M_MAXCOARSESTEP      (0x1f / 4)
-#  define BOARD_DFLL48M_MAXFINESTEP        (0xff / 4)
+/* Peripheral clocking */
 
-#  ifdef CONFIG_METRO_M4_DFLL_OPENLOOP
-#    define BOARD_DFLL48M_FREQUENCY        (13720000) /* REVISIT:  Needs to be measured */
-#  else
-#    define BOARD_DFLL48M_FREQUENCY        (BOARD_DFLL48M_MULTIPLIER * BOARD_DFLL_SRC_FREQUENCY)
-#  endif
-#endif
-
-/* Fractional Digital Phase Locked Loop configuration.
- *
- *   BOARD_FDPLL96M_ENABLE          - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_RUNINSTDBY      - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_ONDEMAND        - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_LBYPASS         - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_WUF             - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_LPEN            - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_FILTER          - See OSCCTRL_DPLLCTRLB_FILTER_* definitions
- *   BOARD_FDPLL96M_REFCLK          - See  OSCCTRL_DPLLCTRLB_REFLCK_* definitions
- *   BOARD_FDPLL96M_REFCLK_CLKGEN   - GCLK index in the range {0..8}
- *   BOARD_FDPLL96M_LOCKTIME_ENABLE - Boolean (defined / not defined)
- *   BOARD_FDPLL96M_LOCKTIME        - See OSCCTRL_DPLLCTRLB_LTIME_* definitions
- *   BOARD_FDPLL96M_LOCKTIME_CLKGEN - GCLK index in the range {0..8}
- *   BOARD_FDPLL96M_REFDIV          - Numeric value, 1 - 2047
- *   BOARD_FDPLL96M_PRESCALER       - See OSCCTRL_DPLLPRESC_* definitions
- *   BOARD_FDPLL96M_REFFREQ         - Numeric value
- *   BOARD_FDPLL96M_FREQUENCY       - Numeric value
- */
-
-#undef  BOARD_FDPLL96M_ENABLE
-#undef  BOARD_FDPLL96M_RUNINSTDBY
-#define BOARD_FDPLL96M_ONDEMAND          1
-#undef  BOARD_FDPLL96M_LBYPASS
-#undef  BOARD_FDPLL96M_WUF
-#undef  BOARD_FDPLL96M_LPEN
-#define BOARD_FDPLL96M_FILTER            OSCCTRL_DPLLCTRLB_FILTER_DEFAULT
-#define BOARD_FDPLL96M_REFCLK            OSCCTRL_DPLLCTRLB_REFLCK_XOSCK32K
-#define BOARD_FDPLL96M_REFCLK_CLKGEN     1
-#undef  BOARD_FDPLL96M_LOCKTIME_ENABLE
-#define BOARD_FDPLL96M_LOCKTIME          OSCCTRL_DPLLCTRLB_LTIME_NONE
-#define BOARD_FDPLL96M_LOCKTIME_CLKGEN   1
-#define BOARD_FDPLL96M_REFDIV            1
-#define BOARD_FDPLL96M_PRESCALER         OSCCTRL_DPLLPRESC_DIV1
-
-#define BOARD_FDPLL96M_REFFREQ           32768
-#define BOARD_FDPLL96M_FREQUENCY         48000000
-
-/* GCLK Configuration
- *
- * Global enable/disable.
- *
- *   BOARD_GCLK_ENABLE            - *MUST* be defined
- *
- * For n=1-7:
- *   BOARD_GCLKn_ENABLE           - Boolean (defined / not defined)
- *
- * For n=0-8:
- *   BOARD_GCLKn_RUN_IN_STANDBY   - Boolean (defined / not defined)
- *   BOARD_GCLKn_CLOCK_SOURCE     - See GCLK_GENCTRL_SRC_* definitions
- *   BOARD_GCLKn_PRESCALER        - Value
- *   BOARD_GCLKn_OUTPUT_ENABLE    - Boolean (defined / not defined)
- */
-
-#define BOARD_GCLK_ENABLE             1
-
-/* GCLK generator 0 (Main Clock) - Source is the DFLL */
-
-#ifdef CONFIG_METRO_M4_DFLL
-#  undef  BOARD_GCLK0_RUN_IN_STANDBY
-#  define BOARD_GCLK0_CLOCK_SOURCE    GCLK_GENCTRL_SRC_DFLL48M
-#  define BOARD_GCLK0_PRESCALER       1
-#  undef  BOARD_GCLK0_OUTPUT_ENABLE
-#  define BOARD_GCLK0_FREQUENCY       (BOARD_DFLL48M_FREQUENCY / BOARD_GCLK0_PRESCALER)
-#else
-#  undef  BOARD_GCLK0_RUN_IN_STANDBY
-#  define BOARD_GCLK0_CLOCK_SOURCE    GCLK_GENCTRL_SRC_OSC16M
-#  define BOARD_GCLK0_PRESCALER       1
-#  undef  BOARD_GCLK0_OUTPUT_ENABLE
-#  define BOARD_GCLK0_FREQUENCY       (BOARD_OSC16M_FREQUENCY / BOARD_GCLK0_PRESCALER)
-#endif
-
-/* Configure GCLK generator 1 - Drives the DFLL */
-
-#if defined(CONFIG_METRO_M4_DFLL_OSC16MSRC)
-#  define BOARD_GCLK1_ENABLE          1
-#  undef  BOARD_GCLK1_RUN_IN_STANDBY
-#  define BOARD_GCLK1_CLOCK_SOURCE    GCLK_GENCTRL_SRC_OSC16M
-#  define BOARD_GCLK1_PRESCALER       1
-#  undef  BOARD_GCLK1_OUTPUT_ENABLE
-#  define BOARD_GCLK1_FREQUENCY       (BOARD_OSC16M_FREQUENCY / BOARD_GCLK1_PRESCALER)
-#elif defined(CONFIG_METRO_M4_DFLL_XOSC32KSRC)
-#  define BOARD_GCLK1_ENABLE          1
-#  undef  BOARD_GCLK1_RUN_IN_STANDBY
-#  define BOARD_GCLK1_CLOCK_SOURCE    GCLK_GENCTRL_SRC_XOSC32K
-#  define BOARD_GCLK1_PRESCALER       1
-#  undef  BOARD_GCLK1_OUTPUT_ENABLE
-#  define BOARD_GCLK1_FREQUENCY       (BOARD_XOSC32K_FREQUENCY / BOARD_GCLK1_PRESCALER)
-#else
-#  error DFLL clock source not provided
-#endif
-
-/* Configure GCLK generator 2 (RTC) */
-
-#undef  BOARD_GCLK2_ENABLE
-#undef  BOARD_GCLK2_RUN_IN_STANDBY
-#define BOARD_GCLK2_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC32K
-#define BOARD_GCLK2_PRESCALER         32
-#undef  BOARD_GCLK2_OUTPUT_ENABLE
-#define BOARD_GCLK2_FREQUENCY         (BOARD_OSC32K_FREQUENCY / BOARD_GCLK2_PRESCALER)
-
-/* Configure GCLK generator 3 */
-
-#undef  BOARD_GCLK3_ENABLE
-#undef  BOARD_GCLK3_RUN_IN_STANDBY
-#define BOARD_GCLK3_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK3_PRESCALER         1
-#undef  BOARD_GCLK3_OUTPUT_ENABLE
-#define BOARD_GCLK3_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK3_PRESCALER)
-
-/* Configure GCLK generator 4 */
-
-#undef  BOARD_GCLK4_ENABLE
-#undef  BOARD_GCLK4_RUN_IN_STANDBY
-#define BOARD_GCLK4_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK4_PRESCALER         1
-#undef  BOARD_GCLK4_OUTPUT_ENABLE
-#define BOARD_GCLK4_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK4_PRESCALER)
-
-/* Configure GCLK generator 5 */
-
-#undef  BOARD_GCLK5_ENABLE
-#undef  BOARD_GCLK5_RUN_IN_STANDBY
-#define BOARD_GCLK5_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK5_PRESCALER         1
-#undef  BOARD_GCLK5_OUTPUT_ENABLE
-#define BOARD_GCLK5_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK5_PRESCALER)
-
-/* Configure GCLK generator 6 */
-
-#undef  BOARD_GCLK6_ENABLE
-#undef  BOARD_GCLK6_RUN_IN_STANDBY
-#define BOARD_GCLK6_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK6_PRESCALER         1
-#undef  BOARD_GCLK6_OUTPUT_ENABLE
-#define BOARD_GCLK6_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK6_PRESCALER)
-
-/* Configure GCLK generator 7 */
-
-#undef  BOARD_GCLK7_ENABLE
-#undef  BOARD_GCLK7_RUN_IN_STANDBY
-#define BOARD_GCLK7_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK7_PRESCALER         1
-#undef  BOARD_GCLK7_OUTPUT_ENABLE
-#define BOARD_GCLK7_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK7_PRESCALER)
-
-/* Configure GCLK generator 8 */
-
-#undef  BOARD_GCLK8_ENABLE
-#undef  BOARD_GCLK8_RUN_IN_STANDBY
-#define BOARD_GCLK8_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC16M
-#define BOARD_GCLK8_PRESCALER         1
-#undef  BOARD_GCLK8_OUTPUT_ENABLE
-#define BOARD_GCLK8_FREQUENCY         (BOARD_OSC16M_FREQUENCY / BOARD_GCLK8_PRESCALER)
-
-/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0], this is
- * the clock feeding the Power Manager. The Power Manager, in turn, generates main
- * clock which is divided down to produce the CPU, AHB, and APB clocks.
- *
- * The main clock is initially OSC16M divided by 8.
- */
-
-#define BOARD_GCLK_MAIN_FREQUENCY     BOARD_GCLK0_FREQUENCY
-
-/* Main clock dividers
- *
- *     BOARD_CPU_DIVIDER        - See MCLK_CPUDIV_DIV* definitions
- *     BOARD_CPU_FRQUENCY       - In Hz
- *     BOARD_CPU_FAILDECT       - Boolean (defined / not defined)
- *     BOARD_LOWPOWER_DIVIDER   - See MCLK_LPDIV_DIV_* definitions
- *     BOARD_LOWPOWER_FREQUENCY - In Hz
- *     BOARD_BACKUP_DIVIDER     - See MCLK_BUPDIV_DIV_* definitions
- *     BOARD_BACKUP_FREQUENCY   - In Hz
- */
-
-#undef  BOARD_CPU_FAILDECT
-#define BOARD_CPU_DIVIDER            MCLK_CPUDIV_DIV1
-#define BOARD_LOWPOWER_DIVIDER       MCLK_LPDIV_DIV1
-#define BOARD_BACKUP_DIVIDER         MCLK_BUPDIV_DIV1
-
-/* Resulting frequencies */
-
-#define BOARD_MCK_FREQUENCY          (BOARD_GCLK_MAIN_FREQUENCY)
-#define BOARD_CPU_FREQUENCY          (BOARD_MCK_FREQUENCY)
-#define BOARD_LOWPOWER_FREQUENCY     (BOARD_MCK_FREQUENCY)
-#define BOARD_BACKUP_FREQUENCY       (BOARD_MCK_FREQUENCY)
-#define BOARD_APBA_FREQUENCY         (BOARD_MCK_FREQUENCY)
-#define BOARD_APBB_FREQUENCY         (BOARD_MCK_FREQUENCY)
-#define BOARD_APBC_FREQUENCY         (BOARD_MCK_FREQUENCY)
-#define BOARD_APBD_FREQUENCY         (BOARD_MCK_FREQUENCY)
-#define BOARD_APBE_FREQUENCY         (BOARD_MCK_FREQUENCY)
+#define BOARD_GLCK_EIC          4         /* EIC GLCK index */
 
 /* FLASH wait states
  *
- * REVISIT: These values come from the SAMD20
- * Vdd Range     Wait states    Maximum Operating Frequency
- * ------------- -------------- ---------------------------
- * 1.62V to 2.7V  0             14 MHz
- *                1             28 MHz
- *                2             42 MHz
- *                3             48 MHz
- * 2.7V to 3.63V  0             24 MHz
- *                1             48 MHz
+ * Vdd Range Wait states Maximum Operating Frequency
+ * --------- ----------- ---------------------------
+ * > 2.7V    0            24 MHz
+ *           1            51 MHz
+ *           2            77 MHz
+ *           3           101 MHz
+ *           4           119 MHz
+ *           5           120 MHz
+ * >1.71V    0            22 MHz
+ *           1            44 MHz
+ *           2            67 MHz
+ *           3            89 MHz
+ *           4           111 MHz
+ *           5           120 MHz
  */
 
-#if 0
-#  define BOARD_FLASH_WAITSTATES     3
-#else
-#  define BOARD_FLASH_WAITSTATES     1
-#endif
+#define BOARD_FLASH_WAITSTATES  6
 
 /* LED definitions ******************************************************************/
 /* The Adafruit Metro M4 has four LEDs, but only two are controllable by software:
@@ -574,6 +346,11 @@
 #define BOARD_SERCOM3_PINMAP_PAD2    0                   /* (not used) */
 #define BOARD_SERCOM3_PINMAP_PAD3    0                   /* (not used) */
 
-#define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK0_FREQUENCY
+#define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0
+#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_2
+
+#define BOARD_SERCOM3_COREGEN        1
+#define BOARD_SERCOM3_SLOWGEN        3
+#define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK1_FREQUENCY
 
 #endif  /* __CONFIG_METRO_M4_INCLUDE_BOARD_H */

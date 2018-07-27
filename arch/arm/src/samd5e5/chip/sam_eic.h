@@ -145,12 +145,12 @@
 #define EIC_CONFIG0_FILTEN(n)        (3 + ((n) << 2))                  /* Filter n enable, n=0-7 */
 #define EIC_CONFIG0_SENSE_SHIFT(n)   ((n) << 2)                        /* Filter n input sense, n=0-7 */
 #define EIC_CONFIG0_SENSE_MASK(n)    (7 << EIC_CONFIG0_SENSE_SHIFT(n))
-#  define EIC_CONFIG0_SENSE_NONE     (0 << EIC_CONFIG0_SENSE_SHIFT(n)) /* No detection */
-#  define EIC_CONFIG0_SENSE_RISE     (1 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Rising edge detection */
-#  define EIC_CONFIG0_SENSE_FALL     (2 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Falling edge detection */
-#  define EIC_CONFIG0_SENSE_BOTH     (3 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Both edge detection */
-#  define EIC_CONFIG0_SENSE_HIGH     (4 << EIC_CONFIG0_SENSE_SHIFT(n)) /* High level detection */
-#  define EIC_CONFIG0_SENSE_LOW      (5 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Low level detection */
+#  define EIC_CONFIG0_SENSE_NONE(n)  (0 << EIC_CONFIG0_SENSE_SHIFT(n)) /* No detection */
+#  define EIC_CONFIG0_SENSE_RISE(n)  (1 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Rising edge detection */
+#  define EIC_CONFIG0_SENSE_FALL(n)  (2 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Falling edge detection */
+#  define EIC_CONFIG0_SENSE_BOTH(n)  (3 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Both edge detection */
+#  define EIC_CONFIG0_SENSE_HIGH(n)  (4 << EIC_CONFIG0_SENSE_SHIFT(n)) /* High level detection */
+#  define EIC_CONFIG0_SENSE_LOW(n)   (5 << EIC_CONFIG0_SENSE_SHIFT(n)) /* Low level detection */
 
 /* Configuration 1 register */
 

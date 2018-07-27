@@ -474,20 +474,6 @@ config SAMD5E5_DMAC_NDESC
 		Each additional DMA descriptor will require 16-bytes for LPRAM
 		memory.
 
-config SAMD5E5_EIC_CLKGEN
-	int "EIC Clock Generator"
-	default 2
-	range 0 11
-	---help---
-		Some optional functions need a peripheral clock, which can either be
-		a generic clock (GCLK_EIC, for wider frequency selection) or a Ultra
-		Low Power 32KHz clock (CLK_ULP32K, for highest power efficiency). One
-		of the clock sources must be configured and enabled before using the
-		peripheral.
-
-		This option assumes that GCLK will be used and provides the GCL
-		number to be used
-
 choice
 	prompt "SERCOM0 mode"
 	default SAMD5E5_SERCOM0_ISUSART

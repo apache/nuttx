@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
+#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -43,10 +43,9 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(ARCH_CHIP_SAME5X)
-#  include "chip/samd5e5_memorymap.h"
+#  include "chip/samd5e5_pinmap.h"
 #else
 #  error "Unsupported SAMD5/E5 family"
 #endif
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_MEMORYMAP_H */
-
+#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H */
