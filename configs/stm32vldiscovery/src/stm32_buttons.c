@@ -79,7 +79,7 @@ uint32_t board_buttons(void)
 {
   uint32_t ret = 0;
 
-  ret = (stm32_gpioread(g_buttons[i]) == false ? 1 : 0);
+  ret = (stm32_gpioread(GPIO_BTN_0) == false ? 1 : 0);
 
   return ret;
 }

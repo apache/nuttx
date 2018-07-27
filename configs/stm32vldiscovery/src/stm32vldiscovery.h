@@ -41,10 +41,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LED - assume it is on PC8 */
+/* LED - assume it is on PC9 */
 
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
-                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN8)
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN9)
 
 /* BUTTON - assume it is on PA0 */
 
