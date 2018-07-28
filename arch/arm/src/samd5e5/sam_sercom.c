@@ -242,7 +242,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
        * of SERCOM modules and, hence, only need to configured once.
        */
 
-      sam_apb_gclk_chan_enable(GCLK_CHAN_SERCOMn_SLOW, gclkgen);
+      sam_gclk_chan_enable(GCLK_CHAN_SERCOMn_SLOW, gclkgen);
 
       /* The slow clock is now configured and should not be re=configured
        * again.

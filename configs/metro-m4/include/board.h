@@ -106,15 +106,6 @@
 #define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
 #define BOARD_CPU_FREQUENCY     120000000 /* CPU frequency 120MHz */
 
-/* FDPLL0/1 -- To be provided */
-
-#define BOARD_FDPLL0_FREQUENCY  0
-#define BOARD_FDPLL1_FREQUENCY  0
-
-/* FDLL -- To be provided */
-
-#define BOARD_DFLL_FREQUENCY    0
-
 /* GCLK */
 
 #define BOARD_GCLK_SET1         0x0000    /* The empty set */
@@ -178,7 +169,7 @@
 #define BOARD_GCLK5_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GLCK5 source */
 #define BOARD_GCLK5_DIV         24        /* Division factor */
-#define BOARD_GCLK5_FREQUENCY   BOARD_DFLL_FREQUENCY
+#define BOARD_GCLK5_FREQUENCY   (BOARD_DFLL_FREQUENCY / 24)
 
 #define BOARD_GCLK6_ENABLE      false     /* Don't enable GCLK6 */
 #define BOARD_GCLK6_IDC         false     /* Don't improve duty cycle */
@@ -238,7 +229,85 @@
 #define BOARD_GCLK11_RUNSTDBY   false     /* Don't run in standby */
 #define BOARD_GCLK11_SOURCE     1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK11_DIV        1         /* Division factor */
-#define BOARD_GCLK0_FREQUENCY   BOARD_XOSC1_FREQUENCY
+#define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY
+
+/* FDLL */
+
+#define BOARD_DFLL_ENABLE       true      /* DFLL enable */
+#define BOARD_DFLL_RUNSTDBY     false     /* Run in standby */
+#define BOARD_DFLL_ONDEMAND     false     /* On-demand control */
+#define BOARD_DFLL_MODE         false     /* Operating mode selection */
+#define BOARD_DFLL_STABLE       false     /* Stable DFLL frequency */
+#define BOARD_DFLL_LLAW         false     /* Lose lock after wake */
+#define BOARD_DFLL_USBCRM       true      /* USB clock recovery mode */
+#define BOARD_DFLL_CCDIS        true      /* Chill cycle disable */
+#define BOARD_DFLL_QLDIS        false     /* Quick Lock Disable */
+#define BOARD_DFLL_BPLCKC       false     /* Bypass coarse clock */
+#define BOARD_DFLL_WAITLOCK     true      /* Wait lock */
+#define BOARD_DFLL_CALIBEN      false     /* Overwrite factory calibration */
+#define BOARD_DFLL_FCALIB       128       /* Coarse calibration value (if caliben) */
+#define BOARD_DFLL_CCALIB       (31 / 4)  /* Fine calibration value (if caliben) */
+#define BOARD_DFLL_FSTEP        1         /* Fine maximum step */
+#define BOARD_DFLL_CSTEP        1         /* Coarse maximum step */
+#define BOARD_DFLL_GCLK         3         /* GCLK source (if !usbcrm && !mode) */
+#define BOARD_DFLL_MUL          0         /* DFLL multiply factor */
+
+#define BOARD_DFLL_FREQUENCY    0         /* To be provided */
+
+/* DPLL0/1
+ *
+ * Fckr is the frequency of the selected reference clock reference:
+ *
+ *    BOARD_XOSC32K_FREQENCY,
+ *    BOARD_XOSCn_FREQUENCY / DIV, or
+ *    BOARD_GCLKn_FREQUENCY
+ *
+ * The DPLL output frequency is then given by:
+ *
+ *   Fdpll = Fckr * (LDR + 1 + LDRFRAC / 32)
+ *
+ * DPLL0:
+ *   Fckr  = BOARD_GCLK5_FREQUENCY = BOARD_DFLL_FREQUENCY / 24
+ *
+ * DPLL1:
+ *   Fckr  = BOARD_XOSCK32_FREQUENCY = 32.768KHz
+ *   Fdpll = 32768 * (1463 + 1 + 13/32) = 47.986 MHz
+ */
+
+#define BOARD_DPLL0_ENABLE      true      /* DPLL enable */
+#define BOARD_DPLL0_DCOEN       false     /* DCO filter enable */
+#define BOARD_DPLL0_LBYPASS     false     /* Lock bypass */
+#define BOARD_DPLL0_WUF         false     /* Wake up fast */
+#define BOARD_DPLL0_RUNSTDBY    false     /* Run in standby */
+#define BOARD_DPLL0_ONDEMAND    false     /* On demand clock activation */
+#define BOARD_DPLL0_REFCLK      0         /* Reference clock selection */
+#define BOARD_DPLL0_LTIME       0         /* Lock time  */
+#define BOARD_DPLL0_FILTER      0         /* Proportional integer filter selection */
+#define BOARD_DPLL0_DCOFILTER   0         /* Sigma-delta DCO filter selection */
+#define BOARD_DPLL0_GCLK        5         /* GCLK5 source (if refclock == 0) */
+#define BOARD_DPLL0_LDRFRAC     0         /* Loop divider fractional part */
+#define BOARD_DPLL0_LDRINT      59        /* Loop divider ratio */
+#define BOARD_DPLL0_DIV         0         /* Clock divider */
+
+#define BOARD_DPLL0_FCLKR       BOARD_GCLK5_FREQUENCY
+#define BOARD_DPLL0_FREQUENCY   0         /* To be provided */
+
+#define BOARD_DPLL1_ENABLE      false     /* DPLL enable */
+#define BOARD_DPLL1_DCOEN       false     /* DCO filter enable */
+#define BOARD_DPLL1_LBYPASS     false     /* Lock bypass */
+#define BOARD_DPLL1_WUF         false     /* Wake up fast */
+#define BOARD_DPLL1_RUNSTDBY    false     /* Run in standby */
+#define BOARD_DPLL1_ONDEMAND    false     /* On demand clock activation */
+#define BOARD_DPLL1_REFCLK      1         /* Reference clock = XOSCK32 */
+#define BOARD_DPLL1_LTIME       0         /* Lock time  */
+#define BOARD_DPLL1_FILTER      0         /* Sigma-delta DCO filter selection */
+#define BOARD_DPLL1_DCOFILTER   0         /* Sigma-delta DCO filter selection */
+#define BOARD_DPLL1_GCLK        0         /* GCLK source (if refclock == 0) */
+#define BOARD_DPLL1_LDRFRAC     13        /* Loop divider fractional part */
+#define BOARD_DPLL1_LDRINT      1463      /* Loop divider ratio */
+#define BOARD_DPLL1_DIV         0         /* Clock divider */
+
+#define BOARD_DPLL1_FREQUENCY  47985664
 
 /* Peripheral clocking */
 

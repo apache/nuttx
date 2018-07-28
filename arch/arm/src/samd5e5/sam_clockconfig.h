@@ -110,10 +110,75 @@ struct sam_xosc_config_s
   uint32_t xosc_frequency;            /* XOSC frequency */
 };
 
-/* This structure defines the configuration of the FDPLL0/1 */
+/* This structure defines the configuration of the DFLL0 */
 
-struct sam_fdpll_config_s
+struct sam_dfll_config_s
 {
+  uint8_t enable     : 1;             /* DFLL enable */
+  uint8_t runstdby   : 1;             /* Run in standby */
+  uint8_t ondemand   : 1;             /* On-demand control */
+  uint8_t mode       : 1;             /* Operating mode selection
+                                       *   0  Open-loop operation
+                                       *   1  Closed-loop operation */
+  uint8_t stable     : 1;             /* Stable DFLL frequency */
+  uint8_t llaw       : 1;             /* Lose lock after wake */
+  uint8_t usbcrm     : 1;             /* USB clock recovery mode */
+  uint8_t ccdis      : 1;             /* Chill cycle disable */
+  uint8_t qldis      : 1;             /* Quick Lock Disable */
+  uint8_t bplckc     : 1;             /* Bypass coarse clock */
+  uint8_t waitlock   : 1;             /* Wait lock */
+  uint8_t caliben    : 1;             /* Overwrite factory calibration */
+  uint8_t fcalib;                     /* Fine calibration value (if caliben != 0) */
+  uint8_t ccalib;                     /* Coarse calibration value (if caliben != 0) */
+  uint8_t fstep;                      /* Fine maximum step */
+  uint8_t cstep;                      /* Coarse maximum step */
+  uint8_t gclk;                       /* GCLK source (if usbcrm != 1 && mode != 0) */
+  uint16_t mul;                       /* DFLL multiply factor */
+};
+
+/* This structure defines the configuration of the DPLL0/1 */
+
+struct sam_dpll_config_s
+{
+  uint8_t enable     : 1;             /*  DPLL enable */
+  uint8_t dcoen      : 1;             /* DCO filter enable */
+  uint8_t lbypass    : 1;             /* Lock bypass */
+  uint8_t wuf        : 1;             /* Wake up fast */
+  uint8_t runstdby   : 1;             /* Run in standby */
+  uint8_t ondemand   : 1;             /* On demand clock activation */
+  uint8_t refclk;                     /* Reference clock selection
+                                       * 0  Dedicated GCLK clock reference
+                                       * 1  XOSC32K clock reference
+                                       * 2  XOSC0 clock reference
+                                       * 3  XOSC2 clock reference */
+  uint8_t ltime;                      /* Lock time
+                                       * 0  No time-out. Automatic lock
+                                       * 4  Time-out if no locka within 800 us
+                                       * 5  Time-out if no locka within 900 us
+                                       * 6  Time-out if no locka within 1MS
+                                       * 7  Time-out if no locka within 1.1MS */
+  uint8_t filter;                     /* Proportional integer filter selection
+                                       *     PLL BW    Damping PLL BW    Damping
+                                       *  0  92.7 kHz  0.76     8  46.4 kHz  1.49
+                                       *  1  131 kHz   1.08     9  65.6 kHz  2.11
+                                       *  2  46.4 kHz  0.38    10  23.2 kHz  0.75
+                                       *  3  65.6 kHz  0.54    11  32.8 kHz  1.06
+                                       *  4  131 kHz   0.56    12  65.6 kHz  1.07
+                                       *  5  185 kHz   0.79    13  92.7 kHz  1.51
+                                       *  6  65.6 kHz  0.28    14  32.8 kHz  0.53
+                                       *  7  92.7 kHz  0.39    15  46.4 kHz  0.75 */
+  uint8_t dcofilter;                  /* Sigma-delta DCO filter selection
+                                       *
+                                       *    Capa pF BW MHz    Capa pF BW MHz
+                                       * 0  0.5     3.21   4  2.5     0.64
+                                       * 1  1       1.6    5  3       0.55
+                                       * 2  1.5     1.1    6  3.5     0.45
+                                       * 3  2       0.8    7  4       0.4 */
+
+  uint8_t gclk;                       /* GCLK source (if refclock == 0) */
+  uint8_t ldrfrac;                    /* Loop divider fractional part */
+  uint16_t ldrint;                    /* Loop divider ratio */
+  uint16_t div;                       /* Clock divider */
 };
 
 /* This structure defines the configuration of a GCLK */
@@ -145,8 +210,8 @@ struct sam_clockconfig_s
 {
   uint8_t waitstates;                 /* NVM read wait states 9-15 */
   uint8_t cpudiv;                     /* MCLK divider to get CPU frequency */
-  uint16_t glckset1;                  /* GLCKs to initialize prior to FDPLL init */
-  uint16_t glckset2;                  /* GLCKs to initialize after to FDPLL init */
+  uint16_t glckset1;                  /* GLCKs to initialize prior to DPLL init */
+  uint16_t glckset2;                  /* GLCKs to initialize after to DPLL init */
   uint32_t cpu_frequency;             /* Resulting CPU frequency */
 #if BOARD_HAVE_XOSC32K != 0
   struct sam_xosc32_config_s xosc32k; /* XOSC32 configuration */
@@ -157,7 +222,8 @@ struct sam_clockconfig_s
 #if BOARD_HAVE_XOSC1 != 0
   struct sam_xosc_config_s xosc1;     /* XOSC1 configuration */
 #endif
-  struct sam_fdpll_config_s fdpll[2]; /* FDPLL0/1 configurations */
+  struct sam_dfll_config_s dfll;      /* DFLL configuration */
+  struct sam_dpll_config_s dpll[2];   /* DPLL0/1 configurations */
   struct sam_gclk_config_s gclk[12];  /* GLCK configurations */
 };
 #endif /* BOARD_HAVE_CLKDEFS */

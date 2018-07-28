@@ -139,11 +139,11 @@
 
 /* PCHCTRL channel mapping ******************************************************************/
 
-#define GCLK_CHAN_OSCCTRL_DFLL48     0         /* DFLL48 input clock source */
-#define GCLK_CHAN_OSCCTRL_FDPLL0     1         /* Reference clock for FDPLL0 */
-#define GCLK_CHAN_OSCCTRL_FDPLL1     2         /* Reference clock for FDPLL1 */
-#define GCLK_CHAN_OSCCTRL_FDPLL0_32K 3         /* FDPLL0 32KHz clock for internal lock timer */
-#define GCLK_CHAN_OSCCTRL_FDPLL1_32K 3         /* FDPLL1 32KHz clock for internal lock timer */
+#define GCLK_CHAN_OSCCTRL_DFLL       0         /* DFLL input clock source */
+#define GCLK_CHAN_OSCCTRL_DPLL0      1         /* Reference clock for DPLL0 */
+#define GCLK_CHAN_OSCCTRL_DPLL1      2         /* Reference clock for DPLL1 */
+#define GCLK_CHAN_OSCCTRL_DPLL0_32K  3         /* DPLL0 32KHz clock for internal lock timer */
+#define GCLK_CHAN_OSCCTRL_DPLL1_32K  3         /* DPLL1 32KHz clock for internal lock timer */
 #define GCLK_CHAN_SDHCn_SLOW         3         /* SDHC0-1 Slow */
 #define GCLK_CHAN_SDHC0_SLOW         3         /* SDHC0 Slow */
 #define GCLK_CHAN_SDHC1_SLOW         3         /* SDHC1 Slow */

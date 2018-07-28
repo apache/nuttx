@@ -70,10 +70,6 @@
  * Private Data
  ****************************************************************************/
 
-/* This is the currently configured CPU frequency */
-
-static uint32_t g_cpu_frequency;
-
 /* This describes the power-up clock configuration using data provided in the
  * board.h header file.
  */
@@ -131,6 +127,62 @@ static const struct sam_clockconfig_s g_initial_clocking =
      .xosc_frequency = BOARD_XOSC1_FREQUENCY,
    },
 #endif
+   .dfll             =
+   {
+     .enable         = BOARD_DFLL_ENABLE,
+     .runstdby       = BOARD_DFLL_RUNSTDBY,
+     .ondemand       = BOARD_DFLL_ONDEMAND,
+     .mode           = BOARD_DFLL_MODE,
+     .stable         = BOARD_DFLL_STABLE,
+     .llaw           = BOARD_DFLL_LLAW,
+     .usbcrm         = BOARD_DFLL_USBCRM,
+     .ccdis          = BOARD_DFLL_CCDIS,
+     .qldis          = BOARD_DFLL_QLDIS,
+     .bplckc         = BOARD_DFLL_BPLCKC,
+     .waitlock       = BOARD_DFLL_WAITLOCK,
+     .caliben        = BOARD_DFLL_CALIBEN,
+     .fcalib         = BOARD_DFLL_FCALIB,
+     .ccalib         = BOARD_DFLL_CCALIB,
+     .fstep          = BOARD_DFLL_FSTEP,
+     .cstep          = BOARD_DFLL_CSTEP,
+     .gclk           = BOARD_DFLL_GCLK,
+     .mul            = BOARD_DFLL_MUL
+   },
+   .dpll            =
+   {
+     {
+       .enable       = BOARD_DPLL0_ENABLE,
+       .dcoen        = BOARD_DPLL0_DCOEN,
+       .lbypass      = BOARD_DPLL0_LBYPASS,
+       .wuf          = BOARD_DPLL0_WUF,
+       .runstdby     = BOARD_DPLL0_RUNSTDBY,
+       .ondemand     = BOARD_DPLL0_ONDEMAND,
+       .refclk       = BOARD_DPLL0_REFCLK,
+       .ltime        = BOARD_DPLL0_LTIME,
+       .filter       = BOARD_DPLL0_FILTER,
+       .dcofilter    = BOARD_DPLL0_DCOFILTER,
+       .gclk         = BOARD_DPLL0_GCLK,
+       .ldrfrac      = BOARD_DPLL0_LDRFRAC,
+       .ldrint       = BOARD_DPLL0_LDRINT,
+       .div          = BOARD_DPLL0_DIV
+     },
+     {
+       .enable       = BOARD_DPLL1_ENABLE,
+       .dcoen        = BOARD_DPLL1_DCOEN,
+       .lbypass      = BOARD_DPLL1_LBYPASS,
+       .wuf          = BOARD_DPLL1_WUF,
+       .runstdby     = BOARD_DPLL1_RUNSTDBY,
+       .ondemand     = BOARD_DPLL1_ONDEMAND,
+       .refclk       = BOARD_DPLL1_REFCLK,
+       .ltime        = BOARD_DPLL1_LTIME,
+       .filter       = BOARD_DPLL1_FILTER,
+       .dcofilter    = BOARD_DPLL1_DCOFILTER,
+       .gclk         = BOARD_DPLL1_GCLK,
+       .ldrfrac      = BOARD_DPLL1_LDRFRAC,
+       .ldrint       = BOARD_DPLL1_LDRINT,
+       .div          = BOARD_DPLL1_DIV
+     }
+   },
    .gclk             =
    {
      {
@@ -261,14 +313,28 @@ static const struct sam_clockconfig_s g_initial_clocking =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_set_waitsates
+ * Name: sam_get_waitstates
  *
  * Description:
  *   Set the number of FLASH wait states.
  *
  ****************************************************************************/
 
-static void sam_set_waitsates(const struct sam_clockconfig_s *config)
+static uint16_t sam_get_waitstates(void)
+{
+  uint16_t regval = getreg16(SAM_NVMCTRL_CTRLA);
+  return (regval & NVMCTRL_CTRLA_RWS_MASK) >> NVMCTRL_CTRLA_RWS_SHIFT;
+}
+
+/****************************************************************************
+ * Name: sam_set_waitstates
+ *
+ * Description:
+ *   Set the number of FLASH wait states.
+ *
+ ****************************************************************************/
+
+static void sam_set_waitstates(const struct sam_clockconfig_s *config)
 {
   DEBUGASSERT(config->waitstates < 16);
   modifyreg16(SAM_NVMCTRL_CTRLA, NVMCTRL_CTRLA_RWS_MASK,
@@ -544,19 +610,6 @@ static inline void sam_mclk_configure(uint8_t cpudiv)
 }
 
 /****************************************************************************
- * Name: sam_fdpll_configure
- *
- * Description:
- *   Configure FDPLL0 and FDPLL1
- *
- ****************************************************************************/
-
-static void sam_fdpll_configure(const struct sam_fdpll_config_s config[2])
-{
-#warning Missing logic
-}
-
-/****************************************************************************
  * Name: sam_gclk_configure
  *
  * Description:
@@ -648,6 +701,356 @@ static void sam_gclkset_configure(uint16_t gclkset,
 }
 
 /****************************************************************************
+ * Name: sam_dfll_configure, sam_dfll_ready, and sam_dfll_gclkready
+ *
+ * Description:
+ *   Configure the DFLL
+ *
+ ****************************************************************************/
+
+static void sam_dfll_configure(const struct sam_dfll_config_s *config)
+{
+  uint32_t regval32;
+  uint8_t regval8;
+
+  /* Set GCLK0 source to OSCULP32K (temporarily) */
+
+  regval32  = getreg32(SAM_GCLK_GENCTRL_OFFSET(0));
+  regval32 &= GCLK_GENCTRL_SRC_MASK;
+  regval32 |= GCLK_GENCTRL_SRC_OSCULP32K;
+  putreg32(regval32, SAM_GCLK_GENCTRL_OFFSET(0));
+
+  /* Disable the DFLL */
+
+  putreg8(0, SAM_OSCCTRL_DFLLCTRLA);
+
+  /* If we are running in closed loop mode and we are in USB clock recover
+   * mode, then set up the input source GCLK channel.
+   */
+
+  if (config->usbcrm && config->mode)
+    {
+      /* Configure the GCLK channel */
+
+      sam_gclk_chan_enable(GCLK_CHAN_OSCCTRL_DFLL, config->gclk);
+    }
+
+  /* Setup the DFLLMUL register */
+
+  regval32 = OSCCTRL_DFLLMUL_MUL(config->mul) |
+             OSCCTRL_DFLLMUL_FSTEP(config->fstep) |
+             OSCCTRL_DFLLMUL_CSTEP(config->cstep);
+  putreg32(regval32, SAM_OSCCTRL_DFLLMUL);
+
+  /* Wait until the multiplier is synchronized */
+
+  do
+    {
+      regval8  = getreg32(SAM_OSCCTRL_DFLLSYNC);
+      regval8 &= OSCCTRL_DFLLSYNC_DFLLMUL;
+    }
+  while (regval8 != 0);
+
+  /* Reset the DFLLCTRLB register */
+
+  putreg32(0, SAM_OSCCTRL_DFLLCTRLB);
+
+  do
+    {
+      regval8  = getreg8(SAM_OSCCTRL_DFLLSYNC);
+      regval8 &= OSCCTRL_DFLLSYNC_DFLLCTRLB;
+    }
+  while (regval8 != 0);
+
+  /* Set up the DFLLCTRLA register */
+
+  regval8 = OSCCTRL_DPLLCTRLA_ENABLE;
+
+  if (config->runstdby)
+    {
+      regval8 |= OSCCTRL_DPLLCTRLA_RUNSTDBY;
+    }
+
+  putreg8(regval8, SAM_OSCCTRL_DFLLCTRLA);
+
+  do
+    {
+      regval8  = getreg8(SAM_OSCCTRL_DFLLSYNC);
+      regval8 &= OSCCTRL_DPLLCTRLA_ENABLE;
+    }
+  while (regval8 != 0);
+
+  /* Overwrite factory calibration values is so requested */
+
+  if (config->caliben)
+    {
+      regval32 = OSCCTRL_DFLLVAL_FINE(config->fcalib) |
+                 OSCCTRL_DFLLVAL_COARSE(config->ccalib);
+      putreg32(regval32, SAM_OSCCTRL_DFLLVAL);
+    }
+  else
+    {
+      regval32 = getreg32(SAM_OSCCTRL_DFLLVAL);
+    }
+
+  /* Writing to the DFLLVAL will force it to re-syncrhonize */
+
+  putreg32(regval32, SAM_OSCCTRL_DFLLVAL);
+
+  do
+    {
+      regval8  = getreg8(SAM_OSCCTRL_DFLLSYNC);
+      regval8 &= OSCCTRL_DFLLSYNC_DFLLVAL;
+    }
+  while (regval8 != 0);
+
+  /* Setup the DFLLCTRLB register */
+
+  regval8 = 0;
+
+  if (config->mode)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_MODE;
+    }
+
+  if (config->stable)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_STABLE;
+    }
+
+  if (config->llaw)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_LLAW;
+    }
+
+  if (config->usbcrm)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_USBCRM;
+    }
+
+  if (config->ccdis)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_CCDIS;
+    }
+
+  if (config->qldis)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_QLDIS;
+    }
+
+  if (config->bplckc)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_BPLCKC;
+    }
+
+  if (config->waitlock)
+    {
+      regval8 |= OSCCTRL_DFLLCTRLB_WAITLOCK;
+    }
+
+  putreg8(regval8, SAM_OSCCTRL_DPLL0CTRLB);
+
+  do
+    {
+      regval8  = getreg8(SAM_OSCCTRL_DFLLSYNC);
+      regval8 &= OSCCTRL_DFLLSYNC_DFLLCTRLB;
+    }
+  while (regval8 != 0);
+}
+
+static void sam_dfll_ready(const struct sam_dfll_config_s *config)
+{
+  uint32_t ready;
+  uint32_t regval32;
+  uint8_t regval8;
+
+  /* Check if the mode bit was set, i.e., we are in closed-loop mode.  If so
+   * wait for the DFLL to be ready for and for the coarse lock to be obtained.
+   */
+
+  regval8 = getreg8(SAM_OSCCTRL_DPLL0CTRLB);
+  if ((regval8 & OSCCTRL_DFLLCTRLB_MODE) != 0)
+    {
+      ready = OSCCTRL_INT_DFLLRDY | OSCCTRL_INT_DFLLLCKC;
+
+    }
+
+  /* In open-loop mode, wait only for DFLL ready */
+
+  else
+    {
+      ready = OSCCTRL_INT_DFLLRDY;
+    }
+
+  /* Wait for whichever ready condition */
+
+  do
+    {
+      regval32  = getreg32(SAM_OSCCTRL_STATUS);
+      regval32 &= ready;
+    }
+  while (regval32 != ready);
+
+  /* Now, we can set the OnDemand bit in the DFLLCTRLA */
+
+  if (config->ondemand)
+    {
+      regval8  = getreg8(SAM_OSCCTRL_DFLLCTRLA);
+      regval8 |= OSCCTRL_DFLLCTRLA_ONDEMAND;
+      putreg8(regval8, SAM_OSCCTRL_DFLLCTRLA);
+    }
+}
+
+static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
+{
+  uint32_t regval32;
+
+  /* Wait until all GCLKs are synchronized */
+
+  while (getreg32(SAM_GCLK_SYNCHBUSY) != 0)
+    {
+    }
+
+  /* Set the source of GLCK0 to to the configured source. */
+
+  regval32  = getreg32(SAM_GCLK_GENCTRL_OFFSET(0));
+  regval32 &= GCLK_GENCTRL_SRC_MASK;
+  regval32 |= GCLK_GENCTRL_SRC(config->gclk);
+  putreg32(regval32, SAM_GCLK_GENCTRL_OFFSET(0));
+}
+
+/****************************************************************************
+ * Name: sam_dpll_configure and sam_dpll_ready
+ *
+ * Description:
+ *   Configure a DPLL, DPLL0 or DPLL1
+ *
+ ****************************************************************************/
+
+static void sam_dpll_gclkchannel(uint8_t chan,
+                                 const struct sam_dpll_config_s *config)
+{
+  /* Check if we are using a dedicated GCLK as the reference clock */
+
+  if (config->refclk == 0)
+    {
+      /* Yes.. configure the GCLK channel */
+
+      sam_gclk_chan_enable(chan, config->gclk);
+    }
+}
+
+static void sam_dpll_configure(uintptr_t base,
+                               const struct sam_dpll_config_s *config)
+{
+  uint32_t regval;
+
+  /* Set up the DPLL ratio control register */
+
+  regval = OSCCTRL_DPLLRATIO_LDR(config->ldrint) |
+           OSCCTRL_DPLLRATIO_LDRFRAC(config->ldrfrac);
+  putreg32(regval, base + SAM_OSCCTRL_DPLLRATIO_OFFSET);
+
+  /* Set up the DPLL control B register */
+
+  regval = OSCCTRL_DPLLCTRLB_FILTER(config->filter) |
+           OSCCTRL_DPLLCTRLB_REFLCK(config->refclk) |
+           OSCCTRL_DPLLCTRLB_LTIME(config->ltime) |
+           OSCCTRL_DPLLCTRLB_DCOFILTER(config->dcofilter) |
+           OSCCTRL_DPLLCTRLB_DIV(config->div);
+
+  if (config->wuf)
+    {
+      regval |= OSCCTRL_DPLLCTRLB_WUF;
+    }
+
+  if (config->lbypass)
+    {
+      regval |= OSCCTRL_DPLLCTRLB_LBYPASS;
+    }
+
+  if (config->dcoen)
+    {
+      regval |= OSCCTRL_DPLLCTRLB_DCOEN;
+    }
+
+  putreg32(regval, base + SAM_OSCCTRL_DPLLCTRLB_OFFSET);
+
+  /* Set up the DPLL control A register */
+
+  regval = 0;
+
+  if (config->enable)
+    {
+      regval |= OSCCTRL_DFLLCTRLA_ENABLE;
+    }
+
+  if (config->runstdby)
+    {
+      regval |= OSCCTRL_DFLLCTRLA_RUNSTDBY;
+    }
+
+  putreg32(regval, base + SAM_OSCCTRL_DPLLCTRLA_OFFSET);
+}
+
+static void sam_dpll_ready(uintptr_t base,
+                           const struct sam_dpll_config_s *config)
+{
+  uint32_t regval;
+
+  /* If the DPLL was enabled, then wait for it to lock and for the clock to
+   * be ready.
+   */
+
+  if (config->enable)
+    {
+      uint32_t lockready = (OSCCTRL_DPLL0STATUS_LOCK |
+                            OSCCTRL_DPLL0STATUS_CLKRDY);
+      do
+        {
+          regval = getreg32(base + SAM_OSCCTRL_DPLLSTATUS_OFFSET);
+          regval &= lockready;
+        }
+      while (regval != lockready);
+    }
+
+  /* Finally, set the OnDemand bit if selected */
+
+  if (config->ondemand)
+    {
+      regval  = getreg32(base + SAM_OSCCTRL_DPLLCTRLA_OFFSET);
+      regval |= OSCCTRL_DFLLCTRLA_ONDEMAND;
+      putreg32(regval, base + SAM_OSCCTRL_DPLLCTRLA_OFFSET);
+    }
+}
+
+/****************************************************************************
+ * Name: sam_loop_configure
+ *
+ * Description:
+ *   Configure all loops:  DFLL, DPLL0, and DPLL1
+ *
+ ****************************************************************************/
+
+static void sam_loop_configure(const struct sam_clockconfig_s *config)
+{
+  /* Configure and enable all loops */
+
+  sam_dfll_configure(&config->dfll);
+  sam_dpll_gclkchannel(GCLK_CHAN_OSCCTRL_DPLL0, &config->dpll[0]);
+  sam_dpll_configure(SAM_OSCCTRL_DPLL0_BASE, &config->dpll[0]);
+  sam_dpll_gclkchannel(GCLK_CHAN_OSCCTRL_DPLL1, &config->dpll[1]);
+  sam_dpll_configure(SAM_OSCCTRL_DPLL1_BASE, &config->dpll[1]);
+
+  /* Wait for them to become ready */
+
+  sam_dfll_ready(&config->dfll);
+  sam_dpll_ready(SAM_OSCCTRL_DPLL0_BASE, &config->dpll[0]);
+  sam_dpll_ready(SAM_OSCCTRL_DPLL1_BASE, &config->dpll[1]);
+  sam_dfll_gclkready(&config->dfll);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -664,16 +1067,27 @@ static void sam_gclkset_configure(uint16_t gclkset,
 
 void sam_clock_configure(const struct sam_clockconfig_s *config)
 {
-  /* Check if the clock frequency is increasing or decreasing */
+  uint16_t waitstates;
 
-  if (config->cpu_frequency > g_cpu_frequency)
+  /* Check if the number of wait states is increasing or decreasing */
+
+  waitstates = sam_get_waitstates();
+  if (config->waitstates > waitstates)
     {
-      /* Increasing.  The number of waits states should be larger.  Set the
-       * new number of wait states before configuring the clocking.
+      /* Increasing.  Set the new number of wait states before configuring
+       * the clocking.
        */
 
-      sam_set_waitsates(config);
+      sam_set_waitstates(config);
     }
+
+  /* REVISIT:  This function is intended to support both the power-up reset
+   * clock configuration as well as the subsequent re-configuration of the
+   * clocking.  Logic is here dependent upon the initial clock state.  In
+   * order to successfully reconfigure the clocks, I suspect that it will be
+   * necessary to always restore the power-up clock configuration here before
+   * setting the new clock configuration.
+   */
 
 #if BOARD_HAVE_XOSC32K != 0
   /* Configure XOSC32 */
@@ -697,27 +1111,27 @@ void sam_clock_configure(const struct sam_clockconfig_s *config)
 
   sam_mclk_configure(config->cpudiv);
 
-  /* Pre-configure some GCLKs before configuring the FDPLLs */
+  /* Pre-configure some GCLKs before configuring the DPLLs */
 
   sam_gclkset_configure(config->glckset1, config->gclk);
 
-  /* Configure the FDPLLs */
+  /* Configure loops:  DFLL, DPLL0, and DPLL1. */
 
-  sam_fdpll_configure(config->fdpll);
+  sam_loop_configure(config);
 
-  /* Configure the renaming GCLKs before configuring the FDPLLs */
+  /* Configure the renaming GCLKs before configuring the DPLLs */
 
   sam_gclkset_configure(config->glckset2, config->gclk);
 
-  /* Check if the clock frequency is increasing or decreasing */
+  /* Check if the number of wait states is increasing or decreasing */
 
-  if (config->cpu_frequency < g_cpu_frequency)
+  if (config->waitstates < waitstates)
     {
-      /* Decreasing.  The number of waits states should be smaller.  Set the
-       * new number of wait states after configuring the clocking.
+      /* Decreasing.  Set the new number of wait states after configuring
+       * the clocking.
        */
 
-      sam_set_waitsates(config);
+      sam_set_waitstates(config);
     }
 }
 
@@ -732,10 +1146,5 @@ void sam_clock_configure(const struct sam_clockconfig_s *config)
 
 void sam_clock_initialize(void)
 {
-  /* Clear .bss used by this file in case it is called before .bss is
-   * initialized.
-   */
-
-  g_cpu_frequency = 0;
   sam_clock_configure(&g_initial_clocking);
 }
