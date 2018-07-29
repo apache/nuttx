@@ -480,9 +480,9 @@ choice
 	depends on SAMD5E5_SERCOM0
 
 config SAMD5E5_SERCOM0_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM0_ISSPI
 	bool "SPI"
@@ -500,9 +500,9 @@ choice
 	depends on SAMD5E5_SERCOM1
 
 config SAMD5E5_SERCOM1_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM1_ISSPI
 	bool "SPI"
@@ -520,9 +520,9 @@ choice
 	depends on SAMD5E5_SERCOM2
 
 config SAMD5E5_SERCOM2_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM2_ISSPI
 	bool "SPI"
@@ -540,9 +540,9 @@ choice
 	depends on SAMD5E5_SERCOM3
 
 config SAMD5E5_SERCOM3_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM3_ISSPI
 	bool "SPI"
@@ -560,9 +560,9 @@ choice
 	depends on SAMD5E5_SERCOM4
 
 config SAMD5E5_SERCOM4_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM4_ISSPI
 	bool "SPI"
@@ -580,9 +580,9 @@ choice
 	depends on SAMD5E5_SERCOM5
 
 config SAMD5E5_SERCOM5_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM5_ISSPI
 	bool "SPI"
@@ -600,9 +600,9 @@ choice
 	depends on SAMD5E5_SERCOM6
 
 config SAMD5E5_SERCOM6_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM6_ISSPI
 	bool "SPI"
@@ -620,9 +620,9 @@ choice
 	depends on SAMD5E5_SERCOM7
 
 config SAMD5E5_SERCOM7_ISI2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
-	select SAMD5E5_HAVE_I2C
+	select SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SERCOM7_ISSPI
 	bool "SPI"
@@ -636,10 +636,11 @@ endchoice
 
 config SAMD5E5_HAVE_SPI
 	bool
+	default n
 	select SPI
 
 menu "SPI options"
-	depends on SAMD5E5_HAVE_SPI
+	depends on SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_SPI_DMA
 	bool "SPI DMA"
@@ -657,12 +658,13 @@ config SAMD5E5_SPI_REGDEBUG
 
 endmenu # SPI options
 
-config SAMD5E5_HAVE_I2C
+config SAMD5E5_HAVE_I2C_MASTER
 	bool
+	default n
 	select I2C
 
-menu "I2C options"
-	depends on SAMD5E5_HAVE_I2C
+menu "I2C master options"
+	depends on SAMD5E5_HAVE_I2C_MASTER
 
 config SAMD5E5_I2C_REGDEBUG
 	bool "I2C register-Level Debug"

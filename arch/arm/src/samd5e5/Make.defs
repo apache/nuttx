@@ -128,6 +128,14 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += sam_idle.c
 endif
 
+ifeq ($(CONFIG_SAMD5E5_HAVE_SPI),y)
+CHIP_CSRCS += sam_spi.c
+endif
+
+ifeq ($(CONFIG_SAMD5E5_HAVE_I2C_MASTER),y)
+CHIP_CSRCS += sam_i2c_master.c
+endif
+
 ifeq ($(CONFIG_SAMD5E5_WDT),y)
 CHIP_CSRCS += sam_wdt.c
 endif
