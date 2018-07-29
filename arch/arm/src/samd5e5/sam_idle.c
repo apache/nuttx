@@ -46,7 +46,6 @@
 
 #include <nuttx/irq.h>
 
-#include "chip.h"
 #include "up_internal.h"
 
 /****************************************************************************

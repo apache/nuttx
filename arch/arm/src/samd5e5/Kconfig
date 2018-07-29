@@ -348,8 +348,6 @@ config SAMD5E5_ADC
 config SAMD5E5_CMCC
 	bool "Cortex M Cache Controller (CMCC)"
 	default n
-	depends on ARCH_CHIP_SAM4E
-
 config SAMD5E5_DAC
 	bool "Digital-to-Analog Converter"
 	default n
@@ -358,7 +356,6 @@ config SAMD5E5_DMAC
 	bool "DMA Controller"
 	default n
 	select ARCH_DMA
-	depends on EXPERIMENTAL
 
 config SAMD5E5_EVSYS
 	bool "Event System"

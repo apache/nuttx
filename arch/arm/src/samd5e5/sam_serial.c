@@ -58,7 +58,6 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip.h"
 #include "sam_config.h"
 #include "sam_usart.h"
 #include "sam_lowputc.h"

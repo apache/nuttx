@@ -48,7 +48,6 @@
 #include <arch/chip/chip.h>
 
 #include "up_arch.h"
-#include "chip.h"
 #include "chip/sam_usart.h"
 
 #include "sam_config.h"

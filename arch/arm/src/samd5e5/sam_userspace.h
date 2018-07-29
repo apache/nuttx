@@ -48,7 +48,6 @@
 #include <stdbool.h>
 
 #include "up_internal.h"
-#include "chip.h"
 
 /************************************************************************************
  * Pre-processor Definitions

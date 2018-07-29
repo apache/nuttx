@@ -42,13 +42,11 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam_memporymap.h"
+#include "chip/sam_memorymap.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-
-#define SAM_DMAC_NCHANNELS               32      /* 32-DMA channels (max) */
 
 /* DMAC register offsets ********************************************************************/
 
@@ -68,7 +66,7 @@
 #define SAM_DMAC_BASEADDR_OFFSET         0x0034  /* Descriptor Memory Section Base Address Register */
 #define SAM_DMAC_WRBADDR_OFFSET          0x0038  /* Write-Back Memory Section Base Address Register */
 
-#define SAM_DMAC_CHAN_OFFSET(n)          (0x0040 + ((n) << 4)
+#define SAM_DMAC_CHAN_OFFSET(n)          (0x0040 + ((n) << 4))
 #  define SAM_DMAC_CHCTRLA_OFFSET        0x0000  /* Channel Control A Register */
 #  define SAM_DMAC_CHCTRLB_OFFSET        0x0004  /* Channel Control B Register */
 #  define SAM_DMAC_CHPRILVL_OFFSET       0x0005  /* Channel Priority Level */
@@ -246,11 +244,13 @@
 #  define DMAC_CHCTRLA_TRIGSRC(n)        ((uint32_t)(n) << DMAC_CHCTRLA_TRIGSRC_SHIFT)
 #define DMAC_CHCTRLA_TRIGACT_SHIFT       (21)      /* Bits 20-21: Trigger Action */
 #define DMAC_CHCTRLA_TRIGACT_MASK        (3 << DMAC_CHCTRLA_TRIGACT_SHIFT)
+#  define DMAC_CHCTRLA_TRIGACT(n)        ((uint32_t)(n) << DMAC_CHCTRLA_TRIGACT_SHIFT)
 #  define DMAC_CHCTRLA_TRIGACT_BLOCK     (0 << DMAC_CHCTRLA_TRIGACT_SHIFT) /* Trigger per block transfer */
 #  define DMAC_CHCTRLA_TRIGACT_BURST     (2 << DMAC_CHCTRLA_TRIGACT_SHIFT) /* Trigger per burst transfer */
 #  define DMAC_CHCTRLA_TRIGACT_TRANS     (3 << DMAC_CHCTRLA_TRIGACT_SHIFT) /* Trigger for each transaction */
 #define DMAC_CHCTRLA_BURSTLEN_SHIFT      (24)      /* Bits 24-27: Burst Length (beats-1) */
 #define DMAC_CHCTRLA_BURSTLEN_MASK       (15 << DMAC_CHCTRLA_BURSTLEN_SHIFT)
+#  define DMAC_CHCTRLA_BURSTLEN(n)       ((uint32_t)((n) - 1)  << DMAC_CHCTRLA_BURSTLEN_SHIFT)
 #  define DMAC_CHCTRLA_BURSTLEN_1BEAT    (0  << DMAC_CHCTRLA_BURSTLEN_SHIFT) /* Single-beat burst */
 #  define DMAC_CHCTRLA_BURSTLEN_2BEATS   (1  << DMAC_CHCTRLA_BURSTLEN_SHIFT) /* 2-beats burst length */
 #  define DMAC_CHCTRLA_BURSTLEN_3BEATS   (2  << DMAC_CHCTRLA_BURSTLEN_SHIFT) /* 3-beats burst length */
@@ -269,6 +269,7 @@
 #  define DMAC_CHCTRLA_BURSTLEN_16BEATS  (15 << DMAC_CHCTRLA_BURSTLEN_SHIFT) /* 16-beats burst length */
 #define DMAC_CHCTRLA_THRESHOLD_SHIFT     (28)      /* Bits 28-29: FIFO Threshold (log2 beats) */
 #define DMAC_CHCTRLA_THRESHOLD_MASK      (3 << DMAC_CHCTRLA_THRESHOLD_SHIFT)
+#  define DMAC_CHCTRLA_THRESHOLD(n)      ((uint32_t)(n) << DMAC_CHCTRLA_THRESHOLD_SHIFT)
 #  define DMAC_CHCTRLA_THRESHOLD_1BEAT   (0 << DMAC_CHCTRLA_THRESHOLD_SHIFT) /* Write after 1 beat */
 #  define DMAC_CHCTRLA_THRESHOLD_2BEATS  (1 << DMAC_CHCTRLA_THRESHOLD_SHIFT) /* Write after 2 beats */
 #  define DMAC_CHCTRLA_THRESHOLD_4BEATS  (2 << DMAC_CHCTRLA_THRESHOLD_SHIFT) /* Write after 3 beats */
@@ -285,9 +286,9 @@
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM1_RX      0x06  /* Index of SERCOM1 DMA RX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM1_TX      0x07  /* Index of SERCOM1 DMA TX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM2_RX      0x08  /* Index of SERCOM2 DMA RX trigger */
-#define DMAC_CHCTRLA_TRIGSRC_SERCOM2_tX      0x09  /* Index of SERCOM2 DMA TX trigger */
+#define DMAC_CHCTRLA_TRIGSRC_SERCOM2_TX      0x09  /* Index of SERCOM2 DMA TX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM3_RX      0x0a  /* Index of SERCOM3 DMA RX trigger */
-#define DMAC_CHCTRLA_TRIGSRC_SERCOM3_tX      0x0b  /* Index of SERCOM3 DMA TX trigger */
+#define DMAC_CHCTRLA_TRIGSRC_SERCOM3_TX      0x0b  /* Index of SERCOM3 DMA TX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM4_RX      0x0c  /* Index of SERCOM4 DMA RX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM4_TX      0x0d  /* Index of SERCOM4 DMA TX trigger */
 #define DMAC_CHCTRLA_TRIGSRC_SERCOM5_RX      0x0e  /* Index of SERCOM5 DMA RX trigger */
@@ -314,9 +315,9 @@
 #define DMAC_CHCTRLA_TRIGSRC_TCC2_MC0        0x23  /* Index of TCC2 DMA Match/Compare trigger 0 */
 #define DMAC_CHCTRLA_TRIGSRC_TCC2_MC1        0x24  /* Index of TCC2 DMA Match/Compare trigger 1 */
 #define DMAC_CHCTRLA_TRIGSRC_TCC2_MC2        0x25  /* Index of TCC2 DMA Match/Compare trigger 2 */
-#define DMAC_CHCTRLA_TRIGSRC_TCC2_OVF        0x26  /* TCC3 DMA overflow/underflow/retrigger trigger */
-#define DMAC_CHCTRLA_TRIGSRC_TCC2_MC0        0x27  /* Index of TCC3 DMA Match/Compare trigger 0 */
-#define DMAC_CHCTRLA_TRIGSRC_TCC2_MC1        0x28  /* Index of TCC3 DMA Match/Compare trigger 1 */
+#define DMAC_CHCTRLA_TRIGSRC_TCC3_OVF        0x26  /* TCC3 DMA overflow/underflow/retrigger trigger */
+#define DMAC_CHCTRLA_TRIGSRC_TCC3_MC0        0x27  /* Index of TCC3 DMA Match/Compare trigger 0 */
+#define DMAC_CHCTRLA_TRIGSRC_TCC3_MC1        0x28  /* Index of TCC3 DMA Match/Compare trigger 1 */
 #define DMAC_CHCTRLA_TRIGSRC_TCC4_OVF        0x29  /* TCC4 DMA overflow/underflow/retrigger trigger */
 #define DMAC_CHCTRLA_TRIGSRC_TCC4_MC0        0x2a  /* Index of TCC4 DMA Match/Compare trigger 0 */
 #define DMAC_CHCTRLA_TRIGSRC_TCC4_MC1        0x2b  /* Index of TCC4 DMA Match/Compare trigger 1 */
@@ -325,10 +326,10 @@
 #define DMAC_CHCTRLA_TRIGSRC_TC0_MC1         0x2e  /* Index of TC0 DMA Match/Compare trigger 1 */
 #define DMAC_CHCTRLA_TRIGSRC_TC1_OVF         0x2f  /* TC1 DMA overflow/underflow trigger */
 #define DMAC_CHCTRLA_TRIGSRC_TC1_MC0         0x30  /* Index of TC1 DMA Match/Compare trigger 0 */
-#define DMAC_CHCTRLA_TRIGSRC_TC2_MC1         0x31  /* Index of TC1 DMA Match/Compare trigger 1 */
-#define DMAC_CHCTRLA_TRIGSRC_TC2_OVF         0x32  /* TC1 DMA overflow/underflow trigger */
-#define DMAC_CHCTRLA_TRIGSRC_TC2_MC0         0x33  /* Index of TC1 DMA Match/Compare trigger 0 */
-#define DMAC_CHCTRLA_TRIGSRC_TC2_MC1         0x34  /* Index of TC1 DMA Match/Compare trigger 1 */
+#define DMAC_CHCTRLA_TRIGSRC_TC1_MC1         0x31  /* Index of TC1 DMA Match/Compare trigger 1 */
+#define DMAC_CHCTRLA_TRIGSRC_TC2_OVF         0x32  /* TC2 DMA overflow/underflow trigger */
+#define DMAC_CHCTRLA_TRIGSRC_TC2_MC0         0x33  /* Index of TC2 DMA Match/Compare trigger 0 */
+#define DMAC_CHCTRLA_TRIGSRC_TC2_MC1         0x34  /* Index of TC2 DMA Match/Compare trigger 1 */
 #define DMAC_CHCTRLA_TRIGSRC_TC3_OVF         0x35  /* TC3 DMA overflow/underflow trigger */
 #define DMAC_CHCTRLA_TRIGSRC_TC3_MC0         0x36  /* Index of TC3 DMA Match/Compare trigger 0 */
 #define DMAC_CHCTRLA_TRIGSRC_TC3_MC1         0x37  /* Index of TC3 DMA Match/Compare trigger 1 */
@@ -375,11 +376,11 @@
 #define DMAC_CHPRILVL_MASK               0x03      /* Channel priority level */
 #  define DMAC_CHPRILVL(n)               ((uint8_t)(n))
 
-/* Channel Event Contol Register */
+/* Channel Event Control Register */
 
 #define DMAC_CHEVCTRL_EVACT_SHIFT        (0)       /* Bits 0-2: Channel event input action */
 #define DMAC_CHEVCTRL_EVACT_MASK         (7 << DMAC_CHEVCTRL_EVACT_SHIFT)
-#  define DMAC_CHEVCTRL_EVACT_NOACT      (0 << DMAC_CHEVCTRL_EVACT_SHIFT) /* No action
+#  define DMAC_CHEVCTRL_EVACT_NOACT      (0 << DMAC_CHEVCTRL_EVACT_SHIFT) /* No action */
 #  define DMAC_CHEVCTRL_EVACT_TRIG       (1 << DMAC_CHEVCTRL_EVACT_SHIFT) /* Transfer/periodic transfer trigger */
 #  define DMAC_CHEVCTRL_EVACT_CTRIG      (2 << DMAC_CHEVCTRL_EVACT_SHIFT) /* Conditional transfer trigger */
 #  define DMAC_CHEVCTRL_EVACT_CBLOCK     (3 << DMAC_CHEVCTRL_EVACT_SHIFT) /* Conditional block transfer */

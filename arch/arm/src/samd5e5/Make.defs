@@ -124,6 +124,10 @@ ifeq ($(CONFIG_SAMD5E5_CMCC),y)
 CHIP_CSRCS += sam_cmcc.c
 endif
 
+ifeq ($(CONFIG_SAMD5E5_DMAC),y)
+CHIP_CSRCS += sam_dmac.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += sam_idle.c
 endif

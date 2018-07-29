@@ -65,6 +65,7 @@
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -89,6 +90,7 @@
 #  define SAMD5E5_NTC               8             /* TC0-TC7 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -113,6 +115,7 @@
 #  define SAMD5E5_NTC               8             /* TC0-TC7 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -137,6 +140,7 @@
 #  define SAMD5E5_NTC               8             /* TC0-TC7 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -161,6 +165,7 @@
 #  define SAMD5E5_NTC               6             /* TC0-TC5 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -185,6 +190,7 @@
 #  define SAMD5E5_NTC               6             /* TC0-TC5 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -209,6 +215,7 @@
 #  define SAMD5E5_NTC               6             /* TC0-TC5 */
 #  define SAMD5E5_NTCCOMP           2             /* TC compare */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -235,6 +242,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            1             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -261,6 +269,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            1             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -287,6 +296,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -313,6 +323,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -339,6 +350,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -383,6 +395,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -409,6 +422,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -435,6 +449,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -461,6 +476,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -487,6 +503,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           10            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -513,6 +530,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -539,6 +557,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             2             /* SDHC0-1 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -565,6 +584,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */
@@ -591,6 +611,7 @@
 #  define SAMD5E5_NTCC24            2             /* TCC 24-bit */
 #  define SAMD5E5_NTCC16            3             /* TCC 16-bit */
 #  define SAMD5E5_NSDHC             1             /* SDHC0 */
+#  define SAMD5E5_NDMACHAN          32            /* 32 DMA channels */
 #  define SAMD5E5_PCCSIZE           14            /* PCC data size */
 #  define SAMD5E5_NCCL              4             /* CCL */
 #  define SAMD5E5_NEVTCHAN          32            /* Event system channels */

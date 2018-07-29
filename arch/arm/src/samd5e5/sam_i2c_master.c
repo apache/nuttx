@@ -1182,9 +1182,8 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
 
   i2c_pad_configure(priv);
 
-  ctrla =
-    I2C_CTRLA_MODE_MASTER | I2C_CTRLA_RUNSTDBY | I2C_CTRLA_SPEED_FAST |
-    I2C_CTRLA_SDAHOLD_450NS | priv->attr->muxconfig;
+  ctrla = I2C_CTRLA_MODE_MASTER | I2C_CTRLA_RUNSTDBY | I2C_CTRLA_SPEED_FAST |
+          I2C_CTRLA_SDAHOLD_450NS | priv->attr->muxconfig;
   i2c_putreg32(priv, ctrla, SAM_I2C_CTRLA_OFFSET);
   i2c_wait_synchronization(priv);
 
