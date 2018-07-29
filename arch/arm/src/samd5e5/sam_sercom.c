@@ -47,22 +47,12 @@
 
 #include "sam_config.h"
 
-#include "sam_pm.h"
+#include "chip.h"
+#include "chip/sam_pm.h"
 #include "sam_gclk.h"
 #include "sam_sercom.h"
 
 #include <arch/board/board.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#undef HAVE_SERCOM0_4
-#if defined(CONFIG_SAMD5E5_SERCOM0) || defined(CONFIG_SAMD5E5_SERCOM1) || \
-    defined(CONFIG_SAMD5E5_SERCOM2) || defined(CONFIG_SAMD5E5_SERCOM3) || \
-    defined(CONFIG_SAMD5E5_SERCOM4)
-#  define HAVE_SERCOM0_4
-#endif
 
 /****************************************************************************
  * Private Data
@@ -70,7 +60,7 @@
 
 static bool g_slowclk_configured = false;
 #ifdef CONFIG_DEBUG_ASSERTIONS
-static uint8_t g_slowclk_gclkgen = 0xff;
+static uint8_t g_slowgen = 0xff;
 #endif
 
 static const uint8_t g_corclk_channel[SAMD5E5_NSERCOM] =
@@ -174,46 +164,16 @@ void sercom_enable(int sercom)
  *
  ****************************************************************************/
 
-void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
+void sercom_coreclk_configure(int sercom, int coregen, bool wrlock)
 {
-  uint16_t regval;
-  uint8_t gclkcore;
+  uint8_t corechan;
 
   DEBUGASSERT((unsigned)sercom < SAMD5E5_NSERCOM);
 
   /* Set up the SERCOMn_GCLK_ID_CORE clock */
 
-  gclkcore = g_corclk_channel[sercom];
-  regval   = ((uint16_t)gclkcore << GCLK_CLKCTRL_ID_SHIFT);
-
-  /* Select and disable the SERCOMn_GCLK_ID_CORE generic clock */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Wait for clock to become disabled */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
-
-  /* Select the SERCOMn_GCLK_ID_CORE source clock generator */
-
-  regval |= (uint16_t)gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
-
-  /* Write the new configuration */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Enable the SERCOMn_GCLK_ID_CORE generic clock, optionally locking
-   * further writes to this GCLK.
-   */
-
-  regval |= GCLK_CLKCTRL_CLKEN;
-
-  if (wrlock)
-    {
-      regval |= GCLK_CLKCTRL_WRTLOCK;
-    }
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
+  corechan = g_corclk_channel[sercom];
+  sam_gclk_chan_enable(corechan, coregen, wrlock);
 }
 
 /****************************************************************************
@@ -230,7 +190,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
  *
  ****************************************************************************/
 
-void sercom_slowclk_configure(int sercom, int gclkgen)
+void sercom_slowclk_configure(int sercom, int slowgen)
 {
   DEBUGASSERT((unsigned)sercom < SAMD5E5_NSERCOM);
 
@@ -242,7 +202,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
        * of SERCOM modules and, hence, only need to configured once.
        */
 
-      sam_gclk_chan_enable(GCLK_CHAN_SERCOMn_SLOW, gclkgen);
+      sam_gclk_chan_enable(GCLK_CHAN_SERCOMn_SLOW, slowgen, true);
 
       /* The slow clock is now configured and should not be re=configured
        * again.
@@ -250,7 +210,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
 
        g_slowclk_configured = true;
 #ifdef CONFIG_DEBUG_ASSERTIONS
-       g_slowclk_gclkgen = (uint8_t)gclkgen;
+       g_slowgen = (uint8_t)slowgen;
 #endif
     }
 
@@ -261,7 +221,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
 
   else
     {
-      DEBUGASSERT((int)g_slowclk_gclkgen == gclkgen);
+      DEBUGASSERT((int)g_slowgen == slowgen);
     }
 #endif
 }

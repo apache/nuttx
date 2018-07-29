@@ -55,7 +55,7 @@
  * Pre-processor Declarations
  ****************************************************************************/
 
-/* Bit-encoded input to sam_configport() */
+/* Bit-encoded input to sam_portconfig() */
 
 /* 24-bit Encoding.  This could be compacted into 16-bits by making the bit usage
  * mode specific.  However, by giving each bit field a unique position, we handle
@@ -344,7 +344,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_configport
+ * Name: sam_portconfig
  *
  * Description:
  *   Configure a PORT pin based on bit-encoded description of the pin.
@@ -354,7 +354,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int sam_configport(port_pinset_t pinset);
+int sam_portconfig(port_pinset_t pinset);
 
 /****************************************************************************
  * Name: sam_portwrite

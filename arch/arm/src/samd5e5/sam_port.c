@@ -445,14 +445,14 @@ static inline void sam_configreset(uintptr_t base, port_pinset_t pinset)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_configport
+ * Name: sam_portconfig
  *
  * Description:
  *   Configure a PORT pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-int sam_configport(port_pinset_t pinset)
+int sam_portconfig(port_pinset_t pinset)
 {
   uintptr_t base = sam_portbase(pinset);
   irqstate_t flags;

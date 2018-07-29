@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_board_initialize
  *
  * Description:
  *   All SAMD5/E5 architectures must provide the following entry point. 
@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+void sam_board_initialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */

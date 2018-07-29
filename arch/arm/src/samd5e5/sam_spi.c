@@ -1506,22 +1506,22 @@ static void spi_pad_configure(struct sam_spidev_s *priv)
 
   if (priv->pad0 != 0)
     {
-      sam_configport(priv->pad0);
+      sam_portconfig(priv->pad0);
     }
 
   if (priv->pad1 != 0)
     {
-      sam_configport(priv->pad1);
+      sam_portconfig(priv->pad1);
     }
 
   if (priv->pad2 != 0)
     {
-      sam_configport(priv->pad2);
+      sam_portconfig(priv->pad2);
     }
 
   if (priv->pad3 != 0)
     {
-      sam_configport(priv->pad3);
+      sam_portconfig(priv->pad3);
     }
 }
 
@@ -1576,10 +1576,6 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   struct sam_spidev_s *priv;
   irqstate_t flags;
   uint32_t regval;
-  int channel;
-#if 0 /* Not used */
-  int ret;
-#endif
 
   /* Get the port state structure */
 
@@ -1663,10 +1659,6 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(priv->sercom, priv->coregen, false);
-
-  channel = priv->sercom + GCLK_CHAN_SERCOM0_CORE;
-  sam_gclk_chan_enable(channel, priv->coregen);
-
   sercom_slowclk_configure(priv->sercom, priv->slowgen);
 
   /* Set the SERCOM in SPI master mode (no address) */

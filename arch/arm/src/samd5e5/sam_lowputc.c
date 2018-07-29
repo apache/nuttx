@@ -251,22 +251,22 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
 
   if (config->pad0 != 0)
     {
-      sam_configport(config->pad0);
+      sam_portconfig(config->pad0);
     }
 
   if (config->pad1 != 0)
     {
-      sam_configport(config->pad1);
+      sam_portconfig(config->pad1);
     }
 
   if (config->pad2 != 0)
     {
-      sam_configport(config->pad2);
+      sam_portconfig(config->pad2);
     }
 
   if (config->pad3 != 0)
     {
-      sam_configport(config->pad3);
+      sam_portconfig(config->pad3);
     }
 }
 #endif
@@ -284,7 +284,6 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
 #ifdef SAMD5E5_HAVE_USART
 int sam_usart_internal(const struct sam_usart_config_s * const config)
 {
-  int channel;
   int ret;
 
   /* Enable clocking to the SERCOM module */
@@ -294,10 +293,6 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(config->sercom, config->coregen, false);
-
-  channel = config->sercom + GCLK_CHAN_SERCOM0_CORE;
-  sam_gclk_chan_enable(channel, config->coregen);
-
   sercom_slowclk_configure(config->sercom, config->slowgen);
 
   /* Set USART configuration according to the board configuration */

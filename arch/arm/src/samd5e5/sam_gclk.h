@@ -116,13 +116,14 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config);
  * Input Parameters:
  *   channel - Index of the GCLK channel to be enabled
  *   srcgen  - The GCLK source generator index
+ *   wrlock  - True: set writelock
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen);
+void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen, bool wrlock);
 
 /****************************************************************************
  * Name: sam_gclk_chan_disable

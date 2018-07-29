@@ -732,7 +732,7 @@ static void sam_dfll_configure(const struct sam_dfll_config_s *config)
     {
       /* Configure the GCLK channel */
 
-      sam_gclk_chan_enable(GCLK_CHAN_OSCCTRL_DFLL, config->gclk);
+      sam_gclk_chan_enable(GCLK_CHAN_OSCCTRL_DFLL, config->gclk, true);
     }
 
   /* Setup the DFLLMUL register */
@@ -936,7 +936,7 @@ static void sam_dpll_gclkchannel(uint8_t chan,
     {
       /* Yes.. configure the GCLK channel */
 
-      sam_gclk_chan_enable(chan, config->gclk);
+      sam_gclk_chan_enable(chan, config->gclk, true);
     }
 }
 

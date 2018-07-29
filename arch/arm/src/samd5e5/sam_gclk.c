@@ -209,13 +209,14 @@ void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
  * Input Parameters:
  *   channel - Index of the GCLK channel to be enabled
  *   srcgen  - The GCLK source generator index
+ *   wrlock  - True: set writelock
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
+void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen, bool wrlock)
 {
   irqstate_t flags;
   uint32_t regaddr;
@@ -235,14 +236,23 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen)
   regval =  GCLK_PCHCTRL_GEN(srcgen);
   putreg32(regval, regaddr);
 
-  /* Enable the peripheral channel */
+  /* Enable the peripheral channel, setting the writelock if so requested. */
 
   regval |= GCLK_PCHCTRL_CHEN;
+
+  if (wrlock)
+    {
+      regval |= GCLK_PCHCTRL_WRTLOCK;
+    }
+
   putreg32(regval, regaddr);
 
   /* Wait for clock synchronization */
 
-  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0);
+  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0)
+    {
+    }
+
   leave_critical_section(flags);
 }
 

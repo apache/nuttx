@@ -1142,7 +1142,6 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   irqstate_t flags;
   uint32_t regval;
   uint32_t ctrla = 0;
-  int channel;
 
   i2cinfo("I2C%d Initializing\n", priv->attr->i2c);
 
@@ -1154,10 +1153,6 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(priv->attr->sercom, priv->attr->coregen, false);
-
-  channel = priv->attr->sercom + GCLK_CHAN_SERCOM0_CORE;
-  sam_gclk_chan_enable(channel, priv->attr->coregen);
-
   sercom_slowclk_configure(priv->attr->sercom, priv->attr->slowgen);
 
   /* Check if module is enabled */
@@ -1243,12 +1238,12 @@ static void i2c_pad_configure(struct sam_i2c_dev_s *priv)
 
   if (priv->attr->pad0 != 0)
     {
-      sam_configport(priv->attr->pad0);
+      sam_portconfig(priv->attr->pad0);
     }
 
   if (priv->attr->pad1 != 0)
     {
-      sam_configport(priv->attr->pad1);
+      sam_portconfig(priv->attr->pad1);
     }
 }
 
