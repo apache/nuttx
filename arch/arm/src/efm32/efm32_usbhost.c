@@ -3792,7 +3792,7 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
  *      connection related event.
  *
  * Returned Value:
- *   Zero (OK) is returned on success when a device in connected or
+ *   Zero (OK) is returned on success when a device is connected or
  *   disconnected. This function will not return until either (1) a device is
  *   connected or disconnect to/from any hub port or until (2) some failure
  *   occurs.  On a failure, a negated errno value is returned indicating the

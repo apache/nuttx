@@ -24,8 +24,12 @@ STATUS
   2018-07-26:  The basic port was merged into master.  It is still
     incomplete and untested.  It is missing the clock configuration logic.
     There is a placeholder from the SAML21, but it is currently stubbed out
-    in the Make.defs file).  Configuration options in the board.h header
+    in the Make.defs file.  Configuration options in the board.h header
     file are bogus and also just cloned from the SAML21.
+  2018-07-29:  Clock configuration logic now complete.  board.h
+    configuration options still need to be verified.  Unverified SERCOM
+    USART, SPI, I2C, Port configuration, and DMA support have been added.
+    I still have no hardware in hand to test.
 
 Serial Console
 ==============

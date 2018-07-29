@@ -3201,7 +3201,7 @@ static inline void max3421e_int_disable(FAR struct max3421e_usbhost_s *priv,
 
 static inline uint8_t max3421e_int_status(FAR struct max3421e_usbhost_s *priv)
 {
-  return max3421e_getreg(priv, MAX3421E_USBHOST_HIEN) & priv->irqset;
+  return max3421e_getreg(priv, MAX3421E_USBHOST_HIRQ) & priv->irqset;
 }
 
 /****************************************************************************
@@ -3217,7 +3217,7 @@ static inline uint8_t max3421e_int_status(FAR struct max3421e_usbhost_s *priv)
  *      connection related event.
  *
  * Returned Value:
- *   Zero (OK) is returned on success when a device in connected or
+ *   Zero (OK) is returned on success when a device is connected or
  *   disconnected. This function will not return until either (1) a device is
  *   connected or disconnect to/from any hub port or until (2) some failure
  *   occurs.  On a failure, a negated errno value is returned indicating the
