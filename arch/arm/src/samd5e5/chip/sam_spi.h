@@ -264,6 +264,8 @@
 #define SPI_SYNCBUSY_CTRLB         (1 << 2)  /* Bit 2:  CTRLB synchronization busy */
 #define SPI_SYNCBUSY_LENGTH        (1 << 4)  /* Bit 4:  LENGTH synchronization busy */
 
+#define SPI_SYNCBUSY_ALL           0x017
+
 /* Length register */
 
 #define SPI_LENGTH_LEN_SHIFT       (0)       /* Bit 0-7: Data length enable */

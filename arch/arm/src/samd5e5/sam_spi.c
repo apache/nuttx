@@ -1576,9 +1576,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   struct sam_spidev_s *priv;
   irqstate_t flags;
   uint32_t regval;
-#ifdef CONFIG_ARCH_FAMILY_SAML21
   int channel;
-#endif
 #if 0 /* Not used */
   int ret;
 #endif
@@ -1667,7 +1665,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
   sercom_coreclk_configure(priv->sercom, priv->coregen, false);
 
   channel = priv->sercom + GCLK_CHAN_SERCOM0_CORE;
-  sam_gclk_chan_enable(channel, config->coregen);
+  sam_gclk_chan_enable(channel, priv->coregen);
 
   sercom_slowclk_configure(priv->sercom, priv->slowgen);
 

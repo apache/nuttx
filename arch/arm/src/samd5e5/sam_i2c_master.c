@@ -7,15 +7,6 @@
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   SAMD/SAML Series Data Sheet
- *   Atmel NoOS sample code.
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *    Copyright (c) 2011, Atmel Corporation
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -26,8 +17,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX, Atmel, nor the names of its contributors may
- *    be used to endorse or promote products derived from this software
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -350,14 +341,6 @@ static const struct i2c_attr_s g_i2c5attr =
 
 static struct sam_i2c_dev_s g_i2c5;
 #endif
-
-struct i2c_ops_s g_i2cops =
-{
-  .transfer = sam_i2c_transfer,
-#ifdef CONFIG_I2C_RESET
-  .reset = sam_i2c_reset,
-#endif
-};
 
 #ifdef SAMD5E5_HAVE_I2C6_MASTER
 static const struct i2c_attr_s g_i2c6attr =
@@ -726,7 +709,7 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 
       /* Clear error INTFLAG */
 
-      i2c_putreg16(priv, I2C_INT_ERROR, SAM_I2C_INTFLAG_OFFSET);
+      i2c_putreg16(priv, I2C_INT_ERR, SAM_I2C_INTFLAG_OFFSET);
 
       /* Cancel timeout */
 
@@ -1159,6 +1142,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   irqstate_t flags;
   uint32_t regval;
   uint32_t ctrla = 0;
+  int channel;
 
   i2cinfo("I2C%d Initializing\n", priv->attr->i2c);
 
@@ -1170,6 +1154,10 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(priv->attr->sercom, priv->attr->coregen, false);
+
+  channel = priv->attr->sercom + GCLK_CHAN_SERCOM0_CORE;
+  sam_gclk_chan_enable(channel, priv->attr->coregen);
+
   sercom_slowclk_configure(priv->attr->sercom, priv->attr->slowgen);
 
   /* Check if module is enabled */
@@ -1177,8 +1165,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   regval = i2c_getreg32(priv, SAM_I2C_CTRLA_OFFSET);
   if (regval & I2C_CTRLA_ENABLE)
     {
-      i2cerr
-        ("ERROR: Cannot initialize I2C because it is already initialized!\n");
+      i2cerr("ERROR: Cannot initialize I2C because it is already initialized!\n");
       return;
     }
 
