@@ -120,7 +120,7 @@ void __start(void) __attribute__ ((no_instrument_function));
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) sam_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
