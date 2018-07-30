@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_hardfault.c
  *
- *   Copyright (C) 2009, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  * interfere with context switching!
  */
 
-#ifdef CONFIG_DEBUG_HARDFAULT
+#ifdef CONFIG_DEBUG_HARDFAULT_ALERT
 # define hfalert(format, ...)  _alert(format, ##__VA_ARGS__)
 #else
 # define hfalert(x...)
@@ -70,7 +70,6 @@
 #else
 # define hfinfo(x...)
 #endif
-
 
 #define INSN_SVC0        0xdf00 /* insn: svc 0 */
 
@@ -89,7 +88,7 @@
 
 int up_hardfault(int irq, FAR void *context, FAR void *arg)
 {
-#if defined(CONFIG_DEBUG_HARDFAULT) || !defined(CONFIG_ARMV7M_USEBASEPRI)
+#if defined(CONFIG_DEBUG_HARDFAULT_ALERT) || !defined(CONFIG_ARMV7M_USEBASEPRI)
   uint32_t *regs = (uint32_t *)context;
 #endif
 

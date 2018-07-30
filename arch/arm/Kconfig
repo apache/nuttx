@@ -744,27 +744,31 @@ config ARCH_ROMPGTABLE
 	default n
 	depends on ARCH_USE_MMU
 	---help---
-		Support a fixed memory mapping use a (read-only) page table in ROM/FLASH.
+		Support a fixed memory mapping use a (read-only) page table in
+		ROM/FLASH.
 
 config ARCH_HAVE_HARDFAULT_DEBUG
 	bool
 	default n
 
-config DEBUG_HARDFAULT
-	bool "Verbose Hard-Fault Debug"
+config DEBUG_HARDFAULT_ALERT
+	bool "Hard-Fault Alert Debug"
 	default n
-	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_FEATURES
+	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a hard fault is occurs.  This verbose
-		output is sometimes helpful when debugging difficult hard fault problems,
-		but may be more than you typically want to see.
+		Enables debug alert output to the SYSLOG when a hard fault
+		occurs.  This output is sometimes helpful when debugging difficult
+		hard fault problems.
 
 config DEBUG_HARDFAULT_INFO
 	bool "Hard-Fault Informational Output"
 	default n
-	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_FEATURES && DEBUG_INFO
+	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_INFO
 	---help---
-		Enable hard fault informational output to SYSLOG.
+		Enables informational alert output to the SYSLOG when a hard fault
+		occurs.  This output is sometimes helpful when debugging difficult
+		hard fault problems but may be more than you want to see in some
+		cases.
 
 config ARCH_HAVE_MEMFAULT_DEBUG
 	bool
