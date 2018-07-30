@@ -48,7 +48,9 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "sam_clockconfig.h"
+#include <arch/board/board.h>  /* Depends on other definitions */
+#include "sam_clockconfig.h"   /* Depends on settings from board.h */
+
 #include "sam_lowputc.h"
 #include "sam_cmcc.h"
 #include "sam_userspace.h"

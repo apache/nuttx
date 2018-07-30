@@ -52,8 +52,49 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
+/* Overview
+ *
+ * The Adafruit Metro M4 Pro has one on-board crystal:
+ *
+ *   X4 32.768KHz XOSC32
+ *
+ * Since there is no high speed crystal, we will run from the OSC16M clock source.
+ *
+ * OSC48M               Output     = 48Mhz
+ *  |
+ * FDLL                 Input      = 48MHz
+ *  |                   Output     = 48MHz
+ * GCLK5                Input      = 48MHz
+ *  |                   Output     = 2MHz
+ * DPLL0                Input      = 2MHz
+ *  |                   Output     = 120MHz
+ * GCLK0                Input      = 120MHz
+ *  |                   Output     = 120MHz
+ * MCK                  Input      = 120MHz
+ *  |                   Output     = 120MHz
+ * CPU                  Input      = 120MHz
+ */
 
-#define BOARD_HAVE_CLKDEFS      1
+#define BOARD_XOSC32K_FREQUENCY 32768     /* XOSC32K frequency 32.768 KHz */
+#define BOARD_DFLL_FREQUENCY    48000000  /* FDLL frequency 28MHz */
+#define BOARD_XOSC0_FREQUENCY   12000000  /* XOSC0 frequency 12MHz (disabled) */
+#define BOARD_XOSC1_FREQUENCY   12000000  /* XOSC0 frequency 12MHz (disabled)*/
+#define BOARD_DPLL0_FREQUENCY   120000000 /* DPLL0 output frueuency (120MHz) */
+#define BOARD_DPLL1_FREQUENCY   47985664  /* DPLL1 output frequency (disabled) */
+
+#define BOARD_GCLK0_FREQUENCY   BOARD_DPLL0_FREQUENCY
+#define BOARD_GCLK1_FREQUENCY   BOARD_DFLL_FREQUENCY
+#define BOARD_GCLK2_FREQUENCY   (BOARD_XOSC32K_FREQUENCY / 4)  /* Disabled */
+#define BOARD_GCLK3_FREQUENCY   BOARD_XOSC32K_FREQUENCY        /* Disabled */
+#define BOARD_GCLK4_FREQUENCY   BOARD_DPLL0_FREQUENCY
+#define BOARD_GCLK5_FREQUENCY   (BOARD_DFLL_FREQUENCY / 24)
+#define BOARD_GCLK6_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK7_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK8_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK0_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY          /* Disabled */
+
+#define BOARD_CPU_FREQUENCY     BOARD_GCLK0_FREQUENCY /* CPU frequency 120MHz */
 
 /* XOSC32 */
 
@@ -71,7 +112,6 @@
 #define BOARD_XOSC32K_STARTUP   0         /* Startup time: 62592us */
 #define BOARD_XOSC32K_CALIB     0         /* Dummy OSCULP32K calibration value */
 #define BOARD_XOSC32K_RTCSEL    0         /* RTC clock = ULP1K */
-#define BOARD_XOSC32K_FREQUENCY 32768     /* XOSC32K frequency 32.768 KHz */
 
 /* XOSC0 */
 
@@ -85,7 +125,6 @@
 #define BOARD_XOSC0_CFDEN       false     /* Clock failure detector not enabled */
 #define BOARD_XOSC0_SWBEN       false     /* XOSC clock switch not enabled */
 #define BOARD_XOSC0_STARTUP     0         /* XOSC0 start-up time 31µs */
-#define BOARD_XOSC0_FREQUENCY   12000000  /* XOSC0 frequency 12MHz */
 
 /* XOSC1 */
 
@@ -99,12 +138,6 @@
 #define BOARD_XOSC1_CFDEN       false     /* Clock failure detector not enabled */
 #define BOARD_XOSC1_SWBEN       false     /* XOSC clock switch not enabled */
 #define BOARD_XOSC1_STARTUP     0         /* XOSC0 start-up time 31µs */
-#define BOARD_XOSC1_FREQUENCY   12000000  /* XOSC0 frequency 12MHz */
-
-/* Master Clock (MCLK) */
-
-#define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
-#define BOARD_CPU_FREQUENCY     120000000 /* CPU frequency 120MHz */
 
 /* GCLK */
 
@@ -119,7 +152,6 @@
 #define BOARD_GCLK0_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK0_SOURCE      7         /* Select DPLL0 output as GLCK0 source */
 #define BOARD_GCLK0_DIV         1         /* Division factor */
-#define BOARD_GCLK0_FREQUENCY   BOARD_DPLL0_FREQUENCY
 
 #define BOARD_GCLK1_ENABLE      true      /* Enable GCLK1 */
 #define BOARD_GCLK1_IDC         false     /* Don't improve duty cycle */
@@ -129,7 +161,6 @@
 #define BOARD_GCLK1_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK1_SOURCE      6         /* Select DFLL output as GLCK1 source */
 #define BOARD_GCLK1_DIV         1         /* Division factor */
-#define BOARD_GCLK1_FREQUENCY   BOARD_DFLL_FREQUENCY
 
 #define BOARD_GCLK2_ENABLE      false     /* Don't enable GCLK2 */
 #define BOARD_GCLK2_IDC         false     /* Don't improve duty cycle */
@@ -139,7 +170,6 @@
 #define BOARD_GCLK2_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GLCK2 source */
 #define BOARD_GCLK2_DIV         1         /* Division factor */
-#define BOARD_GCLK2_FREQUENCY   (BOARD_XOSC32K_FREQUENCY / 4)
 
 #define BOARD_GCLK3_ENABLE      false     /* Don't enable GCLK3 */
 #define BOARD_GCLK3_IDC         false     /* Don't improve duty cycle */
@@ -149,7 +179,6 @@
 #define BOARD_GCLK3_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GLCK3 source */
 #define BOARD_GCLK3_DIV         1         /* Division factor */
-#define BOARD_GCLK3_FREQUENCY   BOARD_XOSC32K_FREQUENCY
 
 #define BOARD_GCLK4_ENABLE      true      /* Enable GCLK4 */
 #define BOARD_GCLK4_IDC         false     /* Don't improve duty cycle */
@@ -159,7 +188,6 @@
 #define BOARD_GCLK4_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK4_SOURCE      7         /* Select DPLL0 output as GLCK4 source */
 #define BOARD_GCLK4_DIV         1         /* Division factor */
-#define BOARD_GCLK4_FREQUENCY   BOARD_DPLL0_FREQUENCY
 
 #define BOARD_GCLK5_ENABLE      true      /* Enable GCLK5 */
 #define BOARD_GCLK5_IDC         false     /* Don't improve duty cycle */
@@ -169,7 +197,6 @@
 #define BOARD_GCLK5_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GLCK5 source */
 #define BOARD_GCLK5_DIV         24        /* Division factor */
-#define BOARD_GCLK5_FREQUENCY   (BOARD_DFLL_FREQUENCY / 24)
 
 #define BOARD_GCLK6_ENABLE      false     /* Don't enable GCLK6 */
 #define BOARD_GCLK6_IDC         false     /* Don't improve duty cycle */
@@ -179,7 +206,6 @@
 #define BOARD_GCLK6_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK6_SOURCE      1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK6_DIV         1         /* Division factor */
-#define BOARD_GCLK6_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
 #define BOARD_GCLK7_ENABLE      false     /* Don't enable GCLK7 */
 #define BOARD_GCLK7_IDC         false     /* Don't improve duty cycle */
@@ -189,7 +215,6 @@
 #define BOARD_GCLK7_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK7_SOURCE      1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK7_DIV         1         /* Division factor */
-#define BOARD_GCLK7_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
 #define BOARD_GCLK8_ENABLE      false     /* Don't enable GCLK8 */
 #define BOARD_GCLK8_IDC         false     /* Don't improve duty cycle */
@@ -199,7 +224,6 @@
 #define BOARD_GCLK8_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK8_SOURCE      1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK8_DIV         1         /* Division factor */
-#define BOARD_GCLK8_FREQUENCY   BOARD_XOSC1_FREQUENCY
 
 #define BOARD_GCLK9_ENABLE      false     /* Don't enable GCLK9 */
 #define BOARD_GCLK9_IDC         false     /* Don't improve duty cycle */
@@ -209,7 +233,6 @@
 #define BOARD_GCLK9_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK9_SOURCE      1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK9_DIV         1         /* Division factor */
-#define BOARD_GCLK10_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
 #define BOARD_GCLK10_ENABLE     false     /* Don't enable GCLK10 */
 #define BOARD_GCLK10_IDC        false     /* Don't improve duty cycle */
@@ -219,7 +242,6 @@
 #define BOARD_GCLK10_RUNSTDBY   false     /* Don't run in standby */
 #define BOARD_GCLK10_SOURCE     1         /* Select XOSC1 as GLCK5 source */
 #define BOARD_GCLK10_DIV        1         /* Division factor */
-#define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
 #define BOARD_GCLK11_ENABLE     false     /* Don't enable GCLK11 */
 #define BOARD_GCLK11_IDC        false     /* Don't improve duty cycle */
@@ -234,25 +256,23 @@
 /* FDLL */
 
 #define BOARD_DFLL_ENABLE       true      /* DFLL enable */
-#define BOARD_DFLL_RUNSTDBY     false     /* Run in standby */
-#define BOARD_DFLL_ONDEMAND     false     /* On-demand control */
-#define BOARD_DFLL_MODE         false     /* Operating mode selection */
-#define BOARD_DFLL_STABLE       false     /* Stable DFLL frequency */
-#define BOARD_DFLL_LLAW         false     /* Lose lock after wake */
-#define BOARD_DFLL_USBCRM       true      /* USB clock recovery mode */
+#define BOARD_DFLL_RUNSTDBY     false     /* Don't run in standby */
+#define BOARD_DFLL_ONDEMAND     false     /* No n-demand control */
+#define BOARD_DFLL_MODE         false     /* Open loop mode */
+#define BOARD_DFLL_STABLE       false     /* No stable DFLL frequency */
+#define BOARD_DFLL_LLAW         false     /* Don't ose lock after wake */
+#define BOARD_DFLL_USBCRM       true      /* Use USB clock recovery mode */
 #define BOARD_DFLL_CCDIS        true      /* Chill cycle disable */
-#define BOARD_DFLL_QLDIS        false     /* Quick Lock Disable */
-#define BOARD_DFLL_BPLCKC       false     /* Bypass coarse clock */
+#define BOARD_DFLL_QLDIS        false     /* No Quick Lock Disable */
+#define BOARD_DFLL_BPLCKC       false     /* No ypass coarse clock */
 #define BOARD_DFLL_WAITLOCK     true      /* Wait lock */
-#define BOARD_DFLL_CALIBEN      false     /* Overwrite factory calibration */
+#define BOARD_DFLL_CALIBEN      false     /* Don't verwrite factory calibration */
 #define BOARD_DFLL_FCALIB       128       /* Coarse calibration value (if caliben) */
 #define BOARD_DFLL_CCALIB       (31 / 4)  /* Fine calibration value (if caliben) */
 #define BOARD_DFLL_FSTEP        1         /* Fine maximum step */
 #define BOARD_DFLL_CSTEP        1         /* Coarse maximum step */
 #define BOARD_DFLL_GCLK         3         /* GCLK source (if !usbcrm && !mode) */
 #define BOARD_DFLL_MUL          0         /* DFLL multiply factor */
-
-#define BOARD_DFLL_FREQUENCY    0         /* To be provided */
 
 /* DPLL0/1
  *
@@ -267,9 +287,10 @@
  *   Fdpll = Fckr * (LDR + 1 + LDRFRAC / 32)
  *
  * DPLL0:
- *   Fckr  = BOARD_GCLK5_FREQUENCY = BOARD_DFLL_FREQUENCY / 24
+ *   Fckr  = BOARD_GCLK5_FREQUENCY = BOARD_DFLL_FREQUENCY / 24 = 2MHz
+ *   Fdpll = 2Mhz * (59 + 1 + 0 / 32) = 120MHz
  *
- * DPLL1:
+ * DPLL1: (not enabled)
  *   Fckr  = BOARD_XOSCK32_FREQUENCY = 32.768KHz
  *   Fdpll = 32768 * (1463 + 1 + 13/32) = 47.986 MHz
  */
@@ -289,9 +310,6 @@
 #define BOARD_DPLL0_LDRINT      59        /* Loop divider ratio */
 #define BOARD_DPLL0_DIV         0         /* Clock divider */
 
-#define BOARD_DPLL0_FCLKR       BOARD_GCLK5_FREQUENCY
-#define BOARD_DPLL0_FREQUENCY   0         /* To be provided */
-
 #define BOARD_DPLL1_ENABLE      false     /* DPLL enable */
 #define BOARD_DPLL1_DCOEN       false     /* DCO filter enable */
 #define BOARD_DPLL1_LBYPASS     false     /* Lock bypass */
@@ -307,7 +325,13 @@
 #define BOARD_DPLL1_LDRINT      1463      /* Loop divider ratio */
 #define BOARD_DPLL1_DIV         0         /* Clock divider */
 
-#define BOARD_DPLL1_FREQUENCY  47985664
+/* Master Clock (MCLK)
+ *
+ * GCLK0 is always the direct source the GCLK_MAIN.
+ * CPU frequency = 120MHz / 1 = 120MHz
+ */
+
+#define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
 
 /* Peripheral clocking */
 
@@ -418,8 +442,8 @@
 #define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0
 #define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_2
 
-#define BOARD_SERCOM3_COREGEN        1
-#define BOARD_SERCOM3_SLOWGEN        3
+#define BOARD_SERCOM3_COREGEN        1                   /* 48MHz, common to all SERCOMS */
+#define BOARD_SERCOM3_SLOWGEN        3                   /* 48MHz */
 #define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK1_FREQUENCY
 
 #endif  /* __CONFIG_METRO_M4_INCLUDE_BOARD_H */

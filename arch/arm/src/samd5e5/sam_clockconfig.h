@@ -50,7 +50,6 @@
  * Public Types
  ************************************************************************************/
 
-#ifdef BOARD_HAVE_CLKDEFS
 /* This structure defines the configuration of the 32.768KHz XOSC32 */
 
 struct sam_xosc32_config_s
@@ -226,7 +225,6 @@ struct sam_clockconfig_s
   struct sam_dpll_config_s dpll[2];   /* DPLL0/1 configurations */
   struct sam_gclk_config_s gclk[12];  /* GLCK configurations */
 };
-#endif /* BOARD_HAVE_CLKDEFS */
 
 /************************************************************************************
  * Inline Functions

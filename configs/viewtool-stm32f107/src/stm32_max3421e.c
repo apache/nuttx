@@ -377,7 +377,14 @@ int stm32_max3421e_setup(void)
 #endif
 
 #ifdef CONFIG_VIEWTOOL_MAX3421E_RST
-  /* Take the MAX3412E out of reset */
+  /* Take the MAX3412E out of reset
+   *
+   * REVISIT:  The MAX3421E is not operational immediately after the reset.
+   * The internal signal OPERATE indicates when the MAX3421E is fully out of
+   * reset an operational.  The reset forces the OPERATE signal to be
+   * visible on the GPX pin.  Hence, it many be necessary to poll the GPX
+   * pin here to assure that the MAX3421E is operational before continuing.
+   */
 
   stm32_gpiowrite(GPIO_MAX3421E_RST, true);
 #endif
