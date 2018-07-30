@@ -704,37 +704,52 @@ MAX3421E Integration
   Board Connections
   -----------------
 
-  Using SPI1on J8 pins 7-12, discretes on J18
+  USBHostShield-v13 (See schematic).
 
-    ------ ----------- ----------- ------------------
-    NAME   VIEWTOOL    STM32       USBHostShield-v13
-    ------ ----------- ----------- ------------------
-    CS#    J8  Pin 12  PA4/NSS1    D10
-    SCK    J8  Pin 11  PA5/SCK1    D13
-    MISO   J8  Pin  9  PA6/MISO1   D12
-    MOSI   J8  Pin 10  PA7/MOSI1   D11
-    INT#   J18 Pin 10  PA0         D9
-    RST#   J18 Pin  8  PA1         D7
-    GPX                            D8
-    VBUS   J18 Pin  2  5V          VIN
-    3.3V   J8  Pin  7              N/C
-    GND    J8  Pin  8              GND
+  DuinoFun UHS mini v2.0.  No schematics available.  This is the pinout:
+
+     INT                                                  MAX_RST?
+      o     o     o     o     o     o     o     o     o     o     o     o
+      o     o     o     o     o
+     V_BUS INT   GPX MAX_RST  SS
+
+      o     o     o     o     o     o     o     o     o     o     o     o
+      SS   CLK*  MISO  MOSI*                         VCC         GND
+
+  NOTE:  There is a error in the silkscreen:  The pin labeled CLK is actually
+  MOSI; the pin labeled MOST is the clock
+
+  Using SPI1 on J8 pins 7-12, discretes on J18
+
+    ------ ----------- ----------- ------------------ ----------------------
+    NAME   VIEWTOOL    STM32       USBHostShield-v13  DuinoFun UHS mini v2.0
+    ------ ----------- ----------- ------------------ ----------------------
+    CS#    J8  Pin 12  PA4/NSS1    D10                SS
+    SCK    J8  Pin 11  PA5/SCK1    D13                MOSI (label wrong)
+    MISO   J8  Pin  9  PA6/MISO1   D12                MISO
+    MOSI   J8  Pin 10  PA7/MOSI1   D11                CLK (label wrong)
+    INT#   J18 Pin 10  PA0         D9                 INT
+    RST#   J18 Pin  8  PA1         D7                 MAX_RST
+    GPX                            D8                 GPX
+    VBUS   J18 Pin  2  5V          VIN                V_BUS
+    3.3V   J8  Pin  7              N/C                VCC
+    GND    J8  Pin  8              GND                GND
 
   Using SPI2 on J8 pins 1-6, discretes on J18
 
-    ------ ----------- ----------- ------------------
-    NAME   VIEWTOOL    STM32       USBHostShield-v13
-    ------ ----------- ----------- ------------------
-    CS#    J8  Pin  6  PB12/NSS2   D10
-    SCK    J8  Pin  5  PB13/SCK2   D13
-    MISO   J8  Pin  3  PB14/MISO2  D12
-    MOSI   J8  Pin  4  PB15/MOSI2  D11
-    INT#   J18 Pin 10  PA0         D9
-    RST#   J18 Pin  8  PA1         D7
-    GPX                            D8
-    VBUS   J18 Pin  2  5V          VIN
-    3.3V   J8  Pin  1              N/C
-    GND    J8  Pin  2              GND
+    ------ ----------- ----------- ------------------ ----------------------
+    NAME   VIEWTOOL    STM32       USBHostShield-v13 DuinoFun UHS mini v2.0
+    ------ ----------- ----------- ------------------ ----------------------
+    CS#    J8  Pin  6  PB12/NSS2   D10                SS
+    SCK    J8  Pin  5  PB13/SCK2   D13                MOSI (label wrong)
+    MISO   J8  Pin  3  PB14/MISO2  D12                MISO
+    MOSI   J8  Pin  4  PB15/MOSI2  D11                CLK (label wrong)
+    INT#   J18 Pin 10  PA0         D9                 INT
+    RST#   J18 Pin  8  PA1         D7                 MAX_RST
+    GPX                            D8                 GPX
+    VBUS   J18 Pin  2  5V          VIN                V_BUS
+    3.3V   J8  Pin  1              N/C                VCC
+    GND    J8  Pin  2              GND                GND
 
   5V VBUS power is also needed.  This might be directly connected to the USB
   host connector (as assumed here), or switched via additional logic.  Then
