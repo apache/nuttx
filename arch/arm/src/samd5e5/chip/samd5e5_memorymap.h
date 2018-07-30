@@ -66,6 +66,15 @@
 #  define SAM_SCS_BASE      0xe000e000 /* SCSS */
 #  define SAM_ROMTAB_BASE   0xe000ff00 /* ROM table */
 
+/* NVM area */
+
+#define SAM_NVM_CALIBAREA 0x00800080   /* NVM software calibration area */
+#define SAM_NVM_USERPAGE  0x00804000   /* NVM user page (512b) */
+#define SAM_NVM_SNWORD0   0x008061fc   /* Serial number word 0 */
+#define SAM_NVM_SNWORD1   0x00806010   /* Serial number word 1 */
+#define SAM_NVM_SNWORD2   0x00806014   /* Serial number word 2 */
+#define SAM_NVM_SNWORD3   0x00806018   /* Serial number word 3 */
+
 /* AHB-APB Bridge A */
 
 #define SAM_PAC_BASE        0x40000000 /* Peripheral Access Controller 0 */

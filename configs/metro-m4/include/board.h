@@ -446,4 +446,8 @@
 #define BOARD_SERCOM3_SLOWGEN        3                   /* 48MHz */
 #define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK1_FREQUENCY
 
+/* USB */
+
+#define BOARD_USB_GCLKGEN            1                   /* GCLK1, 48MHz */
+
 #endif  /* __CONFIG_METRO_M4_INCLUDE_BOARD_H */
