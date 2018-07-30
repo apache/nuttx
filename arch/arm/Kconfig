@@ -759,6 +759,13 @@ config DEBUG_HARDFAULT
 		output is sometimes helpful when debugging difficult hard fault problems,
 		but may be more than you typically want to see.
 
+config DEBUG_HARDFAULT_INFO
+	bool "Hard-Fault Informational Output"
+	default n
+	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_FEATURES && DEBUG_INFO
+	---help---
+		Enable hard fault informational output to SYSLOG.
+
 config ARCH_HAVE_MEMFAULT_DEBUG
 	bool
 	default n
