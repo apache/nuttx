@@ -152,7 +152,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 
           /* Yes... Assign it to the current task. */
 
-          memcpy(&msgq->ntevent, &notification->sigev_value,
+          memcpy(&msgq->ntevent, notification,
                  sizeof(struct sigevent));
 
           msgq->ntpid   = rtcb->pid;
