@@ -221,8 +221,10 @@ struct max3421e_usbhost_s
   uint8_t           xfrtype;   /* See enum mx3421e_hxfrdn_e */
   uint8_t           inflight;  /* Number of Tx bytes "in-flight" (<= 128) */
   uint8_t           result;    /* The result of the transfer */
+  uint8_t           exclcount;  /* Number of nested exclem locks */
   uint16_t          buflen;    /* Buffer length (at start of transfer) */
   uint16_t          xfrd;      /* Bytes transferred (at end of transfer) */
+  pid_t             holder;    /* Current hold of the exclsem */
   sem_t             exclsem;   /* Support mutually exclusive access */
   sem_t             pscsem;    /* Semaphore to wait for a port event */
   sem_t             waitsem;   /* Channel wait semaphore */
@@ -427,6 +429,8 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 
 static void max3421e_takesem(sem_t *sem);
 #define max3421e_givesem(s) nxsem_post(s);
+static void max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv);
+static void max3421e_give_exclsem(FAR struct max3421e_usbhost_s *priv);
 
 /* Byte stream access helper functions *****************************************/
 
@@ -1075,6 +1079,64 @@ static void max3421e_takesem(sem_t *sem)
       DEBUGASSERT(ret == OK || ret == -EINTR);
     }
   while (ret == -EINTR);
+}
+
+/****************************************************************************
+ * Name: max3421e_take_exclsem and max3421e_give_exclsem
+ *
+ * Description:
+ *   Implements a mutual re-entrant mutex for exclsem.
+ *
+ ****************************************************************************/
+
+static void max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv)
+{
+  pid_t me = getpid();
+
+  /* Does this thread already hold the mutual exclusion mutex? */
+
+  if (priv->holder == me)
+    {
+       /* Yes.. just increment the count */
+
+       DEBUGASSERT(priv->exclcount < UINT8_MAX);
+       priv->exclcount++;
+    }
+  else
+    {
+      /* No.. take the semaphore */
+
+      max3421e_takesem(&priv->exclsem);
+
+      /* Now this thread is the holder with a count of one */
+
+      priv->holder = me;
+      priv->exclcount = 1;
+    }
+}
+
+static void max3421e_give_exclsem(FAR struct max3421e_usbhost_s *priv)
+{
+  pid_t me = getpid();
+
+  DEBUGASSERT(priv->holder == me);
+
+  /* Is the lock nested? */
+
+  if (priv->exclcount > 0)
+    {
+       /* Yes.. just decrement the count */
+
+       priv->exclcount--;
+    }
+  else
+    {
+      /* No.. give the semaphore */
+
+      priv->holder    = (pid_t)-1;
+      priv->exclcount = 0;
+      max3421e_givesem(&priv->exclsem);
+    }
 }
 
 /****************************************************************************
@@ -3281,7 +3343,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
     {
       /* We must have exclusive access to the USB host hardware and state structures */
 
-      max3421e_takesem(&priv->exclsem);
+      max3421e_take_exclsem(priv);
 
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3302,7 +3364,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
 
           usbhost_vtrace1(MAX3421E_VTRACE1_CONNECTED2, connport->connected);
 
-          max3421e_givesem(&priv->exclsem);
+          max3421e_give_exclsem(priv);
           return OK;
         }
 
@@ -3321,7 +3383,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
           usbhost_vtrace1(MAX3421E_VTRACE1_HUB_CONNECTED,
                           connport->connected);
 
-          max3421e_givesem(&priv->exclsem);
+          max3421e_give_exclsem(priv);
           return OK;
         }
 #endif
@@ -3329,7 +3391,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
       /* Wait for the next connection event */
 
       priv->pscwait = true;
-      max3421e_givesem(&priv->exclsem);
+      max3421e_give_exclsem(priv);
       max3421e_takesem(&priv->pscsem);
     }
 }
@@ -3391,7 +3453,7 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
       /* No, return an error */
 
       usbhost_trace1(MAX3421E_TRACE1_DEVDISCONN6, 0);
-      max3421e_givesem(&priv->exclsem);
+      max3421e_give_exclsem(priv);
       return -ENODEV;
     }
 
@@ -3452,7 +3514,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* If this is a connection on the root hub, then we need to go to
    * little more effort to get the device speed.  If it is a connection
@@ -3470,7 +3532,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
       ret = max3421e_getspeed(priv, conn, hport);
       if (ret < 0)
         {
-           max3421e_givesem(&priv->exclsem);
+           max3421e_give_exclsem(priv);
            return ret;
         }
     }
@@ -3480,6 +3542,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
   max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL,
                      USBHOST_HCTL_TOGGLES_MASK,
                      USBHOST_HCTL_RCVTOG1 | USBHOST_HCTL_SNDTOG1);
+  max3421e_unlock(priv);
 
   /* Then let the common usbhost_enumerate do the real enumeration. */
 
@@ -3487,7 +3550,6 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
   priv->smstate = SMSTATE_ENUM;
 
   ret = usbhost_enumerate(hport, &hport->devclass);
-  max3421e_unlock(priv);
 
   /* The enumeration may fail either because of some HCD interfaces failure
    * or because the device class is not supported.  In either case, we just
@@ -3511,7 +3573,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
                      USBHOST_HCTL_RCVTOG0| USBHOST_HCTL_SNDTOG0);
   max3421e_unlock(priv);
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return ret;
 }
 
@@ -3553,7 +3615,7 @@ static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Configure the EP0 channel */
 
@@ -3563,7 +3625,7 @@ static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
   chan->maxpacket = maxpacketsize;
   chan->toggles   = USBHOST_HCTL_RCVTOG0 | USBHOST_HCTL_SNDTOG0;
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return OK;
 }
 
@@ -3608,7 +3670,7 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Allocate a host channel for the endpoint */
 
@@ -3616,7 +3678,7 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
   if (chidx < 0)
     {
       usbhost_trace1(MAX3421E_TRACE1_CHANALLOC_FAIL, -chidx);
-      max3421e_givesem(&priv->exclsem);
+      max3421e_give_exclsem(priv);
       return chidx;
     }
 
@@ -3639,7 +3701,7 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
   /* Return the endpoint number as the endpoint "handle" */
 
   *ep = (usbhost_ep_t)chidx;
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return OK;
 }
 
@@ -3671,12 +3733,12 @@ static int max3421e_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Halt the channel and mark the channel available */
 
   max3421e_chan_free(priv, (intptr_t)ep);
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return OK;
 }
 
@@ -3910,7 +3972,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Loop, retrying until the retry time expires */
 
@@ -3954,7 +4016,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                 {
                   /* All success transactions exit here */
 
-                  max3421e_givesem(&priv->exclsem);
+                  max3421e_give_exclsem(priv);
                   return OK;
                 }
 
@@ -3970,7 +4032,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* All failures exit here after all retries and timeouts have been exhausted */
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return -ETIMEDOUT;
 }
 
@@ -4003,7 +4065,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Loop, retrying until the retry time expires */
 
@@ -4049,7 +4111,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                 {
                   /* All success transactions exit here */
 
-                  max3421e_givesem(&priv->exclsem);
+                  max3421e_give_exclsem(priv);
                   return OK;
                 }
 
@@ -4065,7 +4127,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* All failures exit here after all retries and timeouts have been exhausted */
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return -ETIMEDOUT;
 }
 
@@ -4122,7 +4184,7 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Handle IN and OUT transfer differently */
 
@@ -4135,7 +4197,7 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
       nbytes = max3421e_out_transfer(priv, chan, buffer, buflen);
     }
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return nbytes;
 }
 
@@ -4191,7 +4253,7 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_takesem(&priv->exclsem);
+  max3421e_take_exclsem(priv);
 
   /* Handle IN and OUT transfer slightly differently */
 
@@ -4204,7 +4266,7 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       ret = max3421e_out_asynch(priv, chan, buffer, buflen, callback, arg);
     }
 
-  max3421e_givesem(&priv->exclsem);
+  max3421e_give_exclsem(priv);
   return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -4603,6 +4665,7 @@ static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
   priv->connected = false;
   priv->irqset    = 0;
   priv->change    = false;
+  priv->holder    = (pid_t)-1;
 
   /* Put all of the channels back in their initial, allocated state */
 
