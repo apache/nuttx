@@ -706,18 +706,20 @@ MAX3421E Integration
 
   USBHostShield-v13 (See schematic).
 
-  DuinoFun UHS mini v2.0.  No schematics available.  This is the pinout:
+  DuinoFun UHS mini v2.0.  No schematics available.  This is how the pins
+  are labeled:
 
-     INT                                                  MAX_RST?
+     INT                                                 MAX_RST
       o     o     o     o     o     o     o     o     o     o     o     o
       o     o     o     o     o
-     V_BUS INT   GPX MAX_RST  SS
+    V_BUS  INT   GPX MAX_RST  SS
 
       o     o     o     o     o     o     o     o     o     o     o     o
-      SS   CLK*  MISO  MOSI*                         VCC         GND
+      SS   CLK*  MISO  MOSI*                         VCC         GND**
 
-  NOTE:  There is a error in the silkscreen:  The pin labeled CLK is actually
-  MOSI; the pin labeled MOST is the clock
+  *  NOTE:  There is a error in the silkscreen:  The pin labeled CLK is
+     actually MOSI; the pin labeled MOSI is the clock
+  ** Not labeled
 
   Using SPI1 on J8 pins 7-12, discretes on J18
 
@@ -725,15 +727,15 @@ MAX3421E Integration
     NAME   VIEWTOOL    STM32       USBHostShield-v13  DuinoFun UHS mini v2.0
     ------ ----------- ----------- ------------------ ----------------------
     CS#    J8  Pin 12  PA4/NSS1    D10                SS
-    SCK    J8  Pin 11  PA5/SCK1    D13                MOSI (label wrong)
+    SCK    J8  Pin 11  PA5/SCK1    D13                CLK (label MOSI)
     MISO   J8  Pin  9  PA6/MISO1   D12                MISO
-    MOSI   J8  Pin 10  PA7/MOSI1   D11                CLK (label wrong)
+    MOSI   J8  Pin 10  PA7/MOSI1   D11                MOSI (label CLK)
     INT#   J18 Pin 10  PA0         D9                 INT
     RST#   J18 Pin  8  PA1         D7                 MAX_RST
     GPX                            D8                 GPX
     VBUS   J18 Pin  2  5V          VIN                V_BUS
     3.3V   J8  Pin  7              N/C                VCC
-    GND    J8  Pin  8              GND                GND
+    GND    J8  Pin  8              GND                GND (no label)
 
   Using SPI2 on J8 pins 1-6, discretes on J18
 
