@@ -30,6 +30,9 @@ STATUS
     configuration options still need to be verified.  Unverified SERCOM
     USART, SPI, I2C, Port configuration, and DMA support have been added.
     I still have no hardware in hand to test.
+  2018-07-20:  Brought in the USB driver from the SAML21.  It is the same
+    USB IP with only small differences.  There a a few, small open issues
+    still to be resolved.
 
 Serial Console
 ==============

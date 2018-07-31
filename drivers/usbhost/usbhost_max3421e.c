@@ -3065,7 +3065,7 @@ static void max3421e_irqwork(FAR void *arg)
 
   /* Get exclusive access to the SPI bus */
 
-  max3421e_unlock(priv);
+  max3421e_lock(priv);
 
   /* Loop while there are pending interrupts to process.  This loop may save a
    * little interrupt handling overhead.
