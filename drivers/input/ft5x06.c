@@ -780,6 +780,13 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 
   config->clear(config);
   config->enable(config, false);
+
+  /* Detach the interrupt handler (otherwise, the attach may failed if the
+   * driver is re-registered, depending upon how the lower-half is
+   * implemented.
+   */
+
+  (void)config->attach(config, NULL, NULL);
 #endif
 }
 
