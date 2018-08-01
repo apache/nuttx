@@ -72,4 +72,8 @@ ifeq ($(CONFIG_STM32F7_FMC),y)
 CSRCS += stm32_extmem.c
 endif
 
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += stm32_touchscreen.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

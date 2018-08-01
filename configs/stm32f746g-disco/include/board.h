@@ -348,6 +348,15 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_2
 #define GPIO_USART1_TX GPIO_USART1_TX_1
 
+/* I2C - There is a FT5336 TouchPanel on I2C3 using these pins: */
+
+#define GPIO_I2C3_SCL GPIO_I2C3_SCL_2
+#define GPIO_I2C3_SDA GPIO_I2C3_SDA_2
+
+#define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN13)
+
+#define FT5x06_I2C_ADDRESS          0x38
+
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
  *   STM32 F7 BOARD        LAN8742A

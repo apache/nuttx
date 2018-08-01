@@ -524,3 +524,18 @@ Configuration Directories
     configuration. This configuration uses USART1 for the serial console.
     USART1 is connected to the ST-link virtual com inside board.h to remove
     the need of a extra serial connection to use this board.
+
+  lgvl
+  ----
+    STM32F746G-DISCO LittlevGL demo example.
+
+    The LTDC is initialized during boot up.
+    This configuration uses USART1 for the serial console.
+    USART1 is connected to the ST-link virtual com inside board.h to remove
+    the need of a extra serial connection to use this board.
+    From the nsh comand line execute the lvgldemo example:
+
+      nsh> lvgldemo
+
+    The test will execute the calibration process and then run the
+    LittlevGL demo project.

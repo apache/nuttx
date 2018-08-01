@@ -780,10 +780,6 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 
   config->clear(config);
   config->enable(config, false);
-
-  /* Attach the interrupt handler */
-
-  (void)config->attach(config, NULL, NULL);
 #endif
 }
 

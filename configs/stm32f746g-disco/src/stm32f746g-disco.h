@@ -173,7 +173,6 @@ void stm32_enablefmc(void);
 #endif
 
 /****************************************************************************
-
  * Name: stm32_disablefmc
  *
  * Description:
@@ -183,6 +182,27 @@ void stm32_enablefmc(void);
 
 #ifdef CONFIG_STM32F7_FMC
 void stm32_disablefmc(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_tsc_setup
+ *
+ * Description:
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_FT5X06
+int stm32_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
