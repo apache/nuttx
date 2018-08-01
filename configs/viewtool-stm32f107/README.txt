@@ -743,15 +743,15 @@ MAX3421E Integration
     NAME   VIEWTOOL    STM32       USBHostShield-v13 DuinoFun UHS mini v2.0
     ------ ----------- ----------- ------------------ ----------------------
     CS#    J8  Pin  6  PB12/NSS2   D10                SS
-    SCK    J8  Pin  5  PB13/SCK2   D13                MOSI (label wrong)
+    SCK    J8  Pin  5  PB13/SCK2   D13                CLK (label MOSI)
     MISO   J8  Pin  3  PB14/MISO2  D12                MISO
-    MOSI   J8  Pin  4  PB15/MOSI2  D11                CLK (label wrong)
+    MOSI   J8  Pin  4  PB15/MOSI2  D11                MOSI (label CLK)
     INT#   J18 Pin 10  PA0         D9                 INT
     RST#   J18 Pin  8  PA1         D7                 MAX_RST
     GPX                            D8                 GPX
     VBUS   J18 Pin  2  5V          VIN                V_BUS
     3.3V   J8  Pin  1              N/C                VCC
-    GND    J8  Pin  2              GND                GND
+    GND    J8  Pin  2              GND                GND (no label)
 
   5V VBUS power is also needed.  This might be directly connected to the USB
   host connector (as assumed here), or switched via additional logic.  Then

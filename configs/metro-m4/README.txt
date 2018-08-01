@@ -33,6 +33,110 @@ STATUS
   2018-07-20:  Brought in the USB driver from the SAML21.  It is the same
     USB IP with only small differences.  There a a few, small open issues
     still to be resolved.
+  2018-08-01:  Hardware in hand.  Initial attempts to program the board
+    using a Segger J-Link connected via SWD were unsuccessful.  I believe
+    that the FLASH is locked.  See "Unlocking FLASH with J-Link Commander"
+    below.  Unfortunately, this seems to have rendered by board unusable.
+    Sigh.
+
+Unlocking FLASH
+===============
+
+  Options
+  -------
+  The Adafruit Metro M4 comes with a very nice bootloader resident in FLASH.
+  so we have two options:
+
+  1. Learn to play well with others.  Make NuttX coexist and work in the
+     memory partition available to it.  Or,
+  2. Be greedy, unlock the FLASH and overwrite the bootloader.
+
+  I chose to do the last one.  I used a Segger J-Link and here are the steps
+  that I took.  You can probably do these things in Atmel Studio (?) but for
+  other debug environments, you would have to come up with the solution.
+
+  Unlocking FLASH with J-Link Commander
+  -------------------------------------
+
+  1. Start J-Link Commander:
+
+      SEGGER J-Link Commander V6.32i (Compiled Jul 24 2018 15:20:49)
+      DLL version V6.32i, compiled Jul 24 2018 15:19:55
+
+      Connecting to J-Link via USB...O.K.
+      Firmware: J-Link V9 compiled Apr 20 2018 16:47:26
+      Hardware version: V9.30
+      S/N: 269303123
+      License(s): FlashBP, GDB
+      OEM: SEGGER-EDU
+      VTref=3.296V
+
+
+      Type "connect" to establish a target connection, '?' for help
+      J-Link>con
+      Please specify device / core. <Default>: ATSAMD51P19
+      Type '?' for selection dialog
+      Device>ATSAMD51P19
+      Please specify target interface:
+        J) JTAG (Default)
+        S) SWD
+      TIF>S
+      Specify target interface speed [kHz]. <Default>: 4000 kHz
+      Speed>
+      Device "ATSAMD51P19" selected.
+
+
+      Connecting to target via SWD
+      Found SW-DP with ID 0x2BA01477
+      Scanning AP map to find all available APs
+      ...etc. ...
+
+  2. Look at The NVM "user page" memory at address 0x00804000:
+
+       J-Link>mem8 804000, 10
+       00804000 = 39 92 9A F6 80 FF EC AE FF FF FF FF FF FF FF FF
+
+     The field NVM BOOT (also called BOOTPROT) is the field that locks the
+     lower part of FLASH to support the boot loader.  This is bits 26-29
+     of the NVM user page:
+
+       J-Link>mem32 804000, 1
+       00804000 = F69A9239
+
+    In binary 11|11 01|10 1001 1010  1001 0010 0011 1001, so NVM Boot 1101.
+    To unlock the FLASH memory reserved for the bootloader, we need to
+    change this field to 111 so that:
+
+      1111 01|11 11|01 1010  1001 0010 0011 1001 = F7da9239, or
+      00804000 = 39 92 DA F7 80 FF EC AE FF FF FF FF FF FF FF FF
+
+    is read.
+
+  3. Modify the NVM "user page"
+
+    I did this using the instructions for the SAMD21 found at
+
+      https://roamingthings.de/use-j-link-to-change-the-boot-loader-protection-of-a-sam-d21/
+
+    We will need to create a small Motorola S-REC file to write new values
+    into NVM.  See https://en.m.wikipedia.org/wiki/SREC_(file_format) for a
+    description of the Motorola SREC format.
+
+    I wrote a small program at configs/metro-m4-scripts/nvm.c that will
+    generate this Motorola SREC file with the correct checksum.  The file at
+    configs/metro-m4-scripts/nvm.c is the output of that program.
+
+      J-Link>mem8 804000,10
+      00804000 = 39 92 9A F6 80 FF EC AE FF FF FF FF FF FF FF FF
+      J-Link>loadfile D:\Spuda\Documents\projects\nuttx\master\nuttx\configs\metro-m4\scripts\nvm.srec
+      Downloading file [D:\Spuda\Documents\projects\nuttx\master\nuttx\configs\metro-m4\scripts\nvm.srec]...
+      J-Link: Flash download: Bank 1 @ 0x00804000: 1 range affected (16 bytes)
+      J-Link: Flash download: Total time needed: 0.089s (Prepare: 0.035s, Compare: 0.011s, Erase: 0.000s, Program: 0.019s, Verify: 0.011s, Restore: 0.011s)
+      O.K.
+      J-Link>mem8 804000,10
+      00804000 = 39 92 9A FE 80 FF EC AE FF FF FF FF FF FF FF FF
+
+    You will, of course, have to change the path as appropriate for your system.
 
 Serial Console
 ==============
