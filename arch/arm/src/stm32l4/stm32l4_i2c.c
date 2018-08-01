@@ -2649,9 +2649,9 @@ static int stm32l4_i2c_process(FAR struct i2c_master_s *dev,
 
       status = stm32l4_i2c_getstatus(priv);
 
-      while(status & I2C_ISR_BUSY)
+      while (status & I2C_ISR_BUSY)
         {
-          if((clock_systimer() - start) > timeout)
+          if ((clock_systimer() - start) > timeout)
             {
               i2cerr("ERROR: I2C Bus busy");
               errval = EBUSY;

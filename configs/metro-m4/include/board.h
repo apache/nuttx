@@ -425,22 +425,22 @@
  *   ------ ----------------- ---------
  *   SHIELD SAMD5E5           FUNCTION
  *   ------ ----------------- ---------
- *   D0     PA23 SERCOM3 PAD2 RXD
+ *   D0     PA23 SERCOM3 PAD1 RXD
  *   D1     PA22 SERCOM3 PAD0 TXD
  *
  * NOTES:
- *   USART_CTRLA_TXPAD0_1: TxD=PAD0 XCK=PAD1 RTS/TE=N/A CTS=N/A
- *   USART_CTRLA_RXPAD2:   RxD=PAD2
+ *   USART_CTRLA_TXPAD0_1: TxD=PAD0XCK=N/A RTS/TE=PAD2 CTS=PAD3
+ *   USART_CTRLA_RXPAD2:   RxD=PAD1
  */
 
-#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_TXPAD0_1 | USART_CTRLA_RXPAD2)
+#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_TXPAD0_2 | USART_CTRLA_RXPAD2)
 #define BOARD_SERCOM3_PINMAP_PAD0    PORT_SERCOM3_PAD0_1 /* USART TX */
-#define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD2_1 /* USART RX */
+#define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD1_1 /* USART RX */
 #define BOARD_SERCOM3_PINMAP_PAD2    0                   /* (not used) */
 #define BOARD_SERCOM3_PINMAP_PAD3    0                   /* (not used) */
 
 #define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0
-#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_2
+#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_1
 
 #define BOARD_SERCOM3_COREGEN        1                   /* 48MHz, common to all SERCOMS */
 #define BOARD_SERCOM3_SLOWGEN        3                   /* 48MHz */
