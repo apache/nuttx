@@ -36,8 +36,13 @@ STATUS
   2018-08-01:  Hardware in hand.  Initial attempts to program the board
     using a Segger J-Link connected via SWD were unsuccessful.  I believe
     that the FLASH is locked.  See "Unlocking FLASH with J-Link Commander"
-    below.  Unfortunately, this seems to have rendered by board unusable.
-    Sigh.
+    below.  After unlocking the FLASH, I was able to successfully write
+    the NuttX image.
+
+    Unfortunately, the board seems to have become unusable after the first
+    NuttX image was written to FLASH.  I am unable to connect the JTAG
+    debugger and so am dead in the water on this unless I get replacement
+    hardware.
 
 Unlocking FLASH
 ===============
@@ -107,8 +112,8 @@ Unlocking FLASH
     To unlock the FLASH memory reserved for the bootloader, we need to
     change this field to 111 so that:
 
-      1111 01|11 11|01 1010  1001 0010 0011 1001 = F7da9239, or
-      00804000 = 39 92 DA F7 80 FF EC AE FF FF FF FF FF FF FF FF
+      11|11 11|10 10|01 1010  1001 0010 0011 1001 = F7da9239, or
+      00804000 = 39 92 9A FE 80 FF EC AE FF FF FF FF FF FF FF FF
 
     is read.
 
