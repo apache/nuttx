@@ -4875,11 +4875,7 @@ max3421e_usbhost_initialize(FAR const struct max3421e_lowerhalf_s *lower)
       goto errout_with_alloc;
     }
 
-  /* Drive Vbus +5V (the smoke test).
-   *
-   * REVISIT: Should be done elsewhere in order to support device self-
-   * powered mode?  How does the MAX3421E VBUS detect logic work?
-   */
+  /* Drive Vbus +5V (the smoke test). */
 
   lower->power(lower, true);
 

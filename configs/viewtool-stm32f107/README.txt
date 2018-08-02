@@ -732,7 +732,7 @@ MAX3421E Integration
     MOSI   J8  Pin 10  PA7/MOSI1   D11                MOSI (label CLK)
     INT#   J18 Pin 10  PA0         D9                 INT
     RST#   J18 Pin  8  PA1         D7                 MAX_RST
-    GPX                            D8                 GPX
+    GPX    J18 Pin  6  PC5         D8                 GPX (not used)
     VBUS   J18 Pin  2  5V          VIN                V_BUS
     3.3V   J8  Pin  7              N/C                VCC
     GND    J8  Pin  8              GND                GND (no label)
@@ -748,7 +748,7 @@ MAX3421E Integration
     MOSI   J8  Pin  4  PB15/MOSI2  D11                MOSI (label CLK)
     INT#   J18 Pin 10  PA0         D9                 INT
     RST#   J18 Pin  8  PA1         D7                 MAX_RST
-    GPX                            D8                 GPX
+    GPX    J18 Pin  6  PC5         D8                 GPX (not used)
     VBUS   J18 Pin  2  5V          VIN                V_BUS
     3.3V   J8  Pin  1              N/C                VCC
     GND    J8  Pin  2              GND                GND (no label)

@@ -42,7 +42,8 @@ STATUS
     Unfortunately, the board seems to have become unusable after the first
     NuttX image was written to FLASH.  I am unable to connect the JTAG
     debugger and so am dead in the water on this unless I get replacement
-    hardware.
+    hardware.  The primary JTAG problem seems to be that it is now unable
+    to halt the CPU.
 
 Unlocking FLASH
 ===============

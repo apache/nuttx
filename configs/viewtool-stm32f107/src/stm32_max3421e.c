@@ -231,6 +231,8 @@ static void max3421e_acknowledge(FAR const struct max3421e_lowerhalf_s *lower)
 static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
                            bool enable)
 {
+  /* We currently have no control over VBUS power */
+
 #ifdef CONFIG_VIEWTOOL_MAX3421E_PWR
   stm32_gpiowrite(GPIO_MAX3421E_PWR, enable);
 #endif
