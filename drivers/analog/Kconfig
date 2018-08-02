@@ -147,6 +147,18 @@ config DAC_AD5410
 	default n
 	select SPI
 
+config DAC7571
+	bool "DAC7571 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments DAC7571 dac.
+
+config DAC7571_I2C_FREQUENCY
+	int "DAC7571 I2C frequency"
+	default 400000
+	depends on DAC7571
+
 endif # DAC
 
 config OPAMP

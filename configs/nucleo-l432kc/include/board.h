@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-l432kc/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,16 +104,22 @@
 /* I2C
  *
  * On Arduino the I2C bus is available at positions A4 and A5. On the
- * nulceo-1432kc board the I2C bus pins (PB6 and PB7) are connected to
- * pins A4 and A5 through the SB16 and SB18 solder bridges. In this case
- * the pins PA5 and PA6 must be configured as input floating.
+ * nucleo-1432kc board the I2C bus pins (PB6 and PB7) are connected to
+ * pins A4 and A5 through the SB16 and SB18 solder bridges.
+ *
+ * If these solder bridges are open, then Arduino D4(PA5) and D5(PA6)
+ * pins are not supported.  PA5 and PA6 must be configured as input
+ * floating.
  *
  * The optional _GPIO configurations allow the I2C driver to manually
  * reset the bus to clear stuck slaves.  They match the pin configuration,
  * but are normally-high GPIOs.
- *
  */
 
+#define GPIO_I2C1_D4 \
+   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN5)
+#define GPIO_I2C1_D5 \
+   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN6)
 #define GPIO_I2C1_SCL \
    (GPIO_I2C1_SCL_1 | GPIO_OPENDRAIN | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET)
 #define GPIO_I2C1_SDA \
@@ -127,7 +133,7 @@
 
 /* SPI */
 
-/* SPI1 is available on the arduino protocol at positions D11/12/13 */
+/* SPI1 is available on the Arduino protocol at positions D11/12/13 */
 
 #define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1 /*PA6*/
 #define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1 /*PA7*/

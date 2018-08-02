@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-l432kc/src/stm32l4_appinit.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,6 +190,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_DAC7571
+  /* Initialize and register DAC7571 */
+
+  ret = stm32_dac7571initialize("/dev/dac0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dac7571initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_TIMER
   /* Initialize and register the timer driver */
 
@@ -204,7 +214,6 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
-
   /* Initialize and register the qencoder driver */
 
   index = 0;

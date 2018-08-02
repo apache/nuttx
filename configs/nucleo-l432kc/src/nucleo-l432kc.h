@@ -144,6 +144,18 @@ int stm32l4_pwm_setup(void);
 int stm32l4_adc_setup(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_dac7571initialize
+ *
+ * Description:
+ *   Initialize and register the DAC7571 driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DAC7571
+int stm32_dac7571initialize(FAR const char *devpath);
+#endif
+
 /****************************************************************************
  * Name: board_timer_driver_initialize
  *

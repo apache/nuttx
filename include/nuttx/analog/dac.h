@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/analog/dac.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-04 initial version
@@ -55,11 +55,13 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Default configuration settings that may be overridden in the board configuration.
  * file.  The configured size is limited to 255 to fit into a uint8_t.
  */
@@ -207,6 +209,8 @@ int dac_txdone(FAR struct dac_dev_s *dev);
  ************************************************************************************/
 
 FAR struct dac_dev_s *up_ad5410initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+
+FAR struct dac_dev_s *dac7571_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 
 #if defined(__cplusplus)
 }
