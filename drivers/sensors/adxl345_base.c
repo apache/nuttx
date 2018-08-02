@@ -140,7 +140,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   if (len < sizeof(struct adxl345_sample_s))
     {
-      /* We could provide logic to break up a touch report into segments and
+      /* We could provide logic to break up a sample into segments and
        * handle smaller reads... but why?
        */
 
@@ -182,7 +182,7 @@ static ssize_t adxl345_read(FAR struct file *filep, FAR char *buffer, size_t len
  * Name: adxl345_register
  *
  * Description:
- *  This function will register the touchscreen driver as /dev/accelN where N
+ *  This function will register the accelerometer driver as /dev/accelN where N
  *  is the minor device number
  *
  * Input Parameters:
