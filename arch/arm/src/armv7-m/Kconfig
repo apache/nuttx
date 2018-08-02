@@ -13,6 +13,71 @@ config ARMV7M_HAVE_DCACHE
 	bool
 	default n
 
+config ARMV7M_LAZYFPU
+	bool "Lazy FPU storage"
+	default n
+	depends on ARCH_HAVE_LAZYFPU
+	---help---
+		There are two forms of the common vector logic.  There are pros and
+		cons to each option:
+
+		1) The standard common vector logic exploits features of the ARMv7-M
+		   architecture to save the all of floating registers on entry into
+		   each interrupt and then to restore the floating registers when
+		   the interrupt returns.  The primary advantage to this approach is
+		   that floating point operations are available in interrupt
+		   handling logic.  Since the volatile registers are preserved,
+		   operations on the floating point registers by interrupt handling
+		   logic has no ill effect.  The downside is, of course, that more
+		   stack operations are required on each interrupt to save and store
+		   the floating point registers.  Because of the some special
+		   features of the ARMv-M, this is not as much overhead as you might
+		   expect, but overhead nonetheless.
+
+		2) The lazy FPU common vector logic does not save or restore
+		   floating point registers on entry and exit from the interrupt
+		   handler. Rather, the floating point registers are not restored
+		   until it is absolutely necessary to do so when a context switch
+		   occurs and the interrupt handler will be returning to a different
+		   floating point context.  Since floating point registers are not
+		   protected, floating point operations must not be performed in
+		   interrupt handling logic.  Better interrupt performance is be
+		   expected, however.
+
+		By default, the "standard" common vector logic is build.  This
+		option selects the alternate lazy FPU common vector logic.
+
+config ARMV7M_USEBASEPRI
+	bool "Use BASEPRI Register"
+	default n
+	depends on ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
+	---help---
+		Use the BASEPRI register to enable and disable interrupts. By
+		default, the PRIMASK register is used for this purpose. This
+		usually results in hardfaults when supervisor calls are made.
+		Though, these hardfaults are properly handled by the RTOS, the
+		hardfaults can confuse some debuggers. With the BASEPRI
+		register, these hardfaults, will be avoided. For more details see
+		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
+
+config ARMV7M_BASEPRI_WAR
+	bool "Cortex-M7 r0p1 Errata 837070 Workaround"
+	default n
+	depends on ARMV7M_USEBASEPRI && ARCH_CORTEXM7
+	---help---
+		Enable workaround for r0p1 Errata 837070: Increasing priority using
+		write to BASEPRI does not take effect immediately.
+
+		This update is required to be serialized to the instruction stream
+		meaning that after this update completes, it takes effect
+		immediately and no exceptions of lower priority than the new boosted
+		priority can pre-empt execution.  Because of this erratum, the
+		priority boosting does not take place immediately, allowing the
+		instruction after the MSR to be interrupted by an exception of
+		lower priority than the new boosted priority. This effect is only
+		limited to the next instruction. Subsequent instructions are
+		guaranteed to see the new boosted priority.
+
 config ARMV7M_ICACHE
 	bool "Use I-Cache"
 	default n

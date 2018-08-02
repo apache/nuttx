@@ -245,13 +245,36 @@ static inline void setbasepri(uint32_t basepri)
       : "memory");
 }
 
+static inline void raisebasepri(uint32_t basepri) inline_function;
+static inline void raisebasepri(uint32_t basepri)
+{
+  /* This may be retaining or raising priority.  Cortex-M7 r0p1 Errata
+   * 837070 Workaround may be required if we are raising the priority.
+   */
+
+#ifdef CONFIG_ARMV7M_BASEPRI_WAR  /* Cortex-M7 r0p1 Errata 837070 Workaround */
+  __asm__ __volatile__ ("\tcpsid  i\n");
+#endif
+  __asm__ __volatile__
+    (
+      "\tmsr basepri, %0\n"
+      :
+      : "r" (basepri)
+      : "memory");
+#ifdef CONFIG_ARMV7M_BASEPRI_WAR  /* Cortex-M7 r0p1 Errata 837070 Workaround */
+  __asm__ __volatile__ ("\tcpsie  i\n");
+#endif
+}
+
 /* Disable IRQs */
 
 static inline void up_irq_disable(void) inline_function;
 static inline void up_irq_disable(void)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  setbasepri(NVIC_SYSH_DISABLE_PRIORITY);
+  /* Probably raising priority */
+
+  raisebasepri(NVIC_SYSH_DISABLE_PRIORITY);
 #else
   __asm__ __volatile__ ("\tcpsid  i\n");
 #endif
@@ -263,9 +286,10 @@ static inline irqstate_t up_irq_save(void) inline_function;
 static inline irqstate_t up_irq_save(void)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
+  /* Probably raising priority */
 
   uint8_t basepri = getbasepri();
-  setbasepri(NVIC_SYSH_DISABLE_PRIORITY);
+  raisebasepri(NVIC_SYSH_DISABLE_PRIORITY);
   return (irqstate_t)basepri;
 
 #else
@@ -293,6 +317,8 @@ static inline irqstate_t up_irq_save(void)
 static inline void up_irq_enable(void) inline_function;
 static inline void up_irq_enable(void)
 {
+  /* In this case, we are always retaining or lowering the priority value */
+
   setbasepri(NVIC_SYSH_PRIORITY_MIN);
   __asm__ __volatile__ ("\tcpsie  i\n");
 }
@@ -303,7 +329,10 @@ static inline void up_irq_restore(irqstate_t flags) inline_function;
 static inline void up_irq_restore(irqstate_t flags)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
+  /* In this case, we are always retaining or lowering the priority value */
+
   setbasepri((uint32_t)flags);
+
 #else
   /* If bit 0 of the primask is 0, then we need to restore
    * interrupts.
@@ -318,6 +347,7 @@ static inline void up_irq_restore(irqstate_t flags)
       :
       : "r" (flags)
       : "memory");
+
 #endif
 }
 

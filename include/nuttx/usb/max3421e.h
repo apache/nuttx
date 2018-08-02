@@ -461,6 +461,8 @@ struct max3421e_lowerhalf_s
    *   acknowledge - Acknowledge/clear any pending GPIO interrupt
    *   power       - Enable or disable 5V VBUS power.  REVISIT:  Often a
    *                 GPIO from the MAX3421E is used to control VBUS power.
+   *
+   * REVISIT: A method may be necessary to sense the state of the GPX input.
    */
 
   CODE int (*attach)(FAR const struct max3421e_lowerhalf_s *lower,
