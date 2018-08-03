@@ -170,9 +170,9 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
 
 void board_userled_initialize(void)
 {
-  /* Configure LD2 GPIO for output */
+  /* Configure LD3 GPIO for output */
 
-  stm32l4_configgpio(GPIO_LD2);
+  stm32l4_configgpio(GPIO_LD3);
 }
 
 /****************************************************************************
@@ -181,9 +181,9 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == BOARD_LD2)
+  if (led == BOARD_LD3)
     {
-      stm32l4_gpiowrite(GPIO_LD2, ledon);
+      stm32l4_gpiowrite(GPIO_LD3, ledon);
     }
 }
 
@@ -193,7 +193,7 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  stm32l4_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
+  stm32l4_gpiowrite(GPIO_LD3, (ledset & BOARD_LD3_BIT) != 0);
 }
 
 /****************************************************************************

@@ -145,7 +145,7 @@
 
 /* LEDs
  *
- * The Nucleo l432kc board provides a single user LED, LD2.  LD3
+ * The Nucleo l432kc board provides a single user LED, LD3.  LD3
  * is the green LED connected to Arduino signal D13 corresponding to
  * MCU I/O PB3 (pin 26).
  *

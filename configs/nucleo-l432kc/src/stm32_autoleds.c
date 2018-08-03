@@ -64,7 +64,7 @@
 
 void board_autoled_initialize(void)
 {
-  /* Configure LD2 GPIO for output */
+  /* Configure LD3 GPIO for output */
 
   stm32l4_configgpio(GPIO_LD3);
 }
