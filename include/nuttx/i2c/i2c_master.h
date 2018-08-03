@@ -89,7 +89,19 @@
  *       that following message is simply a continuation of the transfer).
  *
  * A proper I2C repeated start would then have I2C_M_NOSTOP set on msg[n]
- * and I2C_M_NOSTART *not* set on msg[n+1];
+ * and I2C_M_NOSTART *not* set on msg[n+1].  See the following table:
+ *
+ *   msg[n].flags  msg[n+1].flags Behavior
+ *   ------------ --------------- -----------------------------------------
+ *   0            0                Two normal, separate messages with STOP
+ *                                 on msg[n] then START on msg[n+1]
+ *   0*           I2C_M_NOSTART    Continuation of the same transfer (must
+ *                                 be the same direction).  See NOTE below.
+ *   NO_STOP      0                No STOP on msg[n]; repeated START on
+ *                                 msg[n+1].
+ *
+ * * NOTE: NO_STOP is implied in this case and may or not be explicitly
+ *   included in the msg[n] flags
  */
 
 #define I2C_M_READ           0x0001 /* Read data, from slave to master */
