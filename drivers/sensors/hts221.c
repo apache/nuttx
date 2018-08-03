@@ -234,7 +234,7 @@ static int32_t hts221_write_reg8(FAR struct hts221_dev_s *priv,
     {
       .frequency = CONFIG_HTS221_I2C_FREQUENCY,
       .addr      = priv->addr,
-      .flags     = I2C_M_NORESTART,
+      .flags     = I2C_M_NOSTART,
       .buffer    = (FAR void *)&command[1],
       .length    = 1
     }

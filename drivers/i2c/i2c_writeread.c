@@ -81,11 +81,13 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
   DEBUGASSERT(config->addrlen == 10 || config->addrlen == 7);
   flags = (config->addrlen == 10) ? I2C_M_TEN : 0;
 
-  /* Format two messages: The first is a write */
+  /* Format two messages: The first is a write which is never terminated
+   * with STOP condition.
+   */
 
   msg[0].frequency  = config->frequency,
   msg[0].addr       = config->address;
-  msg[0].flags      = flags;
+  msg[0].flags      = flags | I2C_M_NOSTOP;
   msg[0].buffer     = (FAR uint8_t *)wbuffer;  /* Override const */
   msg[0].length     = wbuflen;
 
@@ -95,13 +97,12 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
 
   if (rbuflen > 0)
     {
-      msg[0].flags |= I2C_M_NOSTOP;
       msg[1].flags  = (flags | I2C_M_READ);
     }
   else
     {
-      msg[1].flags = (flags | I2C_M_NORESTART);
-      rbuflen = -rbuflen;
+      msg[1].flags  = (flags | I2C_M_NOSTART);
+      rbuflen       = -rbuflen;
     }
 
   msg[1].frequency  = config->frequency,

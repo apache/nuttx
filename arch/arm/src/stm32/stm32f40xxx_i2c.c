@@ -1315,8 +1315,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       * return the error to the waiting task.
       */
 
-      if (((priv->msgv[0].flags & I2C_M_NORESTART) != 0 && (status & I2C_SR1_TXE) == 0) ||
-          ((priv->msgv[0].flags & I2C_M_NORESTART) == 0 && (status & I2C_SR1_SB) == 0))
+      if (((priv->msgv[0].flags & I2C_M_NOSTART) != 0 && (status & I2C_SR1_TXE) == 0) ||
+          ((priv->msgv[0].flags & I2C_M_NOSTART) == 0 && (status & I2C_SR1_SB) == 0))
         {
 #if defined(CONFIG_STM32_I2C_DMA) || defined(CONFIG_I2C_POLLED)
           return OK;
@@ -1778,7 +1778,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
         {
 #ifndef CONFIG_I2C_POLLED
           if (priv->dcnt == 1 &&
-              (priv->msgc == 0 || (priv->msgv->flags & I2C_M_NORESTART) == 0))
+              (priv->msgc == 0 || (priv->msgv->flags & I2C_M_NOSTART) == 0))
             {
               stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);
             }
@@ -1807,13 +1807,13 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
 #ifndef CONFIG_I2C_POLLED
           if (((status & I2C_SR1_ADDR) != 0 && priv->dcnt > 0) ||
-              (priv->msgc > 0 && (priv->msgv->flags & I2C_M_NORESTART) != 0))
+              (priv->msgc > 0 && (priv->msgv->flags & I2C_M_NOSTART) != 0))
             {
               stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
             }
 #endif
           if (priv->dcnt == 0 &&
-              priv->msgc > 0 && (priv->msgv->flags & I2C_M_NORESTART) != 0)
+              priv->msgc > 0 && (priv->msgv->flags & I2C_M_NOSTART) != 0)
             {
               /* Set condition to get to next message */
 

@@ -179,7 +179,7 @@ static int sht21_access(FAR struct sht21_dev_s *priv,
 
   msg[1].frequency = CONFIG_SHT21_I2C_FREQUENCY;
   msg[1].addr = priv->addr;
-  msg[1].flags = read ? I2C_M_READ : I2C_M_NORESTART;
+  msg[1].flags = read ? I2C_M_READ : I2C_M_NOSTART;
   msg[1].buffer = reg_value;
   msg[1].length = len;
 

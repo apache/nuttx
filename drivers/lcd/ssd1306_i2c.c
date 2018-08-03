@@ -139,7 +139,7 @@ int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 
   msg[1].frequency = CONFIG_SSD1306_I2CFREQ;  /* I2C frequency */
   msg[1].addr      = priv->addr;              /* 7-bit address */
-  msg[1].flags     = I2C_M_NORESTART;         /* Write transaction with no RESTART */
+  msg[1].flags     = I2C_M_NOSTART;           /* Write transaction with no RESTART */
   msg[1].buffer    = data;                    /* Transfer from this address */
   msg[1].length    = len;                     /* Send the data, then STOP */
 

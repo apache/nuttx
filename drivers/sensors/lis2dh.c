@@ -1552,7 +1552,7 @@ static int lis2dh_access(FAR struct lis2dh_dev_s *dev, uint8_t subaddr,
     }
   else
     {
-      flags = I2C_M_NORESTART;
+      flags = I2C_M_NOSTART;
       length = -length;
     }
 

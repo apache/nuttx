@@ -135,7 +135,7 @@ static int cs2100_write_reg(FAR const struct cs2100_config_s *config,
 
   msga[1].frequency = config->i2cfreq;
   msgs[1].addr      = config->i2caddr;
-  msgs[1].flags     = I2C_M_NORESTART;
+  msgs[1].flags     = I2C_M_NOSTART;
   msgs[1].buffer    = &regval;
   msgs[1].length    = 1;
 

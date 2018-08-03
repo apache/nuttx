@@ -1159,7 +1159,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
            * the same type as the current one, we can avoid the restart
            */
 
-          if ((nextmsg->flags & I2C_M_NORESTART) &&
+          if ((nextmsg->flags & I2C_M_NOSTART) &&
               nextmsg->addr == priv->msgs->addr &&
               nextmsg->frequency == priv->msgs->frequency &&
               (nextmsg->flags & I2C_M_READ) == (priv->msgs->flags & I2C_M_READ))
@@ -1174,7 +1174,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
        * be correctly used here).
        */
 
-      if (!(priv->msgs->flags & I2C_M_NORESTART))
+      if (!(priv->msgs->flags & I2C_M_NOSTART))
         {
           /* Initiate the transfer, in case restart is required */
 

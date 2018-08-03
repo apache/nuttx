@@ -1601,7 +1601,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
            * do nothing.
            */
 
-          else if (priv->msgc > 0 && ((priv->msgv->flags & I2C_M_NORESTART) != 0))
+          else if (priv->msgc > 0 && ((priv->msgv->flags & I2C_M_NOSTART) != 0))
             {
               /* Set condition to get to next message */
 

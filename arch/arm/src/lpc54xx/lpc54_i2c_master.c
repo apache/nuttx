@@ -391,7 +391,7 @@ static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv)
 
   /* Select the initial state */
 
-  if ((msg->flags & I2C_M_NORESTART) != 0)
+  if ((msg->flags & I2C_M_NOSTART) != 0)
     {
       /* Start condition will be ommited.  Begin the tranfer in the data
        * phase.
@@ -662,7 +662,7 @@ static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv)
                */
 
               nextmsg = msg + 1;
-              dostop  = ((nextmsg->flags & I2C_M_NORESTART) != 0);
+              dostop  = ((nextmsg->flags & I2C_M_NOSTART) != 0);
             }
 
           if (dostop)

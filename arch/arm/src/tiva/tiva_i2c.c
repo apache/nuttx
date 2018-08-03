@@ -1308,7 +1308,7 @@ static int tiva_i2c_process(struct tiva_i2c_priv_s *priv, uint32_t status)
                        */
 
                       tiva_i2c_traceevent(priv, I2CEVENT_NEXTMSG, priv->msgc);
-                      if ((priv->msgv->flags & I2C_M_NORESTART) != 0)
+                      if ((priv->msgv->flags & I2C_M_NOSTART) != 0)
                         {
                           /* Just continue transferring data.  In this case,
                            * no STOP was sent at the end of the last message

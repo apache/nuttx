@@ -1399,7 +1399,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       if (priv->msgc > 0)
         {
-          if (priv->msgv->flags & I2C_M_NORESTART)
+          if (priv->msgv->flags & I2C_M_NOSTART)
             {
               stm32_i2c_traceevent(priv, I2CEVENT_BTFNOSTART, priv->msgc);
               priv->ptr   = priv->msgv->buffer;

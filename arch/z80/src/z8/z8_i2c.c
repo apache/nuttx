@@ -560,13 +560,13 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
           /* No... Check if the next message should have a repeated start or
            * not.  The conditions for NO repeated start are:
            *
-           *   - I2C_M_NORESTART bit set
+           *   - I2C_M_NOSTART bit set
            *   - Same direction (I2C_M_READ)
            *   - Same address (and I2C_M_TEN)
            */
 
           next = &msgs[i + 1];
-          if ((msg->flags & I2C_M_NORESTART) != 0 &&
+          if ((msg->flags & I2C_M_NOSTART) != 0 &&
               (msg->flags & (I2C_M_READ | I2C_M_TEN)) == (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
               msg->addr == next->addr)
             {

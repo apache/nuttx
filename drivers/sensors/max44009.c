@@ -194,7 +194,7 @@ static int max44009_write_reg8(FAR struct max44009_dev_s *dev,
     {
       .frequency = CONFIG_MAX44009_I2C_FREQUENCY,
       .addr      = dev->addr,
-      .flags     = I2C_M_NORESTART,
+      .flags     = I2C_M_NOSTART,
       .buffer    = (void *)&command[1],
       .length    = 1
     }

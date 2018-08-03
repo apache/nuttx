@@ -266,7 +266,7 @@ static int mbr3108_i2c_write(FAR struct mbr3108_dev_s *dev, uint8_t reg,
     {
       .frequency = CONFIG_MBR3108_I2C_FREQUENCY,
       .addr      = dev->addr,
-      .flags     = I2C_M_NORESTART,
+      .flags     = I2C_M_NOSTART,
       .buffer    = (void *)buf,
       .length    = buflen
     }

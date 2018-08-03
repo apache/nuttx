@@ -1155,7 +1155,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
               /* Send byte continue with/without restart ? */
 
-              if (!(priv->flags & I2C_M_NORESTART))
+              if (!(priv->flags & I2C_M_NOSTART))
                 {
                   priv->i2c_state = I2CSTATE_RSTARTADDRSEND;
                   continue;

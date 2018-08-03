@@ -73,13 +73,29 @@
 #define I2C_READADDR10H(a)   (I2C_ADDR10H(a) | I2C_READBIT)
 #define I2C_READADDR10L(a)   I2C_ADDR10L(a)
 
-/* Bit definitions for the flags field in struct i2c_msg_s */
+/* Bit definitions for the flags field in struct i2c_msg_s
+ *
+ * START/STOP Rules:
+ *
+ * 1. The lower half I2C driver will always issue the START condition at the
+ *    beginning of a message unless I2C_M_NOSTART flat is set in the
+ *    message.
+ *
+ * 2. The lower half I2C driver will always issue the STOP condition at the
+ *    end of the messages unless:
+ *
+ *    a. The I2C_M_NOSTOP flag is set in the message, OR
+ *    b. The following message has the I2C_M_NOSTART flag set (meaning
+ *       that following message is simply a continuation of the transfer).
+ *
+ * A proper I2C repeated start would then have I2C_M_NOSTOP set on msg[n]
+ * and I2C_M_NOSTART *not* set on msg[n+1];
+ */
 
 #define I2C_M_READ           0x0001 /* Read data, from slave to master */
 #define I2C_M_TEN            0x0002 /* Ten bit address */
 #define I2C_M_NOSTOP         0x0040 /* Message should not end with a STOP */
-#define I2C_M_NORESTART      0x0080 /* Message should not begin with
-                                     * (re-)START of transfer */
+#define I2C_M_NOSTART        0x0080 /* Message should not begin with a START */
 
 /* I2C Character Driver IOCTL Commands **************************************/
 /* The I2C driver is intended to support application testing of the I2C bus.
@@ -153,7 +169,7 @@
  * Public Types
  ****************************************************************************/
 
-/* The I2C vtable */
+/* The I2C lower half driver interface */
 
 struct i2c_master_s;
 struct i2c_msg_s;

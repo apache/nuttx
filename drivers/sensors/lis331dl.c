@@ -141,7 +141,7 @@ static int lis331dl_access(FAR struct lis331dl_dev_s *dev, uint8_t subaddr,
     }
   else
     {
-      flags  = I2C_M_NORESTART;
+      flags  = I2C_M_NOSTART;
       length = -length;
     }
 

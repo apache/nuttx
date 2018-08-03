@@ -476,14 +476,14 @@ static void chg_disable(void)
   struct i2c_msg_s msg[2] =
   {
     {
-      .addr    = R2A20056BM_ADDR,
+      .addr   = R2A20056BM_ADDR,
       .flags  = 0,
       .buffer = (uint8_t *)&addr,
       .length = 1,
     },
     {
-      .addr    = R2A20056BM_ADDR,
-      .flags  = I2C_M_NORESTART,
+      .addr   = R2A20056BM_ADDR,
+      .flags  = I2C_M_NOSTART,
       .buffer = (uint8_t *)&data,
       .length = 1,
     }

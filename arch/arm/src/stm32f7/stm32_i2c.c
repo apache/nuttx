@@ -83,7 +83,7 @@
  *  All supported features have been tested and found to be operational.
  *
  *  Although the RELOAD capability has been tested as it was required to
- *  implement the I2C_M_NORESTART flag on F3 hardware, the associated
+ *  implement the I2C_M_NOSTART flag on F3 hardware, the associated
  *  logic to support the transfer messages with more than 255 byte
  *  payloads has not been  tested as the author lacked access to a real
  *  device supporting these types of transfers.
@@ -1439,7 +1439,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
    *  The following flags can be used to override this behavior as follows:
    *
    *   - I2C_M_READ: Sets the transfer direction to READ (R/W bit = 1)
-   *   - I2C_M_NORESTART: Prevents a RESTART from being issued prior to the
+   *   - I2C_M_NOSTART: Prevents a RESTART from being issued prior to the
    *      transfer of the message (where allowed by the protocol).
    *
    */
@@ -1448,7 +1448,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
   priv->dcnt  = priv->msgv->length;
   priv->flags = priv->msgv->flags;
 
-  if ((priv->flags & I2C_M_NORESTART) == 0)
+  if ((priv->flags & I2C_M_NOSTART) == 0)
     {
       /* Flag the first byte as an address byte */
 
@@ -1466,7 +1466,7 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 
   if (priv->msgc > 0)
     {
-      next_norestart = (((priv->msgv + 1)->flags & I2C_M_NORESTART) != 0);
+      next_norestart = (((priv->msgv + 1)->flags & I2C_M_NOSTART) != 0);
     }
 
   if (next_norestart || priv->dcnt > 255)
@@ -1890,7 +1890,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    *
    * The fact that the hardware must either RESTART or STOP when a TC
    * event occurs explains why, when messages must be sent back to back
-   * (i.e. without a restart by specifying the I2C_M_NORESTART flag),
+   * (i.e. without a restart by specifying the I2C_M_NOSTART flag),
    * RELOAD mode must be enabled and TCR event(s) must be generated
    * instead.  See the TCR handler for more.
    */
@@ -1969,7 +1969,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    *
    *  1) We're trying to send a message with a payload greater than 255 bytes.
    *  2) We're trying to send messages back to back, regardless of their
-   *     payload size, to avoid a RESTART (i.e. I2C_M_NORESTART flag is set).
+   *     payload size, to avoid a RESTART (i.e. I2C_M_NOSTART flag is set).
    *
    * These conditions may be true simultaneously, as would be the case if
    * we're sending multiple messages with payloads > 255 bytes.   So we only

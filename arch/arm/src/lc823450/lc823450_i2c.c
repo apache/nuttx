@@ -739,7 +739,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
 
           i2cinfo("other message remaining (msgc=%d)\n", priv->msgc);
 
-          if (priv->msgv->flags & I2C_M_NORESTART)
+          if (priv->msgv->flags & I2C_M_NOSTART)
             {
               /* In this case, we don't have to restart using START condition. */
 
