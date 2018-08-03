@@ -188,6 +188,12 @@ exception_common:
 #else
 	/* Set the BASEPRI register so that further normal interrupts will be
 	 * masked.  Nested, high priority may still occur, however.
+	 *
+	 * REVISIT:  I think this is un-necessary:  "When the processor is
+	 * executing an exception handler, an exception can preempt the exception
+	 * handler if its priority is higher than the priority of the exception
+	 * being handled. See Interrupt priority grouping for more information
+	 * about preemption by an interrupt."
 	 */
 
 	mov		r2, #NVIC_SYSH_DISABLE_PRIORITY
