@@ -45,6 +45,12 @@ STATUS
     hardware.  The primary JTAG problem seems to be that it is now unable
     to halt the CPU.
 
+    This is most likely a consequence of something happening in the NuttX
+    boot-up sequence that interferes with JTAG operation.  When I continue
+    debugging in the future, I will put an infinitel loop, branch-on-self
+    at the code startup up (__start) so that I can attached the debugger
+    and step through the initial configuration.
+
 Unlocking FLASH
 ===============
 

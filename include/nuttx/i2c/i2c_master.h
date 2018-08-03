@@ -77,8 +77,9 @@
 
 #define I2C_M_READ           0x0001 /* Read data, from slave to master */
 #define I2C_M_TEN            0x0002 /* Ten bit address */
+#define I2C_M_NOSTOP         0x0040 /* Message should not end with a STOP */
 #define I2C_M_NORESTART      0x0080 /* Message should not begin with
-                                     * (re-)start of transfer */
+                                     * (re-)START of transfer */
 
 /* I2C Character Driver IOCTL Commands **************************************/
 /* The I2C driver is intended to support application testing of the I2C bus.

@@ -416,7 +416,7 @@ static void sam_xosc32k_configure(const struct sam_xosc32_config_s *config)
 
   /* Wait for XOSC32 to become ready if it was enabled */
 
-  if (config->enable && ! config->ondemand)
+  if (config->enable && !config->ondemand)
     {
       while ((getreg32(SAM_OSC32KCTRL_STATUS) &
               OSC32KCTRL_INT_XOSC32KRDY) == 0)
@@ -542,23 +542,21 @@ static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
 
-  /* If the XOSC was enabled, then wait for it to become ready */
+  /* Wait for XOSC32 to become ready if it was enabled */
 
-   /* Wait for XOSC32 to become ready if it was enabled */
-
-   if (config->enable)
-     {
-       while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
-         {
-         }
-     }
+  if (config->enable)
+    {
+      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
+        {
+        }
+    }
 
   /* Re-select OnDemand */
 
   if (config->ondemand)
     {
       regval  = getre32(SAM_OSCCTRL_XOSCCTRL0)
-      regval |=OSCCTRL_XOSCCTRL_ONDEMAND;
+      regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
     }
 }
@@ -574,23 +572,21 @@ void sam_xosc1_configure(const struct sam_xosc_config_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
 
-  /* If the XOSC was enabled, then wait for it to become ready */
+  /* Wait for XOSC32 to become ready if it was enabled */
 
-   /* Wait for XOSC32 to become ready if it was enabled */
-
-   if (config->enable)
-     {
-       while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
-         {
-         }
-     }
+  if (config->enable)
+    {
+      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
+        {
+        }
+    }
 
   /* Re-select OnDemand */
 
   if (config->ondemand)
     {
       regval  = getre32(SAM_OSCCTRL_XOSCCTRL1)
-      regval |=OSCCTRL_XOSCCTRL_ONDEMAND;
+      regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
     }
 }
@@ -630,7 +626,6 @@ static void sam_gclk_configure(uintptr_t regaddr,
 
       regval = GCLK_GENCTRL_SRC(config->source) | GCLK_GENCTRL_GENEN |
                GCLK_GENCTRL1_DIV(config->div);
-
 
       if (config->idc)
         {
@@ -872,7 +867,6 @@ static void sam_dfll_ready(const struct sam_dfll_config_s *config)
   if ((regval8 & OSCCTRL_DFLLCTRLB_MODE) != 0)
     {
       ready = OSCCTRL_INT_DFLLRDY | OSCCTRL_INT_DFLLLCKC;
-
     }
 
   /* In open-loop mode, wait only for DFLL ready */
