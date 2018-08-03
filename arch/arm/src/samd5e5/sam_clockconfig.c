@@ -788,7 +788,7 @@ static void sam_dfll_configure(const struct sam_dfll_config_s *config)
       regval32 = getreg32(SAM_OSCCTRL_DFLLVAL);
     }
 
-  /* Writing to the DFLLVAL will force it to re-syncrhonize */
+  /* Writing to the DFLLVAL will force it to re-synchronize */
 
   putreg32(regval32, SAM_OSCCTRL_DFLLVAL);
 

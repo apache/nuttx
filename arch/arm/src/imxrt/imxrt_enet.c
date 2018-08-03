@@ -1471,8 +1471,8 @@ static int imxrt_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static uint32_t  imxrt_calcethcrc(const uint8_t *data, size_t length)
+#ifdef CONFIG_NET_IGMP
+static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc    = 0xFFFFFFFFU;
   uint32_t count1 = 0;
