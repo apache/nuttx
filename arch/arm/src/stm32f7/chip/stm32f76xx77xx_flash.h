@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32f7/chip/stm32f74xx75xx_flash.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -106,8 +106,8 @@
 #  define STM32_FLASH_NPAGES      12
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (7 * 256))
 #  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
-                                  _K(128), _K(256), _K(256), _K(256) \
-                                  _K(256), _K(256), _K(256), _K(256)}
+                                   _K(128), _K(256), _K(256), _K(256), \
+                                   _K(256), _K(256), _K(256), _K(256)}
 #endif
 
 /* Register Offsets *****************************************************************/
@@ -165,7 +165,7 @@
 #define FLASH_CR_MER_MER1          (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
 #define FLASH_CR_SNB_SHIFT         (3)       /* Bits 3-6: Sector number */
 #define FLASH_CR_SNB_MASK          (0x1f << FLASH_CR_SNB_SHIFT)
-#  define FLASH_CR_SNB(n)          ((uint32_t)((n) % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
+#  define FLASH_CR_SNB(n)          (((uint32_t)((n) % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
 #define FLASH_CR_PSIZE_SHIFT       (8)       /* Bits 8-9: Program size */
 #define FLASH_CR_PSIZE_MASK        (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8        (0 << FLASH_CR_PSIZE_SHIFT) /* Program x8 */

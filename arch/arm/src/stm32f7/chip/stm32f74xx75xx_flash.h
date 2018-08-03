@@ -151,7 +151,7 @@
 #define FLASH_CR_MER               (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
 #define FLASH_CR_SNB_SHIFT         (3)       /* Bits 3-6: Sector number */
 #define FLASH_CR_SNB_MASK          (0xf << FLASH_CR_SNB_SHIFT)
-#  define FLASH_CR_SNB(n)          ((uint32_t)((n) % 8) << FLASH_CR_SNB_SHIFT) | ((n / 8) << 6)) /* Sector n, n=0..23 */
+#  define FLASH_CR_SNB(n)          (((uint32_t)((n) % 8) << FLASH_CR_SNB_SHIFT) | ((n / 8) << 6)) /* Sector n, n=0..23 */
 #define FLASH_CR_PSIZE_SHIFT       (8)       /* Bits 8-9: Program size */
 #define FLASH_CR_PSIZE_MASK        (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8        (0 << FLASH_CR_PSIZE_SHIFT) /* Program x8 */
