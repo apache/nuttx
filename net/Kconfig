@@ -87,7 +87,6 @@ config NET_SLIP_PKTSIZE
 		256 MSS, but restrict transfers to 128 bytes (possibly by modifying
 		the MSS value in the TCP connection structure).
 
-
 config NET_GUARDSIZE
 	int "Driver I/O guard size"
 	default 2
@@ -307,6 +306,7 @@ source "net/socket/Kconfig"
 source "net/inet/Kconfig"
 source "net/pkt/Kconfig"
 source "net/local/Kconfig"
+source "net/netlink/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
 source "net/bluetooth/Kconfig"

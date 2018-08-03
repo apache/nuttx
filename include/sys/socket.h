@@ -62,6 +62,7 @@
 #define PF_BLUETOOTH   5 /* Bluetooth sockets */
 #define PF_IEEE802154  6 /* Low level IEEE 802.15.4 radio frame interface */
 #define PF_PKTRADIO    7 /* Low level packet radio interface */
+#define PF_NETLINK     8 /* Netlink IPC socket */
 
 /* Supported Address Families. Opengroup.org requires only AF_UNSPEC,
  * AF_UNIX, AF_INET and AF_INET6.
@@ -76,6 +77,7 @@
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
 #define AF_PKTRADIO    PF_PKTRADIO
+#define AF_NETLINK     PF_NETLINK
 
 /* The socket created by socket() has the indicated type, which specifies
  * the communication semantics.
@@ -194,7 +196,7 @@
                             * return: int
                             */
 
-/* Protocol-level socket operations */
+/* Protocol-level socket operations. */
 
 #define SOL_IP          1 /* See options in include/netinet/ip.h */
 #define SOL_IPV6        2 /* See options in include/netinet/ip6.h */

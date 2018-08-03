@@ -60,6 +60,7 @@
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "local/local.h"
+#include "netlink/netlink.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
 #include "usrsock/usrsock.h"
@@ -158,6 +159,12 @@ void net_setup(void)
   /* Initialize the local, "Unix domain" socket support */
 
   local_initialize();
+#endif
+
+#ifdef CONFIG_NET_NETLINK
+  /* Initialize the Netlink IPC support */
+
+  netlink_initialize();
 #endif
 
 #ifdef NET_TCP_HAVE_STACK

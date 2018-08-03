@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_NETLINK
+	bool "Netlink socket support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for Nelink-like IPC sockets that will permit user-
+		space applications to interact with network services.
+
+		This logic is a WIP.  Currenlty only fragmentary support is
+		available, not enough to actually do antything of consequence.
+		Hence, the feature depends on EXPERIMENTAL.
+
+if NET_NETLINK
+
+config NET_NETLINK_CONNS
+	int "Number of netlink connections"
+	default 4
+	---help---
+		Maximum number of netlink connections (all tasks).
+
+endif # NET_NETLINK

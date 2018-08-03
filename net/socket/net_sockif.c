@@ -47,6 +47,7 @@
 
 #include "inet/inet.h"
 #include "local/local.h"
+#include "netlink/netlink.h"
 #include "pkt/pkt.h"
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
@@ -100,6 +101,12 @@ FAR const struct sock_intf_s *
 #ifdef CONFIG_NET_LOCAL
     case PF_LOCAL:
       sockif = &g_local_sockif;
+      break;
+#endif
+
+#ifdef CONFIG_NET_NETLINK
+    case PF_NETLINK:
+      sockif = &g_netlink_sockif;
       break;
 #endif
 

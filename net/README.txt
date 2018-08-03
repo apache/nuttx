@@ -20,6 +20,7 @@ Directory Structure
        +- loopback   - Local loopback
        +- neighbor   - Neighbor Discovery Protocol (IPv6)
        +- netdev     - Socket network device interface
+       +- netlink    - Netlink IPC socket interface
        +- pkt        - "Raw" packet socket support
        +- sixlowpan  - 6LoWPAN implementation
        +- socket     - BSD socket interface

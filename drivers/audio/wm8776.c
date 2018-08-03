@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/audio/wm8776.c
  *
- *   Copyright 2017,2018 Sony Video & Sound Products Inc.
+ *   Copyright 2017, 2018 Sony Video & Sound Products Inc.
  *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  *
  * Based on drivers/audio/wm8904.c
