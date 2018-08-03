@@ -37,7 +37,11 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = flash.ld
+ifeq ($(CONFIG_METRO_M4_RUNFROMFLASH),y)
+  LDSCRIPT = flash.ld
+else ifeq ($(CONFIG_METRO_M4_RUNFROMSRAM),y)
+  LDSCRIPT = sram.ld
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

@@ -271,7 +271,9 @@ static void go_os_start(void *pv, unsigned int nbytes)
 
 void __start(void)
 {
+#if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_ARCH_RAMFUNCS)
   const uint32_t *src;
+#endif
   uint32_t *dest;
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
@@ -289,6 +291,7 @@ void __start(void)
       *dest++ = 0;
     }
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the
@@ -299,15 +302,16 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+#endif
 
+#ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
-   * temporary location is in flash after the data initalization code
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
+   * temporary location is in flash after the data initialization code
    * at _framfuncs.  This must be done before sam_clockconfig() can be
    * called (at least for the SAM4L family).
    */
 
-#ifdef CONFIG_ARCH_RAMFUNCS
   for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
     {
       *dest++ = *src++;
@@ -333,7 +337,7 @@ void __start(void)
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
-   * segements.
+   * segments.
    */
 
 #ifdef CONFIG_BUILD_PROTECTED

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/metro-m4/scripts/flash.ld
+ * configs/metro-m4/scripts/sram.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,7 +34,8 @@
  ****************************************************************************/
 
 /* The ATSAMD51J19 has 512Kb of FLASH beginning at address 0x0000:0000 and
- * 192Kb of SRAM at address 0x2000:0000.
+ * 192Kb of SRAM at address 0x2000:0000.  Only sram is used by this linker
+ * script.
  */
 
 MEMORY
@@ -63,28 +64,26 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > sram
 
 	.init_section :
 	{
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > flash
+	} > sram
 
 	.ARM.extab :
 	{
 		*(.ARM.extab*)
-	} > flash
+	} > sram
 
 	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx :
 	{
 		*(.ARM.exidx*)
-	} > flash
+	} > sram
 	__exidx_end = ABSOLUTE(.);
-
-	_eronly = ABSOLUTE(.);
 
 	.data :
 	{
@@ -93,7 +92,7 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} > sram
 
 	.bss :
 	{

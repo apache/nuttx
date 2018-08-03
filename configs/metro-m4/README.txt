@@ -18,6 +18,16 @@ README
   o Built in crypto engines with AES (256 bit), true RNG, Pubkey controller
   o 64 QFN
 
+Contents
+========
+
+  o STATUS
+  o Unlocking FLASH
+  o Serial Console
+  o LEDs
+  o Run from FLASH
+  o Configurations
+
 STATUS
 ======
 
@@ -47,9 +57,13 @@ STATUS
 
     This is most likely a consequence of something happening in the NuttX
     boot-up sequence that interferes with JTAG operation.  When I continue
-    debugging in the future, I will put an infinitel loop, branch-on-self
+    debugging in the future, I will put an infinite loop, branch-on-self
     at the code startup up (__start) so that I can attached the debugger
     and step through the initial configuration.
+  2019-08-03:  Added a configuration option to run out of SRAM vs FLASH.
+    This should be a safer way to do the initial board bring-up since
+    it does not modify the FLASH image nor does it require unlocking
+    the FLASH pages.
 
 Unlocking FLASH
 ===============
@@ -177,6 +191,38 @@ LEDs
     SHIELD SAMD5E5           FUNCTION
     ------ ----------------- -----------
     D13    PA16              GPIO output
+
+Run from FLASH
+==============
+
+  I bricked my first Metro M4 board because there were problems in the
+  bring-up logic.  These problems left the chip in a bad state that was
+  repeated on each reset because the code was written into FLASH and I was
+  unable to ever connect to it again via SWD.
+
+  To make the bring-up less risky, I added a configuration option to build
+  the code to execution entirely out of SRAM.  By default, the setting
+  CONFIG_METRO_M4_RUNFROMFLASH=y is used and the code is built to run out of
+  FLASH.  If CONFIG_METRO_M4_RUNFROMSRAM=y is selected instead, then the
+  code is built to run out of SRAM.
+
+  To use the code in this configuration, the program must be started a
+  little differently:
+
+    gdb> mon reset
+    gdb> mon halt
+    gdb> load nuttx             << Load NuttX into SRAM
+    gdb> file nuttx             << Assuming debug symbols are enabled
+    gdb> mon memu32 0x20000000  << Get the address of initial stack
+    gdb> mon reg sp 0x200161c4  << Set the initial stack pointer using this address
+    gdb> mon memu32 0x20000000  << Get the address of __start entry point
+    gdb> mon reg pc 0x20000264  << Set the PC using this address
+    gdb> si                     << Step in just to make sure everything is okay
+    gdb> [ set breakpoints ]
+    gdb> c                      << Then continue until you hit the breakpoint
+
+  Where 0x200161c4 and 0x20000264 are the values of the initial stack and
+  the __start entry point that I read from SRAM
 
 Configurations
 ==============
