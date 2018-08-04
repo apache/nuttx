@@ -215,11 +215,11 @@ Run from FLASH
     gdb> file nuttx             << Assuming debug symbols are enabled
     gdb> mon memu32 0x20000000  << Get the address of initial stack
     gdb> mon reg sp 0x200161c4  << Set the initial stack pointer using this address
-    gdb> mon memu32 0x20000000  << Get the address of __start entry point
+    gdb> mon memu32 0x20000004  << Get the address of __start entry point
     gdb> mon reg pc 0x20000264  << Set the PC using this address
     gdb> si                     << Step in just to make sure everything is okay
     gdb> [ set breakpoints ]
-    gdb> c                      << Then continue until you hit the breakpoint
+    gdb> c                      << Then continue until you hit a breakpoint
 
   Where 0x200161c4 and 0x20000264 are the values of the initial stack and
   the __start entry point that I read from SRAM
