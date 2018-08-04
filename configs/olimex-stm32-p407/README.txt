@@ -292,6 +292,7 @@ must be is one of the following.
     are loaded into user space.
 
     NOTES:
+
     1. See build recommendations and instructions for combining the .hex
        files under the knsh configuration.  These instructions are common
        for all protected mode builds.
@@ -299,13 +300,14 @@ must be is one of the following.
     2. Unlike other versions of apps/examples/elf configurations, the test
        ELF programs are not provided internally on a ROMFS or CROMFS file
        system.  This is due to the fact that those file systems are built in
-       user space and there is not mechanism in the build system to easily
+       user space and there is no mechanism in the build system to easily
        get them into the kernel space.
 
-       Instead, the programs must be copied to an SD card on your host PC.
-       The programs can be found at apps/examples/elf/tests/romfs.  All of
-       those files should be copied to the SD card and the SD card should be
-       in place when you reset/power-up the board.
+       Instead, the programs must be copied to a USB FLASH drive from your
+       host PC.  The programs can be found at apps/examples/elf/tests/romfs.
+       All of those files should be copied to the USB FLASH drive.  The
+       apps/example/elf will wait on power up until the USB FLASH driver
+       has been inserted and initialized.
 
   knsh:
 
