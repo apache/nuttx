@@ -285,6 +285,28 @@ Configuration sub-directories
 The <subdir> that is provided above as an argument to the tools/configure.sh
 must be is one of the following.
 
+  kelf:
+
+    This is a protected mode version of the apps/examples/elf test of
+    loadable ELF programs.  This version is unique because the ELF programs
+    are loaded into user space.
+
+    NOTES:
+    1. See build recommendations and instructions for combining the .hex
+       files under the knsh configuration.  These instructions are common
+       for all protected mode builds.
+
+    2. Unlike other versions of apps/examples/elf configurations, the test
+       ELF programs are not provided internally on a ROMFS or CROMFS file
+       system.  This is due to the fact that those file systems are built in
+       user space and there is not mechanism in the build system to easily
+       get them into the kernel space.
+
+       Instead, the programs must be copied to an SD card on your host PC.
+       The programs can be found at apps/examples/elf/tests/romfs.  All of
+       those files should be copied to the SD card and the SD card should be
+       in place when you reset/power-up the board.
+
   knsh:
 
     This is identical to the nsh configuration below except that NuttX

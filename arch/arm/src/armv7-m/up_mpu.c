@@ -147,7 +147,7 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
  *   Given (1) the offset to the beginning of data in the region and (2) the
  *   log2 size of the mapping to use, determine the minimal sub-region set
  *   to span that memory region sub-region set at the to be disabled at the
- *   higher end of the region
+ *   lower end of the region
  *
  * Assumption:
  *   l2size has the same properties as the return value from

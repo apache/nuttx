@@ -61,6 +61,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
+#define HAVE_ELF        1
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
  * is not enabled.
@@ -124,6 +125,11 @@
 #  undef HAVE_USBMONITOR
 #endif
 
+/* ELF */
+
+#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
+#  undef HAVE_ELF
+#endif
 
 /* Olimex-STM32-P407 GPIOs **************************************************/
 /* LEDs */

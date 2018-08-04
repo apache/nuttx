@@ -61,7 +61,7 @@
 
 #if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
 #  define HAVE_USBHOST_TRACE 1
-#  if defined(CONFIG_USBHOST_TRACE_VERBOSE) || defined(CONFIG_DEBUG_INFO)
+#  if defined(CONFIG_USBHOST_TRACE_VERBOSE) || defined(CONFIG_DEBUG_USB_INFO)
 #    define HAVE_USBHOST_TRACE_VERBOSE 1
 #  endif
 #endif
