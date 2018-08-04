@@ -108,7 +108,7 @@ endif
 
 $(TOPDIR)$(DELIM)User.map: nuttx_user.elf
 	@echo "MK: User.map"
-	$(Q) $(NM) nuttx_user.elf >$(TOPDIR)$(DELIM)User.map
+	$(Q) $(NM) -n nuttx_user.elf >$(TOPDIR)$(DELIM)User.map
 	$(Q) $(CROSSDEV)size nuttx_user.elf
 
 .depend:
