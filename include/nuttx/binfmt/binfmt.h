@@ -83,18 +83,6 @@ typedef FAR void (*binfmt_dtor_t)(void);
 struct symtab_s;
 struct binary_s
 {
-  /* If CONFIG_SCHED_HAVE_PARENT is defined then schedul_unload() will
-   * manage instances of struct binary_s allocated with kmm_malloc.  It
-   * will keep the binary data in a link list and when SIGCHLD is received
-   * (meaning that the task has exit'ed, schedul_unload() will find the
-   * data, unload the module, and free the structure.
-   */
-
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct binary_s *flink;          /* Supports a singly linked list */
-  pid_t pid;                           /* Task ID of the child task */
-#endif
-
   /* Information provided to the loader to load and bind a module */
 
   FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
@@ -115,22 +103,22 @@ struct binary_s
   FAR void *mapped;                    /* Memory-mapped, address space */
   FAR void *alloc[BINFMT_NALLOC];      /* Allocated address spaces */
 
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Constructors/destructors */
 
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
   FAR binfmt_ctor_t *ctors;            /* Pointer to a list of constructors */
   FAR binfmt_dtor_t *dtors;            /* Pointer to a list of destructors */
   uint16_t nctors;                     /* Number of constructors in the list */
   uint16_t ndtors;                     /* Number of destructors in the list */
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
   /* Address environment.
    *
    * addrenv - This is the handle created by up_addrenv_create() that can be
    *   used to manage the tasks address space.
    */
 
-#ifdef CONFIG_ARCH_ADDRENV
   group_addrenv_t addrenv;             /* Task group address environment */
 #endif
 
