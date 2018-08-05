@@ -1,5 +1,5 @@
 ############################################################################
-# configs/olimex-stm32-p407/kelf/Make.defs
+# configs/olimex-stm32-p407/kmodule/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

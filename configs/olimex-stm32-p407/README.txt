@@ -309,6 +309,37 @@ must be is one of the following.
        apps/example/elf will wait on power up until the USB FLASH driver
        has been inserted and initialized.
 
+  kmodule:
+
+    This is a protected mode version of the apps/examples/module test of
+    loadable ELF kernel modules.  This version is unique because the ELF
+    programs are loaded into the protected kernel space.
+
+    NOTES:
+
+    1. See build recommendations and instructions for combining the .hex
+       files under the knsh configuration.  These instructions are common
+       for all protected mode builds.
+
+    2. Unlike other versions of apps/examples/module configurations, the test
+       ELF modules are not provided internally on a ROMFS or CROMFS file
+       system.  This is due to the fact that those file systems are built in
+       user space and there is no mechanism in the build system to easily
+       get them into the kernel space.
+
+       Instead, the module(s) must be copied to a USB FLASH drive from your
+       host PC.  The module(s) can be found at apps/examples/module/driver/fsroot.
+       All of those file(s) should be copied to the USB FLASH drive.  Lik the
+       kelf configuration, the logic in apps/example/module will wait on power
+       up until the USB FLASH driver has been inserted and initialized.
+
+    STATUS:  There is an issue that makes this configuration unusable at the
+      present time:  The symbol table is built by apps/examples/module/drivers/Makefile
+      in user space.  The problem with that is that the kernel module does reference
+      internal kernel symbols which are not available in the user space build context.
+      A mechanism is needed in the build system to build the symbol table in the
+      context of the kernel.  There is currently no way to do that.
+
   knsh:
 
     This is identical to the nsh configuration below except that NuttX
