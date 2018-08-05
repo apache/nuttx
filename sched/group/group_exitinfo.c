@@ -81,7 +81,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   FAR struct task_group_s *group;
   irqstate_t flags;
 
-  DEBUGASSERT(bin != NULL);
+  DEBUGASSERT(bininfo != NULL);
   flags = spin_lock_irqsave();
 
   /* Get the TCB associated with the PID */
