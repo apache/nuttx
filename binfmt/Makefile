@@ -1,7 +1,8 @@
 ############################################################################
 # nxflat/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2012-2016, 2018 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,8 +53,8 @@ ifeq ($(CONFIG_BINFMT_EXEPATH),y)
 BINFMT_CSRCS += binfmt_exepath.c
 endif
 
-ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-BINFMT_CSRCS += binfmt_schedunload.c
+ifeq ($(CONFIG_BINFMT_LOADABLE),y)
+BINFMT_CSRCS += binfmt_exit.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)

@@ -239,7 +239,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Then wait for the task to exit */
 
-  if (options & WNOHANG)
+  if ((options & WNOHANG) != 0)
     {
       /* Don't wait if status is not available */
 

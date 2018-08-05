@@ -63,7 +63,7 @@
  *   Execute C++ static constructors.
  *
  * Input Parameters:
- *   loadinfo - Load state information
+ *   binp - Load state information
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

@@ -52,6 +52,10 @@ ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CSRCS += group_addrenv.c
 endif
 
+ifeq ($(CONFIG_BINFMT_LOADABLE),y)
+CSRCS += group_exitinfo.c
+endif
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += group_signal.c
 endif

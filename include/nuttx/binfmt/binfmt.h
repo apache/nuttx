@@ -261,40 +261,12 @@ int unload_module(FAR struct binary_s *bin);
 int exec_module(FAR const struct binary_s *bin);
 
 /****************************************************************************
- * Name: schedule_unload
- *
- * Description:
- *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called by
- *   the parent of the newly created task to automatically unload the
- *   module when the task exits.  This assumes that (1) the caller is the
- *   parent of the created task, (2) that bin was allocated with kmm_malloc()
- *   or friends.  It will also automatically free the structure with
- *   kmm_free() after unloading the module.
- *
- * Input Parameters:
- *   pid - The task ID of the child task
- *   bin - This structure must have been allocated with kmm_malloc() and must
- *         persist until the task unloads
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_HAVE_PARENT
-int schedule_unload(pid_t pid, FAR struct binary_s *bin);
-#endif
-
-/****************************************************************************
  * Name: exec
  *
  * Description:
  *   This is a convenience function that wraps load_ and exec_module into
- *   one call.  If CONFIG_SCHED_ONEXIT and CONFIG_SCHED_HAVE_PARENT are
- *   also defined, this function will automatically call schedule_unload()
- *   to unload the module when task exits.
+ *   one call.  If CONFIG_BINFMT_LOADABLE is defined, this function will
+ *   schedule to unload the module when task exits.
  *
  *   This non-standard, NuttX function is similar to execv() and
  *   posix_spawn() but differs in the following ways;
@@ -316,7 +288,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin);
  *   The interface is available in the FLAT build mode although it is not
  *   really necessary in that case. It is currently used by some example
  *   code under the apps/ that that generate their own symbol tables for
- *   linking test programs. So althought it is not necessary, it can still
+ *   linking test programs. So although it is not necessary, it can still
  *   be useful.
  *
  *   The interface would be completely useless and will not be supported in
@@ -324,9 +296,9 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin);
  *   process cannot provide any meaning symbolic information for use in
  *   linking a different process.
  *
- *   NOTE: This function is flawed and useless without CONFIG_SCHED_ONEXIT
- *   and CONFIG_SCHED_HAVE_PARENT because without those features there is
- *   then no mechanism to unload the module once it exits.
+ *   NOTE: This function is flawed and useless without CONFIG_BINFMT_LOADABLE
+ *   because without that features there is then no mechanism to unload the
+ *   module once it exits.
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
@@ -351,6 +323,29 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin);
 
 int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports);
+
+/****************************************************************************
+ * Name: binfmt_exit
+ *
+ * Description:
+ *   This function may be called when a tasked loaded into RAM exits.
+ *   This function will unload the module when the task exits and reclaim
+ *   all resources used by the module.
+ *
+ * Input Parameters:
+ *   bin - This structure must have been allocated with kmm_malloc() and must
+ *         persist until the task unloads
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BINFMT_LOADABLE
+int binfmt_exit(FAR struct binary_s *bin);
+#endif
 
 /****************************************************************************
  * Name: exepath_init

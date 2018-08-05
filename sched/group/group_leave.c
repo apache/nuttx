@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,10 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
+
+#ifdef CONFIG_BINFMT_LOADABLE
+#  include <nuttx/binfmt/binfmt.h>
+#endif
 
 #include "environ/environ.h"
 #include "signal/signal.h"
@@ -258,6 +262,19 @@ static inline void group_release(FAR struct task_group_s *group)
     }
 
 #  endif
+#endif
+
+#ifdef CONFIG_BINFMT_LOADABLE
+  /* If the exiting task was loaded into RAM from a file, then we need to
+   * lease all of the memory resource when the last thread exits the task
+   * group.
+   */
+
+  if (group->tg_bininfo != NULL)
+    {
+      binfmt_exit(group->tg_bininfo);
+      group->tg_bininfo = NULL;
+    }
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)

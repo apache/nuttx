@@ -82,7 +82,7 @@
  *   the new task's main function is called.
  *
  * Input Parameters:
- *   loadinfo - Load state information
+ *   arg - Argument is instance of load state info structure cast to void *.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

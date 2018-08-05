@@ -1,7 +1,8 @@
 /****************************************************************************
  * binfmt/binfmt_exec.c
  *
- *   Copyright (C) 2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -59,9 +61,8 @@
  *
  * Description:
  *   This is a convenience function that wraps load_ and exec_module into
- *   one call.  If CONFIG_SCHED_ONEXIT and CONFIG_SCHED_HAVE_PARENT are
- *   also defined, this function will automatically call schedule_unload()
- *   to unload the module when task exits.
+ *   one call.  If CONFIG_BINFMT_LOADABLE is defined, this function will
+ *   schedule to unload the module when task exits.
  *
  *   This non-standard, NuttX function is similar to execv() and
  *   posix_spawn() but differs in the following ways;
@@ -91,9 +92,9 @@
  *   process cannot provide any meaning symbolic information for use in
  *   linking a different process.
  *
- *   NOTE: This function is flawed and useless without CONFIG_SCHED_ONEXIT
- *   and CONFIG_SCHED_HAVE_PARENT because without those features there is
- *   then no mechanism to unload the module once it exits.
+ *   NOTE: This function is flawed and useless without CONFIG_BINFMT_LOADABLE
+ *   because without that features there is then no mechanism to unload the
+ *   module once it exits.
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
@@ -173,20 +174,22 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (pid < 0)
     {
       errcode = -pid;
-      berr("ERROR: Failed to execute program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to execute program '%s': %d\n",
+           filename, errcode);
       goto errout_with_lock;
     }
 
-#if defined(CONFIG_SCHED_ONEXIT) && defined(CONFIG_SCHED_HAVE_PARENT)
+#ifdef CONFIG_BINFMT_LOADABLE
   /* Set up to unload the module (and free the binary_s structure)
    * when the task exists.
    */
 
-  ret = schedule_unload(pid, bin);
+  ret = group_exitinfo(pid, bin);
   if (ret < 0)
     {
       berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
     }
+
 #else
   /* Free the binary_s structure here */
 
