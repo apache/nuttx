@@ -235,7 +235,7 @@ endmenu
 
 choice
 	prompt "Serial console"
-	default NO_SERIAL_CONSOLE
+	default Z180_NO_SERIAL_CONSOLE
 	depends on DEV_CONSOLE
 
 config Z180_UART0_SERIAL_CONSOLE
@@ -257,6 +257,9 @@ config Z180_ESCCA_SERIAL_CONSOLE
 config Z180_ESCCB_SERIAL_CONSOLE
 	bool "ESCC Channel B"
 	depends on Z180_ESCCB
+
+config Z810_NO_SERIAL_CONSOLE
+	bool "No serial console"
 
 endchoice
 

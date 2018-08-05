@@ -816,8 +816,8 @@ config LCD_SHARP_MEMLCD
 
 if LCD_SHARP_MEMLCD
 
-choice MEMLCD_MODEL
-	prompt "Choose Model"
+choice
+	prompt "Memory LCD Model"
 	default MEMLCD_LS013B7DH03
 
 config MEMLCD_LS013B7DH01

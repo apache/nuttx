@@ -550,7 +550,7 @@ config PTHREAD_MUTEX_TYPES
 choice
 	prompt "pthread mutex robustness"
 	default PTHREAD_MUTEX_ROBUST if !DEFAULT_SMALL
-	default PTHREAD_UNSAFE if DEFAULT_SMALL
+	default PTHREAD_MUTEX_UNSAFE if DEFAULT_SMALL
 
 config PTHREAD_MUTEX_ROBUST
 	bool "Robust mutexes"

@@ -8,7 +8,7 @@ comment "Microchip SAMD5x/E5x Configuration Options"
 choice
 	prompt "Microchip SAMD5x/E5x Chip Selection"
 	default ARCH_CHIP_SAMD51P19 if ARCH_CHIP_SAMD5X
-	default ARCH_CHIP_ATSAME54P20A if ARCH_CHIP_SAME5X
+	default ARCH_CHIP_SAME54P20 if ARCH_CHIP_SAME5X
 	depends on ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
 
 config ARCH_CHIP_SAMD51P20

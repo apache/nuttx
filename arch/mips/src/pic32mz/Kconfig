@@ -8,7 +8,7 @@ comment "PIC32MZ Configuration Options"
 
 choice
 	prompt "PIC32MZ chip selection"
-	default ARCH_CHIP_PIC32MZ460F512L
+	default ARCH_CHIP_PIC32MZ2048ECH
 
 config ARCH_CHIP_PIC32MZ2048ECH
 	bool "PIC32MZ2048ECH"

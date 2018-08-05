@@ -8,7 +8,7 @@ comment "Atmel SAMD/L Configuration Options"
 choice
 	prompt "Atmel SAMD/L Chip Selection"
 	default ARCH_CHIP_SAMD20J18 if ARCH_CHIP_SAMD2X
-	default ARCH_CHIP_SAMD21J18 if ARCH_CHIP_SAML2X
+	default ARCH_CHIP_SAMD21J18A if ARCH_CHIP_SAML2X
 	depends on ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
 
 config ARCH_CHIP_SAMD20E14

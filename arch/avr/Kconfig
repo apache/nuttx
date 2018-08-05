@@ -7,7 +7,7 @@ if ARCH_AVR
 
 choice
 	prompt "Atmel AVR chip selection"
-	default ARCH_CHIP_AT32UC3B0256
+	default ARCH_CHIP_AT32UC3
 
 config ARCH_CHIP_ATMEGA
 	bool "ATMega family"

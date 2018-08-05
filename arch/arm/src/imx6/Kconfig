@@ -9,7 +9,7 @@ menu "iMX.6 Chip Selection"
 
 choice
 	prompt "iMX.6 Core Configuration"
-	default IMX6_6QUAD
+	default ARCH_CHIP_IMX6_6QUAD
 
 config ARCH_CHIP_IMX6_6SOLOLITE
 	bool "i.MX 6SoloLite"

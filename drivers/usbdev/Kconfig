@@ -17,7 +17,7 @@ config USBDEV_DUALSPEED
 	---help---
 		Hardware handles high and full speed operation (USB 2.0)
 
-choice USBDEV_POWERED
+choice
 	prompt "Select USB device powered"
 	default USBDEV_SELFPOWERED
 
@@ -29,7 +29,7 @@ config USBDEV_SELFPOWERED
 config USBDEV_BUSPOWERED
 	bool "Bus powered"
 	---help---
-		Will cause USB features to indicate that the device is self-powered
+		Will cause USB features to indicate that the device is not self-powered
 
 endchoice
 

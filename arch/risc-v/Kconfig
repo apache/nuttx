@@ -8,7 +8,7 @@ comment "RISC-V Options"
 
 choice
 	prompt "RISC-V chip selection"
-	default ARCH_CHIP_NR5M100
+	default ARCH_CHIP_NR5
 
 config ARCH_CHIP_NR5
 	bool "NEXT NanoRisc5"
@@ -32,7 +32,7 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
-	default "nr5m100"	if ARCH_CHIP_NR5M100
+	default "nr5m100"	if ARCH_CHIP_NR5
 
 config NR5_MPU
 	bool "MPU support"

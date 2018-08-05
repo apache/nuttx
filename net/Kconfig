@@ -198,7 +198,7 @@ config NET_TUN_PKTSIZE
 
 choice
 	prompt "Work queue"
-	default LOOPBACK_LPWORK if SCHED_LPWORK
+	default TUN_LPWORK if SCHED_LPWORK
 	default TUN_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
 	depends on SCHED_WORKQUEUE
 	---help---

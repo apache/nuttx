@@ -9,7 +9,7 @@ comment "STM32 F7 Configuration Options"
 
 choice
 	prompt "STM32 F7 Chip Selection"
-	default ARCH_CHIP_STM32F746
+	default ARCH_CHIP_STM32F746NG
 	depends on ARCH_CHIP_STM32F7
 
 config ARCH_CHIP_STM32F722RC
