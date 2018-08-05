@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_initialize.c
  *
- *   Copyright (C) 2007-2010, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,7 +156,7 @@ int pthread_sem_trytake(sem_t *sem)
       /* Try to take the semaphore */
 
       int status = nxsem_trywait(sem);
-      ret = ret < 0 ? -ret : OK;
+      ret = status < 0 ? -status : OK;
     }
 
   return ret;
@@ -167,7 +168,6 @@ int pthread_sem_give(sem_t *sem)
   int ret;
 
   /* Verify input parameters */
-
 
   DEBUGASSERT(sem != NULL);
   if (sem != NULL)
