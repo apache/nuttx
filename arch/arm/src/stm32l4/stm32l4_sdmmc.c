@@ -522,7 +522,7 @@ static int  stm32_registercallback(FAR struct sdio_dev_s *dev,
 /* DMA */
 
 #ifdef CONFIG_STM32L4_SDMMC_DMA
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
 static int  stm32_dmapreflight(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
 #endif
@@ -578,13 +578,13 @@ struct stm32_dev_s g_sdmmcdev1 =
 #endif
 #ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_STM32L4_SDMMC_DMA
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
 #else
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
     .dmapreflight     = NULL,
 #endif
     .dmarecvsetup     = stm32_recvsetup,
@@ -641,7 +641,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .registercallback = stm32_registercallback,
 #endif
 #ifdef CONFIG_SDIO_DMA
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
     .dmapreflight     = stm32_dmapreflight,
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
@@ -2787,7 +2787,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
  *   OK on success; a negated errno on failure
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_SDMMC_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+#if defined(CONFIG_STM32L4_SDMMC_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
@@ -2834,7 +2834,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   uint32_t dblocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
 #else
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
@@ -2924,7 +2924,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   uint32_t dblocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   DEBUGASSERT(stm32_dmapreflight(dev, buffer, buflen) == 0);
 #else
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)

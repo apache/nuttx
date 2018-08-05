@@ -323,6 +323,20 @@ source drivers/ioexpander/Kconfig
 source drivers/lcd/Kconfig
 source drivers/leds/Kconfig
 
+# MMC/SD-related platform capabilities
+
+config ARCH_HAVE_SDIO
+	bool
+	default n
+
+config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	bool
+	default n
+
+config ARCH_HAVE_SDIO_PREFLIGHT
+	bool
+	default n
+
 menuconfig MMCSD
 	bool "MMC/SD Driver Support"
 	default n

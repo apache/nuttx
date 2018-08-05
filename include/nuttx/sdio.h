@@ -782,7 +782,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 #  define SDIO_DMAPREFLIGHT(dev,buffer,len) \
     ((dev)->dmapreflight?(dev)->dmapreflight(dev,buffer,len):OK)
 #else
@@ -941,7 +941,7 @@ struct sdio_dev_s
    */
 
 #ifdef CONFIG_SDIO_DMA
-#ifdef CONFIG_SDIO_PREFLIGHT
+#ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
   int   (*dmapreflight)(FAR struct sdio_dev_s *dev,
           FAR const uint8_t *buffer, size_t buflen);
 #endif

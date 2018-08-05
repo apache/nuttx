@@ -66,15 +66,7 @@ config MMCSD_SPIMODE
 
 endif
 
-config ARCH_HAVE_SDIO
-	bool
-	default n
-
 config SDIO_DMA
-	bool
-	default n
-
-config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	bool
 	default n
 
@@ -84,10 +76,6 @@ config MMCSD_SDIO
 	depends on ARCH_HAVE_SDIO
 
 if MMCSD_SDIO
-
-config SDIO_PREFLIGHT
-	bool
-	default n
 
 config SDIO_MUXBUS
 	bool "SDIO bus share support"
