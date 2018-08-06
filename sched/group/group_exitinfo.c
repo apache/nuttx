@@ -101,6 +101,8 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   /* Save the binary info for use when the task exits */
 
   group->tg_bininfo = bininfo;
+
+  spin_unlock_irqrestore(flags);
   return OK;
 }
 
