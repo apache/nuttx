@@ -404,7 +404,7 @@ static void lc823450_i2s_setchannel(char id, uint8_t ch)
 }
 
 /****************************************************************************
- * Name: _setup_tx_threshold
+ * Name: _setup_tx_threshold (threshold to start playback)
  ****************************************************************************/
 
 static void _setup_tx_threshold(uint32_t tx_th)
@@ -422,7 +422,7 @@ static void _setup_tx_threshold(uint32_t tx_th)
       _i2s_tx_th_bytes = getreg32(BUF_SIZE('C')) * tx_th / 100;
     }
 
-  putreg32(_i2s_tx_th_bytes, BUF_ULVL('C'));
+  /* NOTE: Buffer Under Level is not controlled by tx threshold */
 }
 
 /****************************************************************************
@@ -660,6 +660,12 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 {
   volatile uint32_t *ptr = (uint32_t *)&apb->samp[apb->curbyte];
   uint32_t n = apb->nbytes;
+  uint32_t bufc_enabled;
+  uint32_t decsel;
+
+  ASSERT(0 < n);
+
+  decsel = getreg32(AUDSEL) & AUDSEL_DECSEL;
 
   if (0 == getreg32(BUF_DTCAP('C')))
     {
@@ -668,7 +674,9 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       modifyreg32(ABUFACCEN, ABUFACCEN_CDCEN('C'), 0);
     }
 
-  if (getreg32(ABUFACCEN) & ABUFACCEN_CDCEN('C'))
+  bufc_enabled = getreg32(ABUFACCEN) & ABUFACCEN_CDCEN('C');
+
+  if (bufc_enabled)
     {
       /* Enable C Buffer Under Level IRQ */
 
@@ -679,23 +687,37 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       _i2s_semtake(&_sem_buf_under);
     }
 
+  if (0 == decsel && (n & 0x3))
+    {
+      auderr("** PCM data is not word-aligned (n=%d) ** \n", n);
+
+      /* Set size to align on a word boundary */
+
+      n &= ~0x3;
+
+      if (0 == n)
+        {
+          goto out;
+        }
+    }
+
   /* Setup and start DMA for I2S */
 
-  if (0 == (n % 4))
-    {
-      lc823450_dmasetup(_htxdma,
-                        LC823450_DMA_SRCINC |
-                        LC823450_DMA_SRCWIDTH_WORD |
-                        LC823450_DMA_DSTWIDTH_WORD,
-                        (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n / 4);
-    }
-  else
+  if (n & 0x3)
     {
       lc823450_dmasetup(_htxdma,
                         LC823450_DMA_SRCINC |
                         LC823450_DMA_SRCWIDTH_BYTE |
                         LC823450_DMA_DSTWIDTH_BYTE,
                         (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n);
+    }
+  else
+    {
+      lc823450_dmasetup(_htxdma,
+                        LC823450_DMA_SRCINC |
+                        LC823450_DMA_SRCWIDTH_WORD |
+                        LC823450_DMA_DSTWIDTH_WORD,
+                        (uint32_t)ptr, (uint32_t)BUF_ACCESS('C'), n / 4);
     }
 
   lc823450_dmastart(_htxdma,
@@ -705,7 +727,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   _i2s_semtake(&_sem_txdma);
 
 #ifdef SHOW_BUFFERING
-  if (0 == (getreg32(ABUFACCEN) & ABUFACCEN_CDCEN('C')))
+  if (0 == bufc_enabled)
     {
       audinfo("buffering (remain=%d) \n", getreg32(BUF_DTCAP('C')));
     }
@@ -713,10 +735,12 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Start C Buffer */
 
-  if (_i2s_tx_th_bytes < getreg32(BUF_DTCAP('C')))
+  if (0 == bufc_enabled && _i2s_tx_th_bytes < getreg32(BUF_DTCAP('C')))
     {
       modifyreg32(ABUFACCEN, 0, ABUFACCEN_CDCEN('C'));
     }
+
+out:
 
   /* Invoke the callback handler */
 
@@ -861,12 +885,12 @@ static int lc823450_i2s_configure(void)
   putreg32(MCLKCNTEXT3_AUDIOBUF_CLKEN,
            MCLKCNTEXT3);
 
-  /* C Buffer : size=56KB, under level=1kB */
+  /* C Buffer : size=56KB, under level=55kB */
 
   putreg32(base, BUF_BASE('C'));
   putreg32(1024 * 56, BUF_SIZE('C'));
   base += 1024 * 56;
-  putreg32(1024, BUF_ULVL('C'));
+  putreg32(1024 * 55, BUF_ULVL('C'));
 
   /* Setup F Buffer : size=512B */
 
