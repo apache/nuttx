@@ -75,7 +75,8 @@
 #define STM32_INSTRAM_BASE   0x00000000     /* 0x00000000-0x00003fff: Instruction RAM (ITCM-RAM) */
 #define STM32_SYSMEM_ICTM    0x00100000     /* 0x00100000-0x0010edbf: System memory (ITCM) */
 #define STM32_FLASH_ITCM     0x00200000     /* 0x00200000-0x002fffff: FLASH memory (ITCM) */
-#define STM32_FLASH_BASE     0x08000000     /* 0x08000000-0x080fffff: FLASH memory (AXIM) */
+#define STM32_FLASH_AXIM     0x08000000     /* 0x08000000-0x080fffff: FLASH memory (AXIM) */
+#define STM32_FLASH_BASE     STM32_FLASH_AXIM
 #define STM32_OPTIONS_BASE   0x1fff0000     /* 0x1ff00000-0x1fff001f: OTP (AXIM) */
 
 /* Information Addresses ************************************************************/
