@@ -13,6 +13,7 @@ Contents
   o Board Support
   o microSD Card Interface
   o OTGFS Host
+  o Protect Mode Build
   o Configurations
 
 Board Support
@@ -230,6 +231,94 @@ OTGFS Host
   some logic issues, probably in drivers/usbhost/usbhost_hidkbd, with polling and
   data filtering.
 
+Protected Mode Build
+====================
+
+  The "protected" mode build uses the Cormtex-M4 MPU to separate the FLASH and
+  SRAM into kernel-mode and user-mode regions.  The kernel mode regions are
+  then protected from any errant or mischievous behavior from user-space
+  applications.
+
+  Common notes for all protected mode builds follow:
+
+  1. It is recommends to use a special make command; not just 'make' but make
+     with the following two arguments:
+
+       make pass1 pass2
+
+     In the normal case (just 'make'), make will attempt to build both user-
+     and kernel-mode blobs more or less interleaved.  That actual works!
+     However, for me it is very confusing so I prefer the above make command:
+     Make the user-space binaries first (pass1), then make the kernel-space
+     binaries (pass2)
+
+  2. At the end of the build, there will be several files in the top-level
+     NuttX build directory:
+
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
+       formats.
+
+  3. Combining .hex files.  If you plan to use the .hex files with your
+     debugger or FLASH utility, then you may need to combine the two hex
+     files into a single .hex file.  Here is how you can do that.
+
+     a. The 'tail' of the nuttx.hex file should look something like this
+        (with my comments added):
+
+          $ tail nuttx.hex
+          # 00, data records
+          ...
+          :10 9DC0 00 01000000000800006400020100001F0004
+          :10 9DD0 00 3B005A0078009700B500D400F300110151
+          :08 9DE0 00 30014E016D0100008D
+          # 05, Start Linear Address Record
+          :04 0000 05 0800 0419 D2
+          # 01, End Of File record
+          :00 0000 01 FF
+
+        Use an editor such as vi to remove the 05 and 01 records.
+
+     b. The 'head' of the nuttx_user.hex file should look something like
+        this (again with my comments added):
+
+          $ head nuttx_user.hex
+          # 04, Extended Linear Address Record
+          :02 0000 04 0801 F1
+          # 00, data records
+          :10 8000 00 BD89 01084C800108C8110208D01102087E
+          :10 8010 00 0010 00201C1000201C1000203C16002026
+          :10 8020 00 4D80 01085D80010869800108ED83010829
+          ...
+
+        Nothing needs to be done here.  The nuttx_user.hex file should
+        be fine.
+
+     c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
+        file to produce a single combined hex file:
+
+        $ cat nuttx.hex nuttx_user.hex >combined.hex
+
+     Then use the combined.hex file with the to write the FLASH image. With
+     GDB this would be:
+
+       gdb> mon reset
+       gdb> mon halt
+       gdb> mon clrbp
+       gdb> load combined.hex
+
+     If you do this a lot, you will probably want to invest a little time
+     to develop a tool to automate these steps.
+
 Configurations
 ==============
 
@@ -294,8 +383,7 @@ must be is one of the following.
     NOTES:
 
     1. See build recommendations and instructions for combining the .hex
-       files under the knsh configuration.  These instructions are common
-       for all protected mode builds.
+       files under the section entitled "Protected Mode Build" above.
 
     2. Unlike other versions of apps/examples/elf configurations, the test
        ELF programs are not provided internally on a ROMFS or CROMFS file
@@ -306,7 +394,7 @@ must be is one of the following.
        Instead, the programs must be copied to a USB FLASH drive from your
        host PC.  The programs can be found at apps/examples/elf/tests/romfs.
        All of those files should be copied to the USB FLASH drive.  The
-       apps/example/elf will wait on power up until the USB FLASH driver
+       apps/example/elf will wait on power up until the USB FLASH drive
        has been inserted and initialized.
 
   kmodule:
@@ -318,8 +406,7 @@ must be is one of the following.
     NOTES:
 
     1. See build recommendations and instructions for combining the .hex
-       files under the knsh configuration.  These instructions are common
-       for all protected mode builds.
+       files under the section entitled "Protected Mode Build" above.
 
     2. Unlike other versions of apps/examples/module configurations, the test
        ELF modules are not provided internally on a ROMFS or CROMFS file
@@ -329,9 +416,9 @@ must be is one of the following.
 
        Instead, the module(s) must be copied to a USB FLASH drive from your
        host PC.  The module(s) can be found at apps/examples/module/driver/fsroot.
-       All of those file(s) should be copied to the USB FLASH drive.  Lik the
+       All of those file(s) should be copied to the USB FLASH drive.  Like the
        kelf configuration, the logic in apps/example/module will wait on power
-       up until the USB FLASH driver has been inserted and initialized.
+       up until the USB FLASH drive has been inserted and initialized.
 
     STATUS:
       2018-08-07:  After some struggle, the configuration appears to be
@@ -343,78 +430,10 @@ must be is one of the following.
     is built as a PROTECTED mode, monolithic module and the user applications
     are built separately.
 
-    It is recommends to use a special make command; not just 'make' but make
-    with the following two arguments:
-
-        make pass1 pass2
-
-    In the normal case (just 'make'), make will attempt to build both user-
-    and kernel-mode blobs more or less interleaved.  That actual works!
-    However, for me it is very confusing so I prefer the above make command:
-    Make the user-space binaries first (pass1), then make the kernel-space
-    binaries (pass2)
-
     NOTES:
 
-    1. At the end of the build, there will be several files in the top-level
-       NuttX build directory:
-
-       PASS1:
-         nuttx_user.elf    - The pass1 user-space ELF file
-         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
-         User.map          - Symbols in the user-space ELF file
-
-       PASS2:
-         nuttx             - The pass2 kernel-space ELF file
-         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
-         System.map        - Symbols in the kernel-space ELF file
-
-       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
-       formats.
-
-    2. Combining .hex files.  If you plan to use the .hex files with your
-       debugger or FLASH utility, then you may need to combine the two hex
-       files into a single .hex file.  Here is how you can do that.
-
-       a. The 'tail' of the nuttx.hex file should look something like this
-          (with my comments added):
-
-            $ tail nuttx.hex
-            # 00, data records
-            ...
-            :10 9DC0 00 01000000000800006400020100001F0004
-            :10 9DD0 00 3B005A0078009700B500D400F300110151
-            :08 9DE0 00 30014E016D0100008D
-            # 05, Start Linear Address Record
-            :04 0000 05 0800 0419 D2
-            # 01, End Of File record
-            :00 0000 01 FF
-
-          Use an editor such as vi to remove the 05 and 01 records.
-
-       b. The 'head' of the nuttx_user.hex file should look something like
-          this (again with my comments added):
-
-            $ head nuttx_user.hex
-            # 04, Extended Linear Address Record
-            :02 0000 04 0801 F1
-            # 00, data records
-            :10 8000 00 BD89 01084C800108C8110208D01102087E
-            :10 8010 00 0010 00201C1000201C1000203C16002026
-            :10 8020 00 4D80 01085D80010869800108ED83010829
-            ...
-
-          Nothing needs to be done here.  The nuttx_user.hex file should
-          be fine.
-
-       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
-          file to produce a single combined hex file:
-
-          $ cat nuttx.hex nuttx_user.hex >combined.hex
-
-       Then use the combined.hex file with the to write the FLASH image.
-       If you do this a lot, you will probably want to invest a little time
-       to develop a tool to automate these steps.
+    1. See build recommendations and instructions for combining the .hex
+       files under the section entitled "Protected Mode Build" above.
 
   module:
 
