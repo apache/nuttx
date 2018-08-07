@@ -29,8 +29,12 @@ STM32F103C8T6 Minimum System Development Boards:
   no name at all. It is based on a STM32F103C8T6 and has a DIP-40 form-
   factor.
 
-  There are two versions of very similar boards:  One is red and one is
-  blue.  See http://www.stm32duino.com/viewtopic.php?f=28&t=117
+  There are four versions of very similar boards: Red, Blue, RoboDyn Black and
+  Black.
+  See: https://wiki.stm32duino.com/index.php?title=Blue_Pill
+  https://wiki.stm32duino.com/index.php?title=Red_Pill
+  https://wiki.stm32duino.com/index.php?title=RobotDyn_Black_Pill
+  https://wiki.stm32duino.com/index.php?title=Black_Pill
 
   The Red Board:
 
@@ -39,6 +43,7 @@ STM32F103C8T6 Minimum System Development Boards:
     - 1.5k pull up resistor on the PA12 pin (USB D+) which you can
       programatically drag down for automated USB reset.
     - large power capacitors and LDO power.
+    - User LED on PC13
 
     Problems with the red board:
 
@@ -58,6 +63,7 @@ STM32F103C8T6 Minimum System Development Boards:
       that takes some of the stress off the solder points.
     - It has nice clear readable silkscreen printing.
     - It also a larger reset button.
+    - User LED on PC13
 
     Problems with the blue board:
 
@@ -70,13 +76,17 @@ STM32F103C8T6 Minimum System Development Boards:
     A schematic for the blue board is available here:
     http://www.stm32duino.com/download/file.php?id=276
 
+  The Black Board:
+
+    - User LED is on PB12.
+    - Mounting holes.
+
   Both Boards:
 
     Nice features common to both:
 
     - SWD pins broken out and easily connected (VCC, GND, SWDIO, SWCLK)
     - USB 5V is broken out with easy access.
-    - User LED on PC13
     - Power LED
     - You can probably use more flash (128k) than officially documented for
       the chip (stm32f103c8t6 64k), I was able to load 115k of flash on mine
@@ -84,8 +94,8 @@ STM32F103C8T6 Minimum System Development Boards:
 
     Problems with both boards:
 
-    - No preloaded bootloader * to me this isn't really a problem as the
-      entire 64k of flash is available for use
+    - No preloaded bootloader (this isn't really a problem as the
+      entire 64k of flash is available for use)
     - No user button
 
   This is the board pinout based on its form-factor for the Blue board:

@@ -5,6 +5,18 @@
 
 if ARCH_BOARD_STM32F103_MINIMUM
 
+choice
+        prompt "Board type"
+        default STM32F103MINIMUM_BLUEPILL
+
+config STM32F103MINIMUM_BLUEPILL
+        bool "Blue Pill/Red Pill/RoboDyn Black Pill"
+
+config STM32F103MINIMUM_BLACKPILL
+        bool "Black Pill"
+
+endchoice
+
 config STM32F103MINIMUM_AT24_BLOCKMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
 	default n

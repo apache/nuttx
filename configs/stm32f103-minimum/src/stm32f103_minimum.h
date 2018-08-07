@@ -98,8 +98,18 @@
 /* GPIOs **************************************************************/
 /* LEDs */
 
-#define GPIO_LED1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+/* The Blue/Red pills have a different pinout to the Black pill,
+ * which includes the board's user LED.
+ */
+
+#ifdef CONFIG_STM32F103MINIMUM_BLACKPILL
+#  define GPIO_LED1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN12)
+#else
+#  define GPIO_LED1         (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                             GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN13)
+#endif
+
 /* BUTTONs */
 
 #define GPIO_BTN_USER1    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
