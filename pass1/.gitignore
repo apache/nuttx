@@ -1,0 +1,11 @@
+/*.c
+/Make.dep
+/.depend
+/*.asm
+/*.obj
+/*.rel
+/*.lst
+/*.sym
+/*.adb
+/*.lib
+/*.src

@@ -1,8 +1,7 @@
 ############################################################################
-# binfmt/Makefile
+# pass1/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2016, 2018 Gregory Nutt. All rights
-#     reserved.
+#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,60 +39,36 @@ DELIM ?= $(strip /)
 ifeq ($(WINTOOL),y)
 INCDIROPT = -w
 endif
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(TOPDIR)$(DELIM)sched"}
 
-# Basic BINFMT source files
-
-BINFMT_ASRCS  =
-BINFMT_CSRCS  = binfmt_globals.c binfmt_register.c binfmt_unregister.c
-BINFMT_CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
-BINFMT_CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c
-
-ifeq ($(CONFIG_BINFMT_EXEPATH),y)
-BINFMT_CSRCS += binfmt_exepath.c
-endif
-
-ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-BINFMT_CSRCS += binfmt_exit.c
-endif
-
-ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-BINFMT_CSRCS += binfmt_execsymtab.c
-endif
-
-# Add configured binary modules
-
-VPATH =
-SUBDIRS =
 DEPPATH = --dep-path .
 
-include libnxflat$(DELIM)Make.defs
-include libelf$(DELIM)Make.defs
-include libbuiltin$(DELIM)Make.defs
-include libpcode$(DELIM)Make.defs
+ASRCS = $(wildcard *.S)
+CSRCS = $(wildcard *.c)
 
-BINFMT_AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))
-BINFMT_COBJS = $(BINFMT_CSRCS:.c=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-BINFMT_SRCS = $(BINFMT_ASRCS) $(BINFMT_CSRCS)
-BINFMT_OBJS = $(BINFMT_AOBJS) $(BINFMT_COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-BIN = libbinfmt$(LIBEXT)
+VPATH = .
+
+BIN = libpass1$(LIBEXT)
 
 all: $(BIN)
 .PHONY: depend clean distclean
 
-$(BINFMT_AOBJS): %$(OBJEXT): %.S
+$(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(BINFMT_COBJS): %$(OBJEXT): %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(BINFMT_OBJS)
-	$(call ARCHIVE, $@, $(BINFMT_OBJS))
+$(BIN): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(BINFMT_SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(BINFMT_SRCS) >Make.dep
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
 depend: .depend
@@ -105,5 +80,7 @@ clean:
 distclean: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
+	$(call DELFILE, *.c)
+	$(call DELFILE, *.S)
 
 -include Make.dep

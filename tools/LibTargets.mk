@@ -64,6 +64,12 @@ $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT): context
 staging$(DELIM)libkarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+pass1$(DELIM)libpass1$(LIBEXT): context
+	$(Q) $(MAKE) -C pass1 TOPDIR="$(TOPDIR)" libpass1$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
+
+staging$(DELIM)libpass1$(LIBEXT): pass1$(DELIM)libpass1$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 sched$(DELIM)libsched$(LIBEXT): context
 	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) KERNEL=y EXTRADEFINES=$(KDEFINE)
 

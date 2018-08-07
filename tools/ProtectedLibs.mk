@@ -65,6 +65,14 @@ NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libuc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libumm$(LIBEXT) staging$(DELIM)libuarch$(LIBEXT)
 
+# Add libraries for two pass build support.  The special directory pass1
+# may be populated so that application generated logic can be included into
+# the kernel build
+
+ifeq ($(CONFIG_BUILD_2PASS),y)
+NUTTXLIBS += staging$(DELIM)libpass1$(LIBEXT)
+endif
+
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
