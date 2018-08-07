@@ -333,12 +333,9 @@ must be is one of the following.
        kelf configuration, the logic in apps/example/module will wait on power
        up until the USB FLASH driver has been inserted and initialized.
 
-    STATUS:  There is an issue that makes this configuration unusable at the
-      present time:  The symbol table is built by apps/examples/module/drivers/Makefile
-      in user space.  The problem with that is that the kernel module does reference
-      internal kernel symbols which are not available in the user space build context.
-      A mechanism is needed in the build system to build the symbol table in the
-      context of the kernel.  There is currently no way to do that.
+    STATUS:
+      2018-08-07:  After some struggle, the configuration appears to be
+        working correctly.
 
   knsh:
 

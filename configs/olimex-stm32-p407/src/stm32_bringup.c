@@ -54,12 +54,26 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_MODULE
+#  include "nuttx/symtab.h"
+#  include "nuttx/lib/modlib.h"
+#endif
+
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
 #endif
 
 #include "stm32.h"
 #include "olimex-stm32-p407.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef HAVE_MODSYMS
+extern const struct symtab_s MODSYMS_SYMTAB_ARRAY[];
+extern const int MODSYMS_NSYMBOLS_VAR;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -94,6 +108,12 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+#endif
+
+#ifdef HAVE_MODSYMS
+  /* Install the module symbol table */
+
+  modlib_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
 #endif
 
 #ifdef HAVE_ELF

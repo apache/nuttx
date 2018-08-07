@@ -62,6 +62,7 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 #define HAVE_ELF        1
+#define HAVE_MODSYMS    1
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
  * is not enabled.
@@ -129,6 +130,17 @@
 
 #if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
 #  undef HAVE_ELF
+#endif
+
+/* Module symbol table */
+
+#if !defined(CONFIG_EXAMPLES_MODULE) || defined(CONFIG_BUILD_FLAT)
+#  undef HAVE_MODSYMS
+#endif
+
+#ifdef HAVE_MODSYMS
+#  define MODSYMS_NSYMBOLS_VAR g_mod_nexports
+#  define MODSYMS_SYMTAB_ARRAY g_mod_exports
 #endif
 
 /* Olimex-STM32-P407 GPIOs **************************************************/

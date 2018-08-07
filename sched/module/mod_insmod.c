@@ -70,7 +70,7 @@
  * Name: mod_dumploadinfo
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_BINFMT)
+#ifdef CONFIG_DEBUG_BINFMT_INFO
 static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
