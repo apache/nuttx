@@ -805,7 +805,6 @@ config STM32L4_RTC
 	bool "RTC"
 	default n
 	select RTC
-	depends on !RTC_EXTERNAL
 
 config STM32L4_HAVE_SDMMC1
 	bool

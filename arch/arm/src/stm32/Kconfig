@@ -2488,7 +2488,6 @@ config STM32_RTC
 	bool "RTC"
 	default n
 	select RTC
-	depends on !RTC_EXTERNAL
 
 config STM32_USBHOST
 	bool
