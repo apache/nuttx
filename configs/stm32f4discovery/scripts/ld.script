@@ -54,6 +54,7 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
+EXTERN(_vectors)
 SECTIONS
 {
 	.text : {
