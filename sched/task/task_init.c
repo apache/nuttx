@@ -74,9 +74,7 @@
  *   stack      - Start of the pre-allocated stack
  *   stack_size - Size (in bytes) of the stack allocated
  *   entry      - Application start point of the new task
- *   arg        - A pointer to an array of input parameters. Up to
- *                CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
- *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
+ *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
  *

@@ -307,10 +307,8 @@ int task_create(char *name, int priority, int stack_size, main_t entry, char * c
     <li><code>priority</code>. Priority of the new task</LI>
     <li><code>stack_size</code>. size (in bytes) of the stack needed</LI>
     <li><code>entry</code>. Entry point of a new task</LI>
-    <li><code>argv</code>. A pointer to an array of input parameters.  Up to
-       <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
-       If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
-       passed, the list should be terminated with a NULL argv[] value.
+    <li><code>argv</code>. A pointer to an array of input parameters.
+       The array should be terminated with a NULL argv[] value.
        If no parameters are required, argv may be NULL.
   </ul>
 <p>
@@ -376,10 +374,8 @@ VxWorks provides the following similar interface:
     <li><code>stack</code>. Start of the pre-allocated stack
     <li><code>stack_size</code>. size (in bytes) of the pre-allocated stack
     <li><code>entry</code>. Entry point of a new task
-    <li><code>argv</code>. A pointer to an array of input parameters.  Up to
-       <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
-       If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
-       passed, the list should be terminated with a NULL argv[] value.
+    <li><code>argv</code>. A pointer to an array of input parameters.
+       The array should be terminated with a NULL argv[] value.
        If no parameters are required, argv may be NULL.
   </ul>
 </p>

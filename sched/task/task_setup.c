@@ -485,9 +485,7 @@ static void task_namesetup(FAR struct task_tcb_s *tcb, FAR const char *name)
  *
  * Input Parameters:
  *   tcb  - Address of the new task's TCB
- *   argv - A pointer to an array of input parameters.  Up to
- *          CONFIG_MAX_TASK_ARG parameters may be provided. If fewer than
- *          CONFIG_MAX_TASK_ARG parameters are passed, the list should be
+ *   argv - A pointer to an array of input parameters. The arrau should be
  *          terminated with a NULL argv[] value. If no parameters are
  *          required, argv may be NULL.
  *
@@ -703,9 +701,7 @@ int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
  * Input Parameters:
  *   tcb  - Address of the new task's TCB
  *   name - Name of the new task (not used)
- *   argv - A pointer to an array of input parameters.  Up to
- *          CONFIG_MAX_TASK_ARG parameters may be provided. If fewer than
- *          CONFIG_MAX_TASK_ARG parameters are passed, the list should be
+ *   argv - A pointer to an array of input parameters.  The array should be
  *          terminated with a NULL argv[] value.  If no parameters are
  *          required, argv may be NULL.
  *
