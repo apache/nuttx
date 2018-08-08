@@ -58,7 +58,7 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_RTC
+#ifdef CONFIG_STM32F7_RTC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1982,4 +1982,4 @@ int stm32_rtc_cancelperiodic(void)
 }
 #endif
 
-#endif /* CONFIG_RTC */
+#endif /* CONFIG_STM32F7_RTC */

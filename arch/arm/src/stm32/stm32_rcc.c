@@ -122,7 +122,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_RTC) && defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_RTC) && defined(CONFIG_STM32_PWR) && !defined(CONFIG_STM32_STM32F10XX)
 static inline void rcc_resetbkp(void)
 {
   uint32_t regval;

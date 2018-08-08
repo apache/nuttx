@@ -60,7 +60,7 @@
 #include "stm32l4_exti.h"
 #include "stm32l4_rtc.h"
 
-#ifdef CONFIG_RTC
+#ifdef CONFIG_STM32L4_RTC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1860,4 +1860,4 @@ int stm32l4_rtc_cancelperiodic(void)
 }
 #endif
 
-#endif /* CONFIG_RTC */
+#endif /* CONFIG_STM32L4_RTC */

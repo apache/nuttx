@@ -801,6 +801,11 @@ config STM32L4_HAVE_SAI2
 	bool
 	default n
 
+config STM32L4_RTC
+	bool "RTC"
+	default n
+	select RTC
+
 config STM32L4_HAVE_SDMMC1
 	bool
 	default n
@@ -1457,7 +1462,7 @@ config STM32L4_RTC_MAGIC_TIME_SET
 choice
 	prompt "RTC clock source"
 	default STM32L4_RTC_LSECLOCK
-	depends on RTC
+	depends on STM32L4_RTC
 
 config STM32L4_RTC_LSECLOCK
 	bool "LSE clock"

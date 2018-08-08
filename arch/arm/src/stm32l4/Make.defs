@@ -176,7 +176,7 @@ ifeq ($(CONFIG_STM32L4_PWR),y)
 CHIP_CSRCS += stm32l4_exti_pwr.c
 endif
 
-ifeq ($(CONFIG_RTC),y)
+ifeq ($(CONFIG_STM32L4_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32l4_exti_alarm.c
 endif

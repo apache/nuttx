@@ -1422,6 +1422,11 @@ config STM32F7_QUADSPI
 	bool "QuadSPI"
 	default n
 
+config STM32F7_RTC
+	bool "RTC"
+	default n
+	select RTC
+
 config STM32F7_PWR
 	bool "PWR"
 	default n
@@ -2120,7 +2125,7 @@ config STM32F7_HAVE_RTC_SUBSECONDS
 	default y
 
 menu "RTC Configuration"
-	depends on RTC
+	depends on STM32F7_RTC
 
 config STM32F7_RTC_MAGIC_REG
 	int "BKP register"

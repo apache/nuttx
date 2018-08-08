@@ -1706,7 +1706,8 @@ nuttx/
  |   |
  |   |- arm/
  |   |   `- src
- |   |       `- lpc214x/README.txt
+ |   |       |- lpc214x/README.txt
+ |   |       `- stm32l4/README.txt
  |   |- renesas/
  |   |   |- include/
  |   |   |   `-README.txt

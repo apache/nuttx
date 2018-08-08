@@ -2484,6 +2484,11 @@ config STM32_OPAMP4
 	default n
 	depends on STM32_HAVE_OPAMP4
 
+config STM32_RTC
+	bool "RTC"
+	default n
+	select RTC
+
 config STM32_USBHOST
 	bool
 	default n
@@ -7713,7 +7718,7 @@ config STM32_HAVE_RTC_SUBSECONDS
 	default n
 
 menu "RTC Configuration"
-	depends on RTC
+	depends on STM32_RTC
 
 config STM32_RTC_MAGIC_REG
 	int "BKP register"
