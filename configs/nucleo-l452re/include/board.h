@@ -214,8 +214,14 @@
  * Default is ADC1_IN9 (PA4) connected to CN8-connector pin 3, A2.
  */
 
-#define ADC1_MEASURE_CHANNEL        9
-#define GPIO_MEASURE_ADC            (GPIO_ADC1_IN9)
+#define ADC1_MEASURE_CHANNEL     9
+#define GPIO_MEASURE_ADC         (GPIO_ADC1_IN9)
+
+/* DAC
+ * Default is PA4 (same as ADC, do not use both at the same time)
+ */
+
+#define GPIO_DAC1_OUT            GPIO_DAC1_OUT_1
 
 /* Quadrature encoder
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
