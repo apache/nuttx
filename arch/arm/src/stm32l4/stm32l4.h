@@ -59,6 +59,7 @@
 #include "stm32l4_adc.h"
 #include "stm32l4_can.h"
 #include "stm32l4_comp.h"
+#include "stm32l4_dac.h"
 #include "stm32l4_dbgmcu.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_exti.h"

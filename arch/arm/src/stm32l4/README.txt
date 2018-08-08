@@ -1,9 +1,32 @@
 This is a port of NuttX to the STM32L4 Family
 
 Used development boards are the Nucleo L476RG, Nucleo L496ZG,
-Nucleo L452RE and STM32L4VGDiscovery.
+Nucleo L452RE, Nucleo L432KC, STM32L4VG Discovery and
+Motorola MDK.
 
-Most code is copied and adapted from the STM32 Port.
+Most code is copied and adapted from the STM32 and STM32F7 ports.
+
+The various supported STM32L4 families are:
+
+-------------------------------------------------------------
+| NuttX config      | Manual | Chips
+|
+| Not supported     | RM0392 | STM32L471xx
+|
+| STM32L4_STM32L4X1 | RM0394 | Subset of STM32L4_STM32L4X3
+|
+| STM32L4_STM32L4X2 | RM0394 | Subset of STM32L4_STM32L4X3
+|
+| STM32L4_STM32L4X3 | RM0394 | STM32L43xxx/44xxx/45xxx/46xxx
+|
+| STM32L4_STM32L4X5 | RM0351 | STM32L475xx (was RM0395 in past)
+|
+| STM32L4_STM32L4X6 | RM0351 | STM32L476xx, STM32L486xx,
+|                              STM32L496xx, STM32L4A6xx
+|
+| Not supported     | RM0432 | STM32L4Rxxx, STM32L4Sxxx
+-------------------------------------------------------------
+
 
 TODO list
 ---------
@@ -12,7 +35,7 @@ Peripherals with implementation in STM32 port:
 
 IRQs     : OK
 GPIO     : OK
-EXTI     : OK, to be tested.
+EXTI     : OK
 HSI      : OK
 HSE      : OK
 PLL      : Works @ 80 MHz
@@ -24,8 +47,8 @@ USART    : Working in normal mode (no DMA, to be tested, code is written)
 DMA      : works; at least tested with QSPI
 SRAM2    : OK; can be included in MM region or left separate for special app
          : purposes
-SPI      : OK, tested (Including DMA)
-I2C      : Code written, to be tested
+SPI      : OK, tested (including DMA)
+I2C      : works
 RTC      : works
 QSPI     : works in polling, interrupt, DMA, and also memory-mapped modes
 CAN      : OK, tested
@@ -42,12 +65,12 @@ RNG      : works
 CRC      : TODO (configurable polynomial)
 WWDG     : TODO
 IWDG     : works
-MMCSD    : TODO
-ADC      : Code written, to be tested
-DAC      : Code written, to be tested
+SDMMC    : works
+ADC      : works
+DAC      : works
 DMA2D    : TODO (Chrom-Art Accelerator for image manipulation)
 
-New peripherals with implementation to be written from scratch
+New peripherals with implementation to be written from scratch.
 These are Low Priority TODO items, unless someone requests or contributes
 it.
 

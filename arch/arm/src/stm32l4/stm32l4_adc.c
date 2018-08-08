@@ -76,13 +76,14 @@
 #if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || \
     defined(CONFIG_STM32L4_ADC3)
 
-/* This implementation is for the STM32L4X3 and STM32L4X6 only */
+#if !(defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3) || \
+      defined(CONFIG_STM32L4_STM32L4X6))
+#  error "Unrecognized STM32 chip"
+#endif
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X6)
-
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
 #  if defined(CONFIG_STM32L4_ADC2) || defined(CONFIG_STM32L4_ADC3)
-#    error "Using non-existent ADC on STM32L4X3"
+#    error "Using non-existent ADC"
 #  endif
 #endif
 
@@ -104,7 +105,7 @@
 
 /* ADC interrupts ***********************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
 #  define STM32L4_IRQ_ADC12 STM32L4_IRQ_ADC1
 #endif
 
@@ -2034,6 +2035,5 @@ struct adc_dev_s *stm32l4_adc_initialize(int intf, FAR const uint8_t *chanlist,
   return dev;
 }
 
-#endif /* CONFIG_STM32L4_STM32L4X3 || CONFIG_STM32L4_STM32L4X6 */
 #endif /* CONFIG_STM32L4_ADC1 || CONFIG_STM32L4_ADC2 || CONFIG_STM32L4_ADC3 */
 #endif /* CONFIG_ADC */

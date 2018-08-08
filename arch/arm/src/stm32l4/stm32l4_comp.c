@@ -1,5 +1,4 @@
 /****************************************************************************
-
  * arch/arm/src/stm32l4/stm32l4_comp.c
  *
  *   Copyright (c) 2017 Gregory Nutt. All rights reserved.
@@ -38,7 +37,6 @@
  ****************************************************************************/
 
 /****************************************************************************
-
  * Included Files
  ****************************************************************************/
 
@@ -56,8 +54,8 @@
 
 #include <errno.h>
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-      defined(CONFIG_STM32L4_STM32L4X6))
+#if !(defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3) || \
+      defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6))
 #  error "Unrecognized STM32 chip"
 #endif
 
@@ -375,7 +373,7 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
       regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
     case STM32L4_COMP_INP_PIN_3:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_3 : GPIO_COMP2_INP_3);
       regval |= COMP_CSR_INPSEL_PIN3;
@@ -439,7 +437,7 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
 #endif
       break;
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
     case STM32L4_COMP_INM_PIN_3:
       stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_3 : GPIO_COMP2_INM_3);
       regval |= COMP_CSR_INMSEL_INMESEL;
