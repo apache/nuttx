@@ -1426,6 +1426,7 @@ config STM32F7_RTC
 	bool "RTC"
 	default n
 	select RTC
+	depends on !RTC_EXTERNAL
 
 config STM32F7_PWR
 	bool "PWR"
