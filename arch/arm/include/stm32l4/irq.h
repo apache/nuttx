@@ -76,7 +76,7 @@
 
 #define STM32L4_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 #  include <arch/stm32l4/stm32l4x3xx_irq.h>
 #elif defined(CONFIG_STM32L4_STM32L4X5)
 #  include <arch/stm32l4/stm32l4x5xx_irq.h>

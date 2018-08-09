@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 
 /****************************************************************************************************
  * Pre-processor Definitions

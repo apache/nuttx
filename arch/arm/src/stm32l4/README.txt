@@ -13,9 +13,9 @@ The various supported STM32L4 families are:
 |
 | Not supported     | RM0392 | STM32L471xx
 |
-| STM32L4_STM32L4X1 | RM0394 | Subset of STM32L4_STM32L4X3
+| STM32L4_STM32L4X1 | RM0394 | Subset of STM32L4_STM32L4X3 [*]
 |
-| STM32L4_STM32L4X2 | RM0394 | Subset of STM32L4_STM32L4X3
+| STM32L4_STM32L4X2 | RM0394 | Subset of STM32L4_STM32L4X3 [*]
 |
 | STM32L4_STM32L4X3 | RM0394 | STM32L43xxx/44xxx/45xxx/46xxx
 |
@@ -27,6 +27,9 @@ The various supported STM32L4 families are:
 | Not supported     | RM0432 | STM32L4Rxxx, STM32L4Sxxx
 -------------------------------------------------------------
 
+[*]: Please avoid depending on CONFIG_STM32L4_STM32L4X1 and
+     CONFIG_STM32L4_STM32L4X2 as the MCUs are of the same subfamily
+     as CONFIG_STM32L4_STM32L4X3.
 
 TODO list
 ---------

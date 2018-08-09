@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 #  include "chip/stm32l4x3xx_syscfg.h"
 #elif defined(CONFIG_STM32L4_STM32L4X5)
 #  include "chip/stm32l4x5xx_syscfg.h"

@@ -63,7 +63,7 @@
 
 #include "up_arch.h"
 
-#if !(defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3) || \
+#if !(defined(CONFIG_STM32L4_STM32L4X3) || \
       defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6))
 #  error "Unrecognized STM32 chip"
 #endif

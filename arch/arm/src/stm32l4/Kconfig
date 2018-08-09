@@ -380,10 +380,43 @@ config ARCH_CHIP_STM32L496AG
 	---help---
 		STM32 L4 Cortex M4, 1024Kb FLASH, 320 Kb SRAM
 
-config ARCH_CHIP_STM32L4A6 # REVISIT: expand for each chip
-	bool "STM32L4A6xx"
+config ARCH_CHIP_STM32L4A6RG
+	bool "STM32L4A6RG"
 	select STM32L4_STM32L4A6XX
 	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_R
+	---help---
+		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L4A6VG
+	bool "STM32L4A6VG"
+	select STM32L4_STM32L4A6XX
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_V
+	---help---
+		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L4A6QG
+	bool "STM32L4A6QG"
+	select STM32L4_STM32L4A6XX
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_Q
+	---help---
+		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L4A6ZG
+	bool "STM32L4A6ZG"
+	select STM32L4_STM32L4A6XX
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_Z
+	---help---
+		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
+
+config ARCH_CHIP_STM32L4A6AG
+	bool "STM32L4A6AG"
+	select STM32L4_STM32L4A6XX
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_A
 	---help---
 		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
 
@@ -392,12 +425,28 @@ endchoice # STM32 L4 Chip Selection
 # Chip product lines
 
 config STM32L4_STM32L4X1
-	# Note: This is _not_ for L471xx as in RM0392
+	# STM32L4x1 Access Lines
+	#
+	# Avoid using this config as it is basically same subfamily
+	# as STM32L4_STM32L4X3 (documented in RM0394).
+	#
+	# Note: This is _not_ for STM32L471xx (documented in RM0392).
 	bool
 	default n
 	select STM32L4_STM32L4X3
 
 config STM32L4_STM32L4X2
+	# STM32L4x2 USB Device Lines
+	#
+	# Avoid using this config as it is basically same subfamily
+	# as STM32L4_STM32L4X3 (documented in RM0394).
+	bool
+	default n
+	select STM32L4_STM32L4X3
+
+config STM32L4_STM32L4X3
+	# STM32L4 devices documented in RM0394, regardless of what ST's
+	# marketing calls them.
 	bool
 	default n
 	select ARCH_HAVE_FPU
@@ -408,21 +457,10 @@ config STM32L4_STM32L4X2
 	select STM32L4_HAVE_LPTIM2
 	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
-
-config STM32L4_STM32L4X3
-	bool
-	default n
-	select ARCH_HAVE_FPU
-	select STM32L4_HAVE_USART1
-	select STM32L4_HAVE_USART2
-	select STM32L4_HAVE_USART3
-	select STM32L4_HAVE_LPTIM1
-	select STM32L4_HAVE_LPTIM2
-	select STM32L4_HAVE_COMP
-	select STM32L4_HAVE_SAI1
-	select STM32L4_HAVE_LCD if !STM32L4_STM32L4X1
+	select STM32L4_HAVE_LCD if !(STM32L4_STM32L4X1 || STM32L4_STM32L4X2)
 
 config STM32L4_STM32L4X5
+	# STM32L4 USB OTG Lines (documented in RM0351)
 	bool
 	default n
 	select ARCH_HAVE_FPU
@@ -451,6 +489,7 @@ config STM32L4_STM32L4X5
 	select STM32L4_HAVE_DFSDM1
 
 config STM32L4_STM32L4X6
+	# STM32L4x6 (documented in RM0351)
 	bool
 	default n
 	select ARCH_HAVE_FPU

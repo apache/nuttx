@@ -50,7 +50,7 @@
  * Public Types
  ************************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X2) || defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3)
 
 /* Comparators */
 
