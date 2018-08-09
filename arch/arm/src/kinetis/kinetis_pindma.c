@@ -47,13 +47,13 @@
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/arch.h>
+#include "up_arch.h"
 #include "up_internal.h"
 
 #include "kinetis_config.h"
 #include "chip.h"
 #include "kinetis.h"
-
-
 
 #ifdef CONFIG_KINETIS_DMA
 

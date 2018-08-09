@@ -280,17 +280,17 @@
 #define CAN_ESR2_IMB               (1 << 13) /* Bit 13: Inactive Mailbox */
 #define CAN_ESR2_VPS               (1 << 14) /* Bit 14: Valid Priority Status */
                                              /* Bit 15: Reserved */
-#define CAN_ESR2_VPS               (1 << 14) /* Bit 14: Valid Priority Status */
 #define CAN_ESR2_LPTM_SHIFT        (16)      /* Bits 16-22: Lowest Priority Tx Mailbox */
 #define CAN_ESR2_LPTM_MASK         (0x7f << CAN_ESR2_LPTM_SHIFT)
                                              /* Bits 23-31: Reserved */
 /* CRC Register */
-                                             /* Bits 23-31: Reserved */
-#define CAN_CRCR_MBCRC_SHIFT       (16)      /* Bits 16-22: CRC Mailbox */
-#define CAN_CRCR_MBCRC_MASK        (0x7f << CAN_CRCR_MBCRC_SHIFT)
-                                             /* Bit 15: Reserved */
+
 #define CAN_CRCR_TXCRC_SHIFT       (0)       /* Bits 0-14: CRC Transmitted */
 #define CAN_CRCR_TXCRC_MASK        (0x7fff << CAN_CRCR_TXCRC_SHIFT)
+                                             /* Bit  15: Reserved */
+#define CAN_CRCR_MBCRC_SHIFT       (16)      /* Bits 16-22: CRC Mailbox */
+#define CAN_CRCR_MBCRC_MASK        (0x7f << CAN_CRCR_MBCRC_SHIFT)
+                                             /* Bits 23-31: Reserved */
 
 /* Rx FIFO Global Mask Register (32 Rx FIFO Global Mask Bits) */
 

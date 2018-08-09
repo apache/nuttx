@@ -245,6 +245,8 @@
 #  if ((CONSOLE_FREQ / (CONSOLE_BAUD * 32)) > (LPUART_BAUD_SBR_MASK >> LPUART_BAUD_SBR_SHIFT))
 #    error "LPUART Console: Baud rate not obtainable with this input clock!"
 #  endif
+#endif
+#ifdef HAVE_LPUART_DEVICE
 #  define LPUART_BAUD_INIT (LPUART_BAUD_SBR_MASK | LPUART_BAUD_SBNS | \
                             LPUART_BAUD_RXEDGIE | LPUART_BAUD_LBKDIE | \
                             LPUART_BAUD_RESYNCDIS |LPUART_BAUD_BOTHEDGE | \
@@ -933,7 +935,7 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Check for 9-bit operation */
 
-  if (nbits == 9)
+  if (nbits == 9 || (nbits == 8 && parity != 0))
     {
       regval |= LPUART_CTRL_M;
     }
