@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/environ/environ.h
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +49,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DISABLE_ENVIRON
-# define env_dup(group)     (0)
-# define env_release(group) (0)
+#  define env_dup(group)     (0)
+#  define env_release(group) (0)
 #else
 
 /****************************************************************************
@@ -68,14 +69,94 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Functions used by the task/pthread creation and destruction logic */
+/****************************************************************************
+ * Name: env_dup
+ *
+ * Description:
+ *   Copy the internal environment structure of a task.  This is the action
+ *   that is performed when a new task is created: The new task has a private,
+ *   exact duplicate of the parent task's environment.
+ *
+ * Input Parameters:
+ *   group - The child task group to receive the newly allocated copy of the
+ *           parent task groups environment structure.
+ *
+ * Returned Value:
+ *   zero on success
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler.
+ *
+ ****************************************************************************/
 
 int env_dup(FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: env_release
+ *
+ * Description:
+ *   env_release() is called only from group_leave() when the last member of
+ *   a task group exits.  The env_release() function clears the environment
+ *   of all name-value pairs and sets the value of the external variable
+ *   environ to NULL.
+ *
+ * Input Parameters:
+ *   group - Identifies the task group containing the environment structure
+ *           to be released.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler
+ *
+ ****************************************************************************/
+
 void env_release(FAR struct task_group_s *group);
 
-/* Functions used internally by the environment handling logic */
+/****************************************************************************
+ * Name: env_findvar
+ *
+ * Description:
+ *   Search the provided environment structure for the variable of the
+ *   specified name.
+ *
+ * Input Parameters:
+ *   group - The task group containing environment array to be searched.
+ *   pname - The variable name to find
+ *
+ * Returned Value:
+ *   A pointer to the name=value string in the environment
+ *
+ * Assumptions:
+ *   - Not called from an interrupt handler
+ *   - Pre-emption is disabled by caller
+ *
+ ****************************************************************************/
 
 FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
+
+/****************************************************************************
+ * Name: env_removevar
+ *
+ * Description:
+ *   Remove the referenced name=value pair from the environment
+ *
+ * Input Parameters:
+ *   group - The task group with the environment containing the name=value
+ *           pair
+ *   pvar  - A pointer to the name=value pair in the restroom
+ *
+ * Returned Value:
+ *   Zero on success
+ *
+ * Assumptions:
+ *   - Not called from an interrupt handler
+ *   - Caller has pre-emption disabled
+ *   - Caller will reallocate the environment structure to the correct size
+ *
+ ****************************************************************************/
+
 int env_removevar(FAR struct task_group_s *group, FAR char *pvar);
 
 #undef EXTERN

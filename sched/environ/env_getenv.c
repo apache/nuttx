@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-FAR char *getenv(const char *name)
+FAR char *getenv(FAR const char *name)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;

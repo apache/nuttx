@@ -62,8 +62,8 @@
  *   environ to NULL.
  *
  * Input Parameters:
- *   group Identifies the task group containing the environment structure
- *     to be released.
+ *   group - Identifies the task group containing the environment structure
+ *           to be released.
  *
  * Returned Value:
  *   None
@@ -75,7 +75,7 @@
 
 void env_release(FAR struct task_group_s *group)
 {
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
   /* Free any allocate environment strings */
 

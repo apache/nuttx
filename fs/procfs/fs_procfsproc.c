@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
- *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/environ.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
@@ -92,6 +93,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /* This enumeration identifies all of the task/thread nodes that can be
  * accessed via the procfs file system.
  */
@@ -108,6 +110,9 @@ enum proc_node_e
   PROC_GROUP,                         /* Group directory */
   PROC_GROUP_STATUS,                  /* Task group status */
   PROC_GROUP_FD                       /* Group file descriptors */
+#ifndef CONFIG_DISABLE_ENVIRON
+  , PROC_GROUP_ENV                    /* Group environment variables */
+#endif
 };
 
 /* This structure associates a relative path name with an node in the task
@@ -139,6 +144,18 @@ struct proc_dir_s
   struct procfs_dir_priv_s base;      /* Base directory private data */
   FAR const struct proc_node_s *node; /* Directory node description */
   pid_t pid;                          /* ID of task/thread for attributes */
+};
+
+/* This structure used with the env_foreach() callback */
+
+struct proc_envinfo_s
+{
+  FAR struct proc_file_s *procfile;
+  FAR char *buffer;
+  FAR off_t offset;
+  size_t buflen;
+  size_t remaining;
+  size_t totalsize;
 };
 
 /****************************************************************************
@@ -177,6 +194,12 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
+#ifndef CONFIG_DISABLE_ENVIRON
+static int     proc_groupenv_callback(FAR void *arg, FAR const char *pair);
+static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+#endif
 
 /* File system methods */
 
@@ -270,6 +293,14 @@ static const struct proc_node_s g_groupfd =
   "group/fd",     "fd",      (uint8_t)PROC_GROUP_FD,     DTYPE_FILE        /* Group file descriptors */
 };
 
+#ifndef CONFIG_DISABLE_ENVIRON
+static const struct proc_node_s g_groupenv =
+{
+  "group/env",    "env",     (uint8_t)PROC_GROUP_ENV,    DTYPE_FILE        /* Group environment variables */
+};
+
+#endif
+
 /* This is the list of all nodes */
 
 static FAR const struct proc_node_s * const g_nodeinfo[] =
@@ -283,7 +314,11 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
+#ifndef CONFIG_DISABLE_ENVIRON
+  , &g_groupenv    /* Group environment variables */
+#endif
 };
+
 #define PROC_NNODES (sizeof(g_nodeinfo)/sizeof(FAR const struct proc_node_s * const))
 
 /* This is the list of all level0 nodes */
@@ -306,6 +341,9 @@ static FAR const struct proc_node_s * const g_groupinfo[] =
 {
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
+#ifndef CONFIG_DISABLE_ENVIRON
+  , &g_groupenv    /* Group environment variables */
+#endif
 };
 #define PROC_NGROUPNODES (sizeof(g_groupinfo)/sizeof(FAR const struct proc_node_s * const))
 
@@ -1002,6 +1040,121 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 }
 
 /****************************************************************************
+ * Name: proc_groupenv_callback
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_ENVIRON
+static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
+{
+  FAR struct proc_envinfo_s *info = (FAR struct proc_envinfo_s *)arg;
+  FAR const char *src;
+  FAR const char *value;
+  FAR char *dest;
+  char name[16 + 1];
+  size_t linesize;
+  size_t copysize;
+  int namelen;
+
+  DEBUGASSERT(arg != NULL && pair != NULL);
+
+  /* Parse the name from the name/value pair */
+
+  value  = NULL;
+  namelen = 0;
+
+  for (src = pair, dest = name; *src != '=' && *src != '\0'; src++)
+    {
+      if (namelen < 16)
+        {
+          *dest++ = *src;
+          namelen++;
+        }
+    }
+
+  /* NUL terminate the name string */
+
+  *dest = '\0';
+
+  /* Skip over the '=' to get the value */
+
+  if (*src == '=')
+    {
+      value = src + 1;
+    }
+  else
+    {
+      value = "";
+    }
+
+  /* Output the header */
+
+  linesize        = snprintf(info->procfile->line, STATUS_LINELEN, "%-16s %s\n",
+                             name, value);
+  copysize        = procfs_memcpy(info->procfile->line, linesize, info->buffer,
+                                  info->remaining, &info->offset);
+
+  info->totalsize += copysize;
+  info->buffer    += copysize;
+  info->remaining -= copysize;
+
+  if (info->totalsize >= info->buflen)
+    {
+      return 1;
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: proc_groupenv
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_ENVIRON
+static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset)
+{
+  FAR struct task_group_s *group = tcb->group;
+  size_t linesize;
+  size_t copysize;
+  struct proc_envinfo_s info;
+
+  DEBUGASSERT(group);
+
+  /* Initialize the info structure */
+
+  info.procfile   = procfile;
+  info.buffer     = buffer;
+  info.offset     = offset;
+  info.buflen     = buflen;
+  info.remaining  = buflen;
+  info.totalsize  = 0;
+
+  /* Output the header */
+
+  linesize        = snprintf(info.procfile->line, STATUS_LINELEN, "\n%-16s %s\n",
+                             "VAR", "VALUE");
+  copysize        = procfs_memcpy(info.procfile->line, linesize, info.buffer,
+                                  info.remaining, &info.offset);
+
+  info.totalsize += copysize;
+  info.buffer    += copysize;
+  info.remaining -= copysize;
+
+  if (info.totalsize >= info.buflen)
+    {
+      return info.totalsize;
+    }
+
+  /* Generate output for each environment variable */
+
+  (void)env_foreach(group, proc_groupenv_callback, &info);
+  return info.totalsize;
+}
+#endif
+
+/****************************************************************************
  * Name: proc_open
  ****************************************************************************/
 
@@ -1187,6 +1340,12 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
     case PROC_GROUP_FD: /* Group file descriptors */
       ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
+
+#ifndef CONFIG_DISABLE_ENVIRON
+    case PROC_GROUP_ENV: /* Group environment variables */
+      ret = proc_groupenv(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+#endif
 
      default:
       ret = -EINVAL;

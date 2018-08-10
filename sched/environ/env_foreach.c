@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/environ/env_removevar.c
+ * sched/environ/env_foreach.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,11 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
+#include <stdbool.h>
 #include <string.h>
 #include <sched.h>
+
+#include <nuttx/environ.h>
 
 #include "environ/environ.h"
 
@@ -51,70 +54,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_removevar
+ * Name: env_foreach
  *
  * Description:
- *   Remove the referenced name=value pair from the environment
+ *   Search the provided environment structure for the variable of the
+ *   specified name.
  *
  * Input Parameters:
- *   group - The task group with the environment containing the name=value
- *           pair
- *   pvar  - A pointer to the name=value pair in the restroom
+ *   group - The task group containing environment array to be searched.
+ *   cb    - The callback function to be invoked for each environment
+ *           variable.
  *
  * Returned Value:
- *   Zero on success
+ *   Zero if the all environment variables have been traversed.  A non-zero
+ *   value means that the callback function requested early termination by
+ *   returning a nonzero value.
  *
  * Assumptions:
  *   - Not called from an interrupt handler
- *   - Caller has pre-emption disabled
- *   - Caller will reallocate the environment structure to the correct size
+ *   - Pre-emptions is disabled by caller
  *
  ****************************************************************************/
 
-int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
+int env_foreach(FAR struct task_group_s *group, env_foreach_t cb, FAR void *arg)
 {
-  FAR char *end;    /* Pointer to the end+1 of the environment */
-  int alloc;        /* Size of the allocated environment */
-  int ret = ERROR;
+  FAR char *ptr;
+  FAR char *end;
+  int ret = OK;
 
-  DEBUGASSERT(group != NULL && pvar != NULL);
+  /* Verify input parameters */
 
-  /* Verify that the pointer lies within the environment region */
+  DEBUGASSERT(group != NULL && cb != NULL);
 
-  alloc = group->tg_envsize;          /* Size of the allocated environment */
-  end   = &group->tg_envp[alloc];     /* Pointer to the end+1 of the environment */
+  /* Search for a name=value string with matching name */
 
-  if (pvar >= group->tg_envp && pvar < end)
+  end = &group->tg_envp[group->tg_envsize];
+  for (ptr = group->tg_envp; ptr < end; ptr += (strlen(ptr) + 1))
     {
-      /* Set up for the removal */
+      /* Perform the callback */
 
-      int   len  = strlen(pvar) + 1;  /* Length of name=value string to remove */
-      char *src  = &pvar[len];        /* Address of name=value string after */
-      char *dest = pvar;              /* Location to move the next string */
-      int   count = end - src;        /* Number of bytes to move (might be zero) */
+      ret = cb(arg, ptr);
 
-      /* Move all of the environment strings after the removed one 'down.'
-       * this is inefficient, but robably not high duty.
+      /* Terminate the traversal early if the callback so requests by
+       * returning a non-zero value.
        */
 
-      while (count-- > 0)
+      if (ret != 0)
         {
-          *dest++ = *src++;
+          break;
         }
-
-      /* Then set to the new allocation size.  The caller is expected to
-       * call realloc at some point but we don't do that here because the
-       * caller may add more stuff to the environment.
-       */
-
-      group->tg_envsize -= len;
-      ret = OK;
     }
 
   return ret;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

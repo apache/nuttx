@@ -59,9 +59,11 @@ static bool env_cmpname(const char *pszname, const char *peqname)
 {
   /* Search until we find anything different in the two names */
 
-  for (; *pszname == *peqname; pszname++, peqname++);
+  for (; *pszname == *peqname; pszname++, peqname++)
+    {
+    }
 
-  /* On sucess, pszname will end with '\0' and peqname with '=' */
+  /* On success, pszname will end with '\0' and peqname with '=' */
 
   if (*pszname == '\0' && *peqname == '=')
     {
@@ -83,26 +85,26 @@ static bool env_cmpname(const char *pszname, const char *peqname)
  *   specified name.
  *
  * Input Parameters:
- *   group The task group containging environment array to be searched.
- *   pname The variable name to find
+ *   group - The task group containing environment array to be searched.
+ *   pname - The variable name to find
  *
  * Returned Value:
  *   A pointer to the name=value string in the environment
  *
  * Assumptions:
  *   - Not called from an interrupt handler
- *   - Pre-emptions is disabled by caller
+ *   - Pre-emption is disabled by caller
  *
  ****************************************************************************/
 
-FAR char *env_findvar(FAR struct task_group_s *group, const char *pname)
+FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname)
 {
-  char *ptr;
-  char *end;
+  FAR char *ptr;
+  FAR char *end;
 
   /* Verify input parameters */
 
-  DEBUGASSERT(group && pname);
+  DEBUGASSERT(group != NULL && pname != NULL);
 
   /* Search for a name=value string with matching name */
 
@@ -117,6 +119,3 @@ FAR char *env_findvar(FAR struct task_group_s *group, const char *pname)
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

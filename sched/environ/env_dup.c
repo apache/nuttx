@@ -64,8 +64,8 @@
  *   exact duplicate of the parent task's environment.
  *
  * Input Parameters:
- *   group The child task group to receive the newly allocated copy of the
- *        parent task groups environment structure.
+ *   group - The child task group to receive the newly allocated copy of the
+ *           parent task groups environment structure.
  *
  * Returned Value:
  *   zero on success

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/environ/env_removevar.c
+ * include/nuttx/environ.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_ENVIRON_H
+#define __INCLUDE_NUTTX_ENVIRON_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -41,80 +44,63 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <string.h>
-#include <sched.h>
-
-#include "environ/environ.h"
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_removevar
+ * Public Types
+ ****************************************************************************/
+
+/* Callback function used with env_foreach() */
+
+typedef int (*env_foreach_t)(FAR void *arg, FAR const char *pair);
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: env_foreach
  *
  * Description:
- *   Remove the referenced name=value pair from the environment
+ *   Search the provided environment structure for the variable of the
+ *   specified name.
+ *
+ *   This is an internal OS function and should not be used by applications.
  *
  * Input Parameters:
- *   group - The task group with the environment containing the name=value
- *           pair
- *   pvar  - A pointer to the name=value pair in the restroom
+ *   group - The task group containing environment array to be searched.
+ *   cb    - The callback function to be invoked for each environment
+ *           variable.
  *
  * Returned Value:
- *   Zero on success
+ *   Zero if the all environment variables have been traversed.  A non-zero
+ *   value means that the callback function requested early termination by
+ *   returning a nonzero value.
  *
  * Assumptions:
  *   - Not called from an interrupt handler
- *   - Caller has pre-emption disabled
- *   - Caller will reallocate the environment structure to the correct size
+ *   - Pre-emption is disabled by caller
  *
  ****************************************************************************/
 
-int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
-{
-  FAR char *end;    /* Pointer to the end+1 of the environment */
-  int alloc;        /* Size of the allocated environment */
-  int ret = ERROR;
+struct task_group_s;  /* Forward reference */
+int env_foreach(FAR struct task_group_s *group, env_foreach_t cb,
+                FAR void *arg);
 
-  DEBUGASSERT(group != NULL && pvar != NULL);
-
-  /* Verify that the pointer lies within the environment region */
-
-  alloc = group->tg_envsize;          /* Size of the allocated environment */
-  end   = &group->tg_envp[alloc];     /* Pointer to the end+1 of the environment */
-
-  if (pvar >= group->tg_envp && pvar < end)
-    {
-      /* Set up for the removal */
-
-      int   len  = strlen(pvar) + 1;  /* Length of name=value string to remove */
-      char *src  = &pvar[len];        /* Address of name=value string after */
-      char *dest = pvar;              /* Location to move the next string */
-      int   count = end - src;        /* Number of bytes to move (might be zero) */
-
-      /* Move all of the environment strings after the removed one 'down.'
-       * this is inefficient, but robably not high duty.
-       */
-
-      while (count-- > 0)
-        {
-          *dest++ = *src++;
-        }
-
-      /* Then set to the new allocation size.  The caller is expected to
-       * call realloc at some point but we don't do that here because the
-       * caller may add more stuff to the environment.
-       */
-
-      group->tg_envsize -= len;
-      ret = OK;
-    }
-
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_DISABLE_ENVIRON */
-
-
-
+#endif /* !CONFIG_DISABLE_ENVIRON */
+#endif /* __INCLUDE_NUTTX_ENVIRON_H */
