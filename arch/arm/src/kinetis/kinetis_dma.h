@@ -87,20 +87,20 @@ struct kinetis_dmaregs_s
 };
 #endif
 
-typedef enum _kinetis_dma_direction_e
+enum kinetis_dma_direction_e
 {
   KINETIS_DMA_DIRECTION_PERIPHERAL_TO_MEMORY,
   KINETIS_DMA_DIRECTION_MEMORY_TO_PERIPHERAL
-} kinetis_dma_direction_t;
+};
 
 /* Kinetis data transfer size */
 
-typedef enum _kinetis_dma_data_sz_e
+enum kinetis_dma_data_sz_e
 {
   KINETIS_DMA_DATA_SZ_8BIT = 0,
   KINETIS_DMA_DATA_SZ_16BIT = 1,
   KINETIS_DMA_DATA_SZ_32BIT = 2,
-} kinetis_dma_data_sz_t;
+};
 
 /****************************************************************************
  * Public Data
@@ -158,8 +158,8 @@ void kinetis_dmainitialize(void);
 
 DMA_HANDLE kinetis_dmachannel(uint8_t src,
                               uint32_t per_addr,
-                              kinetis_dma_data_sz_t per_data_sz,
-                              kinetis_dma_direction_t dir);
+                              enum kinetis_dma_data_sz_e per_data_sz,
+                              enum kinetis_dma_direction_e dir);
 
 /****************************************************************************
  * Name: kinetis_dmafree

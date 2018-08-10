@@ -79,13 +79,13 @@
 
  struct kinetis_dma_ch
  {
-    bool                    used;
-    uint8_t                 ind;
-    uint8_t                 irq;
-    kinetis_dma_direction_t dir;
-    kinetis_dma_data_sz_t   data_sz;
-    dma_callback_t          callback;
-    void                    *arg;
+    bool used;
+    uint8_t ind;
+    uint8_t irq;
+    enum kinetis_dma_direction_e dir;
+    enum kinetis_dma_data_sz_e data_sz;
+    dma_callback_t callback;
+    void *arg;
  };
 
 /****************************************************************************
@@ -239,8 +239,8 @@ void weak_function up_dmainitialize(void)
  ****************************************************************************/
 
 DMA_HANDLE kinetis_dmachannel(uint8_t src, uint32_t per_addr,
-                              kinetis_dma_data_sz_t per_data_sz,
-                              kinetis_dma_direction_t dir)
+                              enum kinetis_dma_data_sz_e per_data_sz,
+                              enum kinetis_dma_direction_e dir)
 {
   int i;
   int ch_ind;
