@@ -38,6 +38,7 @@
 #define __ARCH_ARM_SRC_KINETIS_KINETIS_UART_H
 
 #if defined(HAVE_UART_DEVICE) && defined(USE_SERIALDRIVER)
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
