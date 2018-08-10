@@ -80,6 +80,7 @@ enum token_type_e
   TOKEN_CONFIG,
   TOKEN_MENUCONFIG,
   TOKEN_BOOL,
+  TOKEN_TRISTATE,
   TOKEN_INT,
   TOKEN_HEX,
   TOKEN_STRING,
@@ -107,6 +108,7 @@ enum config_type_e
   VALUE_INT,
   VALUE_HEX,
   VALUE_BOOL,
+  VALUE_TRISTATE,
   VALUE_STRING
 };
 
@@ -217,6 +219,7 @@ static struct reserved_s g_reserved[] =
   {TOKEN_CONFIG,     "config"},
   {TOKEN_MENUCONFIG, "menuconfig"},
   {TOKEN_BOOL,       "bool"},
+  {TOKEN_TRISTATE,   "tristate"},
   {TOKEN_INT,        "int"},
   {TOKEN_HEX,        "hex"},
   {TOKEN_STRING,     "string"},
@@ -1173,6 +1176,9 @@ static const char *type2str(enum config_type_e valtype)
       case VALUE_BOOL:
         return "Boolean";
 
+      case VALUE_TRISTATE:
+        return "Tristate";
+
       case VALUE_INT:
         return "Integer";
 
@@ -1620,10 +1626,11 @@ static inline char *process_config(FILE *stream, const char *varname,
           switch (tokid)
             {
               case TOKEN_BOOL:
+              case TOKEN_TRISTATE:
                 {
                   /* Save the type of the configuration variable */
 
-                  config.c_type = VALUE_BOOL;
+                  config.c_type = tokid == TOKEN_BOOL ? VALUE_BOOL : VALUE_TRISTATE;
 
                   /* Get the description following the type */
 

@@ -66,7 +66,7 @@ config EXECFUNCS_SYMTAB_ARRAY
 		symbol table.
 
 config EXECFUNCS_NSYMBOLS_VAR
-	string"Name of variable holding the number of symbols"
+	string "Name of variable holding the number of symbols"
 	default "g_nsymbols"
 	---help---
 		The exec[l|v] and posix_spawn() functions are wrapper functions that

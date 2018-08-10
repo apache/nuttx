@@ -524,11 +524,11 @@ config LPC17_ADC_CHANLIST
 		matching the LPC17_ADC0_MASK within the board-specific library.
 
 config LPC17_ADC_BURSTMODE
-    bool "One interrupt at the end of all ADC conversions"
-    default n
-    ---help---
-        Select this if you want to generate only one interrupt once all selected
-	channels has been converted by the ADC
+	bool "One interrupt at the end of all ADC conversions"
+	default n
+	---help---
+		Select this if you want to generate only one interrupt once all selected
+		channels has been converted by the ADC
 
 config LPC17_ADC_NCHANNELS
 	int "ADC0 number of channels"
