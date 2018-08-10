@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 22, 2018</p>
+      <p>Last Updated: August 10, 2018</p>
     </td>
   </tr>
 </table>
@@ -56,7 +56,7 @@
     <a href="#DirStructGraphics">2.9 nuttx/graphics/</a><br>
     <a href="#DirStructInclude">2.10 nuttx/include/</a><br>
     <a href="#DirStructLib">2.11 nuttx/lib/</a><br>
-    <a href="#DirStructLibC">2.12 nuttx/libc/</a><br>
+    <a href="#DirStructLibC">2.12 nuttx/libs/libc/</a><br>
     <a href="#DirStructLibXX">2.13 nuttx/libxx/</a><br>
     <a href="#DirStructMm">2.14 nuttx/mm/</a><br>
     <a href="#DirStructNet">2.15 nuttx/net</a><br>
@@ -307,6 +307,10 @@
 |   |   |   |   `-- <i>(board configuration-specific source files)</i>
 |   |   |   `---<i>(other configuration sub-directories for this board)</i>/
 |   |   `-- <i>&lt;(other board directories)&gt;</i>/
+|   |-- crypto
+|   |   |-- Makefile
+|   |   |-- Kconfig
+|   |   `-- <i>(common crypto source files)</i>
 |   |-- <a href="#DirStructDrivers">drivers</a>/
 |   |   |-- Makefile
 |   |   |-- Kconfig
@@ -331,14 +335,23 @@
 |   |   |   `-- <i>(more standard header files)</i>
 |   |   |-- <i>(non-standard include sub-directories)</i>
 |   |       `-- <i>(non-standard header files)</i>
-|   |-- <a href="#DirStructLibC">libc</a>/
-|   |   |-- Makefile
-|   |   |-- Kconfig
-|   |   `-- <i>(libc source files)</i>
-|   |-- <a href="#DirStructLibXX">libxx</a>/
-|   |   |-- Makefile
-|   |   |-- Kconfig
-|   |   `-- <i>(libxx management source files)</i>
+|   |-- libs/
+|   |   |-- <a href="#DirStructLibC">libc</a>/
+|   |   |   |-- Makefile
+|   |   |   |-- Kconfig
+|   |   |   `-- <i>(libc source files)</i>
+|   |   |-- libdsp/
+|   |   |   |-- Makefile
+|   |   |   |-- Kconfig
+|   |   |   `-- <i>(libdsp source files)</i>
+|   |   |-- libnx/
+|   |   |   |-- Makefile
+|   |   |   |-- Kconfig
+|   |   |   `-- <i>(libdsp source files)</i>
+|   |   `-- <a href="#DirStructLibXX">libxx</a>/
+|   |       |-- Makefile
+|   |       |-- Kconfig
+|   |       `-- <i>(libxx source files)</i>
 |   |-- <a href="#DirStructMm">mm</a>/
 |   |   |-- Makefile
 |   |   |-- Kconfig
@@ -372,6 +385,8 @@
 |   |   |   `-- <i>(UDP source files)</i>
 |   |   `-- utils/
 |   |       `-- <i>(Miscellaneous, utility source files)</i>
+|   |-- pass1/
+|   |   `-- Makefile
 |   |-- <a href="#DirStructSched">sched</a>/
 |   |   |-- Makefile
 |   |   |-- Kconfig
@@ -382,32 +397,81 @@
 |   |   `-- <i>(syscall source files)</i>
 |   |-- <a href="#DirStructTools">tools</a>/
 |   |   `-- <i>(miscellaneous scripts and programs)</i>
-|   `-- <a href="#DirStructWireless">tools</a>/
+|   `-- <a href="#DirStructWireless">wireless</a>/
 |       |-- Makefile
 |       |-- Kconfig
-|       `-- <i>(wireless management source files)</i>
+|       `-- <i>(wireless source files)</i>
 `- apps
+    |-- builtin/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(builtin source files)</i>
+    |-- canutils/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(can utililities sub-directories)</i>
+    |-- fsutils/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(File system utilities sub-directories)</i>
+    |-- gpsutils/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(GPS utilities sub-directories)</i>
+    |-- include/
+    |   `-- <i>(Include sub-directories)</i>
+    |-- interpreters/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(Interpreter sub-directories)</i>
+    |-- modbus/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(Modbus source files)</i>
     |-- <a href="#DirStructNetUtils">netutils</a>/
     |   |-- Makefile
+    |   |-- Make.defs
     |   |-- Kconfig
     |   |-- <i>(network feature sub-directories)</i>/
-    |   |   `-- <i>(network feature source files)</i>
+    |   |   `-- <i>(network utilities sub-directories)</i>
     |   `-- <i>(netutils common files)</i>
-    |--  <a href="#DirStructNshLib">nshlib</a>/
+    |-- <a href="#DirStructNshLib">nshlib</a>/
     |   |-- Makefile
+    |   |-- Make.defs
     |   |-- Kconfig
     |   `-- <i>NuttShell (NSH) files</i>
-    |-- <i>(Board-specific applications)</i>/
+    |-- platform/
     |   |-- Makefile
+    |   |-- Make.defs
     |   |-- Kconfig
-    |   |-- <i>(Board-specific application sub-directories)</i>/
-    |   |   `-- <i>(Board-specific application source files)</i>
-    |   `-- <i>(Board-specific common files)</i>
+    |   `-- <i>(Platform-specific sub-directories)</i>
+    |-- system/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(System utilities sub-directories)</i>
+    |-- testing/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(Test support sub-directories)</i>
+    |-- wireless/
+    |   |-- Makefile
+    |   |-- Make.defs
+    |   |-- Kconfig
+    |   `-- <i>(Wireless utilities sub-directories)</i>
     `-- <a href="#DirStructExamples">examples</a>/
         `-- <i>(example)</i>/
             |-- Makefile
+            |-- Make.defs
             |-- Kconfig
-            `-- <i>(example source files)</i>
+            `-- <i>(example sub-directories)</i>
 </pre></ul>
 
 <p>
@@ -424,7 +488,7 @@
     </p>
     <p>
       Variants of the processor architecture may be provided in sub-directories of the 
-      Extending this example, the ARMv7-M ARM family is supported by logic in <code>arch/arm/include/armv7-m</code> and <code>arch/arm/src/armv7-m</code> directories which are selected by the <code>CONFIG_ARCH_CORTEXM3=y</code> or <code>CONFIG_ARCH_CORTEXM4=y</code> configuration options
+      Extending this example, the ARMv7-M ARM family is supported by logic in <code>arch/arm/include/armv7-m</code> and <code>arch/arm/src/armv7-m</code> directories which are selected by the <code>CONFIG_ARCH_CORTEXM3=y</code>, <code>CONFIG_ARCH_CORTEXM4=y</code>, or  <code>CONFIG_ARCH_CORTEXM7=y</code> configuration options
     </p>
   </li>
   <li>
@@ -651,83 +715,56 @@
 </p>
 <ul>
   <li><code>arch/sim</code>:
-    A user-mode port of NuttX to the x86 Linux platform is available.
+    A user-mode port of NuttX to the x86 Linux or Cygwin platform is available.
     The purpose of this port is primarily to support OS feature development.
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
-  <p>NOTE: This target will not run on Cygwin probably for many reasons but
-    first off because it uses some of the same symbols as does cygwind.dll.
+  <p>NOTE: In principle, this user mode port should run in any POSIX environement.
+    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environemnt dependencies.
   </p>
 
   <li><code>arch/arm</code>:
     This directory holds common ARM architectures.
   </li>
 
-  <li><code>configs/mcu123-lpc214x</code>:
-    The mcu123.com lpc214x development board.
-    This is a work in progress.
+  <li><code>arch/arm</code>:
+    This directory holds common AVR and AVR32 architectures.
+  </li>
+
+  <li><code>arch/mips</code>:
+    This directory holds common MIPS architectures.  This include PIC32MX and PIC32MZ.
+  </li>
+
+  <li><code>arch/misoc</code>:
+    This directory supports the Misoc LM3 architecture.
+  </li>
+
+  <li><code>arch/or1K</code>:
+    This directory supports the OpenRISC mor1kx architecture.
+  </li>
+
+  <li><code>arch/renesas</code>:
+    This directory is the home for various Renesas architectures, currently only the M16C and vererable SuperH-1 architectures.
+  </li>
+
+  <li><code>arch/risc-v</code>:
+    This directory supports the RISC-V NR5 architecture.
+  </li>
+
+  <li><code>arch/xtensa</code>:
+    This directory supports the Xtensa LX6 architecture as used by the ESP32.
   </li>
 
   <li><code>arch/z16f</code>:
     Zilog z16f Microcontroller.
-    This port uses the Zilog z16f2800100zcog Development Kit.
-    This port was released with nuttx-0.3.7.
   </li>
 
-    <li><code>arch/z80</code>:
+  <li><code>arch/z80</code>:
     This directory holds 8-bit ZiLOG architectures.  At present, this includes the
     Zilog z80, ez80Acclaim! and z8Encore! Microcontrollers.
-    <ul>
-      <li><code>arch/z80/include</code> and <code>arch/z80/src/common</code>:
-          Common logic.
-      </li>
-
-      <li><code>arch/z80/include/z80</code> and <code>arch/z80/src/z80</code>:
-        The Z80 port was released in nuttx-0.3.6 has been verified using only a
-        z80 instruction simulator called z80sim.
-        This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/)
-        (verified with version 2.6.0 and 2.7.0).
-      </li>
-
-      <li><code>arch/z80/include/ez80</code> and <code>arch/z80/src/ez80</code>:
-        The ez80Acclaim! port uses the ZiLOG ez80f0910200kitg development kit, eZ80F091 part,
-        with the Zilog ZDS-II Windows command line tools.
-        The development environment is Cygwin under WinXP.
-        This is a work in progress.  Verified ez80 support will be announced in a future NuttX release.
-      </li>
-
-      <li><code>arch/z80/include/z8</code> and <code>arch/z80/src/z8</code>:
-        The Z8Encore! port uses either the ZiLOG z8encore000zco development kit, Z8F6403 part,
-        or the z8f64200100kit development kit, Z8F6423 part with the Zilog ZDS-II Windows command line
-        tools.  The development environment is Cygwin under WinXP.
-        The initial release, verified only on the ZDS-II ez8 simulator, was released in nuttx-0.3.9.
-      </li>
-    </ul>
-    </li>
-</ul>
-
-<p>
-  <b>Deprecated Architecture Directories</b>.
-  The following architecture directories are deprecated.  They have been
-  replaced by the logic in <code>arm/arm</code> and will deleted when
-  <code>arch/arm</code> is fully verified.
-</p>
-<ul>
-  <li><code>arch/c5471</code>:
-    Replaced with <code>arch/arm/include/c5471</code> and
-    <code>arch/arm/src/c5471</code>.
-  </li>
-
-  <li><code>arch/dm320</code>:
-    Replaced with <code>arch/arm/include/dm320</code> and
-    <code>arch/arm/src/dm320</code>.
   </li>
 </ul>
-<p>
-  Other ports for the for the TI TMS320DM270 and for MIPS are in various states
-  of progress
-</p>
 
 <h2>2.3 <a name="DirStructBinFmt">nuttx/binfmt</a></h2>
 
@@ -772,7 +809,7 @@
 |   ...
 |-- scripts/
 |   |-- <i>(linker script files)</i>
-|   `-- Make.defs <i>(optional</i>
+|   `-- Make.defs <i>(optional)</i>
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
 
@@ -966,78 +1003,94 @@ endif
 drivers/
 |-- Kconfig
 |-- Makefile
+|-- 1wire/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(1-wire device source files)</i>
 |-- analog/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common ADC and DAC driver source files)</i>
+|   `-- <i>(ADC and DAC driver source files)</i>
 |-- audio/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common audio device source files)</i>
+|   `-- <i>(Audio device source files)</i>
 |-- bch/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(bch driver source files)</i>
+|   `-- <i>(BCH driver source files)</i>
+|-- can/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(CAN driver source files)</i>
 |-- contactless/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common contactless device driver source files)</i>
+|   `-- <i>(Contactless device driver source files)</i>
+|-- eeprom/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(EEPROM character driver source files)</i>
+|-- i2c/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(I2C device driver source files)</i>
 |-- input/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common touchscreen and keypad driver source files)</i>
+|   `-- <i>(Touchscreen and keypad driver source files)</i>
 |-- ioexpander/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common I/O expander and GPIO-related driver source files)</i>
+|   `-- <i>(I/O expander and GPIO-related driver source files)</i>
 |-- lcd/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common LCD driver source files)</i>
+|   `-- <i>(LCD driver source files)</i>
 |-- leds/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common LED device driver source files)</i>
+|   `-- <i>(LED device driver source files)</i>
 |-- loop/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common loop device driver source files)</i>
+|   `-- <i>(Loop device driver source files)</i>
 |-- mmcsd/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common MMC/SD card driver source files)</i>
+|   `-- <i>(MMC/SD card driver source files)</i>
 |-- modem/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common modem driver source files)</i>
+|   `-- <i>(Modem driver source files)</i>
 |-- mtd/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common memory technology device driver source files)</i>
+|   `-- <i>(Memory technology device driver source files)</i>
 |-- net/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common network driver source files)</i>
+|   `-- <i>(Network driver source files)</i>
 |-- pipes/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common pipe and FIFO driver source files)</i>
+|   `-- <i>(Pipe and FIFO driver source files)</i>
 |-- power/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common power-related driver source files)</i>
+|   `-- <i>(Power-related driver source files)</i>
 |-- sensors/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common sensor driver source files)</i>
+|   `-- <i>(Sensor driver source files)</i>
 |-- serial/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common front-end character drivers for chip-specific UARTs)</i>
+|   `-- <i>(Front-end character drivers for chip-specific UARTs, 16550 UART support, and Pseudo-Terminal support)</i>
 |-- spi/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common SPI-related drivers and helper functions)</i>
+|   `-- <i>(SPI-related drivers and helper functions)</i>
 |-- syslog/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1049,20 +1102,28 @@ drivers/
 |-- usbdev/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common USB device driver source files)</i>
+|   `-- <i>(USB device driver source files)</i>
 |-- usbhost/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common USB host driver source files)</i>
+|   `-- <i>(USB host driver source files)</i>
+|-- usbmisc/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Miscellaneous USB driver source files)</i>
 |-- usbmonitor/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(USB monitor source files)</i>
+|-- video/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Video driver source files)</i>
 |-- wireless/
 |   |-- Kconfig
 |   |-- Make.defs
-|   `-- <i>(Common wireless driver source files)</i>
-`-- <i>(Various common driver source files)</i>
+|   `-- <i>(Wireless driver source files)</i>
+`-- <i>(Various uncategorized driver source files)</i>
 </pre></ul>
 
 <h2>2.8 <a name="DirStructFs">nuttx/fs</a></h2>
@@ -1075,14 +1136,46 @@ drivers/
 fs/
 |-- Kconfig
 |-- Makefile
+|-- binfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(BINFS file system source files)</i>
+|-- cromfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(CROMFS file system source files)</i>
+|-- dirent/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(VFS directory access source files)</i>
+|-- driver/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Driver registration OS internal interfaces)</i>
 |-- fat/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(FAT file system source files)</i>
+|-- inode/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Pseudo-file system OS internal interfaces)</i>
+|-- hostfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(HOSTFS file system source files)</i>
 |-- mmap/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(RAM-based file mapping source files)</i>
+|-- mount/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Mount point-related OS internal interfaces)</i>
+|-- mqueue/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(POSIX message queue OS internal interfaces)</i>
 |-- nfs/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1091,10 +1184,30 @@ fs/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(NuttX Flash File System (NXFFS) source files)</i>
+|-- procfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(PROCFS pseudo-file system source files)</i>
 |-- romfs/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(ROMFS file system source files)</i>
+|-- smartfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(SmartFS file system source files)</i>
+|-- unionfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(UnionFS file system source files)</i>
+|-- userfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(UserFS file system source files)</i>
+|-- vfs/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(VFS OS internal interfaces)</i>
  `-- <i>(common file system source files)</i>
 </pre></ul>
 
@@ -1110,18 +1223,18 @@ graphics/
 |-- nxbe/
 |   |-- Make.defs
 |   `-- <i>(NuttX graphics back-end (NXBE) source files)</i>
-|-- nxfont/
-|   |-- Make.defs
-|   `-- <i>(NuttX graphics font-related (NXFONT) source files)</i>
 |-- nxglib/
 |   |-- Make.defs
 |   `-- <i>(NuttX graphics library (NXGL) source files)</i>
 |-- nxmu/
 |   |-- Make.defs
 |   `-- <i>(NuttX graphics multi-user (NXMU) server source files)</i>
-|-- nxsu/
+|-- nxterm/
 |   |-- Make.defs
-|   `-- <i>(NuttX graphics single-user (NXSU) source files)</i>
+|   `-- <i>(NX terminal (NxTerm) source files)</i>
+|-- vnc/
+|   |-- Make.defs
+|   `-- <i>(VNC client/server source files)</i>
 `-- <i>(common file system source files)</i>
 </pre></ul>
 
@@ -1147,7 +1260,11 @@ include/
 |   `-- <i>(C++ standard header files)</i>
 |-- netinet/
 |   `-- <i>(Standard header files)</i>
+|-- netpacket/
+|   `-- <i>(Protocol-specific header files.  Most non-standard)</i>
 |-- nuttx/
+|   |-1wire/
+|   |  `-- <i>(1-wire driver header files)</i>
 |   |-analog/
 |   |  `-- <i>(Analog driver header files)</i>
 |   |-audio/
@@ -1164,6 +1281,8 @@ include/
 |   |  `-- <i>(EEPROM driver header files)</i>
 |   |-fs/
 |   |  `-- <i>(File System header files)</i>
+|   |-i2c/
+|   |  `-- <i>(I2C-related header files)</i>
 |   |-input/
 |   |  `-- <i>(Input device driver header files)</i>
 |   |-ioexpander/
@@ -1191,7 +1310,7 @@ include/
 |   |-serial/
 |   |  `-- <i>(Serial driver header files)</i>
 |   |-spi/
-|   |  `-- <i>(SPI driver header files)</i>
+|   |  `-- <i>(SPI-related header files)</i>
 |   |-syslog/
 |   |  `-- <i>(SYSLOG header files)</i>
 |   |-timers/
@@ -1214,7 +1333,7 @@ include/
   These libraries are then in a known place for the final link phase where they are accessed to generated the final binaries.
 </p>
 
-<h2>2.12 <a name="DirStructLibC">nuttx/libc</a></h2>
+<h2>2.12 <a name="DirStructLibC">nuttx/libs/libc</a></h2>
 <p>
   This directory holds a collection of standard libc-like functions with custom
   interfaces into NuttX.
@@ -1238,16 +1357,28 @@ libc/
 |   `-- <i>(Implementation of audio-related functions)</i>
 |-- dirent/
 |   `-- <i>(Implementation of functions from dirent.h)</i>
+|-- dllfch/
+|   `-- <i>(Implementation of functions from dllfcn.h)</i>
 |-- fixedmath/
 |   `-- <i>(Implementation of functions from fixedmath.h)</i>
 |-- hex2bin/
 |   `-- <i>(Implementation of functions from hex2bin.h)</i>
+|-- inttypes/
+|   `-- <i>(Implementation of functions from inttypes.h)</i>
 |-- libgen/
 |   `-- <i>(Implementation of functions from libgen.h)</i>
+|-- locale/
+|   `-- <i>(Implementation of functions from locale.h)</i>
+|-- lzf/
+|   `-- <i>(Implementation of functions from lzf.h)</i>
+|-- machine/
+|   `-- <i>(Implementations of platform-specific logic)</i>
 |-- math/
 |   `-- <i>(Implementation of functions from fixedmath.h)</i>
 |-- misc/
 |   `-- <i>(Implementation of miscellaneous library functions)</i>
+|-- modlib/
+|   `-- <i>(Implementation of functions from nuttx/lib/modlib.h)</i>
 |-- net/
 |   `-- <i>(Implementation of network-related library functions)</i>
 |-- netdb/
@@ -1280,10 +1411,18 @@ libc/
 |   `-- <i>(Implementation of some functions from time.h)</i>
 |-- tls/
 |   `-- <i>(Implementation of some functions from tls.h)</i>
-|-- wqueue/
-|   `-- <i>(Implementation of some functions from wqueue.h)</i>
+|-- uio/
+|   `-- <i>(Implementation of some functions from uio.h)</i>
 |-- unistd/
 |   `-- <i>(Implementation of some functions from unistd.h)</i>
+|-- userfs/
+|   `-- <i>(Implementation of application side internals of UserFS)</i>
+|-- wchar/
+|   `-- <i>(Implementation of some functions from wchar.h.  Not fully functional.)</i>
+|-- wctype/
+|   `-- <i>(Implementation of some functions from wctype.h.  Not fully functional.)</i>
+|-- wqueue/
+|   `-- <i>(Implementation of some functions from wqueue.h)</i>
 `-- zoneinfo/
     `-- <i>(Implementation of timezone database)</i>
 
@@ -1327,27 +1466,46 @@ libc/
 tools/
 |-- Makefile.host
 |-- Makefile.export
+|-- Makefile.unix, Makefile.win, FlatLibs.mk, KernelLibs.mk, LibTargets.mk, ProtectedLibs.mk
 |-- README.txt
-|-- configure.sh / configure.bat
+|-- b16.c
+|-- bdf-converter.c
 |-- cfgparser.c
 |-- cfgparser.h
 |-- cmpconfig.c
 |-- cnvwindeps.c
+|-- configure.sh / configure.bat
 |-- copydir.sh / copydir.bat
 |-- define.sh / define.bat
+|-- discovery.py
 |-- incdir.sh / incdir.bat
 |-- indent.sh
+|-- initialconfig.c
+|-- kconfig2html.c / mkconfigvars.sh
 |-- link.sh / link.bat
 |-- mkconfig.c
+|-- mkctags.sh
+|-- mkdeps.c
 |-- mkexport.sh
+|-- mkfsdata.pl
 |-- mkimage.sh
 |-- mknulldeps.sh
 |-- mkromfsimg.sh
+|-- mksymtab.c
 |-- mksyscall.c
 |-- mkversion.c
 |-- mkwindeps.sh
+|-- noteinfo.c
+|-- nxstyle.c
+|-- pic32mx/mkpichex.c
+|-- refresh.sh
+|-- sethost.sh
+|-- showsize.sh
+|-- testbuild.sh
+|-- uncrustify.cfg
 |-- unlink.sh / unlink.bat
 |-- version.sh
+|-- xmlrpc_test.py
 `-- zipme.sh
 </pre></ul>
 
@@ -1403,7 +1561,7 @@ tools/
   accomplish the same configuration:
 </p>
 <ul><pre>
-  tools/configure.sh <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
+  tools/configure.sh [OPTIONS] <i>&lt;board-name&gt;</i>[/<i>&lt;config-dir&gt;</i>]
 </pre></ul>
 
 <p>
@@ -1414,7 +1572,27 @@ tools/
 </pre></ul>
 <p>
   See <code>tools/README.txt</code> for more information about these scripts.
+  Or use the -h option with <code>configure.sh></code>
 </p>
+<ul><pre>
+$ tools/configure.sh -h
+
+USAGE: tools/configure.sh [-d] [-l|m|c|u|g|n] [-a &lt;app-dir&gt;] &lt;board-name&gt;/&lt;config-name&gt;
+
+Where:
+  -l selects the Linux (l) host environment.
+  -m selects the macOS (m) host environment.
+  -c selects the Windows host and Cygwin (c) environment.
+  -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
+  -g selects the Windows host and MinGW/MSYS environment.
+  -n selects the Windows host and Windows native (n) environment.
+  Default: Use host setup in the defconfig file
+  Default Windows: Cygwin
+  &lt;board-name&gt; is the name of the board in the configs directory
+  &lt;config-name&gt; is the name of the board configuration sub-directory
+  &lt;app-dir&gt; is the path to the apps/ directory, relative to the nuttx
+     directory
+</pre></ul>
 
 <p>
   If your application directory is not in the standard location (<code>../apps</code> or <code>../apps-&lt;version&gt;</code>),
@@ -1443,15 +1621,19 @@ tools/
 $ tools/version.sh -h
 tools/version.sh is a tool for generation of proper version files for the NuttX build
 
-USAGE: tools/version.sh [-d|-h] [-b build] -v &lt;major.minor&gt; &lt;outfile-path&gt;
+USAGE: tools/version.sh [-d|-h] [-b &lt;build&gt;] -v &lt;major.minor&gt; &lt;outfile-path&gt;
 
 Where:
+        -b <build>
+                Use this build identification string.  Default: use GIT build ID
+                NOTE: GIT build information may not be available in a snapshot
         -d
                 Enable script debug
         -h
                 show this help message and exit
+        -v <major.minor>
         -v &lt;major.minor&gt;
-                The NuttX version number expressed a major and minor number separated
+                The NuttX version number expressed as a major and minor number separated
                 by a period
         &lt;outfile-path&gt;
                 The full path to the version file to be created
