@@ -316,10 +316,15 @@ config ARCH_FAMILY_K66
 	select KINETIS_HAVE_LPUART0
 	select KINETIS_HAVE_TPM1
 	select KINETIS_HAVE_TPM2
+	select KINETIS_HAVE_DMA
 
 menu "Kinetis Peripheral Support"
 
 config KINETIS_HAVE_FTM3
+	bool
+	default n
+
+config KINETIS_HAVE_DMA
 	bool
 	default n
 
@@ -659,11 +664,11 @@ config KINETIS_LPTMR0
 		Support the low power timer 0
 
 config KINETIS_LPTMR1
-        bool "Low power timer 0 (LPTMR1)"
-        default n
+	bool "Low power timer 0 (LPTMR1)"
+	default n
 	depends on KINETIS_HAVE_LPTMR1
-        ---help---
-                Support the low power timer 1
+	---help---
+		Support the low power timer 1
 
 config KINETIS_RTC
 	bool "RTC"
@@ -723,6 +728,8 @@ config KINETIS_FTFL
 config KINETIS_DMA
 	bool "DMA"
 	default n
+	depends on KINETIS_HAVE_DMA
+	select ARCH_DMA
 	---help---
 		Support DMA
 
@@ -1078,6 +1085,60 @@ config KINETIS_UARTFIFOS
 	bool "Enable UART0 FIFO"
 	default n
 	depends on KINETIS_UART0
+
+config KINETIS_UART0_RXDMA
+	bool "UART0 Rx DMA"
+	default n
+	depends on KINETIS_UART0 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_UART1_RXDMA
+	bool "UART1 Rx DMA"
+	default n
+	depends on KINETIS_UART1 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_UART2_RXDMA
+	bool "UART2 Rx DMA"
+	default n
+	depends on KINETIS_UART2 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_UART3_RXDMA
+	bool "UART3 Rx DMA"
+	default n
+	depends on KINETIS_UART3 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on KINETIS_UART4 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on KINETIS_UART5 && KINETIS_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on UART1_RXDMA || UART2_RXDMA || UART3_RXDMA || UART4_RXDMA || UART5_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
 
 endmenu # Kinetis UART Configuration
 

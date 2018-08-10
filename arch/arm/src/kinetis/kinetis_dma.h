@@ -1,9 +1,10 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_dma.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Jan Okle <jan@leitwert.ch>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,7 +58,9 @@
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is
+ * selected.
+ */
 
 #ifdef CONFIG_DEBUG_DMA
 struct kinetis_dmaglobalregs_s
@@ -84,6 +87,21 @@ struct kinetis_dmaregs_s
 };
 #endif
 
+typedef enum _kinetis_dma_direction_e
+{
+  KINETIS_DMA_DIRECTION_PERIPHERAL_TO_MEMORY,
+  KINETIS_DMA_DIRECTION_MEMORY_TO_PERIPHERAL
+} kinetis_dma_direction_t;
+
+/* Kinetis data transfer size */
+
+typedef enum _kinetis_dma_data_sz_e
+{
+  KINETIS_DMA_DATA_SZ_8BIT = 0,
+  KINETIS_DMA_DATA_SZ_16BIT = 1,
+  KINETIS_DMA_DATA_SZ_32BIT = 2,
+} kinetis_dma_data_sz_t;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -99,10 +117,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_dmainitialize
@@ -115,7 +132,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void kinetis_dmainitilaize(void);
+void kinetis_dmainitialize(void);
 
 /****************************************************************************
  * Name: kinetis_dmachannel
@@ -124,22 +141,33 @@ void kinetis_dmainitilaize(void);
  *   Allocate a DMA channel.  This function sets aside a DMA channel and
  *   gives the caller exclusive access to the DMA channel.
  *
+ * Input Parameters:
+ *   src         - DMA request source
+ *   per_addr    - Address of the peripheral data
+ *   per_data_sz - Peripheral data size (register size). Note that if this
+ *                 does not agree with the peripheral register size, DMA
+ *                 transfers will silently fail during operation.
+ *   dir         - transfer direction
+ *
  * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
+ *   One success, this function returns a non-NULL, void * DMA channel
  *   handle.  NULL is returned on any failure.  This function can fail only
  *   if no DMA channel is available.
  *
  ****************************************************************************/
 
-DMA_HANDLE kinetis_dmachannel(void);
+DMA_HANDLE kinetis_dmachannel(uint8_t src,
+                              uint32_t per_addr,
+                              kinetis_dma_data_sz_t per_data_sz,
+                              kinetis_dma_direction_t dir);
 
 /****************************************************************************
  * Name: kinetis_dmafree
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until kinetis_dmachannel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until kinetis_dmachannel() is called again to re-
+ *   gain a valid handle.
  *
  * Returned Value:
  *   None
@@ -154,10 +182,18 @@ void kinetis_dmafree(DMA_HANDLE handle);
  * Description:
  *   Configure DMA for one transfer.
  *
+ * Input Parameters:
+ *   mem_addr   - Memory address
+ *   ntransfers - Number of transfers. Must be 0<= ntransfers <= 0x7FFF
+ *   control    - Channel control configuration
+ *
+ * Returned Value:
+ *   result: 0 if ok, negative else
+ *
  ****************************************************************************/
 
-int kinetis_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
+int kinetis_dmasetup(DMA_HANDLE handle, uint32_t mem_addr,
+                     size_t ntransfers, uint16_t control);
 
 /****************************************************************************
  * Name: kinetis_dmastart
@@ -174,12 +210,24 @@ int kinetis_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *
  * Description:
  *   Cancel the DMA.  After kinetis_dmastop() is called, the DMA channel is
- *   reset and kinetis_dmasetup() must be called before kinetis_dmastart() can be
- *   called again
+ *   reset and kinetis_dmasetup() must be called before kinetis_dmastart()
+ *   can be called again
  *
  ****************************************************************************/
 
 void kinetis_dmastop(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: kinetis_dmaresidual
+ *
+ * Description:
+ *   Returns the number of transfers left
+ *
+ * Returned Value:
+ *   Residual transfers
+ ****************************************************************************/
+
+size_t kinetis_dmaresidual(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: kinetis_dmasample
