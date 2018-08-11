@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  June 22, 2018</p>
+      <p>Last Updated:  August 11, 2018</p>
     </td>
   </tr>
 </table>
@@ -846,28 +846,44 @@ nsh&gt;
 </p>
 <ul>
 <li>
-  <b><code>CONFIG_NSH_CMDPARMS</code></b>.
-   If selected, then the output from commands, from file applications, and from NSH built-in commands can be used as arguments to other commands.
-   The entity to be executed is identified by enclosing the command line in back quotes.
+  <p>
+    <b><code>CONFIG_NSH_CMDPARMS</code></b>.
+     If selected, then the output from commands, from file applications, and from NSH built-in commands can be used as arguments to other commands.
+     The entity to be executed is identified by enclosing the command line in back quotes.
    For example,
-<p>
-<ul><pre>
+  </p>
+  <ul><pre>
 set FOO `myprogram $BAR`
 </pre></ul>
-<p>
-   Will execute the program named <code>myprogram</code> passing it the value of the environment variable <code>BAR</code>.
-   The value of the environment variable <code>FOO</code> is then set output of <code>myprogram</code> on <code>stdout</code>.
+  <p>
+     Will execute the program named <code>myprogram</code> passing it the value of the environment variable <code>BAR</code>.
+     The value of the environment variable <code>FOO</code> is then set output of <code>myprogram</code> on <code>stdout</code>.
+  </p>
 </li>
 <li>
-  <b><code>CONFIG_NSH_ARGCAT</code></b>.
-  Support concatenation of strings with environment variables or command output.  For example:
+  <p>
+    <b><code>CONFIG_NSH_ARGCAT</code></b>.
+    Support concatenation of strings with environment variables or command output.  For example:
+  </p>
   <ul><pre>
 set FOO XYZ
 set BAR 123
 set FOOBAR ABC_${FOO}_${BAR}
 </pre></ul>
-  would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
-  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly smaller FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
+  <p>
+    would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
+    If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly smaller FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
+  </p>
+</li>
+<li>
+  <p>
+    <b><code>CONFIG_NSH_QUOTE</code></b>.
+    Enables back-slash quoting of certain characters within the command.
+    This option is useful for the case where an NSH script is used to dynamically generate a new NSH script.
+    In that case, commands must be treated as simple text strings without interpretation of any special characters.
+    Special characters such as <code>$</code>, <code>`</code>, <code>&quot;</code>, and others must be retained intact as part of the test string.
+    This option is currently only available is <code>CONFIG_NSH_ARGCAT</code> is also selected.
+  </p>
 </li>
 </ul>
 
@@ -886,7 +902,7 @@ set FOOBAR ABC_${FOO}_${BAR}
   (see the <a href="#cmdsh"><code>sh</code></a> command).  The syntax is as follows:
 </p>
 <ul><pre>
-if &lt;cmd&gt;
+if [!] &lt;cmd&gt;
 then
   [sequence of &lt;cmd&gt;]
 else
@@ -910,10 +926,10 @@ fi
 <ul>
   <li>
     <p><b><code>while-do-done</code></b>.
-    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has an exit status of zero.
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has an exit status of zero (or non-zero if inverted with <code>!</code>).
     The syntax is as follows:
     <ul><pre>
-while &lt;cmd&gt;
+while [!] &lt;cmd&gt;
 do
   [sequence of &lt;cmd&gt;]
 done
@@ -922,10 +938,10 @@ done
   </li>
   <li>
     <p><b><code>until-do-done</code></b>
-    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has a non-zero exit status.
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has a non-zero exit status (or zero if inverted with <code>!</code>).
     The syntax is as follows:
     <ul><pre>
-until &lt;cmd&gt;
+until [!] &lt;cmd&gt;
 do
   [sequence of &lt;cmd&gt;]
 done
@@ -933,6 +949,10 @@ done
     </p>
   </li>
 </ul>
+
+<p>
+  Note that <code>while</code> is equivalent to <code>until</code> if the command result is inverted.
+</p>
 
 <p><b>The <a href="#cmdbreak"><code>break</code></a> Command</b>.
   A <a href="#cmdbreak"><code>break</code></a> command is also supported.
@@ -3942,6 +3962,16 @@ set FOOBAR ABC_${FOO}_${BAR}
     </td>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_NSH_QUOTE</code></b></td>
+    <td>
+      Enables back-slash quoting of certain characters within the command.
+      This option is useful for the case where an NSH script is used to dynamically generate a new NSH script.
+      In that case, commands must be treated as simple text strings without interpretation of any special characters.
+      Special characters such as <code>$</code>, <code>`</code>, <code>&quot;</code>, and others must be retained intact as part of the test string.
+      This option is currently only available is <code>CONFIG_NSH_ARGCAT</code> is also selected.
+    </td>
+  </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_NSH_NESTDEPTH</code></b></td>
     <td>
       The maximum number of nested <a href="#conditional"><code>if-then[-else]-fi</code></a> sequences that
@@ -5488,6 +5518,7 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#custinit"><code>CONFIG_NFILE_DESCRIPTORS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHINIT</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARGCAT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
   <li><a href="#custapps"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
@@ -5514,11 +5545,11 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NESTDEPTH</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NETMASK</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NOMAC</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_QUOTE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_READLINE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ROMFSETC</code></a></li>
-  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSMOUNTPT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSSECTSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_STRERROR</code></a></li>
@@ -5593,10 +5624,10 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#nshlibrary">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>), initialization</a></li>
+  <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>
 </ul></td>
 <td width="34%" valign="top">
 <ul>
-  <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_initialize()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_main()</code></a></li>
   <li><a href="#custinit"><code>nsh_main.c</code></a></li>
