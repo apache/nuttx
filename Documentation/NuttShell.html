@@ -910,6 +910,12 @@ else
 fi
 </pre></ul>
 
+<p>
+  Where <code>&lt;cmd&gt;</code> is a <a href="#cmdoverview">simple command</a>.
+  The command success value of zero is treated true; a non-zero command failure value is treated false.
+  The <a href="#cmdtest"><code>test</code></a> command is frequently used for comparisons.
+</p>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -950,6 +956,11 @@ done
   </li>
 </ul>
 
+<p>
+  Where <code>&lt;cmd&gt;</code> is a <a href="#cmdoverview">simple command</a>.
+  The command success value of zero is treated true; a non-zero command failure value is treated false.
+  The <a href="#cmdtest"><code>test</code></a> command is frequently used for comparisons.
+</p>
 <p>
   Note that <code>while</code> is equivalent to <code>until</code> if the command result is inverted.
 </p>
@@ -1168,7 +1179,7 @@ mount -t vfat /dev/ram1 /tmp
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-[ &lt;expression&gt; ]
+[ [!] &lt;expression&gt; ]
 test &lt;expression&gt;
 </pre></ul>
 <p>
