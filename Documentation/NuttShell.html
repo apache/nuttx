@@ -932,10 +932,10 @@ fi
 <ul>
   <li>
     <p><b><code>while-do-done</code></b>.
-    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has an exit status of zero (or non-zero if inverted with <code>!</code>).
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has an exit status of zero.
     The syntax is as follows:
     <ul><pre>
-while [!] &lt;cmd&gt;
+while &lt;cmd&gt;
 do
   [sequence of &lt;cmd&gt;]
 done
@@ -944,10 +944,10 @@ done
   </li>
   <li>
     <p><b><code>until-do-done</code></b>
-    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has a non-zero exit status (or zero if inverted with <code>!</code>).
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has a non-zero exit status.
     The syntax is as follows:
     <ul><pre>
-until [!] &lt;cmd&gt;
+until &lt;cmd&gt;
 do
   [sequence of &lt;cmd&gt;]
 done
@@ -960,9 +960,6 @@ done
   Where <code>&lt;cmd&gt;</code> is a <a href="#cmdoverview">simple command</a>.
   The command success value of zero is treated true; a non-zero command failure value is treated false.
   The <a href="#cmdtest"><code>test</code></a> command is frequently used for comparisons.
-</p>
-<p>
-  Note that <code>while</code> is equivalent to <code>until</code> if the command result is inverted.
 </p>
 
 <p><b>The <a href="#cmdbreak"><code>break</code></a> Command</b>.
