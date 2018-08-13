@@ -3793,16 +3793,16 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   /* Load USB factory calibration values from NVRAM */
 
-  calib_transn = getreg32(SYSCTRL_FUSES_USBTRANSN_ADDR) & 
+  calib_transn = getreg32(SYSCTRL_FUSES_USBTRANSN_ADDR) &
                  SYSCTRL_FUSES_USBTRANSN_MASK >> SYSCTRL_FUSES_USBTRANSN_SHIFT;
 
-  calib_transp = getreg32(SYSCTRL_FUSES_USBTRANSP_ADDR) & 
+  calib_transp = getreg32(SYSCTRL_FUSES_USBTRANSP_ADDR) &
                  SYSCTRL_FUSES_USBTRANSP_MASK >> SYSCTRL_FUSES_USBTRANSP_SHIFT;
 
   calib_trim = getreg32(SYSCTRL_FUSES_USBTRIM_ADDR) &
                SYSCTRL_FUSES_USBTRIM_MASK >> SYSCTRL_FUSES_USBTRIM_SHIFT;
 
-  padcalib = USB_PADCAL_TRANSP(calib_transp) | 
+  padcalib = USB_PADCAL_TRANSP(calib_transp) |
              USB_PADCAL_TRANSN(calib_transn) |
              USB_PADCAL_TRIM(calib_trim);
 

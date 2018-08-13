@@ -294,7 +294,7 @@
 #define USART_CTRLC_BRKLEN_SHIFT     (8)       /* Bits 8-9: LIN Master Break Length */
 #define USART_CTRLC_BRKLEN_MASK      (3 << USART_CTRLC_BRKLEN_SHIFT)
 #  define USART_CTRLC_BRKLEN_13BITS  (0 << USART_CTRLC_BRKLEN_SHIFT) /* 13 bit times */
-#  define USART_CTRLC_BRKLEN_17BITS  (1 << USART_CTRLC_BRKLEN_SHIFT) /* 17 bit times */ 
+#  define USART_CTRLC_BRKLEN_17BITS  (1 << USART_CTRLC_BRKLEN_SHIFT) /* 17 bit times */
 #  define USART_CTRLC_BRKLEN_21BITS  (2 << USART_CTRLC_BRKLEN_SHIFT) /* 21 bit times */
 #  define USART_CTRLC_BRKLEN_26BITS  (3 << USART_CTRLC_BRKLEN_SHIFT) /* 26 bit times */
 #define USART_CTRLC_HDRDLY_SHIFT     (10)      /* Bits 10-11: LIN Master Header Delay */

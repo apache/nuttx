@@ -282,7 +282,7 @@ int spirit_pktmbus_set_postamble(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_pktmbus_get_postamble
  *
  * Description:
  *   Returns how many chip sequence "01" are used in the postamble
@@ -309,7 +309,7 @@ uint8_t spirit_pktmbus_get_postamble(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_pktmbus_set_submode
  *
  * Description:
  *   Sets the MBUS submode used.

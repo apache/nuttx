@@ -250,7 +250,7 @@ _reset_vector:
   /* Set the stack pointer */
 
   l.movhi r1,hi(_ebss);
-  l.ori   r1,r1,lo(_ebss); 
+  l.ori   r1,r1,lo(_ebss);
   l.addi  r1,r1,CONFIG_IDLETHREAD_STACKSIZE-4;
   l.ori   r2,r1,0;
   l.nop
@@ -262,7 +262,7 @@ _reset_vector:
   l.nop;
 
   /* Should never reach here */
-  
+
   l.j 0;
   l.nop;
 
@@ -281,7 +281,7 @@ _data_page_fault:
   l.nop;
   l.j 0;
   l.nop;
- 
+
   /* Instruction page fault */
 
   .org 0x400
@@ -289,7 +289,7 @@ _instruction_page_fault:
   l.nop;
   l.j 0;
   l.nop;
-  
+
   /* Tick Timer */
 
   .org 0x500
@@ -354,7 +354,7 @@ _itlb_miss:
 
   /* Range exception */
 
-  .org 0xB00 
+  .org 0xB00
 _range_exception:
   l.nop;
   l.j 0;

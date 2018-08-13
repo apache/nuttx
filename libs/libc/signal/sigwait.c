@@ -62,17 +62,17 @@
  *   suspended until one or more becomes pending. The signals defined by set
  *   will been blocked at the time of the call to sigwait(); otherwise the
  *   behavior is undefined. The effect of sigwait() on the signal actions
- *   for the signals in set is unspecified. 
+ *   for the signals in set is unspecified.
  *
  *   If more than one thread is using sigwait() to wait for the same
  *   signal, no more than one of these threads will return from sigwait()
  *   with the signal number. Which thread returns from sigwait() if more
- *   than a single thread is waiting is unspecified. 
+ *   than a single thread is waiting is unspecified.
  *
  *   Should any of the multiple pending signals in the range SIGRTMIN to
  *   SIGRTMAX be selected, it shall be the lowest numbered one. The selection
  *   order between realtime and non-realtime signals, or between multiple
- *   pending non-realtime signals, is unspecified. 
+ *   pending non-realtime signals, is unspecified.
  *
  * Input Parameters:
  *   set  - The set of pending signals to wait for
@@ -81,7 +81,7 @@
  * Returned Value:
  *   Upon successful completion, sigwait() stores the signal number of the
  *   received signal at the location referenced by sig and returns zero.
- *   Otherwise, an error number is returned to indicate the error. 
+ *   Otherwise, an error number is returned to indicate the error.
  *
  ****************************************************************************/
 

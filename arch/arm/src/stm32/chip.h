@@ -47,7 +47,7 @@
 #include <arch/stm32/chip.h>
 
 /* Include the chip interrupt definition file */
- 
+
 #include <arch/stm32/irq.h>
 
 /* Include the chip pin configuration file */

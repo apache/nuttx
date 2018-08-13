@@ -280,7 +280,7 @@ static uart_dev_t g_uart0port =
     .size   = CONFIG_UART0_RXBUFSIZE,
     .buffer = g_uart0rxbuffer,
   },
-  .xmit     = 
+  .xmit     =
   {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,

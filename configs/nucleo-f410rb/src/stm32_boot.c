@@ -80,7 +80,7 @@ void stm32_boardinitialize(void)
 
 #ifdef CONFIG_ARCH_BUTTONS
   /* Configure on-board BUTTONs if BUTTON support has been selected. */
- 
+
   board_button_initialize();
 #endif
 }

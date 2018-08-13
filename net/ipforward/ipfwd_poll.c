@@ -60,7 +60,7 @@
  *
  * Description:
  *   Generic output conversion hook.  Only needed for IEEE802.15.4 (and
- *   other, non-standard packet radios) for now but this is a point where 
+ *   other, non-standard packet radios) for now but this is a point where
  *   support for other conversions may be provided.
  *
  ****************************************************************************/

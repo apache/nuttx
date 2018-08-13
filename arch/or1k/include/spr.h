@@ -232,7 +232,7 @@
 
 #define SPR_CPUCFGR_NSGF_SHIFT  (0)
 #define SPR_CPUCFGR_NSGF_MASK   (0xf << SPR_CPUCFGR_NSGF_SHIFT)
-#define SPR_CPUCFGR_CGF         (1 << 4) 
+#define SPR_CPUCFGR_CGF         (1 << 4)
 #define SPR_CPUCFGR_OB32S       (1 << 5)                /* ORBIS32 Supported */
 #define SPR_CPUCFGR_OB64S       (1 << 6)                /* ORBIS64 Supported */
 #define SPR_CPUCFGR_OF32S       (1 << 7)                /* ORFPX32 Supported */

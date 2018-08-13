@@ -78,7 +78,7 @@ void board_autoled_initialize(void)
   /* Set the or1k GPIO direction register to output */
 
   /* The Terasic C5G has 18 LEDs on GPIO0[0:17] */
-  
+
   *led_dir = 0x3fff;
   *led_data = 0x0;
 }

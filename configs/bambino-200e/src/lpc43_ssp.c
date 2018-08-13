@@ -76,12 +76,12 @@ void weak_function lpc43_sspdev_initialize(void)
     {
       snerr("ERROR: Error configuring chip select GPIO pin\n");
     }
-    
+
   lpc43_pin_config(PINCONFIG_MAX31855_CS2);
   ret = lpc43_gpio_config(GPIO_MAX31855_CS2);
   if (ret < 0)
     {
-      snerr("ERROR: Error configuring chip select GPIO pin\n")  
+      snerr("ERROR: Error configuring chip select GPIO pin\n")
     }
 #endif
 }
@@ -108,7 +108,7 @@ void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
     {
       lpc43_gpio_write(GPIO_MAX31855_CS1, !selected);
     }
-    
+
   if (devid == SPIDEV_TEMPERATURE(1))
     {
       lpc43_gpio_write(GPIO_MAX31855_CS2, !selected);
@@ -157,7 +157,7 @@ void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
     {
       lpc43_gpio_write(GPIO_MAX31855_CS1, !selected);
     }
-    
+
   if (devid == SPIDEV_TEMPERATURE(1))
     {
       lpc43_gpio_write(GPIO_MAX31855_CS2, !selected);

@@ -96,7 +96,7 @@ int lpc43_max31855initialize(FAR const char *devpath, int bus, uint16_t devid)
     {
       snerr("ERROR: Error registering MAX31855\n");
     }
-    
+
   return ret;
 }
 

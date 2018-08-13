@@ -107,7 +107,7 @@ int spirit_gpio_enable_tempsensor(FAR struct spirit_library_s *spirit,
 
   DEBUGASSERT(IS_SPIRIT_FUNCTIONAL_STATE(newstate));
 
-  /* Reads the ANA_FUNC_CONF0 register and mask the result to enable or disable 
+  /* Reads the ANA_FUNC_CONF0 register and mask the result to enable or disable
    * the temperature sensor */
 
   ret = spirit_reg_read(spirit, ANA_FUNC_CONF0_BASE, &regval, 1);

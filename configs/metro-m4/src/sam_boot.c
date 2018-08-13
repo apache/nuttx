@@ -55,7 +55,7 @@
  * Name: sam_board_initialize
  *
  * Description:
- *   All SAMD5/E5 architectures must provide the following entry point. 
+ *   All SAMD5/E5 architectures must provide the following entry point.
  *   This entry point is called early in the initialization -- after all
  *   memory has been configured and mapped but before any devices have been
  *   initialized.

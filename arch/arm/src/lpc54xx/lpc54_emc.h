@@ -175,7 +175,7 @@ struct emc_static_chip_config_s
                           * read access in units of nanoseconds */
   uint32_t waitreadpage; /* In page mode, the read after the first read
                           * wait states in units of nanoseconds */
-  uint32_t waitwrite;    /* The delay from chip select to write access in 
+  uint32_t waitwrite;    /* The delay from chip select to write access in
                           * units of nanoseconds */
   uint32_t waitturn;     /* The Bus turn-around time in units of
                           * nanoseconds */

@@ -200,7 +200,7 @@ void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
  * Name: (various low-level list operations)
  *
  * Description:
- *   Perform operations on in-memory routing table lists 
+ *   Perform operations on in-memory routing table lists
  *
  * Input Parameters:
  *   entry - A pointer to the new entry to add to the list

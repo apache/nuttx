@@ -330,7 +330,7 @@ int stm32l4_gpio_initialize(void)
       pincount++;
     }
 #endif
-  
+
   return 0;
 }
 #endif /* CONFIG_DEV_GPIO && !CONFIG_GPIO_LOWER_HALF */

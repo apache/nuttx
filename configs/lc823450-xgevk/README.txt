@@ -57,12 +57,12 @@ index 687f50ca..8418eff8 100644
 +++ b/examples/ostest/waitpid.c
 @@ -54,7 +54,7 @@
   ****************************************************************************/
- 
+
  #define RETURN_STATUS 14
 -#define NCHILDREN     3
 +#define NCHILDREN     2
  #define PRIORITY      100
- 
+
  /****************************************************************************
 
 Other Status

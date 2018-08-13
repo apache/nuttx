@@ -491,7 +491,7 @@ void lpc54_emc_sram_initialize(FAR uint32_t *extwait,
   unsigned int i;
 
   /* Initialize extended wait. */
- 
+
   DEBUGASSERT(statconfig != NULL && nchips > 0);
 
   if (extwait)

@@ -185,7 +185,7 @@ static inline irqstate_t up_irq_save(void)
 /* Restore saved interrupt state */
 
 static inline void up_irq_restore(irqstate_t flags)
-{ 
+{
   if ((flags & AVR32_SR_GM_MASK) == 0)
     {
       __asm__ __volatile__ (

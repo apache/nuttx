@@ -1204,7 +1204,7 @@ Configuration Sub-directories
   1. Prepare USB flash storage.  This configuration depends on .WAV files
      provided to the system via a USB flash stick.  There are some sample
      audio files at https://github.com/tdrozdovskiy/CS43L22-Audio-driver
-     and these steps will put those sample .WAV files onto the USB flash: 
+     and these steps will put those sample .WAV files onto the USB flash:
 
      a. Format the USB flash storage into FAT. For example by next command
 

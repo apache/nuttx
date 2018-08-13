@@ -251,7 +251,7 @@ SINT_T fixedSdDrReadSector(UI_32 addr, UI_32 cnt, void *buf, SINT_T type,
                            struct SdDrCfg_s *cfg);
 
 UI_32 sdif_get_status(UI_32);
-  
+
 #if defined(__cplusplus)
 }
 #endif

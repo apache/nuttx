@@ -77,7 +77,7 @@ static int or1k_timer_isr(int irq, uint32_t *regs, void *arg)
   mtspr(SPR_TICK_TTMR, ttmr);
 
   sched_process_timer();
-  
+
   return OK;
 }
 
@@ -89,7 +89,7 @@ static int or1k_timer_isr(int irq, uint32_t *regs, void *arg)
  * Name: or1k_timer_initialize
  *
  * Description:
- *   Initialize the OpenRISC Tick Timer unit  
+ *   Initialize the OpenRISC Tick Timer unit
  *
  ****************************************************************************/
 
@@ -104,6 +104,6 @@ void or1k_timer_initialize(void)
   mtspr(SPR_TICK_TTCR, 0);
 
   /* Write TTMR */
-  
-  mtspr(SPR_TICK_TTMR, ttmr); 
+
+  mtspr(SPR_TICK_TTMR, ttmr);
 }

@@ -388,7 +388,7 @@ FAR struct bt_conn_s *bt_conn_create_le(FAR const bt_addr_le_t *peer);
  * Input Parameters:
  *   conn       - The connection to send the command on.
  *   rand, ediv - Values to use for the encryption key
- *   ltk        - 
+ *   ltk        -
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any

@@ -310,7 +310,7 @@
 #define USBMSC_MKEPBULKOUT(devDesc)   ((devDesc)->epno[USBMSC_EP_BULKOUT_IDX])
 #define USBMSC_EPOUTBULK_ATTR         (USB_EP_ATTR_XFER_BULK)
 
-#define USBMSC_MKEPBULKIN(devDesc)    (USB_DIR_IN | (devDesc)->epno[USBMSC_EP_BULKIN_IDX]) 
+#define USBMSC_MKEPBULKIN(devDesc)    (USB_DIR_IN | (devDesc)->epno[USBMSC_EP_BULKIN_IDX])
 #define USBMSC_EPINBULK_ATTR          (USB_EP_ATTR_XFER_BULK)
 
 #define USBMSC_HSBULKMAXPACKET        (512)

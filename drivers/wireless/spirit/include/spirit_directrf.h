@@ -124,7 +124,7 @@ int spirit_directrf_set_rxmode(FAR struct spirit_library_s *spirit,
                                enum spirit_directrx_e directrx);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_directrf_get_rxmode
  *
  * Description:
  *   Returns the DirectRF RX mode of SPIRIT.
@@ -141,7 +141,7 @@ enum spirit_directrx_e
   spirit_directrf_get_rxmode(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_directrf_set_txmode
  *
  * Description:
  *   Sets the TX mode of SPIRIT.
@@ -159,7 +159,7 @@ int spirit_directrf_set_txmode(FAR struct spirit_library_s *spirit,
                                enum spirit_directtx_e directtx);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_directrf_get_txmode
  *
  * Description:
  *   Returns the DirectRF TX mode of SPIRIT.

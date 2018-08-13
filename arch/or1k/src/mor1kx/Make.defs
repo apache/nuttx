@@ -81,7 +81,7 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = 
+CHIP_CSRCS  =
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 #CHIP_CSRCS += sam_timerisr.c

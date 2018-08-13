@@ -143,7 +143,7 @@ struct radiodev_properties_s
  *
  *    The radio network driver should then inform the network of the recipt
  *    of a frame by calling sixlowpan_input() or ieee802154_input().  That
- *    single frame (or, perhaps, list of frames) should be provided as 
+ *    single frame (or, perhaps, list of frames) should be provided as
  *    second argument of that call.
  *
  *    The network will free the IOB by calling iob_free after it has

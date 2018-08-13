@@ -406,7 +406,7 @@
 /* Vertical Sync Polarity */
 #define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
 /* Horicontal Sync Polarity */
-#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */ 
+#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
 
 /* GPIO pinset */
 

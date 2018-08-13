@@ -62,7 +62,7 @@ g_undeftmp:
 g_aborttmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
-    
+
 #ifdef CONFIG_ARMV7A_DECODEFIQ
 g_fiqtmp:
 	.word	0		/* Saved lr */

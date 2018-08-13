@@ -44,7 +44,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX) 
+#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
 
 /************************************************************************************
  * Pre-processor Definitions

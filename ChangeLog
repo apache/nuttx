@@ -18170,7 +18170,7 @@
 	  almost complete... still lacking GPIO support and LED support.  There are
 	  still no significant drivers available.
 	* SMP: Introduce spin_lock_irqsave() and spin_unlock_irqrestore().  These
-	  APIs are simplified version of enter_critical_section() and 
+	  APIs are simplified version of enter_critical_section() and
 	  leave_critical_section() to protect data (e.g. registers) in SMP mode.  By
 	  using these APIs inside drivers, performance will be improved.  From
 	  Masayuki Ishikawa (2017-12-07).
@@ -18660,7 +18660,7 @@
 	  longer returns an errno.  From Gregory Nutt (2018-01-31).
 	* graphics/:  Review return values for all calls to kthread_start() because
 	  it no longer returns an errno.  From Gregory Nutt (2018-01-31).
-	* sched/:  Convert legitimate uses of task_create() to nxtask_create(). 
+	* sched/:  Convert legitimate uses of task_create() to nxtask_create().
 	  Review handling of returned values from all uses of kthread_create() (as
 	  well as nxtask_create()).  From Gregory Nutt (2018-01-31).
 	* arm/src/kinetis:  Correct some Ethernet PHY register bit tests for the
@@ -18815,7 +18815,7 @@
 	  Mayencourt (2018-02-19).
 	* drivers/mtd:  mtd_config.c:  Add still more error handling (to detect bad
 	  underlying flash implementations).  Remove MTD_ERASE that was erasing data
-	  block instead of erase block.  This is a partial revert of 4f18b4. 
+	  block instead of erase block.  This is a partial revert of 4f18b4.
 	  Reported-by: Pascal Speck <iktek01@yahoo.com>
 	* arch/arm/src/stm32l4:  stm32l4_flash: change flash programming to use
 	  page buffer for unaligned writes.  From Juha Niskanen (2018-02-19).

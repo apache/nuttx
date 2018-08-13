@@ -45,7 +45,7 @@
  * priority" priority level. This mechanism is commonly supported by writing
  * the collection/processing task as a kernel driver worker thread that can
  * access multiple sensors.
- * 
+ *
  * A clean way to implement this is to implement this collection/processing
  * mechanism is as a driver that has efficient kernel-to-kernel access to
  * other sensor leaf-drivers that support the cluster driver interface.
@@ -175,7 +175,7 @@ extern "C"
  *        leaf driver's register function.
  *        It is passed as a parameter to the leaf driver's
  *        driver_open() and driver_close() functions.
- * 
+ *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *

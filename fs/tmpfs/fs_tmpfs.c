@@ -1917,7 +1917,7 @@ static int tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       dir->u.tmpfs.tf_tdo   = tdo;
       dir->u.tmpfs.tf_index = 0;
-      
+
       tmpfs_unlock_directory(tdo);
     }
 

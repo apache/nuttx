@@ -675,7 +675,7 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
 #if CONFIG_PKTRADIO_ADDRLEN == 1
   ninfo("MAC: %02x\n", mac[0]);
-  
+
 #elif CONFIG_PKTRADIO_ADDRLEN == 2
   ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
 
@@ -713,7 +713,7 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
 #if CONFIG_PKTRADIO_ADDRLEN == 1
   ninfo("MAC: %02x\n", mac[0]);
-  
+
 #elif CONFIG_PKTRADIO_ADDRLEN == 2
   ninfo("MAC: %02x:%02x\n", mac[0], mac[1]);
 

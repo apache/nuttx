@@ -222,7 +222,7 @@ static int dac7571_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
   /* Then perform the transfer. */
 
-  ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE); 
+  ret = i2c_write(priv->i2c, &config, buffer, BUFFER_SIZE);
   if (ret < 0)
     {
       aerr("ERROR: dac7571_send failed code:%d\n", ret);

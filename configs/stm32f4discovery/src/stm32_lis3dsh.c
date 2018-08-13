@@ -105,7 +105,7 @@ int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_ha
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
- 
+
 int stm32_lis3dshinitialize(FAR const char *devpath)
 {
   static struct lis3dsh_config_s acc0_config;
@@ -113,7 +113,7 @@ int stm32_lis3dshinitialize(FAR const char *devpath)
   int ret;
 
   sninfo("Initializing LIS3DSH\n");
-  
+
   acc0_config.irq=22;
   acc0_config.spi_devid=0;
   acc0_config.attach = &attach_disc_lis3dsh;

@@ -841,7 +841,7 @@ static inline void up_clear(FAR struct max7219_dev_s  *priv)
  *   spi   - An instance of the SPI interface to use to communicate
  *           with the MAX7219.
  *   devno - Device number to identify current display.
- *   
+ *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *

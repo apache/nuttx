@@ -69,7 +69,7 @@
  *
  * Returned Value:
  *   On success, sched_reporioritize() returns 0 (OK). On error, a negated
- *   errno value is returned. 
+ *   errno value is returned.
  *
  *   EINVAL The parameter 'param' is invalid or does not make sense for the
  *          current scheduling policy.

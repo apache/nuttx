@@ -173,7 +173,7 @@ struct rndis_query_cmplt
   uint32_t buffer[];      /* Buffer */
 };
 
-struct rndis_set_msg 
+struct rndis_set_msg
 {
   struct rndis_command_header hdr;
   uint32_t objid;         /* ObjectID */

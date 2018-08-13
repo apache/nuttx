@@ -71,7 +71,7 @@
 #  define ARGS(a)    ()
 #endif
 
-#define LARGS(a) ()             /* Relay on include files for libary func defs. 
+#define LARGS(a) ()             /* Relay on include files for libary func defs.
                                  */
 
 #ifndef SIG_TYPE
@@ -90,7 +90,7 @@
 #  define OBUFSIZ BUFSIZ        /* Default output buffer size */
 #endif
 
-#define MAXPATHLEN 1024         /* MAXPATHLEN - maximum length of a pathname we 
+#define MAXPATHLEN 1024         /* MAXPATHLEN - maximum length of a pathname we
                                  * allow */
 #define SIZE_INNER_LOOP  256    /* Size of the inter (fast) compress loop */
 
@@ -112,7 +112,7 @@
 #define INIT_BITS 9             /* initial number of bits/code */
 
 #ifndef SACREDMEM
- /* 
+ /*
   * SACREDMEM is the amount of physical memory saved for others; compress
   * will hog the rest.
   */
@@ -120,7 +120,7 @@
 #endif
 
 #ifndef USERMEM
- /* 
+ /*
   * Set USERMEM to the maximum amount of physical user memory available
   * in bytes.  USERMEM is used to determine the maximum BITS that can be used
   * for compression.
@@ -320,7 +320,7 @@ int block_mode = BLOCK_MODE;    /* Block compress mode -C compatible with 2.0 */
 int maxbits = BITS;             /* user settable max # bits/code */
 int zcat_flg = 0;               /* Write output on stdout, suppress messages */
 int recursive = 0;              /* compress directories */
-int exit_code = -1;             /* Exitcode of compress (-1 no file compressed) 
+int exit_code = -1;             /* Exitcode of compress (-1 no file compressed)
                                  */
 
 char_type inbuf[IBUFSIZ + 64];  /* Input buffer */
@@ -436,7 +436,7 @@ int primetab[256] =             /* Special secudary hash table.  */
 /*
  * compress fdin to fdout
  *
- * Algorithm:  use open addressing double hashing (no chaining) on the 
+ * Algorithm:  use open addressing double hashing (no chaining) on the
  * prefix code / next character combination.  We do a variant of Knuth's
  * algorithm D (vol. 3, sec. 6.4) along with G. Knott's relatively-prime
  * secondary probe.  Here, the modular division first probe is gives way
@@ -541,8 +541,8 @@ void compress(int fdin, int fdout)
                 }
               else
                 rat = (bytes_in << 8) / (bytes_out + (outbits >> 3));   /* 8
-                                                                         * fractional 
-                                                                         * bits 
+                                                                         * fractional
+                                                                         * bits
                                                                          */
               if (rat >= ratio)
                 ratio = (int)rat;

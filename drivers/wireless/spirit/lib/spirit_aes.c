@@ -98,7 +98,7 @@ int spirit_aes_enable(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_write_datain
  *
  * Description:
  *   Writes the data to encrypt or decrypt, or the encryption key for the
@@ -149,7 +149,7 @@ int spirit_aes_write_datain(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_read_dataout
  *
  * Description:
  *   Returns the encrypted or decrypted data or the decription key from the
@@ -239,7 +239,7 @@ int spirit_aes_write_key(FAR struct spirit_library_s *spirit,
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_read_key
  *
  * Description:
  *   Returns the encryption/decryption key from the AES_KEY_IN register.
@@ -319,7 +319,7 @@ int spirit_aes_encrypt(FAR struct spirit_library_s *spirit)
 }
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_decrypt
  *
  * Description:
  *   Executes the decryption operation.

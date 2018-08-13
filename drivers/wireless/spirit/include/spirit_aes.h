@@ -54,7 +54,7 @@
  * In order to decrypt data, the user must manage the AES_END IRQ and have a
  * decryption key.  There are two operative modes to make the data
  * decryption:
- * 
+ *
  * 1. Derive the decryption key from the encryption key and decrypt data
  *    directly using the spirit_aes_derivekey_decrypt() function
  *
@@ -126,7 +126,7 @@ int spirit_aes_enable(FAR struct spirit_library_s *spirit,
                       enum spirit_functional_state_e newstate);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_write_datain
  *
  * Description:
  *   Writes the data to encrypt or decrypt, or the encryption key for the
@@ -151,7 +151,7 @@ int spirit_aes_write_datain(FAR struct spirit_library_s *spirit,
                             FAR const uint8_t *buffer, uint8_t buflen);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_read_dataout
  *
  * Description:
  *   Returns the encrypted or decrypted data or the decription key from the
@@ -195,7 +195,7 @@ int spirit_aes_write_key(FAR struct spirit_library_s *spirit,
                          FAR const uint8_t *key);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_read_key
  *
  * Description:
  *   Returns the encryption/decryption key from the AES_KEY_IN register.
@@ -247,7 +247,7 @@ int spirit_aes_enc2deckey(FAR struct spirit_library_s *spirit);
 int spirit_aes_encrypt(FAR struct spirit_library_s *spirit);
 
 /******************************************************************************
- * Name: 
+ * Name: spirit_aes_decrypt
  *
  * Description:
  *   Executes the decryption operation.

@@ -570,7 +570,7 @@ static ssize_t adxl372_dvr_read(FAR void *instance_handle, FAR char *buffer,
                                 size_t buflen)
 {
   FAR struct adxl372_dev_s *priv = ((FAR struct adxl372_dev_s *)instance_handle);
-  union 
+  union
   {
     int16_t d16;
     char    d8[2];

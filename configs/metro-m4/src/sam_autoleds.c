@@ -53,7 +53,7 @@
  *   ------------------- ---------------------------- ------
  *   SYMBOL                  Meaning                  LED
  *   ------------------- ---------------------------- ------
- *   
+ *
  *   LED_STARTED         NuttX has been started       OFF
  *   LED_HEAPALLOCATE    Heap has been allocated      OFF
  *   LED_IRQSENABLED     Interrupts enabled           OFF

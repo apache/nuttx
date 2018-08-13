@@ -218,16 +218,16 @@ static void apds9960_resetgesture(FAR struct apds9960_dev_s *priv)
 {
   priv->gesture_data.index = 0;
   priv->gesture_data.total_gestures = 0;
-    
+
   priv->gesture_ud_delta   = 0;
   priv->gesture_lr_delta   = 0;
-    
+
   priv->gesture_ud_count   = 0;
   priv->gesture_lr_count   = 0;
-    
+
   priv->gesture_near_count = 0;
   priv->gesture_far_count  = 0;
-    
+
   priv->gesture_state      = 0;
 }
 
@@ -288,7 +288,7 @@ static int apds9960_setdefault(FAR struct apds9960_dev_s *priv)
     }
 
   /* Set LED driver strength to 100mA, AGAIN 4X and PGAIN 4X */
-  
+
   ret = apds9960_i2c_write8(priv, APDS9960_CONTROL, DEFAULT_CONTROL);
   if (ret < 0)
     {
@@ -443,7 +443,7 @@ static int apds9960_setdefault(FAR struct apds9960_dev_s *priv)
       return ret;
     }
 
-  return OK;  
+  return OK;
 }
 
 /****************************************************************************
@@ -600,7 +600,7 @@ static bool apds9960_isgestureavailable(FAR struct apds9960_dev_s *priv)
 {
   int ret;
   uint8_t val;
-    
+
   /* Read value from GSTATUS register */
 
   ret = apds9960_i2c_read8(priv, APDS9960_GSTATUS, &val);
@@ -656,7 +656,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
               priv->gesture_data.total_gestures);
         return false;
     }
-    
+
   /* Check to make sure our data isn't out of bounds */
 
   if ((priv->gesture_data.total_gestures <= 32) && \
@@ -678,7 +678,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
               break;
             }
         }
-        
+
       /* If one of the _first values is 0, then there is no good data */
 
       if ((u_first == 0) || (d_first == 0) || \
@@ -712,14 +712,14 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
             }
         }
     }
-    
+
     /* Calculate the first vs. last ratio of up/down and left/right */
 
     ud_ratio_first = ((u_first - d_first) * 100) / (u_first + d_first);
     lr_ratio_first = ((l_first - r_first) * 100) / (l_first + r_first);
     ud_ratio_last  = ((u_last  - d_last)  * 100) / (u_last  + d_last);
     lr_ratio_last  = ((l_last  - r_last)  * 100) / (l_last  + r_last);
-       
+
     sninfo("Last Values: \n");
     sninfo("U: %03d\n", u_last);
     sninfo("D: %03d\n", d_last);
@@ -736,7 +736,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 
     ud_delta = ud_ratio_last - ud_ratio_first;
     lr_delta = lr_ratio_last - lr_ratio_first;
-    
+
     sninfo("Deltas: \n");
     sninfo("UD: %03d\n", ud_delta);
     sninfo("LR: %03d\n", lr_delta);
@@ -745,11 +745,11 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 
     priv->gesture_ud_delta += ud_delta;
     priv->gesture_lr_delta += lr_delta;
-    
+
     sninfo("Accumulations: \n");
     sninfo("UD: %03d\n", priv->gesture_ud_delta);
     sninfo("LR: %03d\n", priv->gesture_lr_delta);
-    
+
     /* Determine U/D gesture */
 
     if (priv->gesture_ud_delta >= GESTURE_SENSITIVITY_1)
@@ -767,7 +767,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
             priv->gesture_ud_count = 0;
           }
       }
-    
+
     /* Determine L/R gesture */
 
     if (priv->gesture_lr_delta >= GESTURE_SENSITIVITY_1)
@@ -804,7 +804,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
                     priv->gesture_far_count++;
                   }
               }
-            
+
             if ((priv->gesture_near_count >= 10) && \
                 (priv->gesture_far_count >= 2))
               {
@@ -833,7 +833,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
               {
                 priv->gesture_near_count++;
               }
-            
+
             if (priv->gesture_near_count >= 10)
               {
                 priv->gesture_ud_count = 0;
@@ -843,13 +843,13 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
               }
           }
       }
-    
+
     sninfo(" UD_CT: %03d\n", priv->gesture_ud_count);
     sninfo(" LR_CT: %03d\n", priv->gesture_lr_count);
     sninfo(" NEAR_CT: %03d\n", priv->gesture_near_count);
     sninfo(" FAR_CT:  %03d\n", priv->gesture_far_count);
     sninfo("----------------------\n");
-    
+
     return false;
 }
 
@@ -996,7 +996,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
   int motion;
   int ret;
   int i;
-    
+
   /* Make sure that power and gesture is on and data is valid */
 
   if (!apds9960_isgestureavailable(priv))
@@ -1011,7 +1011,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
       /* Wait some time to collect next batch of FIFO data */
 
       nxsig_usleep(FIFO_PAUSE_TIME);
-        
+
       /* Get the contents of the STATUS register. Is data still valid? */
 
       ret = apds9960_i2c_read8(priv, APDS9960_GSTATUS, &gstatus);
@@ -1020,7 +1020,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
           snerr("ERROR: Failed to read APDS9960_GSTATUS!\n");
           return ret;
         }
-        
+
       /* If we have valid data, read in FIFO */
 
       if ((gstatus & GVALID) == GVALID)
@@ -1091,7 +1091,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
                             //sninfo("gesture_motion = %d\n", gesture_motion);
                         }
                     }
-                    
+
                   /* Reset data */
 
                   priv->gesture_data.index = 0;

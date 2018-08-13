@@ -77,7 +77,7 @@
 void up_task_start(main_t taskentry, int argc, FAR char *argv[])
 {
   /* Let sys_call3() do all of the work */
-  
+
   sinfo("entry %p argc %d\n", taskentry, argc);
 
   sys_call3(SYS_task_start, (uintptr_t)taskentry, (uintptr_t)argc,

@@ -110,7 +110,7 @@ extern "C"
  *   spi   - An instance of the SPI interface to use to communicate
  *           with the MAX7219.
  *   devno - Device number to identify current display.
- *   
+ *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *

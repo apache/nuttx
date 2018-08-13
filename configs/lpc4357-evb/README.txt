@@ -373,7 +373,7 @@ FPU Configuration Options
 -------------------------
 
 There are two version of the FPU support built into the most NuttX Cortex-M4
-ports. 
+ports.
 
 1. Non-Lazy Floating Point Register Save
 

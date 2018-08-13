@@ -1095,7 +1095,7 @@ static int lsm330_dvr_ioctl(FAR void *instance_handle, int cmd,
  *   None
  *
  ******************************************************************************/
- 
+
 static void lsm330_dvr_exchange(FAR void *instance_handle,
                                 FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords)

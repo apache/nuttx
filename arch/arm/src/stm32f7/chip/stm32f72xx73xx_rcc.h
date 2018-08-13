@@ -140,7 +140,7 @@
 #  define RCC_PLLCFG_PLLN(n)         ((n) << RCC_PLLCFG_PLLN_SHIFT) /* n = 2..432 */
 #define RCC_PLLCFG_PLLP_SHIFT        (16)      /* Bits 16-17: Main PLL (PLL) main system clock divider */
 #define RCC_PLLCFG_PLLP_MASK         (3 << RCC_PLLCFG_PLLP_SHIFT)
-#  define RCC_PLLCFG_PLLP(n)         ((((n)>>1)-1)<< RCC_PLLCFG_PLLP_SHIFT) /* n=2,4,6,8 */ 
+#  define RCC_PLLCFG_PLLP(n)         ((((n)>>1)-1)<< RCC_PLLCFG_PLLP_SHIFT) /* n=2,4,6,8 */
 #  define RCC_PLLCFG_PLLP_2          (0 << RCC_PLLCFG_PLLP_SHIFT) /* 00: PLLP = 2 */
 #  define RCC_PLLCFG_PLLP_4          (1 << RCC_PLLCFG_PLLP_SHIFT) /* 01: PLLP = 4 */
 #  define RCC_PLLCFG_PLLP_6          (2 << RCC_PLLCFG_PLLP_SHIFT) /* 10: PLLP = 6 */

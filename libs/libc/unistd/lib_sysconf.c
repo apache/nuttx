@@ -63,7 +63,7 @@
  *   values used for name.
  *
  *     Variable                           Value of Name
- *     
+ *
  *     {AIO_LISTIO_MAX}                   _SC_AIO_LISTIO_MAX
  *     {AIO_MAX}                          _SC_AIO_MAX
  *     {AIO_PRIO_DELTA_MAX}               _SC_AIO_PRIO_DELTA_MAX
