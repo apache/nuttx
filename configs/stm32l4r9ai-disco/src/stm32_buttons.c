@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/stm32l476vg-disco/src/stm32_buttons.c
+ * configs/stm32l4r9ai-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: dev@ziggurat29.com
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,7 +46,7 @@
 #include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
-#include "stm32l476vg-disco.h"
+#include "stm32l4r9ai-disco.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32l476vg-disco/src/stm32_spi.c
+ * configs/stm32l4r9ai-disco/src/stm32_spi.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <chip.h>
 #include <stm32l4.h>
 
-#include "stm32l476vg-disco.h"
+#include "stm32l4r9ai-disco.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 

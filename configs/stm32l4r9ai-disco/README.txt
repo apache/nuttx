@@ -3,26 +3,26 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the ST
-STM32L476VG Discovery board from ST Micro.  See
+STM32L4R9AI Discovery board from ST Micro.  See
 
-  http://www.st.com/stm32l476g-disco
+  https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-eval-tools/stm32-mcu-eval-tools/stm32-mcu-discovery-kits/32l4r9idiscovery.html
 
-STM32L476VG:
+STM32L4R9AI:
 
-  Microprocessor: 32-bit ARM Cortex M4 at 80MHz STM32L476VGT6
-  Memory:         1024 KB Flash and 96+32 KB SRAM
-  ADC:            3x12-bit, 2.4 MSPS A/D converter: up to 24 channels
+  Microprocessor: 32-bit ARM Cortex M4 at 120MHz STM32L4R9AI
+  Memory:         2048 KB Flash and 192+64+384 KB SRAM
+  ADC:            1x12-bit, 2.4 MSPS A/D converter: up to 24 channels
   DMA:            16-stream DMA controllers with FIFOs and burst support
   Timers:         Up to 11 timers: up to eight 16-bit, two 32-bit timers, two
                   watchdog timers, and a SysTick timer
   GPIO:           Up to 51 I/O ports with interrupt capability
-  I2C:            Up to 3 x I2C interfaces
+  I2C:            Up to 4 x I2C interfaces
   USARTs:         Up to 3 USARTs, 2 UARTs, 1 LPUART
   SPIs:           Up to 3 SPIs
   SAIs:           Up to 2 dual-channel audio interfaces
   CAN interface
   SDIO interface
-  QSPI interface
+  OCTOSPI interface
   USB:            USB 2.0 full-speed device/host/OTG controller with on-chip PHY
   CRC calculation unit
   RTC
@@ -31,7 +31,7 @@ Board features:
 
   Peripherals:    2 led, 1 d-pad joystick, 2 x LED, LCD, USC OTG FS, SAI stereo
                   Digital Microphone, MEMS Accelerometer, Magnetometer,
-                  Gyroscope, 128 Mbit QSPI Flash, current ammeter
+                  Gyroscope, 512 Mbit OCTOSPI Flash, current ammeter
   Debug:          Serial wire debug and JTAG interfaces
 
   Uses a STM32F103 to provide a ST-Link for programming, debug similar to the

@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm32l476vg-disco/include/stm32l476vg-disco-clocking.h
+ * configs/stm32l4r9ai-disco/include/stm32l4r9ai-disco-clocking.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: dev@ziggurat29.com
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
-#define __CONFIGS_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H
+#ifndef __CONFIGS_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
+#define __CONFIGS_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H
 
 /************************************************************************************
  * Included Files
@@ -51,8 +51,8 @@
 
 /* Clocking *************************************************************************/
 
-/* The stm32l476vg-disco supports both HSE and LSE crystals.  As shipped, the HSE
- * crystal is not populated.  Therefore the stm32l476vg-disco will need to run off the
+/* The stm32l4r9ai-disco supports both HSE and LSE crystals.  As shipped, the HSE
+ * crystal is not populated.  Therefore the stm32l4r9ai-disco will need to run off the
  * 16MHz HSI clock, or the 32khz-synced MSI, unless you install the HSE xtal.
  */
 
@@ -158,26 +158,22 @@
 /* APB1 clock (PCLK1) is HCLK/1 (80MHz) */
 
 #define STM32L4_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
-#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY / 1)
+#define STM32L4_PCLK1_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
-/* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the
- * same frequency as that of the APB domain. Otherwise they are set to twice.
- *
- * REVISIT : this can be configured
- */
+/* Timers driven from APB1 will be twice PCLK1 */
+/* REVISIT : this can be configured */
 
-#define STM32L4_APB1_TIM2_CLKIN   (STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM3_CLKIN   (STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM4_CLKIN   (STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM5_CLKIN   (STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM6_CLKIN   (STM32L4_PCLK1_FREQUENCY)
-#define STM32L4_APB1_TIM7_CLKIN   (STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM2_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM3_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM4_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM5_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM6_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
+#define STM32L4_APB1_TIM7_CLKIN   (2*STM32L4_PCLK1_FREQUENCY)
 
 /* APB2 clock (PCLK2) is HCLK (80MHz) */
 
 #define STM32L4_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
-#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY / 1)
+#define STM32L4_PCLK2_FREQUENCY   (STM32L4_HCLK_FREQUENCY/1)
 
 /* The timer clock frequencies are automatically defined by hardware.
  * If the APB prescaler equals 1, the timer clock frequencies are set to the
@@ -395,4 +391,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_STM32L476VG_DISCO_INCLUDE_STM32L476VG_DISCO_CLOCKING_H */
+#endif  /* __CONFIGS_STM32L4R9AI_DISCO_INCLUDE_STM32L4R9AI_DISCO_CLOCKING_H */

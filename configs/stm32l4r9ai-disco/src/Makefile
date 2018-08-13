@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm32l476vg-disco/src/Makefile
+# configs/stm32l4r9ai-disco/src/Makefile
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: dev@ziggurat29.com
@@ -57,7 +57,11 @@ CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
-#CSRCS += stm32_adc.c
+CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_DAC),y)
+CSRCS += stm32_dac.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
