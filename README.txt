@@ -1981,6 +1981,8 @@ nuttx/
  |   |   `- README.txt
  |   |- stm32l476vg-disco/
  |   |   `- README.txt
+ |   |- stm32l4r9ai-disco/
+ |   |   `-README.txt
  |   |- stm32ldiscovery/
  |   |   `- README.txt
  |   |- stm32vldiscovery/
