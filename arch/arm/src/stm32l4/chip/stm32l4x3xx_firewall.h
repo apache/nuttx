@@ -54,7 +54,7 @@
 #define STM32L4_FIREWALL_CSSA_OFFSET    0x0000
 #define STM32L4_FIREWALL_CSL_OFFSET     0x0004
 #define STM32L4_FIREWALL_NVDSSA_OFFSET  0x0008
-#define STM32L4_FIREWALL_NVDSL_OFFSET   0x000C
+#define STM32L4_FIREWALL_NVDSL_OFFSET   0x000c
 #define STM32L4_FIREWALL_VDSSA_OFFSET   0x0010
 #define STM32L4_FIREWALL_VDSL_OFFSET    0x0014
 #define STM32L4_FIREWALL_CR_OFFSET      0x0020
@@ -73,27 +73,27 @@
 
 /* Code Segment Start Address */
 #define FIREWALL_CSSADD_SHIFT           8
-#define FIREWALL_CSSADD_MASK            (0xFFFF << FIREWALL_CSSADD_SHIFT)
+#define FIREWALL_CSSADD_MASK            (0xffff << FIREWALL_CSSADD_SHIFT)
 
 /* Code Segment Length */
 #define FIREWALL_CSSLENG_SHIFT          8
-#define FIREWALL_CSSLENG_MASK           (0x3FFF << FIREWALL_CSSLENG_SHIFT)
+#define FIREWALL_CSSLENG_MASK           (0x3fff << FIREWALL_CSSLENG_SHIFT)
 
 /* Non-volatile Data Segment Start Address */
 #define FIREWALL_NVDSADD_SHIFT          8
-#define FIREWALL_NVDSADD_MASK           (0xFFFF << FIREWALL_NVDSADD_SHIFT)
+#define FIREWALL_NVDSADD_MASK           (0xffff << FIREWALL_NVDSADD_SHIFT)
 
 /* Non-volatile Data Segment Length */
 #define FIREWALL_NVDSLENG_SHIFT         8
-#define FIREWALL_NVDSLENG_MASK          (0x3FFF << FIREWALL_NVDSLENG_SHIFT)
+#define FIREWALL_NVDSLENG_MASK          (0x3fff << FIREWALL_NVDSLENG_SHIFT)
 
 /* Volatile Data Segment Start Address */
 #define FIREWALL_VDSADD_SHIFT           6
-#define FIREWALL_VDSADD_MASK            (0x07FF << FIREWALL_VDSADD_SHIFT)
+#define FIREWALL_VDSADD_MASK            (0x07ff << FIREWALL_VDSADD_SHIFT)
 
 /* Volatile Data Segment Length */
 #define FIREWALL_VDSLENG_SHIFT          6
-#define FIREWALL_VDSLENG_MASK           (0x07FF << FIREWALL_VDSLENG_SHIFT)
+#define FIREWALL_VDSLENG_MASK           (0x07ff << FIREWALL_VDSLENG_SHIFT)
 
 /* Configuration Register */
 #define FIREWALL_CR_FPA                 (1 << 0) /* Bit 0: Firewall prearm */

@@ -55,7 +55,7 @@
  * NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping tables.
  *
  * Processor Exceptions (vectors 0-15).  These common definitions can be found in the file
- * nuttx/arch/arm/include/stm32f7/irq.h which includes this file
+ * nuttx/arch/arm/include/stm32l4/irq.h which includes this file.
  *
  * External interrupts (vectors >= 16)
  */

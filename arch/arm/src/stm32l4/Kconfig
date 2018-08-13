@@ -420,6 +420,14 @@ config ARCH_CHIP_STM32L4A6AG
 	---help---
 		STM32 L4 Cortex M4, AES, HASH, 1024Kb FLASH, 320 Kb SRAM
 
+config ARCH_CHIP_STM32L4R9AI
+	bool "STM32L4R9AI"
+	select STM32L4_STM32L4R9XX
+	select STM32L4_FLASH_CONFIG_I
+	select STM32L4_IO_CONFIG_A
+	---help---
+		STM32 L4+ Cortex M4, 2048Kb FLASH, 640 Kb SRAM
+
 endchoice # STM32 L4 Chip Selection
 
 # Chip product lines
@@ -487,6 +495,7 @@ config STM32L4_STM32L4X5
 	select STM32L4_HAVE_SDMMC1
 	select STM32L4_HAVE_OTGFS
 	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_QSPI
 
 config STM32L4_STM32L4X6
 	# STM32L4x6 (documented in RM0351)
@@ -516,6 +525,37 @@ config STM32L4_STM32L4X6
 	select STM32L4_HAVE_SDMMC1
 	select STM32L4_HAVE_OTGFS
 	select STM32L4_HAVE_LCD
+	select STM32L4_HAVE_QSPI
+
+config STM32L4_STM32L4XR
+	# STM32L4+ (documented in RM0432)
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select STM32L4_HAVE_USART1
+	select STM32L4_HAVE_USART2
+	select STM32L4_HAVE_USART3
+	select STM32L4_HAVE_UART4
+	select STM32L4_HAVE_UART5
+	select STM32L4_HAVE_ADC2
+	select STM32L4_HAVE_DAC2
+	select STM32L4_HAVE_FSMC
+	select STM32L4_HAVE_TIM3
+	select STM32L4_HAVE_TIM4
+	select STM32L4_HAVE_TIM5
+	select STM32L4_HAVE_TIM7
+	select STM32L4_HAVE_TIM8
+	select STM32L4_HAVE_TIM17
+	select STM32L4_HAVE_LPTIM1
+	select STM32L4_HAVE_LPTIM2
+	select STM32L4_HAVE_COMP
+	select STM32L4_HAVE_SAI1
+	select STM32L4_HAVE_SAI2
+	select STM32L4_HAVE_SDMMC1
+	select STM32L4_HAVE_OTGFS
+	select STM32L4_HAVE_I2C4
+	select STM32L4_HAVE_DCMI
+	select STM32L4_HAVE_DFSDM1
 
 # Chip subfamilies:
 
@@ -627,6 +667,48 @@ config STM32L4_STM32L4A6XX
 	select STM32L4_HAVE_AES
 	select STM32L4_HAVE_HASH
 
+config STM32L4_STM32L4R5XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+
+config STM32L4_STM32L4S5XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+	select STM32L4_HAVE_AES
+	select STM32L4_HAVE_HASH
+
+config STM32L4_STM32L4R7XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+	select STM32L4_HAVE_DMA2D
+
+config STM32L4_STM32L4S7XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+	select STM32L4_HAVE_DMA2D
+	select STM32L4_HAVE_AES
+	select STM32L4_HAVE_HASH
+
+config STM32L4_STM32L4R9XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+	select STM32L4_HAVE_DMA2D
+	select STM32L4_HAVE_LTDC
+
+config STM32L4_STM32L4S9XX
+	bool
+	default n
+	select STM32L4_STM32L4XR
+	select STM32L4_HAVE_DMA2D
+	select STM32L4_HAVE_LTDC
+	select STM32L4_HAVE_AES
+	select STM32L4_HAVE_HASH
+
 choice
 	prompt "Override Flash Size Designator"
 	depends on ARCH_CHIP_STM32L4
@@ -640,6 +722,7 @@ choice
 			     C         256
 			     E         512
 			     G        1024
+			     I        2048
 
 		This configuration option defaults to using the configuration based on that designator
 		or the default smaller size if there is no last character designator is present in the
@@ -668,6 +751,9 @@ config STM32L4_FLASH_OVERRIDE_E
 config STM32L4_FLASH_OVERRIDE_G
 	bool "G 1024 KB"
 
+config STM32L4_FLASH_OVERRIDE_I
+	bool "I 2048 KB"
+
 endchoice # "Override Flash Size Designator"
 
 # Flash configurations
@@ -690,6 +776,11 @@ config STM32L4_FLASH_CONFIG_G
 	bool
 	default n
 	depends on STM32L4_STM32L4X5 || STM32L4_STM32L4X6
+
+config STM32L4_FLASH_CONFIG_I
+	bool
+	default n
+	depends on STM32L4_STM32L4XR
 
 # Pin/package configurations
 
@@ -893,6 +984,10 @@ config STM32L4_HAVE_UART5
 	bool
 	default n
 
+config STM32L4_HAVE_QSPI
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -1024,6 +1119,7 @@ config STM32L4_FSMC
 config STM32L4_QSPI
 	bool "QuadSPI"
 	default n
+	depends on STM32L4_HAVE_QSPI
 	---help---
 		The STM32L4 QSPI block is intended to support one serial NOR flash device
 

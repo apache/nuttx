@@ -8,7 +8,7 @@ Most code is copied and adapted from the STM32 and STM32F7 ports.
 
 The various supported STM32L4 families are:
 
--------------------------------------------------------------
+-----------------------------------------------------------------
 | NuttX config      | Manual | Chips
 |
 | Not supported     | RM0392 | STM32L471xx
@@ -24,8 +24,8 @@ The various supported STM32L4 families are:
 | STM32L4_STM32L4X6 | RM0351 | STM32L476xx, STM32L486xx,
 |                              STM32L496xx, STM32L4A6xx
 |
-| Not supported     | RM0432 | STM32L4Rxxx, STM32L4Sxxx
--------------------------------------------------------------
+| STM32L4_STM32L4XR | RM0432 | STM32L4Rxxx, STM32L4Sxxx (STM32L4+)
+------------------------------------------------------------------
 
 [*]: Please avoid depending on CONFIG_STM32L4_STM32L4X1 and
      CONFIG_STM32L4_STM32L4X2 as the MCUs are of the same subfamily
@@ -91,3 +91,13 @@ SAIPLL   : works (PLL For Digital Audio interfaces, and other things)
 SAI      : There is some code (Digital Audio interfaces, I2S, SPDIF, etc)
 HASH     : TODO (SHA-1, SHA-224, SHA-256, HMAC)
 DCMI     : TODO (Digital Camera interfaces)
+
+New peripherals only in STM32L4+:
+
+DMAMUX1    : TODO
+DSI        : TODO
+GFXMMU     : TODO
+LTDC       : TODO
+OCTOSPI    : TODO
+OCTOSPIIOM : TODO
+

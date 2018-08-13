@@ -63,8 +63,8 @@
 
 #include "up_arch.h"
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || \
-      defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6))
+#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+      defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR))
 #  error "Unrecognized STM32 chip"
 #endif
 
@@ -85,7 +85,13 @@
 #define FLASH_PAGE_SIZE    STM32L4_FLASH_PAGESIZE
 #define FLASH_PAGE_WORDS   (FLASH_PAGE_SIZE / 4)
 #define FLASH_PAGE_MASK    (FLASH_PAGE_SIZE - 1)
-#define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
+#if FLASH_PAGE_SIZE == 2048
+#  define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
+#elif FLASH_PAGE_SIZE == 8192
+#  define FLASH_PAGE_SHIFT   (13)    /* 2**13  = 8192B */
+#else
+#  error Unsupported STM32L4_FLASH_PAGESIZE
+#endif
 #define FLASH_BYTE2PAGE(o) ((o) >> FLASH_PAGE_SHIFT)
 
 #define FLASH_CR_PAGE_ERASE              FLASH_CR_PER

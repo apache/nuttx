@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32l4/chip/stm32l4x6xx_firewall.h
+ * arch/arm/src/stm32l4/chip/stm32l4xrxx_firewall.h
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_FIREWALL_H
-#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_FIREWALL_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4XRXX_FIREWALL_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4XRXX_FIREWALL_H
 
 /************************************************************************************
  * Included Files
@@ -94,20 +94,12 @@
 /* Volatile Data Segment Start Address */
 
 #define FIREWALL_VDSADD_SHIFT           6
-#if defined(CONFIG_STM32L4_STM32L496XX)
-#  define FIREWALL_VDSADD_MASK          (0x0fff << FIREWALL_VDSADD_SHIFT)
-#else
-#  define FIREWALL_VDSADD_MASK          (0x07ff << FIREWALL_VDSADD_SHIFT)
-#endif
+#define FIREWALL_VDSADD_MASK            (0x0fff << FIREWALL_VDSADD_SHIFT)
 
 /* Volatile Data Segment Length */
 
 #define FIREWALL_VDSLENG_SHIFT          6
-#if defined(CONFIG_STM32L4_STM32L496XX)
-#  define FIREWALL_VDSLENG_MASK         (0x0fff << FIREWALL_VDSLENG_SHIFT)
-#else
-#  define FIREWALL_VDSLENG_MASK         (0x07ff << FIREWALL_VDSLENG_SHIFT)
-#endif
+#define FIREWALL_VDSLENG_MASK           (0x0fff << FIREWALL_VDSLENG_SHIFT)
 
 /* Configuration Register */
 
@@ -115,4 +107,4 @@
 #define FIREWALL_CR_VDS                 (1 << 1) /* Bit 1: Volatile data shared */
 #define FIREWALL_CR_VDE                 (1 << 2) /* Bit 2: Volatile data execution */
 
-#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4X6XX_FIREWALL_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4XRXX_FIREWALL_H */

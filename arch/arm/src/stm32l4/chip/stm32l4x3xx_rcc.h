@@ -243,14 +243,14 @@
 #define RCC_PLLCFG_PLLSRC_MASK      (3 << RCC_PLLCFG_PLLSRC_SHIFT)
 #  define RCC_PLLCFG_PLLSRC_NONE    (0 << RCC_PLLCFG_PLLSRC_SHIFT) /* 000: No clock sent to PLLs */
 #  define RCC_PLLCFG_PLLSRC_MSI     (1 << RCC_PLLCFG_PLLSRC_SHIFT) /* 001: MSI selected as PLL source */
-#  define RCC_PLLCFG_PLLSRC_HSI     (2 << RCC_PLLCFG_PLLSRC_SHIFT) /* 001: HSI selected as PLL source */
-#  define RCC_PLLCFG_PLLSRC_HSE     (3 << RCC_PLLCFG_PLLSRC_SHIFT) /* 001: HSE selected as PLL source */
+#  define RCC_PLLCFG_PLLSRC_HSI     (2 << RCC_PLLCFG_PLLSRC_SHIFT) /* 010: HSI selected as PLL source */
+#  define RCC_PLLCFG_PLLSRC_HSE     (3 << RCC_PLLCFG_PLLSRC_SHIFT) /* 011: HSE selected as PLL source */
 
 #define RCC_PLLCFG_PLLM_SHIFT       (4)      /* Bits 4-6: Main PLL (PLL) input clock divider */
 #define RCC_PLLCFG_PLLM_MASK        (0x07 << RCC_PLLCFG_PLLM_SHIFT)
 #  define RCC_PLLCFG_PLLM(n)        ((n-1) << RCC_PLLCFG_PLLM_SHIFT) /* m = 1..8 */
 
-#define RCC_PLLCFG_PLLN_SHIFT       (8)      /* Bits 6-14: Main PLL (PLL) VCO multiplier */
+#define RCC_PLLCFG_PLLN_SHIFT       (8)      /* Bits 8-14: Main PLL (PLL) VCO multiplier */
 #define RCC_PLLCFG_PLLN_MASK        (0x7f << RCC_PLLCFG_PLLN_SHIFT)
 #  define RCC_PLLCFG_PLLN(n)        ((n) << RCC_PLLCFG_PLLN_SHIFT) /* n = 8..86 */
 
@@ -262,7 +262,7 @@
 
 #define RCC_PLLCFG_PLLQEN           (1 << 20) /* Bit 20: Main PLL PLL48M1CLK output enable */
 
-#define RCC_PLLCFG_PLLQ_SHIFT       (21)
+#define RCC_PLLCFG_PLLQ_SHIFT       (21)      /* Bits 21-22: Main PLL division factor for PLL48M1CLK (48 MHz clock) */
 #define RCC_PLLCFG_PLLQ_MASK        (3 << RCC_PLLCFG_PLLQ_SHIFT)
 #  define RCC_PLLCFG_PLLQ(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLQ_SHIFT) /* n=2,4,6,8 */
 #  define RCC_PLLCFG_PLLQ_2         (0 << RCC_PLLCFG_PLLQ_SHIFT) /* 00: PLLQ = 2 */
@@ -272,7 +272,7 @@
 
 #define RCC_PLLCFG_PLLREN           (1 << 24) /* Bit 24: Main PLL PLLCLK output enable */
 
-#define RCC_PLLCFG_PLLR_SHIFT       (25)
+#define RCC_PLLCFG_PLLR_SHIFT       (25)      /* Bits 25-26: Main PLL division factor for PLLCLK (system clock) */
 #define RCC_PLLCFG_PLLR_MASK        (3 << RCC_PLLCFG_PLLR_SHIFT)
 #  define RCC_PLLCFG_PLLR(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLR_SHIFT) /* n=2,4,6,8 */
 #  define RCC_PLLCFG_PLLR_2         (0 << RCC_PLLCFG_PLLR_SHIFT) /* 00: PLLR = 2 */

@@ -82,6 +82,8 @@
 #  include <arch/stm32l4/stm32l4x5xx_irq.h>
 #elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include <arch/stm32l4/stm32l4x6xx_irq.h>
+#elif defined(CONFIG_STM32L4_STM32L4XR)
+#  include <arch/stm32l4/stm32l4xrxx_irq.h>
 #else
 #  error "Unsupported STM32 L4 chip"
 #endif

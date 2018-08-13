@@ -43,7 +43,7 @@
 /* STM32L4XXX Address Blocks ********************************************************/
 
 #define STM32L4_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
-#define STM32L4_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block (96k or 256k) */
+#define STM32L4_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block (48k to 256k) */
 #define STM32L4_PERIPH_BASE    0x40000000     /* 0x40000000-0x5fffffff: 512Mb peripheral block */
 #define STM32L4_FSMC_BASE12    0x60000000     /* 0x60000000-0x7fffffff: 512Mb FSMC bank1&2 block */
 #  define STM32L4_FSMC_BANK1   0x60000000     /* 0x60000000-0x6fffffff:   256Mb NOR/SRAM */
@@ -53,6 +53,8 @@
 #  define STM32L4_QSPI_BANK    0x90000000     /* 0x90000000-0x9fffffff:   256Mb QUADSPI */
 #define STM32L4_FSMC_BASE      0xa0000000     /* 0xa0000000-0xbfffffff:       FSMC register block */
 #define STM32L4_QSPI_BASE      0xa0001000     /* 0xa0000000-0xbfffffff:       QSPI register block */
+#define STM32L4_OCTOSPI1_BASE  0xa0001000     /* 0xa0001000-0xa00013ff: OCTOSPI1 register block */
+#define STM32L4_OCTOSPI2_BASE  0xa0001400     /* 0xa0001400-0xbfffffff: OCTOSPI2 register block */
                                               /* 0xc0000000-0xdfffffff: 512Mb (not used) */
 #define STM32L4_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M4 block */
 
@@ -66,8 +68,9 @@
                                               /* 0x00100000-0x07ffffff: Reserved */
 #define STM32L4_FLASH_BASE     0x08000000     /* 0x08000000-0x080fffff: FLASH memory */
                                               /* 0x08100000-0x0fffffff: Reserved */
-#define STM32L4_SRAM2_BASE     0x10000000     /* 0x10000000-0x1000ffff: 32Kb or 64Kb SRAM2 */
+#define STM32L4_SRAM2_BASE     0x10000000     /* 0x10000000-0x1000ffff: 16k to 64k SRAM2 */
                                               /* 0x10010000-0x1ffeffff: Reserved */
+#define STM32L4_SRAM3_BASE     0x20040000     /* 0x20040000-0x3fffffff: SRAM3 (STM32L4R9xx only, 384k) */
 #define STM32L4_SYSMEM_BASE    0x1fff0000     /* 0x1fff0000-0x1fff6fff: System memory */
 #define STM32L4_OTP_BASE       0x1fff7000     /* 0x1fff7000-0x1fff73ff: OTP memory */
                                               /* 0x1fff7400-0x1fff77ff: Reserved */
@@ -161,6 +164,8 @@
 
 /* APB2 Base Addresses **************************************************************/
 
+#define STM32L4_DSI_BASE        0x40016c00
+#define STM32L4_LTDC_BASE       0x40016800
 #define STM32L4_DFSDM_BASE      0x40016000
 #define STM32L4_SAI2_BASE       0x40015800
 #define STM32L4_SAI1_BASE       0x40015400
@@ -171,7 +176,9 @@
 #define STM32L4_TIM8_BASE       0x40013400
 #define STM32L4_SPI1_BASE       0x40013000
 #define STM32L4_TIM1_BASE       0x40012c00
-#define STM32L4_SDMMC1_BASE     0x40012800
+#ifndef CONFIG_STM32L4_STM32L4XR
+#  define STM32L4_SDMMC1_BASE   0x40012800
+#endif
 #define STM32L4_FIREWALL_BASE   0x40011c00
 #define STM32L4_EXTI_BASE       0x40010400
 #define STM32L4_COMP_BASE       0x40010200
@@ -180,16 +187,22 @@
 
 /* AHB1 Base Addresses **************************************************************/
 
+#define STM32L4_GFXMMU_BASE     0x4002c000
 #define STM32L4_DMA2D_BASE      0x4002b000
 #define STM32L4_TSC_BASE        0x40024000
 #define STM32L4_CRC_BASE        0x40023000
 #define STM32L4_FLASHIF_BASE    0x40022000
 #define STM32L4_RCC_BASE        0x40021000
+#define STM32L4_DMAMUX1_BASE    0x40020800
 #define STM32L4_DMA2_BASE       0x40020400
 #define STM32L4_DMA1_BASE       0x40020000
 
 /* AHB2 Base Addresses **************************************************************/
 
+#ifdef CONFIG_STM32L4_STM32L4XR
+#  define STM32L4_SDMMC1_BASE   0x50062400
+#endif
+#define STM32L4_OCTOSPIIOM_BASE 0x50061c00
 #define STM32L4_RNG_BASE        0x50060800
 #define STM32L4_HASH_BASE       0x50060400
 #define STM32L4_AES_BASE        0x50060000

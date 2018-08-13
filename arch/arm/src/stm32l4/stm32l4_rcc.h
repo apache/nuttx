@@ -51,6 +51,8 @@
 #  include "chip/stm32l4x5xx_rcc.h"
 #elif defined(CONFIG_STM32L4_STM32L4X6)
 #  include "chip/stm32l4x6xx_rcc.h"
+#elif defined(CONFIG_STM32L4_STM32L4XR)
+#  include "chip/stm32l4xrxx_rcc.h"
 #else
 #  error "Unsupported STM32L4 chip"
 #endif

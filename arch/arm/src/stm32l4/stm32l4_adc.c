@@ -76,12 +76,12 @@
 #if defined(CONFIG_STM32L4_ADC1) || defined(CONFIG_STM32L4_ADC2) || \
     defined(CONFIG_STM32L4_ADC3)
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || \
-      defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6))
+#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
+      defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR))
 #  error "Unrecognized STM32 chip"
 #endif
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4XR)
 #  if defined(CONFIG_STM32L4_ADC2) || defined(CONFIG_STM32L4_ADC3)
 #    error "Using non-existent ADC"
 #  endif
@@ -105,7 +105,7 @@
 
 /* ADC interrupts ***********************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4XR)
 #  define STM32L4_IRQ_ADC12 STM32L4_IRQ_ADC1
 #endif
 

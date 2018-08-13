@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/stm32l4/stm32l4x6xx_irq.h
+ * arch/arm/include/stm32l4/stm32l4xrxx_irq.h
  *
  *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
@@ -36,8 +36,8 @@
 
 /* This file should never be included directed but, rather, only indirectly through arch/irq.h */
 
-#ifndef __ARCH_ARM_INCLUDE_STM32L4_STM32L4X6XX_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32L4_STM32L4X6XX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_STM32L4_STM32L4XRXX_IRQ_H
+#define __ARCH_ARM_INCLUDE_STM32L4_STM32L4XRXX_IRQ_H
 
 /****************************************************************************************************
  * Included Files
@@ -77,7 +77,7 @@
 #define STM32L4_IRQ_DMA1CH5     (STM32L4_IRQ_FIRST + 15) /* 15: DMA1 Channel 5 global interrupt */
 #define STM32L4_IRQ_DMA1CH6     (STM32L4_IRQ_FIRST + 16) /* 16: DMA1 Channel 6 global interrupt */
 #define STM32L4_IRQ_DMA1CH7     (STM32L4_IRQ_FIRST + 17) /* 17: DMA1 Channel 7 global interrupt */
-#define STM32L4_IRQ_ADC12       (STM32L4_IRQ_FIRST + 18) /* 18: ADC1 and ADC2 global interrupt */
+#define STM32L4_IRQ_ADC1        (STM32L4_IRQ_FIRST + 18) /* 18: ADC1 global interrupt */
 #define STM32L4_IRQ_CAN1TX      (STM32L4_IRQ_FIRST + 19) /* 19: CAN1 TX interrupts */
 #define STM32L4_IRQ_CAN1RX0     (STM32L4_IRQ_FIRST + 20) /* 20: CAN1 RX0 interrupts */
 #define STM32L4_IRQ_CAN1RX1     (STM32L4_IRQ_FIRST + 21) /* 21: CAN1 RX1 interrupt */
@@ -109,7 +109,7 @@
 #define STM32L4_IRQ_TIM8UP      (STM32L4_IRQ_FIRST + 44) /* 44: TIM8 Update interrupt */
 #define STM32L4_IRQ_TIM8TRGCOM  (STM32L4_IRQ_FIRST + 45) /* 45: TIM8 Trigger and Commutation interrupts */
 #define STM32L4_IRQ_TIM8CC      (STM32L4_IRQ_FIRST + 46) /* 46: TIM8 Capture Compare interrupt */
-#define STM32L4_IRQ_ADC3        (STM32L4_IRQ_FIRST + 47) /* 47: ADC3 global interrupt */
+/* Reserved */                                           /* 47: ADC3 global interrupt */
 #define STM32L4_IRQ_FSMC        (STM32L4_IRQ_FIRST + 48) /* 48: FSMC global interrupt */
 #define STM32L4_IRQ_SDMMC1      (STM32L4_IRQ_FIRST + 49) /* 49: SDMMC1 global interrupt */
 #define STM32L4_IRQ_TIM5        (STM32L4_IRQ_FIRST + 50) /* 50: TIM5 global interrupt */
@@ -134,37 +134,29 @@
 #define STM32L4_IRQ_DMA2CH6     (STM32L4_IRQ_FIRST + 68) /* 68: DMA2 Channel 6 global interrupt */
 #define STM32L4_IRQ_DMA2CH7     (STM32L4_IRQ_FIRST + 69) /* 69: DMA2 Channel 7 global interrupt */
 #define STM32L4_IRQ_LPUART1     (STM32L4_IRQ_FIRST + 70) /* 70: Low power UART 1 global interrupt */
-#define STM32L4_IRQ_QUADSPI     (STM32L4_IRQ_FIRST + 71) /* 71: QUADSPI global interrupt */
+#define STM32L4_IRQ_OCTOSPI1    (STM32L4_IRQ_FIRST + 71) /* 71: OCTOSPI1 global interrupt */
 #define STM32L4_IRQ_I2C3EV      (STM32L4_IRQ_FIRST + 72) /* 72: I2C3 event interrupt */
 #define STM32L4_IRQ_I2C3ER      (STM32L4_IRQ_FIRST + 73) /* 73: I2C3 error interrupt */
 #define STM32L4_IRQ_SAI1        (STM32L4_IRQ_FIRST + 74) /* 74: SAI1 global interrupt */
 #define STM32L4_IRQ_SAI2        (STM32L4_IRQ_FIRST + 75) /* 75: SAI2 global interrupt */
-#define STM32L4_IRQ_SWPMI1      (STM32L4_IRQ_FIRST + 76) /* 76: SWPMI1 global interrupt */
+#define STM32L4_IRQ_OCTOSPI2    (STM32L4_IRQ_FIRST + 76) /* 76: OCTOSPI2 global interrupt */
 #define STM32L4_IRQ_TSC         (STM32L4_IRQ_FIRST + 77) /* 77: TSC global interrupt */
-#define STM32L4_IRQ_LCD         (STM32L4_IRQ_FIRST + 78) /* 78: LCD global interrupt */
+#define STM32L4_IRQ_DSIHSOT     (STM32L4_IRQ_FIRST + 78) /* 78: DSI global interrupt */
 #define STM32L4_IRQ_AES         (STM32L4_IRQ_FIRST + 79) /* 79: AES crypto global interrupt */
 #define STM32L4_IRQ_RNG         (STM32L4_IRQ_FIRST + 80) /* 80: RNG global interrupt */
 #define STM32L4_IRQ_FPU         (STM32L4_IRQ_FIRST + 81) /* 81: FPU global interrupt */
-
-/* STM32L496xx/4A6xx only: */
-
 #define STM32L4_IRQ_HASH_CRS    (STM32L4_IRQ_FIRST + 82) /* 82: HASH and CRS global interrupt */
 #define STM32L4_IRQ_I2C4EV      (STM32L4_IRQ_FIRST + 83) /* 83: I2C4 event interrupt */
 #define STM32L4_IRQ_I2C4ER      (STM32L4_IRQ_FIRST + 84) /* 84: I2C4 error interrupt */
 #define STM32L4_IRQ_DCMI        (STM32L4_IRQ_FIRST + 85) /* 85: DCMI global interrupt */
-#define STM32L4_IRQ_CAN2TX      (STM32L4_IRQ_FIRST + 86) /* 86: CAN2 TX interrupts */
-#define STM32L4_IRQ_CAN2RX0     (STM32L4_IRQ_FIRST + 87) /* 87: CAN2 RX0 interrupts */
-#define STM32L4_IRQ_CAN2RX1     (STM32L4_IRQ_FIRST + 88) /* 88: CAN2 RX1 interrupt */
-#define STM32L4_IRQ_CAN2SCE     (STM32L4_IRQ_FIRST + 89) /* 89: CAN2 SCE interrupt */
+/* Reserved */                                           /* 86-89: CAN2 */
 #define STM32L4_IRQ_DMA2D       (STM32L4_IRQ_FIRST + 90) /* 90: DMA2D global interrupt */
+#define STM32L4_IRQ_LCD_TFT     (STM32L4_IRQ_FIRST + 91) /* 91: LTDC global interrupt */
+#define STM32L4_IRQ_LCD_TFT_ER  (STM32L4_IRQ_FIRST + 92) /* 92: LTDC global error interrupt */
+#define STM32L4_IRQ_GFXMMU      (STM32L4_IRQ_FIRST + 93) /* 93: GFXMMU global error interrupt */
+#define STM32L4_IRQ_DMAMUX1_OVR (STM32L4_IRQ_FIRST + 94) /* 94: DMAMUX overrun interrupt */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
-#  define STM32L4_IRQ_NEXTINTS  82
-#elif defined(CONFIG_STM32L4_STM32L496XX)
-#  define STM32L4_IRQ_NEXTINTS  91
-#else
-#  error "Unsupported STM32L4 chip"
-#endif
+#define STM32L4_IRQ_NEXTINTS    95
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 
@@ -197,4 +189,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_STM32L4_STM32L4X6XX_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32L4_STM32L4XRXX_IRQ_H */
+

@@ -98,6 +98,12 @@
  *   1) 256 KiB of System SRAM beginning at address 0x2000:0000 - 0x2004:0000
  *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
  *
+ * STM32L4Rxxx have 640 Kib in three banks:
+ *
+ *   1) 192 KiB of System SRAM beginning at address 0x2000:0000 - 0x2003:0000
+ *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
+ *   3) 384 KiB of System SRAM beginning at address 0x2004:0000 - 0x200A:0000
+ *
  * In addition, external FSMC SRAM may be available.
  */
 
@@ -110,6 +116,21 @@
 
 #define SRAM2_START  STM32L4_SRAM2_BASE
 #define SRAM2_END    (SRAM2_START + STM32L4_SRAM2_SIZE)
+
+/* Set the range of SRAM3, requiring a third memory region */
+
+#ifdef STM32L4_SRAM3_SIZE
+#  define SRAM3_START  STM32L4_SRAM3_BASE
+#  define SRAM3_END    (SRAM3_START + STM32L4_SRAM3_SIZE)
+#  define CONFIG_STM32L4_SRAM3_HEAP
+#endif
+
+#if defined(CONFIG_STM32L4_SRAM3_HEAP)
+/* TODO: better check here */
+#  if CONFIG_MM_REGIONS < 3
+#    error you need at least 3 memory manager regions to support SRAM2 and SRAM3
+#  endif
+#endif
 
 #if defined(CONFIG_STM32L4_SRAM2_HEAP) && defined(CONFIG_STM32L4_FSMC_SRAM_HEAP)
 #  if CONFIG_MM_REGIONS < 3
@@ -328,7 +349,27 @@ void up_addregion(void)
 
   kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
 
+#endif /* SRAM2 */
+
+#ifdef CONFIG_STM32L4_SRAM3_HEAP
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+
+  /* Allow user-mode access to the SRAM3 heap */
+
+  stm32l4_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END-SRAM3_START);
+
 #endif
+
+  /* Colorize the heap for debug */
+
+  up_heap_color((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+
+  /* Add the SRAM2 user heap region. */
+
+  kumm_addregion((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+
+#endif /* SRAM3 */
 
 #ifdef CONFIG_STM32L4_FSMC_SRAM_HEAP
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
