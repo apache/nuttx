@@ -987,7 +987,7 @@ int bt_gatt_read(FAR struct bt_conn_s *conn, uint16_t handle, uint16_t offset,
                  bt_gatt_read_func_t func);
 
 /****************************************************************************
- * Name:
+ * Name: bt_gatt_write
  *
  * Description:
  *   This procedure write the attribute value and return the result in the
