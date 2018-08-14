@@ -362,21 +362,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
        * the interface
        */
 
-#ifdef CONFIG_NET_LOOPBACK
-      /* The local loopback device is a special case:  There can be only one
-       * local loopback device so it is unnumbered.
-       */
-
-      if (lltype == NET_LL_LOOPBACK)
-        {
-          devnum = 0;
-        }
-      else
-#endif
-        {
-          devnum = find_devnum(devfmt);
-        }
-
       /* Check if the caller has provided a user device-specific interface
        * name format string (in d_ifname).
        */
@@ -397,6 +382,21 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
            */
 
           devfmt = devfmt_str;
+        }
+
+#ifdef CONFIG_NET_LOOPBACK
+      /* The local loopback device is a special case:  There can be only one
+       * local loopback device so it is unnumbered.
+       */
+
+      if (lltype == NET_LL_LOOPBACK)
+        {
+          devnum = 0;
+        }
+      else
+#endif
+        {
+          devnum = find_devnum(devfmt);
         }
 
       /* Complete the device name by including the device number (if
