@@ -143,6 +143,9 @@
 #  define STM32L4_FLASH_WRP2AR_OFFSET   0x004c
 #  define STM32L4_FLASH_WRP2BR_OFFSET   0x0050
 #endif
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define STM32L4_FLASH_CFGR_OFFSET     0x0130
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -159,10 +162,13 @@
 #define STM32L4_FLASH_WRP1AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1AR_OFFSET)
 #define STM32L4_FLASH_WRP1BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1BR_OFFSET)
 #if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
-#  define STM32L4_FLASH_PCROP2SR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2SR_OFFSET)
-#  define STM32L4_FLASH_PCROP2ER       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2ER_OFFSET)
-#  define STM32L4_FLASH_WRP2AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2AR_OFFSET)
-#  define STM32L4_FLASH_WRP2BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2BR_OFFSET)
+#  define STM32L4_FLASH_PCROP2SR     (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2SR_OFFSET)
+#  define STM32L4_FLASH_PCROP2ER     (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2ER_OFFSET)
+#  define STM32L4_FLASH_WRP2AR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2AR_OFFSET)
+#  define STM32L4_FLASH_WRP2BR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2BR_OFFSET)
+#endif
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define STM32L4_FLASH_CFGR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_CFGR_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
@@ -170,12 +176,13 @@
 
 #define FLASH_ACR_LATENCY_SHIFT   (0)
 #define FLASH_ACR_LATENCY_MASK    (7 << FLASH_ACR_LATENCY_SHIFT)
-#  define FLASH_ACR_LATENCY(n)    ((n) << FLASH_ACR_LATENCY_SHIFT)  /* n wait states , for Vcore range   1     2 */
-#  define FLASH_ACR_LATENCY_0     (0 << FLASH_ACR_LATENCY_SHIFT)    /* 000: Zero wait states             <=16  <=6  */
-#  define FLASH_ACR_LATENCY_1     (1 << FLASH_ACR_LATENCY_SHIFT)    /* 001: One wait state               <=32  <=12 */
-#  define FLASH_ACR_LATENCY_2     (2 << FLASH_ACR_LATENCY_SHIFT)    /* 010: Two wait states              <=48  <=18 */
-#  define FLASH_ACR_LATENCY_3     (3 << FLASH_ACR_LATENCY_SHIFT)    /* 011: Three wait states            <=64  <=26 */
-#  define FLASH_ACR_LATENCY_4     (4 << FLASH_ACR_LATENCY_SHIFT)    /* 100: Four wait states             <=80  <=26 */
+#  define FLASH_ACR_LATENCY(n)    ((n) << FLASH_ACR_LATENCY_SHIFT)  /* n wait states, for Vcore range 1 and 2. */
+#  define FLASH_ACR_LATENCY_0     (0 << FLASH_ACR_LATENCY_SHIFT)    /* 000: Zero wait states  */
+#  define FLASH_ACR_LATENCY_1     (1 << FLASH_ACR_LATENCY_SHIFT)    /* 001: One wait state    */
+#  define FLASH_ACR_LATENCY_2     (2 << FLASH_ACR_LATENCY_SHIFT)    /* 010: Two wait states   */
+#  define FLASH_ACR_LATENCY_3     (3 << FLASH_ACR_LATENCY_SHIFT)    /* 011: Three wait states */
+#  define FLASH_ACR_LATENCY_4     (4 << FLASH_ACR_LATENCY_SHIFT)    /* 100: Four wait states  */
+#  define FLASH_ACR_LATENCY_5     (5 << FLASH_ACR_LATENCY_SHIFT)    /* 101: Five wait states  */
 
 #define FLASH_ACR_PRFTEN            (1 << 8)  /* Bit 8:  Prefetch enable */
 #define FLASH_ACR_ICEN              (1 << 9)  /* Bit 9:  Instruction cache enable */
@@ -199,7 +206,7 @@
 #define FLASH_SR_RDERR              (1 << 14) /* Bit 14: PCROP read error */
 #define FLASH_SR_OPTVERR            (1 << 15) /* Bit 15: Option validity error */
 #define FLASH_SR_BSY                (1 << 16) /* Bit 16: Busy */
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4XR)
 #  define FLASH_SR_PEMPTY           (1 << 17) /* Bit 17: Program empty */
 #endif
 
@@ -271,5 +278,11 @@
 #define FLASH_OPTCR_RDP_MASK        (0xFF << FLASH_OPTCR_RDP_SHIFT)
 #define FLASH_OPTCR_RDP_NONE        (0xAA << FLASH_OPTCR_RDP_SHIFT)
 #define FLASH_OPTCR_RDP_CHIP        (0xCC << FLASH_OPTCR_RDP_SHIFT) /* WARNING, CANNOT BE REVERSED !! */
+
+/* Flash Configuration Register (CFGR) */
+
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define FLASH_CFGR_LVEN           (1 << 0)                /* Bit 0: Low voltage enable */
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_FLASH_H */

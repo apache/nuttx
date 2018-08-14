@@ -343,12 +343,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_TIM7EN;
 #endif
 
-#ifdef CONFIG_STM32L4_LCD
-  /* LCD clock enable */
-
-  regval |= RCC_APB1ENR1_LCDEN;
-#endif
-
 #ifdef CONFIG_STM32L4_SPI2
   /* SPI2 clock enable */
 
@@ -877,12 +871,20 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
+      /* Configure FLASH wait states */
+
+#ifdef BOARD_FLASH_WAITSTATES
+      regval = FLASH_ACR_LATENCY(BOARD_FLASH_WAITSTATES);
+#else
+      regval = FLASH_ACR_LATENCY_3; /* For Vcore range 1 ≤ 80 MHz (older STM32L4 require 4 WS) */
+#endif
+
+      /* Enable FLASH prefetch, instruction cache and data cache */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
+      regval |= (FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
 #else
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+      regval |= (FLASH_ACR_ICEN | FLASH_ACR_DCEN);
 #endif
       putreg32(regval, STM32L4_FLASH_ACR);
 
