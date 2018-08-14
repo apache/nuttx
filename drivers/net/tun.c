@@ -1231,6 +1231,13 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 
   tun_ifdown(&priv->dev);
 
+  /* Assign d_ifname if specified. */
+
+  if (devfmt)
+    {
+      strncpy(priv->dev.d_ifname, devfmt, IFNAMSIZ);
+    }
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   ret = netdev_register(&priv->dev, NET_LL_TUN);
@@ -1240,13 +1247,6 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
       nxsem_destroy(&priv->waitsem);
       nxsem_destroy(&priv->read_wait_sem);
       return ret;
-    }
-
-  /* Assign d_ifname if specified. This must be done after registration */
-
-  if (devfmt)
-    {
-      strncpy(priv->dev.d_ifname, devfmt, IFNAMSIZ);
     }
 
   priv->filep         = filep;        /* Set link to file */
