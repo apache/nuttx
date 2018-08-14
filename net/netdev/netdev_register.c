@@ -232,6 +232,11 @@ static int get_ifindex(void)
  *   Register a network device driver and assign a name to it so that it can
  *   be found in subsequent network ioctl operations on the device.
  *
+ *   A custom, device-specific interface name format string may be selected
+ *   by putting that format string into the device structure's d_ifname[]
+ *   array before calling netdev_register().  Otherwise, the d_ifname[] must
+ *   be zeroed on entry.
+ *
  * Input Parameters:
  *   dev    - The device driver structure to be registered.
  *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
@@ -248,10 +253,8 @@ static int get_ifindex(void)
 
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
-  FAR const char *devfmt;
-#ifdef CONFIG_NET_USER_DEVFMT
   FAR const char devfmt_str[IFNAMSIZ];
-#endif
+  FAR const char *devfmt;
   int devnum;
 #ifdef CONFIG_NETDEV_IFINDEX
   int ifindex;
@@ -374,13 +377,31 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
           devnum = find_devnum(devfmt);
         }
 
-#ifdef CONFIG_NET_USER_DEVFMT
-      if (*dev->d_ifname)
+      /* Check if the caller has provided a user device-specific interface
+       * name format string (in d_ifname).
+       */
+
+      if (dev->d_ifname[0] != '\0')
         {
+          /* Copy the string in a temporary buffer.  How do we know that the
+           * string is valid and not just uninitialized memory?  We don't.
+           * Let's at least make certain that the format string is NUL
+           * terminated.
+           */
+
+          dev->d_ifname[IFNAMSIZ - 1] = '\0';
           strncpy(devfmt_str, dev->d_ifname, IFNAMSIZ);
+
+          /* Then use the content of the temporary buffer as the format
+           * string.
+           */
+
           devfmt = devfmt_str;
         }
-#endif
+
+      /* Complete the device name by including the device number (if
+       * included in the format).
+       */
 
       snprintf(dev->d_ifname, IFNAMSIZ, devfmt, devnum);
 

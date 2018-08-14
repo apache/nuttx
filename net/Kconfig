@@ -102,13 +102,6 @@ endmenu # Driver buffer configuration
 
 menu "Link layer support"
 
-config NET_USER_DEVFMT
-	bool "User provided devfmt"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		netdev_register will get devfmt form d_ifname if it is initialized.
-
 config NET_ETHERNET
 	bool "Ethernet support"
 	default y
