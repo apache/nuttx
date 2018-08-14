@@ -158,50 +158,11 @@
 #define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
-/* SPI2 is used for several peripherals on the Discovery board, including
- * L3GD20 - 3 axis Gyroscope
- * LSM303CTR - eCompass, comprising an accelerometer and magnetometer
- */
+/* XXX is SPI2 used on Disco? */
 
 #define GPIO_SPI2_MISO   GPIO_SPI2_MISO_3
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_3
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_3
-
-/* PD7; gyroscope CS */
-
-#define GPIO_SPI_CS_GYRO_OFF \
-    (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
-     GPIO_PORTD | GPIO_PIN7)
-#define GPIO_SPI_CS_GYRO \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN7)
-
-/* PE0; accelerometer CS */
-
-#define GPIO_SPI_CS_ACCEL_OFF \
-    (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
-     GPIO_PORTE | GPIO_PIN0)
-#define GPIO_SPI_CS_ACCEL \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN0)
-
-/* PC0; magnetometer CS */
-
-#define GPIO_SPI_CS_MAGNETO_OFF \
-    (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
-     GPIO_PORTC | GPIO_PIN0)
-#define GPIO_SPI_CS_MAGNETO \
-    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
-     GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN0)
-
-/* XXX these will need to be set up when these get implemented:
- * PD2 gyro INT1
- * PB8 gyro INT2/DRDY
- *
- * PE1 accel INT
- * PC2 magneto DRDY
- * PC1 magneto INT
- */
 
 /* LEDs
  *
