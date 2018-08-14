@@ -253,7 +253,7 @@ static int get_ifindex(void)
 
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
-  FAR const char devfmt_str[IFNAMSIZ];
+  FAR char devfmt_str[IFNAMSIZ];
   FAR const char *devfmt;
   int devnum;
 #ifdef CONFIG_NETDEV_IFINDEX
@@ -381,7 +381,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
            * string.
            */
 
-          devfmt = devfmt_str;
+          devfmt = (FAR const char *)devfmt_str;
         }
 
 #ifdef CONFIG_NET_LOOPBACK
