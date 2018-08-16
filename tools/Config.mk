@@ -269,6 +269,7 @@ endef
 endif
 
 # CATFILE - Cat and append a list of files
+#
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
@@ -280,6 +281,19 @@ define CATFILE
 	$(Q) cat $(2) >> $1
 endef
 endif
+
+# RWILDCARD - Recursive wildcard used to get lists of files from directories
+#
+# USAGE:  FILELIST = $(call RWILDCARD,<dir>,<wildcard-filename)
+#
+# This is functionally equivent to the fillowing, but has the advantage in
+# that it is portable
+#
+# FILELIST = ${shell find <dir> -name <wildcard-file>}
+
+define RWILDCARD
+  $(foreach d,$(wildcard $1/*),$(call RWILDCARD,$d/)$(filter $(subst *,%,$2),$d))
+endef
 
 # CLEAN - Default clean target
 
