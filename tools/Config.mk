@@ -212,8 +212,8 @@ endif
 # Depends on these settings defined in board-specific Make.defs file
 # installed at $(TOPDIR)/Make.defs:
 #
-#   LD - The command to invoke the linker (includes any options)
-#    OBJCOPY - The command to invoke the object cop (includes any options)
+#   LD      - The command to invoke the linker (includes any options)
+#   OBJCOPY - The command to invoke the object cop (includes any options)
 #
 # Depends on this settings defined in board-specific defconfig file installed
 # at $(TOPDIR)/.config:
@@ -265,6 +265,19 @@ endef
 else
 define MOVEFILE
 	$(Q) mv -f $1 $2
+endef
+endif
+
+# CATFILE - Cat and append a list of files
+# USAGE: $(call CATFILE,dest,src1,src2,src3,...)
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define CATFILE
+	$(Q) type $(2) >> $1
+endef
+else
+define CATFILE
+	$(Q) cat $(2) >> $1
 endef
 endif
 
