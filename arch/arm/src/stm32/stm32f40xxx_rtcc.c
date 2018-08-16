@@ -58,7 +58,7 @@
 
 #include <arch/board/board.h>
 
-#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
+#ifdef CONFIG_STM32_RTC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -167,16 +167,6 @@ static inline void rtc_enable_alarm(void);
 
 /****************************************************************************
  * Name: rtc_dumpregs
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -216,16 +206,6 @@ static void rtc_dumpregs(FAR const char *msg)
 
 /****************************************************************************
  * Name: rtc_dumptime
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -751,9 +731,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 {
   int ret = -EBUSY;
 
-  /* Need to follow RTC register wrote protection
-   * Disable the write protection for RTC registers
-   */
+  /* Disable the write protection for RTC registers */
 
   rtc_wprunlock();
 
@@ -787,9 +765,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 {
   int ret = -EBUSY;
 
-  /* Need to follow RTC register wrote protection
-   * Disable the write protection for RTC registers
-   */
+  /* Disable the write protection for RTC registers */
 
   rtc_wprunlock();
 
@@ -1319,7 +1295,7 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
   /* Then write the broken out values to the RTC */
 
-  /* Convert the struct tm format to RTC time register fields.  All of the STM32
+  /* Convert the struct tm format to RTC time register fields.
    * All of the ranges of values correspond between struct tm and the time
    * register.
    */
@@ -1537,9 +1513,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
            g_alarmcb[alarmid].ac_cb  = NULL;
            g_alarmcb[alarmid].ac_arg = NULL;
 
-          /* Need to follow RTC register wrote protection.
-           * Disable the write protection for RTC registers
-           */
+          /* Disable the write protection for RTC registers */
 
           rtc_wprunlock();
 
@@ -1569,9 +1543,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
            g_alarmcb[alarmid].ac_cb  = NULL;
            g_alarmcb[alarmid].ac_arg = NULL;
 
-          /* Need to follow RTC register wrote protection.
-           * Disable the write protection for RTC registers
-           */
+          /* Disable the write protection for RTC registers */
 
           rtc_wprunlock();
 
@@ -1607,7 +1579,7 @@ errout_with_wprunlock:
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_rdalarm
  *
  * Description:
@@ -1619,7 +1591,7 @@ errout_with_wprunlock:
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
@@ -1645,7 +1617,7 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
         {
           alarmreg = STM32_RTC_ALRMBR;
           ret = stm32_rtc_getalarmdatetime(alarmreg,
-                                          (struct tm *)alminfo->ar_time);
+                                           (struct tm *)alminfo->ar_time);
         }
         break;
 #endif
@@ -1659,5 +1631,5 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
 }
 #endif
 
-#endif /* CONFIG_RTC && !CONFIG_RTC_EXTERNAL */
+#endif /* CONFIG_STM32_RTC */
 

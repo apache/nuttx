@@ -149,16 +149,6 @@ static inline void rtc_enable_alarm(void);
 
 /****************************************************************************
  * Name: rtc_dumpregs
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -190,16 +180,6 @@ static void rtc_dumpregs(FAR const char *msg)
 
 /****************************************************************************
  * Name: rtc_dumptime
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -664,9 +644,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   int isr;
   int ret = -EBUSY;
 
-  /* Need to allow RTC register write
-   * Disable the write protection for RTC registers
-   */
+  /* Disable the write protection for RTC registers */
 
   rtc_wprunlock();
 
@@ -709,9 +687,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
   int isr;
   int ret = -EBUSY;
 
-  /* Need to allow RTC register write
-   * Disable the write protection for RTC registers
-   */
+  /* Disable the write protection for RTC registers */
 
   rtc_wprunlock();
 
@@ -1467,9 +1443,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
            g_alarmcb[alarmid].ac_cb  = NULL;
            g_alarmcb[alarmid].ac_arg = NULL;
 
-          /* Need to follow RTC register wrote protection.
-           * Disable the write protection for RTC registers
-           */
+          /* Disable the write protection for RTC registers */
 
           rtc_wprunlock();
 
@@ -1500,9 +1474,7 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid)
            g_alarmcb[alarmid].ac_cb  = NULL;
            g_alarmcb[alarmid].ac_arg = NULL;
 
-          /* Need to follow RTC register wrote protection.
-           * Disable the write protection for RTC registers
-           */
+          /* Disable the write protection for RTC registers */
 
           rtc_wprunlock();
 

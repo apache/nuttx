@@ -104,16 +104,6 @@ volatile bool g_rtc_enabled = false;
  ************************************************************************************/
 /************************************************************************************
  * Name: rtc_dumpregs
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
@@ -147,16 +137,6 @@ static void rtc_dumpregs(FAR const char *msg)
 
 /************************************************************************************
  * Name: rtc_dumptime
- *
- * Description:
- *    Disable RTC write protection
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
