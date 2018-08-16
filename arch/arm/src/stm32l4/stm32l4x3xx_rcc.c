@@ -537,11 +537,13 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_DFSDM1
   /* Select SYSCLK as DFSDM clock source */
 
-  /* TODO: not sure if this can be done on these MCUs.
-   * RM0394 Rev 3, p. 525 is confused.
+  /* RM0394 Rev 3, p. 525 is confused about DFSDM clock source.
+   * ST has confirmed that at least in STM32L451, the bit DFSDMSEL
+   * in RCC_CCIPR is present and bit description was omitted from
+   * RM0394 by accident.
    */
 
-  //regval |= RCC_CCIPR_DFSDMSEL_SYSCLK;
+  regval |= RCC_CCIPR_DFSDMSEL_SYSCLK;
 #endif
 
   putreg32(regval, STM32L4_RCC_CCIPR);

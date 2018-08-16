@@ -452,7 +452,7 @@ static void dfsdm_putreg(FAR struct stm32_dev_s *priv, int offset,
  *   Modify the value of an DFSDM register (not atomic).
  *
  * Input Parameters:
- *   priv    - A reference to the ADC block status
+ *   priv    - A reference to the DFSDM block status
  *   offset  - The offset to the register to modify
  *   clrbits - The bits to clear
  *   setbits - The bits to set
@@ -661,7 +661,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
   uint16_t ccer;
   uint16_t egr;
 
-  /* If the timer base address is zero, then this ADC was not configured to
+  /* If the timer base address is zero, then this DFSDM was not configured to
    * use a timer.
    */
 
@@ -686,9 +686,9 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
                 DFSDM_FLTCR1_JEXTEN_MASK | DFSDM_FLTCR1_JEXTSEL_MASK,
                 DFSDM_FLTCR1_JEXTEN_RISING | priv->extsel);
 
-  /* Configure the timer channel to drive the ADC */
+  /* Configure the timer channel. */
 
-  /* Caculate optimal values for the timer prescaler and for the timer
+  /* Calculate optimal values for the timer prescaler and for the timer
    * reload register.  If freq is the desired frequency, then
    *
    *   reload = timclk / freq
@@ -1115,8 +1115,6 @@ static int dfsdm_bind(FAR struct adc_dev_s *dev,
  * Description:
  *   Reset the DFSDM device.  Called early to initialize the hardware. This
  *   is called, before dfsdm_setup() and on error conditions.
- *
- * Input Parameters:
  *
  ****************************************************************************/
 

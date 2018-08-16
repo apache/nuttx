@@ -87,7 +87,8 @@ enum stm32l4_comp_inm_e
   STM32L4_COMP_INM_PIN_5    /* COMP1: PA5, COMP2: PA5 */
 };
 
-#elif defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6)
+#else
+
 /* Comparators */
 
 enum stm32l4_comp_e

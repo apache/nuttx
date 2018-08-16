@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32l4/chip/stm32l4_dfsdm.h
  *
- *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
+ *   Copyright (C) 2017-2018 Haltian Ltd. All rights reserved.
  *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,64 +107,80 @@
 
 #define STM32L4_DFSDM_CHDATINR_OFFSET(ch)  (0x10 + 0x20 * (ch)) /* DFSDM channel data input register */
 
-#define STM32L4_DFSDM_CH0DATINR_OFFSET     0x0010  /* DFSDM channel 0 channel data input register  */
-#define STM32L4_DFSDM_CH1DATINR_OFFSET     0x0030  /* DFSDM channel 1 channel data input register  */
-#define STM32L4_DFSDM_CH2DATINR_OFFSET     0x0050  /* DFSDM channel 2 channel data input register  */
-#define STM32L4_DFSDM_CH3DATINR_OFFSET     0x0070  /* DFSDM channel 3 channel data input register  */
+#define STM32L4_DFSDM_CH0DATINR_OFFSET     0x0010  /* DFSDM channel 0 data input register  */
+#define STM32L4_DFSDM_CH1DATINR_OFFSET     0x0030  /* DFSDM channel 1 data input register  */
+#define STM32L4_DFSDM_CH2DATINR_OFFSET     0x0050  /* DFSDM channel 2 data input register  */
+#define STM32L4_DFSDM_CH3DATINR_OFFSET     0x0070  /* DFSDM channel 3 data input register  */
 #ifndef CONFIG_STM32L4_STM32L4X3
-#  define STM32L4_DFSDM_CH4DATINR_OFFSET   0x0090  /* DFSDM channel 4 channel data input register  */
-#  define STM32L4_DFSDM_CH5DATINR_OFFSET   0x00b0  /* DFSDM channel 5 channel data input register  */
-#  define STM32L4_DFSDM_CH6DATINR_OFFSET   0x00d0  /* DFSDM channel 6 channel data input register  */
-#  define STM32L4_DFSDM_CH7DATINR_OFFSET   0x00f0  /* DFSDM channel 7 channel data input register  */
+#  define STM32L4_DFSDM_CH4DATINR_OFFSET   0x0090  /* DFSDM channel 4 data input register  */
+#  define STM32L4_DFSDM_CH5DATINR_OFFSET   0x00b0  /* DFSDM channel 5 data input register  */
+#  define STM32L4_DFSDM_CH6DATINR_OFFSET   0x00d0  /* DFSDM channel 6 data input register  */
+#  define STM32L4_DFSDM_CH7DATINR_OFFSET   0x00f0  /* DFSDM channel 7 data input register  */
+#endif
+
+#ifdef CONFIG_STM32L4_STM32L4XR
+#  define STM32L4_DFSDM_CHDLYR_OFFSET(ch)  (0x14 + 0x20 * (ch)) /* DFSDM channel delay register */
+
+#  define STM32L4_DFSDM_CH0DLYR_OFFSET     0x0014  /* DFSDM channel 0 delay register  */
+#  define STM32L4_DFSDM_CH1DLYR_OFFSET     0x0034  /* DFSDM channel 1 delay register  */
+#  define STM32L4_DFSDM_CH2DLYR_OFFSET     0x0054  /* DFSDM channel 2 delay register  */
+#  define STM32L4_DFSDM_CH3DLYR_OFFSET     0x0074  /* DFSDM channel 3 delay register  */
+#  define STM32L4_DFSDM_CH4DLYR_OFFSET     0x0094  /* DFSDM channel 4 delay register  */
+#  define STM32L4_DFSDM_CH5DLYR_OFFSET     0x00b4  /* DFSDM channel 5 delay register  */
+#  define STM32L4_DFSDM_CH6DLYR_OFFSET     0x00d4  /* DFSDM channel 6 delay register  */
+#  define STM32L4_DFSDM_CH7DLYR_OFFSET     0x00f4  /* DFSDM channel 7 delay register  */
 #endif
 
 /* DFSDM filter x module registers (x=0..3 or x=0..1 on STM32L4X3) */
 
-#define STM32L4_DFSDM_FLTCR1_OFFSET(x)      (0x100 + 0x80 * (x)) /* DFSDM control register 1 */
-#define STM32L4_DFSDM_FLTCR2_OFFSET(x)      (0x104 + 0x80 * (x)) /* DFSDM control register 2 */
-#define STM32L4_DFSDM_FLTISR_OFFSET(x)      (0x108 + 0x80 * (x)) /* DFSDM interrupt and status register */
-#define STM32L4_DFSDM_FLTICR_OFFSET(x)      (0x10c + 0x80 * (x)) /* DFSDM interrupt flag clear register */
-#define STM32L4_DFSDM_FLTJCHGR_OFFSET(x)    (0x110 + 0x80 * (x)) /* DFSDM injected channel group selection register */
-#define STM32L4_DFSDM_FLTFCR_OFFSET(x)      (0x114 + 0x80 * (x)) /* DFSDM filter control register */
-#define STM32L4_DFSDM_FLTJDATAR_OFFSET(x)   (0x118 + 0x80 * (x)) /* DFSDM data register for injected group */
-#define STM32L4_DFSDM_FLTRDATAR_OFFSET(x)   (0x11c + 0x80 * (x)) /* DFSDM data register for the regular channel */
-#define STM32L4_DFSDM_FLTAWHTR_OFFSET(x)    (0x120 + 0x80 * (x)) /* DFSDM analog watchdog high threshold register */
-#define STM32L4_DFSDM_FLTAWLTR_OFFSET(x)    (0x124 + 0x80 * (x)) /* DFSDM analog watchdog low threshold register */
-#define STM32L4_DFSDM_FLTAWSR_OFFSET(x)     (0x128 + 0x80 * (x)) /* DFSDM analog watchdog status register */
-#define STM32L4_DFSDM_FLTAWCFR_OFFSET(x)    (0x12c + 0x80 * (x)) /* DFSDM analog watchdog clear flag register */
-#define STM32L4_DFSDM_FLTEXMAX_OFFSET(x)    (0x130 + 0x80 * (x)) /* DFSDM Extremes detector maximum register */
-#define STM32L4_DFSDM_FLTEXMIN_OFFSET(x)    (0x134 + 0x80 * (x)) /* DFSDM Extremes detector minimum register */
-#define STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x)  (0x138 + 0x80 * (x)) /* DFSDM conversion timer register */
+#define STM32L4_DFSDM_FLTCR1_OFFSET(x)     (0x100 + 0x80 * (x)) /* DFSDM control register 1 */
+#define STM32L4_DFSDM_FLTCR2_OFFSET(x)     (0x104 + 0x80 * (x)) /* DFSDM control register 2 */
+#define STM32L4_DFSDM_FLTISR_OFFSET(x)     (0x108 + 0x80 * (x)) /* DFSDM interrupt and status register */
+#define STM32L4_DFSDM_FLTICR_OFFSET(x)     (0x10c + 0x80 * (x)) /* DFSDM interrupt flag clear register */
+#define STM32L4_DFSDM_FLTJCHGR_OFFSET(x)   (0x110 + 0x80 * (x)) /* DFSDM injected channel group selection register */
+#define STM32L4_DFSDM_FLTFCR_OFFSET(x)     (0x114 + 0x80 * (x)) /* DFSDM filter control register */
+#define STM32L4_DFSDM_FLTJDATAR_OFFSET(x)  (0x118 + 0x80 * (x)) /* DFSDM data register for injected group */
+#define STM32L4_DFSDM_FLTRDATAR_OFFSET(x)  (0x11c + 0x80 * (x)) /* DFSDM data register for the regular channel */
+#define STM32L4_DFSDM_FLTAWHTR_OFFSET(x)   (0x120 + 0x80 * (x)) /* DFSDM analog watchdog high threshold register */
+#define STM32L4_DFSDM_FLTAWLTR_OFFSET(x)   (0x124 + 0x80 * (x)) /* DFSDM analog watchdog low threshold register */
+#define STM32L4_DFSDM_FLTAWSR_OFFSET(x)    (0x128 + 0x80 * (x)) /* DFSDM analog watchdog status register */
+#define STM32L4_DFSDM_FLTAWCFR_OFFSET(x)   (0x12c + 0x80 * (x)) /* DFSDM analog watchdog clear flag register */
+#define STM32L4_DFSDM_FLTEXMAX_OFFSET(x)   (0x130 + 0x80 * (x)) /* DFSDM Extremes detector maximum register */
+#define STM32L4_DFSDM_FLTEXMIN_OFFSET(x)   (0x134 + 0x80 * (x)) /* DFSDM Extremes detector minimum register */
+#define STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x) (0x138 + 0x80 * (x)) /* DFSDM conversion timer register */
 
 /* Register Addresses ***************************************************************/
 
 /* DFSDM channel y registers (y=0..7 or y=0..3 on STM32L4X3) */
 
-#define STM32L4_DFSDM_CHCFGR1(y)         (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CHCFGR1_OFFSET(y))
-#define STM32L4_DFSDM_CH0CFGR1           (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CH0CFGR1_OFFSET)
+#define STM32L4_DFSDM_CHCFGR1(y)         (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHCFGR1_OFFSET(y))
+#define STM32L4_DFSDM_CH0CFGR1           (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CH0CFGR1_OFFSET)
 
-#define STM32L4_DFSDM_CHCFGR2(y)         (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CHCFGR2_OFFSET(y))
-#define STM32L4_DFSDM_CHAWSCDR(y)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CHAWSCDR_OFFSET(y))
-#define STM32L4_DFSDM_CHWDATR(y)         (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CHWDATR_OFFSET(y)
-#define STM32L4_DFSDM_CHDATINR(y)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_CHDATINR_OFFSET(y))
+#define STM32L4_DFSDM_CHCFGR2(y)         (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHCFGR2_OFFSET(y))
+#define STM32L4_DFSDM_CHAWSCDR(y)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHAWSCDR_OFFSET(y))
+#define STM32L4_DFSDM_CHWDATR(y)         (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHWDATR_OFFSET(y)
+#define STM32L4_DFSDM_CHDATINR(y)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHDATINR_OFFSET(y))
+#ifdef CONFIG_STM32L4_STM32L4XR
+#  define STM32L4_DFSDM_CHDLYR(y)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_CHDLYR_OFFSET(y))
+#endif
 
 /* DFSDM filter x module registers (x=0..3 or x=0..1 on STM32L4X3) */
 
-#define STM32L4_DFSDM_FLTCR1(x)          (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTCR1_OFFSET(x))
-#define STM32L4_DFSDM_FLTCR2(x)          (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTCR2_OFFSET(x))
-#define STM32L4_DFSDM_FLTISR(x)          (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTISR_OFFSET(x))
-#define STM32L4_DFSDM_FLTICR(x)          (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTICR_OFFSET(x))
-#define STM32L4_DFSDM_FLTJCHGR(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTJCHGR_OFFSET(x))
-#define STM32L4_DFSDM_FLTFCR(x)          (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTFCR_OFFSET(x))
-#define STM32L4_DFSDM_FLTJDATAR(x)       (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTJDATAR_OFFSET(x))
-#define STM32L4_DFSDM_FLTRDATAR(x)       (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTRDATAR_OFFSET(x))
-#define STM32L4_DFSDM_FLTAWHTR(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTAWHTR_OFFSET(x))
-#define STM32L4_DFSDM_FLTAWLTR(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTAWLTR_OFFSET(x))
-#define STM32L4_DFSDM_FLTAWSR(x)         (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTAWSR_OFFSET(x))
-#define STM32L4_DFSDM_FLTAWCFR(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTAWCFR_OFFSET(x))
-#define STM32L4_DFSDM_FLTEXMAX(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTEXMAX_OFFSET(x))
-#define STM32L4_DFSDM_FLTEXMIN(x)        (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTEXMIN_OFFSET(x))
-#define STM32L4_DFSDM_FLTCNVTIMR(x)      (STM32L4_DFSDM_BASE+STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x))
+#define STM32L4_DFSDM_FLTCR1(x)          (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTCR1_OFFSET(x))
+#define STM32L4_DFSDM_FLTCR2(x)          (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTCR2_OFFSET(x))
+#define STM32L4_DFSDM_FLTISR(x)          (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTISR_OFFSET(x))
+#define STM32L4_DFSDM_FLTICR(x)          (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTICR_OFFSET(x))
+#define STM32L4_DFSDM_FLTJCHGR(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTJCHGR_OFFSET(x))
+#define STM32L4_DFSDM_FLTFCR(x)          (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTFCR_OFFSET(x))
+#define STM32L4_DFSDM_FLTJDATAR(x)       (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTJDATAR_OFFSET(x))
+#define STM32L4_DFSDM_FLTRDATAR(x)       (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTRDATAR_OFFSET(x))
+#define STM32L4_DFSDM_FLTAWHTR(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTAWHTR_OFFSET(x))
+#define STM32L4_DFSDM_FLTAWLTR(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTAWLTR_OFFSET(x))
+#define STM32L4_DFSDM_FLTAWSR(x)         (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTAWSR_OFFSET(x))
+#define STM32L4_DFSDM_FLTAWCFR(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTAWCFR_OFFSET(x))
+#define STM32L4_DFSDM_FLTEXMAX(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTEXMAX_OFFSET(x))
+#define STM32L4_DFSDM_FLTEXMIN(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTEXMIN_OFFSET(x))
+#define STM32L4_DFSDM_FLTCNVTIMR(x)      (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x))
 
 /* Register Bitfield Definitions ****************************************************/
 /* DFSDM channel configuration y register (DFSDM_CHyCFGR1) */
@@ -250,6 +266,12 @@
 #define DFSDM_CHDATINR_INDAT1_SHIFT      (0)   /* Bits 15-31: input data 1 */
 #define DFSDM_CHDATINR_INDAT1_MASK       (0xffff << DFSDM_CHDATINR_INDAT1_SHIFT)
 #  define DFSDM_CHDATINR_INDAT1(n)       ((n) << DFSDM_CHDATINR_INDAT1_SHIFT)
+
+/* DFSDM channel delay register (DFSDM_CHyDLYR) */
+
+#define DFSDM_CHDLYR_PLSSKP_SHIFT        (0)   /* Bits 0-5: Pulses to skip for input data skipping function */
+#define DFSDM_CHDLYR_PLSSKP_MASK         (0x1f << DFSDM_CHDLYR_PLSSKP_SHIFT)
+#  define DFSDM_CHDLYR_PLSSKP(n)         ((n) << DFSDM_CHDLYR_PLSSKP_SHIFT) /* n=0..63 */
 
 /* DFSDM filter x module registers */
 /* DFSDM control register 1 (DFSDM_FLTxCR1) */
@@ -390,7 +412,8 @@
 
 /* DFSDM data register for the regular channel (DFSDM_FLTxRDATAR) */
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L496XX) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define DFSDM_FLTRDATAR_RDATACH_SHIFT  (0)     /* Bits  0-3: channel most recently converted */
 #  define DFSDM_FLTRDATAR_RDATACH_MASK   (7 << DFSDM_FLTRDATAR_RDATACH_SHIFT)
 #endif

@@ -52,9 +52,9 @@
 #  define STM32L4_FSMC_BANK3   0x80000000     /* 0x80000000-0x8fffffff:   256Mb NAND FLASH */
 #  define STM32L4_QSPI_BANK    0x90000000     /* 0x90000000-0x9fffffff:   256Mb QUADSPI */
 #define STM32L4_FSMC_BASE      0xa0000000     /* 0xa0000000-0xbfffffff:       FSMC register block */
-#define STM32L4_QSPI_BASE      0xa0001000     /* 0xa0000000-0xbfffffff:       QSPI register block */
+#define STM32L4_QSPI_BASE      0xa0001000     /* 0xa0001000-0xbfffffff:       QSPI register block */
 #define STM32L4_OCTOSPI1_BASE  0xa0001000     /* 0xa0001000-0xa00013ff: OCTOSPI1 register block */
-#define STM32L4_OCTOSPI2_BASE  0xa0001400     /* 0xa0001400-0xbfffffff: OCTOSPI2 register block */
+#define STM32L4_OCTOSPI2_BASE  0xa0001400     /* 0xa0001400-0xa00017ff: OCTOSPI2 register block */
                                               /* 0xc0000000-0xdfffffff: 512Mb (not used) */
 #define STM32L4_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M4 block */
 
