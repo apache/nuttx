@@ -186,6 +186,8 @@
 #else
 #  if defined(CONFIG_STM32_STM32F30XX)
 #    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA /* Works without DMA should sampling frequency be reduced */
+#  elif defined(CONFIG_STM32_STM32L15XX)
+#    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_DMA /* Works without DMA as IO_START_CONV can switch channels on the fly */
 #  else
 #    define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #  endif
