@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/stdio.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,6 +206,15 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap);
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 int       remove(FAR const char *path);
+
+/* Shell operations.  These are not actually implemented in the OS.  See
+ * apps/system/open for implementation.
+ */
+
+#ifndef __KERNEL__
+FILE *popen(FAR const char *command, FAR const char *mode);
+int pclose(FILE *stream);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
