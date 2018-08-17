@@ -390,13 +390,15 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       return -ret;
     }
 
+#ifdef CONFIG_SCHED_WAITPID
   /* Disable pre-emption so that the proxy does not run until waitpid
    * is called.  This is probably unnecessary since the task_spawn_proxy has
    * the same priority as this thread; it should be schedule behind this
    * task in the ready-to-run list.
+   *
+   * REVISIT:  This will may not have the desired effect in SMP mode.
    */
 
-#ifdef CONFIG_SCHED_WAITPID
   sched_lock();
 #endif
 
