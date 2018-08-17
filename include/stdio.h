@@ -211,7 +211,7 @@ int       remove(FAR const char *path);
  * apps/system/open for implementation.
  */
 
-#ifndef __KERNEL__
+#if !defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
 FILE *popen(FAR const char *command, FAR const char *mode);
 int pclose(FILE *stream);
 #endif
