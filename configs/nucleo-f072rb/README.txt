@@ -325,6 +325,6 @@ Configurations
 
          CONFIG_HAVE_CXX=y
          CONFIG_HAVE_CXXINITIALIZE=y
-         CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+         CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
 
        And also support for C++ constructors under apps/platform.

@@ -86,9 +86,9 @@ static const char *dequote_list[] =
   /* apps/ definitions */
 
   "CONFIG_EXAMPLES_HELLO_PROGNAME",       /* Name of installed hello example program */
-  "CONFIG_EXAMPLES_NSH_PROGNAME",         /* Name of installed NSH example program */
-  "CONFIG_EXAMPLES_NSH_SYMTAB_ARRAYNAME", /* Symbol table array name */
-  "CONFIG_EXAMPLES_NSH_SYMTAB_COUNTNAME", /* Name of the variable holding the number of symbols */
+  "CONFIG_SYSTEM_NSH_PROGNAME",           /* Name of installed NSH example program */
+  "CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME",   /* Symbol table array name */
+  "CONFIG_SYSTEM_NSH_SYMTAB_COUNTNAME",   /* Name of the variable holding the number of symbols */
   "CONFIG_THTTPD_INDEX_NAMES",            /* List of index file names */
   NULL                                    /* Marks the end of the list */
 };

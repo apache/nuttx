@@ -753,7 +753,7 @@ Configurations
           These settings disable NSH:
 
           Application Configuration -> Examples
-            CONFIG_EXAMPLES_NSH=n
+            CONFIG_SYSTEM_NSH=n
 
           Application Configuration -> NSH Library
             CONFIG_NSH_LIBRARY=y

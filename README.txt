@@ -2106,21 +2106,21 @@ apps/
  |   |- tiff/README.txt
  |   `- traveler/tools/tcledit/README.txt
  |- interpreters/
- |   |- bas
+ |   |- bas/
  |   |  `- README.txt
- |   |- ficl
+ |   |- ficl/
  |   |  `- README.txt
  |   `- README.txt
  |- modbus/
  |   `- README.txt
  |- netutils/
- |   |- discover
+ |   |- discover/
  |   |  `- README.txt
- |   |- ftpc
+ |   |- ftpc/
  |   |  `- README.txt
- |   |- json
+ |   |- json/
  |   |  `- README.txt
- |   |- telnetd
+ |   |- telnetd/
  |   |  `- README.txt
  |   `- README.txt
  |- nshlib/
@@ -2128,28 +2128,30 @@ apps/
  |- NxWidgets/
  |   `- README.txt
  |- system/
- |   |- cdcacm
+ |   |- cdcacm/
  |   |  `- README.txt
- |   |- i2c
+ |   |- i2c/
  |   |  `- README.txt
- |   |- inifile
+ |   |- inifile/
  |   |  `- README.txt
- |   |- install
+ |   |- install/
  |   |  `- README.txt
- |   |- nxplayer
+ |   |- nsh/
+ |   |  `- README.txt
+ |   |- nxplayer/
  |   |  `- README.txt
  |   |- symtab/
  |   |   `- README.txt
- |   |- usbmsc
+ |   |- usbmsc/
  |   |  `- README.txt
- |   `- zmodem
+ |   `- zmodem/
  |      `- README.txt
  `- wireless
-     |- bluetooth
-     |  `- btsak
+     |- bluetooth/
+     |  `- btsak/
      |     `- README.txt
      `- ieee802154
-        `- i8sak
+        `- i8sak/
            `- README.txt
 
 Additional README.txt files in the other, related repositories:
