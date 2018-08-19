@@ -71,7 +71,7 @@ static void timer_timeout(int argc, wdparm_t itimer);
  * Name: timer_signotify
  *
  * Description:
- *   This function basically reimplements nxsig_queue() so that the si_code
+ *   This function basically re-implements nxsig_queue() so that the si_code
  *   can be correctly set to SI_TIMER
  *
  * Input Parameters:
@@ -279,7 +279,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
  * Input Parameters:
  *   timerid - The pre-thread timer, previously created by the call to
  *     timer_create(), to be be set.
- *   flags - Specifie characteristics of the timer (see above)
+ *   flags - Specifies characteristics of the timer (see above)
  *   value - Specifies the timer value to set
  *   ovalue - A location in which to return the time remaining from the
  *     previous timer setting. (ignored)
@@ -329,7 +329,7 @@ int timer_settime(timer_t timerid, int flags,
       return OK;
     }
 
-  /* Setup up any repititive timer */
+  /* Setup up any repetitive timer */
 
   if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
     {
@@ -372,7 +372,7 @@ int timer_settime(timer_t timerid, int flags,
     }
 
   /* If the time is in the past or now, then set up the next interval
-   * instead (assuming a repititive timer).
+   * instead (assuming a repetitive timer).
    */
 
   if (delay <= 0)

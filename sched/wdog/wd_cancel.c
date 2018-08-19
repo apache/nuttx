@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/wdog/wd_cancel.c
  *
- *   Copyright (C) 2007-2009, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +60,7 @@
  *
  * Description:
  *   This function cancels a currently running watchdog timer. Watchdog
- *   timers may be cancelled from the interrupt level.
+ *   timers may be canceled from the interrupt level.
  *
  * Input Parameters:
  *   wdog - ID of the watchdog to cancel.
@@ -110,7 +111,7 @@ int wd_cancel(WDOG_ID wdog)
       ASSERT(curr);
 
       /* If there is a watchdog in the timer queue after the one that
-       * is being cancelled, then it inherits the remaining ticks.
+       * is being canceled, then it inherits the remaining ticks.
        */
 
       if (curr->next)

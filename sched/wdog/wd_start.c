@@ -189,7 +189,7 @@ static inline void wd_expiration(void)
  * Name: wd_start
  *
  * Description:
- *   This function adds a watchdog timer to the actuve timer queue.  The
+ *   This function adds a watchdog timer to the active timer queue.  The
  *   specified watchdog function at 'wdentry' will be called from the
  *   interrupt level after the specified number of ticks has elapsed.
  *   Watchdog timers may be started from the interrupt level.
@@ -428,7 +428,7 @@ unsigned int wd_timer(int ticks)
 
 #ifdef CONFIG_SMP
   /* We are in an interrupt handler as, as a consequence, interrupts are
-   * disabled.  But in the SMP case, interrupst MAY be disabled only on
+   * disabled.  But in the SMP case, interrupts MAY be disabled only on
    * the local CPU since most architectures do not permit disabling
    * interrupts on other CPUS.
    *
@@ -490,7 +490,7 @@ void wd_timer(void)
   irqstate_t flags;
 
   /* We are in an interrupt handler as, as a consequence, interrupts are
-   * disabled.  But in the SMP case, interrupst MAY be disabled only on
+   * disabled.  But in the SMP case, interrupts MAY be disabled only on
    * the local CPU since most architectures do not permit disabling
    * interrupts on other CPUS.
    *

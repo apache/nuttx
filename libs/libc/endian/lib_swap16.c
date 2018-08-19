@@ -47,7 +47,7 @@
 #ifndef __SWAP_UINT16_ISMACRO
 uint16_t __swap_uint16(uint16_t n)
 {
-  return (uint16_t)(((((uint16_t)(n)) & 0x00ff) << 8) | \
+  return (uint16_t)(((((uint16_t)(n)) & 0x00ff) << 8) |
                     ((((uint16_t)(n)) >> 8) & 0x00ff));
 }
 #endif

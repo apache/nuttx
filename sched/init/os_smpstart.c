@@ -150,7 +150,7 @@ int os_idle_task(int argc, FAR char *argv[])
        * possible because if the IDLE thread is running, no other task is!
        *
        * WARNING: This logic could have undesirable side-effects if priority
-       * inheritance is enabled.  Imaginee the possible issues if the
+       * inheritance is enabled.  Imagine the possible issues if the
        * priority of the IDLE thread were to get boosted!  Moral: If you
        * use priority inheritance, then you should also enable the work
        * queue so that is done in a safer context.
@@ -173,10 +173,11 @@ int os_idle_task(int argc, FAR char *argv[])
  * Name: os_smp_start
  *
  * Description:
- *   In an SMP configution, only one CPU is initially active (CPU 0). System
- *   initialization occurs on that single thread. At the completion of the
- *   initialization of the OS, just before beginning normal multitasking,
- *   the additional CPUs would be started by calling this function.
+ *   In an SMP configuration, only one CPU is initially active (CPU 0).
+ *   System initialization occurs on that single thread. At the completion
+ *   of the initialization of the OS, just before beginning normal
+ *   multitasking, the additional CPUs would be started by calling this
+ *   function.
  *
  * Input Parameters:
  *   None
