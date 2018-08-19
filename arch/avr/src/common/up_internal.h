@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_internal.h
  *
- *   Copyright (C) 2010-2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,21 +55,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Bring-up debug configurations.  These are here (vs defconfig)
- * because these should only be controlled during low level
- * board bring-up and not part of normal platform configuration.
- */
-
-#undef  CONFIG_SUPPRESS_INTERRUPTS    /* DEFINED: Do not enable interrupts */
-#undef  CONFIG_SUPPRESS_TIMER_INTS    /* DEFINED: No timer */
-#undef  CONFIG_SUPPRESS_SERIAL_INTS   /* DEFINED: Console will poll */
-#undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
-#undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
-
-#ifndef CONFIG_DEBUG_SCHED_INFO
-#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
-#endif
 
 /* Check if an interrupt stack size is configured */
 

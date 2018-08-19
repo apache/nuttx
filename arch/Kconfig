@@ -695,6 +695,48 @@ config ARCH_NUSER_INTERRUPTS
 		defines the actual number of valid, mapped interrupts in g_irqmap.
 		This number will be the new size of the OS vector table
 
+# Bring-up debug configuration options.  These are only intended for low level
+# bring-up and not part of normal platform configuration.  They should never be
+# selected in a "normal" configuration and, hence, depend on EXPERIMENTAL
+
+menu "Bring-Up Options"
+	depends on EXPERIMENTAL
+
+config SUPPRESS_INTERRUPTS
+	bool "Suppress all interrupts"
+	default n
+	---help---
+		Do not enable interrupts
+
+config SUPPRESS_TIMER_INTS
+	bool "No timer"
+	default n
+	---help---
+		Do not initialize or enable the system timer
+
+config SUPPRESS_SERIAL_INTS
+	bool "Suppress serial interrupts"
+	default n
+	---help---
+		Console will poll
+
+config SUPPRESS_UART_CONFIG
+	bool "Do no re-configure UART"
+	default n
+	---help---
+		Do not re-configure the serial console UART from its start-up state.
+		This is useful when a boot loader has already initialized the serial
+		port.
+
+config DUMP_ON_EXIT
+	bool "Dump task state"
+	default n
+	depends on DEBUG_SCHED_INFO
+	---help---
+		Dump task state on exit()
+
+endmenu # Bring-Up Options
+
 comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC

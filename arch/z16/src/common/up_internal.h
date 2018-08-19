@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z16/src/common/up_internal.h
  *
- *   Copyright (C) 2008-2009, 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2015, 2-18 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,17 +53,8 @@
  * board bring-up and not part of normal platform configuration.
  */
 
-#undef  CONFIG_SUPPRESS_INTERRUPTS    /* Do not enable interrupts */
-#undef  CONFIG_SUPPRESS_TIMER_INTS    /* No timer */
-#undef  CONFIG_SUPPRESS_SERIAL_INTS   /* Console will poll */
-#undef  CONFIG_SUPPRESS_UART_CONFIG   /* Do not reconfig UART */
-#undef  CONFIG_DUMP_ON_EXIT           /* Dump task state on exit */
 #undef  CONFIG_Z16_LOWPUTC            /* Support up_lowputc for debug */
 #undef  CONFIG_Z16_LOWGETC            /* support z16_lowgetc for debug */
-
-#ifndef CONFIG_DEBUG_SCHED_INFO
-#  undef CONFIG_DUMP_ON_EXIT          /* Needs CONFIG_DEBUG_SCHED_INFO */
-#endif
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
