@@ -30,6 +30,7 @@ we have:
 
   audio     - This part of the audio system: nuttx/audio/audio.h
   dllfcn    - dllfcn.h
+  endian    - endian.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
   locale    - locale.h
