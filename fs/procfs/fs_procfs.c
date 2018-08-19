@@ -170,6 +170,11 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "partitions",    &part_procfsoperations,      PROCFS_FILE_TYPE   },
 #endif
 
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+  { "self",          &proc_operations,            PROCFS_DIR_TYPE    },
+  { "self/**",       &proc_operations,            PROCFS_UNKOWN_TYPE },
+#endif
+
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
   { "uptime",        &uptime_operations,          PROCFS_FILE_TYPE   },
 #endif

@@ -481,7 +481,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
   group = tcb->group;
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
 #ifdef HAVE_GROUPID
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Group:",
@@ -818,7 +818,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   int i;
 #endif
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
   remaining = buflen;
   totalsize = 0;
@@ -954,7 +954,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   size_t totalsize;
   int i;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
   remaining = buflen;
   totalsize = 0;
@@ -1120,7 +1120,7 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
   size_t copysize;
   struct proc_envinfo_s info;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL);
 
   /* Initialize the info structure */
 
@@ -1183,12 +1183,23 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* The first segment of the relative path should be a task/thread ID */
+  /* The first segment of the relative path should be a task/thread ID or
+   * the string "self".
+   */
 
   ptr = NULL;
-  tmp = strtoul(relpath, &ptr, 10);
 
-  if (!ptr || *ptr != '/')
+  if (strncmp(relpath, "self", 4) == 0)
+    {
+      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      ptr = (FAR char *)relpath + 4;    /* Discard const */
+    }
+  else
+    {
+      tmp = strtoul(relpath, &ptr, 10); /* Extract the PID from path */
+    }
+
+  if (ptr == NULL || *ptr != '/')
     {
       ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
@@ -1216,7 +1227,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   tcb = sched_gettcb(pid);
   leave_critical_section(flags);
 
-  if (!tcb)
+  if (tcb == NULL)
     {
       ferr("ERROR: PID %d is no longer valid\n", (int)pid);
       return -ENOENT;
@@ -1227,7 +1238,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   node = proc_findnode(ptr);
-  if (!node)
+  if (node == NULL)
     {
       ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
@@ -1244,7 +1255,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the task and node selection */
 
   procfile = (FAR struct proc_file_s *)kmm_zalloc(sizeof(struct proc_file_s));
-  if (!procfile)
+  if (procfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
@@ -1272,7 +1283,7 @@ static int proc_close(FAR struct file *filep)
   /* Recover our private data from the struct file instance */
 
   procfile = (FAR struct proc_file_s *)filep->f_priv;
-  DEBUGASSERT(procfile);
+  DEBUGASSERT(procfile != NULL);
 
   /* Release the file container structure */
 
@@ -1298,14 +1309,14 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   procfile = (FAR struct proc_file_s *)filep->f_priv;
-  DEBUGASSERT(procfile);
+  DEBUGASSERT(procfile != NULL);
 
   /* Verify that the thread is still valid */
 
   flags = enter_critical_section();
   tcb = sched_gettcb(procfile->pid);
 
-  if (!tcb)
+  if (tcb == NULL)
     {
       ferr("ERROR: PID %d is not valid\n", (int)procfile->pid);
       leave_critical_section(flags);
@@ -1382,12 +1393,12 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Recover our private data from the old struct file instance */
 
   oldfile = (FAR struct proc_file_s *)oldp->f_priv;
-  DEBUGASSERT(oldfile);
+  DEBUGASSERT(oldfile != NULL);
 
   /* Allocate a new container to hold the task and node selection */
 
   newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
-  if (!newfile)
+  if (newfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
@@ -1422,20 +1433,30 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   pid_t pid;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath != NULL && dir != NULL && dir->u.procfs == NULL);
 
   /* The relative must be either:
    *
-   *  (1) "<pid>" - The sub-directory of task/thread attributes, or
-   *  (2) The name of a directory node under <pid>
+   *  (1) "<pid>" - The sub-directory of task/thread attributes,
+   *  (2) "self"  - Which refers to the PID of the calling task, or
+   *  (3) The name of a directory node under either of those
    */
 
   /* Otherwise, the relative path should be a valid task/thread ID */
 
   ptr = NULL;
-  tmp = strtoul(relpath, &ptr, 10);
 
-  if (!ptr || (*ptr != '\0' && *ptr != '/'))
+  if (strncmp(relpath, "self", 4) == 0)
+    {
+      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      ptr = (FAR char *)relpath + 4;    /* Discard const */
+    }
+  else
+    {
+      tmp = strtoul(relpath, &ptr, 10); /* Extract the PID from path */
+    }
+
+  if (ptr == NULL || (*ptr != '\0' && *ptr != '/'))
     {
       /* strtoul failed or there is something in the path after the pid */
 
@@ -1461,7 +1482,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   tcb = sched_gettcb(pid);
   leave_critical_section(flags);
 
-  if (!tcb)
+  if (tcb == NULL)
     {
       ferr("ERROR: PID %d is not valid\n", (int)pid);
       return -ENOENT;
@@ -1473,7 +1494,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
    */
 
   procdir = (FAR struct proc_dir_s *)kmm_zalloc(sizeof(struct proc_dir_s));
-  if (!procdir)
+  if (procdir == NULL)
     {
       ferr("ERROR: Failed to allocate the directory structure\n");
       return -ENOMEM;
@@ -1489,7 +1510,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
       ptr++;
       node = proc_findnode(ptr);
-      if (!node)
+      if (node == NULL)
         {
           ferr("ERROR: Invalid path \"%s\"\n", relpath);
           kmm_free(procdir);
@@ -1536,7 +1557,7 @@ static int proc_closedir(FAR struct fs_dirent_s *dir)
 {
   FAR struct proc_dir_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
+  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
   priv = dir->u.procfs;
 
   if (priv)
@@ -1565,7 +1586,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
   pid_t pid;
   int ret;
 
-  DEBUGASSERT(dir && dir->u.procfs);
+  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
   procdir = dir->u.procfs;
 
   /* Have we reached the end of the directory */
@@ -1593,7 +1614,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
       tcb = sched_gettcb(pid);
       leave_critical_section(flags);
 
-      if (!tcb)
+      if (tcb == NULL)
         {
           ferr("ERROR: PID %d is no longer valid\n", (int)pid);
           return -ENOENT;
@@ -1645,7 +1666,7 @@ static int proc_rewinddir(struct fs_dirent_s *dir)
 {
   FAR struct proc_dir_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
+  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
   priv = dir->u.procfs;
 
   priv->base.index = 0;
@@ -1677,9 +1698,18 @@ static int proc_stat(const char *relpath, struct stat *buf)
    */
 
   ptr = NULL;
-  tmp = strtoul(relpath, &ptr, 10);
 
-  if (!ptr)
+  if (strncmp(relpath, "self", 4) == 0)
+    {
+      tmp = (unsigned long)getpid();    /* Get the PID of the calling task */
+      ptr = (FAR char *)relpath + 4;    /* Discard const */
+    }
+  else
+    {
+      tmp = strtoul(relpath, &ptr, 10); /* Extract the PID from path */
+    }
+
+  if (ptr == NULL)
     {
       ferr("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
@@ -1703,7 +1733,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
   tcb = sched_gettcb(pid);
   leave_critical_section(flags);
 
-  if (!tcb)
+  if (tcb == NULL)
     {
       ferr("ERROR: PID %d is no longer valid\n", (int)pid);
       return -ENOENT;
@@ -1741,7 +1771,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
       /* Lookup the well-known node associated with the relative path. */
 
       node = proc_findnode(ptr);
-      if (!node)
+      if (node == NULL)
         {
           ferr("ERROR: Invalid path \"%s\"\n", relpath);
           return -ENOENT;
