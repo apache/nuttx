@@ -32,6 +32,14 @@ config FS_PROCFS_EXCLUDE_PROCESS
 		This will reduce code space, but then giving access to process info
 		was kinda the whole point of procfs, but hey, whatever.
 
+config FS_PROCFS_EXCLUDE_ENVIRON
+	bool "Exclude environment information"
+	default y
+	depends on !FS_PROCFS_EXCLUDE_PROCESS
+	---help---
+		Causes the environment variable information to be excluded from the
+		procfs system.  This will reduce code space slightly.
+
 config FS_PROCFS_EXCLUDE_MODULE
 	bool "Exclude module information"
 	depends on MODULE

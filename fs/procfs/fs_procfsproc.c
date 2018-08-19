@@ -110,7 +110,7 @@ enum proc_node_e
   PROC_GROUP,                         /* Group directory */
   PROC_GROUP_STATUS,                  /* Task group status */
   PROC_GROUP_FD                       /* Group file descriptors */
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
   , PROC_GROUP_ENV                    /* Group environment variables */
 #endif
 };
@@ -194,7 +194,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static int     proc_groupenv_callback(FAR void *arg, FAR const char *pair);
 static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
@@ -293,7 +293,7 @@ static const struct proc_node_s g_groupfd =
   "group/fd",     "fd",      (uint8_t)PROC_GROUP_FD,     DTYPE_FILE        /* Group file descriptors */
 };
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static const struct proc_node_s g_groupenv =
 {
   "group/env",    "env",     (uint8_t)PROC_GROUP_ENV,    DTYPE_FILE        /* Group environment variables */
@@ -314,7 +314,7 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
   , &g_groupenv    /* Group environment variables */
 #endif
 };
@@ -341,7 +341,7 @@ static FAR const struct proc_node_s * const g_groupinfo[] =
 {
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
   , &g_groupenv    /* Group environment variables */
 #endif
 };
@@ -1043,7 +1043,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
  * Name: proc_groupenv_callback
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
 {
   FAR struct proc_envinfo_s *info = (FAR struct proc_envinfo_s *)arg;
@@ -1110,7 +1110,7 @@ static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
  * Name: proc_groupenv
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset)
@@ -1352,7 +1352,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
     case PROC_GROUP_ENV: /* Group environment variables */
       ret = proc_groupenv(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
