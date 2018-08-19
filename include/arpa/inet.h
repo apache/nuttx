@@ -97,7 +97,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Functions to convert between nost and network byte ordering */
+/* Functions to convert between host and network byte ordering.
+ *
+ * REVISIT:  Since network order is defined as big-endian, the following
+ * functions are equivalent to functions declared in endian.h:
+ *
+ *   htonl   htobe32
+ *   htons   htobe16
+ *   ntohl   be32toh
+ *   ntohs   be16toh
+ */
 
 uint32_t    ntohl(uint32_t nl);
 uint16_t    ntohs(uint16_t ns);
