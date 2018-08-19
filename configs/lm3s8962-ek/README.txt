@@ -196,13 +196,6 @@ Stellaris LM3S8962 Evaluation Kit Configuration Options
 
     CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-       cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
-       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-       the delay actually is 100 seconds.
-
   There are configurations for disabling support for interrupts GPIO ports.
   GPIOJ must be disabled because it does not exist on the LM3S8962.
   Additional interrupt support can be disabled if desired to reduce memory

@@ -60,45 +60,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARCH_CALIBRATION
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_calibratedelay
- *
- * Description:
- *   Delay loops are provided for short timing loops.  This function, if
- *   enabled, will just wait for 100 seconds.  Using a stopwatch, you can
- *   can then determine if the timing loops are properly calibrated.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG_FEATURES)
-static void up_calibratedelay(void)
-{
-  int i;
-
-  swarn("Beginning 100s delay\n");
-  for (i = 0; i < 100; i++)
-    {
-      up_mdelay(1000);
-    }
-
-  swarn("End 100s delay\n");
-}
-#else
-# define up_calibratedelay()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -124,10 +85,6 @@ void up_initialize(void)
   /* Initialize global variables */
 
   g_current_regs = NULL;
-
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
 
   /* Initialize the interrupt subsystem */
 

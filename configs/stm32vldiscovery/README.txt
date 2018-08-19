@@ -109,13 +109,6 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-    CONFIG_ARCH_CALIBRATION - when used togeter with CONFIG_DEBUG_FEATURES enables some
-	   build in instrumentation that cause a 100 second delay during boot-up.
-	   This 100 second delay serves no purpose other than it allows you to
-	   calibratre CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to
-	   measure the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-       the delay actually is 100 seconds.
-
   Individual subsystems can be enabled:
 
     AHB

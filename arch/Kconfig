@@ -705,16 +705,6 @@ config BOARD_LOOPSPERMSEC
 		driver initialization.  These delay loops must be calibrated for each
 		board in order to assure accurate timing by the delay loops.
 
-config ARCH_CALIBRATION
-	bool "Calibrate delay loop"
-	default n
-	---help---
-		Enables some built in instrumentation that causes a 100 second delay
-		during boot-up.  This 100 second delay serves no purpose other than it
-		allows you to calibrate BOARD_LOOPSPERMSEC.  You simply use a stop
-		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
-		the actual delay is 100 seconds.
-
 comment "Interrupt options"
 
 config ARCH_HAVE_INTERRUPTSTACK
