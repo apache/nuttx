@@ -16,7 +16,6 @@ README for the Expressif ESP32 Core board (V2)
 Contents
 ========
 
-  o STATUS
   o ESP32 Features
   o ESP32 Toolchain
   o Memory Map
@@ -31,7 +30,19 @@ Contents
 STATUS
 ======
 
-  The basic port is underway.  No testing has yet been performed.
+  Currently, the NuttX port depends on the bootloader to initialize hardware,
+  including basic (slow) clocking.  That is because the clock configuration
+  logic is only available via an Espressif add-on library.
+
+  Because of this, all board configurations require these settings:
+
+    CONFIG_EXPERIMENTAL=y
+    CONFIG_DEBUG_FEATURES=y
+    CONFIG_SUPPRESS_CLOCK_CONFIG=y
+
+  Some configurations may also require:
+
+    CONFIG_SUPPRESS_UART_CONFIG=y
 
 ESP32 Features
 ==============
@@ -527,22 +538,11 @@ OpenOCD for the ESP32
     CONFIG_DEBUG_SYMBOLS=y
     CONFIG_ESP32CORE_RUN_IRAM=y
 
-  I also made this change which will eliminate all attempts to re-configure
-  serial. It will just use the serial settings as they were left by the
-  bootloader:
+  I also made this change configuration which will eliminate all attempts to
+  re-configure serial. It will just use the serial settings as they were left
+  by the bootloader:
 
-    diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
-    index 422ec0b..8707d7c 100644
-    --- a/arch/xtensa/src/common/xtensa.h
-    +++ b/arch/xtensa/src/common/xtensa.h
-    @@ -60,7 +60,7 @@
-     #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
-     #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
-     #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
-    -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
-    +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
-     #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
-     #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
+    CONFIG_SUPPRESS_UART_CONFIG=y
 
   Start OpenOCD:
 
@@ -735,18 +735,11 @@ Things to Do
      This will use the serial port settings as left by the preceding
      bootloader:
 
-     diff --git a/arch/xtensa/src/common/xtensa.h b/arch/xtensa/src/common/xtensa.h
-     index 422ec0b..8707d7c 100644
-     --- a/arch/xtensa/src/common/xtensa.h
-     +++ b/arch/xtensa/src/common/xtensa.h
-     @@ -60,7 +60,7 @@
-      #undef  CONFIG_SUPPRESS_INTERRUPTS     /* DEFINED: Do not enable interrupts */
-      #undef  CONFIG_SUPPRESS_TIMER_INTS     /* DEFINED: No timer */
-      #undef  CONFIG_SUPPRESS_SERIAL_INTS    /* DEFINED: Console will poll */
-     -#undef  CONFIG_SUPPRESS_UART_CONFIG    /* DEFINED: Do not reconfigure UART */
-     +#define CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfigure UART */
-      #define CONFIG_SUPPRESS_CLOCK_CONFIG 1 /* DEFINED: Do not reconfigure clocking */
-      #undef  CONFIG_DUMP_ON_EXIT            /* DEFINED: Dump task state on exit */
+     I also made this change configuration which will eliminate all attempts to
+     re-configure serial. It will just use the serial settings as they were left
+     by the bootloader:
+
+       CONFIG_SUPPRESS_UART_CONFIG=y
 
      I have not debugged this in detail, but this appears to be an issue with the
      impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from

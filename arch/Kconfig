@@ -697,10 +697,19 @@ config ARCH_NUSER_INTERRUPTS
 
 # Bring-up debug configuration options.  These are only intended for low level
 # bring-up and not part of normal platform configuration.  They should never be
-# selected in a "normal" configuration and, hence, depend on EXPERIMENTAL
+# selected in a "normal" configuration and, hence, depend on both EXPERIMENTAL
+# and DEBUG_FEATURES.
 
 menu "Bring-Up Options"
-	depends on EXPERIMENTAL
+	depends on EXPERIMENTAL && DEBUG_FEATURES
+
+config SUPPRESS_CLOCK_CONFIG
+	bool "Suppress clock configuration"
+	default n
+	depends on ARCH_XTENSA
+	---help---
+		Do not configure clocking.  Instead relies on the reset clock
+		configuration (or clock configuration provided by a bootloader).
 
 config SUPPRESS_INTERRUPTS
 	bool "Suppress all interrupts"
