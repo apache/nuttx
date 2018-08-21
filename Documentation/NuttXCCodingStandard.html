@@ -419,8 +419,12 @@
   </li>
   <li>
     With braces.
-    No blank line separates the beginning left brace from a comment.
-    No blank line follows a comment that may be the final thing preceding a right brace.
+    No blank line separates the line containing the opening left brace from a comment.
+    No blank line follows a comment that may be the final line preceding a closing right brace.
+  </li>
+  <li>
+    With Labels.
+    No blank line separates the line containing the label from a comment.
   </li>
 </p>
 <center><table width="60%" border=1>
@@ -444,6 +448,11 @@
       /* Only a comment */
 
     }
+
+  here:
+
+    /* This is the place */
+
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -468,6 +477,10 @@
     {
       /* Only a comment */
     }
+
+  here:
+    /* This is the place */
+
 </ul></pre></font>
 </td></tr>
 </table></center>

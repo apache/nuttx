@@ -119,6 +119,11 @@ int main(int argc, char **argv, char **envp)
         {
           if (lineno == last_oneline_comment + 1)
             {
+              /* TODO:  This generates a false alarm if the current line
+               * contains a right brace.  No blank line should be present in
+               * that case.
+               */
+
               fprintf(stderr,
                       "Missing blank line after comment line. Found at line %d\n",
                       last_oneline_comment);
@@ -179,13 +184,11 @@ int main(int argc, char **argv, char **envp)
           if (line[indent] == '/' && line[indent +1] == '*' &&
               lptr - line == linelen - 3)
             {
-              /* TODO:  This generates a false alarm if followed by a right brace.
-               * No blank line should be present in that case.
-               */
-
               if (last_oneline_comment != lineno - 1 &&
                   last_blank_line != lineno - 1)
                 {
+                  /* TODO:  This generates a false alarm if preceded by a label. */
+
                   fprintf(stderr,
                           "Missing blank line before comment found at line %d\n",
                           lineno);
