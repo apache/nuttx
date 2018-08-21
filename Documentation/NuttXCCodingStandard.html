@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: August 7, 2017</p>
+      <p>Last Updated: August 21, 2018</p>
     </td>
   </tr>
 </table>
@@ -405,11 +405,23 @@
 <p>
   <b>Line Spacing</b>
   A single blank line should precede and follow each comment.
-  The only exceptions are (1) for the file header block comment that begins on line one;
-  there is no preceding blank line in that case.
-  And (2) for conditional compilation.
-  Conditional compilation should include the conditional logic <i>and</i> all comments associated with the conditional logic.
-  In this case, the blank line appears <i>before</i> the conditional, not after it.
+  The only exceptions are:
+</p>
+<ol>
+  <li>
+    For the file header block comment that begins on line one;
+    there is no preceding blank line in that case.
+  <li>
+    For conditional compilation.
+    Conditional compilation should include the conditional logic <i>and</i> all comments associated with the conditional logic.
+    In this case, the blank line appears <i>before</i> the conditional, not after it.
+    No blank lines precede any comments following the conditional.
+  </li>
+  <li>
+    With braces.
+    No blank line separates the beginning left brace from a comment.
+    No blank line follows a comment that may be the final thing preceding a right brace.
+  </li>
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -425,6 +437,13 @@
 #ifdef CONFIG_THE_IMPOSSIBLE
   the_impossible();
 #endif
+
+  if (a == b)
+    {
+
+      /* Only a comment */
+
+    }
 </ul></pre></font>
 </td></tr>
 <tr><td bgcolor="white">
@@ -444,6 +463,11 @@
 
   the_impossible();
 #endif
+
+  if (a == b)
+    {
+      /* Only a comment */
+    }
 </ul></pre></font>
 </td></tr>
 </table></center>
