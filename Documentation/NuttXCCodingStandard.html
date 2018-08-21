@@ -2022,8 +2022,11 @@ ptr = (FAR struct somestruct_s *)value;
   </li>
   <li>
     <b>Local variables first</b>.
-    Because NuttX conforms to the older C89 standard, all variables that have scope over the entire compound statement must be defined at the beginning of the compound statement.
-    A single blank line must follow the local variable definitions.
+    Because NuttX conforms to the older C89 standard, all variables that have scope over the compound statement must be defined at the beginning of the compound statement prior to any executable statements.
+    Local variable definitions intermixed within the following sequence of executable statements are forbidden.
+    A single blank line must follow the local variable definitions separating the local variable definitions from the following executable statements.
+    <b>NOTE</b> that a function body consists of a compound statement, but typically so does the statement following <code>if</code>, <code>else</code>, <code>for</code>, <code>while</code>, <code>do</code>.
+    Local variable definitions are also acceptable at the beginning of these compound statements as with any other.
   </li>
   <li>
     <b>Long functions are discouraged</b>.
@@ -2034,6 +2037,52 @@ ptr = (FAR struct somestruct_s *)value;
     A one (and only one) blank line must follow the closing right brace of the function body.
   </li>
 </ul>
+
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  int myfunction(int a, int b)
+    {
+      int c, d;
+      c = a
+      d = b;
+
+      int e = c + d;
+
+      for (int i = 0; i &lt; b; i++)
+        {
+          e += d;
+        }
+
+      return e / a;
+    }
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  int myfunction(int a, int b)
+    {
+      int c;
+      int d;
+      int e;
+      int i;
+
+      c = a
+      d = b;
+      e = c + d;
+
+      for (i = 0; i &lt; b; i++)
+        {
+          e += d;
+        }
+
+      return e / a;
+    }
+</ul></pre></font>
+</td></tr>
+</table></center>
 
 <h2><a name="retvalues">Returned Values</a></h2>
 
