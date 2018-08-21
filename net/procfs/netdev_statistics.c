@@ -211,8 +211,9 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 
   switch (dev->d_lltype)
     {
-#ifdef CONFIG_NET_ETHERNET
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       case NET_LL_ETHERNET:
+      case NET_LL_IEEE80211:
         len += snprintf(&netfile->line[len], NET_LINELEN - len,
                         "%s\tLink encap:Ethernet HWaddr %s",
                         dev->d_ifname, ether_ntoa(&dev->d_mac.ether));
