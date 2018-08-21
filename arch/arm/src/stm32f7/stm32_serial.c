@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_serial.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -2359,18 +2359,11 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int c = 0;
 
-  /* If additional bytes have been added to the DMA buffer, then we will need
-   * to invalidate the DMA buffer before reading the byte.
-   */
+  /* Check if additional bytes have been added to the DMA buffer. */
 
   if (up_dma_nextrx(priv) != priv->rxdmanext)
     {
-      /* Invalidate the DMA buffer */
-
-      arch_invalidate_dcache((uintptr_t)priv->rxfifo,
-                             (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE - 1);
-
-      /* Now read from the DMA buffer */
+      /* Read one byte from the Rx DMA buffer */
 
       c = priv->rxfifo[priv->rxdmanext];
 
@@ -2398,7 +2391,7 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
-  /* En/disable DMA reception.
+  /* Enable/disable DMA reception.
    *
    * Note that it is not safe to check for available bytes and immediately
    * pass them to uart_recvchars as that could potentially recurse back
@@ -2550,6 +2543,22 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   if (priv->rxenable && up_dma_rxavailable(&priv->dev))
     {
+      /* Invalidate the DMA buffer.
+       *
+       * REVISIT:  We could improve this logic slightly by checking the DMA
+       * status.  If this is the completion of half of the DMA, then we
+       * would only have invalidate the 1st half of the DMA buffer.
+       * Otherwise, we would only have to invalidate the second half of the
+       * DMA buffer.  This would require that the Rx DMA buffers have a size
+       * that is a multiple of twice the cache line size and would also have
+       * implications to stm32_serial_dma_poll()
+       */
+
+      arch_invalidate_dcache((uintptr_t)priv->rxfifo,
+                             (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE - 1);
+
+      /* Receive the newly DMA'ed characters */
+
       uart_recvchars(&priv->dev);
     }
 }
