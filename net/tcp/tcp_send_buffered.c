@@ -424,7 +424,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x\n", flags);
 
-  /* If this packet contains an acknowledgement, then update the count of
+  /* If this packet contains an acknowledgment, then update the count of
    * acknowledged bytes.
    */
 
