@@ -79,7 +79,7 @@
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
 #else
 
-   /* Use the selected work queue */
+    /* Use the selected work queue */
 
 #  if defined(CONFIG_IEEE80211_BROADCOM_HPWORK)
 #    define BCMFWORK HPWORK
@@ -280,8 +280,8 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
            */
 
           uint8_t temp_buffer[12];
-          memcpy( temp_buffer, frame->data, 12);
-          memcpy( frame->data + 4, temp_buffer, 12);
+          memcpy(temp_buffer, frame->data, 12);
+          memcpy(frame->data + 4, temp_buffer, 12);
 
           priv->bc_dev.d_buf = frame->data = frame->data + 4;
           priv->bc_dev.d_len -= 4;
@@ -425,7 +425,8 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
  *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
+ *   2. When the preceding TX packet send times out and the interface is
+ *      reset
  *   3. During normal TX polling
  *
  * Input Parameters:
@@ -444,7 +445,6 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
-  wlinfo("Entry\n");
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
@@ -477,10 +477,10 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 
       bcmf_transmit(priv, priv->cur_tx_frame);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
+      /* TODO: Check if there is room in the device to hold another packet.
+       * If not, return a non-zero value to terminate the poll.
        */
-      // TODO
+
       priv->cur_tx_frame = NULL;
       return 1;
     }
@@ -511,7 +511,6 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 
 static void bcmf_rxpoll(FAR void *arg)
 {
-  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
@@ -545,8 +544,6 @@ static void bcmf_rxpoll(FAR void *arg)
 
 void bcmf_netdev_notify_tx_done(FAR struct bcmf_dev_s *priv)
 {
-  // wlinfo("Entry\n");
-
   /* TODO TX buffer may be available, try to send again if needed */
 }
 
@@ -586,7 +583,6 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 
 static void bcmf_poll_work(FAR void *arg)
 {
-  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Lock the network and serialize driver operations if necessary.
@@ -645,7 +641,6 @@ exit_unlock:
 
 static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 {
-  // wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -672,7 +667,6 @@ static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int bcmf_ifup(FAR struct net_driver_s *dev)
 {
-  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
@@ -686,8 +680,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
-
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
 
   /* Instantiate the MAC address from priv->bc_dev.d_mac.ether.ether_addr_octet */
 
@@ -705,7 +697,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   /* Enable the hardware interrupt */
 
   priv->bc_bifup = true;
-
   return OK;
 }
 
@@ -727,7 +718,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
 static int bcmf_ifdown(FAR struct net_driver_s *dev)
 {
-  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
 
@@ -772,8 +762,6 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 static void bcmf_txavail_work(FAR void *arg)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-
-  // wlinfo("Entry\n");
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -864,7 +852,6 @@ static int bcmf_txavail(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
 static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
@@ -894,7 +881,6 @@ static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  wlinfo("Entry\n");
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
@@ -922,7 +908,6 @@ static int bcmf_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_ICMPv6
 static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
 {
-  wlinfo("Entry\n");
   FAR struct net_driver_s *dev;
   uint16_t tmp16;
   uint8_t mac[6];
@@ -963,7 +948,6 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
    */
 
   (void)bcmf_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
-
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -973,7 +957,6 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
    */
 
   (void)bcmf_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
-
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
 #endif /* CONFIG_NET_ICMPv6 */
@@ -1142,8 +1125,8 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 
   /* Initialize network stack interface buffer */
 
-  priv->cur_tx_frame = NULL;
-  priv->bc_dev.d_buf = NULL;
+  priv->cur_tx_frame     = NULL;
+  priv->bc_dev.d_buf     = NULL;
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling bcmf_ifdown().
