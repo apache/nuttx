@@ -2543,15 +2543,12 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   if (priv->rxenable && up_dma_rxavailable(&priv->dev))
     {
-      /* Invalidate the DMA buffer.
-       *
-       * REVISIT:  We could improve this logic slightly by checking the DMA
-       * status.  If this is the completion of half of the DMA, then we
-       * would only have invalidate the 1st half of the DMA buffer.
-       * Otherwise, we would only have to invalidate the second half of the
-       * DMA buffer.  This would require that the Rx DMA buffers have a size
-       * that is a multiple of twice the cache line size and would also have
-       * implications to stm32_serial_dma_poll()
+      /* Invalidate the entire DMA buffer.  It would be tempting to
+       * invalidate only half of the DMA buffer, since the DMA completion
+       * event means that only half of the DMA buffer has been filled.
+       * However, we need to account for the behavior of up_dma_rxavailable()
+       * which may encroach into the next half of the DMA buffer while DMA
+       * is still in progress in that half.
        */
 
       arch_invalidate_dcache((uintptr_t)priv->rxfifo,
