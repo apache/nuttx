@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/nxstyle.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@ int main(int argc, char **argv, char **envp)
   int n;
   int i;
   int last_oneline_comment;
+  int last_blank_line;
   int linelen;
 
   instream = fopen(argv[1], "r");
@@ -96,6 +97,7 @@ int main(int argc, char **argv, char **envp)
   prevncomment = 0;
   last_oneline_comment = -1; /* Line on which the last one line comment was
                               * closed */
+  last_blank_line = -1;      /* lineno of last blank line */
 
   while (fgets(line, LINE_SIZE, instream))
     {
@@ -109,7 +111,11 @@ int main(int argc, char **argv, char **envp)
 
       /* Check for a blank line */
 
-      if (line[0] != '\n')
+      if (line[0] == '\n')
+        {
+          last_blank_line = lineno;
+        }
+      else /* this line is non-blank */
         {
           if (lineno == last_oneline_comment + 1)
             {
@@ -158,6 +164,9 @@ int main(int argc, char **argv, char **envp)
 
       if (line[indent] == '#')
         {
+          /* Suppress error for comment following conditional compilation */
+
+          last_blank_line = lineno;
           continue;
         }
 
@@ -170,6 +179,18 @@ int main(int argc, char **argv, char **envp)
           if (line[indent] == '/' && line[indent +1] == '*' &&
               lptr - line == linelen - 3)
             {
+              /* TODO:  This generates a false alarm if followed by a right brace.
+               * No blank line should be present in that case.
+               */
+
+              if (last_oneline_comment != lineno - 1 &&
+                  last_blank_line != lineno - 1)
+                {
+                  fprintf(stderr,
+                          "Missing blank line before comment found at line %d\n",
+                          lineno);
+                }
+
               last_oneline_comment = lineno;
             }
         }
@@ -433,6 +454,10 @@ int main(int argc, char **argv, char **envp)
                       {
                         declnest++;
                       }
+
+                    /* Suppress error for comment following a left brace */
+
+                    last_blank_line = lineno;
                   }
                   break;
 
