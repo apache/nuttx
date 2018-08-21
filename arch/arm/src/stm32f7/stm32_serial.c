@@ -294,9 +294,9 @@
 
 struct up_dev_s
 {
-  struct uart_dev_s dev;       /* Generic UART device */
-  uint16_t          ie;        /* Saved interrupt mask bits value */
-  uint16_t          sr;        /* Saved status bits */
+  struct uart_dev_s dev;        /* Generic UART device */
+  uint16_t          ie;         /* Saved interrupt mask bits value */
+  uint16_t          sr;         /* Saved status bits */
 
   /* Has been initialized and HW is setup. */
 
@@ -307,39 +307,39 @@ struct up_dev_s
    */
 
 #ifdef CONFIG_SERIAL_TERMIOS
-  uint8_t           parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t           bits;      /* Number of bits (7 or 8) */
-  bool              stopbits2; /* True: Configure with 2 stop bits instead of 1 */
+  uint8_t           parity;     /* 0=none, 1=odd, 2=even */
+  uint8_t           bits;       /* Number of bits (7 or 8) */
+  bool              stopbits2;  /* True: Configure with 2 stop bits instead of 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  bool              iflow;     /* input flow control (RTS) enabled */
+  bool              iflow;      /* input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  bool              oflow;     /* output flow control (CTS) enabled */
+  bool              oflow;      /* output flow control (CTS) enabled */
 #endif
-  uint32_t          baud;      /* Configured baud */
+  uint32_t          baud;       /* Configured baud */
 #else
-  const uint8_t     parity;    /* 0=none, 1=odd, 2=even */
-  const uint8_t     bits;      /* Number of bits (7 or 8) */
-  const bool        stopbits2; /* True: Configure with 2 stop bits instead of 1 */
+  const uint8_t     parity;     /* 0=none, 1=odd, 2=even */
+  const uint8_t     bits;       /* Number of bits (7 or 8) */
+  const bool        stopbits2;  /* True: Configure with 2 stop bits instead of 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  const bool        iflow;     /* input flow control (RTS) enabled */
+  const bool        iflow;      /* input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  const bool        oflow;     /* output flow control (CTS) enabled */
+  const bool        oflow;      /* output flow control (CTS) enabled */
 #endif
-  const uint32_t    baud;      /* Configured baud */
+  const uint32_t    baud;       /* Configured baud */
 #endif
 
-  const uint8_t     irq;       /* IRQ associated with this USART */
-  const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
-  const uint32_t    usartbase; /* Base address of USART registers */
-  const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
-  const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
+  const uint8_t     irq;        /* IRQ associated with this USART */
+  const uint32_t    apbclock;   /* PCLK 1 or 2 frequency */
+  const uint32_t    usartbase;  /* Base address of USART registers */
+  const uint32_t    tx_gpio;    /* U[S]ART TX GPIO pin configuration */
+  const uint32_t    rx_gpio;    /* U[S]ART RX GPIO pin configuration */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  const uint32_t    rts_gpio;  /* U[S]ART RTS GPIO pin configuration */
+  const uint32_t    rts_gpio;   /* U[S]ART RTS GPIO pin configuration */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  const uint32_t    cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
+  const uint32_t    cts_gpio;   /* U[S]ART CTS GPIO pin configuration */
 #endif
 
 #ifdef SERIAL_HAVE_DMA
@@ -349,15 +349,21 @@ struct up_dev_s
   /* RX DMA state */
 
 #ifdef SERIAL_HAVE_DMA
-  DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
-  bool              rxenable;  /* DMA-based reception en/disable */
-  uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
-  char      *const  rxfifo;    /* Receive DMA buffer */
+  DMA_HANDLE        rxdma;      /* currently-open receive DMA stream */
+  bool              rxenable;   /* DMA-based reception en/disable */
+  uint32_t          rxdmanext;  /* Next byte in the DMA buffer to be read */
+#ifdef CONFIG_ARMV7M_DCACHE
+  uint32_t          rxdmaavail; /* Number of bytes available without need to
+                                 * to invalidate the data cache */
+#endif
+  char      *const  rxfifo;     /* Receive DMA buffer */
 #endif
 
 #ifdef HAVE_RS485
-  const uint32_t    rs485_dir_gpio; /* U[S]ART RS-485 DIR GPIO pin configuration */
-  const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR pin state for TX enabled */
+  const uint32_t    rs485_dir_gpio;     /* U[S]ART RS-485 DIR GPIO pin
+                                         * configuration */
+  const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR pin state for
+                                         * TX enabled */
 #endif
 };
 
@@ -1601,11 +1607,14 @@ static int up_dma_setup(struct uart_dev_s *dev)
                    RXDMA_BUFFER_SIZE,
                    SERIAL_DMA_CONTROL_WORD);
 
-  /* Reset our DMA shadow pointer to match the address just
-   * programmed above.
+  /* Reset our DMA shadow pointer and Rx data availability count to match
+   * the address just programmed above.
    */
 
   priv->rxdmanext = 0;
+#ifdef CONFIG_ARMV7M_DCACHE
+  priv->rxdmaavail = 0;
+#endif
 
   /* Enable receive DMA for the UART */
 
@@ -2357,13 +2366,57 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  uint32_t nextrx = up_dma_nextrx(priv);
   int c = 0;
 
-  /* Check if additional bytes have been added to the DMA buffer. */
+  /* Check if more data is available */
 
-  if (up_dma_nextrx(priv) != priv->rxdmanext)
+  if (nextrx != priv->rxdmanext)
     {
-      /* Read one byte from the Rx DMA buffer */
+#ifdef CONFIG_ARMV7M_DCACHE
+      /* If the data cache is enabled, then we will also need to manage
+       * cache coherency.  Are any bytes available in the currently coherent
+       * region of the data cache?
+       */
+
+      if (priv->rxdmaavail == 0)
+        {
+          uint32_t rxdmaavail;
+          uintptr_t addr;
+
+          /* No.. then we will have to invalidate additional space in the Rx
+           * DMA buffer.
+           */
+
+          if (nextrx > priv->rxdmanext)
+            {
+              /* Number of available bytes */
+
+              rxdmaavail = nextrx - priv->rxdmanext;
+            }
+          else
+            {
+              /* Number of available bytes up to the end of RXDMA buffer */
+
+              rxdmaavail = RXDMA_BUFFER_SIZE - priv->rxdmanext;
+            }
+
+          /* Invalidate the DMA buffer range */
+
+          addr = (uintptr_t)&priv->rxfifo[priv->rxdmanext];
+          arch_invalidate_dcache(addr, addr + rxdmaavail);
+
+          /* We don't need to invalidate the data cache for the next
+           * rxdmaavail number of next bytes.
+           */
+
+          priv->rxdmaavail = rxdmaavail;
+        }
+
+      priv->rxdmaavail--;
+#endif
+
+      /* Now read from the DMA buffer */
 
       c = priv->rxfifo[priv->rxdmanext];
 
@@ -2373,6 +2426,12 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
           priv->rxdmanext = 0;
         }
     }
+
+  /* NOTE:  If no data is available, then we would return NULL which is,
+   * of course, valid binary data.  The protocol is that the upper half
+   * driver must call up_dma_rxavailable prior to calling this function to
+   * assure that this never happens.
+   */
 
   return c;
 }
@@ -2543,19 +2602,6 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   if (priv->rxenable && up_dma_rxavailable(&priv->dev))
     {
-      /* Invalidate the entire DMA buffer.  It would be tempting to
-       * invalidate only half of the DMA buffer, since the DMA completion
-       * event means that only half of the DMA buffer has been filled.
-       * However, we need to account for the behavior of up_dma_rxavailable()
-       * which may encroach into the next half of the DMA buffer while DMA
-       * is still in progress in that half.
-       */
-
-      arch_invalidate_dcache((uintptr_t)priv->rxfifo,
-                             (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE - 1);
-
-      /* Receive the newly DMA'ed characters */
-
       uart_recvchars(&priv->dev);
     }
 }
