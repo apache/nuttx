@@ -2050,9 +2050,12 @@ ptr = (FAR struct somestruct_s *)value;
 
       int e = c + d;
 
-      for (int i = 0; i &lt; b; i++)
+      for (int i = 0; i &lt; a; i++)
         {
-          e += d;
+          for (int j = 0; j &lt; b; j++)
+            {
+              e += j * d;
+            }
         }
 
       return e / a;
@@ -2073,9 +2076,14 @@ ptr = (FAR struct somestruct_s *)value;
       d = b;
       e = c + d;
 
-      for (i = 0; i &lt; b; i++)
+      for (i = 0; i &lt; a; i++)
         {
-          e += d;
+          int j;
+
+          for (j = 0; j &lt; b; j++)
+            {
+              e += j * d;
+            }
         }
 
       return e / a;
