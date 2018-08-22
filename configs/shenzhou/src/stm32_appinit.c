@@ -46,6 +46,10 @@
 
 #include <nuttx/board.h>
 
+#ifdef CONFIG_NXFLAT
+#  include <nuttx/binfmt/nxflat.h>
+#endif
+
 #include "stm32.h"
 #include "shenzhou.h"
 
@@ -150,7 +154,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -167,9 +171,21 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-  /* Initialize and register the W25 FLASH file system. */
+#ifdef CONFIG_NXFLAT
+  /* Initialize the NXFLAT binary loader */
+
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
+             ret);
+    }
+#endif
 
 #ifdef HAVE_W25
+  /* Initialize and register the W25 FLASH file system. */
+
   ret = stm32_w25initialize(CONFIG_NSH_W25MINOR);
   if (ret < 0)
     {
@@ -179,9 +195,9 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef HAVE_MMCSD
   /* Initialize the SPI-based MMC/SD slot */
 
-#ifdef HAVE_MMCSD
   ret = stm32_sdinitialize(CONFIG_NSH_MMCSDMINOR);
   if (ret < 0)
     {
@@ -191,11 +207,11 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.
    */
 
-#ifdef HAVE_USBHOST
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {

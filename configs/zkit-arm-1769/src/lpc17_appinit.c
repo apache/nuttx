@@ -52,6 +52,10 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#ifdef CONFIG_NXFLAT
+#  include <nuttx/binfmt/nxflat.h>
+#endif
+
 #include "lpc17_spi.h"
 #include "zkit-arm-1769.h"
 
@@ -146,7 +150,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -161,11 +165,24 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret;
-
 #ifdef CONFIG_NSH_HAVEMMCSD
   FAR struct spi_dev_s *spi;
+#endif
+  int ret;
 
+#ifdef CONFIG_NXFLAT
+  /* Initialize the NXFLAT binary loader */
+
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_NSH_HAVEMMCSD
   /* Get the SPI port */
 
   spi = lpc17_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
@@ -189,7 +206,7 @@ int board_app_initialize(uintptr_t arg)
       return ret;
     }
 
-  message("Successfuly bound SPI port %d to MMC/SD slot %d\n",
+  message("Successfully bound SPI port %d to MMC/SD slot %d\n",
           CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
 

@@ -51,6 +51,10 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
 
+#ifdef CONFIG_NXFLAT
+#  include <nuttx/binfmt/nxflat.h>
+#endif
+
 #include "lpc17_ssp.h"
 #include "lpc17_gpio.h"
 #include "lpc17_usbhost.h"
@@ -330,7 +334,7 @@ static int nsh_usbhostinitialize(void)
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -347,12 +351,26 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
+#ifdef CONFIG_NXFLAT
+  /* Initialize the NXFLAT binary loader */
+
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
+             ret);
+    }
+#endif
+
   /* Initialize SPI-based microSD */
 
   ret = nsh_sdinitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI-based SD card: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SPI-based SD card: %d\n",
+             ret);
     }
 
   /* Initialize USB host */

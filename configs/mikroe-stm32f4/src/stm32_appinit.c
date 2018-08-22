@@ -65,12 +65,16 @@
 #endif
 #endif
 
-#ifdef CONFIG_STM32_OTGFS
-#  include "stm32_usbhost.h"
+#ifdef CONFIG_AUDIO
+#  include <nuttx/audio/audio.h>
 #endif
 
-#ifdef CONFIG_AUDIO
-#  include "nuttx/audio/audio.h"
+#if defined(CONFIG_FS_BINFS) && (CONFIG_BUILTIN)
+#  include <nuttx/binfmt/builtin.h>
+#endif
+
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
 #endif
 
 #include "stm32.h"
@@ -181,6 +185,17 @@ int board_app_initialize(uintptr_t arg)
   FAR struct mtd_dev_s *mtd;
 #endif
   int ret = OK;
+
+#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
+  /* Register the BINFS file system */
+
+  ret = builtin_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: builtin_initialize failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Configure SPI-based devices */
 

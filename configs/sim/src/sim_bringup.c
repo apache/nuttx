@@ -56,6 +56,10 @@
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
+#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
+#  include <nuttx/binfmt/builtin.h>
+#endif
+
 #include "up_internal.h"
 #include "sim.h"
 
@@ -107,10 +111,37 @@ int sim_bringup(void)
 #endif
   int ret;
 
+#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
+  /* Register the BINFS file system */
+
+  ret = builtin_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: builtin_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             SIM_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
 #ifdef CONFIG_LIB_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
   (void)sim_zoneinfo(3);
+#endif
+
+#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
+  /* Special initialization for the Traveler game simulation */
+
+  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
 #endif
 
 #ifdef CONFIG_EXAMPLES_GPIO
@@ -208,23 +239,6 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_tsc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-  /* Special initialization for the Traveler game simulation */
-
-  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, SIM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-             SIM_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

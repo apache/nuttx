@@ -73,6 +73,16 @@
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+#if defined(CONFIG_FS_BINFS) && (CONFIG_BUILTIN)
+  /* Register the BINFS file system */
+
+  int ret = builtin_initialize();
+  if (ret < 0)
+    {
+     fprintf(stderr, "ERROR: builtin_initialize failed: %d\n", ret);
+   }
+#endif
+
 #ifdef CONFIG_NET_FTMAC100
   /* Perform board-specific initialization */
 
