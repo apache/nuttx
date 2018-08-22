@@ -264,7 +264,6 @@ static int elf_loadbinary(FAR struct binary_s *binp)
 
   binp->entrypt   = (main_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
   binp->stacksize = CONFIG_ELF_STACKSIZE;
-  binp->priority  = SCHED_PRIORITY_DEFAULT;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
    * environment.  If there is an address environment, it will automatically
