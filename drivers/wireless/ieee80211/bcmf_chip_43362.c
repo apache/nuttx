@@ -65,8 +65,7 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio =
   },
 
   /* Firmware images */
-
-  // TODO find something smarter than using image_len references
+  /* TODO find something smarter than using image_len references */
 
   .firmware_image      = (uint8_t *)bcm43362_firmware_image,
   .firmware_image_size = (unsigned int *)&bcm43362_firmware_image_len,

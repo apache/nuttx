@@ -210,8 +210,11 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_abort;
     }
 
-  // wlinfo("Receive frame %p %d\n", sframe, len);
-  // bcmf_hexdump((uint8_t *)header, header->size, (unsigned int)header);
+#if 0
+  wlinfo("Receive frame %p %d\n", sframe, len);
+
+  bcmf_hexdump((uint8_t *)header, header->size, (unsigned int)header);
+#endif
 
   /* Process and validate header */
 
@@ -301,7 +304,8 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   if (sbus->tx_seq == sbus->max_seq)
     {
-      // TODO handle this case
+      /* TODO handle this case */
+
       wlerr("No credit to send frame\n");
       return -EAGAIN;
     }
@@ -320,18 +324,22 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 
   header->sequence = sbus->tx_seq++;
 
-  // wlinfo("Send frame %p\n", sframe);
-  // bcmf_hexdump(sframe->header.base, sframe->header.len,
-  //              (unsigned long)sframe->header.base);
+#if 0
+  wlinfo("Send frame %p\n", sframe);
+
+  bcmf_hexdump(sframe->header.base, sframe->header.len,
+               (unsigned long)sframe->header.base);
+#endif
 
   ret = bcmf_transfer_bytes(sbus, true, 2, 0, sframe->header.base,
                             sframe->header.len);
   if (ret != OK)
     {
+      /* TODO handle retry count and remove frame from queue + abort TX */
+
       wlinfo("fail send frame %d\n", ret);
       ret = -EIO;
       goto exit_abort;
-      // TODO handle retry count and remove frame from queue + abort TX
     }
 
   /* Frame sent, remove it from queue */
@@ -354,7 +362,10 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   return OK;
 
 exit_abort:
-  // bcmf_sdpcm_txfail(sbus, false);
+#if 0
+  bcmf_sdpcm_txfail(sbus, false);
+#endif
+
   nxsem_post(&sbus->queue_mutex);
   return ret;
 }

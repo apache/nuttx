@@ -300,7 +300,7 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
       return -EINVAL;
     }
 
-  // TODO check interface ?
+  /* TODO check interface ? */
 
   if (cdc_header->flags >> BCMF_CONTROL_REQID_SHIFT == priv->control_reqid)
     {

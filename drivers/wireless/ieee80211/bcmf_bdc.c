@@ -91,7 +91,10 @@ struct __attribute__((packed)) bcmf_event_msg
  * Private Data
  ****************************************************************************/
 
-static const uint8_t bcmf_broadcom_oui[] = {0x00, 0x10, 0x18};
+static const uint8_t bcmf_broadcom_oui[] =
+{
+  0x00, 0x10, 0x18
+};
 
 /****************************************************************************
  * Public Functions
@@ -103,8 +106,8 @@ struct bcmf_frame_s *bcmf_bdc_allocate_frame(FAR struct bcmf_dev_s *priv,
   struct bcmf_frame_s *frame;
 
   /* Allocate data frame */
+  /* TODO check for integer overflow */
 
-  // TODO check for integer overflow
   frame = priv->bus->allocate_frame(priv,
                 sizeof(struct bcmf_bdc_header) + len, block, false);
 
@@ -245,7 +248,7 @@ int bcmf_bdc_transmit_frame(FAR struct bcmf_dev_s *priv,
   /* Setup data frame header */
 
   header->flags       = 0x20; /* Set bdc protocol version */
-  header->priority    = 0; // TODO handle priority
+  header->priority    = 0;    /* TODO handle priority */
   header->flags2      = CHIP_STA_INTERFACE;
   header->data_offset = 0;
 
@@ -280,7 +283,7 @@ struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
 
   /* Transmit frame to upper layer */
 
-  header       = (struct bcmf_bdc_header*)frame->data;
+  header       = (struct bcmf_bdc_header *)frame->data;
   frame->data += sizeof(struct bcmf_bdc_header) + header->data_offset * 4;
   return frame;
 }
