@@ -561,6 +561,12 @@ ipforward
   Additional required settings will also be selected when you manually
   select the above via 'make menuconfig'.
 
+loadable
+
+  This configuration provides an example of loadable apps.  It cannot used
+  with any Windows configuration, however, because Windows does not use
+  the ELF format.
+
 minibasic
 
   This configuration was used to test the Mini Basic port at
