@@ -544,7 +544,9 @@ static void bcmf_rxpoll(FAR void *arg)
 
 void bcmf_netdev_notify_tx_done(FAR struct bcmf_dev_s *priv)
 {
-  /* TODO TX buffer may be available, try to send again if needed */
+  /* Schedule to perform a poll for new Tx data the worker thread. */
+
+  work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_poll_work, priv, 0);
 }
 
 /****************************************************************************
