@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  August 11, 2018</p>
+      <p>Last Updated:  August 22, 2018</p>
     </td>
   </tr>
 </table>
@@ -2610,12 +2610,14 @@ passwd &lt;username&gt; &lt;password&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-poweroff
+poweroff [&lt;n&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   Shutdown and power off the system immediately.
-  This command depends on hardware support to power down the system.
+  This command depends on board-specific hardware support to power down the system.
+  The optional,decimal numeric argument <n> may be included to provide power off
+  mode to board-specific power off logic.
 </p>
 <p>
   NOTE: Supporting both the <code>poweroff</code> and <code>shutdown</code> commands is redundant.
@@ -2714,12 +2716,13 @@ readlink &lt;link&gt;
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-reboot
+reboot [&lt;n&gt;]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
   Reset and reboot the system immediately.
   This command depends on hardware support to reset the system.
+  The optional, decimal numeric argument &lt;n&gt; may be included to provide a reboot mode to board-specific reboot logic.
 </p>
 <p>
   NOTE: Supporting both the <code>reboot</code> and <code>shutdown</code> commands is redundant.
