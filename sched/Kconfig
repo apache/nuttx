@@ -363,40 +363,6 @@ config INIT_NEXPORTS
 		Any kernel mode symbols tables would not be usable for resolving
 		symbols in user mode executables.
 
-menuconfig INIT_MOUNT
-	bool "Auto-mount init file system"
-	default n
-	depends on !DISABLE_MOUNTPOINT
-	---help---
-		In order to use the the initial startup program when CONFIG_INIT_FILEPATH
-		is provided, it is necessary to mount the initial file system that
-		provides init program.  Normally this mount is done in the board-specific
-		initialization logic.  However, if the mount is very simple, it can be
-		performed by the OS bring-up logic itself by selecting this option.
-
-if INIT_MOUNT
-
-config INIT_MOUNT_SOURCE
-	string "The block device to mount"
-	default "/dev/ram0"
-
-config INIT_MOUNT_TARGET
-	string "Path to the mounted file system"
-	default "/bin"
-
-config INIT_MOUNT_FSTYPE
-	string "The file system type to mount"
-	default "romfs"
-
-config INIT_MOUNT_FLAGS
-	hex "Flags passed to mount"
-	default 0
-
-config INIT_MOUNT_DATA
-	string "Additional data passed to mount"
-	default ""
-
-endif # INIT_MOUNT
 endif # INIT_FILEPATH
 
 config RR_INTERVAL
