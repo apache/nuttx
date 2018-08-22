@@ -87,6 +87,11 @@ static int load_default_priority(FAR struct binary_s *bin)
   /* Save that as the priority of child thread */
 
   bin->priority = param.sched_priority;
+  if (bin->priority <= 0)
+    {
+      bin->priority = SCHED_PRIORITY_DEFAULT;
+    }
+
   return ret;
 }
 
