@@ -545,10 +545,6 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
       up_lowputc('!');
     }
-
-#if defined(CONFIG_BOARD_RESET_ON_CRASH)
-  up_systemreset();
-#endif
 }
 #endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */
 

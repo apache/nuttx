@@ -66,6 +66,10 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
+#ifndef CONFIG_BOARD_RESET_ON_ASSERT
+#  define CONFIG_BOARD_RESET_ON_ASSERT 0
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -88,6 +92,9 @@ static void _up_assert(int errorcode)
        (void)up_irq_save();
         for (; ; )
           {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+            board_reset(0);
+#endif
 #ifdef CONFIG_ARCH_LEDS
             board_autoled_on(LED_PANIC);
             up_mdelay(250);
@@ -98,6 +105,9 @@ static void _up_assert(int errorcode)
     }
   else
     {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
+      board_reset(0);
+#endif
       exit(errorcode);
     }
 }

@@ -2330,14 +2330,6 @@ config BOARD_CRASHDUMP
 		"machine state" in a place where on the next reset can write it
 		to more sophisticated storage in a sane operating environment.
 
-config BOARD_RESET_ON_CRASH
-	bool "Enable Board Reset after the crashdump is saved"
-	default n
-	depends on BOARD_CRASHDUMP
-	---help---
-		If selected the board_crashdump should reset the machine after
-		saveing the state of the machine
-
 config BOARD_ENTROPY_POOL
 	bool "Enable Board level storing of entropy pool structure"
 	default n
@@ -2385,6 +2377,17 @@ config BOARDCTL_RESET
 		Enables support for the BOARDIOC_RESET boardctl() command.
 		Architecture specific logic must provide the board_reset()
 		interface.
+
+config BOARD_RESET_ON_ASSERT
+	int "Enable Board Reset after assert"
+	default 0
+	depends on BOARDCTL_RESET
+	---help---
+		== 0 up_assert never reset the machine
+		>= 1 up_assert from interrupt handler or IDLE thread will reset the
+		     machine
+		>= 2 up_assert from user or kernel thread will reset the machine.
+		     The default behavior is just to kill the asserting thread.
 
 config BOARDCTL_UNIQUEID
 	bool "Return board unique ID"
