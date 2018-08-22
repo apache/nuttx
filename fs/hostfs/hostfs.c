@@ -299,12 +299,29 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Try to open the file in the host file system */
 
   hf->fd = host_open(path, oflags, mode);
-  if (hf->fd == -1)
+  if (hf->fd < 0)
     {
       /* Error opening file */
 
       ret = -EBADF;
       goto errout_with_buffer;
+    }
+
+  /* In write/append mode, we need to set the file pointer to the end of the
+   * file.
+   */
+
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+    {
+      ret = host_lseek(hf->fd, 0, SEEK_END);
+      if (ret >= 0)
+        {
+          filep->f_pos = ret;
+        }
+      else
+        {
+          goto errout_with_buffer;
+        }
     }
 
   /* Attach the private date to the struct file instance */
@@ -430,7 +447,7 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode;
   FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
-  int ret = OK;
+  ssize_t ret;
 
   /* Sanity checks */
 
@@ -451,6 +468,10 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
   /* Call the host to perform the read */
 
   ret = host_read(hf->fd, buffer, buflen);
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
 
   hostfs_semgive(fs);
   return ret;
@@ -466,7 +487,7 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
   FAR struct inode *inode;
   FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
-  int ret;
+  ssize_t ret;
 
   /* Sanity checks.  I have seen the following assertion misfire if
    * CONFIG_DEBUG_MM is enabled while re-directing output to a
@@ -509,6 +530,10 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
   /* Call the host to perform the write */
 
   ret = host_write(hf->fd, buffer, buflen);
+  if (ret > 0)
+    {
+      filep->f_pos += ret;
+    }
 
 errout_with_semaphore:
   hostfs_semgive(fs);
@@ -524,7 +549,7 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct inode *inode;
   FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s *hf;
-  int ret;
+  off_t ret;
 
   /* Sanity checks */
 
@@ -545,6 +570,10 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Call our internal routine to perform the seek */
 
   ret = host_lseek(hf->fd, offset, whence);
+  if (ret >= 0)
+    {
+      filep->f_pos = ret;
+    }
 
   hostfs_semgive(fs);
   return ret;
