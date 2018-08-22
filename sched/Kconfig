@@ -335,7 +335,8 @@ config USER_INITPATH
 
 config INIT_SYMTAB
 	string "Symbol table"
-	default "NULL"
+	default "NULL" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
 	depends on !BUILD_PROTECTED && !BUILD_KERNEL
 	---help---
 		The name of othe global array that holds the exported symbol table.
@@ -348,7 +349,8 @@ config INIT_SYMTAB
 
 config INIT_NEXPORTS
 	string "Symbol table size"
-	default "0"
+	default "0" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
 	depends on !BUILD_PROTECTED && !BUILD_KERNEL
 	---help---
 		The size of the symbol table.  NOTE that is is logically a numeric

@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/init.h>
+#include <nuttx/symtab.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/userspace.h>
@@ -114,6 +115,9 @@
 #      undef CONFIG_INIT_NEXPORTS
 #      define CONFIG_INIT_SYMTAB NULL
 #      define CONFIG_INIT_NEXPORTS 0
+#    else
+extern const struct symtab_s CONFIG_INIT_SYMTAB[];
+extern const int             CONFIG_INIT_NEXPORTS;
 #    endif
 #  endif
 #endif
