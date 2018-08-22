@@ -260,6 +260,13 @@ struct bcmf_frame_s *bcmf_bdc_rx_frame(FAR struct bcmf_dev_s *priv)
   struct bcmf_frame_s *frame = priv->bus->rxframe(priv);
   struct bcmf_bdc_header *header;
 
+  /* Very that there is an Rx frame */
+
+  if (frame == NULL)
+    {
+      return NULL;
+    }
+
   /* Process bdc header */
 
   frame_len = frame->len - (unsigned int)(frame->data - frame->base);
