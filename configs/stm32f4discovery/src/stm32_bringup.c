@@ -49,8 +49,6 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include <nuttx/binfmt/elf.h>
-
 #include "stm32.h"
 #include "stm32_romfs.h"
 
@@ -288,16 +286,6 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       serr("Failed to initialize CS43L22 audio: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_ELF
-  /* Initialize the ELF binary loader */
-
-  ret = elf_initialize();
-  if (ret < 0)
-    {
-      serr("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 

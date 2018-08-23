@@ -51,10 +51,6 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
 
-#ifdef CONFIG_NXFLAT
-#  include <nuttx/binfmt/nxflat.h>
-#endif
-
 #include "lpc17_ssp.h"
 #include "lpc17_gpio.h"
 #include "lpc17_usbhost.h"
@@ -350,18 +346,6 @@ static int nsh_usbhostinitialize(void)
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
-
-#ifdef CONFIG_NXFLAT
-  /* Initialize the NXFLAT binary loader */
-
-  ret = nxflat_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
-             ret);
-    }
-#endif
 
   /* Initialize SPI-based microSD */
 

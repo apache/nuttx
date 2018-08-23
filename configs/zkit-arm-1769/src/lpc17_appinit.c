@@ -52,10 +52,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#ifdef CONFIG_NXFLAT
-#  include <nuttx/binfmt/nxflat.h>
-#endif
-
 #include "lpc17_spi.h"
 #include "zkit-arm-1769.h"
 
@@ -169,18 +165,6 @@ int board_app_initialize(uintptr_t arg)
   FAR struct spi_dev_s *spi;
 #endif
   int ret;
-
-#ifdef CONFIG_NXFLAT
-  /* Initialize the NXFLAT binary loader */
-
-  ret = nxflat_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
-             ret);
-    }
-#endif
 
 #ifdef CONFIG_NSH_HAVEMMCSD
   /* Get the SPI port */

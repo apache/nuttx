@@ -51,7 +51,6 @@
 #endif
 
 #include <nuttx/drivers/ramdisk.h>
-#include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include "sam_twi.h"
@@ -335,17 +334,6 @@ int sam_bringup(void)
   if (ret != OK)
     {
       _err("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_ELF
-  /* Initialize the ELF binary loader */
-
-  _err("Initializing the ELF binary loader\n");
-  ret = elf_initialize();
-  if (ret < 0)
-    {
-      _err("ERROR: Initialization of the ELF loader failed: %d\n", ret);
     }
 #endif
 

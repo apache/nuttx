@@ -47,10 +47,6 @@
 #include <nuttx/board.h>
 #include <nuttx/net/ftmac100.h>
 
-#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
-#  include <nuttx/binfmt/builtin.h>
-#endif
-
 #include <arch/board/board.h>
 
 /****************************************************************************
@@ -94,16 +90,6 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifndef CONFIG_BOARD_INITIALIZE
-#if defined(CONFIG_FS_BINFS) && (CONFIG_BUILTIN)
-  /* Register the BINFS file system */
-
-  int ret = builtin_initialize();
-  if (ret < 0)
-    {
-     fprintf(stderr, "ERROR: builtin_initialize failed: %d\n", ret);
-   }
-#endif
-
 #ifdef CONFIG_NET_FTMAC100
   /* Perform board-specific initialization */
 

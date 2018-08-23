@@ -47,10 +47,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#ifdef CONFIG_NXFLAT
-#  include <nuttx/binfmt/nxflat.h>
-#endif
-
 #include "tiva_ssi.h"
 
 /****************************************************************************
@@ -128,18 +124,6 @@ int board_app_initialize(uintptr_t arg)
 {
   FAR struct spi_dev_s *spi;
   int ret;
-
-#ifdef CONFIG_NXFLAT
-  /* Initialize the NXFLAT binary loader */
-
-  ret = nxflat_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
-             ret);
-    }
-#endif
 
   /* Get the SPI port */
 

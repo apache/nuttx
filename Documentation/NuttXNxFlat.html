@@ -607,39 +607,6 @@ cat ../syscall/syscall.csv ../libc/libc.csv | sort >tmp.csv
 </ul>
 </ul>
 
-<p><b>NXFLAT Initialization</b>
-  These interfaces are specific to NXFLAT.
-  Normally, an application needs only call <code>nxflat_initialize()</code> during its initialization
-  to have full NXFLAT support.
-</p>
-
-<ul>
-<p><b><code>int nxflat_initialize(void)</code></b>
-<ul>
-<p><b>Description:</b>
-  NXFLAT support is built unconditionally.  However, it order to
-  use this binary format, this function must be called during system
-  format in order to register the NXFLAT binary format.
-  This function calls <code>register_binfmt()</code> appropriately.
-</p>
-<p><b>Returned Value:</b>
-  This is a NuttX internal function so it follows the convention that
-  0 (OK) is returned on success and a negated errno is returned on
-  failure.
-</p>
-</ul>
-
-<p><b><code>void nxflat_uninitialize(void)</code></b>
-<ul>
-<p><b>Description:</b>
-  Unregister the NXFLAT binary loader
-</p>
-<p><b>Returned Value:</b>
-  None
-</p>
-</ul>
-</ul>
-
 <p><b>Binary Loader Interfaces</b>.
   The remaining APIs are called by user applications to maintain modules in the file system.
 </p>

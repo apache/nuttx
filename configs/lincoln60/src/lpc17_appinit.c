@@ -47,10 +47,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#ifdef CONFIG_FS_BINFS
-#  include <nuttx/binfmt/builtin.h>
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -65,7 +61,7 @@
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -80,17 +76,5 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_FS_BINFS
-  /* Initialize the BINFS binary loader */
-
-  int ret = builtin_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Initialization of the Built-In loader failed: %d\n",
-             ret);
-    }
-#endif
-
   return OK;
 }

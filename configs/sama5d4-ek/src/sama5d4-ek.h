@@ -69,7 +69,6 @@
 #define HAVE_WM8904      1
 #define HAVE_AUDIO_NULL  1
 #define HAVE_PMIC        1
-#define HAVE_ELF         1
 #define HAVE_ROMFS       1
 #define HAVE_I2CTOOL     1
 
@@ -461,12 +460,6 @@
 
 #ifndef CONFIG_EXPERIMENTAL
 #  undef HAVE_PMIC /* REVISIT: Disable anyway because it does not yet work */
-#endif
-
-/* ELF */
-
-#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
-#  undef HAVE_ELF
 #endif
 
 /* ROMFS */

@@ -58,7 +58,6 @@
 #define HAVE_USBMONITOR 1
 #define HAVE_SDIO       1
 #define HAVE_RTC_DRIVER 1
-#define HAVE_ELF        1
 #define HAVE_NETMONITOR 1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
@@ -86,12 +85,6 @@
 
 #if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
-#endif
-
-/* ELF */
-
-#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
-#  undef HAVE_ELF
 #endif
 
 /* NSH Network monitor  */

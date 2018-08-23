@@ -46,10 +46,6 @@
 
 #include <nuttx/board.h>
 
-#ifdef CONFIG_NXFLAT
-#  include <nuttx/binfmt/nxflat.h>
-#endif
-
 #include "stm32.h"
 #include "shenzhou.h"
 
@@ -170,18 +166,6 @@
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
-
-#ifdef CONFIG_NXFLAT
-  /* Initialize the NXFLAT binary loader */
-
-  ret = nxflat_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Initialization of the NXFLAT loader failed: %d\n",
-             ret);
-    }
-#endif
 
 #ifdef HAVE_W25
   /* Initialize and register the W25 FLASH file system. */

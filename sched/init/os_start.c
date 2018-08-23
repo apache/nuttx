@@ -55,6 +55,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/binfmt/binfmt.h>
 #include <nuttx/init.h>
 
 #include "sched/sched.h"
@@ -716,6 +717,12 @@ void os_start(void)
    */
 
   lib_initialize();
+
+#ifndef CONFIG_BINFMT_DISABLE
+  /* Initialize the binfmt system */
+
+  binfmt_initialize();
+#endif
 
   /* IDLE Group Initialization **********************************************/
   /* Announce that the CPU0 IDLE task has started */

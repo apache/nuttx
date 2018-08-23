@@ -56,10 +56,6 @@
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
-#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
-#  include <nuttx/binfmt/builtin.h>
-#endif
-
 #include "up_internal.h"
 #include "sim.h"
 
@@ -110,16 +106,6 @@ int sim_bringup(void)
   FAR uint8_t *ramstart;
 #endif
   int ret;
-
-#if defined(CONFIG_FS_BINFS) && defined(CONFIG_BUILTIN)
-  /* Register the BINFS file system */
-
-  ret = builtin_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: builtin_initialize failed: %d\n", ret);
-    }
-#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

@@ -81,7 +81,6 @@
 #define HAVE_SDIO       1
 #define HAVE_CS43L22    1
 #define HAVE_RTC_DRIVER 1
-#define HAVE_ELF        1
 #define HAVE_NETMONITOR 1
 #define HAVE_HCIUART    1
 
@@ -176,12 +175,6 @@
 
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
 #  undef HAVE_RTC_DRIVER
-#endif
-
-/* ELF */
-
-#if defined(CONFIG_BINFMT_DISABLE) || !defined(CONFIG_ELF)
-#  undef HAVE_ELF
 #endif
 
 /* NSH Network monitor  */

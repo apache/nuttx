@@ -48,7 +48,6 @@
 #include <nuttx/board.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/input/buttons.h>
-#include <nuttx/binfmt/elf.h>
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
@@ -114,17 +113,6 @@ int stm32_bringup(void)
   /* Install the module symbol table */
 
   modlib_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
-#endif
-
-#ifdef HAVE_ELF
-  /* Initialize the ELF binary loader */
-
-  ret = elf_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Initialization of the ELF loader failed: %d\n",
-             ret);
-    }
 #endif
 
 #ifdef HAVE_MMCSD

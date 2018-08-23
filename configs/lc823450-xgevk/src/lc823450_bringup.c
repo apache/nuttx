@@ -51,10 +51,6 @@
 
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_ELF
-#  include <nuttx/binfmt/elf.h>
-#endif
-
 #ifdef CONFIG_RNDIS
 #  include <nuttx/usb/rndis.h>
 #endif
@@ -118,16 +114,6 @@ int lc823450_bringup(void)
 
 #ifdef CONFIG_AUDIO_WM8776
   lc823450_wm8776initialize(0);
-#endif
-
-#ifdef CONFIG_ELF
-  /* Initialize the ELF binary loader */
-
-  ret = elf_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize the ELF loader: %d\n", ret);
-    }
 #endif
 
 #if defined(CONFIG_RNDIS) && defined(CONFIG_NSH_MACADDR)
