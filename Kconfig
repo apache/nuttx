@@ -161,6 +161,16 @@ config APPS_DIR
 		example, to include makefile fragments (e.g., .config or Make.defs)
 		or to set up include file paths.
 
+config BUILD_LOADABLE
+	bool "NuttX application loadable build"
+	default n if !BUILD_KERNEL
+	default y if BUILD_KERNEL
+	---help---
+		Automatically selected if KERNEL build is selected.
+		This selection only effects the behavior of the 'make export'
+		target and currently has no effect unless you wish to build
+		loadable applications in a FLAT build.
+
 choice
 	prompt "Memory organization"
 	default BUILD_FLAT

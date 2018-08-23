@@ -86,7 +86,7 @@
 #undef get_errno
 #undef set_errno
 
-#include <nuttx/errno.h>
+#include <errno.h>
 #include <nuttx/clock.h>
 
 /****************************************************************************
