@@ -255,3 +255,9 @@ config ARMV7M_ITMSYSLOG_SWODIV
 	range 1 8192
 
 endif # ARMV7M_ITMSYSLOG
+
+config ARMV7M_SYSTICK
+	bool "SysTick timer driver"
+	depends on TIMER
+	---help---
+		Enable SysTick timer driver.
