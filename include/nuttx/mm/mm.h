@@ -426,9 +426,17 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 FAR void *kmm_memalign(size_t alignment, size_t size);
 #endif
 
+/* Functions contained in mm_heapmember.c ***********************************/
+
+bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem);
+
+/* Functions contained in mm_uheapmember.c **********************************/
+
+bool umm_heapmember(FAR void *mem);
+
 /* Functions contained in kmm_heapmember.c **********************************/
 
-#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG_FEATURES)
+#ifdef CONFIG_MM_KERNEL_HEAP
 bool kmm_heapmember(FAR void *mem);
 #endif
 

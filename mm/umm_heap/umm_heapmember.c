@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/kmm_heap/kmm_heapmember.c
+ * umm/umm_heap/umm_heapmember.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,35 +39,31 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-
 #include <nuttx/mm/mm.h>
 
-#ifdef CONFIG_MM_KERNEL_HEAP
+#include "umm_heap/umm_heap.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_heapmember
+ * Name: umm_heapmember
  *
  * Description:
- *   Check if an address lies in the kernel heap.
+ *   Check if an address lies in the user heap.
  *
- * Input Parameters:
+ * Parameters:
  *   mem - The address to check
  *
- * Returned Value:
- *   true if the address is a member of the kernel heap.  false if not
- *   not.  If the address is not a member of the kernel heap, then it
+ * Return Value:
+ *   true if the address is a member of the user heap.  false if not
+ *   not.  If the address is not a member of the user heap, then it
  *   must be a member of the user-space heap (unchecked)
  *
  ****************************************************************************/
 
-bool kmm_heapmember(FAR void *mem)
+bool umm_heapmember(FAR void *mem)
 {
-  return mm_heapmember(&g_kmmheap, mem);
+  return mm_heapmember(USR_HEAP, mem);
 }
-
-#endif /* CONFIG_MM_KERNEL_HEAP */

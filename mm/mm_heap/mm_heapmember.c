@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/kmm_heap/kmm_heapmember.c
+ * mm/mm_heap/mm_heapmember.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,35 +39,65 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-
 #include <nuttx/mm/mm.h>
-
-#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_heapmember
+ * Name: mm_heapmember
  *
  * Description:
- *   Check if an address lies in the kernel heap.
+ *   Check if an address lies in the heap.
  *
- * Input Parameters:
- *   mem - The address to check
+ * Parameters:
+ *   heap - The heap to check
+ *   mem  - The address to check
  *
- * Returned Value:
- *   true if the address is a member of the kernel heap.  false if not
- *   not.  If the address is not a member of the kernel heap, then it
+ * Return Value:
+ *   true if the address is a member of the heap.  false if not
+ *   not.  If the address is not a member of the heap, then it
  *   must be a member of the user-space heap (unchecked)
  *
  ****************************************************************************/
 
-bool kmm_heapmember(FAR void *mem)
+bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  return mm_heapmember(&g_kmmheap, mem);
-}
+#if CONFIG_MM_REGIONS > 1
+  int i;
 
-#endif /* CONFIG_MM_KERNEL_HEAP */
+  /* A valid address from the heap for this region would have to lie
+   * between the region's two guard nodes.
+   */
+
+  for (i = 0; i < heap->mm_nregions; i++)
+    {
+      if (mem > (FAR void *)heap->mm_heapstart[i] &&
+          mem < (FAR void *)heap->mm_heapend[i])
+        {
+          return true;
+        }
+    }
+
+  /* The address does not like any any region assigned to the heap */
+
+  return false;
+
+#else
+  /* A valid address from the heap would have to lie between the
+   * two guard nodes.
+   */
+
+  if (mem > (FAR void *)heap->mm_heapstart[0] &&
+      mem < (FAR void *)heap->mm_heapend[0])
+    {
+      return true;
+    }
+
+  /* Otherwise, the address does not lie in the heap */
+
+  return false;
+
+#endif
+}

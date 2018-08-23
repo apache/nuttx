@@ -37,7 +37,7 @@
 
 CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
 CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
-CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c
+CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c umm_heapmember.c
 CSRCS += umm_globals.c
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)

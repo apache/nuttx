@@ -1,8 +1,8 @@
 /****************************************************************************
- * mm/kmm_heap/kmm_heapmember.c
+ * binfmt/binfmt_initialize.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
+ *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,35 +39,63 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <nuttx/binfmt/binfmt.h>
+#include <nuttx/binfmt/builtin.h>
+#include <nuttx/binfmt/elf.h>
+#include <nuttx/binfmt/pcode.h>
+#include <nuttx/binfmt/nxflat.h>
 
-#include <nuttx/mm/mm.h>
-
-#ifdef CONFIG_MM_KERNEL_HEAP
+#ifndef CONFIG_BINFMT_DISABLE
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_heapmember
+ * Name: binfmt_initialize
  *
  * Description:
- *   Check if an address lies in the kernel heap.
- *
- * Input Parameters:
- *   mem - The address to check
- *
- * Returned Value:
- *   true if the address is a member of the kernel heap.  false if not
- *   not.  If the address is not a member of the kernel heap, then it
- *   must be a member of the user-space heap (unchecked)
+ *   initialize binfmt subsystem
  *
  ****************************************************************************/
 
-bool kmm_heapmember(FAR void *mem)
+void binfmt_initialize(void)
 {
-  return mm_heapmember(&g_kmmheap, mem);
+  int ret;
+
+#ifdef CONFIG_FS_BINFS
+  ret = builtin_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: builtin_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ELF
+  ret = elf_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: elf_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_BINFMT_PCODE
+  ret = pcode_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: pcode_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NXFLAT
+  ret = nxflat_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: nxflat_initialize failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }
 
-#endif /* CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_BINFMT_DISABLE */
