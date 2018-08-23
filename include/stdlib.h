@@ -182,7 +182,7 @@ void      _exit(int status); /* See unistd.h */
  */
 
 #ifndef __KERNEL__
-int       system(FAR char *cmd);
+int       system(FAR const char *cmd);
 #endif
 
 /* String to binary conversions */
