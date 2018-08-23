@@ -302,10 +302,21 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_tcb;
     }
 
-  /* Allocate the stack for the TCB */
+  if (attr->stackaddr)
+    {
+      /* Use pre-allocated stack */
 
-  ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
-                        TCB_FLAG_TTYPE_PTHREAD);
+      ret = up_use_stack((FAR struct tcb_s *)ptcb, attr->stackaddr,
+                         attr->stacksize);
+    }
+  else
+    {
+      /* Allocate the stack for the TCB */
+
+      ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
+                            TCB_FLAG_TTYPE_PTHREAD);
+    }
+
   if (ret != OK)
     {
       errcode = ENOMEM;

@@ -71,6 +71,7 @@
     0,                        /* low_priority */ \
     0,                        /* max_repl */ \
     0,                        /* affinity */ \
+    NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
     {0, 0},                   /* repl_period */ \
     {0, 0}                    /* budget */ \
@@ -83,6 +84,7 @@
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
     0,                        /* low_priority */ \
     0,                        /* max_repl */ \
+    NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
     {0, 0},                   /* repl_period */ \
     {0, 0},                   /* budget */ \
@@ -94,6 +96,7 @@
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
     0,                        /* affinity */ \
+    NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
   }
 #else
@@ -102,6 +105,7 @@
     PTHREAD_DEFAULT_PRIORITY, /* priority */ \
     PTHREAD_DEFAULT_POLICY,   /* policy */ \
     PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
+    NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
   }
 #endif

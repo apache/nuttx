@@ -227,6 +227,7 @@ struct pthread_attr_s
   cpu_set_t affinity;          /* Set of permitted CPUs for the thread */
 #endif
 
+  FAR void  *stackaddr;        /* Address of memory to be used as stack */
   size_t stacksize;            /* Size of the stack allocated for the pthread */
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -405,6 +406,13 @@ int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
 
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize);
 int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, long *stackaddr);
+
+/* Set or obtain stack address and size */
+
+int pthread_attr_setstack(FAR pthread_attr_t *attr,
+                          FAR void *stackaddr, long stacksize);
+int pthread_attr_getstack(FAR pthread_attr_t *attr,
+                          FAR void **stackaddr, FAR long *stacksize);
 
 /* To create a thread object and runnable thread, a routine must be specified
  * as the new thread's start routine.  An argument may be passed to this

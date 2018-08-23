@@ -81,7 +81,10 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 
   if (dtcb->stack_alloc_ptr)
     {
-      sched_ufree(dtcb->stack_alloc_ptr);
+      if (umm_heapmember(dtcb->stack_alloc_ptr))
+        {
+          sched_ufree(dtcb->stack_alloc_ptr);
+        }
     }
 
   /* Mark the stack freed */
