@@ -372,6 +372,15 @@ struct foc_data_s
  * Public Functions
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* Math functions */
 
 float fast_sin(float angle);
@@ -478,11 +487,7 @@ void motor_phy_params_temp_set(FAR struct motor_phy_params_s *phy,
 
 #undef EXTERN
 #if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+}
 #endif
 
 #endif /* __INCLUDE_DSP_H */
