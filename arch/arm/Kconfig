@@ -737,6 +737,18 @@ config DEBUG_MEMFAULT
 		output is sometimes helpful when debugging difficult mem fault problems,
 		but may be more than you typically want to see.
 
+config ARM_SEMIHOSTING_SYSLOG
+	bool "Semihosting SYSLOG support"
+	select ARCH_SYSLOG
+	---help---
+		Enable hooks to support semihosting syslog output.
+
+config ARM_SEMIHOSTING_HOSTFS
+	bool "Semihosting HostFS"
+	depends on FS_HOSTFS
+	---help---
+		Mount HostFS through semihosting.
+
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif

@@ -218,6 +218,28 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
+/* semihosting(SMH) call with call number and one parameter */
+
+static inline long smh_call(unsigned int nbr, void *parm)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg1 __asm__("r1") = (long)(parm);
+
+  __asm__ __volatile__
+    (
+#if defined(__thumb__) || defined(__thumb2__)
+    "svc #0xab"
+#else
+    "svc #0x123456"
+#endif
+    : "=r"(reg0)
+    : "r"(reg0), "r"(reg1)
+    : "memory"
+    );
+
+  return reg0;
+}
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
