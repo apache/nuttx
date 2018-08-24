@@ -834,6 +834,7 @@ void up_sched_garbage_collection(void);
  *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Name: up_addrenv_create
  *
@@ -1237,6 +1238,44 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
 int up_addrenv_kstackfree(FAR struct tcb_s *tcb);
 #endif
+
+/****************************************************************************
+ * Name: up_addrenv_pa_to_va
+ *
+ * Description:
+ *   Map phy address to virtual address.  Not supported by all architectures.
+ *
+ *   REVISIT:  Should this not then be conditional on having that
+ *   architecture-specific support?
+ *
+ * Input Parameters:
+ *   pa - The phy address to be mapped.
+ *
+ * Returned Value:
+ *   Virtual address on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+FAR void *up_addrenv_pa_to_va(uintptr_t pa);
+
+/****************************************************************************
+ * Name: up_addrenv_va_to_pa
+ *
+ * Description:
+ *   Map virtual address to phy address.  Not supported by all architectures.
+ *
+ *   REVISIT:  Should this not then be conditional on having that
+ *   architecture-specific support?
+ *
+ * Input Parameters:
+ *   va - The virtual address to be mapped.  Not supported by all architectures.
+ *
+ * Returned Value:
+ *   Phy address on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+uintptr_t up_addrenv_va_to_pa(FAR void *va);
 
 /****************************************************************************
  * Name: up_shmat
