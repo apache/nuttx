@@ -226,9 +226,9 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
     }
   else
     {
-      uint64_t intcount = ((uint64_t)intpart * elapsed) / TICK_PER_SEC;
+      uint64_t intcount = ((uint64_t)intpart * elapsed);
       fracpart = (unsigned int)
-        (((copy.count - intcount) * TICK_PER_SEC * 1000) / elapsed);
+        (((copy.count * TICK_PER_SEC - intcount) * 1000) / elapsed);
     }
 
   /* Make sure that the count is representable with snprintf format */
