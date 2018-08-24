@@ -375,7 +375,7 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
 
   angle_norm_2pi(&angle, 0.0f, 2.0f*M_PI_F);
 
-  /* Store estimated angle in observer data*/
+  /* Store estimated angle in observer data */
 
   o->angle = angle;
 }
@@ -422,7 +422,6 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
 
   so->one_by_dt = 1.0f/(so->samples * per);
 }
-
 
 /****************************************************************************
  * Name: motor_sobserver_div

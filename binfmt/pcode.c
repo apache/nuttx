@@ -199,7 +199,7 @@ static int pcode_run(FAR char *exepath, size_t varsize, size_t strsize)
 
   /* Execute the P-Code program until a stopping condition occurs */
 
-  for (;;)
+  for (; ; )
     {
       /* Execute the instruction; Check for exceptional conditions */
 

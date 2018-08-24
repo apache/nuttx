@@ -67,5 +67,3 @@ FAR struct binfmt_s *g_binfmts;
  ****************************************************************************/
 
 #endif /* CONFIG_BINFMT_DISABLE */
-
-

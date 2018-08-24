@@ -944,18 +944,21 @@ ssize_t rwb_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
                       size_t nbytes, FAR uint8_t *buffer)
 {
   /* Loop while there are bytes still be be read */
+
   /* Make sure that the sector containing the next bytes to transfer is in
    * memory.
    */
+
   /* How many bytes can be transfer from the in-memory data? */
+
   /* Transfer the bytes */
+
   /* Adjust counts and offsets for the next time through the loop */
 
 #warning Not Implemented
   return -ENOSYS;
 }
 #endif
-
 
 /****************************************************************************
  * Name: rwb_mediaremoved

@@ -90,5 +90,3 @@ int dump_module(FAR const struct binary_s *bin)
   return OK;
 }
 #endif
-
-

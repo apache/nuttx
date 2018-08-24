@@ -592,6 +592,7 @@ static void lo_txavail_work(FAR void *arg)
   if (priv->lo_bifup)
     {
       /* If so, then poll the network for new XMIT data */
+
 #ifdef CONFIG_NET_6LOWPAN
       /* Make sure the our single packet buffer is attached */
 

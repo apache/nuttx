@@ -152,7 +152,7 @@ static uint8_t svm3_sector_get(FAR abc_frame_t *ijk)
  * Returned Value:
  *   None
  *
-****************************************************************************/
+ ****************************************************************************/
 
 static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
 {

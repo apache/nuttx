@@ -240,7 +240,6 @@ float fast_cos(float angle)
   return fast_sin(angle + M_PI_2_F);
 }
 
-
 /****************************************************************************
  * Name: fast_sin2
  *

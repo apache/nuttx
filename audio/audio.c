@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing Audio */
 
@@ -416,6 +417,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_SHUTDOWN\n");
 
           /* Call the lower-half driver initialize handler */
+
           ret = lower->ops->shutdown(lower);
         }
         break;
