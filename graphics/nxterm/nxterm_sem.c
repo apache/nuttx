@@ -102,7 +102,7 @@ int nxterm_sempost(FAR struct nxterm_state_s *priv)
 
   /* Make sure that I really hold the semaphore */
 
-  ASSERT(priv->holder == me);
+  DEBUGASSERT(priv->holder == me);
 
   /* Then let go of it */
 

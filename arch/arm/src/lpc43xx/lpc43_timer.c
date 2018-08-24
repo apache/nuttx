@@ -752,7 +752,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 #endif
 
     default:
-      ASSERT(0);
+      DEBUGASSERT(0);
     }
 
   priv->ops = &g_tmrops;

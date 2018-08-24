@@ -118,7 +118,7 @@ int nxsem_post(FAR sem_t *sem)
        * initialixed if the semaphore is to used for signaling purposes.
        */
 
-      ASSERT(sem->semcount < SEM_VALUE_MAX);
+      DEBUGASSERT(sem->semcount < SEM_VALUE_MAX);
       nxsem_releaseholder(sem);
       sem->semcount++;
 

@@ -177,7 +177,7 @@ void spawn_semtake(FAR sem_t *sem)
   do
     {
       ret = nxsem_wait(sem);
-      ASSERT(ret == 0 || ret == -EINTR);
+      DEBUGASSERT(ret == 0 || ret == -EINTR);
     }
   while (ret == -EINTR);
 }

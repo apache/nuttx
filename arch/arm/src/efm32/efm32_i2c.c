@@ -1604,11 +1604,11 @@ int efm32_i2c_reset(FAR struct i2c_master_s *dev)
   uint32_t sda_gpio;
   int ret = ERROR;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Our caller must own a ref */
 
-  ASSERT(priv->refs > 0);
+  DEBUGASSERT(priv->refs > 0);
 
   /* Lock out other clients */
 
@@ -1765,7 +1765,7 @@ int efm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
   irqstate_t flags;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Decrement reference count and check for underflow */
 

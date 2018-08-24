@@ -579,7 +579,7 @@ int pg_worker(int argc, char *argv[])
             {
               /* Any value other than OK, brings the system down */
 
-              ASSERT(g_fillresult == OK);
+              DEBUGASSERT(g_fillresult == OK);
 
               /* Handle the successful page fill complete event by restarting the
                * task that was blocked waiting for this page fill.
@@ -614,7 +614,7 @@ int pg_worker(int argc, char *argv[])
           else
             {
               pgerr("ERROR: Timeout!\n");
-              ASSERT(clock_systimer() - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
+              DEBUGASSERT(clock_systimer() - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif
         }

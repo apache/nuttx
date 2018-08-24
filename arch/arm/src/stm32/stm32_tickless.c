@@ -447,7 +447,7 @@ void arm_timer_initialize(void)
 
         /* Basic timers not supported by this implementation */
 
-        ASSERT(0);
+        DEBUGASSERT(0);
         break;
 #endif
 
@@ -456,7 +456,7 @@ void arm_timer_initialize(void)
 
         /* Basic timers not supported by this implementation */
 
-        ASSERT(0);
+        DEBUGASSERT(0);
         break;
 #endif
 
@@ -517,7 +517,7 @@ void arm_timer_initialize(void)
 #endif
 
       default:
-        ASSERT(0);
+        DEBUGASSERT(0);
     }
 
   /* Get the TC frequency that corresponds to the requested resolution */
@@ -535,7 +535,7 @@ void arm_timer_initialize(void)
   if (!g_tickless.tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
-      ASSERT(0);
+      DEBUGASSERT(0);
     }
 
   STM32_TIM_SETCLOCK(g_tickless.tch, g_tickless.frequency);

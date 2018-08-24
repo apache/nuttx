@@ -108,7 +108,7 @@ int wd_cancel(WDOG_ID wdog)
        * error has occurred because the watchdog is marked active!
        */
 
-      ASSERT(curr);
+      DEBUGASSERT(curr);
 
       /* If there is a watchdog in the timer queue after the one that
        * is being canceled, then it inherits the remaining ticks.

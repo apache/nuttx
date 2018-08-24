@@ -410,7 +410,7 @@ static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
     {
       /* Unknown irq, should not occur */
 
-      ASSERT("Unknown interrupt error\n");
+      DEBUGASSERT("Unknown interrupt error\n");
     }
 
   /* Unlock the semaphore if locked */

@@ -154,7 +154,7 @@ static int nr5_timer_setclock(FAR struct nr5_timer_dev_s *dev, uint32_t freq)
 {
   int prescaler;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Disable Timer? */
 
@@ -199,7 +199,7 @@ static int nr5_timer_setclock(FAR struct nr5_timer_dev_s *dev, uint32_t freq)
 static void nr5_timer_setperiod(FAR struct nr5_timer_dev_s *dev,
                                 uint32_t period)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   nr5_putreg32(dev, NR5_BTIM_ARR_OFFSET, period);
 }
 
@@ -208,8 +208,8 @@ static int nr5_timer_setisr(FAR struct nr5_timer_dev_s *dev,
 {
   int vectorno;
 
-  ASSERT(dev);
-  ASSERT(source == 0);
+  DEBUGASSERT(dev);
+  DEBUGASSERT(source == 0);
 
   switch (((struct nr5_timer_priv_s *)dev)->base)
     {
@@ -290,13 +290,13 @@ static int nr5_timer_setisr(FAR struct nr5_timer_dev_s *dev,
 
 static void nr5_timer_enableint(FAR struct nr5_timer_dev_s *dev, int source)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   nr5_modifyreg16(dev, NR5_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
 
 static void nr5_timer_disableint(FAR struct nr5_timer_dev_s *dev, int source)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
   nr5_modifyreg16(dev, NR5_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
@@ -313,7 +313,7 @@ static int nr5_timer_setmode(FAR struct nr5_timer_dev_s *dev, nr5_timer_mode_t m
 {
   uint16_t val = ATIM_CR1_CEN | ATIM_CR1_ARPE;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Decode operational modes */
 
@@ -465,7 +465,7 @@ FAR struct nr5_timer_dev_s *nr5_timer_init(int timer)
 
 int nr5_timer_deinit(FAR struct nr5_timer_dev_s * dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Set timer mode to STOP */
 

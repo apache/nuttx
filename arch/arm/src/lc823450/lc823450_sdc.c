@@ -241,7 +241,7 @@ int lc823450_sdc_initialize(uint32_t ch)
 
   /* Only ES2 is supported */
 
-  ASSERT(1 == cpu_ver);
+  DEBUGASSERT(1 == cpu_ver);
 
   struct SdDrCfg_s *psd = _cfg[ch];
 
@@ -280,7 +280,7 @@ int lc823450_sdc_initialize(uint32_t ch)
 #endif
 
       default:
-        ASSERT(false);
+        DEBUGASSERT(false);
     }
 
   mcinfo("++++ start \n");

@@ -85,7 +85,7 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 
   /* Lets do a sanity check before we get started. */
 
-  ASSERT(sched_priority >= SCHED_PRIORITY_MIN);
+  DEBUGASSERT(sched_priority >= SCHED_PRIORITY_MIN);
 
   /* Search the list to find the location to insert the new Tcb.
    * Each is list is maintained in descending sched_priority order.

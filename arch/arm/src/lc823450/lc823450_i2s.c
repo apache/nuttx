@@ -271,7 +271,7 @@ extern unsigned int XT1OSC_CLK;
 
 static void _setup_audio_pll(uint32_t freq)
 {
-  ASSERT(24000000 == XT1OSC_CLK);
+  DEBUGASSERT(24000000 == XT1OSC_CLK);
 
   uint32_t m;
   uint32_t n;
@@ -289,7 +289,7 @@ static void _setup_audio_pll(uint32_t freq)
         break;
 
       default:
-        ASSERT(false);
+        DEBUGASSERT(false);
     }
 
   /* Set divider */
@@ -396,7 +396,7 @@ static void lc823450_i2s_setchannel(char id, uint8_t ch)
         break;
 
       default:
-        ASSERT(false);
+        DEBUGASSERT(false);
         break;
     }
 
@@ -441,7 +441,7 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
     {
       case AUDIOIOC_CONFIGURE:
         cap_desc = (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
-        ASSERT(NULL != cap_desc);
+        DEBUGASSERT(NULL != cap_desc);
 
         tx_th   = cap_desc->caps.ac_controls.w >> 24;
         rate[1] = cap_desc->caps.ac_controls.w & 0xfffff;
@@ -663,7 +663,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   uint32_t bufc_enabled;
   uint32_t decsel;
 
-  ASSERT(0 < n);
+  DEBUGASSERT(0 < n);
 
   decsel = getreg32(AUDSEL) & AUDSEL_DECSEL;
 

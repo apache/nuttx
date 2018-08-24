@@ -837,7 +837,7 @@ void tms570_clockconfig(void)
 #ifdef CONFIG_TMS570_SELFTEST
   /* Wait for eFuse controller self-test to complete and check results */
 
-  ASSERT(tms570_efc_selftest_complete() == 0);
+  DEBUGASSERT(tms570_efc_selftest_complete() == 0);
 #endif
 
   /* Set up flash address and data wait states. */

@@ -571,7 +571,7 @@ static void tsc2007_worker(FAR void *arg)
   uint16_t                     z2;       /* Z2 position */
   uint32_t                     pressure; /* Measured pressure */
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Get a pointer the callbacks for convenience (and so the code is not so
    * ugly).
@@ -764,7 +764,7 @@ static int tsc2007_interrupt(int irq, FAR void *context)
        priv && priv->configs->irq != irq;
        priv = priv->flink);
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 #endif
 
   /* Get a pointer the callbacks for convenience (and so the code is not so

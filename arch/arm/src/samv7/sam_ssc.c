@@ -944,7 +944,7 @@ static struct sam_buffer_s *ssc_buf_allocate(struct sam_ssc_s *priv)
 
   flags = enter_critical_section();
   bfcontainer = priv->freelist;
-  ASSERT(bfcontainer);
+  DEBUGASSERT(bfcontainer);
 
   /* Unlink the buffer from the freelist */
 

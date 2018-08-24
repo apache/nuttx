@@ -570,7 +570,7 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
   return oldhandler;
 
 #endif
-  ASSERT(0);
+  DEBUGASSERT(0);
   return NULL;
 }
 

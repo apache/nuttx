@@ -124,7 +124,7 @@ bool sched_mergepending(void)
        * the ready-to-run list!
        */
 
-      ASSERT(rtcb);
+      DEBUGASSERT(rtcb);
 
       /* The ptcb goes just before rtcb */
 

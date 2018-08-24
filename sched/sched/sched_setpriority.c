@@ -248,7 +248,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
     {
       /* Remove the TCB from the ready-to-run task list that it resides in */
 
-      ASSERT(!sched_removereadytorun(tcb));
+      DEBUGASSERT(!sched_removereadytorun(tcb));
 
       /* Change the task priority */
 
@@ -256,7 +256,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
 
       /* Put it back into the correct ready-to-run task list */
 
-      ASSERT(!sched_addreadytorun(tcb));
+      DEBUGASSERT(!sched_addreadytorun(tcb));
     }
 }
 

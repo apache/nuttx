@@ -173,7 +173,7 @@ static int lc823450_st7565_backlight(FAR struct st7565_lcd_s *lcd, int level)
 int board_lcd_initialize(void)
 {
   g_spidev = lc823450_spibus_initialize(LCD_SPI_PORTNO);
-  ASSERT(NULL != g_spidev);
+  DEBUGASSERT(NULL != g_spidev);
 
   g_spidev->ops->setmode(g_spidev, SPIDEV_MODE3);
   g_spidev->ops->setbits(g_spidev, 8);

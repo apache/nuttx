@@ -75,7 +75,7 @@ void sched_ufree(FAR void *address)
    * collect garbage on a group-by-group basis.
    */
 
-  ASSERT(!up_interrupt_context());
+  DEBUGASSERT(!up_interrupt_context());
   kumm_free(address);
 
 #else

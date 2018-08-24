@@ -710,7 +710,7 @@ static struct stm32_buffer_s *i2s_buf_allocate(struct stm32_i2s_s *priv)
 
   flags = enter_critical_section();
   bfcontainer = priv->freelist;
-  ASSERT(bfcontainer);
+  DEBUGASSERT(bfcontainer);
 
   /* Unlink the buffer from the freelist */
 

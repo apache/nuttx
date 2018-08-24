@@ -103,7 +103,7 @@ void up_sigdeliver(void)
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
+  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
   /* Save the real return state on the stack. */
 

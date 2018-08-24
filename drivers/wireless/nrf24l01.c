@@ -1462,7 +1462,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
   uint8_t *rx_fifo;
 #endif
 
-  ASSERT((spi != NULL) & (cfg != NULL));
+  DEBUGASSERT((spi != NULL) & (cfg != NULL));
 
   if ((dev = kmm_malloc(sizeof(struct nrf24l01_dev_s))) == NULL)
     {

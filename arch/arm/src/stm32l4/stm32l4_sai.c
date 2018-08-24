@@ -1207,7 +1207,7 @@ static struct sai_buffer_s *sai_buf_allocate(struct stm32l4_sai_s *priv)
 
   flags = enter_critical_section();
   bfcontainer = priv->freelist;
-  ASSERT(bfcontainer);
+  DEBUGASSERT(bfcontainer);
 
   /* Unlink the buffer from the freelist */
 
@@ -1305,7 +1305,7 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
   /* Create a watchdog timer to catch transfer timeouts */
 
   priv->dog = wd_create();
-  ASSERT(priv->dog);
+  DEBUGASSERT(priv->dog);
 
   /* Initialize buffering */
 

@@ -73,8 +73,8 @@ void up_unblock_task(struct tcb_s *tcb)
 
   /* Verify that the context switch can be performed */
 
-  ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
-         (tcb->task_state <= LAST_BLOCKED_STATE));
+  DEBUGASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
+              (tcb->task_state <= LAST_BLOCKED_STATE));
 
   /* Remove the task from the blocked task list */
 

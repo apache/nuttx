@@ -873,7 +873,7 @@ static int twi_reset(FAR struct i2c_master_s *dev)
   uint32_t sdapin;
   int ret;
 
-  ASSERT(priv);
+  DEBUGASSERT(priv);
 
   /* Get exclusive access to the TWI device */
 

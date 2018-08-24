@@ -655,9 +655,9 @@ int lc823450_mtd_initialize(uint32_t devno)
 #ifdef CONFIG_DEBUG
   for (i = 0; i < LC823450_NPARTS - 1; i++)
     {
-      ASSERT(partinfo[i].startblock < partinfo[i + 1].startblock);
-      ASSERT(partinfo[i].startblock + partinfo[i].nblocks <= maxblock);
-      ASSERT(partinfo[i + 1].startblock + partinfo[i + 1].nblocks <= maxblock);
+      DEBUGASSERT(partinfo[i].startblock < partinfo[i + 1].startblock);
+      DEBUGASSERT(partinfo[i].startblock + partinfo[i].nblocks <= maxblock);
+      DEBUGASSERT(partinfo[i + 1].startblock + partinfo[i + 1].nblocks <= maxblock);
     }
 #endif
 

@@ -494,7 +494,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
     }
   else
     {
-       ASSERT(txdesc->data == buf);
+       DEBUGASSERT(txdesc->data == buf);
     }
 
   /* Start the TX transfer (if it was not already waiting for buffers) */

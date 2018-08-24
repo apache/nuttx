@@ -146,7 +146,7 @@ static inline void tms570_check_reset(void)
    */
 
 #if 0
-  ASSERT((regval & SYS_ESR_FAILALL) == 0);
+  DEBUGASSERT((regval & SYS_ESR_FAILALL) == 0);
 #else
   UNUSED(regval);
 #endif
@@ -322,7 +322,7 @@ void arm_boot(void)
    * application.
    */
 
-  ASSERT(getreg32(TMS570_ESM_SR3) == 0);
+  DEBUGASSERT(getreg32(TMS570_ESM_SR3) == 0);
 
   /* Initialize clocking to settings provided by board-specific logic */
 
@@ -341,7 +341,7 @@ void arm_boot(void)
   /* Run the memory selftest on CPU RAM. */
 
   tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM);
-  ASSERT(tms570_memtest_complete() == OK);
+  DEBUGASSERT(tms570_memtest_complete() == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Initialize CPU RAM. */
@@ -380,7 +380,7 @@ void arm_boot(void)
 
   /* Wait for the memory test to complete */
 
-  ASSERT(tms570_memtest_complete() == OK);
+  DEBUGASSERT(tms570_memtest_complete() == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
 #ifdef CONFIG_TMS570_MIBASPI1

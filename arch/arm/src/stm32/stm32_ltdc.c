@@ -1524,7 +1524,7 @@ static int stm32_ltdcirq(int irq, void *context, FAR void *arg)
     }
   else
     {
-      ASSERT("Unknown interrupt");
+      DEBUGASSERT("Unknown interrupt");
     }
 
   /* Unlock the semaphore if locked */

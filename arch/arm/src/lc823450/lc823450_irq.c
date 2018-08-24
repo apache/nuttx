@@ -736,7 +736,7 @@ void up_ack_irq(int irq)
     {
       /* IRQ should be handled on CPU0 */
 
-      ASSERT(false);
+      DEBUGASSERT(false);
     }
 #endif
 

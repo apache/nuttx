@@ -242,8 +242,8 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
   FAR struct lis331dl_dev_s *dev;
   uint8_t retval;
 
-  ASSERT(i2c);
-  ASSERT(address);
+  DEBUGASSERT(i2c);
+  DEBUGASSERT(address);
 
   dev = kmm_malloc(sizeof(struct lis331dl_dev_s));
   if (dev == NULL)
@@ -288,7 +288,7 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
 
 int lis331dl_deinit(FAR struct lis331dl_dev_s * dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   lis331dl_powerdown(dev);
   kmm_free(dev);
@@ -388,7 +388,7 @@ lis331dl_getreadings(FAR struct lis331dl_dev_s * dev)
 {
   uint8_t retval[7];
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   if (lis331dl_access(dev, ST_LIS331DL_STATUS_REG, retval, 7) == 7)
     {

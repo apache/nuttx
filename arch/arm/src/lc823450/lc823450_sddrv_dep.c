@@ -110,7 +110,7 @@ static int _get_ch_from_cfg(struct SdDrCfg_s *cfg)
         break;
 
       default:
-        ASSERT(false);
+        DEBUGASSERT(false);
     }
 
   return ch;

@@ -126,7 +126,7 @@ int sigsuspend(FAR const sigset_t *set)
 
       unblocksigno = nxsig_lowest(&intersection);
       sigpend = nxsig_remove_pendingsignal(rtcb, unblocksigno);
-      ASSERT(sigpend);
+      DEBUGASSERT(sigpend);
 
       nxsig_release_pendingsignal(sigpend);
       leave_critical_section(flags);

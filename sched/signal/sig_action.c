@@ -92,7 +92,7 @@ static FAR sigactq_t *nxsig_alloc_action(void)
       /* And try again */
 
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-      ASSERT(sigact);
+      DEBUGASSERT(sigact);
     }
 
   return sigact;

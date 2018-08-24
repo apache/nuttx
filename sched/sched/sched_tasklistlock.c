@@ -91,7 +91,7 @@ irqstate_t sched_tasklist_lock(void)
     }
 
   g_tasklist_lock_count[me]++;
-  ASSERT(0 != g_tasklist_lock_count[me]);
+  DEBUGASSERT(0 != g_tasklist_lock_count[me]);
   return ret;
 }
 
@@ -121,7 +121,7 @@ void sched_tasklist_unlock(irqstate_t lock)
 
   me = this_cpu();
 
-  ASSERT(0 < g_tasklist_lock_count[me]);
+  DEBUGASSERT(0 < g_tasklist_lock_count[me]);
   g_tasklist_lock_count[me]--;
 
   if (0 == g_tasklist_lock_count[me])

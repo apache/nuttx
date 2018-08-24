@@ -309,7 +309,7 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
     {
       /* Yes.. then it must not be tagged as an output */
 
-      ASSERT((cfgset & GPIO_DIRECTION) != GPIO_OUTPUT);
+      DEBUGASSERT((cfgset & GPIO_DIRECTION) != GPIO_OUTPUT);
 
       /* If the pull-driver is also enabled, it must be enabled with a
        * compatible priority.
@@ -319,11 +319,11 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
         {
           if ((cfgset & GPIO_INT_POLARITY) != 0)
             {
-              ASSERT((cfgset & GPIO_PULL_POLARITY) != 0);
+              DEBUGASSERT((cfgset & GPIO_PULL_POLARITY) != 0);
             }
           else
             {
-              ASSERT((cfgset & GPIO_PULL_POLARITY) == 0);
+              DEBUGASSERT((cfgset & GPIO_PULL_POLARITY) == 0);
             }
         }
     }

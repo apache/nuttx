@@ -979,7 +979,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
   uint16_t y;        /* Y position */
   bool     pendown;  /* true: pen is down */
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Cancel the missing pen up timer */
 

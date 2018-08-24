@@ -523,7 +523,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
     }
   else
     {
-       ASSERT(txdesc->data == buf);
+       DEBUGASSERT(txdesc->data == buf);
     }
 
   /* Start the TX transfer (if it was not already waiting for buffers) */

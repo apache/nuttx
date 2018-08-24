@@ -454,7 +454,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       /* If one was found, unblock it */
 
-      ASSERT(btcb);
+      DEBUGASSERT(btcb);
 
       btcb->msgwaitq = NULL;
       msgq->nwaitnotempty--;

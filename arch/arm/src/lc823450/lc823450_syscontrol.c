@@ -146,7 +146,7 @@ void up_enable_clk(enum clock_e clk)
   irqstate_t flags;
   flags = spin_lock_irqsave();
 
-  ASSERT(clk < LC823450_CLOCK_NUM);
+  DEBUGASSERT(clk < LC823450_CLOCK_NUM);
 
   if (lc823450_clocks[clk].count++ == 0)
     {
@@ -166,7 +166,7 @@ void up_disable_clk(enum clock_e clk)
   irqstate_t flags;
   flags = spin_lock_irqsave();
 
-  ASSERT(clk < LC823450_CLOCK_NUM);
+  DEBUGASSERT(clk < LC823450_CLOCK_NUM);
 
   if (--lc823450_clocks[clk].count == 0)
     {
@@ -174,7 +174,7 @@ void up_disable_clk(enum clock_e clk)
                   lc823450_clocks[clk].regmask, 0);
     }
 
-  /*  ASSERT(lc823450_clocks[clk].count >= 0); */
+  /*  DEBUGASSERT(lc823450_clocks[clk].count >= 0); */
 
   if (lc823450_clocks[clk].count < 0)
     {

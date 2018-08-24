@@ -522,7 +522,7 @@ static void sam_tsd_bottomhalf(void *arg)
   uint32_t p;
   bool pendown;
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Get the set of pending ADC interrupts and pen status */
 

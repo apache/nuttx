@@ -988,7 +988,7 @@ static void mxt_worker(FAR void *arg)
   int retries;
   int ret;
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Get a pointer the callbacks for convenience (and so the code is not so
    * ugly).

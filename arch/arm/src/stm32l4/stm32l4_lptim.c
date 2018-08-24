@@ -464,7 +464,7 @@ static int stm32l4_lptim_setchannel(FAR struct stm32l4_lptim_dev_s *dev,
   int ret = OK;
   uint32_t cfg = 0;
 
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Configure GPIOs */
 
@@ -532,7 +532,7 @@ FAR struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer)
 
 int stm32l4_lptim_deinit(FAR struct stm32l4_lptim_dev_s * dev)
 {
-  ASSERT(dev);
+  DEBUGASSERT(dev);
 
   /* Disable power */
 

@@ -405,7 +405,7 @@ static int pwm_timer(FAR struct efm32_pwmtimer_s *priv,
       break;
 
     default:
-      ASSERT(false);
+      DEBUGASSERT(false);
     }
 
   pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, regval);
@@ -625,7 +625,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
       break;
 
     default:
-      ASSERT(false);
+      DEBUGASSERT(false);
       break;
     }
 

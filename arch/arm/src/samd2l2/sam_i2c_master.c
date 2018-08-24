@@ -1404,7 +1404,7 @@ int sam_i2c_reset(FAR struct i2c_master_s *dev)
   struct sam_i2c_dev_s *priv = (struct sam_i2c_dev_s *)dev;
   int ret;
 
-  ASSERT(priv);
+  DEBUGASSERT(priv);
 
   /* Get exclusive access to the I2C device */
 

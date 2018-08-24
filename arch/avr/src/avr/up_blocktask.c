@@ -80,7 +80,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
   /* Verify that the context switch can be performed */
 
-  ASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
+  DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
          (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
   /* Remove the tcb task from the ready-to-run list.  If we

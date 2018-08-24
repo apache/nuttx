@@ -227,8 +227,8 @@ static FAR sigpendq_t *
  *
  ****************************************************************************/
 
-static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
-                                               FAR siginfo_t *info)
+static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
+                                    FAR siginfo_t *info)
 {
   FAR struct task_group_s *group;
   FAR sigpendq_t *sigpend;
@@ -240,7 +240,7 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
   /* Check if the signal is already pending for the group */
 
   sigpend = nxsig_find_pendingsignal(group, info->si_signo);
-  if (sigpend)
+  if (sigpend != NULL)
     {
       /* The signal is already pending... retain only one copy */
 
@@ -254,7 +254,7 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
       /* Allocate a new pending signal entry */
 
       sigpend = nxsig_alloc_pendingsignal();
-      if (sigpend)
+      if (sigpend != NULL)
         {
           /* Put the signal information into the allocated structure */
 
@@ -268,7 +268,7 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
         }
     }
 
-  return sigpend;
+  DEBUGASSERT(sigpend);
 }
 
 /****************************************************************************
@@ -338,7 +338,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       else
         {
           leave_critical_section(flags);
-          ASSERT(nxsig_add_pendingsignal(stcb, info));
+          nxsig_add_pendingsignal(stcb, info);
         }
     }
 

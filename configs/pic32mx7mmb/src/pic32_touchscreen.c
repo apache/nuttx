@@ -641,7 +641,7 @@ static void tc_worker(FAR void *arg)
   int16_t ydiff;
   int ret;
 
-  ASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Perform the next action based on the state of the conversions */
 
@@ -972,7 +972,7 @@ static void tc_worker(FAR void *arg)
   /* Set up the next sample event */
 
   ret = work_queue(HPWORK, &priv->work, tc_worker, priv, delay);
-  ASSERT(ret == 0);
+  DEBUGASSERT(ret == 0);
 }
 
 /****************************************************************************

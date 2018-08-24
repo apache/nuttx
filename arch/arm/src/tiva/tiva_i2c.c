@@ -1776,7 +1776,7 @@ static int tiva_i2c_reset(FAR struct i2c_master_s * dev)
 
   /* Our caller must own a ref */
 
-  ASSERT(priv->refs > 0);
+  DEBUGASSERT(priv->refs > 0);
 
   /* Lock out other clients */
 
