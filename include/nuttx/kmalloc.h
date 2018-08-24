@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/kmalloc.h
  *
- *   Copyright (C) 2007-2008, 2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011, 2013, 2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,6 +203,10 @@ void sched_kfree(FAR void *address);
 #else
 #  define sched_kfree(a) sched_ufree(a)
 #endif
+
+/* Signal the worker thread that is has some clean up to do */
+
+void sched_signal_free(void);
 
 /* Functions defined in sched/sched_garbage *********************************/
 

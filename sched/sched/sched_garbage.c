@@ -237,6 +237,10 @@ void sched_garbage_collection(void)
   /* Handle deferred deallocations for the user heap */
 
   sched_kucleanup();
+
+  /* Handle the architecure-specific garbage collection */
+
+  up_sched_garbage_collection();
 }
 
 /****************************************************************************
@@ -264,5 +268,6 @@ void sched_garbage_collection(void)
 
 bool sched_have_garbage(void)
 {
-  return (sched_have_kgarbage() || sched_have_kugarbage());
+  return (sched_have_kgarbage() || sched_have_kugarbage() ||
+          up_sched_have_garbage());
 }

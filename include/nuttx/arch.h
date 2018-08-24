@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/arch.h
  *
- *   Copyright (C) 2007-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -732,7 +732,26 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
 #endif
 
 /****************************************************************************
- * Name: up_setpicbase, up_getpicbase
+ * Name: up_sched_have_garbage and up_sched_garbage_collection
+ *
+ * Description:
+ *   Some architectures may soft unique memory allocators.  If
+ *   CONFIG_ARCH_HAVE_GARBAGE is defined, those architectures must provide
+ *   both up_sched_have_garbage and up_sched_garbage_collection.  These will
+ *   be tied into the NuttX memory garbage collection logic.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_GARBAGE
+bool up_sched_have_garbage(void);
+void up_sched_garbage_collection(void);
+#else
+#  define up_sched_have_garbage() false
+#  define up_sched_garbage_collection()
+#endif
+
+/****************************************************************************
+ * Name: up_setpicbase and up_getpicbase
  *
  * Description:
  *   It NXFLAT external modules (or any other binary format that requires)

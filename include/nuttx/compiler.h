@@ -93,7 +93,7 @@
  * unnecessary "weak" functions can be excluded from the link.
  */
 
-# ifndef __CYGWIN__
+# if !defined(__CYGWIN__) && !defined(CONFIG_ARCH_GNU_NO_WEAKFUNCTIONS)
 #  define CONFIG_HAVE_WEAKFUNCTIONS 1
 #  define weak_alias(name, aliasname) \
    extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));

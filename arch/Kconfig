@@ -139,6 +139,13 @@ config ARCH_TOOLCHAIN_GNU
 	bool
 	default n
 
+config ARCH_GNU_NO_WEAKFUNCTIONS
+	bool
+	depends on ARCH_TOOLCHAIN_GNU
+	default n
+	---help---
+		Disable support for weak functions.
+
 comment "Architecture Options"
 
 config ARCH_NOINTC
@@ -219,6 +226,10 @@ config ARCH_HAVE_FETCHADD
 	default n
 
 config ARCH_HAVE_RTC_SUBSECONDS
+	bool
+	default n
+
+config ARCH_HAVE_GARBAGE
 	bool
 	default n
 
