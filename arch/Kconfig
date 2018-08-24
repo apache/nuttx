@@ -149,6 +149,11 @@ config ARCH_VECNOTIRQ
 	bool
 	default n
 
+config ARCH_HAVE_TRIGGER_HOOK
+	bool
+	default n
+	depends on !ARCH_NOINTC
+
 config ARCH_DMA
 	bool
 	default n
