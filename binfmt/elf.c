@@ -321,9 +321,8 @@ errout:
  * Name: elf_initialize
  *
  * Description:
- *   ELF support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialization in order to register the ELF binary format.
+ *   In order to use the ELF binary format, this function must be called
+ *   during system initialization to register the ELF binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

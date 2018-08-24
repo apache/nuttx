@@ -53,8 +53,6 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include <nuttx/binfmt/elf.h>
-
 #include "stm32.h"
 
 #ifdef CONFIG_STM32_OTGFS

@@ -154,9 +154,8 @@ static int builtin_loadbinary(struct binary_s *binp)
  * Name: builtin_initialize
  *
  * Description:
- *   Builtin support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialzie in order to register the builtin binary format.
+ *   In order to use the builtin binary format, this function must be called
+ *   during system initialize to register the builtin binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

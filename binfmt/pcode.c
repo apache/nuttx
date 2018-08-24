@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Check configuration.  This is not all of the configuration settings that
  * are required -- only the more obvious.
  */
@@ -522,9 +523,8 @@ static int pcode_unload(struct binary_s *binp)
  * Name: pcode_initialize
  *
  * Description:
- *   P-code support is built based on the configuration.  However, in order
- *   to use this binary format, this function must be called during system
- *   initialization in order to register the P-Code binary format.
+ *   In order to use the P-code binary format, this function must be called
+ *   during system initialization to register the P-Code binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

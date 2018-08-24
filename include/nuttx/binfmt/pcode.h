@@ -66,9 +66,8 @@ extern "C"
  * Name: pcode_initialize
  *
  * Description:
- *   P-code support is built based on the configuration.  However, in order
- *   to use this binary format, this function must be called during system
- *   initialization in order to register the P-Code binary format.
+ *   In order to use the P-code binary format, this function must be called
+ *   during system initialization to register the P-Code binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

@@ -44,7 +44,6 @@
 #include <sys/mount.h>
 #include <debug.h>
 
-#include <nuttx/binfmt/elf.h>
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>

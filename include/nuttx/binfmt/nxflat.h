@@ -130,8 +130,34 @@ extern "C"
 #endif
 
 /****************************************************************************
- * These are APIs exported by libnxflat (and may be used outside of NuttX):
+ * Name: nxflat_initialize
+ *
+ * Description:
+ *   In order to use the NxFLAT binary format, this function must be called
+ *   during system initialization to register the NXFLAT binary
+ *   format.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
  ****************************************************************************/
+
+int nxflat_initialize(void);
+
+/****************************************************************************
+ * Name: nxflat_uninitialize
+ *
+ * Description:
+ *   Unregister the NXFLAT binary loader
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxflat_uninitialize(void);
 
 /****************************************************************************
  * Name: nxflat_verifyheader
@@ -245,39 +271,6 @@ int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 int nxflat_unload(struct nxflat_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * These are APIs used internally only by NuttX:
- ****************************************************************************/
-/****************************************************************************
- * Name: nxflat_initialize
- *
- * Description:
- *   NXFLAT support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialization in order to register the NXFLAT binary format.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int nxflat_initialize(void);
-
-/****************************************************************************
- * Name: nxflat_uninitialize
- *
- * Description:
- *   Unregister the NXFLAT binary loader
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxflat_uninitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

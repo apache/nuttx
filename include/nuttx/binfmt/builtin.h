@@ -82,9 +82,8 @@ extern "C"
  * Name: builtin_initialize
  *
  * Description:
- *   Builtin support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialzie in order to register the builtin binary format.
+ *   In order to use the builtin binary format, this function must be called
+ *   during system initialize to register the builtin binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -109,13 +108,10 @@ int builtin_initialize(void);
 void builtin_uninitialize(void);
 
 /****************************************************************************
- * Utility Functions Provided to Applications by binfmt/libbuiltin
- ****************************************************************************/
-/****************************************************************************
  * Name: builtin_isavail
  *
  * Description:
- *   Checks for availabiliy of application registerred during compile time.
+ *   Checks for availability of application registered during compile time.
  *
  * Input Parameters:
  *   filename - Name of the linked-in binary to be started.
@@ -148,9 +144,6 @@ int builtin_isavail(FAR const char *appname);
 FAR const char *builtin_getname(int index);
 
 /****************************************************************************
- * Data Set Access Functions Provided to Applications by binfmt/libbuiltin
- ****************************************************************************/
-/****************************************************************************
  * Name: builtin_for_index
  *
  * Description:
@@ -176,4 +169,3 @@ FAR const struct builtin_s *builtin_for_index(int index);
 #endif
 
 #endif /* __INCLUDE_NUTTX_BINFMT_BUILTIN_H */
-
