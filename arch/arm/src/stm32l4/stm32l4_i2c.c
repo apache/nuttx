@@ -1495,7 +1495,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
 #endif
       else
         {
-          PANIC();
+          DEBUGPANIC();
         }
 
       uint32_t timingr =

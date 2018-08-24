@@ -307,7 +307,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
   else
 #endif
     {
-      PANIC();
+      DEBUGPANIC();
     }
   dmach = &g_dma[chndx];
 

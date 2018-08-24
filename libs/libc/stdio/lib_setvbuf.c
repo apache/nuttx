@@ -234,7 +234,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
         break;
 
       default:
-        PANIC();
+        DEBUGPANIC();
     }
 
    /* Do not release the previous buffer if it was allocated by the user

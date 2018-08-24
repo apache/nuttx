@@ -499,7 +499,7 @@ static int tms570_interrupt(int irq, void *context, FAR void *arg)
           case SCI_INTVECT_TIMEOUT: /* Timeout interrupt */
 
           default:
-            PANIC();
+            DEBUGPANIC();
         }
     }
 

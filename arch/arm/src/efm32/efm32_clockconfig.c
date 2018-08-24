@@ -303,7 +303,7 @@ static void efm32_setwaitstates(uint32_t hfcoreclk)
 #ifdef MSC_READCTRL_MODE_WS2
   if (hfcoreclk > CMU_MAX_FREQ_2WS)
     {
-      PANIC();
+      DEBUGPANIC();
     }
   else
 #endif
@@ -319,7 +319,7 @@ static void efm32_setwaitstates(uint32_t hfcoreclk)
 #else
       /* No.. this MCU does not support 2 wait states */
 
-      PANIC();
+      DEBUGPANIC();
 #endif
     }
 
@@ -452,7 +452,7 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
 
 #ifdef CONFIG_DEBUG_FEATURES
       default:
-        PANIC();
+        DEBUGPANIC();
 #endif
     }
 

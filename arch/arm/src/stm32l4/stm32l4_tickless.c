@@ -202,7 +202,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: stm32l4_oneshot_initialize failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
@@ -212,7 +212,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: stm32l4_oneshot_max_delay failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 
   /* Convert this to configured clock ticks for use by the OS timer logic */
@@ -236,7 +236,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: stm32l4_freerun_initialize failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 }
 

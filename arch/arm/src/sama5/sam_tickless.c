@@ -257,7 +257,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: sam_oneshot_initialize failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 
   DEBUGASSERT(ONESHOT_INITIALIZED(&g_tickless.oneshot));
@@ -269,7 +269,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: sam_oneshot_max_delay failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 
   /* Convert this to configured clock ticks for use by the OS timer logic */
@@ -293,7 +293,7 @@ void arm_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: sam_freerun_initialize failed\n");
-      PANIC();
+      DEBUGPANIC();
     }
 
   DEBUGASSERT(FREERUN_INITIALIZED(&g_tickless.freerun));

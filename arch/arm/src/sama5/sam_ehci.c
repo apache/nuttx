@@ -3007,7 +3007,7 @@ static inline void sam_portsc_bottomhalf(void)
 static inline void sam_syserr_bottomhalf(void)
 {
   usbhost_trace1(EHCI_TRACE1_SYSERR_INTR, 0);
-  PANIC();
+  DEBUGPANIC();
 }
 
 /****************************************************************************

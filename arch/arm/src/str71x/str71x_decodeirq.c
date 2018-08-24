@@ -135,7 +135,7 @@ void up_decodeirq(uint32_t *regs)
 #ifdef CONFIG_DEBUG_FEATURES
   else
     {
-      PANIC(); /* Normally never happens */
+      DEBUGPANIC(); /* Normally never happens */
     }
 #endif
   board_autoled_off(LED_INIRQ);

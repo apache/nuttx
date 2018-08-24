@@ -202,5 +202,5 @@ void _exit(int status)
    * interrupts are disabled.
    */
 
-  PANIC();
+  DEBUGPANIC();
 }

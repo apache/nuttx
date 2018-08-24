@@ -945,7 +945,7 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
     {
       if (nxsem_wait(&sbus->queue_mutex) < 0)
         {
-          PANIC();
+          DEBUGPANIC();
         }
 
 #if 0
@@ -995,7 +995,7 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
 
   if (nxsem_wait(&sbus->queue_mutex) < 0)
     {
-      PANIC();
+      DEBUGPANIC();
     }
 
   bcmf_dqueue_push(&sbus->free_queue, &sframe->list_entry);

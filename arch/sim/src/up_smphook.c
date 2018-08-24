@@ -79,7 +79,7 @@ void sim_smp_hook(void)
 
   /* That function should not return. */
 
-  PANIC();
+  DEBUGPANIC();
 }
 
 #endif /* CONFIG_SMP */

@@ -147,7 +147,7 @@ void up_sigdeliver(void)
    * interrupts are disabled.
    */
 
-  PANIC();
+  DEBUGPANIC();
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */

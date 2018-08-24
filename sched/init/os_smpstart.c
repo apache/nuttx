@@ -111,7 +111,7 @@ void os_idle_trampoline(void)
 
   /* The IDLE task should never return */
 
-  PANIC();
+  DEBUGPANIC();
 }
 
 /****************************************************************************

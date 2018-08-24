@@ -112,6 +112,6 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
     }
   else
     {
-      PANIC();
+      DEBUGPANIC();
     }
 }

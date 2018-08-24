@@ -90,7 +90,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 #endif
     )
     {
-       PANIC();
+       DEBUGPANIC();
     }
   else
     {

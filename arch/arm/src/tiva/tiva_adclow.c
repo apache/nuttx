@@ -685,7 +685,7 @@ static void tiva_adc_read(void *arg)
        */
 
       aerr("ERROR: Invalid ADC device number given %d\n", sse->adc);
-      PANIC();
+      DEBUGPANIC();
       return;
     }
 

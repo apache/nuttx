@@ -500,7 +500,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   else
 #endif
     {
-      PANIC();
+      DEBUGPANIC();
     }
 }
 

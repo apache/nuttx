@@ -194,7 +194,7 @@ static int lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
 
   if (!(getreg32(WDT_PT0STS) & (1 << WDT_PT0STS_CSTS)))
     {
-      PANIC();
+      DEBUGPANIC();
     }
 
   /* Is there a registered handler? */

@@ -410,7 +410,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
   else
 #endif
     {
-      PANIC();
+      DEBUGPANIC();
     }
 
   /* Get the stream structure from the stream and controller numbers */
