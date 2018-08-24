@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "up_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -70,10 +71,6 @@ extern void exception_common(void);
 /************************************************************************************
  * Public data
  ************************************************************************************/
-
-/* Provided by the linker script to indicate the end of the BSS */
-
-extern char _ebss;
 
 /* The v7m vector table consists of an array of function pointers, with the first
  * slot (vector zero) used to hold the initial stack pointer.
