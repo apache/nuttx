@@ -74,6 +74,8 @@
  *                      the timer expires.
  *                      Argument: A read-only pointer to an instance of
  *                      stuct timer_notify_s.
+ * TCIOC_MAXTIMEOUT   - Get the maximum supported timeout value
+ *                      Argument: A 32-bit timeout value in microseconds.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
@@ -93,6 +95,7 @@
 #define TCIOC_GETSTATUS    _TCIOC(0x0003)
 #define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
 #define TCIOC_NOTIFICATION _TCIOC(0x0005)
+#define TCIOC_MAXTIMEOUT   _TCIOC(0x0006)
 
 /* Bit Settings *************************************************************/
 /* Bit settings for the struct timer_status_s flags field */
@@ -172,6 +175,11 @@ struct timer_ops_s
 
   CODE int (*ioctl)(FAR struct timer_lowerhalf_s *lower, int cmd,
                     unsigned long arg);
+
+  /* Get the maximum supported timeout value */
+
+  CODE int (*maxtimeout)(FAR struct timer_lowerhalf_s *lower,
+                         FAR uint32_t *maxtimeout);
 };
 
 /* This structure provides the publicly visible representation of the
