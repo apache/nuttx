@@ -432,6 +432,38 @@ endchoice # Work queue
 
 endif # NET_FTMAC100
 
+menuconfig NET_LAN91C111
+	bool "Microchip LAN91C111 Support"
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		References:
+		LAN91C111 Data Sheet, 10/100 Non-PCI Ethernet Single Chip MAC + PHY
+		DS00002276A, 2016 Microchip Technology Inc.
+
+if NET_LAN91C111
+
+choice
+	prompt "Work queue"
+	default LAN91C111_LPWORK if SCHED_LPWORK
+	default LAN91C111_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
+	---help---
+		Work queue support is required to use the Ethernet driver. If the
+		low priority work queue is available, then it should be used by the
+		driver.
+
+config LAN91C111_HPWORK
+	bool "High priority"
+	depends on SCHED_HPWORK
+
+config LAN91C111_LPWORK
+	bool "Low priority"
+	depends on SCHED_LPWORK
+
+endchoice # Work queue
+
+endif # NET_LAN91C111
+
 if ARCH_HAVE_PHY
 
 comment "External Ethernet PHY Device Support"
