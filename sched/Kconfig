@@ -754,7 +754,6 @@ choice
 
 config CPULOAD_ONESHOT
 	bool "Use Oneshot timer"
-	default n
 	---help---
 		Use an MCU-specific oneshot timer as the external clock.  The
 		oneshot timer must be configured by board specific logic which must
@@ -773,7 +772,6 @@ config CPULOAD_ONESHOT
 
 config CPULOAD_PERIOD
 	bool "Use Period timer"
-	default n
 	---help---
 		Use an MCU-specific period timer as the external clock.  The
 		period timer must be configured by board specific logic which must
