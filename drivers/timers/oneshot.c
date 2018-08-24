@@ -46,7 +46,6 @@
 #include <semaphore.h>
 #include <signal.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -303,6 +302,21 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Cancel the oneshot timer */
 
           ret = ONESHOT_CANCEL(priv->od_lower, ts);
+        }
+        break;
+
+      /* OSIOC_CURRENT - Get the current time
+       *                 Argument: A reference to a struct timespec in
+       *                 which the current time will be returned.
+       */
+
+      case OSIOC_CURRENT:
+        {
+          FAR struct timespec *ts = (FAR struct timespec *)((uintptr_t)arg);
+
+          /* Get the current time */
+
+          ret = ONESHOT_CURRENT(priv->od_lower, ts);
         }
         break;
 

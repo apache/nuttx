@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -68,6 +69,9 @@
  * OSIOC_CANCEL     - Stop the timer
  *                    Argument: A reference to a struct timespec in which
  *                    the time remaining will be returned.
+ * OSIOC_CURRENT    - Get the current time
+ *                    Argument: A reference to a struct timespec in which
+ *                    the current time will be returned.
  *
  * NOTE: _TCIOC(0x0020) througn _TCIOC(0x003f) are reserved for use by the
  * oneshot driver to assure that the values are unique.  Other timer drivers
@@ -77,6 +81,7 @@
 #define OSIOC_MAXDELAY   _TCIOC(0x0020)
 #define OSIOC_START      _TCIOC(0x0021)
 #define OSIOC_CANCEL     _TCIOC(0x0022)
+#define OSIOC_CURRENT    _TCIOC(0x0023)
 
 /* Method access helper macros **********************************************/
 
@@ -149,6 +154,27 @@
 #define ONESHOT_CANCEL(l,t) ((l)->ops->cancel(l,t))
 
 /****************************************************************************
+ * Name: ONESHOT_CURRENT
+ *
+ * Description:
+ *  Get the current time.
+ *
+ * Input Parameters:
+ *   lower   Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ts      The location in which to return the current time. A time of zero
+ *           is returned for the initialization moment.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#define ONESHOT_CURRENT(l,t) ((l)->ops->current ? (l)->ops->current(l,t) : -ENOSYS)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -175,6 +201,8 @@ struct oneshot_operations_s
                     FAR const struct timespec *ts);
   CODE int (*cancel)(struct oneshot_lowerhalf_s *lower,
                      FAR struct timespec *ts);
+  CODE int (*current)(struct oneshot_lowerhalf_s *lower,
+                      FAR struct timespec *ts);
 };
 
 /* This structure describes the state of the oneshot timer lower-half driver */
