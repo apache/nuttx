@@ -110,8 +110,8 @@ void irq_dispatch(int irq, FAR void *context)
 #else
       if (g_irqvector[irq].handler)
         {
-          vector = g_irqvector[ndx].handler;
-          arg    = g_irqvector[ndx].arg;
+          vector = g_irqvector[irq].handler;
+          arg    = g_irqvector[irq].arg;
         }
 
       INCR_COUNT(irq);
@@ -129,4 +129,3 @@ void irq_dispatch(int irq, FAR void *context)
 
   vector(irq, context, arg);
 }
-
