@@ -569,6 +569,23 @@ void neighbor_out(FAR struct net_driver_s *dev);
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
+ * Name: devif_loopback_out
+ *
+ * Description:
+ *   This function should be called before sending out a packet. The function
+ *   checks the destination address of the packet to see whether the target of
+ *   packet is ourself and then consume the packet directly by calling input
+ *   process functions.
+ *
+ * Returned Value:
+ *   Zero is returned if the packet don't loop back to ourself, otherwise
+ *   a no zero value is returned.
+ *
+ ****************************************************************************/
+
+int devif_loopback_out(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Carrier detection
  *
  * Call netdev_carrier_on when the carrier has become available and the device

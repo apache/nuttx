@@ -1176,31 +1176,34 @@ static int pic32mz_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send this packet.  In this context, we know that there is space for
-       * at least one more packet in the descriptor list.
-       */
-
-      pic32mz_transmit(priv);
-
-      /* Check if the next TX descriptor is available. If not, return a
-       * non-zero value to terminate the poll.
-       */
-
-      if (pic32mz_txdesc(priv) == NULL)
+      if (!devif_loopback_out(&priv->pd_dev))
         {
-          /* There are no more TX descriptors/buffers available.. stop the poll */
+          /* Send this packet.  In this context, we know that there is space for
+           * at least one more packet in the descriptor list.
+           */
 
-          return -EAGAIN;
-        }
+          pic32mz_transmit(priv);
 
-      /* Get the next Tx buffer needed in order to continue the poll */
+          /* Check if the next TX descriptor is available. If not, return a
+           * non-zero value to terminate the poll.
+           */
 
-      priv->pd_dev.d_buf = pic32mz_allocbuffer(priv);
-      if (priv->pd_dev.d_buf == NULL)
-        {
-          /* We have no more buffers available for the nex Tx.. stop the poll */
+          if (pic32mz_txdesc(priv) == NULL)
+            {
+              /* There are no more TX descriptors/buffers available.. stop the poll */
 
-          return -ENOMEM;
+              return -EAGAIN;
+            }
+
+          /* Get the next Tx buffer needed in order to continue the poll */
+
+          priv->pd_dev.d_buf = pic32mz_allocbuffer(priv);
+          if (priv->pd_dev.d_buf == NULL)
+            {
+              /* We have no more buffers available for the nex Tx.. stop the poll */
+
+              return -ENOMEM;
+            }
         }
     }
 

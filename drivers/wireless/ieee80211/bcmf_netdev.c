@@ -473,16 +473,19 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&priv->bc_dev))
+        {
+          /* Send the packet */
 
-      bcmf_transmit(priv, priv->cur_tx_frame);
+          bcmf_transmit(priv, priv->cur_tx_frame);
 
-      /* TODO: Check if there is room in the device to hold another packet.
-       * If not, return a non-zero value to terminate the poll.
-       */
+          /* TODO: Check if there is room in the device to hold another packet.
+           * If not, return a non-zero value to terminate the poll.
+           */
 
-      priv->cur_tx_frame = NULL;
-      return 1;
+          priv->cur_tx_frame = NULL;
+          return 1;
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

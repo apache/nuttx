@@ -600,20 +600,23 @@ static int imxrt_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      imxrt_transmit(priv);
-      priv->dev.d_buf =
-        (uint8_t*)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
-
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
-
-      if (imxrt_txringfull(priv))
+      if (!devif_loopback_out(&priv->dev))
         {
-          return -EBUSY;
-        }
+          /* Send the packet */
+
+          imxrt_transmit(priv);
+          priv->dev.d_buf =
+            (uint8_t*)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+
+          /* Check if there is room in the device to hold another packet. If not,
+           * return a non-zero value to terminate the poll.
+           */
+
+          if (imxrt_txringfull(priv))
+            {
+              return -EBUSY;
+            }
+       }
     }
 
   /* If zero is returned, the polling will continue until all connections have

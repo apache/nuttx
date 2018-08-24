@@ -1273,44 +1273,47 @@ static int tiva_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      tiva_transmit(priv);
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-
-      /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-       * cannot perform the TX poll if we are unable to accept another packet for
-       * transmission.
-       *
-       * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-       * because tiva_freeframe() has not yet run.  If tiva_freeframe() has run,
-       * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-       * CONFIG_TIVA_EMAC_NTXDESC).
-       */
-
-      if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) != 0 ||
-           priv->txhead->tdes2 != 0)
+      if (!devif_loopback_out(&priv->dev))
         {
-          /* We have to terminate the poll if we have no more descriptors
-           * available for another transfer.
+          /* Send the packet */
+
+          tiva_transmit(priv);
+          DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+
+          /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
+           * cannot perform the TX poll if we are unable to accept another packet for
+           * transmission.
+           *
+           * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
+           * because tiva_freeframe() has not yet run.  If tiva_freeframe() has run,
+           * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
+           * CONFIG_TIVA_EMAC_NTXDESC).
            */
 
-          return -EBUSY;
-        }
+          if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) != 0 ||
+               priv->txhead->tdes2 != 0)
+            {
+              /* We have to terminate the poll if we have no more descriptors
+               * available for another transfer.
+               */
 
-      /* We have the descriptor, we can continue the poll. Allocate a new
-       * buffer for the poll.
-       */
+              return -EBUSY;
+            }
 
-      dev->d_buf = tiva_allocbuffer(priv);
+          /* We have the descriptor, we can continue the poll. Allocate a new
+           * buffer for the poll.
+           */
 
-      /* We can't continue the poll if we have no buffers */
+          dev->d_buf = tiva_allocbuffer(priv);
 
-      if (dev->d_buf == NULL)
-        {
-          /* Terminate the poll. */
+          /* We can't continue the poll if we have no buffers */
 
-          return -ENOMEM;
+          if (dev->d_buf == NULL)
+            {
+              /* Terminate the poll. */
+
+              return -ENOMEM;
+            }
         }
     }
 

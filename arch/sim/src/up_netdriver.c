@@ -151,9 +151,12 @@ static int sim_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&g_sim_dev))
+        {
+          /* Send the packet */
 
-      netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+          netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

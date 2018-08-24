@@ -405,7 +405,10 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      slip_transmit(priv);
+      if (!devif_loopback_out(&priv->dev))
+        {
+          slip_transmit(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

@@ -388,13 +388,16 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&priv->ft_dev))
+        {
+          /* Send the packet */
 
-      ftmac100_transmit(priv);
+          ftmac100_transmit(priv);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
+          /* Check if there is room in the device to hold another packet. If not,
+           * return a non-zero value to terminate the poll.
+           */
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

@@ -716,17 +716,20 @@ static int lpc17_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send this packet.  In this context, we know that there is space for
-       * at least one more packet in the descriptor list.
-       */
+      if (!devif_loopback_out(&priv->lp_dev))
+        {
+          /* Send this packet.  In this context, we know that there is space for
+           * at least one more packet in the descriptor list.
+           */
 
-      lpc17_transmit(priv);
+          lpc17_transmit(priv);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return any non-zero value to terminate the poll.
-       */
+          /* Check if there is room in the device to hold another packet. If not,
+           * return any non-zero value to terminate the poll.
+           */
 
-      ret = lpc17_txdesc(priv);
+          ret = lpc17_txdesc(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

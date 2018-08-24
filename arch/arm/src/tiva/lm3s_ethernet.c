@@ -644,11 +644,14 @@ static int tiva_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet.  tiva_transmit() will return zero if the
-       * packet was successfully handled.
-       */
+      if (!devif_loopback_out(&priv->ld_dev))
+        {
+          /* Send the packet.  tiva_transmit() will return zero if the
+           * packet was successfully handled.
+           */
 
-      ret = tiva_transmit(priv);
+          ret = tiva_transmit(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

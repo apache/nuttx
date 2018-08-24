@@ -571,19 +571,22 @@ static int kinetis_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      kinetis_transmit(priv);
-      priv->dev.d_buf =
-        (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
-
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
-
-      if (kinetis_txringfull(priv))
+      if (!devif_loopback_out(&priv->dev))
         {
-          return -EBUSY;
+          /* Send the packet */
+
+          kinetis_transmit(priv);
+          priv->dev.d_buf =
+            (uint8_t*)kinesis_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+
+          /* Check if there is room in the device to hold another packet. If not,
+           * return a non-zero value to terminate the poll.
+           */
+
+          if (kinetis_txringfull(priv))
+            {
+              return -EBUSY;
+            }
         }
     }
 

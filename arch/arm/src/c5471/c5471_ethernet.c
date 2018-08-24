@@ -1046,19 +1046,22 @@ static int c5471_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      c5471_transmit(priv);
-
-      /* Check if the ESM has let go of the RX descriptor giving us access
-       * rights to submit another Ethernet frame.
-       */
-
-      if ((EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) != 0)
+      if (!devif_loopback_out(&priv->c_dev))
         {
-          /* No, then return non-zero to terminate the poll */
+          /* Send the packet */
 
-          return 1;
+          c5471_transmit(priv);
+
+          /* Check if the ESM has let go of the RX descriptor giving us access
+           * rights to submit another Ethernet frame.
+           */
+
+          if ((EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) != 0)
+            {
+              /* No, then return non-zero to terminate the poll */
+
+              return 1;
+            }
         }
     }
 

@@ -334,13 +334,16 @@ static int misoc_net_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&priv->misoc_net_dev))
+        {
+          /* Send the packet */
 
-      misoc_net_transmit(priv);
+          misoc_net_transmit(priv);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
-       */
+          /* Check if there is room in the device to hold another packet. If not,
+           * return a non-zero value to terminate the poll.
+           */
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

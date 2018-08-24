@@ -994,8 +994,10 @@ static int rndis_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      ret = rndis_transmit(priv);
-
+      if (!devif_loopback_out(&priv->netdev))
+        {
+          ret = rndis_transmit(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

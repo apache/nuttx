@@ -1547,21 +1547,24 @@ static int sam_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      sam_transmit(priv, EMAC_QUEUE_0);
-
-      /* Check if there are any free TX descriptors.  We cannot perform
-       * the TX poll if we do not have buffering for another packet.
-       */
-
-      if (sam_txfree(priv, EMAC_QUEUE_0) == 0)
+      if (!devif_loopback_out(&priv->dev))
         {
-          /* We have to terminate the poll if we have no more descriptors
-           * available for another transfer.
+          /* Send the packet */
+
+          sam_transmit(priv, EMAC_QUEUE_0);
+
+          /* Check if there are any free TX descriptors.  We cannot perform
+           * the TX poll if we do not have buffering for another packet.
            */
 
-          return -EBUSY;
+          if (sam_txfree(priv, EMAC_QUEUE_0) == 0)
+            {
+              /* We have to terminate the poll if we have no more descriptors
+               * available for another transfer.
+               */
+
+              return -EBUSY;
+            }
         }
     }
 

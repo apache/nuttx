@@ -1147,11 +1147,14 @@ static int ez80emac_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet.  ez80emac_transmit() will return zero if the
-       * packet was successfully handled.
-       */
+      if (!devif_loopback_out(&priv->dev))
+        {
+          /* Send the packet.  ez80emac_transmit() will return zero if the
+           * packet was successfully handled.
+           */
 
-      ret = ez80emac_transmit(priv);
+          ret = ez80emac_transmit(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

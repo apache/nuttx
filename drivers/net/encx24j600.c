@@ -1194,9 +1194,12 @@ static int enc_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&priv->dev))
+        {
+          /* Send the packet */
 
-      ret = enc_txenqueue(priv);
+          ret = enc_txenqueue(priv);
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

@@ -819,19 +819,22 @@ static int dm9x_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      dm9x_transmit(priv);
-
-      /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-       * that can be 2 packets, otherwise it is a single packet.
-       */
-
-      if (priv->dm_ntxpending > 1 || !priv->dm_b100M)
+      if (!devif_loopback_out(&priv->dm_dev))
         {
-          /* Returning a non-zero value will terminate the poll operation */
+          /* Send the packet */
 
-          return 1;
+          dm9x_transmit(priv);
+
+          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
+           * that can be 2 packets, otherwise it is a single packet.
+           */
+
+          if (priv->dm_ntxpending > 1 || !priv->dm_b100M)
+            {
+              /* Returning a non-zero value will terminate the poll operation */
+
+              return 1;
+            }
         }
     }
 

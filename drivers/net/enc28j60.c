@@ -1213,13 +1213,16 @@ static int enc_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
+      if (!devif_loopback_out(&priv->dev))
+        {
+          /* Send the packet */
 
-      enc_transmit(priv);
+          enc_transmit(priv);
 
-      /* Stop the poll now because we can queue only one packet */
+          /* Stop the poll now because we can queue only one packet */
 
-      return -EBUSY;
+          return -EBUSY;
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have

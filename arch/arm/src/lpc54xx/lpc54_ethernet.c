@@ -790,49 +790,52 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      /* Send the packet */
-
-      chan   = lpc54_eth_getring(priv);
-      txring = &priv->eth_txring[chan];
-
-      (txring->tr_buffers)[txring->tr_supply] =
-        (uint32_t *)priv->eth_dev.d_buf;
-
-      lpc54_eth_transmit(priv, chan);
-
-      txring0 = &priv->eth_txring[0];
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-      txring1 = &priv->eth_txring[1];
-
-      /* We cannot perform the Tx poll now if all of the Tx descriptors for
-       * both channels are in-use.
-       */
-
-      if (txring0->tr_inuse >= txring0->tr_ndesc ||
-          txring1->tr_inuse >= txring1->tr_ndesc)
-#else
-      /* We cannot continue the Tx poll now if all of the Tx descriptors for
-       * this channel 0 are in-use.
-       */
-
-      if (txring0->tr_inuse >= txring0->tr_ndesc)
-#endif
+      if (!devif_loopback_out(&priv->eth_dev))
         {
-          /* Stop the poll.. no more Tx descriptors */
+          /* Send the packet */
 
-          return 1;
-        }
+          chan   = lpc54_eth_getring(priv);
+          txring = &priv->eth_txring[chan];
 
-      /* There is a free descriptor in the ring, allocate a new Tx buffer
-       * to perform the poll.
-       */
+          (txring->tr_buffers)[txring->tr_supply] =
+            (uint32_t *)priv->eth_dev.d_buf;
 
-       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
-       if (priv->eth_dev.d_buf == NULL)
-         {
-          /* Stop the poll.. no more packet buffers */
+          lpc54_eth_transmit(priv, chan);
 
-          return 1;
+          txring0 = &priv->eth_txring[0];
+#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
+          txring1 = &priv->eth_txring[1];
+
+          /* We cannot perform the Tx poll now if all of the Tx descriptors for
+           * both channels are in-use.
+           */
+
+          if (txring0->tr_inuse >= txring0->tr_ndesc ||
+              txring1->tr_inuse >= txring1->tr_ndesc)
+#else
+          /* We cannot continue the Tx poll now if all of the Tx descriptors for
+           * this channel 0 are in-use.
+           */
+
+          if (txring0->tr_inuse >= txring0->tr_ndesc)
+#endif
+            {
+              /* Stop the poll.. no more Tx descriptors */
+
+              return 1;
+            }
+
+          /* There is a free descriptor in the ring, allocate a new Tx buffer
+           * to perform the poll.
+           */
+
+           priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
+           if (priv->eth_dev.d_buf == NULL)
+             {
+              /* Stop the poll.. no more packet buffers */
+
+              return 1;
+            }
         }
     }
 
