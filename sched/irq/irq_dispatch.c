@@ -89,41 +89,34 @@
 
 void irq_dispatch(int irq, FAR void *context)
 {
-  xcpt_t vector;
-  FAR void *arg;
-
-  /* Perform some sanity checks */
+  xcpt_t vector = irq_unexpected_isr;
+  FAR void *arg = NULL;
 
 #if NR_IRQS > 0
-  if ((unsigned)irq >= NR_IRQS)
-    {
-      vector = irq_unexpected_isr;
-      arg    = NULL;
-    }
-  else
+  if ((unsigned)irq < NR_IRQS)
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
       irq_mapped_t ndx = g_irqmap[irq];
-      if (ndx >= CONFIG_ARCH_NUSER_INTERRUPTS)
+      if (ndx < CONFIG_ARCH_NUSER_INTERRUPTS)
         {
-          vector = irq_unexpected_isr;
-          arg    = NULL;
-        }
-      else
-        {
-          vector = g_irqvector[ndx].handler;
-          arg    = g_irqvector[ndx].arg;
+          if (g_irqvector[ndx].handler)
+            {
+              vector = g_irqvector[ndx].handler;
+              arg    = g_irqvector[ndx].arg;
+            }
+
           INCR_COUNT(ndx);
         }
 #else
-      vector = g_irqvector[irq].handler;
-      arg    = g_irqvector[irq].arg;
+      if (g_irqvector[irq].handler)
+        {
+          vector = g_irqvector[ndx].handler;
+          arg    = g_irqvector[ndx].arg;
+        }
+
       INCR_COUNT(irq);
 #endif
     }
-#else
-  vector = irq_unexpected_isr;
-  arg    = NULL;
 #endif
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL_COLLECT_IRQ_RANDOMNESS
@@ -136,3 +129,4 @@ void irq_dispatch(int irq, FAR void *context)
 
   vector(irq, context, arg);
 }
+
