@@ -1,8 +1,8 @@
 /****************************************************************************
- * sched/sched/sched_cpuload_oneshot.c
+ * sched/sched/sched_cpuload_period.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
+ *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,18 +39,15 @@
 
 #include <nuttx/config.h>
 
-#include <time.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/lib/xorshift128.h>
-#include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/timer.h>
 
-#include "clock/clock.h"
-
-#ifdef CONFIG_CPULOAD_ONESHOT
+#ifdef CONFIG_CPULOAD_PERIOD
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -85,147 +82,106 @@
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
 
-#define CPULOAD_ONESHOT_NOMINAL      (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+#define CPULOAD_PERIOD_NOMINAL       (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
 
-#if CPULOAD_ONESHOT_NOMINAL < 1 || CPULOAD_ONESHOT_NOMINAL > 0x7fffffff
-#  error CPULOAD_ONESHOT_NOMINAL is out of range
+#if CPULOAD_PERIOD_NOMINAL < 1 || CPULOAD_PERIOD_NOMINAL > 0x7fffffff
+#  error CPULOAD_PERIOD_NOMINAL is out of range
 #endif
 
 /* Convert the entropy from number of bits to a numeric value */
 
-#define CPULOAD_ONESHOT_ENTROPY      (1 << CONFIG_CPULOAD_ENTROPY)
+#define CPULOAD_PERIOD_ENTROPY       (1 << CONFIG_CPULOAD_ENTROPY)
 
-#if CPULOAD_ONESHOT_NOMINAL < CPULOAD_ONESHOT_ENTROPY
-#  error CPULOAD_ONESHOT_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
+#if CPULOAD_PERIOD_NOMINAL < CPULOAD_PERIOD_ENTROPY
+#  error CPULOAD_PERIOD_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
 #endif
 
-#define CPULOAD_ONESHOT_ENTROPY_MASK (CPULOAD_ONESHOT_ENTROPY - 1)
+#define CPULOAD_PERIOD_ENTROPY_MASK  (CPULOAD_PERIOD_ENTROPY - 1)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct sched_oneshot_s
-{
-  FAR struct oneshot_lowerhalf_s *oneshot;
 #if CONFIG_CPULOAD_ENTROPY > 0
+struct sched_period_s
+{
   struct xorshift128_state_s prng;
-  int32_t maxdelay;
+  uint32_t maxtimeout;
   int32_t error;
-#endif
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void sched_oneshot_start(void);
-static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                   FAR void *arg);
+static bool sched_period_callback(FAR uint32_t *next_interval_us,
+                                  FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct sched_oneshot_s g_sched_oneshot;
+#if CONFIG_CPULOAD_ENTROPY > 0
+static struct sched_period_s g_sched_period;
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_oneshot_start
+ * Name:  sched_period_callback
  *
  * Description:
- *   [Re-]start the oneshot timer, applying entropy as configured
+ *   This is the callback function that will be invoked when the period
+ *   timer expires.
  *
  * Input Parameters:
- *   None
- *   lower - An instance of the lower half driver
- *   arg   - The opaque argument provided when the interrupt was registered
+ *   next_interval_us - The timeout value for next interval
+ *   arg   - The opaque argument provided when the callback was registered
  *
  * Returned Value:
- *   None
+ *   return false to stop the timer, true to continue the timing
  *
  ****************************************************************************/
 
-static void sched_oneshot_start(void)
+static bool sched_period_callback(FAR uint32_t *next_interval_us,
+                                  FAR void *arg)
 {
-  struct timespec ts;
-#if CONFIG_CPULOAD_ENTROPY > 0
-  uint32_t entropy;
-#endif
-  int32_t secs;
-  int32_t usecs;
-
   /* Get the next delay */
 
 #if CONFIG_CPULOAD_ENTROPY > 0
-  /* The one shot will be set to this interval:
+  /* The period timer will be set to this interval:
    *
-   *  CPULOAD_ONESHOT_NOMINAL - (CPULOAD_ONESHOT_ENTROPY / 2) + error
-   *    + nrand(CPULOAD_ONESHOT_ENTROPY)
+   *  CPULOAD_PERIOD_NOMINAL - (CPULOAD_PERIOD_ENTROPY / 2) + error
+   *    + nrand(CPULOAD_PERIOD_ENTROPY)
    */
 
-  usecs   = (CPULOAD_ONESHOT_NOMINAL - CPULOAD_ONESHOT_ENTROPY / 2) +
-            g_sched_oneshot.error;
+  *next_interval_us = CPULOAD_PERIOD_NOMINAL - CPULOAD_PERIOD_ENTROPY / 2 +
+                      g_sched_period.error;
 
-  /* Add the random value in the range 0..(CPULOAD_ONESHOT_ENTRY - 1) */
+  /* Add the random value in the range 0..(CPULOAD_PERIOD_ENTROPY - 1) */
 
-  entropy = xorshift128(&g_sched_oneshot.prng);
-  usecs  += (int32_t)(entropy & CPULOAD_ONESHOT_ENTROPY_MASK);
+  *next_interval_us += xorshift128(&g_sched_period.prng) &
+                       CPULOAD_PERIOD_ENTROPY_MASK;
 
-  DEBUGASSERT(usecs > 0); /* Check for overflow to negative or zero */
+  DEBUGASSERT(*next_interval_us > 0); /* Check for overflow to negative or zero */
 
-  /* Make sure that the accumulated value does not exceed the maximum delay */
+  /* Make sure that the accumulated value does not exceed the maximum timeout */
 
-  if (usecs > g_sched_oneshot.maxdelay)
+  if (*next_interval_us > g_sched_period.maxtimeout)
     {
       tmrwarn("WARNING: Truncating\n");
-      usecs = g_sched_oneshot.maxdelay;
+      *next_interval_us = g_sched_period.maxtimeout;
     }
 
   /* Save the new error value */
 
-  g_sched_oneshot.error = CPULOAD_ONESHOT_NOMINAL +
-                          g_sched_oneshot.error - usecs;
-#else
-  /* No entropy */
-
-  usecs = CPULOAD_ONESHOT_NOMINAL;
+  g_sched_period.error = CPULOAD_PERIOD_NOMINAL +
+                         g_sched_period.error - *next_interval_us;
 #endif
 
-  /* Then re-start the oneshot timer */
-
-  secs       = usecs / 1000000;
-  usecs     -= 100000 * secs;
-
-  ts.tv_sec  = secs;
-  ts.tv_nsec = 1000 * usecs;
-
-  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot, sched_oneshot_callback,
-                            NULL, &ts));
-}
-
-/****************************************************************************
- * Name:  sched_oneshot_callback
- *
- * Description:
- *   This is the callback function that will be invoked when the oneshot
- *   timer expires.
- *
- * Input Parameters:
- *   lower - An instance of the lower half driver
- *   arg   - The opaque argument provided when the interrupt was registered
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                   FAR void *arg)
-{
   /* Perform CPU load measurements */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -235,9 +191,9 @@ static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
       sched_process_cpuload();
     }
 
-  /* Then restart the oneshot */
+  /* Then continue the timing */
 
-  sched_oneshot_start();
+  return true;
 }
 
 /****************************************************************************
@@ -245,60 +201,50 @@ static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_oneshot_extclk
+ * Name:  sched_period_extclk
  *
  * Description:
- *   Configure to use a oneshot timer as described in
- *   include/nuttx/timers/oneshot.h to provid external clocking to assess
+ *   Configure to use a period timer as described in
+ *   include/nuttx/timers/timer.h to provide external clocking to assess
  *   the CPU load.
  *
  * Input Parameters:
- *   lower - An instance of the oneshot timer interface as defined in
- *           include/nuttx/timers/oneshot.h
+ *   lower - An instance of the period timer interface as defined in
+ *           include/nuttx/timers/timer.h
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
+void sched_period_extclk(FAR struct timer_lowerhalf_s *lower)
 {
-#if CONFIG_CPULOAD_ENTROPY > 0
-  struct timespec ts;
-#endif
-
   DEBUGASSERT(lower != NULL && lower->ops != NULL);
+  DEBUGASSERT(lower->ops->setcallback != NULL);
+  DEBUGASSERT(lower->ops->settimeout != NULL);
   DEBUGASSERT(lower->ops->start != NULL);
 
 #if CONFIG_CPULOAD_ENTROPY > 0
-  DEBUGASSERT(lower->ops->max_delay != NULL);
+  DEBUGASSERT(lower->ops->maxtimeout != NULL);
 
-  /* Get the maximum delay */
+  /* Get the maximum timeout */
 
-  DEBUGVERIFY(ONESHOT_MAX_DELAY(lower, &ts));
-  if (ts.tv_sec >= 0)
-    {
-      g_sched_oneshot.maxdelay = INT32_MAX;
-    }
-  else
-    {
-      g_sched_oneshot.maxdelay = ts.tv_nsec / 1000;
-    }
-
-  tmrinfo("madelay = %ld usec\n", (long)g_sched_oneshot.maxdelay);
-  DEBUGASSERT(CPULOAD_ONESHOT_NOMINAL < g_sched_oneshot.maxdelay);
+  DEBUGVERIFY(lower->ops->maxtimeout(lower, &g_sched_period.maxtimeout));
+  tmrinfo("maxtimeout = %lu usec\n", (long)g_sched_period.maxtimeout);
+  DEBUGASSERT(CPULOAD_PERIOD_NOMINAL < g_sched_period.maxtimeout);
 
   /* Seed the PRNG */
 
-  g_sched_oneshot.prng.w = 97;
-  g_sched_oneshot.prng.x = 101;
-  g_sched_oneshot.prng.y = g_sched_oneshot.prng.w << 17;
-  g_sched_oneshot.prng.z = g_sched_oneshot.prng.x << 25;
+  g_sched_period.prng.w = 97;
+  g_sched_period.prng.x = 101;
+  g_sched_period.prng.y = g_sched_period.prng.w << 17;
+  g_sched_period.prng.z = g_sched_period.prng.x << 25;
 #endif
 
-  /* Then start the oneshot */
+  /* Then start the period timer */
 
-  g_sched_oneshot.oneshot = lower;
-  sched_oneshot_start();
+  lower->ops->setcallback(lower, sched_period_callback, NULL);
+  lower->ops->settimeout(lower, CPULOAD_PERIOD_NOMINAL);
+  lower->ops->start(lower);
 }
 #endif

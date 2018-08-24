@@ -729,6 +729,10 @@ config SCHED_CPULOAD_TICKSPERSEC
 		that 100Hz is the default frequency of the system time and, hence,
 		the worst possible choice in most cases.
 
+choice
+	prompt "Select CPU load timer"
+	default CPULOAD_ONESHOT
+
 config CPULOAD_ONESHOT
 	bool "Use Oneshot timer"
 	default n
@@ -748,7 +752,25 @@ config CPULOAD_ONESHOT
 		significantly faster than CONFIG_SCHED_CPULOAD_TICKSPERSE to permit
 		precise modulation the sample periods.
 
-config CPULOAD_ONESHOT_ENTROPY
+config CPULOAD_PERIOD
+	bool "Use Period timer"
+	default n
+	---help---
+		Use an MCU-specific period timer as the external clock.  The
+		period timer must be configured by board specific logic which must
+		then call:
+
+			void sched_period_extclk(FAR struct timer_lowerhalf_s *lower);
+
+		To start the CPU load measurement. See include/nuttx/clock.h
+
+		NOTE that in this configuration, CONFIG_SCHED_CPULOAD_TICKSPERSEC is
+		the sample rate that will be accomplished by programming the period
+		time.
+
+endchoice
+
+config CPULOAD_ENTROPY
 	int "Bits of entropy"
 	default 6
 	range 0 30
@@ -764,7 +786,7 @@ config CPULOAD_ONESHOT_ENTROPY
 
 			CPULOAD_ONESHOT_NOMINAL is the nominal sample interval implied
 			by CONFIG_SCHED_CPULOAD_TICKSPERSEC in units of microseconds.
-			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ONESHOT_ENTROPY),
+			CPULOAD_ONESHOT_ENTROPY is (1 << CONFIG_CPULOAD_ENTROPY),
 			and 'error' is an error value that is retained from interval to
 			interval so that although individual intervals are randomized,
 			the average will still be CONFIG_SCHED_CPULOAD_TICKSPERSEC.

@@ -86,6 +86,9 @@ CSRCS += sched_cpuload.c
 ifeq ($(CONFIG_CPULOAD_ONESHOT),y)
 CSRCS += sched_cpuload_oneshot.c
 endif
+ifeq ($(CONFIG_CPULOAD_PERIOD),y)
+CSRCS += sched_cpuload_period.c
+endif
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
