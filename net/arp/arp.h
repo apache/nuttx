@@ -379,7 +379,8 @@ void arp_notify(in_addr_t ipaddr);
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions:
- *   The network is locked.
+ *   The network is locked to assure exclusive access to the ARP table.
+ *   The return value will become unstable when the network is unlocked.
  *
  ****************************************************************************/
 
@@ -397,7 +398,7 @@ FAR struct arp_entry *arp_lookup(in_addr_t ipaddr);
  *   entry  - location to return a copy of the ARP table entry.
  *
  * Assumptions
- *   The network is locked.
+ *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
@@ -413,8 +414,7 @@ int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry);
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions
- *   Interrupts are disabled to assure exclusive access to the ARP table
- *   (and because arp_find() is called).
+ *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 

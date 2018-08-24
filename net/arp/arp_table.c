@@ -294,7 +294,8 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions:
- *   The network is locked.
+ *   The network is locked to assure exclusive access to the ARP table.
+ *   The return value will become unstable when the network is unlocked.
  *
  ****************************************************************************/
 
@@ -330,7 +331,7 @@ FAR struct arp_entry *arp_lookup(in_addr_t ipaddr)
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions:
- *   The network is locked.
+ *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
@@ -350,8 +351,8 @@ int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
     }
 
   /* No.. check if the IPv4 address is the address assigned to a local
-   * Ethernet network device.  If so, return a "fake" arp table entry
-   * mapping that IP address to the Ethernet MAC address of the device.
+   * Ethernet network device.  If so, return a mapping of that IP address
+   * to the Ethernet MAC address assigned to the network device.
    */
 
   entry->at_ipaddr = ipaddr;
@@ -375,8 +376,7 @@ int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
  *   ipaddr - Refers to an IP address in network order
  *
  * Assumptions
- *   Interrupts are disabled to assure exclusive access to the ARP table
- *   (and because arp_find() is called).
+ *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
@@ -389,7 +389,7 @@ void arp_delete(in_addr_t ipaddr)
   tabptr = arp_lookup(ipaddr);
   if (tabptr != NULL)
     {
-      /* Yes.. set the IP address to zero to "delete" it */
+      /* Yes.. Set the IP address to zero to "delete" it */
 
       tabptr->at_ipaddr = 0;
     }
