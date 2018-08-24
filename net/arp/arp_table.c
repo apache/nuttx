@@ -2,7 +2,8 @@
  * net/arp/arp_table.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based originally on uIP which also has a BSD style license:
@@ -54,11 +55,13 @@
 #include <net/ethernet.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 
 #include <arp/arp.h>
+#include <netdev/netdev.h>
 
 #ifdef CONFIG_NET_ARP
 
@@ -70,6 +73,37 @@
 
 static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
 static uint8_t g_arptime;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arp_match
+ *
+ * Description:
+ *   This is a callback that checks if the Ethernet network device has the
+ *   indicated IPv4 address assigned to it.
+ *
+ ****************************************************************************/
+
+static int arp_match(FAR struct net_driver_s *dev, FAR void *arg)
+{
+  FAR struct arp_entry *entry = arg;
+
+  if (dev->d_lltype != NET_LL_ETHERNET)
+    {
+      return 0;
+    }
+
+  if (!net_ipv4addr_cmp(dev->d_ipaddr, entry->at_ipaddr))
+    {
+      return 0;
+    }
+
+  memcpy(&entry->at_ethaddr, &dev->d_mac.ether, ETHER_ADDR_LEN);
+  return 1;
+}
 
 /****************************************************************************
  * Public Functions
@@ -266,7 +300,10 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
 FAR struct arp_entry *arp_find(in_addr_t ipaddr)
 {
   FAR struct arp_entry *tabptr;
+  struct arp_entry entry;
   int i;
+
+  /* Check if the IPv4 address is already in the ARP table. */
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
@@ -276,6 +313,19 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr)
           return tabptr;
         }
     }
+
+  /* No.. check if the IPv4 address is the address assigned to a local
+   * Ethernet network device.  If so, return a "fake" arp table entry
+   * mapping that IP address to the Ethernet MAC address of the device.
+   */
+
+  entry.at_ipaddr = ipaddr;
+  if (netdev_foreach(arp_match, &entry) != 0)
+    {
+      return &entry;
+    }
+
+  /* Not found */
 
   return NULL;
 }
