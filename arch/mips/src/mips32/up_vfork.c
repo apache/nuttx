@@ -121,6 +121,8 @@ pid_t up_vfork(const struct vfork_s *context)
   uint32_t newfp;
 #endif
   uint32_t stackutil;
+  size_t argsize;
+  void *argv;
   int ret;
 
   sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
@@ -149,7 +151,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = task_vforksetup((start_t)context->ra);
+  child = task_vforksetup((start_t)context->ra, &argsize);
   if (!child)
     {
       sinfo("task_vforksetup failed\n");
@@ -167,7 +169,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)child, stacksize,
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
@@ -175,6 +177,11 @@ pid_t up_vfork(const struct vfork_s *context)
       task_vforkabort(child, -ret);
       return (pid_t)ERROR;
     }
+
+  /* Allocate the memory and copy argument from parent task */
+
+  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
+  memcpy(argv, parent->adj_stack_ptr, argsize);
 
   /* How much of the parent's stack was utilized?  The MIPS uses
    * a push-down stack so that the current stack pointer should

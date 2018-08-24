@@ -131,7 +131,7 @@ static inline int vfork_stackargsetup(FAR struct tcb_s *parent,
 
       /* Get the address correction */
 
-      offset = child->cmn.xcp.regs[REG_SP] - parent->xcp.regs[REG_SP];
+      offset = child->cmn.adj_stack_ptr - parent->adj_stack_ptr;
 
       /* Change the child argv[] to point into its stack (instead of its
        * parent's stack).
@@ -195,6 +195,45 @@ static inline int vfork_argsetup(FAR struct tcb_s *parent,
 }
 
 /****************************************************************************
+ * Name: vfork_argsize
+ *
+ * Description:
+ *   Get the parent's argument size.
+ *
+ * Input Parameters:
+ *   parent - Address of the parent task's TCB
+ *
+ * Return Value:
+ *   The parent's argument size.
+ *
+ ****************************************************************************/
+
+static inline size_t vfork_argsize(FAR struct tcb_s *parent)
+{
+  if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+    {
+      FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
+      size_t strtablen = 0;
+      int argc = 0;
+
+      while (ptcb->argv[argc])
+        {
+          /* Add the size of this argument (with NUL terminator) */
+
+          strtablen += strlen(ptcb->argv[argc++]) + 1;
+        }
+
+      /* Return the size to hold argv[] array and the strings. */
+
+      return (argc + 1) * sizeof(FAR char *) + strtablen;
+    }
+  else
+    {
+      return 0;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -230,8 +269,8 @@ static inline int vfork_argsetup(FAR struct tcb_s *parent,
  *   6) task_vforkstart() then executes the child thread.
  *
  * Input Parameters:
- *   parent - Address of the parent task's TCB
- *   child  - Address of the child task's TCB
+ *   retaddr - Return address
+ *   argsize - Location to return the argument size
  *
  * Returned Value:
  *   Upon successful completion, task_vforksetup() returns a pointer to
@@ -240,7 +279,7 @@ static inline int vfork_argsetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
+FAR struct task_tcb_s *task_vforksetup(start_t retaddr, size_t *argsize)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
@@ -248,7 +287,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   int priority;
   int ret;
 
-  DEBUGASSERT(retaddr);
+  DEBUGASSERT(retaddr != NULL && argsize != NULL);
 
   /* Get the type of the fork'ed task (kernel or user) */
 
@@ -311,6 +350,10 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
     {
       goto errout_with_tcb;
     }
+
+  /* Return the argument size */
+
+  *argsize = vfork_argsize(parent);
 
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;

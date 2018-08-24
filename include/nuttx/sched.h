@@ -872,7 +872,7 @@ void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
  *
  ********************************************************************************/
 
-FAR struct task_tcb_s *task_vforksetup(start_t retaddr);
+FAR struct task_tcb_s *task_vforksetup(start_t retaddr, size_t *argsize);
 pid_t task_vforkstart(FAR struct task_tcb_s *child);
 void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
 

@@ -117,6 +117,8 @@ pid_t up_vfork(const struct vfork_s *context)
   uint32_t newsp;
   uint32_t newfp;
   uint32_t stackutil;
+  size_t argsize;
+  void *argv;
   int ret;
 
   sinfo("vfork context [%p]:\n", context);
@@ -129,7 +131,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = task_vforksetup((start_t)(context->lr & ~1));
+  child = task_vforksetup((start_t)(context->lr & ~1), &argsize);
   if (!child)
     {
       serr("ERROR: task_vforksetup failed\n");
@@ -147,7 +149,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)child, stacksize,
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
@@ -155,6 +157,11 @@ pid_t up_vfork(const struct vfork_s *context)
       task_vforkabort(child, -ret);
       return (pid_t)ERROR;
     }
+
+  /* Allocate the memory and copy argument from parent task */
+
+  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
+  memcpy(argv, parent->adj_stack_ptr, argsize);
 
   /* How much of the parent's stack was utilized?  The ARM uses
    * a push-down stack so that the current stack pointer should
