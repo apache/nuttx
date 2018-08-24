@@ -355,7 +355,7 @@ void up_wdtinit(void);
  * up_initialize().  Then this stub would not be needed.
  */
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void);
 #else
 # define up_netinitialize()

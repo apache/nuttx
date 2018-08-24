@@ -228,7 +228,7 @@ void x86_timer_initialize(void);
 
 /* Defined in board/up_network.c */
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void);
 #else
 # define up_netinitialize()
