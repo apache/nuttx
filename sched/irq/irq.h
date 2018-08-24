@@ -227,6 +227,12 @@ bool irq_cpu_locked(int cpu);
 int irq_foreach(irq_foreach_t callback, FAR void *arg);
 #endif
 
+#ifdef CONFIG_IRQCHAIN
+void irqchain_initialize(void);
+bool is_irqchain(int ndx, xcpt_t isr);
+int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

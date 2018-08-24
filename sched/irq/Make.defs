@@ -53,6 +53,10 @@ CSRCS += irq_procfs.c
 endif
 endif
 
+ifeq ($(CONFIG_IRQCHAIN),y)
+CSRCS += irq_chain.c
+endif
+
 # Include irq build support
 
 DEPPATH += --dep-path irq

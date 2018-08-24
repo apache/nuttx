@@ -112,6 +112,21 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
           arg = NULL;
         }
 
+#ifdef CONFIG_IRQCHAIN
+      /* Save the new ISR and its argument in the table.
+       * If there is only one ISR on this irq, then .handler point to the ISR
+       * and .arg point to the ISR parameter; Otherwise, .handler point to
+       * irqchain_dispatch and .arg point to irqchain_s.
+       */
+
+      if (is_irqchain(ndx, isr))
+        {
+          ret = irqchain_attach(ndx, isr, arg);
+          leave_critical_section(flags);
+          return ret;
+        }
+#endif
+
       /* Save the new ISR and its argument in the table. */
 
       g_irqvector[ndx].handler = isr;

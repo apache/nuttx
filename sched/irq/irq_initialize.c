@@ -99,4 +99,10 @@ void irq_initialize(void)
 #endif
 #endif
     }
+
+#ifdef CONFIG_IRQCHAIN
+  /* Initialize IRQ chain support */
+
+  irqchain_initialize();
+#endif
 }

@@ -257,6 +257,25 @@ config SPINLOCK_IRQ
 		Enables suppport for spinlocks with IRQ control. This feature can be
 		used to protect data in SMP mode.
 
+config IRQCHAIN
+	bool "Enable multi handler sharing a IRQ"
+	default n
+	---help---
+		Enable support for IRQCHAIN.
+
+if IRQCHAIN
+
+config PREALLOC_IRQCHAIN
+	int "Number of pre-allocated irq chains"
+	default 8
+	---help---
+		The number of pre-allocated irq chain structures.  The system manages
+		a pool of preallocated irq chain structures to minimize dynamic
+		allocations.  You will, however, get better performance and memory
+		usage if this value is tuned to minimize such allocations.
+
+endif # IRQCHAIN
+
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
 	default n
