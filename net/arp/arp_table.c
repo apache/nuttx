@@ -49,6 +49,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <netinet/in.h>
@@ -284,10 +285,10 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
 }
 
 /****************************************************************************
- * Name: arp_find
+ * Name: arp_lookup
  *
  * Description:
- *   Find the ARP entry corresponding to this IP address.
+ *   Find the ARP entry corresponding to this IP address in the ARP table.
  *
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
@@ -297,10 +298,9 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
  *
  ****************************************************************************/
 
-FAR struct arp_entry *arp_find(in_addr_t ipaddr)
+FAR struct arp_entry *arp_lookup(in_addr_t ipaddr)
 {
   FAR struct arp_entry *tabptr;
-  struct arp_entry entry;
   int i;
 
   /* Check if the IPv4 address is already in the ARP table. */
@@ -314,20 +314,85 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr)
         }
     }
 
+  /* Not found */
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: arp_find
+ *
+ * Description:
+ *   Find the ARP entry corresponding to this IP address which may or may
+ *   not be in the ARP table (it may, instead, be a local network device).
+ *
+ * Input Parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
+{
+  FAR struct arp_entry *tabptr;
+
+  DEBUGASSERT(entry);
+
+  /* Check if the IPv4 address is already in the ARP table. */
+
+  tabptr = arp_lookup(ipaddr);
+  if (tabptr != NULL)
+    {
+      memcpy(entry, tabptr, sizeof(struct arp_entry));
+      return OK;
+    }
+
   /* No.. check if the IPv4 address is the address assigned to a local
    * Ethernet network device.  If so, return a "fake" arp table entry
    * mapping that IP address to the Ethernet MAC address of the device.
    */
 
-  entry.at_ipaddr = ipaddr;
-  if (netdev_foreach(arp_match, &entry) != 0)
+  entry->at_ipaddr = ipaddr;
+  if (netdev_foreach(arp_match, entry) != 0)
     {
-      return &entry;
+      return OK;
     }
 
   /* Not found */
 
-  return NULL;
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: arp_delete
+ *
+ * Description:
+ *   Remove an IP association from the ARP table
+ *
+ * Input Parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *
+ * Assumptions
+ *   Interrupts are disabled to assure exclusive access to the ARP table
+ *   (and because arp_find() is called).
+ *
+ ****************************************************************************/
+
+void arp_delete(in_addr_t ipaddr)
+{
+  FAR struct arp_entry *tabptr;
+
+  /* Check if the IPv4 address is in the ARP table. */
+
+  tabptr = arp_lookup(ipaddr);
+  if (tabptr != NULL)
+    {
+      /* Yes.. set the IP address to zero to "delete" it */
+
+      tabptr->at_ipaddr = 0;
+    }
 }
 
 #endif /* CONFIG_NET_ARP */

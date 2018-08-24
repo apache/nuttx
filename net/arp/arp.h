@@ -54,6 +54,7 @@
 
 #include <stdint.h>
 #include <semaphore.h>
+#include <errno.h>
 
 #include <netinet/in.h>
 
@@ -369,21 +370,38 @@ void arp_notify(in_addr_t ipaddr);
 #endif
 
 /****************************************************************************
- * Name: arp_find
+ * Name: arp_lookup
  *
  * Description:
- *   Find the ARP entry corresponding to this IP address.
+ *   Find the ARP entry corresponding to this IP address in the ARP table.
  *
  * Input Parameters:
  *   ipaddr - Refers to an IP address in network order
  *
- * Assumptions
- *   The network is locked; Returned value will become unstable when the
- *   network is unlocked or if any other network APIs are called.
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
-FAR struct arp_entry *arp_find(in_addr_t ipaddr);
+FAR struct arp_entry *arp_lookup(in_addr_t ipaddr);
+
+/****************************************************************************
+ * Name: arp_find
+ *
+ * Description:
+ *   Find the ARP entry corresponding to this IP address which may or may
+ *   not be in the ARP table (it may, instead, be a local network device).
+ *
+ * Input Parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *   entry  - location to return a copy of the ARP table entry.
+ *
+ * Assumptions
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry);
 
 /****************************************************************************
  * Name: arp_delete
@@ -400,14 +418,7 @@ FAR struct arp_entry *arp_find(in_addr_t ipaddr);
  *
  ****************************************************************************/
 
-#define arp_delete(ipaddr) \
-{ \
-  struct arp_entry *tabptr = arp_find(ipaddr); \
-  if (tabptr) \
-    { \
-      tabptr->at_ipaddr = 0; \
-    } \
-}
+void arp_delete(in_addr_t ipaddr);
 
 /****************************************************************************
  * Name: arp_update
@@ -487,7 +498,7 @@ void arp_dump(FAR struct arp_hdr_s *arp);
 #  define arp_wait_cancel(n) (0)
 #  define arp_wait(n,t) (0)
 #  define arp_notify(i)
-#  define arp_find(i) (NULL)
+#  define arp_find(i,e) (-ENOSYS)
 #  define arp_delete(i)
 #  define arp_update(i,m);
 #  define arp_hdr_update(i,m);

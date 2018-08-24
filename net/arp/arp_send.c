@@ -304,7 +304,8 @@ int arp_send(in_addr_t ipaddr)
 
   /* Remember the routing device name */
 
-  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname, IFNAMSIZ);
+  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+          IFNAMSIZ);
 
   /* Now loop, testing if the address mapping is in the ARP table and re-
    * sending the ARP request if it is not.
@@ -314,6 +315,8 @@ int arp_send(in_addr_t ipaddr)
 
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
     {
+      struct arp_entry entry;
+
       /* Check if the address mapping is present in the ARP table.  This
        * is only really meaningful on the first time through the loop.
        *
@@ -321,7 +324,7 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr))
+      if (arp_find(ipaddr, &entry) >= 0)
         {
           /* We have it!  Break out with success */
 

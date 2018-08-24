@@ -159,7 +159,11 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
       FAR struct ipv4_hdr_s *ipv4 = (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data;
-      return (arp_find(*(in_addr_t *)ipv4->destipaddr) != NULL);
+      struct arp_entry entry;
+      int ret;
+ 
+      ret = arp_find(*(in_addr_t *)ipv4->destipaddr, &entry);
+      return (ret >= 0);
 #else
       return true;
 #endif

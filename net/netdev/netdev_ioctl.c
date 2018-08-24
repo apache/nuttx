@@ -1259,7 +1259,7 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
 
               /* Find the existing ARP table entry for this protocol address. */
 
-              FAR struct arp_entry *entry = arp_find(addr->sin_addr.s_addr);
+              FAR struct arp_entry *entry = arp_lookup(addr->sin_addr.s_addr);
               if (entry != NULL)
                 {
                   /* The ARP table is fixed size; an entry is deleted
@@ -1287,23 +1287,20 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
             {
               FAR struct sockaddr_in *addr =
                 (FAR struct sockaddr_in *)&req->arp_pa;
+              struct arp_entry entry;
 
               /* Find the existing ARP table entry for this protocol address. */
 
-              FAR struct arp_entry *entry = arp_find(addr->sin_addr.s_addr);
-              if (entry != NULL)
+              ret = arp_find(addr->sin_addr.s_addr, &entry);
+              if (ret >= 0)
                 {
                   /* Return the mapped hardware address. */
 
                   req->arp_ha.sa_family = ARPHRD_ETHER;
                   memcpy(req->arp_ha.sa_data,
-                         entry->at_ethaddr.ether_addr_octet,
+                         entry.at_ethaddr.ether_addr_octet,
                          ETHER_ADDR_LEN);
                   ret = OK;
-                }
-              else
-                {
-                  ret = -ENOENT;
                 }
             }
           else

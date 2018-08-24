@@ -281,7 +281,9 @@ static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
 #endif
     {
 #if !defined(CONFIG_NET_ARP_IPIN) && !defined(CONFIG_NET_ARP_SEND)
-      return (arp_find(conn->u.ipv4.raddr) != NULL);
+      struct arp_entry entry;
+
+      return (arp_find(conn->u.ipv4.raddr, entry) >= 0);
 #else
       return true;
 #endif
