@@ -112,15 +112,6 @@ void timer_reset(struct timer *t)
   t->start += t->interval;
 }
 
-#ifdef CONFIG_NET_PROMISCUOUS
-# define up_comparemac(a,b) (0)
-#else
-static inline int up_comparemac(uint8_t *paddr1, struct ether_addr *paddr2)
-{
-  return memcmp(paddr1, paddr2->ether_addr_octet, ETHER_ADDR_LEN);
-}
-#endif
-
 static int sim_txpoll(struct net_driver_s *dev)
 {
   /* If the polling resulted in data that should be sent out on the network,
@@ -155,7 +146,9 @@ static int sim_txpoll(struct net_driver_s *dev)
         {
           /* Send the packet */
 
+          NETDEV_TXPACKETS(dev);
           netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+          NETDEV_TXDONE(dev);
         }
     }
 
@@ -193,6 +186,8 @@ void netdriver_loop(void)
   sched_lock();
   if (g_sim_dev.d_len > 0)
     {
+      NETDEV_RXPACKETS(&g_sim_dev);
+
       /* Data received event.  Check for valid Ethernet header with destination == our
        * MAC address
        */
@@ -200,32 +195,21 @@ void netdriver_loop(void)
       eth = BUF;
       if (g_sim_dev.d_len > ETH_HDRLEN)
         {
-         int is_ours;
-
-         /* Figure out if this ethernet frame is addressed to us.  This affects
-           * what we're willing to receive.   Note that in promiscuous mode, the
-           * up_comparemac will always return 0.
-           */
-
-         is_ours = (up_comparemac(eth->dest, &g_sim_dev.d_mac.ether) == 0);
-
 #ifdef CONFIG_NET_PKT
           /* When packet sockets are enabled, feed the frame into the packet
            * tap.
            */
 
-          if (is_ours)
-            {
-              pkt_input(&g_sim_dev);
-            }
+          pkt_input(&g_sim_dev);
 #endif /* CONFIG_NET_PKT */
 
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
-          if (eth->type == HTONS(ETHTYPE_IP) && is_ours)
+          if (eth->type == HTONS(ETHTYPE_IP))
             {
               ninfo("IPv4 frame\n");
+              NETDEV_RXIPV4(&g_sim_dev);
 
               /* Handle ARP on input then give the IPv4 packet to the network
                * layer
@@ -264,9 +248,10 @@ void netdriver_loop(void)
           else
 #endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
-          if (eth->type == HTONS(ETHTYPE_IP6) && is_ours)
+          if (eth->type == HTONS(ETHTYPE_IP6))
             {
               ninfo("Iv6 frame\n");
+              NETDEV_RXIPV6(&g_sim_dev);
 
               /* Give the IPv6 packet to the network layer */
 
@@ -304,6 +289,9 @@ void netdriver_loop(void)
 #ifdef CONFIG_NET_ARP
           if (eth->type == htons(ETHTYPE_ARP))
             {
+              ninfo("ARP frame\n");
+              NETDEV_RXARP(&g_sim_dev);
+
               arp_arpin(&g_sim_dev);
 
               /* If the above function invocation resulted in data that
@@ -319,8 +307,13 @@ void netdriver_loop(void)
           else
 #endif
            {
+             NETDEV_RXDROPPED(&g_sim_dev);
              nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
            }
+        }
+      else
+        {
+          NETDEV_RXERRORS(&g_sim_dev);
         }
     }
 

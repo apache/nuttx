@@ -107,6 +107,7 @@ config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
 	depends on NET
+	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.
