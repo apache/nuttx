@@ -883,6 +883,8 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   /* TODO wait for WLC_E_RADIO event */
 
+  usleep(3000);
+
   if (ret == OK)
     {
       /* TODO update device state */
