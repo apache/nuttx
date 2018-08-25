@@ -198,6 +198,8 @@ int sam_watchdog_initialize(void)
                               (main_t)wdog_daemon, (FAR char * const *)NULL);
 
   DEBUGASSERT(taskid > 0);
+  UNUSED(taskid);
+
   sched_unlock();
 #endif
   return OK;
