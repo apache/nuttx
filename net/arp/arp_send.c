@@ -315,8 +315,6 @@ int arp_send(in_addr_t ipaddr)
 
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
     {
-      struct arp_entry entry;
-
       /* Check if the address mapping is present in the ARP table.  This
        * is only really meaningful on the first time through the loop.
        *
@@ -324,7 +322,7 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr, &entry) >= 0)
+      if (arp_find(ipaddr, NULL) >= 0)
         {
           /* We have it!  Break out with success */
 

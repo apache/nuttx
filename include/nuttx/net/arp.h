@@ -2,7 +2,8 @@
  * include/nuttx/net/arp.h
  * Macros and definitions for the ARP module.
  *
- *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2012, 2015-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived from uIP with has a similar BSD-style license:
@@ -78,7 +79,7 @@
 
 /* One entry in the ARP table (volatile!) */
 
-struct arp_entry
+struct arp_entry_s
 {
   in_addr_t         at_ipaddr;   /* IP address */
   struct ether_addr at_ethaddr;  /* Hardware address */

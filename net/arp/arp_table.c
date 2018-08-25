@@ -49,7 +49,6 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 #include <debug.h>
 
 #include <netinet/in.h>
@@ -67,12 +66,22 @@
 #ifdef CONFIG_NET_ARP
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct arp_table_info_s
+{
+  in_addr_t              ai_ipaddr;   /* IP address for lookup */
+  FAR struct ether_addr *ai_ethaddr;  /* Location to return the MAC address */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The table of known address mappings */
 
-static struct arp_entry g_arptable[CONFIG_NET_ARPTAB_SIZE];
+static struct arp_entry_s g_arptable[CONFIG_NET_ARPTAB_SIZE];
 static uint8_t g_arptime;
 
 /****************************************************************************
@@ -90,19 +99,38 @@ static uint8_t g_arptime;
 
 static int arp_match(FAR struct net_driver_s *dev, FAR void *arg)
 {
-  FAR struct arp_entry *entry = arg;
+  FAR struct arp_table_info_s *info = arg;
 
-  if (dev->d_lltype != NET_LL_ETHERNET)
+  /* Make sure that this is an Ethernet device (or an IEEE 802.11 device
+   * which is also Ethernet)
+   */
+
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
     {
       return 0;
     }
 
-  if (!net_ipv4addr_cmp(dev->d_ipaddr, entry->at_ipaddr))
+  /* Check if the network device has been assigned the IP address of the
+   * lookup.
+   */
+
+  if (!net_ipv4addr_cmp(dev->d_ipaddr, info->ai_ipaddr))
     {
       return 0;
     }
 
-  memcpy(&entry->at_ethaddr, &dev->d_mac.ether, ETHER_ADDR_LEN);
+  /* Yes.. Return the matching Ethernet MAC address if the caller of
+   * arp_find() provided a non-NULL location.
+   */
+
+  if (info->ai_ethaddr != NULL)
+    {
+      memcpy(info->ai_ethaddr, &dev->d_mac.ether, ETHER_ADDR_LEN);
+    }
+
+  /* Return success in any event */
+
   return 1;
 }
 
@@ -141,7 +169,7 @@ void arp_reset(void)
 
 void arp_timer(void)
 {
-  FAR struct arp_entry *tabptr;
+  FAR struct arp_entry_s *tabptr;
   int i;
 
   ++g_arptime;
@@ -179,7 +207,7 @@ void arp_timer(void)
 
 int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 {
-  struct arp_entry *tabptr = NULL;
+  struct arp_entry_s *tabptr = NULL;
   int               i;
 
   /* Walk through the ARP mapping table and try to find an entry to
@@ -299,9 +327,9 @@ void arp_hdr_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
  *
  ****************************************************************************/
 
-FAR struct arp_entry *arp_lookup(in_addr_t ipaddr)
+FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr)
 {
-  FAR struct arp_entry *tabptr;
+  FAR struct arp_entry_s *tabptr;
   int i;
 
   /* Check if the IPv4 address is already in the ARP table. */
@@ -328,25 +356,40 @@ FAR struct arp_entry *arp_lookup(in_addr_t ipaddr)
  *   not be in the ARP table (it may, instead, be a local network device).
  *
  * Input Parameters:
- *   ipaddr - Refers to an IP address in network order
+ *   ipaddr -  Refers to an IP address in network order
+ *   ethaddr - Location to return the corresponding Ethernet MAN address.
+ *             This address may be NULL.  In that case, this function may be
+ *             used simply to determine if the Ethernet MAC address is
+ *             available.
  *
- * Assumptions:
+ * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
+int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr)
 {
-  FAR struct arp_entry *tabptr;
-
-  DEBUGASSERT(entry);
+  FAR struct arp_entry_s *tabptr;
+  struct arp_table_info_s info;
 
   /* Check if the IPv4 address is already in the ARP table. */
 
   tabptr = arp_lookup(ipaddr);
   if (tabptr != NULL)
     {
-      memcpy(entry, tabptr, sizeof(struct arp_entry));
+      /* Yes.. return the Ethernet MAC address if the caller has provided a
+       * non-NULL address in 'ethaddr'.
+       */
+
+      if (ethaddr != NULL)
+        {
+          memcpy(ethaddr, &tabptr->at_ethaddr, ETHER_ADDR_LEN);
+        }
+
+      /* Return success in any case meaning that a valid Ethernet MAC
+       * address mapping is available for the IP address.
+       */
+
       return OK;
     }
 
@@ -355,8 +398,10 @@ int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
    * to the Ethernet MAC address assigned to the network device.
    */
 
-  entry->at_ipaddr = ipaddr;
-  if (netdev_foreach(arp_match, entry) != 0)
+  info.ai_ipaddr  = ipaddr;
+  info.ai_ethaddr = ethaddr;
+
+  if (netdev_foreach(arp_match, &info) != 0)
     {
       return OK;
     }
@@ -382,7 +427,7 @@ int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry)
 
 void arp_delete(in_addr_t ipaddr)
 {
-  FAR struct arp_entry *tabptr;
+  FAR struct arp_entry_s *tabptr;
 
   /* Check if the IPv4 address is in the ARP table. */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/arp/arp.h
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -384,7 +384,7 @@ void arp_notify(in_addr_t ipaddr);
  *
  ****************************************************************************/
 
-FAR struct arp_entry *arp_lookup(in_addr_t ipaddr);
+FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr);
 
 /****************************************************************************
  * Name: arp_find
@@ -394,15 +394,19 @@ FAR struct arp_entry *arp_lookup(in_addr_t ipaddr);
  *   not be in the ARP table (it may, instead, be a local network device).
  *
  * Input Parameters:
- *   ipaddr - Refers to an IP address in network order
- *   entry  - location to return a copy of the ARP table entry.
+ *   ipaddr -  Refers to an IP address in network order
+ *   ethaddr - Location to return the corresponding Ethernet MAN address.
+ *             This address may be NULL.  In that case, this function may be
+ *             used simply to determine if the Ethernet MAC address is
+ *             available.
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-int arp_find(in_addr_t ipaddr, FAR struct arp_entry *entry);
+struct ether_addr;  /* Forward reference */
+int arp_find(in_addr_t ipaddr, FAR struct ether_addr *ethaddr);
 
 /****************************************************************************
  * Name: arp_delete
