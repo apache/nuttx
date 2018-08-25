@@ -36,7 +36,7 @@
 # Network device interface source files
 
 NET_CSRCS += devif_initialize.c devif_send.c devif_poll.c devif_callback.c
-NET_CSRCS += devif_loopbackout.c
+NET_CSRCS += devif_loopback.c
 
 # Device driver IP packet receipt interfaces
 

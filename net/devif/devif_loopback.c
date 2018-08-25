@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/devif_loopbackout.c
+ * net/devif/devif_loopback.c
  *
  *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
  *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
