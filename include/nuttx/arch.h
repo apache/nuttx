@@ -1455,7 +1455,7 @@ void up_disable_irq(int irq);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_TRIGGER_HOOK
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
 void up_trigger_irq(int irq);
 #endif
 
