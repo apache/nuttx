@@ -81,6 +81,18 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif
 
+ifeq ($(CONFIG_SENSORS_HTS221),y)
+CSRCS += stm32_hts221.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
+CSRCS += stm32_lsm6dsl.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LSM303AGR),y)
+CSRCS += stm32_lsm303agr.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif

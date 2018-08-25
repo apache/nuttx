@@ -454,10 +454,10 @@ o SMP
   Title:       CORTEX-A GIC SGI INTERRUPT MASKING
   Description: In the ARMv7-A GICv2 architecture, the inter-processor
                interrupts (SGIs) are non maskable and will occur even if
-               interrupts are disabled.  This addes a lot of complexity
+               interrupts are disabled.  This adde a lot of complexity
                to the ARMV7-A critical section design.
 
-               Masayuki Ishakawa has suggest the use of the GICv2 ICCMPR
+               Masayuki Ishakawa has suggested the use of the GICv2 ICCMPR
                register to control SGI interrupts.  This register (much like
                the ARMv7-M BASEPRI register) can be used to mask interrupts
                by interrupt priority.  Since SGIs may be assigned priorities

@@ -64,6 +64,12 @@
 #  include "stm32l4_rtc.h"
 #endif
 
+#include "stm32l4_i2c.h"
+
+/****************************************************************************
+ * Private Data
+ ***************************************************************************/
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -204,10 +210,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-/* Initialize CAN and register the CAN driver.
- * Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
- */
-
 #ifdef CONFIG_CAN
   ret = stm32l4_can_setup();
   if (ret < 0)
@@ -332,9 +334,29 @@ int board_app_initialize(uintptr_t arg)
 #endif
 #endif /* CONFIG_SENSORS_QENCODER */
 
-/* Initialize CAN and register the CAN driver.
- * Added by: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
- */
+#ifdef CONFIG_SENSORS_HTS221
+  ret = stm32l4_hts221_initialize("/dev/hts221");
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize HTC221 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_LSM6DSL
+  ret = stm32l4_lsm6dsl_initialize("/dev/lsm6dsl0");
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize LSM6DSL driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_LSM303AGR
+  ret = stm32l4_lsm303agr_initialize("/dev/lsm303mag0");
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
+    }
+#endif    
 
 #ifdef CONFIG_DEV_GPIO
   ret = stm32l4_gpio_initialize();

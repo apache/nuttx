@@ -185,6 +185,32 @@ config SENSORS_LSM330SPI
 	---help---
 		Enable driver support for the STMicro LSM330 on SPI.
 
+config SENSORS_LSM303AGR
+	bool "STMicro LSM303AGR support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LSM303AGR.
+
+config LSM303AGR_I2C_FREQUENCY
+	int "LSM303AGR I2C frequency"
+	default 400000
+	range 1 400000
+	depends on SN_LSM303AGR
+
+config SENSORS_LSM6DSL
+	bool "STMicro LSM6DSL support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LSM6DSL.
+
+config LSM6DSL_I2C_FREQUENCY
+	int "LSM6DSL I2C frequency"
+	default 400000
+	range 1 400000
+	depends on SN_LSM6DSL
+
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n

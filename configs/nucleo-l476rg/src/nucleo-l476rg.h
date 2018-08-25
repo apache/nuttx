@@ -267,6 +267,10 @@
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
+#define GPIO_HTS221_INT   (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN10)
+#define GPIO_LSM6DSL_INT1 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN4)
+#define GPIO_LSM6DSL_INT2 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN5)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
