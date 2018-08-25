@@ -801,7 +801,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
 {
   struct i2c_msg_s *msg;
-  systime_t start;
+  clock_t start;
 
   i2cinfo("START msg=%p\n", priv->msgs);
   msg = priv->msgs;
