@@ -122,8 +122,8 @@ static int lsm303agr_register(FAR const char *devpath,
  * Private Data
  ****************************************************************************/
 
-static double accelerofactor = 0;
-static double magnetofactor = 0;
+static double g_accelerofactor = 0;
+static double g_magnetofactor = 0;
 
 static const struct file_operations g_fops =
 {
@@ -443,7 +443,7 @@ static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv)
 
   lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG1_A, 0x77);
   lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0xB0);
-  accelerofactor = 11.72;
+  g_accelerofactor = 11.72;
 
   /* Gyro config registers Turn on the gyro: FS=2000dps, ODR=833Hz Not using
    * modifyreg with empty value!!!! Then read value first!!!
@@ -451,7 +451,7 @@ static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv)
    */
 
   lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8C);
-  magnetofactor = 1.5;
+  g_magnetofactor = 1.5;
 
   return OK;
 }
@@ -570,7 +570,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
       lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG3_A, 0x00);
       lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG4_A, 0x81);
       lsm303agr_writereg8(priv, LSM303AGR_CTRL_REG1_A, 0x57);
-      accelerofactor = 1;
+      g_accelerofactor = 1;
     }
   else
     {
@@ -578,7 +578,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_A_M, 0x8C);
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_B_M, 0x02);
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x10);
-      magnetofactor = 1;
+      g_magnetofactor = 1;
     }
 
   nxsig_usleep(100000);         /* 100ms */
@@ -949,9 +949,9 @@ static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
   y_valg = (int16_t) (((hiyg) << 8) | loyg);
   z_valg = (int16_t) (((hizg) << 8) | lozg);
 
-  sninfo("Data 16-bit M_X--->: %d mguass\n", (short)(x_valg * magnetofactor));
-  sninfo("Data 16-bit M_Y--->: %d mguass\n", (short)(y_valg * magnetofactor));
-  sninfo("Data 16-bit M_Z--->: %d mguass\n", (short)(z_valg * magnetofactor));
+  sninfo("Data 16-bit M_X--->: %d mguass\n", (short)(x_valg * g_magnetofactor));
+  sninfo("Data 16-bit M_Y--->: %d mguass\n", (short)(y_valg * g_magnetofactor));
+  sninfo("Data 16-bit M_Z--->: %d mguass\n", (short)(z_valg * g_magnetofactor));
 
   sensor_data->m_x_data = x_valg;
   sensor_data->m_y_data = y_valg;

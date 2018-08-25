@@ -121,8 +121,8 @@ static int lsm6dsl_register(FAR const char *devpath,
  * Private Data
  ****************************************************************************/
 
-static double accelerofactor = 0;
-static double gyrofactor = 0;
+static double g_accelerofactor = 0;
+static double g_gyrofactor = 0;
 
 static const struct file_operations g_fops =
 {
@@ -434,14 +434,14 @@ static int lsm6dsl_sensor_start(FAR struct lsm6dsl_dev_s *priv)
   /* Accelerometer config registers Turn on the accelerometer: 833Hz, +- 16g */
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x74);
-  accelerofactor = 0.488;
+  g_accelerofactor = 0.488;
 
   /* Gyro config registers Turn on the gyro: FS=2000dps, ODR=833Hz Not using
    * modifyreg with empty value!!!! Then read value first!!!
    */
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x7C);
-  gyrofactor = 70;
+  g_gyrofactor = 70;
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL6_C, 0x00);
 
@@ -581,7 +581,7 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x38);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x00);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL3_C, 0x44);
-      accelerofactor = (0.122 / 1000);
+      g_accelerofactor = (0.122 / 1000);
     }
   else
     {
@@ -592,7 +592,7 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x00);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x5C);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL3_C, 0x44);
-      gyrofactor = (70 / 1000); /* 2000dps */
+      g_gyrofactor = (70 / 1000); /* 2000dps */
     }
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL4_C, 0x00);
@@ -987,14 +987,14 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
 
   temp_val = (tempi / 256) + 25;
 
-  sninfo("Data 16-bit XL_X--->: %d mg\n", (short)(xf_val * accelerofactor));
-  sninfo("Data 16-bit XL_Y--->: %d mg\n", (short)(yf_val * accelerofactor));
-  sninfo("Data 16-bit XL_Z--->: %d mg\n", (short)(zf_val * accelerofactor));
+  sninfo("Data 16-bit XL_X--->: %d mg\n", (short)(xf_val * g_accelerofactor));
+  sninfo("Data 16-bit XL_Y--->: %d mg\n", (short)(yf_val * g_accelerofactor));
+  sninfo("Data 16-bit XL_Z--->: %d mg\n", (short)(zf_val * g_accelerofactor));
   sninfo("Data 16-bit TEMP--->: %d Celsius\n", temp_val);
 
-  sensor_data->x_data = xf_val * accelerofactor;
-  sensor_data->y_data = yf_val * accelerofactor;
-  sensor_data->z_data = zf_val * accelerofactor;
+  sensor_data->x_data = xf_val * g_accelerofactor;
+  sensor_data->y_data = yf_val * g_accelerofactor;
+  sensor_data->z_data = zf_val * g_accelerofactor;
   sensor_data->temperature = temp_val;
   sensor_data->timestamp = ts;
 
@@ -1002,13 +1002,13 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
   y_valg = (int16_t) (((hiyg) << 8) | loyg);
   z_valg = (int16_t) (((hizg) << 8) | lozg);
 
-  sninfo("Data 16-bit G_X--->: %d mdps\n", (short)(x_valg * gyrofactor));
-  sninfo("Data 16-bit G_Y--->: %d mdps\n", (short)(y_valg * gyrofactor));
-  sninfo("Data 16-bit G_Z--->: %d mdps\n", (short)(z_valg * gyrofactor));
+  sninfo("Data 16-bit G_X--->: %d mdps\n", (short)(x_valg * g_gyrofactor));
+  sninfo("Data 16-bit G_Y--->: %d mdps\n", (short)(y_valg * g_gyrofactor));
+  sninfo("Data 16-bit G_Z--->: %d mdps\n", (short)(z_valg * g_gyrofactor));
 
-  sensor_data->g_x_data = x_valg * gyrofactor;
-  sensor_data->g_y_data = y_valg * gyrofactor;
-  sensor_data->g_z_data = z_valg * gyrofactor;
+  sensor_data->g_x_data = x_valg * g_gyrofactor;
+  sensor_data->g_y_data = y_valg * g_gyrofactor;
+  sensor_data->g_z_data = z_valg * g_gyrofactor;
 
   return OK;
 }
