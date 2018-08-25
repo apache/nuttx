@@ -45,10 +45,13 @@
 #include <nuttx/random.h>
 
 #include "irq/irq.h"
+#include "clock/clock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* INCR_COUNT - Increment the count of interrupts taken on this IRQ number */
 
 #ifdef CONFIG_SCHED_IRQMONITOR
 #  ifdef CONFIG_HAVE_LONG_LONG
@@ -71,6 +74,32 @@
 #  endif
 #else
 #  define INCR_COUNT(ndx)
+#endif
+
+/* CALL_VECTOR - Call the interrupt service routine attached to this interrupt
+ * request
+ */
+
+#if defined(CONFIG_SCHED_IRQMONITOR) && defined(CONFIG_SCHED_TICKLESS)
+#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
+     do \
+       { \
+         struct timespec start; \
+         struct timespec end; \
+         struct timespec delta; \
+         clock_systimespec(&start); \
+         vector(irq, context, arg); \
+         clock_systimespec(&end); \
+         clock_timespec_subtract(&end, &start, &delta); \
+         if (delta.tv_nsec > g_irqvector[ndx].time) \
+           { \
+             g_irqvector[ndx].time = delta.tv_nsec; \
+           } \
+       } \
+     while (0)
+#else
+#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
+     vector(irq, context, arg)
 #endif
 
 /****************************************************************************
@@ -127,5 +156,5 @@ void irq_dispatch(int irq, FAR void *context)
 
   /* Then dispatch to the interrupt handler */
 
-  vector(irq, context, arg);
+  CALL_VECTOR(ndx, vector, irq, context, arg);
 }
