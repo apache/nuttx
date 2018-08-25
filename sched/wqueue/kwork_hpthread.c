@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wqueue/work_hothread.c
+ * sched/wqueue/work_hpthread.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
+#include <sched.h>
+#include <string.h>
 #include <errno.h>
 #include <queue.h>
 #include <debug.h>
@@ -56,7 +59,7 @@
  * Public Data
  ****************************************************************************/
 
-/* The state of the kernel mode, high priority work queue. */
+/* The state of the kernel mode, high priority work queue(s). */
 
 struct hp_wqueue_s g_hpwork;
 
@@ -68,10 +71,10 @@ struct hp_wqueue_s g_hpwork;
  * Name: work_hpthread
  *
  * Description:
- *   This is the worker thread that performs the actions placed on the high
+ *   These are the worker threads that performs the actions placed on the high
  *   priority work queue.
  *
- *   This, along with the lower priority worker thread(s) are the kernel
+ *   These, along with the lower priority worker thread(s) are the kernel
  *   mode work queues (also build in the flat build).  One of these threads
  *   also performs periodic garbage collection (that would otherwise be
  *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
@@ -92,31 +95,68 @@ struct hp_wqueue_s g_hpwork;
 
 static int work_hpthread(int argc, char *argv[])
 {
+#if CONFIG_SCHED_HPNTHREADS > 1
+  int wndx;
+  pid_t me = getpid();
+  int i;
+
+  /* Find out thread index by search the workers in g_hpwork */
+
+  for (wndx = 0, i = 0; i < CONFIG_SCHED_HPNTHREADS; i++)
+    {
+      if (g_hpwork.worker[i].pid == me)
+        {
+          wndx = i;
+          break;
+        }
+    }
+
+  DEBUGASSERT(i < CONFIG_SCHED_HPNTHREADS);
+#endif
+
   /* Loop forever */
 
   for (; ; )
     {
-#ifndef CONFIG_SCHED_LPWORK
-      /* First, perform garbage collection.  This cleans-up memory
-       * de-allocations that were queued because they could not be freed in
-       * that execution context (for example, if the memory was freed from
-       * an interrupt handler).
-       *
-       * NOTE: If the work thread is disabled, this clean-up is performed by
-       * the IDLE thread (at a very, very low priority).  If the low-priority
-       * work thread is enabled, then the garbage collection is done on that
-       * thread instead.
-       */
+#if CONFIG_SCHED_HPNTHREADS > 1
+      /* Thread 0 is special.  Only thread 0 performs period garbage collection */
 
-      sched_garbage_collection();
+      if (wndx > 0)
+        {
+          /* The other threads will perform work, waiting indefinitely until
+           * signalled for the next work availability.
+           *
+           * The special value of zero for the poll period instructs work_process
+           * to wait indefinitely until a signal is received.
+           */
+
+          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0, wndx);
+        }
+      else
+#endif
+        {
+#ifndef CONFIG_SCHED_LPWORK
+          /* First, perform garbage collection.  This cleans-up memory
+           * de-allocations that were queued because they could not be freed in
+           * that execution context (for example, if the memory was freed from
+           * an interrupt handler).
+           *
+           * NOTE: If the work thread is disabled, this clean-up is performed by
+           * the IDLE thread (at a very, very low priority).  If the low-priority
+           * work thread is enabled, then the garbage collection is done on that
+           * thread instead.
+           */
+
+          sched_garbage_collection();
 #endif
 
-      /* Then process queued work.  work_process will not return until: (1)
-       * there is no further work in the work queue, and (2) the polling
-       * period provided by g_hpwork.delay expires.
-       */
+          /* Then process queued work.  work_process will not return until: (1)
+           * there is no further work in the work queue, and (2) the polling
+           * period provided by g_hpwork.delay expires.
+           */
 
-      work_process((FAR struct kwork_wqueue_s *)&g_hpwork, g_hpwork.delay, 0);
+          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, g_hpwork.delay, 0);
+        }
     }
 
   return OK; /* To keep some compilers happy */
@@ -130,7 +170,7 @@ static int work_hpthread(int argc, char *argv[])
  * Name: work_hpstart
  *
  * Description:
- *   Start the high-priority, kernel-mode work queue.
+ *   Start the high-priority, kernel-mode worker thread(s)
  *
  * Input Parameters:
  *   None
@@ -144,31 +184,43 @@ static int work_hpthread(int argc, char *argv[])
 int work_hpstart(void)
 {
   pid_t pid;
+  int wndx;
 
   /* Initialize work queue data structures */
 
-  g_hpwork.delay          = CONFIG_SCHED_HPWORKPERIOD / USEC_PER_TICK;
-  dq_init(&g_hpwork.q);
+  g_hpwork.delay = CONFIG_SCHED_HPWORKPERIOD / USEC_PER_TICK;
 
-  /* Start the high-priority, kernel mode worker thread */
+  /* Don't permit any of the threads to run until we have fully initialized
+   * g_hpwork.
+   */
 
-  sinfo("Starting high-priority kernel worker thread\n");
+  sched_lock();
 
-  pid = kthread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
-                       CONFIG_SCHED_HPWORKSTACKSIZE,
-                       (main_t)work_hpthread,
-                       (FAR char * const *)NULL);
+  /* Start the high-priority, kernel mode worker thread(s) */
 
-  DEBUGASSERT(pid > 0);
-  if (pid < 0)
+  sinfo("Starting high-priority kernel worker thread(s)\n");
+
+  for (wndx = 0; wndx < CONFIG_SCHED_HPNTHREADS; wndx++)
     {
-      serr("ERROR: kthread_create failed: %d\n", (int)pid);
-      return (int)pid;
+      pid = kthread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
+                           CONFIG_SCHED_HPWORKSTACKSIZE,
+                           (main_t)work_hpthread,
+                           (FAR char * const *)NULL);
+
+      DEBUGASSERT(pid > 0);
+      if (pid < 0)
+        {
+          serr("ERROR: kthread_create %d failed: %d\n", wndx, (int)pid);
+          sched_unlock();
+          return (int)pid;
+        }
+
+      g_hpwork.worker[wndx].pid  = pid;
+      g_hpwork.worker[wndx].busy = true;
     }
 
-  g_hpwork.worker[0].pid  = pid;
-  g_hpwork.worker[0].busy = true;
-  return pid;
+  sched_unlock();
+  return g_hpwork.worker[0].pid;
 }
 
 #endif /* CONFIG_SCHED_HPWORK */

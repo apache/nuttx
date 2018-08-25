@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/work_process.c
  *
- *   Copyright (C) 2009-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,12 +215,13 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx)
         }
     }
 
-#if defined(CONFIG_SCHED_LPWORK) && CONFIG_SCHED_LPNTHREADS > 0
+#if (defined(CONFIG_SCHED_HPWORK) && CONFIG_SCHED_HPNTHREADS > 1) \
+     || (defined(CONFIG_SCHED_LPWORK) && CONFIG_SCHED_LPNTHREADS > 1)
   /* Value of zero for period means that we should wait indefinitely until
    * signalled.  This option is used only for the case where there are
-   * multiple, low-priority worker threads.  In that case, only one of
-   * the threads does the poll... the others simple.  In all other cases
-   * period will be non-zero and equal to wqueue->delay.
+   * multiple worker threads.  In that case, only one of the threads does
+   * the poll... the others simple.  In all other cases period will be
+   * non-zero and equal to wqueue->delay.
    */
 
   if (period == 0)

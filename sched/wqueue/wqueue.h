@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/wqueue.h
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,11 +88,14 @@ struct hp_wqueue_s
 {
   clock_t           delay;     /* Delay between polling cycles (ticks) */
   struct dq_queue_s q;         /* The queue of pending work */
-  struct kworker_s  worker[1]; /* Describes the single high priority worker */
+
+  /* Describes each thread in the high priority queue's thread pool */
+
+  struct kworker_s  worker[CONFIG_SCHED_HPNTHREADS];
 };
 #endif
 
-/* This structure defines the state of one high-priority work queue.  This
+/* This structure defines the state of one low-priority work queue.  This
  * structure must be cast compatible with kwork_wqueue_s
  */
 

@@ -65,6 +65,8 @@
  *   (which runs at the lowest of priority and may not be appropriate
  *   if memory reclamation is of high priority).  If CONFIG_SCHED_HPWORK
  *   is enabled, then the following options can also be used:
+ * CONFIG_SCHED_HPNTHREADS - The number of thread in the high-priority queue's
+ *   thread pool.  Default: 1
  * CONFIG_SCHED_HPWORKPRIORITY - The execution priority of the high-
  *   priority worker thread.  Default: 224
  * CONFIG_SCHED_HPWORKPERIOD - How often the worker thread checks for
@@ -145,6 +147,10 @@
 /* High priority, kernel work queue configuration ***************************/
 
 #ifdef CONFIG_SCHED_HPWORK
+
+#  ifndef CONFIG_SCHED_HPNTHREADS
+#    define CONFIG_SCHED_HPNTHREADS 1
+#  endif
 
 #  ifndef CONFIG_SCHED_HPWORKPRIORITY
 #    define CONFIG_SCHED_HPWORKPRIORITY 224

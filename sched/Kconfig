@@ -1302,6 +1302,24 @@ config SCHED_HPWORK
 
 if SCHED_HPWORK
 
+config SCHED_HPNTHREADS
+	int "Number of high-priority worker threads"
+	default 1
+	---help---
+		This options selects multiple, high-priority threads.  This is
+		essentially a "thread pool" that provides multi-threaded servicing
+		of the high-priority work queue.  This breaks the serialization
+		of the "queue" (hence, it is no longer a queue at all).
+
+		CAUTION: Some drivers may use the work queue to serialize
+		operations.  They may also use the high-priority work queue if it is
+		available.  If there are multiple high-priority worker threads, then
+		this can result in the loss of that serialization.  There may be
+		concurrent driver operations running on different HP threads and
+		this could lead to a failure.  You may need to visit the use of the
+		HP work queue on your configuration is you select
+		CONFIG_SCHED_HPNTHREADS > 1
+
 config SCHED_HPWORKPRIORITY
 	int "High priority worker thread priority"
 	default 224
@@ -1370,8 +1388,8 @@ config SCHED_LPNTHREADS
 		example).
 
 		CAUTION: Some drivers may use the work queue to serialize
-		operations.  The may also use the low-priority work queue if it is
-		available.  If there are multiple low-priority worker thread, then
+		operations.  They may also use the low-priority work queue if it is
+		available.  If there are multiple low-priority worker threads, then
 		this can result in the loss of that serialization.  There may be
 		concurrent driver operations running on different LP threads and
 		this could lead to a failure.  You may need to visit the use of the

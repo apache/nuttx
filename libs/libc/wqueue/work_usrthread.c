@@ -341,7 +341,6 @@ int work_usrstart(void)
   /* Initialize work queue data structures */
 
   g_usrwork.delay = CONFIG_LIB_USRWORKPERIOD / USEC_PER_TICK;
-  dq_init(&g_usrwork.q);
 
 #ifdef CONFIG_BUILD_PROTECTED
   {
