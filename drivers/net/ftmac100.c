@@ -388,7 +388,7 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->ft_dev))
+      if (!devif_loopback(&priv->ft_dev))
         {
           /* Send the packet */
 

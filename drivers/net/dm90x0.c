@@ -819,7 +819,7 @@ static int dm9x_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->dm_dev))
+      if (!devif_loopback(&priv->dm_dev))
         {
           /* Send the packet */
 

@@ -994,7 +994,7 @@ static int rndis_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->netdev))
+      if (!devif_loopback(&priv->netdev))
         {
           ret = rndis_transmit(priv);
         }

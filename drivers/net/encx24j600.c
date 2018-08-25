@@ -1194,7 +1194,7 @@ static int enc_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->dev))
+      if (!devif_loopback(&priv->dev))
         {
           /* Send the packet */
 

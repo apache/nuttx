@@ -716,7 +716,7 @@ static int lpc17_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->lp_dev))
+      if (!devif_loopback(&priv->lp_dev))
         {
           /* Send this packet.  In this context, we know that there is space for
            * at least one more packet in the descriptor list.

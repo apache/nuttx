@@ -644,7 +644,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->ld_dev))
+      if (!devif_loopback(&priv->ld_dev))
         {
           /* Send the packet.  tiva_transmit() will return zero if the
            * packet was successfully handled.

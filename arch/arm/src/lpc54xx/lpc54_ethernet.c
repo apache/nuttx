@@ -790,7 +790,7 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->eth_dev))
+      if (!devif_loopback(&priv->eth_dev))
         {
           /* Send the packet */
 

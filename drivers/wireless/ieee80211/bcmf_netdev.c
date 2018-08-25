@@ -473,7 +473,7 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->bc_dev))
+      if (!devif_loopback(&priv->bc_dev))
         {
           /* Send the packet */
 

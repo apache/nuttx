@@ -304,7 +304,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
        * don't attmpt to put it on the wire.
        */
 
-      if (!devif_loopback_out(&priv->sk_dev))
+      if (!devif_loopback(&priv->sk_dev))
         {
           /* Send the packet */
 

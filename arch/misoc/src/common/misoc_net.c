@@ -334,7 +334,7 @@ static int misoc_net_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->misoc_net_dev))
+      if (!devif_loopback(&priv->misoc_net_dev))
         {
           /* Send the packet */
 

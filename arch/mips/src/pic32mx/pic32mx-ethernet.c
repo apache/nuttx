@@ -1149,7 +1149,7 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&priv->pd_dev))
+      if (!devif_loopback(&priv->pd_dev))
         {
           /* Send this packet.  In this context, we know that there is space for
            * at least one more packet in the descriptor list.

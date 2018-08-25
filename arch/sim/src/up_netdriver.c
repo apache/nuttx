@@ -142,7 +142,7 @@ static int sim_txpoll(struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback_out(&g_sim_dev))
+      if (!devif_loopback(&g_sim_dev))
         {
           /* Send the packet */
 

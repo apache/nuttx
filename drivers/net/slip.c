@@ -405,7 +405,7 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      if (!devif_loopback_out(&priv->dev))
+      if (!devif_loopback(&priv->dev))
         {
           slip_transmit(priv);
         }
