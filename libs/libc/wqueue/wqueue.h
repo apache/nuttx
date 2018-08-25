@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/libs/libc/wqueue.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,6 @@
 
 struct usr_wqueue_s
 {
-  uint32_t          delay;  /* Delay between polling cycles (ticks) */
   struct dq_queue_s q;      /* The queue of pending work */
   pid_t             pid;    /* The task ID of the worker thread(s) */
 };

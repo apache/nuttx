@@ -74,7 +74,6 @@ struct kworker_s
 
 struct kwork_wqueue_s
 {
-  clock_t           delay;     /* Delay between polling cycles (ticks) */
   struct dq_queue_s q;         /* The queue of pending work */
   struct kworker_s  worker[1]; /* Describes a worker thread */
 };
@@ -86,7 +85,6 @@ struct kwork_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 struct hp_wqueue_s
 {
-  clock_t           delay;     /* Delay between polling cycles (ticks) */
   struct dq_queue_s q;         /* The queue of pending work */
 
   /* Describes each thread in the high priority queue's thread pool */
@@ -102,7 +100,6 @@ struct hp_wqueue_s
 #ifdef CONFIG_SCHED_LPWORK
 struct lp_wqueue_s
 {
-  clock_t           delay;  /* Delay between polling cycles (ticks) */
   struct dq_queue_s q;      /* The queue of pending work */
 
   /* Describes each thread in the low priority queue's thread pool */
@@ -180,7 +177,6 @@ int work_lpstart(void);
  *
  * Input Parameters:
  *   wqueue - Describes the work queue to be processed
- *   period - The polling period in clock ticks
  *   wndx   - The worker thread index
  *
  * Returned Value:
@@ -188,7 +184,7 @@ int work_lpstart(void);
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx);
+void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __SCHED_WQUEUE_WQUEUE_H */

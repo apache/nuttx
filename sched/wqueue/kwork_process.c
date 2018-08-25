@@ -68,6 +68,12 @@
 #  define WORK_CLOCK CLOCK_REALTIME
 #endif
 
+#ifdef CONFIG_SYSTEM_TIME64
+#  define WORK_DELAY_MAX UINT64_MAX
+#else
+#  define WORK_DELAY_MAX UINT32_MAX
+#endif
+
 #ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
@@ -93,7 +99,7 @@
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx)
+void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -109,10 +115,10 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx)
    * we process items in the work list.
    */
 
-  next  = period;
+  next  = WORK_DELAY_MAX;
   flags = enter_critical_section();
 
-  /* Get the time that we started this polling cycle in clock ticks. */
+  /* Get the time that we started processing the queue in clock ticks. */
 
   stick = clock_systimer();
 
@@ -215,16 +221,16 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx)
         }
     }
 
-#if (defined(CONFIG_SCHED_HPWORK) && CONFIG_SCHED_HPNTHREADS > 1) \
-     || (defined(CONFIG_SCHED_LPWORK) && CONFIG_SCHED_LPNTHREADS > 1)
-  /* Value of zero for period means that we should wait indefinitely until
-   * signalled.  This option is used only for the case where there are
-   * multiple worker threads.  In that case, only one of the threads does
-   * the poll... the others simple.  In all other cases period will be
-   * non-zero and equal to wqueue->delay.
+  /* When multiple worker threads are created for this work queue, only
+   * thread 0 (wndx = 0) will monitor the unexpired works.
+   *
+   * Other worker threads (wndx > 0) just process no-delay or expired
+   * works, then sleep. The unexpired works are left in the queue. They
+   * will be handled by thread 0 when it finishes current work and iterate
+   * over the queue again.
    */
 
-  if (period == 0)
+  if (wndx > 0 || next == WORK_DELAY_MAX)
     {
       sigset_t set;
 
@@ -238,31 +244,15 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, clock_t period, int wndx)
       wqueue->worker[wndx].busy = true;
     }
   else
-#endif
     {
-      /* Get the delay (in clock ticks) since we started the sampling */
+      /* Wait a while to check the work list.  We will wait here until
+       * either the time elapses or until we are awakened by a signal.
+       * Interrupts will be re-enabled while we wait.
+       */
 
-      elapsed = clock_systimer() - stick;
-      if (elapsed < period && next > 0)
-        {
-          /* How much time would we need to delay to get to the end of the
-           * sampling period?  The amount of time we delay should be the smaller
-           * of the time to the end of the sampling period and the time to the
-           * next work expiry.
-           */
-
-          remaining = period - elapsed;
-          next      = MIN(next, remaining);
-
-          /* Wait awhile to check the work list.  We will wait here until
-           * either the time elapses or until we are awakened by a signal.
-           * Interrupts will be re-enabled while we wait.
-           */
-
-          wqueue->worker[wndx].busy = false;
-          nxsig_usleep(next * USEC_PER_TICK);
-          wqueue->worker[wndx].busy = true;
-        }
+      wqueue->worker[wndx].busy = false;
+      nxsig_usleep(next * USEC_PER_TICK);
+      wqueue->worker[wndx].busy = true;
     }
 
   leave_critical_section(flags);

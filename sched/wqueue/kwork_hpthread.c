@@ -125,12 +125,9 @@ static int work_hpthread(int argc, char *argv[])
         {
           /* The other threads will perform work, waiting indefinitely until
            * signalled for the next work availability.
-           *
-           * The special value of zero for the poll period instructs work_process
-           * to wait indefinitely until a signal is received.
            */
 
-          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0, wndx);
+          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, wndx);
         }
       else
 #endif
@@ -151,11 +148,11 @@ static int work_hpthread(int argc, char *argv[])
 #endif
 
           /* Then process queued work.  work_process will not return until: (1)
-           * there is no further work in the work queue, and (2) the polling
-           * period provided by g_hpwork.delay expires.
+           * there is no further work in the work queue, and (2) signal is
+           * triggered, or delayed work expires.
            */
 
-          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, g_hpwork.delay, 0);
+          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0);
         }
     }
 
@@ -185,10 +182,6 @@ int work_hpstart(void)
 {
   pid_t pid;
   int wndx;
-
-  /* Initialize work queue data structures */
-
-  g_hpwork.delay = CONFIG_SCHED_HPWORKPERIOD / USEC_PER_TICK;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork.

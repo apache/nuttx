@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/wqueue/work_usrthread.c
  *
- *   Copyright (C) 2009-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,12 @@
 #  define WORK_CLOCK CLOCK_REALTIME
 #endif
 
+#ifdef CONFIG_SYSTEM_TIME64
+#  define WORK_DELAY_MAX UINT64_MAX
+#else
+#  define WORK_DELAY_MAX UINT32_MAX
+#endif
+
 #ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
@@ -130,7 +136,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
    * in the work list.
    */
 
-  next = wqueue->delay;
+  next = WORK_DELAY_MAX;
   ret = work_lock();
   if (ret < 0)
     {
@@ -249,20 +255,19 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
         }
     }
 
-  /* Get the delay (in clock ticks) since we started the sampling */
-
-  elapsed = clock() - stick;
-  if (elapsed < wqueue->delay && next > 0)
+  if (next == WORK_DELAY_MAX)
     {
-      /* How must time would we need to delay to get to the end of the
-       * sampling period?  The amount of time we delay should be the smaller
-       * of the time to the end of the sampling period and the time to the
-       * next work expiry.
-       */
+      sigset_t set;
 
-      remaining = wqueue->delay - elapsed;
-      next      = MIN(next, remaining);
+      /* Wait indefinitely until signaled with SIGWORK */
 
+      sigemptyset(&set);
+      sigaddset(&set, SIGWORK);
+
+      sigwaitinfo(&set, NULL);
+    }
+  else
+    {
       /* Wait awhile to check the work list.  We will wait here until
        * either the time elapses or until we are awakened by a signal.
        * Interrupts will be re-enabled while we wait.
@@ -339,8 +344,6 @@ static pthread_addr_t work_usrthread(pthread_addr_t arg)
 int work_usrstart(void)
 {
   /* Initialize work queue data structures */
-
-  g_usrwork.delay = CONFIG_LIB_USRWORKPERIOD / USEC_PER_TICK;
 
 #ifdef CONFIG_BUILD_PROTECTED
   {
