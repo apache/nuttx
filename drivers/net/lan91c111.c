@@ -547,7 +547,7 @@ static int lan91c111_txpoll(FAR struct net_driver_s *dev)
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!loopback_out(dev))
+      if (!devif_loopback(dev))
         {
           /* Send the packet */
 
