@@ -203,13 +203,9 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
            * broadcast packet out ALL locally available networks.  I am not
            * sure of that and, in any event, there is nothing we can do
            * about that here.
-           *
-           * REVISIT:  For now, arbitrarily return the first network
-           * interface in the list of network devices.  The broadcast
-           * will be sent on that device only.
            */
 
-          return g_netdevices;
+          return netdev_default();
         }
       else
         {
@@ -250,15 +246,11 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
 #endif /* CONFIG_NET_ROUTE */
 
   /* The above lookup will fail if the packet is being sent out of our
-   * out subnet to a router and there is no routing information.
+   * out subnet to a router and there is no routing information. Let's
+   * try the default network device.
    */
 
-  /* If we will did not find the network device, then we might as well fail
-   * because we are not configured properly to determine the route to the
-   * destination.
-   */
-
-  return dev;
+  return netdev_default();
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -302,13 +294,9 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
            * broadcast packet out ALL locally available networks.  I am not
            * sure of that and, in any event, there is nothing we can do
            * about that here.
-           *
-           * REVISIT:  For now, arbitrarily return the first network
-           * interface in the list of network devices.  The broadcast
-           * will be sent on that device only.
            */
 
-          return g_netdevices;
+          return netdev_default();
         }
       else
         {
@@ -349,15 +337,11 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
 #endif /* CONFIG_NET_ROUTE */
 
   /* The above lookup will fail if the packet is being sent out of our
-   * out subnet to a router and there is no routing information.
+   * out subnet to a router and there is no routing information. Let's
+   * try the default network device.
    */
 
-  /* If we will did not find the network device, then we might as well fail
-   * because we are not configured properly to determine the route to the
-   * destination.
-   */
-
-  return dev;
+  return netdev_default();
 }
 #endif /* CONFIG_NET_IPv6 */
 
