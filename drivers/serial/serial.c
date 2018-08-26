@@ -597,16 +597,9 @@ static int uart_open(FAR struct file *filep)
            goto errout_with_sem;
         }
 
-      /* Mark the io buffers empty */
-
-      dev->xmit.head = 0;
-      dev->xmit.tail = 0;
-      dev->recv.head = 0;
-      dev->recv.tail = 0;
-
+#ifdef CONFIG_SERIAL_TERMIOS
       /* Initialize termios state */
 
-#ifdef CONFIG_SERIAL_TERMIOS
       dev->tc_iflag = 0;
       if (dev->isconsole)
         {
@@ -686,6 +679,13 @@ static int uart_close(FAR struct file *filep)
 
       (void)uart_tcdrain(dev, 4 * TICK_PER_SEC);
     }
+
+  /* Mark the I/O buffers empty */
+
+  dev->xmit.head = 0;
+  dev->xmit.tail = 0;
+  dev->recv.head = 0;
+  dev->recv.tail = 0;
 
   /* Free the IRQ and disable the UART */
 
@@ -1350,12 +1350,22 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   dev->recv.head = 0;
                   dev->recv.tail = 0;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+                  /* De-activate RX flow control. */
+
+                  uart_rxflowcontrol(dev, 0, false);
+#endif
                 }
 
               if (arg == TCOFLUSH || arg == TCIOFLUSH)
                 {
                   dev->xmit.head = 0;
                   dev->xmit.tail = 0;
+
+                  /* Inform any waiters there there is space available. */
+
+                  uart_datasent(dev);
                 }
 
               leave_critical_section(flags);
