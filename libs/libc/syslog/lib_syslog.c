@@ -65,6 +65,8 @@
 
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
 {
+  va_list copy;
+
   /* Check if this priority is enabled */
 
   if ((g_syslog_mask & LOG_MASK(priority)) != 0)
@@ -76,7 +78,8 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
        * of structures in the NuttX sycalls does not work.
        */
 
-      (void)nx_vsyslog(priority, fmt, &ap);
+      va_copy(copy, ap);
+      (void)nx_vsyslog(priority, fmt, &copy);
     }
 }
 
