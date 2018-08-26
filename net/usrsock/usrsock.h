@@ -256,6 +256,19 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate);
   usrsock_teardown_request_callback(&(datastate)->reqstate)
 
 /****************************************************************************
+ * Name: usrsock_setup_datain
+ ****************************************************************************/
+
+void usrsock_setup_datain(FAR struct usrsock_conn_s *conn,
+                          FAR struct iovec *iov, unsigned int iovcnt);
+
+/****************************************************************************
+ * Name: usrsock_teardown_datain
+ ****************************************************************************/
+
+#define usrsock_teardown_datain(conn) usrsock_setup_datain(conn, NULL, 0)
+
+/****************************************************************************
  * Name: usrsock_event
  *
  * Description:

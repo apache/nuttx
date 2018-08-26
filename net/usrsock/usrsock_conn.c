@@ -307,6 +307,26 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate)
 }
 
 /****************************************************************************
+ * Name: usrsock_setup_datain
+ ****************************************************************************/
+
+void usrsock_setup_datain(FAR struct usrsock_conn_s *conn,
+                          FAR struct iovec *iov, unsigned int iovcnt)
+{
+  unsigned int i;
+
+  conn->resp.datain.iov = iov;
+  conn->resp.datain.pos = 0;
+  conn->resp.datain.total = 0;
+  conn->resp.datain.iovcnt = iovcnt;
+
+  for (i = 0; i < iovcnt; i++)
+    {
+      conn->resp.datain.total += iov[i].iov_len;
+    }
+}
+
+/****************************************************************************
  * Name: usrsock_initialize()
  *
  * Description:

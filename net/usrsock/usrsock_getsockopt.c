@@ -151,26 +151,6 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
 }
 
 /****************************************************************************
- * Name: setup_conn_getsockopt
- ****************************************************************************/
-
-static void setup_conn_getsockopt(FAR struct usrsock_conn_s *conn,
-                                  FAR struct iovec *iov, unsigned int iovcnt)
-{
-  unsigned int i;
-
-  conn->resp.datain.iov = iov;
-  conn->resp.datain.pos = 0;
-  conn->resp.datain.total = 0;
-  conn->resp.datain.iovcnt = iovcnt;
-
-  for (i = 0; i < iovcnt; i++)
-    {
-      conn->resp.datain.total += iov[i].iov_len;
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -235,7 +215,7 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
   inbufs[0].iov_base = (FAR void *)value;
   inbufs[0].iov_len = *value_len;
 
-  setup_conn_getsockopt(conn, inbufs, ARRAY_SIZE(inbufs));
+  usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
   /* Request user-space daemon to close socket. */
 
@@ -261,7 +241,7 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
         }
     }
 
-  setup_conn_getsockopt(conn, NULL, 0);
+  usrsock_teardown_datain(conn);
   usrsock_teardown_data_request_callback(&state);
 
 errout_unlock:
