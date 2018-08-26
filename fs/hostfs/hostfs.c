@@ -62,6 +62,12 @@
 #include "hostfs.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define HOSTFS_RETRY_DELAY_MS       10
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -915,8 +921,9 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 {
   FAR struct hostfs_mountpt_s  *fs;
   struct stat buf;
-  FAR const char *options;
-  int len;
+  FAR char *options;
+  char *ptr, *saveptr;
+  int len, timeout = 0;
   int ret;
 
   /* Validate the block driver is NULL */
@@ -926,23 +933,42 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENODEV;
     }
 
-  /* The only options we suppor are "-o fs=whatever", so search
-   * for the 'dir=' portion
-   */
-
-  options = (const char *) data;
-  if ((strncmp(options, "fs=", 3) != 0) || (strlen(options) < 4))
-    {
-      return -ENODEV;
-    }
-
   /* Create an instance of the mountpt state structure */
 
-  fs = (struct hostfs_mountpt_s *)kmm_zalloc(sizeof(struct hostfs_mountpt_s));
-  if (!fs)
+  fs = (FAR struct hostfs_mountpt_s *)kmm_zalloc(sizeof(struct hostfs_mountpt_s));
+  if (fs == NULL)
     {
       return -ENOMEM;
     }
+
+  /* The options we suppor are:
+   *  "fs=whatever", remote dir
+   *  "timeout=xx", bind timeout, unit (ms)
+   */
+
+  options = strdup(data);
+  if (!options)
+    {
+      kmm_free(fs);
+      return -ENOMEM;
+    }
+
+  ptr = strtok_r(options, ",", &saveptr);
+  while(ptr != NULL)
+    {
+      if ((strncmp(ptr, "fs=", 3) == 0))
+        {
+          strncpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
+        }
+      else if ((strncmp(ptr, "timeout=", 8) == 0))
+        {
+          timeout = atoi(&ptr[8]);
+        }
+
+      ptr = strtok_r(NULL, ",", &saveptr);
+    }
+
+  kmm_free(options);
 
   /* If the global semaphore hasn't been initialized, then
    * initialized it now. */
@@ -971,7 +997,6 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Now perform the mount.  */
 
-  strncpy(fs->fs_root, &options[3], sizeof(fs->fs_root));
   len = strlen(fs->fs_root);
   if (len > 1 && fs->fs_root[len - 1] == '/')
     {
@@ -982,12 +1007,23 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Try to stat the file in the host FS */
 
-  ret = host_stat(fs->fs_root, &buf);
-  if (ret != 0 || (buf.st_mode & S_IFDIR) == 0)
+  while (1)
     {
-      hostfs_semgive(fs);
-      kmm_free(fs);
-      return -ENOENT;
+      ret = host_stat(fs->fs_root, &buf);
+      if ((ret != 0 && timeout <= 0) ||
+              (ret == 0 && (buf.st_mode & S_IFDIR) == 0))
+        {
+          hostfs_semgive(fs);
+          kmm_free(fs);
+          return -ENOENT;
+        }
+      else if (ret == 0)
+        {
+          break;
+        }
+
+      usleep(HOSTFS_RETRY_DELAY_MS * 1000);
+      timeout -= HOSTFS_RETRY_DELAY_MS;
     }
 
   /* Append a '/' to the name now */
