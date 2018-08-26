@@ -80,6 +80,9 @@ struct u16550_s
   uint8_t          parity;    /* 0=none, 1=odd, 2=even */
   uint8_t          bits;      /* Number of bits (7 or 8) */
   bool             stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  bool             flow;      /* flow control (RTS/CTS) enabled */
+#endif
 #endif
 };
 
@@ -96,6 +99,10 @@ static int  u16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  u16550_receive(FAR struct uart_dev_s *dev, uint32_t *status);
 static void u16550_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
+                                 bool upper);
+#endif
 #ifdef CONFIG_SERIAL_DMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev);
 static void u16550_dmareceive(FAR struct uart_dev_s *dev);
@@ -122,7 +129,7 @@ static const struct uart_ops_s g_uart_ops =
   .rxint          = u16550_rxint,
   .rxavailable    = u16550_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = NULL,
+  .rxflowcontrol  = u16550_rxflowcontrol,
 #endif
 #ifdef CONFIG_SERIAL_DMA
   .dmasend        = u16550_dmasend,
@@ -170,6 +177,9 @@ static struct u16550_s g_uart0priv =
   .parity         = CONFIG_16550_UART0_PARITY,
   .bits           = CONFIG_16550_UART0_BITS,
   .stopbits2      = CONFIG_16550_UART0_2STOP,
+#if defined(CONFIG_16550_UART0_IFLOWCONTROL) || defined(CONFIG_16550_UART0_OFLOWCONTROL)
+  .flow           = true,
+#endif
 #endif
 };
 
@@ -205,6 +215,9 @@ static struct u16550_s g_uart1priv =
   .parity         = CONFIG_16550_UART1_PARITY,
   .bits           = CONFIG_16550_UART1_BITS,
   .stopbits2      = CONFIG_16550_UART1_2STOP,
+#if defined(CONFIG_16550_UART1_IFLOWCONTROL) || defined(CONFIG_16551_UART1_OFLOWCONTROL)
+  .flow           = true,
+#endif
 #endif
 };
 
@@ -240,6 +253,9 @@ static struct u16550_s g_uart2priv =
   .parity         = CONFIG_16550_UART2_PARITY,
   .bits           = CONFIG_16550_UART2_BITS,
   .stopbits2      = CONFIG_16550_UART2_2STOP,
+#if defined(CONFIG_16550_UART2_IFLOWCONTROL) || defined(CONFIG_16550_UART2_OFLOWCONTROL)
+  .flow           = true,
+#endif
 #endif
 };
 
@@ -275,6 +291,9 @@ static struct u16550_s g_uart3priv =
   .parity         = CONFIG_16550_UART3_PARITY,
   .bits           = CONFIG_16550_UART3_BITS,
   .stopbits2      = CONFIG_16550_UART3_2STOP,
+#if defined(CONFIG_16550_UART3_IFLOWCONTROL) || defined(CONFIG_16550_UART3_OFLOWCONTROL)
+  .flow           = true,
+#endif
 #endif
 };
 
@@ -606,6 +625,9 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   uint16_t div;
   uint32_t lcr;
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  uint32_t mcr;
+#endif
 
   /* Clear fifos */
 
@@ -677,6 +699,23 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   u16550_serialout(priv, UART_FCR_OFFSET,
                    (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
                     UART_FCR_FIFOEN));
+
+  /* Set up the auto flow control */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  mcr = u16550_serialin(priv, UART_MCR_OFFSET);
+  if (priv->flow)
+    {
+      mcr |= UART_MCR_AFCE;
+    }
+  else
+    {
+      mcr &= ~UART_MCR_AFCE;
+    }
+
+  u16550_serialout(priv, UART_MCR_OFFSET, mcr);
+#endif /* defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) */
+
 #endif
   return OK;
 }
@@ -934,6 +973,9 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
                             ((priv->parity == 1) ? PARODD : 0);
         termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+        termiosp->c_cflag |= priv->flow ? CRTSCTS : 0;
+#endif
 
         switch (priv->bits)
           {
@@ -1003,6 +1045,9 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         priv->baud      = cfgetispeed(termiosp);
         priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+        priv->flow      = (termiosp->c_cflag & CRTSCTS) != 0;
+#endif
 
         u16550_setup(dev);
         leave_critical_section(flags);
@@ -1083,6 +1128,31 @@ static bool u16550_rxavailable(struct uart_dev_s *dev)
  *   Stubbed out DMA-related methods
  *
  ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
+                                 bool upper)
+{
+#ifndef CONFIG_16550_SUPRESS_CONFIG
+  FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
+
+  if (priv->flow)
+    {
+      /* Disable Rx interrupt to prevent more data being from
+       * peripheral if the RX buffer is near full. When hardware
+       * RTS is enabled, this will prevent more data from coming
+       * in. Otherwise, enable Rx interrupt to make sure that more
+       * input is received.
+       */
+
+      u16550_rxint(dev, !upper);
+      return true;
+    }
+#endif
+
+  return false;
+}
+#endif
 
 #ifdef CONFIG_SERIAL_DMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev)
@@ -1232,7 +1302,9 @@ void up_earlyserialinit(void)
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
+#ifndef CONFIG_16550_SUPRESS_INITIAL_CONFIG
   u16550_setup(&CONSOLE_DEV);
+#endif
 #endif
 }
 

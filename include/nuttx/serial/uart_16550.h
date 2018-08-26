@@ -290,7 +290,8 @@
 #define UART_MCR_OUT1                (1 << 2)  /* Bit 2:  Auxiliary user-defined output 1 */
 #define UART_MCR_OUT2                (1 << 3)  /* Bit 3:  Auxiliary user-defined output 2 */
 #define UART_MCR_LPBK                (1 << 4)  /* Bit 4:  Loopback Mode Select */
-                                               /* Bit 5-7: Reserved */
+#define UART_MCR_AFCE                (1 << 5)  /* Bit 5:  Auto Flow Control Enable */
+                                               /* Bit 6-7: Reserved */
 
 /* LSR Line Status Register */
 

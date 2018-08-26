@@ -312,6 +312,11 @@ endchoice # 16550 Serial Console
 config 16550_SUPRESS_CONFIG
 	bool "Suppress 16550 configuration"
 	default n
+
+config 16550_SUPRESS_INITIAL_CONFIG
+	bool "Suppress initial 16550 configuration"
+	depends on !16550_SUPRESS_CONFIG
+	default n
 	---help---
 		This option is useful, for example, if you are using a bootloader
 		that configures the 16550_UART.  In that case, you may want to
