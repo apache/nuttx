@@ -1225,6 +1225,23 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
+ * Name: psock_dupsd
+ *
+ * Description:
+ *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup().
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
+ *
+ ****************************************************************************/
+
+int psock_dupsd(FAR struct socket *psock, int minsd);
+
+/****************************************************************************
  * Name: net_dupsd
  *
  * Description:
@@ -1354,6 +1371,46 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 struct file;
 ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset, size_t count);
 #endif
+
+/****************************************************************************
+ * Name: psock_vfcntl
+ *
+ * Description:
+ *   Performs fcntl operations on socket
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   cmd   - The fcntl command.
+ *   ap    - Command-specific arguments
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap);
+
+/****************************************************************************
+ * Name: psock_fcntl
+ *
+ * Description:
+ *   Similar to the standard fcntl function except that is accepts a struct
+ *   struct socket instance instead of a file descriptor.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   cmd   - Identifies the operation to be performed.  Command specific
+ *           arguments may follow.
+ *
+ * Returned Value:
+ *   The nature of the return value depends on the command.  Non-negative
+ *   values indicate success.  Failures are reported as negated errno
+ *   values.
+ *
+ ****************************************************************************/
+
+int psock_fcntl(FAR struct socket *psock, int cmd, ...);
 
 /****************************************************************************
  * Name: net_vfcntl

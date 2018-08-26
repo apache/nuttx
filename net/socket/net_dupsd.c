@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_dupsd
+ * Name: psock_dupsd
  *
  * Description:
  *   Clone a socket descriptor to an arbitrary descriptor number.  If file
@@ -67,9 +67,8 @@
  *
  ****************************************************************************/
 
-int net_dupsd(int sockfd, int minsd)
+int psock_dupsd(FAR struct socket *psock, int minsd)
 {
-  FAR struct socket *psock1;
   FAR struct socket *psock2;
   int sockfd2;
   int ret;
@@ -94,13 +93,9 @@ int net_dupsd(int sockfd, int minsd)
 
   sched_lock();
 
-  /* Get the socket structure underlying sockfd */
-
-  psock1 = sockfd_socket(sockfd);
-
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (!psock1 || psock1->s_crefs <= 0)
+  if (!psock || psock->s_crefs <= 0)
     {
       ret = -EBADF;
       goto errout;
@@ -126,7 +121,7 @@ int net_dupsd(int sockfd, int minsd)
 
   /* Duplicate the socket state */
 
-  ret = net_clone(psock1, psock2);
+  ret = net_clone(psock, psock2);
   if (ret < 0)
     {
       goto errout_with_sockfd;
@@ -141,6 +136,26 @@ errout_with_sockfd:
 errout:
   sched_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: net_dupsd
+ *
+ * Description:
+ *   Clone a socket descriptor to an arbitrary descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup().
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
+ *
+ ****************************************************************************/
+
+int net_dupsd(int sockfd, int minsd)
+{
+  return psock_dupsd(sockfd_socket(sockfd), minsd);
 }
 
 #endif /* defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 */

@@ -59,15 +59,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_vfcntl
+ * Name: psock_vfcntl
  *
  * Description:
  *   Performs fcntl operations on socket
  *
  * Input Parameters:
- *   sockfd - Socket descriptor of the socket to operate on
- *   cmd    - The fcntl command.
- *   ap     - Command-specific arguments
+ *   psock - An instance of the internal socket structure.
+ *   cmd   - The fcntl command.
+ *   ap    - Command-specific arguments
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -75,12 +75,11 @@
  *
  ****************************************************************************/
 
-int net_vfcntl(int sockfd, int cmd, va_list ap)
+int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
   int ret = -EINVAL;
 
-  ninfo("sockfd=%d cmd=%d\n", sockfd, cmd);
+  ninfo("sockfd=%p cmd=%d\n", psock, cmd);
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -108,7 +107,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
         {
           /* Does not set the errno value on failure */
 
-          ret = net_dupsd(sockfd, va_arg(ap, int));
+          ret = psock_dupsd(psock, va_arg(ap, int));
         }
         break;
 
@@ -257,6 +256,66 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
   net_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: psock_fcntl
+ *
+ * Description:
+ *   Similar to the standard fcntl function except that is accepts a struct
+ *   struct socket instance instead of a file descriptor.
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   cmd   - Identifies the operation to be performed.  Command specific
+ *           arguments may follow.
+ *
+ * Returned Value:
+ *   The nature of the return value depends on the command.  Non-negative
+ *   values indicate success.  Failures are reported as negated errno
+ *   values.
+ *
+ ****************************************************************************/
+
+int psock_fcntl(FAR struct socket *psock, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let psock_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = psock_vfcntl(psock, cmd, ap);
+
+  va_end(ap);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: net_vfcntl
+ *
+ * Description:
+ *   Performs fcntl operations on socket
+ *
+ * Input Parameters:
+ *   sockfd - Socket descriptor of the socket to operate on
+ *   cmd    - The fcntl command.
+ *   ap     - Command-specific arguments
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int net_vfcntl(int sockfd, int cmd, va_list ap)
+{
+  return psock_vfcntl(sockfd_socket(sockfd), cmd, ap);
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */

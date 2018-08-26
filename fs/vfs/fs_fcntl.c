@@ -215,6 +215,46 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
 /****************************************************************************
+ * Name: file_fcntl
+ *
+ * Description:
+ *   Similar to the standard fcntl function except that is accepts a struct
+ *   struct file instance instead of a file descriptor.
+ *
+ * Input Parameters:
+ *   filep - Instance for struct file for the opened file.
+ *   cmd   - Identifies the operation to be performed.  Command specific
+ *           arguments may follow.
+ *
+ * Returned Value:
+ *   The nature of the return value depends on the command.  Non-negative
+ *   values indicate success.  Failures are reported as negated errno
+ *   values.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_fcntl(FAR struct file *filep, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let file_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = file_vfcntl(filep, cmd, ap);
+
+  va_end(ap);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: fcntl
  *
  * Description:
