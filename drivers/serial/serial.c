@@ -887,33 +887,45 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
       else
         {
+#ifdef CONFIG_SERIAL_DMA
+          /* Disable all interrupts and test again...
+           * uart_disablerxint() is insufficient for the check in DMA mode.
+           */
+
+          flags = enter_critical_section();
+#else
           /* Disable Rx interrupts and test again... */
 
           uart_disablerxint(dev);
+#endif
 
-          /* If the Rx ring buffer still empty?  Bytes may have been addded
-           * between the last time that we checked and when we disabled Rx
+          /* If the Rx ring buffer still empty?  Bytes may have been added
+           * between the last time that we checked and when we disabled
            * interrupts.
            */
 
           if (rxbuf->head == rxbuf->tail)
             {
-              /* Yes.. the buffer is still empty.  Wait for some characters
-               * to be received into the buffer with the RX interrupt re-
-               * enabled.  All interrupts are disabled briefly to assure
-               * that the following operations are atomic.
+              /* Yes.. the buffer is still empty.  We will need to wait for
+               * additional data to be received.
                */
-
-              flags = enter_critical_section();
 
 #ifdef CONFIG_SERIAL_DMA
               /* Notify DMA that there is free space in the RX buffer */
 
               uart_dmarxfree(dev);
-#endif
+#else
+              /* Wait with the RX interrupt re-enabled.  All interrupts are
+               * disabled briefly to assure that the following operations
+               * are atomic.
+               */
+
+              flags = enter_critical_section();
+
               /* Re-enable UART Rx interrupts */
 
               uart_enablerxint(dev);
+#endif
 
 #ifdef CONFIG_SERIAL_REMOVABLE
               /* Check again if the removable device is still connected
@@ -928,7 +940,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
               else
 #endif
                {
-                  /* Now wait with the Rx interrupt re-enabled.  NuttX will
+                  /* Now wait with the Rx interrupt enabled.  NuttX will
                    * automatically re-enable global interrupts when this
                    * thread goes to sleep.
                    */
@@ -979,7 +991,11 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                * the loop.
                */
 
+#ifdef CONFIG_SERIAL_DMA
+              leave_critical_section(flags);
+#else
               uart_enablerxint(dev);
+#endif
             }
         }
     }
@@ -992,9 +1008,11 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
   leave_critical_section(flags);
 #endif
 
+#ifndef CONFIG_SERIAL_DMA
   /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
 
   uart_enablerxint(dev);
+#endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
