@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/pipes/pipe_common.c
  *
- *   Copyright (C) 2008-2009, 2011, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2015-2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -721,17 +722,18 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
 
       /* Notify the POLLOUT event if the pipe is not full, but only if
-       * there is readers. */
+       * there is readers.
+       */
 
       eventset = 0;
-      if (nbytes < (dev->d_bufsize - 1))
+      if ((filep->f_oflags & O_WROK) && (nbytes < (dev->d_bufsize - 1)))
         {
           eventset |= POLLOUT;
         }
 
       /* Notify the POLLIN event if the pipe is not empty */
 
-      if (nbytes > 0)
+      if ((filep->f_oflags & O_RDOK) && (nbytes > 0))
         {
           eventset |= POLLIN;
         }
