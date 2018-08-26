@@ -39,11 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
-
-#include <sys/stat.h>
 
 #include <nuttx/fs/fs.h>
 #include "inode/inode.h"

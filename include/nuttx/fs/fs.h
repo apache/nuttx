@@ -189,13 +189,18 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* Forward references */
+
+struct file;
+struct inode;
+struct stat;
+struct statfs;
+struct pollfd;
+struct fs_dirent_s;
+
 /* This structure is provided by devices when they are registered with the
  * system.  It is used to call back to perform device specific operations.
  */
-
-struct file;   /* Forward reference */
-struct pollfd; /* Forward reference */
-struct inode;  /* Forward reference */
 
 struct file_operations
 {
@@ -264,10 +269,6 @@ struct block_operations
  * struct file_operations or struct mountpt_operations
  */
 
-struct inode;
-struct fs_dirent_s;
-struct stat;
-struct statfs;
 struct mountpt_operations
 {
   /* The mountpoint open method differs from the driver open method
