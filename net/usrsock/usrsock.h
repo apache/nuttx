@@ -404,6 +404,80 @@ int usrsock_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
+ * Name: usrsock_listen
+ *
+ * Description:
+ *   To accept connections, a socket is first created with psock_socket(), a
+ *   willingness to accept incoming connections and a queue limit for
+ *   incoming connections are specified with psock_listen(), and then the
+ *   connections are accepted with psock_accept().  For the case of AFINET
+ *   and AFINET6 sockets, psock_listen() calls this function.  The
+ *   psock_listen() call applies only to sockets of type SOCK_STREAM or
+ *   SOCK_SEQPACKET.
+ *
+ * Parameters:
+ *   psock    Reference to an internal, bound socket structure.
+ *   backlog  The maximum length the queue of pending connections may grow.
+ *            If a connection request arrives with the queue full, the client
+ *            may receive an error with an indication of ECONNREFUSED or,
+ *            if the underlying protocol supports retransmission, the request
+ *            may be ignored so that retries succeed.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, a negated errno value is
+ *   returned.  See list() for the set of appropriate error values.
+ *
+ ****************************************************************************/
+
+int usrsock_listen(FAR struct socket *psock, int backlog);
+
+/****************************************************************************
+ * Name: usrsock_accept
+ *
+ * Description:
+ *   The usrsock_sockif_accept function is used with connection-based socket
+ *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
+ *   connection request on the queue of pending connections, creates a new
+ *   connected socket with mostly the same properties as 'sockfd', and
+ *   allocates a new socket descriptor for the socket, which is returned. The
+ *   newly created socket is no longer in the listening state. The original
+ *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an inet_accept.
+ *
+ *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   socket(), bound to a local address with bind(), and is listening for
+ *   connections after a call to listen().
+ *
+ *   On return, the 'addr' structure is filled in with the address of the
+ *   connecting entity. The 'addrlen' argument initially contains the size
+ *   of the structure pointed to by 'addr'; on return it will contain the
+ *   actual length of the address returned.
+ *
+ *   If no pending connections are present on the queue, and the socket is
+ *   not marked as non-blocking, inet_accept blocks the caller until a
+ *   connection is present. If the socket is marked non-blocking and no
+ *   pending connections are present on the queue, inet_accept returns
+ *   EAGAIN.
+ *
+ * Parameters:
+ *   psock    Reference to the listening socket structure
+ *   addr     Receives the address of the connecting client
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   newsock  Location to return the accepted socket information.
+ *
+ * Returned Value:
+ *   Returns 0 (OK) on success.  On failure, it returns a negated errno
+ *   value.  See accept() for a desrciption of the approriate error value.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                   FAR socklen_t *addrlen, FAR struct socket *newsock);
+
+/****************************************************************************
  * Name: usrsock_poll
  *
  * Description:
@@ -556,6 +630,46 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
 
 int usrsock_getsockname(FAR struct socket *psock,
                         FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+
+/****************************************************************************
+ * Name: usrsock_getpeername
+ *
+ * Description:
+ *   The getpeername() function retrieves the remote-connected name of the
+ *   specified socket, stores this address in the sockaddr structure pointed
+ *   to by the 'addr' argument, and stores the length of this address in the
+ *   object pointed to by the 'addrlen' argument.
+ *
+ *   If the actual length of the address is greater than the length of the
+ *   supplied sockaddr structure, the stored address will be truncated.
+ *
+ *   If the socket has not been bound to a local name, the value stored in
+ *   the object pointed to by address is unspecified.
+ *
+ * Input Parameters:
+ *   conn     usrsock socket connection structure
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ ****************************************************************************/
+
+int usrsock_getpeername(FAR struct socket *psock,
+                        FAR struct sockaddr *addr, FAR socklen_t *addrlen);
+
+/****************************************************************************
+ * Name: usrsock_ioctl
+ *
+ * Description:
+ *   The usrsock_ioctl() function performs network device specific operations.
+ *
+ * Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ ****************************************************************************/
+
+int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg, size_t arglen);
 
 #undef EXTERN
 #ifdef __cplusplus

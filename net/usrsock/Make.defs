@@ -38,10 +38,11 @@
 ifeq ($(CONFIG_NET_USRSOCK),y)
 
 NET_CSRCS += usrsock_close.c usrsock_conn.c usrsock_bind.c usrsock_connect.c
-NET_CSRCS += usrsock_dev.c
+NET_CSRCS += usrsock_dev.c usrsock_getpeername.c
 NET_CSRCS += usrsock_event.c usrsock_getsockname.c usrsock_getsockopt.c
 NET_CSRCS += usrsock_poll.c usrsock_recvfrom.c usrsock_sendto.c
 NET_CSRCS += usrsock_setsockopt.c usrsock_socket.c usrsock_sockif.c
+NET_CSRCS += usrsock_accept.c usrsock_listen.c usrsock_ioctl.c
 
 # Include User Socket build support
 
