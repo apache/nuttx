@@ -253,6 +253,8 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
   int ret = -EBUSY;
 
   (void)nxsem_init(&pstate->recvsem, 0, 0);
+  nxsem_setprotocol(&pstate->recvsem, SEM_PRIO_NONE);
+
   pstate->conn   = conn;
   pstate->result = -EAGAIN;
   pstate->completed = false;
@@ -299,6 +301,7 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate)
   /* Make sure that no further events are processed */
 
   devif_conn_callback_free(NULL, pstate->cb, &conn->list);
+  nxsem_destroy(&pstate->recvsem);
 
   pstate->cb = NULL;
 }

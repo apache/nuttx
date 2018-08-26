@@ -274,8 +274,8 @@ static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
 {
   int conn_idx;
 
-#if CONFIG_NET_USRSOCK_CONNS > 255
-#  error "CONFIG_NET_USRSOCK_CONNS too large (over 255)"
+#if CONFIG_NET_USRSOCK_CONNS > 254
+#  error "CONFIG_NET_USRSOCK_CONNS too large (over 254)"
 #endif
 
   /* Each connection can one only one request/response pending. So map
@@ -1240,6 +1240,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
   else
     {
       ninfo("usockid=%d; daemon abruptly closed /usr/usrsock.\n", conn->usockid);
+      ret = -ESHUTDOWN;
     }
 
   /* Free request line for next command. */
@@ -1248,7 +1249,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   --dev->req.nbusy; /* net_lock held. */
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1268,6 +1269,7 @@ void usrsockdev_register(void)
   nxsem_init(&g_usrsockdev.devsem, 0, 1);
   nxsem_init(&g_usrsockdev.req.sem, 0, 1);
   nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
+  nxsem_setprotocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
 
   (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666, &g_usrsockdev);
 }
