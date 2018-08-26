@@ -45,6 +45,7 @@
 #ifdef CONFIG_NET_USRSOCK
 
 #include <sys/types.h>
+#include <sys/uio.h>
 #include <queue.h>
 #include <semaphore.h>
 
@@ -83,12 +84,6 @@ enum usrsock_conn_state_e
   USRSOCK_CONN_STATE_ABORTED,
   USRSOCK_CONN_STATE_READY,
   USRSOCK_CONN_STATE_CONNECTING,
-};
-
-struct iovec
-{
-  FAR void *iov_base; /* Starting address */
-  size_t iov_len;     /* Number of bytes to transfer */
 };
 
 struct usrsock_conn_s
