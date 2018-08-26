@@ -1065,14 +1065,11 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   hostfs_semtake(fs);
 
-  /* Implement the logic!! */
-
-  memset(buf, 0, sizeof(struct statfs));
-  buf->f_type = HOSTFS_MAGIC;
-
   /* Call the host fs to perform the statfs */
 
+  memset(buf, 0, sizeof(struct statfs));
   ret = host_statfs(fs->fs_root, buf);
+  buf->f_type = HOSTFS_MAGIC;
 
   hostfs_semgive(fs);
   return ret;
