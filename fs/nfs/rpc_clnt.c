@@ -475,7 +475,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
    */
 
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
-  request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER1);
+  request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
   request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
   request.sdata.pmap.port = 0;
 
@@ -504,7 +504,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
   strncpy(request.mountd.mount.rpath, rpc->rc_path, 90);
   request.mountd.mount.len =  txdr_unsigned(sizeof(request.mountd.mount.rpath));
 
-  error = rpcclnt_request(rpc, RPCMNT_MOUNT, RPCPROG_MNT, RPCMNT_VER1,
+  error = rpcclnt_request(rpc, RPCMNT_MOUNT, RPCPROG_MNT, RPCMNT_VER3,
                           (FAR void *)&request.mountd, sizeof(struct call_args_mount),
                           (FAR void *)&response.mdata, sizeof(struct rpc_reply_mount));
   if (error != 0)
@@ -520,7 +520,8 @@ int rpcclnt_connect(struct rpcclnt *rpc)
       goto bad;
     }
 
-  memcpy(&rpc->rc_fh, &response.mdata.mount.fhandle, sizeof(nfsfh_t));
+  rpc->rc_fhsize = fxdr_unsigned(uint32_t, response.mdata.mount.fhandle.length);
+  memcpy(&rpc->rc_fh, &response.mdata.mount.fhandle.handle, rpc->rc_fhsize);
 
   /* Do the RPC to get a dynamic bounding with the server using PMAP.
    * NFS port in the socket.
@@ -630,7 +631,7 @@ int rpcclnt_umount(struct rpcclnt *rpc)
     }
 
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
-  request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER1);
+  request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
   request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
   request.sdata.pmap.port = 0;
 
@@ -659,7 +660,7 @@ int rpcclnt_umount(struct rpcclnt *rpc)
   strncpy(request.mountd.umount.rpath, rpc->rc_path, 92);
   request.mountd.umount.len =  txdr_unsigned(sizeof(request.mountd.umount.rpath));
 
-  error = rpcclnt_request(rpc, RPCMNT_UMOUNT, RPCPROG_MNT, RPCMNT_VER1,
+  error = rpcclnt_request(rpc, RPCMNT_UMOUNT, RPCPROG_MNT, RPCMNT_VER3,
                           (FAR void *)&request.mountd, sizeof(struct call_args_umount),
                           (FAR void *)&response.mdata, sizeof(struct rpc_reply_umount));
   if (error != 0)

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nfs/nfs_proto.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
  *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *           Gregory Nutt <gnutt@nuttx.org>
@@ -112,7 +112,7 @@
 #define NFSERR_AUTHERR          0x40000000    /* Mark an authentication error */
 #define NFSERR_RETERR           0x80000000    /* Mark an error return for V3 */
 
-/* Sizes in bytes of various nfs rpc components */
+/* Sizes in bytes of various NFS RPC components */
 
 #define NFSX_UNSIGNED           4
 
@@ -158,7 +158,6 @@
 #define NFSPROC_COMMIT          21
 #define NFSPROC_NOOP            22
 #define NFS_NPROCS              23
-
 
 /* Constants used by the Version 3 protocol for various RPCs */
 
@@ -561,6 +560,10 @@ struct READDIR3resok
   uint32_t           value_follows;
   uint32_t           reply[1]; /* Variable length reply begins here */
 };
+
+#define SIZEOF_READDIR3resok(n) \
+   (sizeof(uint32_t) + sizeof(struct nfs_fattr) + \
+    NFSX_V3COOKIEVERF + sizeof(uint32_t) + (n))
 
 struct FS3args
 {

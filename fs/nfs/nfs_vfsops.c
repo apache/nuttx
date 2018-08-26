@@ -182,6 +182,7 @@ static int     nfs_stat(struct inode *mountpt, FAR const char *relpath,
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* nfs vfs operations. */
 
 const struct mountpt_operations nfs_operations =
@@ -1414,6 +1415,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   struct nfsmount *nmp;
   struct file_handle fhandle;
   struct nfs_fattr obj_attributes;
+  uint32_t readsize;
   uint32_t tmp;
   uint32_t *ptr;
   uint8_t *name;
@@ -1470,8 +1472,15 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   /* Number of directory entries (We currently only process one entry at a time) */
 
-  *ptr    = txdr_unsigned(nmp->nm_readdirsize);
-  reqlen += sizeof(uint32_t);
+  readsize = nmp->nm_readdirsize;
+  tmp      = SIZEOF_rpc_reply_readdir(readsize);
+  if (tmp > nmp->nm_buflen)
+    {
+      readsize -= (tmp - nmp->nm_buflen);
+    }
+
+  *ptr     = txdr_unsigned(readsize);
+  reqlen  += sizeof(uint32_t);
 
   /* And read the directory */
 
@@ -1949,6 +1958,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   nmp->nm_mounted        = true;
   nmp->nm_so             = nmp->nm_rpcclnt->rc_so;
+  nmp->nm_fhsize         = nmp->nm_rpcclnt->rc_fhsize;
   memcpy(&nmp->nm_fh, &nmp->nm_rpcclnt->rc_fh, sizeof(nfsfh_t));
 
   /* Get the file attributes */

@@ -202,21 +202,26 @@ struct call_args_umount
   char rpath[90];
 };
 
-struct call_result_mount
-{
-  uint32_t status;
-  nfsfh_t fhandle;
-};
-
-/* Generic RPC call headers */
-
 enum auth_flavor
 {
   AUTH_NONE  = 0,
   AUTH_SYS   = 1,
-  AUTH_SHORT = 2
+  AUTH_SHORT = 2,
+  AUTH_DES   = 3,
+  AUTH_MAX
+
   /* and more to be defined */
 };
+
+struct call_result_mount
+{
+  uint32_t status;
+  struct file_handle fhandle;
+  uint32_t authlen;
+  uint32_t autolist[AUTH_MAX];
+};
+
+/* Generic RPC call headers */
 
 struct rpc_auth_info
 {
@@ -396,7 +401,10 @@ struct rpc_reply_read
   uint32_t status;
   struct READ3resok read;        /* Variable length */
 };
-#define SIZEOF_rpc_reply_read(n) (sizeof(struct rpc_reply_header) + sizeof(uint32_t) + SIZEOF_READ3resok(n))
+
+#define SIZEOF_rpc_reply_read(n) \
+  (sizeof(struct rpc_reply_header) + sizeof(uint32_t) + \
+   SIZEOF_READ3resok(n))
 
 struct rpc_reply_remove
 {
@@ -433,6 +441,10 @@ struct rpc_reply_readdir
   struct READDIR3resok readdir;
 };
 
+#define SIZEOF_rpc_reply_readdir(n) \
+  (sizeof(struct rpc_reply_header) + sizeof(uint32_t) + \
+   SIZEOF_READDIR3resok(n))
+
 struct rpc_reply_fsinfo
 {
   struct rpc_reply_header rh;
@@ -464,6 +476,7 @@ struct rpc_reply_setattr
 struct  rpcclnt
 {
   nfsfh_t  rc_fh;             /* File handle of the root directory */
+  uint8_t  rc_fhsize;         /* File size of the root directory */
   char    *rc_path;           /* Server's path of the mounted directory */
 
   struct  sockaddr *rc_name;
