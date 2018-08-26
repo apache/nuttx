@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/serial/serial.h
  *
- *   Copyright (C) 2007-2008, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2012-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -288,6 +288,10 @@ struct uart_dev_s
   tcflag_t             tc_lflag;     /* Local modes */
 #endif
 
+#ifdef CONFIG_SERIAL_SIGKILL_CHAR
+  pid_t                 pid;         /* Thread PID to receive SIGKILL signals (-1 if none) */
+#endif
+
   /* Semaphores */
 
   sem_t                closesem;     /* Locks out new open while close is in progress */
@@ -480,6 +484,17 @@ void uart_recvchars_dma(FAR uart_dev_t *dev);
 #ifdef CONFIG_SERIAL_DMA
 void uart_recvchars_done(FAR uart_dev_t *dev);
 #endif
+
+/************************************************************************************
+ * Name: uart_reset_sem
+ *
+ * Description:
+ *   This function is called when need reset uart semphore, this may used in kill one
+ *   process, but this process was reading/writing with the semphore.
+ *
+ ************************************************************************************/
+
+void uart_reset_sem(FAR uart_dev_t *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial_io.c
  *
- *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,6 +123,9 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int watermark;
 #endif
+#ifdef CONFIG_SIG_SIGKILL
+  bool needkill = false;
+#endif
   unsigned int status;
   int nexthead = rxbuf->head + 1;
   uint16_t nbytes = 0;
@@ -194,7 +197,23 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #endif
 #endif
 
+      /* Get this next character from the hardware */
+
       ch = uart_receive(dev, &status);
+
+#ifdef CONFIG_SIG_SIGKILL
+      /* Is this the special character that will generate the SIGKILL signal? */
+
+      if (dev->pid >= 0 && ch == CONFIG_SERIAL_SIGKILL_CHAR)
+        {
+          /* Yes.. not the the kill is needed and do not put the character into
+           * the Rx buffer.  It should not be read as normal data.
+           */
+
+          needkill = true;
+        }
+      else
+#endif
 
       /* If the RX buffer becomes full, then the serial data is discarded.  This is
        * necessary because on most serial hardware, you must read the data in order
@@ -229,4 +248,14 @@ void uart_recvchars(FAR uart_dev_t *dev)
     {
       uart_datareceived(dev);
     }
+
+#ifdef CONFIG_SIG_SIGKILL
+  /* Send the SIGKILL signal if needed */
+
+  if (needkill)
+    {
+      kill(dev->pid, SIGKILL);
+      uart_reset_sem(dev);
+    }
+#endif
 }

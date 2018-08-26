@@ -1184,6 +1184,15 @@ config SIG_EVTHREAD
 		different mechanism would need to be development to support this
 		feature on the PROTECTED or KERNEL build.
 
+config SIG_SIGKILL
+	bool "Support SIGKILL"
+	default n
+	depends on !DISABLE_SIGNALS
+	---help---
+		Whether support Ctrl-c/x event, or kill -9 cmd.
+
+		NOTE: SIGINT is normally sent by Ctrl-C in other systems.
+
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS
 
@@ -1222,6 +1231,16 @@ config SIG_POLL
 	---help---
 		The SIGPOLL signal is sent to a process when an asynchronous I/O
 		event occurs (meaning it has been polled).  Default: 5
+
+config SIG_KILL
+	int "SIGKILL"
+	default 9
+	depends on SIG_SIGKILL
+	---help---
+		The SIGKILL signal is sent to a process when Ctrl-c/x event,
+		or cmd kill -9 xx happened.
+
+		NOTE: SIGINT is normally sent by Ctrl-C in other systems.
 
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"

@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -703,14 +703,7 @@ static int uart_close(FAR struct file *filep)
    * a thread currently blocking on any of them.
    */
 
-  nxsem_reset(&dev->xmitsem,  0);
-  nxsem_reset(&dev->recvsem,  0);
-  nxsem_reset(&dev->xmit.sem, 1);
-  nxsem_reset(&dev->recv.sem, 1);
-#ifndef CONFIG_DISABLE_POLL
-  nxsem_reset(&dev->pollsem,  1);
-#endif
-
+  uart_reset_sem(dev);
   uart_givesem(&dev->closesem);
   return OK;
 }
@@ -1376,6 +1369,25 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 #endif
+
+#ifdef CONFIG_SERIAL_SIGKILL_CHAR
+          case TIOCSCTTY:
+            {
+              /* REVISIT:  This only applies to console devices (TTYs).  In
+               * reality, this feature should be controlled by TERMIOS ISIG
+               * c_lflag setting.
+               */
+
+             if (dev->isconsole)
+               {
+                  /* Save the PID of the recipient of the SIGKILL signal. */
+
+                  dev->pid = (pid_t)arg;
+                  DEBUGASSERT((unsigned long)dev->pid = arg);
+               }
+            }
+            break;
+#endif
         }
     }
 
@@ -1584,6 +1596,12 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
+#ifdef CONFIG_SERIAL_SIGKILL_CHAR
+  /* Initialize  of the task that will receive SIGKILL signals. */
+
+  dev->pid = -1;
+#endif
+
   /* Initialize semaphores */
 
   nxsem_init(&dev->xmit.sem, 0, 1);
@@ -1728,3 +1746,23 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
   leave_critical_section(flags);
 }
 #endif
+
+/************************************************************************************
+ * Name: uart_reset_sem
+ *
+ * Description:
+ *   This function is called when need reset uart semphore, this may used in kill one
+ *   process, but this process was reading/writing with the semphore.
+ *
+ ************************************************************************************/
+
+void uart_reset_sem(FAR uart_dev_t *dev)
+{
+  nxsem_reset(&dev->xmitsem,  0);
+  nxsem_reset(&dev->recvsem,  0);
+  nxsem_reset(&dev->xmit.sem, 1);
+  nxsem_reset(&dev->recv.sem, 1);
+#ifndef CONFIG_DISABLE_POLL
+  nxsem_reset(&dev->pollsem,  1);
+#endif
+}

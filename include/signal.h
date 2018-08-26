@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/signal.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,6 +166,14 @@
 #    define SIGPOLL     5  /* Sent when an asynchronous I/O event occurs */
 #  else
 #    define SIGPOLL     CONFIG_SIG_POLL
+#  endif
+#endif
+
+#ifdef CONFIG_SIG_SIGKILL
+#  ifndef CONFIG_SIG_KILL
+#    define SIGKILL     9  /* Sent when ctrl-c event (vs. standard SIGINT)  */
+#  else
+#    define SIGKILL     CONFIG_SIG_KILL
 #  endif
 #endif
 

@@ -42,21 +42,84 @@
 #include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
+#include "group/group.h"
 #include "sched/sched.h"
 #include "task/task.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This is an artificial limit to detect error conditions where an argv[]
  * list is not properly terminated.
  */
 
 #define MAX_START_ARGS 256
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: task_sigkill_action
+ *
+ * Description:
+ *   This is the default action for the SIGKILL signal.
+ *
+ *   REVISIT:  I think there is an issue here in the PROTECTED and KERNEL
+ *   build modes.  In those cases, the signal handler will go through a
+ *   trampoline that drops to user mode for execution of the signal handler.
+ *   In the PROTECTED mode, this will forward the call to here in user mode
+ *   which will result in a crash.  The behavior in KERNEL mode in
+ *   indeterminate.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_SIGKILL
+static void task_sigkill_action(int signo, siginfo_t *siginfo, void *arg)
+{
+#ifdef HAVE_GROUP_MEMBERS
+  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
+  group_killchildren(tcb);
+#endif
+  exit(EXIT_FAILURE);
+}
+
+/****************************************************************************
+ * Name: task_setup_sigkill
+ *
+ * Description:
+ *   Setup the default action for the SIGKILL signal
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void task_setup_sigkill(void)
+{
+  struct sigaction sa;
+
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_sigaction = task_sigkill_action;
+  sa.sa_flags     = SA_SIGINFO;
+  sigaction(SIGKILL, &sa, NULL);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -85,6 +148,12 @@ void task_start(void)
   int argc;
 
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+
+  /* Set up default signal actions */
+
+#ifdef CONFIG_SIG_SIGKILL
+  task_setup_sigkill();
+#endif
 
   /* Execute the start hook if one has been registered */
 

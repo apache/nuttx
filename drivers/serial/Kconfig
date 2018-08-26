@@ -19,6 +19,18 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
+config SERIAL_SIGKILL_CHAR
+	int "Serial parse SIGKILL characters"
+	default 3 if SERIAL_CONSOLE
+	default 4 if !SERIAL_CONSOLE
+	depends on SIG_SIGKILL
+	---help---
+		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
+		send a SIGKILL event.  Other charcters may also be selected.
+
+		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
+		End-of-File character that should close the stream.
+
 menuconfig 16550_UART
 	bool "16550 UART Chip support"
 	default n

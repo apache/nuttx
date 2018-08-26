@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 21, 2018)
+NuttX TODO List (Last updated August 26, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -21,7 +21,7 @@ nuttx/:
   (5)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
-  (2)  Other drivers (drivers/)
+  (1)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
@@ -2137,14 +2137,6 @@ o Other drivers (drivers/)
   Priority:    Low.  It would be a convenience and would simplify crash
                debug if you could see all of the SYSLOG output up to the
                time of the crash.  But not essential.
-
-  Title:       ADD SUPPORT FOR CONTROL-C
-  Description: Add support for control-C interrupts and perhaps other
-               interrupts generated from a keyboard.
-  Status:      Open
-  Priority:    Low.  This would make working with tasks at the NSH terminal
-               more like working with processes via a Bash shell.  That is
-               a feature enhancement.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

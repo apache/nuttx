@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial_dma.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author:  Max Neklyudov <macscomp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,67 @@
 #include <nuttx/serial/serial.h>
 
 #ifdef CONFIG_SERIAL_DMA
+
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: uart_check_sigkill
+ *
+ * Description:
+ *   Check if the SIGKILL character is in the contiguous Rx DMA buffer region.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SIG_SIGKILL
+static bool uart_check_sigkill(const char *buf, size_t size)
+{
+  size_t i;
+
+  for (i = 0; i < size; i++)
+    {
+      if (buf[i] == CONFIG_SERIAL_SIGKILL_CHAR)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+#endif
+
+/************************************************************************************
+ * Name: uart_recvchars_sigkill
+ *
+ * Description:
+ *   Check if the SIGKILL character is anywhere in the newly received DMA buffer.
+ *
+ *   REVISIT:  We must also remove the SIGKILL character from the Rx buffer.  It
+ *   should not be read as normal data by the caller.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SIG_SIGKILL
+static bool uart_recvchars_sigkill(FAR uart_dev_t *dev)
+{
+  FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
+
+  if (xfer->nbytes <= xfer->length)
+    {
+      return uart_check_sigkill(xfer->buffer, xfer->nbytes);
+    }
+  else
+    {
+      if (uart_check_sigkill(xfer->buffer, xfer->length))
+        {
+          return true;
+        }
+
+      return uart_check_sigkill(xfer->nbuffer, xfer->nbytes - xfer->length);
+    }
+}
+#endif
 
 /************************************************************************************
  * Public Functions
@@ -250,6 +311,16 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
+#ifdef CONFIG_SIG_SIGKILL
+  bool needkill = false;
+
+  /* Check if the SIGKILL character is anywhere in the newly received DMA buffer. */
+
+  if (dev->pid >= 0 && uart_recvchars_sigkill(dev))
+    {
+      needkill = true;
+    }
+#endif
 
   /* Move head for nbytes. */
 
@@ -265,6 +336,16 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
     {
       uart_datareceived(dev);
     }
+
+#ifdef CONFIG_SIG_SIGKILL
+  /* Send the SIGKILL signal if needed */
+
+  if (needkill)
+    {
+      kill(dev->pid, SIGKILL);
+      uart_reset_sem(dev);
+    }
+#endif
 }
 
 #endif /* CONFIG_SERIAL_DMA */
