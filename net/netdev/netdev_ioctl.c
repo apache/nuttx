@@ -63,10 +63,8 @@
 #  include <nuttx/net/sixlowpan.h>
 #endif
 
-#ifdef CONFIG_NET_IGMP
-#  include <sys/sockio.h>
-#  include <nuttx/net/igmp.h>
-#endif
+#include <sys/sockio.h>
+#include <nuttx/net/igmp.h>
 
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
 #  include <nuttx/wireless/wireless.h>
@@ -1430,8 +1428,147 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: netdev_usrsock_ioctl
+ *
+ * Description:
+ *   Perform user private ioctl operations.
+ *
+ * Parameters:
+ *   psock    Socket structure
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Return:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_USRSOCK
+static int netdev_usrsock_ioctl(FAR struct socket *psock, int cmd,
+                                unsigned long arg)
+{
+  if (psock->s_sockif && psock->s_sockif->si_ioctl)
+    {
+      ssize_t arglen;
+
+      arglen = net_ioctl_arglen(cmd);
+      if (arglen < 0)
+        {
+          return arglen;
+        }
+
+      return psock->s_sockif->si_ioctl(psock, cmd, (FAR void *)arg, arglen);
+    }
+  else
+    {
+      return -ENOTTY;
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: net_ioctl_arglen
+ *
+ * Description:
+ *   Calculate the ioctl argument buffer length.
+ *
+ * Input Parameters:
+ *
+ *   cmd      The ioctl command
+ *
+ * Returned Value:
+ *   The argument buffer length, or error code.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_USRSOCK
+ssize_t net_ioctl_arglen(int cmd)
+{
+  switch (cmd)
+    {
+      case SIOCGIFADDR:
+      case SIOCSIFADDR:
+      case SIOCGIFDSTADDR:
+      case SIOCSIFDSTADDR:
+      case SIOCGIFBRDADDR:
+      case SIOCSIFBRDADDR:
+      case SIOCGIFNETMASK:
+      case SIOCSIFNETMASK:
+      case SIOCGIFMTU:
+      case SIOCGIFHWADDR:
+      case SIOCSIFHWADDR:
+      case SIOCDIFADDR:
+      case SIOCGIFCOUNT:
+      case SIOCSIFFLAGS:
+      case SIOCGIFFLAGS:
+        return sizeof(struct ifreq);
+      case SIOCGLIFADDR:
+      case SIOCSLIFADDR:
+      case SIOCGLIFDSTADDR:
+      case SIOCSLIFDSTADDR:
+      case SIOCGLIFBRDADDR:
+      case SIOCSLIFBRDADDR:
+      case SIOCGLIFNETMASK:
+      case SIOCSLIFNETMASK:
+      case SIOCGLIFMTU:
+      case SIOCIFAUTOCONF:
+        return sizeof(struct lifreq);
+      case SIOCGIFCONF:
+        return sizeof(struct ifconf);
+      case SIOCGLIFCONF:
+        return sizeof(struct lifconf);
+      case SIOCGIPMSFILTER:
+      case SIOCSIPMSFILTER:
+        return sizeof(struct ip_msfilter);
+      case SIOCSARP:
+      case SIOCDARP:
+      case SIOCGARP:
+        return sizeof(struct arpreq);
+      case SIOCADDRT:
+      case SIOCDELRT:
+        return sizeof(struct rtentry);
+      case SIOCMIINOTIFY:
+        return sizeof(struct mii_iotcl_notify_s);
+      case SIOCGMIIPHY:
+      case SIOCGMIIREG:
+      case SIOCSMIIREG:
+        return sizeof(struct mii_ioctl_data_s);
+      default:
+#ifdef CONFIG_NETDEV_IOCTL
+#  ifdef CONFIG_NETDEV_WIRELESS_IOCTL
+        if (_WLIOCVALID(cmd) && _IOC_NR(cmd) <= WL_NNETCMDS)
+          {
+            return sizeof(struct iwreq);
+          }
+#  endif
+#  ifdef CONFIG_WIRELESS_IEEE802154
+        if (_MAC802154IOCVALID(cmd))
+          {
+            return sizeof(struct ieee802154_netmac_s);
+          }
+#  endif
+#  ifdef CONFIG_WIRELESS_PKTRADIO
+        if (WL_ISPKTRADIOCMD(cmd))
+          {
+            return sizeof(struct pktradio_ifreq_s);
+          }
+#  endif
+#  ifdef CONFIG_WIRELESS_BLUETOOTH
+        if (WL_IBLUETOOTHCMD(cmd))
+          {
+            return sizeof(struct btreq_s);
+          }
+#  endif
+#endif
+        return -ENOTTY;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: psock_ioctl
@@ -1477,7 +1614,17 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
   /* Execute the command.  First check for a standard network IOCTL command. */
 
-  ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+#ifdef CONFIG_NET_USRSOCK
+  /* Check for a USRSOCK ioctl command */
+
+  ret = netdev_usrsock_ioctl(psock, cmd, arg);
+  if (ret == -ENOTTY)
+#endif
+    {
+      /* Check for a standard network IOCTL command. */
+
+      ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+    }
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
   /* Check for a wireless network command */

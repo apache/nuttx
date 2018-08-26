@@ -46,8 +46,6 @@
 
 #include <nuttx/net/ioctl.h>
 
-#ifdef CONFIG_NET_ROUTE
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -131,5 +129,4 @@ int delroute(int sockfd, FAR struct sockaddr_storage *target,
 }
 #endif
 
-#endif /* CONFIG_NET_ROUTE */
 #endif /* __INCLUDE_NET_ROUTE_H */
