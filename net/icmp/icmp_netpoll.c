@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_netpoll.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <nuttx/net/net.h>
 
 #include <devif/devif.h>
+#include "netdev/netdev.h"
 #include "icmp/icmp.h"
 
 #ifdef CONFIG_MM_IOB
@@ -182,7 +183,7 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct devif_callback_s *cb;
   int ret;
 
-  DEBUGASSERT(conn != NULL && fds != NULL && conn->dev != NULL);
+  DEBUGASSERT(conn != NULL && fds != NULL);
 
   /* Allocate a container to hold the poll information */
 
@@ -200,6 +201,11 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    * NOTE: in the event that the local socket is bound to INADDR_ANY, the
    * dev value will be zero and there will be no NETDEV_DOWN notifications.
    */
+
+  if (conn->dev == NULL)
+    {
+      conn->dev = netdev_default();
+    }
 
   /* Allocate a ICMP callback structure */
 
@@ -227,12 +233,12 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if ((info->fds->events & POLLOUT) != 0)
     {
-      cb->flags |= UDP_POLL;
+      cb->flags |= ICMP_POLL;
     }
 
   if ((info->fds->events & POLLIN) != 0)
     {
-      cb->flags |= UDP_NEWDATA;
+      cb->flags |= ICMP_NEWDATA;
     }
 
   if ((info->fds->events & (POLLHUP | POLLERR)) != 0)
