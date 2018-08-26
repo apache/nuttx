@@ -49,8 +49,6 @@
 #include <stdint.h>
 #include <net/ethernet.h>
 
-#ifdef CONFIG_NET_ETHERNET
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -138,5 +136,4 @@ EXTERN const struct ether_addr g_ipv6_ethallrouters;  /* All link local routers 
 }
 #endif
 
-#endif /* CONFIG_NET_ETHERNET */
 #endif /* __INCLUDE_NUTTX_NET_ETHERNET_H */
