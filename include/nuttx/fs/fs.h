@@ -499,7 +499,7 @@ void fs_initialize(void);
  * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - inmode privileges (not used)
+ *   mode - Access privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -526,7 +526,7 @@ int register_driver(FAR const char *path,
  * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - inmode privileges (not used)
+ *   mode - Access privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -881,7 +881,7 @@ int fs_getfilep(int fd, FAR struct file **filep);
  * Name: file_read
  *
  * Description:
- *   file_read() is an interanl OS interface.  It is functionally similar to
+ *   file_read() is an internal OS interface.  It is functionally similar to
  *   the standard read() interface except:
  *
  *    - It does not modify the errno variable,
@@ -908,7 +908,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
  * Name: nx_read
  *
  * Description:
- *   nx_read() is an interanl OS interface.  It is functionally similar to
+ *   nx_read() is an internal OS interface.  It is functionally similar to
  *   the standard read() interface except:
  *
  *    - It does not modify the errno variable, and
@@ -945,7 +945,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
  * Name: nx_write
  *
  * Description:
- *  nx_write() writes up to nytes bytes to the file referenced by the file
+ *  nx_write() writes up to nbytes bytes to the file referenced by the file
  *  descriptor fd from the buffer starting at buf.  nx_write() is an
  *  internal OS function.  It is functionally equivalent to write() except
  *  that:
@@ -961,7 +961,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
  * Returned Value:
  *  On success, the number of bytes written are returned (zero indicates
  *  nothing was written).  On any failure, a negated errno value is returned
- *  (see comments withwrite() for a description of the appropriate errno
+ *  (see comments with write() for a description of the appropriate errno
  *   values).
  *
  ****************************************************************************/
@@ -1089,7 +1089,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  * Name: file_poll
  *
  * Description:
- *   Low-level poll operation based on struc file.  This is used both to (1)
+ *   Low-level poll operation based on struct file.  This is used both to (1)
  *   support detached file, and also (2) by fdesc_poll() to perform all
  *   normal operations on file descriptors descriptors.
  *
@@ -1106,6 +1106,33 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+#endif
+
+/****************************************************************************
+ * Name: file_fstat
+ *
+ * Description:
+ *   file_fstat() is an internal OS interface.  It is functionally similar to
+ *   the standard fstat() interface except:
+ *
+ *    - It does not modify the errno variable,
+ *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
+ *    - It accepts a file structure instance instead of file descriptor.
+ *
+ * Input Parameters:
+ *   filep  - File structure instance
+ *   buf    - The caller provide location in which to return information about
+ *            the open file.
+ *
+ * Returned Value:
+ *   Upon successful completion, 0 shall be returned. Otherwise, -1 shall be
+ *   returned and errno set to indicate the error.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int file_fstat(FAR struct file *filep, FAR struct stat *buf);
 #endif
 
 /****************************************************************************
