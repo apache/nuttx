@@ -63,14 +63,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* The architecture must provide up_putc for this driver */
-
-#ifndef CONFIG_ARCH_LOWPUTC
-#  error "Architecture must provide up_putc() for this driver"
-#endif
-
-#define uart_putc(ch) up_putc(ch)
-
 /* Check watermark levels */
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
@@ -359,6 +351,19 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 }
 
 /************************************************************************************
+ * Name: uart_putc
+ ************************************************************************************/
+
+static inline void uart_putc(FAR uart_dev_t *dev, int ch)
+{
+  while (!uart_txready(dev))
+    {
+    }
+
+  uart_send(dev, ch);
+}
+
+/************************************************************************************
  * Name: uart_irqwrite
  ************************************************************************************/
 
@@ -373,16 +378,16 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
     {
       int ch = *buffer++;
 
-     /* If this is the console, then we should replace LF with CR-LF */
+      /* If this is the console, then we should replace LF with CR-LF */
 
-      if (ch == '\n')
+      if (dev->isconsole && ch == '\n')
         {
-          uart_putc('\r');
+          uart_putc(dev, '\r');
         }
 
       /* Output the character, using the low-level direct UART interfaces */
 
-      uart_putc(ch);
+      uart_putc(dev, ch);
     }
 
   return ret;
@@ -1062,13 +1067,15 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
   int               ret;
   char              ch;
 
-  /* We may receive console writes through this path from interrupt handlers and
+  /* We may receive serial writes through this path from interrupt handlers and
    * from debug output in the IDLE task!  In these cases, we will need to do things
    * a little differently.
    */
 
   if (up_interrupt_context() || sched_idletask())
     {
+      irqstate_t flags;
+
 #ifdef CONFIG_SERIAL_REMOVABLE
       /* If the removable device is no longer connected, refuse to write to
        * the device.
@@ -1080,21 +1087,11 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
         }
 #endif
 
-      /* up_putc() will be used to generate the output in a busy-wait loop.
-       * up_putc() is only available for the console device.
-       */
+      flags = enter_critical_section();
+      ret = uart_irqwrite(dev, buffer, buflen);
+      leave_critical_section(flags);
 
-      if (dev->isconsole)
-        {
-          irqstate_t flags = enter_critical_section();
-          ret = uart_irqwrite(dev, buffer, buflen);
-          leave_critical_section(flags);
-          return ret;
-        }
-      else
-        {
-          return -EPERM;
-        }
+      return ret;
     }
 
   /* Only one user can access dev->xmit.head at a time */
