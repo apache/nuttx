@@ -99,8 +99,6 @@
 
 #if CONFIG_NET_SLIP_PKTSIZE < 296
 #  error "CONFIG_NET_SLIP_PKTSIZE >= 296 is required"
-#elif CONFIG_NET_SLIP_PKTSIZE > 296
-#  warning "CONFIG_NET_SLIP_PKTSIZE == 296 is optimal"
 #endif
 
 /* CONFIG_NET_SLIP_NINTERFACES determines the number of physical interfaces

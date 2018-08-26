@@ -61,7 +61,7 @@ config NET_ETH_PKTSIZE
 		size 1514.
 
 config NET_SLIP_PKTSIZE
-	int # "SLIP packet buffer size"
+	int "SLIP packet buffer size"
 	default 296
 	depends on NET_SLIP
 	range 296 1518
