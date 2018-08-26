@@ -95,6 +95,13 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
+
 #ifdef CONFIG_NET_USRSOCK
   if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
@@ -450,14 +457,8 @@ int setsockopt(int sockfd, int level, int option, const void *value, socklen_t v
   int ret;
 
   /* Get the underlying socket structure */
-  /* Verify that the sockfd corresponds to valid, allocated socket */
 
   psock = sockfd_socket(sockfd);
-  if (!psock || psock->s_crefs <= 0)
-    {
-      set_errno(EBADF);
-      return ERROR;
-    }
 
   /* Then let psock_setockopt() do all of the work */
 
