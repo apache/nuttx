@@ -96,6 +96,12 @@ static int  u16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  u16550_receive(FAR struct uart_dev_s *dev, uint32_t *status);
 static void u16550_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
+#ifdef CONFIG_SERIAL_DMA
+static void u16550_dmasend(FAR struct uart_dev_s *dev);
+static void u16550_dmareceive(FAR struct uart_dev_s *dev);
+static void u16550_dmarxfree(FAR struct uart_dev_s *dev);
+static void u16550_dmatxavail(FAR struct uart_dev_s *dev);
+#endif
 static void u16550_send(FAR struct uart_dev_s *dev, int ch);
 static void u16550_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_txready(FAR struct uart_dev_s *dev);
@@ -117,6 +123,12 @@ static const struct uart_ops_s g_uart_ops =
   .rxavailable    = u16550_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol  = NULL,
+#endif
+#ifdef CONFIG_SERIAL_DMA
+  .dmasend        = u16550_dmasend,
+  .dmareceive     = u16550_dmareceive,
+  .dmarxfree      = u16550_dmarxfree,
+  .dmatxavail     = u16550_dmatxavail,
 #endif
   .send           = u16550_send,
   .txint          = u16550_txint,
@@ -969,6 +981,32 @@ static bool u16550_rxavailable(struct uart_dev_s *dev)
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   return ((u16550_serialin(priv, UART_LSR_OFFSET) & UART_LSR_DR) != 0);
 }
+
+/****************************************************************************
+ * Name: u16550_dma*
+ *
+ * Description:
+ *   Stubbed out DMA-related methods
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_DMA
+static void u16550_dmasend(FAR struct uart_dev_s *dev)
+{
+}
+
+static void u16550_dmareceive(FAR struct uart_dev_s *dev)
+{
+}
+
+static void u16550_dmarxfree(FAR struct uart_dev_s *dev)
+{
+}
+
+static void u16550_dmatxavail(FAR struct uart_dev_s *dev)
+{
+}
+#endif
 
 /****************************************************************************
  * Name: u16550_send
