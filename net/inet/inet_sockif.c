@@ -62,6 +62,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
+
 static int        inet_setup(FAR struct socket *psock, int protocol);
 static sockcaps_t inet_sockcaps(FAR struct socket *psock);
 static void       inet_addref(FAR struct socket *psock);
@@ -1288,6 +1290,8 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
 #endif
 }
 #endif
+
+#endif /* NET_UDP_HAVE_STACK || NET_TCP_HAVE_STACK */
 
 /****************************************************************************
  * Public Functions
