@@ -265,7 +265,8 @@ FAR struct icmp_conn_s *icmp_nextconn(FAR struct icmp_conn_s *conn)
  *
  ****************************************************************************/
 
-FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev, uint8_t id)
+FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
+                                      uint16_t id)
 {
   FAR struct icmp_conn_s *conn;
 

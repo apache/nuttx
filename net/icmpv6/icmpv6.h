@@ -589,7 +589,7 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn);
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
-                                          uint8_t id);
+                                          uint16_t id);
 #endif
 
 /****************************************************************************
