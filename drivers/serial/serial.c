@@ -1155,19 +1155,14 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
           if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
             {
               ret = uart_putxmitchar(dev, '\r', oktoblock);
-              if (ret < 0)
-                {
-                  nwritten = ret;
-                  break;
-                }
             }
 
           /* Specifically not handled:
            *
-           * OXTABS - primarily a full-screen terminal optimisation
+           * OXTABS - primarily a full-screen terminal optimization
            * ONOEOT - Unix interoperability hack
            * OLCUC  - Not specified by POSIX
-           * ONOCR  - low-speed interactive optimisation
+           * ONOCR  - low-speed interactive optimization
            */
         }
 
@@ -1182,7 +1177,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 
       /* Put the character into the transmit buffer */
 
-      if (ret == OK)
+      if (ret >= 0)
         {
           ret = uart_putxmitchar(dev, ch, oktoblock);
         }
