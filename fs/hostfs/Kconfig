@@ -7,7 +7,6 @@ config FS_HOSTFS
 	bool "Host File System"
 	default n
 	depends on !DISABLE_MOUNTPOINT
-	depends on ARCH_SIM
 	select FS_READABLE
 	select FS_WRITABLE
 	---help---
