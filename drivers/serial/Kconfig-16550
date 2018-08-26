@@ -5,6 +5,16 @@
 
 if 16550_UART
 
+config 16550_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART.  This option disables that re-ordering for 16550 UARTs.
+
 config 16550_UART0
 	bool "16550 UART0"
 	default n
@@ -306,6 +316,10 @@ config 16550_SUPRESS_CONFIG
 		This option is useful, for example, if you are using a bootloader
 		that configures the 16550_UART.  In that case, you may want to
 		just leave the existing console configuration in place.  Default: n
+
+config SERIAL_UART_ARCH_MMIO
+	bool "Platform access register through the memory mapping"
+	default n
 
 config SERIAL_UART_ARCH_IOCTL
 	bool "Platform has own custom IOCTL"

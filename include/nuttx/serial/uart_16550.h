@@ -345,8 +345,11 @@ typedef uint32_t uart_addrwidth_t;
  *
  ************************************************************************************/
 
+#ifndef CONFIG_SERIAL_UART_ARCH_MMIO
 uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset);
 void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value);
+#endif
+
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 #endif /* CONFIG_16550_UART */
