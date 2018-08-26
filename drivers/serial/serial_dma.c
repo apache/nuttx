@@ -199,8 +199,21 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
   unsigned int watermark;
 #endif
   bool is_full;
-  int nexthead = rxbuf->head + 1;
+  int nexthead;
 
+  /* If RX buffer is empty move tail and head to zero position */
+
+  if (rxbuf->head == rxbuf->tail)
+    {
+      rxbuf->head = 0;
+      rxbuf->head = 0;
+    }
+
+  /* Get the next head index and check if there is room to adding another
+   * byte to the buffer.
+   */
+
+  nexthead = rxbuf->head + 1;
   if (nexthead >= rxbuf->size)
     {
       nexthead = 0;
