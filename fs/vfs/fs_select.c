@@ -103,7 +103,7 @@
 int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
            FAR fd_set *exceptfds, FAR struct timeval *timeout)
 {
-  struct pollfd *pollset;
+  struct pollfd *pollset = NULL;
   int errcode = OK;
   int fd;
   int npfds;
@@ -133,19 +133,18 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
-  if (npfds <= 0)
-    {
-      errcode = EINVAL;
-      goto errout;
-    }
-
   /* Allocate the descriptor list for poll() */
 
-  pollset = (struct pollfd *)kmm_zalloc(npfds * sizeof(struct pollfd));
-  if (!pollset)
+  if (npfds > 0)
     {
-      errcode = ENOMEM;
-      goto errout;
+      pollset = (FAR struct pollfd *)
+        kmm_zalloc(npfds * sizeof(struct pollfd));
+
+      if (pollset == NULL)
+        {
+          errcode = ENOMEM;
+          goto errout;
+        }
     }
 
   /* Initialize the descriptor list for poll() */
