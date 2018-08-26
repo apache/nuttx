@@ -262,6 +262,16 @@
 
 #  define CONFIG_HAVE_INLINE 1
 
+/* ISO C11 supports anonymous (unnamed) structures and unions, added in
+ * GCC 4.6
+ */
+
+#  undef CONFIG_HAVE_ANONYMOUS_STRUCT
+#  if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#    define CONFIG_HAVE_ANONYMOUS_STRUCT 1
+#    define CONFIG_HAVE_ANONYMOUS_UNION 1
+#  endif
+
 /* GCC supports both types double and long long */
 
 #  ifndef __clang__
@@ -350,6 +360,11 @@
  */
 
 #  define reentrant_function __reentrant
+
+/* ISO C11 supports anonymous (unnamed) structures and unions.  Does SDCC? */
+
+#  undef CONFIG_HAVE_ANONYMOUS_STRUCT
+#  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
 /* Indicate that a local variable is not used */
 
@@ -524,6 +539,13 @@
 #  undef  CONFIG_HAVE_INLINE
 #  define inline
 
+/* ISO C11 supports anonymous (unnamed) structures and unions.  Zilog does
+ * not support C11
+ */
+
+#  undef CONFIG_HAVE_ANONYMOUS_STRUCT
+#  undef  CONFIG_HAVE_ANONYMOUS_UNION
+
 /* Older Zilog compilers support both types double and long long, but the size
  * is 32-bits (same as long and single precision) so it is safer to say that
  * they are not supported.  Later versions are more ANSII compliant and
@@ -588,6 +610,11 @@
 
 #  undef CONFIG_HAVE_CXX14
 
+/* ISO C11 supports anonymous (unnamed) structures and unions.  Does ICCARM? */
+
+#  undef CONFIG_HAVE_ANONYMOUS_STRUCT
+#  undef  CONFIG_HAVE_ANONYMOUS_UNION
+
 /* Unknown compiler *********************************************************/
 
 #else
@@ -626,6 +653,8 @@
 #  undef  CONFIG_HAVE_DOUBLE
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 #  undef  CONFIG_CAN_PASS_STRUCTS
+#  undef  CONFIG_HAVE_ANONYMOUS_STRUCT
+#  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
 #  define UNUSED(a) ((void)(a))
 
