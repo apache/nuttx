@@ -531,9 +531,22 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(dev);
   pipe_dumpbuffer("To PIPE:", (FAR uint8_t *)buffer, len);
 
+  /* Handle zero-length writes */
+
   if (len == 0)
     {
       return 0;
+    }
+
+  /* REVISIT:  "If all file descriptors referring to the read end of a pipe
+   * have been closed, then a write will cause a SIGPIPE signal to be
+   * generated for the calling process.  If the calling process is ignoring
+   * this signal, then write(2) fails with the error EPIPE."
+   */
+
+  if (dev->d_nreaders <= 0)
+    {
+      return -EPIPE;
     }
 
   /* At present, this method cannot be called from interrupt handlers.  That
