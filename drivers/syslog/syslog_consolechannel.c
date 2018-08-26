@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 #undef HAVE_LOWPUTC
-#if defined(CONFIG_SYSLOG_SERIAL_CONSOLE) && defined(CONFIG_ARCH_LOWPUTC)
+#if defined(CONFIG_ARCH_LOWPUTC)
 #  define HAVE_LOWPUTC 1
 #endif
 

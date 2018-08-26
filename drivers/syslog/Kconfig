@@ -125,6 +125,19 @@ config SYSLOG_TIMESTAMP_REALTIME
 		CLOCK_MONOTONIC, if enabled, will be used or the system timer
 		is not.
 
+config SYSLOG_PREFIX
+	bool "Prepend prefix to syslog message"
+	default n
+	---help---
+		Prepend prefix to syslog message.
+
+config SYSLOG_PREFIX_STRING
+	string "Prefix string"
+	depends on SYSLOG_PREFIX
+	default ""
+	---help---
+		The prefix string to be prepend.
+
 config SYSLOG_SERIAL_CONSOLE
 	bool
 	default n
