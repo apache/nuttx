@@ -1154,6 +1154,14 @@ static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
 }
 #endif
 
+/****************************************************************************
+ * Name: u16550_dma*
+ *
+ * Description:
+ *   Stub functions used when serial DMA is enabled.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SERIAL_DMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev)
 {
