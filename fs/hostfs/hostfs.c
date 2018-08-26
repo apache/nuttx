@@ -931,7 +931,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    */
 
   options = (const char *) data;
-  if ((strncmp(options, "fs=", 3) != 0) || (strlen(options) < 5))
+  if ((strncmp(options, "fs=", 3) != 0) || (strlen(options) < 4))
     {
       return -ENODEV;
     }
@@ -973,7 +973,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   strncpy(fs->fs_root, &options[3], sizeof(fs->fs_root));
   len = strlen(fs->fs_root);
-  if (len && fs->fs_root[len-1] == '/')
+  if (len > 1 && fs->fs_root[len - 1] == '/')
     {
       /* Remove trailing '/' */
 
@@ -992,7 +992,10 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Append a '/' to the name now */
 
-  strcat(fs->fs_root, "/");
+  if (fs->fs_root[len-1] != '/')
+    {
+      strcat(fs->fs_root, "/");
+    }
 
   *handle = (FAR void *)fs;
   hostfs_semgive(fs);
