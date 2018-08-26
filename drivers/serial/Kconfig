@@ -23,7 +23,7 @@ config SERIAL_SIGKILL_CHAR
 	int "Serial parse SIGKILL characters"
 	default 3 if SERIAL_CONSOLE
 	default 4 if !SERIAL_CONSOLE
-	depends on SIG_SIGKILL
+	depends on SIG_SIGKILL && BUILD_FLAT
 	---help---
 		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
 		send a SIGKILL event.  Other charcters may also be selected.

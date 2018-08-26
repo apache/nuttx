@@ -1371,6 +1371,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #ifdef CONFIG_SERIAL_SIGKILL_CHAR
+          /* Make the given terminal the controlling terminal of the calling process */
+
           case TIOCSCTTY:
             {
               /* REVISIT:  This only applies to console devices (TTYs).  In
