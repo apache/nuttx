@@ -62,22 +62,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: romfs_swap32
- *
- * Description:
- *   Convert the 32-bit big endian value to little endian
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ENDIAN_BIG
-static inline uint32_t romfs_swap32(uint32_t value)
-{
-  return ((((value) & 0x000000ff) << 24) | (((value) & 0x0000ff00) << 8) |
-          (((value) & 0x00ff0000) >>  8) | (((value) & 0xff000000) >> 24));
-}
-#endif
-
-/****************************************************************************
  * Name: romfs_devread32
  *
  * Description:
@@ -90,16 +74,10 @@ static inline uint32_t romfs_swap32(uint32_t value)
 
 static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
 {
-  /* Extract the value */
-
-  uint32_t value = *(FAR uint32_t *)&rm->rm_buffer[ndx];
-
-  /* Value is begin endian -- return the native host endian-ness. */
-#ifdef CONFIG_ENDIAN_BIG
-  return value;
-#else
-  return romfs_swap32(value);
-#endif
+  return ((((uint32_t)rm->rm_buffer[ndx]     & 0xff) << 24) |
+          (((uint32_t)rm->rm_buffer[ndx + 1] & 0xff) << 16) |
+          (((uint32_t)rm->rm_buffer[ndx + 2] & 0xff) << 8) |
+           ((uint32_t)rm->rm_buffer[ndx + 3] & 0xff));
 }
 
 /****************************************************************************
