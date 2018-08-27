@@ -1,0 +1,76 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ARCH_HAVE_RNG
+	bool
+
+config DEV_RANDOM
+	bool "Enable /dev/random"
+	default y
+	depends on ARCH_HAVE_RNG
+	---help---
+		Enable support for /dev/random provided by a hardware TRNG.
+
+config DEV_URANDOM
+	bool "Enable /dev/urandom"
+	default n
+	---help---
+		Enable support for /dev/urandom provided by either a hardware TRNG or
+		by a software PRNG implementation.
+
+		NOTE:  This option may not be cryptographially secure and should not
+		be enabled if you are concerned about cyptographically secure
+		pseudo-random numbers (CPRNG) and do not know the characteristics
+		of the software PRNG implementation!
+
+if DEV_URANDOM
+
+choice
+	prompt "/dev/urandom algorithm"
+	default DEV_URANDOM_ARCH if ARCH_HAVE_RNG
+	default DEV_URANDOM_XORSHIFT128 if !ARCH_HAVE_RNG
+
+config DEV_URANDOM_XORSHIFT128
+	bool "xorshift128"
+	---help---
+		xorshift128 is a pseudorandom number generator that is simple,
+		portable, and can also be used on 8-bit and 16-bit MCUs.
+
+		NOTE: Not cyptographically secure
+
+config DEV_URANDOM_CONGRUENTIAL
+	bool "Congruential"
+	---help---
+		Use the same congruential general used with srand().  This algorithm
+		is computationally more intense and uses double precision floating
+		point.  NOTE: Good randomness from the congruential generator also
+		requires that you also select CONFIG_LIB_RAND_ORDER > 2
+
+		NOTE: Not cyptographically secure
+
+config DEV_URANDOM_RANDOM_POOL
+	bool "Entropy pool"
+	depends on CRYPTO_RANDOM_POOL
+	---help---
+		Use the entropy pool CPRNG output for urandom algorithm.
+
+		NOTE: May or may not be cyptographically secure, depending upon the
+		quality entropy available to entropy pool.
+
+config DEV_URANDOM_ARCH
+	bool "Architecture-specific"
+	depends on ARCH_HAVE_RNG
+	---help---
+		The implementation of /dev/urandom is provided in archtecture-
+		specific logic using hardware TRNG logic.  architecture-specific
+		logic must provide the whole implementation in this case, including
+		the function devurandom_register().  In this case, /dev/urandom may
+		refer to the same driver as /dev/random.
+
+		NOTE: May or may not be cyptographically secure, depending upon the
+		implementation.
+
+endchoice # /dev/urandom algorithm
+endif # DEV_URANDOM

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/dev_urandom.c
+ * drivers/crypto/dev_urandom.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: David S. Alessio

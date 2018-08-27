@@ -53,6 +53,7 @@ include analog$(DELIM)Make.defs
 include audio$(DELIM)Make.defs
 include bch$(DELIM)Make.defs
 include can$(DELIM)Make.defs
+include crypto$(DELIM)Make.defs
 include i2c$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include ioexpander$(DELIM)Make.defs
@@ -98,11 +99,6 @@ ifeq ($(CONFIG_PWM),y)
   CSRCS += pwm.c
 endif
 
-ifeq ($(CONFIG_DEV_URANDOM),y)
-ifneq ($(CONFIG_DEV_URANDOM_ARCH),y)
-  CSRCS += dev_urandom.c
-endif
-endif
 endif # CONFIG_NFILE_DESCRIPTORS != 0
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
