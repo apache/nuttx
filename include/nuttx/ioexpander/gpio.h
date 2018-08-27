@@ -75,6 +75,11 @@
  * Command:     GPIOC_UNREGISTER
  * Description: Stop receiving signals for pin interrupts.
  * Argument:    None.
+ *
+ * Command:     GPIOC_SETPINTYPE
+ * Description: Set the GPIO pin type.
+ * Argument:    The enum gpio_pintype_e type.
+ *
  */
 
 #define GPIOC_WRITE      _GPIOC(1)
@@ -82,6 +87,7 @@
 #define GPIOC_PINTYPE    _GPIOC(3)
 #define GPIOC_REGISTER   _GPIOC(4)
 #define GPIOC_UNREGISTER _GPIOC(5)
+#define GPIOC_SETPINTYPE _GPIOC(6)
 
 /****************************************************************************
  * Public Types
@@ -94,6 +100,11 @@ enum gpio_pintype_e
   GPIO_INPUT_PIN = 0,
   GPIO_OUTPUT_PIN,
   GPIO_INTERRUPT_PIN,
+  GPIO_INTERRUPT_HIGH_PIN,
+  GPIO_INTERRUPT_LOW_PIN,
+  GPIO_INTERRUPT_RISING_PIN,
+  GPIO_INTERRUPT_FALLING_PIN,
+  GPIO_INTERRUPT_BOTH_PIN,
   GPIO_NPINTYPES
 };
 
@@ -110,6 +121,7 @@ typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
  *     for other pin types may be NULL.
  *   - go_attach and gp_eanble.  Required only the GPIO_INTERRUPT_PIN pin
  *     type.  Unused for other pin types may be NULL.
+ *   - go_setpinytype.  Required for all all pin types.
  */
 
 struct gpio_dev_s;
@@ -122,6 +134,8 @@ struct gpio_operations_s
   CODE int (*go_attach)(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
   CODE int (*go_enable)(FAR struct gpio_dev_s *dev, bool enable);
+  CODE int (*go_setpintype)(FAR struct gpio_dev_s *dev,
+                            enum gpio_pintype_e pintype);
 };
 
 /* Pin interface definition.  Must lie in writable memory. */
@@ -176,6 +190,23 @@ extern "C"
  ****************************************************************************/
 
 int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
+
+/****************************************************************************
+ * Name: gpio_pin_unregister
+ *
+ * Description:
+ *   Unregister GPIO pin device driver.
+ *
+ *   - Input pin types will be registered at /dev/gpinN
+ *   - Output pin types will be registered at /dev/gpoutN
+ *   - Interrupt pin types will be registered at /dev/gpintN
+ *
+ *   Where N is the provided minor number in the range of 0-99.
+ *
+ *
+ ****************************************************************************/
+
+void gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor);
 
 /****************************************************************************
  * Name: gpio_lower_half

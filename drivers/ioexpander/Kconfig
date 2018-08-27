@@ -189,4 +189,15 @@ config GPIO_LOWER_HALF
 		Enable support for a lower half driver that provides GPIO driver
 		support for I/O expander pins.
 
+if GPIO_LOWER_HALF
+
+config GPIO_LOWER_HALF_INTTYPE
+	int "default interrupt type for GPIO_INTERRUPT_PIN pintype"
+	default 14
+	---help---
+		This is the default interrupt type (IOEXPANDER_VAL_BOTH) for
+		GPIO_INTERRUPT_PIN pintype in gplf driver register.
+
+endif
+
 endmenu # IO Expander/GPIO Support

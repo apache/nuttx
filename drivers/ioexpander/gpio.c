@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/ioexpander/gpio.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     gpio_handler(FAR struct gpio_dev_s *dev);
+static int     gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin);
 static int     gpio_open(FAR struct file *filep);
 static int     gpio_close(FAR struct file *filep);
 static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
@@ -97,7 +97,7 @@ static const struct file_operations g_gpio_drvrops =
  *
  ****************************************************************************/
 
-static int gpio_handler(FAR struct gpio_dev_s *dev)
+static int gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin)
 {
   DEBUGASSERT(dev != NULL);
   (void)nxsig_kill(dev->gp_pid, dev->gp_signo);
@@ -296,6 +296,17 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
+      /* Command:     GPIOC_SETPINTYPE
+       * Description: Set the GPIO pin type.
+       * Argument:    The enum gpio_pintype_e type.
+       */
+
+      case GPIOC_SETPINTYPE:
+        {
+          ret = dev->gp_ops->go_setpintype(dev, arg);
+        }
+        break;
+
       /* Unrecognized command */
 
       default:
@@ -376,6 +387,56 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
   gpioinfo("Registering %s\n", devname);
 
   return register_driver(devname, &g_gpio_drvrops, 0666, dev);
+}
+
+/****************************************************************************
+ * Name: gpio_pin_unregister
+ *
+ * Description:
+ *   Unregister GPIO pin device driver.
+ *
+ *   - Input pin types will be registered at /dev/gpinN
+ *   - Output pin types will be registered at /dev/gpoutN
+ *   - Interrupt pin types will be registered at /dev/gpintN
+ *
+ *   Where N is the provided minor number in the range of 0-99.
+ *
+ *
+ ****************************************************************************/
+
+void gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor)
+{
+  FAR const char *fmt;
+  char devname[16];
+
+  switch (dev->gp_pintype)
+    {
+      case GPIO_INPUT_PIN:
+        {
+          fmt = "/dev/gpin%u";
+        }
+        break;
+
+      case GPIO_OUTPUT_PIN:
+        {
+          fmt = "/dev/gpout%u";
+        }
+        break;
+
+      case GPIO_INTERRUPT_PIN:
+        {
+          fmt = "/dev/gpint%u";
+        }
+        break;
+
+      default:
+        return;
+    }
+
+  snprintf(devname, 16, fmt, (unsigned int)minor);
+  gpioinfo("Unregistering %s\n", devname);
+
+  (void)unregister_driver(devname);
 }
 
 #endif /* CONFIG_DEV_GPIO */

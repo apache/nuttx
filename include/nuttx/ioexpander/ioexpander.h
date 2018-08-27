@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/ioexpander/ioexpander.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef CONFIG_IOEXPANDER
@@ -53,10 +54,6 @@
 
 #ifndef CONFIG_IOEXPANDER_NPINS
 #  define CONFIG_IOEXPANDER_NPINS 16
-#endif
-
-#if CONFIG_IOEXPANDER_NPINS > 64
-#  error No support for devices with more than 64 pins
 #endif
 
 /* Pin definitions **********************************************************/
@@ -101,7 +98,7 @@
  *
  ****************************************************************************/
 
-#define IOEXP_SETDIRECTION(dev,pin,dir)  ((dev)->ops->ioe_direction(dev,pin,dir))
+#define IOEXP_SETDIRECTION(dev,pin,dir) ((dev)->ops->ioe_direction(dev,pin,dir))
 
 /****************************************************************************
  * Name: IOEXP_SETOPTION
@@ -293,7 +290,11 @@
  * Public Types
  ****************************************************************************/
 
-/* This type represents a bitmap of pins */
+/* This type represents a bitmap of pins
+ *
+ * For IOE NPINS greater than 64, ioe_pinset_t represent one interrupt pin
+ * number instead of a bitmap of pins.
+ */
 
 #if CONFIG_IOEXPANDER_NPINS <= 8
 typedef uint8_t ioe_pinset_t;
@@ -301,8 +302,10 @@ typedef uint8_t ioe_pinset_t;
 typedef uint16_t ioe_pinset_t;
 #elif CONFIG_IOEXPANDER_NPINS <= 32
 typedef uint32_t ioe_pinset_t;
-#else /* if CONFIG_IOEXPANDER_NPINS <= 64 */
+#elif CONFIG_IOEXPANDER_NPINS <= 64
 typedef uint64_t ioe_pinset_t;
+#else
+typedef uint8_t ioe_pinset_t;
 #endif
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
