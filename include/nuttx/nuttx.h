@@ -55,7 +55,7 @@
  *   structure
  *
  * Arguments:
- *   ptr    - the pointer to the member.
+ *   ptr    - The pointer to the member.
  *   type   - The type of the container struct this is embedded in.
  *   member - The name of the member within the struct.
  */

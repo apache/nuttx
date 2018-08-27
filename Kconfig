@@ -163,6 +163,7 @@ config APPS_DIR
 
 config BUILD_LOADABLE
 	bool "NuttX application loadable build"
+	option modules
 	default n if !BUILD_KERNEL
 	default y if BUILD_KERNEL
 	---help---
