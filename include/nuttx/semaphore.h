@@ -45,7 +45,6 @@
 #include <semaphore.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/fs/fs.h>
 
 /****************************************************************************
  * Pre-processor Definitions
