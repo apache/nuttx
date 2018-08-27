@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/audio/i2schar.c
+ * drivers/i2s/i2schar.c
  *
  * This is a simple character driver for testing I2C.  It is not an audio
  * driver but does conform to some of the buffer management heuristics of an

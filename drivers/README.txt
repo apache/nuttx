@@ -75,6 +75,9 @@ eeprom/
 i2c/
   I2C drivers and support logic.  See include/nuttx/i2c/i2c_master.h
 
+i2s/
+  I2S drivers and support logic.  See include/nuttx/audio/i2s.h
+
 input/
   This directory holds implementations of human input device (HID)
   drivers.  This includes such things as mouse, touchscreen, joystick,

@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config AUDIO_I2SCHAR
+	bool "I2S character driver (for testing only)"
+	default n
+	---help---
+		This selection enables a simple character driver that supports I2S
+		transfers via a read() and write().  The intent of this driver is to
+		support I2S testing.  It is not an audio driver but does conform to
+		some of the buffer management heuristics of an audio driver.  It is
+		not suitable for use in any real driver application in its current
+		form.
+
+if AUDIO_I2SCHAR
+
+config AUDIO_I2SCHAR_RXTIMEOUT
+	int "RX timeout"
+	default 0
+	---help---
+		This is a fixed timeout value that will be used for all receiver
+		transfers.  This is in units of system clock ticks (configurable).
+		The special value of zero disables RX timeouts.  Default: 0
+
+config AUDIO_I2SCHAR_TXTIMEOUT
+	int "TX timeout"
+	default 0
+	---help---
+		This is a fixed timeout value that will be used for all transmitter
+		transfers.  This is in units of system clock ticks (configurable).
+		The special value of zero disables RX timeouts.  Default: 0
+
+endif # AUDIO_I2SCHAR

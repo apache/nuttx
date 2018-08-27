@@ -137,6 +137,7 @@ menuconfig I2S
 		See include/nuttx/audio/i2s.h for further I2S driver information.
 
 if I2S
+source drivers/i2s/Kconfig
 endif # I2S
 
 source drivers/timers/Kconfig

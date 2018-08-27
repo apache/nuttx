@@ -55,6 +55,7 @@ include bch$(DELIM)Make.defs
 include can$(DELIM)Make.defs
 include crypto$(DELIM)Make.defs
 include i2c$(DELIM)Make.defs
+include i2s$(DELIM)Make.defs
 include input$(DELIM)Make.defs
 include ioexpander$(DELIM)Make.defs
 include lcd$(DELIM)Make.defs
