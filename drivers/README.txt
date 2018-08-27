@@ -18,11 +18,6 @@ dev_null.c, dev_urandom, and dev_zero.c
   that should be called if you want to register these devices
   (devnull_register(), devurandom_register(), and devzero_register()).
 
-pwm.c
-  Provides the "upper half" of a pulse width modulation (PWM) driver.
-  The "lower half" of the PWM driver is provided by device-specific
-  logic.  See include/nuttx/drivers/pwm.h for usage information.
-
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
   a block driver that can be mounted as a files system.  See
@@ -129,6 +124,11 @@ power/
   to manage power usage of a platform by monitoring driver activity
   and by placing drivers into reduce power usage modes when the
   drivers are not active.
+
+pwm/
+  Provides the "upper half" of a pulse width modulation (PWM) driver.
+  The "lower half" of the PWM driver is provided by device-specific
+  logic.  See include/nuttx/drivers/pwm.h for usage information.
 
 sensors/
   Drivers for various sensors.  A sensor driver differs little from

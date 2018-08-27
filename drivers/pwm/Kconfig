@@ -1,0 +1,38 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if PWM
+
+config PWM_PULSECOUNT
+	bool "PWM Pulse Count Support"
+	default n
+	depends on ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Some hardware will support generation of a fixed number of pulses.
+		This might be used, for example to support a stepper motor.  If the
+		hardware will support a fixed pulse count, then this configuration
+		should be set to enable the capability.
+
+config PWM_MULTICHAN
+	bool "PWM Multiple Output Channel Support"
+	default n
+	depends on ARCH_HAVE_PWM_MULTICHAN
+	depends on !PWM_PULSECOUNT
+	---help---
+		Enables support for multiple output channels per timer.
+
+if PWM_MULTICHAN
+
+config PWM_NCHANNELS
+	int "Number of Output Channels Per Timer"
+	default 1
+	range 1 6
+	---help---
+		Specifies the number of output channels per timer.  Each timer
+		may support fewer output channels than this value.
+
+endif # PWM_MULTICHAN
+
+endif # PWM

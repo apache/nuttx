@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pwm.c
+ * drivers/pwm/pwm.c
  *
  *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -67,6 +67,7 @@ include eeprom$(DELIM)Make.defs
 include net$(DELIM)Make.defs
 include pipes$(DELIM)Make.defs
 include power$(DELIM)Make.defs
+include pwm$(DELIM)Make.defs
 include sensors$(DELIM)Make.defs
 include serial$(DELIM)Make.defs
 include spi$(DELIM)Make.defs
@@ -94,11 +95,6 @@ ifeq ($(CONFIG_DRVR_READAHEAD),y)
 endif
 endif
 endif
-
-ifeq ($(CONFIG_PWM),y)
-  CSRCS += pwm.c
-endif
-
 endif # CONFIG_NFILE_DESCRIPTORS != 0
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
