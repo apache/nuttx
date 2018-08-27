@@ -77,6 +77,10 @@ ifeq ($(CONFIG_AUDIO_TONE),y)
 CSRCS += tone.c
 endif
 
+ifeq ($(CONFIG_AUDIO_I2S),y)
+CSRCS += audio_i2s.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio
