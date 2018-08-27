@@ -242,9 +242,15 @@
  */
 
 #define SIG_ERR         ((_sa_handler_t)-1)  /* And error occurred */
-#define SIG_DFL         ((_sa_handler_t)0)   /* Default is SIG_IGN for all signals */
 #define SIG_IGN         ((_sa_handler_t)0)   /* Ignore the signal */
-#define SIG_HOLD        ((_sa_handler_t)1)   /* Used only with sigset() */
+
+#ifdef CONFIG_SIG_DEFAULT
+#  define SIG_DFL       ((_sa_handler_t)1)   /* Default signal action */
+#  define SIG_HOLD      ((_sa_handler_t)2)   /* Used only with sigset() */
+#else
+#  define SIG_DFL       ((_sa_handler_t)0)   /* Default is SIG_IGN for all signals */
+#  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
+#endif
 
 /********************************************************************************
  * Public Type Definitions

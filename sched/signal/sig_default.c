@@ -113,67 +113,6 @@ static void nxsig_abnormal_termination(int signo, FAR siginfo_t *siginfo,
 }
 
 /****************************************************************************
- * Name: nxsig_setup_default_action
- *
- * Description:
- *   Setup the default action for the SIGKILL signal
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void nxsig_setup_default_action(FAR struct tcb_s *tcb,
-                                       _sa_sigaction_t action, int signo)
-{
-  FAR struct task_group_s *group;
-  struct sigaction sa;
-
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL && GOOD_SIGNO(signo));
-  group = tcb->group;
-
-  /* Attach the signal handler */
-
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_sigaction = action;
-  sa.sa_flags     = SA_SIGINFO;
-  (void)sigaction(SIGKILL, &sa, NULL);
-
-  /* Indicate that the default signal handler has been attached */
-
-  (void)sigaddset(&group->tg_sigdefault, signo);
-}
-
-/****************************************************************************
- * Name: nxsig_setup_default_action
- *
- * Description:
- *   Setup the default action for the SIGKILL signal
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void nxsig_unsetup_default_action(FAR struct tcb_s *tcb, int signo)
-{
-  FAR struct task_group_s *group;
-
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL && GOOD_SIGNO(signo));
-  group = tcb->group;
-
-  /* Indicate that the default signal handler has been replaced */
-
-  (void)sigdelset(&group->tg_sigdefault, signo);
-}
-
-/****************************************************************************
  * Name: nxsig_default_action
  *
  * Description:
@@ -196,6 +135,48 @@ static _sa_sigaction_t nxsig_default_action(int signo)
 
   return signo == SIGKILL ? nxsig_abnormal_termination : NULL;
 #endif
+}
+
+/****************************************************************************
+ * Name: nxsig_setup_default_action
+ *
+ * Description:
+ *   Setup the default action for the SIGKILL signal
+ *
+ * Input Parameters:
+ *   group  - The group that the task belongs in.
+ *   action - The new default signal action
+ *   signo  - The signal that will produce this default action
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nxsig_setup_default_action(FAR struct task_group_s *group,
+                                       int signo)
+{
+  struct sigaction sa;
+  _sa_sigaction_t action;
+
+  DEBUGASSERT(group != NULL && GOOD_SIGNO(signo));
+
+  /* Get the address of the handler for this signals default action. */
+
+  action = nxsig_default_action(signo);
+  if (action != (_sa_sigaction_t)SIG_IGN)
+    {
+      /* Attach the signal handler */
+
+      memset(&sa, 0, sizeof(sa));
+      sa.sa_sigaction = action;
+      sa.sa_flags     = SA_SIGINFO;
+      (void)sigaction(SIGKILL, &sa, NULL);
+
+      /* Indicate that the default signal handler has been attached */
+
+      (void)sigaddset(&group->tg_sigdefault, signo);
+    }
 }
 
 /****************************************************************************
@@ -235,10 +216,17 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
 }
 
 /****************************************************************************
- * Name: nxsig_setdefault
+ * Name: nxsig_default
  *
  * Description:
- *   Set the default action for the specified signal
+ *   If 'defaction' is true, then return the default signal handler action
+ *   for the specified signal and mark that the default signal hander is
+ *   in place (it is not yet).
+ *
+ *   If 'defaction' is false, then mark that the default signal handler is
+ *   NOT in place and return SIG_IGN.
+ *
+ *   This function is called form sigaction() to handle actions = SIG_DFL.
  *
  * Input Parameters:
  *   tcb       - Identifies the thread associated with the default handler
@@ -246,13 +234,20 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
  *   defaction - True: the default action is in place
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   on failure.
+ *   The address of the default signal action handler is returne on success.
+ *   SIG_IGN is returned if there is no default action.
  *
  ****************************************************************************/
 
-int nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
+ _sa_sigaction_t nxsig_default(FAR struct tcb_s *tcb, int signo,
+                               bool defaction)
 {
+  FAR struct task_group_s *group;
+  _sa_sigaction_t handler = (_sa_sigaction_t)SIG_IGN;
+
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
+  group = tcb->group;
+
   /* Are we setting or unsetting the default action? */
 
   if (defaction)
@@ -261,27 +256,29 @@ int nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
        * associated with signo.
        */
 
-      _sa_sigaction_t handler = nxsig_default_action(signo);
-      if (handler != NULL)
+      handler = nxsig_default_action(signo);
+      if (handler != (_sa_sigaction_t)SIG_IGN)
         {
-          nxsig_setup_default_action(tcb, handler, signo);
+          (void)sigaddset(&group->tg_sigdefault, signo);
         }
     }
-  else
+
+  if (handler == (_sa_sigaction_t)SIG_IGN)
     {
       /* We are unsetting the default action */
 
-      nxsig_unsetup_default_action(tcb, SIGKILL);
+      (void)sigdelset(&group->tg_sigdefault, signo);
     }
 
-  return OK;
+  return handler;
 }
 
 /****************************************************************************
  * Name: nxsig_default_initialize
  *
  * Description:
- *   Set all signals to their default action.
+ *   Set all signals to their default action.  This is called from task_start
+ *   to configure the newly started task.
  *
  * Input Parameters:
  *   tcb - Identifies the thread associated with the default handlers
@@ -294,7 +291,31 @@ int nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
 
 int nxsig_default_initialize(FAR struct tcb_s *tcb)
 {
-  /* Currently only SIGKILL is supported */
+  FAR struct task_group_s *group;
 
-  return nxsig_default(tcb, SIGKILL, true);
+  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
+  group = tcb->group;
+
+  /* Initialize the set of default signal handlers */
+
+  (void)sigemptyset(&group->tg_sigdefault);
+
+#if 0
+  /* TODO Currently only SIGKILL is supported.  The following needs to be
+   * in a loop that instantiates the default action for all signals (other
+   * that those that are ignored).
+   */
+
+  for (signo = 0; signo <= MAX_SIGNO; signo++)
+    {
+      nxsig_setup_default_action(group, signo);
+    }
+
+#else
+   /* For now */
+
+  nxsig_setup_default_action(group, SIGKILL);
+#endif
+
+  return OK;
 }

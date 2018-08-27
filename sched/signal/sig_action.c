@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/signal/sig_action.c
  *
- *   Copyright (C) 2007-2009, 2013, 2016-2017 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2009, 2013, 2016-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -51,15 +51,6 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define COPY_SIGACTION(t,f) \
-  { (t)->sa_sigaction = (f)->sa_sigaction; \
-    (t)->sa_mask      = (f)->sa_mask; \
-    (t)->sa_flags     = (f)->sa_flags; }
 
 /****************************************************************************
  * Private Functions
@@ -154,11 +145,13 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *
  ****************************************************************************/
 
-int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
+int sigaction(int signo, FAR const struct sigaction *act,
+              FAR struct sigaction *oact)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
+  _sa_sigaction_t handler;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.
@@ -181,34 +174,48 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
   /* Return the old sigaction value if so requested */
 
-  if (oact)
+  if (oact != NULL)
     {
+#ifdef CONFIG_SIG_DEFAULT
+      if (nxsig_isdefault(rtcb, signo))
+        {
+          /* Return SIG_DFL if the default signal is attached */
+
+          oact->sa_sigaction = (_sa_sigaction_t)SIG_DFL;
+          oact->sa_mask      = NULL_SIGNAL_SET;
+          oact->sa_flags     = SA_SIGINFO;
+        }
+      else
+#endif
       if (sigact)
         {
-          COPY_SIGACTION(oact, &sigact->act);
+          /* Return the old signal action */
+
+          oact->sa_sigaction = sigact->act.sa_sigaction;
+          oact->sa_mask      = sigact->act.sa_mask;
+          oact->sa_flags     = sigact->act.sa_flags;
         }
       else
         {
           /* There isn't an old value */
 
-          oact->sa_u._sa_handler = NULL;
-          oact->sa_mask = NULL_SIGNAL_SET;
-          oact->sa_flags = 0;
+          oact->sa_sigaction = NULL;
+          oact->sa_mask      = NULL_SIGNAL_SET;
+          oact->sa_flags     = 0;
         }
     }
 
   /* If the argument act is a null pointer, signal handling is unchanged;
-   * thus, the call can be used to enquire about the current handling of
+   * thus, the call can be used to inquire about the current handling of
    * a given signal.
    */
 
-  if (!act)
+  if (act == NULL)
     {
       return OK;
     }
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
-
   /* Handle a special case.  Retention of child status can be suppressed
    * if signo == SIGCHLD and sa_flags == SA_NOCLDWAIT.
    *
@@ -239,9 +246,30 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
     }
 #endif
 
+  handler = act->sa_sigaction;
+
+#ifdef CONFIG_SIG_DEFAULT
+  /* If the caller is setting the handler to SIG_DFL, then we need to
+   * replace this with the correct, internal default signal action handler.
+   */
+
+  if (handler == (_sa_sigaction_t)SIG_DFL)
+    {
+      /* nxsig_default() may returned SIG_IGN */
+
+      handler = nxsig_default(rtcb, signo, true);
+    }
+  else
+    {
+      /* We will be replacing the default action (or ignoring it) */
+
+      (void)nxsig_default(rtcb, signo, false);
+    }
+#endif
+
   /* Handle the case where no sigaction is supplied (SIG_IGN) */
 
-  if (act->sa_u._sa_handler == SIG_IGN)
+  if (handler == (_sa_sigaction_t)SIG_IGN)
     {
       /* Do we still have a sigaction container from the previous setting? */
 
@@ -265,7 +293,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
        * If so, then re-use for the new signal action.
        */
 
-      if (!sigact)
+      if (sigact == NULL)
         {
           /* No.. Then we need to allocate one for the new action. */
 
@@ -290,7 +318,9 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
       /* Set the new sigaction */
 
-      COPY_SIGACTION(&sigact->act, act);
+      sigact->act.sa_sigaction = handler;
+      sigact->act.sa_mask      = act->sa_mask;
+      sigact->act.sa_flags     = act->sa_flags;
     }
 
   return OK;
