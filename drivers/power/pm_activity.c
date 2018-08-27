@@ -84,7 +84,7 @@
 void pm_activity(int domain, int priority)
 {
   FAR struct pm_domain_s *pdom;
-  clock_t now;
+  clock_t now, elapsed;
   uint32_t accum;
   irqstate_t flags;
 
@@ -123,8 +123,9 @@ void pm_activity(int domain, int priority)
        * estimated.
        */
 
-      now = clock_systimer();
-      if (now - pdom->stime >= TIME_SLICE_TICKS)
+      now     = clock_systimer();
+      elapsed = now - pdom->stime;
+      if (elapsed >= TIME_SLICE_TICKS)
         {
           int16_t tmp;
 
@@ -137,7 +138,7 @@ void pm_activity(int domain, int priority)
           pdom->stime = now;
           pdom->accum = 0;
 
-          (void)pm_update(domain, tmp);
+          (void)pm_update(domain, tmp, elapsed);
         }
 
       leave_critical_section(flags);

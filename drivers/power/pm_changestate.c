@@ -53,6 +53,56 @@
  * Private Functions
  ****************************************************************************/
 
+static void pm_timer_cb(int argc, wdparm_t arg1, ...)
+{
+  /* Do nothing here, cause we only need TIMER ISR to wake up PM,
+   * for deceasing PM state.
+   */
+}
+
+/****************************************************************************
+ * Name: pm_timer
+ *
+ * Description:
+ *   This internal function is called to start one timer to decrease power
+ *   state level.
+ *
+ * Input Parameters:
+ *   domain - The PM domain associated with the accumulator
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void pm_timer(int domain)
+{
+  FAR struct pm_domain_s *pdom = &g_pmglobals.domain[domain];
+  uint32_t delay;
+
+  if (!pdom->wdog)
+    {
+      pdom->wdog = wd_create();
+    }
+
+  if (pdom->state < PM_SLEEP)
+    {
+      const uint16_t g_pmcount[3] =
+      {
+        CONFIG_PM_IDLEENTER_COUNT,
+        CONFIG_PM_STANDBYENTER_COUNT,
+        CONFIG_PM_SLEEPENTER_COUNT
+      };
+
+      delay = (g_pmcount[pdom->state] - pdom->thrcnt) * CONFIG_PM_SLICEMS;
+      wd_start(pdom->wdog, MSEC2TICK(delay), pm_timer_cb, 0);
+    }
+  else
+    {
+      wd_cancel(pdom->wdog);
+    }
+}
+
 /****************************************************************************
  * Name: pm_prepall
  *
@@ -250,6 +300,10 @@ int pm_changestate(int domain, enum pm_state_e newstate)
   if (newstate != PM_RESTORE)
     {
       g_pmglobals.domain[domain].state = newstate;
+
+      /* Start PM timer to decrease PM state */
+
+      pm_timer(domain);
     }
 
   /* Restore the interrupt state */

@@ -87,7 +87,7 @@
 enum pm_state_e pm_checkstate(int domain)
 {
   FAR struct pm_domain_s *pdom;
-  clock_t now;
+  clock_t now, elapsed;
   irqstate_t flags;
   int index;
 
@@ -111,8 +111,9 @@ enum pm_state_e pm_checkstate(int domain)
    * estimated.
    */
 
-   now = clock_systimer();
-   if (now - pdom->stime >= TIME_SLICE_TICKS)
+  now     = clock_systimer();
+  elapsed = now - pdom->stime;
+  if (elapsed >= TIME_SLICE_TICKS)
     {
       int16_t accum;
 
@@ -125,7 +126,7 @@ enum pm_state_e pm_checkstate(int domain)
       pdom->stime = now;
       pdom->accum = 0;
 
-      (void)pm_update(domain, accum);
+      (void)pm_update(domain, accum, elapsed);
     }
 
   /* Consider the possible power state lock here */

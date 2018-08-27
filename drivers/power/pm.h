@@ -48,6 +48,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/wdog.h>
 
 #ifdef CONFIG_PM
 
@@ -138,6 +139,10 @@ struct pm_domain_s
   /* The power state lock count */
 
   uint16_t stay[PM_COUNT];
+
+  /* Timer to decrease state */
+
+  WDOG_ID wdog;
 };
 
 /* This structure encapsulates all of the global data used by the PM module */
@@ -194,6 +199,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *   domain - The domain associated with the accumulator.
  *   accum - The value of the activity accumulator at the end of the time
  *     slice.
+ *   elapsed - The elapsed time from last called pm_update, unit ms
  *
  * Returned Value:
  *   None.
@@ -205,7 +211,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *
  ****************************************************************************/
 
-void pm_update(int domain, int16_t accum);
+void pm_update(int domain, int16_t accum, clock_t elapsed);
 
 #undef EXTERN
 #if defined(__cplusplus)
