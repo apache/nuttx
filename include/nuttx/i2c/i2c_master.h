@@ -109,6 +109,13 @@
 #define I2C_M_NOSTOP         0x0040 /* Message should not end with a STOP */
 #define I2C_M_NOSTART        0x0080 /* Message should not begin with a START */
 
+/* I2c bus speed */
+
+#define I2C_SPEED_STANDARD   100000  /* Standard speed (100Khz) */
+#define I2C_SPEED_FAST       400000  /* Fast speed     (400Khz) */
+#define I2C_SPEED_FAST_PLUS  1000000 /* Fast+ speed    (  1Mhz) */
+#define I2C_SPEED_HIGH       3400000 /* High speed     (3.4Mhz) */
+
 /* I2C Character Driver IOCTL Commands **************************************/
 /* The I2C driver is intended to support application testing of the I2C bus.
  * The I2C driver simply wraps an instance of struct i2c_dev_s and then
