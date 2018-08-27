@@ -377,7 +377,7 @@ begin_packed_struct struct ap_buffer_s
   sem_t                 sem;        /* Reference locking semaphore */
   uint16_t              flags;      /* Buffer flags */
   uint16_t              crefs;      /* Number of reference counts */
-  uint8_t               samp[0];    /* Offset of the first sample */
+  FAR uint8_t           *samp;      /* Offset of the first sample */
 } end_packed_struct;
 
 /* Structure defining the messages passed to a listening audio thread

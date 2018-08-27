@@ -130,6 +130,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
       apb->nmaxbytes  = bufdesc->numbytes;
       apb->nbytes     = 0;
       apb->flags      = 0;
+      apb->samp       = (FAR uint8_t *)(apb + 1);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       apb->session    = bufdesc->session;
 #endif
