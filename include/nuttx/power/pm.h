@@ -267,6 +267,7 @@ enum pm_state_e
                     *
                     * PM_SLEEP may be following by PM_NORMAL
                     */
+  PM_COUNT,
 };
 
 /* This structure contain pointers callback functions in the driver.  These
@@ -440,6 +441,53 @@ int pm_unregister(FAR struct pm_callback_s *callbacks);
 void pm_activity(int domain, int priority);
 
 /****************************************************************************
+ * Name: pm_stay
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle), needs the power kept at
+ *   last the specified level.
+ *
+ * Input Parameters:
+ *   domain - The domain of the PM activity
+ *   state - The state want to stay.
+ *
+ *     As an example, media player might stay in normal state during playback.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_stay(int domain, enum pm_state_e state);
+
+/****************************************************************************
+ * Name: pm_relax
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   idle now, could relax the previous requested power level.
+ *
+ * Input Parameters:
+ *   domain - The domain of the PM activity
+ *   state - The state want to relax.
+ *
+ *     As an example, media player might relax power level after playback.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_relax(int domain, enum pm_state_e state);
+
+/****************************************************************************
  * Name: pm_checkstate
  *
  * Description:
@@ -523,6 +571,8 @@ int pm_changestate(int domain, enum pm_state_e newstate);
 #  define pm_register(cb)             (0)
 #  define pm_unregister(cb)           (0)
 #  define pm_activity(domain,prio)
+#  define pm_stay(domain,state)
+#  define pm_relax(domain,state)
 #  define pm_checkstate(domain)       (0)
 #  define pm_changestate(domain,state)
 

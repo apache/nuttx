@@ -89,6 +89,7 @@ enum pm_state_e pm_checkstate(int domain)
   FAR struct pm_domain_s *pdom;
   clock_t now;
   irqstate_t flags;
+  int index;
 
   /* Get a convenience pointer to minimize all of the indexing */
 
@@ -130,6 +131,17 @@ enum pm_state_e pm_checkstate(int domain)
        */
 
       (void)pm_update(domain, accum);
+    }
+
+  /* Consider the possible power state lock here */
+
+  for (index = 0; index < pdom->recommended; index++)
+    {
+      if (pdom->stay[index] != 0)
+        {
+          pdom->recommended = index;
+          break;
+        }
     }
 
   leave_critical_section(flags);

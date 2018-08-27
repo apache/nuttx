@@ -139,6 +139,10 @@ struct pm_domain_s
   /* stime - The time (in ticks) at the start of the current time slice */
 
   clock_t stime;
+
+  /* The power state lock count */
+
+  uint16_t stay[PM_COUNT];
 };
 
 /* This structure encapsulates all of the global data used by the PM module */
