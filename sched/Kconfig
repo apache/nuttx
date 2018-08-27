@@ -1186,17 +1186,52 @@ config SIG_EVTHREAD
 		different mechanism would need to be development to support this
 		feature on the PROTECTED or KERNEL build.
 
-config SIG_DEFAULT
+menuconfig SIG_DEFAULT
 	bool "Default signal actions"
 	default n
 	depends on !DISABLE_SIGNALS
 	---help---
 		Enable to support default signal actions.
 
-		NOTE: SIGKILL is the only signal currently supported.
+if SIG_DEFAULT
+
+comment "Per-signal Default Actions"
+
+config SIG_SIGUSR1_ACTION
+	bool "SIGUSR1"
+	default n
+	---help---
+		Enable the default action for SIGUSR1 (terminate the process)
+		Make sure that your applications are expecting this POSIX behavior.
+
+config SIG_SIGUSR2_ACTION
+	bool "SIGUSR2"
+	default n
+	---help---
+		Enable the default action for SIGUSR2 (terminate the process)
+		Make sure that your applications are expecting this POSIX behavior.
+
+config SIG_SIGALRM_ACTION
+	bool "SIGALRM"
+	default n
+	---help---
+		Enable the default action for SIGALRM (terminate the process)
+		Make sure that your applications are expecting this POSIX behavior.
+
+config SIG_SIGPOLL_ACTION
+	bool "SIGPOLL"
+	default n
+	depends on FS_AIO
+	---help---
+		Enable the default action for SIGPOLL (terminate the process)
+		Make sure that your applications are expecting this POSIX behavior.
+
+endif # SIG_DEFAULT
 
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS
+
+comment "Standard Signal Numbers"
 
 config SIG_SIGUSR1
 	int "SIGUSR1"
@@ -1210,7 +1245,7 @@ config SIG_SIGUSR2
 	---help---
 		Value of standard user signal 2 (SIGUSR2). Default: 2
 
-config SIG_SIGALARM
+config SIG_SIGALRM
 	int "SIGALRM"
 	default 3
 	---help---
@@ -1241,6 +1276,8 @@ config SIG_KILL
 	---help---
 		The SIGKILL signal is sent to cause a task termination event (only
 		if CONFIG_SIG_DEFAULT=y)
+
+comment "Non-standard Signal Numbers"
 
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"

@@ -146,11 +146,11 @@
 #  define SIGUSR2       CONFIG_SIG_SIGUSR2
 #endif
 
-#ifndef CONFIG_SIG_SIGALARM
+#ifndef CONFIG_SIG_SIGALRM
 #  define SIGALRM       3  /* Default signal used with POSIX timers (used only */
                            /* no other signal is provided) */
 #else
-#  define SIGALRM       CONFIG_SIG_SIGALARM
+#  define SIGALRM       CONFIG_SIG_SIGALRM
 #endif
 
 #ifdef CONFIG_SCHED_HAVE_PARENT

@@ -151,7 +151,7 @@ int sigaction(int signo, FAR const struct sigaction *act,
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
-  _sa_sigaction_t handler;
+  _sa_handler_t handler;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.
@@ -181,9 +181,9 @@ int sigaction(int signo, FAR const struct sigaction *act,
         {
           /* Return SIG_DFL if the default signal is attached */
 
-          oact->sa_sigaction = (_sa_sigaction_t)SIG_DFL;
-          oact->sa_mask      = NULL_SIGNAL_SET;
-          oact->sa_flags     = SA_SIGINFO;
+          oact->sa_handler = SIG_DFL;
+          oact->sa_mask    = NULL_SIGNAL_SET;
+          oact->sa_flags   = SA_SIGINFO;
         }
       else
 #endif
@@ -191,17 +191,17 @@ int sigaction(int signo, FAR const struct sigaction *act,
         {
           /* Return the old signal action */
 
-          oact->sa_sigaction = sigact->act.sa_sigaction;
-          oact->sa_mask      = sigact->act.sa_mask;
-          oact->sa_flags     = sigact->act.sa_flags;
+          oact->sa_handler = sigact->act.sa_handler;
+          oact->sa_mask    = sigact->act.sa_mask;
+          oact->sa_flags   = sigact->act.sa_flags;
         }
       else
         {
           /* There isn't an old value */
 
-          oact->sa_sigaction = NULL;
-          oact->sa_mask      = NULL_SIGNAL_SET;
-          oact->sa_flags     = 0;
+          oact->sa_handler = NULL;
+          oact->sa_mask    = NULL_SIGNAL_SET;
+          oact->sa_flags   = 0;
         }
     }
 
@@ -246,14 +246,14 @@ int sigaction(int signo, FAR const struct sigaction *act,
     }
 #endif
 
-  handler = act->sa_sigaction;
+  handler = act->sa_handler;
 
 #ifdef CONFIG_SIG_DEFAULT
   /* If the caller is setting the handler to SIG_DFL, then we need to
    * replace this with the correct, internal default signal action handler.
    */
 
-  if (handler == (_sa_sigaction_t)SIG_DFL)
+  if (handler == SIG_DFL)
     {
       /* nxsig_default() may returned SIG_IGN */
 
@@ -269,7 +269,7 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
   /* Handle the case where no sigaction is supplied (SIG_IGN) */
 
-  if (handler == (_sa_sigaction_t)SIG_IGN)
+  if (handler == SIG_IGN)
     {
       /* Do we still have a sigaction container from the previous setting? */
 
@@ -318,9 +318,9 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
       /* Set the new sigaction */
 
-      sigact->act.sa_sigaction = handler;
-      sigact->act.sa_mask      = act->sa_mask;
-      sigact->act.sa_flags     = act->sa_flags;
+      sigact->act.sa_handler = handler;
+      sigact->act.sa_mask    = act->sa_mask;
+      sigact->act.sa_flags   = act->sa_flags;
     }
 
   return OK;

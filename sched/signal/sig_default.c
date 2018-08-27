@@ -48,19 +48,63 @@
 #include "signal/signal.h"
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This type provides the default action associated with a signal */
+
+struct nxsig_defaction_s
+{
+  uint8_t       signo;   /* Signal number.  Range 1..MAX_SIGNO */
+  _sa_handler_t action;  /* Default signal action */
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* Default actions */
+
+static void nxsig_abnormal_termination(int signo);
+
+/* Helpers */
+
+static _sa_handler_t nxsig_default_action(int signo);
+static void nxsig_setup_default_action(FAR struct task_group_s *group,
+                                       FAR const struct nxsig_defaction_s *info);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This table is used to make the default action for a signal to the correct
- * signal handler.
+/* NOTE:  Default actions are not currently supported for very many signals.
+ * However, this array is set up to support an indefinite number of default
+ * signal actions.
  */
 
-#if 0 /* Not used */
-static const struct _sa_sigaction_t g_defactions[MAX_SIGNO + 1] =
+/* This table is used to make the default action for a signal to the correct
+ * signal handler.  Signals whose default action is be ignored do not need
+ * to be in this table (e.g., SIGCHLD).
+ */
+
+static const struct nxsig_defaction_s g_defactions[] =
 {
-  /* To be provided */
-}
+#ifdef CONFIG_SIG_SIGUSR1_ACTION
+   { SIGUSR1, nxsig_abnormal_termination },
 #endif
+#ifdef CONFIG_SIG_SIGUSR2_ACTION
+   { SIGUSR2, nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGALRM_ACTION
+   { SIGALRM, nxsig_abnormal_termination },
+#endif
+#ifdef CONFIG_SIG_SIGPOLL_ACTION
+   { SIGPOLL, nxsig_abnormal_termination },
+#endif
+   { SIGKILL, nxsig_abnormal_termination }
+};
+
+#define NACTIONS (sizeof(g_defactions) / sizeof(struct nxsig_defaction_s))
 
 /****************************************************************************
  * Private Functions
@@ -96,8 +140,7 @@ static const struct _sa_sigaction_t g_defactions[MAX_SIGNO + 1] =
  *
  ****************************************************************************/
 
-static void nxsig_abnormal_termination(int signo, FAR siginfo_t *siginfo,
-                                       FAR void *arg)
+static void nxsig_abnormal_termination(int signo)
 {
 #ifdef HAVE_GROUP_MEMBERS
   FAR struct tcb_s *tcb = (FAR struct tcb_s *)this_task();
@@ -126,15 +169,25 @@ static void nxsig_abnormal_termination(int signo, FAR siginfo_t *siginfo,
  *
  ****************************************************************************/
 
-static _sa_sigaction_t nxsig_default_action(int signo)
+static _sa_handler_t nxsig_default_action(int signo)
 {
-#if 0 /* Not implemented */
-  return g_defactions[signo];
-#else
-  /* Currently only SIGKILL and the abnormal exit signal action are supported */
+  int i;
 
-  return signo == SIGKILL ? nxsig_abnormal_termination : NULL;
-#endif
+  /* Search the default action table for the entry associated with this
+   * signal.
+   */
+
+  for (i = 0; i < NACTIONS; i++)
+    {
+      if (g_defactions[i].signo == signo)
+        {
+          return g_defactions[i].action;
+        }
+    }
+
+  /* No default action */
+
+  return SIG_IGN;
 }
 
 /****************************************************************************
@@ -154,28 +207,27 @@ static _sa_sigaction_t nxsig_default_action(int signo)
  ****************************************************************************/
 
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       int signo)
+                                       FAR const struct nxsig_defaction_s *info)
 {
-  struct sigaction sa;
-  _sa_sigaction_t action;
-
-  DEBUGASSERT(group != NULL && GOOD_SIGNO(signo));
-
   /* Get the address of the handler for this signals default action. */
 
-  action = nxsig_default_action(signo);
-  if (action != (_sa_sigaction_t)SIG_IGN)
+  if (info->action != SIG_IGN)
     {
-      /* Attach the signal handler */
+      struct sigaction sa;
+
+      /* Attach the signal handler.
+       *
+       * NOTE: sigaction will call nxsig_default(tcb, action, false)
+       */
 
       memset(&sa, 0, sizeof(sa));
-      sa.sa_sigaction = action;
-      sa.sa_flags     = SA_SIGINFO;
+      sa.sa_handler = info->action;
+      sa.sa_flags   = SA_SIGINFO;
       (void)sigaction(SIGKILL, &sa, NULL);
 
       /* Indicate that the default signal handler has been attached */
 
-      (void)sigaddset(&group->tg_sigdefault, signo);
+      (void)sigaddset(&group->tg_sigdefault, (int)info->signo);
     }
 }
 
@@ -239,11 +291,10 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
  *
  ****************************************************************************/
 
- _sa_sigaction_t nxsig_default(FAR struct tcb_s *tcb, int signo,
-                               bool defaction)
+ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
 {
   FAR struct task_group_s *group;
-  _sa_sigaction_t handler = (_sa_sigaction_t)SIG_IGN;
+  _sa_handler_t handler = SIG_IGN;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL);
   group = tcb->group;
@@ -257,13 +308,13 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
        */
 
       handler = nxsig_default_action(signo);
-      if (handler != (_sa_sigaction_t)SIG_IGN)
+      if (handler != SIG_IGN)
         {
           (void)sigaddset(&group->tg_sigdefault, signo);
         }
     }
 
-  if (handler == (_sa_sigaction_t)SIG_IGN)
+  if (handler == SIG_IGN)
     {
       /* We are unsetting the default action */
 
@@ -292,6 +343,7 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
 int nxsig_default_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+  int i;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL);
   group = tcb->group;
@@ -300,22 +352,15 @@ int nxsig_default_initialize(FAR struct tcb_s *tcb)
 
   (void)sigemptyset(&group->tg_sigdefault);
 
-#if 0
   /* TODO Currently only SIGKILL is supported.  The following needs to be
    * in a loop that instantiates the default action for all signals (other
    * that those that are ignored).
    */
 
-  for (signo = 0; signo <= MAX_SIGNO; signo++)
+  for (i = 0; i < NACTIONS; i++)
     {
-      nxsig_setup_default_action(group, signo);
+      nxsig_setup_default_action(group, &g_defactions[i]);
     }
-
-#else
-   /* For now */
-
-  nxsig_setup_default_action(group, SIGKILL);
-#endif
 
   return OK;
 }
