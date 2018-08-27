@@ -42,6 +42,7 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/init.h>
 #include <nuttx/power/pm.h>
 
 #include "pm.h"
@@ -76,11 +77,19 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 
   /* Add the new entry to the end of the list of registered callbacks */
 
-  ret = pm_lock();
-  if (ret == OK)
+  if (OSINIT_OSREADY())
+    {
+      ret = pm_lock();
+      if (ret == OK)
+        {
+          dq_addlast(&callbacks->entry, &g_pmglobals.registry);
+          pm_unlock();
+        }
+    }
+  else
     {
       dq_addlast(&callbacks->entry, &g_pmglobals.registry);
-      pm_unlock();
+      ret = OK;
     }
 
   return ret;

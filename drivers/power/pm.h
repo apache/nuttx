@@ -144,10 +144,6 @@ struct pm_domain_s
 
 struct pm_global_s
 {
-  /* The activity/state information for each PM domain */
-
-  struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
-
   /* This semaphore manages mutually exclusive access to the power management
    * registry.  It must be initialized to the value 1.
    */
@@ -160,6 +156,10 @@ struct pm_global_s
    */
 
   dq_queue_t registry;
+
+  /* The activity/state information for each PM domain */
+
+  struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
 };
 
 /****************************************************************************

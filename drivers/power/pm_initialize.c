@@ -54,7 +54,16 @@
 
 /* All PM global data: */
 
-struct pm_global_s g_pmglobals;
+/* Initialize the registry and the PM global data structures.  The PM
+ * global data structure resides in .data which is zeroed at boot time.  So
+ * it is only required to initialize non-zero elements of the PM global
+ * data structure here.
+ */
+
+struct pm_global_s g_pmglobals =
+{
+  SEM_INITIALIZER(1)
+};
 
 /****************************************************************************
  * Public Functions
@@ -80,14 +89,6 @@ struct pm_global_s g_pmglobals;
 
 void pm_initialize(void)
 {
-  /* Initialize the registry and the PM global data structures.  The PM
-   * global data structure resides in .bss which is zeroed at boot time.  So
-   * it is only required to initialize non-zero elements of the PM global
-   * data structure here.
-   */
-
-  dq_init(&g_pmglobals.registry);
-  nxsem_init(&g_pmglobals.regsem, 0, 1);
 }
 
 #endif /* CONFIG_PM */
