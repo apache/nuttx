@@ -86,7 +86,7 @@ void pm_initialize(void)
    * data structure here.
    */
 
-  sq_init(&g_pmglobals.registry);
+  dq_init(&g_pmglobals.registry);
   nxsem_init(&g_pmglobals.regsem, 0, 1);
 }
 

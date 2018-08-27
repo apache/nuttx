@@ -277,7 +277,7 @@ enum pm_state_e
 
 struct pm_callback_s
 {
-  struct sq_entry_s entry;   /* Supports a singly linked list */
+  struct dq_entry_s entry;   /* Supports a doubly linked list */
 
   /**************************************************************************
    * Name: prepare

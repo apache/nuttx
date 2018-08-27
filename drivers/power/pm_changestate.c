@@ -76,23 +76,45 @@
 
 static int pm_prepall(int domain, enum pm_state_e newstate)
 {
-  FAR sq_entry_t *entry;
+  FAR dq_entry_t *entry;
   int ret = OK;
 
-  /* Visit each registered callback structure. */
-
-  for (entry = sq_peek(&g_pmglobals.registry);
-       entry && ret == OK;
-       entry = sq_next(entry))
+  if (newstate <= g_pmglobals.domain[domain].state)
     {
-      /* Is the prepare callback supported? */
+      /* Visit each registered callback structure in normal order. */
 
-      FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
-      if (cb->prepare)
+      for (entry = dq_peek(&g_pmglobals.registry);
+           entry && ret == OK;
+           entry = dq_next(entry))
         {
-          /* Yes.. prepare the driver */
+          /* Is the prepare callback supported? */
 
-          ret = cb->prepare(cb, domain, newstate);
+          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          if (cb->prepare)
+            {
+              /* Yes.. prepare the driver */
+
+              ret = cb->prepare(cb, domain, newstate);
+            }
+        }
+    }
+  else
+    {
+      /* Visit each registered callback structure in reverse order. */
+
+      for (entry = dq_tail(&g_pmglobals.registry);
+           entry && ret == OK;
+           entry = dq_prev(entry))
+        {
+          /* Is the prepare callback supported? */
+
+          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          if (cb->prepare)
+            {
+              /* Yes.. prepare the driver */
+
+              ret = cb->prepare(cb, domain, newstate);
+            }
         }
     }
 
@@ -120,20 +142,40 @@ static int pm_prepall(int domain, enum pm_state_e newstate)
 
 static inline void pm_changeall(int domain, enum pm_state_e newstate)
 {
-  FAR sq_entry_t *entry;
+  FAR dq_entry_t *entry;
 
-  /* Visit each registered callback structure. */
-
-  for (entry = sq_peek(&g_pmglobals.registry); entry; entry = sq_next(entry))
+if (newstate <= g_pmglobals.domain[domain].state)
     {
-      /* Is the notification callback supported? */
+      /* Visit each registered callback structure in normal order. */
 
-      FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
-      if (cb->notify)
+      for (entry = dq_peek(&g_pmglobals.registry); entry; entry = dq_next(entry))
         {
-          /* Yes.. notify the driver */
+          /* Is the notification callback supported? */
 
-          cb->notify(cb, domain, newstate);
+          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          if (cb->notify)
+            {
+              /* Yes.. notify the driver */
+
+              cb->notify(cb, domain, newstate);
+            }
+        }
+    }
+  else
+    {
+      /* Visit each registered callback structure in reverse order. */
+
+    for (entry = dq_tail(&g_pmglobals.registry); entry; entry = dq_prev(entry))
+        {
+          /* Is the notification callback supported? */
+
+          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          if (cb->notify)
+            {
+              /* Yes.. notify the driver */
+
+              cb->notify(cb, domain, newstate);
+            }
         }
     }
 }

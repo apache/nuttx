@@ -154,12 +154,12 @@ struct pm_global_s
 
   sem_t regsem;
 
-  /* registry is a singly-linked list of registered power management
+  /* registry is a doubly-linked list of registered power management
    * callback structures.  To ensure mutually exclusive access, this list
    * must be locked by calling pm_lock() before it is accessed.
    */
 
-  sq_queue_t registry;
+  dq_queue_t registry;
 };
 
 /****************************************************************************

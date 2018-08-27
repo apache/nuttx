@@ -79,7 +79,7 @@ int pm_register(FAR struct pm_callback_s *callbacks)
   ret = pm_lock();
   if (ret == OK)
     {
-      sq_addlast(&callbacks->entry, &g_pmglobals.registry);
+      dq_addlast(&callbacks->entry, &g_pmglobals.registry);
       pm_unlock();
     }
 
