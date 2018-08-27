@@ -180,6 +180,31 @@
 #define AUDIO_SUBFMT_MIDI_1         0x0d
 #define AUDIO_SUBFMT_MIDI_2         0x0e
 
+/* Audio Hardware-Format Types **********************************************/
+
+#define AUDIO_HWFMT_I2S             (1 << 0)
+#define AUDIO_HWFMT_RIGHT_J         (2 << 0)
+#define AUDIO_HWFMT_LEFT_J          (3 << 0)
+#define AUDIO_HWFMT_DSP_A           (4 << 0)
+#define AUDIO_HWFMT_DSP_B           (5 << 0)
+#define AUDIO_HWFMT_AC97            (6 << 0)
+#define AUDIO_HWFMT_PDM             (7 << 0)
+
+#define AUDIO_HWFMT_NB_NF           (0 << 8)
+#define AUDIO_HWFMT_NB_IF           (2 << 8)
+#define AUDIO_HWFMT_IB_NF           (3 << 8)
+#define AUDIO_HWFMT_IB_IF           (4 << 8)
+
+#define AUDIO_HWFMT_CBM_CFM         (1 << 12)
+#define AUDIO_HWFMT_CBS_CFM         (2 << 12)
+#define AUDIO_HWFMT_CBM_CFS         (3 << 12)
+#define AUDIO_HWFMT_CBS_CFS         (4 << 12)
+
+#define AUDIO_HWFMT_FORMAT_MASK     0x000f
+#define AUDIO_HWFMT_CLOCK_MASK      0x00f0
+#define AUDIO_HWFMT_INV_MASK        0x0f00
+#define AUDIO_HWFMT_MASTER_MASK     0xf000
+
 /* Supported Sampling Rates *************************************************/
 
 #define AUDIO_SAMP_RATE_8K          0x0001
@@ -254,6 +279,10 @@
 #define AUDIO_STEXT_UNDERFLOW       0x03
 #define AUDIO_STEXT_OVERFLOW        0x04
 #define AUDIO_STEXT_LATENCY         0x05
+
+/* Extension Unit controls **************************************************/
+
+#define AUDIO_EU_HW_FORMAT          0x0001
 
 /* Audio Callback Reasons ***************************************************/
 
