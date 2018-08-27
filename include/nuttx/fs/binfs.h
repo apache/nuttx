@@ -68,7 +68,7 @@ extern "C"
  * It is typically mounted under /bin.
  */
 
-EXTERN mountpt_operations;
+struct mountpt_operations;
 EXTERN const struct mountpt_operations binfs_operations;
 
 /****************************************************************************
