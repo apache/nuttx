@@ -247,7 +247,10 @@ int pm_changestate(int domain, enum pm_state_e newstate)
    */
 
   pm_changeall(domain, newstate);
-  g_pmglobals.domain[domain].state = newstate;
+  if (newstate != PM_RESTORE)
+    {
+      g_pmglobals.domain[domain].state = newstate;
+    }
 
   /* Restore the interrupt state */
 
