@@ -51,8 +51,20 @@ ifeq ($(CONFIG_TIMER),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_TIMER_ARCH),y)
+  CSRCS += arch_timer.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += oneshot.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_ALARM_ARCH),y)
+  CSRCS += arch_alarm.c
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif
@@ -65,6 +77,12 @@ endif
 
 ifeq ($(CONFIG_RTC_PCF85263),y)
   CSRCS += pcf85263.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_RTC_ARCH),y)
+  CSRCS += arch_rtc.c
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif

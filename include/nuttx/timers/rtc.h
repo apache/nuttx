@@ -240,6 +240,9 @@ struct rtc_time
   int tm_yday;    /* Day of the year (0-365) (unused) */
   int tm_isdst;   /* Non-0 if daylight savings time is in effect (unused) */
 #endif
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
+  long tm_nsec;   /* Nanosecond (0-999999999) */
+#endif
 };
 
 #ifdef CONFIG_RTC_ALARM

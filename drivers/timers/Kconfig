@@ -13,6 +13,17 @@ config TIMER
 		driver. See include/nuttx/timers/timer.h for further timer driver
 		information.
 
+if TIMER
+
+config TIMER_ARCH
+	bool "Timer Arch Implementation"
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	---help---
+		Implement timer arch API on top of timer driver interface.
+
+endif # TIMER
+
 config ONESHOT
 	bool "Oneshot timer driver"
 	default n
@@ -20,6 +31,17 @@ config ONESHOT
 		This selection enables building of the "upper-half" oneshot timer
 		driver. See include/nuttx/timers/oneshot.h for further oneshot timer
 		driver information.
+
+if ONESHOT
+
+config ALARM_ARCH
+	bool "Alarm Arch Implementation"
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	---help---
+		Implement alarm arch API on top of oneshot driver interface.
+
+endif # ONESHOT
 
 menuconfig RTC
 	bool "RTC Driver Support"
@@ -94,6 +116,12 @@ config RTC_DRIVER
 		information.
 
 if RTC_DRIVER
+
+config RTC_ARCH
+	bool "RTC Arch Implementation"
+	default n
+	---help---
+		Implement RTC arch API on top of RTC driver interface.
 
 config RTC_PERIODIC
 	bool "RTC Periodic Interrupts"
