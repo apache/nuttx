@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/audio/i2s.h
  *
- *   Copyright(C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,25 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
+ * Name: I2S_RXCHANNELS
+ *
+ * Description:
+ *   Set the I2S RX channel num. NOTE: This may also have unexpected side-
+ *   effects of the RX channel num is coupled with the TX channel num.
+ *
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   channel - The I2S channel num
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2S_RXCHANNELS(d,c) \
+  ((d)->ops->i2s_rxchannels ? (d)->ops->i2s_rxchannels(d,c) : -ENOTTY)
+
+/****************************************************************************
  * Name: I2S_RXSAMPLERATE
  *
  * Description:
@@ -73,7 +92,8 @@
  *
  ****************************************************************************/
 
-#define I2S_RXSAMPLERATE(d,f) ((d)->ops->i2s_rxsamplerate(d,r))
+#define I2S_RXSAMPLERATE(d,r) \
+  ((d)->ops->i2s_rxsamplerate ? (d)->ops->i2s_rxsamplerate(d,r) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_RXDATAWIDTH
@@ -91,7 +111,8 @@
  *
  ****************************************************************************/
 
-#define I2S_RXDATAWIDTH(d,b) ((d)->ops->i2s_rxdatawidth(d,b))
+#define I2S_RXDATAWIDTH(d,b) \
+  ((d)->ops->i2s_rxdatawidth ? (d)->ops->i2s_rxdatawidth(d,b) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_RECEIVE
@@ -123,7 +144,27 @@
  *
  ****************************************************************************/
 
-#define I2S_RECEIVE(d,b,c,a,t) ((d)->ops->i2s_receive(d,b,c,a,t))
+#define I2S_RECEIVE(d,b,c,a,t) \
+  ((d)->ops->i2s_receive ? (d)->ops->i2s_receive(d,b,c,a,t) : -ENOTTY)
+
+/****************************************************************************
+ * Name: I2S_RXCHANNELS
+ *
+ * Description:
+ *   Set the I2S TX channel num. NOTE: This may also have unexpected side-
+ *   effects of the TX channel num is coupled with the RX channel num.
+ *
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   channel - The I2S channel num
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2S_TXCHANNELS(d,c) \
+  ((d)->ops->i2s_txchannels ? (d)->ops->i2s_txchannels(d,c) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_TXSAMPLERATE
@@ -143,7 +184,8 @@
  *
  ****************************************************************************/
 
-#define I2S_TXSAMPLERATE(d,f) ((d)->ops->i2s_txsamplerate(d,r))
+#define I2S_TXSAMPLERATE(d,r) \
+  ((d)->ops->i2s_txsamplerate ? (d)->ops->i2s_txsamplerate(d,r) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_TXDATAWIDTH
@@ -161,7 +203,8 @@
  *
  ****************************************************************************/
 
-#define I2S_TXDATAWIDTH(d,b) ((d)->ops->i2s_txdatawidth(d,b))
+#define I2S_TXDATAWIDTH(d,b) \
+  ((d)->ops->i2s_txdatawidth ? (d)->ops->i2s_txdatawidth(d,b) : -ENOTTY)
 
 /****************************************************************************
  * Name: I2S_SEND
@@ -193,7 +236,27 @@
  *
  ****************************************************************************/
 
-#define I2S_SEND(d,b,c,a,t) ((d)->ops->i2s_send(d,b,c,a,t))
+#define I2S_SEND(d,b,c,a,t) \
+  ((d)->ops->i2s_send ? (d)->ops->i2s_send(d,b,c,a,t) : -ENOTTY)
+
+/****************************************************************************
+ * Name: I2S_IOCTL
+ *
+ * Description:
+ *   IOCTL of I2S.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   cmd      - A pointer to the audio buffer from which to send data
+ *   arg      - An opaque argument that will be provided to the callback
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2S_IOCTL(d,c,a) \
+  ((d)->ops->i2s_ioctl ? (d)->ops->i2s_ioctl(d,c,a) : -ENOTTY)
 
 /****************************************************************************
  * Public Types
@@ -202,7 +265,7 @@
 
 struct i2s_dev_s;
 typedef CODE void (*i2s_callback_t)(FAR struct i2s_dev_s *dev,
-                  FAR struct ap_buffer_s *apb, FAR void *arg, int result);
+                   FAR struct ap_buffer_s *apb, FAR void *arg, int result);
 
 /* The I2S vtable */
 
@@ -210,6 +273,7 @@ struct i2s_ops_s
 {
   /* Receiver methods */
 
+  CODE int      (*i2s_rxchannels)(FAR struct i2s_dev_s *dev, uint8_t channels);
   CODE uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
   CODE uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev, int bits);
   CODE int      (*i2s_receive)(FAR struct i2s_dev_s *dev,
@@ -218,6 +282,7 @@ struct i2s_ops_s
 
   /* Transmitter methods */
 
+  CODE int      (*i2s_txchannels)(FAR struct i2s_dev_s *dev, uint8_t channels);
   CODE uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
   CODE uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev, int bits);
   CODE int      (*i2s_send)(FAR struct i2s_dev_s *dev,
