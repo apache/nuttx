@@ -82,25 +82,21 @@
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
-/* "The <wchar.h> header defines the following data types through
+
+/* "The <wchar.h> header defines the following data types:
  *
  * wchar_t
- *   As described in <stddef.h>.
+ *   Provided via <stddef.h>.
  *
  * wint_t
  *   An integral type capable of storing any valid value of wchar_t, or WEOF.
- */
-
-typedef int wint_t;
-
-/* wctype_t
+ *   Provided via <sys/type.h>
+ *
+ * wctype_t
  *   A scalar type of a data object that can hold values which represent
- *   locale-specific character classification.
- */
-
-typedef int wctype_t;
-
-/* mbstate_t
+ *   locale-specific character classification.  Provided via <sys/type.h>
+ *
+ * mbstate_t
  *   An object type other than an array type that can hold the conversion
  *   state information necessary to convert between sequences of (possibly
  *   multibyte) characters and wide-characters. If a codeset is being used

@@ -204,6 +204,19 @@ typedef intptr_t     ptrdiff_t;
 typedef uint16_t     wchar_t;
 #endif
 
+/* wint_t
+ *   An integral type capable of storing any valid value of wchar_t, or WEOF.
+ */
+
+typedef int wint_t;
+
+/* wctype_t
+ *   A scalar type of a data object that can hold values which represent
+ *   locale-specific character classification.
+ */
+
+typedef int wctype_t;
+
 /* blkcnt_t and off_t are signed integer types.
  *
  *   blkcnt_t is used for file block counts.
