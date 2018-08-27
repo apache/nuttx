@@ -47,7 +47,6 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/clock.h>
-#include <nuttx/wqueue.h>
 #include <nuttx/power/pm.h>
 
 #ifdef CONFIG_PM
@@ -56,10 +55,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#endif
 
 /* Convert the time slice interval into system clock ticks.
  *
@@ -159,10 +154,6 @@ struct pm_global_s
 
   sem_t regsem;
 
-  /* For work that has been deferred to the worker thread */
-
-  struct work_s work;
-
   /* registry is a singly-linked list of registered power management
    * callback structures.  To ensure mutually exclusive access, this list
    * must be locked by calling pm_lock() before it is accessed.
@@ -210,8 +201,7 @@ EXTERN struct pm_global_s g_pmglobals;
  * Assumptions:
  *   This function may be called from a driver, perhaps even at the interrupt
  *   level.  It may also be called from the IDLE loop at the lowest possible
- *   priority level.  To reconcile these various conditions, all work is
- *   performed on the worker thread at a user-selectable priority.
+ *   priority level.
  *
  ****************************************************************************/
 

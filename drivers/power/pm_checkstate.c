@@ -125,11 +125,6 @@ enum pm_state_e pm_checkstate(int domain)
       pdom->stime = now;
       pdom->accum = 0;
 
-      /* Reassessing the PM state may require some computation.  However,
-       * the work will actually be performed on a worker thread at a user-
-       * controlled priority.
-       */
-
       (void)pm_update(domain, accum);
     }
 
@@ -145,12 +140,6 @@ enum pm_state_e pm_checkstate(int domain)
     }
 
   leave_critical_section(flags);
-
-  /* Return the recommended state.  Assuming that we are called from the
-   * IDLE thread at the lowest priority level, any updates scheduled on the
-   * worker thread above should have already been peformed and the recommended
-   * state should be current:
-   */
 
   return pdom->recommended;
 }

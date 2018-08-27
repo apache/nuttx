@@ -50,26 +50,6 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct pm_worker_param_s
-{
-  uint8_t domndx;
-  int16_t accum;
-};
-
-union pm_worker_param_u
-{
-  struct pm_worker_param_s s;
-  uintptr_t i;
-};
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 /* CONFIG_PM_MEMORY is the total number of time slices (including the current
@@ -132,38 +112,35 @@ static const uint16_t g_pmcount[3] =
 };
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pm_worker
+ * Name: pm_update
  *
  * Description:
- *   This worker function is queued at the end of a time slice in order to
+ *   This internal function is called at the end of a time slice in order to
  *   update driver activity metrics and recommended states.
  *
  * Input Parameters:
- *   arg - The value of the activity accumulator at the end of the time
+ *   domain - The PM domain associated with the accumulator
+ *   accum - The value of the activity accumulator at the end of the time
  *     slice.
  *
  * Returned Value:
  *   None.
  *
  * Assumptions:
- *   This function runs on the worker thread.
+ *   This function may be called from a driver, perhaps even at the interrupt
+ *   level.  It may also be called from the IDLE loop at the lowest possible
+ *   priority level.
  *
  ****************************************************************************/
 
-void pm_worker(FAR void *arg)
+void pm_update(int domain, int16_t accum)
 {
-  union pm_worker_param_u parameter;
   FAR struct pm_domain_s *pdom;
   int32_t Y;
-  int16_t accum;
   int index;
 #if CONFIG_PM_MEMORY > 1
   int32_t denom;
@@ -171,21 +148,10 @@ void pm_worker(FAR void *arg)
   int j;
 #endif
 
-  /* Decode the domain and accumulator as a scaler value.
-   *
-   * REVISIT: domain will fit in a uint8_t and accum is int16_t.  Assuming
-   * that sizeof(FAR void *) >=3, the following will work.  It will not work
-   * for 16-bit addresses!
-   */
-
-  parameter.i = (uintptr_t)arg;
-  index       = parameter.s.domndx;
-  accum       = parameter.s.accum;
-
   /* Get a convenience pointer to minimize all of the indexing */
 
-  DEBUGASSERT(index >= 0 && index < CONFIG_PM_NDOMAINS);
-  pdom        = &g_pmglobals.domain[index];
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  pdom        = &g_pmglobals.domain[domain];
 
 #if CONFIG_PM_MEMORY > 1
   /* We won't bother to do anything until we have accumulated
@@ -325,57 +291,6 @@ void pm_worker(FAR void *arg)
             }
         }
     }
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pm_update
- *
- * Description:
- *   This internal function is called at the end of a time slice in order to
- *   update driver activity metrics and recommended states.
- *
- * Input Parameters:
- *   domain - The PM domain associated with the accumulator
- *   accum - The value of the activity accumulator at the end of the time
- *     slice.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   This function may be called from a driver, perhaps even at the interrupt
- *   level.  It may also be called from the IDLE loop at the lowest possible
- *   priority level.  To reconcile these various conditions, all work is
- *   performed on the worker thread at a user-selectable priority.  This will
- *   also serialize all of the updates and eliminate any need for additional
- *   protection.
- *
- ****************************************************************************/
-
-void pm_update(int domain, int16_t accum)
-{
-  union pm_worker_param_u parameter;
-
-  /* Encode the domain and accumulator as a scaler value.
-   *
-   * REVISIT: domain will fit in a uint8_t and accum is int16_t.  Assuming
-   * that sizeof(FAR void *) >=3, the following will work.  It will not work
-   * for 16-bit addresses!
-   */
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  parameter.s.domndx = (uint8_t)domain;
-  parameter.s.accum  = accum;
-
-  /* The work will be performed on the worker thread */
-
-  DEBUGASSERT(g_pmglobals.work.worker == NULL);
-  (void)work_queue(HPWORK, &g_pmglobals.work, pm_worker,
-                   (FAR void *)parameter.i, 0);
 }
 
 #endif /* CONFIG_PM */

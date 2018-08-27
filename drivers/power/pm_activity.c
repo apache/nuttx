@@ -137,11 +137,6 @@ void pm_activity(int domain, int priority)
           pdom->stime = now;
           pdom->accum = 0;
 
-          /* Reassessing the PM state may require some computation.  However,
-           * the work will actually be performed on a worker thread at a user-
-           * controlled priority.
-           */
-
           (void)pm_update(domain, tmp);
         }
 
