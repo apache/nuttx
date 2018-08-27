@@ -213,4 +213,23 @@ int pm_changestate(int domain, enum pm_state_e newstate)
   return ret;
 }
 
+/****************************************************************************
+ * Name: pm_querystate
+ *
+ * Description:
+ *   This function returns the current power management state.
+ *
+ * Input Parameters:
+ *   domain - The PM domain to check
+ *
+ * Returned Value:
+ *   The current power management state.
+ *
+ ****************************************************************************/
+
+enum pm_state_e pm_querystate(int domain)
+{
+  return g_pmglobals.domain[domain].state;
+}
+
 #endif /* CONFIG_PM */
