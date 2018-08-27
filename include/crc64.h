@@ -64,10 +64,10 @@
 
 /* CRC-64/WE */
 
-#define CRC64_POLY   ((uint64_t)0x42f0e1eba9ea3693)
-#define CRC64_INIT   ((uint64_t)0xffffffffffffffff)
-#define CRC64_XOROUT ((uint64_t)0xffffffffffffffff)
-#define CRC64_CHECK  ((uint64_t)0x62ec59e3f1a4f00a)
+#define CRC64_POLY   ((uint64_t)0x42f0e1eba9ea3693ull)
+#define CRC64_INIT   ((uint64_t)0xffffffffffffffffull)
+#define CRC64_XOROUT ((uint64_t)0xffffffffffffffffull)
+#define CRC64_CHECK  ((uint64_t)0x62ec59e3f1a4f00aull)
 
 /****************************************************************************
  * Public Function Prototypes
