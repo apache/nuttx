@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <queue.h>
 #include <sched.h>
 
@@ -168,6 +169,14 @@ void               nxsig_alloc_actionblock(void);
 /* sig_action.c */
 
 void               nxsig_release_action(FAR sigactq_t *sigact);
+
+/* sig_default.c */
+
+#ifdef CONFIG_SIG_DEFAULT
+bool               nxsig_isdefault(FAR struct tcb_s *tcb, int signo);
+int                nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction);
+int                nxsig_default_initialize(FAR struct tcb_s *tcb);
+#endif
 
 /* sig_pending.c */
 

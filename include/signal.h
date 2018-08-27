@@ -116,7 +116,7 @@
  *    all the consequences of _exit() except that the status made available
  *    to wait() and waitpid() indicates abnormal termination by the
  *    specified signal.
- * A  Abnormal termination of the process. Additionally ith the XSI
+ * A  Abnormal termination of the process. Additionally with the XSI
  *    extension, implementation-defined abnormal termination actions, such
  *    as creation of a core file, may occur.
  * I  Ignore the signal.
@@ -169,7 +169,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_SIG_SIGKILL
+#ifdef CONFIG_SIG_DEFAULT
 #  ifndef CONFIG_SIG_KILL
 #    define SIGKILL     9  /* Sent when ctrl-c event (vs. standard SIGINT)  */
 #  else

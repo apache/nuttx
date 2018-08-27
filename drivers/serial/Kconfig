@@ -19,14 +19,22 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
-config SERIAL_SIGKILL_CHAR
+config TTY_SIGKILL
+	bool "Support SIGKILL"
+	default n
+	select SIG_DEFAULT
+	depends on !DISABLE_SIGNALS
+	---help---
+		Whether support Ctrl-c/x event
+
+config TTY_SIGKILL_CHAR
 	int "Serial parse SIGKILL characters"
 	default 3 if SERIAL_CONSOLE
 	default 4 if !SERIAL_CONSOLE
-	depends on SIG_SIGKILL && BUILD_FLAT
+	depends on SIG_SIGKILL
 	---help---
 		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
-		send a SIGKILL event.  Other charcters may also be selected.
+		send a SIGKILL event.  Other characters may also be selected.
 
 		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
 		End-of-File character that should close the stream.

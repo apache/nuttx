@@ -60,14 +60,14 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SIG_SIGKILL
+#ifdef CONFIG_TTY_SIGKILL
 static bool uart_check_sigkill(const char *buf, size_t size)
 {
   size_t i;
 
   for (i = 0; i < size; i++)
     {
-      if (buf[i] == CONFIG_SERIAL_SIGKILL_CHAR)
+      if (buf[i] == CONFIG_TTY_SIGKILL_CHAR)
         {
           return true;
         }
@@ -88,7 +88,7 @@ static bool uart_check_sigkill(const char *buf, size_t size)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SIG_SIGKILL
+#ifdef CONFIG_TTY_SIGKILL
 static bool uart_recvchars_sigkill(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -324,7 +324,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
-#ifdef CONFIG_SIG_SIGKILL
+#ifdef CONFIG_TTY_SIGKILL
   bool needkill = false;
 
   /* Check if the SIGKILL character is anywhere in the newly received DMA buffer. */
@@ -350,7 +350,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#ifdef CONFIG_SIG_SIGKILL
+#ifdef CONFIG_TTY_SIGKILL
   /* Send the SIGKILL signal if needed */
 
   if (needkill)

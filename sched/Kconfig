@@ -1172,6 +1172,8 @@ config SCHED_ONEXIT_MAX
 
 endmenu # RTOS hooks
 
+menu "Signal Configuration"
+
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
@@ -1184,14 +1186,14 @@ config SIG_EVTHREAD
 		different mechanism would need to be development to support this
 		feature on the PROTECTED or KERNEL build.
 
-config SIG_SIGKILL
-	bool "Support SIGKILL"
+config SIG_DEFAULT
+	bool "Default signal actions"
 	default n
 	depends on !DISABLE_SIGNALS
 	---help---
-		Whether support Ctrl-c/x event, or kill -9 cmd.
+		Enable to support default signal actions.
 
-		NOTE: SIGINT is normally sent by Ctrl-C in other systems.
+		NOTE: SIGKILL is the only signal currently supported.
 
 menu "Signal Numbers"
 	depends on !DISABLE_SIGNALS
@@ -1235,12 +1237,10 @@ config SIG_POLL
 config SIG_KILL
 	int "SIGKILL"
 	default 9
-	depends on SIG_SIGKILL
+	depends on SIG_DEFAULT
 	---help---
-		The SIGKILL signal is sent to a process when Ctrl-c/x event,
-		or cmd kill -9 xx happened.
-
-		NOTE: SIGINT is normally sent by Ctrl-C in other systems.
+		The SIGKILL signal is sent to cause a task termination event (only
+		if CONFIG_SIG_DEFAULT=y)
 
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"
@@ -1260,6 +1260,7 @@ config SIG_SIGWORK
 		used for SIGWORK.  Default: 17
 
 endmenu # Signal Numbers
+endmenu # Signal Configuration
 
 menu "POSIX Message Queue Options"
 	depends on !DISABLE_MQUEUE

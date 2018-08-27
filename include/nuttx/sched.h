@@ -518,6 +518,9 @@ struct task_group_s
 
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
+#ifdef CONFIG_SIG_DEFAULT
+  sigset_t tg_sigdefault;           /* Set of signals set to the default action */
+#endif
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
