@@ -162,6 +162,7 @@ void apb_free(FAR struct ap_buffer_s *apb)
   if (refcount <= 1)
     {
       audinfo("Freeing %p\n", apb);
+      nxsem_destroy(&apb->sem);
       lib_ufree(apb);
     }
 }
