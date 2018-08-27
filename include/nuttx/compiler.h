@@ -81,7 +81,7 @@
 
 /* C++ support */
 
-#if __cplusplus >= 201402L
+#if defined(__cplusplus) && __cplusplus >= 201402L
 #  define CONFIG_HAVE_CXX14 1
 #else
 #  undef CONFIG_HAVE_CXX14
