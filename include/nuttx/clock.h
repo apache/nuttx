@@ -270,6 +270,13 @@ EXTERN volatile clock_t g_system_timer;
  * Public Function Prototypes
  ****************************************************************************/
 
+void clock_timespec_add(FAR const struct timespec *ts1,
+                        FAR const struct timespec *ts2,
+                        FAR struct timespec *ts3);
+void clock_timespec_subtract(FAR const struct timespec *ts1,
+                             FAR const struct timespec *ts2,
+                             FAR struct timespec *ts3);
+
 /****************************************************************************
  * Name:  clock_synchronize
  *
