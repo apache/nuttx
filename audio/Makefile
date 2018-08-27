@@ -45,6 +45,10 @@ ASRCS =
 CSRCS = audio.c
 VPATH = .
 
+ifeq ($(CONFIG_AUDIO_COMP),y)
+  CSRCS += audio_comp.c
+endif
+
 # Include support for various drivers.  Each Make.defs file will add its
 # files to the source file list, add its DEPPATH info, and will add
 # the appropriate paths to the VPATH variable

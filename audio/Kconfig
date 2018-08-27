@@ -11,6 +11,12 @@ config AUDIO
 
 if AUDIO
 
+config AUDIO_COMP
+	bool "Support audio composition"
+	default n
+	---help---
+		Composite several lower level audio devices into big one.
+
 config AUDIO_MULTI_SESSION
 	bool "Support multiple sessions"
 	default n
