@@ -107,7 +107,7 @@ struct lan91c111_driver_s
   WDOG_ID txpoll;           /* TX poll timer */
   struct work_s irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s pollwork;   /* For deferring poll work to the work queue */
-  uint8_t pktbuf[MAX_NET_DEV_MTU + 4]; /* +4 due to getregs32/putregs32 */
+  uint8_t pktbuf[MAX_NETDEV_PKTSIZE + 4]; /* +4 due to getregs32/putregs32 */
 
   /* This holds the information visible to the NuttX network */
 
@@ -680,7 +680,7 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
 
   length -= status & RS_ODDFRAME ? 5 : 6;
 
-  if (length < ETH_HDRLEN || length > MAX_NET_DEV_MTU)
+  if (length < ETH_HDRLEN || length > MAX_NETDEV_PKTSIZE)
     {
       lan91c111_command_mmu(priv, MC_RELEASE);
       NETDEV_RXERRORS(dev);
