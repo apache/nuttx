@@ -137,9 +137,29 @@ config TTY_SIGKILL
 	select SIG_DEFAULT
 	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
 	---help---
-		Whether support Ctrl-c/x event.  Enabled automatically for console devices.
-		May be enabled for other serial devices using the ISIG bit in the Termios
-		c_lflag.
+		Whether support Ctrl-c/x event.  Enabled automatically for console
+		devices.  May be enabled for other serial devices using the ISIG bit
+		in the Termios c_lflag.
+
+		REVISIT:  This implementation is non-standard.  The c_lflag ISIG bit
+		normally enables/disables INTR, QUIT, SUSP, and DSUSP character
+		processing.  The relationship between these names, standard signals,
+		and typical key presses are as follows:
+
+		  INTR   SIGINT   Ctrl-C  ETX(0x03) Interrupt
+		  KILL   SIGKILL  Ctrl-U  NAK(0x15) Kill
+		  QUIT   SIGQUIT  Ctrl-\  FS (0x1c) Quit
+		  SUSP   SIGSTP   Ctrl-Z  SUB(0x1a) Suspend
+		  DSUSP  SIGSTP   Ctrl-Y  EM (0x19) Delayed suspend
+
+		NOTES:
+		  - SIGQUIT is like SIGKILL but causes generation of a core dump
+		  - SIGSTP is like SIGSTOP but can be ignored.
+		  - The delayed suspend (DSUS) is like suspend (SUPD), except that
+		    the suspension is delayed until the next read operation
+
+		Ctrl-D (EOT 0x04) normally should not generate a signal but, instead,
+		should generate an immediate End-of-File result.
 
 config TTY_SIGKILL_CHAR
 	int "Serial parse SIGKILL characters"
