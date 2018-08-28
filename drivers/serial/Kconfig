@@ -131,8 +131,8 @@ config SERIAL_TERMIOS
 		If this is not defined, then the terminal settings (baud, parity, etc).
 		are not configurable at runtime; serial streams cannot be flushed, etc..
 
-config TTY_SIGKILL
-	bool "Support SIGKILL"
+config TTY_SIGINT
+	bool "Support SIGINT"
 	default n
 	select SIG_DEFAULT
 	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
@@ -152,23 +152,26 @@ config TTY_SIGKILL
 		  SUSP   SIGSTP   Ctrl-Z  SUB(0x1a) Suspend
 		  DSUSP  SIGSTP   Ctrl-Y  EM (0x19) Delayed suspend
 
-		NOTES:
-		  - SIGQUIT is like SIGKILL but causes generation of a core dump
-		  - SIGSTP is like SIGSTOP but can be ignored.
-		  - The delayed suspend (DSUS) is like suspend (SUPD), except that
+		Additional requirements:
+		  - SIGKILL cannot be caught or ignored.  Compared to SIGTERM which
+		    is like SIGKILL but can be caught or ignored.
+		  - SIGQUIT is like SIGINT but causes generation of a core dump
+		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
+		    can be caught or ignored ignored.
+		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
 		    the suspension is delayed until the next read operation
 
 		Ctrl-D (EOT 0x04) normally should not generate a signal but, instead,
-		should generate an immediate End-of-File result.
+		should cause an immediate End-of-File result.
 
-config TTY_SIGKILL_CHAR
-	int "Serial parse SIGKILL characters"
+config TTY_SIGINT_CHAR
+	int "Serial parse SIGINT characters"
 	default 3 if SERIAL_CONSOLE
 	default 4 if !SERIAL_CONSOLE
-	depends on TTY_SIGKILL
+	depends on TTY_SIGINT
 	---help---
 		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
-		send a SIGKILL event.  Other characters may also be selected.
+		send a SIGINT event.  Other characters may also be selected.
 
 		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
 		End-of-File character that should close the stream.

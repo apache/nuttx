@@ -102,6 +102,7 @@ static const struct nxsig_defaction_s g_defactions[] =
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
    { SIGPOLL, nxsig_abnormal_termination },
 #endif
+   { SIGINT,  nxsig_abnormal_termination },
    { SIGKILL, nxsig_abnormal_termination }
 };
 

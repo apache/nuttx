@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  August 22, 2018</p>
+      <p>Last Updated:  August 28, 2018</p>
     </td>
   </tr>
 </table>
@@ -2034,11 +2034,16 @@ nsh&gt;
 </pre></ul>
 <p><small>
   <b>NOTE</b>:
-  NuttX does not support a FULL POSIX signalling system.
-  Standard signals like SIGCHLD, SIGINTR, SIGKILL, etc. do not exist in NuttX and sending those signals may not have the result that you expect.
+  NuttX does not support a FULL POSIX signaling system.
+  A few standard signal names like <code>SIGCHLD</code>, <code>SIGUSR1</code>, <code>SIGUSR2</code>, <code>SIGALRM</code>, and <code>SIGPOLL</code> exist in the system.
+  However, they do not have the default actions that you might expect.
   Rather, NuttX supports only what are referred to as POSIX real-time signals.
   These signals may be used to communicate with running tasks, may be use to waiting waiting tasks, etc.
-  But, as an example, <code>kill -9</code> (SIGKILL) will not terminate a task.
+</p>
+<p>
+  If the configuration option <code>CONFIG_SIG_DEFAULT</code> is enabled, then default actions for the <code>SIGINT</code> and <code>SIGKILL</code> signals (only) will be supported.
+  In that case, as an example, <code>kill -9</code> (SIGKILL) will, indeed, terminate a task.
+  Caution should be exercised, however, because this is likely to cause memory leaks and to strand resource since there is insufficient clean-up in certain build configurations.
 </p></small>
 
 <table width ="100%">

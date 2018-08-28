@@ -1372,7 +1372,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
 #endif
 
-#ifdef CONFIG_TTY_SIGKILL
+#ifdef CONFIG_TTY_SIGINT
           /* Make the given terminal the controlling terminal of the calling process */
 
           case TIOCSCTTY:
@@ -1384,7 +1384,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
              if ((dev->tc_lflag & ISIG) != 0)
                {
-                  /* Save the PID of the recipient of the SIGKILL signal. */
+                  /* Save the PID of the recipient of the SIGINT signal. */
 
                   dev->pid = (pid_t)arg;
                   DEBUGASSERT((unsigned long)(dev->pid) == arg);
@@ -1436,7 +1436,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
 
-#ifdef CONFIG_TTY_SIGKILL
+#ifdef CONFIG_TTY_SIGINT
               /* If the ISIG flag has been cleared in c_lflag, then un-
                * register the controlling terminal.
                */
@@ -1611,8 +1611,8 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-#ifdef CONFIG_TTY_SIGKILL
-  /* Initialize  of the task that will receive SIGKILL signals. */
+#ifdef CONFIG_TTY_SIGINT
+  /* Initialize  of the task that will receive SIGINT signals. */
 
   dev->pid = (pid_t)-1;
 

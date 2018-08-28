@@ -123,7 +123,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int watermark;
 #endif
-#ifdef CONFIG_TTY_SIGKILL
+#ifdef CONFIG_TTY_SIGINT
   bool needkill = false;
 #endif
   unsigned int status;
@@ -201,10 +201,10 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       ch = uart_receive(dev, &status);
 
-#ifdef CONFIG_TTY_SIGKILL
-      /* Is this the special character that will generate the SIGKILL signal? */
+#ifdef CONFIG_TTY_SIGINT
+      /* Is this the special character that will generate the SIGINT signal? */
 
-      if (dev->pid >= 0 && ch == CONFIG_TTY_SIGKILL_CHAR)
+      if (dev->pid >= 0 && ch == CONFIG_TTY_SIGINT_CHAR)
         {
           /* Yes.. note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
@@ -249,12 +249,12 @@ void uart_recvchars(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#ifdef CONFIG_TTY_SIGKILL
-  /* Send the SIGKILL signal if needed */
+#ifdef CONFIG_TTY_SIGINT
+  /* Send the SIGINT signal if needed */
 
   if (needkill)
     {
-      kill(dev->pid, SIGKILL);
+      kill(dev->pid, SIGINT);
       uart_reset_sem(dev);
     }
 #endif
