@@ -526,9 +526,9 @@
 #define ADC_FORMAT_TYPEIII_IEC61937_MPEG2_AAC_ADTS (1 << 4)
 #define ADC_FORMAT_TYPEIII_IEC61937_MPEG2_L1_LS    (1 << 5)
 #define ADC_FORMAT_TYPEIII_IEC61937_MPEG2_L2_3_LS  (1 << 6)
-#define ADC_FORMAT_TYPEIII_IEC61937_DTS-I          (1 << 7)
-#define ADC_FORMAT_TYPEIII_IEC61937_DTS-II         (1 << 8)
-#define ADC_FORMAT_TYPEIII_IEC61937_DTS-III        (1 << 9)
+#define ADC_FORMAT_TYPEIII_IEC61937_DTS_I          (1 << 7)
+#define ADC_FORMAT_TYPEIII_IEC61937_DTS_II         (1 << 8)
+#define ADC_FORMAT_TYPEIII_IEC61937_DTS_III        (1 << 9)
 #define ADC_FORMAT_TYPEIII_IEC61937_ATRAC          (1 << 10)
 #define ADC_FORMAT_TYPEIII_IEC61937_ATRAC2_3       (1 << 11)
 #define ADC_FORMAT_TYPEIII_WMA                     (1 << 12)
@@ -551,9 +551,9 @@
 #define ADC_FORMAT_TYPEIV_IEC61937_MPEG2_AAC_ADTS  (1 << 12)
 #define ADC_FORMAT_TYPEIV_IEC61937_MPEG2_L1_LS     (1 << 13)
 #define ADC_FORMAT_TYPEIV_IEC61937_MPEG2_L2_3_LS   (1 << 14)
-#define ADC_FORMAT_TYPEIV_IEC61937_DTS-I           (1 << 15)
-#define ADC_FORMAT_TYPEIV_IEC61937_DTS-II          (1 << 16)
-#define ADC_FORMAT_TYPEIV_IEC61937_DTS-III         (1 << 17)
+#define ADC_FORMAT_TYPEIV_IEC61937_DTS_I           (1 << 15)
+#define ADC_FORMAT_TYPEIV_IEC61937_DTS_II          (1 << 16)
+#define ADC_FORMAT_TYPEIV_IEC61937_DTS_III         (1 << 17)
 #define ADC_FORMAT_TYPEIV_IEC61937_ATRAC           (1 << 18)
 #define ADC_FORMAT_TYPEIV_IEC61937_ATRAC2_3        (1 << 19)
 #define ADC_FORMAT_TYPEIV_TYPE_III_WMA             (1 << 20)
@@ -802,7 +802,7 @@ struct adc_mixerunit_desc_s
 #define mu_controls(p) mu_variable[(p)->mu_npins+1]
 #define mu_mixer(p)    mu_variable[(p)->mu_npins+2]
 
-#define USB_SIZEOF_ADC_CLKSEL_DESC(npins,nchan) (13+(npins)+(nchan))
+#define USB_SIZEOF_ADC_MIXERUNIT_DESC(npins,nchan) (13+(npins)+(nchan))
 
 /* Selector Unit Descriptor */
 
@@ -1067,7 +1067,7 @@ struct adc_stextunit_desc_s
   uint8_t st_processing;        /* 16: String index to name of processing unit */
 };
 
-#define USB_SIZEOF_ADC_DOLBYUNIT_DESC(nmodes) (17)
+#define USB_SIZEOF_ADC_STEXTUNIT_DESC(nmodes) (17)
 
 /* Extension Unit Descriptor */
 
@@ -1418,7 +1418,7 @@ struct adc_equalizer_curparm_s
   uint8_t eq_cur[1];            /* 4: Setting for the band in bands bitset */
 };
 
-#define USB_SIZEOF_ADC_CONNCTRL_CURPARM(nbands) (4+(nbands))
+#define USB_SIZEOF_ADC_EQUALIZER_CURPARM(nbands) (4+(nbands))
 
 /* Graphic Equalizer Control RANGE Parameter Block */
 

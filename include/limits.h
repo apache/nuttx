@@ -213,6 +213,7 @@
 #define PIPE_BUF       _POSIX_PIPE_BUF
 #define SIZE_MAX       _POSIX_SIZE_MAX
 #define SIZE_MIN       _POSIX_SIZE_MIN
+#define RSIZE_MAX      _POSIX_SIZE_MAX
 #define SSIZE_MAX      _POSIX_SSIZE_MAX
 #define SSIZE_MIN      _POSIX_SSIZE_MIN
 #define STREAM_MAX     _POSIX_STREAM_MAX
