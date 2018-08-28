@@ -984,3 +984,28 @@ config W25_SLOWREAD
 	default n
 
 endif # MTD_W25
+
+config MTD_GD25
+	bool "SPI-based GD25 FLASH"
+	default n
+	select SPI
+
+if MTD_GD25
+
+config GD25_SPIMODE
+	int "GD25 SPI Mode"
+	default 0
+
+config GD25_SPIFREQUENCY
+	int "GD25 SPI Frequency"
+	default 20000000
+
+config GD25_READONLY
+	bool "GD25 Read-Only FLASH"
+	default n
+
+config GD25_SLOWREAD
+	bool
+	default n
+
+endif # MTD_GD25
