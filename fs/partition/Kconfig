@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if !DISABLE_MOUNTPOINT
+
+menu "Partition Table"
+
+config PTABLE_PARTITION
+	bool "PTABLE support"
+	default n
+
+endmenu
+
+endif
