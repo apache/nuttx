@@ -117,13 +117,14 @@
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
-#define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
-#define BOARDIOC_RESET             _BOARDIOC(0x0003)
-#define BOARDIOC_UNIQUEID          _BOARDIOC(0x0004)
-#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0005)
-#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0006)
-#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0007)
-#define BOARDIOC_NX_START          _BOARDIOC(0x0008)
+#define BOARDIOC_FINALINIT         _BOARDIOC(0x0002)
+#define BOARDIOC_POWEROFF          _BOARDIOC(0x0003)
+#define BOARDIOC_RESET             _BOARDIOC(0x0004)
+#define BOARDIOC_UNIQUEID          _BOARDIOC(0x0005)
+#define BOARDIOC_APP_SYMTAB        _BOARDIOC(0x0006)
+#define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0007)
+#define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0008)
+#define BOARDIOC_NX_START          _BOARDIOC(0x0009)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded

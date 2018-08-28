@@ -2360,6 +2360,14 @@ config LIB_BOARDCTL
 
 if LIB_BOARDCTL
 
+config BOARDCTL_FINALINIT
+	bool "Enable board app final init"
+	default n
+	---help---
+		Enables support for the BOARDIOC_FINALINIT boardctl() command.
+		Architecture specific logic must provide board_app_finalinitialize()
+		interface.
+
 config BOARDCTL_POWEROFF
 	bool "Enable power off interfaces"
 	default n

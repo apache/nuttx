@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/boardctl.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -275,6 +275,22 @@ int boardctl(unsigned int cmd, uintptr_t arg)
           ret = board_app_initialize(arg);
         }
         break;
+
+#ifdef CONFIG_BOARDCTL_FINALINIT
+      /* CMD:           BOARDIOC_FINALINIT
+       * DESCRIPTION:   Perform one-time application initialization after
+       *                start-up script.
+       * ARG:           The argument has no meaning
+       * CONFIGURATION: CONFIG_BOARDCTL_FINALINIT
+       * DEPENDENCIES:  Board logic must provide board_app_finalinitialize
+       */
+
+      case BOARDIOC_FINALINIT:
+        {
+          ret = board_app_finalinitialize(arg);
+        }
+        break;
+#endif
 
 #ifdef CONFIG_BOARDCTL_POWEROFF
       /* CMD:           BOARDIOC_POWEROFF
