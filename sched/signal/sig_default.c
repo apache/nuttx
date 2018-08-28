@@ -44,6 +44,7 @@
 #include <assert.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/irq.h>
 
 #include "signal/signal.h"
 
@@ -130,7 +131,7 @@ static const struct nxsig_defaction_s g_defactions[] =
  * Name: nxsig_abnormal_termination
  *
  * Description:
- *   This is the abnormal termination default action for the SIGKILL signal.
+ *   This is the handler for the abnormal termination default action.
  *
  * Input Parameters:
  *   Standard signal handler parameters
@@ -150,7 +151,7 @@ static void nxsig_abnormal_termination(int signo)
   group_killchildren(tcb);
 #endif
 
-  /* And exit to terminate the task */
+  /* And exit to terminate the task (note exit() vs. _exit() is used. */
 
   exit(EXIT_FAILURE);
 }
@@ -194,7 +195,10 @@ static _sa_handler_t nxsig_default_action(int signo)
  * Name: nxsig_setup_default_action
  *
  * Description:
- *   Setup the default action for the SIGKILL signal
+ *   Setup the default action for a signal.
+ *
+ *   This function is called early in task setup, prior to the creation of
+ *   any pthreads so we should have exclusive access to the group structure.
  *
  * Input Parameters:
  *   group  - The group that the task belongs in.
@@ -223,7 +227,7 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
       memset(&sa, 0, sizeof(sa));
       sa.sa_handler = info->action;
       sa.sa_flags   = SA_SIGINFO;
-      (void)sigaction(SIGKILL, &sa, NULL);
+      (void)sigaction(info->signo, &sa, NULL);
 
       /* Indicate that the default signal handler has been attached */
 
@@ -295,6 +299,7 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
 {
   FAR struct task_group_s *group;
   _sa_handler_t handler = SIG_IGN;
+  irqstate_t flags;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL);
   group = tcb->group;
@@ -310,15 +315,22 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
       handler = nxsig_default_action(signo);
       if (handler != SIG_IGN)
         {
+          /* sigaddset() is not atomic (but neither is sigaction()) */
+
+          flags = spin_lock_irqsave();
           (void)sigaddset(&group->tg_sigdefault, signo);
+          spin_unlock_irqrestore(flags);
         }
     }
 
   if (handler == SIG_IGN)
     {
       /* We are unsetting the default action */
+      /* sigdelset() is not atomic (but neither is sigaction()) */
 
+      flags = spin_lock_irqsave();
       (void)sigdelset(&group->tg_sigdefault, signo);
+      spin_unlock_irqrestore(flags);
     }
 
   return handler;
@@ -352,10 +364,7 @@ int nxsig_default_initialize(FAR struct tcb_s *tcb)
 
   (void)sigemptyset(&group->tg_sigdefault);
 
-  /* TODO Currently only SIGKILL is supported.  The following needs to be
-   * in a loop that instantiates the default action for all signals (other
-   * that those that are ignored).
-   */
+  /* Setup the default action for each signal in g_defactions[] */
 
   for (i = 0; i < NACTIONS; i++)
     {
