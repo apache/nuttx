@@ -49,6 +49,14 @@
 #include "signal/signal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Bit definitions for the struct nxsig_defaction_s 'flags' field */
+
+#define SIG_FLAG_NOCATCH (1 << 0)  /* Signal cannot be caught or ignored */
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -57,6 +65,7 @@
 struct nxsig_defaction_s
 {
   uint8_t       signo;   /* Signal number.  Range 1..MAX_SIGNO */
+  uint8_t       flags;   /* See SIG_FLAG_ definitions */
   _sa_handler_t action;  /* Default signal action */
 };
 
@@ -91,19 +100,19 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 static const struct nxsig_defaction_s g_defactions[] =
 {
 #ifdef CONFIG_SIG_SIGUSR1_ACTION
-   { SIGUSR1, nxsig_abnormal_termination },
+   { SIGUSR1, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGUSR2_ACTION
-   { SIGUSR2, nxsig_abnormal_termination },
+   { SIGUSR2, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGALRM_ACTION
-   { SIGALRM, nxsig_abnormal_termination },
+   { SIGALRM, 0,                nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
-   { SIGPOLL, nxsig_abnormal_termination },
+   { SIGPOLL, 0,                nxsig_abnormal_termination },
 #endif
-   { SIGINT,  nxsig_abnormal_termination },
-   { SIGKILL, nxsig_abnormal_termination }
+   { SIGINT,  0,                nxsig_abnormal_termination },
+   { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination }
 };
 
 #define NACTIONS (sizeof(g_defactions) / sizeof(struct nxsig_defaction_s))
@@ -270,6 +279,42 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
 
   ret = sigismember(&group->tg_sigdefault, signo);
   return ret < 0 ? false : (bool)ret;
+}
+
+/****************************************************************************
+ * Name: nxsig_iscatchable
+ *
+ * Description:
+ *   Return true if the specified signal can be caught or ignored.
+ *
+ * Input Parameters:
+ *   signo - The signal number to be queried
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+bool nxsig_iscatchable(int signo)
+{
+  int i;
+
+  /* Search the default action table for the entry associated with this
+   * signal.
+   */
+
+  for (i = 0; i < NACTIONS; i++)
+    {
+      if (g_defactions[i].signo == signo)
+        {
+          return (g_defactions[i].flags & SIG_FLAG_NOCATCH) == 0;
+        }
+    }
+
+  /* If it is not in the table, then it is catchable */
+
+  return true;
 }
 
 /****************************************************************************

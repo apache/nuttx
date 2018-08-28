@@ -174,6 +174,7 @@ void               nxsig_release_action(FAR sigactq_t *sigact);
 
 #ifdef CONFIG_SIG_DEFAULT
 bool               nxsig_isdefault(FAR struct tcb_s *tcb, int signo);
+bool               nxsig_iscatchable(int signo);
 _sa_handler_t      nxsig_default(FAR struct tcb_s *tcb, int signo,
                                  bool defaction);
 int                nxsig_default_initialize(FAR struct tcb_s *tcb);

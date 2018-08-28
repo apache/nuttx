@@ -137,8 +137,8 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  * Assumptions:
  *
  * POSIX Compatibility:
- * - There are no default actions so the special value SIG_DFL is treated
- *   like SIG_IGN.
+ * - If CONFIG_SIG_DEFAULT is not defined, then there are no default actions
+ *   so the special value SIG_DFL is treated like SIG_IGN.
  * - All sa_flags in struct sigaction of act input are ignored (all
  *   treated like SA_SIGINFO). The one exception is if CONFIG_SCHED_CHILD_STATUS
  *   is defined; then SA_NOCLDWAIT is supported but only for SIGCHLD
@@ -167,6 +167,19 @@ int sigaction(int signo, FAR const struct sigaction *act,
       set_errno(EINVAL);
       return ERROR;
     }
+
+#ifdef CONFIG_SIG_DEFAULT
+  /* Check if the user is trying to catch or ignore a signal that cannot be
+   * caught or ignored.
+   */
+
+  if (act != NULL &&
+      (act->sa_handler != SIG_DFL && !nxsig_iscatchable(signo)))
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
 
   /* Find the signal in the signal action queue */
 

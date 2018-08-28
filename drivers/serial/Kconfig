@@ -141,10 +141,10 @@ config TTY_SIGINT
 		devices.  May be enabled for other serial devices using the ISIG bit
 		in the Termios c_lflag.
 
-		REVISIT:  This implementation is non-standard.  The c_lflag ISIG bit
-		normally enables/disables INTR, QUIT, SUSP, and DSUSP character
-		processing.  The relationship between these names, standard signals,
-		and typical key presses are as follows:
+		REVISIT:  This implementation is compliant but incomplete.  The
+		c_lflag ISIG bit normally enables/disables INTR, QUIT, SUSP, and
+		DSUSP character processing.  The relationship between these names,
+		standard signals, and typical key presses are as follows:
 
 		  INTR   SIGINT   Ctrl-C  ETX(0x03) Interrupt
 		  KILL   SIGKILL  Ctrl-U  NAK(0x15) Kill
