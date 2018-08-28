@@ -206,8 +206,8 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       if (dev->pid >= 0 && ch == CONFIG_TTY_SIGKILL_CHAR)
         {
-          /* Yes.. not the the kill is needed and do not put the character into
-           * the Rx buffer.  It should not be read as normal data.
+          /* Yes.. note that the kill is needed and do not put the character
+           * into the Rx buffer.  It should not be read as normal data.
            */
 
           needkill = true;

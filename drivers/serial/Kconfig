@@ -19,26 +19,6 @@ config SERIAL_CONSOLE
 	bool
 	default n
 
-config TTY_SIGKILL
-	bool "Support SIGKILL"
-	default n
-	select SIG_DEFAULT
-	depends on !DISABLE_SIGNALS
-	---help---
-		Whether support Ctrl-c/x event
-
-config TTY_SIGKILL_CHAR
-	int "Serial parse SIGKILL characters"
-	default 3 if SERIAL_CONSOLE
-	default 4 if !SERIAL_CONSOLE
-	depends on SIG_SIGKILL
-	---help---
-		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
-		send a SIGKILL event.  Other characters may also be selected.
-
-		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
-		End-of-File character that should close the stream.
-
 menuconfig 16550_UART
 	bool "16550 UART Chip support"
 	default n
@@ -150,6 +130,28 @@ config SERIAL_TERMIOS
 		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
 		If this is not defined, then the terminal settings (baud, parity, etc).
 		are not configurable at runtime; serial streams cannot be flushed, etc..
+
+config TTY_SIGKILL
+	bool "Support SIGKILL"
+	default n
+	select SIG_DEFAULT
+	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	---help---
+		Whether support Ctrl-c/x event.  Enabled automatically for console devices.
+		May be enabled for other serial devices using the ISIG bit in the Termios
+		c_lflag.
+
+config TTY_SIGKILL_CHAR
+	int "Serial parse SIGKILL characters"
+	default 3 if SERIAL_CONSOLE
+	default 4 if !SERIAL_CONSOLE
+	depends on TTY_SIGKILL
+	---help---
+		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
+		send a SIGKILL event.  Other characters may also be selected.
+
+		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
+		End-of-File character that should close the stream.
 
 #
 # Serial console selection

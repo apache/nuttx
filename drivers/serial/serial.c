@@ -1372,22 +1372,22 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
 #endif
 
-#ifdef CONFIG_TTY_SIGKILL_CHAR
+#ifdef CONFIG_TTY_SIGKILL
           /* Make the given terminal the controlling terminal of the calling process */
 
           case TIOCSCTTY:
             {
-              /* REVISIT:  This only applies to console devices (TTYs).  In
-               * reality, this feature should be controlled by TERMIOS ISIG
-               * c_lflag setting.
+              /* Check if the ISIG flag is set in the termios c_lflag to enable
+               * this feature.  This flag is set automatically for a serial console
+               * device.
                */
 
-             if (dev->isconsole)
+             if ((dev->tc_lflag & ISIG) != 0)
                {
                   /* Save the PID of the recipient of the SIGKILL signal. */
 
                   dev->pid = (pid_t)arg;
-                  DEBUGASSERT((unsigned long)dev->pid = arg);
+                  DEBUGASSERT((unsigned long)(dev->pid) == arg);
                }
             }
             break;
@@ -1435,6 +1435,17 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
+
+#ifdef CONFIG_TTY_SIGKILL
+              /* If the ISIG flag has been cleared in c_lflag, then un-
+               * register the controlling terminal.
+               */
+
+              if ((dev->tc_lflag & ISIG) == 0)
+                {
+                  dev->pid = (pid_t)-1;
+                }
+#endif
             }
             break;
         }
@@ -1600,10 +1611,17 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-#ifdef CONFIG_TTY_SIGKILL_CHAR
+#ifdef CONFIG_TTY_SIGKILL
   /* Initialize  of the task that will receive SIGKILL signals. */
 
-  dev->pid = -1;
+  dev->pid = (pid_t)-1;
+
+  /* If this UART is a serial console, then enable signals by default */
+
+  if (dev->isconsole)
+    {
+      dev->tc_lflag |= ISIG;
+    }
 #endif
 
   /* Initialize semaphores */
