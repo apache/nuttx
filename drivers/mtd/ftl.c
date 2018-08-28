@@ -46,6 +46,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
@@ -60,9 +61,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Check if read/write buffer support is needed */
+
 #if defined(CONFIG_FTL_READAHEAD) || defined(CONFIG_FTL_WRITEBUFFER)
 #  define FTL_HAVE_RWBUFFER 1
 #endif
+
+/* The maximum length of the device name paths is the maximum length of a
+ * name plus 5 for the the length of "/dev/" and a NUL terminator.
+ */
+
+#define DEV_NAME_MAX    (NAME_MAX + 5)
 
 /****************************************************************************
  * Private Types
@@ -515,7 +524,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 int ftl_initialize_by_name(FAR const char *name, FAR struct mtd_dev_s *mtd)
 {
   struct ftl_struct_s *dev;
-  char devname[64];
+  char devname[DEV_NAME_MAX];
   int ret = -ENOMEM;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -597,7 +606,7 @@ int ftl_initialize_by_name(FAR const char *name, FAR struct mtd_dev_s *mtd)
 
       /* Create a MTD block device name */
 
-      snprintf(devname, 64, "/dev/mtd%s", name);
+      snprintf(devname, DEV_NAME_MAX, "/dev/mtd%s", name);
 
       /* Inode private data is a reference to the FTL device structure */
 
