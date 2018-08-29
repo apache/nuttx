@@ -46,6 +46,8 @@
 #include <nuttx/sched.h>
 #include <nuttx/irq.h>
 
+#include "group/group.h"
+#include "sched/sched.h"
 #include "signal/signal.h"
 
 /****************************************************************************
@@ -154,7 +156,7 @@ static const struct nxsig_defaction_s g_defactions[] =
 static void nxsig_abnormal_termination(int signo)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  FAR struct tcb_s *tcb = (FAR struct tcb_s *)this_task();
+  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
 
   /* Kill of of the children of the task */
 
