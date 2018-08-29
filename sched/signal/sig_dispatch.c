@@ -391,11 +391,11 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
           nxsem_wait_irq(stcb, EINTR);
         }
 
+#ifndef CONFIG_DISABLE_MQUEUE
       /* If the task is blocked waiting on a message queue, then that task
        * must be unblocked when a signal is received.
        */
 
-#ifndef CONFIG_DISABLE_MQUEUE
       if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
           stcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
