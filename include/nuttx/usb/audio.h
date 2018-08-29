@@ -797,7 +797,7 @@ struct adc_mixerunit_desc_s
                                 /* 12+npins+nchan: mixer=String index of mixer unit name */
 };
 
-#define mu_srcid[n]    mu_variable[(n)-1]
+#define mu_srcid(n)    mu_variable[(n)-1]
 #define mu_nchan(p)    mu_variable[(p)->mu_npins]
 #define mu_controls(p) mu_variable[(p)->mu_npins+1]
 #define mu_mixer(p)    mu_variable[(p)->mu_npins+2]
