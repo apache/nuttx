@@ -120,12 +120,13 @@ void irq_dispatch(int irq, FAR void *context)
 {
   xcpt_t vector = irq_unexpected_isr;
   FAR void *arg = NULL;
+  unsigned intx ndx = irq;
 
 #if NR_IRQS > 0
   if ((unsigned)irq < NR_IRQS)
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-      irq_mapped_t ndx = g_irqmap[irq];
+      ndx = g_irqmap[irq];
       if (ndx < CONFIG_ARCH_NUSER_INTERRUPTS)
         {
           if (g_irqvector[ndx].handler)
@@ -137,13 +138,13 @@ void irq_dispatch(int irq, FAR void *context)
           INCR_COUNT(ndx);
         }
 #else
-      if (g_irqvector[irq].handler)
+      if (g_irqvector[ndx].handler)
         {
-          vector = g_irqvector[irq].handler;
-          arg    = g_irqvector[irq].arg;
+          vector = g_irqvector[ndx].handler;
+          arg    = g_irqvector[ndx].arg;
         }
 
-      INCR_COUNT(irq);
+      INCR_COUNT(ndx);
 #endif
     }
 #endif
