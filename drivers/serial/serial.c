@@ -1347,7 +1347,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
                   /* De-activate RX flow control. */
 
-                  uart_rxflowcontrol(dev, 0, false);
+                  (void)uart_rxflowcontrol(dev, 0, false);
 #endif
                 }
 
