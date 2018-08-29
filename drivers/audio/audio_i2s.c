@@ -231,11 +231,12 @@ static int audio_i2s_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
 {
   FAR struct audio_i2s_s *audio_i2s = (struct audio_i2s_s *)dev;
-  FAR struct i2s_dev_s *i2s = audio_i2s->i2s;
+  FAR struct i2s_dev_s *i2s;
   int samprate, nchannels, bpsamp;
   int ret = OK;
 
-  DEBUGASSERT(audio_i2s && caps);
+  DEBUGASSERT(audio_i2s != NULL && caps != NULL);
+  i2s = audio_i2s->i2s;
   audinfo("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */
