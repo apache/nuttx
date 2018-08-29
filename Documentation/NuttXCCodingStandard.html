@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: August 21, 2018</p>
+      <p>Last Updated: August 28, 2018</p>
     </td>
   </tr>
 </table>
@@ -790,7 +790,15 @@ void some_function(void)
   <li>
     <b>Final brace followed by a single blank line</b>.
     The <i>final</i> right brace must be followed by a blank line as per standard rules.
-    In the case where there are nested several consecutive right braces, no blank lines should be inserted except for after the <i>final</i> right brace.
+    There are two exceptions to this rule:
+    <ol>
+      <li>
+        In the case where there are nested several consecutive right braces, no blank lines should be inserted except for after the <i>final</i> right brace.
+      </li>
+      <li>
+        No blank should be used to separate the final, closing right brace when it is followed by a <code>break;</code> statement.
+      </li>
+    </ol>
   </li>
   <li>
     <b>Special Indentation Rules</b>.
