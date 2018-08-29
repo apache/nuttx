@@ -89,7 +89,7 @@ int inode_checkflags(FAR struct inode *inode, int oflags)
  *
  ****************************************************************************/
 
-int open(const char *path, int oflags, ...)
+int open(FAR const char *path, int oflags, ...)
 {
   struct inode_search_s desc;
   FAR struct file *filep;

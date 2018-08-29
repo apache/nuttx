@@ -152,7 +152,7 @@ int file_detach(int fd, FAR struct file *filep)
   filep->f_inode   = parent->f_inode;
   filep->f_priv    = parent->f_priv;
 
-  /* Release the file descriptore *without* calling the drive close method
+  /* Release the file descriptor *without* calling the driver close method
    * and without decrementing the inode reference count.  That will be done
    * in file_close_detached().
    */
