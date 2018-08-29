@@ -120,7 +120,7 @@ void irq_dispatch(int irq, FAR void *context)
 {
   xcpt_t vector = irq_unexpected_isr;
   FAR void *arg = NULL;
-  unsigned intx ndx = irq;
+  unsigned int ndx = irq;
 
 #if NR_IRQS > 0
   if ((unsigned)irq < NR_IRQS)
