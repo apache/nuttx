@@ -206,7 +206,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
   if (rxbuf->head == rxbuf->tail)
     {
       rxbuf->head = 0;
-      rxbuf->head = 0;
+      rxbuf->tail = 0;
     }
 
   /* Get the next head index and check if there is room to adding another
