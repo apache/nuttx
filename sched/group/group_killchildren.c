@@ -62,7 +62,7 @@
  *   Callback from group_foreachchild that handles one member of the group.
  *
  * Input Parameters:
- *   pid - The ID of the group member that may be signalled.
+ *   pid - The ID of the group member that may be signaled.
  *   arg - The PID of the thread to be retained.
  *
  * Returned Value:
@@ -73,7 +73,7 @@
 static int group_killchildren_handler(pid_t pid, FAR void *arg)
 {
   FAR struct tcb_s *rtcb;
-  int ret = OK;
+  int ret;
 
   /* Cancel all threads except for the one specified by the argument */
 
@@ -86,23 +86,39 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
        */
 
       rtcb = sched_gettcb(pid);
-      rtcb->flags &= ~TCB_FLAG_NONCANCELABLE;
-
-      /* 'pid' could refer to the main task of the thread.  That pid will
-       * appear in the group member list as well!
-       */
-
-      if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+      if (rtcb != NULL)
         {
-          ret = pthread_cancel(pid);
-        }
-       else
-        {
-          ret = task_delete(pid);
+          /* This is a forced cancellation.  Make sure that cancellation is
+           * not disabled by the task/thread.  That bit would prevent
+           * pthread_cancel() or task_delete() from doing what they need
+           * to do.
+           */
+
+          rtcb->flags &= ~TCB_FLAG_NONCANCELABLE;
+
+          /* 'pid' could refer to the main task of the thread.  That pid
+           * will appear in the group member list as well!
+           */
+
+          if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+            {
+              ret = pthread_cancel(pid);
+            }
+          else
+            {
+              ret = task_delete(pid);
+            }
+
+          if (ret < 0)
+            {
+              serr("ERROR: Failed to kill %d: %d\n", ret, pid);
+            }
         }
     }
 
-  return ret;
+  /* Always return zero.  We need to visit each member of the group*/
+
+  return OK;
 }
 
 /****************************************************************************
@@ -114,7 +130,8 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
  *
  * Description:
  *   Delete all children of a task except for the specified task.  This is
- *   used by the task restart logic.  When the main task is restarted,
+ *   used by the task restart logic and by the default signal handling
+ *   abnormal termination logic.  When the main task is restarted or killed,
  *   all of its child pthreads must be terminated.
  *
  * Input Parameters:
@@ -123,14 +140,21 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
  * Returned Value:
  *   None
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 int group_killchildren(FAR struct task_tcb_s *tcb)
 {
-  return group_foreachchild(tcb->cmn.group, group_killchildren_handler,
-                            (FAR void *)((uintptr_t)tcb->cmn.pid));
+  int ret;
+
+  /* Lock the scheduler so that there this thread will not lose priority
+   * until all of its children are suspended.
+   */
+
+  sched_lock();
+  ret = group_foreachchild(tcb->cmn.group, group_killchildren_handler,
+                          (FAR void *)((uintptr_t)tcb->cmn.pid));
+  sched_unlock();
+  return ret;
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
