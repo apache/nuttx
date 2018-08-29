@@ -169,9 +169,14 @@ static void nxsig_abnormal_termination(int signo)
    * this will not kill the currently running task/pthread (this_task).  It
    * will kill the main thread of the task group if the this_task is a
    * pthread.
+   *
+   * Lock the scheduler so that there this thread will not lose priority
+   * until all of its children are dead.
    */
 
+  sched_lock();
   group_killchildren((FAR struct task_tcb_s *)rtcb);
+  sched_unlock();
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
