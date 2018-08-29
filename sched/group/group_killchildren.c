@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_killchildren.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
+#include <pthread.h>
 
+#include <nuttx/sched.h>
+
+#include "sched/sched.h"
 #include "group/group.h"
 
 #ifdef HAVE_GROUP_MEMBERS
@@ -66,15 +72,34 @@
 
 static int group_killchildren_handler(pid_t pid, FAR void *arg)
 {
+  FAR struct tcb_s *rtcb;
   int ret = OK;
 
-  /* Is this the pthread that we are looking for? */
+  /* Cancel all threads except for the one specified by the argument */
 
   if (pid != (pid_t)((uintptr_t)arg))
     {
-      /* Yes.. cancel it */
+      /* Cancel this thread.  This is a forced cancellation.  Make sure that
+       * cancellation is not disabled by the task/thread.  That bit will
+       * prevent pthread_cancel() or task_delete() from doing what they need
+       * to do.
+       */
 
-      ret = pthread_cancel(pid);
+      rtcb = sched_gettcb(pid);
+      rtcb->flags &= ~TCB_FLAG_NONCANCELABLE;
+
+      /* 'pid' could refer to the main task of the thread.  That pid will
+       * appear in the group member list as well!
+       */
+
+      if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+        {
+          ret = pthread_cancel(pid);
+        }
+       else
+        {
+          ret = task_delete(pid);
+        }
     }
 
   return ret;

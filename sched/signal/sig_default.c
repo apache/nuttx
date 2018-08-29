@@ -39,7 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <signal.h>
 #include <assert.h>
 
@@ -155,17 +158,41 @@ static const struct nxsig_defaction_s g_defactions[] =
 
 static void nxsig_abnormal_termination(int signo)
 {
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+
+  /* Careful:  In the multi-threaded task, the signal may be handled on a
+   * child pthread.
+   */
+
 #ifdef HAVE_GROUP_MEMBERS
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
+  /* Kill of of the children of the task.  If we are running on a pthread,
+   * this will not kill the currently running task/pthread (this_task).  It
+   * will kill the main thread of the task group if the this_task is a
+   * pthread.
+   */
 
-  /* Kill of of the children of the task */
-
-  group_killchildren(tcb);
+  group_killchildren((FAR struct task_tcb_s *)rtcb);
 #endif
 
-  /* And exit to terminate the task (note exit() vs. _exit() is used. */
+#ifndef CONFIG_DISABLE_PTHREAD
+  /* Check if the currently running task is actually a pthread */
 
-  exit(EXIT_FAILURE);
+  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      /* Exit the final thread of the task group.
+       *
+       * REVISIT:  This will not work if HAVE_GROUP_MEMBERS is not set.
+       */
+
+      pthread_exit(NULL);
+    }
+  else
+#endif
+    {
+      /* Exit to terminate the task (note that exit() vs. _exit() is used. */
+
+      exit(EXIT_FAILURE);
+    }
 }
 
 /****************************************************************************
