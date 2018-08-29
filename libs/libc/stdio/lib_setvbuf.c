@@ -92,7 +92,7 @@
 int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  FAR unsigned char *newbuf;
+  FAR unsigned char *newbuf = NULL;
   uint8_t flags;
   int errcode;
 
