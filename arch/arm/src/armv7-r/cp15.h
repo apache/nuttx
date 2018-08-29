@@ -165,5 +165,6 @@
 #define CP15_CNTVCT(r,n)   _CP15(1, r, c14, c14, n) /* Virtual Count register */
 #define CP15_CNTP_CVAL(r,n) _CP15(2, r, c14, c14, n) /* PL1 Physical Timer CompareValue register */
 #define CP15_CNTV_CVAL(r,n) _CP15(3, r, c14, c14, n) /* Virtual Timer CompareValue register */
+#define CP15_DCIALLU(r)    _CP15(0, r, c15, c5, 0)  /* Invalidate data cache */
 
 #endif /* __ARCH_ARM_SRC_ARMV7_R_CP15_H */

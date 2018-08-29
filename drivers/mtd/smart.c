@@ -152,6 +152,8 @@
 #define SMART_WEAR_ZERO_MASK                0x0f
 #define SMART_WEAR_BLOCK_MASK               0x01
 
+#ifdef CONFIG_MTD_SMART_WEAR_LEVEL
+
 /* Bit mapping for wear level bits */
 /* These are defined to allow updating the wear leveling with the minimum
  * number of sector relocations / maximum use of 1 --> 0 transitions when
@@ -184,6 +186,7 @@ static const uint8_t gWearBitToLevelMap4[] =
   7, 13, 10, 14, 6, 15, 5, 4,
   3, 12, 9,  8,  2, 11, 1, 0
 };
+#endif
 
 /****************************************************************************
  * Private Types

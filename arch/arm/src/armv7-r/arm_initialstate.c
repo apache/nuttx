@@ -131,9 +131,15 @@ void up_initial_state(struct tcb_s *tcb)
 
 #ifndef CONFIG_ARMV7R_DECODEFIQ
 
-  cpsr |= (PSR_F_BIT | PSR_A_BIT | PSR_E_BIT);
+  cpsr |= PSR_F_BIT;
 
 #endif /* !CONFIG_ARMV7R_DECODEFIQ */
+
+#ifdef CONFIG_ENDIAN_BIG
+
+  cpsr |= PSR_E_BIT;
+
+#endif /* CONFIG_ENDIAN_BIG */
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
   xcp->regs[REG_CPSR] = cpsr;

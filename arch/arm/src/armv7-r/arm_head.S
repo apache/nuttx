@@ -190,6 +190,7 @@ __start:
 	mov		r0, #0
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
+	mcr		CP15_DCIALLU(r0)	/* Invalidate D-cache */
 
 	/* Configure the system control register (see sctrl.h) */
 

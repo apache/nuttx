@@ -5,6 +5,13 @@
 
 comment "ARMv7-R Configuration Options"
 
+config ARMV7R_HAVE_GICv2
+	bool "ARMV7R_GICv2 support"
+	default y
+	---help---
+		Selected by the configuration tool if the architecture supports the
+		Generic Interrupt Controller (GIC)
+
 config ARMV7R_MEMINIT
 	bool
 	default y if BOOT_SDRAM_DATA

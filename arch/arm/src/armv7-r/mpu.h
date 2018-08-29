@@ -66,9 +66,10 @@
 #define MPUIR_IREGION_SHIFT      (16)     /* Bits 16-23: Number MPU instruction regions */
 #define MPUIR_IREGION_MASK       (0xff << MPUIR_IREGION_SHIFT)
 
-/* Region Base Address Register Definitions */
-
-#define MPU_RBAR_ADDR_MASK       0xfffffffc
+/* Region Base Address Register Definitions
+ * [31:5] Physical base address. Defines the base address of a region.
+ */
+#define MPU_RBAR_ADDR_MASK       0xffffffe0
 
 /* Region Size and Enable Register */
 
@@ -93,7 +94,7 @@
 #define MPU_RACR_B               (1 << 0)  /* Bit 0: Bufferable */
 #define MPU_RACR_C               (1 << 1)  /* Bit 1: Cacheable */
 #define MPU_RACR_S               (1 << 2)  /* Bit 2: Shareable */
-#define MPU_RACR_TEX_SHIFT       (8)       /* Bits 0-2: Memory attributes (with C and B) */
+#define MPU_RACR_TEX_SHIFT       (3)       /* Bits 3-5: Type extension */
 #define MPU_RACR_TEX_MASK        (7 << MPU_RACR_TEX_SHIFT)
 #  define MPU_RACR_TEX(n)        ((uint32_t)(n) << MPU_RACR_TEX_SHIFT)
 #define MPU_RACR_AP_SHIFT        (8)       /* Bits 8-10: Access permission */
@@ -487,6 +488,52 @@ static inline void mpu_user_flash(uintptr_t base, size_t size)
 }
 
 /****************************************************************************
+ * Name: mpu_priv_noncache
+ *
+ * Description:
+ *   Configure a non-cacheable region as privileged internal memory
+ *
+ ****************************************************************************/
+
+static inline void mpu_priv_noncache(uintptr_t base, size_t size)
+{
+  unsigned int region = mpu_allocregion();
+  uint32_t regval;
+  uint8_t l2size;
+  uint8_t subregions;
+
+  /* Select the region */
+
+  mpu_set_rgnr(region);
+
+  /* Select the region base address */
+
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
+
+  /* Select the region size and the sub-region map */
+
+  l2size = mpu_log2regionceil(size);
+  subregions = mpu_subregion(base, size, l2size);
+
+  /* The configure the region
+   * inner/outer non-cache : TEX(4), C(0), B(0), S(1)
+   */
+
+  regval =                                         /* Not Cacheable  */
+                                                   /* Not Bufferable */
+           MPU_RACR_S                            | /* Shareable      */
+           MPU_RACR_TEX(4)                       | /* TEX */
+           MPU_RACR_AP_RWRW                      | /* P:RO   U:None  */
+           MPU_RACR_XN;                            /* Instruction access disable */
+  mpu_set_dracr(regval);
+
+  regval = MPU_RASR_ENABLE                        | /* Enable region */
+           MPU_RASR_RSIZE_LOG2((uint32_t)l2size)  | /* Region size   */
+         ((uint32_t)subregions << MPU_RASR_SRD_SHIFT); /* Sub-regions */
+    mpu_set_drsr(regval);
+}
+
+/****************************************************************************
  * Name: mpu_priv_flash
  *
  * Description:
@@ -731,6 +778,51 @@ static inline void mpu_peripheral(uintptr_t base, size_t size)
   regval = MPU_RASR_ENABLE                              | /* Enable region */
            MPU_RASR_RSIZE_LOG2((uint32_t)l2size)        | /* Region size   */
            ((uint32_t)subregions << MPU_RASR_SRD_SHIFT);  /* Sub-regions   */
+  mpu_set_drsr(regval);
+}
+
+/****************************************************************************
+ * Name: mpu_user_intsram_wb
+ *
+ * Description:
+ *   Configure a region as user internal SRAM
+ *   Unlike a mpu_user_intsram, this regions includes WB/WA cache policy
+ *
+ ****************************************************************************/
+
+static inline void mpu_user_intsram_wb(uintptr_t base, size_t size)
+{
+  unsigned int region = mpu_allocregion();
+  uint32_t regval;
+  uint8_t l2size;
+  uint8_t subregions;
+
+  /* Select the region */
+
+  mpu_set_rgnr(region);
+
+  /* Select the region base address */
+
+  mpu_set_drbar(base & MPU_RBAR_ADDR_MASK);
+
+  /* Select the region size and the sub-region map */
+
+  l2size = mpu_log2regionceil(size);
+  subregions = mpu_subregion(base, size, l2size);
+
+  /* The configure the region
+   * WB/Write Allocate: TEX(5), C(0), B(1), S(1)
+   */
+
+  regval =                                               /* Not Cacheable  */
+           MPU_RACR_B                                  | /* Not Bufferable */
+           MPU_RACR_TEX(5)                             | /* TEX            */
+           MPU_RACR_AP_RWRW;                             /* P:RW   U:RW    */
+  mpu_set_dracr(regval);
+
+  regval = MPU_RASR_ENABLE                             | /* Enable region */
+           MPU_RASR_RSIZE_LOG2((uint32_t)l2size)       | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT); /* Sub-regions */
   mpu_set_drsr(regval);
 }
 
