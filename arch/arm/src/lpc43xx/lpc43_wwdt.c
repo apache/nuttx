@@ -101,7 +101,7 @@ static void   lpc43_setwarning(uint32_t warning);
 
 /* Interrupt hanlding *******************************************************/
 
-static int    lpc43_interrupt(int irq, FAR void *context);
+static int    lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -211,7 +211,7 @@ static void lpc43_setwarning(uint32_t warning)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context)
+static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct lpc43_lowerhalf_wwdt_s *priv = &g_wdgdev;
   uint32_t regval;
@@ -230,7 +230,7 @@ static int lpc43_interrupt(int irq, FAR void *context)
            * reset upon return.
            */
 
-          priv->handler(irq, context);
+          priv->handler(irq, context, arg);
         }
 
       /* The watchdog interrupt flag is cleared by writing '1' to the WDINT
@@ -609,10 +609,10 @@ static int lpc43_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_wwdginitialize
+ * Name: lpc43_wwdtinitialize
  *
  * Description:
- *   Initialize the WWDT watchdog time.  The watchdog timer is initialized and
+ *   Initialize the WWDT watchdog timer.  The watchdog timer is initialized and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
@@ -625,7 +625,7 @@ static int lpc43_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-void lpc43_wwdginitialize(FAR const char *devpath)
+void lpc43_wwdtinitialize(FAR const char *devpath)
 {
   FAR struct lpc43_lowerhalf_wwdt_s *priv = &g_wdgdev;
 
@@ -644,7 +644,7 @@ void lpc43_wwdginitialize(FAR const char *devpath)
 
   /* Attach our watchdog interrupt handler (But don't enable it yet) */
 
-  (void)irq_attach(LPC43M4_IRQ_WWDT, lpc43_interrupt);
+  (void)irq_attach(LPC43M4_IRQ_WWDT, lpc43_interrupt, NULL);
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

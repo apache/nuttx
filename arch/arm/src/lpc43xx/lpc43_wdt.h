@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/lpc43_wdt.h"
+#include "chip/lpc43_wwdt.h"
 
 #ifdef CONFIG_WATCHDOG
 
@@ -67,10 +67,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_wwtginitialize
+ * Name: lpc43_wwdtinitialize
  *
  * Description:
- *   Initialize the WWDG watchdog time.  The watchdog timer is initializeed and
+ *   Initialize the WWDT watchdog timer.  The watchdog timer is initializeed and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
