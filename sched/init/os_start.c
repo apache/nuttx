@@ -182,6 +182,12 @@ volatile dq_queue_t g_waitingformqnotfull;
 volatile dq_queue_t g_waitingforfill;
 #endif
 
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+/* This is the list of all tasks that have been stopped via SIGSTOP or SIGSTP */
+
+volatile dq_queue_t g_stoppedtasks;
+#endif
+
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
@@ -300,6 +306,13 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
     TLIST_ATTR_PRIORITIZED
   }
 #endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  ,
+  {                                              /* TSTATE_TASK_STOPPED */
+    &g_stoppedtasks,
+    0                                            /* See tcb->prev_state */
+  },
+#endif
 };
 
 /* This is the current initialization state.  The level of initialization
@@ -397,6 +410,9 @@ void os_start(void)
 #endif
 #ifdef CONFIG_PAGING
   dq_init(&g_waitingforfill);
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  dq_init(&g_stoppedtasks);
 #endif
   dq_init(&g_inactivetasks);
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \

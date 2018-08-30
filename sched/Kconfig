@@ -1201,30 +1201,52 @@ config SIG_SIGUSR1_ACTION
 	bool "SIGUSR1"
 	default n
 	---help---
-		Enable the default action for SIGUSR1 (terminate the process)
+		Enable the default action for SIGUSR1 (terminate the task)
 		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGUSR1.
 
 config SIG_SIGUSR2_ACTION
 	bool "SIGUSR2"
 	default n
 	---help---
-		Enable the default action for SIGUSR2 (terminate the process)
+		Enable the default action for SIGUSR2 (terminate the task)
 		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGUSR2.
 
 config SIG_SIGALRM_ACTION
 	bool "SIGALRM"
 	default n
 	---help---
-		Enable the default action for SIGALRM (terminate the process)
+		Enable the default action for SIGALRM (terminate the task)
 		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGALRM.
 
 config SIG_SIGPOLL_ACTION
 	bool "SIGPOLL"
 	default n
 	depends on FS_AIO
 	---help---
-		Enable the default action for SIGPOLL (terminate the process)
+		Enable the default action for SIGPOLL (terminate the task)
 		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGPOLL.
+
+config SIG_SIGSTOP_ACTION
+	bool "SIGSTOP SIGSTP, and SIGCONT"
+	default y
+	---help---
+		Enable the default action for SIGSTOP and SIGSTP (suspend the
+		task) and SIGCONT (resume the task).
+
+config SIG_SIGKILL_ACTION
+	bool "SIGINT and SIGKILL"
+	default y
+	---help---
+		Enable the default action for SIGINT and SIGKILL (terminate the
+		task).
 
 endif # SIG_DEFAULT
 
@@ -1269,22 +1291,49 @@ config SIG_POLL
 		The SIGPOLL signal is sent to a process when an asynchronous I/O
 		event occurs (meaning it has been polled).  Default: 5
 
-config SIG_INT
-	int "SIGINT"
+if SIG_DEFAULT
+
+config SIG_STOP
+	int "SIGSTOP"
 	default 6
-	depends on SIG_DEFAULT
+	depends on SIG_SIGSTOP_ACTION
 	---help---
-		The SIGINT signal is sent to cause a task termination event (only
-		if CONFIG_SIG_DEFAULT=y).  SIGINT may be ignored or caught by the
-		receiving task.
+		Suspend/pause a task.  SIGSTOP may not be caught or ignored.
+
+config SIG_STP
+	int "SIGSTP"
+	default 7
+	depends on SIG_SIGSTOP_ACTION
+	---help---
+		Suspend/pause a task.  Unlike SIGSTOP, this signal can be caught or
+		ignored.
+
+config SIG_CONT
+	int "SIGCONT"
+	default 8
+	depends on SIG_SIGSTOP_ACTION
+	---help---
+		Resume a suspended/paused task.  SIGSTOP only has an action when
+		send to a stopped task.  SIGCONT is ignored by other task.  SIGCONT
+		may not be caught or ignored by a stopped task.
 
 config SIG_KILL
 	int "SIGKILL"
 	default 9
-	depends on SIG_DEFAULT
+	depends on SIG_SIGKILL_ACTION
 	---help---
-		The SIGKILL signal is sent to cause a task termination event (only
-		if CONFIG_SIG_DEFAULT=y).  SIGKILL may not be caught or ignored.
+		The SIGKILL signal is sent to cause a task termination event.
+		SIGKILL may not be caught or ignored.
+
+config SIG_INT
+	int "SIGINT"
+	default 10
+	depends on SIG_SIGKILL_ACTION
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGINT may be ignored or caught by the receiving task.
+
+endif # SIG_DEFAULT
 
 comment "Non-standard Signal Numbers"
 

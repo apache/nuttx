@@ -359,13 +359,16 @@ static FAR const char *g_statenames[] =
 #endif
   "Running",
   "Inactive",
-  "Waiting,Semaphore",
+  "Waiting,Semaphore"
 #ifndef CONFIG_DISABLE_SIGNALS
-  "Waiting,Signal",
+  , "Waiting,Signal"
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
-  "Waiting,MQ empty",
-  "Waiting,MQ full"
+  , "Waiting,MQ empty"
+  , "Waiting,MQ full"
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  , "Stopped"
 #endif
 };
 

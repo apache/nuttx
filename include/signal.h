@@ -169,17 +169,15 @@
 #  endif
 #endif
 
-#ifdef CONFIG_SIG_DEFAULT
-#  ifndef CONFIG_SIG_INT
-#    define SIGINT      6  /* Sent when ctrl-c event  */
-#  else
-#    define SIGINT      CONFIG_SIG_INT
-#  endif
-#  ifndef CONFIG_SIG_KILL
-#    define SIGKILL     9  /* Sent from shell as 'kill -9 <task>'  */
-#  else
-#    define SIGKILL     CONFIG_SIG_KILL
-#  endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+#  define SIGSTOP     CONFIG_SIG_STOP
+#  define SIGSTP      CONFIG_SIG_STP
+#  define SIGCONT     CONFIG_SIG_CONT
+#endif
+
+#ifdef CONFIG_SIG_SIGKILL_ACTION
+#  define SIGKILL     CONFIG_SIG_KILL
+#  define SIGINT      CONFIG_SIG_INT
 #endif
 
 /* The following are non-standard signal definitions */

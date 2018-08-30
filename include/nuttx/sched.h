@@ -245,6 +245,10 @@ enum tstate_e
 #ifdef CONFIG_PAGING
   TSTATE_WAIT_PAGEFILL,       /* BLOCKED      - Waiting for page fill */
 #endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  TSTATE_TASK_STOPPED,        /* BLOCKED      - Waiting for SIGCONT */
+#endif
+
   NUM_TASK_STATES             /* Must be last */
 };
 typedef enum tstate_e tstate_t;

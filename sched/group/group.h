@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/group/group.h
  *
- *   Copyright (C) 2007-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,6 +116,10 @@ FAR struct task_group_s *group_findbypid(pid_t pid);
 int group_foreachchild(FAR struct task_group_s *group,
                        foreachchild_t handler, FAR void *arg);
 int group_killchildren(FAR struct task_tcb_s *tcb);
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+int group_suspendchildren(FAR struct task_tcb_s *tcb);
+int group_continue(FAR struct task_tcb_s *tcb);
+#endif
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

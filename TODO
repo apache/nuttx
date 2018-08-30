@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 26, 2018)
+NuttX TODO List (Last updated August 30, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -579,10 +579,24 @@ o Signals (sched/signal, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       STANDARD SIGNALS
-  Description: 'Standard' signals and signal actions are not supported.
-               (e.g., SIGINT, SIGSEGV, etc).  Default is only SIG_IGN.
+  Description: 'Standard' signals and signal actions are not fully
+               supported.  The SIGCHLD signal is supported and, if the
+               option CONFIG_SIG_DEFAULT=y is included, some signals will
+               perform their default actions (dependent upon addition
+               configuration settings):
 
-               Update:  SIGCHLD is supported if so configured.
+               Signal  Action               Additional Configuration
+               ------- -------------------- -------------------------
+               SIGUSR1 Abnormal Termination CONFIG_SIG_SIGUSR1_ACTION
+               SIGUSR2 Abnormal Termination CONFIG_SIG_SIGUSR2_ACTION
+               SIGALRM Abnormal Termination CONFIG_SIG_SIGALRM_ACTION
+               SIGPOLL Abnormal Termination CONFIG_SIG_SIGPOLL_ACTION
+               SIGSTOP Suspend task         CONFIG_SIG_SIGSTOP_ACTION
+               SIGSTP  Suspend task         CONFIG_SIG_SIGSTOP_ACTION
+               SIGCONT Resume task          CONFIG_SIG_SIGSTOP_ACTION
+               SIGINT  Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
+               SIGKILL Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
+
   Status:      Open.  No further changes are planned.
   Priority:    Low, required by standards but not so critical for an
                embedded system.

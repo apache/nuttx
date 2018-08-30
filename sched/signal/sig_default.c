@@ -48,6 +48,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 
 #include "group/group.h"
 #include "sched/sched.h"
@@ -80,7 +81,9 @@ struct nxsig_defaction_s
 
 /* Default actions */
 
+static void nxsig_null_action(int signo);
 static void nxsig_abnormal_termination(int signo);
+static void nxsig_stop_task(int signo);
 
 /* Helpers */
 
@@ -116,8 +119,15 @@ static const struct nxsig_defaction_s g_defactions[] =
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
    { SIGPOLL, 0,                nxsig_abnormal_termination },
 #endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+   { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
+   { SIGSTP,  0,                nxsig_stop_task },
+   { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
+#endif
+#ifdef CONFIG_SIG_SIGKILL_ACTION
    { SIGINT,  0,                nxsig_abnormal_termination },
    { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination }
+#endif
 };
 
 #define NACTIONS (sizeof(g_defactions) / sizeof(struct nxsig_defaction_s))
@@ -141,6 +151,24 @@ static const struct nxsig_defaction_s g_defactions[] =
  * - Stop the process.
  * - Continue the process, if it is stopped; otherwise, ignore the signal.
  */
+
+/****************************************************************************
+ * Name: nxsig_null_action
+ *
+ * Description:
+ *   The do-nothing default signal actin handler.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nxsig_null_action(int signo)
+{
+}
 
 /****************************************************************************
  * Name: nxsig_abnormal_termination
@@ -193,6 +221,42 @@ static void nxsig_abnormal_termination(int signo)
 
       exit(EXIT_FAILURE);
     }
+}
+
+/****************************************************************************
+ * Name: nxsig_stop_task
+ *
+ * Description:
+ *   This is the handler for the abnormal termination default action.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nxsig_stop_task(int signo)
+{
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+
+  /* Careful:  In the multi-threaded task, the signal may be handled on a
+   * child pthread.
+   */
+
+#ifdef HAVE_GROUP_MEMBERS
+  /* Suspend of of the children of the task.  This will not suspend the
+   * currently running task/pthread (this_task).  It will suspend the
+   * main thread of the  task group if the this_task is a pthread.
+   */
+
+  group_suspendchildren((FAR struct task_tcb_s *)rtcb);
+#endif
+
+  /* Then, finally, suspend this thread */
+
+  sched_suspend(rtcb);
 }
 
 /****************************************************************************
@@ -260,13 +324,14 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 
       /* Attach the signal handler.
        *
-       * NOTE: sigaction will call nxsig_default(tcb, action, false)
+       * NOTE: nxsig_action will call nxsig_default(tcb, action, false).
+       * Don't be surprised.
        */
 
       memset(&sa, 0, sizeof(sa));
       sa.sa_handler = info->action;
       sa.sa_flags   = SA_SIGINFO;
-      (void)sigaction(info->signo, &sa, NULL);
+      (void)nxsig_action(info->signo, &sa, NULL, true);
 
       /* Indicate that the default signal handler has been attached */
 

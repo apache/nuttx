@@ -4874,10 +4874,63 @@ interface of the same name.
   The signal handler is a user-supplied function that is bound to a specific signal and performs whatever actions are necessary whenever the signal is received.
 </p>
 <p>
-  There are no predefined actions for any signal.
+  By default, here are no predefined actions for any signal.
   The default action for all signals (i.e., when no signal handler has been supplied by the user) is to ignore the signal.
-  In this sense, all NuttX are <i>real time</i> signals.
+  In this sense, all NuttX are <i>real time</i> signals by default.
+  If the configuration option <code>CONFIG_SIG_DEFAULT=y</code> is included, some signals will perform their default actions dependent upon addition configuration settings as summarized in the following table:
 </p>
+<p><ul><table>
+  <tr>
+    <th>Signal</th>
+    <th>Action</th>
+    <th>Additional Configuration</th>
+  </tr>
+  <tr>
+    <td><code>SIGUSR1</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGUSR1_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGUSR2</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGUSR2_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGALRM</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGALRM_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGPOLL</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGPOLL_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGSTOP</code></td>
+    <td>Suspend task</td>
+    <td><code>CONFIG_SIG_SIGSTOP_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGSTP</code></td>
+    <td>Suspend task</td>
+    <td><code>CONFIG_SIG_SIGSTOP_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGCONT</code></td>
+    <td>Resume task</td>
+    <td><code>CONFIG_SIG_SIGSTOP_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGINT</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGKILL_ACTION</code></td>
+  </tr>
+  <tr>
+    <td><code>SIGKILL</code></td>
+    <td>Abnormal Termination</td>
+    <td><code>CONFIG_SIG_SIGKILL_ACTION</code></td>
+  </tr>
+</table></ul></p>
 <p>
   Tasks may also suspend themselves and wait until a signal is received.
 </p>

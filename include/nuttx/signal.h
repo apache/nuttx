@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <signal.h>
 
 /****************************************************************************
@@ -69,25 +70,27 @@
  */
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define _SIG_PROCMASK(h,s,o) nxsig_procmask(h,s,o)
-#  define _SIG_QUEUE(p,s,v)    nxsig_queue(p,s,v)
-#  define _SIG_KILL(p,s)       nxsig_kill(p,s);
-#  define _SIG_WAITINFO(s,i)   nxsig_timedwait(s,i,NULL)
-#  define _SIG_NANOSLEEP(r,a)  nxsig_nanosleep(r,a)
-#  define _SIG_SLEEP(s)        nxsig_sleep(s)
-#  define _SIG_USLEEP(u)       nxsig_usleep(u)
-#  define _SIG_ERRNO(r)        (-(r))
-#  define _SIG_ERRVAL(r)       (r)
+#  define _SIG_PROCMASK(h,s,o)  nxsig_procmask(h,s,o)
+#  define _SIG_SIGACTION(s,a,o) nxsig_action(s,a,o,false)
+#  define _SIG_QUEUE(p,s,v)     nxsig_queue(p,s,v)
+#  define _SIG_KILL(p,s)        nxsig_kill(p,s);
+#  define _SIG_WAITINFO(s,i)    nxsig_timedwait(s,i,NULL)
+#  define _SIG_NANOSLEEP(r,a)   nxsig_nanosleep(r,a)
+#  define _SIG_SLEEP(s)         nxsig_sleep(s)
+#  define _SIG_USLEEP(u)        nxsig_usleep(u)
+#  define _SIG_ERRNO(r)         (-(r))
+#  define _SIG_ERRVAL(r)        (r)
 #else
-#  define _SIG_PROCMASK(h,s,o) sigprocmask(h,s,o)
-#  define _SIG_QUEUE(p,s,v)    sigqueue(p,s,v)
-#  define _SIG_KILL(p,s)       kill(p,s);
-#  define _SIG_WAITINFO(s,i)   sigwaitinfo(s,i)
-#  define _SIG_NANOSLEEP(r,a)  nanosleep(r,a)
-#  define _SIG_SLEEP(s)        sleep(s)
-#  define _SIG_USLEEP(u)       usleep(u)
-#  define _SIG_ERRNO(r)        errno
-#  define _SIG_ERRVAL(r)       (-errno)
+#  define _SIG_PROCMASK(h,s,o)  sigprocmask(h,s,o)
+#  define _SIG_SIGACTION(s,a,o) sigaction(s,a,o)
+#  define _SIG_QUEUE(p,s,v)     sigqueue(p,s,v)
+#  define _SIG_KILL(p,s)        kill(p,s);
+#  define _SIG_WAITINFO(s,i)    sigwaitinfo(s,i)
+#  define _SIG_NANOSLEEP(r,a)   nanosleep(r,a)
+#  define _SIG_SLEEP(s)         sleep(s)
+#  define _SIG_USLEEP(u)        usleep(u)
+#  define _SIG_ERRNO(r)         errno
+#  define _SIG_ERRVAL(r)        (-errno)
 #endif
 
 /****************************************************************************
@@ -137,6 +140,32 @@ struct timespec;  /* Forward reference */
  ****************************************************************************/
 
 int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+
+/****************************************************************************
+ * Name: nxsig_action
+ *
+ * Description:
+ *   This function allows the calling process to examine and/or specify the
+ *   action to be associated with a specific signal.  This is a non-standard,
+ *   OS internal version of the standard sigaction() function. nxsig_action()
+ *   adds an additional parameter, force, that is used to set default signal
+ *   actions (which may not normally be settable).  nxsig_action() does not
+ *   alter the errno variable.
+ *
+ * Input Parameters:
+ *   sig   - Signal of interest
+ *   act   - Location of new handler
+ *   oact  - Location to store only handler
+ *   force - Force setup of the signal handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+int nxsig_action(int signo, FAR const struct sigaction *act,
+                 FAR struct sigaction *oact, bool force);
 
 /****************************************************************************
  * Name: nxsig_queue

@@ -402,6 +402,22 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
           nxmq_wait_irq(stcb, EINTR);
         }
 #endif
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+      /* If the task was stopped by SIGSTOP or SIGSTP, then unblock the task
+       * if SIGCONT is received.
+       */
+
+      if (stcb->task_state == TSTATE_TASK_STOPPED &&
+          info->si_signo == SIGCONT)
+        {
+#ifdef HAVE_GROUP_MEMBERS
+          group_continue(stcb);
+#else
+          sched_continue(stcb);
+#endif
+        }
+#endif
     }
 
   return ret;

@@ -134,7 +134,7 @@ config SERIAL_TERMIOS
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
-	select SIG_DEFAULT
+	select SIG_SIGKILL_ACTION
 	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console

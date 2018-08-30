@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <signal.h>
 #include <queue.h>
 #include <sched.h>
@@ -94,7 +95,7 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sigaction
+ * Name: nxsig_action and sigaction
  *
  * Description:
  *   This function allows the calling process to examine and/or specify the
@@ -123,16 +124,28 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *   original signal mask is restored.
  *
  *   Once an action is installed for a specific signal, it remains installed
- *   until another action is explicitly requested by another call to sigaction().
+ *   until another action is explicitly requested by another call to
+ *   sigaction().
+ *
+ *   nxsig_action() is an internal version of sigaction that adds an
+ *   additional parameter, force, that is used to set default signal actions
+ *   (which may not normally be settable).  nxsig_action() does not alter the
+ *   errno variable.
  *
  * Input Parameters:
- *   sig - Signal of interest
- *   act - Location of new handler
- *   oact - Location to store only handler
+ *   sig   - Signal of interest
+ *   act   - Location of new handler
+ *   oact  - Location to store only handler
+ *   force - Force setup of the signal handler, even if it cannot normally
+ *           be caught or ignored (nxsig_action only)
  *
  * Returned Value:
- *   0 (OK), or -1 (ERROR) if the signal number is invalid.
- *   (errno is not set)
+ *   nxsig_action:
+ *     Zero (OK) is returned on success; a negated errno value is returned
+ *     on failure
+ *   sigaction:
+ *     Zero (OK) is returned on success; -1 (ERROR) is returned on any
+ *     failure if the signal number is invalid with the errno set appropriately
  *
  * Assumptions:
  *
@@ -145,8 +158,8 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *
  ****************************************************************************/
 
-int sigaction(int signo, FAR const struct sigaction *act,
-              FAR struct sigaction *oact)
+int nxsig_action(int signo, FAR const struct sigaction *act,
+                 FAR struct sigaction *oact, bool force)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group;
@@ -164,8 +177,7 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
   if (!GOOD_SIGNO(signo))
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
 #ifdef CONFIG_SIG_DEFAULT
@@ -173,11 +185,10 @@ int sigaction(int signo, FAR const struct sigaction *act,
    * caught or ignored.
    */
 
-  if (act != NULL &&
-      (act->sa_handler != SIG_DFL && !nxsig_iscatchable(signo)))
+  if (act != NULL && !force && act->sa_handler != SIG_DFL &&
+      !nxsig_iscatchable(signo))
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 #endif
 
@@ -316,8 +327,7 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
           if (!sigact)
             {
-              set_errno(ENOMEM);
-              return ERROR;
+              return -ENOMEM;
             }
 
           /* Put the signal number in the queue entry */
@@ -334,6 +344,23 @@ int sigaction(int signo, FAR const struct sigaction *act,
       sigact->act.sa_handler = handler;
       sigact->act.sa_mask    = act->sa_mask;
       sigact->act.sa_flags   = act->sa_flags;
+    }
+
+  return OK;
+}
+
+int sigaction(int signo, FAR const struct sigaction *act,
+              FAR struct sigaction *oact)
+{
+  int ret;
+
+  /* nxsig_action() does all of the work */
+
+  ret = nxsig_action(signo, act, oact, false);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
     }
 
   return OK;

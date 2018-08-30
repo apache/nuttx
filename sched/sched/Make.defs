@@ -54,6 +54,10 @@ CSRCS += sched_cpuselect.c sched_cpupause.c
 CSRCS += sched_getaffinity.c sched_setaffinity.c
 endif
 
+ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
+CSRCS += sched_suspend.c sched_continue.c
+endif
+
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += sched_waitpid.c
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)

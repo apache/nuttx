@@ -440,6 +440,11 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+void sched_suspend(FAR struct tcb_s *tcb);
+void sched_continue(FAR struct tcb_s *tcb);
+#endif
+
 #ifdef CONFIG_SMP
 #if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || defined(CONFIG_ARCH_HAVE_FETCHADD)
 FAR struct tcb_s *this_task(void);
