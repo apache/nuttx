@@ -111,7 +111,7 @@ enum gpio_pintype_e
 /* Interrupt callback */
 
 struct gpio_dev_s;
-typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev);
+typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev, uint8_t pin);
 
 /* Pin interface vtable definition.  Instances of this vtable are read-only
  * and may reside in FLASH.
