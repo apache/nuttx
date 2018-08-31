@@ -141,8 +141,8 @@
 
 /* GCLK */
 
-#define BOARD_GCLK_SET1         0x0000    /* The empty set */
-#define BOARD_GCLK_SET2         0x0fff    /* All GCLKs */
+#define BOARD_GCLK_SET1         0x0020    /* Pre-configure:  GCLK5 needed by DPLL0 */
+#define BOARD_GCLK_SET2         0x0fdf    /* Post-configure: All GCLKs except GCLK5 */
 
 #define BOARD_GCLK0_ENABLE      true      /* Enable GCLK0 */
 #define BOARD_GCLK0_IDC         false     /* Don't improve duty cycle */
@@ -150,7 +150,7 @@
 #define BOARD_GCLK0_OE          true      /* Generate output on GCLK_IO */
 #define BOARD_GCLK0_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK0_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK0_SOURCE      7         /* Select DPLL0 output as GLCK0 source */
+#define BOARD_GCLK0_SOURCE      7         /* Select DPLL0 output as GCLK0 source */
 #define BOARD_GCLK0_DIV         1         /* Division factor */
 
 #define BOARD_GCLK1_ENABLE      true      /* Enable GCLK1 */
@@ -159,7 +159,7 @@
 #define BOARD_GCLK1_OE          true      /* Generate output on GCLK_IO */
 #define BOARD_GCLK1_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK1_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK1_SOURCE      6         /* Select DFLL output as GLCK1 source */
+#define BOARD_GCLK1_SOURCE      6         /* Select DFLL output as GCLK1 source */
 #define BOARD_GCLK1_DIV         1         /* Division factor */
 
 #define BOARD_GCLK2_ENABLE      false     /* Don't enable GCLK2 */
@@ -168,7 +168,7 @@
 #define BOARD_GCLK2_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK2_DIVSEL      1         /* GCLK frequency is source/(2^(N+1) */
 #define BOARD_GCLK2_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GLCK2 source */
+#define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GCLK2 source */
 #define BOARD_GCLK2_DIV         1         /* Division factor */
 
 #define BOARD_GCLK3_ENABLE      false     /* Don't enable GCLK3 */
@@ -177,7 +177,7 @@
 #define BOARD_GCLK3_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK3_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK3_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GLCK3 source */
+#define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GCLK3 source */
 #define BOARD_GCLK3_DIV         1         /* Division factor */
 
 #define BOARD_GCLK4_ENABLE      true      /* Enable GCLK4 */
@@ -186,7 +186,7 @@
 #define BOARD_GCLK4_OE          true      /* Generate output on GCLK_IO */
 #define BOARD_GCLK4_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK4_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK4_SOURCE      7         /* Select DPLL0 output as GLCK4 source */
+#define BOARD_GCLK4_SOURCE      7         /* Select DPLL0 output as GCLK4 source */
 #define BOARD_GCLK4_DIV         1         /* Division factor */
 
 #define BOARD_GCLK5_ENABLE      true      /* Enable GCLK5 */
@@ -195,7 +195,7 @@
 #define BOARD_GCLK5_OE          true      /* Generate output on GCLK_IO */
 #define BOARD_GCLK5_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK5_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GLCK5 source */
+#define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GCLK5 source */
 #define BOARD_GCLK5_DIV         24        /* Division factor */
 
 #define BOARD_GCLK6_ENABLE      false     /* Don't enable GCLK6 */
@@ -204,7 +204,7 @@
 #define BOARD_GCLK6_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK6_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK6_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK6_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK6_SOURCE      1         /* Select XOSC1 as GCLK6 source */
 #define BOARD_GCLK6_DIV         1         /* Division factor */
 
 #define BOARD_GCLK7_ENABLE      false     /* Don't enable GCLK7 */
@@ -213,7 +213,7 @@
 #define BOARD_GCLK7_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK7_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK7_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK7_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK7_SOURCE      1         /* Select XOSC1 as GCLK7 source */
 #define BOARD_GCLK7_DIV         1         /* Division factor */
 
 #define BOARD_GCLK8_ENABLE      false     /* Don't enable GCLK8 */
@@ -222,7 +222,7 @@
 #define BOARD_GCLK8_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK8_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK8_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK8_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK8_SOURCE      1         /* Select XOSC1 as GCLK8 source */
 #define BOARD_GCLK8_DIV         1         /* Division factor */
 
 #define BOARD_GCLK9_ENABLE      false     /* Don't enable GCLK9 */
@@ -231,7 +231,7 @@
 #define BOARD_GCLK9_OE          false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK9_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK9_RUNSTDBY    false     /* Don't run in standby */
-#define BOARD_GCLK9_SOURCE      1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK9_SOURCE      1         /* Select XOSC1 as GCLK9 source */
 #define BOARD_GCLK9_DIV         1         /* Division factor */
 
 #define BOARD_GCLK10_ENABLE     false     /* Don't enable GCLK10 */
@@ -240,7 +240,7 @@
 #define BOARD_GCLK10_OE         false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK10_DIVSEL     0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK10_RUNSTDBY   false     /* Don't run in standby */
-#define BOARD_GCLK10_SOURCE     1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK10_SOURCE     1         /* Select XOSC1 as GCLK10 source */
 #define BOARD_GCLK10_DIV        1         /* Division factor */
 
 #define BOARD_GCLK11_ENABLE     false     /* Don't enable GCLK11 */
@@ -249,7 +249,7 @@
 #define BOARD_GCLK11_OE         false     /* No generator output of GCLK_IO */
 #define BOARD_GCLK11_DIVSEL     0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK11_RUNSTDBY   false     /* Don't run in standby */
-#define BOARD_GCLK11_SOURCE     1         /* Select XOSC1 as GLCK5 source */
+#define BOARD_GCLK11_SOURCE     1         /* Select XOSC1 as GCLK11 source */
 #define BOARD_GCLK11_DIV        1         /* Division factor */
 #define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY
 
@@ -267,6 +267,7 @@
 #define BOARD_DFLL_BPLCKC       false     /* No ypass coarse clock */
 #define BOARD_DFLL_WAITLOCK     true      /* Wait lock */
 #define BOARD_DFLL_CALIBEN      false     /* Don't verwrite factory calibration */
+#define BOARD_DFLL_GCLKLOCK     false     /* Don't lock the GCLK source */
 #define BOARD_DFLL_FCALIB       128       /* Coarse calibration value (if caliben) */
 #define BOARD_DFLL_CCALIB       (31 / 4)  /* Fine calibration value (if caliben) */
 #define BOARD_DFLL_FSTEP        1         /* Fine maximum step */
@@ -301,11 +302,13 @@
 #define BOARD_DPLL0_WUF         false     /* Wake up fast */
 #define BOARD_DPLL0_RUNSTDBY    false     /* Run in standby */
 #define BOARD_DPLL0_ONDEMAND    false     /* On demand clock activation */
+#define BOARD_DPLL0_REFLOCK     false     /* Do not lock reference clock section */
 #define BOARD_DPLL0_REFCLK      0         /* Reference clock selection */
 #define BOARD_DPLL0_LTIME       0         /* Lock time  */
 #define BOARD_DPLL0_FILTER      0         /* Proportional integer filter selection */
 #define BOARD_DPLL0_DCOFILTER   0         /* Sigma-delta DCO filter selection */
-#define BOARD_DPLL0_GCLK        5         /* GCLK5 source (if refclock == 0) */
+#define BOARD_DPLL0_GCLK        5         /* GCLK source (if refclock == 0) */
+#define BOARD_DPLL0_GCLKLOCK    0         /* Don't lock GCLK source clock configuration */
 #define BOARD_DPLL0_LDRFRAC     0         /* Loop divider fractional part */
 #define BOARD_DPLL0_LDRINT      59        /* Loop divider ratio */
 #define BOARD_DPLL0_DIV         0         /* Clock divider */
@@ -316,11 +319,13 @@
 #define BOARD_DPLL1_WUF         false     /* Wake up fast */
 #define BOARD_DPLL1_RUNSTDBY    false     /* Run in standby */
 #define BOARD_DPLL1_ONDEMAND    false     /* On demand clock activation */
+#define BOARD_DPLL1_REFLOCK     false     /* Do not lock reference clock section */
 #define BOARD_DPLL1_REFCLK      1         /* Reference clock = XOSCK32 */
 #define BOARD_DPLL1_LTIME       0         /* Lock time  */
 #define BOARD_DPLL1_FILTER      0         /* Sigma-delta DCO filter selection */
 #define BOARD_DPLL1_DCOFILTER   0         /* Sigma-delta DCO filter selection */
 #define BOARD_DPLL1_GCLK        0         /* GCLK source (if refclock == 0) */
+#define BOARD_DPLL1_GCLKLOCK    0         /* Don't lock GCLK source clock configuration */
 #define BOARD_DPLL1_LDRFRAC     13        /* Loop divider fractional part */
 #define BOARD_DPLL1_LDRINT      1463      /* Loop divider ratio */
 #define BOARD_DPLL1_DIV         0         /* Clock divider */
@@ -335,7 +340,7 @@
 
 /* Peripheral clocking */
 
-#define BOARD_GLCK_EIC          4         /* EIC GLCK index */
+#define BOARD_GCLK_EIC          4         /* EIC GCLK index */
 
 /* FLASH wait states
  *

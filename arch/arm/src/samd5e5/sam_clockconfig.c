@@ -78,8 +78,8 @@ static const struct sam_clockconfig_s g_initial_clocking =
 {
   .waitstates        = BOARD_FLASH_WAITSTATES,
   .cpudiv            = BOARD_MCLK_CPUDIV,
-  .glckset1          = BOARD_GCLK_SET1,
-  .glckset2          = BOARD_GCLK_SET2,
+  .gclkset1          = BOARD_GCLK_SET1,
+  .gclkset2          = BOARD_GCLK_SET2,
   .cpu_frequency     = BOARD_CPU_FREQUENCY,
 #if BOARD_HAVE_XOSC32K != 0
    .xosc32k          =
@@ -141,6 +141,7 @@ static const struct sam_clockconfig_s g_initial_clocking =
      .bplckc         = BOARD_DFLL_BPLCKC,
      .waitlock       = BOARD_DFLL_WAITLOCK,
      .caliben        = BOARD_DFLL_CALIBEN,
+     .gclklock       = BOARD_DFLL_GCLKLOCK,
      .fcalib         = BOARD_DFLL_FCALIB,
      .ccalib         = BOARD_DFLL_CCALIB,
      .fstep          = BOARD_DFLL_FSTEP,
@@ -157,6 +158,7 @@ static const struct sam_clockconfig_s g_initial_clocking =
        .wuf          = BOARD_DPLL0_WUF,
        .runstdby     = BOARD_DPLL0_RUNSTDBY,
        .ondemand     = BOARD_DPLL0_ONDEMAND,
+       .reflock      = BOARD_DPLL0_REFLOCK,
        .refclk       = BOARD_DPLL0_REFCLK,
        .ltime        = BOARD_DPLL0_LTIME,
        .filter       = BOARD_DPLL0_FILTER,
@@ -173,6 +175,7 @@ static const struct sam_clockconfig_s g_initial_clocking =
        .wuf          = BOARD_DPLL1_WUF,
        .runstdby     = BOARD_DPLL1_RUNSTDBY,
        .ondemand     = BOARD_DPLL1_ONDEMAND,
+       .reflock      = BOARD_DPLL1_REFLOCK,
        .refclk       = BOARD_DPLL1_REFCLK,
        .ltime        = BOARD_DPLL1_LTIME,
        .filter       = BOARD_DPLL1_FILTER,
@@ -609,7 +612,7 @@ static inline void sam_mclk_configure(uint8_t cpudiv)
  * Name: sam_gclk_configure
  *
  * Description:
- *   Configure one GLCK
+ *   Configure one GCLK
  *
  ****************************************************************************/
 
@@ -618,11 +621,11 @@ static void sam_gclk_configure(uintptr_t regaddr,
 {
   uint32_t regval;
 
-  /* Are we enabling or disabling the GLCK? */
+  /* Are we enabling or disabling the GCLK? */
 
   if (config->enable)
     {
-      /* Get the GLCK configuration */
+      /* Get the GCLK configuration */
 
       regval = GCLK_GENCTRL_SRC(config->source) | GCLK_GENCTRL_GENEN |
                GCLK_GENCTRL1_DIV(config->div);
@@ -654,7 +657,7 @@ static void sam_gclk_configure(uintptr_t regaddr,
     }
   else
     {
-      /* Disable the GLCK */
+      /* Disable the GCLK */
 
       regval = 0;
     }
@@ -668,7 +671,7 @@ static void sam_gclk_configure(uintptr_t regaddr,
  * Name: sam_gclkset_configure
  *
  * Description:
- *   Configure a set of GLCKs
+ *   Configure a set of GCLKs
  *
  ****************************************************************************/
 
@@ -680,7 +683,7 @@ static void sam_gclkset_configure(uint16_t gclkset,
 
   /* Try every GCLK */
 
-  for (gclk = 0; gclk < SAM_NGLCK && gclkset != 0; gclk++)
+  for (gclk = 0; gclk < SAM_NGCLK && gclkset != 0; gclk++)
     {
       /* Check if this one is in the set */
 
@@ -720,14 +723,17 @@ static void sam_dfll_configure(const struct sam_dfll_config_s *config)
   putreg8(0, SAM_OSCCTRL_DFLLCTRLA);
 
   /* If we are running in closed loop mode and we are in USB clock recover
-   * mode, then set up the input source GCLK channel.
+   * mode, then set up the input source GCLK channel (unless it has already
+   * been configured and the configuration is locked).
    */
 
-  if (config->usbcrm && config->mode)
+  if (config->usbcrm && config->mode &&
+      !sam_gclk_chan_locked(GCLK_CHAN_OSCCTRL_DFLL))
     {
-      /* Configure the GCLK channel */
+      /* Configure the DFLL GCLK channel to use the GCLK source. */
 
-      sam_gclk_chan_enable(GCLK_CHAN_OSCCTRL_DFLL, config->gclk, true);
+      sam_gclk_chan_enable(GCLK_CHAN_OSCCTRL_DFLL, config->gclk,
+                           (bool)config->gclklock);
     }
 
   /* Setup the DFLLMUL register */
@@ -905,7 +911,7 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
     {
     }
 
-  /* Set the source of GLCK0 to to the configured source. */
+  /* Set the source of GCLK0 to to the configured source. */
 
   regval32  = getreg32(SAM_GCLK_GENCTRL(0));
   regval32 &= ~GCLK_GENCTRL_SRC_MASK;
@@ -924,15 +930,16 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
 static void sam_dpll_gclkchannel(uint8_t chan,
                                  const struct sam_dpll_config_s *config)
 {
-  /* Check if we are using a dedicated GCLK as the reference clock (vs. the
-   * common GCLK0).
+  /* Check if we are using a dedicated GCLK as the reference clock.  If so
+   * configure GCLK unless it has already been configured and configuration
+   * registers have been locked.
    */
 
-  if (config->refclk != 0)
+  if (config->refclk == 0 && !sam_gclk_chan_locked(chan))
     {
-      /* Yes.. configure the GCLK channel */
+      /* Yes.. configure the GCLK channel that will be used as refclk source */
 
-      sam_gclk_chan_enable(chan, config->gclk, true);
+      sam_gclk_chan_enable(chan, config->gclk, (bool)config->reflock);
     }
 }
 
@@ -1109,7 +1116,7 @@ void sam_clock_configure(const struct sam_clockconfig_s *config)
 
   /* Pre-configure some GCLKs before configuring the DPLLs */
 
-  sam_gclkset_configure(config->glckset1, config->gclk);
+  sam_gclkset_configure(config->gclkset1, config->gclk);
 
   /* Configure loops:  DFLL, DPLL0, and DPLL1. */
 
@@ -1117,7 +1124,7 @@ void sam_clock_configure(const struct sam_clockconfig_s *config)
 
   /* Configure the renaming GCLKs before configuring the DPLLs */
 
-  sam_gclkset_configure(config->glckset2, config->gclk);
+  sam_gclkset_configure(config->gclkset2, config->gclk);
 
   /* Check if the number of wait states is increasing or decreasing */
 

@@ -145,10 +145,10 @@ int sam_eic_initialize(void)
    */
 
   regaddr = SAM_GCLK_PCHCTRL(GCLK_CHAN_EIC);
-  regval  = GCLK_PCHCTRL_GEN(BOARD_GLCK_EIC) | GCLK_PCHCTRL_CHEN;
+  regval  = GCLK_PCHCTRL_GEN(BOARD_GCLK_EIC) | GCLK_PCHCTRL_CHEN;
   putreg32(regval, regaddr);
 
-  /* Enable the EIC, selecting clocking via the GLCK_EIC  */
+  /* Enable the EIC, selecting clocking via the GCLK_EIC  */
 
   putreg8(EIC_CTRLA_ENABLE | EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
   sam_eic_syncwait();

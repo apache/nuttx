@@ -36,18 +36,21 @@ STATUS
     There is a placeholder from the SAML21, but it is currently stubbed out
     in the Make.defs file.  Configuration options in the board.h header
     file are bogus and also just cloned from the SAML21.
+
   2018-07-29:  Clock configuration logic now complete.  board.h
     configuration options still need to be verified.  Unverified SERCOM
     USART, SPI, I2C, Port configuration, and DMA support have been added.
     I still have no hardware in hand to test.
+
   2018-07-20:  Brought in the USB driver from the SAML21.  It is the same
     USB IP with only small differences.  There a a few, small open issues
     still to be resolved.
+
   2018-08-01:  Hardware in hand.  Initial attempts to program the board
-    using a Segger J-Link connected via SWD were unsuccessful.  I believe
-    that the FLASH is locked.  See "Unlocking FLASH with J-Link Commander"
-    below.  After unlocking the FLASH, I was able to successfully write
-    the NuttX image.
+    using a Segger J-Link connected via SWD were unsuccessful because the
+    Metro M4 comes with an application in FLASH and the FLASH locked.  See
+    "Unlocking FLASH with J-Link Commander" below.  After unlocking the
+    FLASH, I was able to successfully write the NuttX image.
 
     Unfortunately, the board seems to have become unusable after the first
     NuttX image was written to FLASH.  I am unable to connect the JTAG
@@ -56,17 +59,23 @@ STATUS
     to halt the CPU.
 
     This is most likely a consequence of something happening in the NuttX
-    boot-up sequence that interferes with JTAG operation.  When I continue
-    debugging in the future, I will put an infinite loop, branch-on-self
-    at the code startup up (__start) so that I can attached the debugger
-    and step through the initial configuration.
+    boot-up sequence that interferes with JTAG operation.
+
+    Future me:  This boot-up failure was do to bad clock initialization
+    logic that caused infinite loops during clock configuration.  Unlocking
+    and erasing the FLASH is innocuous, but the JTAG will apparently not
+    work if the clocks are not in a good state.
+
   2018-08-03:  Added a configuration option to run out of SRAM vs FLASH.
     This should be a safer way to do the initial board bring-up since
     it does not modify the FLASH image nor does it require unlocking
     the FLASH pages.
+
   2018-08-31:  I finally have a new Metro M4 and have been successfully
-    debugging from SRAM.  Several errors in clock configuration logic
-    have been corrected but it still hangs in the clock configuration.
+    debugging from SRAM (with FLASH unlocked and erased).  Several
+    errors in clock configuration logic have been corrected and it now
+    gets through clock configuration okay.  It now hangs in the low-level
+    USART initialzation.
 
 Unlocking FLASH
 ===============
@@ -166,6 +175,15 @@ Unlocking FLASH
       00804000 = 39 92 9A FE 80 FF EC AE FF FF FF FF FF FF FF FF
 
     You will, of course, have to change the path as appropriate for your system.
+
+  4. Erase FLASH (optional)
+
+      J-Link>erase
+      Erasing device (ATSAMD51P19)...
+      J-Link: Flash download: Total time needed: 2.596s (Prepare: 0.031s, Compare: 0.000s, Erase: 2.553s, Program: 0.000s, Verify: 0.000s, Restore: 0.012s)
+      J-Link: Flash download: Total time needed: 0.066s (Prepare: 0.038s, Compare: 0.000s, Erase: 0.016s, Program: 0.000s, Verify: 0.000s, Restore: 0.010s)
+      Erasing done.
+      J-Link>
 
 Serial Console
 ==============

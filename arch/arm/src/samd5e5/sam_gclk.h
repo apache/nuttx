@@ -45,6 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "up_arch.h"
 #include "sam_config.h"
 #include "chip/sam_gclk.h"
 
@@ -140,6 +141,39 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen, bool wrlock);
  ****************************************************************************/
 
 void sam_gclk_chan_disable(uint8_t channel);
+
+/****************************************************************************
+ * Name: sam_gclk_chan_locked
+ *
+ * Description:
+ *  Return true if the GCLK cannot be configured because the wrtlock is set
+ *  int the PCHCTRL register.
+ *
+ * Input Parameters:
+ *   channel - Index of the GCLK channel to be checked
+ *
+ * Returned Value:
+ *   True if the the wrtlock bit is set in the channel's PCHCTRL register.
+ *
+ ****************************************************************************/
+
+static inline bool sam_gclk_chan_locked(uint8_t channel)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  /* Get the address of the peripheral channel control register */
+
+  regaddr = SAM_GCLK_PCHCTRL(channel);
+
+  /* Get content of the peripheral channel control register */
+
+  regval = getreg32(regaddr);
+
+  /* Return true if the WRTLOCK bit is set in the register */
+
+  return (regval & GCLK_PCHCTRL_WRTLOCK) != 0;
+}
 
 #undef EXTERN
 #if defined(__cplusplus)

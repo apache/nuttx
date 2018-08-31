@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd5e5/sam_glck.c
+ * arch/arm/src/samd5e5/sam_gclk.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +61,7 @@
  *   the clock domains is complete.
  *
  * Input Parameters:
- *   glck - GCLK clock index
+ *   gclk - GCLK clock index
  *
  * Returned Value:
  *   None
@@ -233,7 +233,7 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen, bool wrlock)
 
   /* Configure the peripheral channel */
 
-  regval =  GCLK_PCHCTRL_GEN(srcgen);
+  regval = GCLK_PCHCTRL_GEN(srcgen);
   putreg32(regval, regaddr);
 
   /* Enable the peripheral channel, setting the writelock if so requested. */
