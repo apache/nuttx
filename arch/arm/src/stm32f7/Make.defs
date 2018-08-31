@@ -59,6 +59,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += up_idle.c
 endif
 
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
