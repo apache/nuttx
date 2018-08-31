@@ -337,6 +337,10 @@ config SAMD5E5_HAVE_TC7
 	bool
 	default n
 
+config SAMD5E5_SERCOM
+	bool
+	default n
+
 config SAMD5E5_AC
 	bool "Analog Comparator"
 	default n
@@ -376,35 +380,43 @@ config SAMD5E5_RTC
 config SAMD5E5_SERCOM0
 	bool "Serial Communication Interface 0"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM1
 	bool "Serial Communication Interface 1"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM2
 	bool "Serial Communication Interface 2"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM3
 	bool "Serial Communication Interface 3"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM4
 	bool "Serial Communication Interface 4"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM5
 	bool "Serial Communication Interface 5"
 	default n
+	select SAMD5E5_SERCOM
 
 config SAMD5E5_SERCOM6
 	bool "Serial Communication Interface 6"
 	default n
+	select SAMD5E5_SERCOM
 	depends on SAMD5E5_HAVE_SERCOM6
 
 config SAMD5E5_SERCOM7
 	bool "Serial Communication Interface 7"
 	default n
+	select SAMD5E5_SERCOM
 	depends on SAMD5E5_HAVE_SERCOM7
 
 config SAMD5E5_TC0
@@ -470,6 +482,9 @@ config SAMD5E5_DMAC_NDESC
 
 		Each additional DMA descriptor will require 16-bytes for LPRAM
 		memory.
+
+menu "SERCOM Configuration"
+	depends on SAMD5E5_SERCOM
 
 choice
 	prompt "SERCOM0 mode"
@@ -630,6 +645,7 @@ config SAMD5E5_SERCOM7_ISUSART
 	select USART7_SERIALDRIVER
 
 endchoice
+endmenu # SERCOM Configuration
 
 config SAMD5E5_HAVE_SPI
 	bool

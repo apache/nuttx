@@ -292,7 +292,8 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 
   /* Configure the GCLKs for the SERCOM module */
 
-  sercom_coreclk_configure(config->sercom, config->coregen, false);
+  sercom_coreclk_configure(config->sercom, config->coregen,
+                           (bool)config->corelock);
   sercom_slowclk_configure(config->sercom, config->slowgen);
 
   /* Set USART configuration according to the board configuration */

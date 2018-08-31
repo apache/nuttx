@@ -56,6 +56,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Pick the console USART configuration */
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
@@ -85,22 +86,23 @@
 
 struct sam_usart_config_s
 {
-  uint8_t sercom;     /* Identifies the SERCOM peripheral */
-  uint8_t parity;     /* 0=none, 1=odd, 2=even */
-  uint8_t bits;       /* Number of bits (5-9) */
-  uint8_t txirq;      /* Tx SERCOM IRQ number */
-  uint8_t rxirq;      /* Rx SERCOM IRQ number */
-  uint8_t coregen;    /* Core GCLK generator */
-  uint8_t slowgen;    /* Slow GCLK generator */
-  bool stopbits2;     /* True: Configure with 2 stop bits instead of 1 */
-  uint32_t baud;      /* Configured baud */
-  port_pinset_t pad0; /* Pin configuration for PAD0 */
-  port_pinset_t pad1; /* Pin configuration for PAD1 */
-  port_pinset_t pad2; /* Pin configuration for PAD2 */
-  port_pinset_t pad3; /* Pin configuration for PAD3 */
-  uint32_t muxconfig; /* Pad multiplexing configuration */
-  uint32_t frequency; /* Source clock frequency */
-  uintptr_t base;     /* SERCOM base address */
+  uint8_t sercom;         /* Identifies the SERCOM peripheral */
+  uint8_t parity;         /* 0=none, 1=odd, 2=even */
+  uint8_t bits;           /* Number of bits (5-9) */
+  uint8_t txirq;          /* Tx SERCOM IRQ number */
+  uint8_t rxirq;          /* Rx SERCOM IRQ number */
+  uint8_t coregen;        /* Core GCLK generator */
+  uint8_t slowgen;        /* Slow GCLK generator */
+  uint8_t stopbits2 : 1;  /* True: Configure with 2 stop bits instead of 1 */
+  uint8_t corelock  : 1;  /* True: Lock the CORE clock */
+  uint32_t baud;          /* Configured baud */
+  port_pinset_t pad0;     /* Pin configuration for PAD0 */
+  port_pinset_t pad1;     /* Pin configuration for PAD1 */
+  port_pinset_t pad2;     /* Pin configuration for PAD2 */
+  port_pinset_t pad3;     /* Pin configuration for PAD3 */
+  uint32_t muxconfig;     /* Pad multiplexing configuration */
+  uint32_t frequency;     /* Source clock frequency */
+  uintptr_t base;         /* SERCOM base address */
 };
 
 /************************************************************************************
