@@ -110,10 +110,10 @@
 #define GCLK_GENCTRL_OE              (1 << 11) /* Bit 11: Clock output enable */
 #define GCLK_GENCTRL_DIVSEL          (1 << 12) /* Bit 12: Clock source divider */
 #define GCLK_GENCTRL_RUNSTDBY        (1 << 13) /* Bit 13: Run in standby */
-#define GCLK_GENCTRL_DIV_SHIFT       (16)      /* Bits 16-31: Generator 0,2-11 Division factor */
+#define GCLK_GENCTRL_DIV_SHIFT       (16)      /* Bits 16-23: Generator 0,2-11 Division factor */
 #define GCLK_GENCTRL_DIV_MASK        (0xff << GCLK_GENCTRL_DIV_SHIFT)
 #  define GCLK_GENCTRL_DIV(n)        ((uint32_t)(n) << GCLK_GENCTRL_DIV_SHIFT)
-#define GCLK_GENCTRL1_DIV_SHIFT      (16)      /* Bits 16-23: Generator 1 Division factor **/
+#define GCLK_GENCTRL1_DIV_SHIFT      (16)      /* Bits 16-31: Generator 1 Division factor **/
 #define GCLK_GENCTRL1_DIV_MASK       (0xffff << GCLK_GENCTRL1_DIV_SHIFT)
 #  define GCLK_GENCTRL1_DIV(n)       ((uint32_t)(n) << GCLK_GENCTRL1_DIV_SHIFT)
 

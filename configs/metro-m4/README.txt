@@ -59,12 +59,17 @@ STATUS
     to halt the CPU.
 
     This is most likely a consequence of something happening in the NuttX
-    boot-up sequence that interferes with JTAG operation.
+    boot-up sequence that interferes with JTAG operation.  There must be
+    be some way around this, but I don't know what it is.
 
     Future me:  This boot-up failure was do to bad clock initialization
     logic that caused infinite loops during clock configuration.  Unlocking
     and erasing the FLASH is innocuous, but the JTAG will apparently not
     work if the clocks are not in a good state.
+
+    I would say that as a general practice, any changes to the clock
+    configuration should be testing in SRAM first before risking the
+    write to FLASH.
 
   2018-08-03:  Added a configuration option to run out of SRAM vs FLASH.
     This should be a safer way to do the initial board bring-up since

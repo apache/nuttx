@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "sam_gclk.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -180,29 +181,6 @@ struct sam_dpll_config_s
   uint8_t ldrfrac;                    /* Loop divider fractional part */
   uint16_t ldrint;                    /* Loop divider ratio */
   uint16_t div;                       /* Clock divider */
-};
-
-/* This structure defines the configuration of a GCLK */
-
-struct sam_gclk_config_s
-{
-  uint8_t enable     : 1;             /* True:  Enable GCLK */
-  uint8_t idc        : 1;             /* True:  Improve duty cycle */
-  uint8_t oov        : 1;             /* True:  Clock output selection */
-  uint8_t oe         : 1;             /* True:  Output enable */
-  uint8_t divsel     : 1;             /* True:  Clock source divider */
-  uint8_t runstdby   : 1;             /* Run in standby */
-  uint8_t source;                     /* GCLK clock source:
-                                       *   0  XOSC 0 oscillator input
-                                       *   1  XOSC 1 oscillator input
-                                       *   2  Generator input pad
-                                       *   3  Generic clock generator 1 output
-                                       *   4  OSCULP32K oscillator output
-                                       *   5  XOSC32K oscillator output
-                                       *   6  DFLL oscillator output
-                                       *   7  DPLL0 output
-                                       *   8  DPLL1 output */
-  uint16_t div;                       /* Division factor: 8-bits for all but GCLK1 */
 };
 
 /* This structure defines the configuration of the clock sus-system */

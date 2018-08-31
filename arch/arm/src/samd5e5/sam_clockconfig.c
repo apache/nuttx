@@ -149,7 +149,7 @@ static const struct sam_clockconfig_s g_initial_clocking =
      .gclk           = BOARD_DFLL_GCLK,
      .mul            = BOARD_DFLL_MUL
    },
-   .dpll            =
+   .dpll             =
    {
      {
        .enable       = BOARD_DPLL0_ENABLE,
@@ -189,124 +189,100 @@ static const struct sam_clockconfig_s g_initial_clocking =
    .gclk             =
    {
      {
-     .enable        = BOARD_GCLK0_ENABLE,
-     .idc           = BOARD_GCLK0_IDC,
-     .oov           = BOARD_GCLK0_OOV,
-     .oe            = BOARD_GCLK0_OE,
-     .divsel        = BOARD_GCLK0_DIVSEL,
-     .runstdby      = BOARD_GCLK0_RUNSTDBY,
-     .source        = BOARD_GCLK0_SOURCE,
-     .div           = BOARD_GCLK0_DIV
+     .enable         = BOARD_GCLK0_ENABLE,
+     .oov            = BOARD_GCLK0_OOV,
+     .oe             = BOARD_GCLK0_OE,
+     .runstdby       = BOARD_GCLK0_RUNSTDBY,
+     .source         = BOARD_GCLK0_SOURCE,
+     .div            = BOARD_GCLK0_DIV
      },
      {
-     .enable        = BOARD_GCLK1_ENABLE,
-     .idc           = BOARD_GCLK1_IDC,
-     .oov           = BOARD_GCLK1_OOV,
-     .oe            = BOARD_GCLK1_OE,
-     .divsel        = BOARD_GCLK1_DIVSEL,
-     .runstdby      = BOARD_GCLK1_RUNSTDBY,
-     .source        = BOARD_GCLK1_SOURCE,
-     .div           = BOARD_GCLK1_DIV
+     .enable         = BOARD_GCLK1_ENABLE,
+     .oov            = BOARD_GCLK1_OOV,
+     .oe             = BOARD_GCLK1_OE,
+     .runstdby       = BOARD_GCLK1_RUNSTDBY,
+     .source         = BOARD_GCLK1_SOURCE,
+     .div            = BOARD_GCLK1_DIV
      },
      {
-     .enable        = BOARD_GCLK2_ENABLE,
-     .idc           = BOARD_GCLK2_IDC,
-     .oov           = BOARD_GCLK2_OOV,
-     .oe            = BOARD_GCLK2_OE,
-     .divsel        = BOARD_GCLK2_DIVSEL,
-     .runstdby      = BOARD_GCLK2_RUNSTDBY,
-     .source        = BOARD_GCLK2_SOURCE,
-     .div           = BOARD_GCLK2_DIV
+     .enable         = BOARD_GCLK2_ENABLE,
+     .oov            = BOARD_GCLK2_OOV,
+     .oe             = BOARD_GCLK2_OE,
+     .runstdby       = BOARD_GCLK2_RUNSTDBY,
+     .source         = BOARD_GCLK2_SOURCE,
+     .div            = BOARD_GCLK2_DIV
      },
      {
-     .enable        = BOARD_GCLK3_ENABLE,
-     .idc           = BOARD_GCLK3_IDC,
-     .oov           = BOARD_GCLK3_OOV,
-     .oe            = BOARD_GCLK3_OE,
-     .divsel        = BOARD_GCLK3_DIVSEL,
-     .runstdby      = BOARD_GCLK3_RUNSTDBY,
-     .source        = BOARD_GCLK3_SOURCE,
-     .div           = BOARD_GCLK3_DIV
+     .enable         = BOARD_GCLK3_ENABLE,
+     .oov            = BOARD_GCLK3_OOV,
+     .oe             = BOARD_GCLK3_OE,
+     .runstdby       = BOARD_GCLK3_RUNSTDBY,
+     .source         = BOARD_GCLK3_SOURCE,
+     .div            = BOARD_GCLK3_DIV
      },
      {
-     .enable        = BOARD_GCLK4_ENABLE,
-     .idc           = BOARD_GCLK4_IDC,
-     .oov           = BOARD_GCLK4_OOV,
-     .oe            = BOARD_GCLK4_OE,
-     .divsel        = BOARD_GCLK4_DIVSEL,
-     .runstdby      = BOARD_GCLK4_RUNSTDBY,
-     .source        = BOARD_GCLK4_SOURCE,
-     .div           = BOARD_GCLK4_DIV
+     .enable         = BOARD_GCLK4_ENABLE,
+     .oov            = BOARD_GCLK4_OOV,
+     .oe             = BOARD_GCLK4_OE,
+     .runstdby       = BOARD_GCLK4_RUNSTDBY,
+     .source         = BOARD_GCLK4_SOURCE,
+     .div            = BOARD_GCLK4_DIV
      },
      {
-     .enable        = BOARD_GCLK5_ENABLE,
-     .idc           = BOARD_GCLK5_IDC,
-     .oov           = BOARD_GCLK5_OOV,
-     .oe            = BOARD_GCLK5_OE,
-     .divsel        = BOARD_GCLK5_DIVSEL,
-     .runstdby      = BOARD_GCLK5_RUNSTDBY,
-     .source        = BOARD_GCLK5_SOURCE,
-     .div           = BOARD_GCLK5_DIV
+     .enable         = BOARD_GCLK5_ENABLE,
+     .oov            = BOARD_GCLK5_OOV,
+     .oe             = BOARD_GCLK5_OE,
+     .runstdby       = BOARD_GCLK5_RUNSTDBY,
+     .source         = BOARD_GCLK5_SOURCE,
+     .div            = BOARD_GCLK5_DIV
      },
      {
-     .enable        = BOARD_GCLK6_ENABLE,
-     .idc           = BOARD_GCLK6_IDC,
-     .oov           = BOARD_GCLK6_OOV,
-     .oe            = BOARD_GCLK6_OE,
-     .divsel        = BOARD_GCLK6_DIVSEL,
-     .runstdby      = BOARD_GCLK6_RUNSTDBY,
-     .source        = BOARD_GCLK6_SOURCE,
-     .div           = BOARD_GCLK6_DIV
+     .enable         = BOARD_GCLK6_ENABLE,
+     .oov            = BOARD_GCLK6_OOV,
+     .oe             = BOARD_GCLK6_OE,
+     .runstdby       = BOARD_GCLK6_RUNSTDBY,
+     .source         = BOARD_GCLK6_SOURCE,
+     .div            = BOARD_GCLK6_DIV
      },
      {
-     .enable        = BOARD_GCLK7_ENABLE,
-     .idc           = BOARD_GCLK7_IDC,
-     .oov           = BOARD_GCLK7_OOV,
-     .oe            = BOARD_GCLK7_OE,
-     .divsel        = BOARD_GCLK7_DIVSEL,
-     .runstdby      = BOARD_GCLK7_RUNSTDBY,
-     .source        = BOARD_GCLK7_SOURCE,
-     .div           = BOARD_GCLK7_DIV
+     .enable         = BOARD_GCLK7_ENABLE,
+     .oov            = BOARD_GCLK7_OOV,
+     .oe             = BOARD_GCLK7_OE,
+     .runstdby       = BOARD_GCLK7_RUNSTDBY,
+     .source         = BOARD_GCLK7_SOURCE,
+     .div            = BOARD_GCLK7_DIV
      },
      {
-     .enable        = BOARD_GCLK8_ENABLE,
-     .idc           = BOARD_GCLK8_IDC,
-     .oov           = BOARD_GCLK8_OOV,
-     .oe            = BOARD_GCLK8_OE,
-     .divsel        = BOARD_GCLK8_DIVSEL,
-     .runstdby      = BOARD_GCLK8_RUNSTDBY,
-     .source        = BOARD_GCLK8_SOURCE,
-     .div           = BOARD_GCLK8_DIV
+     .enable         = BOARD_GCLK8_ENABLE,
+     .oov            = BOARD_GCLK8_OOV,
+     .oe             = BOARD_GCLK8_OE,
+     .runstdby       = BOARD_GCLK8_RUNSTDBY,
+     .source         = BOARD_GCLK8_SOURCE,
+     .div            = BOARD_GCLK8_DIV
      },
      {
-     .enable        = BOARD_GCLK9_ENABLE,
-     .idc           = BOARD_GCLK9_IDC,
-     .oov           = BOARD_GCLK9_OOV,
-     .oe            = BOARD_GCLK9_OE,
-     .divsel        = BOARD_GCLK9_DIVSEL,
-     .runstdby      = BOARD_GCLK9_RUNSTDBY,
-     .source        = BOARD_GCLK9_SOURCE,
-     .div           = BOARD_GCLK9_DIV
+     .enable         = BOARD_GCLK9_ENABLE,
+     .oov            = BOARD_GCLK9_OOV,
+     .oe             = BOARD_GCLK9_OE,
+     .runstdby       = BOARD_GCLK9_RUNSTDBY,
+     .source         = BOARD_GCLK9_SOURCE,
+     .div            = BOARD_GCLK9_DIV
      },
      {
-     .enable        = BOARD_GCLK10_ENABLE,
-     .idc           = BOARD_GCLK10_IDC,
-     .oov           = BOARD_GCLK10_OOV,
-     .oe            = BOARD_GCLK10_OE,
-     .divsel        = BOARD_GCLK10_DIVSEL,
-     .runstdby      = BOARD_GCLK10_RUNSTDBY,
-     .source        = BOARD_GCLK10_SOURCE,
-     .div           = BOARD_GCLK10_DIV
+     .enable         = BOARD_GCLK10_ENABLE,
+     .oov            = BOARD_GCLK10_OOV,
+     .oe             = BOARD_GCLK10_OE,
+     .runstdby       = BOARD_GCLK10_RUNSTDBY,
+     .source         = BOARD_GCLK10_SOURCE,
+     .div            = BOARD_GCLK10_DIV
      },
      {
-     .enable        = BOARD_GCLK11_ENABLE,
-     .idc           = BOARD_GCLK11_IDC,
-     .oov           = BOARD_GCLK11_OOV,
-     .oe            = BOARD_GCLK11_OE,
-     .divsel        = BOARD_GCLK11_DIVSEL,
-     .runstdby      = BOARD_GCLK11_RUNSTDBY,
-     .source        = BOARD_GCLK11_SOURCE,
-     .div           = BOARD_GCLK11_DIV
+     .enable         = BOARD_GCLK11_ENABLE,
+     .oov            = BOARD_GCLK11_OOV,
+     .oe             = BOARD_GCLK11_OE,
+     .runstdby       = BOARD_GCLK11_RUNSTDBY,
+     .source         = BOARD_GCLK11_SOURCE,
+     .div            = BOARD_GCLK11_DIV
      }
    }
 };
@@ -609,65 +585,6 @@ static inline void sam_mclk_configure(uint8_t cpudiv)
 }
 
 /****************************************************************************
- * Name: sam_gclk_configure
- *
- * Description:
- *   Configure one GCLK
- *
- ****************************************************************************/
-
-static void sam_gclk_configure(uintptr_t regaddr,
-                               const struct sam_gclk_config_s *config)
-{
-  uint32_t regval;
-
-  /* Are we enabling or disabling the GCLK? */
-
-  if (config->enable)
-    {
-      /* Get the GCLK configuration */
-
-      regval = GCLK_GENCTRL_SRC(config->source) | GCLK_GENCTRL_GENEN |
-               GCLK_GENCTRL1_DIV(config->div);
-
-      if (config->idc)
-        {
-          regval |= GCLK_GENCTRL_IDC;
-        }
-
-      if (config->oov)
-        {
-          regval |= GCLK_GENCTRL_OOV;
-        }
-
-      if (config->oe)
-        {
-          regval |= GCLK_GENCTRL_OE;
-        }
-
-      if (config->divsel)
-        {
-          regval |= GCLK_GENCTRL_DIVSEL;
-        }
-
-      if (config->runstdby)
-        {
-          regval |= GCLK_GENCTRL_RUNSTDBY;
-        }
-    }
-  else
-    {
-      /* Disable the GCLK */
-
-      regval = 0;
-    }
-
-  /* Write the GCLK configuration */
-
-  putreg32(regval, regaddr);
-}
-
-/****************************************************************************
  * Name: sam_gclkset_configure
  *
  * Description:
@@ -693,7 +610,7 @@ static void sam_gclkset_configure(uint16_t gclkset,
           /* Yes.. Remove it from the set and configure it */
 
           gclkset &= ~mask;
-          sam_gclk_configure(SAM_GCLK_GENCTRL(gclk), &config[gclk]);
+          sam_gclk_configure(gclk, &config[gclk]);
         }
     }
 }

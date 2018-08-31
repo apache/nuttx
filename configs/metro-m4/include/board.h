@@ -98,8 +98,8 @@
 
 /* XOSC32 */
 
-#define BOARD_HAVE_XOSC32K      1         /* 32.768KHz XOSC32 crystal installed */
-#define BOARD_XOSC32K_ENABLE    false     /* Don't enable XOSC32 */
+#define BOARD_HAVE_XOSC32K      1         /* 32.768 KHz XOSC32 crystal installed */
+#define BOARD_XOSC32K_ENABLE    true      /* Enable XOSC32 */
 #define BOARD_XOSC32K_XTALEN    false     /* External clock connected on XIN32 */
 #define BOARD_XOSC32K_EN32K     false     /* No 32KHz output */
 #define BOARD_XOSC32K_EN1K      false     /* No 1KHz output */
@@ -154,100 +154,78 @@
 #define BOARD_GCLK0_DIV         1         /* Division factor */
 
 #define BOARD_GCLK1_ENABLE      true      /* Enable GCLK1 */
-#define BOARD_GCLK1_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK1_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK1_OE          true      /* Generate output on GCLK_IO */
-#define BOARD_GCLK1_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK1_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK1_SOURCE      6         /* Select DFLL output as GCLK1 source */
 #define BOARD_GCLK1_DIV         1         /* Division factor */
 
 #define BOARD_GCLK2_ENABLE      false     /* Don't enable GCLK2 */
-#define BOARD_GCLK2_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK2_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK2_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK2_DIVSEL      1         /* GCLK frequency is source/(2^(N+1) */
 #define BOARD_GCLK2_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GCLK2 source */
 #define BOARD_GCLK2_DIV         1         /* Division factor */
 
-#define BOARD_GCLK3_ENABLE      false     /* Don't enable GCLK3 */
-#define BOARD_GCLK3_IDC         false     /* Don't improve duty cycle */
+#define BOARD_GCLK3_ENABLE      true      /* Enable GCLK3 */
 #define BOARD_GCLK3_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK3_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK3_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK3_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GCLK3 source */
 #define BOARD_GCLK3_DIV         1         /* Division factor */
 
 #define BOARD_GCLK4_ENABLE      true      /* Enable GCLK4 */
-#define BOARD_GCLK4_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK4_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK4_OE          true      /* Generate output on GCLK_IO */
-#define BOARD_GCLK4_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK4_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK4_SOURCE      7         /* Select DPLL0 output as GCLK4 source */
 #define BOARD_GCLK4_DIV         1         /* Division factor */
 
 #define BOARD_GCLK5_ENABLE      true      /* Enable GCLK5 */
-#define BOARD_GCLK5_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK5_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK5_OE          true      /* Generate output on GCLK_IO */
-#define BOARD_GCLK5_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK5_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK5_SOURCE      6         /* Select DFLL output as GCLK5 source */
 #define BOARD_GCLK5_DIV         24        /* Division factor */
 
 #define BOARD_GCLK6_ENABLE      false     /* Don't enable GCLK6 */
-#define BOARD_GCLK6_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK6_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK6_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK6_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK6_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK6_SOURCE      1         /* Select XOSC1 as GCLK6 source */
 #define BOARD_GCLK6_DIV         1         /* Division factor */
 
 #define BOARD_GCLK7_ENABLE      false     /* Don't enable GCLK7 */
-#define BOARD_GCLK7_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK7_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK7_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK7_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK7_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK7_SOURCE      1         /* Select XOSC1 as GCLK7 source */
 #define BOARD_GCLK7_DIV         1         /* Division factor */
 
 #define BOARD_GCLK8_ENABLE      false     /* Don't enable GCLK8 */
-#define BOARD_GCLK8_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK8_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK8_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK8_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK8_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK8_SOURCE      1         /* Select XOSC1 as GCLK8 source */
 #define BOARD_GCLK8_DIV         1         /* Division factor */
 
 #define BOARD_GCLK9_ENABLE      false     /* Don't enable GCLK9 */
-#define BOARD_GCLK9_IDC         false     /* Don't improve duty cycle */
 #define BOARD_GCLK9_OOV         false     /* Clock output will be LOW */
 #define BOARD_GCLK9_OE          false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK9_DIVSEL      0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK9_RUNSTDBY    false     /* Don't run in standby */
 #define BOARD_GCLK9_SOURCE      1         /* Select XOSC1 as GCLK9 source */
 #define BOARD_GCLK9_DIV         1         /* Division factor */
 
 #define BOARD_GCLK10_ENABLE     false     /* Don't enable GCLK10 */
-#define BOARD_GCLK10_IDC        false     /* Don't improve duty cycle */
 #define BOARD_GCLK10_OOV        false     /* Clock output will be LOW */
 #define BOARD_GCLK10_OE         false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK10_DIVSEL     0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK10_RUNSTDBY   false     /* Don't run in standby */
 #define BOARD_GCLK10_SOURCE     1         /* Select XOSC1 as GCLK10 source */
 #define BOARD_GCLK10_DIV        1         /* Division factor */
 
 #define BOARD_GCLK11_ENABLE     false     /* Don't enable GCLK11 */
-#define BOARD_GCLK11_IDC        false     /* Don't improve duty cycle */
 #define BOARD_GCLK11_OOV        false     /* Clock output will be LOW */
 #define BOARD_GCLK11_OE         false     /* No generator output of GCLK_IO */
-#define BOARD_GCLK11_DIVSEL     0         /* GCLK frequency is source/DIV */
 #define BOARD_GCLK11_RUNSTDBY   false     /* Don't run in standby */
 #define BOARD_GCLK11_SOURCE     1         /* Select XOSC1 as GCLK11 source */
 #define BOARD_GCLK11_DIV        1         /* Division factor */

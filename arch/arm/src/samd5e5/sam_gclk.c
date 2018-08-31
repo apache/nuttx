@@ -71,7 +71,9 @@
 static void sam_gclck_waitsyncbusy(uint8_t gclk)
 {
   uintptr_t gclkbit = GCLK_SYNCHBUSY_GENCTRL(gclk);
-  while ((getreg8(SAM_GCLK_SYNCHBUSY) & gclkbit) != 0);
+  while ((getreg8(SAM_GCLK_SYNCHBUSY) & gclkbit) != 0)
+    {
+    }
 }
 
 /****************************************************************************
@@ -79,12 +81,13 @@ static void sam_gclck_waitsyncbusy(uint8_t gclk)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_gclk_config
+ * Name: sam_gclk_configure
  *
  * Description:
  *   Configure a single GCLK(s) based on settings in the config structure.
  *
  * Input Parameters:
+ *   gclk   - GCLK index
  *   config - An instance of struct sam_gclkconfig describing the GCLK
  *            configuration.
  *
@@ -93,111 +96,114 @@ static void sam_gclck_waitsyncbusy(uint8_t gclk)
  *
  ****************************************************************************/
 
-void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+void sam_gclk_configure(int gclk, FAR const struct sam_gclk_config_s *config)
 {
   irqstate_t flags;
   uintptr_t regaddr;
   uint32_t regval;
-  uint32_t genctrl;
 
-  /* Select the requested source clock for the generator */
+  /* Are we enabling or disabling the GCLK? */
 
-  genctrl = ((uint32_t)config->clksrc << GCLK_GENCTRL_SRC_SHIFT);
+  regval  = 0;
+  regaddr = SAM_GCLK_GENCTRL(gclk);
 
-#if 0 /* Not yet supported */
-  /* Configure the clock to be either high or low when disabled */
-
-  if (config->level)
+  if (config->enable)
     {
-      genctrl |= GCLK_GENCTRL_OOV;
-    }
-#endif
+      /* Select the requested source clock for the generator */
 
-  /* Configure if the clock output to I/O pin should be enabled */
+      regval = GCLK_GENCTRL_SRC(config->source);
 
-  if (config->output)
-    {
-      genctrl |= GCLK_GENCTRL_OE;
-    }
+      /* Clock output selection */
 
-  /* Set the prescaler division factor */
-
-  if (config->prescaler > 1)
-    {
-      /* Check if division is a power of two */
-
-      if (((config->prescaler & (config->prescaler - 1)) == 0))
+      if (config->oov)
         {
-          /* Determine the index of the highest bit set to get the
-           * division factor that must be loaded into the division
-           * register.
-           */
+          regval |= GCLK_GENCTRL_OOV;
+        }
 
-          uint32_t count = 0;
-          uint32_t mask;
+      /* Output enable */
 
-          for (mask = 2; mask < (uint32_t)config->prescaler; mask <<= 1)
+      if (config->oe)
+        {
+          regval |= GCLK_GENCTRL_OE;
+        }
+
+      /* Run in standby */
+
+      if (config->runstdby)
+        {
+          regval |= GCLK_GENCTRL_RUNSTDBY;
+        }
+
+      /* Set the prescaler division factor */
+
+      if (config->div > 1)
+        {
+          /* Check if division is a power of two */
+
+          if (((config->div & (config->div - 1)) == 0))
             {
-              count++;
+              /* Determine the index of the highest bit set to get the
+               * division factor that must be loaded into the division
+               * register.
+               */
+
+              uint32_t count = 0;
+              uint32_t mask;
+
+              for (mask = 2; mask < (uint32_t)config->div; mask <<= 1)
+                {
+                  count++;
+                }
+
+              /* Set binary divider power of 2 division factor */
+
+              regval |= GCLK_GENCTRL1_DIV(count);
+              regval |= GCLK_GENCTRL_DIVSEL;
             }
+          else
+            {
+              /* Set integer division factor */
 
-          /* Set binary divider power of 2 division factor */
+              regval |= GCLK_GENCTRL1_DIV((uint32_t)config->div);
 
-          genctrl |= count << GCLK_GENCTRL_DIV_SHIFT;
-          genctrl |= GCLK_GENCTRL_DIVSEL;
+              /* Enable non-binary division with increased duty cycle accuracy */
+
+              regval |= GCLK_GENCTRL_IDC;
+            }
         }
-      else
+
+      /* Don't disable GCLK0 */
+
+      if (gclk == 0)
         {
-          /* Set integer division factor */
-
-          genctrl |= GCLK_GENCTRL_DIV((uint32_t)config->prescaler);
-
-          /* Enable non-binary division with increased duty cycle accuracy */
-
-          genctrl |= GCLK_GENCTRL_IDC;
+          regval |= GCLK_GENCTRL_GENEN;
         }
     }
-
-  /* Enable or disable the clock in standby mode */
-
-  if (config->runstandby)
-    {
-      genctrl |= GCLK_GENCTRL_RUNSTDBY;
-    }
-
-  /* Wait for synchronization */
-
-  sam_gclck_waitsyncbusy(config->gclk);
-
-  /* Preserve the GENEN bit */
-
-  regaddr  = SAM_GCLK_GENCTRL(config->gclk);
-
-  flags    = enter_critical_section();
-  regval   = getreg32(regaddr);
-  regval  &= GCLK_GENCTRL_GENEN;
-  genctrl |= regval;
 
   /* Configure the generator */
 
-  putreg32(genctrl, regaddr);
+  flags = enter_critical_section();
+  putreg32(regval, regaddr);
 
   /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy(gclk);
   leave_critical_section(flags);
-  sam_gclck_waitsyncbusy(config->gclk);
+  sam_gclck_waitsyncbusy(gclk);
 
-  /* Enable the clock generator */
+  if (config->enable)
+    {
+      /* Enable the clock generator */
 
-  flags    = enter_critical_section();
-  genctrl |= GCLK_GENCTRL_GENEN;
-  putreg32(genctrl, regaddr);
+      flags    = enter_critical_section();
+      regval |= GCLK_GENCTRL_GENEN;
+      putreg32(regval, regaddr);
 
-  /* Wait for synchronization */
+      /* Wait for synchronization */
 
-  sam_gclck_waitsyncbusy(config->gclk);
-  leave_critical_section(flags);
+      sam_gclck_waitsyncbusy(gclk);
+      leave_critical_section(flags);
+    }
 }
 
 /****************************************************************************
