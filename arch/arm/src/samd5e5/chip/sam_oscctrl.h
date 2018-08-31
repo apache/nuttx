@@ -307,15 +307,15 @@
 #define OSCCTRL_DPLLCTRLB_DIV_MASK        (0x7ff << OSCCTRL_DPLLCTRLB_DIV_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_DIV(n)        ((uint32_t)(n) << OSCCTRL_DPLLCTRLB_DIV_SHIFT)
 
-/* DPLL0 synchronization busy */
+/* DPLL0/1 synchronization busy */
 
-#define OSCCTRL_DPLL0STATUS_ENABLE        (1 << 1)  /* Bit 1:  DPLL enable synchronization status */
-#define OSCCTRL_DPLL0STATUS_DPLLRATIO     (1 << 2)  /* Bit 2:  DPLL loop divider ratio synchronization status */
+#define OSCCTRL_DPLLSYNCBUSY_ENABLE       (1 << 1)  /* Bit 1:  DPLL enable synchronization status */
+#define OSCCTRL_DPLLSYNCBUSY_DPLLRATIO    (1 << 2)  /* Bit 2:  DPLL loop divider ratio synchronization status */
 
-/* DPLL0 status */
+/* DPLL0/1 status */
 
-#define OSCCTRL_DPLL0STATUS_LOCK          (1 << 0)  /* Bit 0:  DPLL lock status */
-#define OSCCTRL_DPLL0STATUS_CLKRDY        (1 << 1)  /* Bit 1:  Output clock ready */
+#define OSCCTRL_DPLLSTATUS_LOCK           (1 << 0)  /* Bit 0:  DPLL lock status */
+#define OSCCTRL_DPLLSTATUS_CLKRDY         (1 << 1)  /* Bit 1:  Output clock ready */
 
 /********************************************************************************************
  * Public Types

@@ -710,10 +710,10 @@ static void sam_dfll_configure(const struct sam_dfll_config_s *config)
 
   /* Set GCLK0 source to OSCULP32K (temporarily) */
 
-  regval32  = getreg32(SAM_GCLK_GENCTRL_OFFSET(0));
-  regval32 &= GCLK_GENCTRL_SRC_MASK;
+  regval32  = getreg32(SAM_GCLK_GENCTRL(0));
+  regval32 &= ~GCLK_GENCTRL_SRC_MASK;
   regval32 |= GCLK_GENCTRL_SRC_OSCULP32K;
-  putreg32(regval32, SAM_GCLK_GENCTRL_OFFSET(0));
+  putreg32(regval32, SAM_GCLK_GENCTRL(0));
 
   /* Disable the DFLL */
 
@@ -907,10 +907,10 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
 
   /* Set the source of GLCK0 to to the configured source. */
 
-  regval32  = getreg32(SAM_GCLK_GENCTRL_OFFSET(0));
-  regval32 &= GCLK_GENCTRL_SRC_MASK;
+  regval32  = getreg32(SAM_GCLK_GENCTRL(0));
+  regval32 &= ~GCLK_GENCTRL_SRC_MASK;
   regval32 |= GCLK_GENCTRL_SRC(config->gclk);
-  putreg32(regval32, SAM_GCLK_GENCTRL_OFFSET(0));
+  putreg32(regval32, SAM_GCLK_GENCTRL(0));
 }
 
 /****************************************************************************
@@ -924,9 +924,11 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
 static void sam_dpll_gclkchannel(uint8_t chan,
                                  const struct sam_dpll_config_s *config)
 {
-  /* Check if we are using a dedicated GCLK as the reference clock */
+  /* Check if we are using a dedicated GCLK as the reference clock (vs. the
+   * common GCLK0).
+   */
 
-  if (config->refclk == 0)
+  if (config->refclk != 0)
     {
       /* Yes.. configure the GCLK channel */
 
@@ -998,11 +1000,11 @@ static void sam_dpll_ready(uintptr_t base,
 
   if (config->enable)
     {
-      uint32_t lockready = (OSCCTRL_DPLL0STATUS_LOCK |
-                            OSCCTRL_DPLL0STATUS_CLKRDY);
+      uint32_t lockready = (OSCCTRL_DPLLSTATUS_LOCK |
+                            OSCCTRL_DPLLSTATUS_CLKRDY);
       do
         {
-          regval = getreg32(base + SAM_OSCCTRL_DPLLSTATUS_OFFSET);
+          regval  = getreg32(base + SAM_OSCCTRL_DPLLSTATUS_OFFSET);
           regval &= lockready;
         }
       while (regval != lockready);

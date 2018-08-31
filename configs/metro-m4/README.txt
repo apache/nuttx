@@ -25,7 +25,7 @@ Contents
   o Unlocking FLASH
   o Serial Console
   o LEDs
-  o Run from FLASH
+  o Run from SRAM
   o Configurations
 
 STATUS
@@ -60,10 +60,13 @@ STATUS
     debugging in the future, I will put an infinite loop, branch-on-self
     at the code startup up (__start) so that I can attached the debugger
     and step through the initial configuration.
-  2019-08-03:  Added a configuration option to run out of SRAM vs FLASH.
+  2018-08-03:  Added a configuration option to run out of SRAM vs FLASH.
     This should be a safer way to do the initial board bring-up since
     it does not modify the FLASH image nor does it require unlocking
     the FLASH pages.
+  2018-08-31:  I finally have a new Metro M4 and have been successfully
+    debugging from SRAM.  Several errors in clock configuration logic
+    have been corrected but it still hangs in the clock configuration.
 
 Unlocking FLASH
 ===============
@@ -192,8 +195,8 @@ LEDs
     ------ ----------------- -----------
     D13    PA16              GPIO output
 
-Run from FLASH
-==============
+Run from SRAM
+=============
 
   I bricked my first Metro M4 board because there were problems in the
   bring-up logic.  These problems left the chip in a bad state that was
@@ -216,7 +219,7 @@ Run from FLASH
     gdb> mon memu32 0x20000000  << Get the address of initial stack
     gdb> mon reg sp 0x200161c4  << Set the initial stack pointer using this address
     gdb> mon memu32 0x20000004  << Get the address of __start entry point
-    gdb> mon reg pc 0x20000264  << Set the PC using this address
+    gdb> mon reg pc 0x20000264  << Set the PC using this address (without bit 0 set)
     gdb> si                     << Step in just to make sure everything is okay
     gdb> [ set breakpoints ]
     gdb> c                      << Then continue until you hit a breakpoint

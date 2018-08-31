@@ -249,7 +249,7 @@ void sam_gclk_chan_enable(uint8_t channel, uint8_t srcgen, bool wrlock)
 
   /* Wait for clock synchronization */
 
-  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) == 0)
+  while ((getreg32(regaddr) & GCLK_PCHCTRL_CHEN) == 0)
     {
     }
 
@@ -289,6 +289,9 @@ void sam_gclk_chan_disable(uint8_t channel)
 
   /* Wait for clock synchronization */
 
-  while ((getreg32(regaddr) &GCLK_PCHCTRL_CHEN) != 0);
+  while ((getreg32(regaddr) & GCLK_PCHCTRL_CHEN) != 0)
+    {
+    }
+
   leave_critical_section(flags);
 }
