@@ -104,6 +104,14 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
   uint16_t baud;
   uint64_t tmp;
 
+  /* The CTRLA, CTRLB, and BAUD registers are enable protected, meaning that
+   * they can only be written when the USART is disabled.  We can just write
+   * zero because only the ENABLE and SWRST bits can be modified while the
+   * USART is enabled.
+   */
+
+  putreg32(0, config->base + SAM_USART_CTRLA_OFFSET);
+
   /* Calculate BAUD divider from the source clock frequency and desired.
    * baud.  For asynchronous mode, the formula for the baud generation is
    *
@@ -198,6 +206,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 
       case 1: /* Odd */
         ctrlb |= USART_CTRLB_PODD;
+
         /* Fall through */
 
       case 2: /* Even */
@@ -216,22 +225,21 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
     }
 #endif
 
-  /* Wait until synchronization is complete */
+  /* Write configuration to CTRLA */
 
   sam_wait_synchronization(config);
+  putreg32(ctrla, config->base + SAM_USART_CTRLA_OFFSET);
 
   /* Write configuration to CTRLB */
 
+  sam_wait_synchronization(config);
   putreg32(ctrlb, config->base + SAM_USART_CTRLB_OFFSET);
 
-  /* Wait until synchronization is complete */
+  /* Enable the USART */
 
   sam_wait_synchronization(config);
-
-  /* Write configuration to CTRLA */
-
+  ctrla |= USART_CTRLA_ENABLE;
   putreg32(ctrla, config->base + SAM_USART_CTRLA_OFFSET);
-  return OK;
 }
 #endif
 
@@ -311,34 +319,6 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 #endif
 
 /****************************************************************************
- * Name: sam_usart_enable
- *
- * Description:
- *   Enable the SERCOM USART (without enabling interrupts).
- *
- ****************************************************************************/
-
-#ifdef SAMD5E5_HAVE_USART
-static inline void
-sam_usart_enable(const struct sam_usart_config_s * const config)
-{
-  uintptr_t regaddr;
-  uint32_t regval;
-
-  /* Wait until synchronization is complete */
-
-  sam_wait_synchronization(config);
-
-  /* Enable USART module */
-
-  regaddr = config->base + SAM_USART_CTRLA_OFFSET;
-  regval = getreg32(regaddr);
-  regval |= USART_CTRLA_ENABLE;
-  putreg32(regval, regaddr);
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -357,7 +337,6 @@ void sam_lowsetup(void)
   /* Configure and enable the console USART */
 
   VERIFY(sam_usart_internal(&g_consoleconfig));
-  sam_usart_enable(&g_consoleconfig);
 #endif
 }
 
@@ -418,7 +397,9 @@ void sam_usart_reset(const struct sam_usart_config_s * const config)
 
   /* Wait for the reset to complete */
 
-  while ((getreg32(regaddr) & USART_CTRLA_SWRST) != 0);
+  while ((getreg32(regaddr) & USART_CTRLA_SWRST) != 0)
+    {
+    }
 }
 #endif
 
