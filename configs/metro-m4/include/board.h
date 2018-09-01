@@ -445,8 +445,8 @@
 #define BOARD_SERCOM3_PINMAP_PAD2    0                   /* PAD2: (not used) */
 #define BOARD_SERCOM3_PINMAP_PAD3    0                   /* PAD3: (not used) */
 
-#define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0   /* PAD0 */
-#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_1   /* PAD1 */
+#define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0   /* INTFLAG[0] DRE */
+#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_2   /* INTFLAG[2] RXC */
 
 #define BOARD_SERCOM3_COREGEN        1                   /* 48MHz Core clock */
 #define BOARD_SERCOM3_CORELOCK       FALSE               /* Don't lock the CORECLOCK */
