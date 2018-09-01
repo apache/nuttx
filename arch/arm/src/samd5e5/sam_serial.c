@@ -676,7 +676,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
   intflag = sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET);
   inten   = sam_serialin8(priv, SAM_USART_INTENCLR_OFFSET);
-  pending  = intflag & inten;
+  pending = intflag & inten;
 
   /* Handle an incoming, receive byte.  The RXC flag is set when there is
    * unread data in DATA register.  This flag is cleared by reading the DATA
@@ -907,9 +907,9 @@ static void sam_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Receive an interrupt when their is anything in the Rx data register */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       sam_serialout8(priv, SAM_USART_INTENSET_OFFSET, USART_INT_RXC);
 #endif
     }
@@ -963,11 +963,11 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
       sam_serialout8(priv, SAM_USART_INTENSET_OFFSET, USART_INT_DRE);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -975,7 +975,6 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
        */
 
       uart_xmitchars(dev);
-
 #endif
     }
   else

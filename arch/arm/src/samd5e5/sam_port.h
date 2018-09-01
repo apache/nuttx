@@ -200,7 +200,7 @@
 #  define PORT_SYNCHRONIZER_OFF    (0 << PORT_SYNCHRONIZER_SHIFT)
 #  define PORT_SYNCHRONIZER_ON     (1 << PORT_SYNCHRONIZER_SHIFT)
 
-/* Output and Input Buffer both enabled to let readback
+/* Output and Input Buffer both enabled to support readback of output pins.
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -217,7 +217,7 @@
 #  define PORT_OUTREADBACK_DISABLE (0 << PORT_OUTREADBACK_SHIFT)
 #  define PORT_OUTREADBACK_ENABLE  (1 << PORT_OUTREADBACK_SHIFT)
 
-/* If the pin is an PORT output, then this identifies the initial output value:
+/* If the pin is a PORT output, then this identifies the initial output value:
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -229,10 +229,10 @@
  *   Peripheral:  .... .... .... .... .... ....
  */
 
-#define PORT_OUTVALUE_SHIFT      (12)       /* Bit 12: Initial value of output */
-#define PORT_OUTVALUE_MASK       (1 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_OUTPUT_CLEAR      (0 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_OUTPUT_SET        (1 << PORT_SYNCHRONIZER_SHIFT)
+#define PORT_OUTVALUE_SHIFT        (12)       /* Bit 12: Initial value of output */
+#define PORT_OUTVALUE_MASK         (1 << PORT_OUTVALUE_SHIFT)
+#  define PORT_OUTPUT_CLEAR        (0 << PORT_OUTVALUE_SHIFT)
+#  define PORT_OUTPUT_SET          (1 << PORT_OUTVALUE_SHIFT)
 
 /* Selections for external interrupts:
  *

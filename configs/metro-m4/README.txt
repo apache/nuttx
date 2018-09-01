@@ -92,17 +92,23 @@ STATUS
       3. GCLK3 ->SERCOM slow clock channel.
          This hangs when I try to enable the peripheral clock.
 
-  2018-08-31:  I found a workaround by substituting OSCULP32K for XOSC32
-    as the source to GCLK3 (workaround *NOT* committed):
+  2018-09-01:  I found a workaround by substituting OSCULP32K for XOSC32
+    as the source to GCLK3:
 
     -#define BOARD_GCLK3_SOURCE  5  /* Select XOSC32K as GCLK3 source */
     +#define BOARD_GCLK3_SOURCE  4  /* Select OSCULP32K as GCLK3 source */
 
     With that workaround, the port gets past all clock and USART
     configuration and, in fact, completely through OS initialization and
-    aplication startup!  The NSH shell runs and the NSH prompt is presented
+    application startup!  The NSH shell runs and the NSH prompt is presented
     on the serial console at the correct baud.  Serial input, however, is
-    not received so there is still more to be done.
+    not received.  There are no serial Rx interrupts!  So there is still
+    more to be done.
+
+    A new configuration option was added, CONFIG_METRO_M4_32KHZXTAL. By
+    default this workaround is in place.  But you can enabled
+    CONFIG_METRO_M4_32KHZXTAL if you want to further study the XOSC32K
+    problem.
 
 Unlocking FLASH
 ===============

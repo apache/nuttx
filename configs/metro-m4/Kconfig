@@ -29,4 +29,21 @@ config METRO_M4_RUNFROMSRAM
 		from SRAM.
 
 endchoice # Execution memory
+
+config METRO_M4_32KHZXTAL
+	bool "32.768 KHz XTAL"
+	default n
+	---help---
+		According to the schematic, a 32.768 KHz crystal is installed  on
+		board.  However, I have been unable to use this crystal and thought
+		perhaps it is missing or defective on my board (there is a metal
+		package that could be a crystal on board, but I am not certain).
+		Another, more likely option is that there is a coding error on my
+		part that prevents the 32.768 KHz crystal from usable(?)
+
+		The configuration defaults to using the always-on OSCULP32 as the
+		slow clock source.  This option will select instead XOSC32 as the
+		slow clock source.
+
+
 endif # ARCH_BOARD_METRO_M4

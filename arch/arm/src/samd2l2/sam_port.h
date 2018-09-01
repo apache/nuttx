@@ -225,10 +225,10 @@
  *   Peripheral:  .... .... .... .... .... ....
  */
 
-#define PORT_OUTVALUE_SHIFT      (12)       /* Bit 12: Initial value of output */
-#define PORT_OUTVALUE_MASK       (1 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_OUTPUT_CLEAR      (0 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_OUTPUT_SET        (1 << PORT_SYNCHRONIZER_SHIFT)
+#define PORT_OUTVALUE_SHIFT        (12)       /* Bit 12: Initial value of output */
+#define PORT_OUTVALUE_MASK         (1 << PORT_OUTVALUE_SHIFT)
+#  define PORT_OUTPUT_CLEAR        (0 << PORT_OUTVALUE_SHIFT)
+#  define PORT_OUTPUT_SET          (1 << PORT_OUTVALUE_SHIFT)
 
 /* Selections for external interrupts:
  *

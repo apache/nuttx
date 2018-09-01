@@ -57,9 +57,12 @@
 /* Clocking *************************************************************************/
 /* Overview
  *
- * The Adafruit Metro M4 Pro has one on-board crystal:
+ * Per the schematic Adafruit Metro M4 Pro has one on-board crystal:
  *
  *   X4 32.768KHz XOSC32
+ *
+ * However, I have been unsuccessful using it and have fallen back to using OSCULP32K
+ * (Unless CONFIG_METRO_M4_32KHZXTAL=y)
  *
  * Since there is no high speed crystal, we will run from the OSC16M clock source.
  *
@@ -78,6 +81,7 @@
  * CPU                  Input      = 120MHz
  */
 
+#define BOARD_OSC32K_FREQUENCY  32768     /* OSCULP32K frequency 32.768 KHz (nominal) */
 #define BOARD_XOSC32K_FREQUENCY 32768     /* XOSC32K frequency 32.768 KHz */
 #define BOARD_DFLL_FREQUENCY    48000000  /* FDLL frequency 28MHz */
 #define BOARD_XOSC0_FREQUENCY   12000000  /* XOSC0 frequency 12MHz (disabled) */
@@ -88,7 +92,11 @@
 #define BOARD_GCLK0_FREQUENCY   BOARD_DPLL0_FREQUENCY
 #define BOARD_GCLK1_FREQUENCY   BOARD_DFLL_FREQUENCY
 #define BOARD_GCLK2_FREQUENCY   (BOARD_XOSC32K_FREQUENCY / 4)  /* Disabled */
-#define BOARD_GCLK3_FREQUENCY   BOARD_XOSC32K_FREQUENCY        /* Disabled */
+#ifdef CONFIG_METRO_M4_32KHZXTAL
+#  define BOARD_GCLK3_FREQUENCY BOARD_XOSC32K_FREQUENCY        /* Enabled */
+#else
+#  define BOARD_GCLK3_FREQUENCY BOARD_OSC32K_FREQUENCY         /* Always-on */
+#endif
 #define BOARD_GCLK4_FREQUENCY   BOARD_DPLL0_FREQUENCY
 #define BOARD_GCLK5_FREQUENCY   (BOARD_DFLL_FREQUENCY / 24)
 #define BOARD_GCLK6_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
@@ -101,8 +109,13 @@
 
 /* XOSC32 */
 
-#define BOARD_HAVE_XOSC32K      1         /* 32.768 KHz XOSC32 crystal installed */
-#define BOARD_XOSC32K_ENABLE    TRUE      /* Enable XOSC32 */
+#ifdef CONFIG_METRO_M4_32KHZXTAL
+#  define BOARD_HAVE_XOSC32K    1         /* 32.768 KHz XOSC32 crystal installed */
+#  define BOARD_XOSC32K_ENABLE  TRUE      /* Enable XOSC32 */
+#else
+#  define BOARD_HAVE_XOSC32K    0         /* No 32.768 KHz XOSC32 crystal installed */
+#  define BOARD_XOSC32K_ENABLE  FALSE     /* Disable XOSC32 */
+#endif
 #define BOARD_XOSC32K_XTALEN    TRUE      /* Crystal connected on XIN32 */
 #define BOARD_XOSC32K_EN32K     FALSE     /* No 32KHz output */
 #define BOARD_XOSC32K_EN1K      FALSE     /* No 1KHz output */
@@ -166,14 +179,18 @@
 #define BOARD_GCLK2_OOV         FALSE     /* Clock output will be LOW */
 #define BOARD_GCLK2_OE          FALSE     /* No generator output of GCLK_IO */
 #define BOARD_GCLK2_RUNSTDBY    FALSE     /* Don't run in standby */
-#define BOARD_GCLK2_SOURCE      5         /* Select XOSC32K as GCLK2 source */
+#define BOARD_GCLK2_SOURCE      1         /* Select XOSC1 as GCLK2 source */
 #define BOARD_GCLK2_DIV         1         /* Division factor */
 
 #define BOARD_GCLK3_ENABLE      TRUE      /* Enable GCLK3 */
 #define BOARD_GCLK3_OOV         FALSE     /* Clock output will be LOW */
 #define BOARD_GCLK3_OE          FALSE     /* No generator output of GCLK_IO */
 #define BOARD_GCLK3_RUNSTDBY    FALSE     /* Don't run in standby */
-#define BOARD_GCLK3_SOURCE      5         /* Select XOSC32K as GCLK3 source */
+#ifdef CONFIG_METRO_M4_32KHZXTAL
+#  define BOARD_GCLK3_SOURCE    5         /* Select XOSC32K as GCLK3 source */
+#else
+#  define BOARD_GCLK3_SOURCE    4         /* Select OSCULP32K as GCLK3 source */
+#endif
 #define BOARD_GCLK3_DIV         1         /* Division factor */
 
 #define BOARD_GCLK4_ENABLE      TRUE      /* Enable GCLK4 */
@@ -418,18 +435,18 @@
  *   D1     PA22 SERCOM3 PAD0 TXD
  *
  * NOTES:
- *   USART_CTRLA_TXPAD0_1: TxD=PAD0XCK=N/A RTS/TE=PAD2 CTS=PAD3
- *   USART_CTRLA_RXPAD2:   RxD=PAD1
+ *   USART_CTRLA_TXPAD0_2: TxD=PAD0 XCK=N/A RTS/TE=PAD2 CTS=PAD3
+ *   USART_CTRLA_RXPAD1:   RxD=PAD1
  */
 
-#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_TXPAD0_2 | USART_CTRLA_RXPAD2)
-#define BOARD_SERCOM3_PINMAP_PAD0    PORT_SERCOM3_PAD0_1 /* USART TX */
-#define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD1_1 /* USART RX */
-#define BOARD_SERCOM3_PINMAP_PAD2    0                   /* (not used) */
-#define BOARD_SERCOM3_PINMAP_PAD3    0                   /* (not used) */
+#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_TXPAD0_2 | USART_CTRLA_RXPAD1)
+#define BOARD_SERCOM3_PINMAP_PAD0    PORT_SERCOM3_PAD0_1 /* PAD0: USART TX */
+#define BOARD_SERCOM3_PINMAP_PAD1    PORT_SERCOM3_PAD1_1 /* PAD1: USART RX */
+#define BOARD_SERCOM3_PINMAP_PAD2    0                   /* PAD2: (not used) */
+#define BOARD_SERCOM3_PINMAP_PAD3    0                   /* PAD3: (not used) */
 
-#define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0
-#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_1
+#define BOARD_TXIRQ_SERCOM3          SAM_IRQ_SERCOM3_0   /* PAD0 */
+#define BOARD_RXIRQ_SERCOM3          SAM_IRQ_SERCOM3_1   /* PAD1 */
 
 #define BOARD_SERCOM3_COREGEN        1                   /* 48MHz Core clock */
 #define BOARD_SERCOM3_CORELOCK       FALSE               /* Don't lock the CORECLOCK */
