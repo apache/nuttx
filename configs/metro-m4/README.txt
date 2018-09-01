@@ -124,11 +124,11 @@ STATUS
 
     There are additional drivers ported from SAML21 which has, in most cases,
     identical peripherals.  None of these drivers have been verified on the
-    SAMD51, However.  These include:  CMCC, DMAC, I2C, SPI, and USB.
+    SAMD51, However.  These include:  DMAC, I2C, SPI, and USB.
 
-    The delay loop has not yet been calibrated.  no sense in doing that
-    because the CMCC should improve performance dramatically when it is
-    integrated.
+    The timer interrupt appears to be running too fast.  From the NSH console,
+    I see that sleep 5 seems to take about 1 second, sleep 10 seems to take
+    about 2 seconds.
 
 Unlocking FLASH
 ===============
@@ -342,4 +342,10 @@ Configuration sub-directories
 -----------------------------
 
   nsh:
-    This configuration directory will built the NuttShell.  See NOTES above.
+    This configuration directory will built the NuttShell.  See NOTES ;for
+    common configuration above and the following:
+
+    NOTES:
+
+    1. The CMCC (Cortex M Cache Controller) is enabled.
+

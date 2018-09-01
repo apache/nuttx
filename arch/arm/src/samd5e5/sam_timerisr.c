@@ -117,22 +117,10 @@ void arm_timer_initialize(void)
 
   /* Set the SysTick interrupt to the default priority */
 
-  regval = getreg32(NVIC_SYSH12_15_PRIORITY);
+  regval  = getreg32(NVIC_SYSH12_15_PRIORITY);
   regval &= ~NVIC_SYSH_PRIORITY_PR15_MASK;
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
-
-  /* Make sure that the SysTick clock source is set correctly */
-
-#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
-  regval = getreg32(NVIC_SYSTICK_CTRL);
-#ifdef CONFIG_SAM34_SYSTICK_HCLKd8
-  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
-#else
-  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
-#endif
-  putreg32(regval, NVIC_SYSTICK_CTRL);
-#endif
 
   /* Configure SysTick to interrupt at the requested rate */
 
@@ -143,7 +131,7 @@ void arm_timer_initialize(void)
 
   (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)sam_timerisr, NULL);
 
-  /* Enable SysTick interrupts */
+  /* Enable SysTick interrupts using the processor clock source. */
 
   putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
             NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);

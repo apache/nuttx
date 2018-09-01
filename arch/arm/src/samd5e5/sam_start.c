@@ -345,18 +345,13 @@ void __start(void)
   showprogress('C');
 #endif
 
-  /* Initialize onboard resources */
+  /* Initialize on-board resources */
 
   sam_board_initialize();
   showprogress('D');
 
-#ifdef CONFIG_SAM34_CMCC
-  /* Enable the Cortex-M Cache
-   *
-   * REVISIT:  This logic is complete but I have not yet tried to enable it.
-   * I have some questions about how the cache will effect memory mapped
-   * register accesses.
-   */
+#ifdef CONFIG_SAMD5E5_CMCC
+  /* Enable the Cortex-M Cache Controller (CMCC) */
 
   sam_cmcc_enable();
 #endif

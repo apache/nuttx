@@ -87,8 +87,8 @@ endif
 # Required SAMD5x/E5x files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = sam_clockconfig.c sam_cmcc.c sam_gclk.c sam_irq.c
-CHIP_CSRCS += sam_lowputc.c sam_port.c sam_serial.c sam_start.c sam_usart.c
+CHIP_CSRCS  = sam_clockconfig.c sam_gclk.c sam_irq.c sam_lowputc.c
+CHIP_CSRCS += sam_port.c sam_serial.c sam_start.c sam_usart.c
 
 # Configuration-dependent SAMD5x/E5x files
 
