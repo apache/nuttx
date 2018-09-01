@@ -39,33 +39,37 @@ ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
+  CSRCS += stm32_autoleds.c
 else
-CSRCS += stm32_userleds.c
+  CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  stm32_buttons.c
+  CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += stm32_sram.c
+  CSRCS += stm32_sram.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
-CSRCS += stm32_usb.c
+  CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinit.c
+  CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
-CSRCS +=  stm32_adc.c
+  CSRCS +=  stm32_adc.c
 endif
 
 ifeq ($(CONFIG_CAN),y)
-CSRCS += stm32_can.c
+  CSRCS += stm32_can.c
+endif
+
+ifeq ($(CONFIG_SENSORS_DHTXX),y)
+  CSRCS += stm32_dhtxx.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

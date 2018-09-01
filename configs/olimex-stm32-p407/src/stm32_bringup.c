@@ -200,6 +200,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_DHTXX
+  ret = stm32_dhtxx_initialize("/dev/dht0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dhtxx_initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
