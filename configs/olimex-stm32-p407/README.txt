@@ -374,6 +374,16 @@ Configuration sub-directories
 The <subdir> that is provided above as an argument to the tools/configure.sh
 must be is one of the following.
 
+  dhtxx:
+
+    Configuration added by Abdelatif Guettouche for testing the the DHTxx
+    sensor.  This configuration expects this setup:
+
+      DHTXX_PIN_OUTPUT   PG9
+      DHTXX_PIN_INPUT    PG9
+
+    The STM32 free-running timer is also required.
+
   kelf:
 
     This is a protected mode version of the apps/examples/elf test of

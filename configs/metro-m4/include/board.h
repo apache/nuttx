@@ -148,7 +148,6 @@
 #define BOARD_GCLK_SET2         0x0fdf    /* Post-configure: All GCLKs except GCLK5 */
 
 #define BOARD_GCLK0_ENABLE      TRUE      /* Enable GCLK0 */
-#define BOARD_GCLK0_IDC         FALSE     /* Don't improve duty cycle */
 #define BOARD_GCLK0_OOV         FALSE     /* Clock output will be LOW */
 #define BOARD_GCLK0_OE          TRUE      /* Generate output on GCLK_IO */
 #define BOARD_GCLK0_DIVSEL      0         /* GCLK frequency is source/DIV */
@@ -403,7 +402,7 @@
  * before using the SERCOM.
  */
 
-#define BOARD_SERCOM_SLOWGEN         3                   /* 48MHz, common to all SERCOMS */
+#define BOARD_SERCOM_SLOWGEN         3                   /* 32.768KHz, common to all SERCOMS */
 #define BOARD_SERCOM_SLOWLOCK        FALSE               /* Don't lock the SLOWCLOCK */
 #define BOARD_SLOWCLOCK_FREQUENCY    BOARD_GCLK3_FREQUENCY
 
