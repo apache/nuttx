@@ -45,6 +45,10 @@ ifeq ($(CONFIG_SENSORS_ADXL345),y)
   CSRCS += adxl345_base.c
 endif
 
+ifeq ($(CONFIG_SENSORS_DHTXX),y)
+  CSRCS += dhtxx.c
+endif
+
 # These drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
