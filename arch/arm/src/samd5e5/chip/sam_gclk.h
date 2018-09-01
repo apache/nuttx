@@ -147,7 +147,7 @@
 #define GCLK_CHAN_SDHCn_SLOW         3         /* SDHC0-1 Slow */
 #define GCLK_CHAN_SDHC0_SLOW         3         /* SDHC0 Slow */
 #define GCLK_CHAN_SDHC1_SLOW         3         /* SDHC1 Slow */
-#define GCLK_CHAN_SERCOMn_SLOW       3         /* SERCOM0=7 Slow */
+#define GCLK_CHAN_SERCOMn_SLOW       3         /* SERCOM Slow (common) */
 #define GCLK_CHAN_SERCOM0_SLOW       3         /* SERCOM0 Slow */
 #define GCLK_CHAN_SERCOM1_SLOW       3         /* SERCOM1 Slow */
 #define GCLK_CHAN_SERCOM2_SLOW       3         /* SERCOM2 Slow */

@@ -80,7 +80,28 @@ STATUS
     debugging from SRAM (with FLASH unlocked and erased).  Several
     errors in clock configuration logic have been corrected and it now
     gets through clock configuration okay.  It now hangs in the low-level
-    USART initialzation.
+    USART initialization.
+
+    It hangs trying to enabled the SERCOM slow clock channel.  The clock
+    sequence is:
+
+      1. 32.678KHz crystal -> XOSC32K
+         This is configured and says that XOSC32K is ready.
+      2. XOSCK32 -> GCLK3.
+         This is configured and it says that is is ready (GENEN=1).
+      3. GCLK3 ->SERCOM slow clock channel.
+         This hangs when I try to enable the peripheral clock.
+
+  2018-08-31:  I found a workaround by substituting OSCULP32K for XOSC32
+    as the source to GCLK3 (workaround *NOT* committed):
+
+    -#define BOARD_GCLK3_SOURCE  5  /* Select XOSC32K as GCLK3 source */
+    +#define BOARD_GCLK3_SOURCE  4  /* Select OSCULP32K as GCLK3 source */
+
+    This gets past all clock and USART configuration, but then there is a
+    hang in sam_lowputc().  All of the USART3 registers are zero so the wait
+    for data register empty (DRE) causes the hang.  It appears that the
+    SERCOM3 module is not properly enabled or not receiving clocking.
 
 Unlocking FLASH
 ===============
