@@ -122,6 +122,14 @@ STATUS
       Builtin Apps:
       nsh>
 
+    There are additional drivers ported from SAML21 which has, in most cases,
+    identical peripherals.  None of these drivers have been verified on the
+    SAMD51, However.  These include:  CMCC, DMAC, I2C, SPI, and USB.
+
+    The delay loop has not yet been calibrated.  no sense in doing that
+    because the CMCC should improve performance dramatically when it is
+    integrated.
+
 Unlocking FLASH
 ===============
 
