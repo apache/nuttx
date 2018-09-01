@@ -240,6 +240,8 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
   sam_wait_synchronization(config);
   ctrla |= USART_CTRLA_ENABLE;
   putreg32(ctrla, config->base + SAM_USART_CTRLA_OFFSET);
+
+  return OK;
 }
 #endif
 

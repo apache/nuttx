@@ -68,12 +68,12 @@
 
 /* NVM area */
 
-#define SAM_NVM_CALIBAREA 0x00800080   /* NVM software calibration area */
-#define SAM_NVM_USERPAGE  0x00804000   /* NVM user page (512b) */
-#define SAM_NVM_SNWORD0   0x008061fc   /* Serial number word 0 */
-#define SAM_NVM_SNWORD1   0x00806010   /* Serial number word 1 */
-#define SAM_NVM_SNWORD2   0x00806014   /* Serial number word 2 */
-#define SAM_NVM_SNWORD3   0x00806018   /* Serial number word 3 */
+#define SAM_NVM_CALIBAREA   0x00800080 /* NVM software calibration area */
+#define SAM_NVM_USERPAGE    0x00804000 /* NVM user page (512b) */
+#define SAM_NVM_SNWORD0     0x008061fc /* Serial number word 0 */
+#define SAM_NVM_SNWORD1     0x00806010 /* Serial number word 1 */
+#define SAM_NVM_SNWORD2     0x00806014 /* Serial number word 2 */
+#define SAM_NVM_SNWORD3     0x00806018 /* Serial number word 3 */
 
 /* AHB-APB Bridge A */
 
@@ -106,14 +106,14 @@
                                        /* Reserved */
 #define SAM_EVSYS_BASE      0x4100e000 /* Event System */
                                        /* Reserved */
-#define SAM_SERCOM2_BASE    0x41001200 /* Serial Communication Interface 2 */
-#define SAM_SERCOM3_BASE    0x41001400 /* Serial Communication Interface 3 */
-#define SAM_TCC0_BASE       0x41001600 /* Timer/Counter Control 0 */
-#define SAM_TCC1_BASE       0x41001800 /* Timer/Counter Control 1 */
-#define SAM_TC2_BASE        0x41001a00 /* Timer/Counter 2 */
-#define SAM_TC3_BASE        0x41001c00 /* Timer/Counter 3 */
+#define SAM_SERCOM2_BASE    0x41012000 /* Serial Communication Interface 2 */
+#define SAM_SERCOM3_BASE    0x41014000 /* Serial Communication Interface 3 */
+#define SAM_TCC0_BASE       0x41016000 /* Timer/Counter Control 0 */
+#define SAM_TCC1_BASE       0x41018000 /* Timer/Counter Control 1 */
+#define SAM_TC2_BASE        0x4101a000 /* Timer/Counter 2 */
+#define SAM_TC3_BASE        0x4101c000 /* Timer/Counter 3 */
                                        /* Reserved */
-#define SAM_RAMECC_BASE     0x41002000 /* RAM Error Correction Code (RAMECC) */
+#define SAM_RAMECC_BASE     0x41020000 /* RAM Error Correction Code (RAMECC) */
                                        /* Reserved */
 
 /* AHB-APB Bridge C */

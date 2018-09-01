@@ -98,10 +98,11 @@ STATUS
     -#define BOARD_GCLK3_SOURCE  5  /* Select XOSC32K as GCLK3 source */
     +#define BOARD_GCLK3_SOURCE  4  /* Select OSCULP32K as GCLK3 source */
 
-    This gets past all clock and USART configuration, but then there is a
-    hang in sam_lowputc().  All of the USART3 registers are zero so the wait
-    for data register empty (DRE) causes the hang.  It appears that the
-    SERCOM3 module is not properly enabled or not receiving clocking.
+    With that workaround, the port gets past all clock and USART
+    configuration and, in fact, completely through OS initialization and
+    aplication startup!  The NSH shell runs and the NSH prompt is presented
+    on the serial console at the correct baud.  Serial input, however, is
+    not received so there is still more to be done.
 
 Unlocking FLASH
 ===============
