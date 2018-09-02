@@ -299,8 +299,7 @@ config USART1_RS485
 	default n
 	---help---
 		Enable RS-485 interface on USART1. Your board config will have to
-		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
-		used with USART1_RXDMA.
+		provide GPIO_USART1_RS485_DIR pin definition.
 
 config USART1_RS485_DIR_POLARITY
 	int "USART1 RS-485 DIR pin polarity"
@@ -311,12 +310,23 @@ config USART1_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART1_RXDMA
-	bool "USART1 Rx DMA"
-	default n
-	depends on STM32H7_DMA1
+config USART1_RXFIFO_THRES
+	int "USART1 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_USART1
 
@@ -327,8 +337,7 @@ config USART2_RS485
 	default n
 	---help---
 		Enable RS-485 interface on USART2. Your board config will have to
-		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
-		used with USART2_RXDMA.
+		provide GPIO_USART2_RS485_DIR pin definition.
 
 config USART2_RS485_DIR_POLARITY
 	int "USART2 RS-485 DIR pin polarity"
@@ -339,12 +348,23 @@ config USART2_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART2_RXDMA
-	bool "USART2 Rx DMA"
-	default n
-	depends on STM32H7_DMA1
+config USART2_RXFIFO_THRES
+	int "USART2 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_USART2
 
@@ -355,8 +375,7 @@ config USART3_RS485
 	default n
 	---help---
 		Enable RS-485 interface on USART3. Your board config will have to
-		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
-		used with USART3_RXDMA.
+		provide GPIO_USART3_RS485_DIR pin definition.
 
 config USART3_RS485_DIR_POLARITY
 	int "USART3 RS-485 DIR pin polarity"
@@ -367,13 +386,23 @@ config USART3_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART3_RXDMA
-	bool "USART3 Rx DMA"
-	default n
-	depends on STM32H7_DMA1
+config USART3_RXFIFO_THRES
+	int "USART3 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
 
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_USART3
 
@@ -384,8 +413,7 @@ config UART4_RS485
 	default n
 	---help---
 		Enable RS-485 interface on UART4. Your board config will have to
-		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
-		used with UART4_RXDMA.
+		provide GPIO_UART4_RS485_DIR pin definition.
 
 config UART4_RS485_DIR_POLARITY
 	int "UART4 RS-485 DIR pin polarity"
@@ -396,12 +424,23 @@ config UART4_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config UART4_RXDMA
-	bool "UART4 Rx DMA"
-	default n
-	depends on STM32H7_DMA1
+config UART4_RXFIFO_THRES
+	int "UART4 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_UART4
 
@@ -412,8 +451,7 @@ config UART5_RS485
 	default n
 	---help---
 		Enable RS-485 interface on UART5. Your board config will have to
-		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
-		used with UART5_RXDMA.
+		provide GPIO_UART5_RS485_DIR pin definition.
 
 config UART5_RS485_DIR_POLARITY
 	int "UART5 RS-485 DIR pin polarity"
@@ -424,12 +462,23 @@ config UART5_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config UART5_RXDMA
-	bool "UART5 Rx DMA"
-	default n
-	depends on STM32H7_DMA1
+config UART5_RXFIFO_THRES
+	int "UART5 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_UART5
 
@@ -440,8 +489,7 @@ config USART6_RS485
 	default n
 	---help---
 		Enable RS-485 interface on USART6. Your board config will have to
-		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
-		used with USART6_RXDMA.
+		provide GPIO_USART6_RS485_DIR pin definition.
 
 config USART6_RS485_DIR_POLARITY
 	int "USART6 RS-485 DIR pin polarity"
@@ -452,12 +500,23 @@ config USART6_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART6_RXDMA
-	bool "USART6 Rx DMA"
-	default n
-	depends on STM32H7_DMA2
+config USART6_RXFIFO_THRES
+	int "USART6 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_USART
 
@@ -468,8 +527,7 @@ config UART7_RS485
 	default n
 	---help---
 		Enable RS-485 interface on UART7. Your board config will have to
-		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
-		used with UART7_RXDMA.
+		provide GPIO_UART7_RS485_DIR pin definition.
 
 config UART7_RS485_DIR_POLARITY
 	int "UART7 RS-485 DIR pin polarity"
@@ -480,12 +538,23 @@ config UART7_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config UART7_RXDMA
-	bool "UART7 Rx DMA"
-	default n
-	depends on STM32H7_DMA2
+config UART7_RXFIFO_THRES
+	int "UART7 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_UART7
 
@@ -496,8 +565,7 @@ config UART8_RS485
 	default n
 	---help---
 		Enable RS-485 interface on UART8. Your board config will have to
-		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
-		used with UART8_RXDMA.
+		provide GPIO_UART8_RS485_DIR pin definition.
 
 config UART8_RS485_DIR_POLARITY
 	int "UART8 RS-485 DIR pin polarity"
@@ -508,26 +576,25 @@ config UART8_RS485_DIR_POLARITY
 		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config UART8_RXDMA
-	bool "UART8 Rx DMA"
-	default n
-	depends on STM32H7_DMA2
+config UART8_RXFIFO_THRES
+	int "UART8 Rx FIFO Threshold"
+	default 3
+	range 0 5
 	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values are need at high BAUD rates to prevent Rx data overrun
+		errors.
 
 endif # STM32H7_UART8
-
-config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
-	int "Rx DMA buffer size"
-	default 32
-	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
-	---help---
-		The DMA buffer size when using RX DMA to emulate a FIFO.
-
-		When streaming data, the generic serial layer will be called
-		every time the FIFO receives half this number of bytes.
-
-		Value given here will be rounded up to next multiple of 32 bytes.
 
 config STM32H7_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."

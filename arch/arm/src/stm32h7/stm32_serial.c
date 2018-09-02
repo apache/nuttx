@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_serial.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -146,6 +146,7 @@ struct up_dev_s
 #endif
   uint32_t          baud;      /* Configured baud */
 #else
+  const uint8_t     rxftcfg;   /* Rx FIFO threshold level */
   const uint8_t     parity;    /* 0=none, 1=odd, 2=even */
   const uint8_t     bits;      /* Number of bits (7 or 8) */
   const bool        stopbits2; /* True: Configure with 2 stop bits instead of 1 */
@@ -295,6 +296,7 @@ static struct up_dev_s g_usart1priv =
     },
 
   .irq           = STM32_IRQ_USART1,
+  .rxftcfg       = CONFIG_USART1_RXFIFO_THRES,
   .parity        = CONFIG_USART1_PARITY,
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
@@ -348,6 +350,7 @@ static struct up_dev_s g_usart2priv =
     },
 
   .irq           = STM32_IRQ_USART2,
+  .rxftcfg       = CONFIG_USART2_RXFIFO_THRES,
   .parity        = CONFIG_USART2_PARITY,
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
@@ -401,6 +404,7 @@ static struct up_dev_s g_usart3priv =
     },
 
   .irq           = STM32_IRQ_USART3,
+  .rxftcfg       = CONFIG_USART3_RXFIFO_THRES,
   .parity        = CONFIG_USART3_PARITY,
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
@@ -454,6 +458,7 @@ static struct up_dev_s g_uart4priv =
     },
 
   .irq           = STM32_IRQ_UART4,
+  .rxftcfg       = CONFIG_UART4_RXFIFO_THRES,
   .parity        = CONFIG_UART4_PARITY,
   .bits          = CONFIG_UART4_BITS,
   .stopbits2     = CONFIG_UART4_2STOP,
@@ -496,35 +501,36 @@ static struct up_dev_s g_uart5priv =
 #if CONSOLE_UART == 5
       .isconsole = true,
 #endif
-      .recv     =
+      .recv      =
       {
-        .size   = CONFIG_UART5_RXBUFSIZE,
-        .buffer = g_uart5rxbuffer,
+        .size    = CONFIG_UART5_RXBUFSIZE,
+        .buffer  = g_uart5rxbuffer,
       },
-      .xmit     =
+      .xmit      =
       {
-        .size   = CONFIG_UART5_TXBUFSIZE,
-        .buffer = g_uart5txbuffer,
+        .size    = CONFIG_UART5_TXBUFSIZE,
+        .buffer  = g_uart5txbuffer,
       },
-      .ops      = &g_uart_ops,
-      .priv     = &g_uart5priv,
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart5priv,
     },
 
-  .irq            = STM32_IRQ_UART5,
-  .parity         = CONFIG_UART5_PARITY,
-  .bits           = CONFIG_UART5_BITS,
-  .stopbits2      = CONFIG_UART5_2STOP,
+  .irq           = STM32_IRQ_UART5,
+  .rxftcfg       = CONFIG_UART5_RXFIFO_THRES,
+  .parity        = CONFIG_UART5_PARITY,
+  .bits          = CONFIG_UART5_BITS,
+  .stopbits2     = CONFIG_UART5_2STOP,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .iflow         = false,
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   .oflow         = false,
 #endif
-  .baud           = CONFIG_UART5_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
-  .usartbase      = STM32_UART5_BASE,
-  .tx_gpio        = GPIO_UART5_TX,
-  .rx_gpio        = GPIO_UART5_RX,
+  .baud          = CONFIG_UART5_BAUD,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_UART5_BASE,
+  .tx_gpio       = GPIO_UART5_TX,
+  .rx_gpio       = GPIO_UART5_RX,
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   .cts_gpio      = 0,
 #endif
@@ -553,36 +559,37 @@ static struct up_dev_s g_usart6priv =
 #if CONSOLE_UART == 6
       .isconsole = true,
 #endif
-      .recv     =
+      .recv      =
       {
-        .size   = CONFIG_USART6_RXBUFSIZE,
-        .buffer = g_usart6rxbuffer,
+        .size    = CONFIG_USART6_RXBUFSIZE,
+        .buffer  = g_usart6rxbuffer,
       },
-      .xmit     =
+      .xmit      =
       {
-        .size   = CONFIG_USART6_TXBUFSIZE,
-        .buffer = g_usart6txbuffer,
+        .size    = CONFIG_USART6_TXBUFSIZE,
+        .buffer  = g_usart6txbuffer,
       },
-      .ops      = &g_uart_ops,
-      .priv     = &g_usart6priv,
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart6priv,
     },
 
-  .irq            = STM32_IRQ_USART6,
-  .parity         = CONFIG_USART6_PARITY,
-  .bits           = CONFIG_USART6_BITS,
-  .stopbits2      = CONFIG_USART6_2STOP,
-  .baud           = CONFIG_USART6_BAUD,
-  .apbclock       = STM32_PCLK2_FREQUENCY,
-  .usartbase      = STM32_USART6_BASE,
-  .tx_gpio        = GPIO_USART6_TX,
-  .rx_gpio        = GPIO_USART6_RX,
+  .irq           = STM32_IRQ_USART6,
+  .rxftcfg       = CONFIG_USART6_RXFIFO_THRES,
+  .parity        = CONFIG_USART6_PARITY,
+  .bits          = CONFIG_USART6_BITS,
+  .stopbits2     = CONFIG_USART6_2STOP,
+  .baud          = CONFIG_USART6_BAUD,
+  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .usartbase     = STM32_USART6_BASE,
+  .tx_gpio       = GPIO_USART6_TX,
+  .rx_gpio       = GPIO_USART6_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
-  .oflow          = true,
-  .cts_gpio       = GPIO_USART6_CTS,
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART6_CTS,
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART6_IFLOWCONTROL)
-  .iflow          = true,
-  .rts_gpio       = GPIO_USART6_RTS,
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART6_RTS,
 #endif
 
 #ifdef CONFIG_USART6_RS485
@@ -606,36 +613,37 @@ static struct up_dev_s g_uart7priv =
 #if CONSOLE_UART == 7
       .isconsole = true,
 #endif
-      .recv     =
+      .recv      =
       {
-        .size   = CONFIG_UART7_RXBUFSIZE,
-        .buffer = g_uart7rxbuffer,
+        .size    = CONFIG_UART7_RXBUFSIZE,
+        .buffer  = g_uart7rxbuffer,
       },
-      .xmit     =
+      .xmit      =
       {
-        .size   = CONFIG_UART7_TXBUFSIZE,
-        .buffer = g_uart7txbuffer,
+        .size    = CONFIG_UART7_TXBUFSIZE,
+        .buffer  = g_uart7txbuffer,
       },
-      .ops      = &g_uart_ops,
-      .priv     = &g_uart7priv,
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart7priv,
     },
 
-  .irq            = STM32_IRQ_UART7,
-  .parity         = CONFIG_UART7_PARITY,
-  .bits           = CONFIG_UART7_BITS,
-  .stopbits2      = CONFIG_UART7_2STOP,
-  .baud           = CONFIG_UART7_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
-  .usartbase      = STM32_UART7_BASE,
-  .tx_gpio        = GPIO_UART7_TX,
-  .rx_gpio        = GPIO_UART7_RX,
+  .irq           = STM32_IRQ_UART7,
+  .rxftcfg       = CONFIG_UART7_RXFIFO_THRES,
+  .parity        = CONFIG_UART7_PARITY,
+  .bits          = CONFIG_UART7_BITS,
+  .stopbits2     = CONFIG_UART7_2STOP,
+  .baud          = CONFIG_UART7_BAUD,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_UART7_BASE,
+  .tx_gpio       = GPIO_UART7_TX,
+  .rx_gpio       = GPIO_UART7_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
-  .oflow          = true,
-  .cts_gpio       = GPIO_UART7_CTS,
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART7_CTS,
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
-  .iflow          = true,
-  .rts_gpio       = GPIO_UART7_RTS,
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART7_RTS,
 #endif
 
 #ifdef CONFIG_UART7_RS485
@@ -659,36 +667,37 @@ static struct up_dev_s g_uart8priv =
 #if CONSOLE_UART == 8
       .isconsole = true,
 #endif
-      .recv     =
+      .recv      =
       {
-        .size   = CONFIG_UART8_RXBUFSIZE,
-        .buffer = g_uart8rxbuffer,
+        .size    = CONFIG_UART8_RXBUFSIZE,
+        .buffer  = g_uart8rxbuffer,
       },
-      .xmit     =
+      .xmit      =
       {
-        .size   = CONFIG_UART8_TXBUFSIZE,
-        .buffer = g_uart8txbuffer,
+        .size    = CONFIG_UART8_TXBUFSIZE,
+        .buffer  = g_uart8txbuffer,
       },
-      .ops      = &g_uart_ops,
-      .priv     = &g_uart8priv,
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart8priv,
     },
 
-  .irq            = STM32_IRQ_UART8,
-  .parity         = CONFIG_UART8_PARITY,
-  .bits           = CONFIG_UART8_BITS,
-  .stopbits2      = CONFIG_UART8_2STOP,
-  .baud           = CONFIG_UART8_BAUD,
-  .apbclock       = STM32_PCLK1_FREQUENCY,
-  .usartbase      = STM32_UART8_BASE,
-  .tx_gpio        = GPIO_UART8_TX,
-  .rx_gpio        = GPIO_UART8_RX,
+  .irq           = STM32_IRQ_UART8,
+  .rxftcfg       = CONFIG_USRT8_RXFIFO_THRES,
+  .parity        = CONFIG_UART8_PARITY,
+  .bits          = CONFIG_UART8_BITS,
+  .stopbits2     = CONFIG_UART8_2STOP,
+  .baud          = CONFIG_UART8_BAUD,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_UART8_BASE,
+  .tx_gpio       = GPIO_UART8_TX,
+  .rx_gpio       = GPIO_UART8_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
-  .oflow          = true,
-  .cts_gpio       = GPIO_UART8_CTS,
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART8_CTS,
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
-  .iflow          = true,
-  .rts_gpio       = GPIO_UART8_RTS,
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART8_RTS,
 #endif
 
 #ifdef CONFIG_UART8_RS485
@@ -1198,8 +1207,9 @@ static int up_setup(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE);
 
-  /* Set FIFO threshold to empty */
-  regval     |= USART_CR3_RXFTCFG_FULL;
+  /* Set Rx FIFO threshold to empty */
+
+  regval |= USART_CR3_RXFTCFG(priv->rxftcfg);
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
@@ -1210,8 +1220,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Rx, Tx, and the USART */
   /* Enable FIFO */
 
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   regval |= USART_CR1_FIFOEN;
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
@@ -1220,7 +1230,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set up the cached interrupt enables value */
 
-  priv->ie    = 0;
+  priv->ie = 0;
 
   /* Mark device as initialized. */
 

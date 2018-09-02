@@ -292,6 +292,7 @@
 #  define USART_CR3_SCARCNT(n)    ((uint32_t)(n) << USART_CR3_SCARCNT_SHIFT)
 #define USART_CR3_RXFTCFG_SHIFT   (25)      /* Bit 25-27: Receive FIFO threshold configuration */
 #define USART_CR3_RXFTCFG_MASK    (7 << USART_CR3_RXFTCFG_SHIFT)
+#  define USART_CR3_RXFTCFG(n)    ((uint32_t)(n) << USART_CR3_RXFTCFG_SHIFT)
 #  define USART_CR3_RXFTCFG_12PCT (0 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/8 full */
 #  define USART_CR3_RXFTCFG_25PCT (1 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/4 full */
 #  define USART_CR3_RXFTCFG_50PCT (2 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 1/2 full */
@@ -301,6 +302,7 @@
 #define USART_CR3_RXFTIE          (1 << 28) /* Bit 28: RXFIFO threshold interrupt enable */
 #define USART_CR3_TXFTCFG_SHIFT   (29)      /* Bits 29-31: TXFIFO threshold configuration */
 #define USART_CR3_TXFTCFG_MASK    (7 << USART_CR3_TXFTCFG_SHIFT)
+#  define USART_CR3_TXFTCFG(n)    ((uint32_t)(n) << USART_CR3_TXFTCFG_SHIFT)
 #  define USART_CR3_TXFTCFG_12PCT (0 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/8 full */
 #  define USART_CR3_TXFTCFG_24PCT (1 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/4 full */
 #  define USART_CR3_TXFTCFG_50PCT (2 << USART_CR3_TXFTCFG_SHIFT) /* TXFIFO 1/2 full */
