@@ -66,7 +66,7 @@
  *   arg - The PID of the thread to be retained.
  *
  * Returned Value:
- *   0 (OK) on success; a negated errno value on failure.
+ *   0 (OK) always
  *
  ****************************************************************************/
 

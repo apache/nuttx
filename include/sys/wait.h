@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/wait.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,7 @@
 #define WEXITED         (1 << 3) /* Wait for processes that have exited (2) */
 #define WSTOPPED        (1 << 4) /* Status for child stopped on signal (2) */
 #define WNOWAIT         (1 << 5) /* Keep the process in a waitable state (2) */
+#define WCLAIMED        (1 << 7) /* Non-standard (For internal OS use only) */
 
 /****************************************************************************
  * Public Type Definitions

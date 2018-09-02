@@ -66,14 +66,13 @@
  *   arg - The PID of the thread to be retained.
  *
  * Returned Value:
- *   0 (OK) on success; a negated errno value on failure.
+ *   0 (OK) always
  *
  ****************************************************************************/
 
 static int group_suspendchildren_handler(pid_t pid, FAR void *arg)
 {
   FAR struct tcb_s *rtcb;
-  int ret;
 
   /* Suspend all threads except for the one specified by the argument */
 
@@ -84,11 +83,7 @@ static int group_suspendchildren_handler(pid_t pid, FAR void *arg)
       rtcb = sched_gettcb(pid);
       if (rtcb != NULL)
         {
-          ret = sched_suspend(rtcb);
-          if (ret < 0)
-            {
-              serr("ERROR: Failed to suspend %d: %d\n", ret, pid);
-            }
+          sched_suspend(rtcb);
         }
     }
 
@@ -117,7 +112,7 @@ static int group_suspendchildren_handler(pid_t pid, FAR void *arg)
  *
  ****************************************************************************/
 
-int group_suspendchildren(FAR struct task_tcb_s *tcb)
+int group_suspendchildren(FAR struct tcb_s *tcb)
 {
   int ret;
 
@@ -126,8 +121,8 @@ int group_suspendchildren(FAR struct task_tcb_s *tcb)
    */
 
   sched_lock();
-  ret = group_foreachchild(tcb->cmn.group, group_suspendchildren_handler,
-                          (FAR void *)((uintptr_t)tcb->cmn.pid));
+  ret = group_foreachchild(tcb->group, group_suspendchildren_handler,
+                          (FAR void *)((uintptr_t)tcb->pid));
   sched_unlock();
   return ret;
 }

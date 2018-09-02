@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_waitpid.c
  *
- *   Copyright (C) 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,9 +232,20 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
    * others?
    */
 
-  if (stat_loc != NULL && group->tg_statloc == NULL)
+  if (group->tg_waitflags == 0)
     {
+      /* Save the waitpid() options, setting the non-standard WCLAIMED bit to
+       * assure that tg_waitflags is non-zero.
+       */
+
+      group->tg_waitflags = (uint8_t)options | WCLAIMED;
+
+      /* Save the return status location (which may be NULL) */
+
       group->tg_statloc = stat_loc;
+
+      /* We are the waipid() instance that gets the return status */
+
       mystat = true;
     }
 
@@ -267,7 +279,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
           if (mystat)
             {
-              group->tg_statloc = NULL;
+              group->tg_statloc   = NULL;
+              group->tg_waitflags = 0;
             }
 
           errcode = -ret;

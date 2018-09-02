@@ -117,8 +117,8 @@ int group_foreachchild(FAR struct task_group_s *group,
                        foreachchild_t handler, FAR void *arg);
 int group_killchildren(FAR struct task_tcb_s *tcb);
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-int group_suspendchildren(FAR struct task_tcb_s *tcb);
-int group_continue(FAR struct task_tcb_s *tcb);
+int group_suspendchildren(FAR struct tcb_s *tcb);
+int group_continue(FAR struct tcb_s *tcb);
 #endif
 #endif
 

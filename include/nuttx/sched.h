@@ -502,8 +502,9 @@ struct task_group_s
   /* Simple mechanism used only when there is no support for SIGCHLD            */
 
   uint8_t tg_nwaiters;              /* Number of waiters                        */
+  uint8_t tg_waitflags;             /* User flags for waitpid behavior          */
   sem_t tg_exitsem;                 /* Support for waitpid                      */
-  int *tg_statloc;                  /* Location to return exit status           */
+  FAR int *tg_statloc;              /* Location to return exit status           */
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD

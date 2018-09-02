@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_exithook.c
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015. 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -536,7 +536,9 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
         {
           /* Yes.. Wakeup any tasks waiting for this task to exit */
 
-          group->tg_statloc = NULL;
+          group->tg_statloc   = NULL;
+          group->tg_waitflags = 0;
+
           while (group->tg_exitsem.semcount < 0)
             {
               /* Wake up the thread */

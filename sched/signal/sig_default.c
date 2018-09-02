@@ -156,7 +156,7 @@ static const struct nxsig_defaction_s g_defactions[] =
  * Name: nxsig_null_action
  *
  * Description:
- *   The do-nothing default signal actin handler.
+ *   The do-nothing default signal action handler.
  *
  * Input Parameters:
  *   Standard signal handler parameters
@@ -248,15 +248,55 @@ static void nxsig_stop_task(int signo)
 #ifdef HAVE_GROUP_MEMBERS
   /* Suspend of of the children of the task.  This will not suspend the
    * currently running task/pthread (this_task).  It will suspend the
-   * main thread of the  task group if the this_task is a pthread.
+   * main thread of the task group if the this_task is a pthread.
    */
 
-  group_suspendchildren((FAR struct task_tcb_s *)rtcb);
+  group_suspendchildren(rtcb);
 #endif
 
-  /* Then, finally, suspend this thread */
+  /* Lock the scheudler so this thread is not pre-empted until after we
+   * call sched_suspend().
+   */
+
+  sched_lock();
+
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  /* Notify via waitpid if any parent is waiting for this task to EXIT
+   * or STOP.  This action is only performed if WUNTRACED is set in the
+   * waitpid flags.
+   */
+
+  if (group->tg_waitflags & WUNTRACED) != 0)
+    {
+      /* Return zero for exit status (we are not exiting, however) */
+
+      if (group->tg_statloc != NULL)
+        {
+          *group->tg_statloc = 0;
+           group->tg_statloc = NULL;
+        }
+
+      /* tg_waitflags == 0 means that the flags are available to another
+       * caller of waitpid().
+       */
+
+      group->tg_waitflags = 0;
+
+      /* YWakeup any tasks waiting for this task to exit or stop. */
+
+      while (group->tg_exitsem.semcount < 0)
+        {
+          /* Wake up the thread */
+
+          nxsem_post(&group->tg_exitsem);
+         }
+    }
+#endif
+
+  /* Then, finally, suspend this the final thread of the task group */
 
   sched_suspend(rtcb);
+  sched_unlock();
 }
 
 /****************************************************************************

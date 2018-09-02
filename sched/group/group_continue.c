@@ -66,25 +66,20 @@
  *   arg - Unused
  *
  * Returned Value:
- *   0 (OK) on success; a negated errno value on failure.
+ *   0 (OK) always
  *
  ****************************************************************************/
 
 static int group_continue_handler(pid_t pid, FAR void *arg)
 {
   FAR struct tcb_s *rtcb;
-  int ret;
 
   /* Resume all threads */
 
   rtcb = sched_gettcb(pid);
-  if (rtc != NULL)
+  if (rtcb != NULL)
     {
-      ret = sched_resume(rtcb);
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to resume %d: %d\n", ret, pid);
-        }
+      sched_continue(rtcb);
     }
 
   /* Always return zero.  We need to visit each member of the group*/
@@ -111,7 +106,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
  *
  ****************************************************************************/
 
-int group_continue(FAR struct task_tcb_s *tcb)
+int group_continue(FAR struct tcb_s *tcb)
 {
   int ret;
 
@@ -120,7 +115,7 @@ int group_continue(FAR struct task_tcb_s *tcb)
    */
 
   sched_lock();
-  ret = group_foreachchild(tcb->cmn.group, group_continue_handler, NULL);
+  ret = group_foreachchild(tcb->group, group_continue_handler, NULL);
   sched_unlock();
   return ret;
 }
