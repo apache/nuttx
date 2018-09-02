@@ -53,58 +53,81 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: uart_check_sigint
+ * Name: uart_check_signo
  *
  * Description:
- *   Check if the SIGINT character is in the contiguous Rx DMA buffer region.
+ *   Check if the SIGINT or SIGSTP character is in the contiguous Rx DMA buffer
+ *   region.  The first signal associated with the first such character is returned.
+ *
+ *   If there multiple such characters in the buffer, only the signal associated
+ *   with the first is returned (this a bug!)
+ *
+ * Returned Value:
+ *   0 if a signal-related character does not appear in the.  Otherwise, SIGKILL or
+ *   SIGSTP may be returned to indicate the appropriate signal action.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_TTY_SIGINT
-static bool uart_check_sigint(const char *buf, size_t size)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+static int uart_check_signo(const char *buf, size_t size)
 {
   size_t i;
 
   for (i = 0; i < size; i++)
     {
+#ifdef CONFIG_TTY_SIGINT
       if (buf[i] == CONFIG_TTY_SIGINT_CHAR)
         {
-          return true;
+          return SIGINT;
         }
+#endif
+
+#ifdef CONFIG_TTY_SIGSTP
+      if (buf[i] == CONFIG_TTY_SIGSTP_CHAR)
+        {
+          return SIGSTP;
+        }
+#endif
     }
 
-  return false;
+  return 0;
 }
 #endif
 
 /************************************************************************************
- * Name: uart_recvchars_sigkill
+ * Name: uart_recvchars_signo
  *
  * Description:
  *   Check if the SIGINT character is anywhere in the newly received DMA buffer.
  *
- *   REVISIT:  We must also remove the SIGINT character from the Rx buffer.  It
+ *   REVISIT:  We must also remove the SIGINT/SIGSTP character from the Rx buffer.  It
  *   should not be read as normal data by the caller.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_TTY_SIGINT
-static bool uart_recvchars_sigkill(FAR uart_dev_t *dev)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+static int uart_recvchars_signo(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
+  int signo;
+
+  /* Check if the valid DMAed data is in one or two contiguous regions */
 
   if (xfer->nbytes <= xfer->length)
     {
-      return uart_check_sigint(xfer->buffer, xfer->nbytes);
+      return uart_check_signo(xfer->buffer, xfer->nbytes);
     }
   else
     {
-      if (uart_check_sigint(xfer->buffer, xfer->length))
+      /* REVISIT:  Additional signals could be in the second region. */
+
+      signo = uart_check_signo(xfer->buffer, xfer->length);
+      if (signo != 0)
         {
-          return true;
+          return signo;
         }
 
-      return uart_check_sigint(xfer->nbuffer, xfer->nbytes - xfer->length);
+      return uart_check_signo(xfer->nbuffer, xfer->nbytes - xfer->length);
     }
 }
 #endif
@@ -324,14 +347,14 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
-#ifdef CONFIG_TTY_SIGINT
-  bool needkill = false;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+  int signo = 0;
 
   /* Check if the SIGINT character is anywhere in the newly received DMA buffer. */
 
-  if (dev->pid >= 0 && uart_recvchars_sigkill(dev))
+  if (dev->pid >= 0)
     {
-      needkill = true;
+      signo = uart_recvchars_signo(dev);
     }
 #endif
 
@@ -350,12 +373,12 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#ifdef CONFIG_TTY_SIGINT
-  /* Send the SIGINT signal if needed */
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+  /* Send the signal if necessary */
 
-  if (needkill)
+  if (signo != 0)
     {
-      kill(dev->pid, SIGINT);
+      kill(dev->pid, signo);
       uart_reset_sem(dev);
     }
 #endif

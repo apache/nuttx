@@ -165,16 +165,54 @@ config TTY_SIGINT
 		should cause an immediate End-of-File result.
 
 config TTY_SIGINT_CHAR
-	int "Serial parse SIGINT characters"
-	default 3 if SERIAL_CONSOLE
-	default 4 if !SERIAL_CONSOLE
+	hex "Serial parse SIGINT characters"
+	default 0x03 if SERIAL_CONSOLE
+	default 0x04 if !SERIAL_CONSOLE
 	depends on TTY_SIGINT
 	---help---
-		Use ASCII 3 (Ctrl-c) or 4 (ctrl-d) inputs to determine whether to
-		send a SIGINT event.  Other characters may also be selected.
+		Use ASCII 0x03 (Ctrl-c) or 0x04 (ctrl-d) inputs to determine whether
+		to send a SIGINT event.  Other characters may also be selected.
 
 		REVISIT:  Traditionally Ctrl-C would generate SIGINT.  Ctrl-D is the
 		End-of-File character that should close the stream.
+
+config TTY_SIGSTP
+	bool "Support SIGSTP"
+	default n
+	select CONFIG_SIG_SIGSTOP_ACTION
+	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	---help---
+		Whether support Ctrl-z event.  Enabled automatically for console
+		devices.  May be enabled for other serial devices using the ISIG bit
+		in the Termios c_lflag.
+
+		REVISIT:  This implementation is compliant but incomplete.  The
+		c_lflag ISIG bit normally enables/disables INTR, QUIT, SUSP, and
+		DSUSP character processing.  The relationship between these names,
+		standard signals, and typical key presses are as follows:
+
+		  INTR   SIGINT   Ctrl-C  ETX(0x03) Interrupt
+		  KILL   SIGKILL  Ctrl-U  NAK(0x15) Kill
+		  QUIT   SIGQUIT  Ctrl-\  FS (0x1c) Quit
+		  SUSP   SIGSTP   Ctrl-Z  SUB(0x1a) Suspend
+		  DSUSP  SIGSTP   Ctrl-Y  EM (0x19) Delayed suspend
+
+		Additional requirements:
+		  - SIGKILL cannot be caught or ignored.  Compared to SIGTERM which
+		    is like SIGKILL but can be caught or ignored.
+		  - SIGQUIT is like SIGINT but causes generation of a core dump
+		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
+		    can be caught or ignored ignored.
+		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
+		    the suspension is delayed until the next read operation
+
+config TTY_SIGSTP_CHAR
+	hex "Serial parse SIGSTP characters"
+	default 0x1a
+	depends on TTY_SIGSTP
+	---help---
+		Use ASCII 0x1a (Ctrl-z) input to determine whether to send a SIGSTP
+		event.  Other characters may also be selected.
 
 #
 # Serial console selection

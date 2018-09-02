@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/wait.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -240,6 +241,12 @@ static void nxsig_abnormal_termination(int signo)
 static void nxsig_stop_task(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  FAR struct task_group_s *group;
+
+  DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
+  group = rtcb->group;
+#endif
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
@@ -254,7 +261,7 @@ static void nxsig_stop_task(int signo)
   group_suspendchildren(rtcb);
 #endif
 
-  /* Lock the scheudler so this thread is not pre-empted until after we
+  /* Lock the scheduler so this thread is not pre-empted until after we
    * call sched_suspend().
    */
 
@@ -266,7 +273,7 @@ static void nxsig_stop_task(int signo)
    * waitpid flags.
    */
 
-  if (group->tg_waitflags & WUNTRACED) != 0)
+  if ((group->tg_waitflags & WUNTRACED) != 0)
     {
       /* Return zero for exit status (we are not exiting, however) */
 

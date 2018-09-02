@@ -123,11 +123,11 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   unsigned int watermark;
 #endif
-#ifdef CONFIG_TTY_SIGINT
-  bool needkill = false;
-#endif
   unsigned int status;
   int nexthead = rxbuf->head + 1;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+  int signo = 0;
+#endif
   uint16_t nbytes = 0;
 
   if (nexthead >= rxbuf->size)
@@ -136,7 +136,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
     }
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* Pre-calcuate the watermark level that we will need to test against. */
+  /* Pre-calculate the watermark level that we will need to test against. */
 
   watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) / 100;
 #endif
@@ -210,7 +210,27 @@ void uart_recvchars(FAR uart_dev_t *dev)
            * into the Rx buffer.  It should not be read as normal data.
            */
 
-          needkill = true;
+          signo = SIGINT;
+        }
+      else
+#endif
+#ifdef CONFIG_TTY_SIGSTP
+      /* Is this the special character that will generate the SIGSTP signal? */
+
+      if (dev->pid >= 0 && ch == CONFIG_TTY_SIGSTP_CHAR)
+        {
+#ifdef CONFIG_TTY_SIGINT
+          /* Give precedence to SIGINT */
+
+          if (signo == 0)
+#endif
+            {
+              /* Note that the kill is needed and do not put the character
+               * into the Rx buffer.  It should not be read as normal data.
+               */
+
+              signo = SIGSTP;
+            }
         }
       else
 #endif
@@ -249,12 +269,12 @@ void uart_recvchars(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#ifdef CONFIG_TTY_SIGINT
-  /* Send the SIGINT signal if needed */
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+  /* Send the signal if necessary */
 
-  if (needkill)
+  if (signo != 0)
     {
-      kill(dev->pid, SIGINT);
+      kill(dev->pid, signo);
       uart_reset_sem(dev);
     }
 #endif
