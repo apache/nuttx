@@ -325,8 +325,8 @@ config USART1_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_USART1
 
@@ -363,8 +363,8 @@ config USART2_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_USART2
 
@@ -401,8 +401,8 @@ config USART3_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_USART3
 
@@ -439,8 +439,8 @@ config UART4_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_UART4
 
@@ -477,8 +477,8 @@ config UART5_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_UART5
 
@@ -515,8 +515,8 @@ config USART6_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_USART
 
@@ -553,8 +553,8 @@ config UART7_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_UART7
 
@@ -591,8 +591,8 @@ config UART8_RXFIFO_THRES
 		  5 -> Full
 
 		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values are need at high BAUD rates to prevent Rx data overrun
-		errors.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 endif # STM32H7_UART8
 

@@ -1207,7 +1207,7 @@ static int up_setup(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE);
 
-  /* Set Rx FIFO threshold to empty */
+  /* Set Rx FIFO threshold to the configured level */
 
   regval |= USART_CR3_RXFTCFG(priv->rxftcfg);
 

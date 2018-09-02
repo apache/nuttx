@@ -86,7 +86,7 @@ STATUS
   2018-09-01:  I found a workaround by substituting OSCULP32K for XOSC32
     as the source to GCLK3.   With that workaround, the port gets past all
     clock and USART  configuration.  A new configuration option was added,
-    CONFIG_METRO_M4_32KHZXTAL. By default this workaround is in place.
+    CONFIG_METRO_M4_32KHZXTAL.  By default this workaround is in place.
     But you can enable CONFIG_METRO_M4_32KHZXTAL if you want to further
     study the XOSC32K problem.
 
