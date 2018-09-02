@@ -32,15 +32,11 @@ STATUS
 ======
 
   2018-07-26:  The basic port was merged into master.  It is still
-    incomplete and untested.  It is missing the clock configuration logic.
-    There is a placeholder from the SAML21, but it is currently stubbed out
-    in the Make.defs file.  Configuration options in the board.h header
-    file are bogus and also just cloned from the SAML21.
+    incomplete and untested.
 
-  2018-07-29:  Clock configuration logic now complete.  board.h
-    configuration options still need to be verified.  Unverified SERCOM
-    USART, SPI, I2C, Port configuration, and DMA support have been added.
-    I still have no hardware in hand to test.
+  2018-07-29:  Code complete.  Clock configuration complete.  Unverified
+    SERCOM USART, SPI, I2C, Port configuration, and DMA support have been
+    added. I still have no hardware in hand to test.
 
   2018-07-20:  Brought in the USB driver from the SAML21.  It is the same
     USB IP with only small differences.  There a a few, small open issues
@@ -54,13 +50,8 @@ STATUS
 
     Unfortunately, the board seems to have become unusable after the first
     NuttX image was written to FLASH.  I am unable to connect the JTAG
-    debugger and so am dead in the water on this unless I get replacement
-    hardware.  The primary JTAG problem seems to be that it is now unable
+    debugger.  The primary JTAG problem seems to be that it is now unable
     to halt the CPU.
-
-    This is most likely a consequence of something happening in the NuttX
-    boot-up sequence that interferes with JTAG operation.  There must be
-    be some way around this, but I don't know what it is.
 
     Future me:  This boot-up failure was do to bad clock initialization
     logic that caused infinite loops during clock configuration.  Unlocking
@@ -72,12 +63,12 @@ STATUS
     write to FLASH.
 
   2018-08-03:  Added a configuration option to run out of SRAM vs FLASH.
-    This should be a safer way to do the initial board bring-up since
-    it does not modify the FLASH image nor does it require unlocking
-    the FLASH pages.
+    This is a safer way to do the initial board bring-up since it does
+    not modify the FLASH image nor does it require unlocking the FLASH
+    pages.
 
-  2018-08-31:  I finally have a new Metro M4 and have been successfully
-    debugging from SRAM (with FLASH unlocked and erased).  Several
+  2018-08-31:  I finally have a new Metro M4 and have successfully
+    debugged from SRAM (with FLASH unlocked and erased).  Several
     errors in clock configuration logic have been corrected and it now
     gets through clock configuration okay.  It now hangs in the low-level
     USART initialization.
@@ -93,42 +84,19 @@ STATUS
          This hangs when I try to enable the peripheral clock.
 
   2018-09-01:  I found a workaround by substituting OSCULP32K for XOSC32
-    as the source to GCLK3:
-
-    -#define BOARD_GCLK3_SOURCE  5  /* Select XOSC32K as GCLK3 source */
-    +#define BOARD_GCLK3_SOURCE  4  /* Select OSCULP32K as GCLK3 source */
-
-    With that workaround, the port gets past all clock and USART
-    configuration.  A new configuration option was added,
+    as the source to GCLK3.   With that workaround, the port gets past all
+    clock and USART  configuration.  A new configuration option was added,
     CONFIG_METRO_M4_32KHZXTAL. By default this workaround is in place.
     But you can enable CONFIG_METRO_M4_32KHZXTAL if you want to further
     study the XOSC32K problem.
 
     With that workaround (and a bunch of other fixes), the basic NSH
     configuration appears fully function, indicating the the board bring-
-    up is complete:
-
-      NuttShell (NSH) NuttX-7.25
-      nsh> help
-      help usage:  help [-v] [<cmd>]
-
-        [           cmp         false       mkdir       set         uname
-        ?           dirname     help        mh          sh          usleep
-        basename    dd          hexdump     mv          sleep       xd
-        break       echo        kill        mw          test
-        cat         exec        ls          rm          time
-        cp          exit        mb          rmdir       true
-
-      Builtin Apps:
-      nsh>
+    up is complete.
 
     There are additional drivers ported from SAML21 which has, in most cases,
     identical peripherals.  None of these drivers have been verified on the
     SAMD51, However.  These include:  DMAC, I2C, SPI, and USB.
-
-    The timer interrupt appears to be running too fast.  From the NSH console,
-    I see that sleep 5 seems to take about 1 second, sleep 10 seems to take
-    about 2 seconds.
 
 Unlocking FLASH
 ===============

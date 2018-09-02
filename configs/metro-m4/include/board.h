@@ -102,7 +102,8 @@
 #define BOARD_GCLK6_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
 #define BOARD_GCLK7_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
 #define BOARD_GCLK8_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
-#define BOARD_GCLK0_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK9_FREQUENCY   BOARD_XOSC1_FREQUENCY          /* Disabled */
+#define BOARD_GCLK10_FREQUENCY  BOARD_XOSC1_FREQUENCY          /* Disabled */
 #define BOARD_GCLK11_FREQUENCY  BOARD_XOSC1_FREQUENCY          /* Disabled */
 
 #define BOARD_CPU_FREQUENCY     BOARD_GCLK0_FREQUENCY /* CPU frequency 120MHz */
