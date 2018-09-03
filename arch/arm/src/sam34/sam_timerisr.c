@@ -144,9 +144,9 @@ void arm_timer_initialize(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
+#if 0
   /* Make sure that the SYSTICK clock source is set correctly */
 
-#if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
   regval = getreg32(NVIC_SYSTICK_CTRL);
 #ifdef CONFIG_SAM34_SYSTICK_HCLKd8
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
