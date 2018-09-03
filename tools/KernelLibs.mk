@@ -79,6 +79,12 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 USERLIBS += staging$(DELIM)$(LIBXX)$(LIBEXT)
 endif
 
+# Add library for application support.
+
+ifneq ($(APPDIR),)
+USERLIBS += staging$(DELIM)libapps$(LIBEXT)
+endif
+
 # Add libraries for network support
 
 ifeq ($(CONFIG_NET),y)
