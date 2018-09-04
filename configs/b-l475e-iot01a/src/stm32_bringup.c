@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/b-l475e-iot01a/src/stm32_bringup.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,6 +231,16 @@ process_next_part:
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32l4_spirit_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_TIMER
+/* Register timer drivers */
+
+  ret = stm32l4_timer_driver_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to setup TIM1 at /dev/timer0: %d\n", ret);
     }
 #endif
 
