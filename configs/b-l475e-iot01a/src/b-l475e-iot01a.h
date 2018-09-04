@@ -142,7 +142,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32l4_bringup
  *
  * Description:
  *   Called either by board_intialize() if CONFIG_BOARD_INITIALIZE or by
