@@ -217,6 +217,7 @@ if [ "X${USRONLY}" == "Xy" ]; then
 	echo "AR               = ${AR}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "NM               = ${NM}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/build/Make.defs"
