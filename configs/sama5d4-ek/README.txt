@@ -4153,7 +4153,7 @@ Configurations
         A. Build with no symbol table
 
         $ cd nuttx                          : Go to the NuttX build directory
-        $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
+        $ tools/configure.sh sama5d4-ek/knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ make                              : Build the kerne with a dummy ROMFS image
                                             : This should create the nuttx ELF
@@ -4173,7 +4173,7 @@ Configurations
         D. Create the symbol table from the apps/bin/content and copy back to NuttX
 
         $ make symtab                       : Create the symbol table
-        $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
+        $ ar rcs ../nuttx/binfmt/libbinfmt.a exe/symtab_apps.o
 
         NOTE: There are many ways to create symbol tables.  The above will create
         the minimal symbol tabled needed.
@@ -4201,7 +4201,7 @@ Configurations
 
         A. Build with dummy ROMFS file system image and no symbol table
 
-        $ tools/configure.sh sama5d4-ek/kernel  : Establish this configuration
+        $ tools/configure.sh sama5d4-ek/knsh  : Establish this configuration
         $ export PATH=???:$PATH             : Set up the PATH variable
         $ touch configs/sama5d4-ek/include/boot_romfsimg.h
         $ make                              : Build the kernel with a dummy ROMFS image
@@ -4227,7 +4227,7 @@ Configurations
         E. Create the symbol table from the apps/bin and copy it back to NuttX
 
         $ make symtab                       : Create the symbol table
-        $ ar rcs ../nuttx/binfmt/libbinfmt.a import/symtab.o
+        $ ar rcs ../nuttx/binfmt/libbinfmt.a exe/symtab_apps.o
 
         NOTE: There are many ways to create symbol tables.  The above will create
         the minimal symbol tabled needed.
