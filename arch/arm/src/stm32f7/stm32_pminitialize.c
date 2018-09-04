@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pmsleep.c
+ * arch/arm/src/stm32f7/stm32_pminitialize.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +31,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -41,74 +39,40 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <nuttx/power/pm.h>
 
-#include "up_arch.h"
-#include "nvic.h"
-#include "stm32_pwr.h"
+#include "up_internal.h"
 #include "stm32_pm.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_PM
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_pmsleep
+ * Name: up_pminitialize
  *
  * Description:
- *   Enter SLEEP mode.
+ *   This function is called by MCU-specific logic at power-on reset in
+ *   order to provide one-time initialization the power management subystem.
+ *   This function must be called *very* early in the initialization sequence
+ *   *before* any other device drivers are initialized (since they may
+ *   attempt to register with the power management subsystem).
  *
  * Input Parameters:
- *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it
- *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *   None.
+ *
  * Returned Value:
- *   None
+ *    None.
  *
  ****************************************************************************/
 
-void stm32_pmsleep(bool sleeponexit)
+void up_pminitialize(void)
 {
-  uint32_t regval;
+  /* Then initialize the NuttX power management subsystem proper */
 
-  /* Clear SLEEPDEEP bit of Cortex System Control Register */
-
-  regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  if (sleeponexit)
-    {
-      regval |= NVIC_SYSCON_SLEEPONEXIT;
-    }
-  else
-    {
-      regval &= ~NVIC_SYSCON_SLEEPONEXIT;
-    }
-
-  putreg32(regval, NVIC_SYSCON);
-
-  /* Sleep until the wakeup interrupt or event occurs */
-
-#ifdef CONFIG_PM_WFE
-  /* Mode: SLEEP + Entry with WFE */
-
-  asm("wfe");
-#else
-  /* Mode: SLEEP + Entry with WFI */
-
-  asm("wfi");
-#endif
+  pm_initialize();
 }
+
+#endif /* CONFIG_PM */

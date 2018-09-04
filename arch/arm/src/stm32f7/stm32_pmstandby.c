@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pmsleep.c
+ * arch/arm/src/stm32f7/stm32_pmstandby.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +31,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -45,70 +43,54 @@
 
 #include "up_arch.h"
 #include "nvic.h"
+#include "stm32_rcc.h"
 #include "stm32_pwr.h"
 #include "stm32_pm.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_pmsleep
+ * Name: stm32_pmstandby
  *
  * Description:
- *   Enter SLEEP mode.
+ *   Enter STANDBY mode.
  *
  * Input Parameters:
- *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it
- *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *   None
+ *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void stm32_pmsleep(bool sleeponexit)
+void stm32_pmstandby(void)
 {
   uint32_t regval;
 
-  /* Clear SLEEPDEEP bit of Cortex System Control Register */
+  /* Clear the wake-up flags before reseting. */
+
+  modifyreg32(STM32_PWR_CR1, 0, PWR_CR1_CSBF);
+  modifyreg32(STM32_PWR_CR2, 0, PWR_CR2_CWUPF1 | PWR_CR2_CWUPF2 |
+                                PWR_CR2_CWUPF3 | PWR_CR2_CWUPF4 |
+                                PWR_CR2_CWUPF5 | PWR_CR2_CWUPF6);
+
+  /* Clear reset flags. */
+
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_RMVF);
+
+  /* Set the Power Down Deep Sleep (PDDS) bit in the power control register. */
+
+  modifyreg32(STM32_PWR_CR1, 0, PWR_CR1_PDDS);
+
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
 
   regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  if (sleeponexit)
-    {
-      regval |= NVIC_SYSCON_SLEEPONEXIT;
-    }
-  else
-    {
-      regval &= ~NVIC_SYSCON_SLEEPONEXIT;
-    }
-
+  regval |= NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
 
-  /* Sleep until the wakeup interrupt or event occurs */
-
-#ifdef CONFIG_PM_WFE
-  /* Mode: SLEEP + Entry with WFE */
-
-  asm("wfe");
-#else
-  /* Mode: SLEEP + Entry with WFI */
+  /* Sleep until the wakeup reset occurs */
 
   asm("wfi");
-#endif
 }

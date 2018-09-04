@@ -1,9 +1,8 @@
-/****************************************************************************
- * arch/arm/src/stm32/stm32_pmsleep.c
+/************************************************************************************
+ * arch/arm/src/stm32f7/stm32_pm.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,8 +31,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
- ****************************************************************************/
+ ************************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_PM_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_PM_H
 
 /****************************************************************************
  * Included Files
@@ -43,26 +44,55 @@
 
 #include <stdbool.h>
 
-#include "up_arch.h"
-#include "nvic.h"
-#include "stm32_pwr.h"
-#include "stm32_pm.h"
+#include "chip.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Private Functions
+ * Name: stm32_pmstop
+ *
+ * Description:
+ *   Enter STOP mode.
+ *
+ * Input Parameters:
+ *   lpds - true: To further reduce power consumption in Stop mode, put the
+ *          internal voltage regulator in low-power under-drive mode using the
+ *          LPDS and LPUDS bits of the Power control register (PWR_CR1).
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
+void stm32_pmstop(bool lpds);
+
 /****************************************************************************
- * Public Functions
+ * Name: stm32_pmstandby
+ *
+ * Description:
+ *   Enter STANDBY mode.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
+
+void stm32_pmstandby(void);
 
 /****************************************************************************
  * Name: stm32_pmsleep
@@ -81,34 +111,12 @@
  *
  ****************************************************************************/
 
-void stm32_pmsleep(bool sleeponexit)
-{
-  uint32_t regval;
+void stm32_pmsleep(bool sleeponexit);
 
-  /* Clear SLEEPDEEP bit of Cortex System Control Register */
-
-  regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  if (sleeponexit)
-    {
-      regval |= NVIC_SYSCON_SLEEPONEXIT;
-    }
-  else
-    {
-      regval &= ~NVIC_SYSCON_SLEEPONEXIT;
-    }
-
-  putreg32(regval, NVIC_SYSCON);
-
-  /* Sleep until the wakeup interrupt or event occurs */
-
-#ifdef CONFIG_PM_WFE
-  /* Mode: SLEEP + Entry with WFE */
-
-  asm("wfe");
-#else
-  /* Mode: SLEEP + Entry with WFI */
-
-  asm("wfi");
-#endif
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_PM_H */

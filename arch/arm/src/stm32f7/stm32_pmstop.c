@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_pmsleep.c
+ * arch/arm/src/stm32f7/stm32_pmstop.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +31,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -49,55 +47,53 @@
 #include "stm32_pm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_pmsleep
+ * Name: stm32_pmstop
  *
  * Description:
- *   Enter SLEEP mode.
+ *   Enter STOP mode.
  *
  * Input Parameters:
- *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it
- *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *   lpds - true: To further reduce power consumption in Stop mode, put the
+ *          internal voltage regulator in low-power under-drive mode using the
+ *          LPDS and LPUDS bits of the Power control register (PWR_CR1).
+ *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void stm32_pmsleep(bool sleeponexit)
+void stm32_pmstop(bool lpds)
 {
   uint32_t regval;
 
-  /* Clear SLEEPDEEP bit of Cortex System Control Register */
+  /* Clear the Power Down Deep Sleep (PDDS), the Low Power Deep Sleep
+   * (LPDS), Under-Drive Enable in Stop Mode (UDEN), Flash Power Down in Stop
+   * Mode (FPDS), Main Regulator in Deepsleep Under-Drive Mode (MRUDS), and
+   * Low-power Regulator in Deepsleep Under-Drive Mode (LPUDS) bits in
+   * the power control register.
+   */
+
+  regval  = getreg32(STM32_PWR_CR1);
+  regval &= ~(PWR_CR1_LPDS | PWR_CR1_PDDS | PWR_CR1_FPDS);
+  regval &= ~(PWR_CR1_UDEN_ENABLE | PWR_CR1_MRUDS | PWR_CR1_LPUDS);
+
+  /* Set under-drive enabled with low-power regulator.  */
+
+  if (lpds)
+    {
+      regval |= PWR_CR1_UDEN_ENABLE | PWR_CR1_LPUDS | PWR_CR1_LPDS;
+    }
+
+  putreg32(regval, STM32_PWR_CR1);
+
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
 
   regval  = getreg32(NVIC_SYSCON);
-  regval &= ~NVIC_SYSCON_SLEEPDEEP;
-  if (sleeponexit)
-    {
-      regval |= NVIC_SYSCON_SLEEPONEXIT;
-    }
-  else
-    {
-      regval &= ~NVIC_SYSCON_SLEEPONEXIT;
-    }
-
+  regval |= NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
 
   /* Sleep until the wakeup interrupt or event occurs */
@@ -105,10 +101,29 @@ void stm32_pmsleep(bool sleeponexit)
 #ifdef CONFIG_PM_WFE
   /* Mode: SLEEP + Entry with WFE */
 
-  asm("wfe");
+  asm volatile ("wfe");
 #else
   /* Mode: SLEEP + Entry with WFI */
 
-  asm("wfi");
+  asm volatile ("wfi");
 #endif
+
+  /* Clear deep sleep bits, so that MCU does not go into deep sleep in idle. */
+
+  /* Clear the Power Down Deep Sleep (PDDS), the Low Power Deep Sleep
+   * (LPDS) bits, Under-Drive Enable in Stop Mode (UDEN), Main Regulator in
+   * Deepsleep Under-Drive Mode (MRUDS), and Low-power Regulator in Deepsleep
+   * Under-Drive Mode (LPUDS) in the power control register.
+   */
+
+  regval  = getreg32(STM32_PWR_CR1);
+  regval &= ~(PWR_CR1_LPDS | PWR_CR1_PDDS);
+  regval &= ~(PWR_CR1_UDEN_ENABLE | PWR_CR1_MRUDS | PWR_CR1_LPUDS);
+  putreg32(regval, STM32_PWR_CR1);
+
+  /* Clear SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval &= ~NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
 }
