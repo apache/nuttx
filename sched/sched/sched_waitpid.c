@@ -335,17 +335,6 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   (void)enter_cancellation_point();
 
-  /* None of the options are supported */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (options != 0)
-    {
-      set_errno(ENOSYS);
-      leave_cancellation_point();
-      return ERROR;
-    }
-#endif
-
   /* Create a signal set that contains only SIGCHLD */
 
   (void)sigemptyset(&set);
