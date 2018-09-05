@@ -1851,7 +1851,7 @@ o File system / Generic drivers (fs/, drivers/)
 
                link, unlink, softlink, readlink - For symbolic links.  Only
                  the ROMFS file system currently supports hard and soft links,
-                 so this is not too important.  The top-level, psuedo-file
+                 so this is not too important.  The top-level, pseudo-file
                  system supports soft links.
 
                File locking

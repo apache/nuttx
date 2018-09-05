@@ -74,7 +74,7 @@ static sem_t g_devno_sem = SEM_INITIALIZER(1);
  *
  * Description:
  *   Create a unique temporary device name in the /dev/ directory of the
- *   psuedo-file system.  We cannot use mktemp for this because it will
+ *   pseudo-file system.  We cannot use mktemp for this because it will
  *   attempt to open() the file.
  *
  * Input Parameters:

@@ -68,39 +68,42 @@
 #define SIGRTMIN        MIN_SIGNO  /* First real time signal */
 #define SIGRTMAX        MAX_SIGNO  /* Last real time signal */
 
-/* NuttX does not support standard signal actions.  NuttX supports only what
+/* NuttX does not support all standard signal actions.  NuttX supports what
  * are referred to as "real time" signals.  The default action of all NuttX
- * signals is to simply ignore the signal.
+ * signals is to simply ignore the signal.  Certain signals can be
+ * configured to support there default actions as indicated by NOTEs to the
+ * following table.
  *
- * This is not POSIX compliant.  Per OpenGroup.org:  The following signals
- * and default signal action s must be supported on all implementations:
+ * This is not POSIX compliant behavior!  Per OpenGroup.org:  The following
+ * signals and default signal action s must be supported on all
+ * implementations:
  *
  *   ---------- ------- ----------------------------------------------------
  *   Signal     Default Description
  *   Name       Action
  *   ---------- ------- ----------------------------------------------------
  *   SIGABRT    A       Process abort signal
- *   SIGALRM    T       Alarm clock
+ *   SIGALRM    T (1)   Alarm clock
  *   SIGBUS     A       Access to an undefined portion of a memory object
  *   SIGCHLD    I       Child process terminated, stopped
  *                      (or continued XSI extension)
- *   SIGCONT    C       Continue executing, if stopped
+ *   SIGCONT    C (2)   Continue executing, if stopped
  *   SIGFPE     A       Erroneous arithmetic operation
  *   SIGHUP     T       Hangup
  *   SIGILL     A       Illegal instruction
- *   SIGINT     T       Terminal interrupt signal
- *   SIGKILL    T       Kill (cannot be caught or ignored)
+ *   SIGINT     T (3)   Terminal interrupt signal
+ *   SIGKILL    T (3)   Kill (cannot be caught or ignored)
  *   SIGPIPE    T       Write on a pipe with no one to read it
  *   SIGQUIT    A       Terminal quit signal
  *   SIGSEGV    A       Invalid memory reference
- *   SIGSTOP    S       Stop executing (cannot be caught or ignored)
+ *   SIGSTOP    S (2)   Stop executing (cannot be caught or ignored)
  *   SIGTERM    T       Termination signal
- *   SIGTSTP    S       Terminal stop signal
+ *   SIGTSTP    S (2)   Terminal stop signal
  *   SIGTTIN    S       Background process attempting read
  *   SIGTTOU    S       Background process attempting write
- *   SIGUSR1    T       User-defined signal 1
- *   SIGUSR2    T       User-defined signal 2
- *   SIGPOLL    T       Poll-able event (XSI extension)
+ *   SIGUSR1    T (4)   User-defined signal 1
+ *   SIGUSR2    T (5)   User-defined signal 2
+ *   SIGPOLL    T (6)   Poll-able event (XSI extension)
  *   SIGPROF    T       Profiling timer expired (XSI extension)
  *   SIGSYS     A       Bad system call (XSI extension)
  *   SIGTRAP    A       Trace/breakpoint trap (XSI extension)
@@ -112,21 +115,29 @@
  *
  * Where default action codes are:
  *
- * T  Abnormal termination of the process. The process is terminated with
+ * T  Abnormal termination of the process.  The process is terminated with
  *    all the consequences of _exit() except that the status made available
  *    to wait() and waitpid() indicates abnormal termination by the
  *    specified signal.
- * A  Abnormal termination of the process. Additionally with the XSI
+ * A  Abnormal termination of the process.  Additionally with the XSI
  *    extension, implementation-defined abnormal termination actions, such
  *    as creation of a core file, may occur.
  * I  Ignore the signal.
  * S  Stop the process.
  * C  Continue the process, if it is stopped; otherwise, ignore the signal.
+ *
+ * NOTES:
+ * (1)  The default action can be enabled with CONFIG_SIG_SIGALRM_ACTION
+ * (2)  The default action can be enabled with CONFIG_SIG_SIGSTOP_ACTION
+ * (3)  The default action can be enabled with CONFIG_SIG_SIGKILL_ACTION
+ * (4)  The default action can be enabled with CONFIG_SIG_SIGUSR1_ACTION
+ * (5)  The default action can be enabled with CONFIG_SIG_SIGUSR2_ACTION
+ * (6)  The default action can be enabled with CONFIG_SIG_SIGPOLL_ACTION
  */
 
 /* A few of the real time signals are used within the OS.  They have
  * default values that can be overridden from the configuration file. The
- * rest are all user signals.
+ * rest are all standard or user real-time signals.
  *
  * The signal number zero is wasted for the most part.  It is a valid
  * signal number, but has special meaning at many interfaces (e.g., Kill()).

@@ -3379,7 +3379,7 @@
 	  now functional.
 	* configs/fire-stm32v2:  Add support or the fire-stm32v3 board as
 	  well (untested because I do not have a v3 board).
-	* lib/stdio/lib_sscanf.c:  Add %n psuedo-format (from Kate).
+	* lib/stdio/lib_sscanf.c:  Add %n pseudo-format (from Kate).
 	* lib/stdio/lib_sscanf.c:  There is an issue of handling input
 	  when (1) no fieldwidth is provided and (2) there is no space
 	  seperating the input values.  No solutions is in place for this
@@ -10578,7 +10578,7 @@
 	  was calling stm32_pw_setvos() which accessed PWR_CR via an inactive APB
 	  From Juha Niskaneni (2015-06-11).
 	* fs/mount: Add the ability to mount a file system on top of en existing
-	  node in the psuedo-file system (2015-06-11).
+	  node in the pseudo-file system (2015-06-11).
 	* arch/arm/src/sam34/sam_clockconfig.c: Add default loop optimization if
 	  EEFC_FMR is available in the configuration (i.e., for SAM4S and 4E).
 	  From Marco Aurélio da Cruz (2015-06-11).
@@ -13661,7 +13661,7 @@
 	  (2017-02-05).
 	* tools/noteinfo.c: A hack tool that I use to analyze some sched_note
 	  output.  Needs a home and may be useful to others (2017-02-05).
-	* Pseudo File System:  Add support for soft links in the top-level psuedo
+	* Pseudo File System:  Add support for soft links in the top-level pseudo
 	  file system (2017-02-05).
 	* Updates to Kinetis SDHC driver.  From Marc Rechté (2017-02-06).
 	* SDIO interface: Handle all possible DMA combinations in all SDIO drivers
@@ -17781,7 +17781,7 @@
 	* fs/userfs:  This commit converts the underlying IPC used by the
 	  UserFS from Unix domain local sockets to UDP LocalHost loopback
 	  sockets.  The problem with the local sockets is that they do require
-	  operations on the top level psuedo-file system inode tree.  That tree
+	  operations on the top level pseudo-file system inode tree.  That tree
 	  must be locked during certain traversals such as enumerate mountpoints
 	  or enumerating directory entries.
 

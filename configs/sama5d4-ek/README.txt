@@ -4495,10 +4495,10 @@ Configurations
          |   |      |- fd                : File descriptors open in the group
          |   |      `- status            : Status of the group
          |   |- 1/                       : Information about Task ID 1
-         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
+         |   |  `- ...                   : Same pseudo-directories as for Task ID 0
          |   |- ...                      : ...
          |   |- n/                       : Information about Task ID n
-         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
+         |   |  `- ...                   : Same pseudo-directories as for Task ID 0
          |   |- uptime                   : Processor uptime
          `- tmp/
 

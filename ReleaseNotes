@@ -9283,7 +9283,7 @@ Additional new features and extended functionality:
     * File Systems/Block Drivers/MTD:
 
       - mount: Add the ability to mount a file system on top of en existing
-        node in the psuedo-file system.
+        node in the pseudo-file system.
       - epoll(): Add a very simple epoll layer just around poll calls. To
         satisfy build app requirements.  From Anton D. Kachalov.
 
@@ -13135,7 +13135,7 @@ Additional new features and extended functionality:
     * File Systems/Block and MTD Drivers
 
       - Pseudo File System:  Add support for soft links in the top-level
-        psuedo file system.
+        pseudo file system.
       - Soft links:  Add an implementation of readlink().
       - Add fstat() support.  Implement fstat() method in binfs, romfs,
         unionfs, tmpfs, nxffs, nfx, hostfs, procfs, and smartfs.
@@ -15697,7 +15697,7 @@ Additional new features and extended functionality:
         message queues.  However, that lead to certain inescapable deadlock
         conditions So the IPC was converted to UDP LocalHost loopback
         sockets.  The problem with the local sockets is that they do require
-        operations on the top level psuedo-file system inode tree.  That
+        operations on the top level pseudo-file system inode tree.  That
         tree must be locked during certain traversals such as enumerate
         mountpoints or enumerating directory entries.  This conversion is
         unfortunate in the sense that Unix local domain sockets are
