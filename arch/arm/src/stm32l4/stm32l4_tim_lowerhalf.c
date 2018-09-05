@@ -84,6 +84,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * timer_lowerhalf_s structure.
@@ -111,6 +112,8 @@ static int stm32l4_timer_handler(int irq, void *context, void *arg);
 
 static int stm32l4_start(FAR struct timer_lowerhalf_s *lower);
 static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower);
+static int stm32l4_getstatus(FAR struct timer_lowerhalf_s *lower,
+                             FAR struct timer_status_s *status);
 static int stm32l4_settimeout(FAR struct timer_lowerhalf_s *lower,
                               uint32_t timeout);
 static void stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
@@ -119,13 +122,14 @@ static void stm32l4_setcallback(FAR struct timer_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct timer_ops_s g_timer_ops =
 {
   .start       = stm32l4_start,
   .stop        = stm32l4_stop,
-  .getstatus   = NULL,
+  .getstatus   = stm32l4_getstatus,
   .settimeout  = stm32l4_settimeout,
   .setcallback = stm32l4_setcallback,
   .ioctl       = NULL,
@@ -329,6 +333,71 @@ static int stm32l4_stop(FAR struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
+ * Name: stm32l4_getstatus
+ *
+ * Description:
+ *   get timer status
+ *
+ * Input Parameters:
+ *   lower  - A pointer the publicly visible representation of the "lower-
+ *            half" driver state structure.
+ *   status - The location to return the status information.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int stm32l4_getstatus(FAR struct timer_lowerhalf_s *lower,
+                             FAR struct timer_status_s *status)
+{
+  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+  uint64_t maxtimeout;
+  uint32_t timeout;
+  uint32_t clock;
+  uint32_t period;
+  uint32_t clock_factor;
+
+  DEBUGASSERT(priv);
+
+  /* Return the status bit */
+
+  status->flags = 0;
+  if (priv->started)
+    {
+      status->flags |= TCFLAGS_ACTIVE;
+    }
+
+  if (priv->callback)
+    {
+      status->flags |= TCFLAGS_HANDLER;
+    }
+
+  /* Get timeout */
+
+  maxtimeout = (1 << priv->resolution) - 1;
+  clock      = STM32L4_TIM_GETCLOCK(priv->tim);
+  period     = STM32L4_TIM_GETPERIOD(priv->tim);
+
+  if (clock == 1000000)
+    {
+      timeout = period;
+    }
+  else
+    {
+      timeout = (maxtimeout * 1000000) / clock;
+    }
+
+  status->timeout = timeout;
+
+  /* Get the time remaining until the timer expires (in microseconds) */
+
+  clock_factor     = (clock == 1000000)? 1: (clock / 1000000);
+  status->timeleft = (timeout - STM32L4_TIM_GETCOUNTER(priv->tim)) * clock_factor;
+  return OK;
+}
+
+/****************************************************************************
  * Name: stm32l4_settimeout
  *
  * Description:
@@ -449,21 +518,25 @@ int stm32l4_timer_initialize(FAR const char *devpath, int timer)
         lower = &g_tim1_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM2
       case 2:
         lower = &g_tim2_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM3
       case 3:
         lower = &g_tim3_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM4
       case 4:
         lower = &g_tim4_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM5
       case 5:
         lower = &g_tim5_lowerhalf;
@@ -474,31 +547,37 @@ int stm32l4_timer_initialize(FAR const char *devpath, int timer)
         lower = &g_tim6_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM7
       case 7:
         lower = &g_tim7_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM8
       case 8:
         lower = &g_tim8_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
       case 15:
         lower = &g_tim15_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM16
       case 16:
         lower = &g_tim16_lowerhalf;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM17
       case 17:
         lower = &g_tim17_lowerhalf;
         break;
 #endif
+
       default:
         return -ENODEV;
     }

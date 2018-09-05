@@ -6,7 +6,7 @@
  *
  * With modifications and updates by:
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           <dev@ziggurat29.com>
  *
@@ -71,21 +71,22 @@
 /* Configuration ********************************************************************/
 /* Timer devices may be used for different purposes.  Such special purposes include:
  *
- * - To generate modulated outputs for such things as motor control.  If CONFIG_STM32L4_TIMn
- *   is defined then the CONFIG_STM32L4_TIMn_PWM may also be defined to indicate that
- *   the timer is intended to be used for pulsed output modulation.
+ * - To generate modulated outputs for such things as motor control.  If
+ *   CONFIG_STM32L4_TIMn is defined then the CONFIG_STM32L4_TIMn_PWM may also be
+ *   defined to indicate that the timer is intended to be used for pulsed output
+ *   modulation.
  *
  * - To control periodic ADC input sampling.  If CONFIG_STM32L4_TIMn is defined then
- *   CONFIG_STM32L4_TIMn_ADC may also be defined to indicate that timer "n" is intended
- *   to be used for that purpose.
+ *   CONFIG_STM32L4_TIMn_ADC may also be defined to indicate that timer "n" is
+ *   intended to be used for that purpose.
  *
  * - To control periodic DAC outputs.  If CONFIG_STM32L4_TIMn is defined then
- *   CONFIG_STM32L4_TIMn_DAC may also be defined to indicate that timer "n" is intended
- *   to be used for that purpose.
+ *   CONFIG_STM32L4_TIMn_DAC may also be defined to indicate that timer "n" is
+ *   intended to be used for that purpose.
  *
  * - To use a Quadrature Encoder.  If CONFIG_STM32L4_TIMn is defined then
- *   CONFIG_STM32L4_TIMn_QE may also be defined to indicate that timer "n" is intended
- *   to be used for that purpose.
+ *   CONFIG_STM32L4_TIMn_QE may also be defined to indicate that timer "n" is
+ *   intended to be used for that purpose.
  *
  * In any of these cases, the timer will not be used by this timer module.
  */
@@ -94,42 +95,52 @@
     defined(CONFIG_STM32L4_TIM1_DAC) || defined(CONFIG_STM32L4_TIM1_QE)
 #  undef CONFIG_STM32L4_TIM1
 #endif
+
 #if defined(CONFIG_STM32L4_TIM2_PWM) || defined (CONFIG_STM32L4_TIM2_ADC) || \
     defined(CONFIG_STM32L4_TIM2_DAC) || defined(CONFIG_STM32L4_TIM2_QE)
 #  undef CONFIG_STM32L4_TIM2
 #endif
+
 #if defined(CONFIG_STM32L4_TIM3_PWM) || defined (CONFIG_STM32L4_TIM3_ADC) || \
     defined(CONFIG_STM32L4_TIM3_DAC) || defined(CONFIG_STM32L4_TIM3_QE)
 #  undef CONFIG_STM32L4_TIM3
 #endif
+
 #if defined(CONFIG_STM32L4_TIM4_PWM) || defined (CONFIG_STM32L4_TIM4_ADC) || \
     defined(CONFIG_STM32L4_TIM4_DAC) || defined(CONFIG_STM32L4_TIM4_QE)
 #  undef CONFIG_STM32L4_TIM4
 #endif
+
 #if defined(CONFIG_STM32L4_TIM5_PWM) || defined (CONFIG_STM32L4_TIM5_ADC) || \
     defined(CONFIG_STM32L4_TIM5_DAC) || defined(CONFIG_STM32L4_TIM5_QE)
 #  undef CONFIG_STM32L4_TIM5
 #endif
+
 #if defined(CONFIG_STM32L4_TIM6_PWM) || defined (CONFIG_STM32L4_TIM6_ADC) || \
     defined(CONFIG_STM32L4_TIM6_DAC) || defined(CONFIG_STM32L4_TIM6_QE)
 #  undef CONFIG_STM32L4_TIM6
 #endif
+
 #if defined(CONFIG_STM32L4_TIM7_PWM) || defined (CONFIG_STM32L4_TIM7_ADC) || \
     defined(CONFIG_STM32L4_TIM7_DAC) || defined(CONFIG_STM32L4_TIM7_QE)
 #  undef CONFIG_STM32L4_TIM7
 #endif
+
 #if defined(CONFIG_STM32L4_TIM8_PWM) || defined (CONFIG_STM32L4_TIM8_ADC) || \
     defined(CONFIG_STM32L4_TIM8_DAC) || defined(CONFIG_STM32L4_TIM8_QE)
 #  undef CONFIG_STM32L4_TIM8
 #endif
+
 #if defined(CONFIG_STM32L4_TIM15_PWM) || defined (CONFIG_STM32L4_TIM15_ADC) || \
     defined(CONFIG_STM32L4_TIM15_DAC) || defined(CONFIG_STM32L4_TIM15_QE)
 #  undef CONFIG_STM32L4_TIM15
 #endif
+
 #if defined(CONFIG_STM32L4_TIM16_PWM) || defined (CONFIG_STM32L4_TIM16_ADC) || \
     defined(CONFIG_STM32L4_TIM16_DAC) || defined(CONFIG_STM32L4_TIM16_QE)
 #  undef CONFIG_STM32L4_TIM16
 #endif
+
 #if defined(CONFIG_STM32L4_TIM17_PWM) || defined (CONFIG_STM32L4_TIM17_ADC) || \
     defined(CONFIG_STM32L4_TIM17_DAC) || defined(CONFIG_STM32L4_TIM17_QE)
 #  undef CONFIG_STM32L4_TIM17
@@ -218,7 +229,7 @@
 struct stm32l4_tim_priv_s
 {
   FAR const struct stm32l4_tim_ops_s *ops;
-  stm32l4_tim_mode_t mode;
+  enum stm32l4_tim_mode_e mode;
   uint32_t base;                      /* TIMn base address */
 };
 
@@ -251,20 +262,22 @@ static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev);
     defined(HAVE_TIM5_GPIOCONFIG) || defined(HAVE_TIM8_GPIOCONFIG) || \
     defined(HAVE_TIM15_GPIOCONFIG) || defined(HAVE_TIM16_GPIOCONFIG) || \
     defined(HAVE_TIM17_GPIOCONFIG)
-static void stm32l4_tim_gpioconfig(uint32_t cfg, stm32l4_tim_channel_t mode);
+static void stm32l4_tim_gpioconfig(uint32_t cfg, enum stm32l4_tim_channel_e mode);
 #endif
 
 /* Timer methods */
 
 static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
-                               stm32l4_tim_mode_t mode);
+                               enum stm32l4_tim_mode_e mode);
 static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
                                 uint32_t freq);
+static uint32_t  stm32l4_tim_getclock(FAR struct stm32l4_tim_dev_s *dev);
 static void stm32l4_tim_setperiod(FAR struct stm32l4_tim_dev_s *dev,
                                   uint32_t period);
+static uint32_t stm32l4_tim_getperiod(FAR struct stm32l4_tim_dev_s *dev);
 static uint32_t stm32l4_tim_getcounter(FAR struct stm32l4_tim_dev_s *dev);
 static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
-                                  uint8_t channel, stm32l4_tim_channel_t mode);
+                                  uint8_t channel, enum stm32l4_tim_channel_e mode);
 static int stm32l4_tim_setcompare(FAR struct stm32l4_tim_dev_s *dev,
                                   uint8_t channel, uint32_t compare);
 static int stm32l4_tim_getcapture(FAR struct stm32l4_tim_dev_s *dev,
@@ -286,7 +299,9 @@ static const struct stm32l4_tim_ops_s stm32l4_tim_ops =
 {
   .setmode    = stm32l4_tim_setmode,
   .setclock   = stm32l4_tim_setclock,
+  .getclock   = stm32l4_tim_getclock,
   .setperiod  = stm32l4_tim_setperiod,
+  .getperiod  = stm32l4_tim_getperiod,
   .getcounter = stm32l4_tim_getcounter,
   .setchannel = stm32l4_tim_setchannel,
   .setcompare = stm32l4_tim_setcompare,
@@ -531,7 +546,7 @@ static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev)
     defined(HAVE_TIM5_GPIOCONFIG) || defined(HAVE_TIM8_GPIOCONFIG) || \
     defined(HAVE_TIM15_GPIOCONFIG) || defined(HAVE_TIM16_GPIOCONFIG) || \
     defined(HAVE_TIM17_GPIOCONFIG)
-static void stm32l4_tim_gpioconfig(uint32_t cfg, stm32l4_tim_channel_t mode)
+static void stm32l4_tim_gpioconfig(uint32_t cfg, enum stm32l4_tim_channel_e mode)
 {
   /* TODO: Add support for input capture and bipolar dual outputs for TIM8 */
 
@@ -551,7 +566,7 @@ static void stm32l4_tim_gpioconfig(uint32_t cfg, stm32l4_tim_channel_t mode)
  ************************************************************************************/
 
 static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
-                               stm32l4_tim_mode_t mode)
+                               enum stm32l4_tim_mode_e mode)
 {
   uint16_t val = ATIM_CR1_CEN | ATIM_CR1_ARPE;
 
@@ -650,41 +665,49 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
         freqin = BOARD_TIM1_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM2
       case STM32L4_TIM2_BASE:
         freqin = BOARD_TIM2_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM3
       case STM32L4_TIM3_BASE:
         freqin = BOARD_TIM3_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM4
       case STM32L4_TIM4_BASE:
         freqin = BOARD_TIM4_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM5
       case STM32L4_TIM5_BASE:
         freqin = BOARD_TIM5_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM6
       case STM32L4_TIM6_BASE:
         freqin = BOARD_TIM6_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM7
       case STM32L4_TIM7_BASE:
         freqin = BOARD_TIM7_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM8
       case STM32L4_TIM8_BASE:
         freqin = BOARD_TIM8_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
       case STM32L4_TIM15_BASE:
         freqin = BOARD_TIM15_FREQUENCY;
@@ -695,6 +718,7 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
         freqin = BOARD_TIM16_FREQUENCY;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM17
       case STM32L4_TIM17_BASE:
         freqin = BOARD_TIM17_FREQUENCY;
@@ -734,6 +758,96 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
 }
 
 /************************************************************************************
+ * Name: stm32l4_tim_getclock
+ ************************************************************************************/
+
+static uint32_t stm32l4_tim_getclock(FAR struct stm32l4_tim_dev_s *dev)
+{
+  uint32_t freqin;
+  uint32_t clock;
+  DEBUGASSERT(dev != NULL);
+
+  /* Get the input clock frequency for this timer.  These vary with
+   * different timer clock sources, MCU-specific timer configuration, and
+   * board-specific clock configuration.  The correct input clock frequency
+   * must be defined in the board.h header file.
+   */
+
+  switch (((struct stm32l4_tim_priv_s *)dev)->base)
+    {
+#ifdef CONFIG_STM32L4_TIM1
+      case STM32L4_TIM1_BASE:
+        freqin = BOARD_TIM1_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM2
+      case STM32L4_TIM2_BASE:
+        freqin = BOARD_TIM2_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM3
+      case STM32L4_TIM3_BASE:
+        freqin = BOARD_TIM3_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM4
+      case STM32L4_TIM4_BASE:
+        freqin = BOARD_TIM4_FREQUENCY;
+        break;
+#endif
+#ifdef CONFIG_STM32L4_TIM5
+      case STM32L4_TIM5_BASE:
+        freqin = BOARD_TIM5_FREQUENCY;
+        break;
+#endif
+#ifdef CONFIG_STM32L4_TIM6
+      case STM32L4_TIM6_BASE:
+        freqin = BOARD_TIM6_FREQUENCY;
+        break;
+#endif
+#ifdef CONFIG_STM32L4_TIM7
+      case STM32L4_TIM7_BASE:
+        freqin = BOARD_TIM7_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM8
+      case STM32L4_TIM8_BASE:
+        freqin = BOARD_TIM8_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM15
+      case STM32L4_TIM15_BASE:
+        freqin = BOARD_TIM15_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM16
+      case STM32L4_TIM16_BASE:
+        freqin = BOARD_TIM16_FREQUENCY;
+        break;
+#endif
+
+#ifdef CONFIG_STM32L4_TIM17
+      case STM32L4_TIM17_BASE:
+        freqin = BOARD_TIM17_FREQUENCY;
+        break;
+#endif
+      default:
+        return -EINVAL;
+    }
+
+  /* From chip datasheet, at page 1179. */
+
+  clock = freqin / (stm32l4_getreg16(dev, STM32L4_BTIM_PSC_OFFSET) + 1);
+  return clock;
+}
+
+/************************************************************************************
  * Name: stm32l4_tim_setperiod
  ************************************************************************************/
 
@@ -745,13 +859,45 @@ static void stm32l4_tim_setperiod(FAR struct stm32l4_tim_dev_s *dev,
 }
 
 /************************************************************************************
+ * Name: stm32l4_tim_getperiod
+ ************************************************************************************/
+
+static uint32_t stm32l4_tim_getperiod (FAR struct stm32l4_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return stm32l4_getreg32 (dev, STM32L4_BTIM_ARR_OFFSET);
+}
+
+/************************************************************************************
  * Name: stm32l4_tim_getcounter
  ************************************************************************************/
 
 static uint32_t stm32l4_tim_getcounter(FAR struct stm32l4_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
-  return stm32l4_getreg32(dev, STM32L4_BTIM_CNT_OFFSET);
+  uint32_t counter = stm32l4_getreg32(dev, STM32L4_BTIM_CNT_OFFSET);
+
+  /* In datasheet page 988, there is a useless bit named UIFCPY in TIMx_CNT.
+   * reset it it result when not TIM2 or TIM5.
+   */
+
+#if defined(CONFIG_STM32L4_TIM2) || defined(CONFIG_STM32L4_TIM5)
+  switch (((struct stm32l4_tim_priv_s *)dev)->base)
+    {
+#ifdef CONFIG_STM32L4_TIM2
+      case STM32L4_TIM2_BASE:
+#endif
+#ifdef CONFIG_STM32L4_TIM5
+      case STM32L4_TIM5_BASE:
+#endif
+        return counter;
+
+      default:
+        return counter & 0x0000FFFF;
+    }
+#else
+  return counter & 0x0000FFFF;
+#endif
 }
 
 /************************************************************************************
@@ -759,7 +905,7 @@ static uint32_t stm32l4_tim_getcounter(FAR struct stm32l4_tim_dev_s *dev)
  ************************************************************************************/
 
 static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
-                                  uint8_t channel, stm32l4_tim_channel_t mode)
+                                  uint8_t channel, enum stm32l4_tim_channel_e mode)
 {
   uint16_t ccmr_orig   = 0;
   uint16_t ccmr_val    = 0;
@@ -792,7 +938,7 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
       || ((struct stm32l4_tim_priv_s *)dev)->base == STM32L4_TIM7_BASE
 #endif
 #if STM32L4_NBTIM > 0
-  )
+     )
     {
       return -EINVAL;
     }
@@ -850,20 +996,28 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
           {
 #if defined(GPIO_TIM1_CH1OUT)
             case 0:
-              stm32l4_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM1_CH2OUT)
             case 1:
-              stm32l4_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM1_CH3OUT)
             case 2:
-              stm32l4_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM1_CH4OUT)
             case 3:
-              stm32l4_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode);
+              break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -878,21 +1032,25 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM2_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM2_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM2_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM2_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM2_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM2_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM2_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -907,21 +1065,25 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM3_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM3_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM3_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM3_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM3_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM3_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM3_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -936,6 +1098,7 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM4_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM4_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM4_CH2OUT, mode);
@@ -946,11 +1109,13 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM4_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM4_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM4_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -965,21 +1130,25 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM5_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM5_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM5_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM5_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM5_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM5_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM5_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -991,20 +1160,28 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
           {
 #if defined(GPIO_TIM8_CH1OUT)
             case 0:
-              stm32l4_tim_gpioconfig(GPIO_TIM8_CH1OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM8_CH1OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM8_CH2OUT)
             case 1:
-              stm32l4_tim_gpioconfig(GPIO_TIM8_CH2OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM8_CH2OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM8_CH3OUT)
             case 2:
-              stm32l4_tim_gpioconfig(GPIO_TIM8_CH3OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM8_CH3OUT, mode);
+              break;
 #endif
+
 #if defined(GPIO_TIM8_CH4OUT)
             case 3:
-              stm32l4_tim_gpioconfig(GPIO_TIM8_CH4OUT, mode); break;
+              stm32l4_tim_gpioconfig(GPIO_TIM8_CH4OUT, mode);
+              break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -1019,21 +1196,25 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM15_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM15_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM15_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM15_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM15_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM15_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM15_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -1048,21 +1229,25 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM16_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM16_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM16_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM16_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM16_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM16_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM16_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
@@ -1077,26 +1262,31 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
               stm32l4_tim_gpioconfig(GPIO_TIM17_CH1OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM17_CH2OUT)
             case 1:
               stm32l4_tim_gpioconfig(GPIO_TIM17_CH2OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM17_CH3OUT)
             case 2:
               stm32l4_tim_gpioconfig(GPIO_TIM17_CH3OUT, mode);
               break;
 #endif
+
 #if defined(GPIO_TIM17_CH4OUT)
             case 3:
               stm32l4_tim_gpioconfig(GPIO_TIM17_CH4OUT, mode);
               break;
 #endif
+
             default:
               return -EINVAL;
           }
         break;
 #endif
+
       default:
         return -EINVAL;
     }
@@ -1118,18 +1308,23 @@ static int stm32l4_tim_setcompare(FAR struct stm32l4_tim_dev_s *dev,
       case 1:
         stm32l4_putreg32(dev, STM32L4_GTIM_CCR1_OFFSET, compare);
         break;
+
       case 2:
         stm32l4_putreg32(dev, STM32L4_GTIM_CCR2_OFFSET, compare);
         break;
+
       case 3:
         stm32l4_putreg32(dev, STM32L4_GTIM_CCR3_OFFSET, compare);
         break;
+
       case 4:
         stm32l4_putreg32(dev, STM32L4_GTIM_CCR4_OFFSET, compare);
         break;
+
       default:
         return -EINVAL;
     }
+
   return OK;
 }
 
@@ -1146,10 +1341,13 @@ static int stm32l4_tim_getcapture(FAR struct stm32l4_tim_dev_s *dev,
     {
       case 1:
         return stm32l4_getreg32(dev, STM32L4_GTIM_CCR1_OFFSET);
+
       case 2:
         return stm32l4_getreg32(dev, STM32L4_GTIM_CCR2_OFFSET);
+
       case 3:
         return stm32l4_getreg32(dev, STM32L4_GTIM_CCR3_OFFSET);
+
       case 4:
         return stm32l4_getreg32(dev, STM32L4_GTIM_CCR4_OFFSET);
     }
@@ -1176,21 +1374,25 @@ static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
         vectorno = STM32L4_IRQ_TIM1UP;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM2
       case STM32L4_TIM2_BASE:
         vectorno = STM32L4_IRQ_TIM2;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM3
       case STM32L4_TIM3_BASE:
         vectorno = STM32L4_IRQ_TIM3;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM4
       case STM32L4_TIM4_BASE:
         vectorno = STM32L4_IRQ_TIM4;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM5
       case STM32L4_TIM5_BASE:
         vectorno = STM32L4_IRQ_TIM5;
@@ -1201,16 +1403,19 @@ static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
         vectorno = STM32L4_IRQ_TIM6;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM7
       case STM32L4_TIM7_BASE:
         vectorno = STM32L4_IRQ_TIM7;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM8
       case STM32L4_TIM8_BASE:
         vectorno = STM32L4_IRQ_TIM8UP;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
       case STM32L4_TIM15_BASE:
         vectorno = STM32L4_IRQ_TIM15;
@@ -1221,6 +1426,7 @@ static int stm32l4_tim_setisr(FAR struct stm32l4_tim_dev_s *dev,
         vectorno = STM32L4_IRQ_TIM16;
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM17
       case STM32L4_TIM17_BASE:
         vectorno = STM32L4_IRQ_TIM17;
@@ -1316,30 +1522,35 @@ FAR struct stm32l4_tim_dev_s *stm32l4_tim_init(int timer)
         modifyreg32(STM32L4_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM2
       case 2:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim2_priv;
         modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_TIM2EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM3
       case 3:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim3_priv;
         modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_TIM3EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM4
       case 4:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim4_priv;
         modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_TIM4EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM5
       case 5:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim5_priv;
         modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_TIM5EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM6
       case 6:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim6_priv;
@@ -1352,30 +1563,35 @@ FAR struct stm32l4_tim_dev_s *stm32l4_tim_init(int timer)
         modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_TIM7EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM8
       case 8:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim8_priv;
         modifyreg32(STM32L4_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
       case 15:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim15_priv;
         modifyreg32(STM32L4_RCC_APB2ENR, 0, RCC_APB2ENR_TIM15EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM16
       case 16:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim16_priv;
         modifyreg32(STM32L4_RCC_APB2ENR, 0, RCC_APB2ENR_TIM16EN);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM17
       case 17:
         dev = (struct stm32l4_tim_dev_s *)&stm32l4_tim17_priv;
         modifyreg32(STM32L4_RCC_APB2ENR, 0, RCC_APB2ENR_TIM17EN);
         break;
 #endif
+
       default:
         return NULL;
     }
@@ -1412,41 +1628,49 @@ int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev)
         modifyreg32(STM32L4_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM2
       case STM32L4_TIM2_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM2EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM3
       case STM32L4_TIM3_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM3EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM4
       case STM32L4_TIM4_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM4EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM5
       case STM32L4_TIM5_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM5EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM6
       case STM32L4_TIM6_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM6EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM7
       case STM32L4_TIM7_BASE:
         modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_TIM7EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM8
       case STM32L4_TIM8_BASE:
         modifyreg32(STM32L4_RCC_APB2ENR, RCC_APB2ENR_TIM8EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
       case STM32L4_TIM15_BASE:
         modifyreg32(STM32L4_RCC_APB2ENR, RCC_APB2ENR_TIM15EN, 0);
@@ -1457,11 +1681,13 @@ int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev)
         modifyreg32(STM32L4_RCC_APB2ENR, RCC_APB2ENR_TIM16EN, 0);
         break;
 #endif
+
 #ifdef CONFIG_STM32L4_TIM17
       case STM32L4_TIM17_BASE:
         modifyreg32(STM32L4_RCC_APB2ENR, RCC_APB2ENR_TIM17EN, 0);
         break;
 #endif
+
       default:
         return -EINVAL;
     }

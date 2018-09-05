@@ -6,7 +6,7 @@
  *
  * With modifications and updates by:
  *
- *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           dev@ziggurat29.com
  *
@@ -54,11 +54,14 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Helpers **************************************************************************/
 
 #define STM32L4_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define STM32L4_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
+#define STM32L4_TIM_GETCLOCK(d)           ((d)->ops->getclock(d))
 #define STM32L4_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32L4_TIM_GETPERIOD(d)          ((d)->ops->getperiod(d))
 #define STM32L4_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
 #define STM32L4_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
 #define STM32L4_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
@@ -93,7 +96,7 @@ struct stm32l4_tim_dev_s
 
 /* TIM Modes of Operation */
 
-typedef enum
+enum stm32l4_tim_mode_e
 {
   STM32L4_TIM_MODE_UNUSED       = -1,
 
@@ -109,25 +112,28 @@ typedef enum
   /* One of the following */
 
   STM32L4_TIM_MODE_CK_INT       = 0x0000,
-//STM32L4_TIM_MODE_CK_INT_TRIG  = 0x0400,
-//STM32L4_TIM_MODE_CK_EXT       = 0x0800,
-//STM32L4_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+#if 0
+  STM32L4_TIM_MODE_CK_INT_TRIG  = 0x0400,
+  STM32L4_TIM_MODE_CK_EXT       = 0x0800,
+  STM32L4_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+#endif
 
   /* Clock sources, OR'ed with CK_EXT */
 
-//STM32L4_TIM_MODE_CK_CHINVALID = 0x0000,
-//STM32L4_TIM_MODE_CK_CH1       = 0x0001,
-//STM32L4_TIM_MODE_CK_CH2       = 0x0002,
-//STM32L4_TIM_MODE_CK_CH3       = 0x0003,
-//STM32L4_TIM_MODE_CK_CH4       = 0x0004
+#if 0
+  STM32L4_TIM_MODE_CK_CHINVALID = 0x0000,
+  STM32L4_TIM_MODE_CK_CH1       = 0x0001,
+  STM32L4_TIM_MODE_CK_CH2       = 0x0002,
+  STM32L4_TIM_MODE_CK_CH3       = 0x0003,
+  STM32L4_TIM_MODE_CK_CH4       = 0x0004
+#endif
 
   /* Todo: external trigger block */
-
-} stm32l4_tim_mode_t;
+};
 
 /* TIM Channel Modes */
 
-typedef enum
+enum stm32l4_tim_channel_e
 {
   STM32L4_TIM_CH_DISABLED       = 0x00,
 
@@ -142,15 +148,19 @@ typedef enum
 
   /* Output Compare Modes */
 
-  STM32L4_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
-//STM32L4_TIM_CH_OUTCOMPARE     = 0x06,
+  STM32L4_TIM_CH_OUTPWM         = 0x04,  /* Enable standard PWM mode, active high when counter < compare */
+#if 0
+  STM32L4_TIM_CH_OUTCOMPARE     = 0x06,
+#endif
 
-  // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
-//STM32L4_TIM_CH_INCAPTURE      = 0x10,
-//STM32L4_TIM_CH_INPWM          = 0x20
-//STM32L4_TIM_CH_DRIVE_OC   -- open collector mode
+  /* TODO other modes ... as PWM capture, ENCODER and Hall Sensor */
 
-} stm32l4_tim_channel_t;
+#if 0
+  STM32L4_TIM_CH_INCAPTURE      = 0x10,
+  STM32L4_TIM_CH_INPWM          = 0x20
+  STM32L4_TIM_CH_DRIVE_OC   -- open collector mode
+#endif
+};
 
 /* TIM Operations */
 
@@ -158,15 +168,18 @@ struct stm32l4_tim_ops_s
 {
   /* Basic Timers */
 
-  int  (*setmode)(FAR struct stm32l4_tim_dev_s *dev, stm32l4_tim_mode_t mode);
+  int  (*setmode)(FAR struct stm32l4_tim_dev_s *dev,
+                  enum stm32l4_tim_mode_e mode);
   int  (*setclock)(FAR struct stm32l4_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getclock)(FAR struct stm32l4_tim_dev_s *dev);
   void (*setperiod)(FAR struct stm32l4_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(FAR struct stm32l4_tim_dev_s *dev);
   uint32_t (*getcounter)(FAR struct stm32l4_tim_dev_s *dev);
 
   /* General and Advanced Timers Adds */
 
   int  (*setchannel)(FAR struct stm32l4_tim_dev_s *dev, uint8_t channel,
-                     stm32l4_tim_channel_t mode);
+                     enum stm32l4_tim_channel_e mode);
   int  (*setcompare)(FAR struct stm32l4_tim_dev_s *dev, uint8_t channel,
                      uint32_t compare);
   int  (*getcapture)(FAR struct stm32l4_tim_dev_s *dev, uint8_t channel);
