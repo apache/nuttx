@@ -18396,7 +18396,7 @@ Additional new features and extended functionality:
         devices from being removed, unregistered and re-installed,
         re-registered and keeping the same interface index.  From Gregory
         Nutt.
-      - Driver Interface:  Add devif_loopback_out() to check the loopback
+      - Driver Interface:  Add devif_loopback() to check the loopback
         case where a packet is being sent to itself.  Modify the net driver
         to call this function in this case.  This function will simply
         re-inject the packet back into the network and the network driver
@@ -18735,7 +18735,7 @@ Additional new features and extended functionality:
       - LC823450 I2S:  Add tx start threshold to lc823450_i2s.c In
         addition, lc823450_i2s_send() now accepts byte-aligned stream.
         From Masayuki Ishikawa.
-      - LC823450 SPI: Add SPI flash driver for lc823450.  NOTE: Only bus
+      - LC823450 SPI:  Add SPI flash driver for lc823450.  NOTE: Only bus
         accelerator mode is supported.  From Masayuki Ishikawa.
       - LC823450:  Change C-Buffer under-level control.  The under-level
         setting was changed from 1KB to 55KB.  In previous implementation,

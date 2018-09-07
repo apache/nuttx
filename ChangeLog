@@ -20204,7 +20204,7 @@
 	  conversions between physical and virtual address.  From ligd (2018-08-24).
 	* net/arp: arp_find() now checks if the target IP belongs to one of the
 	  local network devices.  From Xiang Xiao (2018-08-24).
-	* net/netdev: add devif_loopback_out() to check the loopback case where
+	* net/netdev: add devif_loopback() to check the loopback case where
 	  a packet is being sent to itself.  Modify the net driver to call this
 	  function in this case.  This function will simply re-inject the
 	  packet back into the network and the network driver will not put
