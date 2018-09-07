@@ -3175,7 +3175,7 @@
 	* configs/*/defconfig:  Update all defconfig files to remove syntax
 	  that is incompatible with the mconf configuration tool.
 	* arch/arm/src/stm32/stm32_otgfshost.c:  This driver now appears to be
-	  functional (although more testing is necesary).
+	  functional (although more testing is necessary).
 
 6.22 2012-09-29 Gregory Nutt <gnutt@nuttx.org>
 
@@ -4832,7 +4832,7 @@
 	  handling:  If the NULL-packet needed flag ever gets set, then
 	  it is not cleared and inifinite NULL packets result.  This only
 	  effects the CDC/ACM class and was the cause of the failure of
-	  configs/stm32f3discovery/usbnsh configureation which works great
+	  configs/stm32f3discovery/usbnsh configuration which works great
 	  after this change (2013-5-29).
 	* drivers/usbdev/cdcacm.c and pl2303.c and include/nuttx/usb/cdcacm.h:
 	  Change the default IN request buffer size from 64 to 96.  This will
@@ -19522,7 +19522,7 @@
 	  sched/clock:  Move the implementation of clock() from libs/libc/time
 	  to sched/clock.  This is necessary because it calls the (now)
 	  internal OS function clock_systimer.  clock() is now accessed only
-	  via a system call in certain configuratins.  From Gregory Nutt
+	  via a system call in certain configurations.  From Gregory Nutt
 	  (2018-06-16).
 	* /arch/arm/src/xmc4:  Fix XMC4 SPI.  It was working only for the first
 	  transfer  From Alan Carvalho de Assis (2018-06-16).
@@ -19533,7 +19533,7 @@
 	  (2018-06-16).
 	* configs/stm32f4discovery: Remove STM32F4BB dependence from rndis; add
 	  RAMDISK support.  From Alan Carvalho de Assis (2018-06-18).
-	* arch/arm/src/stm32l4:  STM32L4 has fetchadd and testset  From Juh
+	* arch/arm/src/stm32l4:  STM32L4 has fetchadd and testset  From Juha
 	  Niskanen (2018-06-18).
 	* libs/libc/netdb/lib_getaddrinfo.c:  The 'port' argument to the static
 	  alloc_ai() function is always in network byte order.  However, that
@@ -19939,7 +19939,7 @@
 	  new START of messages from a repeated start.  No lower-half I2C
 	  drivers actually implement this new flag bit, however.
 	  drivers/i2c/i2c_writeread.c:  Use new repeated START definition where
-	  appopriate.  Rename I2C_M_NORESTART to I2C_M_NOSTART since it may be
+	  appropriate.  Rename I2C_M_NORESTART to I2C_M_NOSTART since it may be
 	  used in other contexts than a repeated start.  Add comments to
 	  clarify setup for repeated start.  From Gregory Nutt (2018-08-03).
 	* configs/nucleo-l432kc: Fix stm32_userleds.  After change LD2 to LD3
@@ -20102,7 +20102,7 @@
 	* include/stdio.h:  Add prototypes for popen() and pclose().  Actual
 	  implementation is in apps/system/popen()  From Gregory Nutt
 	  (2018-08-17).
-	* inclued/stdio.h:  popen()/pclose() are not available in KERNEL mode
+	* include/stdio.h:  popen()/pclose() are not available in KERNEL mode
 	  because they depend on task_spawn() which is not available in KERNEL
 	  mode.  From Gregory Nutt (2018-08-17).
 	* fs/procfs/:  Add support for /self, a convenient way for getting
@@ -20189,15 +20189,15 @@
 	* arch/ and task/sched: vfork operation needs to allocate and copy the
 	  task argument too.  Also correction of the address correction cannot
 	  depend on the stack pointer since it is not available in all
-	  architectures.  Rather callculate the offset from the stack
+	  architectures.  Rather calculate the offset from the stack
 	  allocation pointer  From Xiang Xiao (2018-08-24).
 	* include/nuttx/arch.h:  Add prototype for an architecture-specific
 	  up_trigger_irq function  From dongjianli (2018-08-24).
 	* include/nuttx/arch.h:  Add prototype for an architecture-specific
 	  up_trigger_irq function
 	  arch/, include/nuttx, sched/sched:  Add the garbage collection hook
-	  so each architecture can do custom memory cleanup if necesary.
-	  arch/Kconfig:  Add configureation CONFIG_ARCH_GNU_NO_WEAKFUNCTIONS to
+	  so each architecture can do custom memory cleanup if necessary.
+	  arch/Kconfig:  Add configuration CONFIG_ARCH_GNU_NO_WEAKFUNCTIONS to
 	  suppress use of weak functions.  Some gnu derived toolchains do not
 	  support weak symbols  From Xiang Xiao (2018-08-24).
 	* include/nuttx/arch.h:  Add architecture-specific prototypes for
@@ -20234,7 +20234,7 @@
 	  hardware block (like Linux MFD)  From zhuguangqing (2018-08-24).
 	* sched/irq/irq_procfs.c: Fix occasional computation error when
 	  fracpart >= 1000  From Xiang Xiao (2018-08-24).
-	* arch/:  Fix an error found in build testing.  The protoype of
+	* arch/:  Fix an error found in build testing.  The prototype of
 	  mpu_log2regionfloor() changed; an additional parameter was added.
 	  However, none of the calls to mpu_log2regionfloor() were updated to
 	  pass the new, additional parameter.  From Gregory Nutt (2018-08-24).
@@ -20279,7 +20279,7 @@
 	* Write to a pipe when there are no readers from the pipe should return
 	  -EPIPE.  From ligd (2018-08-26).
 	* drivers/serial/pty.c:  Add support so that a PTY can poll for both
-	  IN/OUT event simultaneously.  From Gregory Nutt (2018-08-26).
+	  IN/OUT event simultaneously.  From ligd (2018-08-26).
 	* drivers/serial:  Add Ctrl-C/Ctrl-X support.  This is an initial
 	  working implementation that still requires that several details be
 	  resolved.
@@ -20404,7 +20404,7 @@
 	  types.h indirectly.  This fixes a compilation error with newlib's
 	  math.h:  'unknown type name wint_t'  From Xiang Xiao (2018-08-27).
 	* include/nuttx/nuttx.h:  Added nuttx.h header file which is analogous
-	  to the linux.h header file.  Currently, it contains on the defintion
+	  to the linux.h header file.  Currently, it contains on the definition
 	  of the container_of() macro.  From zhuyanlin (2018-08-27).
 	* Kconfig:  Move 'option modules' from NSH_FILE_APPS to BUILD_LOADABLE
 	  From anchao (2018-08-27).
@@ -20453,7 +20453,7 @@
 	  drivers/timers/arch_rtc.c:  Implement RTC arch API on top of RTC
 	  driver interface
 	  include/nuttx/timers/rtc.h:  Extend struct rtc_time by adding
-	  tm_nsec if RTC supporst hiresolution time.  From Xiang Xiao
+	  tm_nsec if RTC supports hiresolution time.  From Xiang Xiao
 	  (2018-08-27).
 	* sched/signals:  Update the signal default action logic to support
 	  sigaction().  signaction() must be able to handle and input action
@@ -20477,7 +20477,7 @@
 	  hold the lock if OS isn't ready  From Xiang Xiao (2018-08-27).
 	* drivers/pm: PM:  Add PM_RESTORE to notify driver that device exit
 	  WFI so the driver could restore state.  For example, WDT may stop
-	  counting before enter low power state and restore the counting agian
+	  counting before enter low power state and restore the counting again
 	  in PM_RESTORE notification  From zhuguangqing (2018-08-27).
 	* drivers/power: PM:  Add timer to decrease PM level automatically
 	  From ligd (2018-08-27).
@@ -20560,7 +20560,7 @@
 	  some compilation issues.
 	  sched/sched:  If a task/thread was already blocked when
 	  SIGSTOP/SIGSTP was received, it will restart in the running state.
-	  I will appear that to the task/thread that the blocked condition was
+	  It will appear that to the task/thread that the blocked condition was
 	  interrupt by a signal and returns the EINTR error.  From Gregory
 	  Nutt (2018-08-30).
 	* arch/arm/src/lpc43xx:  Make WWDT usable again.  LPC43xx WWDT driver
