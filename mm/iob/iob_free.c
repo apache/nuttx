@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/iob/iob_free.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,16 +126,32 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       g_iob_freelist  = iob;
     }
 
-  /* Signal that an IOB is available.  If there is a thread waiting
-   * for an IOB, this will wake up exactly one thread.  The semaphore
-   * count will correctly indicated that the awakened task owns an
-   * IOB and should find it in the committed list.
+  /* Signal that an IOB is available.  If there is a thread blocked,
+   * waiting for an IOB, this will wake up exactly one thread.  The
+   * semaphore count will correctly indicated that the awakened task
+   * owns an IOB and should find it in the committed list.
    */
 
   nxsem_post(&g_iob_sem);
 #if CONFIG_IOB_THROTTLE > 0
   nxsem_post(&g_throttle_sem);
 #endif
+
+#ifdef CONFIG_IOB_NOTIFIER
+  /* Check if the IOB was claimed by a thread that is blocked waiting
+   * for an IOB.
+   */
+
+  if (iob_navail() > 0)
+    {
+      /* Signal any threads that have requested a signal notification
+       * when an IOB becomes available.
+       */
+
+      iob_notify_signal();
+    }
+#endif
+
   leave_critical_section(flags);
 
   /* And return the I/O buffer after the one that was freed */

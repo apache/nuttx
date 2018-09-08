@@ -154,6 +154,30 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
 
 FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
+/****************************************************************************
+ * Name: iob_notify_signal
+ *
+ * Description:
+ *   An IOB has become available.  Signal all threads waiting for an IOB
+ *   that an IOB is available.
+ *
+ *   When an IOB becomes available, *all* of the waiters in this thread will
+ *   be signaled.  If there are multiple waiters then only the highest
+ *   priority thread will get the IOB.  Lower priority threads will need to
+ *   call iob_notify once again.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_NOTIFIER
+void iob_notify_signal(void);
+#endif
+
 #endif /* CONFIG_MM_IOB */
 #endif /* __MM_IOB_IOB_H */
 

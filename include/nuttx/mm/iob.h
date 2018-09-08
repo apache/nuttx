@@ -205,6 +205,63 @@ int iob_navail(void);
 FAR struct iob_s *iob_free(FAR struct iob_s *iob);
 
 /****************************************************************************
+ * Name: iob_notify_setup
+ *
+ * Description:
+ *   Set up to notify the specified PID with the provided signal number.
+ *
+ *   NOTE: To avoid race conditions, the caller should set the sigprocmask
+ *   to block signal delivery.  The signal will be delivered once the
+ *   signal is removed from the sigprocmask.
+ *
+ * Input Parameters:
+ *   pid   - The PID to be notified.  If a zero value is provided, then the
+ *           PID of the calling thread will be used.
+ *   signo - The signal number to use with the notification.
+ *
+ * Returned Value:
+ *   > 0   - There are already free IOBs and this this number of free IOBs
+ *           (CAUTION:  This value is volatile).  No signal notification
+ *           will be provided.
+ *   == 0  - There are no free IOBs.  A signal will be sent to 'pid' when
+ *           at least one IOB is available.  That IOB is *not* reserved for
+ *           the caller.  Hence, due to race conditions, it could be taken
+ *           by some other task.  In that event, the caller should call
+ *           sig_notify again.
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_NOTIFIER
+int iob_notify_setup(int pid, int signo);
+#endif
+
+/****************************************************************************
+ * Name: iob_notify_teardown
+ *
+ * Description:
+ *   Eliminate an IOB notification previously setup by iob_notify_setup().
+ *   This function should only be called if the notification should be
+ *   aborted prior to the notification.  The notification will automatically
+ *   be torn down after the signal is sent.
+ *
+ * Input Parameters:
+ *   pid   - The PID whose notification will be torn down.  If a zero value
+ *           is provided, then the PID of the calling thread will be used.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_NOTIFIER
+int iob_notify_teardown(int pid, int signo);
+#endif
+
+/****************************************************************************
  * Name: iob_free_chain
  *
  * Description:

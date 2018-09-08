@@ -44,6 +44,10 @@ CSRCS += iob_initialize.c iob_pack.c iob_peek_queue.c iob_remove_queue.c
 CSRCS += iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c
 CSRCS += iob_navail.c
 
+ifeq ($(CONFIG_IOB_NOTIFIER),y)
+  CSRCS += iob_notify.c
+endif
+
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
   CSRCS += iob_dump.c
 endif
