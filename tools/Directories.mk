@@ -1,7 +1,7 @@
 ############################################################################
 # tools/Directories.mk
 #
-#   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights
+#   Copyright (C) 2007-2012, 2014, 2016-2018 Gregory Nutt. All rights
 #     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
@@ -79,7 +79,7 @@ else
 LIBXX=libxx
 endif
 
-NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
+NONFSDIRS = sched drivers configs pass1 $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
 CONTEXTDIRS = configs $(APPDIR)
 USERDIRS =
