@@ -73,7 +73,7 @@ struct iob_notify_s
  ****************************************************************************/
 
 /* This is a an array of threads waiting for an IOB.  When an IOB becomes
- * available, *all* of the waiters in this thread will be signaled and the
+ * available, *all* of the waiters in this array will be signaled and the
  * entry will be marked invalid.  If there are multiple waiters then only
  * the highest priority thread will get the IOB.  Lower priority threads
  * will need to call iob_notify once again.
@@ -81,7 +81,7 @@ struct iob_notify_s
 
 static struct iob_notify_s g_iob_notify[CONFIG_IOB_NWAITERS];
 
-/* This semaphore is used as mutex to enforce mutually exlusive access to
+/* This semaphore is used as mutex to enforce mutually exclusive access to
  * the g_io_notify[] array.
  */
 
