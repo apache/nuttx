@@ -79,11 +79,11 @@ else
 LIBXX=libxx
 endif
 
-NONFSDIRS = sched drivers configs pass1 $(ARCH_SRC) $(NUTTX_ADDONS)
+NONFSDIRS = sched drivers configs $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS = fs binfmt
 CONTEXTDIRS = configs $(APPDIR)
 USERDIRS =
-OTHERDIRS = lib
+OTHERDIRS = pass1
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 
