@@ -155,6 +155,18 @@ FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
 FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
 /****************************************************************************
+ * Name: iob_notify_initialize
+ *
+ * Description:
+ *   Set up the notification structure for normal operation.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_NOTIFIER
+void iob_notify_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: iob_notify_signal
  *
  * Description:

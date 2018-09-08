@@ -63,33 +63,113 @@
 
 struct iob_notify_s
 {
-  bool waiter;    /* True if the waiter information is valid */
-  uint8_t signo;  /* The signal number to use when notifying the PID */
-  pid_t pid;      /* The PID to be notified when an IOB is available */
+  FAR struct iob_notify_s *flink; /* Supports a singly linked list */
+  uint8_t signo;                  /* The signal number for notification */
+  pid_t pid;                      /* The PID to be notified */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This is a an array of threads waiting for an IOB.  When an IOB becomes
- * available, *all* of the waiters in this array will be signaled and the
- * entry will be marked invalid.  If there are multiple waiters then only
- * the highest priority thread will get the IOB.  Lower priority threads
- * will need to call iob_notify once again.
+/* This is a statically allocated pool of notification structures */
+
+static struct iob_notify_s g_iobnotify_pool[CONFIG_IOB_NWAITERS];
+
+/* This is a list of free notification structures */
+
+static FAR struct iob_notify_s *g_iobnotify_free;
+
+/* This is a singly linked list pending notifications.  When an IOB becomes
+ * available, *all* of the waiters in this list will be signaled and the
+ * entry will be freed.  If there are multiple waiters then only the highest
+ * priority thread will get the IOB.  Lower priority threads will need to
+ * call iob_notify_setup() once again.
  */
 
-static struct iob_notify_s g_iob_notify[CONFIG_IOB_NWAITERS];
+static FAR struct iob_notify_s *g_iobnotify_pending;
 
 /* This semaphore is used as mutex to enforce mutually exclusive access to
- * the g_io_notify[] array.
+ * the IOB notification structures.
  */
 
-static sem_t g_notify_sem = SEM_INITIALIZER(1);
+static sem_t g_iobnotify_sem;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_notify_alloc
+ *
+ * Description:
+ *   Allocate a notification structure by removing it from the free list.
+ *
+ ****************************************************************************/
+
+static FAR struct iob_notify_s *iob_notify_alloc(void)
+{
+  FAR struct iob_notify_s *notify;
+
+  notify = g_iobnotify_free;
+  if (notify != NULL)
+    {
+      g_iobnotify_free = notify->flink;
+      notify->flink    = NULL;
+    }
+
+  return notify;
+}
+
+/****************************************************************************
+ * Name: iob_notify_free
+ *
+ * Description:
+ *   Free a notification structure by returning it to the head of the free
+ *   list.
+ *
+ ****************************************************************************/
+
+static void iob_notify_free(FAR struct iob_notify_s *notify)
+{
+  notify->flink    = g_iobnotify_free;
+  g_iobnotify_free = notify;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_notify_initialize
+ *
+ * Description:
+ *   Set up the notification structure for normal operation.
+ *
+ ****************************************************************************/
+
+void iob_notify_initialize(void)
+{
+  int i;
+
+  /* Add each notification structure to the free list */
+
+  for (i = 0; i < CONFIG_IOB_NWAITERS; i++)
+    {
+      FAR struct iob_notify_s *notify = &g_iobnotify_pool[i];
+
+      /* Add the pre-allocated notification to the head of the free list */
+
+      notify->flink    = g_iobnotify_free;
+      g_iobnotify_free = notify;
+    }
+
+  /* Initialize the semaphore that enforces mutually exclusive access to the
+   * notification data structures.
+   */
+
+  nxsem_init(&g_iobnotify_sem, 0, 1);
+}
 
 /****************************************************************************
  * Name: iob_notify_setup
@@ -124,7 +204,6 @@ static sem_t g_notify_sem = SEM_INITIALIZER(1);
 int iob_notify_setup(int pid, int signo)
 {
   int ret;
-  int i;
 
   /* If the pid is zero, then use the pid of the calling thread */
 
@@ -133,9 +212,9 @@ int iob_notify_setup(int pid, int signo)
       pid = getpid();
     }
 
-  /* Get exclusive access to the notifier array */
+  /* Get exclusive access to the notifier data structures */
 
-  ret = nxsem_wait(&g_notify_sem);
+  ret = nxsem_wait(&g_iobnotify_sem);
   if (ret < 0)
     {
       return ret;
@@ -148,24 +227,29 @@ int iob_notify_setup(int pid, int signo)
   ret = iob_navail();
   if (ret <= 0)
     {
-      /* Find a free entry in the g_iob_notify[] array */
+      /* Allocate a new notification */
 
-      ret = -ENOSPC;
-      for (i = 0; i < CONFIG_IOB_NWAITERS; i++)
+      FAR struct iob_notify_s *notify = iob_notify_alloc();
+      if (notify == NULL)
         {
-          if (!g_iob_notify[i].waiter)
-            {
-              g_iob_notify[i].waiter =  true;
-              g_iob_notify[i].pid    =  pid;
-              g_iob_notify[i].signo  =  signo;
+          ret = -ENOSPC;
+        }
+      else
+        {
+          /* Initialize the notification structure */
 
-              ret = OK;
-              break;
-            }
+          notify->pid         =  pid;
+          notify->signo       =  signo;
+
+          /* And add it to the head of the pending list */
+
+          notify->flink       = g_iobnotify_pending;
+          g_iobnotify_pending = notify;
+          ret                 = OK;
         }
     }
 
-  (void)nxsem_post(&g_notify_sem);
+  (void)nxsem_post(&g_iobnotify_sem);
   return ret;
 }
 
@@ -190,8 +274,9 @@ int iob_notify_setup(int pid, int signo)
 
 int iob_notify_teardown(int pid, int signo)
 {
+  FAR struct iob_notify_s *notify;
+  FAR struct iob_notify_s *prev;
   int ret;
-  int i;
 
   /* If the pid is zero, then use the pid of the calling thread */
 
@@ -200,30 +285,48 @@ int iob_notify_teardown(int pid, int signo)
       pid = getpid();
     }
 
-  /* Get exclusive access to the notifier array */
+  /* Get exclusive access to the notifier data structures */
 
-  ret = nxsem_wait(&g_notify_sem);
+  ret = nxsem_wait(&g_iobnotify_sem);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Find the entry matching this PID in the g_iob_notify[] array.  We
+  /* Find the entry matching this PID in the g_iobnotify_pending list.  We
    * assume that there is only one.
    */
 
   ret = -ENOENT;
-  for (i = 0; i < CONFIG_IOB_NWAITERS; i++)
+  for (prev = NULL, notify = g_iobnotify_pending;
+       notify != NULL;
+       prev = notify, notify = notify->flink)
     {
-      if (g_iob_notify[i].waiter && g_iob_notify[i].pid ==  pid)
+      /* Is this the one we were looking for? */
+
+      if (notify->pid ==  pid)
         {
-          g_iob_notify[i].waiter =  false;
+          /* Yes, remove it from the pending list */
+
+          if (prev == NULL)
+            {
+              g_iobnotify_pending = notify->flink;
+            }
+          else
+            {
+              prev->flink = notify->flink;
+            }
+
+          /* And add it to the free list */
+
+          iob_notify_free(notify);
+
           ret = OK;
           break;
         }
     }
 
-  (void)nxsem_post(&g_notify_sem);
+  (void)nxsem_post(&g_iobnotify_sem);
   return ret;
 }
 
@@ -249,12 +352,12 @@ int iob_notify_teardown(int pid, int signo)
 
 void iob_notify_signal(void)
 {
+  FAR struct iob_notify_s *notify;
   int ret;
-  int i;
 
-  /* Get exclusive access to the notifier array */
+  /* Get exclusive access to the notifier data structure */
 
-  ret = nxsem_wait(&g_notify_sem);
+  ret = nxsem_wait(&g_iobnotify_sem);
   while (ret < 0)
     {
       DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
@@ -266,23 +369,26 @@ void iob_notify_signal(void)
 
   sched_lock();
 
-  /* Find the entry matching this PID in the g_iob_notify[] array.  We
-   * assume that there is only one.
-   */
+  /* Process the notification at the head of the pending list until the
+   * pending list is empty  */
 
-  for (i = 0; i < CONFIG_IOB_NWAITERS; i++)
+  while ((notify = g_iobnotify_pending) != NULL)
     {
-      if (g_iob_notify[i].waiter)
-        {
-          /* Signal the waiter and free the entry */
+      /* Remove the notification from the pending list */
 
-          (void)nxsig_kill(g_iob_notify[i].pid, g_iob_notify[i].signo);
-          g_iob_notify[i].waiter =  false;
-        }
+      g_iobnotify_pending = notify->flink;
+
+      /* Signal the waiter */
+
+      (void)nxsig_kill(notify->pid, notify->signo);
+
+      /* Free the notification by returning it to the free list */
+
+      iob_notify_free(notify);
     }
 
   sched_unlock();
-  (void)nxsem_post(&g_notify_sem);
+  (void)nxsem_post(&g_iobnotify_sem);
 }
 
 #endif /* CONFIG_IOB_NOTIFIER */
