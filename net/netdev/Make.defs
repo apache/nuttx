@@ -45,6 +45,10 @@ ifeq ($(CONFIG_NETDEV_IFINDEX),y)
 NETDEV_CSRCS += netdev_indextoname.c netdev_nametoindex.c
 endif
 
+ifeq ($(CONFIG_NETDOWN_NOTIFIER),y)
+SOCK_CSRCS += netdown_notifier.c
+endif
+
 # Include netdev build support
 
 DEPPATH += --dep-path netdev

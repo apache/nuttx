@@ -466,6 +466,85 @@ int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
 
 int netdev_dev_lladdrsize(FAR struct net_driver_s *dev);
 
+/****************************************************************************
+ * Name: netdown_notifier_setup
+ *
+ * Description:
+ *   Set up to notify the specified PID with the provided signal number.
+ *
+ *   NOTE: To avoid race conditions, the caller should set the sigprocmask
+ *   to block signal delivery.  The signal will be delivered once the
+ *   signal is removed from the sigprocmask.
+ *
+ * Input Parameters:
+ *   pid   - The PID to be notified.  If a zero value is provided, then the
+ *           PID of the calling thread will be used.
+ *   signo - The signal number to use with the notification.
+ *   dev   - The network driver to be monitored
+ *
+ * Returned Value:
+ *   > 0   - The signal notification is in place.  The returned value is a
+ *           key that may be used later in a call to
+ *           netdown_notifier_teardown().
+ *   == 0  - The the device is already down.  No signal notification will
+ *           be provided.
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDOWN_NOTIFIER
+int netdown_notifier_setup(int pid, int signo, FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: netdown_notifier_teardown
+ *
+ * Description:
+ *   Eliminate a TCP read-ahead notification previously setup by
+ *   netdown_notifier_setup().  This function should only be called if the
+ *   notification should be aborted prior to the notification.  The
+ *   notification will automatically be torn down after the signal is sent.
+ *
+ * Input Parameters:
+ *   key - The key value returned from a previous call to
+ *         netdown_notifier_setup().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDOWN_NOTIFIER
+int netdown_notifier_teardown(int key);
+#endif
+
+/****************************************************************************
+ * Name: netdown_notifier_signal
+ *
+ * Description:
+ *   Read-ahead data has been buffered.  Signal all threads waiting for
+ *   read-ahead data to become available.
+ *
+ *   When the read-ahead data becomes available, *all* of the waiters in
+ *   this thread will be signaled.  If there are multiple waiters then only
+ *   the highest priority thread will get the data.  Lower priority threads
+ *   will need to call netdown_notifier_setup() once again.
+ *
+ * Input Parameters:
+ *   dev  - The TCP connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDOWN_NOTIFIER
+void netdown_notifier_signal(FAR struct net_driver_s *dev);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

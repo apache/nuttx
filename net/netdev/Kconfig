@@ -36,4 +36,15 @@ config NETDEV_IFINDEX
 		When enabled, these option also enables the user interfaces:
 		if_nametoindex() and if_indextoname().
 
+config NETDOWN_NOTIFIER
+	bool "Support network down notifications"
+	default n
+	select SIG_NOTIFIER
+	depends on !DISABLE_SIGNALS
+	---help---
+		Enable building of logic that will send a signal to a kernel
+		thread when the network is taken down.  This is is a general purpose
+		notifier, but was developed specifically to support SIGHUP poll()
+		logic.
+
 endmenu # Network Device Operations

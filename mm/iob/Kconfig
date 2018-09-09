@@ -63,6 +63,7 @@ config IOB_NOTIFIER
 	bool "Support IOB notifications"
 	default n
 	select SIG_NOTIFIER
+	depends on !DISABLE_SIGNALS
 	---help---
 		Enable building of IOB notifier logic that will send a signal to
 		a kernel thread when an IOB is available.  This is is a general

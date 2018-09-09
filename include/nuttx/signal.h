@@ -59,6 +59,7 @@ enum nxsig_evtype_e
   NXSIG_IOB_AVAIL  = 1, /* Signal availability of an IOB */
   NXSIG_NET_DOWN,       /* Signal that the network is down */
   NXSIG_TCP_READAHEAD,  /* Signal that TCP read-ahead data is available */
+  NXSIG_TCP_DISCONNECT, /* Signal loss of TCP connection */
   NXSIG_UDP_READAHEAD,  /* Signal that TCP read-ahead data is available */
 };
 

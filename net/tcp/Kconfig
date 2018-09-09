@@ -70,7 +70,7 @@ config TCP_READAHEAD_NOTIFIER
 	bool "Support TCP read-ahead notifications"
 	default n
 	select SIG_NOTIFIER
-	depends on NET_TCP_READAHEAD && !DISABLE_POLL
+	depends on NET_TCP_READAHEAD && !DISABLE_SIGNALS
 	---help---
 		Enable building of TCP read-ahead notifier logic that will send a
 		signal to a kernel thread when an TCP read-ahead data has been

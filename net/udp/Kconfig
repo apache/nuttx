@@ -61,7 +61,7 @@ config UDP_READAHEAD_NOTIFIER
 	bool "Support UDP read-ahead notifications"
 	default n
 	select SIG_NOTIFIER
-	depends on NET_UDP_READAHEAD && !DISABLE_POLL
+	depends on NET_UDP_READAHEAD && !DISABLE_SIGNALS
 	---help---
 		Enable building of UDP read-ahead notifier logic that will send a
 		signal to a kernel thread when an UDP read-ahead data has been

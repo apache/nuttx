@@ -1185,7 +1185,7 @@ config SIG_NOTIFIER
 
 config SIG_NOTIFIER_NWAITERS
 	int "Number of signal waiters"
-	default 4
+	default 8
 	range 1 32766
 	depends on SIG_NOTIFIER
 	---help---
