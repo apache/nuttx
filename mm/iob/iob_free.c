@@ -148,7 +148,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
        * when an IOB becomes available.
        */
 
-      iob_notify_signal();
+      iob_notifier_signal();
     }
 #endif
 

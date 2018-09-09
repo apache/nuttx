@@ -155,12 +155,6 @@ void iob_initialize(void)
       nxsem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
 #endif
 
-#ifdef CONFIG_IOB_NOTIFIER
-      /* Initialize the IOB notification data structures */
-
-      iob_notify_initialize();
-#endif
-
       initialized = true;
     }
 }

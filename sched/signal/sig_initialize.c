@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_initialize.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -233,6 +234,12 @@ void nxsig_initialize(void)
     nxsig_alloc_pendingsignalblock(&g_sigpendingirqsignal,
                                    NUM_INT_SIGNALS_PENDING,
                                    SIG_ALLOC_IRQ);
+
+#ifdef CONFIG_SIG_NOTIFIER
+  /* Initialize the generic notifier facility */
+
+  nxsig_notifier_initialize();
+#endif
 }
 
 /****************************************************************************

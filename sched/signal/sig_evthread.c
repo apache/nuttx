@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/signal/sig_notification.c
+ * sched/signal/sig_evthread.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Use the low-prioriry work queue is it is available */
 
 #if defined(CONFIG_SCHED_LPWORK)
@@ -68,7 +69,7 @@
 
 /* This structure retains all that is necessary to perform the notification */
 
-struct sig_notify_s
+struct sig_evthread_s
 {
   struct work_s nt_work;           /* Work queue structure */
   union sigval nt_value;           /* Data passed with notification */
@@ -80,7 +81,7 @@ struct sig_notify_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_notify_worker
+ * Name: nxsig_evthread_worker
  *
  * Description:
  *   Perform the callback from the context of the worker thread.
@@ -93,9 +94,9 @@ struct sig_notify_s
  *
  ****************************************************************************/
 
-static void nxsig_notify_worker(FAR void *arg)
+static void nxsig_evthread_worker(FAR void *arg)
 {
-  FAR struct sig_notify_s *notify = (FAR struct sig_notify_s *)arg;
+  FAR struct sig_evthread_s *notify = (FAR struct sig_evthread_s *)arg;
 
   DEBUGASSERT(notify != NULL);
 
@@ -117,7 +118,7 @@ static void nxsig_notify_worker(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_notification
+ * Name: nxsig_evthread
  *
  * Description:
  *   Notify a client a signal event via a function call.  This function is
@@ -136,15 +137,15 @@ static void nxsig_notify_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int nxsig_notification(pid_t pid, FAR struct sigevent *event)
+int nxsig_evthread(pid_t pid, FAR struct sigevent *event)
 {
-  FAR struct sig_notify_s *notify;
+  FAR struct sig_evthread_s *notify;
   DEBUGASSERT(event != NULL && event->sigev_notify_function != NULL);
   int ret;
 
   /* Allocate a structure to hold the notification information */
 
-  notify = kmm_zalloc(sizeof(struct sig_notify_s));
+  notify = kmm_zalloc(sizeof(struct sig_evthread_s));
   if (notify == NULL)
     {
       return -ENOMEM;
@@ -161,7 +162,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event)
 
   /* Then queue the work */
 
-  ret = work_queue(NTWORK, &notify->nt_work, nxsig_notify_worker,
+  ret = work_queue(NTWORK, &notify->nt_work, nxsig_evthread_worker,
                    notify, 0);
   if (ret < 0)
     {

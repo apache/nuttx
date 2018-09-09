@@ -62,22 +62,12 @@ config IOB_THROTTLE
 config IOB_NOTIFIER
 	bool "Support IOB notifications"
 	default n
+	select SIG_NOTIFIER
 	---help---
 		Enable building of IOB notifier logic that will send a signla to
 		a kernel thread when an IOB is available.  This is is a general
 		purpose notifier, but was developed specifically to support poll()
 		logic where the poll must wait for an IOB to become available.
-
-config IOB_NWAITERS
-	int "Number of IOB waiters"
-	default 4
-	range 1 32767
-	depends on IOB_NOTIFIER
-	---help---
-		If CONFIG_IOB_NOTIFIER is selected, then a static array will be
-		allocated to hold information about pending notifications.  This
-		then determines an upper limit for the number of waiters that can
-		be supported.
 
 config IOB_DEBUG
 	bool "Force I/O buffer debug"

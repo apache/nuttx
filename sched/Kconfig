@@ -1174,6 +1174,26 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+config SIG_NOTIFIER
+	bool "Generic Signal notifier"
+	default n
+	---help---
+		Enable building of signal notifier logic that will send a signal to
+		a kernel thread when an event occurs.  This is is a general
+		purpose notifier, but was developed specifically to support poll()
+		logic where the poll must wait for an resources to become available.
+
+config SIG_NOTIFIER_NWAITERS
+	int "Number of signal waiters"
+	default 4
+	range 1 32766
+	depends on SIG_NOTIFIER
+	---help---
+		If CONFIG_SIG_NOTIFIER is selected, then a pre-allocated pool of
+		notification structures will be allocated to hold information about
+		pending notifications.  This then determines an upper limit for the
+		number of waiters that can be supported.
+
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n

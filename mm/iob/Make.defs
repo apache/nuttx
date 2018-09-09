@@ -45,7 +45,7 @@ CSRCS += iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c
 CSRCS += iob_navail.c
 
 ifeq ($(CONFIG_IOB_NOTIFIER),y)
-  CSRCS += iob_notify.c
+  CSRCS += iob_notifier.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)

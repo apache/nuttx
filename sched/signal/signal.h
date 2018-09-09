@@ -68,13 +68,14 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* This enumeration identifies the type of signal data allocation */
+
 enum sigalloc_e
 {
   SIG_ALLOC_FIXED = 0,  /* pre-allocated; never freed */
   SIG_ALLOC_DYN,        /* dynamically allocated; free when unused */
   SIG_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
 };
-typedef enum sigalloc_e sigalloc_t;
 
 /* The following defines the sigaction queue entry */
 
@@ -165,6 +166,12 @@ struct task_group_s;
 
 void weak_function nxsig_initialize(void);
 void               nxsig_alloc_actionblock(void);
+
+/* sig_notifier.c */
+
+#ifdef CONFIG_SIG_NOTIFIER
+void nxsig_notifier_initialize(void);
+#endif
 
 /* sig_action.c */
 

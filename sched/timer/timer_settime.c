@@ -118,7 +118,7 @@ static inline void timer_signotify(FAR struct posix_timer_s *timer)
 
   else if (timer->pt_event.sigev_notify == SIGEV_THREAD)
     {
-      DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event));
+      DEBUGVERIFY(nxsig_evthread(timer->pt_owner, &timer->pt_event));
     }
 #endif
 }

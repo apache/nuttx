@@ -430,7 +430,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       else if (event.sigev_notify == SIGEV_THREAD)
         {
-          DEBUGVERIFY(nxsig_notification(pid, &event));
+          DEBUGVERIFY(nxsig_evthread(pid, &event));
         }
 #endif
 
