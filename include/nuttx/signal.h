@@ -481,6 +481,10 @@ int nxsig_evthread(pid_t pid, FAR struct sigevent *event);
  *   to block signal delivery.  The signal will be delivered once the
  *   signal is removed from the sigprocmask.
  *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then qualifier value may be recovered in the sival_ptr value of
+ *   the struct siginfo instance.
+ *
  * Input Parameters:
  *   pid       - The PID to be notified.  If a zero value is provided,
  *               then the PID of the calling thread will be used.
@@ -537,6 +541,10 @@ int nxsig_notifier_teardown(int key);
  *   be signaled.  If there are multiple waiters for a resource then only
  *   the highest priority thread will get the resource.  Lower priority
  *   threads will need to call nxsig_notify once again.
+ *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then qualifier value may be obtained in the sival_ptr value of
+ *   the struct siginfo instance.
  *
  * Input Parameters:
  *   evtype   - The type of the event that just occurred.

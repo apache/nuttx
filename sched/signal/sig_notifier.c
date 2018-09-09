@@ -255,6 +255,10 @@ void nxsig_notifier_initialize(void)
  *   to block signal delivery.  The signal will be delivered once the
  *   signal is removed from the sigprocmask.
  *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then qualifier value may be recovered in the sival_ptr value of
+ *   the struct siginfo instance.
+ *
  * Input Parameters:
  *   pid       - The PID to be notified.  If a zero value is provided,
  *               then the PID of the calling thread will be used.
@@ -403,6 +407,10 @@ int nxsig_notifier_teardown(int key)
  *   the highest priority thread will get the resource.  Lower priority
  *   threads will need to call nxsig_notify once again.
  *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then qualifier value may be obtained in the sival_ptr value of
+ *   the struct siginfo instance.
+ *
  * Input Parameters:
  *   evtype   - The type of the event that just occurred.
  *   qualifier - Event qualifier to distinguish different cases of the
@@ -444,6 +452,10 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
        notifier != NULL; 
        notifier = next)
     {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      union sigval value;
+#endif
+
       /* Set up for the next time through the loop (in case the entry is
        * removed from the list).
        */
@@ -469,8 +481,13 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
 
           /* Signal the waiter */
 
-          (void)nxsig_kill(notifier->pid, notifier->signo);
-
+#ifdef CONFIG_CAN_PASS_STRUCTS
+          value.sival_ptr = notifier->qualifier;
+          (void)nxsig_queue(notifier->pid, notifier->signo, value);
+#else
+          (void)nxsig_queue(notifier->pid, notifier->signo,
+                            notifier->qualifier);
+#endif
           /* Free the notification by returning it to the free list */
 
           nxsig_notifier_free(notifier);

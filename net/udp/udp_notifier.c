@@ -62,6 +62,10 @@
  *   to block signal delivery.  The signal will be delivered once the
  *   signal is removed from the sigprocmask.
  *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then UDP connection structure pointer may be recovered in the
+ *   sival_ptr value of the struct siginfo instance.
+ *
  * Input Parameters:
  *   pid   - The PID to be notified.  If a zero value is provided, then the
  *           PID of the calling thread will be used.
@@ -133,6 +137,10 @@ int udp_notifier_teardown(int key)
  *   this thread will be signaled.  If there are multiple waiters then only
  *   the highest priority thread will get the data.  Lower priority threads
  *   will need to call udp_notifier_setup() once again.
+ *
+ *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
+ *   then then UDP connection structure pointer may be obtained in the
+ *   sival_ptr value of the struct siginfo instance.
  *
  * Input Parameters:
  *   conn  - The UDP connection where read-ahead data was just buffered.

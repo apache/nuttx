@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/tcp/tcp_notifier.c
+ * net/netdev/netdown_notifier.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,17 +43,18 @@
 
 #include <nuttx/signal.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/netdev.h>
 
-#include "tcp/tcp.h"
+#include "netdev/netdev.h"
 
-#ifdef CONFIG_TCP_READAHEAD_NOTIFIER
+#ifdef CONFIG_NETDOWN_NOTIFIER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_notifier_setup
+ * Name: netdown_notifier_setup
  *
  * Description:
  *   Set up to notify the specified PID with the provided signal number.
@@ -62,56 +63,52 @@
  *   to block signal delivery.  The signal will be delivered once the
  *   signal is removed from the sigprocmask.
  *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then TCP connection structure pointer may be recovered in the
- *   sival_ptr value of the struct siginfo instance.
- *
  * Input Parameters:
  *   pid   - The PID to be notified.  If a zero value is provided, then the
  *           PID of the calling thread will be used.
  *   signo - The signal number to use with the notification.
- *   conn  - The TCP connection where read-ahead data is needed.
+ *   dev   - The network driver to be monitored
  *
  * Returned Value:
  *   > 0   - The signal notification is in place.  The returned value is a
  *           key that may be used later in a call to
- *           tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
+ *           netdown_notifier_teardown().
+ *   == 0  - The the device is already down.  No signal notification will
+ *           be provided.
  *   < 0   - An unexpected error occurred and no signal will be sent.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
  ****************************************************************************/
 
-int tcp_notifier_setup(int pid, int signo, FAR struct tcp_conn_s *conn)
+int netdown_notifier_setup(int pid, int signo, FAR struct net_driver_s *dev)
 {
-  /* If there is already buffered read-ahead data, then return zero without
-   * setting up the notification.
+  /* If network driver is already down, then return zero without setting up
+   * the notification.
    */
 
-  if (conn->readahead.qh_head != NULL)
+  if ((dev->d_flags & IFF_UP) == 0)
     {
       return 0;
     }
 
   /* Otherwise, this is just a simple wrapper around nxsig_notifer_setup(). */
 
-  return nxsig_notifier_setup(pid, signo, NXSIG_TCP_READAHEAD, conn);
+  return nxsig_notifier_setup(pid, signo, NXSIG_NET_DOWN, dev);
 }
 
 /****************************************************************************
- * Name: tcp_notifier_teardown
+ * Name: netdown_notifier_teardown
  *
  * Description:
  *   Eliminate a TCP read-ahead notification previously setup by
- *   tcp_notifier_setup().  This function should only be called if the
+ *   netdown_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the signal is sent.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
- *         tcp_notifier_setup().
+ *         netdown_notifier_setup().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -119,7 +116,7 @@ int tcp_notifier_setup(int pid, int signo, FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-int tcp_notifier_teardown(int key)
+int netdown_notifier_teardown(int key)
 {
   /* This is just a simple wrapper around nxsig_notifier_teardown(). */
 
@@ -127,7 +124,7 @@ int tcp_notifier_teardown(int key)
 }
 
 /****************************************************************************
- * Name: tcp_notifier_signal
+ * Name: netdown_notifier_signal
  *
  * Description:
  *   Read-ahead data has been buffered.  Signal all threads waiting for
@@ -136,25 +133,21 @@ int tcp_notifier_teardown(int key)
  *   When the read-ahead data becomes available, *all* of the waiters in
  *   this thread will be signaled.  If there are multiple waiters then only
  *   the highest priority thread will get the data.  Lower priority threads
- *   will need to call tcp_notifier_setup() once again.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then TCP connection structure pointer may be obtained in the
- *   sival_ptr value of the struct siginfo instance.
+ *   will need to call netdown_notifier_setup() once again.
  *
  * Input Parameters:
- *   conn  - The TCP connection where read-ahead data was just buffered.
+ *   dev  - The TCP connection where read-ahead data was just buffered.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-void tcp_notifier_signal(FAR struct tcp_conn_s *conn)
+void netdown_notifier_signal(FAR struct net_driver_s *dev)
 {
   /* This is just a simple wrapper around nxsig_notifier_signal(). */
 
-  return nxsig_notifier_signal(NXSIG_TCP_READAHEAD, conn);
+  return nxsig_notifier_signal(NXSIG_NET_DOWN, dev);
 }
 
-#endif /* CONFIG_TCP_READAHEAD_NOTIFIER */
+#endif /* CONFIG_NETDOWN_NOTIFIER */
