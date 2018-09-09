@@ -44,17 +44,18 @@
 
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/tcp.h>
 
 #include "tcp/tcp.h"
 
-#ifdef CONFIG_TCP_READAHEAD_NOTIFIER
+#ifdef CONFIG_TCP_NOTIFIER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_notifier_setup
+ * Name: tcp_readahead_notifier_setup
  *
  * Description:
  *   Set up to perform a callback to the worker function when an TCP data
@@ -63,7 +64,7 @@
  *
  * Input Parameters:
  *   worker - The worker function to execute on the high priority work
- *            queue when data is available in the TCP readahead buffer.
+ *            queue when data is available in the TCP read-ahead buffer.
  *   conn  - The TCP connection where read-ahead data is needed.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
@@ -80,8 +81,9 @@
  *
  ****************************************************************************/
 
-int tcp_notifier_setup(worker_t worker, FAR struct tcp_conn_s *conn,
-                       FAR void *arg)
+int tcp_readahead_notifier_setup(worker_t worker,
+                                 FAR struct tcp_conn_s *conn,
+                                 FAR void *arg)
 {
   struct work_notifier_s info;
 
@@ -107,17 +109,68 @@ int tcp_notifier_setup(worker_t worker, FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
+ * Name: tcp_readahead_disconnect_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function if the TCP
+ *   connection is lost.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the high priority work
+ *            queue when data is available in the TCP read-ahead buffer.
+ *   conn  - The TCP connection where read-ahead data is needed.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The signal notification is in place.  The returned value is a
+ *           key that may be used later in a call to
+ *           tcp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No signal
+ *           notification will be provided.
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+int tcp_readahead_disconnect_setup(worker_t worker,
+                                   FAR struct tcp_conn_s *conn,
+                                   FAR void *arg)
+{
+  struct work_notifier_s info;
+
+  DEBUGASSERT(worker != NULL);
+
+  /* If connection has not been established, then return 0. */
+
+  if (conn->tcpstateflags != TCP_ESTABLISHED)
+    {
+      return 0;
+    }
+
+  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
+
+  info.evtype    = WORK_TCP_DISCONNECT;
+  info.qualifier = conn;
+  info.arg       = arg;
+  info.worker    = worker;
+
+  return work_notifier_setup(&info);
+}
+
+/****************************************************************************
  * Name: tcp_notifier_teardown
  *
  * Description:
  *   Eliminate a TCP read-ahead notification previously setup by
- *   tcp_notifier_setup().  This function should only be called if the
- *   notification should be aborted prior to the notification.  The
+ *   tcp_readahead_notifier_setup().  This function should only be called
+ *   if the notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the signal is sent.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
- *         tcp_notifier_setup().
+ *         tcp_readahead_notifier_setup().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -133,7 +186,7 @@ int tcp_notifier_teardown(int key)
 }
 
 /****************************************************************************
- * Name: tcp_notifier_signal
+ * Name: tcp_readahead_signal
  *
  * Description:
  *   Read-ahead data has been buffered.  Signal all threads waiting for
@@ -142,7 +195,8 @@ int tcp_notifier_teardown(int key)
  *   When read-ahead data becomes available, *all* of the workers waiting
  *   for read-ahead data will be executed.  If there are multiple workers
  *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call tcp_notifier_setup() once again.
+ *   data.  Others will need to call tcp_readahead_notifier_setup() once
+ *   again.
  *
  * Input Parameters:
  *   conn  - The TCP connection where read-ahead data was just buffered.
@@ -152,11 +206,33 @@ int tcp_notifier_teardown(int key)
  *
  ****************************************************************************/
 
-void tcp_notifier_signal(FAR struct tcp_conn_s *conn)
+void tcp_readahead_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
   return work_notifier_signal(WORK_TCP_READAHEAD, conn);
 }
 
-#endif /* CONFIG_TCP_READAHEAD_NOTIFIER */
+/****************************************************************************
+ * Name: tcp_disconnect_signal
+ *
+ * Description:
+ *   The TCP connection has been lost.  Signal all threads monitoring TCP
+ *   state events.
+ *
+ * Input Parameters:
+ *   conn  - The TCP connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void tcp_disconnect_signal(FAR struct tcp_conn_s *conn)
+{
+  /* This is just a simple wrapper around work_notifier_signal(). */
+
+  return work_notifier_signal(WORK_TCP_DISCONNECT, conn);
+}
+
+#endif /* CONFIG_TCP_NOTIFIER */

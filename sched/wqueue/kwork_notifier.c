@@ -314,7 +314,13 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       key                = work_notifier_key();
 
-      /* Add the notification to the head of the pending list */
+      /* Add the notification to the head of the pending list
+       *
+       * REVISIT:  Work will be processed in LIFO order.  Perhaps
+       * we should should consider saving the notification is the
+       * order of the caller's execution priority so that the
+       * notifications executed in a saner order?
+       */
 
       notifier->flink    = g_notifier_pending;
       notifier->alloc    = alloc;
