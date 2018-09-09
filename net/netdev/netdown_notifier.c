@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 
-#include <nuttx/signal.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
@@ -57,18 +58,16 @@
  * Name: netdown_notifier_setup
  *
  * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
+ *   Set up to perform a callback to the worker function the network goes
+ *   down.  The worker function will execute on the high priority worker
+ *   thread.
  *
  * Input Parameters:
- *   pid   - The PID to be notified.  If a zero value is provided, then the
- *           PID of the calling thread will be used.
- *   signo - The signal number to use with the notification.
+ *   worker - The worker function to execute on the high priority work
+ *            queue when data is available in the UDP readahead buffer.
  *   dev   - The network driver to be monitored
- *
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
  * Returned Value:
  *   > 0   - The signal notification is in place.  The returned value is a
  *           key that may be used later in a call to
@@ -81,8 +80,13 @@
  *
  ****************************************************************************/
 
-int netdown_notifier_setup(int pid, int signo, FAR struct net_driver_s *dev)
+int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
+                           FAR void *arg)
 {
+  struct work_notifier_s info;
+
+  DEBUGASSERT(worker != NULL);
+
   /* If network driver is already down, then return zero without setting up
    * the notification.
    */
@@ -92,16 +96,21 @@ int netdown_notifier_setup(int pid, int signo, FAR struct net_driver_s *dev)
       return 0;
     }
 
-  /* Otherwise, this is just a simple wrapper around nxsig_notifer_setup(). */
+  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
-  return nxsig_notifier_setup(pid, signo, NXSIG_NET_DOWN, dev);
+  info.evtype    = WORK_NET_DOWN;
+  info.qualifier = dev;
+  info.arg       = arg;
+  info.worker    = worker;
+
+  return work_notifier_setup(&info);
 }
 
 /****************************************************************************
  * Name: netdown_notifier_teardown
  *
  * Description:
- *   Eliminate a TCP read-ahead notification previously setup by
+ *   Eliminate a network down notification previously setup by
  *   netdown_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
  *   notification will automatically be torn down after the signal is sent.
@@ -118,22 +127,17 @@ int netdown_notifier_setup(int pid, int signo, FAR struct net_driver_s *dev)
 
 int netdown_notifier_teardown(int key)
 {
-  /* This is just a simple wrapper around nxsig_notifier_teardown(). */
+  /* This is just a simple wrapper around work_notifier_teardown(). */
 
-  return nxsig_notifier_teardown(key);
+  return work_notifier_teardown(key);
 }
 
 /****************************************************************************
  * Name: netdown_notifier_signal
  *
  * Description:
- *   Read-ahead data has been buffered.  Signal all threads waiting for
- *   read-ahead data to become available.
- *
- *   When the read-ahead data becomes available, *all* of the waiters in
- *   this thread will be signaled.  If there are multiple waiters then only
- *   the highest priority thread will get the data.  Lower priority threads
- *   will need to call netdown_notifier_setup() once again.
+ *   A network has gone down has been buffered.  Execute worker thread
+ *   functions for all threads monitoring the state of the device.
  *
  * Input Parameters:
  *   dev  - The TCP connection where read-ahead data was just buffered.
@@ -145,9 +149,9 @@ int netdown_notifier_teardown(int key)
 
 void netdown_notifier_signal(FAR struct net_driver_s *dev)
 {
-  /* This is just a simple wrapper around nxsig_notifier_signal(). */
+  /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return nxsig_notifier_signal(NXSIG_NET_DOWN, dev);
+  return work_notifier_signal(WORK_NET_DOWN, dev);
 }
 
 #endif /* CONFIG_NETDOWN_NOTIFIER */

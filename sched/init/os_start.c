@@ -68,6 +68,9 @@
 #ifndef CONFIG_DISABLE_PTHREAD
 #  include "pthread/pthread.h"
 #endif
+#ifdef CONFIG_SCHED_WORKQUEUE
+#  include "wqueue/wqueue.h"
+#endif
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
@@ -700,6 +703,12 @@ void os_start(void)
    */
 
   net_setup();
+#endif
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+  /* Initialize work queue data structures */
+
+  work_initialize();
 #endif
 
   /* The processor specific details of running the operating system

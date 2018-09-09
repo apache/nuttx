@@ -278,6 +278,29 @@ struct work_s
   clock_t delay;         /* Delay until work performed */
 };
 
+/* This is an enumeration of the various events that may be
+ * notified via nxig_notifier_signal().
+ */
+
+enum work_evtype_e
+{
+  WORK_IOB_AVAIL  = 1, /* Notify availability of an IOB */
+  WORK_NET_DOWN,       /* Notify that the network is down */
+  WORK_TCP_READAHEAD,  /* Notify that TCP read-ahead data is available */
+  WORK_TCP_DISCONNECT, /* Notify loss of TCP connection */
+  WORK_UDP_READAHEAD,  /* Notify that TCP read-ahead data is available */
+};
+
+/* This structure describes one notification */
+
+struct work_notifier_s
+{
+  uint8_t evtype;      /* See enum work_evtype_e */
+  FAR void *qualifier; /* Event qualifier value */
+  FAR void *arg;       /* User-defined worker function argument */
+  worker_t worker;     /* The worker function to schedule */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -442,6 +465,78 @@ void lpwork_boostpriority(uint8_t reqprio);
 
 #if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_PRIORITY_INHERITANCE)
 void lpwork_restorepriority(uint8_t reqprio);
+#endif
+
+/****************************************************************************
+ * Name: work_notifier_setup
+ *
+ * Description:
+ *   Set up to provide a notification when event is signaled.
+ *
+ * Input Parameters:
+ *   info - Describes the work notification.
+ *
+ * Returned Value:
+ *   > 0   - The key which may be used later in a call to
+ *           work_notifier_teardown().
+ *   == 0  - Not used (reserved for wrapper functions).
+ *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WQUEUE_NOTIFIER
+int work_notifier_setup(FAR struct work_notifier_s *info);
+#endif
+
+/****************************************************************************
+ * Name: work_notifier_teardown
+ *
+ * Description:
+ *   Eliminate a notification previously setup by work_notifier_setup().
+ *   This function should only be called if the notification should be
+ *   aborted prior to the notification.  The notification will automatically
+ *   be torn down after the signal is sent.
+ *
+ * Input Parameters:
+ *   key - The key value returned from a previous call to
+ *         work_notifier_setup().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WQUEUE_NOTIFIER
+int work_notifier_teardown(int key);
+#endif
+
+/****************************************************************************
+ * Name: work_notifier_signal
+ *
+ * Description:
+ *   An event has just occurred.  Signal all threads waiting for that event.
+ *
+ *   When an event of interest occurs, *all* of the workers waiting for this
+ *   event will be executed.  If there are multiple workers for a resource
+ *   then only the first to execute will get the resource.  Others will
+ *   need to call work_notifier_setup() once again.
+ *
+ * Input Parameters:
+ *   evtype   - The type of the event that just occurred.
+ *   qualifier - Event qualifier to distinguish different cases of the
+ *               generic event type.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WQUEUE_NOTIFIER
+void work_notifier_signal(enum work_evtype_e evtype,
+                           FAR void *qualifier);
 #endif
 
 #undef EXTERN

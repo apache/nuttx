@@ -47,23 +47,6 @@
 #include <signal.h>
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This is an enumeration of the various signal events that may be
- * notified via nxig_notifier_signal().
- */
-
-enum nxsig_evtype_e
-{
-  NXSIG_IOB_AVAIL  = 1, /* Signal availability of an IOB */
-  NXSIG_NET_DOWN,       /* Signal that the network is down */
-  NXSIG_TCP_READAHEAD,  /* Signal that TCP read-ahead data is available */
-  NXSIG_TCP_DISCONNECT, /* Signal loss of TCP connection */
-  NXSIG_UDP_READAHEAD,  /* Signal that TCP read-ahead data is available */
-};
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -469,96 +452,6 @@ int nxsig_usleep(useconds_t usec);
 
 #if defined(CONFIG_SIG_EVTHREAD) && defined(CONFIG_BUILD_FLAT)
 int nxsig_evthread(pid_t pid, FAR struct sigevent *event);
-#endif
-
-/****************************************************************************
- * Name: nxsig_notifier_setup
- *
- * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then qualifier value may be recovered in the sival_ptr value of
- *   the struct siginfo instance.
- *
- * Input Parameters:
- *   pid       - The PID to be notified.  If a zero value is provided,
- *               then the PID of the calling thread will be used.
- *   signo     - The signal number to use with the notification.
- *   evtype    - The event type.
- *   qualifier - Event qualifier to distinguish different cases of the
- *               generic event type.
- *
- * Returned Value:
- *   > 0   - The key which may be used later in a call to
- *           nxsig_notifier_teardown().
- *   == 0  - Not used (reserved for wrapper functions).
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
- *           returned value is a negated errno value that indicates the
- *           nature of the failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SIG_NOTIFIER
-int nxsig_notifier_setup(int pid, int signo, enum nxsig_evtype_e evtype,
-                         FAR void *qualifier);
-#endif
-
-/****************************************************************************
- * Name: nxsig_notifier_teardown
- *
- * Description:
- *   Eliminate a notification previously setup by nxsig_notifier_setup().
- *   This function should only be called if the notification should be
- *   aborted prior to the notification.  The notification will automatically
- *   be torn down after the signal is sent.
- *
- * Input Parameters:
- *   key - The key value returned from a previous call to
- *         nxsig_notifier_setup().
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SIG_NOTIFIER
-int nxsig_notifier_teardown(int key);
-#endif
-
-/****************************************************************************
- * Name: nxsig_notifier_signal
- *
- * Description:
- *   An event has just occurred.  Signal all threads waiting for that event.
- *
- *   When an IOB becomes available, *all* of the waiters in this thread will
- *   be signaled.  If there are multiple waiters for a resource then only
- *   the highest priority thread will get the resource.  Lower priority
- *   threads will need to call nxsig_notify once again.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then qualifier value may be obtained in the sival_ptr value of
- *   the struct siginfo instance.
- *
- * Input Parameters:
- *   evtype   - The type of the event that just occurred.
- *   qualifier - Event qualifier to distinguish different cases of the
- *               generic event type.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SIG_NOTIFIER
-void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
-                           FAR void *qualifier);
 #endif
 
 #endif /* __INCLUDE_NUTTX_SIGNAL_H */

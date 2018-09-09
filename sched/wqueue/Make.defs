@@ -37,7 +37,8 @@
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
-CSRCS += kwork_queue.c kwork_process.c kwork_cancel.c kwork_signal.c
+CSRCS += kwork_initialize.c kwork_queue.c kwork_process.c kwork_cancel.c
+CSRCS += kwork_signal.c
 
 # Add high priority work queue files
 
@@ -53,6 +54,12 @@ ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += kwork_inherit.c
 endif # CONFIG_PRIORITY_INHERITANCE
 endif # CONFIG_SCHED_LPWORK
+
+# Add work queue notifier support
+
+ifeq ($(CONFIG_WQUEUE_NOTIFIER),y)
+CSRCS += kwork_notifier.c
+endif
 
 # Include wqueue build support
 

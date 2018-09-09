@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/signal/sig_notifier.c
+ * sched/wqueue/kwork_notifier.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,31 +43,40 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 #include <sched.h>
 #include <assert.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/signal.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/wqueue.h>
 
 #include "signal/signal.h"
 
-#ifdef CONFIG_SIG_NOTIFIER
+#ifdef CONFIG_WQUEUE_NOTIFIER
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This is the saved information for one notification */
+/* The full allocated notification will hold additional information.  The
+ * allocated notification information persist until the work is executed
+ * and must be freed using kmm_free() by the work.
+ */
 
-struct nxsig_notifier_s
+struct work_notifier_alloc_s
 {
-  FAR struct nxsig_notifier_s *flink; /* Supports a singly linked list */
-  FAR void *qualifier;                /* Event qualifier value */
-  uint8_t signo;                      /* The signal number for notification */
-  uint8_t evtype;                     /* See enum nxsig_evtype_e */
-  pid_t pid;                          /* The PID to be notified */
-  int16_t key;                        /* Unique ID for this notification */
+  struct work_notifier_s info;             /* The notification info */
+  struct work_s work;                      /* Used for scheduling the work */
+};
+
+/* This structure describes one notification list entry */
+
+struct work_notifier_entry_s
+{
+  FAR struct work_notifier_entry_s *flink;
+  FAR struct work_notifier_alloc_s *alloc; /* Allocated notification info copy */
+  int16_t key;                             /* Unique ID for the notification */
 };
 
 /****************************************************************************
@@ -76,21 +85,22 @@ struct nxsig_notifier_s
 
 /* This is a statically allocated pool of notification structures */
 
-static struct nxsig_notifier_s g_notifier_pool[CONFIG_SIG_NOTIFIER_NWAITERS];
+static struct work_notifier_entry_s
+  g_notifier_pool[CONFIG_WQUEUE_NOTIFIER_NWAITERS];
 
 /* This is a list of free notification structures */
 
-static FAR struct nxsig_notifier_s *g_notifier_free;
+static FAR struct work_notifier_entry_s *g_notifier_free;
 
 /* This is a singly linked list of pending notifications.  When an event
  * occurs available, *all* of the waiters for that event in this list will
  * be signaled and the entry will be freed.  If there are multiple waiters
  * for some resource, then only the highest priority thread will get the
- * resource.  Lower priority threads will need to call nxsig_notifier_setup()
+ * resource.  Lower priority threads will need to call work_notifier_setup()
  * once again.
  */
 
-static FAR struct nxsig_notifier_s *g_notifier_pending;
+static FAR struct work_notifier_entry_s *g_notifier_pending;
 
 /* This semaphore is used as mutex to enforce mutually exclusive access to
  * the notification data structures.
@@ -107,16 +117,16 @@ static uint16_t g_notifier_key;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_notifier_alloc
+ * Name: work_notifier_alloc
  *
  * Description:
  *   Allocate a notification structure by removing it from the free list.
  *
  ****************************************************************************/
 
-static FAR struct nxsig_notifier_s *nxsig_notifier_alloc(void)
+static FAR struct work_notifier_entry_s *work_notifier_alloc(void)
 {
-  FAR struct nxsig_notifier_s *notifier;
+  FAR struct work_notifier_entry_s *notifier;
 
   notifier = g_notifier_free;
   if (notifier != NULL)
@@ -129,7 +139,7 @@ static FAR struct nxsig_notifier_s *nxsig_notifier_alloc(void)
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_free
+ * Name: work_notifier_free
  *
  * Description:
  *   Free a notification structure by returning it to the head of the free
@@ -137,14 +147,15 @@ static FAR struct nxsig_notifier_s *nxsig_notifier_alloc(void)
  *
  ****************************************************************************/
 
-static void nxsig_notifier_free(FAR struct nxsig_notifier_s *notifier)
+static inline void
+  work_notifier_free(FAR struct work_notifier_entry_s *notifier)
 {
   notifier->flink = g_notifier_free;
   g_notifier_free = notifier;
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_find
+ * Name: work_notifier_find
  *
  * Description:
  *   Given a unique key for notification, find the corresponding notification
@@ -152,11 +163,11 @@ static void nxsig_notifier_free(FAR struct nxsig_notifier_s *notifier)
  *
  ****************************************************************************/
 
-static FAR struct nxsig_notifier_s *
-  nxsig_notifier_find(int16_t key, FAR struct nxsig_notifier_s **pprev)
+static FAR struct work_notifier_entry_s *
+  work_notifier_find(int16_t key, FAR struct work_notifier_entry_s **pprev)
 {
-  FAR struct nxsig_notifier_s *notifier;
-  FAR struct nxsig_notifier_s *prev;
+  FAR struct work_notifier_entry_s *notifier;
+  FAR struct work_notifier_entry_s *prev;
 
   /* Find the entry matching this key in the g_notifier_pending list. */
 
@@ -183,14 +194,14 @@ static FAR struct nxsig_notifier_s *
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_key
+ * Name: work_notifier_key
  *
  * Description:
  *   Generate a unique key for this notification.
  *
  ****************************************************************************/
 
-static int16_t nxsig_notifier_key(void)
+static int16_t work_notifier_key(void)
 {
   int16_t key;
 
@@ -205,7 +216,7 @@ static int16_t nxsig_notifier_key(void)
 
       key = (int16_t)++g_notifier_key;
     }
-  while (nxsig_notifier_find(key, NULL) != NULL);
+  while (work_notifier_find(key, NULL) != NULL);
 
   return key;
 }
@@ -215,22 +226,22 @@ static int16_t nxsig_notifier_key(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_notifier_initialize
+ * Name: work_notifier_initialize
  *
  * Description:
- *   Set up the notification structure for normal operation.
+ *   Set up the notification data structures for normal operation.
  *
  ****************************************************************************/
 
-void nxsig_notifier_initialize(void)
+void work_notifier_initialize(void)
 {
   int i;
 
   /* Add each notification structure to the free list */
 
-  for (i = 0; i < CONFIG_SIG_NOTIFIER_NWAITERS; i++)
+  for (i = 0; i < CONFIG_WQUEUE_NOTIFIER_NWAITERS; i++)
     {
-      FAR struct nxsig_notifier_s *notifier = &g_notifier_pool[i];
+      FAR struct work_notifier_entry_s *notifier = &g_notifier_pool[i];
 
       /* Add the pre-allocated notification to the head of the free list */
 
@@ -246,30 +257,17 @@ void nxsig_notifier_initialize(void)
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_setup
+ * Name: work_notifier_setup
  *
  * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then qualifier value may be recovered in the sival_ptr value of
- *   the struct siginfo instance.
+ *   Set up to provide a notification when event is signaled.
  *
  * Input Parameters:
- *   pid       - The PID to be notified.  If a zero value is provided,
- *               then the PID of the calling thread will be used.
- *   signo     - The signal number to use with the notification.
- *   evtype    - The event type.
- *   qualifier - Event qualifier to distinguish different cases of the
- *               generic event type.
+ *   info - Describes the work notification.
  *
  * Returned Value:
  *   > 0   - The key which may be used later in a call to
- *           nxsig_notifier_teardown().
+ *           work_notifier_teardown().
  *   == 0  - Not used (reserved for wrapper functions).
  *   < 0   - An unexpected error occurred and no signal will be sent.  The
  *           returned value is a negated errno value that indicates the
@@ -277,17 +275,9 @@ void nxsig_notifier_initialize(void)
  *
  ****************************************************************************/
 
-int nxsig_notifier_setup(int pid, int signo, enum nxsig_evtype_e evtype,
-                         FAR void *qualifier)
+int work_notifier_setup(FAR struct work_notifier_s *info)
 {
   int ret;
-
-  /* If the 'pid' is zero, then use the PID of the calling thread */
-
-  if (pid <= 0)
-    {
-      pid = getpid();
-    }
 
   /* Get exclusive access to the notifier data structures */
 
@@ -299,30 +289,39 @@ int nxsig_notifier_setup(int pid, int signo, enum nxsig_evtype_e evtype,
 
   /* Allocate a new notification */
 
-  FAR struct nxsig_notifier_s *notifier = nxsig_notifier_alloc();
+  FAR struct work_notifier_entry_s *notifier = work_notifier_alloc();
   if (notifier == NULL)
     {
       ret = -ENOSPC;
     }
   else
     {
+      FAR struct work_notifier_alloc_s *alloc;
+      int16_t key;
+
+      /* Duplicate the notification info */
+
+      alloc = kmm_malloc(sizeof(struct work_notifier_alloc_s));
+      if (alloc == NULL)
+        {
+          work_notifier_free(notifier);
+          return -ENOMEM;
+        }
+
+      memcpy(&alloc->info, info, sizeof(struct work_notifier_s));
+
       /* Generate a unique key for this notification */
 
-      int16_t key         = nxsig_notifier_key();
+      key                = work_notifier_key();
 
-      /* Initialize the notification structure */
+      /* Add the notification to the head of the pending list */
 
-      notifier->pid       =  pid;
-      notifier->signo     =  signo;
-      notifier->evtype    =  evtype;
-      notifier->key       =  key;
-      notifier->qualifier =  qualifier;
+      notifier->flink    = g_notifier_pending;
+      notifier->alloc    = alloc;
+      notifier->key      = key;
 
-      /* And add it to the head of the pending list */
-
-      notifier->flink     = g_notifier_pending;
-      g_notifier_pending  = notifier;
-      ret                 = key;
+      g_notifier_pending = notifier;
+      ret                = key;
     }
 
   (void)nxsem_post(&g_notifier_sem);
@@ -330,17 +329,17 @@ int nxsig_notifier_setup(int pid, int signo, enum nxsig_evtype_e evtype,
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_teardown
+ * Name: work_notifier_teardown
  *
  * Description:
- *   Eliminate a notification previously setup by nxsig_notifier_setup().
+ *   Eliminate a notification previously setup by work_notifier_setup().
  *   This function should only be called if the notification should be
  *   aborted prior to the notification.  The notification will automatically
  *   be torn down after the signal is sent.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
- *         nxsig_notifier_setup().
+ *         work_notifier_setup().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -348,10 +347,10 @@ int nxsig_notifier_setup(int pid, int signo, enum nxsig_evtype_e evtype,
  *
  ****************************************************************************/
 
-int nxsig_notifier_teardown(int key)
+int work_notifier_teardown(int key)
 {
-  FAR struct nxsig_notifier_s *notifier;
-  FAR struct nxsig_notifier_s *prev;
+  FAR struct work_notifier_entry_s *notifier;
+  FAR struct work_notifier_entry_s *prev;
   int ret;
 
   /* Get exclusive access to the notifier data structures */
@@ -366,7 +365,7 @@ int nxsig_notifier_teardown(int key)
    * assume that there is only one.
    */
 
-  notifier = nxsig_notifier_find(key, &prev);
+  notifier = work_notifier_find(key, &prev);
   if (notifier == NULL)
     {
       /* There is no notification with this key in the pending list */
@@ -386,9 +385,14 @@ int nxsig_notifier_teardown(int key)
           prev->flink = notifier->flink;
         }
 
-      /* And add it to the free list */
+      /* Free the contained information */
 
-      nxsig_notifier_free(notifier);
+      DEBUGASSERT(notifier->alloc != NULL);
+      kmm_free(notifier->alloc);
+
+      /* And return the notification to the free list */
+
+      work_notifier_free(notifier);
       ret = OK;
     }
 
@@ -397,19 +401,15 @@ int nxsig_notifier_teardown(int key)
 }
 
 /****************************************************************************
- * Name: nxsig_notifier_signal
+ * Name: work_notifier_signal
  *
  * Description:
  *   An event has just occurred.  Signal all threads waiting for that event.
  *
- *   When an IOB becomes available, *all* of the waiters in this thread will
- *   be signaled.  If there are multiple waiters for a resource then only
- *   the highest priority thread will get the resource.  Lower priority
- *   threads will need to call nxsig_notify once again.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then qualifier value may be obtained in the sival_ptr value of
- *   the struct siginfo instance.
+ *   When an event of interest occurs, *all* of the workers waiting for this
+ *   event will be executed.  If there are multiple workers for a resource
+ *   then only the first to execute will get the resource.  Others will
+ *   need to call work_notifier_setup() once again.
  *
  * Input Parameters:
  *   evtype   - The type of the event that just occurred.
@@ -421,12 +421,12 @@ int nxsig_notifier_teardown(int key)
  *
  ****************************************************************************/
 
-void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
+void work_notifier_signal(enum work_evtype_e evtype,
                            FAR void *qualifier)
 {
-  FAR struct nxsig_notifier_s *notifier;
-  FAR struct nxsig_notifier_s *prev;
-  FAR struct nxsig_notifier_s *next;
+  FAR struct work_notifier_entry_s *notifier;
+  FAR struct work_notifier_entry_s *prev;
+  FAR struct work_notifier_entry_s *next;
   int ret;
 
   /* Get exclusive access to the notifier data structure */
@@ -449,12 +449,11 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
   /* Find the entry matching this key in the g_notifier_pending list. */
 
   for (prev = NULL, notifier = g_notifier_pending;
-       notifier != NULL; 
+       notifier != NULL;
        notifier = next)
     {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      union sigval value;
-#endif
+      FAR struct work_notifier_alloc_s *alloc;
+      FAR struct work_notifier_s *info;
 
       /* Set up for the next time through the loop (in case the entry is
        * removed from the list).
@@ -466,8 +465,13 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
        * just occurred.
        */
 
-      if (notifier->evtype == evtype && notifier->qualifier == qualifier)
+      alloc = notifier->alloc;
+      DEBUGASSERT(alloc != NULL);
+      info  = &alloc->info;
+
+      if (info->evtype == evtype && info->qualifier == qualifier)
         {
+
           /* Yes.. Remove the notification from the pending list */
 
           if (prev == NULL)
@@ -479,18 +483,13 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
               prev->flink = next;
             }
 
-          /* Signal the waiter */
+          /* Schedule the work */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          value.sival_ptr = notifier->qualifier;
-          (void)nxsig_queue(notifier->pid, notifier->signo, value);
-#else
-          (void)nxsig_queue(notifier->pid, notifier->signo,
-                            notifier->qualifier);
-#endif
+          (void)work_queue(HPWORK, &alloc->work, info->worker, info, 0);
+
           /* Free the notification by returning it to the free list */
 
-          nxsig_notifier_free(notifier);
+          work_notifier_free(notifier);
         }
       else
         {
@@ -506,4 +505,4 @@ void nxsig_notifier_signal(enum nxsig_evtype_e evtype,
   (void)nxsem_post(&g_notifier_sem);
 }
 
-#endif /* CONFIG_SIG_NOTIFIER */
+#endif /* CONFIG_WQUEUE_NOTIFIER */

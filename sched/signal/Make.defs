@@ -52,10 +52,6 @@ ifeq ($(CONFIG_SIG_EVTHREAD),y)
 CSRCS += sig_evthread.c
 endif
 
-ifeq ($(CONFIG_SIG_NOTIFIER),y)
-  CSRCS += sig_notifier.c
-endif
-
 # Include signal build support
 
 DEPPATH += --dep-path signal

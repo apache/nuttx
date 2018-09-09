@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Kkernel thread names */
+/* Kernel thread names */
 
 #define HPWORKNAME "hpwork"
 #define LPWORKNAME "lpwork"
@@ -62,6 +62,7 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
 /* This represents one worker */
 
 struct kworker_s
@@ -129,6 +130,22 @@ extern struct lp_wqueue_s g_lpwork;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: work_initialize
+ *
+ * Description:
+ *   One time initialization of the work queue data structures.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void work_initialize(void);
+
+/****************************************************************************
  * Name: work_hpstart
  *
  * Description:
@@ -185,6 +202,18 @@ int work_lpstart(void);
  ****************************************************************************/
 
 void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
+
+/****************************************************************************
+ * Name: work_notifier_initialize
+ *
+ * Description:
+ *   Set up the notification data structures for normal operation.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WQUEUE_NOTIFIER
+void work_notifier_initialize(void);
+#endif
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __SCHED_WQUEUE_WQUEUE_H */

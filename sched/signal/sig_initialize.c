@@ -234,12 +234,6 @@ void nxsig_initialize(void)
     nxsig_alloc_pendingsignalblock(&g_sigpendingirqsignal,
                                    NUM_INT_SIGNALS_PENDING,
                                    SIG_ALLOC_IRQ);
-
-#ifdef CONFIG_SIG_NOTIFIER
-  /* Initialize the generic notifier facility */
-
-  nxsig_notifier_initialize();
-#endif
 }
 
 /****************************************************************************

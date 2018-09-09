@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 
-#include <nuttx/signal.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -56,16 +57,15 @@
  * Name: iob_notifier_setup
  *
  * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
+ *   Set up to perform a callback to the worker function when an IOB is
+ *   available.  The worker function will execute on the high priority
+ *   worker thread.
  *
  * Input Parameters:
- *   pid   - The PID to be notified.  If a zero value is provided, then the
- *           PID of the calling thread will be used.
- *   signo - The signal number to use with the notification.
+ *   worker - The worker function to execute on the high priority work queue
+ *            when the event occurs.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
  *
  * Returned Value:
  *   > 0   - The signal notification is in place.  The returned value is a
@@ -79,8 +79,12 @@
  *
  ****************************************************************************/
 
-int iob_notifier_setup(int pid, int signo)
+int iob_notifier_setup(worker_t worker, FAR void *arg)
 {
+  struct work_notifier_s info;
+
+  DEBUGASSERT(worker != NULL);
+
   /* If there are already free IOBs, then return zero without setting up the
    * notification.
    */
@@ -90,9 +94,14 @@ int iob_notifier_setup(int pid, int signo)
       return 0;
     }
 
-  /* Otherwise, this is just a simple wrapper around nxsig_notifer_setup(). */
+  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
-  return nxsig_notifier_setup(pid, signo, NXSIG_IOB_AVAIL, NULL);
+  info.evtype    = WORK_IOB_AVAIL;
+  info.qualifier = NULL;
+  info.arg       = arg;
+  info.worker    = worker;
+
+  return work_notifier_setup(&info);
 }
 
 /****************************************************************************
@@ -116,9 +125,9 @@ int iob_notifier_setup(int pid, int signo)
 
 int iob_notifier_teardown(int key)
 {
-  /* This is just a simple wrapper around nxsig_notifier_teardown(). */
+  /* This is just a simple wrapper around work_notifier_teardown(). */
 
-  return nxsig_notifier_teardown(key);
+  return work_notifier_teardown(key);
 }
 
 /****************************************************************************
@@ -128,10 +137,10 @@ int iob_notifier_teardown(int key)
  *   An IOB has become available.  Signal all threads waiting for an IOB
  *   that an IOB is available.
  *
- *   When an IOB becomes available, *all* of the waiters in this thread will
- *   be signaled.  If there are multiple waiters then only the highest
- *   priority thread will get the IOB.  Lower priority threads will need to
- *   call iob_notifier_setup() once again.
+ *   When an IOB becomes available, *all* of the workers waiting for an
+ *   IOB will be executed.  If there are multiple workers waiting for an IOB
+ *   then only the first to execute will get the IOB.  Others will
+ *   need to call iob_notify_setup() once again.
  *
  * Input Parameters:
  *   None.
@@ -143,9 +152,9 @@ int iob_notifier_teardown(int key)
 
 void iob_notifier_signal(void)
 {
-  /* This is just a simple wrapper around nxsig_notifier_signal(). */
+  /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return nxsig_notifier_signal(NXSIG_IOB_AVAIL, NULL);
+  return work_notifier_signal(WORK_IOB_AVAIL, NULL);
 }
 
 #endif /* CONFIG_IOB_NOTIFIER */

@@ -49,6 +49,10 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 
+#ifdef CONFIG_TCP_READAHEAD_NOTIFIER
+#  include <nuttx/wqueue.h>
+#endif
+
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 
 /****************************************************************************
@@ -1546,21 +1550,16 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  * Name: tcp_notifier_setup
  *
  * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then TCP connection structure pointer may be recovered in the
- *   sival_ptr value of the struct siginfo instance.
+ *   Set up to perform a callback to the worker function when an TCP data
+ *   is added to the read-ahead buffer.  The worker function will execute
+ *   on the high priority worker thread.
  *
  * Input Parameters:
- *   pid   - The PID to be notified.  If a zero value is provided, then the
- *           PID of the calling thread will be used.
- *   signo - The signal number to use with the notification.
+ *   worker - The worker function to execute on the high priority work
+ *            queue when data is available in the TCP readahead buffer.
  *   conn  - The TCP connection where read-ahead data is needed.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
  *
  * Returned Value:
  *   > 0   - The signal notification is in place.  The returned value is a
@@ -1575,7 +1574,8 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  ****************************************************************************/
 
 #ifdef CONFIG_TCP_READAHEAD_NOTIFIER
-int tcp_notifier_setup(int pid, int signo, FAR struct tcp_conn_s *conn);
+int tcp_notifier_setup(worker_t worker, FAR struct tcp_conn_s *conn,
+                       FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -1608,14 +1608,10 @@ int tcp_notifier_teardown(int key);
  *   Read-ahead data has been buffered.  Signal all threads waiting for
  *   read-ahead data to become available.
  *
- *   When the read-ahead data becomes available, *all* of the waiters in
- *   this thread will be signaled.  If there are multiple waiters then only
- *   the highest priority thread will get the data.  Lower priority threads
- *   will need to call tcp_notifier_setup() once again.
- *
- *   NOTE: If sigwaitinfo() or sigtimedwait() are used to catch the signal
- *   then then TCP connection structure pointer may be obtained in the
- *   sival_ptr value of the struct siginfo instance.
+ *   When read-ahead data becomes available, *all* of the workers waiting
+ *   for read-ahead data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call tcp_notifier_setup() once again.
  *
  * Input Parameters:
  *   conn  - The TCP connection where read-ahead data was just buffered.

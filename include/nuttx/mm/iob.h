@@ -45,6 +45,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef CONFIG_IOB_NOTIFIER
+#  include <nuttx/wqueue.h>
+#endif
+
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
@@ -208,16 +212,15 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
  * Name: iob_notifier_setup
  *
  * Description:
- *   Set up to notify the specified PID with the provided signal number.
- *
- *   NOTE: To avoid race conditions, the caller should set the sigprocmask
- *   to block signal delivery.  The signal will be delivered once the
- *   signal is removed from the sigprocmask.
+ *   Set up to perform a callback to the worker function when an IOB is
+ *   available.  The worker function will execute on the high priority
+ *   worker thread.
  *
  * Input Parameters:
- *   pid   - The PID to be notified.  If a zero value is provided, then the
- *           PID of the calling thread will be used.
- *   signo - The signal number to use with the notification.
+ *   worker - The worker function to execute on the high priority work queue
+ *            when the event occurs.
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
  *
  * Returned Value:
  *   > 0   - The signal notification is in place.  The returned value is a
@@ -232,7 +235,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
  ****************************************************************************/
 
 #ifdef CONFIG_IOB_NOTIFIER
-int iob_notifier_setup(int pid, int signo);
+int iob_notifier_setup(worker_t worker, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -256,6 +259,30 @@ int iob_notifier_setup(int pid, int signo);
 
 #ifdef CONFIG_IOB_NOTIFIER
 int iob_notifier_teardown(int key);
+#endif
+
+/****************************************************************************
+ * Name: iob_notifier_signal
+ *
+ * Description:
+ *   An IOB has become available.  Signal all threads waiting for an IOB
+ *   that an IOB is available.
+ *
+ *   When an IOB becomes available, *all* of the workers waiting for an
+ *   IOB will be executed.  If there are multiple workers for waiting an IOB
+ *   then only the first to execute will get the IOB.  Others will
+ *   need to call iob_notify_setup() once again.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_NOTIFIER
+void iob_notifier_signal(void);
 #endif
 
 /****************************************************************************

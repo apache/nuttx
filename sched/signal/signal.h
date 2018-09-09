@@ -167,12 +167,6 @@ struct task_group_s;
 void weak_function nxsig_initialize(void);
 void               nxsig_alloc_actionblock(void);
 
-/* sig_notifier.c */
-
-#ifdef CONFIG_SIG_NOTIFIER
-void nxsig_notifier_initialize(void);
-#endif
-
 /* sig_action.c */
 
 void               nxsig_release_action(FAR sigactq_t *sigact);
