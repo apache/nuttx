@@ -224,6 +224,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev, FAR struct udp_con
       return 0;
     }
 
+#ifdef CONFIG_UDP_READAHEAD_NOTIFIER
+  /* Provided notification(s) that additional UDP read-ahead data is
+   * available.
+   */
+
+  udp_notifier_signal(conn);
+#endif
+
   ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }

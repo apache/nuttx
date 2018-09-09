@@ -273,6 +273,14 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
       return 0;
     }
 
+#ifdef CONFIG_TCP_READAHEAD_NOTIFIER
+  /* Provided notification(s) that additional TCP read-ahead data is
+   * available.
+   */
+
+  tcp_notifier_signal(conn);
+#endif
+
   ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }

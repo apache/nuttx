@@ -55,6 +55,9 @@ endif
 ifneq ($(CONFIG_DISABLE_POLL),y)
 ifeq ($(CONFIG_NET_UDP_READAHEAD),y)
 SOCK_CSRCS += udp_netpoll.c
+ifeq ($(CONFIG_UDP_READAHEAD_NOTIFIER),y)
+SOCK_CSRCS += udp_notifier.c
+endif
 endif
 endif
 

@@ -66,8 +66,17 @@ config NET_TCP_READAHEAD
 		These settings are critical to the reasonable operation of read-
 		ahead buffering.
 
-if NET_TCP_READAHEAD
-endif # NET_TCP_READAHEAD
+config TCP_READAHEAD_NOTIFIER
+	bool "Support TCP read-ahead notifications"
+	default n
+	select SIG_NOTIFIER
+	depends on NET_TCP_READAHEAD && !DISABLE_POLL
+	---help---
+		Enable building of TCP read-ahead notifier logic that will send a
+		signal to a kernel thread when an TCP read-ahead data has been
+		buffered.  This is is a general purpose notifier, but was developed
+		specifically to support TCP poll() logic where the poll must wait
+		for incoming TCP data to be buffered.
 
 config NET_TCP_WRITE_BUFFERS
 	bool "Enable TCP/IP write buffering"

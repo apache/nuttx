@@ -57,6 +57,18 @@ config NET_UDP_READAHEAD
 	select NET_READAHEAD
 	select MM_IOB
 
+config UDP_READAHEAD_NOTIFIER
+	bool "Support UDP read-ahead notifications"
+	default n
+	select SIG_NOTIFIER
+	depends on NET_UDP_READAHEAD && !DISABLE_POLL
+	---help---
+		Enable building of UDP read-ahead notifier logic that will send a
+		signal to a kernel thread when an UDP read-ahead data has been
+		buffered.  This is is a general purpose notifier, but was developed
+		specifically to support UDP poll() logic where the poll must wait
+		for incoming UDP data to be buffered.
+
 config NET_UDP_WRITE_BUFFERS
 	bool "Enable UDP/IP write buffering"
 	default n
