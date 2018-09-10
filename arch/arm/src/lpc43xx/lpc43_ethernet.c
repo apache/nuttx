@@ -3386,7 +3386,7 @@ static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
   lpc43_pin_config(PINCONF_ENET_RXD1);
   lpc43_pin_config(PINCONF_ENET_TXD0);
   lpc43_pin_config(PINCONF_ENET_TXD1);
-  lpc43_pin_config(PINCONF_ENET_TXEN);
+  lpc43_pin_config(PINCONF_ENET_TX_EN);
 
 #ifdef PINCONF_ENET_RESET
   lpc43_pin_config(PINCONF_ENET_RESET);
