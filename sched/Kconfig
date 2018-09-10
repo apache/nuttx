@@ -1469,17 +1469,6 @@ config WQUEUE_NOTIFIER
 		notifier, but was developed specifically to support poll() logic
 		where the poll must wait for an resources to become available.
 
-config WQUEUE_NOTIFIER_NWAITERS
-	int "Number of notifications"
-	default 16
-	range 1 32766
-	depends on WQUEUE_NOTIFIER
-	---help---
-		If CONFIG_WQUEUE_NOTIFIER is selected, then a pre-allocated pool of
-		notification structures will be used to hold information about
-		pending notifications.  This then determines an upper limit for the
-		number of waiters that can be supported.
-
 endif # SCHED_HPWORK
 
 config SCHED_LPWORK

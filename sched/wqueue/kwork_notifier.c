@@ -59,38 +59,29 @@
  * Private Types
  ****************************************************************************/
 
-/* The full allocated notification will hold additional information.  The
- * allocated notification information persist until the work is executed
- * and must be freed using kmm_free() by the work.
+/* This structure describes one notification list entry.  It is cast-
+ * compatible with struct work_notifier_s.  This structure is an allocated
+ * container for the user notification data.   It is allocated because it
+ * must persist until the work is executed and must be freed using
+ * kmm_free() by the work.
  */
-
-struct work_notifier_alloc_s
-{
-  struct work_notifier_s info;             /* The notification info */
-  struct work_s work;                      /* Used for scheduling the work */
-};
-
-/* This structure describes one notification list entry */
 
 struct work_notifier_entry_s
 {
+  /* User notification information */
+
+  struct work_notifier_s info;             /* The notification info */
+
+  /* Additional payload needed to manage the notification */
+
   FAR struct work_notifier_entry_s *flink;
-  FAR struct work_notifier_alloc_s *alloc; /* Allocated notification info copy */
+  struct work_s work;                      /* Used for scheduling the work */
   int16_t key;                             /* Unique ID for the notification */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* This is a statically allocated pool of notification structures */
-
-static struct work_notifier_entry_s
-  g_notifier_pool[CONFIG_WQUEUE_NOTIFIER_NWAITERS];
-
-/* This is a list of free notification structures */
-
-static FAR struct work_notifier_entry_s *g_notifier_free;
 
 /* This is a singly linked list of pending notifications.  When an event
  * occurs available, *all* of the waiters for that event in this list will
@@ -106,7 +97,7 @@ static FAR struct work_notifier_entry_s *g_notifier_pending;
  * the notification data structures.
  */
 
-static sem_t g_notifier_sem;
+static sem_t g_notifier_sem = SEM_INITIALIZER(1);
 
 /* Used for lookup key generation */
 
@@ -115,44 +106,6 @@ static uint16_t g_notifier_key;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: work_notifier_alloc
- *
- * Description:
- *   Allocate a notification structure by removing it from the free list.
- *
- ****************************************************************************/
-
-static FAR struct work_notifier_entry_s *work_notifier_alloc(void)
-{
-  FAR struct work_notifier_entry_s *notifier;
-
-  notifier = g_notifier_free;
-  if (notifier != NULL)
-    {
-      g_notifier_free = notifier->flink;
-      notifier->flink = NULL;
-    }
-
-  return notifier;
-}
-
-/****************************************************************************
- * Name: work_notifier_free
- *
- * Description:
- *   Free a notification structure by returning it to the head of the free
- *   list.
- *
- ****************************************************************************/
-
-static inline void
-  work_notifier_free(FAR struct work_notifier_entry_s *notifier)
-{
-  notifier->flink = g_notifier_free;
-  g_notifier_free = notifier;
-}
 
 /****************************************************************************
  * Name: work_notifier_find
@@ -226,37 +179,6 @@ static int16_t work_notifier_key(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_notifier_initialize
- *
- * Description:
- *   Set up the notification data structures for normal operation.
- *
- ****************************************************************************/
-
-void work_notifier_initialize(void)
-{
-  int i;
-
-  /* Add each notification structure to the free list */
-
-  for (i = 0; i < CONFIG_WQUEUE_NOTIFIER_NWAITERS; i++)
-    {
-      FAR struct work_notifier_entry_s *notifier = &g_notifier_pool[i];
-
-      /* Add the pre-allocated notification to the head of the free list */
-
-      notifier->flink    = g_notifier_free;
-      g_notifier_free = notifier;
-    }
-
-  /* Initialize the semaphore that enforces mutually exclusive access to the
-   * notification data structures.
-   */
-
-  nxsem_init(&g_notifier_sem, 0, 1);
-}
-
-/****************************************************************************
  * Name: work_notifier_setup
  *
  * Description:
@@ -277,6 +199,7 @@ void work_notifier_initialize(void)
 
 int work_notifier_setup(FAR struct work_notifier_s *info)
 {
+  FAR struct work_notifier_entry_s *notifier;
   int ret;
 
   /* Get exclusive access to the notifier data structures */
@@ -287,32 +210,22 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
       return ret;
     }
 
-  /* Allocate a new notification */
+  /* Allocate a new notification entry */
 
-  FAR struct work_notifier_entry_s *notifier = work_notifier_alloc();
+  notifier = kmm_malloc(sizeof(struct work_notifier_entry_s));
   if (notifier == NULL)
     {
-      ret = -ENOSPC;
+      ret = -ENOMEM;
     }
   else
     {
-      FAR struct work_notifier_alloc_s *alloc;
-      int16_t key;
-
       /* Duplicate the notification info */
 
-      alloc = kmm_malloc(sizeof(struct work_notifier_alloc_s));
-      if (alloc == NULL)
-        {
-          work_notifier_free(notifier);
-          return -ENOMEM;
-        }
-
-      memcpy(&alloc->info, info, sizeof(struct work_notifier_s));
+      memcpy(&notifier->info, info, sizeof(struct work_notifier_s));
 
       /* Generate a unique key for this notification */
 
-      key                = work_notifier_key();
+      notifier->key      = work_notifier_key();
 
       /* Add the notification to the head of the pending list
        *
@@ -323,11 +236,9 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
        */
 
       notifier->flink    = g_notifier_pending;
-      notifier->alloc    = alloc;
-      notifier->key      = key;
-
       g_notifier_pending = notifier;
-      ret                = key;
+
+      ret                = work_notifier_key();
     }
 
   (void)nxsem_post(&g_notifier_sem);
@@ -391,14 +302,9 @@ int work_notifier_teardown(int key)
           prev->flink = notifier->flink;
         }
 
-      /* Free the contained information */
+      /* Free the notification */
 
-      DEBUGASSERT(notifier->alloc != NULL);
-      kmm_free(notifier->alloc);
-
-      /* And return the notification to the free list */
-
-      work_notifier_free(notifier);
+      kmm_free(notifier);
       ret = OK;
     }
 
@@ -458,7 +364,6 @@ void work_notifier_signal(enum work_evtype_e evtype,
        notifier != NULL;
        notifier = next)
     {
-      FAR struct work_notifier_alloc_s *alloc;
       FAR struct work_notifier_s *info;
 
       /* Set up for the next time through the loop (in case the entry is
@@ -466,18 +371,14 @@ void work_notifier_signal(enum work_evtype_e evtype,
        */
 
       next = notifier->flink;
+      info = &notifier->info;
 
       /* Check if this is the a notification request for the event that
        * just occurred.
        */
 
-      alloc = notifier->alloc;
-      DEBUGASSERT(alloc != NULL);
-      info  = &alloc->info;
-
       if (info->evtype == evtype && info->qualifier == qualifier)
         {
-
           /* Yes.. Remove the notification from the pending list */
 
           if (prev == NULL)
@@ -491,11 +392,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
           /* Schedule the work */
 
-          (void)work_queue(HPWORK, &alloc->work, info->worker, info, 0);
-
-          /* Free the notification by returning it to the free list */
-
-          work_notifier_free(notifier);
+          (void)work_queue(HPWORK, &notifier->work, info->worker, info, 0);
         }
       else
         {

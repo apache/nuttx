@@ -130,22 +130,6 @@ extern struct lp_wqueue_s g_lpwork;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_initialize
- *
- * Description:
- *   One time initialization of the work queue data structures.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_initialize(void);
-
-/****************************************************************************
  * Name: work_hpstart
  *
  * Description:

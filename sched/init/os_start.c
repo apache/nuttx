@@ -705,12 +705,6 @@ void os_start(void)
   net_setup();
 #endif
 
-#ifdef CONFIG_SCHED_WORKQUEUE
-  /* Initialize work queue data structures */
-
-  work_initialize();
-#endif
-
   /* The processor specific details of running the operating system
    * will be handled here.  Such things as setting up interrupt
    * service routines and starting the clock are some of the things
