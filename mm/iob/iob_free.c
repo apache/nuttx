@@ -133,8 +133,14 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    */
 
   nxsem_post(&g_iob_sem);
+  DEBUGASSERT(g_iob_sem.semcount <= CONFIG_IOB_NBUFFERS);
+
 #if CONFIG_IOB_THROTTLE > 0
   nxsem_post(&g_throttle_sem);
+
+#if 0 /* REVISIT:  This assertion fires! */
+  DEBUGASSERT(g_throttle_sem.semcount <= (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE));
+#endif
 #endif
 
 #ifdef CONFIG_IOB_NOTIFIER

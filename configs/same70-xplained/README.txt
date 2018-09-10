@@ -105,7 +105,7 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
 
     EDBG VCOM Interface
     ---------------- --------- --------------------------
-    EDBG Singal      SAME70
+    EDBG Signal      SAME70
     ---------------- --------- --------------------------
     EDBG_CDC_UART_RX TXD1 PB4
     EDBG_CDC_UART_TX RXD1 PA21
@@ -1416,7 +1416,7 @@ Configuration sub-directories
          CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
          CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
 
-    3. NSH built-in applications are supported.  There are, however, not
+    3. NSH built-in applications are supported.  There are, however, no
        enabled built-in applications.
 
        Binary Formats:
