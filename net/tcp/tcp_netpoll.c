@@ -45,9 +45,12 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
@@ -64,6 +67,9 @@ struct tcp_poll_s
   FAR struct socket *psock;        /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  int16_t key;                     /* Needed to cancel pending notification */
+#endif
 };
 
 /****************************************************************************
@@ -153,6 +159,73 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: tcp_iob_work
+ *
+ * Description:
+ *   Work thread callback function execute when an IOB because available.
+ *
+ * Input Parameters:
+ *   psock - Socket state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+static inline void tcp_iob_work(FAR void *arg)
+{
+  FAR struct work_notifier_s *ninfo = (FAR struct work_notifier_s *)arg;
+  FAR struct tcp_poll_s *pinfo;
+  FAR struct socket *psock;
+  FAR struct pollfd *fds;
+
+  DEBUGASSERT(ninfo != NULL && ninfo->arg != NULL);
+  pinfo = (FAR struct tcp_poll_s *)ninfo->arg;
+
+  psock = pinfo->psock;
+  DEBUGASSERT(psock != NULL);
+
+  fds   = pinfo->fds;
+  DEBUGASSERT(fds != NULL);
+
+  /* Verify that we still have a connection */
+
+  if (!_SS_ISCONNECTED(psock->s_flags) && !_SS_ISLISTENING(psock->s_flags))
+    {
+      /* We were previously connected but lost the connection either due
+       * to a graceful shutdown by the remote peer or because of some
+       * exceptional event.
+       */
+
+      fds->revents |= (POLLERR | POLLHUP);
+    }
+
+  /* Check if we are now able to send */
+
+  else if (_SS_ISCONNECTED(psock->s_flags) && psock_tcp_cansend(psock) >= 0)
+    {
+      fds->revents |= (POLLWRNORM & fds->events);
+    }
+
+  /* Check if any requested events are already in effect */
+
+  if (fds->revents != 0)
+    {
+      /* Yes.. then signal the poll logic */
+
+      nxsem_post(fds->sem);
+    }
+  else
+    {
+      /* No.. ask for the IOB free notification again */
+
+      pinfo->key = iob_notifier_setup(LPWORK, tcp_iob_work, pinfo);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: tcp_poll_txnotify
  *
  * Description:
@@ -170,7 +243,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 #ifndef CONFIG_NET_TCP_WRITE_BUFFERS
 static inline void tcp_poll_txnotify(FAR struct socket *psock)
 {
-  FAR struct tcp_conn_s *conn = psock->conn;
+  FAR struct tcp_conn_s *conn = psock->s_conn;
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -263,6 +336,9 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   info->psock  = psock;
   info->fds    = fds;
   info->cb     = cb;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  info->key    = 0;
+#endif
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
@@ -357,10 +433,23 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       nxsem_post(fds->sem);
     }
 
-#ifndef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  /* If (1) revents == 0, (2) write buffering is enabled, and (3) the
+   * POLLOUT event is needed, then setup to receive a notification an IOB
+   * is freed.
+   */
+
+  else if ((fds->events & POLLOUT) != 0)
+    {
+      /* Ask for the IOB free notification */
+
+      info->key = iob_notifier_setup(LPWORK, tcp_iob_work, info);
+    }
+
+#else
   /* If (1) the socket is in a bound state, (2) revents == 0, (3) write
    * buffering is not enabled (determined by a configuration setting), and
-   * (3) the POLLOUT event is needed then request an immediate Tx poll from
+   * (4) the POLLOUT event is needed then request an immediate Tx poll from
    * the device associated with the binding.
    */
 
@@ -417,9 +506,20 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct tcp_poll_s *)fds->priv;
-  DEBUGASSERT(info && info->fds && info->cb);
-  if (info)
+  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+  if (info != NULL)
     {
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      /* Cancel any pending IOB free notification */
+
+      if (info->key > 0)
+        {
+          /* Ask for the IOB free notification */
+
+          iob_notifier_teardown(info->key);
+        }
+#endif
+
       /* Release the callback */
 
       net_lock();

@@ -1239,7 +1239,7 @@ errout:
  *
  * Returned Value:
  *   OK
- *     At least one byte of data could be succesfully written.
+ *     At least one byte of data could be successfully written.
  *   -EWOULDBLOCK
  *     There is no room in the output buffer.
  *   -EBADF

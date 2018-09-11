@@ -47,8 +47,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
-#include <devif/devif.h>
-#include <socket/socket.h>
+#include "devif/devif.h"
+#include "netdev/netdev.h"
+#include "socket/socket.h"
 #include "udp/udp.h"
 
 #ifdef HAVE_UDP_POLL
@@ -161,7 +162,7 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 #ifndef CONFIG_NET_UDP_WRITE_BUFFERS
 static inline void udp_poll_txnotify(FAR struct socket *psock)
 {
-  FAR struct tcp_conn_s *conn = psock->conn;
+  FAR struct udp_conn_s *conn = psock->s_conn;
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -320,12 +321,22 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   else if ((fds->events & POLLOUT) != 0)
     {
+      /* Check if the socket has been bound to a local address (might be
+       * INADDR_ANY or the IPv6 unspecified address!  In that case the
+       * notification will fail)
+       */
+
+      if (_SS_ISBOUND(psock->s_flags))
+        {
+          udp_poll_txnotify(psock);
+        }
+
 #ifdef CONFIG_NET_UDP_BINDTODEVICE
       /* Check if the socket has been bound to a device interface index via
        * the UDP_BINDTODEVICE socket option.
        */
 
-      if (conn->boundto > 0)
+      else if (conn->boundto > 0)
         {
           /* Yes, find the device associated with the interface index */
 
@@ -337,17 +348,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
               netdev_txnotify_dev(dev);
             }
         }
-      else
 #endif
-      /* Check if the socket has been bound to a local address (might be
-       * INADDR_ANY or the IPv6 unspecified address!  In that case the
-       * notification will fail)
-       */
-
-      if (_SS_ISBOUND(psock->s_flags))
-        {
-          udp_poll_txnotify(psock);
-        }
     }
 #endif
 

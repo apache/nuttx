@@ -158,7 +158,7 @@ static int16_t work_notifier_key(void)
 {
   int16_t key;
 
-  /* Loop until a unique key is generated */
+  /* Loop until a unique key is generated.  Range 1-INT16_MAX. */
 
   do
     {
@@ -272,6 +272,8 @@ int work_notifier_teardown(int key)
   FAR struct work_notifier_entry_s *notifier;
   FAR struct work_notifier_entry_s *prev;
   int ret;
+
+  DEBUGASSERT(key > 0 && key <= INT16_MAX);
 
   /* Get exclusive access to the notifier data structures */
 
