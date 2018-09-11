@@ -296,7 +296,7 @@ enum work_evtype_e
 struct work_notifier_s
 {
   uint8_t evtype;      /* See enum work_evtype_e */
-  uint8_t wqueue;      /* The work queue to use: HPWORK or LPWORK */
+  uint8_t qid;         /* The work queue to use: HPWORK or LPWORK */
   FAR void *qualifier; /* Event qualifier value */
   FAR void *arg;       /* User-defined worker function argument */
   worker_t worker;     /* The worker function to schedule */

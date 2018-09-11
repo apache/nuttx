@@ -58,10 +58,11 @@
  *
  * Description:
  *   Set up to perform a callback to the worker function when an IOB is
- *   available.  The worker function will execute on the high priority
+ *   available.  The worker function will execute on the selected priority
  *   worker thread.
  *
  * Input Parameters:
+ *   qid    - Selects work queue.  Must be HPWORK or LPWORK.
  *   worker - The worker function to execute on the high priority work queue
  *            when the event occurs.
  *   arg    - A user-defined argument that will be available to the worker
@@ -77,7 +78,7 @@
  *
  ****************************************************************************/
 
-int iob_notifier_setup(worker_t worker, FAR void *arg)
+int iob_notifier_setup(int qid, worker_t worker, FAR void *arg)
 {
   struct work_notifier_s info;
 
@@ -95,7 +96,7 @@ int iob_notifier_setup(worker_t worker, FAR void *arg)
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_IOB_AVAIL;
-  info.wqueue    = HPWORK;
+  info.qid       = qid;
   info.qualifier = NULL;
   info.arg       = arg;
   info.worker    = worker;

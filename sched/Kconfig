@@ -1511,7 +1511,7 @@ config SCHED_LPNTHREADS
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
-	default 50
+	default 100
 	---help---
 		The minimum execution priority of the lower priority worker thread.
 
@@ -1520,7 +1520,7 @@ config SCHED_LPWORKPRIORITY
 		priority, of course, but has the added advantage that it supports
 		"priority inheritance" (if PRIORITY_INHERITANCE is also selected):
 		The priority of the lower priority worker thread can then be
-		adjusted to match the highest priority client.  Default: 50
+		adjusted to match the highest priority client.  Default: 100
 
 		NOTE: This priority inheritance feature is not automatic.  The
 		lower priority worker thread will always a fixed priority unless

@@ -203,7 +203,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
   int ret;
 
   DEBUGASSERT(info != NULL && info->worker != NULL);
-  DEBUGASSERT(info->wqueue == HPWORK && info->wqueue == LPWORK);
+  DEBUGASSERT(info->qid == HPWORK && info->qid == LPWORK);
 
   /* Get exclusive access to the notifier data structures */
 
@@ -395,7 +395,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
           /* Schedule the work */
 
-          (void)work_queue(info->wqueue, &notifier->work, info->worker,
+          (void)work_queue(info->qid, &notifier->work, info->worker,
                            info, 0);
         }
       else

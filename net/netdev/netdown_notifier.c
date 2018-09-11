@@ -98,7 +98,7 @@ int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_NET_DOWN;
-  info.wqueue    = LPWORK;
+  info.qid       = LPWORK;
   info.qualifier = dev;
   info.arg       = arg;
   info.worker    = worker;

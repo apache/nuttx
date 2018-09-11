@@ -100,7 +100,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_TCP_READAHEAD;
-  info.wqueue    = LPWORK;
+  info.qid       = LPWORK;
   info.qualifier = conn;
   info.arg       = arg;
   info.worker    = worker;
@@ -151,7 +151,7 @@ int tcp_readahead_disconnect_setup(worker_t worker,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_TCP_DISCONNECT;
-  info.wqueue    = LPWORK;
+  info.qid       = LPWORK;
   info.qualifier = conn;
   info.arg       = arg;
   info.worker    = worker;

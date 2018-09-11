@@ -213,10 +213,11 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
  *
  * Description:
  *   Set up to perform a callback to the worker function when an IOB is
- *   available.  The worker function will execute on the high priority
+ *   available.  The worker function will execute on the selected priority
  *   worker thread.
  *
  * Input Parameters:
+ *   qid    - Selects work queue.  Must be HPWORK or LPWORK.
  *   worker - The worker function to execute on the high priority work queue
  *            when the event occurs.
  *   arg    - A user-defined argument that will be available to the worker
@@ -235,7 +236,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
  ****************************************************************************/
 
 #ifdef CONFIG_IOB_NOTIFIER
-int iob_notifier_setup(worker_t worker, FAR void *arg);
+int iob_notifier_setup(int qid, worker_t worker, FAR void *arg);
 #endif
 
 /****************************************************************************

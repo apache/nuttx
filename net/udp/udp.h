@@ -653,23 +653,22 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  * Description:
  *   Set up to perform a callback to the worker function when an UDP data
  *   is added to the read-ahead buffer.  The worker function will execute
- *   on the high priority worker thread.
+ *   on the low priority worker thread.
  *
  * Input Parameters:
- *   worker - The worker function to execute on the high priority work
- *            queue when data is available in the UDP readahead buffer.
+ *   worker - The worker function to execute on the low priority work
+ *            queue when data is available in the UDP read-ahead buffer.
  *   conn  - The UDP connection where read-ahead data is needed.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
  *
  * Returned Value:
- *   > 0   - The signal notification is in place.  The returned value is a
- *           key that may be used later in a call to
- *           udp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
- *           returned value is a negated errno value that indicates the
+ *   > 0   - The notification is in place.  The returned value is a key that
+ *           may be used later in a call to udp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No notification
+ *           will be provided.
+ *   < 0   - An unexpected error occurred and no notification will occur.
+ *           The returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
  ****************************************************************************/
@@ -686,7 +685,7 @@ int udp_notifier_setup(worker_t worker, FAR struct udp_conn_s *conn,
  *   Eliminate a UDP read-ahead notification previously setup by
  *   udp_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the signal is sent.
+ *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
@@ -706,7 +705,7 @@ int udp_notifier_teardown(int key);
  * Name: udp_notifier_signal
  *
  * Description:
- *   Read-ahead data has been buffered.  Signal all threads waiting for
+ *   Read-ahead data has been buffered.  Notify all threads waiting for
  *   read-ahead data to become available.
  *
  *   When read-ahead data becomes available, *all* of the workers waiting
