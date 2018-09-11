@@ -279,7 +279,7 @@ struct work_s
 };
 
 /* This is an enumeration of the various events that may be
- * notified via nxig_notifier_signal().
+ * notified via work_notifier_signal().
  */
 
 enum work_evtype_e
@@ -288,7 +288,7 @@ enum work_evtype_e
   WORK_NET_DOWN,       /* Notify that the network is down */
   WORK_TCP_READAHEAD,  /* Notify that TCP read-ahead data is available */
   WORK_TCP_DISCONNECT, /* Notify loss of TCP connection */
-  WORK_UDP_READAHEAD,  /* Notify that TCP read-ahead data is available */
+  WORK_UDP_READAHEAD   /* Notify that TCP read-ahead data is available */
 };
 
 /* This structure describes one notification */
@@ -296,6 +296,7 @@ enum work_evtype_e
 struct work_notifier_s
 {
   uint8_t evtype;      /* See enum work_evtype_e */
+  uint8_t wqueue;      /* The work queue to use: HPWORK or LPWORK */
   FAR void *qualifier; /* Event qualifier value */
   FAR void *arg;       /* User-defined worker function argument */
   worker_t worker;     /* The worker function to schedule */
@@ -471,7 +472,7 @@ void lpwork_restorepriority(uint8_t reqprio);
  * Name: work_notifier_setup
  *
  * Description:
- *   Set up to provide a notification when event is signaled.
+ *   Set up to provide a notification when event occurs.
  *
  * Input Parameters:
  *   info - Describes the work notification.
@@ -480,8 +481,8 @@ void lpwork_restorepriority(uint8_t reqprio);
  *   > 0   - The key which may be used later in a call to
  *           work_notifier_teardown().
  *   == 0  - Not used (reserved for wrapper functions).
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
- *           returned value is a negated errno value that indicates the
+ *   < 0   - An unexpected error occurred and no notification will be sent.
+ *           The returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
  ****************************************************************************/
@@ -497,7 +498,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info);
  *   Eliminate a notification previously setup by work_notifier_setup().
  *   This function should only be called if the notification should be
  *   aborted prior to the notification.  The notification will automatically
- *   be torn down after the signal is sent.
+ *   be torn down after the notification is executed.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
@@ -517,7 +518,7 @@ int work_notifier_teardown(int key);
  * Name: work_notifier_signal
  *
  * Description:
- *   An event has just occurred.  Signal all threads waiting for that event.
+ *   An event has just occurred.  Notify all threads waiting for that event.
  *
  *   When an event of interest occurs, *all* of the workers waiting for this
  *   event will be executed.  If there are multiple workers for a resource

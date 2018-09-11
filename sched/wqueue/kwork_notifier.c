@@ -51,7 +51,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
-#include "signal/signal.h"
+#include "wqueue/wqueue.h"
 
 #ifdef CONFIG_WQUEUE_NOTIFIER
 
@@ -85,8 +85,8 @@ struct work_notifier_entry_s
 
 /* This is a singly linked list of pending notifications.  When an event
  * occurs available, *all* of the waiters for that event in this list will
- * be signaled and the entry will be freed.  If there are multiple waiters
- * for some resource, then only the highest priority thread will get the
+ * be notified and the entry will be freed.  If there are multiple waiters
+ * for some resource, then only the first to execute thread will get the
  * resource.  Lower priority threads will need to call work_notifier_setup()
  * once again.
  */
@@ -182,7 +182,7 @@ static int16_t work_notifier_key(void)
  * Name: work_notifier_setup
  *
  * Description:
- *   Set up to provide a notification when event is signaled.
+ *   Set up to provide a notification when an event occurs.
  *
  * Input Parameters:
  *   info - Describes the work notification.
@@ -191,8 +191,8 @@ static int16_t work_notifier_key(void)
  *   > 0   - The key which may be used later in a call to
  *           work_notifier_teardown().
  *   == 0  - Not used (reserved for wrapper functions).
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
- *           returned value is a negated errno value that indicates the
+ *   < 0   - An unexpected error occurred and no notification will be sent.
+ *           The returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
  ****************************************************************************/
@@ -201,6 +201,9 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 {
   FAR struct work_notifier_entry_s *notifier;
   int ret;
+
+  DEBUGASSERT(info != NULL && info->worker != NULL);
+  DEBUGASSERT(info->wqueue == HPWORK && info->wqueue == LPWORK);
 
   /* Get exclusive access to the notifier data structures */
 
@@ -252,7 +255,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
  *   Eliminate a notification previously setup by work_notifier_setup().
  *   This function should only be called if the notification should be
  *   aborted prior to the notification.  The notification will automatically
- *   be torn down after the signal is sent.
+ *   be torn down after the notification executes.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
@@ -316,7 +319,7 @@ int work_notifier_teardown(int key)
  * Name: work_notifier_signal
  *
  * Description:
- *   An event has just occurred.  Signal all threads waiting for that event.
+ *   An event has just occurred.  Notify all threads waiting for that event.
  *
  *   When an event of interest occurs, *all* of the workers waiting for this
  *   event will be executed.  If there are multiple workers for a resource
@@ -334,7 +337,7 @@ int work_notifier_teardown(int key)
  ****************************************************************************/
 
 void work_notifier_signal(enum work_evtype_e evtype,
-                           FAR void *qualifier)
+                          FAR void *qualifier)
 {
   FAR struct work_notifier_entry_s *notifier;
   FAR struct work_notifier_entry_s *prev;
@@ -392,7 +395,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
           /* Schedule the work */
 
-          (void)work_queue(HPWORK, &notifier->work, info->worker, info, 0);
+          (void)work_queue(info->wqueue, &notifier->work, info->worker,
+                           info, 0);
         }
       else
         {

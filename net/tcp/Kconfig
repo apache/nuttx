@@ -50,10 +50,11 @@ config NET_MAX_LISTENPORTS
 config TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n
-	depends on SCHED_HPWORK
+	depends on SCHED_LPWORK
+	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of TCP notifier logic that will execute a worker
-		function on the high priority work queue when read-ahead data
+		function on the low priority work queue when read-ahead data
 		is available or when a TCP connection is lost.  This is is a general
 		purpose notifier, but was developed specifically to support poll()
 		logic where the poll must wait for these events.

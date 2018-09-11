@@ -59,22 +59,21 @@
  *
  * Description:
  *   Set up to perform a callback to the worker function the network goes
- *   down.  The worker function will execute on the high priority worker
+ *   down.  The worker function will execute on the low priority worker
  *   thread.
  *
  * Input Parameters:
- *   worker - The worker function to execute on the high priority work
- *            queue when data is available in the UDP readahead buffer.
+ *   worker - The worker function to execute on the low priority work
+ *            queue when data is available in the UDP read-ahead buffer.
  *   dev   - The network driver to be monitored
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
  * Returned Value:
- *   > 0   - The signal notification is in place.  The returned value is a
- *           key that may be used later in a call to
- *           netdown_notifier_teardown().
- *   == 0  - The the device is already down.  No signal notification will
- *           be provided.
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *   > 0   - The notification is in place.  The returned value is a key that
+ *           may be used later in a call to netdown_notifier_teardown().
+ *   == 0  - The the device is already down.  No notification will be
+ *           provided.
+ *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
@@ -99,6 +98,7 @@ int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_NET_DOWN;
+  info.wqueue    = LPWORK;
   info.qualifier = dev;
   info.arg       = arg;
   info.worker    = worker;
@@ -113,7 +113,7 @@ int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
  *   Eliminate a network down notification previously setup by
  *   netdown_notifier_setup().  This function should only be called if the
  *   notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the signal is sent.
+ *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to

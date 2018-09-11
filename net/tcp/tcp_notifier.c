@@ -60,22 +60,21 @@
  * Description:
  *   Set up to perform a callback to the worker function when an TCP data
  *   is added to the read-ahead buffer.  The worker function will execute
- *   on the high priority worker thread.
+ *   on the low priority worker thread.
  *
  * Input Parameters:
- *   worker - The worker function to execute on the high priority work
+ *   worker - The worker function to execute on the low priority work
  *            queue when data is available in the TCP read-ahead buffer.
  *   conn  - The TCP connection where read-ahead data is needed.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
  *
  * Returned Value:
- *   > 0   - The signal notification is in place.  The returned value is a
- *           key that may be used later in a call to
- *           tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *   > 0   - The notification is in place.  The returned value is a key that
+ *           may be used later in a call to tcp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No notification
+ *           will be provided.
+ *   < 0   - An unexpected error occurred and notification will ocur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
@@ -101,6 +100,7 @@ int tcp_readahead_notifier_setup(worker_t worker,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_TCP_READAHEAD;
+  info.wqueue    = LPWORK;
   info.qualifier = conn;
   info.arg       = arg;
   info.worker    = worker;
@@ -116,19 +116,18 @@ int tcp_readahead_notifier_setup(worker_t worker,
  *   connection is lost.
  *
  * Input Parameters:
- *   worker - The worker function to execute on the high priority work
+ *   worker - The worker function to execute on the low priority work
  *            queue when data is available in the TCP read-ahead buffer.
  *   conn  - The TCP connection where read-ahead data is needed.
  *   arg    - A user-defined argument that will be available to the worker
  *            function when it runs.
  *
  * Returned Value:
- *   > 0   - The signal notification is in place.  The returned value is a
- *           key that may be used later in a call to
- *           tcp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No signal
- *           notification will be provided.
- *   < 0   - An unexpected error occurred and no signal will be sent.  The
+ *   > 0   - The notification is in place.  The returned value is a key that
+ *           may be used later in a call to tcp_notifier_teardown().
+ *   == 0  - There is already buffered read-ahead data.  No notification
+ *           will be provided.
+ *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
@@ -152,6 +151,7 @@ int tcp_readahead_disconnect_setup(worker_t worker,
   /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
 
   info.evtype    = WORK_TCP_DISCONNECT;
+  info.wqueue    = LPWORK;
   info.qualifier = conn;
   info.arg       = arg;
   info.worker    = worker;
@@ -166,7 +166,7 @@ int tcp_readahead_disconnect_setup(worker_t worker,
  *   Eliminate a TCP read-ahead notification previously setup by
  *   tcp_readahead_notifier_setup().  This function should only be called
  *   if the notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the signal is sent.
+ *   notification will automatically be torn down after the notifcation.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
