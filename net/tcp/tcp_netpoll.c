@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_netpoll.c
  *
- *   Copyright (C) 2008-2009, 2011-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,6 +151,55 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   return flags;
 }
+
+/****************************************************************************
+ * Name: tcp_poll_txnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are have data ready to
+ *   be send (TCP)
+ *
+ * Input Parameters:
+ *   psock - Socket state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_TCP_WRITE_BUFFERS
+static inline void tcp_poll_txnotify(FAR struct socket *psock)
+{
+  FAR struct tcp_conn_s *conn = psock->conn;
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  /* If both IPv4 and IPv6 support are enabled, then we will need to select
+   * the device driver using the appropriate IP domain.
+   */
+
+  if (psock->s_domain == PF_INET)
+#endif
+    {
+      /* Notify the device driver that send data is available */
+
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else /* if (psock->s_domain == PF_INET6) */
+#endif /* CONFIG_NET_IPv4 */
+    {
+      /* Notify the device driver that send data is available */
+
+      DEBUGASSERT(psock->s_domain == PF_INET6);
+      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+    }
+#endif /* CONFIG_NET_IPv6 */
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -306,6 +356,24 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       nxsem_post(fds->sem);
     }
+
+#ifndef CONFIG_NET_TCP_WRITE_BUFFERS
+  /* If (1) the socket is in a bound state, (2) revents == 0, (3) write
+   * buffering is not enabled (determined by a configuration setting), and
+   * (3) the POLLOUT event is needed then request an immediate Tx poll from
+   * the device associated with the binding.
+   */
+
+  else if (_SS_ISBOUND(psock->s_flags) && (fds->events & POLLOUT) != 0)
+    {
+      /* Note that the notification will fail if the socket is bound to
+       * INADDR_ANY or the IPv6 unspecified address!  In that case the
+       * notification will fail.
+       */
+
+      tcp_poll_txnotify(psock);
+    }
+#endif
 
   net_unlock();
   return OK;
