@@ -58,6 +58,7 @@
 struct simgpio_dev_s
 {
   struct gpio_dev_s gpio;
+  uint8_t id;
   bool value;
 };
 
@@ -113,6 +114,7 @@ static struct simgpio_dev_s g_gpin =
     .gp_pintype = GPIO_INPUT_PIN,
     .gp_ops     = &gpin_ops,
   },
+  .id = 0,
 };
 
 static struct simgpio_dev_s g_gpout =
@@ -122,6 +124,7 @@ static struct simgpio_dev_s g_gpout =
     .gp_pintype = GPIO_OUTPUT_PIN,
     .gp_ops     = &gpout_ops,
   },
+  .id = 1,
 };
 
 static struct simgpint_dev_s g_gpint =
@@ -133,6 +136,7 @@ static struct simgpint_dev_s g_gpint =
       .gp_pintype = GPIO_INTERRUPT_PIN,
       .gp_ops     = &gpint_ops,
     },
+    .id = 2,
   },
 };
 
@@ -147,7 +151,7 @@ static int sim_interrupt(int argc, wdparm_t arg1, ...)
   DEBUGASSERT(simgpint != NULL && simgpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", simgpint->callback);
 
-  simgpint->callback(&simgpint->simgpio.gpio);
+  simgpint->callback(&simgpint->simgpio.gpio, simgpint->simgpio.id);
   return OK;
 }
 
@@ -226,9 +230,9 @@ int sim_gpio_initialize(void)
   g_gpint.wdog = wd_create();
   DEBUGASSERT(g_gpint.wdog != NULL);
 
-  (void)gpio_pin_register(&g_gpin.gpio, 0);
-  (void)gpio_pin_register(&g_gpout.gpio, 1);
-  (void)gpio_pin_register(&g_gpint.simgpio.gpio, 2);
+  (void)gpio_pin_register(&g_gpin.gpio, g_gpin.id);
+  (void)gpio_pin_register(&g_gpout.gpio, g_gpout.id);
+  (void)gpio_pin_register(&g_gpint.simgpio.gpio, g_gpint.simgpio.id);
   return 0;
 }
 #endif /* CONFIG_EXAMPLES_GPIO && !CONFIG_GPIO_LOWER_HALF */
