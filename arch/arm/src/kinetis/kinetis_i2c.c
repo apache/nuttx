@@ -1335,17 +1335,16 @@ static int kinetis_i2c_reset(struct i2c_master_s *dev)
 
   kinetis_pinconfig(MKI2C_INPUT(sda_gpio));
   kinetis_pinconfig(MKI2C_INPUT(scl_gpio));
+  ret = OK;
 
-  /* Re-init the port */
+  /* Re-init the port (even on error to enable clock) */
 
+out:
   kinetis_i2c_init(priv);
 
   /* Restore the frequency */
 
   kinetis_i2c_setfrequency(priv, frequency);
-  ret = OK;
-
-out:
 
   /* Release the port for re-use by other clients */
 
