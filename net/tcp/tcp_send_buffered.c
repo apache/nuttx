@@ -1251,11 +1251,15 @@ errout:
 
 int psock_tcp_cansend(FAR struct socket *psock)
 {
+  /* Verify that we received a valid socket */
+
   if (!psock || psock->s_crefs <= 0)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;
     }
+
+  /* Verify that this is connected TCP socket */
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
@@ -1263,7 +1267,15 @@ int psock_tcp_cansend(FAR struct socket *psock)
       return -ENOTCONN;
     }
 
-  if (tcp_wrbuffer_test() < 0)
+  /* In order to setup the send, we need to have at least one free write
+   * buffer head and at least one free IOB to initialize the write buffer head.
+   *
+   * REVISIT:  The send will still block if we are unable to buffer the entire
+   * user-provided buffer which may be quite large.  We will almost certainly
+   * need to have more than one free IOB, but we don't know how many more.
+   */
+
+  if (tcp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
     {
       return -EWOULDBLOCK;
     }

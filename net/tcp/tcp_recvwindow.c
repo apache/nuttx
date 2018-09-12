@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#incldue <stdbool.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <net/if.h>

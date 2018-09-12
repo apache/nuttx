@@ -291,7 +291,11 @@ enum work_evtype_e
   WORK_UDP_READAHEAD   /* Notify that TCP read-ahead data is available */
 };
 
-/* This structure describes one notification */
+/* This structure describes one notification and is provided as input to
+ * to work_notifier_setup().  This input is copied by work_notifier_setup()
+ * into an allocated instance of struct work_notifier_entry_s and need not
+ * persist on the caller's side.
+ */
 
 struct work_notifier_s
 {
@@ -300,6 +304,36 @@ struct work_notifier_s
   FAR void *qualifier; /* Event qualifier value */
   FAR void *arg;       /* User-defined worker function argument */
   worker_t worker;     /* The worker function to schedule */
+};
+
+/* This structure describes one notification list entry.  It is cast-
+ * compatible with struct work_notifier_s.  This structure is an allocated
+ * container for the user notification data.   It is allocated because it
+ * must persist until the work is executed and must be freed using
+ * kmm_free() by the work.
+ *
+ * With the work notification is scheduled, the work function will receive
+ * the allocated instance of struct work_notifier_entry_s as its input
+ * argument.  When it completes the notification operation, the work function
+ * is responsible for freeing that instance.
+ */
+
+struct work_notifier_entry_s
+{
+  /* This must appear at the beginning of the structure.  A reference to
+   * the struct work_notifier_entry_s instance must be cast-compatible with
+   * struct dq_entry_s.
+   */
+
+  struct work_s work;           /* Used for scheduling the work */
+
+  /* User notification information */
+
+  struct work_notifier_s info;  /* The notification info */
+
+  /* Additional payload needed to manage the notification */
+
+  int16_t key;                  /* Unique ID for the notification */
 };
 
 /****************************************************************************

@@ -56,34 +56,10 @@
 #ifdef CONFIG_WQUEUE_NOTIFIER
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This structure describes one notification list entry.  It is cast-
- * compatible with struct work_notifier_s.  This structure is an allocated
- * container for the user notification data.   It is allocated because it
- * must persist until the work is executed and must be freed using
- * kmm_free() by the work.
- */
-
-struct work_notifier_entry_s
-{
-  /* User notification information */
-
-  struct work_notifier_s info;             /* The notification info */
-
-  /* Additional payload needed to manage the notification */
-
-  FAR struct work_notifier_entry_s *flink;
-  struct work_s work;                      /* Used for scheduling the work */
-  int16_t key;                             /* Unique ID for the notification */
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This is a singly linked list of pending notifications.  When an event
+/* This is a doubly linked list of pending notifications.  When an event
  * occurs available, *all* of the waiters for that event in this list will
  * be notified and the entry will be freed.  If there are multiple waiters
  * for some resource, then only the first to execute thread will get the
@@ -91,7 +67,7 @@ struct work_notifier_entry_s
  * once again.
  */
 
-static FAR struct work_notifier_entry_s *g_notifier_pending;
+static dq_queue_t g_notifier_pending;
 
 /* This semaphore is used as mutex to enforce mutually exclusive access to
  * the notification data structures.
@@ -116,28 +92,24 @@ static uint16_t g_notifier_key;
  *
  ****************************************************************************/
 
-static FAR struct work_notifier_entry_s *
-  work_notifier_find(int16_t key, FAR struct work_notifier_entry_s **pprev)
+static FAR struct work_notifier_entry_s *work_notifier_find(int16_t key)
 {
   FAR struct work_notifier_entry_s *notifier;
-  FAR struct work_notifier_entry_s *prev;
+  FAR dq_entry_t *entry;
 
   /* Find the entry matching this key in the g_notifier_pending list. */
 
-  for (prev = NULL, notifier = g_notifier_pending;
-       notifier != NULL;
-       prev = notifier, notifier = notifier->flink)
+  for (entry  = dq_peek(&g_notifier_pending);
+       entry != NULL;
+       entry  = dq_next(entry))
     {
+      notifier = (FAR struct work_notifier_entry_s *)entry;
+
       /* Is this the one we were looking for? */
 
       if (notifier->key ==  key)
         {
-          /* Return the previous entry if so requested */
-
-          if (pprev != NULL)
-            {
-              *pprev = prev;
-            }
+          /* Yes.. return a reference to it */
 
           return notifier;
         }
@@ -169,7 +141,7 @@ static int16_t work_notifier_key(void)
 
       key = (int16_t)++g_notifier_key;
     }
-  while (work_notifier_find(key, NULL) != NULL);
+  while (work_notifier_find(key) != NULL);
 
   return key;
 }
@@ -203,7 +175,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
   int ret;
 
   DEBUGASSERT(info != NULL && info->worker != NULL);
-  DEBUGASSERT(info->qid == HPWORK && info->qid == LPWORK);
+  DEBUGASSERT(info->qid == HPWORK || info->qid == LPWORK);
 
   /* Get exclusive access to the notifier data structures */
 
@@ -228,20 +200,18 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       /* Generate a unique key for this notification */
 
-      notifier->key      = work_notifier_key();
+      notifier->key = work_notifier_key();
 
-      /* Add the notification to the head of the pending list
+      /* Add the notification to the tail of the pending list
        *
-       * REVISIT:  Work will be processed in LIFO order.  Perhaps
+       * REVISIT:  Work will be processed in FIFO order.  Perhaps
        * we should should consider saving the notification is the
        * order of the caller's execution priority so that the
        * notifications executed in a saner order?
        */
 
-      notifier->flink    = g_notifier_pending;
-      g_notifier_pending = notifier;
-
-      ret                = work_notifier_key();
+      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      ret = work_notifier_key();
     }
 
   (void)nxsem_post(&g_notifier_sem);
@@ -270,7 +240,6 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 int work_notifier_teardown(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
-  FAR struct work_notifier_entry_s *prev;
   int ret;
 
   DEBUGASSERT(key > 0 && key <= INT16_MAX);
@@ -287,7 +256,7 @@ int work_notifier_teardown(int key)
    * assume that there is only one.
    */
 
-  notifier = work_notifier_find(key, &prev);
+  notifier = work_notifier_find(key);
   if (notifier == NULL)
     {
       /* There is no notification with this key in the pending list */
@@ -298,14 +267,7 @@ int work_notifier_teardown(int key)
     {
       /* Found it!  Remove the notification from the pending list */
 
-      if (prev == NULL)
-        {
-          g_notifier_pending = notifier->flink;
-        }
-      else
-        {
-          prev->flink = notifier->flink;
-        }
+      dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
 
       /* Free the notification */
 
@@ -342,8 +304,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
                           FAR void *qualifier)
 {
   FAR struct work_notifier_entry_s *notifier;
-  FAR struct work_notifier_entry_s *prev;
-  FAR struct work_notifier_entry_s *next;
+  FAR dq_entry_t *entry;
+  FAR dq_entry_t *next;
   int ret;
 
   /* Get exclusive access to the notifier data structure */
@@ -365,9 +327,9 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
   /* Find the entry matching this key in the g_notifier_pending list. */
 
-  for (prev = NULL, notifier = g_notifier_pending;
-       notifier != NULL;
-       notifier = next)
+  for (entry = dq_peek(&g_notifier_pending);
+       entry != NULL;
+       entry = next)
     {
       FAR struct work_notifier_s *info;
 
@@ -375,8 +337,12 @@ void work_notifier_signal(enum work_evtype_e evtype,
        * removed from the list).
        */
 
-      next = notifier->flink;
-      info = &notifier->info;
+      next = entry->flink;
+
+      /* Set up some convenience pointers */
+
+      notifier = (FAR struct work_notifier_entry_s *)entry;
+      info     = &notifier->info;
 
       /* Check if this is the a notification request for the event that
        * just occurred.
@@ -386,27 +352,15 @@ void work_notifier_signal(enum work_evtype_e evtype,
         {
           /* Yes.. Remove the notification from the pending list */
 
-          if (prev == NULL)
-            {
-              g_notifier_pending = next;
-            }
-          else
-            {
-              prev->flink = next;
-            }
+          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
 
-          /* Schedule the work */
-
-          (void)work_queue(info->qid, &notifier->work, info->worker,
-                           info, 0);
-        }
-      else
-        {
-          /* The entry was not removed, the current entry will be the
-           * next previous entry.
+          /* Schedule the work.  The entire notifier entry is passed as an
+           * argument to the work function because that function is
+           * responsible for freeing the allocated memory.
            */
 
-          prev = notifier;
+          (void)work_queue(info->qid, &notifier->work, info->worker,
+                           entry, 0);
         }
     }
 
