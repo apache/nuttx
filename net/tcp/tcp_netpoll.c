@@ -67,7 +67,7 @@ struct tcp_poll_s
   FAR struct socket *psock;        /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
   int16_t key;                     /* Needed to cancel pending notification */
 #endif
 };
@@ -197,34 +197,42 @@ static inline void tcp_iob_work(FAR void *arg)
 
   if (!_SS_ISCONNECTED(psock->s_flags) && !_SS_ISLISTENING(psock->s_flags))
     {
-      /* We were previously connected but lost the connection either due
-       * to a graceful shutdown by the remote peer or because of some
-       * exceptional event.
-       */
+      /* Don't report more than once.  Might happen in a race condition */
 
-      fds->revents |= (POLLERR | POLLHUP);
+      if ((fds->revents & (POLLERR | POLLHUP)) == 0)
+        {
+          /* We were previously connected but lost the connection either due
+           * to a graceful shutdown by the remote peer or because of some
+           * exceptional event.
+           */
+
+          fds->revents |= (POLLERR | POLLHUP);
+          nxsem_post(fds->sem);
+        }
     }
 
-  /* Check if we are now able to send */
+  /* Handle a race condition.  Check if we have already posted the POLLOUT
+   * event.  If so, don't do it again and don't setup notification again.
+   */
 
-  else if (_SS_ISCONNECTED(psock->s_flags) && psock_tcp_cansend(psock) >= 0)
+  if ((fds->events && POLLWRNORM) == 0 ||
+      (fds->revents && POLLWRNORM) != 0)
     {
-      fds->revents |= (POLLWRNORM & fds->events);
-    }
+      /* Check if we are now able to send */
 
-  /* Check if any requested events are already in effect */
+      if (psock_tcp_cansend(psock) >= 0)
+        {
+          /* Yes.. then signal the poll logic */
 
-  if (fds->revents != 0)
-    {
-      /* Yes.. then signal the poll logic */
+          fds->revents |= POLLWRNORM;
+          nxsem_post(fds->sem);
+        }
+      else
+        {
+          /* No.. ask for the IOB free notification again */
 
-      nxsem_post(fds->sem);
-    }
-  else
-    {
-      /* No.. ask for the IOB free notification again */
-
-      pinfo->key = iob_notifier_setup(LPWORK, tcp_iob_work, pinfo);
+          pinfo->key = iob_notifier_setup(LPWORK, tcp_iob_work, pinfo);
+        }
     }
 
   /* Protocol for the use of the IOB notifier is that we free the argument
@@ -240,7 +248,7 @@ static inline void tcp_iob_work(FAR void *arg)
  *
  * Description:
  *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
+ *   be sent (TCP)
  *
  * Input Parameters:
  *   psock - Socket state structure
@@ -250,7 +258,7 @@ static inline void tcp_iob_work(FAR void *arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_TCP_WRITE_BUFFERS
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || !defined(CONFIG_IOB_NOTIFIER)
 static inline void tcp_poll_txnotify(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
@@ -346,7 +354,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   info->psock  = psock;
   info->fds    = fds;
   info->cb     = cb;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
   info->key    = 0;
 #endif
 
@@ -519,7 +527,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
       /* Cancel any pending IOB free notification */
 
       if (info->key > 0)

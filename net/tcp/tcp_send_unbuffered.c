@@ -964,7 +964,7 @@ errout:
  *   psock    An instance of the internal socket structure.
  *
  * Returned Value:
- *   -ENOSYS (Function not implemented).
+ *   -ENOSYS (Function not implemented, always have to wait to send).
  *
  * Assumptions:
  *   None
@@ -973,8 +973,6 @@ errout:
 
 int psock_tcp_cansend(FAR struct socket *psock)
 {
-  /* TODO: return OK unless someone is waiting for a packet to send */
-
   return -ENOSYS;
 }
 

@@ -562,4 +562,28 @@ errout_with_lock:
   return ret;
 }
 
+/****************************************************************************
+ * Name: psock_udp_cansend
+ *
+ * Description:
+ *   psock_udp_cansend() returns a value indicating if a write to the socket
+ *   would block.  It is still possible that the write may block if another
+ *   write occurs first.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   -ENOSYS (Function not implemented, always have to wait to send).
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+int psock_udp_cansend(FAR struct socket *psock)
+{
+  return -ENOSYS;
+}
+
 #endif /* CONFIG_NET_UDP */

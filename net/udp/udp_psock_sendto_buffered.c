@@ -881,4 +881,51 @@ errout_with_lock:
   return ret;
 }
 
+/****************************************************************************
+ * Name: psock_udp_cansend
+ *
+ * Description:
+ *   psock_udp_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be successfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *
+ ****************************************************************************/
+
+int psock_udp_cansend(FAR struct socket *psock)
+{
+  /* Verify that we received a valid socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      nerr("ERROR: Invalid socket\n");
+      return -EBADF;
+    }
+
+  /* In order to setup the send, we need to have at least one free write
+   * buffer head and at least one free IOB to initialize the write buffer head.
+   *
+   * REVISIT:  The send will still block if we are unable to buffer the entire
+   * user-provided buffer which may be quite large.  We will almost certainly
+   * need to have more than one free IOB, but we don't know how many more.
+   */
+
+  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+    {
+      return -EWOULDBLOCK;
+    }
+
+  return OK;
+}
 #endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NET_UDP_WRITE_BUFFERS */

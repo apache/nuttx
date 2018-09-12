@@ -45,6 +45,8 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
@@ -65,6 +67,9 @@ struct udp_poll_s
   FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  int16_t key;                     /* Needed to cancel pending notification */
+#endif
 };
 
 /****************************************************************************
@@ -145,11 +150,10 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: udp_poll_txnotify
+ * Name: udp_iob_work
  *
  * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
+ *   Work thread callback function execute when an IOB because available.
  *
  * Input Parameters:
  *   psock - Socket state structure
@@ -159,7 +163,75 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_UDP_WRITE_BUFFERS
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+static inline void udp_iob_work(FAR void *arg)
+{
+  FAR struct work_notifier_entry_s *entry;
+  FAR struct work_notifier_s *ninfo;
+  FAR struct udp_poll_s *pinfo;
+  FAR struct socket *psock;
+  FAR struct pollfd *fds;
+
+  entry = (FAR struct work_notifier_entry_s *)arg;
+  DEBUGASSERT(entry != NULL);
+
+  ninfo = &entry->info;
+  DEBUGASSERT(ninfo->arg != NULL);
+
+  pinfo = (FAR struct udp_poll_s *)ninfo->arg;
+  DEBUGASSERT(pinfo->psock != NULL && pinfo->fds != NULL);
+
+  psock = pinfo->psock;
+  fds   = pinfo->fds;
+
+  /* Handle a race condition.  Check if we have already posted the POLLOUT
+   * event.  If so, don't do it again.
+   */
+
+  if ((fds->events && POLLWRNORM) == 0 ||
+      (fds->revents && POLLWRNORM) != 0)
+    {
+      /* Check if we are now able to send */
+
+      if (psock_udp_cansend(psock) >= 0)
+        {
+          /* Yes.. then signal the poll logic */
+
+          fds->revents |= POLLWRNORM;
+          nxsem_post(fds->sem);
+        }
+      else
+        {
+          /* No.. ask for the IOB free notification again */
+
+          pinfo->key = iob_notifier_setup(LPWORK, udp_iob_work, pinfo);
+        }
+    }
+
+  /* Protocol for the use of the IOB notifier is that we free the argument
+   * after the notification has been processed.
+   */
+
+  kmm_free(arg);
+}
+#endif
+
+/****************************************************************************
+ * Name: udp_poll_txnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are have data ready to
+ *   be sent (UDP)
+ *
+ * Input Parameters:
+ *   psock - Socket state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NET_UDP_WRITE_BUFFERS) || !defined(CONFIG_IOB_NOTIFIER)
 static inline void udp_poll_txnotify(FAR struct socket *psock)
 {
   FAR struct udp_conn_s *conn = psock->s_conn;
@@ -262,6 +334,9 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   info->psock  = psock;
   info->fds    = fds;
   info->cb     = cb;
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  info->key    = 0;
+#endif
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
@@ -302,6 +377,13 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       fds->revents |= (POLLRDNORM & fds->events);
     }
 
+   if (psock_udp_cansend(psock) >= 0)
+    {
+      /* Normal data may be sent without blocking (at least one byte). */
+
+      fds->revents |= (POLLWRNORM & fds->events);
+    }
+
   /* Check if any requested events are already in effect */
 
   if (fds->revents != 0)
@@ -311,7 +393,20 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       nxsem_post(fds->sem);
     }
 
-#ifndef CONFIG_NET_UDP_WRITE_BUFFERS
+#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+  /* If (1) revents == 0, (2) write buffering is enabled, and (3) the
+   * POLLOUT event is needed, then setup to receive a notification an IOB
+   * is freed.
+   */
+
+  else if ((fds->events & POLLOUT) != 0)
+    {
+      /* Ask for the IOB free notification */
+
+      info->key = iob_notifier_setup(LPWORK, udp_iob_work, info);
+    }
+
+#else
   /* If (1) the socket is in a bound state via bind() or via the
    * UDP_BINDTODEVICE socket options, (2) revents == 0, (3) write buffering
    * is not enabled (determined by a configuration setting), and (3) the
@@ -394,9 +489,20 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct udp_poll_s *)fds->priv;
-  DEBUGASSERT(info && info->fds && info->cb);
-  if (info)
+  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+  if (info != NULL)
     {
+     #if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_IOB_NOTIFIER)
+      /* Cancel any pending IOB free notification */
+
+      if (info->key > 0)
+        {
+          /* Ask for the IOB free notification */
+
+          iob_notifier_teardown(info->key);
+        }
+#endif
+
       /* Release the callback */
 
       net_lock();
