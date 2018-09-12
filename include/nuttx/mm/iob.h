@@ -195,7 +195,17 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
  *
  ****************************************************************************/
 
-int iob_navail(void);
+int iob_navail(bool throttled);
+
+/****************************************************************************
+ * Name: iob_quentry_navail
+ *
+ * Description:
+ *   Return the number of available IOB chains.
+ *
+ ****************************************************************************/
+
+int iob_quentry_navail(void);
 
 /****************************************************************************
  * Name: iob_free

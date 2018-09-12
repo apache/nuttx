@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 
@@ -56,17 +58,62 @@
  *
  ****************************************************************************/
 
-int iob_navail(void)
+int iob_navail(bool throttled)
+{
+  int navail = 0;
+  int ret;
+
+#if CONFIG_IOB_NBUFFERS > 0
+  /* Get the value of the IOB counting semaphores */
+
+  ret = nxsem_getvalue(&g_iob_sem, &navail);
+  if (ret >= 0)
+    {
+      ret = navail;
+
+#if CONFIG_IOB_THROTTLE > 0
+      /* Subtract the throttle value is so requested */
+
+      if (throttled)
+        {
+          ret -= CONFIG_IOB_THROTTLE;
+          if (ret < 0)
+            {
+              ret = 0;
+            }
+        }
+#endif
+    }
+
+#else
+  ret = navail;
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: iob_quentry_navail
+ *
+ * Description:
+ *   Return the number of available IOB chains.
+ *
+ ****************************************************************************/
+
+int iob_quentry_navail(void)
 {
   int navail = 0;
   int ret;
 
 #if CONFIG_IOB_NCHAINS > 0
+  /* Get the value of the IOB chain qentry counting semaphores */
+
   ret = nxsem_getvalue(&g_qentry_sem, &navail);
   if (ret >= 0)
     {
       ret = navail;
     }
+
 #else
   ret = navail;
 #endif

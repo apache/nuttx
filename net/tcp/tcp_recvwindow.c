@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#incldue <stdbool.h>
 #include <debug.h>
 
 #include <net/if.h>
@@ -109,7 +110,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
    * availability.
    */
 
-  navail = iob_navail();
+  navail = iob_navail(true);
 
   /* Are the read-ahead allocations throttled?  If so, then not all of these
    * IOBs are available for read-ahead buffering.

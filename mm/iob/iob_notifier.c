@@ -86,9 +86,11 @@ int iob_notifier_setup(int qid, worker_t worker, FAR void *arg)
 
   /* If there are already free IOBs, then return zero without setting up the
    * notification.
+   *
+   * REVISIT: The 'throttled' argument should not always be 'false'.
    */
 
-  if (iob_navail() > 0)
+  if (iob_navail(false) > 0)
     {
       return 0;
     }

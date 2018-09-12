@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
@@ -148,7 +149,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * for an IOB.
    */
 
-  if (iob_navail() > 0)
+  if (iob_navail(false) > 0)
     {
       /* Signal any threads that have requested a signal notification
        * when an IOB becomes available.
