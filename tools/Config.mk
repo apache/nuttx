@@ -292,7 +292,7 @@ endif
 # FILELIST = ${shell find <dir> -name <wildcard-file>}
 
 define RWILDCARD
-  $(foreach d,$(wildcard $1/*),$(call RWILDCARD,$d/)$(filter $(subst *,%,$2),$d))
+  $(foreach d,$(wildcard $1/*),$(call RWILDCARD,$d,$2)$(filter $(subst *,%,$2),$d))
 endef
 
 # CLEAN - Default clean target
