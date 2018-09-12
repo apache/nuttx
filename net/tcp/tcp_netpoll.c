@@ -215,8 +215,8 @@ static inline void tcp_iob_work(FAR void *arg)
    * event.  If so, don't do it again and don't setup notification again.
    */
 
-  if ((fds->events && POLLWRNORM) == 0 ||
-      (fds->revents && POLLWRNORM) != 0)
+  else if ((fds->events && POLLWRNORM) == 0 ||
+           (fds->revents && POLLWRNORM) != 0)
     {
       /* Check if we are now able to send */
 
