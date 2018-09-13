@@ -89,7 +89,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 
 USERDIRS += libs$(DELIM)libc mm $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libs$(DELIM)libxx$(DELIM)$(LIBXX)
+USERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 else
@@ -97,7 +97,7 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 
 USERDIRS += libs$(DELIM)libc mm
 ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libs$(DELIM)libxx$(DELIM)$(LIBXX)
+USERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 else
@@ -105,9 +105,9 @@ else
 NONFSDIRS += libs$(DELIM)libc mm
 OTHERDIRS += $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
-NONFSDIRS += libs$(DELIM)libxx$(DELIM)$(LIBXX)
+NONFSDIRS += libs$(DELIM)$(LIBXX)
 else
-OTHERDIRS += libs$(DELIM)libxx$(DELIM)$(LIBXX)
+OTHERDIRS += libs$(DELIM)$(LIBXX)
 endif
 
 endif
