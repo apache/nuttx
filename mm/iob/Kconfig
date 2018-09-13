@@ -71,6 +71,20 @@ config IOB_NOTIFIER
 		support poll() logic where the poll must wait for an IOB to become
 		available.
 
+config IOB_NOTIFIER_DIV
+	int "Notification divider"
+	default 4
+	range 1 64
+	depends on IOB_NOTIFIER
+	---help---
+		IOBs may become available at very high rates and the resulting
+		notification processing can be substantial even if there is nothing
+		waiting for a free IOB.  This divider will reduce that rate of
+		notification.  This must be an even power of two.  Supported values
+		include:  1, 2, 4, 8, 16, 32, 64.  The default value of 4 means that
+		a notification will be sent only when there are a multiple of 4 IOBs
+		available.
+
 config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n

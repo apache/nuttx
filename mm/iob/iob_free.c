@@ -51,6 +51,28 @@
 #include "iob.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if !defined(CONFIG_IOB_NOTIFIER_DIV) || CONFIG_IOB_NOTIFIER_DIV < 2
+#  define IOB_DIVIDER 1
+#elif CONFIG_IOB_NOTIFIER_DIV < 4
+#  define IOB_DIVIDER 2
+#elif CONFIG_IOB_NOTIFIER_DIV < 8
+#  define IOB_DIVIDER 4
+#elif CONFIG_IOB_NOTIFIER_DIV < 16
+#  define IOB_DIVIDER 8
+#elif CONFIG_IOB_NOTIFIER_DIV < 32
+#  define IOB_DIVIDER 16
+#elif CONFIG_IOB_NOTIFIER_DIV < 64
+#  define IOB_DIVIDER 32
+#else
+#  define IOB_DIVIDER 64
+#endif
+
+#define IOB_MASK      (IOB_DIVIDER - 1)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,6 +89,9 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
   FAR struct iob_s *next = iob->io_flink;
   irqstate_t flags;
+#ifdef CONFIG_IOB_NOTIFIER
+  int16_t navail;
+#endif
 
   iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
           iob, iob->io_pktlen, iob->io_len, next);
@@ -149,7 +174,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * for an IOB.
    */
 
-  if (iob_navail(false) > 0)
+  navail = iob_navail(false);
+  if (navail > 0 && (navail & IOB_MASK) == 0)
     {
       /* Signal any threads that have requested a signal notification
        * when an IOB becomes available.
