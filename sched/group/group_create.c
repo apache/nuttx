@@ -203,6 +203,9 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   /* In a flat, single-heap build.  The stream list is allocated with the
    * group structure.  But in a kernel build with a kernel allocator, it
    * must be separately allocated using a user-space allocator.
+   *
+   * REVISIT:  Kernel threads should not require a stream allocation.  They
+   * should not be using C buffered I/O at all.
    */
 
   group->tg_streamlist = (FAR struct streamlist *)

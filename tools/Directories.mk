@@ -74,7 +74,7 @@ endif
 #   configurations.
 
 ifeq ($(CONFIG_LIBCXX),y)
-LIBXX=libcxx
+LIBXX=libxx$(DELIM)libcxx
 else
 LIBXX=libxx
 endif

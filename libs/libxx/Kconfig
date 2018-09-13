@@ -36,9 +36,9 @@ config LIBCXX
 	bool "Build LLVM libcxx (must be installed)"
 	default n
 	---help---
-		If you have installed libcxx into the NuttX source try, then it can
+		If you have installed libcxx into the NuttX source tree, then it can
 		be built by selecting this option.  See the README.txt file in the
-		libcxx packet for information on installing libcxx.
+		libcxx package for information on installing libcxx.
 
 if LIBCXX
 
