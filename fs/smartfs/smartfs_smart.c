@@ -1306,7 +1306,7 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
           /* Now advance to the next entry */
 
           dir->u.smartfs.fs_curroffset += entrysize;
-          if (dir->u.smartfs.fs_curroffset >= fs->fs_llformat.availbytes)
+          if (dir->u.smartfs.fs_curroffset + entrysize >= fs->fs_llformat.availbytes)
             {
               /* We advanced past the end of the sector.  Go to next sector */
 
