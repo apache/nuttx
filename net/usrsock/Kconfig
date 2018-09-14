@@ -36,13 +36,13 @@ config NET_USRSOCK_NO_INET6
 config NET_USRSOCK_UDP
 	bool "User-space daemon provides UDP sockets"
 	default n
-	select NET_UDP_NO_STACK
+	select NET_UDP
 	---help---
 
 config NET_USRSOCK_TCP
 	bool "User-space daemon provides TCP sockets"
 	default n
-	select NET_TCP_NO_STACK
+	select NET_TCP
 	---help---
 
 config NET_USRSOCK_OTHER
