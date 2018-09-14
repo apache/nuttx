@@ -123,6 +123,8 @@ pthread_mutex_t g_usrmutex;
 void work_process(FAR struct usr_wqueue_s *wqueue)
 {
   volatile FAR struct work_s *work;
+  sigset_t sigset;
+  sigset_t oldset;
   worker_t  worker;
   FAR void *arg;
   clock_t elapsed;
@@ -144,6 +146,11 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
 
       return;
     }
+
+  /* Set up the signal mask */
+
+  sigemptyset(&sigset);
+  sigaddset(&sigset, SIGWORK);
 
   /* Get the time that we started this polling cycle in clock ticks. */
 
@@ -215,7 +222,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
             }
           else
             {
-              /* Cancelled.. Just move to the next work in the list with
+              /* Canceled.. Just move to the next work in the list with
                * the work queue still locked.
                */
 
@@ -255,36 +262,39 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
         }
     }
 
-  /* Unlock the work queue before waiting.  In order to assure that these
-   * operations are atomic with respect to other user tasks, we disable
-   * pre-emption here.  Pre-emption will be re-enabled while we sleep.
+  /* Unlock the work queue before waiting.  In order to assure that we do
+   * not lose the SIGWORK signal before waiting, we block the SIGWORK
+   * signals before unlocking the work queue.  That will cause in SIGWORK
+   * signals directed to the worker thread to pend.
    */
 
-  sched_lock();
+  (void)nxsig_procmask(SIG_BLOCK, &sigset, &oldset);
   work_unlock();
 
   if (next == WORK_DELAY_MAX)
     {
-      sigset_t set;
-
       /* Wait indefinitely until signaled with SIGWORK */
 
-      sigemptyset(&set);
-      sigaddset(&set, SIGWORK);
-
-      sigwaitinfo(&set, NULL);
+      sigwaitinfo(&sigset, NULL);
     }
   else
     {
+      struct timespec rqtp;
+      time_t sec;
+
       /* Wait awhile to check the work list.  We will wait here until
        * either the time elapses or until we are awakened by a signal.
        * Interrupts will be re-enabled while we wait.
        */
 
-      usleep(next * USEC_PER_TICK);
+      sec          = next / 1000000;
+      rqtp.tv_sec  = sec;
+      rqtp.tv_nsec = (next - (sec * 1000000)) * 1000;
+
+      sigtimewait(&sigset, NULL, &rqtp);
     }
 
-  sched_unlock();
+  (void)nxsig_procmask(SIG_SETMASK, &oldset, NULL);
 }
 
 /****************************************************************************

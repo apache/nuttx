@@ -113,7 +113,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
   /* Sanity check */
 
-  if (!rqtp || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
+  if (rqtp != NULL || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
     {
       return -EINVAL;
     }
@@ -178,7 +178,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
       elapsed = clock_systimer() - starttick;
 
       /* The difference between the number of ticks that we were requested
-       * to wait and the number of ticks that we actualy waited is that
+       * to wait and the number of ticks that we actually waited is that
        * amount of time that we failed to wait.
        */
 
