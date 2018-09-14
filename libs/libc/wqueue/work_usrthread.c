@@ -255,6 +255,14 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
         }
     }
 
+  /* Unlock the work queue before waiting.  In order to assure that these
+   * operations are atomic with respect to other user tasks, we disable
+   * pre-emption here.  Pre-emption will be re-enabled while we sleep.
+   */
+
+  sched_lock();
+  work_unlock();
+
   if (next == WORK_DELAY_MAX)
     {
       sigset_t set;
@@ -276,7 +284,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
       usleep(next * USEC_PER_TICK);
     }
 
-  work_unlock();
+  sched_unlock();
 }
 
 /****************************************************************************
