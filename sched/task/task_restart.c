@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/task/task_restart.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013, 2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +69,8 @@
  *         calling task.
  *
  * Returned Value:
- *   OK on sucess; ERROR on failure.
+ *   Zero (OK) on success; -1 (ERROR) on failure with the errno variable set
+ *   appropriately.
  *
  *   This function can fail if:
  *   (1) A pid of zero or the pid of the calling task is provided
@@ -156,16 +158,17 @@ int task_restart(pid_t pid)
   dq_rem((FAR dq_entry_t *)tcb, tasklist);
   tcb->cmn.task_state = TSTATE_TASK_INVALID;
 
-  /* Deallocate anything left in the TCB's queues */
+  /* Deallocate anything left in the TCB's signal queues */
 
-  nxsig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
+  nxsig_cleanup((FAR struct tcb_s *)tcb);  /* Deallocate Signal lists */
+  tcb->cmn.sigprocmask = NULL_SIGNAL_SET;  /* Reset sigprocmask */
 
   /* Reset the current task priority  */
 
   tcb->cmn.sched_priority = tcb->cmn.init_priority;
 
   /* The task should restart with pre-emption disabled and not in a critical
-   * secton.
+   * section.
    */
 
   tcb->cmn.lockcount = 0;
