@@ -289,7 +289,7 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
  *              FRAGN frames.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, on failure a negater errno value is
+ *   Zero (OK) is returned on success, on failure a negated errno value is
  *   returned.
  *
  ****************************************************************************/

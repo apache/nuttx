@@ -82,7 +82,7 @@ EXTERN FAR struct binfmt_s *g_binfmts;
  *   bin      - Load structure
  *
  * Returned Value:
- *   Zero (OK) on success; a negater errno value on failure
+ *   Zero (OK) on success; a negated errno value on failure
  *
  ****************************************************************************/
 
@@ -106,7 +106,7 @@ int dump_module(FAR const struct binary_s *bin);
  *   argv     - Argument list
  *
  * Returned Value:
- *   Zero (OK) on success; a negater errno value on failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

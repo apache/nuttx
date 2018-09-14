@@ -37,7 +37,7 @@ ST Bootloader
 
   A flash utility must be used on your development workstation to upload / flash
   a firmware image. (The 'stm32flash' open source tool, available at
-  http://stm32flash.googlecode.com/ has been used sucessfully).
+  http://stm32flash.googlecode.com/ has been used successfully).
 
 LEDs
 ====

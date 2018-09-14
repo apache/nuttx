@@ -177,7 +177,7 @@ static void pthread_start(void)
 
   DEBUGASSERT(group && pjoin);
 
-  /* Sucessfully spawned, add the pjoin to our data set. */
+  /* Successfully spawned, add the pjoin to our data set. */
 
   (void)pthread_sem_take(&group->tg_joinsem, false);
   pthread_addjoininfo(group, pjoin);

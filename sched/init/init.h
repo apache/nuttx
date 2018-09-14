@@ -77,7 +77,7 @@ void os_start(void);
  *   None
  *
  * Returned Value:
- *   Zero on success; a negater errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

@@ -183,7 +183,7 @@ int os_idle_task(int argc, FAR char *argv[])
  *   None
  *
  * Returned Value:
- *   Zero on success; a negater errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  * Assumption:
  *   Runs before the full initialization sequence has completed.  Runs after

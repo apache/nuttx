@@ -66,7 +66,7 @@
  *   name=value string describing the environment setting to add/modify
  *
  * Returned Value:
- *   Zero on sucess
+ *   Zero on success
  *
  * Assumptions:
  *   Not called from an interrupt handler

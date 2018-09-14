@@ -107,7 +107,7 @@ int rmmod(FAR void *handle)
 
       ret = modp->modinfo.uninitializer(modp->modinfo.arg);
 
-      /* Did the module sucessfully uninitialize? */
+      /* Did the module successfully uninitialize? */
 
       if (ret < 0)
         {

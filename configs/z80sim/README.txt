@@ -54,7 +54,7 @@ Configuring NuttX
        or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
-    3. This configuration was last verified sucessfully prior to the
+    3. This configuration was last verified successfully prior to the
        the configure to Kconfig/mconf tool using SDCC 2.6.0 built to run
        natively under Cygwin.  The current build requires ca. 3.2.1 SDCC.
 
@@ -96,7 +96,7 @@ Configuring NuttX
        or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
-    3. This configuration was last verified sucessfully prior to the
+    3. This configuration was last verified successfully prior to the
        the configure to Kconfig/mconf tool using SDCC 2.6.0 built to run
        natively under Cygwin.nsh/defconfig:CONFIG_BOARD_LOOPSPERMSEC
 
@@ -139,7 +139,7 @@ Configuring NuttX
        or macOS" which will give you the steps you would need to do to convert
        this configuration to build in other environments.
 
-    3. This configuration was last verified sucessfully prior to the
+    3. This configuration was last verified successfully prior to the
        the configure to Kconfig/mconf tool using SDCC 2.6.0 built to run
        natively under Cygwin.nsh/defconfig:CONFIG_BOARD_LOOPSPERMSEC
 

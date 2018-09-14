@@ -138,7 +138,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
 
       mqmsg = nxmq_alloc_msg();
 
-      /* Check if the message was sucessfully allocated */
+      /* Check if the message was successfully allocated */
 
       ret = (mqmsg == NULL) ? -ENOMEM : OK;
     }

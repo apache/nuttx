@@ -491,7 +491,7 @@ static int usbhost_createconfig(FAR struct usbhost_member_s *member,
  *
  * Returned Value:
  *   Zero (OK) is returned if (1) the device was determined to be a
- *   composite device and (2) the composite class wrapper was sucessfully
+ *   composite device and (2) the composite class wrapper was successfully
  *   created and bound to the HCD.  A negated errno value is returned on
  *   any failure.  The value -ENOENT, in particular means that the attached
  *   device is not a composite device.  Other values would indicate other

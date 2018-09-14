@@ -209,7 +209,7 @@ int fhex2mem(FAR FILE *instream, uint32_t baseaddr, uint32_t endpaddr,
  *   Standard task inputs
  *
  * Returned Value:
- *   EXIT_SUCESS on success; EXIT_FAILURE on failure
+ *   EXIT_SUCCESS on success; EXIT_FAILURE on failure
  *
  ****************************************************************************/
 
@@ -227,7 +227,7 @@ int hex2bin_main(int argc, char **argv);
  *   Standard task inputs
  *
  * Returned Value:
- *   EXIT_SUCESS on success; EXIT_FAILURE on failure
+ *   EXIT_SUCCESS on success; EXIT_FAILURE on failure
  *
  ****************************************************************************/
 

@@ -113,7 +113,7 @@
 
 /* Return values ************************************************************/
 
-/* Sucessful return values from header compression logic */
+/* Successful return values from header compression logic */
 
 #define COMPRESS_HDR_INLINE     0 /* L2 header not compressed */
 #define COMPRESS_HDR_ELIDED     1 /* L2 header compressed */
@@ -552,7 +552,7 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
  *              FRAGN frames.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, on failure a negater errno value is
+ *   Zero (OK) is returned on success, on failure a negated errno value is
  *   returned.
  *
  ****************************************************************************/

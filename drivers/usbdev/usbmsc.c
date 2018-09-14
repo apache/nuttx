@@ -1780,7 +1780,7 @@ int usbmsc_classobject(FAR void *handle,
   ret = usbmsc_exportluns(handle);
   if (ret == OK)
     {
-      /* On sucess, return an (typed) instance of the class instance */
+      /* On success, return an (typed) instance of the class instance */
 
       *classdev = &alloc->drvr.drvr;
     }

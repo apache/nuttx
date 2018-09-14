@@ -352,7 +352,7 @@ int vnc_server(int argc, FAR char *argv[]);
  * Name: vnc_negotiate
  *
  * Description:
- *  Perform the VNC initialization sequence after the client has sucessfully
+ *  Perform the VNC initialization sequence after the client has successfully
  *  connected to the server.  Negotiate security, framebuffer and color
  *  properties.
  *

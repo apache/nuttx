@@ -348,7 +348,7 @@ PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi)
  *   settings - New channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -413,7 +413,7 @@ int pga11x_select(PGA11X_HANDLE handle,
  *   settings - New channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -467,7 +467,7 @@ int pga11x_uselect(PGA11X_HANDLE handle, int pos,
  *   settings - Returned channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -563,7 +563,7 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
  *   settings - Returned channel and gain settings
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -605,7 +605,7 @@ int pga11x_uread(PGA11X_HANDLE handle, int pos,
  *   spi - An SPI "bottom half" device driver instance
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -640,7 +640,7 @@ int pga11x_shutdown(PGA11X_HANDLE handle)
  *   pos      - Position of the chip in the daisy chain (0 or 1)
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -681,7 +681,7 @@ int pga11x_ushutdown(PGA11X_HANDLE handle, int pos)
  *   spi - An SPI "bottom half" device driver instance
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -719,7 +719,7 @@ int pga11x_enable(PGA11X_HANDLE handle)
  *   pos      - Position of the chip in the daisy chain (0 or 1)
  *
  * Returned Value:
- *   Zero on sucess; a negated errno value on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

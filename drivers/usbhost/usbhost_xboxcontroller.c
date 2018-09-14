@@ -1472,7 +1472,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
  *   priv - A reference to the class instance.
  *
  * Returned Value:
- *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   On success, zero (OK) is returned.  On failure, an negated errno value
  *   is returned to indicate the nature of the failure.
  *
  ****************************************************************************/
@@ -1498,7 +1498,7 @@ static inline int usbhost_talloc(FAR struct usbhost_state_s *priv)
  *   priv - A reference to the class instance.
  *
  * Returned Value:
- *   On sucess, zero (OK) is returned.  On failure, an negated errno value
+ *   On success, zero (OK) is returned.  On failure, an negated errno value
  *   is returned to indicate the nature of the failure.
  *
  ****************************************************************************/

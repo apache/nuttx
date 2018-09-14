@@ -67,7 +67,7 @@ void stm32_boardinitialize(void)
  *   Initializes upper half drivers with board specific settings
  *
  * Returned Value:
- *   0 on sucess or errno value of failed init function.
+ *   0 on success or errno value of failed init function.
  ****************************************************************************/
 
 int board_app_initialize(uintptr_t arg)

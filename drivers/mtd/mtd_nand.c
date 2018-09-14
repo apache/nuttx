@@ -138,7 +138,7 @@ static int     nand_ioctl(struct mtd_dev_s *dev, int cmd,
  *   block - Number of block to check.
  *
  * Returned Value:
- *   OK on success; a negater errno value on failure.
+ *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

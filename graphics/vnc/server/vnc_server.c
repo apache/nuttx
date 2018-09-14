@@ -321,7 +321,7 @@ int vnc_server(int argc, FAR char *argv[])
           ginfo("New VNC connection\n");
 
           /* Perform the VNC initialization sequence after the client has
-           * sucessfully connected to the server.  Negotiate security,
+           * successfully connected to the server.  Negotiate security,
            * framebuffer and color properties.
            */
 

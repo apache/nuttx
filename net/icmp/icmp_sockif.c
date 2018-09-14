@@ -127,7 +127,7 @@ const struct sock_intf_s g_icmp_sockif =
  *   protocol (see sys/socket.h)
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise, a negater errno value is
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
  *   returned.
  *
  ****************************************************************************/
