@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ea3152/src/lpc31_fillpage.c
  *
- *   Copyright (C) 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -277,7 +277,7 @@ static inline void lpc31_initsrc(void)
 
       /* Open the selected path for read-only access */
 
-      g_pgsrc.fd = open(CONFIG_PAGING_BINPATH, O_RDONLY);
+      g_pgsrc.fd = nx_open(CONFIG_PAGING_BINPATH, O_RDONLY);
       DEBUGASSERT(g_pgsrc.fd >= 0);
 
       /* Then we are initialized */

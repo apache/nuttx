@@ -494,7 +494,6 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
   size_t nblocks;
   int mode;
   int ret;
-  int fd;
 
   /* Create an instance of the FILE MTD device state structure */
 
@@ -516,21 +515,10 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
    * driver proxy.
    */
 
-  fd = open(path, mode);
-  if (fd <0)
-    {
-      ferr("ERROR: Failed to open the FILE MTD file %s\n", path);
-      kmm_free(priv);
-      return NULL;
-    }
-
-  /* Detach the file descriptor from the open file */
-
-  ret = file_detach(fd, &priv->mtdfile);
+  ret = file_open(&priv->mtdfile, path, mode);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to detail the FILE MTD file %s\n", path);
-      close(fd);
+      ferr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);
       kmm_free(priv);
       return NULL;
     }

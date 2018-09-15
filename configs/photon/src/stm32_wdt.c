@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/photon/src/stm32_wdt.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <fcntl.h>
 
 #include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -69,12 +70,12 @@ static int wdog_daemon(int argc, char *argv[])
 
   /* Open watchdog device */
 
-  fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
 
   if (fd < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
-      return ERROR;
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
+      return fd;
     }
 
   /* Start watchdog timer */
@@ -128,11 +129,11 @@ int photon_watchdog_initialize(void)
 
   /* Open the watchdog device */
 
-  fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
-      return ERROR;
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
+      return fd;
     }
 
   /* Set the watchdog timeout */

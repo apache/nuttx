@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/pcode.c
  *
- *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
-#include <nuttx/fd/fs.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/pcode.h>
@@ -391,12 +391,11 @@ static int pcode_load(struct binary_s *binp)
 
   /* Open the binary file for reading (only) */
 
-  fd = open(binp->filename, O_RDONLY);
+  fd = nx_open(binp->filename, O_RDONLY);
   if (fd < 0)
     {
-      int errval = get_errno();
-      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
-      return -errval;
+      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, fd);
+      return fd;
     }
 
   /* Read the POFF file header */

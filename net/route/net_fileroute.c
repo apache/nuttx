@@ -110,27 +110,13 @@ int net_openroute_detached(FAR const char *pathname, int oflags,
                            FAR struct file *filep)
 {
   int ret;
-  int fd;
 
-  /* Open the file for read/write access.  Here we borrow the file descriptor
-   * of this tread of execution.  We won't use it for long.
-   */
+  /* Open the file for read/write access. */
 
-  fd = open(pathname, oflags, 0644);
-  if (fd < 0)
-    {
-      int errcode = get_errno();
-      nerr("ERROR: Failed to open %s: %d\n", pathname, errcode);
-      return -errcode;
-    }
-
-  /* Now detach the file descriptor */
-
-  ret = file_detach(fd, filep);
+  ret = file_open(filep, pathname, oflags, 0644);
   if (ret < 0)
     {
-      nerr("ERROR: file_detach() failed: %d\n", ret);
-      (void)close(fd);
+      nerr("ERROR: Failed to open %s: %d\n", pathname, ret);
       return ret;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_init.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <errno.h>
 
 #include <arpa/inet.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/binfmt/nxflat.h>
 
 /****************************************************************************
@@ -108,12 +109,12 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 
   /* Open the binary file */
 
-  loadinfo->filfd = open(filename, O_RDONLY);
+  loadinfo->filfd = nx_open(filename, O_RDONLY);
   if (loadinfo->filfd < 0)
     {
-      int errval = get_errno();
-      berr("Failed to open NXFLAT binary %s: %d\n", filename, errval);
-      return -errval;
+      ret = loadinfo->filfd;
+      berr("Failed to open NXFLAT binary %s: %d\n", filename, ret);
+      return ret;
     }
 
   /* Read the NXFLAT header from offset 0 */

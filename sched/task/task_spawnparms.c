@@ -46,6 +46,7 @@
 
 #include <nuttx/signal.h>
 #include <nuttx/spawn.h>
+#include <nuttx/fs/fs.h>
 
 #include "task/spawn.h"
 #include "task/task.h"
@@ -120,10 +121,10 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
   sinfo("Open'ing path=%s oflags=%04x mode=%04x\n",
         action->path, action->oflags, action->mode);
 
-  fd = open(action->path, action->oflags, action->mode);
+  fd = nx_open(action->path, action->oflags, action->mode);
   if (fd < 0)
     {
-      ret = get_errno();
+      ret = fd;
       serr("ERROR: open failed: %d\n", ret);
     }
 

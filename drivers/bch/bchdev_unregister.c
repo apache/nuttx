@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/bch/bchdev_unregister.c
  *
- *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +65,8 @@
  *
  * Description:
  *   Unregister character driver access to a block device that was created
- *   by a previous call to bchdev_register().
+ /
+*   by a previous call to bchdev_register().
  *
  ****************************************************************************/
 
@@ -85,11 +87,11 @@ int bchdev_unregister(FAR const char *chardev)
 
   /* Open the character driver associated with chardev */
 
-  fd = open(chardev, O_RDONLY);
+  fd = nx_open(chardev, O_RDONLY);
   if (fd < 0)
     {
-      _err("ERROR: Failed to open %s: %d\n", chardev, errno);
-      return -errno;
+      _err("ERROR: Failed to open %s: %d\n", chardev, fd);
+      return fd;
     }
 
   /* Get a reference to the internal data structure.  On success, we

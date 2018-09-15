@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/loop/losetup.c
  *
- *   Copyright (C) 2008-2009, 2011, 2014-2015, 2017 Gregory Nutt. All
+ *   Copyright (C) 2008-2009, 2011, 2014-2015, 2017-2018 Gregory Nutt. All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -373,7 +373,6 @@ int losetup(FAR const char *devname, FAR const char *filename,
   FAR struct loop_struct_s *dev;
   struct stat sb;
   int ret;
-  int fd = -1;
 
   /* Sanity check */
 
@@ -424,12 +423,13 @@ int losetup(FAR const char *devname, FAR const char *filename,
    * to open it readonly).
    */
 
+  ret = -ENOSYS;
   if (!readonly)
     {
-      fd = open(filename, O_RDWR);
+      ret = file_open(&dev->devfile, filename, O_RDWR);
     }
 
-  if (fd >= 0)
+  if (ret >= 0)
     {
       dev->writeenabled = true; /* Success */
     }
@@ -438,23 +438,12 @@ int losetup(FAR const char *devname, FAR const char *filename,
     {
       /* If that fails, then try to open the device read-only */
 
-      fd = open(filename, O_RDONLY);
-      if (fd < 0)
+      ret = file_open(&dev->devfile, filename, O_RDONLY);
+      if (ret < 0)
         {
-          ret = -get_errno();
           ferr("ERROR: Failed to open %s: %d\n", filename, ret);
           goto errout_with_dev;
         }
-    }
-
-  /* Detach the file from the file descriptor */
-
-  ret = file_detach(fd, &dev->devfile);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to open %s: %d\n", filename, ret);
-      close(fd);
-      goto errout_with_dev;
     }
 
   /* Inode private data will be reference to the loop device structure */

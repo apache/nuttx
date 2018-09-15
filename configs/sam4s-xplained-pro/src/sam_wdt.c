@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sam4s-xplained-pro/src/up_wdt.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Bob Doiron
  *
@@ -49,6 +49,7 @@
 #include <fcntl.h>
 
 #include <nuttx/signal.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
@@ -98,10 +99,10 @@ static int wdog_daemon(int argc, char *argv[])
   /* Open the watchdog device for reading */
 
   wdinfo("Opening.\n");
-  fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
       goto errout;
     }
 
@@ -160,11 +161,11 @@ int sam_watchdog_initialize(void)
   /* Open the watchdog device */
 
   wdinfo("Opening.\n");
-  fd = open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, errno);
-      goto errout;
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
+      goto fd;
     }
 
   /* Set the watchdog timeout */

@@ -1,8 +1,7 @@
 /****************************************************************************
- *  sched/group/group_setupidlefiles.c
+ * fs/inode/fs_fileopen.c
  *
- *   Copyright (C) 2007-2010, 2012-2013, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,106 +39,70 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <fcntl.h>
-#include <sched.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdarg.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 
-#include "group/group.h"
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+#include "inode/inode.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_setupidlefiles
+ * Name: file_open
  *
  * Description:
- *   Configure the idle thread's TCB.
+ *   file_open() is similar to the standard 'open' interface except that it
+ *   returns an instance of 'struct file' rather than a file descriptor.  It
+ *   also is not a cancellation point and does not modify the errno variable.
  *
  * Input Parameters:
- *   tcb - tcb of the idle task.
+ *   filep  - The caller provided location in which to return the 'struct
+ *            file' instance.
+ *   path   - The full path to the file to be open.
+ *   oflags - open flags
+ *   ...    - Variable number of arguments, may include 'mode_t mode'
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Zero (OK) is returned on success.  On failure, a negated errno value is
+ *   returned.
  *
  ****************************************************************************/
 
-int group_setupidlefiles(FAR struct task_tcb_s *tcb)
+int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  FAR struct task_group_s *group = tcb->cmn.group;
-#endif
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+  va_list ap;
+  int ret;
   int fd;
-#endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  DEBUGASSERT(group);
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Initialize file descriptors for the TCB */
-
-  files_initlist(&group->tg_filelist);
-#endif
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Allocate socket descriptors for the TCB */
-
-  net_initlist(&group->tg_socketlist);
-#endif
-
-  /* Open stdin, dup to get stdout and stderr. This should always
-   * be the first file opened and, hence, should always get file
-   * descriptor 0.
+  /* At present, this is just a placeholder.  It is just a wrapper around
+   * nx_open() followed by a called to file_detach().  Ideally, this should
+   * a native open function that opens the VFS node directly without using
+   * any file descriptors.
    */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
-  fd = nx_open("/dev/console", O_RDWR);
-  if (fd == 0)
+  va_start(ap, oflags);
+  fd = nx_vopen(path, oflags, ap);
+  va_end(ap);
+
+  if (fd < 0)
     {
-      /* Successfully opened /dev/console as stdin (fd == 0) */
-
-      (void)fs_dupfd2(0, 1);
-      (void)fs_dupfd2(0, 2);
+      return fd;
     }
-  else
+
+  /* Detach the file structure from the file descriptor so that it can be
+   * used on any thread.
+   */
+
+  ret = file_detach(fd, filep);
+  if (ret < 0)
     {
-      /* We failed to open /dev/console OR for some reason, we opened
-       * it and got some file descriptor other than 0.
-       */
-
-      if (fd > 0)
-        {
-          sinfo("Open /dev/console fd: %d\n", fd);
-          (void)close(fd);
-        }
-      else
-        {
-          serr("ERROR: Failed to open /dev/console: %d\n", fd);
-        }
-
-      return -ENFILE;
+      (void)close(fd);
+      return ret;
     }
-#endif
 
-  /* Allocate file/socket streams for the TCB */
-
-#if CONFIG_NFILE_STREAMS > 0
-  return group_setupstreams(tcb);
-#else
   return OK;
-#endif
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

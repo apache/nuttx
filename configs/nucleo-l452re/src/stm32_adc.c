@@ -172,7 +172,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
   int ret;
   int fd;
 
-  fd = open("/dev/adc0", O_RDONLY);
+  fd = nx_open("/dev/adc0", O_RDONLY);
   if (fd < 0)
     {
       aerr("ERROR: Cannot open ADC converter\n");

@@ -48,6 +48,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/binfmt/elf.h>
 
 #include "libelf.h"
@@ -162,12 +163,12 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   /* Open the binary file for reading (only) */
 
-  loadinfo->filfd = open(filename, O_RDONLY);
+  loadinfo->filfd = nx_open(filename, O_RDONLY);
   if (loadinfo->filfd < 0)
     {
-      int errval = get_errno();
-      berr("Failed to open ELF binary %s: %d\n", filename, errval);
-      return -errval;
+      ret = loadinfo->filfd;
+      berr("Failed to open ELF binary %s: %d\n", filename, ret);
+      return ret;
     }
 
   /* Read the ELF ehdr from offset 0 */

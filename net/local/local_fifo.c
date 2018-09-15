@@ -254,35 +254,22 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
 {
   int oflags = nonblock ? O_RDONLY | O_NONBLOCK : O_RDONLY;
   int ret;
-  int fd;
 
-  fd = open(path, oflags);
-  if (fd < 0)
+  ret = file_open(&conn->lc_infile, path, oflags);
+  if (ret < 0)
     {
-      int errcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-
       nerr("ERROR: Failed on open %s for reading: %d\n",
-           path, errcode);
+           path, ret);
 
-      /* Map the errcode to something consistent with the return
+      /* Map the error code to something consistent with the return
        * error codes from connect():
        *
-       * If errcode is ENOENT, meaning that the FIFO does exist,
+       * If error is ENOENT, meaning that the FIFO does exist,
        * return EFAULT meaning that the socket structure address is
        * outside the user's address space.
        */
 
-      return errcode == ENOENT ? -EFAULT : -errcode;
-    }
-
-  /* Detach the file descriptor from the open file instance */
-
-  ret = file_detach(fd, &conn->lc_infile);
-  if (ret < 0)
-    {
-      close(fd);
-      return ret;
+      return ret == -ENOENT ? -EFAULT : ret;
     }
 
   return OK;
@@ -301,35 +288,22 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
 {
   int oflags = nonblock ? O_WRONLY | O_NONBLOCK : O_WRONLY;
   int ret;
-  int fd;
 
-  fd = open(path, oflags);
-  if (fd < 0)
+  ret = file_open(&conn->lc_outfile, path, oflags);
+  if (ret < 0)
     {
-      int errcode = get_errno();
-      DEBUGASSERT(errcode > 0);
-
       nerr("ERROR: Failed on open %s for writing: %d\n",
-           path, errcode);
+           path, ret);
 
-      /* Map the errcode to something consistent with the return
+      /* Map the error code to something consistent with the return
        * error codes from connect():
        *
-       * If errcode is ENOENT, meaning that the FIFO does exist,
+       * If error is ENOENT, meaning that the FIFO does exist,
        * return EFAULT meaning that the socket structure address is
        * outside the user's address space.
        */
 
-      return errcode == ENOENT ? -EFAULT : -errcode;
-    }
-
-  /* Detach the file descriptor from the open file instance */
-
-  ret = file_detach(fd, &conn->lc_outfile);
-  if (ret < 0)
-    {
-      close(fd);
-      return ret;
+      return ret == -ENOENT ? -EFAULT : -errcode;
     }
 
   return OK;

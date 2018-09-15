@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/slip.c
  *
- *   Copyright (C) 2011-2012, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Reference: RFC 1055
@@ -935,6 +935,7 @@ int slip_initialize(int intf, FAR const char *devname)
   FAR struct slip_driver_s *priv;
   char buffer[8];
   FAR char *argv[2];
+  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -955,11 +956,12 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Open the device */
 
-  priv->fd            = open(devname, O_RDWR, 0666);
+  priv->fd            = nx_open(devname, O_RDWR, 0666);
   if (priv->fd < 0)
     {
-      nerr("ERROR: Failed to open %s: %d\n", devname, errno);
-      return -errno;
+      ret = priv->fd;
+      nerr("ERROR: Failed to open %s: %d\n", devname, ret);
+      return ret;
     }
 
   /* Initialize the wait semaphore */

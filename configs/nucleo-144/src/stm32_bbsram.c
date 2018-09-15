@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-144/src/stm32_bbsram.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016m, 2018 Gregory Nutt. All rights reserved.
  *   Author: David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,10 @@
 #include <debug.h>
 #include <syslog.h>
 
-#include <up_internal.h>
-#include <stm32_bbsram.h>
+#include <nuttx/fs/fs.h>
+
+#include "up_internal.h"
+#include "stm32_bbsram.h"
 
 #include "nucleo-144.h"
 
@@ -290,7 +292,7 @@ static uint8_t g_sdata[STM32F7_BBSRAM_SIZE];
 static int hardfault_get_desc(struct bbsramd_s *desc)
 {
   int ret = -ENOENT;
-  int fd = open(HARDFAULT_PATH, O_RDONLY);
+  int fd = nx_open(HARDFAULT_PATH, O_RDONLY);
   int rv;
 
   if (fd < 0)

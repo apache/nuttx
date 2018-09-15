@@ -114,7 +114,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
 
   fd = open(path, oflags, 0666);
 
-  /* If the open was successful, then fdopen() the fil using the file
+  /* If the open was successful, then call fdopen() using the file
    * descriptor returned by open.  If open failed, then just return the
    * NULL stream -- open() has already set the errno.
    */
@@ -131,6 +131,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
           (void)close(fd);
         }
     }
+
   return ret;
 }
 

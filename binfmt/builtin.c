@@ -48,6 +48,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/builtin.h>
@@ -99,12 +100,11 @@ static int builtin_loadbinary(struct binary_s *binp)
 
   /* Open the binary file for reading (only) */
 
-  fd = open(binp->filename, O_RDONLY);
+  fd = nx_open(binp->filename, O_RDONLY);
   if (fd < 0)
     {
-      int errval = get_errno();
-      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
-      return -errval;
+      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, fd);
+      return fd;
     }
 
   /* If this file is a BINFS file system, then we can recover the name of

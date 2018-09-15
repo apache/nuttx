@@ -44,6 +44,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/drivers/pwm.h>
 #include <nuttx/leds/rgbled.h>
 #include <arch/board/board.h>
@@ -163,7 +164,7 @@ int stm32_rgbled_setup(void)
           return ret;
         }
 
-      fd = open("/dev/rgbled0", O_WRONLY);
+      fd = nx_open("/dev/rgbled0", O_WRONLY);
       if (fd < 0)
         {
           lederr("ERROR: open failed: %d\n", fd);
@@ -172,7 +173,7 @@ int stm32_rgbled_setup(void)
 
       /* Initialize led off */
 
-      write(fd, "#000000", 8);
+      (void)nx_write(fd, "#000000", 8);
       close(fd);
 
       /* Now we are initialized */

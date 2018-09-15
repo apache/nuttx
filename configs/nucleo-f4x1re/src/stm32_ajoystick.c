@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-f3x1re/src/stm32_ajoystick.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -451,30 +451,15 @@ int board_ajoy_initialize(void)
   int i;
 
 #ifndef NO_JOYSTICK_ADC
-  int fd;
-
   iinfo("Initialize ADC driver: /dev/adc0\n");
 
   /* NOTE: The ADC driver was initialized earlier in the bring-up sequence. */
   /* Open the ADC driver for reading. */
 
-  fd = open("/dev/adc0", O_RDONLY);
-  if (fd < 0)
-    {
-      int errcode = get_errno();
-      ierr("ERROR: Failed to open /dev/adc0: %d\n", errcode);
-      return -errcode;
-    }
-
-  /* Detach the file structure from the file descriptor so that it can be
-   * used on any thread.
-   */
-
-  ret = file_detach(fd, &g_adcfile);
+  ret = file_open(&g_adcfile, "/dev/adc0", O_RDONLY);
   if (ret < 0)
     {
-      ierr("ERROR: Failed to detach from file descriptor: %d\n", ret);
-      (void)close(fd);
+      ierr("ERROR: Failed to open /dev/adc0: %d\n", ret);
       return ret;
     }
 #endif

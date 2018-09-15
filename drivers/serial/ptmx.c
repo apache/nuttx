@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/serial/ptmx.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,8 +248,8 @@ static int ptmx_open(FAR struct file *filep)
   /* Open the master device:  /dev/ptyN, where N=minor */
 
   snprintf(devname, 16, "/dev/pty%d", minor);
-  fd = open(devname, O_RDWR);
-  DEBUGASSERT(fd >= 0);  /* open() should never fail */
+  fd = nx_open(devname, O_RDWR);
+  DEBUGASSERT(fd >= 0);  /* nx_open() should never fail */
 
   /* No unlink the master.  This will remove it from the VFS namespace,
    * the driver will still persist because of the open count on the

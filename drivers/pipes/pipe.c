@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pipes/pipe.c
  *
- *   Copyright (C) 2008-2009, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@ static int pipe_close(FAR struct file *filep)
 
   /* Perform common close operations */
 
-  ret =  pipecommon_close(filep);
+  ret = pipecommon_close(filep);
   if (ret == 0 && dev->d_refs == 0)
     {
       /* Release the pipe when there are no further open references to it. */
@@ -254,7 +254,7 @@ int pipe2(int fd[2], size_t bufsize)
 
   /* Get a write file descriptor */
 
-  fd[1] = open(devname, O_WRONLY);
+  fd[1] = nx_open(devname, O_WRONLY);
   if (fd[1] < 0)
     {
       errcode = -fd[1];
@@ -263,7 +263,7 @@ int pipe2(int fd[2], size_t bufsize)
 
   /* Get a read file descriptor */
 
-  fd[0] = open(devname, O_RDONLY);
+  fd[0] = nx_open(devname, O_RDONLY);
   if (fd[0] < 0)
     {
       errcode = -fd[0];
