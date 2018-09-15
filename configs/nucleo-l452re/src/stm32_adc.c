@@ -166,28 +166,27 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
 
 int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext)
 {
+  FAR struct file filestruct;
   ssize_t nbytes;
   struct adc_msg_s sample[ADC1_NCHANNELS] = { 0 };
   int nsamples;
   int ret;
-  int fd;
 
-  fd = nx_open("/dev/adc0", O_RDONLY);
-  if (fd < 0)
+  ret = file_open(&filestruct, "/dev/adc0", O_RDONLY);
+  if (ret < 0)
     {
       aerr("ERROR: Cannot open ADC converter\n");
-      ret = fd;
       goto out;
     }
 
-  ret = ioctl(fd, ANIOC_TRIGGER, 0);
+  ret = file_ioctl(&filestruct, ANIOC_TRIGGER, 0);
   if (ret < 0)
     {
       aerr("ERROR: Cannot trigger ADC conversion\n");
       goto out_close;
     }
 
-  nbytes = nx_read(fd, sample, sizeof(sample));
+  nbytes = file_read(&filestruct, sample, sizeof(sample));
   if (nbytes < 0)
     {
       if (nbytes != -EINTR)
@@ -268,7 +267,8 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *ve
     }
 
 out_close:
-  close(fd);
+  file_close_detached(&filestruct);
+
 out:
   return ret;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/nucleo-144/src/stm32_bbsram.c
  *
- *   Copyright (C) 2016m, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -291,29 +291,25 @@ static uint8_t g_sdata[STM32F7_BBSRAM_SIZE];
 
 static int hardfault_get_desc(struct bbsramd_s *desc)
 {
-  int ret = -ENOENT;
-  int fd = nx_open(HARDFAULT_PATH, O_RDONLY);
-  int rv;
+  FAR struct file filestruct;
+  int ret;
 
-  if (fd < 0)
+  ret = file_open(&filestruct, HARDFAULT_PATH, O_RDONLY);
+  if (ret < 0)
     {
       syslog(LOG_INFO, "stm32 bbsram: Failed to open Fault Log file [%s] "
-          "(%d)\n", HARDFAULT_PATH, fd);
+             "(%d)\n", HARDFAULT_PATH, ret);
     }
   else
     {
-      ret = -EIO;
-      rv  = ioctl(fd, STM32F7_BBSRAM_GETDESC_IOCTL,
-                 (unsigned long)((uintptr_t)desc));
+      ret = file_ioctl(&filestruct, STM32F7_BBSRAM_GETDESC_IOCTL,
+                       (unsigned long)((uintptr_t)desc));
+      (void)file_close_detached(&filestruct);
 
-      if (rv >= 0)
-        {
-          ret = fd;
-        }
-      else
+      if (ret < 0)
         {
           syslog(LOG_INFO, "stm32 bbsram: Failed to get Fault Log descriptor "
-              "(%d)\n", rv);
+              "(%d)\n", ret);
         }
     }
 
@@ -352,7 +348,6 @@ int stm32_bbsram_int(void)
   struct tm tt;
   time_t time_sec;
 
-
   /* Using Battery Backed Up SRAM */
 
   stm32_bbsraminitialize(BBSRAM_PATH, filesizes);
@@ -380,7 +375,6 @@ int stm32_bbsram_int(void)
           syslog(LOG_INFO, "Fault Logged on %s - Valid\n", buf);
         }
 
-      close(rv);
       rv = unlink(HARDFAULT_PATH);
       if (rv < 0)
         {

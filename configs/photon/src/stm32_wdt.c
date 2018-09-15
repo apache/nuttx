@@ -65,23 +65,21 @@
 
 static int wdog_daemon(int argc, char *argv[])
 {
-  int fd;
+  FAR struct file filestruct;
   int ret;
 
   /* Open watchdog device */
 
-  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
-
-  if (fd < 0)
+  ret = file_open(&filestruct, CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  if (ret < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
-      return fd;
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, ret);
+      return ret;
     }
 
   /* Start watchdog timer */
 
-  ret = ioctl(fd, WDIOC_START, 0);
-
+  ret = file_ioctl(&filestruct, WDIOC_START, 0);
   if (ret < 0)
     {
         wderr("ERROR: ioctl(WDIOC_START) failed: %d\n", errno);
@@ -94,8 +92,7 @@ static int wdog_daemon(int argc, char *argv[])
 
       /* Send keep alive ioctl */
 
-      ret = ioctl(fd, WDIOC_KEEPALIVE, 0);
-
+      ret = file_ioctl(&filestruct, WDIOC_KEEPALIVE, 0);
       if (ret < 0)
         {
           wderr("ERROR: ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
@@ -104,9 +101,9 @@ static int wdog_daemon(int argc, char *argv[])
     }
 
 exit_close_dev:
-
   /* Close watchdog device and exit. */
-  close(fd);
+
+  file_close_detached(&filestruct);
   return ret;
 }
 
@@ -124,30 +121,31 @@ exit_close_dev:
 
 int photon_watchdog_initialize(void)
 {
-  int fd;
+  FAR struct file filestruct;
   int ret = 0;
 
   /* Open the watchdog device */
 
-  fd = nx_open(CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
-  if (fd < 0)
+  ret = file_open(&filestruct, CONFIG_WATCHDOG_DEVPATH, O_RDONLY);
+  if (ret < 0)
     {
-      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, fd);
-      return fd;
+      wderr("ERROR: open %s failed: %d\n", CONFIG_WATCHDOG_DEVPATH, ret);
+      return ret;
     }
 
   /* Set the watchdog timeout */
 
 #ifdef CONFIG_PHOTON_IWDG
   wdinfo("Timeout = %d.\n", CONFIG_PHOTON_IWDG_TIMEOUT);
-  ret = ioctl(fd, WDIOC_SETTIMEOUT, (unsigned long)CONFIG_PHOTON_IWDG_TIMEOUT);
+  ret = ioctl(&filestruct, WDIOC_SETTIMEOUT,
+              (unsigned long)CONFIG_PHOTON_IWDG_TIMEOUT);
 #else
 # error "No watchdog configured"
 #endif
 
   /*  Close watchdog as it is not needed here anymore */
 
-  close(fd);
+  (void)file_close_detached(&filestruct);
 
   if (ret < 0)
     {
@@ -157,7 +155,7 @@ int photon_watchdog_initialize(void)
 
 #if defined(CONFIG_PHOTON_WDG_THREAD)
 
-  /* Spawn wdog deamon thread */
+  /* Spawn wdog daemon thread */
 
   int taskid = kthread_create(CONFIG_PHOTON_WDG_THREAD_NAME,
                               CONFIG_PHOTON_WDG_THREAD_PRIORITY,
