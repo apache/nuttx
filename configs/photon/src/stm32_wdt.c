@@ -137,8 +137,8 @@ int photon_watchdog_initialize(void)
 
 #ifdef CONFIG_PHOTON_IWDG
   wdinfo("Timeout = %d.\n", CONFIG_PHOTON_IWDG_TIMEOUT);
-  ret = ioctl(&filestruct, WDIOC_SETTIMEOUT,
-              (unsigned long)CONFIG_PHOTON_IWDG_TIMEOUT);
+  ret = file_ioctl(&filestruct, WDIOC_SETTIMEOUT,
+                   (unsigned long)CONFIG_PHOTON_IWDG_TIMEOUT);
 #else
 # error "No watchdog configured"
 #endif
