@@ -437,7 +437,7 @@ int sam_ajoy_initialization(void)
   if (ret < 0)
     {
       ierr("ERROR: ajoy_register failed: %d\n", ret);
-      file_close_detached(&g_adcfile);
+      file_close(&g_adcfile);
     }
 
   return ret;

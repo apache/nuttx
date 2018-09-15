@@ -551,7 +551,7 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
   if (nblocks < 3)
     {
       ferr("ERROR: Need to provide at least three full erase block\n");
-      file_close_detached(&priv->mtdfile);
+      file_close(&priv->mtdfile);
       kmm_free(priv);
       return NULL;
     }
@@ -598,7 +598,7 @@ void blockmtd_teardown(FAR struct mtd_dev_s *dev)
   /* Close the enclosed file */
 
   priv = (FAR struct file_dev_s *) dev;
-  file_close_detached(&priv->mtdfile);
+  file_close(&priv->mtdfile);
 
 #ifdef CONFIG_MTD_REGISTRATION
   /* Un-register the MTD with the procfs system if enabled */

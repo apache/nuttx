@@ -154,7 +154,7 @@ int file_detach(int fd, FAR struct file *filep)
 
   /* Release the file descriptor *without* calling the driver close method
    * and without decrementing the inode reference count.  That will be done
-   * in file_close_detached().
+   * in file_close().
    */
 
   parent->f_oflags = 0;
@@ -168,7 +168,7 @@ int file_detach(int fd, FAR struct file *filep)
 #endif
 
 /****************************************************************************
- * Name: file_close_detached
+ * Name: file_close
  *
  * Description:
  *   Close a file that was previously detached with file_detach().
@@ -185,7 +185,7 @@ int file_detach(int fd, FAR struct file *filep)
  *
  ****************************************************************************/
 
-int file_close_detached(FAR struct file *filep)
+int file_close(FAR struct file *filep)
 {
   struct inode *inode;
   int ret = OK;

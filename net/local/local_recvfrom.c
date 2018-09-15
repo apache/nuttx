@@ -348,7 +348,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Now we can close the read-only file descriptor */
 
-  file_close_detached(&conn->lc_infile);
+  file_close(&conn->lc_infile);
   conn->lc_infile.f_inode = NULL;
 
   /* Release our reference to the half duplex FIFO */
@@ -371,7 +371,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 errout_with_infd:
   /* Close the read-only file descriptor */
 
-  file_close_detached(&conn->lc_infile);
+  file_close(&conn->lc_infile);
   conn->lc_infile.f_inode = NULL;
 
 errout_with_halfduplex:

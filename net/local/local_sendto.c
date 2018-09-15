@@ -164,7 +164,7 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Now we can close the write-only socket descriptor */
 
-  file_close_detached(&conn->lc_outfile);
+  file_close(&conn->lc_outfile);
   conn->lc_outfile.f_inode = NULL;
 
 errout_with_halfduplex:

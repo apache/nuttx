@@ -128,7 +128,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   if (conn->lc_infile.f_inode != NULL)
     {
-      file_close_detached(&conn->lc_infile);
+      file_close(&conn->lc_infile);
       conn->lc_infile.f_inode = NULL;
     }
 
@@ -136,7 +136,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   if (conn->lc_outfile.f_inode != NULL)
     {
-      file_close_detached(&conn->lc_outfile);
+      file_close(&conn->lc_outfile);
       conn->lc_outfile.f_inode = NULL;
     }
 

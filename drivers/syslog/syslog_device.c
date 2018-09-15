@@ -420,7 +420,7 @@ int syslog_dev_uninitialize(void)
 
   /* Close the detached file instance */
 
-  (void)file_close_detached(&g_syslog_dev.sl_file);
+  (void)file_close(&g_syslog_dev.sl_file);
 
   /* Free the device path */
 

@@ -131,7 +131,7 @@ static int wdog_daemon(int argc, char *argv[])
     }
 
 errout_with_dev:
-  file_close_detached(&filestruct);
+  file_close(&filestruct);
 errout:
   return ret;
 }
@@ -210,7 +210,7 @@ int sam_watchdog_initialize(void)
 #endif
   return OK;
 errout_with_dev:
-  file_close_detached(&filestruct);
+  file_close(&filestruct);
 errout:
   return ret;
 #else

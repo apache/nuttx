@@ -458,7 +458,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
   return OK;
 
 errout_with_file:
-  file_close_detached(&dev->devfile);
+  file_close(&dev->devfile);
 
 errout_with_dev:
   kmm_free(dev);
@@ -521,7 +521,7 @@ int loteardown(FAR const char *devname)
 
   if (dev->devfile.f_inode != NULL)
     {
-      (void)file_close_detached(&dev->devfile);
+      (void)file_close(&dev->devfile);
     }
 
   kmm_free(dev);

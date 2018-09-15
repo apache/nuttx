@@ -304,7 +304,7 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
     {
       ret = file_ioctl(&filestruct, STM32F7_BBSRAM_GETDESC_IOCTL,
                        (unsigned long)((uintptr_t)desc));
-      (void)file_close_detached(&filestruct);
+      (void)file_close(&filestruct);
 
       if (ret < 0)
         {

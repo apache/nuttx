@@ -780,7 +780,7 @@ int file_detach(int fd, FAR struct file *filep);
 #endif
 
 /****************************************************************************
- * Name: file_close_detached
+ * Name: file_close
  *
  * Description:
  *   Close a file that was previously detached with file_detach().
@@ -795,7 +795,7 @@ int file_detach(int fd, FAR struct file *filep);
  *
  ****************************************************************************/
 
-int file_close_detached(FAR struct file *filep);
+int file_close(FAR struct file *filep);
 
 /****************************************************************************
  * Name: open_blockdriver

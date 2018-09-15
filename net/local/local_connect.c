@@ -230,7 +230,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   return OK;
 
 errout_with_outfd:
-  (void)file_close_detached(&client->lc_outfile);
+  (void)file_close(&client->lc_outfile);
   client->lc_outfile.f_inode = NULL;
 
 errout_with_fifos:

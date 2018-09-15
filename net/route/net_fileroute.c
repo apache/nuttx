@@ -835,14 +835,14 @@ int net_unlockroute_ipv6(void)
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 int net_closeroute_ipv4(FAR struct file *filep)
 {
-  return file_close_detached(filep);
+  return file_close(filep);
 }
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 int net_closeroute_ipv6(FAR struct file *filep)
 {
-  return file_close_detached(filep);
+  return file_close(filep);
 }
 #endif
 

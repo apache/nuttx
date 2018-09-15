@@ -485,7 +485,7 @@ int board_ajoy_initialize(void)
     {
       ierr("ERROR: ajoy_register failed: %d\n", ret);
 #ifndef NO_JOYSTICK_ADC
-      file_close_detached(&g_adcfile);
+      file_close(&g_adcfile);
 #endif
     }
 

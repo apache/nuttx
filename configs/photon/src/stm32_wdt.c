@@ -103,7 +103,7 @@ static int wdog_daemon(int argc, char *argv[])
 exit_close_dev:
   /* Close watchdog device and exit. */
 
-  file_close_detached(&filestruct);
+  file_close(&filestruct);
   return ret;
 }
 
@@ -145,7 +145,7 @@ int photon_watchdog_initialize(void)
 
   /*  Close watchdog as it is not needed here anymore */
 
-  (void)file_close_detached(&filestruct);
+  (void)file_close(&filestruct);
 
   if (ret < 0)
     {

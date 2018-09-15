@@ -278,10 +278,10 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 
   /* Close the contained file structures */
 
-  (void)file_close_detached(&devpair->pp_master.pd_src);
-  (void)file_close_detached(&devpair->pp_master.pd_sink);
-  (void)file_close_detached(&devpair->pp_slave.pd_src);
-  (void)file_close_detached(&devpair->pp_slave.pd_sink);
+  (void)file_close(&devpair->pp_master.pd_src);
+  (void)file_close(&devpair->pp_master.pd_sink);
+  (void)file_close(&devpair->pp_slave.pd_src);
+  (void)file_close(&devpair->pp_slave.pd_sink);
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Free this minor number so that it can be reused */
@@ -1221,7 +1221,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_master.pd_src);
+      (void)file_close(&devpair->pp_master.pd_src);
     }
 
   if (pipe_b[1] >= 0)
@@ -1230,7 +1230,7 @@ errout_with_pipeb:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_slave.pd_sink);
+      (void)file_close(&devpair->pp_slave.pd_sink);
     }
 
 errout_with_pipea:
@@ -1240,7 +1240,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_slave.pd_src);
+      (void)file_close(&devpair->pp_slave.pd_src);
     }
 
   if (pipe_a[1] >= 0)
@@ -1249,7 +1249,7 @@ errout_with_pipea:
     }
   else
     {
-      (void)file_close_detached(&devpair->pp_master.pd_sink);
+      (void)file_close(&devpair->pp_master.pd_sink);
     }
 
 errout_with_devpair:
