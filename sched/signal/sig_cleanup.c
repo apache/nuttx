@@ -58,7 +58,7 @@
 
 void nxsig_cleanup(FAR struct tcb_s *stcb)
 {
-  FAR sigq_t     *sigq;
+  FAR sigq_t *sigq;
 
   /* Deallocate all entries in the list of pending signal actions */
 
@@ -110,4 +110,3 @@ void nxsig_release(FAR struct task_group_s *group)
       nxsig_release_pendingsignal(sigpend);
     }
 }
-
