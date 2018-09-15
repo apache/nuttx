@@ -783,7 +783,8 @@ int file_detach(int fd, FAR struct file *filep);
  * Name: file_close
  *
  * Description:
- *   Close a file that was previously detached with file_detach().
+ *   Close a file that was previously opened with file_open() (or detached
+ *   with file_detach()).
  *
  * Input Parameters:
  *   filep - A pointer to a user provided memory location containing the
