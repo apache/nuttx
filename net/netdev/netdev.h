@@ -468,9 +468,7 @@ int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDOWN_NOTIFIER
 int netdev_dev_lladdrsize(FAR struct net_driver_s *dev);
-#endif
 
 /****************************************************************************
  * Name: netdown_notifier_setup

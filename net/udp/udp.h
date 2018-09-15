@@ -335,6 +335,27 @@ void udp_ipv6_select(FAR struct net_driver_s *dev);
 void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
 
 /****************************************************************************
+ * Name: psock_udp_cansend
+ *
+ * Description:
+ *   psock_udp_cansend() returns a value indicating if a write to the socket
+ *   would block.  It is still possible that the write may block if another
+ *   write occurs first.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   -ENOSYS (Function not implemented, always have to wait to send).
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+int psock_udp_cansend(FAR struct socket *psock);
+;
+/****************************************************************************
  * Name: udp_send
  *
  * Description:
