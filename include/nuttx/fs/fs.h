@@ -84,7 +84,7 @@
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  nx_open(f,b,##__VA_ARGS__)
+#    define _NX_OPEN(p,f,...)  nx_open(p,f,##__VA_ARGS__)
 #  else
 #    define _NX_OPEN           nx_open
 #  endif
@@ -95,7 +95,7 @@
 #  define _NX_GETERRVAL(r)     (r)
 #else
 #  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  open(f,b,##__VA_ARGS__)
+#    define _NX_OPEN(p,f,...)  open(p,f,##__VA_ARGS__)
 #  else
 #    define _NX_OPEN           open
 #  endif
