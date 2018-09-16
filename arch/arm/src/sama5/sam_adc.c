@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_adc.c
  *
- *   Copyright (C) 2013, 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2014, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -972,11 +972,11 @@ static int sam_adc_interrupt(int irq, void *context, FAR void *arg)
   /* Make sure that all interrupts were handled */
 
   DEBUGASSERT(pending == 0);
+  UNUSED(priv);  /* Not used in all configurations */
   return OK;
 }
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
-
 /****************************************************************************
  * ADC methods
  ****************************************************************************/
