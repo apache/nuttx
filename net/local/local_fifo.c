@@ -303,7 +303,7 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
        * outside the user's address space.
        */
 
-      return ret == -ENOENT ? -EFAULT : -errcode;
+      return ret == -ENOENT ? -EFAULT : ret;
     }
 
   return OK;
