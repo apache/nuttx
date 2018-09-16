@@ -3,7 +3,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
  *   Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
@@ -36,17 +36,42 @@
 #include <float.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* To avoid looping forever in particular corner cases, every LOGF_MAX_ITER
+ * the error criteria is relaxed by a factor LOGF_RELAX_MULTIPLIER.
+ * todo: might need to adjust the double floating point version too.
+ */
+
+#define LOGF_MAX_ITER         10
+#define LOGF_RELAX_MULTIPLIER 2
+
+/****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: log
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_DOUBLE
 double log(double x)
 {
-  double y, y_old, ey, epsilon;
+  double y;
+  double y_old;
+  double ey;
+  double epsilon;
+  int    relax_factor;
+  int    i;
 
   y = 0.0;
   y_old = 1.0;
   epsilon = DBL_EPSILON;
+
+  i            = 0;
+  relax_factor = 1;
+
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -65,6 +90,14 @@ double log(double x)
         }
 
       epsilon = (fabs(y) > 1.0) ? fabs(y) * DBL_EPSILON : DBL_EPSILON;
+
+      if (++i >= LOGF_MAX_ITER)
+        {
+          relax_factor *= LOGF_RELAX_MULTIPLIER;
+          i = 0;
+        }
+
+      epsilon *= relax_factor;
     }
 
   if (y == 700.0)
