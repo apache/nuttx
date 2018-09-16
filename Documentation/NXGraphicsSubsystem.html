@@ -397,8 +397,8 @@
 
 <p>
   <a href="NxWidgets.html">NxWidgets</a> is a higher level, C++, object-oriented library for object-oriented access to graphical &quot;widgets.&quot;
-  NxWidgets is provided as a separate package.
-  NxWidgets is built on top of the core NuttX graphics subsystem, but is not a part of the core graphics subystems.
+  NxWidgets is provided as a separate library in the <code>apps/</code> repository
+  NxWidgets is built on top of the core NuttX graphics subsystem, but is part of the application space rather than part of the core OS graphics subystems.
 </p>
 
 <h3>1.3.6 <a name="nxterm1">NX Terminal Driver (<code>NxTerm</code>)</a></h3>
@@ -3216,8 +3216,8 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       This toolkit is built on top of NX and works with the multi-user NX front-end.
       See <code>include/nuttx/nx/nxtk.h</code>.
 
-    <dt><code>nuttx/../nxwidgets</code>
-      <dd>The <a href="NxWidgets.html">NxWidgets</a> code is provided as a separate package located outside of the NuttX source tree (probably at this location).
+    <dt><code>apps/graphics/NxWidgets</code>
+      <dd>The <a href="NxWidgets.html">NxWidgets</a> code is provided as a separate package provided in the <code>apps/</code> repository.
 
     <dt><code>graphics/nxterm</code>
       <dd>The NxTerm driver is built on top of NX and works with the multi-user NX front-end.
