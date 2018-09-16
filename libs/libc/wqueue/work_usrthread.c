@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
@@ -268,7 +269,7 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
    * signals directed to the worker thread to pend.
    */
 
-  (void)nxsig_procmask(SIG_BLOCK, &sigset, &oldset);
+  (void)sigprocmask(SIG_BLOCK, &sigset, &oldset);
   work_unlock();
 
   if (next == WORK_DELAY_MAX)
@@ -291,10 +292,10 @@ void work_process(FAR struct usr_wqueue_s *wqueue)
       rqtp.tv_sec  = sec;
       rqtp.tv_nsec = (next - (sec * 1000000)) * 1000;
 
-      sigtimewait(&sigset, NULL, &rqtp);
+      sigtimedwait(&sigset, NULL, &rqtp);
     }
 
-  (void)nxsig_procmask(SIG_SETMASK, &oldset, NULL);
+  (void)sigprocmask(SIG_SETMASK, &oldset, NULL);
 }
 
 /****************************************************************************
