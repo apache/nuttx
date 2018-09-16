@@ -4766,10 +4766,6 @@ Configurations
 
           nuttx-git/NxWidgets/UnitTests/nxwm
 
-        Documentation for installing the NxWM unit test can be found here:
-
-          nuttx-git/NxWidgets/UnitTests/README.txt
-
     2. This configuration is set up generally like the nsh configuration
        except that:
 
@@ -4784,45 +4780,7 @@ Configurations
        for the nxwm configuration (other than the differences noted
        above).
 
-    3. Here is the quick summary of the build steps.  These steps assume
-       that you have the entire NuttX GIT in some directory ~/nuttx-git.
-       You may have these components installed elsewhere.  In that case, you
-       will need to adjust all of the paths in the following accordingly:
-
-        a. Install the nxwm configuration
-
-           $ tools/configure.sh sama5d4-ek/nxwm
-
-        b. Make the build context (only)
-
-           $ make context
-
-        c. Install the nxwm unit test
-
-           $ cd ~/nuttx-git/NxWidgets
-           $ tools/install.sh ~/nuttx-git/apps nxwm
-           Creating symbolic link
-            - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
-            - At ~/nuttx-git/apps/external
-
-        d. Build the NxWidgets library
-
-           $ cd ~/nuttx-git/NxWidgets/libnxwidgets
-           $ make TOPDIR=~/nuttx-git/nuttx
-           ...
-
-        e. Build the NxWM library
-
-           $ cd ~/nuttx-git/NxWidgets/nxwm
-           $ make TOPDIR=~/nuttx-git/nuttx
-           ...
-
-        f. Built NuttX with the installed unit test as the application
-
-           $ cd ~/nuttx-git/nuttx
-           $ make
-
-    4. NSH Console Access.
+    3. NSH Console Access.
 
        This configuration boots directly into a graphic, window manage
        environment.  There is no serial console.  Some initial stdout
@@ -4846,7 +4804,7 @@ Configurations
        Instead, you will need use the dmesg command from an NxTerm or
        from a Telnet session to see the debug output
 
-    5. USB HID Keyboard Input
+    4. USB HID Keyboard Input
 
        USB keyboard support is enabled in the default configuration, but
        can be disabled:
@@ -4887,7 +4845,7 @@ Configurations
 
        which can be reduced if better keyboard response is required.
 
-    6. Media Player
+    5. Media Player
 
        This configuration has the media player application enabled. Support
        for the WM8904 CODEC is built in.

@@ -797,15 +797,11 @@ nxwm
   This is a special configuration setup for the NxWM window manager
   UnitTest.  The NxWM window manager can be found here:
 
-    nuttx-code/NxWidgets/nxwm
+    apps/graphics/NxWidgets/nxwm
 
   The NxWM unit test can be found at:
 
-    nuttx-code/NxWidgets/UnitTests/nxwm
-
-  Documentation for installing the NxWM unit test can be found here:
-
-    nuttx-code/NxWidgets/UnitTests/READEM.txt
+    apps/graphics/NxWidgets/UnitTests/nxwm
 
   NOTES
 

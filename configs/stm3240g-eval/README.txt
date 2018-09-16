@@ -1223,54 +1223,11 @@ Where <subdir> is one of the following:
     This is a special configuration setup for the NxWM window manager
     UnitTest.  The NxWM window manager can be found here:
 
-      nuttx-code/NxWidgets/nxwm
+      apps/graphics/NxWidgets/nxwm
 
     The NxWM unit test can be found at:
 
-      nuttx-code/NxWidgets/UnitTests/nxwm
-
-    Documentation for installing the NxWM unit test can be found here:
-
-      nuttx-code/NxWidgets/UnitTests/README.txt
-
-    Here is the quick summary of the build steps (Assuming that all of
-    the required packages are available in a directory ~/nuttx-code):
-
-    1. Install the nxwm configuration
-
-       $ cd ~/nuttx-code/nuttx
-       $ tools/configure.sh stm3240g-eval/nxwm
-
-       Use the -l option with the configure.sh script if you are using a
-       Linux host; use the -c option if you are using Cygwin under Windows.
-       Use the -h option to see other selections.
-
-    2. Make the build context (only)
-
-       $ make context
-
-    3. Install the nxwm unit test
-
-       $ cd ~/nuttx-code/NxWidgets
-       $ tools/install.sh ~/nuttx-code/apps nxwm
-       Creating symbolic link
-        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-code/apps/external
-
-    4. Build the NxWidgets library
-
-       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-code/nuttx
-
-    5. Build the NxWM library
-
-       $ cd ~/nuttx-code/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-code/nuttx
-
-    6. Built NuttX with the installed unit test as the application
-
-       $ cd ~/nuttx-code/nuttx
-       $ make
+      apps/graphics/NxWidgets/UnitTests/nxwm
 
   telnetd:
   --------

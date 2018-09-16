@@ -470,53 +470,11 @@ Configurations
 
     The NxWM window manager can be found here:
 
-      nuttx-git/NxWidgets/nxwm
+      apps/graphics/NxWidgets/nxwm
 
     The NxWM unit test can be found at:
 
-      nuttx-git/NxWidgets/UnitTests/nxwm
-
-    Documentation for installing the NxWM unit test can be found here:
-
-      nuttx-git/NxWidgets/UnitTests/README.txt
-
-    Here is the quick summary of the build steps.  These steps assume that
-    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
-    have these components installed elsewhere.  In that case, you will need
-    to adjust all of the paths in the following accordingly:
-
-    1. Intall the nxwm configuration
-
-       $ tools/configure.sh sam3u-ek/nxwm
-
-    2. Make the build context (only)
-
-       $ make context
-
-    3. Install the nxwm unit test
-
-       $ cd ~/nuttx-git/NxWidgets
-       $ tools/install.sh ~/nuttx-git/apps nxwm
-       Creating symbolic link
-        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-git/apps/external
-
-    4. Build the NxWidgets library
-
-       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
-
-    5. Build the NxWM library
-
-       $ cd ~/nuttx-git/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
-
-    6. Built NuttX with the installed unit test as the application
-
-       $ cd ~/nuttx-git/nuttx
-       $ make
+      apps/graphics/NxWidgets/UnitTests/nxwm
 
     STATUS:
 
@@ -533,3 +491,4 @@ Configurations
        beginning of FLASH, trashing the FLASH images.
 
        Bottom line:  Still untested.
+

@@ -2372,62 +2372,20 @@ Configuration sub-directories
 
        The NxWM window manager can be found here:
 
-         NxWidgets/nxwm
+         apps/graphics/NxWidgets/nxwm
 
        The NxWM unit test can be found at:
 
-         NxWidgets/UnitTests/nxwm
+         apps/graphics/NxWidgets/UnitTests/nxwm
 
-       Documentation for installing the NxWM unit test can be found here:
-
-         NxWidgets/UnitTests/README.txt
-
-    2. Here is the quick summary of the build steps.  These steps assume
-       that you have the entire NuttX GIT in some directory HOME. You may
-       have these components installed elsewhere.  In that case, you
-       will need to adjust all of the paths in the following accordingly:
-
-       a. Install the VNC nxwm configuration
-
-          $ tools/configure.sh samv71-xult/vnc
-
-       b. Make the build context (only)
-
-          $ make context
-
-       c. Install the nxwm unit test
-
-          $ cd HOME/NxWidgets
-          $ tools/install.sh HOME/apps nxwm
-          Creating symbolic link
-           - To HOME/NxWidgets/UnitTests/nxwm
-           - At HOME/apps/external
-
-       d. Build the NxWidgets library
-
-          $ cd HOME/NxWidgets/libnxwidgets
-          $ make TOPDIR=HOME/nuttx
-          ...
-
-       e. Build the NxWM library
-
-          $ cd HOME/NxWidgets/nxwm
-          $ make TOPDIR=HOME/nuttx
-          ...
-
-       f. Built NuttX with the installed unit test as the application
-
-          $ cd HOME/nuttx
-          $ make
-
-    3. Reading from the LCD is not currently functional.  The following
+    2. Reading from the LCD is not currently functional.  The following
        settings are in the configuration that tell the system that this
        is a read-only LCD:
 
          CONFIG_LCD_NOGETRUN=y
          CONFIG_NX_WRITEONLY=y
 
-    4. Small Icons are selected and can be very difficult to touch.  You
+    3. Small Icons are selected and can be very difficult to touch.  You
        might want to enable larger icons with:
 
          CONFIG_NXWM_LARGE_ICONS=y
@@ -2552,58 +2510,16 @@ Configuration sub-directories
 
        The NxWM window manager can be found here:
 
-         NxWidgets/nxwm
+         apps/graphics/NxWidgets/nxwm
 
        The NxWM unit test can be found at:
 
-         NxWidgets/UnitTests/nxwm
+         apps/graphics/NxWidgets/UnitTests/nxwm
 
-       Documentation for installing the NxWM unit test can be found here:
-
-         NxWidgets/UnitTests/README.txt
-
-    2. Here is the quick summary of the build steps.  These steps assume
-       that you have the entire NuttX GIT in some directory HOME. You may
-       have these components installed elsewhere.  In that case, you
-       will need to adjust all of the paths in the following accordingly:
-
-       a. Install the nxwm configuration
-
-          $ tools/configure.sh samv71-xult/nxwm
-
-       b. Make the build context (only)
-
-          $ make context
-
-       c. Install the nxwm unit test
-
-          $ cd HOME/NxWidgets
-          $ tools/install.sh HOME/apps nxwm
-          Creating symbolic link
-           - To HOME/NxWidgets/UnitTests/nxwm
-           - At HOME/apps/external
-
-       d. Build the NxWidgets library
-
-          $ cd HOME/NxWidgets/libnxwidgets
-          $ make TOPDIR=HOME/nuttx
-          ...
-
-       e. Build the NxWM library
-
-          $ cd HOME/NxWidgets/nxwm
-          $ make TOPDIR=HOME/nuttx
-          ...
-
-       f. Built NuttX with the installed unit test as the application
-
-          $ cd HOME/nuttx
-          $ make
-
-    3. Network configuration:  IP address 10.0.0.2.  The is easily changed
+    2. Network configuration:  IP address 10.0.0.2.  The is easily changed
        via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
 
-    4. The default (local) framebuffer configuration is 320x240 with 8-bit
+    3. The default (local) framebuffer configuration is 320x240 with 8-bit
        RGB color.
 
        I had some problems at 16-bits per pixle (see STATUS below).  To
@@ -2626,9 +2542,8 @@ Configuration sub-directories
          # CONFIG_VNCSERVER_COLORFMT_RGB16 is not set
 
          # CONFIG_EXAMPLES_NXIMAGE_GREYSCALE is not set
-         CONFIG_EXAMPLES_NXIMAGE_BPP=8
 
-    5. There are complicated interactions between VNC and the network
+    2. There are complicated interactions between VNC and the network
        configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
        size of update messages.  That is 1024 bytes in that configuration
        (the full message with the header will be a little larger).  The
