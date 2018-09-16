@@ -60,24 +60,24 @@ double log(double x)
 {
   double y;
   double y_old;
-  double ey;
+  double ney;
   double epsilon;
   int    relax_factor;
-  int    i;
+  int    iter;
 
   y = 0.0;
   y_old = 1.0;
   epsilon = DBL_EPSILON;
 
-  i            = 0;
+  iter         = 0;
   relax_factor = 1;
 
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
       y_old = y;
-      ey = exp(y);
-      y -= (ey - x) / ey;
+      ney   = exp(-y);
+      y    -= 1 - x * ney;
 
       if (y > 700.0)
         {
@@ -91,13 +91,16 @@ double log(double x)
 
       epsilon = (fabs(y) > 1.0) ? fabs(y) * DBL_EPSILON : DBL_EPSILON;
 
-      if (++i >= LOGF_MAX_ITER)
+      if (++iter >= LOGF_MAX_ITER)
         {
           relax_factor *= LOGF_RELAX_MULTIPLIER;
-          i = 0;
+          iter = 0;
         }
 
-      epsilon *= relax_factor;
+      if (relax_factor > 1)
+        {
+          epsilon *= relax_factor;
+        }
     }
 
   if (y == 700.0)

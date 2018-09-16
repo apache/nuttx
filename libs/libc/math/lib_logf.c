@@ -58,23 +58,23 @@ float logf(float x)
 {
   float y;
   float y_old;
-  float ey;
+  float ney;
   float epsilon;
   int   relax_factor;
-  int   i;
+  int   iter;
 
   y       = 0.0F;
   y_old   = 1.0F;
   epsilon = FLT_EPSILON;
 
-  i            = 0;
+  iter         = 0;
   relax_factor = 1;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
       y_old = y;
-      ey    = expf(y);
-      y    -= (ey - x) / ey;
+      ney   = expf(-y);
+      y    -= 1 - x * ney;
 
       if (y > FLT_MAX_EXP_X)
         {
@@ -88,13 +88,16 @@ float logf(float x)
 
       epsilon = (fabsf(y) > 1.0F) ? fabsf(y) * FLT_EPSILON : FLT_EPSILON;
 
-      if (++i >= LOGF_MAX_ITER)
+      if (++iter >= LOGF_MAX_ITER)
         {
           relax_factor *= LOGF_RELAX_MULTIPLIER;
-          i = 0;
+          iter = 0;
         }
 
-      epsilon *= relax_factor;
+      if (relax_factor > 1)
+        {
+          epsilon *= relax_factor;
+        }
     }
 
   if (y == FLT_MAX_EXP_X)
