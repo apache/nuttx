@@ -1,8 +1,8 @@
 /*****************************************************************************
- * configs/stm32l476rg/src/stm32_lsm303agr.c
+ * configs/nucleo-h743zi/src/stm32_lsm6dsl.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,16 +43,16 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include "stm32l4.h"
-#include <nucleo-l476rg.h>
-#include <nuttx/sensors/lsm303agr.h>
+#include "stm32.h"
+#include <nucleo-h743zi.h>
+#include <nuttx/sensors/lsm6dsl.h>
 
 /*****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_I2C1
-#  error "LSM303AGR driver requires CONFIG_STM32L4_I2C1 to be enabled"
+#ifndef CONFIG_STM32H7_I2C1
+#  error "LSM6DSL driver requires CONFIG_STM32H7_I2C1 to be enabled"
 #endif
 
 /*****************************************************************************
@@ -60,34 +60,40 @@
  ****************************************************************************/
 
 /*****************************************************************************
- * Name: stm32_lsm303agr_initialize
+ * Name: stm32_lsm6dsl_initialize
  *
  * Description:
- *   Initialize I2C-based LSM303AGR.
+ *   Initialize I2C-based LSM6DSL.
  ****************************************************************************/
 
-int stm32l4_lsm303agr_initialize(char *devpath)
+int stm32_lsm6dsl_initialize(char *devpath)
 {
   FAR struct i2c_master_s *i2c;
   int ret = OK;
 
-  sninfo("INFO: Initializing LMS303AGR sensor over I2C\n");
+  sninfo("Initializing LMS6DSL!\n");
 
-#if defined(CONFIG_STM32L4_I2C1)
-  i2c = stm32l4_i2cbus_initialize(1);
+  /* Configure the GPIO interrupt */
+
+  stm32_configgpio(GPIO_LPS22HB_INT1);
+
+#if defined(CONFIG_STM32H7_I2C1)
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
       return -ENODEV;
     }
 
-  ret = lsm303agr_sensor_register("/dev/lsm303mag0", i2c, LSM303AGRMAGNETO_ADDR);
+  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
+
+  ret = lsm6dsl_sensor_register("/dev/lsm6dsl0", i2c, LSM6DSLACCEL_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS303AGR magneto driver %s\n", devpath);
+      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);
       return -ENODEV;
     }
 
-  sninfo("INFO: LMS303AGR sensor has been initialized successfully\n");
+  sninfo("INFO: LMS6DSL sensor has been initialized successfully\n");
 #endif
 
   return ret;

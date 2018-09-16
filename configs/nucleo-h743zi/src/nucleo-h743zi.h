@@ -82,6 +82,12 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
+/* X-NUCLEO IKS01A2 */
+
+#define GPIO_LPS22HB_INT1 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN10)
+#define GPIO_LSM6DSL_INT1 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN4)
+#define GPIO_LSM6DSL_INT2 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN5)
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -126,6 +132,29 @@ void stm32_spidev_initialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+
+/*****************************************************************************
+ * Name: stm32_lsm6dsl_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM6DSL.
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM303AGR
+int stm32_lsm6dsl_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_lsm303agr_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM303AGR.
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM6DSL
+int stm32_lsm303agr_initialize(char *devpath);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */

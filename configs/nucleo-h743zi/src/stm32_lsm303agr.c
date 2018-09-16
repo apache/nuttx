@@ -1,8 +1,8 @@
 /*****************************************************************************
- * configs/stm32l476rg/src/stm32_lsm303agr.c
+ * configs/nucleo-h743zi/src/stm32_lsm303agr.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,16 +43,16 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include "stm32l4.h"
-#include <nucleo-l476rg.h>
+#include "stm32.h"
+#include <nucleo-h743zi.h>
 #include <nuttx/sensors/lsm303agr.h>
 
 /*****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_I2C1
-#  error "LSM303AGR driver requires CONFIG_STM32L4_I2C1 to be enabled"
+#ifndef CONFIG_STM32H7_I2C1
+#  error "LSM303AGR driver requires CONFIG_STM32H7_I2C1 to be enabled"
 #endif
 
 /*****************************************************************************
@@ -66,21 +66,21 @@
  *   Initialize I2C-based LSM303AGR.
  ****************************************************************************/
 
-int stm32l4_lsm303agr_initialize(char *devpath)
+int stm32_lsm303agr_initialize(char *devpath)
 {
   FAR struct i2c_master_s *i2c;
   int ret = OK;
 
   sninfo("INFO: Initializing LMS303AGR sensor over I2C\n");
 
-#if defined(CONFIG_STM32L4_I2C1)
-  i2c = stm32l4_i2cbus_initialize(1);
+#if defined(CONFIG_STM32H7_I2C1)
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
       return -ENODEV;
     }
 
-  ret = lsm303agr_sensor_register("/dev/lsm303mag0", i2c, LSM303AGRMAGNETO_ADDR);
+  ret = lsm303agr_sensor_register("/dev/lsm303agr0", i2c, LSM303AGRMAGNETO_ADDR);
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize LMS303AGR magneto driver %s\n", devpath);

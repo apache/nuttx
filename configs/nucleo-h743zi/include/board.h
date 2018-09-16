@@ -184,6 +184,15 @@
 #define STM32_RCC_D3CFGR_D3PPRE   RCC_D3CFGR_D3PPRE_HCLKd4       /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK4_FREQUENCY     (STM32_HCLK_FREQUENCY/4)
 
+
+/* I2C123 clock source */
+
+#define STM32_RCC_D2CCIP2R_I2C123SRC RCC_D2CCIP2R_I2C123SEL_HSI
+
+/* I2C4 clock source */
+
+#define STM32_RCC_D2CCIP3R_I2C4SRC RCC_D2CCIP3R_I2C4SEL_HSI
+
 /* FLASH wait states
  *
  *  ------------ ---------- -----------
@@ -266,7 +275,7 @@
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Pin Disambiguation ***************************************************************/
+/* Alternate function pin selections ************************************************/
 /* USART3 (Nucleo Virtual Console) */
 
 #define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
@@ -276,6 +285,13 @@
 
 #define GPIO_USART6_RX     GPIO_USART6_RX_2  /* PG9 */
 #define GPIO_USART6_TX     GPIO_USART6_TX_2  /* PG14 */
+
+/* I2C1 Use Nucleo I2C pins */
+
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 */
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 */
+
+/*  */
 
 /************************************************************************************
  * Public Data

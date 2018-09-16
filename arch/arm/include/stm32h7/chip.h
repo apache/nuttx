@@ -92,8 +92,19 @@
 /* Peripherals */
 
 #  define STM32H7_NGPIO                   (11)        /* GPIOA-GPIOK */
-#  define STM32H7_NUSART                  (4)         /* USART1-3, 6 */
-#  define STM32H7_NUART                   (4)         /* UART4-5, 7-8 */
+#  define STM32H7_NADC                    (3)         /* (3) ADC1-3*/
+#  define STM32H7_NDAC                    (2)         /* (2) DAC1-2*/
+#  define STM32H7_NCMP                    (2)         /* (2) ultra-low power comparators */
+#  define STM32H7_NPGA                    (2)         /* (2) Operational amplifiers: OPAMP */
+#  define STM32H7_NDFSDM                  (1)         /* (1) digital filters for sigma delta modulator */
+#  define STM32H7_NUSART                  (4)         /* (4) USART1-3, 6 */
+#  define STM32H7_NSPI                    (6)         /* (6) SPI1-6 */
+#  define STM32H7_NI2S                    (3)         /* (3) I2S1-3 */
+#  define STM32H7_NUART                   (4)         /* (4) UART4-5, 7-8 */
+#  define STM32H7_NI2C                    (4)         /* (4) I2C1-4 */
+#  define STM32H7_NSAI                    (4)         /* (4) SAI1-4*/
+#  define STM32H7_NCAN                    (2)         /* (2) CAN1-2 */
+#  define STM32H7_NSDIO                   (2)         /* (2) SDIO */
 #else
 #  error STM32 H7 chip Family not identified
 #endif

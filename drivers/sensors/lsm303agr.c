@@ -2,9 +2,9 @@
  * drivers/sensors/lsm303agr.c
  *
  *   Copyright (C) 2018 Inc. All rights reserved.
- *   Author: Ben vd Veen <disruptivesolutionsnl@gmail.com> 
+ *   Author: Ben vd Veen <disruptivesolutionsnl@gmail.com>
  *   Alias: DisruptiveNL
- *   
+ *
  * Based on:
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
@@ -57,6 +57,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lsm303agr.h>
 #include <nuttx/random.h>
+#include <nuttx/signal.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LSM303AGR)
 
@@ -869,10 +870,10 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
  *
  * Description:
  *   Read the sensor.
- * A sensor in a steady state on a horizontal surface will 
- *  measure 0 g on both the X-axis and Y-axis, whereas the Z-axis will
- *  measure 1 g. (page 30 datasheet). The X- and Y-axis have an offset
- *  of 40 mg/LSB
+ *   A sensor in a steady state on a horizontal surface will
+ *   measure 0 g on both the X-axis and Y-axis, whereas the Z-axis will
+ *   measure 1 g. (page 30 datasheet). The X- and Y-axis have an offset
+ *   of 40 mg/LSB
  *
  ****************************************************************************/
 

@@ -70,7 +70,7 @@ int stm32l4_lsm6dsl_initialize(char *devpath)
 {
   FAR struct i2c_master_s *i2c;
   int ret = OK;
- 
+
   sninfo("Initializing LMS6DSL!\n");
 
   /* Configure the GPIO interrupt */
@@ -83,7 +83,7 @@ int stm32l4_lsm6dsl_initialize(char *devpath)
     {
       return -ENODEV;
     }
-  
+
   sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
 
   ret = lsm6dsl_sensor_register("/dev/lsm6dsl0", i2c, LSM6DSLACCEL_ADDR1);

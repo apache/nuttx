@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-h743zi/src/stm32_bringup.c
+ * arch/arm/src/stm32h7/stm32_i2c.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,102 +33,72 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32H7_I2C_H
+#define __ARCH_ARM_SRC_STM32H7_STM32H7_I2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include <sys/types.h>
-#include <sys/mount.h>
-#include <syslog.h>
-#include <errno.h>
+#include "chip.h"
+#include "chip/stm32_i2c.h"
 
-#include "nucleo-h743zi.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#ifdef CONFIG_BUTTONS
-#  include <nuttx/input/buttons.h>
+/* If a dynamic timeout is selected, then a non-negative, non-zero micro-
+ * seconds per byte value must be provided as well.
+ */
+
+#ifdef CONFIG_STM32H7_I2C_DYNTIMEO
+#  if CONFIG_STM32H7_I2C_DYNTIMEO_USECPERBYTE < 1
+#    warning "Ignoring CONFIG_STM32H7_I2C_DYNTIMEO because of CONFIG_STM32H7_I2C_DYNTIMEO_USECPERBYTE"
+#    undef CONFIG_STM32H7_I2C_DYNTIMEO
+#  endif
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32_i2cbus_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y && CONFIG_NSH_ARCHINIT:
- *     Called from the NSH library
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
-{
-  int ret;
+FAR struct i2c_master_s *stm32_i2cbus_initialize(int port);
 
-  UNUSED(ret);
+/****************************************************************************
+ * Name: stm32_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the stm32_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_FS_PROCFS
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
+int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-  (void)ccm_procfs_register();
-#endif  /* CONFIG_STM32_CCM_PROCFS */
-
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
-    }
-#endif  /* CONFIG_FS_PROCFS */
-
-#ifdef CONFIG_BUTTONS
-  /* Register the BUTTON driver */
-
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-    }
-#endif  /* CONFIG_BUTTONS */
-
-#ifdef CONFIG_ADC
-  /* Initialize ADC and register the ADC driver. */
-
-  ret = stm32_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif  /* CONFIG_ADC */
-
-#ifdef CONFIG_SENSORS_LSM6DSL
-  ret = stm32_lsm6dsl_initialize("/dev/lsm6dsl0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize LSM6DSL driver: %d\n", ret);
-    }
-#endif  /* CONFIG_SENSORS_LSM6DSL */
-
-#ifdef CONFIG_SENSORS_LSM303AGR
-  ret = stm32_lsm303agr_initialize("/dev/lsm303mag0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
-    }
-#endif  /* CONFIG_SENSORS_LSM303AGR */
-
-  return OK;
-}
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32H7_I2C_H */
