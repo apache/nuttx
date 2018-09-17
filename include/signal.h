@@ -370,33 +370,35 @@ extern "C"
 #define EXTERN extern
 #endif
 
-int kill(pid_t pid, int signo);
-int raise(int signo);
-int sigaction(int signo, FAR const struct sigaction *act,
-              FAR struct sigaction *oact);
-int sigaddset(FAR sigset_t *set, int signo);
-int sigdelset(FAR sigset_t *set, int signo);
-int sigemptyset(FAR sigset_t *set);
-int sigfillset(FAR sigset_t *set);
-int sighold(int signo);
-int sigismember(FAR const sigset_t *set, int signo);
-int sigignore(int signo);
+int  kill(pid_t pid, int signo);
+void psignal(int signum, FAR const char *message);
+void psiginfo(FAR const siginfo_t *pinfo, FAR const char *message);
+int  raise(int signo);
+int  sigaction(int signo, FAR const struct sigaction *act,
+               FAR struct sigaction *oact);
+int  sigaddset(FAR sigset_t *set, int signo);
+int  sigdelset(FAR sigset_t *set, int signo);
+int  sigemptyset(FAR sigset_t *set);
+int  sigfillset(FAR sigset_t *set);
+int  sighold(int signo);
+int  sigismember(FAR const sigset_t *set, int signo);
+int  sigignore(int signo);
 _sa_handler_t signal(int signo, _sa_handler_t func);
-int sigpause(int signo);
-int sigpending(FAR sigset_t *set);
-int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+int  sigpause(int signo);
+int  sigpending(FAR sigset_t *set);
+int  sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int sigqueue(int pid, int signo, union sigval value);
+int  sigqueue(int pid, int signo, union sigval value);
 #else
-int sigqueue(int pid, int signo, FAR void *sival_ptr);
+int  sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
-int sigrelse(int signo);
+int  sigrelse(int signo);
 _sa_handler_t sigset(int signo, _sa_handler_t func);
-int sigwait(FAR const sigset_t *set, FAR int *sig);
-int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
-                 FAR const struct timespec *timeout);
-int sigsuspend(FAR const sigset_t *sigmask);
-int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
+int  sigwait(FAR const sigset_t *set, FAR int *sig);
+int  sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
+                  FAR const struct timespec *timeout);
+int  sigsuspend(FAR const sigset_t *sigmask);
+int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 
 #undef EXTERN
 #ifdef __cplusplus

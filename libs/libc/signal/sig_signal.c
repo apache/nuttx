@@ -1,7 +1,7 @@
 /****************************************************************************
- * libs/libc/string/lib_strncpy.c
+ * libs/libc/signal/sig_signal.c
  *
- *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,57 +38,86 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <string.h>
+
+#include <signal.h>
+#include <assert.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strncpy
+ * Name: signal
  *
  * Description:
- *   Copies the string pointed to by 'src' (including the terminating NUL
- *   character) into the array pointed to by 'dest'.  strncpy() will not
- *   copy more than 'n' bytes from 'src' to 'dest' array (including the
- *   NUL terminator).
+ *   The signal() function will modify signal dispositions. The 'signo'
+ *   argument specifies the signal. The 'func' argument specifies the
+ *   signal's disposition, which may be SIG_DFL, SIG_IGN, or the address
+ *   of a signal handler.  If 'func' is the address of a signal handler, the
+ *   system will add 'signo' to the calling process' signal mask before
+ *   executing the signal handler; when the signal handler returns, the
+ *   system will restore the calling process' signal mask to its state prior
+ *   to the delivery of the signal.
  *
- *   If the array pointed to by 'src' is a string that is shorter than 'n'
- *   bytes, NUL characters will be appended to the copy in the array
- *   pointed to by 'dest', until 'n' bytes in all are written.
- *
- *   If copying takes place between objects that overlap, the behavior is
- *   undefined.
+ * Input Parameters:
+ *   signo - Identifies the signal to operate on
+ *   func  - The new disposition of the signal
  *
  * Returned Value:
- *   The strncpy() function returns the pointer to 'dest'
+ *   Upon successful completion, signal() will return the previous
+ *   disposition of the signal handling. Otherwise, SIG_ERR will be returned
+ *   and errno set to indicate the nature of the error.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRNCPY
-FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
+_sa_handler_t signal(int signo, _sa_handler_t func)
 {
-  FAR char *ret = dest;     /* Value to be returned */
-  FAR char *end = dest + n; /* End of dest buffer + 1 byte */
+  struct sigaction act;
+  struct sigaction oact;
+  int ret;
 
-  /* Copy up n bytes, breaking out of the loop early if a NUL terminator is
-   * encountered.
+  DEBUGASSERT(GOOD_SIGNO(signo) && func != SIG_ERR && func != SIG_HOLD);
+
+  /* Initialize the sigaction structure */
+
+  act.sa_handler = func;
+  act.sa_flags   = 0;
+  (void)sigemptyset(&act.sa_mask);
+
+  /* Check for SIG_IGN and SIG_DFL (and someday SIG_HOLD)
+   *
+   * REVISIT:  Currently SIG_IGN, SIG_DFL, and SIG_HOLD have the same value
+   * and cannot be distinguished.
    */
 
-  while ((dest != end) && (*dest++ = *src++) != '\0')
+  if (func != SIG_DFL /* && func != SIG_IGN */)
     {
+      /* Add the signal to the set of signals to be ignored when the signal
+       * handler executes.
+       */
+
+      ret = sigaddset(&act.sa_mask, signo);
+      if (ret < 0)
+        {
+          /* Would happen if signo were invalid */
+
+          return (_sa_handler_t)SIG_ERR;
+        }
     }
 
-  /* Note that there may be no NUL terminator in 'dest' */
+  /* Set the signal disposition */
 
-  /* Pad the remainder of the array pointer to 'dest' with NULs */
+  ret = sigaction(signo, &act, &oact);
 
-  while (dest != end)
-    {
-      *dest++ = '\0';
-    }
+  /* Upon successful completion, signal() will the signal's previous
+   * disposition. Otherwise, SIG_ERR will be returned and errno set to
+   * indicate the error.
+   */
 
-  return ret;
+  if (ret == OK)
+   {
+     return oact.sa_handler;
+   }
+
+  return (_sa_handler_t)SIG_ERR;
 }
-#endif

@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * libs/libc/string/lib_stpncpy.c
  *
- *   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,72 +33,68 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stddef.h>
+#include <sys/types.h>
+#include <string.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: strncpy
+ *
+ * Description:
+ *   Copies the string pointed to by 'src' (including the terminating NUL
+ *   character) into the array pointed to by 'dest'.  strncpy() will not
+ *   copy more than 'n' bytes from 'src' to 'dest' array (including the
+ *   NUL terminator).
+ *
+ *   If the array pointed to by 'src' is a string that is shorter than 'n'
+ *   bytes, NUL characters will be appended to the copy in the array
+ *   pointed to by 'dest', until 'n' bytes in all are written.
+ *
+ *   If copying takes place between objects that overlap, the behavior is
+ *   undefined.
+ *
+ * Returned Value:
+ *   If a NUL character is written to the destination, the stpncpy()
+ *   function will return the address of the first such NUL character.
+ *   Otherwise, it will return &dest[n]
+ *
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+#ifndef CONFIG_LIBC_ARCH_STRNCPY
+FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
-#else
-#define EXTERN extern
-#endif
+  FAR char *end = dest + n; /* End of dest buffer + 1 byte */
+  FAR char *ret;            /* Value to be returned */
 
-FAR char  *strdup(FAR const char *s);
-FAR char  *strndup(FAR const char *s, size_t size);
-FAR const char *strerror(int);
-int        strerror_r(int, FAR char *, size_t);
-size_t     strlen(FAR const char *);
-size_t     strnlen(FAR const char *, size_t);
-FAR char  *strcat(FAR char *, FAR const char *);
-FAR char  *strncat(FAR char *, FAR const char *, size_t);
-int        strcmp(FAR const char *, FAR const char *);
-int        strncmp(FAR const char *, FAR const char *, size_t);
-int        strcoll(FAR const char *, FAR const char *s2);
-FAR char  *strcpy(FAR char *dest, FAR const char *src);
-FAR char  *stpcpy(FAR char *dest, FAR const char *src);
-FAR char  *strncpy(FAR char *, FAR const char *, size_t);
-FAR char  *stpncpy(FAR char *, FAR const char *, size_t);
-FAR char  *strpbrk(FAR const char *, FAR const char *);
-FAR char  *strchr(FAR const char *s, int c);
-FAR char  *strrchr(FAR const char *s, int c);
-size_t     strspn(FAR const char *, FAR const char *);
-size_t     strcspn(FAR const char *, FAR const char *);
-FAR char  *strstr(FAR const char *, FAR const char *);
-FAR char  *strcasestr(FAR const char *, FAR const char *);
-FAR char  *strsignal(int signum);
-FAR char  *strtok(FAR char *, FAR const char *);
-FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
-size_t     strxfrm(FAR char *, FAR const char *, size_t n);
+  /* Copy up n bytes, breaking out of the loop early if a NUL terminator is
+   * encountered.
+   */
 
-FAR void  *memchr(FAR const void *s, int c, size_t n);
-FAR void  *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n);
-int        memcmp(FAR const void *s1, FAR const void *s2, size_t n);
-FAR void  *memcpy(FAR void *dest, FAR const void *src, size_t n);
-FAR void  *memmove(FAR void *dest, FAR const void *src, size_t count);
-FAR void  *memset(FAR void *s, int c, size_t n);
+  while ((dest != end) && (*dest++ = *src++) != '\0')
+    {
+    }
 
-void explicit_bzero(FAR void *s, size_t n);
+  /* Return the pointer to the NUL terminator (or to the end of the buffer
+   * + 1.
+   */
 
-#undef EXTERN
-#if defined(__cplusplus)
+  ret = dest;
+
+  /* Pad the remainder of the array pointer to 'dest' with NULs */
+
+  while (dest != end)
+    {
+      *dest++ = '\0';
+    }
+
+  return ret;
 }
 #endif
-#endif /* __INCLUDE_STRING_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/signal/sigwait.c
+ * libs/libc/signal/sig_wait.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
