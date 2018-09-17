@@ -74,7 +74,7 @@ float logf(float x)
     {
       y_old = y;
       ney   = expf(-y);
-      y    -= 1 - x * ney;
+      y    -= 1.0F - x * ney;
 
       if (y > FLT_MAX_EXP_X)
         {

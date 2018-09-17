@@ -113,7 +113,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
   /* Sanity check */
 
-  if (rqtp != NULL || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
+  if (rqtp == NULL || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
     {
       return -EINVAL;
     }

@@ -77,7 +77,7 @@ double log(double x)
     {
       y_old = y;
       ney   = exp(-y);
-      y    -= 1 - x * ney;
+      y    -= 1.0 - x * ney;
 
       if (y > 700.0)
         {
