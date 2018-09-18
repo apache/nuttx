@@ -63,8 +63,8 @@
  *     the string pointed to by the message argument will be written,
  *     followed by a colon and a space.
  *
- *     Then the signal description string associated with signum or with the
- *     signal indicated by pinfo will be written, followed by a newline.
+ *     Then the signal description string associated with signum will be
+ *     written, followed by a newline.
  *
  * Returned Value
  *  None.  The errno value is never set in this implementation.
@@ -99,8 +99,8 @@ void psignal(int signum, FAR const char *message)
  *     the string pointed to by the message argument will be written,
  *     followed by a colon and a space.
  *
- *     Then the signal description string associated with signum or with the
- *     signal indicated by pinfo will be written, followed by a newline.
+ *     Then the signal description string associated with the signal
+ *     indicated by pinfo will be written, followed by a newline.
  *
  * Returned Value
  *  None.  Since no value is returned, an application wishing to check for
@@ -121,4 +121,4 @@ void psiginfo(FAR const siginfo_t *pinfo, FAR const char *message)
     }
 }
 
-#endif /* __KERNEL__ */
+#endif /* !__KERNEL__ */

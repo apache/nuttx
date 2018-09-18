@@ -78,17 +78,24 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
    * encountered.
    */
 
-  while ((dest != end) && (*dest++ = *src++) != '\0')
+  while ((dest != end) && (*dest = *src++) != '\0')
     {
+      /* Increment the 'dest' pointer only if it does not refer to the
+       * NUL terminator.
+       */
+
+      dest++;
     }
 
   /* Return the pointer to the NUL terminator (or to the end of the buffer
-   * + 1.
+   * + 1).
    */
 
   ret = dest;
 
-  /* Pad the remainder of the array pointer to 'dest' with NULs */
+  /* Pad the remainder of the array pointer to 'dest' with NULs.  This
+   * overwrites any previously copied NUL terminator.
+   */
 
   while (dest != end)
     {
