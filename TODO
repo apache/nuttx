@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 15, 2018)
+NuttX TODO List (Last updated September 18, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,12 +16,12 @@ nuttx/:
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (8)  Kernel/Protected Build
+  (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
-  (1)  Other drivers (drivers/)
+  (2)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
  (10)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
@@ -905,6 +905,26 @@ o Kernel/Protected Build
   Priority:    Low for most embedded systems but would be a critical need if
                NuttX were used in a secure system.
 
+  Title:       ERRNO VARIABLE in KERNEL MODE
+  Description: In the FLAT and PROTECTED mode, the errno variable is retained
+               within the TCB.  It requires a call into the OS to access the
+               errno variable.
+
+               In the KERNEL build, TLS should be used:  The errno should be
+               stored at the base of the callers stack along with other TLS
+               data.
+
+               To do this, NuttX system calls should be reorganized.  The
+               system calls should go to the internal OS functions (like
+               nxsem_wait() vs sem_wait()) which do not set the errno value.
+               The implementation available to appplications (sem_wait() in
+               this example) should call the internal OS function then set the
+               errno variable in TLS.
+  Status:      Open
+  Priority:    Low, this primarily an aesthetic issue but may also have some
+               performance implications if the the errno varaible is accessed
+               via a system call at high rates.
+
 o C++ Support
   ^^^^^^^^^^^
 
@@ -1165,7 +1185,7 @@ o Network (net/, drivers/net)
   Description: IPv6 requires that the Ethernet driver support NuttX address
                filter interfaces.  Several Ethernet drivers do support there,
                however.  Others support the address filtering interfaces but
-               have never been verifed:
+               have never been verified:
 
                C5471, LM3S, ez80, DM0x90 NIC, PIC, LPC54: Do not support
                  address filtering.
@@ -1284,6 +1304,17 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    High if you happen to be using Ethernet in this configuration.
 
+  Title:       NETWORK DRIVERS USING HIGH PRIORITY WORK QUEUE
+  Description: Many network drivers run the network on the high priority work
+               queue thread (or support an option to do so).  Networking should
+               not be done on the high priority work thread because it interferes
+               with realtime behavior.  Fix by forcing all network drivers to
+               run on the low priority work queue.
+  Status:      Open
+  Priority:    Low.  Not such big deal for demo network test and demo
+               configurations except that it provides a bad example for a product
+               OS configuration.
+
   Title:       REPARTITION DRIVER FUNCTIONALITY
   Description: Every network driver performs the first level of packet decoding.
                It examines the packet header and calls ipv4_input(), ipv6_input().
@@ -1354,7 +1385,6 @@ o Network (net/, drivers/net)
                MAC-based addressing in the 6LoWPAN implementation.
 
   Title:       ETHERNET LOCAL BROADCAST DOES NOT WORK
-
   Description: In case of "local broadcast" the system still send ARP
                request to the destination, but it shouldn't, it should
                broadcast.  For Example, the system has network with IP
@@ -1404,6 +1434,14 @@ o Network (net/, drivers/net)
   Priority:    Medium.  I have never heard of this problem being reported
                before, so I suspect it might not be so prevalent as one
                might expect.
+
+  Title:       TCP SOCKETS CLOSED TOO QUICKLY
+  Description: When a socket is closed, the resources are torn down
+               immediately (unless the SO_LINGER option is selected).  As a
+               result, the socket does not send the FIN and this looks like
+               an unexpected, abnormal loss of connection to the remote peer.
+  Status:      Open
+  Priority:    Medium-Low.
 
   Title:       LOCAL DATAGRAM RECVFROM RETURNS WRONG SENDER ADDRESS
   Description: The recvfrom logic for local datagram sockets returns the
@@ -2143,7 +2181,7 @@ o Other drivers (drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SYSLOG OUTPUT LOST ON A CRASH
-  Desription:  Flush syslog output on crash.  I don't know how to do in the
+  Description: Flush syslog output on crash.  I don't know how to do in the
                character driver case with interrupts disabled.  It would be
                easy to flush the interrupt interrupt buffer, but not the
                data buffered within a character driver (such as the serial
@@ -2155,6 +2193,21 @@ o Other drivers (drivers/)
   Priority:    Low.  It would be a convenience and would simplify crash
                debug if you could see all of the SYSLOG output up to the
                time of the crash.  But not essential.
+
+  Title:       SERIAL DRIVER WITH DMA DOES NOT DISCARD OOB CHARACTERS
+  Description: If Ctrl-Z or Ctrl-C actions are enabled, the the OOB
+               character that generates the signal action must not be placed
+               in the serial driver Rx buffer.  This behavior is correct for
+               the non-DMA case (serial_io.c), but not for the DMA case
+               (serial_dma.c).  In the DMA case, the OOB character is left
+               in the Rx buffer and will be received as normal Rx data by
+               the application.  It should not work that way.
+
+               Perhaps in the DMA case, the OOB characters could be filtered
+               out later, just before returning the Rx data to the application?
+  Status:      Open
+  Priority:    Low, provided that the application can handle these characters
+               in the data stream.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
