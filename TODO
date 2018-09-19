@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 18, 2018)
+NuttX TODO List (Last updated September 19, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (16)  Task/Scheduler (sched/)
+ (15)  Task/Scheduler (sched/)
   (3)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
@@ -366,16 +366,6 @@ o Task/Scheduler (sched/)
                higher to the lower priority.
   Status:      Open
   Priority:    Low.  Does anyone actually use the sporadic scheduler?
-
-  Title:       PRIORITY INHERITANCE WITH ROUND ROBIN SCHEDULER
-  Description: Priority Inheritance:  (1) Round robin scheduling.. is boost
-               priority respected?  (2) Need to remember priority of the
-               highest priority waiting task.  We need this in several
-               places:  (a) Reprioritizing a task and (b) sporadic scheduler
-               when priority goes down.
-  Status:      Open
-  Priority:    Potentially high.  Need to determine if there really is an
-               issue with priority inheritance and the round robin scheduler.
 
   Title:       SIMPLIFY SPORADIC SCHEDULER DESIGN
   Description: I have been planning to re-implement sporadic scheduling for
