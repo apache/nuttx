@@ -1249,7 +1249,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
 
           /* Check if the received packet exceeds request buffer */
 
-          if ((RNDIS_PACKET_HDR_SIZE + index + copysize) <= CONFIG_NET_ETH_PKTSIZE)
+          if ((index + copysize) <= CONFIG_NET_ETH_PKTSIZE)
             {
               memcpy(&priv->rx_req->req->buf[RNDIS_PACKET_HDR_SIZE + index], reqbuf,
                      copysize);
