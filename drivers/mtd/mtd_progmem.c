@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_progmem.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -225,8 +225,9 @@ static ssize_t progmem_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
   ssize_t result;
 
-  /* Write the specified blocks from the provided user buffer and return status
-   * (The positive, number of blocks actually written or a negated errno)
+  /* Write the specified blocks from the provided user buffer and return
+   * status (The positive, number of blocks actually written or a negated
+   * errno)
    */
 
   result = up_progmem_write(up_progmem_getaddress(startblock), buffer,
@@ -256,7 +257,7 @@ static ssize_t progmem_read(FAR struct mtd_dev_s *dev, off_t offset,
 
   startblock = offset >> priv->blkshift;
   src = (FAR const uint8_t *)up_progmem_getaddress(startblock) +
-                                (offset & ((1 << priv->blkshift) - 1));
+                             (offset & ((1 << priv->blkshift) - 1));
   memcpy(buffer, src, nbytes);
   return nbytes;
 }
@@ -284,7 +285,7 @@ static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
 
   startblock = offset >> priv->blkshift;
   result = up_progmem_write(up_progmem_getaddress(startblock) +
-                  (offset & ((1 << priv->blkshift) - 1)), buffer, nbytes);
+           (offset & ((1 << priv->blkshift) - 1)), buffer, nbytes);
   return result < 0 ? result : nbytes;
 }
 #endif
@@ -314,9 +315,9 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * appear so.
                */
 
-              geo->blocksize    = (1 << priv->blkshift);  /* Size of one read/write block */
-              geo->erasesize    = (1 << priv->ersshift);  /* Size of one erase block */
-              geo->neraseblocks = up_progmem_neraseblocks();    /* Number of erase blocks */
+              geo->blocksize    = (1 << priv->blkshift);     /* Size of one read/write block */
+              geo->erasesize    = (1 << priv->ersshift);     /* Size of one erase block */
+              geo->neraseblocks = up_progmem_neraseblocks(); /* Number of erase blocks */
               ret               = OK;
           }
         }
