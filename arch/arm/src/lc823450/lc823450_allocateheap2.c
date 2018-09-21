@@ -165,8 +165,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Return the heap settings */
 
-  *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size  = SRAM1_END - g_idle_topstack;
+  *heap_start = (uintptr_t *)&_eronly; /* please see ld.script */
+  *heap_size  = SRAM1_END - (int)heap_start;
 
   /* Colorize the heap for debug */
 
