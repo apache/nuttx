@@ -370,14 +370,14 @@ void sam_progmem_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_progmem_npages
+ * Name: up_progmem_neraseblocks
  *
  * Description:
  *   Return number of clusters in the available FLASH memory.
  *
  ****************************************************************************/
 
-size_t up_progmem_npages(void)
+size_t up_progmem_neraseblocks(void)
 {
   return SAMV7_PROGMEM_NCLUSTERS;
 }
@@ -479,7 +479,7 @@ size_t up_progmem_getaddress(size_t cluster)
 }
 
 /****************************************************************************
- * Name: up_progmem_erasepage
+ * Name: up_progmem_eraseblock
  *
  * Description:
  *   Erase selected cluster.
@@ -500,7 +500,7 @@ size_t up_progmem_getaddress(size_t cluster)
  *
  ****************************************************************************/
 
-ssize_t up_progmem_erasepage(size_t cluster)
+ssize_t up_progmem_eraseblock(size_t cluster)
 {
   uint32_t page;
   uint32_t arg;

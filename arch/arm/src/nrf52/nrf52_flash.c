@@ -78,7 +78,7 @@
 
 size_t up_progmem_pagesize(size_t page)
 {
-  size_t npage = up_progmem_npages();
+  size_t npage = up_progmem_neraseblocks();
 
   if (page >= npage)
     {
@@ -99,9 +99,9 @@ size_t up_progmem_pagesize(size_t page)
  *
  ****************************************************************************/
 
-size_t up_progmem_erasesize(size_t page)
+size_t up_progmem_erasesize(size_t block)
 {
-  return up_progmem_pagesize(page);
+  return up_progmem_pagesize(block);
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ ssize_t up_progmem_getpage(size_t addr)
 
 size_t up_progmem_getaddress(size_t page)
 {
-  if (page >= up_progmem_npages())
+  if (page >= up_progmem_neraseblocks())
     {
       return SIZE_MAX;
     }
@@ -160,14 +160,14 @@ size_t up_progmem_getaddress(size_t page)
 }
 
 /****************************************************************************
- * Name: up_progmem_npages
+ * Name: up_progmem_neraseblocks
  *
  * Description:
- *   Return number of pages in the available FLASH memory.
+ *   Return number of erase blocks in the available FLASH memory.
  *
  ****************************************************************************/
 
-size_t up_progmem_npages(void)
+size_t up_progmem_neraseblocks(void)
 {
   return nrf_nvmc_get_flash_size() / NRF52_FLASH_PAGE_SIZE;
 }
@@ -187,13 +187,13 @@ bool up_progmem_isuniform(void)
 }
 
 /****************************************************************************
- * Name: up_progmem_erasepage
+ * Name: up_progmem_eraseblock
  *
  * Description:
- *   Erase selected paged.
+ *   Erase selected block.
  *
  * Input Parameters:
- *   page - Page to be erased
+ *   block - Block to be erased
  *
  * Returned Value:
  *   Page size or negative value on error.  The following errors are reported
@@ -208,17 +208,17 @@ bool up_progmem_isuniform(void)
  *
  ****************************************************************************/
 
-ssize_t up_progmem_erasepage(size_t page)
+ssize_t up_progmem_eraseblock(size_t block)
 {
   size_t page_address;
 
-  if (page >= up_progmem_npages())
+  if (block >= up_progmem_neraseblocks())
     {
       _err("Wrong Page number %d.\n", page);
       return -EFAULT;
     }
 
-  page_address = up_progmem_getaddress(page);
+  page_address = up_progmem_getaddress(block);
 
   /* Get flash ready and begin erasing single page */
 
@@ -226,9 +226,9 @@ ssize_t up_progmem_erasepage(size_t page)
 
   /* Verify */
 
-  if (up_progmem_ispageerased(page) == 0)
+  if (up_progmem_ispageerased(block) == 0)
     {
-      return up_progmem_pagesize(page);
+      return up_progmem_erasesize(block);
     }
   else
     {
@@ -260,7 +260,7 @@ ssize_t up_progmem_ispageerased(size_t page)
   size_t count;
   size_t bwritten = 0;
 
-  if (page >= up_progmem_npages())
+  if (page >= up_progmem_neraseblocks())
     {
       return -EFAULT;
     }

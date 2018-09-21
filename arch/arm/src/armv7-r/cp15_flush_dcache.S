@@ -104,7 +104,7 @@ cp15_flush_dcache:
 	/* Loop, cleaning and invaliding each D cache line in the address range */
 
 1:
-	mcrne	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
+	mcr	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
 	add		r0, r0, r2				/* R12=Next cache line */
 	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
 	blo		1b

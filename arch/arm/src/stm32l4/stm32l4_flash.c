@@ -282,7 +282,7 @@ size_t up_progmem_pagesize(size_t page)
   return STM32L4_FLASH_PAGESIZE;
 }
 
-size_t up_progmem_erasesize(size_t page)
+size_t up_progmem_erasesize(size_t block)
 {
   return STM32L4_FLASH_PAGESIZE;
 }
@@ -312,7 +312,7 @@ size_t up_progmem_getaddress(size_t page)
   return page * STM32L4_FLASH_PAGESIZE + STM32L4_FLASH_BASE;
 }
 
-size_t up_progmem_npages(void)
+size_t up_progmem_neraseblocks(void)
 {
   return STM32L4_FLASH_NPAGES;
 }
@@ -322,28 +322,28 @@ bool up_progmem_isuniform(void)
   return true;
 }
 
-ssize_t up_progmem_erasepage(size_t page)
+ssize_t up_progmem_eraseblock(size_t block)
 {
-  if (page >= STM32L4_FLASH_NPAGES)
+  if (block >= STM32L4_FLASH_NPAGES)
     {
       return -EFAULT;
     }
 
-  /* Erase single page */
+  /* Erase single block */
 
   sem_lock();
   flash_unlock();
 
-  flash_erase(page);
+  flash_erase(block);
 
   flash_lock();
   sem_unlock();
 
   /* Verify */
 
-  if (up_progmem_ispageerased(page) == 0)
+  if (up_progmem_ispageerased(block) == 0)
     {
-      return up_progmem_pagesize(page);
+      return up_progmem_erasesize(block);
     }
   else
     {

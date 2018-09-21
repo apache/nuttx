@@ -65,14 +65,14 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_progmem_npages
+ * Name: up_progmem_neraseblocks
  *
  * Description:
- *   Return number of erase pages
+ *   Return number of erase blocks
  *
  ****************************************************************************/
 
-size_t up_progmem_npages(void);
+size_t up_progmem_neraseblocks(void);
 
 /****************************************************************************
  * Name: up_progmem_isuniform
@@ -98,11 +98,11 @@ size_t up_progmem_pagesize(size_t page);
  * Name: up_progmem_erasesize
  *
  * Description:
- *   Return erase page size. Must be a multiple of the read/write page size.
+ *   Return erase block size. Must be a multiple of the read/write page size.
  *
  ****************************************************************************/
 
-size_t up_progmem_erasesize(size_t page);
+size_t up_progmem_erasesize(size_t block);
 
 /****************************************************************************
  * Name: up_progmem_getpage
@@ -140,16 +140,16 @@ ssize_t up_progmem_getpage(size_t addr);
 size_t up_progmem_getaddress(size_t page);
 
 /****************************************************************************
- * Name: up_progmem_erasepage
+ * Name: up_progmem_eraseblock
  *
  * Description:
- *   Erase selected erase page.
+ *   Erase selected erase block.
  *
  * Input Parameters:
- *   page - The erase page index to be erased.
+ *   block - The erase block index to be erased.
  *
  * Returned Value:
- *   Page size or negative value on error.  The following errors are reported
+ *   block size or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
  *     -EFAULT: On invalid page
@@ -161,7 +161,7 @@ size_t up_progmem_getaddress(size_t page);
  *
  ****************************************************************************/
 
-ssize_t up_progmem_erasepage(size_t page);
+ssize_t up_progmem_eraseblock(size_t block);
 
 /****************************************************************************
  * Name: up_progmem_ispageerased

@@ -162,7 +162,7 @@ size_t up_progmem_pagesize(size_t page)
   return STM32_FLASH_PAGESIZE;
 }
 
-size_t up_progmem_erasesize(size_t page)
+size_t up_progmem_erasesize(size_t block)
 {
   return STM32_FLASH_PAGESIZE;
 }
@@ -192,7 +192,7 @@ size_t up_progmem_getaddress(size_t page)
   return page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE;
 }
 
-size_t up_progmem_npages(void)
+size_t up_progmem_neraseblocks(void)
 {
   return STM32_FLASH_NPAGES;
 }
@@ -231,12 +231,12 @@ ssize_t up_progmem_ispageerased(size_t page)
   return bwritten;
 }
 
-ssize_t up_progmem_erasepage(size_t page)
+ssize_t up_progmem_eraseblock(size_t block)
 {
   uintptr_t base;
   size_t page_address;
 
-  if (page >= STM32_FLASH_NPAGES)
+  if (block >= STM32_FLASH_NPAGES)
     {
       return -EFAULT;
     }
@@ -244,7 +244,7 @@ ssize_t up_progmem_erasepage(size_t page)
 #if defined(STM32_FLASH_DUAL_BANK)
   /* Handle paged FLASH */
 
-  if (page >= STM32_FLASH_BANK0_NPAGES)
+  if (block >= STM32_FLASH_BANK0_NPAGES)
     {
       base = STM32_FLASH_BANK1_BASE;
     }
@@ -270,7 +270,7 @@ ssize_t up_progmem_erasepage(size_t page)
 
   /* Must be valid - page index checked above */
 
-  page_address = up_progmem_getaddress(page);
+  page_address = up_progmem_getaddress(block);
   putreg32(page_address, base + STM32_FLASH_AR_OFFSET);
 
   modifyreg32(base + STM32_FLASH_CR_OFFSET, 0, FLASH_CR_STRT);
@@ -285,9 +285,9 @@ ssize_t up_progmem_erasepage(size_t page)
 
   /* Verify */
 
-  if (up_progmem_ispageerased(page) == 0)
+  if (up_progmem_ispageerased(block) == 0)
     {
-      return up_progmem_pagesize(page); /* success */
+      return up_progmem_erasesize(block); /* success */
     }
   else
     {

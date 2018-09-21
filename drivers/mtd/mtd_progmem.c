@@ -172,7 +172,7 @@ static int progmem_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   while (nblocks > 0)
     {
-      result = up_progmem_erasepage(startblock);
+      result = up_progmem_eraseblock(startblock);
       if (result < 0)
         {
           return (int)result;
@@ -316,7 +316,7 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
               geo->blocksize    = (1 << priv->blkshift);  /* Size of one read/write block */
               geo->erasesize    = (1 << priv->ersshift);  /* Size of one erase block */
-              geo->neraseblocks = up_progmem_npages();    /* Number of erase blocks */
+              geo->neraseblocks = up_progmem_neraseblocks();    /* Number of erase blocks */
               ret               = OK;
           }
         }
@@ -338,7 +338,7 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-          size_t nblocks = up_progmem_npages();
+          size_t nblocks = up_progmem_neraseblocks();
 
           /* Erase the entire device */
 

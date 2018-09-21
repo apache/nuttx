@@ -172,14 +172,14 @@ static uint32_t lpc17_iap_copy_ram_to_flash(void *flash, const void *ram,
  ******************************************************************************/
 
 /******************************************************************************
- * Name: up_progmem_npages
+ * Name: up_progmem_neraseblocks
  *
  * Description:
- *   Return number of erase pages
+ *   Return number of erase blocks
  *
  ******************************************************************************/
 
-size_t up_progmem_npages(void)
+size_t up_progmem_neraseblocks(void)
 {
   return CONFIG_LPC17_PROGMEM_NSECTORS;
 }
@@ -214,11 +214,11 @@ size_t up_progmem_pagesize(size_t page)
  * Name: up_progmem_erasesize
  *
  * Description:
- *   Return erase page size
+ *   Return erase block size
  *
  ******************************************************************************/
 
-size_t up_progmem_erasesize(size_t page)
+size_t up_progmem_erasesize(size_t block)
 {
   return (size_t)LPC17_PROGMEM_SECTOR_SIZE;
 }
@@ -270,16 +270,16 @@ size_t up_progmem_getaddress(size_t page)
 }
 
 /******************************************************************************
- * Name: up_progmem_erasepage
+ * Name: up_progmem_eraseblock
  *
  * Description:
- *   Erase selected page.
+ *   Erase selected block.
  *
  * Input Parameters:
- *   page - The erase page index to be erased.
+ *   block - The erase block index to be erased.
  *
  * Returned Value:
- *   Page size or negative value on error.  The following errors are reported
+ *   block size or negative value on error.  The following errors are reported
  *   (errno is not set!):
  *
  *     -EFAULT: On invalid page
@@ -291,23 +291,23 @@ size_t up_progmem_getaddress(size_t page)
  *
  ******************************************************************************/
 
-ssize_t up_progmem_erasepage(size_t page)
+ssize_t up_progmem_eraseblock(size_t block)
 {
   uint32_t rc;
 
-  if (page >= CONFIG_LPC17_PROGMEM_NSECTORS)
+  if (block >= CONFIG_LPC17_PROGMEM_NSECTORS)
     {
       return -EFAULT;
     }
 
-  rc = lpc17_iap_prepare_sector_for_write_operation((uint32_t)page +
+  rc = lpc17_iap_prepare_sector_for_write_operation((uint32_t)block +
                                                     LPC17_PROGMEM_START_SECTOR);
   if (rc != LPC17_IAP_RC_CMD_SUCCESS)
     {
       return -EIO;
     }
 
-  rc = lpc17_iap_erase_sector((uint32_t)page + LPC17_PROGMEM_START_SECTOR);
+  rc = lpc17_iap_erase_sector((uint32_t)block + LPC17_PROGMEM_START_SECTOR);
 
   if (rc != LPC17_IAP_RC_CMD_SUCCESS)
     {
