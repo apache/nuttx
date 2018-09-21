@@ -1560,6 +1560,11 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
         }
 
       break;
+
+    default:
+      /* Should not get here */
+
+      break;
     }
 
   return OK;

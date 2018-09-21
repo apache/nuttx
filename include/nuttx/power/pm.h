@@ -588,14 +588,14 @@ enum pm_state_e pm_querystate(int domain);
  */
 
 #  define pm_initialize()
-#  define pm_register(cb)             (0)
-#  define pm_unregister(cb)           (0)
+#  define pm_register(cb)              (0)
+#  define pm_unregister(cb)            (0)
 #  define pm_activity(domain,prio)
 #  define pm_stay(domain,state)
 #  define pm_relax(domain,state)
-#  define pm_checkstate(domain)       (0)
-#  define pm_changestate(domain,state)
-#  define pm_querystate(domain)       (0)
+#  define pm_checkstate(domain)        (0)
+#  define pm_changestate(domain,state) (0)
+#  define pm_querystate(domain)        (0)
 
 #endif /* CONFIG_PM */
 #endif /* __INCLUDE_NUTTX_POWER_PM_H */

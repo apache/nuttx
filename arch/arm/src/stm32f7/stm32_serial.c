@@ -302,6 +302,14 @@ struct up_dev_s
 
   bool              initialized;
 
+#ifdef CONFIG_PM
+  bool              suspended; /* UART device has been suspended. */
+
+  /* Interrupt mask value stored before suspending for stop mode. */
+
+  uint16_t          suspended_ie;
+#endif
+
   /* If termios are supported, then the following fields may vary at
    * runtime.
    */
@@ -351,6 +359,9 @@ struct up_dev_s
 #ifdef SERIAL_HAVE_DMA
   DMA_HANDLE        rxdma;      /* currently-open receive DMA stream */
   bool              rxenable;   /* DMA-based reception en/disable */
+#ifdef CONFIG_PM
+  bool              rxdmasusp;  /* Rx DMA suspended */
+#endif
   uint32_t          rxdmanext;  /* Next byte in the DMA buffer to be read */
 #ifdef CONFIG_ARMV7M_DCACHE
   uint32_t          rxdmaavail; /* Number of bytes available without need to
@@ -371,7 +382,9 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void up_set_format(struct uart_dev_s *dev);
+#endif
 static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
@@ -395,6 +408,9 @@ static bool up_txready(struct uart_dev_s *dev);
 static int  up_dma_setup(struct uart_dev_s *dev);
 static void up_dma_shutdown(struct uart_dev_s *dev);
 static int  up_dma_receive(struct uart_dev_s *dev, unsigned int *status);
+#ifdef CONFIG_PM
+static void up_dma_reenable(struct up_dev_s *priv);
+#endif
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_dma_rxavailable(struct uart_dev_s *dev);
 
@@ -402,6 +418,8 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
 #ifdef CONFIG_PM
+static void up_setsuspend(struct uart_dev_s *dev, bool suspend);
+static void up_pm_setsuspend(bool suspend);
 static void up_pm_notify(struct pm_callback_s *cb, int domain,
                          enum pm_state_e pmstate);
 static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
@@ -1074,10 +1092,15 @@ static struct up_dev_s * const g_uart_devs[STM32_NSERIAL] =
 };
 
 #ifdef CONFIG_PM
-static  struct pm_callback_s g_serialcb =
+static struct
 {
-  .notify  = up_pm_notify,
-  .prepare = up_pm_prepare,
+  struct pm_callback_s pm_cb;
+  bool serial_suspended;
+} g_serialpm =
+{
+  .pm_cb.notify     = up_pm_notify,
+  .pm_cb.prepare    = up_pm_prepare,
+  .serial_suspended = false
 };
 #endif
 
@@ -1370,6 +1393,154 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
 /****************************************************************************
+ * Name: up_setsuspend
+ *
+ * Description:
+ *   Suspend or resume serial peripheral.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  int passes;
+#ifdef SERIAL_HAVE_DMA
+  bool dmarestored = false;
+#endif
+
+  if (priv->suspended == suspend)
+    {
+      return;
+    }
+
+  priv->suspended = suspend;
+
+  if (suspend)
+    {
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          /* Force RTS high to prevent further Rx. */
+
+          stm32_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
+                           | (GPIO_OUTPUT | GPIO_OUTPUT_SET));
+        }
+#endif
+
+      /* Disable interrupts to prevent Tx. */
+
+      up_disableusartint(priv, &priv->suspended_ie);
+
+      /* Loop until last Tx has completed or,
+       * until we have been looping for a long time.
+       */
+
+      for (passes = 0; passes < 256; passes++)
+        {
+          if ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_TC) != 0)
+            {
+              break;
+            }
+        }
+
+#ifdef SERIAL_HAVE_DMA
+      if (priv->dev.ops == &g_uart_dma_ops && !priv->rxdmasusp)
+        {
+          /* Suspend Rx DMA. */
+
+          stm32_dmastop(priv->rxdma);
+          priv->rxdmasusp = true;
+        }
+#endif
+    }
+  else
+    {
+#ifdef SERIAL_HAVE_DMA
+      if (priv->dev.ops == &g_uart_dma_ops && priv->rxdmasusp)
+        {
+          /* Re-enable DMA. */
+
+          up_dma_reenable(priv);
+          priv->rxdmasusp = false;
+
+          dmarestored = true;
+        }
+#endif
+
+      /* Re-enable interrupts to resume Tx. */
+
+      up_restoreusartint(priv, priv->suspended_ie);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          /* Restore peripheral RTS control. */
+
+          stm32_configgpio(priv->rts_gpio);
+        }
+#endif
+    }
+
+#ifdef SERIAL_HAVE_DMA
+  if (dmarestored)
+    {
+      irqstate_t flags;
+
+      flags = enter_critical_section();
+
+      /* Perform initial Rx DMA buffer fetch to wake-up serial device
+       * activity.
+       */
+
+      if (priv->rxdma != NULL)
+        {
+          up_dma_rxcallback(priv->rxdma, 0, priv);
+        }
+
+      leave_critical_section(flags);
+    }
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: up_pm_setsuspend
+ *
+ * Description:
+ *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_pm_setsuspend(bool suspend)
+{
+  int n;
+
+  /* Already in desired state? */
+
+  if (suspend == g_serialpm.serial_suspended)
+    {
+      return;
+    }
+
+  g_serialpm.serial_suspended = suspend;
+
+  for (n = 0; n < STM32F7_NUSART + STM32F7_NUART; n++)
+    {
+      struct up_dev_s *priv = g_uart_devs[n];
+
+      if (!priv || !priv->initialized)
+        {
+          continue;
+        }
+
+      up_setsuspend(&priv->dev, suspend);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: up_set_apb_clock
  *
  * Description:
@@ -1541,7 +1712,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Clear CTSE, RTSE, and all interrupt enable bits */
 
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE);
+  regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
+              USART_CR3_EIE);
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
@@ -1599,13 +1771,13 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
   priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
 
-    /* Configure for circular DMA reception into the RX FIFO */
+  /* Configure for circular DMA reception into the RX FIFO */
 
-    stm32_dmasetup(priv->rxdma,
-                   priv->usartbase + STM32_USART_RDR_OFFSET,
-                   (uint32_t)priv->rxfifo,
-                   RXDMA_BUFFER_SIZE,
-                   SERIAL_DMA_CONTROL_WORD);
+  stm32_dmasetup(priv->rxdma,
+                 priv->usartbase + STM32_USART_RDR_OFFSET,
+                 (uint32_t)priv->rxfifo,
+                 RXDMA_BUFFER_SIZE,
+                 SERIAL_DMA_CONTROL_WORD);
 
   /* Reset our DMA shadow pointer and Rx data availability count to match
    * the address just programmed above.
@@ -1622,12 +1794,12 @@ static int up_dma_setup(struct uart_dev_s *dev)
   regval |= USART_CR3_DMAR;
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
-    /* Start the DMA channel, and arrange for callbacks at the half and
-     * full points in the FIFO.  This ensures that we have half a FIFO
-     * worth of time to claim bytes before they are overwritten.
-     */
+  /* Start the DMA channel, and arrange for callbacks at the half and
+   * full points in the FIFO.  This ensures that we have half a FIFO
+   * worth of time to claim bytes before they are overwritten.
+   */
 
-    stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
 
   return OK;
 }
@@ -2438,6 +2610,44 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 #endif
 
 /****************************************************************************
+ * Name: up_dma_reenable
+ *
+ * Description:
+ *   Call to re-enable RX DMA.
+ *
+ ****************************************************************************/
+
+#if defined(SERIAL_HAVE_DMA) && defined(CONFIG_PM)
+static void up_dma_reenable(struct up_dev_s *priv)
+{
+  /* Configure for circular DMA reception into the RX FIFO */
+
+  stm32_dmasetup(priv->rxdma,
+                 priv->usartbase + STM32_USART_RDR_OFFSET,
+                 (uint32_t)priv->rxfifo,
+                 RXDMA_BUFFER_SIZE,
+                 SERIAL_DMA_CONTROL_WORD);
+
+  /* Reset our DMA shadow pointer to match the address just
+   * programmed above.
+   */
+
+  priv->rxdmanext = 0;
+
+  /* Start the DMA channel, and arrange for callbacks at the half and
+   * full points in the FIFO.  This ensures that we have half a FIFO
+   * worth of time to claim bytes before they are overwritten.
+   */
+
+  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+
+  /* Clear DMA suspended flag. */
+
+  priv->rxdmasusp = false;
+}
+#endif
+
+/****************************************************************************
  * Name: up_dma_rxint
  *
  * Description:
@@ -2604,6 +2814,24 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
     {
       uart_recvchars(&priv->dev);
     }
+
+  /* Get the masked USART status word to check and clear error flags.
+   *
+   * When wake-up from low power mode was not fast enough, UART is resumed too
+   * late and sometimes exactly when character was coming over UART, resulting
+   * to frame error.
+
+   * If error flag is not cleared, Rx DMA will be stuck. Clearing errors
+   * will release Rx DMA.
+   */
+
+  priv->sr = up_serialin(priv, STM32_USART_ISR_OFFSET);
+
+  if ((priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
+    {
+      up_serialout(priv, STM32_USART_ICR_OFFSET,
+                   (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF));
+    }
 }
 #endif
 
@@ -2635,36 +2863,33 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case PM_NORMAL:
         {
-          /* Logic for PM_NORMAL goes here */
-
+          up_pm_setsuspend(false);
         }
         break;
 
-      case(PM_IDLE):
+      case PM_IDLE:
         {
-          /* Logic for PM_IDLE goes here */
-
+          up_pm_setsuspend(false);
         }
         break;
 
-      case(PM_STANDBY):
+      case PM_STANDBY:
         {
-          /* Logic for PM_STANDBY goes here */
-
+          up_pm_setsuspend(true);
         }
         break;
 
-      case(PM_SLEEP):
+      case PM_SLEEP:
         {
-          /* Logic for PM_SLEEP goes here */
-
+          up_pm_setsuspend(true);
         }
         break;
 
       default:
         /* Should not get here */
+
         break;
     }
 }
@@ -2707,7 +2932,73 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 static int up_pm_prepare(struct pm_callback_s *cb, int domain,
                          enum pm_state_e pmstate)
 {
+  int n;
+
   /* Logic to prepare for a reduced power state goes here. */
+
+  switch (pmstate)
+    {
+    case PM_NORMAL:
+    case PM_IDLE:
+      break;
+
+    case PM_STANDBY:
+    case PM_SLEEP:
+
+#ifdef SERIAL_HAVE_DMA
+      /* Flush Rx DMA buffers before checking state of serial device
+       * buffers.
+       */
+
+      stm32_serial_dma_poll();
+#endif
+
+      /* Check if any of the active ports have data pending on Tx/Rx
+       * buffers.
+       */
+
+      for (n = 0; n < STM32F7_NUSART + STM32F7_NUART; n++)
+        {
+          struct up_dev_s *priv = g_uart_devs[n];
+
+          if (!priv || !priv->initialized)
+            {
+              /* Not active, skip. */
+
+              continue;
+            }
+
+          if (priv->suspended)
+            {
+              /* Port already suspended, skip. */
+
+              continue;
+            }
+
+          if (priv->dev.isconsole)
+            {
+              /* Allow losing some debug traces. */
+
+              continue;
+            }
+
+          /* Check if port has data pending (Rx & Tx). */
+
+          if (priv->dev.xmit.head != priv->dev.xmit.tail)
+            {
+              return ERROR;
+            }
+          if (priv->dev.recv.head != priv->dev.recv.tail)
+            {
+              return ERROR;
+            }
+        }
+      break;
+
+    default:
+      /* Should not get here */
+      break;
+    }
 
   return OK;
 }
@@ -2720,31 +3011,6 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
-
-/****************************************************************************
- * Name: stm32_serial_get_uart
- *
- * Description:
- *   Get serial driver structure for STM32 USART
- *
- ****************************************************************************/
-
-FAR uart_dev_t *stm32_serial_get_uart(int uart_num)
-{
-  int uart_idx = uart_num - 1;
-
-  if (uart_idx < 0 || uart_idx >= STM32_NSERIAL || !g_uart_devs[uart_idx])
-    {
-      return NULL;
-    }
-
-  if (!g_uart_devs[uart_idx]->initialized)
-    {
-      return NULL;
-    }
-
-  return &g_uart_devs[uart_idx]->dev;
-}
 
 /****************************************************************************
  * Name: up_earlyserialinit
@@ -2800,10 +3066,10 @@ void up_serialinit(void)
   int ret;
 #endif
 
+#ifdef CONFIG_PM
   /* Register to receive power management callbacks */
 
-#ifdef CONFIG_PM
-  ret = pm_register(&g_serialcb);
+  ret = pm_register(&g_serialpm.pm_cb);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 #endif
@@ -2941,7 +3207,7 @@ void stm32_serial_dma_poll(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug  writes
+ *   Provide priority, low-level access to support OS debug writes
  *
  ****************************************************************************/
 
@@ -2964,7 +3230,6 @@ int up_putc(int ch)
 
   up_lowputc(ch);
   up_restoreusartint(priv, ie);
-
 #endif
   return ch;
 }
