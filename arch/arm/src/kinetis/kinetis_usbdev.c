@@ -4404,12 +4404,6 @@ void up_usbinitialize(void)
       return;
     }
 
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set the interrupt priority */
-
-  up_prioritize_irq(KINETIS_IRQ_USBOTG, 112);
-#endif
-
   khci_hwinitalize(priv);
 }
 

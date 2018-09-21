@@ -69,10 +69,6 @@
 #   define DMA_CHN_PER_GROUP KINETIS_NDMACH /* Number of channels per group */
 #endif
 
-#ifndef CONFIG_DMA_PRI
-#  define CONFIG_DMA_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -178,12 +174,6 @@ void weak_function up_dmainitialize(void)
 
       if (i < DMA_CHN_PER_GROUP)
         {
-#ifdef CONFIG_ARCH_IRQPRIO
-          /* Set up the interrupt priority */
-
-          up_prioritize_irq(g_channels[i].irq, CONFIG_DMA_PRI);
-#endif
-
           /* Attach DMA interrupt */
 
           ret = irq_attach(g_channels[i].irq, kinetis_dmainterrupt,

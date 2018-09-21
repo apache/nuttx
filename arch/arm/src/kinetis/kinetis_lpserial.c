@@ -222,7 +222,6 @@ struct kinetis_dev_s
   uint32_t  clock;     /* Clocking frequency of the LPUART module */
   uint32_t  ie;        /* Interrupts enabled */
   uint8_t   irq;       /* IRQ associated with this LPUART (for enable) */
-  uint8_t   irqprio;   /* Interrupt priority */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
   uint8_t   stop2;     /* Use 2 stop bits */
@@ -316,7 +315,6 @@ static struct kinetis_dev_s g_lpuart0priv =
   .clock          = BOARD_LPUART0_FREQ,
   .baud           = CONFIG_LPUART0_BAUD,
   .irq            = KINETIS_IRQ_LPUART0,
-  .irqprio        = CONFIG_KINETIS_LPUART0PRIO,
   .parity         = CONFIG_LPUART0_PARITY,
   .bits           = CONFIG_LPUART0_BITS,
   .stop2          = CONFIG_LPUART0_2STOP,
@@ -356,7 +354,6 @@ static struct kinetis_dev_s g_lpuart1priv =
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = BOARD_LPUART1_FREQ,
   .irq            = KINETIS_IRQ_LPUART1,
-  .irqprio        = CONFIG_KINETIS_LPUART1PRIO,
   .parity         = CONFIG_LPUART1_PARITY,
   .bits           = CONFIG_LPUART1_BITS,
   .stop2          = CONFIG_LPUART1_2STOP,
@@ -396,7 +393,6 @@ static struct kinetis_dev_s g_lpuart2priv =
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = BOARD_LPUART2_FREQ,
   .irq            = KINETIS_IRQ_LPUART2,
-  .irqprio        = CONFIG_KINETIS_LPUART2PRIO,
   .parity         = CONFIG_LPUART2_PARITY,
   .bits           = CONFIG_LPUART2_BITS,
   .stop2          = CONFIG_LPUART2_2STOP,
@@ -436,7 +432,6 @@ static struct kinetis_dev_s g_lpuart3priv =
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = BOARD_LPUART3_FREQ,
   .irq            = KINETIS_IRQ_LPUART3,
-  .irqprio        = CONFIG_KINETIS_LPUART3PRIO,
   .parity         = CONFIG_LPUART3_PARITY,
   .bits           = CONFIG_LPUART3_BITS,
   .stop2          = CONFIG_LPUART3_2STOP,
@@ -476,7 +471,6 @@ static struct kinetis_dev_s g_lpuart4priv =
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = BOARD_LPUART4_FREQ,
   .irq            = KINETIS_IRQ_LPUART4,
-  .irqprio        = CONFIG_KINETIS_LPUART4PRIO,
   .parity         = CONFIG_LPUART4_PARITY,
   .bits           = CONFIG_LPUART4_BITS,
   .stop2          = CONFIG_LPUART4_2STOP,
@@ -620,13 +614,6 @@ static int kinetis_setup(struct uart_dev_s *dev)
   /* Make sure that all interrupts are disabled */
 
   kinetis_restoreuartint(priv, 0);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set up the interrupt priority */
-
-  up_prioritize_irq(priv->irq, priv->irqprio);
-#endif
-
   return OK;
 }
 

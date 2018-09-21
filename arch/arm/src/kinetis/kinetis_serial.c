@@ -305,7 +305,6 @@ struct up_dev_s
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
 #endif
   uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
-  uint8_t   irqprio;   /* Interrupt priority */
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
@@ -490,7 +489,6 @@ static struct up_dev_s g_uart0priv =
   .irqe           = KINETIS_IRQ_UART0E,
 #endif
   .irqs           = KINETIS_IRQ_UART0S,
-  .irqprio        = CONFIG_KINETIS_UART0PRIO,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stop2          = CONFIG_UART0_2STOP,
@@ -542,7 +540,6 @@ static struct up_dev_s g_uart1priv =
   .irqe           = KINETIS_IRQ_UART1E,
 #endif
   .irqs           = KINETIS_IRQ_UART1S,
-  .irqprio        = CONFIG_KINETIS_UART1PRIO,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stop2          = CONFIG_UART1_2STOP,
@@ -593,7 +590,6 @@ static struct up_dev_s g_uart2priv =
   .irqe           = KINETIS_IRQ_UART2E,
 #endif
   .irqs           = KINETIS_IRQ_UART2S,
-  .irqprio        = CONFIG_KINETIS_UART2PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stop2          = CONFIG_UART2_2STOP,
@@ -644,7 +640,6 @@ static struct up_dev_s g_uart3priv =
   .irqe           = KINETIS_IRQ_UART3E,
 #endif
   .irqs           = KINETIS_IRQ_UART3S,
-  .irqprio        = CONFIG_KINETIS_UART3PRIO,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stop2          = CONFIG_UART3_2STOP,
@@ -695,7 +690,6 @@ static struct up_dev_s g_uart4priv =
   .irqe           = KINETIS_IRQ_UART4E,
 #endif
   .irqs           = KINETIS_IRQ_UART4S,
-  .irqprio        = CONFIG_KINETIS_UART4PRIO,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stop2          = CONFIG_UART4_2STOP,
@@ -746,7 +740,6 @@ static struct up_dev_s g_uart5priv =
   .irqe           = KINETIS_IRQ_UART5E,
 #endif
   .irqs           = KINETIS_IRQ_UART5S,
-  .irqprio        = CONFIG_KINETIS_UART5PRIO,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stop2          = CONFIG_UART5_2STOP,
@@ -930,16 +923,6 @@ static int up_setup(struct uart_dev_s *dev)
   /* Make sure that all interrupts are disabled */
 
   up_restoreuartint(priv, 0);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set up the interrupt priority */
-
-  up_prioritize_irq(priv->irqs, priv->irqprio);
-#ifdef CONFIG_DEBUG_FEATURES
-  up_prioritize_irq(priv->irqe, priv->irqprio);
-#endif
-#endif
-
   return OK;
 }
 

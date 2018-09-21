@@ -403,9 +403,6 @@ void up_irqinitialize(void)
 
   /* Set the priority of the SVCall interrupt */
 
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* up_prioritize_irq(KINETIS_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
-#endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
   kinetis_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif

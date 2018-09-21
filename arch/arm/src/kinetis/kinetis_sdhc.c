@@ -84,10 +84,6 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE and CONFIG_SCHED_HPWORK"
 #endif
 
-#ifndef CONFIG_KINETIS_SDHC_PRIO
-#  define CONFIG_KINETIS_SDHC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 #ifndef CONFIG_DEBUG_MEMCARD_INFO
 #  undef CONFIG_SDIO_XFRDEBUG
 #endif
@@ -1716,12 +1712,6 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
 
       putreg32(0,            KINETIS_SDHC_IRQSIGEN);
       putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTAT);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(KINETIS_IRQ_SDHC, CONFIG_KINETIS_SDHC_PRIO);
-#endif
 
       /* Enable SDIO interrupts at the NVIC.  They can now be enabled at
        * the SDIO controller as needed.
