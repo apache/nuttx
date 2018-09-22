@@ -93,14 +93,14 @@ int iob_navail(bool throttled)
 }
 
 /****************************************************************************
- * Name: iob_quentry_navail
+ * Name: iob_qentry_navail
  *
  * Description:
  *   Return the number of available IOB chains.
  *
  ****************************************************************************/
 
-int iob_quentry_navail(void)
+int iob_qentry_navail(void)
 {
   int navail = 0;
   int ret;

@@ -76,7 +76,8 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
   uint16_t mss;
   uint16_t recvwndo;
 #ifdef CONFIG_NET_TCP_READAHEAD
-  int  navail;
+  int  niob_avail;
+  int  nqentry_avail;
 #endif
 
 #ifdef CONFIG_NET_IPv6
@@ -107,10 +108,14 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Update the TCP received window based on read-ahead I/O buffer
-   * availability.
+   * and IOB chain availability.  At least one queue entry is required.
+   * If one queue entry is available, then the amount of read-ahead
+   * data that can be buffered is given by the number of IOBs available
+   * (ignoring competition with other IOB consumers).
    */
 
-  navail = iob_navail(true);
+  niob_avail    = iob_navail(true);
+  nqentry_avail = iob_qentry_navail();
 
   /* Are the read-ahead allocations throttled?  If so, then not all of these
    * IOBs are available for read-ahead buffering.
@@ -120,19 +125,19 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
    */
 
 #if CONFIG_IOB_THROTTLE > 0
-  if (navail > CONFIG_IOB_THROTTLE)
+  if (niob_avail > CONFIG_IOB_THROTTLE)
     {
-      navail -= CONFIG_IOB_THROTTLE;
+      niob_avail -= CONFIG_IOB_THROTTLE;
     }
   else
     {
-      navail = 0;
+      niob_avail = 0;
     }
 #endif
 
-  /* Are there any IOBs available for read-ahead buffering? */
+  /* Is there a a queue entry and IOBs available for read-ahead buffering? */
 
-  if (navail > 0)
+  if (nqentry_avail > 0 && niob_avail > 0)
     {
       uint32_t rwnd;
 
@@ -152,7 +157,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
        * buffering for this connection.
        */
 
-      rwnd = (navail * CONFIG_IOB_BUFSIZE) + mss;
+      rwnd = (niob_avail * CONFIG_IOB_BUFSIZE) + mss;
       if (rwnd > UINT16_MAX)
         {
           rwnd = UINT16_MAX;
@@ -162,12 +167,12 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
 
       recvwndo = (uint16_t)rwnd;
     }
-  else /* if (navail == 0) */
+  else /* nqentry_avail == 0 || niob_avail == 0 */
 #endif
     {
-      /* No IOBs are available.  The only buffering available is within the
-       * packet buffer itself.  We can buffer no more than the MSS (unless
-       * we are very fast).
+      /* No IOB chains or noIOBs are available.  The only buffering
+       * available is within the packet buffer itself.  We can buffer no
+       * more than the MSS (unless we are very fast).
        *
        * NOTE:  If no IOBs are available, then the next packet will be
        * lost if there is no listener on the connection.
