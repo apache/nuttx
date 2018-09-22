@@ -46,6 +46,10 @@ CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 CSRCS += fs_blockpartition.c
 
+ifeq ($(CONFIG_MTD),y)
+CSRCS += fs_registermtddriver.c fs_unregistermtddriver.c fs_findmtddriver.c
+endif
+
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif

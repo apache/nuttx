@@ -52,7 +52,7 @@
 #include "driver/driver.h"
 
 /* At least one filesystem must be defined, or this file will not compile.
- * It may be desire-able to make filesystems dynamically registered at
+ * It may be desire-able to make file systems dynamically registered at
  * some time in the future, but at present, this file needs to know about
  * every configured filesystem.
  */
@@ -75,13 +75,17 @@
 #  define BDFS_SUPPORT 1
 #endif
 
-/* These file systems do not require block drivers */
+/* These file systems require MTD drivers */
+
+#undef MDFS_SUPPORT
+
+/* These file systems do not require block or MTD drivers */
 
 #if defined(CONFIG_FS_NXFFS) || defined(CONFIG_FS_BINFS) || \
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
     defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS) || \
     defined(CONFIG_FS_CROMFS)
-#  define NONBDFS_SUPPORT
+#  define NODFS_SUPPORT
 #endif
 
 /****************************************************************************
@@ -99,6 +103,8 @@ struct fsmap_t
  ****************************************************************************/
 
 #ifdef BDFS_SUPPORT
+/* File systems that require block drivers */
+
 #ifdef CONFIG_FS_FAT
 extern const struct mountpt_operations fat_operations;
 #endif
@@ -122,9 +128,19 @@ static const struct fsmap_t g_bdfsmap[] =
 #endif
     { NULL,   NULL },
 };
-#endif /* BDFS_SUPPORT*/
+#endif /* BDFS_SUPPORT */
 
-#ifdef NONBDFS_SUPPORT
+#ifdef MDFS_SUPPORT
+/* File systems that require MTD drivers */
+
+static const struct fsmap_t g_mdfsmap[] =
+{
+};
+#endif /* MDFS_SUPPORT */
+
+#ifdef NODFS_SUPPORT
+/* File systems that require neither block nor MTD drivers */
+
 #ifdef CONFIG_FS_NXFFS
 extern const struct mountpt_operations nxffs_operations;
 #endif
@@ -178,7 +194,7 @@ static const struct fsmap_t g_nonbdfsmap[] =
 #endif
     { NULL, NULL },
 };
-#endif /* NONBDFS_SUPPORT */
+#endif /* NODFS_SUPPORT */
 
 /****************************************************************************
  * Private Functions
@@ -192,7 +208,7 @@ static const struct fsmap_t g_nonbdfsmap[] =
  *
  ****************************************************************************/
 
-#if defined(BDFS_SUPPORT) || defined(NONBDFS_SUPPORT)
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT) || defined(NODFS_SUPPORT)
 static FAR const struct mountpt_operations *
 mount_findfs(FAR const struct fsmap_t *fstab, FAR const char *filesystemtype)
 {
@@ -242,9 +258,9 @@ int mount(FAR const char *source, FAR const char *target,
           FAR const char *filesystemtype, unsigned long mountflags,
           FAR const void *data)
 {
-#if defined(BDFS_SUPPORT) || defined(NONBDFS_SUPPORT)
-#ifdef BDFS_SUPPORT
-  FAR struct inode *blkdrvr_inode = NULL;
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT) || defined(NODFS_SUPPORT)
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+  FAR struct inode *drvr_inode = NULL;
 #endif
   FAR struct inode *mountpt_inode;
   FAR const struct mountpt_operations *mops;
@@ -262,15 +278,11 @@ int mount(FAR const char *source, FAR const char *target,
   /* Find the specified filesystem.  Try the block driver file systems first */
 
 #ifdef BDFS_SUPPORT
-  if (source && (mops = mount_findfs(g_bdfsmap, filesystemtype)) != NULL)
+  if (source != NULL && (mops = mount_findfs(g_bdfsmap, filesystemtype)) != NULL)
     {
-      /* Make sure that a block driver argument was provided */
-
-      DEBUGASSERT(source);
-
       /* Find the block driver */
 
-      ret = find_blockdriver(source, mountflags, &blkdrvr_inode);
+      ret = find_blockdriver(source, mountflags, &drvr_inode);
       if (ret < 0)
         {
           ferr("ERROR: Failed to find block driver %s\n", source);
@@ -280,12 +292,27 @@ int mount(FAR const char *source, FAR const char *target,
     }
   else
 #endif /* BDFS_SUPPORT */
-#ifdef NONBDFS_SUPPORT
+#ifdef MDFS_SUPPORT
+  if (source != NULL && (mops = mount_findfs(g_mdfsmap, filesystemtype)) != NULL)
+    {
+      /* Find the named MTD driver */
+
+      ret = find_mtddriver(source, mountflags, &drvr_inode);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to find MTD driver %s\n", source);
+          errcode = -ret;
+          goto errout;
+        }
+    }
+  else
+#endif /* MDFS_SUPPORT */
+#ifdef NODFS_SUPPORT
   if ((mops = mount_findfs(g_nonbdfsmap, filesystemtype)) != NULL)
     {
     }
   else
-#endif /* NONBDFS_SUPPORT */
+#endif /* NODFS_SUPPORT */
     {
       ferr("ERROR: Failed to find file system %s\n", filesystemtype);
       errcode = ENODEV;
@@ -353,7 +380,7 @@ int mount(FAR const char *source, FAR const char *target,
    * that encapsulates this binding.
    */
 
-  if (!mops->bind)
+  if (mops->bind == NULL)
     {
       /* The filesystem does not support the bind operation ??? */
 
@@ -364,38 +391,40 @@ int mount(FAR const char *source, FAR const char *target,
 
   /* Increment reference count for the reference we pass to the file system */
 
-#ifdef BDFS_SUPPORT
-#ifdef NONBDFS_SUPPORT
-  if (blkdrvr_inode)
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+  if (drvr_inode != NULL)
 #endif
     {
-      blkdrvr_inode->i_crefs++;
+      drvr_inode->i_crefs++;
     }
 #endif
 
   /* On failure, the bind method returns -errorcode */
 
-#ifdef BDFS_SUPPORT
-  ret = mops->bind(blkdrvr_inode, data, &fshandle);
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+  ret = mops->bind(drvr_inode, data, &fshandle);
 #else
   ret = mops->bind(NULL, data, &fshandle);
 #endif
-  if (ret != 0)
+  if (ret < 0)
     {
-      /* The inode is unhappy with the blkdrvr for some reason.  Back out
+      /* The inode is unhappy with the driver for some reason.  Back out
        * the count for the reference we failed to pass and exit with an
        * error.
        */
 
       ferr("ERROR: Bind method failed: %d\n", ret);
-#ifdef BDFS_SUPPORT
-#ifdef NONBDFS_SUPPORT
-      if (blkdrvr_inode)
+
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+      if (drvr_inode != NULL)
 #endif
         {
-          blkdrvr_inode->i_crefs--;
+          drvr_inode->i_crefs--;
         }
 #endif
+
       errcode = -ret;
       goto errout_with_mountpt;
     }
@@ -417,12 +446,12 @@ int mount(FAR const char *source, FAR const char *target,
    * that will persist until umount2() is called.
    */
 
-#ifdef BDFS_SUPPORT
-#ifdef NONBDFS_SUPPORT
-  if (blkdrvr_inode)
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+  if (drvr_inode != NULL)
 #endif
     {
-      inode_release(blkdrvr_inode);
+      inode_release(drvr_inode);
     }
 #endif
 
@@ -437,12 +466,13 @@ errout_with_mountpt:
   mountpt_inode->i_crefs = 0;
   inode_remove(target);
   inode_semgive();
-#ifdef BDFS_SUPPORT
-#ifdef NONBDFS_SUPPORT
-  if (blkdrvr_inode)
+
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+  if (drvr_inode != NULL)
 #endif
     {
-       inode_release(blkdrvr_inode);
+       inode_release(drvr_inode);
     }
 #endif
 
@@ -455,12 +485,12 @@ errout_with_mountpt:
 errout_with_semaphore:
   inode_semgive();
 
-#ifdef BDFS_SUPPORT
-#ifdef NONBDFS_SUPPORT
-  if (blkdrvr_inode)
+#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+#ifdef NODFS_SUPPORT
+  if (drvr_inode != NULL)
 #endif
     {
-      inode_release(blkdrvr_inode);
+      inode_release(drvr_inode);
     }
 #endif
 
@@ -476,7 +506,7 @@ errout:
   ferr("ERROR: No filesystems enabled\n");
   set_errno(ENOSYS);
   return ERROR;
-#endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */
+#endif /* BDFS_SUPPORT || MDFS_SUPPORT || NODFS_SUPPORT */
 }
 
 #endif /* CONFIG_FS_READABLE */

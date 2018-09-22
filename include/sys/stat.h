@@ -91,6 +91,7 @@
 #define S_IFSEM     (6 << 11)
 #define S_IFSHM     (7 << 11)
 #define S_IFSOCK    (8 << 11)
+#define S_IFMTD     (9 << 11)
 #define s_IFTGT     (15 << 11) /* May be the target of a symbolic link */
 
 #define S_IFLNK     (1 << 15)  /* Bit 15: Symbolic link */
@@ -98,16 +99,17 @@
 
 /* File type macros that operate on an instance of mode_t */
 
-#define S_ISLNK(m)  (((m) & S_IFLNK)   != 0)
 #define S_ISFIFO(m) (0)
 #define S_ISCHR(m)  (((m) & s_IFTGT) == S_IFCHR)
 #define S_ISDIR(m)  (((m) & s_IFTGT) == S_IFDIR)
 #define S_ISBLK(m)  (((m) & s_IFTGT) == S_IFBLK)
 #define S_ISREG(m)  (((m) & s_IFTGT) == S_IFREG)
-#define S_ISSOCK(m) (((m) & s_IFTGT) == S_IFSOCK)
 #define S_ISMQ(m)   (((m) & s_IFTGT) == S_IFMQ)
 #define S_ISSEM(m)  (((m) & s_IFTGT) == S_IFSEM)
 #define S_ISSHM(m)  (((m) & s_IFTGT) == S_IFSHM)
+#define S_ISSOCK(m) (((m) & s_IFTGT) == S_IFSOCK)
+#define S_ISMTD(m)  (((m) & s_IFTGT) == S_IFMTD)
+#define S_ISLNK(m)  (((m) & S_IFLNK)   != 0)
 
 /****************************************************************************
  * Type Definitions

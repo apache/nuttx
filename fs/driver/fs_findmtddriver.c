@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/driver/fs_findblockdriver.c
+ * fs/driver/fs_findmtddriver.c
  *
- *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in pathname and binary forms, with or without
@@ -51,34 +51,31 @@
 #include "inode/inode.h"
 #include "driver/driver.h"
 
+#ifdef CONFIG_MTD
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: find_blockdriver
+ * Name: find_mtddriver
  *
  * Description:
- *   Return the inode of the block driver specified by 'pathname'
+ *   Return the inode of the named MTD driver specified by 'pathname'
  *
  * Input Parameters:
- *   pathname   - The full path to the block driver to be located
- *   mountflags - If MS_RDONLY is not set, then driver must support write
- *                operations (see include/sys/mount.h)
- *   ppinode    - Address of the location to return the inode reference
+ *   pathname   - the full path to the named MTD driver to be located
+ *   ppinode    - address of the location to return the inode reference
  *
  * Returned Value:
  *   Returns zero on success or a negated errno on failure:
  *
- *   ENOENT  - No block driver of this name is registered
- *   ENOTBLK - The inode associated with the pathname is not a block driver
- *   EACCESS - The MS_RDONLY option was not set but this driver does not
- *             support write access
+ *   ENOENT  - No MTD driver of this name is registered
+ *   ENOTBLK - The inode associated with the pathname is not an MTD driver
  *
  ****************************************************************************/
 
-int find_blockdriver(FAR const char *pathname, int mountflags,
-                     FAR struct inode **ppinode)
+int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
@@ -105,22 +102,16 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
 
   /* Verify that the inode is a block driver. */
 
-  if (!INODE_IS_BLOCK(inode))
+  if (!INODE_IS_MTD(inode))
     {
-      ferr("ERROR: %s is not a block driver\n", pathname);
+      ferr("ERROR: %s is not a named MTD driver\n", pathname);
       ret = -ENOTBLK;
       goto errout_with_inode;
     }
 
-  /* Make sure that the inode supports the requested access */
+  /* Return the MTD inode reference */
 
-  if (!inode->u.i_bops || !inode->u.i_bops->read ||
-      (!inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
-    {
-      ferr("ERROR: %s does not support requested access\n", pathname);
-      ret = -EACCES;
-      goto errout_with_inode;
-    }
+  DEBUGASSERT(inode->u.i_mtd != NULL);
 
   *ppinode = inode;
   RELEASE_SEARCH(&desc);
@@ -128,7 +119,10 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
 
 errout_with_inode:
   inode_release(inode);
+
 errout_with_search:
   RELEASE_SEARCH(&desc);
   return ret;
 }
+
+#endif /* CONFIG_MTD */

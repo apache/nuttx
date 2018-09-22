@@ -1,14 +1,14 @@
 /****************************************************************************
- * fs/driver/fs_findblockdriver.c
+ * fs/driver/fs_registermtddriver.c
  *
- *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in pathname and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- * 1. Redistributions of pathname code must retain the above copyright
+ * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -40,95 +40,75 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "inode/inode.h"
-#include "driver/driver.h"
+
+#if defined(CONFIG_MTD) && !defined(CONFIG_DISABLE_MOUNTPOINT)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: find_blockdriver
+ * Name: register_mtddriver
  *
  * Description:
- *   Return the inode of the block driver specified by 'pathname'
+ *   Register an MTD driver inode the pseudo file system.
  *
  * Input Parameters:
- *   pathname   - The full path to the block driver to be located
- *   mountflags - If MS_RDONLY is not set, then driver must support write
- *                operations (see include/sys/mount.h)
- *   ppinode    - Address of the location to return the inode reference
+ *   path - The path to the inode to create
+ *   mtd  - The MTD driver structure
+ *   mode - inode privileges (not used)
+ *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
- *   Returns zero on success or a negated errno on failure:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
  *
- *   ENOENT  - No block driver of this name is registered
- *   ENOTBLK - The inode associated with the pathname is not a block driver
- *   EACCESS - The MS_RDONLY option was not set but this driver does not
- *             support write access
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
  *
  ****************************************************************************/
 
-int find_blockdriver(FAR const char *pathname, int mountflags,
-                     FAR struct inode **ppinode)
+int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                       mode_t mode, FAR void *priv)
 {
-  struct inode_search_s desc;
-  FAR struct inode *inode;
-  int ret = 0; /* Assume success */
+  FAR struct inode *node;
+  int ret;
 
-  DEBUGASSERT(pathname != NULL || ppinode != NULL);
+  /* Insert an inode for the device driver -- we need to hold the inode
+   * semaphore to prevent access to the tree while we this.  This is because
+   * we will have a momentarily bad true until we populate the inode with
+   * valid data.
+   */
 
-  /* Find the inode registered with this pathname */
-
-  SETUP_SEARCH(&desc, pathname, false);
-
-  ret = inode_find(&desc);
-  if (ret < 0)
+  inode_semtake();
+  ret = inode_reserve(path, &node);
+  if (ret >= 0)
     {
-      ferr("ERROR: Failed to find %s\n", pathname);
-      ret = -ENOENT;
-      goto errout_with_search;
+      /* We have it, now populate it with block driver specific information.
+       * NOTE that the initial reference count on the new inode is zero.
+       */
+
+      INODE_SET_MTD(node);
+
+      node->u.i_mtd   = mtd;
+#ifdef CONFIG_FILE_MODE
+      node->i_mode    = mode;
+#endif
+      node->i_private = priv;
+      ret             = OK;
     }
 
-  /* Get the search results */
-
-  inode = desc.node;
-  DEBUGASSERT(inode != NULL);
-
-  /* Verify that the inode is a block driver. */
-
-  if (!INODE_IS_BLOCK(inode))
-    {
-      ferr("ERROR: %s is not a block driver\n", pathname);
-      ret = -ENOTBLK;
-      goto errout_with_inode;
-    }
-
-  /* Make sure that the inode supports the requested access */
-
-  if (!inode->u.i_bops || !inode->u.i_bops->read ||
-      (!inode->u.i_bops->write && (mountflags & MS_RDONLY) == 0))
-    {
-      ferr("ERROR: %s does not support requested access\n", pathname);
-      ret = -EACCES;
-      goto errout_with_inode;
-    }
-
-  *ppinode = inode;
-  RELEASE_SEARCH(&desc);
-  return OK;
-
-errout_with_inode:
-  inode_release(inode);
-errout_with_search:
-  RELEASE_SEARCH(&desc);
+  inode_semgive();
   return ret;
 }
+
+#endif /* CONFIG_MTD && !CONFIG_DISABLE_MOUNTPOINT */
+

@@ -113,22 +113,23 @@
 #define __FS_FLAG_LBF   (1 << 2) /* Line buffered */
 #define __FS_FLAG_UBF   (1 << 3) /* Buffer allocated by caller of setvbuf */
 
-/* Inode i_flag values:
+/* Inode i_flags values:
  *
- *   Bit 0-3: Inode type (Bit 4 indicates internal OS types)
+ *   Bit 0-3: Inode type (Bit 3 indicates internal OS types)
  *   Bit 4:   Set if inode has been unlinked and is pending removal.
  */
 
-#define FSNODEFLAG_TYPE_MASK       0x00000007 /* Isolates type field        */
-#define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver         */
-#define   FSNODEFLAG_TYPE_BLOCK    0x00000001 /*   Block driver             */
-#define   FSNODEFLAG_TYPE_MOUNTPT  0x00000002 /*   Mount point              */
-#define FSNODEFLAG_TYPE_SPECIAL    0x00000004 /* Special OS type            */
-#define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000004 /*   Named semaphore          */
-#define   FSNODEFLAG_TYPE_MQUEUE   0x00000005 /*   Message Queue            */
-#define   FSNODEFLAG_TYPE_SHM      0x00000006 /*   Shared memory region     */
-#define   FSNODEFLAG_TYPE_SOFTLINK 0x00000007 /*   Soft link                */
-#define FSNODEFLAG_DELETED         0x00000008 /* Unlinked                   */
+#define FSNODEFLAG_TYPE_MASK       0x0000000f /* Isolates type field      */
+#define   FSNODEFLAG_TYPE_DRIVER   0x00000000 /*   Character driver       */
+#define   FSNODEFLAG_TYPE_BLOCK    0x00000001 /*   Block driver           */
+#define   FSNODEFLAG_TYPE_MOUNTPT  0x00000002 /*   Mount point            */
+#define FSNODEFLAG_TYPE_SPECIAL    0x00000008 /* Special OS type          */
+#define   FSNODEFLAG_TYPE_NAMEDSEM 0x00000008 /*   Named semaphore        */
+#define   FSNODEFLAG_TYPE_MQUEUE   0x00000009 /*   Message Queue          */
+#define   FSNODEFLAG_TYPE_SHM      0x0000000a /*   Shared memory region   */
+#define   FSNODEFLAG_TYPE_MTD      0x0000000b /*   Named MTD driver       */
+#define   FSNODEFLAG_TYPE_SOFTLINK 0x0000000c /*   Soft link              */
+#define FSNODEFLAG_DELETED         0x00000010 /* Unlinked                 */
 
 #define INODE_IS_TYPE(i,t) \
   (((i)->i_flags & FSNODEFLAG_TYPE_MASK) == (t))
@@ -141,6 +142,7 @@
 #define INODE_IS_NAMEDSEM(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_IS_MQUEUE(i)    INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_IS_SHM(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_IS_MTD(i)       INODE_IS_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_IS_SOFTLINK(i)  INODE_IS_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 
 #define INODE_GET_TYPE(i)     ((i)->i_flags & FSNODEFLAG_TYPE_MASK)
@@ -157,6 +159,7 @@
 #define INODE_SET_NAMEDSEM(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_NAMEDSEM)
 #define INODE_SET_MQUEUE(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MQUEUE)
 #define INODE_SET_SHM(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SHM)
+#define INODE_SET_MTD(i)      INODE_SET_TYPE(i,FSNODEFLAG_TYPE_MTD)
 #define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 
 /* Mountpoint fd_flags values */
@@ -207,6 +210,7 @@ struct stat;
 struct statfs;
 struct pollfd;
 struct fs_dirent_s;
+struct mtd_dev_s;
 
 /* This structure is provided by devices when they are registered with the
  * system.  It is used to call back to perform device specific operations.
@@ -376,6 +380,9 @@ union inode_ops_u
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
   FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
+#endif
+#ifndef CONFIGMTD
+  FAR struct mtd_dev_s                 *i_mtd;    /* MTD device driver */
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   FAR char                             *i_link;   /* Full path to link target */
@@ -605,6 +612,46 @@ int unregister_driver(FAR const char *path);
  ****************************************************************************/
 
 int unregister_blockdriver(FAR const char *path);
+
+/****************************************************************************
+ * Name: register_mtddriver
+ *
+ * Description:
+ *   Register an MTD driver inode the pseudo file system.
+ *
+ * Input Parameters:
+ *   path - The path to the inode to create
+ *   mtd  - The MTD driver structure
+ *   mode - inode privileges (not used)
+ *   priv - Private, user data that will be associated with the inode.
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                       mode_t mode, FAR void *priv);
+#endif
+
+/****************************************************************************
+ * Name: unregister_mtddriver
+ *
+ * Description:
+ *   Remove the named TMD driver inode at 'path' from the pseudo-file system
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+int unregister_mtddriver(FAR const char *path);
+#endif
 
 /****************************************************************************
  * Name: inode_checkflags
