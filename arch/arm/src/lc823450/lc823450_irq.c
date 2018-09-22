@@ -467,8 +467,8 @@ void up_irqinitialize(void)
 
   /* Disable all interrupts */
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
-  putreg32(0, NVIC_IRQ32_63_ENABLE);
+  putreg32(0xffffffff, NVIC_IRQ0_31_CLEAR);
+  putreg32(0xffffffff, NVIC_IRQ32_63_CLEAR);
 
   /* Colorize the interrupt stack for debug purposes */
 
