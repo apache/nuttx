@@ -295,9 +295,9 @@ int mount(FAR const char *source, FAR const char *target,
 #ifdef MDFS_SUPPORT
   if (source != NULL && (mops = mount_findfs(g_mdfsmap, filesystemtype)) != NULL)
     {
-      /* Find the named MTD driver */
+      /* Find the named MTD driver.  NOTE: mountflags are ignored. */
 
-      ret = find_mtddriver(source, mountflags, &drvr_inode);
+      ret = find_mtddriver(source, &drvr_inode);
       if (ret < 0)
         {
           ferr("ERROR: Failed to find MTD driver %s\n", source);
