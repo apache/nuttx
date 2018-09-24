@@ -83,24 +83,25 @@
  * the communication semantics.
  */
 
-#define SOCK_STREAM    0 /* Provides sequenced, reliable, two-way,
+#define SOCK_UNSPEC    0 /* Unspecified socket type */
+#define SOCK_STREAM    1 /* Provides sequenced, reliable, two-way,
                           * connection-based byte streams. An out-of-band data
                           * transmission mechanism may be supported.
                           */
-#define SOCK_DGRAM     1 /* Supports  datagrams (connectionless, unreliable
+#define SOCK_DGRAM     2 /* Supports  datagrams (connectionless, unreliable
                           * messages of a fixed maximum length).
                           */
-#define SOCK_SEQPACKET 2 /* Provides a sequenced, reliable, two-way
+#define SOCK_SEQPACKET 3 /* Provides a sequenced, reliable, two-way
                           * connection-based data transmission path for
                           * datagrams of fixed maximum length; a consumer is
                           * required to read an entire packet with each read
                           * system call.
                           */
-#define SOCK_RAW       3 /* Provides raw network protocol access. */
-#define SOCK_RDM       4 /* Provides a reliable datagram layer that does not
+#define SOCK_RAW       4 /* Provides raw network protocol access. */
+#define SOCK_RDM       5 /* Provides a reliable datagram layer that does not
                           * guarantee ordering.
                           */
-#define SOCK_PACKET    5 /* Obsolete and should not be used in new programs */
+#define SOCK_PACKET    6 /* Obsolete and should not be used in new programs */
 
 /* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
  * recognized by Linus, not all are supported by NuttX.
