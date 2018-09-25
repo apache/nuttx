@@ -61,7 +61,7 @@ extern "C"
 #define SPIFFS_CACHE_FLAG_TYPE_WR     (1 << 7)
 
 #define SPIFFS_CACHE_PAGE_SIZE(fs) \
-  (sizeof(struct spiffs_cache_page_s) + SPIFFS_CFG_LOG_PAGE_SZ(fs))
+  (sizeof(struct spiffs_cache_page_s) + SPIFFS_GEO_PAGE_SIZE(fs))
 
 #define spiffs_get_cache(fs) \
   ((FAR struct spiffs_cache_s *)((fs)->cache))

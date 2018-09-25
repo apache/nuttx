@@ -116,7 +116,7 @@ int spiffs_stat_pgndx(FAR struct spiffs_s *fs, int16_t pgndx, int16_t objid,
   buf->st_mode    = mode;
   buf->st_size    = objhdr.size == SPIFFS_UNDEFINED_LEN ? 0 : objhdr.size;
   buf->st_blksize = fs->geo.blocksize;
-  buf->st_blocks  = fs->phys_size / fs->geo.blocksize;
+  buf->st_blocks  = fs->media_size / fs->geo.blocksize;
 
   return ret;
 }

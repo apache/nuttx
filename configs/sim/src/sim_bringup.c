@@ -181,6 +181,16 @@ int sim_bringup(void)
                      ret);
             }
 
+          /* Mount the SPIFFS file system */
+
+          ret = mount("/dev/rammtd", "/mnt/spiffs", "spiffs", 0, NULL);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: Failed to mount SPIFFS at /mnt/spiffs: %d\n",
+                     ret);
+            }
+
 #elif defined(CONFIG_FS_NXFFS)
           /* Initialize to provide NXFFS on the MTD interface */
 

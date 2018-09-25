@@ -147,12 +147,13 @@ struct spiffs_s
   FAR uint8_t *work;                /* Secondary work buffer, size of a logical page */
   FAR void *cache;                  /* Cache memory */
 #ifdef CONFIG_HAVE_LONG_LONG
-  off64_t phys_size;                /* Physical size of the SPI flash */
+  off64_t media_size;               /* Physical size of the SPI flash */
 #else
-  off_t phys_size;                  /* Physical size of the SPI flash */
+  off_t media_size;                 /* Physical size of the SPI flash */
 #endif
   int free_entry;                   /* Cursor for free blocks, entry index */
   int lu_entry;                     /* Cursor when searching, entry index */
+  uint32_t total_pages;             /* Total number of pages on the media */
   uint32_t free_blocks;             /* Current number of free blocks */
   uint32_t stats_p_allocated;       /* Current number of busy pages */
   uint32_t stats_p_deleted;         /* Current number of deleted pages */
@@ -164,10 +165,10 @@ struct spiffs_s
   uint32_t cache_hits;              /* Number of cache hits */
   uint32_t cache_misses;            /* Number of cache misses */
 #endif
-  uint32_t config_magic;            /* Config magic */
-  int16_t free_blkndx;              /* cursor for free blocks, block index */
+  int16_t free_blkndx;              /* Cursor for free blocks, block index */
   int16_t lu_blkndx;                /* Cursor when searching, block index */
   int16_t max_erase_count;          /* Max erase count amongst all blocks */
+  uint8_t pages_per_block;          /* Pages per block */
 };
 
 /* This structure represents the state of an open file */

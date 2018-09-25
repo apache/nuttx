@@ -64,13 +64,13 @@
  *   Write data to FLASH memory
  *
  * Input Parameters:
- *   fs    - A reference to the volume structure
+ *   fs     - A reference to the volume structure
  *   offset - The physical offset to write to
- *   len   - The number of bytes to write
- *   src   - A reference to the bytes to be written
+ *   len    - The number of bytes to write
+ *   src    - A reference to the bytes to be written
  *
  * Returned Value:
- *   On success, the number of bytes written is returned.  On failure, a 
+ *   On success, the number of bytes written is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/
@@ -81,28 +81,30 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
   int16_t blksize;
   off_t blkstart;
   off_t blkend;
+
   ssize_t ret;
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL);
-
-#warning REVISIT:  What are units of offset and len?
 
 #ifdef CONFIG_MTD_BYTE_WRITE
   ret = MTD_WRITE(fs->mtd, offset, len, src);
   if (ret < 0)
 #endif
     {
+      /* We will have to do a block read */
+
       blksize  = fs->geo.blocksize;
-      DEBUGASSERT(offset = offset % blksize);
-      DEBUGASSERT(len    = len    % blksize);
+      DEBUGASSERT(offset == offset % blksize);
+      DEBUGASSERT(len    == len    % blksize);
 
       blkstart = offset / blksize;                       /* Truncates to floor */
       blkend   = (offset + len + blksize - 1) / blksize; /* Rounds up to ceil */
 
+#warning WRONG: Needs to use page work buffer, not 'src'
       ret      = MTD_BWRITE(fs->mtd, blkstart, blkend - blkstart, src);
     }
 
-  return ret;
+  return ret < 0 ret : len;
 }
 
 /****************************************************************************
@@ -118,7 +120,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *   dest   - The user provide location to store the bytes read from FLASH.
  *
  * Returned Value:
- *   On success, the number of bytes read is returned.  On failure, a 
+ *   On success, the number of bytes read is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/
@@ -133,22 +135,21 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL);
 
-#warning REVISIT:  What are units of offset and len?
-
   ret = MTD_READ(fs->mtd, offset, len, dest);
   if (ret < 0)
     {
       blksize  = fs->geo.blocksize;
-      DEBUGASSERT(offset = offset % blksize);
-      DEBUGASSERT(len    = len    % blksize);
+      DEBUGASSERT(offset == offset % blksize);
+      DEBUGASSERT(len    == len    % blksize);
 
       blkstart = offset / blksize;                       /* Truncates to floor */
       blkend   = (offset + len + blksize - 1) / blksize; /* Rounds up to ceil */
 
+#warning WRONG: Needs to use page work buffer, not 'dest'
       ret      = MTD_BREAD(fs->mtd, blkstart, blkend - blkstart, dest);
     }
 
-  return ret;
+  return ret < 0 ret : len;
 }
 
 /****************************************************************************
@@ -163,7 +164,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *   len    - The number of bytes to erase
  *
  * Returned Value:
- *   On success, the number of bytes erased is returned.  On failure, a 
+ *   On success, the number of bytes erased is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/

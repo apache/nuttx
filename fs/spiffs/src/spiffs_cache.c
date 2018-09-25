@@ -144,7 +144,7 @@ static int spiffs_cache_page_free(FAR struct spiffs_s *fs, int cpndx,
                            cpndx, cp->pgndx);
 
           ret = spiffs_mtd_write(fs, SPIFFS_PAGE_TO_PADDR(fs, cp->pgndx),
-                                 SPIFFS_CFG_LOG_PAGE_SZ(fs), mem);
+                                 SPIFFS_GEO_PAGE_SIZE(fs), mem);
         }
 
       if (cp->flags & SPIFFS_CACHE_FLAG_TYPE_WR)
@@ -460,7 +460,7 @@ ssize_t spiffs_cache_read(FAR struct spiffs_s *fs, uint8_t op, int16_t objid,
 
               ret = spiffs_mtd_read(fs, addr -
                                     SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr),
-                                    SPIFFS_CFG_LOG_PAGE_SZ(fs),
+                                    SPIFFS_GEO_PAGE_SIZE(fs),
                                     spiffs_get_cache_page(fs, cache, cp->cpndx));
 
               mem = spiffs_get_cache_page(fs, cache, cp->cpndx);

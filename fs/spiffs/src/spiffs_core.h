@@ -174,138 +174,116 @@
 
 #define SPIFFS_VIS_END                  (SPIFFS_ERR_INTERNAL - 22)
 
-/* updating an object index contents */
+/* Events */
 
-#define SPIFFS_EV_IX_UPD                (0)
+#define SPIFFS_EV_NDXUPD                (0)  /* Updating object index contents */
+#define SPIFFS_EV_NDXNEW                (1)  /* Creating new object index */
+#define SPIFFS_EV_NDXDEL                (2)  /* Deleting object index */
+#define SPIFFS_EV_NDXMOV                (3)  /* Moving abject index without
+                                              * updating contents */
+#define SPIFFS_EV_NDXUPD_HDR            (4)  /* Updating object index header
+                                              * data only (not the table itself */
 
-/* creating a new object index */
-
-#define SPIFFS_EV_IX_NEW                (1)
-
-/* deleting an object index */
-
-#define SPIFFS_EV_IX_DEL                (2)
-
-/* moving an object index without updating contents */
-
-#define SPIFFS_EV_IX_MOV                (3)
-
-/* updating an object index header data only, not the table itself */
-
-#define SPIFFS_EV_IX_UPD_HDR            (4)
-
-#define SPIFFS_OBJ_ID_IX_FLAG           ((int16_t)(1<<(8*sizeof(int16_t)-1)))
+#define SPIFFS_OBJID_NDXFLAG            ((int16_t)(1 << (8 * sizeof(int16_t) - 1)))
 
 #define SPIFFS_UNDEFINED_LEN            (uint32_t)(-1)
 
-#define SPIFFS_OBJ_ID_DELETED           ((int16_t)0)
-#define SPIFFS_OBJ_ID_FREE              ((int16_t)-1)
+#define SPIFFS_OBJID_DELETED            ((int16_t)0)
+#define SPIFFS_OBJID_FREE               ((int16_t)-1)
 
-/* total number of pages */
+/* Number of object lookup pages per block */
 
-#define SPIFFS_MAX_PAGES(fs) \
-  (SPIFFS_CFG_PHYS_SZ(fs)/SPIFFS_CFG_LOG_PAGE_SZ(fs))
+#define SPIFFS_OBJ_LOOKUP_PAGES(fs) \
+  (MAX(1, (SPIFFS_GEO_PAGES_PER_BLOCK(fs) * sizeof(int16_t)) / SPIFFS_GEO_PAGE_SIZE(fs)))
 
-/* total number of pages per block, including object lookup pages */
-
-#define SPIFFS_PAGES_PER_BLOCK(fs) \
-  (SPIFFS_CFG_LOG_BLOCK_SZ(fs)/SPIFFS_CFG_LOG_PAGE_SZ(fs))
-
-/* number of object lookup pages per block */
-
-#define SPIFFS_OBJ_LOOKUP_PAGES(fs)     \
-  (MAX(1, (SPIFFS_PAGES_PER_BLOCK(fs) * sizeof(int16_t)) / SPIFFS_CFG_LOG_PAGE_SZ(fs)))
-
-/* checks if page index belongs to object lookup */
+/* Checks if page index belongs to object lookup */
 
 #define SPIFFS_IS_LOOKUP_PAGE(fs,pgndx)     \
-  (((pgndx) % SPIFFS_PAGES_PER_BLOCK(fs)) < SPIFFS_OBJ_LOOKUP_PAGES(fs))
+  (((pgndx) % SPIFFS_GEO_PAGES_PER_BLOCK(fs)) < SPIFFS_OBJ_LOOKUP_PAGES(fs))
 
-/* number of object lookup entries in all object lookup pages */
+/* Number of object lookup entries in all object lookup pages */
 
 #define SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs) \
-  (SPIFFS_PAGES_PER_BLOCK(fs)-SPIFFS_OBJ_LOOKUP_PAGES(fs))
+  (SPIFFS_GEO_PAGES_PER_BLOCK(fs)-SPIFFS_OBJ_LOOKUP_PAGES(fs))
 
-/* converts a block to physical address */
+/* Converts a block to physical address */
 
-#define SPIFFS_BLOCK_TO_PADDR(fs, block)       ((block) * SPIFFS_CFG_LOG_BLOCK_SZ(fs))
+#define SPIFFS_BLOCK_TO_PADDR(fs, block)       ((block) * SPIFFS_GEO_BLOCK_SIZE(fs))
 
-/* converts a object lookup entry to page index */
+/* Converts a object lookup entry to page index */
 
 #define SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, block, entry) \
-  ((block)*SPIFFS_PAGES_PER_BLOCK(fs) + (SPIFFS_OBJ_LOOKUP_PAGES(fs) + entry))
+  ((block)*SPIFFS_GEO_PAGES_PER_BLOCK(fs) + (SPIFFS_OBJ_LOOKUP_PAGES(fs) + entry))
 
-/* converts a object lookup entry to physical address of corresponding page */
+/* Converts a object lookup entry to physical address of corresponding page */
 
 #define SPIFFS_OBJ_LOOKUP_ENTRY_TO_PADDR(fs, block, entry) \
-  (SPIFFS_BLOCK_TO_PADDR(fs, block) + (SPIFFS_OBJ_LOOKUP_PAGES(fs) + entry) * SPIFFS_CFG_LOG_PAGE_SZ(fs))
+  (SPIFFS_BLOCK_TO_PADDR(fs, block) + (SPIFFS_OBJ_LOOKUP_PAGES(fs) + entry) * SPIFFS_GEO_PAGE_SIZE(fs))
 
-/* converts a page to physical address */
+/* Converts a page to physical address */
 
-#define SPIFFS_PAGE_TO_PADDR(fs, page)         ((page) * SPIFFS_CFG_LOG_PAGE_SZ(fs))
+#define SPIFFS_PAGE_TO_PADDR(fs, page)         ((page) * SPIFFS_GEO_PAGE_SIZE(fs))
 
-/* converts a physical address to page */
+/* Converts a physical address to page */
 
-#define SPIFFS_PADDR_TO_PAGE(fs, addr)         ((addr) / SPIFFS_CFG_LOG_PAGE_SZ(fs))
+#define SPIFFS_PADDR_TO_PAGE(fs, addr)         ((addr) / SPIFFS_GEO_PAGE_SIZE(fs))
 
-/* gives index in page for a physical address */
+/* Gives index in page for a physical address */
 
-#define SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr)  ((addr) % SPIFFS_CFG_LOG_PAGE_SZ(fs))
+#define SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr)  ((addr) % SPIFFS_GEO_PAGE_SIZE(fs))
 
-/* returns containing block for given page */
+/* Returns containing block for given page */
 
-#define SPIFFS_BLOCK_FOR_PAGE(fs, page)        ((page) / SPIFFS_PAGES_PER_BLOCK(fs))
+#define SPIFFS_BLOCK_FOR_PAGE(fs, page)        ((page) / SPIFFS_GEO_PAGES_PER_BLOCK(fs))
 
-/* returns starting page for block */
+/* Returns starting page for block */
 
-#define SPIFFS_PAGE_FOR_BLOCK(fs, block)       ((block) * SPIFFS_PAGES_PER_BLOCK(fs))
+#define SPIFFS_PAGE_FOR_BLOCK(fs, block)       ((block) * SPIFFS_GEO_PAGES_PER_BLOCK(fs))
 
-/* converts page to entry in object lookup page */
+/* Converts page to entry in object lookup page */
 
 #define SPIFFS_OBJ_LOOKUP_ENTRY_FOR_PAGE(fs, page) \
-  ((page) % SPIFFS_PAGES_PER_BLOCK(fs) - SPIFFS_OBJ_LOOKUP_PAGES(fs))
+  ((page) % SPIFFS_GEO_PAGES_PER_BLOCK(fs) - SPIFFS_OBJ_LOOKUP_PAGES(fs))
 
-/* returns data size in a data page */
+/* Returns data size in a data page */
 
 #define SPIFFS_DATA_PAGE_SIZE(fs) \
-    (SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_page_header_s))
+    (SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(struct spiffs_page_header_s))
 
-/* returns physical address for block's erase count,
+/* Returns physical address for block's erase count,
  * always in the physical last entry of the last object lookup page
  */
 
 #define SPIFFS_ERASE_COUNT_PADDR(fs, blkndx) \
-  (SPIFFS_BLOCK_TO_PADDR(fs, blkndx) + SPIFFS_OBJ_LOOKUP_PAGES(fs) * SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(int16_t))
+  (SPIFFS_BLOCK_TO_PADDR(fs, blkndx) + SPIFFS_OBJ_LOOKUP_PAGES(fs) * SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(int16_t))
 
-/* checks if there is any room for magic in the object luts */
+/* Checks if there is any room for magic in the object luts */
 
 #define SPIFFS_CHECK_MAGIC_POSSIBLE(fs) \
-  ((SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs) % (SPIFFS_CFG_LOG_PAGE_SZ(fs)/sizeof(int16_t))) * sizeof(int16_t) \
-    <= (SPIFFS_CFG_LOG_PAGE_SZ(fs)-sizeof(int16_t)*2))
+  ((SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs) % (SPIFFS_GEO_PAGE_SIZE(fs)/sizeof(int16_t))) * sizeof(int16_t) \
+    <= (SPIFFS_GEO_PAGE_SIZE(fs)-sizeof(int16_t)*2))
 
-/* define helpers object */
-
-/* entries in an object header page index */
+/* Entries in an object header page index */
 
 #define SPIFFS_OBJ_HDR_IX_LEN(fs) \
-  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_pgobj_ndxheader_s))/sizeof(int16_t))
+  ((SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(struct spiffs_pgobj_ndxheader_s))/sizeof(int16_t))
 
-/* entries in an object page index */
+/* Entries in an object page index */
 
 #define SPIFFS_OBJ_IX_LEN(fs) \
-  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_page_objndx_s))/sizeof(int16_t))
+  ((SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(struct spiffs_page_objndx_s))/sizeof(int16_t))
 
-/* object index entry for given data span index */
+/* Object index entry for given data span index */
 
 #define SPIFFS_OBJ_IX_ENTRY(fs, spndx) \
   ((spndx) < SPIFFS_OBJ_HDR_IX_LEN(fs) ? (spndx) : (((spndx)-SPIFFS_OBJ_HDR_IX_LEN(fs))%SPIFFS_OBJ_IX_LEN(fs)))
 
-/* object index span index number for given data span index or entry */
+/* Object index span index number for given data span index or entry */
 
 #define SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, spndx) \
   ((spndx) < SPIFFS_OBJ_HDR_IX_LEN(fs) ? 0 : (1+((spndx)-SPIFFS_OBJ_HDR_IX_LEN(fs))/SPIFFS_OBJ_IX_LEN(fs)))
 
-/* get data span index for object index span index */
+/* Get data span index for object index span index */
 
 #define SPIFFS_DATA_SPAN_IX_FOR_OBJ_IX_SPAN_IX(fs, spndx) \
   ((spndx) == 0 ? 0 : (SPIFFS_OBJ_HDR_IX_LEN(fs) + (((spndx)-1) * SPIFFS_OBJ_IX_LEN(fs))))
@@ -422,7 +400,7 @@ int     spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
           FAR void *user_var, FAR int16_t *blkndx, int *lu_entry);
 int     spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx);
 int     spiffs_objlu_scan(FAR struct spiffs_s *fs);
-int     spiffs_objlu_find_free_obj_id(FAR struct spiffs_s *fs,
+int     spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs,
           int16_t *objid, FAR const uint8_t *conflicting_name);
 int     spiffs_objlu_find_free(FAR struct spiffs_s *fs,
           int16_t starting_block, int starting_lu_entry,

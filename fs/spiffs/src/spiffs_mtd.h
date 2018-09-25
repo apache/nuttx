@@ -53,11 +53,18 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SPIFFS_CFG_EBLOCK_COUNT(fs)     ((fs)->geo.neraseblocks)
-#define SPIFFS_CFG_LOG_PAGE_SZ(fs)      ((fs)->geo.blocksize)
-#define SPIFFS_CFG_LOG_BLOCK_SZ(fs)     ((fs)->geo.blocksize)
-#define SPIFFS_CFG_PHYS_SZ(fs)          ((fs)->phys_size)
-#define SPIFFS_CFG_PHYS_ERASE_SZ(fs)    ((fs)->geo.erasesize)
+/* The MTD interface does not deal with pages explicitly.  With most
+ * hardware a logical block is the same as an SPIFFS page.
+ */
+
+#define SPIFFS_GEO_MEDIA_SIZE(fs)       ((fs)->media_size)
+#define SPIFFS_GEO_EBLOCK_COUNT(fs)     ((fs)->geo.neraseblocks)
+#define SPIFFS_GEO_EBLOCK_SIZE(fs)      ((fs)->geo.erasesize)
+#define SPIFFS_GEO_BLOCK_COUNT(fs)      ((fs)->geo.neraseblocks)
+#define SPIFFS_GEO_BLOCK_SIZE(fs)       ((fs)->geo.erasesize)
+#define SPIFFS_GEO_PAGE_COUNT(fs)       ((fs)->total_pages)
+#define SPIFFS_GEO_PAGE_SIZE(fs)        ((fs)->geo.blocksize)
+#define SPIFFS_GEO_PAGES_PER_BLOCK(fs)  ((fs)->pages_per_block)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -76,7 +83,7 @@ extern "C"
  *   src    - A reference to the bytes to be written
  *
  * Returned Value:
- *   On success, the number of bytes written is returned.  On failure, a 
+ *   On success, the number of bytes written is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/
@@ -97,7 +104,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *   dest   - The user provide location to store the bytes read from FLASH.
  *
  * Returned Value:
- *   On success, the number of bytes read is returned.  On failure, a 
+ *   On success, the number of bytes read is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/
@@ -117,7 +124,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *   len    - The number of bytes to erase
  *
  * Returned Value:
- *   On success, the number of bytes erased is returned.  On failure, a 
+ *   On success, the number of bytes erased is returned.  On failure, a
  *   negated errno value is returned.
  *
  ****************************************************************************/

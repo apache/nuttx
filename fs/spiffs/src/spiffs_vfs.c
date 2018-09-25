@@ -297,8 +297,8 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
   int16_t pgndx;
   int ret;
 
-  if (objid == SPIFFS_OBJ_ID_FREE || objid == SPIFFS_OBJ_ID_DELETED ||
-      (objid & SPIFFS_OBJ_ID_IX_FLAG) == 0)
+  if (objid == SPIFFS_OBJID_FREE || objid == SPIFFS_OBJID_DELETED ||
+      (objid & SPIFFS_OBJID_NDXFLAG) == 0)
     {
       return SPIFFS_VIS_COUNTINUE;
     }
@@ -314,7 +314,7 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  if ((objid & SPIFFS_OBJ_ID_IX_FLAG) &&
+  if ((objid & SPIFFS_OBJID_NDXFLAG) &&
       objhdr.phdr.spndx == 0 &&
       (objhdr.phdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_FINAL |
                                 SPIFFS_PH_FLAG_IXDELE)) ==
@@ -411,7 +411,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
       /* The file does not exist.  We need to create the it. */
 
-      ret = spiffs_objlu_find_free_obj_id(fs, &objid, 0);
+      ret = spiffs_objlu_find_free_objid(fs, &objid, 0);
       if (ret < 0)
         {
           goto errout_with_fileobject;
@@ -644,7 +644,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
   if ((fobj->flags & O_DIRECT) == 0)
     {
-      if (buflen < (size_t)SPIFFS_CFG_LOG_PAGE_SZ(fs))
+      if (buflen < (size_t)SPIFFS_GEO_PAGE_SIZE(fs))
         {
           /* Small write, try to cache it */
 
@@ -657,7 +657,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
               if (offset < fobj->cache_page->offset ||
                   offset > fobj->cache_page->offset + fobj->cache_page->size ||
-                  offset + buflen > fobj->cache_page->offset + SPIFFS_CFG_LOG_PAGE_SZ(fs))
+                  offset + buflen > fobj->cache_page->offset + SPIFFS_GEO_PAGE_SIZE(fs))
                 {
                   /* Boundary violation, write back cache first and allocate
                    * new
@@ -881,7 +881,7 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
     {
       int16_t pgndx;
 
-      ret = spiffs_objlu_find_id_and_span(fs, fobj->objid | SPIFFS_OBJ_ID_IX_FLAG,
+      ret = spiffs_objlu_find_id_and_span(fs, fobj->objid | SPIFFS_OBJID_NDXFLAG,
                                           objndx_spndx, 0, &pgndx);
       if (ret < 0)
         {
@@ -956,7 +956,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               /* No.. we will have to erase a block at a time */
 
               int16_t blkndx = 0;
-              while (blkndx < fs->geo.neraseblocks)
+              while (blkndx < SPIFFS_GEO_BLOCK_COUNT(fs))
                 {
                   fs->max_erase_count = 0;
                   ret = spiffs_erase_block(fs, blkndx);
@@ -1289,7 +1289,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   int ret;
 
   finfo("mtdinode: %p data: %p handle: %p\n", mtdinode, data, handle);
-  DEBUGASSERT(mtdinode == NULL && handle != NULL);
+  DEBUGASSERT(mtdinode != NULL && handle != NULL);
 
   /* Extract the MTD interface reference */
 
@@ -1316,7 +1316,9 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
       goto errout_with_volume;
     }
 
-  fs->phys_size = fs->geo.neraseblocks * fs->geo.erasesize;
+  fs->media_size      = SPIFFS_GEO_EBLOCK_COUNT(fs) * SPIFFS_GEO_EBLOCK_SIZE(fs);
+  fs->total_pages     = fs->media_size / SPIFFS_GEO_PAGE_SIZE(fs);
+  fs->pages_per_block = SPIFFS_GEO_EBLOCK_SIZE(fs) / SPIFFS_GEO_PAGE_SIZE(fs);
 
   /* Get the aligned cache size */
 
@@ -1325,7 +1327,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   /* Don't let the cache size exceed the maximum that is needed */
 
-  cache_max  = SPIFFS_CFG_LOG_PAGE_SZ(fs) << 5;
+  cache_max  = SPIFFS_GEO_PAGE_SIZE(fs) << 5;
   if (cache_size > cache_max)
     {
       cache_size = cache_max;
@@ -1351,7 +1353,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
    * NOTE: Currently page size is equivalent to block size.
    */
 
-  work_size = SPIFFS_CFG_LOG_PAGE_SZ(fs) << 1;
+  work_size = SPIFFS_GEO_PAGE_SIZE(fs) << 1;
   work      = (FAR uint8_t *)kmm_malloc(work_size);
 
   if (work == NULL)
@@ -1363,7 +1365,8 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   fs->work         = &work[0];
   fs->lu_work      = &work[work_size >> 1];
-  fs->config_magic = SPIFFS_SUPER_MAGIC;
+
+  (void)nxsem_init(&fs->exclsem.sem, 0, 1);
 
   /* Check the file system */
 
@@ -1375,11 +1378,11 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
     }
 
   finfo("page index byte len:         %u\n",
-        (unsigned int)SPIFFS_CFG_LOG_PAGE_SZ(fs));
+        (unsigned int)SPIFFS_GEO_PAGE_SIZE(fs));
   finfo("object lookup pages:         %u\n",
         (unsigned int)SPIFFS_OBJ_LOOKUP_PAGES(fs));
   finfo("page pages per block:        %u\n",
-        (unsigned int)SPIFFS_PAGES_PER_BLOCK(fs));
+        (unsigned int)SPIFFS_GEO_PAGES_PER_BLOCK(fs));
   finfo("page header length:          %u\n",
         (unsigned int)sizeof(struct spiffs_page_header_s));
   finfo("object header index entries: %u\n",
@@ -1505,8 +1508,8 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   /* Collect some statistics */
 
-  pages_per_block  = SPIFFS_PAGES_PER_BLOCK(fs);
-  blocks           = fs->geo.neraseblocks;
+  pages_per_block  = SPIFFS_GEO_PAGES_PER_BLOCK(fs);
+  blocks           = SPIFFS_GEO_BLOCK_COUNT(fs);
   obj_lupages      = SPIFFS_OBJ_LOOKUP_PAGES(fs);
   data_pgsize      = SPIFFS_DATA_PAGE_SIZE(fs);
 
