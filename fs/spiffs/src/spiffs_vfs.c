@@ -271,10 +271,10 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
         }
     }
 
-  status = spiffs_obj_lu_scan(fs);
+  status = spiffs_objlu_scan(fs);
   if (status < 0)
     {
-      fwarn("WARNING spiffs_obj_lu_scan failed: %d\n", status);
+      fwarn("WARNING spiffs_objlu_scan failed: %d\n", status);
       if (ret == OK)
         {
           ret = status;
@@ -289,11 +289,11 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
  ****************************************************************************/
 
 static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
-                                   int16_t objid, int16_t blkndx, int ix_entry,
+                                   int16_t objid, int16_t blkndx, int entry,
                                    FAR const void *user_const,
                                    FAR void *user_var)
 {
-  struct spiffs_pgobj_ixheader_s objhdr;
+  struct spiffs_pgobj_ndxheader_s objhdr;
   int16_t pgndx;
   int ret;
 
@@ -303,10 +303,10 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       return SPIFFS_VIS_COUNTINUE;
     }
 
-  pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, ix_entry);
+  pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, entry);
   ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU2 | SPIFFS_OP_C_READ,
                           0, SPIFFS_PAGE_TO_PADDR(fs, pgndx),
-                          sizeof(struct spiffs_pgobj_ixheader_s),
+                          sizeof(struct spiffs_pgobj_ndxheader_s),
                           (FAR uint8_t *) & objhdr);
   if (ret < 0)
     {
@@ -315,8 +315,8 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
     }
 
   if ((objid & SPIFFS_OBJ_ID_IX_FLAG) &&
-      objhdr.p_hdr.spndx == 0 &&
-      (objhdr.p_hdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_FINAL |
+      objhdr.phdr.spndx == 0 &&
+      (objhdr.phdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_FINAL |
                                 SPIFFS_PH_FLAG_IXDELE)) ==
       (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_IXDELE))
     {
@@ -411,7 +411,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
       /* The file does not exist.  We need to create the it. */
 
-      ret = spiffs_obj_lu_find_free_obj_id(fs, &objid, 0);
+      ret = spiffs_objlu_find_free_obj_id(fs, &objid, 0);
       if (ret < 0)
         {
           goto errout_with_fileobject;
@@ -881,8 +881,8 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
     {
       int16_t pgndx;
 
-      ret = spiffs_obj_lu_find_id_and_span(fs, fobj->objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                           objndx_spndx, 0, &pgndx);
+      ret = spiffs_objlu_find_id_and_span(fs, fobj->objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                          objndx_spndx, 0, &pgndx);
       if (ret < 0)
         {
           goto errout_with_lock;
@@ -1158,7 +1158,7 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
   ret = spiffs_object_truncate(fs, fobj, length, false);
   if (ret < 0)
     {
-      ferr("ERROR:  spiffs_object_truncate failed: %d/n", ret);
+      ferr("ERROR: spiffs_object_truncate failed: %d/n", ret);
     }
 
   /* Check if we need to reset the file pointer.  Probably could use
@@ -1301,7 +1301,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   fs = (FAR struct spiffs_s *)kmm_zalloc(sizeof(struct spiffs_s));
   if (fs == NULL)
     {
-      ferr("ERROR:  Failed to allocate volume structure\n");
+      ferr("ERROR: Failed to allocate volume structure\n");
       return -ENOMEM;
     }
 
@@ -1312,7 +1312,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&fs->geo));
   if (ret < 0)
     {
-      ferr("ERROR:  MTD_IOCTL(MTDIOC_GEOMETRY) failed: %d\n", ret);
+      ferr("ERROR: MTD_IOCTL(MTDIOC_GEOMETRY) failed: %d\n", ret);
       goto errout_with_volume;
     }
 
@@ -1338,7 +1338,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   if (fs->cache == NULL)
     {
-      ferr("ERROR:  Failed to allocate volume structure\n");
+      ferr("ERROR: Failed to allocate volume structure\n");
       ret = -ENOMEM;
       goto errout_with_volume;
     }
@@ -1356,7 +1356,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   if (work == NULL)
     {
-      ferr("ERROR:  Failed to allocate work buffer\n");
+      ferr("ERROR: Failed to allocate work buffer\n");
       ret = -ENOMEM;
       goto errout_with_cache;
     }
@@ -1367,10 +1367,10 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   /* Check the file system */
 
-  ret = spiffs_obj_lu_scan(fs);
+  ret = spiffs_objlu_scan(fs);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_obj_lu_scan() failed: %d\n", ret);
+      ferr("ERROR: spiffs_objlu_scan() failed: %d\n", ret);
       goto errout_with_work;
     }
 

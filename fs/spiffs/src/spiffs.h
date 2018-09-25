@@ -77,7 +77,6 @@ extern "C"
 #define SPIFFS_ERR_INDEX_FREE           -10018
 #define SPIFFS_ERR_INDEX_LU             -10019
 #define SPIFFS_ERR_INDEX_INVALID        -10020
-#define SPIFFS_ERR_INTERNAL             -10050
 
 /* Flags on open file/directory options */
 

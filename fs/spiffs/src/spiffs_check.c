@@ -109,11 +109,11 @@ static int spiffs_check_get_data_pgndx(FAR struct spiffs_s *fs,
 
   /* Find the object index for the object ID and span index */
 
-  ret = spiffs_obj_lu_find_id_and_span(fs, objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                       objndx_spndx, 0, objndx_pgndx);
+  ret = spiffs_objlu_find_id_and_span(fs, objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                      objndx_spndx, 0, objndx_pgndx);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+      ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
       return ret;
     }
 
@@ -124,14 +124,14 @@ static int spiffs_check_get_data_pgndx(FAR struct spiffs_s *fs,
     {
       /* Get the referenced page from object index header */
 
-      addr += sizeof(struct spiffs_pgobj_ixheader_s) +
+      addr += sizeof(struct spiffs_pgobj_ndxheader_s) +
               data_spndx * sizeof(int16_t);
     }
   else
     {
       /* Get the referenced page from object index */
 
-      addr += sizeof(spiffs_page_object_ix) +
+      addr += sizeof(struct spiffs_page_objndx_s) +
               SPIFFS_OBJ_IX_ENTRY(fs, data_spndx) *
               sizeof(int16_t);
     }
@@ -230,11 +230,11 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
 
   /* Find free entry */
 
-  ret = spiffs_obj_lu_find_free(fs, fs->free_blkndx,
-                                fs->free_entry, &blkndx, &entry);
+  ret = spiffs_objlu_find_free(fs, fs->free_blkndx,
+                               fs->free_entry, &blkndx, &entry);
   if (ret < 0)
     {
-      fwarn("WARNING: spiffs_obj_lu_find_free() failed: %d\n", ret);
+      fwarn("WARNING: spiffs_objlu_find_free() failed: %d\n", ret);
       return ret;
     }
 
@@ -299,13 +299,13 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
   if (objndx_spndx == 0)
     {
       ((FAR int16_t *)((FAR uint8_t *)fs->lu_work +
-        sizeof(struct spiffs_pgobj_ixheader_s)))[data_spndx] =
+        sizeof(struct spiffs_pgobj_ndxheader_s)))[data_spndx] =
           new_data_pgndx;
     }
   else
     {
       ((FAR int16_t *)((FAR uint8_t *)fs->lu_work +
-        sizeof(spiffs_page_object_ix)))[SPIFFS_OBJ_IX_ENTRY(fs, data_spndx)] =
+        sizeof(struct spiffs_page_objndx_s)))[SPIFFS_OBJ_IX_ENTRY(fs, data_spndx)] =
           new_data_pgndx;
     }
 
@@ -360,14 +360,14 @@ static int spiffs_check_delobj_lazy(FAR struct spiffs_s *fs, int16_t objid)
   uint8_t flags = 0xff;
   int ret;
 
-  ret = spiffs_obj_lu_find_id_and_span(fs, objid, 0, 0, &objhdr_pgndx);
+  ret = spiffs_objlu_find_id_and_span(fs, objid, 0, 0, &objhdr_pgndx);
   if (ret == -ENOENT)
     {
       return OK;
     }
   else if (ret < 0)
     {
-      ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+      ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
       return ret;
     }
 
@@ -531,18 +531,18 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
            * with same objid and span index is found
            */
 
-          ret = spiffs_obj_lu_find_id_and_span(fs,
-                                               pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                               pghdr->spndx, cur_pgndx, 0);
+          ret = spiffs_objlu_find_id_and_span(fs,
+                                              pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                              pghdr->spndx, cur_pgndx, 0);
           if (ret == -ENOENT)
             {
               /* No such index page found, check for a data page amongst page
                * headers.  lu cannot be trusted
                */
 
-              ret = spiffs_obj_lu_find_id_and_span_byphdr(fs,
-                                                          pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                                          0, 0, 0);
+              ret = spiffs_objlu_find_id_and_span_byphdr(fs,
+                                                         pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                                         0, 0, 0);
               if (ret == OK)
                 {
                   int16_t new_pgndx;
@@ -568,7 +568,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
             }
           else if (ret < 0)
             {
-              ferr("ERROR: spiffs_obj_lu_find_id_and_span_byphdr() failed: %d\n", ret);
+              ferr("ERROR: spiffs_objlu_find_id_and_span_byphdr() failed: %d\n", ret);
               return ret;
             }
         }
@@ -675,10 +675,10 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                * and span index
                */
 
-              ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                   lu_objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                                   pghdr->spndx, 0,
-                                                   &objndx_pgndx_lu);
+              ret = spiffs_objlu_find_id_and_span(fs,
+                                                  lu_objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                                  pghdr->spndx, 0,
+                                                  &objndx_pgndx_lu);
               if (ret == -ENOENT)
                 {
                   ret = OK;
@@ -686,7 +686,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                 }
               else if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -694,10 +694,10 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                * span index
                */
 
-              ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                   pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                                   pghdr->spndx, 0,
-                                                   &objndx_pgndx_ph);
+              ret = spiffs_objlu_find_id_and_span(fs,
+                                                  pghdr->objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                                  pghdr->spndx, 0,
+                                                  &objndx_pgndx_ph);
               if (ret == -ENOENT)
                 {
                   ret = OK;
@@ -705,7 +705,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                 }
               else if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -724,9 +724,9 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                    * span index
                    */
 
-                  ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                       lu_objid & ~SPIFFS_OBJ_ID_IX_FLAG,
-                                                       0, 0, &data_pgndx_lu);
+                  ret = spiffs_objlu_find_id_and_span(fs,
+                                                      lu_objid & ~SPIFFS_OBJ_ID_IX_FLAG,
+                                                      0, 0, &data_pgndx_lu);
                   if (ret == -ENOENT)
                     {
                       ret = OK;
@@ -734,7 +734,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                     }
                   else if (ret < 0)
                     {
-                      ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                      ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                       return ret;
                     }
 
@@ -742,9 +742,9 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                    * and span index
                    */
 
-                  ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                       pghdr->objid & ~SPIFFS_OBJ_ID_IX_FLAG,
-                                                       0, 0, &data_pgndx_ph);
+                  ret = spiffs_objlu_find_id_and_span(fs,
+                                                      pghdr->objid & ~SPIFFS_OBJ_ID_IX_FLAG,
+                                                      0, 0, &data_pgndx_ph);
                   if (ret == -ENOENT)
                     {
                       ret = OK;
@@ -752,7 +752,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
                     }
                   else if (ret < 0)
                     {
-                      ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                      ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                       return ret;
                     }
 
@@ -823,9 +823,9 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
 
           /* see if other data page exists for given objid and span index */
 
-          ret = spiffs_obj_lu_find_id_and_span(fs,
-                                               lu_objid & ~SPIFFS_OBJ_ID_IX_FLAG,
-                                               pghdr->spndx, cur_pgndx, &data_pgndx);
+          ret = spiffs_objlu_find_id_and_span(fs,
+                                              lu_objid & ~SPIFFS_OBJ_ID_IX_FLAG,
+                                              pghdr->spndx, cur_pgndx, &data_pgndx);
           if (ret == -ENOENT)
             {
               ret = OK;
@@ -833,16 +833,16 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
             }
           else if (ret < 0)
             {
-              ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+              ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
               return ret;
             }
 
           /* See if other object index exists for given objid and span index */
 
-          ret = spiffs_obj_lu_find_id_and_span(fs,
-                                               lu_objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                               pghdr->spndx, cur_pgndx,
-                                               &objndx_pgndx_d);
+          ret = spiffs_objlu_find_id_and_span(fs,
+                                              lu_objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                              pghdr->spndx, cur_pgndx,
+                                              &objndx_pgndx_d);
           if (ret == -ENOENT)
             {
               ret = OK;
@@ -850,7 +850,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
             }
           else if (ret < 0)
             {
-              ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+              ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
               return ret;
             }
 
@@ -1225,8 +1225,8 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
 
               /* Not in temporary index, try finding it */
 
-              ret = spiffs_obj_lu_find_id_and_span(fs, objid | SPIFFS_OBJ_ID_IX_FLAG,
-                                                   0, 0, &objhdr_pgndx);
+              ret = spiffs_objlu_find_id_and_span(fs, objid | SPIFFS_OBJ_ID_IX_FLAG,
+                                                  0, 0, &objhdr_pgndx);
               retc = SPIFFS_VIS_COUNTINUE_RELOAD;
 
               if (ret == OK)
@@ -1244,7 +1244,7 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
                 }
               else if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -1448,7 +1448,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                       data_spndx_offset = 0;
                       object_page_index =
                         (FAR int16_t *)((FAR uint8_t *)fs->lu_work +
-                          sizeof(struct spiffs_pgobj_ixheader_s));
+                          sizeof(struct spiffs_pgobj_ndxheader_s));
                     }
                   else
                     {
@@ -1459,7 +1459,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                           SPIFFS_OBJ_IX_LEN(fs) * (pghdr.spndx - 1);
                       object_page_index =
                         (FAR int16_t *)((FAR uint8_t *) fs->lu_work +
-                          sizeof(spiffs_page_object_ix));
+                          sizeof(struct spiffs_page_objndx_s));
                     }
 
                   /* For all entries in index */
@@ -1485,10 +1485,11 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
 
                           /* Check for data page elsewhere */
 
-                          ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                               objndx_phdr->objid & ~SPIFFS_OBJ_ID_IX_FLAG,
-                                                               data_spndx_offset + i,
-                                                               0, &data_pgndx);
+                          ret = spiffs_objlu_find_id_and_span(fs,
+                                                              objndx_phdr->objid &
+                                                              ~SPIFFS_OBJ_ID_IX_FLAG,
+                                                              data_spndx_offset + i,
+                                                              0, &data_pgndx);
                           if (ret == -ENOENT)
                             {
                               ret = OK;
@@ -1496,7 +1497,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                             }
                           else if (ret < 0)
                             {
-                              ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n",
+                              ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n",
                                     ret);
                               return ret;
                             }
@@ -1561,12 +1562,12 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                         {
                           /* Valid reference. read referenced page header */
 
-                          struct spiffs_page_header_s rp_hdr;
+                          struct spiffs_page_header_s rphdr;
                           ret = spiffs_cache_read(fs,
                                                   SPIFFS_OP_T_OBJ_LU2 | SPIFFS_OP_C_READ,
                                                   0, SPIFFS_PAGE_TO_PADDR(fs, rpgndx),
                                                   sizeof(struct spiffs_page_header_s),
-                                                  (FAR uint8_t *)&rp_hdr);
+                                                  (FAR uint8_t *)&rphdr);
                           if (ret < 0)
                             {
                               ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -1575,9 +1576,9 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
 
                           /* Cross reference page header check */
 
-                          if (rp_hdr.objid != (pghdr.objid & ~SPIFFS_OBJ_ID_IX_FLAG) ||
-                              rp_hdr.spndx != data_spndx_offset + i ||
-                              (rp_hdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_INDEX |
+                          if (rphdr.objid != (pghdr.objid & ~SPIFFS_OBJ_ID_IX_FLAG) ||
+                              rphdr.spndx != data_spndx_offset + i ||
+                              (rphdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_INDEX |
                                                SPIFFS_PH_FLAG_USED)) !=
                               (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_INDEX))
                             {
@@ -1588,15 +1589,16 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                                rpgndx,
                                                pghdr.objid & ~SPIFFS_OBJ_ID_IX_FLAG,
                                                data_spndx_offset + i,
-                                               rp_hdr.objid, rp_hdr.spndx,
-                                               rp_hdr.flags);
+                                               rphdr.objid, rphdr.spndx,
+                                               rphdr.flags);
 
                               /* Try finding correct page */
 
-                              ret = spiffs_obj_lu_find_id_and_span(fs,
-                                                                   pghdr.objid & ~SPIFFS_OBJ_ID_IX_FLAG,
-                                                                   data_spndx_offset + i, rpgndx,
-                                                                   &data_pgndx);
+                              ret = spiffs_objlu_find_id_and_span(fs,
+                                                                  pghdr.objid &
+                                                                  ~SPIFFS_OBJ_ID_IX_FLAG,
+                                                                  data_spndx_offset + i, rpgndx,
+                                                                  &data_pgndx);
                               if (ret == -ENOENT)
                                 {
                                   ret = OK;
@@ -1604,7 +1606,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                 }
                               else if (ret < 0)
                                 {
-                                  ferr("ERROR: spiffs_obj_lu_find_id_and_span() failed: %d\n", ret);
+                                  ferr("ERROR: spiffs_objlu_find_id_and_span() failed: %d\n", ret);
                                   return ret;
                                 }
 
@@ -1783,7 +1785,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                             }
                           else
                             {
-                              struct spiffs_page_header_s rp_hdr;
+                              struct spiffs_page_header_s rphdr;
 
                               /* Pointing to something else, check what */
 
@@ -1792,7 +1794,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                                       0,
                                                       SPIFFS_PAGE_TO_PADDR(fs, rpgndx),
                                                       sizeof(struct spiffs_page_header_s),
-                                                      (FAR uint8_t *)&rp_hdr);
+                                                      (FAR uint8_t *)&rphdr);
                               if (ret < 0)
                                 {
                                   ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -1800,8 +1802,8 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                 }
 
                               if (((pghdr.objid & ~SPIFFS_OBJ_ID_IX_FLAG) ==
-                                   rp_hdr.objid) &&
-                                  ((rp_hdr.flags & (SPIFFS_PH_FLAG_INDEX |
+                                   rphdr.objid) &&
+                                  ((rphdr.flags & (SPIFFS_PH_FLAG_INDEX |
                                                     SPIFFS_PH_FLAG_DELET |
                                                     SPIFFS_PH_FLAG_USED |
                                                     SPIFFS_PH_FLAG_FINAL)) ==
@@ -1828,13 +1830,13 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                                     ("PA: corresponding ref is weird: "
                                      "%04x %s%s%s%s, rewrite this "
                                          "%04x\n", rpgndx,
-                                         (rp_hdr.flags & SPIFFS_PH_FLAG_INDEX) ? "" :
+                                         (rphdr.flags & SPIFFS_PH_FLAG_INDEX) ? "" :
                                          "INDEX ",
-                                         (rp_hdr.flags & SPIFFS_PH_FLAG_DELET) ? "" :
+                                         (rphdr.flags & SPIFFS_PH_FLAG_DELET) ? "" :
                                          "DELETED ",
-                                         (rp_hdr.flags & SPIFFS_PH_FLAG_USED) ?
+                                         (rphdr.flags & SPIFFS_PH_FLAG_USED) ?
                                          "NOTUSED " : "",
-                                         (rp_hdr.flags & SPIFFS_PH_FLAG_FINAL) ?
+                                         (rphdr.flags & SPIFFS_PH_FLAG_FINAL) ?
                                          "NOTFINAL " : "", cur_pgndx);
 
                                   rewrite_ndx_to_this = true;

@@ -160,6 +160,8 @@
  *      obj.objid:0123 span.ndx:0005 flags:DATA
  */
 
+#define SPIFFS_ERR_INTERNAL             (-256)
+
 /* visitor result, continue searching */
 
 #define SPIFFS_VIS_COUNTINUE            (SPIFFS_ERR_INTERNAL - 20)
@@ -286,12 +288,12 @@
 /* entries in an object header page index */
 
 #define SPIFFS_OBJ_HDR_IX_LEN(fs) \
-  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_pgobj_ixheader_s))/sizeof(int16_t))
+  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_pgobj_ndxheader_s))/sizeof(int16_t))
 
 /* entries in an object page index */
 
 #define SPIFFS_OBJ_IX_LEN(fs) \
-  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(spiffs_page_object_ix))/sizeof(int16_t))
+  ((SPIFFS_CFG_LOG_PAGE_SZ(fs) - sizeof(struct spiffs_page_objndx_s))/sizeof(int16_t))
 
 /* object index entry for given data span index */
 
@@ -343,31 +345,7 @@
 
 #define SPIFFS_PH_FLAG_IXDELE (1<<6)
 
-#define SPIFFS_CHECK_RES(res) \
-  do { \
-    if ((res) < OK) return (res); \
-  } while (0);
-
-#define SPIFFS_VALIDATE_OBJIX(_ph, _objid, _spndx) \
-    if (((_ph).flags & SPIFFS_PH_FLAG_USED) != 0) return SPIFFS_ERR_IS_FREE; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_DELET) == 0) return SPIFFS_ERR_DELETED; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_FINAL) != 0) return SPIFFS_ERR_NOT_FINALIZED; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_INDEX) != 0) return SPIFFS_ERR_NOT_INDEX; \
-    if (((_objid) & SPIFFS_OBJ_ID_IX_FLAG) == 0) return SPIFFS_ERR_NOT_INDEX; \
-    if ((_ph).spndx != (_spndx)) return SPIFFS_ERR_INDEX_SPAN_MISMATCH;
-    /* if ((_spndx) == 0 && ((_ph).flags & SPIFFS_PH_FLAG_IXDELE) == 0) return
-     * SPIFFS_ERR_DELETED;
-     */
-
-#define SPIFFS_VALIDATE_DATA(_ph, _objid, _spndx) \
-    if (((_ph).flags & SPIFFS_PH_FLAG_USED) != 0) return SPIFFS_ERR_IS_FREE; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_DELET) == 0) return SPIFFS_ERR_DELETED; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_FINAL) != 0) return SPIFFS_ERR_NOT_FINALIZED; \
-    if (((_ph).flags & SPIFFS_PH_FLAG_INDEX) == 0) return SPIFFS_ERR_IS_INDEX; \
-    if ((_objid) & SPIFFS_OBJ_ID_IX_FLAG) return SPIFFS_ERR_IS_INDEX; \
-    if ((_ph).spndx != (_spndx)) return SPIFFS_ERR_DATA_SPAN_MISMATCH;
-
-/* check objid, only visit matching objec ids */
+/* Check objid, only visit matching objec ids */
 
 #define SPIFFS_VIS_CHECK_ID     (1<<0)
 
@@ -394,66 +372,68 @@
 
 /* page header, part of each page except object lookup pages
  * NB: this is always aligned when the data page is an object index,
- * as in this case struct spiffs_page_object_ix is used
+ * as in this case struct spiffs_page_objndx_s is used
  */
 
 begin_packed_struct struct spiffs_page_header_s
 {
-  int16_t objid;                       /* object objid */
-  int16_t spndx;                       /* object span index */
-  uint8_t flags;                       /* flags */
+  int16_t objid;                        /* object objid */
+  int16_t spndx;                        /* object span index */
+  uint8_t flags;                        /* flags */
 } end_packed_struct;
 
 /* object index header page header */
 
-begin_packed_struct struct spiffs_pgobj_ixheader_s
+begin_packed_struct struct spiffs_pgobj_ndxheader_s
 {
-  struct spiffs_page_header_s p_hdr;   /* common page header */
-  uint32_t size;                       /* size of object */
-  uint8_t type;                        /* type of object */
-  uint8_t name[CONFIG_SPIFFS_NAME_MAX];       /* name of object */
+  struct spiffs_page_header_s phdr;     /* common page header */
+  uint32_t size;                        /* size of object */
+  uint8_t type;                         /* type of object */
+  uint8_t name[CONFIG_SPIFFS_NAME_MAX]; /* name of object */
 } end_packed_struct;
 
 /* object index page header */
 
-typedef begin_packed_struct struct
+begin_packed_struct struct spiffs_page_objndx_s
 {
-  struct spiffs_page_header_s p_hdr;
+  struct spiffs_page_header_s phdr;
   uint8_t _align[4 - ((sizeof(struct spiffs_page_header_s) & 3) ==
                  0 ? 4 : (sizeof(struct spiffs_page_header_s) & 3))];
-} begin_packed_struct spiffs_page_object_ix;
+} begin_packed_struct;
 
 /* callback func for object lookup visitor */
 
-typedef int (*spiffs_visitor_f)(FAR struct spiffs_s *fs, int16_t objid,
-                                int16_t blkndx, int ix_entry,
-                                FAR const void *user_const,
-                                FAR void *user_var);
+typedef int (*spiffs_callback_t)(FAR struct spiffs_s *fs, int16_t objid,
+                                 int16_t blkndx, int entry,
+                                 FAR const void *user_const,
+                                 FAR void *user_var);
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+int     spiffs_validate_objix(FAR struct spiffs_page_header_s *ph,
+                              int16_t objid, int16_t spndx);
 int     spiffs_phys_cpy(FAR struct spiffs_s *fs,
-          int16_t objid, uint32_t dst, uint32_t src, uint32_t len);
+          int16_t objid, uint32_t dest, uint32_t src, uint32_t len);
 int     spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
           int starting_lu_entry, uint8_t flags, int16_t objid,
-          spiffs_visitor_f v, FAR const void *user_const,
-          FAR void *user_var, FAR int16_t *block_ix, int *lu_entry);
+          spiffs_callback_t v, FAR const void *user_const,
+          FAR void *user_var, FAR int16_t *blkndx, int *lu_entry);
 int     spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx);
-int     spiffs_obj_lu_scan(FAR struct spiffs_s *fs);
-int     spiffs_obj_lu_find_free_obj_id(FAR struct spiffs_s *fs,
+int     spiffs_objlu_scan(FAR struct spiffs_s *fs);
+int     spiffs_objlu_find_free_obj_id(FAR struct spiffs_s *fs,
           int16_t *objid, FAR const uint8_t *conflicting_name);
-int     spiffs_obj_lu_find_free(FAR struct spiffs_s *fs,
+int     spiffs_objlu_find_free(FAR struct spiffs_s *fs,
           int16_t starting_block, int starting_lu_entry,
-          FAR int16_t *block_ix, FAR int *lu_entry);
-int     spiffs_obj_lu_find_id(FAR struct spiffs_s *fs,
+          FAR int16_t *blkndx, FAR int *lu_entry);
+int     spiffs_objlu_find_id(FAR struct spiffs_s *fs,
           int16_t starting_block, int starting_lu_entry, int16_t objid,
-          FAR int16_t *block_ix, FAR int *lu_entry);
-int     spiffs_obj_lu_find_id_and_span(FAR struct spiffs_s *fs,
+          FAR int16_t *blkndx, FAR int *lu_entry);
+int     spiffs_objlu_find_id_and_span(FAR struct spiffs_s *fs,
           int16_t objid, int16_t spndx, int16_t exclusion_pgndx,
           FAR int16_t *pgndx);
-int     spiffs_obj_lu_find_id_and_span_byphdr(FAR struct spiffs_s *fs,
+int     spiffs_objlu_find_id_and_span_byphdr(FAR struct spiffs_s *fs,
           int16_t objid, int16_t spndx, int16_t exclusion_pgndx,
           FAR int16_t *pgndx);
 int     spiffs_page_allocate_data(FAR struct spiffs_s *fs,
@@ -472,8 +452,8 @@ int     spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, int16_t objid, int16_t objhdr_pgndx,
           FAR uint8_t *new_objhdr_data, const uint8_t name[],
           uint32_t size, FAR int16_t *new_pgndx);
-void    spiffs_cb_object_event(FAR struct spiffs_s *fs,
-          FAR spiffs_page_object_ix * objndx, int ev, int16_t objid,
+void    spiffs_object_event(FAR struct spiffs_s *fs,
+          FAR struct spiffs_page_objndx_s * objndx, int ev, int16_t objid,
           int16_t spndx, int16_t new_pgndx, uint32_t new_size);
 int     spiffs_object_open_bypage(FAR struct spiffs_s *fs,
           int16_t pgndx, FAR struct spiffs_file_s *f, uint16_t flags,
@@ -483,7 +463,7 @@ int     spiffs_object_append(FAR struct spiffs_s *fs,
           size_t len);
 ssize_t spiffs_object_read(FAR struct spiffs_s *fs, FAR
           FAR struct spiffs_file_s *fobj, off_t offset, size_t len,
-          FAR uint8_t *dst);
+          FAR uint8_t *dest);
 int     spiffs_object_truncate(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t new_size, bool remove_full);
 int     spiffs_object_modify(FAR struct spiffs_s *fs,

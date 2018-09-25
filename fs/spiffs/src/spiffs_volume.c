@@ -79,7 +79,7 @@
 int spiffs_stat_pgndx(FAR struct spiffs_s *fs, int16_t pgndx, int16_t objid,
                       FAR struct stat *buf)
 {
-  struct spiffs_pgobj_ixheader_s objhdr;
+  struct spiffs_pgobj_ndxheader_s objhdr;
   uint32_t obj_id_addr;
   int16_t ndx;
   mode_t mode;
@@ -87,7 +87,7 @@ int spiffs_stat_pgndx(FAR struct spiffs_s *fs, int16_t pgndx, int16_t objid,
 
   ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_IX | SPIFFS_OP_C_READ, objid,
                           SPIFFS_PAGE_TO_PADDR(fs, pgndx),
-                          sizeof(struct spiffs_pgobj_ixheader_s),
+                          sizeof(struct spiffs_pgobj_ndxheader_s),
                           (FAR uint8_t *) & objhdr);
   if (ret < 0)
     {
