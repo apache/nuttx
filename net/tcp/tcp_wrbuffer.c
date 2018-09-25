@@ -252,13 +252,16 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_tryalloc(void)
 
 void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 {
-  DEBUGASSERT(wrb && wrb->wb_iob);
+  DEBUGASSERT(wrb != NULL);
 
   /* To avoid deadlocks, we must following this ordering:  Release the I/O
    * buffer chain first, then the write buffer structure.
    */
 
-  iob_free_chain(wrb->wb_iob);
+  if (wrb->wb_iob != NULL)
+    {
+      iob_free_chain(wrb->wb_iob);
+    }
 
   /* Then free the write buffer structure */
 
