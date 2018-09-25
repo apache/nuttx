@@ -1486,7 +1486,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
   else
 #endif
     {
-      nerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+      nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
+            htons(BUF->type));
       NETDEV_RXDROPPED(&priv->dev);
     }
 }
@@ -1768,7 +1769,7 @@ static void enc_irqworker(FAR void *arg)
           uint8_t pktcnt = enc_rdbreg(priv, ENC_EPKTCNT);
           if (pktcnt > 0)
             {
-              nerr("EPKTCNT: %02x\n", pktcnt);
+              ninfo("EPKTCNT: %02x\n", pktcnt);
 
               /* Handle packet receipt */
 
@@ -1796,7 +1797,7 @@ static void enc_irqworker(FAR void *arg)
        * clear the EIR.RXERIF bit.
        */
 
-      if ((eir & EIR_RXERIF) != 0) /* Receive Errror Interrupts */
+      if ((eir & EIR_RXERIF) != 0) /* Receive Error Interrupts */
         {
           enc_rxerif(priv);                       /* Handle the RX error */
           enc_bfcgreg(priv, ENC_EIR, EIR_RXERIF); /* Clear the RXERIF interrupt */
@@ -1934,7 +1935,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
 
-  /* In complex environments, we cannot do SPI transfers from the timout
+  /* In complex environments, we cannot do SPI transfers from the timeout
    * handler because semaphores are probably used to lock the SPI bus.  In
    * this case, we will defer processing to the worker thread.  This is also
    * much kinder in the use of system resources and is, therefore, probably
@@ -2029,7 +2030,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
 
-  /* In complex environments, we cannot do SPI transfers from the timout
+  /* In complex environments, we cannot do SPI transfers from the timeout
    * handler because semaphores are probably used to lock the SPI bus.  In
    * this case, we will defer processing to the worker thread.  This is also
    * much kinder in the use of system resources and is, therefore, probably
@@ -2643,7 +2644,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->lower        = lower;         /* Save the low-level MCU interface */
 
   /* The interface should be in the down state.  However, this function is called
-   * too early in initalization to perform the ENC28J60 reset in enc_ifdown.  We
+   * too early in initialization to perform the ENC28J60 reset in enc_ifdown.  We
    * are depending upon the fact that the application level logic will call enc_ifdown
    * later to reset the ENC28J60.  NOTE:  The MAC address will not be set up until
    * enc_ifup() is called. That gives the app time to set the MAC address before
