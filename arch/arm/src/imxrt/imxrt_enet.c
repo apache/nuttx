@@ -2025,8 +2025,22 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv)
       return ret;
     }
 
+  /* Indicate 50MHz clock */
+
   imxrt_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
                  (phydata | (1 << 7)));
+
+  /* Switch off NAND Tree mode */
+
+  ret = imxrt_readmii(priv, phyaddr, MII_KSZ8081_OMSO, &phydata);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read MII_KSZ8081_OMSO: %d\n", ret);
+      return ret;
+    }
+
+  imxrt_writemii(priv, phyaddr, MII_KSZ8081_OMSO,
+                 (phydata & ~(1 << 5)));
 
   /* Start auto negotiation */
 
