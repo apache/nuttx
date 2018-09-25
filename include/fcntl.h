@@ -65,6 +65,7 @@
 #define O_SYNC      (1 << 7)        /* Synchronize output on write */
 #define O_DSYNC     O_SYNC          /* Equivalent to OSYNC in NuttX */
 #define O_BINARY    (1 << 8)        /* Open the file in binary (untranslated) mode. */
+#define O_DIRECT    (1 << 9)        /* Avoid caching, write directly to hardware */
 
 /* Unsupported, but required open flags */
 

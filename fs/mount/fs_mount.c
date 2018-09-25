@@ -77,7 +77,9 @@
 
 /* These file systems require MTD drivers */
 
-#undef MDFS_SUPPORT
+#ifdef CONFIG_FS_SPIFFS
+#  define MDFS_SUPPORT 1
+#endif
 
 /* These file systems do not require block or MTD drivers */
 
@@ -133,8 +135,15 @@ static const struct fsmap_t g_bdfsmap[] =
 #ifdef MDFS_SUPPORT
 /* File systems that require MTD drivers */
 
+#ifdef CONFIG_FS_SPIFFS
+extern const struct mountpt_operations spiffs_operations;
+#endif
+
 static const struct fsmap_t g_mdfsmap[] =
 {
+#ifdef CONFIG_FS_SPIFFS
+    { "spiffs", &spiffs_operations },
+#endif
 };
 #endif /* MDFS_SUPPORT */
 

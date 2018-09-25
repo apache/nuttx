@@ -785,8 +785,8 @@ nx11
 
 nxffs
 
-  This is the apps/examples/nxffs test using a MTD RAM driver to
-  simulate the FLASH part.
+  This is a test of the NXFFS file system using the apps/examples/nxffs
+  test with an MTD RAM driver to simulate the FLASH part.
 
 nxlines
 
@@ -891,6 +891,11 @@ sixlowpan
   returned packet.
 
   See also the 'pktradio' configuration.
+
+spiffs
+
+  This is a test of the SPIFFS file system using the apps/examples/fstest
+  test with an MTD RAM driver to simulate the FLASH part.
 
 touchscreen
 

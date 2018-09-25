@@ -172,6 +172,16 @@ struct fs_smartfsdir_s
 };
 #endif
 
+#ifdef CONFIG_FS_SPIFFS
+/* SPIFFS is an SPI-oriented FLASH file system originally by Peter Andersson */
+
+struct fs_spiffsdir_s
+{
+  int16_t block;                               /* Current block */
+  int entry;                                   /* Current entry */
+};
+#endif
+
 #ifdef CONFIG_FS_UNIONFS
 /* The Union File System can be used to merge to different mountpoints so
  * that they appear as a single merged directory.
@@ -275,6 +285,9 @@ struct fs_dirent_s
 #endif
 #ifdef CONFIG_FS_SMARTFS
       struct fs_smartfsdir_s smartfs;
+#endif
+#ifdef CONFIG_FS_SPIFFS
+      struct fs_spiffsdir_s  spiffs;
 #endif
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;

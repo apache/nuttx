@@ -2058,6 +2058,8 @@ nuttx/
  |   |   `- README.txt
  |   |- procfs/
  |   |   `- README.txt
+ |   |- spiffs/
+ |   |   `- README.md
  |   `- unionfs/
  |       `- README.txt
  |- graphics/

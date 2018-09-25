@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* General ioctl definitions ************************************************/
 /* Each NuttX ioctl commands are uint16_t's consisting of an 8-bit type
  * identifier and an 8-bit command number.  All command type identifiers are
@@ -240,7 +241,7 @@
                                            *      the block with specific debug
                                            *      command and data.
                                            * OUT: None.  */
-#define BIOC_GEOMETRY   _BIOC(0x000c)    /* Used only by BCH to return the
+#define BIOC_GEOMETRY   _BIOC(0x000c)     /* Used only by BCH to return the
                                            * geometry of the contained block
                                            * driver.
                                            * IN:  Pointer to writable instance
@@ -248,6 +249,18 @@
                                            *      to return geometry.
                                            * OUT: Data return in user-provided
                                            *      buffer. */
+#define BIOC_CHECK      _BIOC(0x000d)     /* Run a consistency check on the
+                                           * file system media.
+                                           * IN:  None
+                                           * OUT: None */
+#define BIOC_FORMAT     _BIOC(0x000e)     /* Force reformatting of media.  All
+                                           * data will be lost.
+                                           * IN:  None
+                                           * OUT: None */
+#define BIOC_GC         _BIOC(0x000f)     /* Run garbage collection.
+                                           * IN:  On entry holds the number
+                                           *      of bytes to be recovered.
+                                           * OUT: None */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

@@ -170,6 +170,17 @@ int sim_bringup(void)
            */
 
           smart_initialize(0, mtd, NULL);
+
+#elif defined(CONFIG_FS_SPIFFS)
+          /* Register the MTD driver so that it can be accessed from the VFS */
+
+          ret = register_mtddriver("/dev/rammtd", mtd, 0755, NULL);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n",
+                     ret);
+            }
+
 #elif defined(CONFIG_FS_NXFFS)
           /* Initialize to provide NXFFS on the MTD interface */
 

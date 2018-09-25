@@ -73,6 +73,7 @@ include nfs/Make.defs
 include smartfs/Make.defs
 include binfs/Make.defs
 include procfs/Make.defs
+include spiffs/Make.defs
 include unionfs/Make.defs
 include userfs/Make.defs
 include hostfs/Make.defs

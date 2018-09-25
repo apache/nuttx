@@ -1,0 +1,151 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_SPIFFS
+	bool "SPIFFS File System"
+	default n
+	select FS_READABLE
+	select FS_WRITABLE
+	depends on !DISABLE_MOUNTPOINT && EXPERIMENTAL
+	---help---
+		Build the SPIFFS file system.  This is a port of version 0.3.7 of
+		the SPIFFS file system by  Peter Andersson.  It was originally
+		released under the MIT license.
+
+if FS_SPIFFS
+
+comment "In-memory Cache Options"
+
+config SPIFFS_CACHE_SIZE
+	int "Size of the cache"
+	default 8192
+
+config SPIFFS_CACHE_HITSCORE
+	int "Cache Hit Score"
+	default 4
+	range 1 255
+	---help---
+		Temporal file cache hit score. Each time a file is opened, all
+		cached files will lose one point. If the opened file is found in
+		cache, that entry will gain CONFIG_SPIFFS_CACHE_HITSCORE points.
+		One can experiment with this value for the specific access patterns
+		of the application. However, it must be between 1 (no gain for
+		hitting a cached entry often) and 255.
+
+config SPIFFS_CACHEDBG
+	bool "Enable cache debug output"
+	default n
+	depends on DEBUG_FS_INFO
+
+comment "Garbage Collection (GC) Options"
+
+config SPIFFS_GC_MAXRUNS
+	int "Max GC runs"
+	default 5
+	---help---
+		Define maximum number of gc runs to perform to reach desired free
+		pages.
+
+config SPIFFS_GC_DELWGT
+	int "Deleted pages weight"
+	default 5
+	---help---
+		Garbage collecting examines all pages in a block which and sums up
+		to a block score. Deleted pages normally gives positive score and
+		used pages normally gives a negative score (as these must be moved).
+		To have a fair wear-leveling, the erase age is also included in
+		score, whose factor normally is the most positive.  The larger the
+		score, the more likely it is that the block will picked for garbage
+		collection.
+
+		This option provides the weight used for deleted pages.
+
+config SPIFFS_GC_USEDWGT
+	int "Used pages weight"
+	default -1
+	---help---
+		Garbage collecting examines all pages in a block which and sums up
+		to a block score. Deleted pages normally gives positive score and
+		used pages normally gives a negative score (as these must be moved).
+		To have a fair wear-leveling, the erase age is also included in
+		score, whose factor normally is the most positive.  The larger the
+		score, the more likely it is that the block will picked for garbage
+		collection.
+
+		This option provides the weight used for used pages.
+
+config SPIFFS_GC_ERASEAGEWGT
+	int "Used pages weight"
+	default 50
+	---help---
+		Garbage collecting examines all pages in a block which and sums up
+		to a block score. Deleted pages normally gives positive score and
+		used pages normally gives a negative score (as these must be moved).
+		To have a fair wear-leveling, the erase age is also included in
+		score, whose factor normally is the most positive.  The larger the
+		score, the more likely it is that the block will picked for garbage
+		collection.
+
+		This option provides the weight used weight used for time between
+		last erased and erase of this block.
+
+config SPIFFS_GCDBG
+	bool "Enable garbage collection debug output"
+	default n
+	depends on DEBUG_FS_INFO
+
+comment "Consistency Check Options"
+
+config SPIFFS_CHECK_ONMOUNT
+	bool "Consistency check on mount"
+	default n
+	select SPIFFS_CHECK_OUTPUT
+	---help---
+		Perhaps a full, extended consistency check on mount.  By default, a
+		simple scan of the file system only is performed.
+
+config SPIFFS_CHECK_OUTPUT
+	bool "Enable consistency check SYSLOG output"
+	default n
+
+comment "SPIFFS Core Options"
+
+config SPIFFS_NO_BLIND_WRITES
+	bool "No blind writes"
+	default n
+	---help---
+		By default SPIFFS in some cases relies on the property of NOR flash
+		that bits cannot be set from 0 to 1 by writing and that controllers
+		will ignore such bit changes. This results in fewer reads as SPIFFS
+		can in some cases perform blind writes, with all bits set to 1 and
+		only those it needs reset set to 0.  Most of the chips and
+		controllers allow this behavior, so the default is to use this
+		technique. If your controller is one of the rare ones that don't,
+		turn this option on and SPIFFS will perform a read-modify-write
+		instead.
+
+config SPIFFS_PAGE_CHECK
+	bool "Check Page Headers"
+	default y
+	---help---
+		Always check header of each accessed page to ensure consistent state.
+		If enabled it will increase number of reads, will increase flash.
+
+config SPIFFS_NAME_MAX
+	int "Maximum Name Length"
+	default 32
+	---help---
+		Object name maximum length. Note that this length include the zero
+		termination character, meaning maximum string of characters.
+
+config SPIFFS_COPYBUF_STACK
+	int "Max Stack Allocation"
+	default 64
+	---help---
+		Size of buffer allocated on stack used when copying data.  Lower
+		value generates more read/writes.  No meaning having it bigger
+		than logical page size.
+
+endif # FS_SPIFFS

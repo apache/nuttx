@@ -95,6 +95,7 @@
 #define XENIX_SUPER_MAGIC     0x012ff7b4
 #define XFS_SUPER_MAGIC       0x58465342
 #define _XIAFS_SUPER_MAGIC    0x012fd16d
+#define SPIFFS_SUPER_MAGIC    0x20090315
 
 /* NuttX specific file-systems */
 
