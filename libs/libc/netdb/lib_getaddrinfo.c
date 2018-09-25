@@ -65,7 +65,8 @@ struct ai_s
  * Private Functions
  ****************************************************************************/
 
-FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
+FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
+                                 int port, FAR void *addr)
 {
   struct ai_s *ai;
   socklen_t addrlen;
@@ -82,6 +83,8 @@ FAR static struct ai_s *alloc_ai(int family, int port, FAR void *addr)
   ai->ai.ai_addr            = (struct sockaddr *)&ai->sa;
   ai->ai.ai_addrlen         = addrlen;
   ai->ai.ai_addr->sa_family = ai->ai.ai_family = family;
+  ai->ai.ai_socktype        = socktype;
+  ai->ai.ai_protocol        = protocol;
 
   switch (family)
     {
@@ -183,35 +186,21 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         }
     }
 
-  if ((flags & AI_PASSIVE) != 0)
-    {
-      in_addr_t addr;
-
-      addr = hostname ? inet_addr(hostname) : HTONL(0x00000000);
-
-      /* REVISIT: IPv6? */
-
-      ai = alloc_ai(AF_INET, port, &addr);
-      if (ai == NULL)
-        {
-          return EAI_MEMORY;
-        }
-
-      *res = (struct addrinfo *)ai;
-      return OK;
-   }
-
   *res = NULL;
 
-  if (hostname == NULL)
+  /* If hostname is not NULL, then the AI_PASSIVE flag is ignored. */
+
+  if ((flags & AI_PASSIVE) != 0 && hostname == NULL)
     {
-#ifdef CONFIG_NET_LOOPBACK
-      /* Local service. */
+      struct in6_addr addr;
+      int ret;
+
+      memset(&addr, 0, sizeof(struct in6_addr));
 
 #ifdef CONFIG_NET_IPv4
       if (family == AF_INET || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET, port, (void *)&g_lo_ipv4addr);
+          ai = alloc_ai(AF_INET, socktype, proto, port, (void *)&addr);
           if (ai == NULL)
             {
               return EAI_MEMORY;
@@ -223,7 +212,48 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv6
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET6, port, (void *)&g_lo_ipv6addr);
+          ai = alloc_ai(AF_INET6, socktype, proto, port, (void *)&addr);
+          if (ai == NULL)
+            {
+              return (*res != NULL) ? OK : EAI_MEMORY;
+            }
+
+          /* Can return both IPv4 and IPv6 loopback. */
+
+          if (*res != NULL)
+            {
+              (*res)->ai_next = (struct addrinfo *)ai;
+            }
+          else
+            {
+              *res = (struct addrinfo *)ai;
+            }
+        }
+#endif
+      return OK;
+   }
+
+  if (hostname == NULL)
+    {
+#ifdef CONFIG_NET_LOOPBACK
+      /* Local service. */
+
+#ifdef CONFIG_NET_IPv4
+      if (family == AF_INET || family == AF_UNSPEC)
+        {
+          ai = alloc_ai(AF_INET, socktype, proto, port, (void *)&g_lo_ipv4addr);
+          if (ai == NULL)
+            {
+              return EAI_MEMORY;
+            }
+
+          *res = (struct addrinfo *)ai;
+        }
+#endif
+#ifdef CONFIG_NET_IPv6
+      if (family == AF_INET6 || family == AF_UNSPEC)
+        {
+          ai = alloc_ai(AF_INET6, socktype, proto, port, (void *)&g_lo_ipv6addr);
           if (ai == NULL)
             {
               return (*res != NULL) ? OK : EAI_MEMORY;
@@ -269,10 +299,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
           /* REVISIT: filter by socktype and protocol not implemented. */
 
-          UNUSED(proto);
-          UNUSED(socktype);
-
-          ai = alloc_ai(hp->h_addrtype, port, hp->h_addr_list[i]);
+          ai = alloc_ai(hp->h_addrtype, socktype, proto, port, hp->h_addr_list[i]);
           if (ai == NULL)
             {
               if (*res)
