@@ -89,7 +89,9 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
   off_t blkstart;
   off_t blkend;
 
-  DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL);
+  DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL && len > 0);
+
+  remaining = len;
 
 #ifdef CONFIG_MTD_BYTE_WRITE
   /* Try to do the byte write */
@@ -105,14 +107,14 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
        * blkmask   - Mask that isolates fractional block bytes.
        * blkoffset - The offset of data in the first block written
        * blkstart  - Start block number (aligned down)
-       * blkend    - End block number (aligned up)
+       * blkend    - End block number (aligned down)
        */
 
       blksize   = fs->geo.blocksize;
       blkmask   = blksize - 1;
-      blkoffset = blksize & ~blkmask;
+      blkoffset = offset & blkmask;
       blkstart  = offset / blksize;
-      blkend    = (offset + len + blkmask) / blksize;
+      blkend    = (offset + len) / blksize;
 
       /* Check if we have to do a read-modify-write on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
@@ -159,22 +161,19 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       /* Write all intervening complete blocks... all at once */
 
-      nblocks = blkend - blkstart;
-
-      if ((remaining & blkmask) == 0)
+      nblocks = blkend - blkstart + 1;
+      if (nblocks > 0)
         {
-          nblocks++;  /* Include the final block */
-        }
+          ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
 
-      ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
-      if (ret < 0)
-        {
-          ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
-          return (ssize_t)ret;
+          src       += (remaining & ~blkmask);
+          remaining  = (remaining & blkmask);
         }
-
-      src       += (remaining & ~blkmask);
-      remaining  = (remaining & blkmask);
 
       /* Check if we need to perform a read-modify-write on the final block.
        * If the remaining bytes to write is less then a full block, then we
@@ -183,6 +182,10 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (remaining > 0)
         {
+          /* The real end block is the next block */
+
+          blkend++;
+
 #warning "REVISIT: is fs->work available here?"
           ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
           if (ret < 0)
@@ -239,7 +242,9 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
   off_t blkstart;
   off_t blkend;
 
-  DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL);
+  DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL && len > 0);
+
+  remaining = len;
 
   /* Try to do the byte read */
 
@@ -253,14 +258,14 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
        * blkmask   - Mask that isolates fractional block bytes.
        * blkoffset - The offset of data in the first block read.
        * blkstart  - Start block number (aligned down)
-       * blkend    - End block number (aligned up)
+       * blkend    - End block number (aligned down)
        */
 
       blksize   = fs->geo.blocksize;
       blkmask   = blksize - 1;
-      blkoffset = blksize & ~blkmask;
+      blkoffset = offset & blkmask;
       blkstart  = offset / blksize;
-      blkend    = (offset + len + blkmask) / blksize;
+      blkend    = (offset + len) / blksize;
 
       /* Check if we have to do a partial read on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
@@ -298,22 +303,19 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       /* Read all intervening complete blocks... all at once */
 
-      nblocks = blkend - blkstart;
-
-      if ((remaining & blkmask) == 0)
+      nblocks = blkend - blkstart + 1;
+      if (nblocks > 0)
         {
-          nblocks++;  /* Include the final block */
-        }
+          ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
 
-      ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
-      if (ret < 0)
-        {
-          ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
-          return (ssize_t)ret;
+          dest      += (remaining & ~blkmask);
+          remaining  = (remaining & blkmask);
         }
-
-      dest      += (remaining & ~blkmask);
-      remaining  = (remaining & blkmask);
 
       /* Check if we need to perform a partial read on the final block.
        * If the remaining bytes to write is less then a full block, then we
@@ -323,7 +325,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       if (remaining > 0)
         {
 #warning "REVISIT: is fs->work available here?"
-          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
+          ret = MTD_BREAD(fs->mtd, blkend + 1, 1, fs->work);
           if (ret < 0)
             {
               ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
@@ -347,7 +349,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *
  * Input Parameters:
  *   fs     - A reference to the volume structure
- *   offset - The physical offset to begin erasing
+ *   offset - The byte offset to begin erasing
  *   len    - The number of bytes to erase
  *
  * Returned Value:
@@ -358,20 +360,35 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
 ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len)
 {
-  int16_t blksize;
-  off_t blkstart;
-  off_t blkend;
+  int16_t erasesize;
+  off_t eblkstart;
+  off_t eblkend;
+  ssize_t nerased;
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL);
 
-#warning REVISIT:  What are units of offset and len?
+  /* We will have to do block read(s)
+   *
+   * erasesize  - Size of one erase block.
+   * eblkstart  - Start erase block number (aligned down)
+   * eblkend    - End block number (aligned down)
+   */
 
-  blksize  = fs->geo.erasesize;
-  DEBUGASSERT(offset = offset % blksize);
-  DEBUGASSERT(len    = len    % blksize);
+  erasesize = fs->geo.erasesize;
+  eblkstart = offset / erasesize;
+  eblkend   = (offset + len) / erasesize;
 
-  blkstart = offset / blksize;                       /* Truncates to floor */
-  blkend   = (offset + len + blksize - 1) / blksize; /* Rounds up to ceil */
+  /* Must be even multiples of the erase block size */
 
-  return MTD_ERASE(fs->mtd, blkstart, blkend - blkstart);
+  DEBUGASSERT(offset == erasesize * eblkstart);
+  DEBUGASSERT(len    == erasesize * eblkend - offset);
+
+  nerased = MTD_ERASE(fs->mtd, eblkstart, eblkend - eblkstart);
+  if (nerased < 0)
+    {
+      ferr("ERROR: MTD_ERASE() failed: %d\n");
+      return nerased;
+    }
+
+  return erasesize * nerased;
 }

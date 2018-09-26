@@ -194,7 +194,7 @@ static void spiffs_lock_reentrant(FAR struct spiffs_sem_s *rsem)
            * was awakened by a signal.
            */
 
-          DEBUGASSERT(ret == OK || ret == -EINTR);
+          DEBUGASSERT(ret >= 0 || ret == -EINTR);
         }
       while (ret == -EINTR);
 
@@ -245,7 +245,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   if (status < 0)
     {
       fwarn("WARNING spiffs_check_luconsistency failed: %d\n", status);
-      if (ret == OK)
+      if (ret >= 0)
         {
           ret = status;
         }
@@ -255,7 +255,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   if (status < 0)
     {
       fwarn("WARNING spiffs_check_objidconsistency failed: %d\n", status);
-      if (ret == OK)
+      if (ret >= 0)
         {
           ret = status;
         }
@@ -265,7 +265,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   if (status < 0)
     {
       fwarn("WARNING spiffs_check_pgconsistency failed: %d\n", status);
-      if (ret == OK)
+      if (ret >= 0)
         {
           ret = status;
         }
@@ -275,7 +275,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   if (status < 0)
     {
       fwarn("WARNING spiffs_objlu_scan failed: %d\n", status);
-      if (ret == OK)
+      if (ret >= 0)
         {
           ret = status;
         }
@@ -378,6 +378,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   fobj = (FAR struct spiffs_file_s *)kmm_zalloc(sizeof(struct spiffs_file_s));
   if (fobj == NULL)
     {
+      ferr("ERROR: Failed to allocate fail object\n");
       return -ENOMEM;
     }
 
@@ -389,19 +390,19 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Check of the file object already exists */
 
-  ret = spiffs_find_objhdr_pgndx(fs,
-                                                       (FAR const uint8_t *)relpath,
-                                                       &pgndx);
+  ret = spiffs_find_objhdr_pgndx(fs, (FAR const uint8_t *)relpath, &pgndx);
   if (ret < 0 && (oflags & O_CREAT) == 0)
     {
       /* It does not exist and we were not asked to create it */
 
+      fwarn("WARNING: File does not exist a O_CREAT not set\n");
       goto errout_with_fileobject;
     }
-  else if (ret == OK && (oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
+  else if (ret >= 0 && (oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
     {
       /* O_CREAT and O_EXCL and file exists - fail */
 
+      fwarn("WARNING: File exists and O_CREAT|O_EXCL is selected\n");
       ret = -EEXIST;
       goto errout_with_fileobject;
     }
@@ -414,6 +415,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
       ret = spiffs_objlu_find_free_objid(fs, &objid, 0);
       if (ret < 0)
         {
+          ferr("ERROR: spiffs_objlu_find_free_objid() failed: %d\n", ret);
           goto errout_with_fileobject;
         }
 
@@ -421,6 +423,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
                                  DTYPE_FILE, &pgndx);
       if (ret < 0)
         {
+          ferr("ERROR: spiffs_object_create() failed: %d\n", ret);
           goto errout_with_fileobject;
         }
 
@@ -430,6 +433,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
     }
   else if (ret < 0)
     {
+      ferr("ERROR: spiffs_find_objhdr_pgndx() failed: %d\n", ret);
       goto errout_with_fileobject;
     }
 
@@ -438,6 +442,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   ret = spiffs_object_open_bypage(fs, pgndx, fobj, oflags, mode);
   if (ret < 0)
     {
+      ferr("ERROR: spiffs_object_open_bypage() failed: %d\n", ret);
       goto errout_with_fileobject;
     }
 
@@ -448,6 +453,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
       ret = spiffs_object_truncate(fs, fobj, 0, false);
       if (ret < 0)
         {
+          ferr("ERROR: spiffs_object_truncate() failed: %d\n", ret);
           goto errout_with_fileobject;
         }
     }
@@ -1242,7 +1248,7 @@ static int spiffs_readdir(FAR struct inode *mountpt,
   ret = spiffs_foreach_objlu(fs, dir->u.spiffs.block, dir->u.spiffs.entry,
                              SPIFFS_VIS_NO_WRAP, 0, spiffs_readdir_callback,
                              NULL, dir, &blkndx, &entry);
-  if (ret == OK)
+  if (ret >= 0)
     {
       dir->u.spiffs.block = blkndx;
       dir->u.spiffs.entry = entry + 1;
@@ -1725,7 +1731,7 @@ static int spiffs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
     {
       ret = OK;
     }
-  else if (ret == OK)
+  else if (ret >= 0)
     {
       ret = -EEXIST;
     }

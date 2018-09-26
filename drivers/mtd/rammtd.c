@@ -190,7 +190,8 @@ static void *ram_write(FAR void *dest, FAR const void *src, size_t len)
  * Name: ram_erase
  ****************************************************************************/
 
-static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                     size_t nblocks)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
   off_t offset;

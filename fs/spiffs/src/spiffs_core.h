@@ -391,8 +391,8 @@ typedef int (*spiffs_callback_t)(FAR struct spiffs_s *fs, int16_t objid,
  * Public Function Prototypes
  ****************************************************************************/
 
-int     spiffs_validate_objix(FAR struct spiffs_page_header_s *ph,
-                              int16_t objid, int16_t spndx);
+int     spiffs_validate_objndx(FAR struct spiffs_page_header_s *ph,
+                               int16_t objid, int16_t spndx);
 int     spiffs_phys_cpy(FAR struct spiffs_s *fs,
           int16_t objid, uint32_t dest, uint32_t src, uint32_t len);
 int     spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,

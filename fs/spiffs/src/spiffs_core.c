@@ -189,10 +189,10 @@ static int spiffs_page_index_check(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  ret = spiffs_validate_objix(&ph, fobj->objid, spndx);
+  ret = spiffs_validate_objndx(&ph, fobj->objid, spndx);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+      ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -418,7 +418,7 @@ spiffs_objlu_find_free_objid_compact_callback(FAR struct spiffs_s *fs,
                               SPIFFS_OBJ_LOOKUP_ENTRY_TO_PADDR(fs, blkndx, entry),
                               sizeof(struct spiffs_pgobj_ndxheader_s),
                               (FAR uint8_t *)&objhdr);
-      if (ret == OK && objhdr.phdr.spndx == 0 &&
+      if (ret >= 0 && objhdr.phdr.spndx == 0 &&
           ((objhdr.phdr.flags & (SPIFFS_PH_FLAG_INDEX |
                                  SPIFFS_PH_FLAG_FINAL |
                                  SPIFFS_PH_FLAG_DELET)) ==
@@ -451,7 +451,7 @@ spiffs_objlu_find_free_objid_compact_callback(FAR struct spiffs_s *fs,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spiffs_validate_objix
+ * Name: spiffs_validate_objndx
  *
  * Description:
  *   Returns zero (OK) if everything checks out.  Otherwise, a negated errno
@@ -459,8 +459,8 @@ spiffs_objlu_find_free_objid_compact_callback(FAR struct spiffs_s *fs,
  *
  ****************************************************************************/
 
-int spiffs_validate_objix(FAR struct spiffs_page_header_s *ph, int16_t objid,
-                          int16_t spndx)
+int spiffs_validate_objndx(FAR struct spiffs_page_header_s *ph,
+                           int16_t objid, int16_t spndx)
 {
   int ret = OK;
 
@@ -584,7 +584,7 @@ int spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
   entry_count      = SPIFFS_GEO_BLOCK_COUNT(fs) * SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs);
   cur_block        = starting_block;
   cur_block_addr   = starting_block * SPIFFS_GEO_BLOCK_SIZE(fs);
-  objlu_buf        = (FAR int16_t *) fs->lu_work;
+  objlu_buf        = (FAR int16_t *)fs->lu_work;
   cur_entry        = starting_lu_entry;
   entries_per_page = (SPIFFS_GEO_PAGE_SIZE(fs) / sizeof(int16_t));
   ret              = OK;
@@ -615,13 +615,13 @@ int spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
 
   /* Check each block */
 
-  while (ret == OK && entry_count > 0)
+  while (ret >= 0 && entry_count > 0)
     {
       int obj_lookup_page = cur_entry / entries_per_page;
 
       /* Check each object lookup page */
 
-      while (ret == OK &&
+      while (ret >= 0 &&
              obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
         {
           int entry_offset = obj_lookup_page * entries_per_page;
@@ -632,7 +632,7 @@ int spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
 
           /* Check each entry */
 
-          while (ret == OK &&
+          while (ret >= 0 &&
                  cur_entry - entry_offset < entries_per_page &&
                  cur_entry < (int)SPIFFS_OBJ_LOOKUP_MAX_ENTRIES(fs))
             {
@@ -900,7 +900,7 @@ int spiffs_objlu_find_free(FAR struct spiffs_s *fs, int16_t starting_block,
 
   ret = spiffs_objlu_find_id(fs, starting_block, starting_lu_entry,
                              SPIFFS_OBJID_FREE, blkndx, lu_entry);
-  if (ret == OK)
+  if (ret >= 0)
     {
       fs->free_blkndx = *blkndx;
       fs->free_entry  = (*lu_entry) + 1;
@@ -1442,10 +1442,10 @@ int spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
       objhdr = (FAR struct spiffs_pgobj_ndxheader_s *) fs->work;
     }
 
-  ret = spiffs_validate_objix(&objhdr->phdr, objid, 0);
+  ret = spiffs_validate_objndx(&objhdr->phdr, objid, 0);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+      ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
       return ret;
     }
 
@@ -1662,10 +1662,10 @@ int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
   fobj->objid        = objid;
   fobj->flags        = flags;
 
-  ret = spiffs_validate_objix(&objndx_hdr.phdr, fobj->objid, 0);
+  ret = spiffs_validate_objndx(&objndx_hdr.phdr, fobj->objid, 0);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+      ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
       return ret;
     }
 
@@ -1727,7 +1727,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
 
   /* Write all data */
 
-  while (ret == OK && written < len)
+  while (ret >= 0 && written < len)
     {
       size_t to_write;
 
@@ -1875,11 +1875,11 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
                   return ret;
                 }
 
-              ret = spiffs_validate_objix(&objhdr->phdr, fobj->objid,
-                                          cur_objndx_spndx);
+              ret = spiffs_validate_objndx(&objhdr->phdr, fobj->objid,
+                                           cur_objndx_spndx);
               if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
                   return ret;
                 }
             }
@@ -1967,11 +1967,11 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
                       return ret;
                     }
 
-                  ret = spiffs_validate_objix(&objhdr->phdr, fobj->objid,
-                                              cur_objndx_spndx);
+                  ret = spiffs_validate_objndx(&objhdr->phdr, fobj->objid,
+                                               cur_objndx_spndx);
                   if (ret < 0)
                     {
-                      ferr("ERROR: spiffs_validate_objix() failed: %d\n",
+                      ferr("ERROR: spiffs_validate_objndx() failed: %d\n",
                            ret);
                       return ret;
                     }
@@ -2261,7 +2261,7 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
 
   /* Write all data */
 
-  while (ret == OK && written < len)
+  while (ret >= 0 && written < len)
     {
       size_t to_write;
       int16_t orig_data_pgndx;
@@ -2358,11 +2358,11 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
                   return ret;
                 }
 
-              ret = spiffs_validate_objix(&objhdr->phdr, fobj->objid,
-                                          cur_objndx_spndx);
+              ret = spiffs_validate_objndx(&objhdr->phdr, fobj->objid,
+                                           cur_objndx_spndx);
               if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
                   return ret;
                 }
             }
@@ -2405,11 +2405,11 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
                   return ret;
                 }
 
-              ret = spiffs_validate_objix(&objhdr->phdr, fobj->objid,
-                                          cur_objndx_spndx);
+              ret = spiffs_validate_objndx(&objhdr->phdr, fobj->objid,
+                                           cur_objndx_spndx);
               if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -2882,11 +2882,11 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
               return ret;
             }
 
-          ret = spiffs_validate_objix(&objhdr->phdr, fobj->objid,
-                                      cur_objndx_spndx);
+          ret = spiffs_validate_objndx(&objhdr->phdr, fobj->objid,
+                                       cur_objndx_spndx);
           if (ret < 0)
             {
-              ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+              ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
               return ret;
             }
 
@@ -3280,11 +3280,11 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
               return ret;
             }
 
-          ret = spiffs_validate_objix(&objndx->phdr, fobj->objid,
-                                      cur_objndx_spndx);
+          ret = spiffs_validate_objndx(&objndx->phdr, fobj->objid,
+                                       cur_objndx_spndx);
           if (ret < 0)
             {
-              ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+              ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
               return ret;
             }
 

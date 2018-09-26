@@ -543,7 +543,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
               ret = spiffs_objlu_find_id_and_span_byphdr(fs,
                                                          pghdr->objid | SPIFFS_OBJID_NDXFLAG,
                                                          0, 0, 0);
-              if (ret == OK)
+              if (ret >= 0)
                 {
                   int16_t new_pgndx;
 
@@ -1229,7 +1229,7 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
                                                   0, 0, &objhdr_pgndx);
               retc = SPIFFS_VIS_COUNTINUE_RELOAD;
 
-              if (ret == OK)
+              if (ret >= 0)
                 {
                   /* Found, register as reachable */
 
@@ -1767,7 +1767,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                       ret = spiffs_check_get_data_pgndx(fs, pghdr.objid,
                                                         pghdr.spndx, &rpgndx,
                                                         &objndx_pgndx);
-                      if (ret == OK)
+                      if (ret >= 0)
                         {
                           if (((rpgndx == (int16_t) - 1 ||
                                 rpgndx > SPIFFS_GEO_PAGE_COUNT(fs)) ||

@@ -168,7 +168,7 @@ static int spiffs_gc_epage_stats(FAR struct spiffs_s *fs, int16_t blkndx)
 
   /* Check each object lookup page */
 
-  while (ret == OK && obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
+  while (ret >= 0 && obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
     {
       int entry_offset = obj_lookup_page * entries_per_page;
       ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ, 0,
@@ -178,7 +178,7 @@ static int spiffs_gc_epage_stats(FAR struct spiffs_s *fs, int16_t blkndx)
 
       /* Check each entry */
 
-      while (ret == OK &&
+      while (ret >= 0 &&
              cur_entry - entry_offset < entries_per_page &&
              cur_entry <
              (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) - SPIFFS_OBJ_LOOKUP_PAGES(fs)))
@@ -272,7 +272,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
 
   /* Check each block */
 
-  while (ret == OK && blocks--)
+  while (ret >= 0 && blocks--)
     {
       uint16_t deleted_pages_in_block = 0;
       uint16_t used_pages_in_block    = 0;
@@ -280,7 +280,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
 
       /* check each object lookup page */
 
-      while (ret == OK &&
+      while (ret >= 0 &&
              obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
         {
           int entry_offset = obj_lookup_page * entries_per_page;
@@ -291,7 +291,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
 
           /* Check each entry */
 
-          while (ret == OK &&
+          while (ret >= 0 &&
                  cur_entry - entry_offset < entries_per_page &&
                  cur_entry <
                  (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
@@ -332,7 +332,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
        * probably not so many blocks
        */
 
-      if (ret == OK /* && deleted_pages_in_block > 0 */ )
+      if (ret >= 0 /* && deleted_pages_in_block > 0 */ )
         {
           int32_t score;
           int16_t erase_count;
@@ -476,7 +476,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
       spiffs_gcinfo("Move free cursor to block=%0rx\n", fs->free_blkndx);
     }
 
-  while (ret == OK && gc.state != FINISHED)
+  while (ret >= 0 && gc.state != FINISHED)
     {
       int obj_lookup_page;
       uint8_t scan;
@@ -492,7 +492,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
       /* Check each object lookup page */
 
-      while (scan && ret == OK &&
+      while (scan && ret >= 0 &&
              obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
         {
           int entry_offset = obj_lookup_page * entries_per_page;
@@ -504,7 +504,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
           /* Check each object lookup entry */
 
-          while (scan && ret == OK &&
+          while (scan && ret >= 0 &&
                  cur_entry - entry_offset < entries_per_page &&
                  cur_entry <
                  (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
@@ -845,12 +845,12 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                * index, a check must run or lot of data may be lost
                */
 
-              ret = spiffs_validate_objix(&objndx->phdr,
-                                          gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
-                                          gc.cur_objndx_spndx);
+              ret = spiffs_validate_objndx(&objndx->phdr,
+                                           gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
+                                           gc.cur_objndx_spndx);
               if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_validate_objix() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_validate_objndx() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -981,7 +981,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
 
   /* Find fully deleted blocks */
 
-  while (ret == OK && blocks--)
+  while (ret >= 0 && blocks--)
     {
       uint16_t deleted_pages_in_block = 0;
       uint16_t free_pages_in_block = 0;
@@ -989,7 +989,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
 
       /* Check each object lookup page */
 
-      while (ret == OK &&
+      while (ret >= 0 &&
              obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
         {
           int entry_offset = obj_lookup_page * entries_per_page;
@@ -1001,7 +1001,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
 
           /* Check each entry */
 
-          while (ret == OK &&
+          while (ret >= 0 &&
                  cur_entry - entry_offset < entries_per_page &&
                  cur_entry <
                  (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
@@ -1045,7 +1045,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
           ret = OK;
         }
 
-      if (ret == OK &&
+      if (ret >= 0 &&
           deleted_pages_in_block + free_pages_in_block ==
           SPIFFS_GEO_PAGES_PER_BLOCK(fs) - SPIFFS_OBJ_LOOKUP_PAGES(fs) &&
           free_pages_in_block <= max_free_pages)
@@ -1062,7 +1062,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
       cur_block_addr += SPIFFS_GEO_BLOCK_SIZE(fs);
     }
 
-  if (ret == OK)
+  if (ret >= 0)
     {
       /* No deleted blocks */
 
