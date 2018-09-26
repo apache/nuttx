@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/imxrt1050-evk/src/imxrt_bringup.c
+ * arch/arm/src/imxrt/imxrt_lpi2c.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,86 +33,61 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H
+#define __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/mount.h>
-#include <sys/types.h>
-#include <debug.h>
-
-#include <syslog.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <imxrt_lpi2c.h>
 
-#include "imxrt1050-evk.h"
+#include "chip.h"
+#include "chip/imxrt_lpi2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static void imxrt_i2c_register(int bus)
-{
-  FAR struct i2c_master_s *i2c;
-  int ret;
-
-  i2c = imxrt_i2cbus_initialize(bus);
-  if (i2c == NULL)
-    {
-      serr("ERROR: Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, bus);
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-          imxrt_i2cbus_uninitialize(i2c);
-        }
-    }
-}
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_bringup
+ * Name: imxrt_i2cbus_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-int imxrt_bringup(void)
-{
-  int ret;
+FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port);
 
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
+/****************************************************************************
+ * Name: imxrt_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the imxrt_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+int imxrt_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#if defined ( CONFIG_I2C_DRIVER ) & (CONFIG_IMXRT_LPI2C1)
-  imxrt_i2c_register(1);
-#endif
-
-  UNUSED(ret);
-  return OK;
-}
+#endif /* __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H */

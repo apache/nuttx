@@ -62,6 +62,10 @@ config IMXRT_HAVE_LPUART
 	bool
 	default n
 
+config IMXRT_LPI2C
+	bool
+	default n
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA
@@ -139,6 +143,93 @@ config IMXRT_LPUART8
 	select IMXRT_HAVE_LPUART
 
 endmenu # LPUART Peripherals
+
+menu "LPI2C Peripherals"
+
+menuconfig IMXRT_LPI2C1
+	bool "LPI2C1"
+	default n
+	select IMXRT_LPI2C
+
+if IMXRT_LPI2C1
+
+	config LPI2C1_BUSYIDLE
+		int "Bus idle timeout period in clock cycles"
+		default 0
+
+	config LPI2C1_FILTSCL
+		int "I2C master digital glitch filters for SCL input in clock cycles"
+		default 0
+
+	config LPI2C1_FILTSDA
+		int "I2C master digital glitch filters for SDA input in clock cycles"
+		default 0
+
+endif # IMXRT_LPI2C1
+
+menuconfig IMXRT_LPI2C2
+	bool "LPI2C2"
+	default n
+	select IMXRT_LPI2C
+
+if IMXRT_LPI2C2
+
+	config LPI2C2_BUSYIDLE
+		int "Bus idle timeout period in clock cycles"
+		default 0
+
+	config LPI2C2_FILTSCL
+		int "I2C master digital glitch filters for SCL input in clock cycles"
+		default 0
+
+	config LPI2C2_FILTSDA
+		int "I2C master digital glitch filters for SDA input in clock cycles"
+		default 0
+
+endif # IMXRT_LPI2C2
+
+menuconfig IMXRT_LPI2C3
+	bool "LPI2C3"
+	default n
+	select IMXRT_LPI2C
+
+if IMXRT_LPI2C3
+
+	config LPI2C3_BUSYIDLE
+		int "Bus idle timeout period in clock cycles"
+		default 0
+
+	config LPI2C3_FILTSCL
+		int "I2C master digital glitch filters for SCL input in clock cycles"
+		default 0
+
+	config LPI2C3_FILTSDA
+		int "I2C master digital glitch filters for SDA input in clock cycles"
+		default 0
+
+endif # IMXRT_LPI2C3
+
+config IMXRT_LPI2C4
+	bool "LPI2C4"
+	default n
+	select IMXRT_LPI2C
+
+if IMXRT_LPI2C4
+
+	config LPI2C4_BUSYIDLE
+		int "Bus idle timeout period in clock cycles"
+		default 0
+
+	config LPI2C4_FILTSCL
+		int "I2C master digital glitch filters for SCL input in clock cycles"
+		default 0
+
+	config LPI2C4_FILTSDA
+		int "I2C master digital glitch filters for SDA input in clock cycles"
+		default 0
+
+endif # IMXRT_LPI2C4
+endmenu # LPI2C Peripherals
 
 config IMXRT_SEMC
 	bool "Smart External Memory Controller (SEMC)"

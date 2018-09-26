@@ -134,3 +134,7 @@ endif
 ifeq ($(CONFIG_IMXRT_ENET),y)
 CHIP_CSRCS += imxrt_enet.c
 endif
+
+ifeq ($(CONFIG_IMXRT_LPI2C),y)
+CHIP_CSRCS += imxrt_lpi2c.c
+endif

@@ -492,7 +492,7 @@ void up_irqinitialize(void)
   irq_attach(IMXRT_IRQ_RESERVED, imxrt_reserved, NULL);
 #endif
 
-  imxrt_dumpnvic("initial", IMXRT_IRQ_NIRQS);
+  imxrt_dumpnvic("initial", NR_IRQS);
 
   /* If a debugger is connected, try to prevent it from catching hardfaults.
    * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
@@ -644,7 +644,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= IMXRT_IRQ_MEMFAULT && irq < IMXRT_IRQ_NIRQS &&
+  DEBUGASSERT(irq >= IMXRT_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < IMXRT_IRQ_EXTINT)

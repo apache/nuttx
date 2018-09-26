@@ -45,14 +45,14 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Clocking *************************************************************************/
 
 /* Set VDD_SOC to 1.5V */
 
 #define IMXRT_VDD_SOC (0x12)
 
-/*
- * Set Arm PLL (PLL1) to 1200Mhz = (24Mhz * 100) / 2
+/* Set Arm PLL (PLL1) to 1200Mhz = (24Mhz * 100) / 2
  * Set Sys PLL (PLL2) to 528Mhz = 1
  *   (0 = 20 * 24Mhz = 480Mhz
  *    1 = 22 * 24Mhz = 528Mhz)
@@ -60,16 +60,16 @@
  * Arm clock divider = 2 -> Arm Clock = 600Mhz
  * AHB clock divider = 1
  * IPG clock divider = 4
- *
  */
 
-#define BOARD_XTAL_FREQUENCY    24000000
+#define BOARD_XTAL_FREQUENCY     24000000
 
-#define IMXRT_ARM_PLL_SELECT    (100)
-#define IMXRT_SYS_PLL_SELECT    (1)
-#define IMXRT_ARM_CLOCK_DIVIDER (1)
-#define IMXRT_AHB_CLOCK_DIVIDER (0)
-#define IMXRT_IPG_CLOCK_DIVIDER (3)
+#define IMXRT_ARM_PLL_SELECT     (100)
+#define IMXRT_SYS_PLL_SELECT     (1)
+#define IMXRT_ARM_CLOCK_DIVIDER  (1)
+#define IMXRT_AHB_CLOCK_DIVIDER  (0)
+#define IMXRT_IPG_CLOCK_DIVIDER  (3)
+#define IMXRT_SEMC_CLOCK_DIVIDER (7)
 
 #define BOARD_CPU_FREQUENCY \
   (BOARD_XTAL_FREQUENCY * IMXRT_ARM_PLL_SELECT) / (IMXRT_ARM_CLOCK_DIVIDER + 1)
@@ -151,6 +151,16 @@
 #define GPIO_LPUART3_RX   GPIO_LPUART3_RX_1  /* GPIO_AD_B1_07 */
 #define GPIO_LPUART3_TX   GPIO_LPUART3_TX_1  /* GPIO_AD_B1_06 */
 
+/* LPI2Cs
+ *
+ * Arduino Connector
+ *
+ *   J23 A4 A4/ADC4/SDA  GPIO_AD_B1_01  LPI2C1_SDA
+ *   J23 A5 A5/ADC5/SCL  GPIO_AD_B1_00  LPI2C1_SCL
+ */
+
+#define GPIO_LPI2C1_SDA   GPIO_LPI2C1_SDA_2  /* GPIO_AD_B1_01 */
+#define GPIO_LPI2C1_SCL   GPIO_LPI2C1_SCL_2  /* GPIO_AD_B1_00 */
 
 /************************************************************************************
  * Public Types

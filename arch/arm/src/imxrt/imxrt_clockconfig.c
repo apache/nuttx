@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
+ *   Modified: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,14 +76,14 @@ void imxrt_clockconfig(void)
 
   /* Set PERIPH_CLK2 MUX to OSC */
 
-  reg = getreg32(IMXRT_CCM_CBCMR);
+  reg  = getreg32(IMXRT_CCM_CBCMR);
   reg &= ~CCM_CBCMR_PERIPH_CLK2_SEL_MASK;
   reg |= CCM_CBCMR_PERIPH_CLK2_SEL_OSC_CLK;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
   /* Set PERIPH_CLK MUX to PERIPH_CLK2 */
 
-  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg  = getreg32(IMXRT_CCM_CBCDR);
   reg |= CCM_CBCDR_SEMC_PERIPH_CLK_SEL;
   putreg32(reg, IMXRT_CCM_CBCDR);
 
@@ -94,7 +95,7 @@ void imxrt_clockconfig(void)
 
   /* Set Soc VDD */
 
-  reg = getreg32(IMXRT_DCDC_REG3);
+  reg  = getreg32(IMXRT_DCDC_REG3);
   reg &= ~(DCDC_REG3_TRG_MASK);
   reg |= DCDC_REG3_TRG(IMXRT_VDD_SOC);
   putreg32(reg, IMXRT_DCDC_REG3);
@@ -119,52 +120,82 @@ void imxrt_clockconfig(void)
 
   /* Set Dividers */
 
-  reg = getreg32(IMXRT_CCM_CACRR);
+  reg  = getreg32(IMXRT_CCM_CACRR);
   reg &= ~CCM_CACRR_ARM_PODF_MASK;
   reg |= CCM_CACRR_ARM_PODF(IMXRT_ARM_CLOCK_DIVIDER);
   putreg32(reg, IMXRT_CCM_CACRR);
 
-  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_AHB_PODF_MASK;
   reg |= CCM_CBCDR_AHB_PODF(IMXRT_AHB_CLOCK_DIVIDER);
   putreg32(reg, IMXRT_CCM_CBCDR);
 
-  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_IPG_PODF_MASK;
   reg |= CCM_CBCDR_IPG_PODF(IMXRT_IPG_CLOCK_DIVIDER);
   putreg32(reg, IMXRT_CCM_CBCDR);
 
+  reg  = getreg32(IMXRT_CCM_CBCDR);
+  reg &= ~CCM_CBCDR_SEMC_PODF_MASK;
+  reg |= CCM_CBCDR_SEMC_PODF(IMXRT_SEMC_CLOCK_DIVIDER);
+  putreg32(reg, IMXRT_CCM_CBCDR);
+
   /* Set PRE_PERIPH_CLK to PLL1 */
 
-  reg = getreg32(IMXRT_CCM_CBCMR);
+  reg  = getreg32(IMXRT_CCM_CBCMR);
   reg &= ~CCM_CBCMR_PRE_PERIPH_CLK_SEL_MASK;
   reg |= CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL1;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
   /* Set PERIPH_CLK MUX to PRE_PERIPH_CLK2 */
 
-  reg = getreg32(IMXRT_CCM_CBCDR);
+  reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_SEMC_PERIPH_CLK_SEL;
   putreg32(reg, IMXRT_CCM_CBCDR);
 
   /* Wait handshake */
 
   while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH2_CLK_SEL_BUSY) == 1)
-  {
-  }
+    {
+    }
 
   /* Set UART source to PLL3 80M */
 
-  reg = getreg32(IMXRT_CCM_CSCDR1);
+  reg  = getreg32(IMXRT_CCM_CSCDR1);
   reg &= CCM_CSCDR1_UART_CLK_SEL;
   reg |= CCM_CSCDR1_UART_CLK_SEL_PLL3_80;
   putreg32(reg, IMXRT_CCM_CSCDR1);
 
   /* Set UART divider to 1 */
 
-  reg = getreg32(IMXRT_CCM_CSCDR1);
+  reg  = getreg32(IMXRT_CCM_CSCDR1);
   reg &= CCM_CSCDR1_UART_CLK_PODF_MASK;
   reg |= CCM_CSCDR1_UART_CLK_PODF(0);
   putreg32(reg, IMXRT_CCM_CSCDR1);
+
+#ifdef CONFIG_IMXRT_LPI2C
+  /* Set UART source to PLL3 80M */
+
+  reg  = getreg32(IMXRT_CCM_CSCDR2);
+  reg &= CCM_CSCDR2_LPI2C_CLK_SEL;
+  reg |= CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M;
+  putreg32(reg, IMXRT_CCM_CSCDR2);
+
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) == 1)
+    {
+    }
+
+  /* Set LPI2C divider to 5 */
+
+  reg  = getreg32(IMXRT_CCM_CSCDR2);
+  reg &= CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
+  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5);
+  putreg32(reg, IMXRT_CCM_CSCDR2);
+
+  while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) == 1)
+    {
+    }
+#endif
+
 #endif
 }
