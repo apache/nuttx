@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 19, 2018)
+NuttX TODO List (Last updated September 26, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -228,14 +228,17 @@ o Task/Scheduler (sched/)
                and that sets the errno value on failures.
 
                On particularly difficult issue is the use of common memory
-               manager C, and NX libraries in the build.  For the FLAT
-               build, that is not such a issue because the OS internal
-               versions of the interfaces can be used.  But is a difficult
-               problem for PROTECTED and KERNEL builds where the OS links
-               with a different version of the libraries than does the
-               application:  The OS version would use the OS internal
+               manager C, and NX libraries in the build.  For the PROTECTED
+               and KERNEL builds, this issue is resolved.  In that case,
+               The OS links with a different version of the libraries than
+               does the application:  The OS version would use the OS internal
                interfaces and the application would use the standard
                interfaces.
+
+               But for the FLAT build, both the OS and the applications use
+               the same library functions.  For applications, the library
+               functions *must* support errno's and cancellation and, hence,
+               these are also used within the OS.
 
                But that raises yet another issue:  If the application
                version of the libraries use the standard interfaces
