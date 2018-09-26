@@ -461,6 +461,7 @@ static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
 static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
+  irqstate_t flags;
   uint32_t regval;
   uint8_t *buf;
 
@@ -526,9 +527,9 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
        DEBUGASSERT(txdesc->data == buf);
     }
 
-  /* Start the TX transfer (if it was not already waiting for buffers) */
+  /* Make the following operations atomic */
 
-  putreg32(ENET_TDAR, IMXRT_ENET_TDAR);
+  flags = spin_lock_irqsave();
 
   /* Enable TX interrupts */
 
@@ -540,6 +541,12 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   (void)wd_start(priv->txtimeout, IMXRT_TXTIMEOUT, imxrt_txtimeout_expiry, 1,
                  (wdparm_t)priv);
+
+  /* Start the TX transfer (if it was not already waiting for buffers) */
+
+  putreg32(ENET_TDAR, IMXRT_ENET_TDAR);
+
+  spin_unlock_irqrestore(flags);
   return OK;
 }
 

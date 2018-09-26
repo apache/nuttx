@@ -57,6 +57,7 @@
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
 static void imxrt_i2c_register(int bus)
 {
   FAR struct i2c_master_s *i2c;
@@ -77,6 +78,7 @@ static void imxrt_i2c_register(int bus)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -109,7 +111,7 @@ int imxrt_bringup(void)
     }
 #endif
 
-#if defined ( CONFIG_I2C_DRIVER ) & (CONFIG_IMXRT_LPI2C1)
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
   imxrt_i2c_register(1);
 #endif
 
