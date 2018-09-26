@@ -63,7 +63,7 @@ enum spiffs_gc_clean_state_e
 {
   FIND_OBJ_DATA,
   MOVE_OBJ_DATA,
-  MOVE_OBJ_IX,
+  MOVE_OBJ_NDX,
   FINISHED
 };
 
@@ -512,7 +512,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
             {
               int16_t id = objlu_buf[cur_entry - entry_offset];
 
-              cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, cur_entry);
+              cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, blkndx, cur_entry);
 
               /* Act upon object id depending on gc state */
 
@@ -562,7 +562,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                       spiffs_gcinfo("Found data page %04x:%04x @%04x\n",
                                     gc.cur_objid, phdr.spndx, cur_pgndx);
 
-                      if (SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, phdr.spndx) !=
+                      if (SPIFFS_OBJNDX_ENTRY_SPNDX(fs, phdr.spndx) !=
                           gc.cur_objndx_spndx)
                         {
                           spiffs_gcinfo("No objndx spndx match, take in another run\n");
@@ -636,7 +636,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
                               spiffs_gcinfo("Wrote page=%04x to objhdr entry=%04x in mem\n",
                                             new_data_pgndx,
-                                            (int16_t)SPIFFS_OBJ_IX_ENTRY(fs, phdr.spndx));
+                                            (int16_t)SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
                             }
                           else
                             {
@@ -644,18 +644,18 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
                               ((FAR int16_t *)((FAR uint8_t *)objndx +
                                 sizeof(struct spiffs_page_objndx_s)))
-                                  [SPIFFS_OBJ_IX_ENTRY(fs, phdr.spndx)] =
+                                  [SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx)] =
                                     new_data_pgndx;
 
                               spiffs_gcinfo("Wrote page=%04x to objndx entry=%04x in mem\n",
                                             new_data_pgndx,
-                                            (int16_t)SPIFFS_OBJ_IX_ENTRY(fs, phdr.spndx));
+                                            (int16_t)SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
                             }
                         }
                     }
                   break;
 
-                case MOVE_OBJ_IX:
+                case MOVE_OBJ_NDX:
                   /* Find and evacuate object index pages */
 
                   if (id != SPIFFS_OBJID_DELETED &&
@@ -789,7 +789,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                 }
 
               gc.cur_objndx_spndx =
-                SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, phdr.spndx);
+                SPIFFS_OBJNDX_ENTRY_SPNDX(fs, phdr.spndx);
 
               spiffs_gcinfo("Find objndx spndx=%04x\n", gc.cur_objndx_spndx);
 
@@ -862,7 +862,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                * evacuating object indices
                */
 
-              gc.state  = MOVE_OBJ_IX;
+              gc.state  = MOVE_OBJ_NDX;
               cur_entry = 0;    /* Restart entry scan index */
             }
           break;
@@ -924,7 +924,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
           }
           break;
 
-        case MOVE_OBJ_IX:
+        case MOVE_OBJ_NDX:
           /* Scanned through all blocks, no more object indices found - our
            * work here is done
            */

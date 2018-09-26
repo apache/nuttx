@@ -105,7 +105,7 @@ static int spiffs_check_get_data_pgndx(FAR struct spiffs_s *fs,
 
   /* Calculate object index span index for given data page span index */
 
-  objndx_spndx = SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, data_spndx);
+  objndx_spndx = SPIFFS_OBJNDX_ENTRY_SPNDX(fs, data_spndx);
 
   /* Find the object index for the object ID and span index */
 
@@ -132,7 +132,7 @@ static int spiffs_check_get_data_pgndx(FAR struct spiffs_s *fs,
       /* Get the referenced page from object index */
 
       addr += sizeof(struct spiffs_page_objndx_s) +
-              SPIFFS_OBJ_IX_ENTRY(fs, data_spndx) *
+              SPIFFS_OBJNDX_ENTRY(fs, data_spndx) *
               sizeof(int16_t);
     }
 
@@ -238,11 +238,11 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  free_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, entry);
+  free_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, blkndx, entry);
 
   /* Calculate object index span index for given data page span index */
 
-  int16_t objndx_spndx = SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, data_spndx);
+  int16_t objndx_spndx = SPIFFS_OBJNDX_ENTRY_SPNDX(fs, data_spndx);
   if (objndx_spndx == 0)
     {
       /* Calculate index in index header */
@@ -253,7 +253,7 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
     {
       /* Calculate entry in index */
 
-      entry = SPIFFS_OBJ_IX_ENTRY(fs, data_spndx);
+      entry = SPIFFS_OBJNDX_ENTRY(fs, data_spndx);
     }
 
   /* Load index */
@@ -285,10 +285,10 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
       return -EFAULT;
     }
 
-  if ((objndx_phdr->flags & (SPIFFS_PH_FLAG_USED | SPIFFS_PH_FLAG_IXDELE |
+  if ((objndx_phdr->flags & (SPIFFS_PH_FLAG_USED | SPIFFS_PH_FLAG_NDXDELE |
                              SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_FINAL |
                              SPIFFS_PH_FLAG_DELET)) !=
-      (SPIFFS_PH_FLAG_IXDELE | SPIFFS_PH_FLAG_DELET))
+      (SPIFFS_PH_FLAG_NDXDELE | SPIFFS_PH_FLAG_DELET))
     {
       spiffs_page_delete(fs, free_pgndx);
       return -EFAULT;
@@ -305,7 +305,7 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
   else
     {
       ((FAR int16_t *)((FAR uint8_t *)fs->lu_work +
-        sizeof(struct spiffs_page_objndx_s)))[SPIFFS_OBJ_IX_ENTRY(fs, data_spndx)] =
+        sizeof(struct spiffs_page_objndx_s)))[SPIFFS_OBJNDX_ENTRY(fs, data_spndx)] =
           new_data_pgndx;
     }
 
@@ -387,7 +387,7 @@ static int spiffs_check_delobj_lazy(FAR struct spiffs_s *fs, int16_t objid)
 
   /* Clear the deleted flag in FLASH to mark the page deleted */
 
-  flags &= ~SPIFFS_PH_FLAG_IXDELE;
+  flags &= ~SPIFFS_PH_FLAG_NDXDELE;
   ret = spiffs_cache_write(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_UPDT, 0,
                            SPIFFS_PAGE_TO_PADDR(fs, objhdr_pgndx) +
                            offsetof(struct spiffs_page_header_s, flags),
@@ -587,7 +587,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
           delete_page = true;
           if ((pghdr->flags & SPIFFS_PH_FLAG_DELET) == 0 ||
               (pghdr->flags & SPIFFS_PH_FLAG_FINAL) ||
-              (pghdr->flags & (SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_IXDELE)) == 0)
+              (pghdr->flags & (SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_NDXDELE)) == 0)
             {
               /* Page deleted or not finalized, just remove it */
             }
@@ -1053,7 +1053,7 @@ static int spiffs_lucheck_callback(FAR struct spiffs_s *fs, int16_t objid,
   int ret = OK;
   bool reload_lu = false;
 
-  cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, cur_block, cur_entry);
+  cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, cur_block, cur_entry);
 
   /* Load header */
 
@@ -1151,7 +1151,7 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
       struct spiffs_page_header_s pghdr;
       int16_t cur_pgndx;
 
-      cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, cur_block, cur_entry);
+      cur_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, cur_block, cur_entry);
 
       /* Load header */
 
@@ -1166,7 +1166,7 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
 
       if (pghdr.spndx == 0 &&
           (pghdr.flags & (SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_FINAL |
-                          SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_IXDELE)) ==
+                          SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE)) ==
           (SPIFFS_PH_FLAG_DELET))
         {
           spiffs_checkinfo("pgndx=%04x, objid=%04x spndx=%04x "
@@ -1184,8 +1184,8 @@ static int spiffs_check_objidconsistency_callback(FAR struct spiffs_s *fs,
         }
 
       if ((pghdr.flags & (SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_FINAL |
-                          SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_IXDELE)) ==
-          (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_IXDELE))
+                          SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE)) ==
+          (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE))
         {
           return retc;
         }
@@ -1409,7 +1409,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                 }
 
               if ((pghdr.flags & SPIFFS_PH_FLAG_DELET) &&
-                  (pghdr.flags & SPIFFS_PH_FLAG_IXDELE) &&
+                  (pghdr.flags & SPIFFS_PH_FLAG_NDXDELE) &&
                   (pghdr.flags & (SPIFFS_PH_FLAG_INDEX | SPIFFS_PH_FLAG_USED)) == 0)
                 {
                   FAR struct spiffs_page_header_s *objndx_phdr;
@@ -1444,7 +1444,7 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                     {
                       /* object header page index */
 
-                      entries           = SPIFFS_OBJ_HDR_IX_LEN(fs);
+                      entries           = SPIFFS_OBJHDR_NDXLEN(fs);
                       data_spndx_offset = 0;
                       object_page_index =
                         (FAR int16_t *)((FAR uint8_t *)fs->lu_work +
@@ -1454,9 +1454,9 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs)
                     {
                       /* Object page index */
 
-                      entries           = SPIFFS_OBJ_IX_LEN(fs);
-                      data_spndx_offset = SPIFFS_OBJ_HDR_IX_LEN(fs) +
-                                          SPIFFS_OBJ_IX_LEN(fs) * (pghdr.spndx - 1);
+                      entries           = SPIFFS_OBJNDX_LEN(fs);
+                      data_spndx_offset = SPIFFS_OBJHDR_NDXLEN(fs) +
+                                          SPIFFS_OBJNDX_LEN(fs) * (pghdr.spndx - 1);
                       object_page_index =
                         (FAR int16_t *)((FAR uint8_t *) fs->lu_work +
                           sizeof(struct spiffs_page_objndx_s));

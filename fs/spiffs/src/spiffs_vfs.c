@@ -303,7 +303,7 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       return SPIFFS_VIS_COUNTINUE;
     }
 
-  pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, entry);
+  pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, blkndx, entry);
   ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU2 | SPIFFS_OP_C_READ,
                           0, SPIFFS_PAGE_TO_PADDR(fs, pgndx),
                           sizeof(struct spiffs_pgobj_ndxheader_s),
@@ -317,8 +317,8 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
   if ((objid & SPIFFS_OBJID_NDXFLAG) &&
       objhdr.phdr.spndx == 0 &&
       (objhdr.phdr.flags & (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_FINAL |
-                                SPIFFS_PH_FLAG_IXDELE)) ==
-      (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_IXDELE))
+                                SPIFFS_PH_FLAG_NDXDELE)) ==
+      (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE))
     {
       FAR struct fs_dirent_s *dir = (FAR struct fs_dirent_s *)user_var;
       FAR struct dirent *entryp;
@@ -883,7 +883,7 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
 
 
   data_spndx  = (pos > 0 ? (pos - 1) : 0) / SPIFFS_DATA_PAGE_SIZE(fs);
-  objndx_spndx = SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, data_spndx);
+  objndx_spndx = SPIFFS_OBJNDX_ENTRY_SPNDX(fs, data_spndx);
 
   if (fobj->objndx_spndx != objndx_spndx)
     {
@@ -1394,9 +1394,9 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   finfo("page header length:          %u\n",
         (unsigned int)sizeof(struct spiffs_page_header_s));
   finfo("object header index entries: %u\n",
-        (unsigned int)SPIFFS_OBJ_HDR_IX_LEN(fs));
+        (unsigned int)SPIFFS_OBJHDR_NDXLEN(fs));
   finfo("object index entries:        %u\n",
-        (unsigned int)SPIFFS_OBJ_IX_LEN(fs));
+        (unsigned int)SPIFFS_OBJNDX_LEN(fs));
   finfo("free blocks:                 %u\n",
         (unsigned int)fs->free_blocks);
 

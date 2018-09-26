@@ -212,7 +212,7 @@
 
 /* Converts a object lookup entry to page index */
 
-#define SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, block, entry) \
+#define SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, block, entry) \
   ((block)*SPIFFS_GEO_PAGES_PER_BLOCK(fs) + (SPIFFS_OBJ_LOOKUP_PAGES(fs) + entry))
 
 /* Converts a object lookup entry to physical address of corresponding page */
@@ -265,32 +265,32 @@
 
 /* Entries in an object header page index */
 
-#define SPIFFS_OBJ_HDR_IX_LEN(fs) \
+#define SPIFFS_OBJHDR_NDXLEN(fs) \
   ((SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(struct spiffs_pgobj_ndxheader_s))/sizeof(int16_t))
 
 /* Entries in an object page index */
 
-#define SPIFFS_OBJ_IX_LEN(fs) \
+#define SPIFFS_OBJNDX_LEN(fs) \
   ((SPIFFS_GEO_PAGE_SIZE(fs) - sizeof(struct spiffs_page_objndx_s))/sizeof(int16_t))
 
 /* Object index entry for given data span index */
 
-#define SPIFFS_OBJ_IX_ENTRY(fs, spndx) \
-  ((spndx) < SPIFFS_OBJ_HDR_IX_LEN(fs) ? (spndx) : (((spndx)-SPIFFS_OBJ_HDR_IX_LEN(fs))%SPIFFS_OBJ_IX_LEN(fs)))
+#define SPIFFS_OBJNDX_ENTRY(fs, spndx) \
+  ((spndx) < SPIFFS_OBJHDR_NDXLEN(fs) ? (spndx) : (((spndx)-SPIFFS_OBJHDR_NDXLEN(fs))%SPIFFS_OBJNDX_LEN(fs)))
 
 /* Object index span index number for given data span index or entry */
 
-#define SPIFFS_OBJ_IX_ENTRY_SPAN_IX(fs, spndx) \
-  ((spndx) < SPIFFS_OBJ_HDR_IX_LEN(fs) ? 0 : (1+((spndx)-SPIFFS_OBJ_HDR_IX_LEN(fs))/SPIFFS_OBJ_IX_LEN(fs)))
+#define SPIFFS_OBJNDX_ENTRY_SPNDX(fs, spndx) \
+  ((spndx) < SPIFFS_OBJHDR_NDXLEN(fs) ? 0 : (1+((spndx)-SPIFFS_OBJHDR_NDXLEN(fs))/SPIFFS_OBJNDX_LEN(fs)))
 
 /* Get data span index for object index span index */
 
-#define SPIFFS_DATA_SPAN_IX_FOR_OBJ_IX_SPAN_IX(fs, spndx) \
-  ((spndx) == 0 ? 0 : (SPIFFS_OBJ_HDR_IX_LEN(fs) + (((spndx)-1) * SPIFFS_OBJ_IX_LEN(fs))))
+#define SPIFFS_DATA_SPNDX_FOR_OBJNDX_SPNDX(fs, spndx) \
+  ((spndx) == 0 ? 0 : (SPIFFS_OBJHDR_NDXLEN(fs) + (((spndx)-1) * SPIFFS_OBJNDX_LEN(fs))))
 
 #define SPIFFS_OP_T_OBJ_LU    (0 << 0)
 #define SPIFFS_OP_T_OBJ_LU2   (1 << 0)
-#define SPIFFS_OP_T_OBJ_IX    (2 << 0)
+#define SPIFFS_OP_T_OBJNDX    (2 << 0)
 #define SPIFFS_OP_T_OBJ_DA    (3 << 0)
 #define SPIFFS_OP_C_DELE      (0 << 2)
 #define SPIFFS_OP_C_UPDT      (1 << 2)
@@ -321,7 +321,7 @@
 
 /* if 0, this index header is being deleted */
 
-#define SPIFFS_PH_FLAG_IXDELE (1<<6)
+#define SPIFFS_PH_FLAG_NDXDELE (1<<6)
 
 /* Check objid, only visit matching objec ids */
 

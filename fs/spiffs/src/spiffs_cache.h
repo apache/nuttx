@@ -56,7 +56,7 @@ extern "C"
 #define SPIFFS_CACHE_FLAG_DIRTY       (1 << 0)
 #define SPIFFS_CACHE_FLAG_WRTHRU      (1 << 1)
 #define SPIFFS_CACHE_FLAG_OBJLU       (1 << 2)
-#define SPIFFS_CACHE_FLAG_OBJIX       (1 << 3)
+#define SPIFFS_CACHE_FLAG_OBJNDX      (1 << 3)
 #define SPIFFS_CACHE_FLAG_DATA        (1 << 4)
 #define SPIFFS_CACHE_FLAG_TYPE_WR     (1 << 7)
 
