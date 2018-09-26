@@ -66,6 +66,14 @@ extern "C"
 #define SPIFFS_GEO_PAGE_SIZE(fs)        ((fs)->geo.blocksize)
 #define SPIFFS_GEO_PAGES_PER_BLOCK(fs)  ((fs)->pages_per_block)
 
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -78,7 +86,7 @@ extern "C"
  *
  * Input Parameters:
  *   fs     - A reference to the volume structure
- *   offset - The physical offset to write to
+ *   offset - The byte offset to write to
  *   len    - The number of bytes to write
  *   src    - A reference to the bytes to be written
  *
@@ -99,7 +107,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *
  * Input Parameters:
  *   fs     - A reference to the volume structure
- *   offset - The physical offset to read from
+ *   offset - The byte offset to read from
  *   len    - The number of bytes to read
  *   dest   - The user provide location to store the bytes read from FLASH.
  *

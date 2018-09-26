@@ -41,8 +41,10 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/mtd/mtd.h>
 
@@ -65,7 +67,7 @@
  *
  * Input Parameters:
  *   fs     - A reference to the volume structure
- *   offset - The physical offset to write to
+ *   offset - The byte offset to write to
  *   len    - The number of bytes to write
  *   src    - A reference to the bytes to be written
  *
@@ -79,32 +81,132 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
                          FAR const uint8_t *src)
 {
   int16_t blksize;
+  size_t blkoffset;
+  size_t remaining;
+  ssize_t nblocks;
+  ssize_t ret;
+  off_t blkmask;
   off_t blkstart;
   off_t blkend;
-
-  ssize_t ret;
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL);
 
 #ifdef CONFIG_MTD_BYTE_WRITE
+  /* Try to do the byte write */
+
   ret = MTD_WRITE(fs->mtd, offset, len, src);
   if (ret < 0)
 #endif
     {
-      /* We will have to do a block read */
+      /* We will have to do block write(s)
+       *
+       * blksize   - Size of one block.  We assume that the block size is a
+       *             power of two.
+       * blkmask   - Mask that isolates fractional block bytes.
+       * blkoffset - The offset of data in the first block written
+       * blkstart  - Start block number (aligned down)
+       * blkend    - End block number (aligned up)
+       */
 
-      blksize  = fs->geo.blocksize;
-      DEBUGASSERT(offset == offset % blksize);
-      DEBUGASSERT(len    == len    % blksize);
+      blksize   = fs->geo.blocksize;
+      blkmask   = blksize - 1;
+      blkoffset = blksize & ~blkmask;
+      blkstart  = offset / blksize;
+      blkend    = (offset + len + blkmask) / blksize;
 
-      blkstart = offset / blksize;                       /* Truncates to floor */
-      blkend   = (offset + len + blksize - 1) / blksize; /* Rounds up to ceil */
+      /* Check if we have to do a read-modify-write on the first block.  We
+       * need to do this if the blkoffset is not zero.  In that case we need
+       * write only the data at the end of the block.
+       */
 
-#warning WRONG: Needs to use page work buffer, not 'src'
-      ret      = MTD_BWRITE(fs->mtd, blkstart, blkend - blkstart, src);
+      if (blkoffset != 0)
+        {
+          FAR uint8_t *wptr = fs->work;
+          size_t maxcopy;
+          ssize_t nbytes;
+
+#warning "REVISIT: is fs->work available here?"
+          ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
+          /* Copy the data in place */
+
+          maxcopy = blksize - blkoffset;
+          nbytes  = MIN(remaining, maxcopy);
+
+          memcpy(&wptr[blkoffset], src, nbytes);
+
+          /* Write back the modified block */
+
+          ret = MTD_BWRITE(fs->mtd, blkstart, 1, wptr);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
+          /* Update block numbers and counts */
+
+          blkoffset  = 0;
+          remaining -= nbytes;
+          src       += nbytes;
+          blkstart++;
+        }
+
+      /* Write all intervening complete blocks... all at once */
+
+      nblocks = blkend - blkstart;
+
+      if ((remaining & blkmask) == 0)
+        {
+          nblocks++;  /* Include the final block */
+        }
+
+      ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
+      if (ret < 0)
+        {
+          ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+          return (ssize_t)ret;
+        }
+
+      src       += (remaining & ~blkmask);
+      remaining  = (remaining & blkmask);
+
+      /* Check if we need to perform a read-modify-write on the final block.
+       * If the remaining bytes to write is less then a full block, then we
+       * need write only the data at the beginning of the block.
+       */
+
+      if (remaining > 0)
+        {
+#warning "REVISIT: is fs->work available here?"
+          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
+          /* Copy the data in place */
+
+          memcpy(fs->work, src, remaining);
+
+          /* Write back the modified block */
+
+          ret = MTD_BWRITE(fs->mtd, blkend, 1, fs->work);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+        }
     }
 
-  return ret < 0 ret : len;
+  return (ssize_t)len;
 }
 
 /****************************************************************************
@@ -115,7 +217,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
  *
  * Input Parameters:
  *   fs     - A reference to the volume structure
- *   offset - The physical offset to read from
+ *   offset - The byte offset to read from
  *   len    - The number of bytes to read
  *   dest   - The user provide location to store the bytes read from FLASH.
  *
@@ -129,27 +231,112 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
                         FAR uint8_t *dest)
 {
   int16_t blksize;
+  int16_t nblocks;
+  size_t blkoffset;
+  size_t remaining;
+  ssize_t ret;
+  off_t blkmask;
   off_t blkstart;
   off_t blkend;
-  ssize_t ret;
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL);
+
+  /* Try to do the byte read */
 
   ret = MTD_READ(fs->mtd, offset, len, dest);
   if (ret < 0)
     {
-      blksize  = fs->geo.blocksize;
-      DEBUGASSERT(offset == offset % blksize);
-      DEBUGASSERT(len    == len    % blksize);
+      /* We will have to do block read(s)
+       *
+       * blksize   - Size of one block.  We assume that the block size is a
+       *             power of two.
+       * blkmask   - Mask that isolates fractional block bytes.
+       * blkoffset - The offset of data in the first block read.
+       * blkstart  - Start block number (aligned down)
+       * blkend    - End block number (aligned up)
+       */
 
-      blkstart = offset / blksize;                       /* Truncates to floor */
-      blkend   = (offset + len + blksize - 1) / blksize; /* Rounds up to ceil */
+      blksize   = fs->geo.blocksize;
+      blkmask   = blksize - 1;
+      blkoffset = blksize & ~blkmask;
+      blkstart  = offset / blksize;
+      blkend    = (offset + len + blkmask) / blksize;
 
-#warning WRONG: Needs to use page work buffer, not 'dest'
-      ret      = MTD_BREAD(fs->mtd, blkstart, blkend - blkstart, dest);
+      /* Check if we have to do a partial read on the first block.  We
+       * need to do this if the blkoffset is not zero.  In that case we need
+       * read only the data at the end of the block.
+       */
+
+      if (blkoffset != 0)
+        {
+          FAR uint8_t *wptr = fs->work;
+          size_t maxcopy;
+          ssize_t nbytes;
+
+#warning "REVISIT: is fs->work available here?"
+          ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
+          /* Copy the data from the block */
+
+          maxcopy = blksize - blkoffset;
+          nbytes  = MIN(remaining, maxcopy);
+
+          memcpy(dest, &wptr[blkoffset], nbytes);
+
+          /* Update block numbers and counts */
+
+          blkoffset  = 0;
+          remaining -= nbytes;
+          dest      += nbytes;
+          blkstart++;
+        }
+
+      /* Read all intervening complete blocks... all at once */
+
+      nblocks = blkend - blkstart;
+
+      if ((remaining & blkmask) == 0)
+        {
+          nblocks++;  /* Include the final block */
+        }
+
+      ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
+      if (ret < 0)
+        {
+          ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+          return (ssize_t)ret;
+        }
+
+      dest      += (remaining & ~blkmask);
+      remaining  = (remaining & blkmask);
+
+      /* Check if we need to perform a partial read on the final block.
+       * If the remaining bytes to write is less then a full block, then we
+       * need write only the data at the beginning of the block.
+       */
+
+      if (remaining > 0)
+        {
+#warning "REVISIT: is fs->work available here?"
+          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
+          /* Copy the data from the block */
+
+          memcpy(dest, fs->work, remaining);
+        }
     }
 
-  return ret < 0 ret : len;
+  return (ssize_t)len;
 }
 
 /****************************************************************************
