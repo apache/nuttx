@@ -382,7 +382,8 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  fobj->crefs = 1;
+  fobj->crefs  = 1;
+  fobj->oflags = oflags;
 
   /* Get exclusive access to the file system */
 
@@ -673,11 +674,12 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
                                    "Boundary violation, offset=%d size=%d\n",
                                    fobj->cache_page->cpndx, fobj->objid,
                                    fobj->cache_page->offset, fobj->cache_page->size);
+
                   nwritten = spiffs_fobj_write(fs, fobj,
-                                                spiffs_get_cache_page(fs, spiffs_get_cache(fs),
-                                                                      fobj->cache_page->cpndx),
-                                                fobj->cache_page->offset,
-                                                fobj->cache_page->size);
+                                               spiffs_get_cache_page(fs, spiffs_get_cache(fs),
+                                                                     fobj->cache_page->cpndx),
+                                               fobj->cache_page->offset,
+                                               fobj->cache_page->size);
                   spiffs_cache_page_release(fs, fobj->cache_page);
                   if (nwritten < 0)
                     {

@@ -1439,7 +1439,7 @@ int spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
           return ret;
         }
 
-      objhdr = (FAR struct spiffs_pgobj_ndxheader_s *) fs->work;
+      objhdr = (FAR struct spiffs_pgobj_ndxheader_s *)fs->work;
     }
 
   ret = spiffs_validate_objndx(&objhdr->phdr, objid, 0);
@@ -1704,7 +1704,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
 
   if (offset > fobj->size)
     {
-      finfo("Offset reversed to size\n");
+      finfo("Offset replaced with size\n");
       offset = fobj->size;
     }
 
@@ -1717,8 +1717,8 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  objhdr            = (FAR struct spiffs_pgobj_ndxheader_s *) fs->work;
-  objndx            = (FAR struct spiffs_page_objndx_s *) fs->work;
+  objhdr            = (FAR struct spiffs_pgobj_ndxheader_s *)fs->work;
+  objndx            = (FAR struct spiffs_page_objndx_s *)fs->work;
   cur_objndx_spndx  = 0;
   prev_objndx_spndx = (int16_t)-1;
   cur_objndx_pgndx  = fobj->objhdr_pgndx;
@@ -2249,8 +2249,8 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  objhdr            = (FAR struct spiffs_pgobj_ndxheader_s *) fs->work;
-  objndx            = (FAR struct spiffs_page_objndx_s *) fs->work;
+  objhdr            = (FAR struct spiffs_pgobj_ndxheader_s *)fs->work;
+  objndx            = (FAR struct spiffs_page_objndx_s *)fs->work;
 
   cur_objndx_spndx  = 0;
   prev_objndx_spndx = (int16_t) - 1;
@@ -3469,7 +3469,7 @@ int spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs, int16_t *objid,
                */
 
               min_i     = 0;
-              map       = (uint8_t *) fs->work;
+              map       = (uint8_t *)fs->work;
               min_count = 0xff;
 
               for (i = 0;

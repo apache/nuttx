@@ -162,7 +162,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
       /* Write all intervening complete blocks... all at once */
 
       nblocks = blkend - blkstart + 1;
-      if (nblocks > 0)
+      if (nblocks > 0 && remaining >= blksize)
         {
           ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
           if (ret < 0)
@@ -304,7 +304,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       /* Read all intervening complete blocks... all at once */
 
       nblocks = blkend - blkstart + 1;
-      if (nblocks > 0)
+      if (nblocks > 0 && remaining >= blksize)
         {
           ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
           if (ret < 0)
