@@ -89,6 +89,8 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
   off_t blkstart;
   off_t blkend;
 
+  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
+
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL && len > 0);
 
   remaining = len;
@@ -173,6 +175,10 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
           src       += (remaining & ~blkmask);
           remaining  = (remaining & blkmask);
+
+          /* The real end block is the next block (if remainder > 0) */
+
+          blkend++;
         }
 
       /* Check if we need to perform a read-modify-write on the final block.
@@ -182,10 +188,6 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (remaining > 0)
         {
-          /* The real end block is the next block */
-
-          blkend++;
-
 #warning "REVISIT: is fs->work available here?"
           ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
           if (ret < 0)
@@ -241,6 +243,8 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
   off_t blkmask;
   off_t blkstart;
   off_t blkend;
+
+  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL && len > 0);
 
@@ -315,6 +319,10 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
           dest      += (remaining & ~blkmask);
           remaining  = (remaining & blkmask);
+
+          /* The real end block is the next block (if remainder > 0) */
+
+          blkend++;
         }
 
       /* Check if we need to perform a partial read on the final block.
@@ -325,7 +333,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       if (remaining > 0)
         {
 #warning "REVISIT: is fs->work available here?"
-          ret = MTD_BREAD(fs->mtd, blkend + 1, 1, fs->work);
+          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
           if (ret < 0)
             {
               ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
@@ -364,6 +372,8 @@ ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len)
   off_t eblkstart;
   off_t eblkend;
   ssize_t nerased;
+
+  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL);
 

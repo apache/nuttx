@@ -253,8 +253,8 @@ static int spiffs_objlu_find_id_and_span_callback(FAR struct spiffs_s *fs,
   pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, entry);
 
   ret = spiffs_cache_read(fs, 0, SPIFFS_OP_T_OBJ_LU2 | SPIFFS_OP_C_READ,
-                   SPIFFS_PAGE_TO_PADDR(fs, pgndx), sizeof(struct spiffs_page_header_s),
-                   (uint8_t *) & ph);
+                   SPIFFS_PAGE_TO_PADDR(fs, pgndx),
+                   sizeof(struct spiffs_page_header_s), (FAR uint8_t *)&ph);
   if (ret < 0)
     {
       ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -624,11 +624,16 @@ int spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
       while (ret >= 0 &&
              obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
         {
-          int entry_offset = obj_lookup_page * entries_per_page;
+          int entry_offset;
+          off_t physoff;
+
+          entry_offset = obj_lookup_page * entries_per_page;
+          physoff      = cur_block_addr +
+                         SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page);
+
           ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
-                                  0, cur_block_addr +
-                                  SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
-                                  SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
+                                  0, physoff, SPIFFS_GEO_PAGE_SIZE(fs),
+                                  fs->lu_work);
 
           /* Check each entry */
 
@@ -652,20 +657,22 @@ int spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
                   if (cb)
                     {
                       ret = cb(fs,
-                              (flags & SPIFFS_VIS_CHECK_PH) ? objid :
-                              objlu_buf[cur_entry - entry_offset],
-                              cur_block, cur_entry, user_const, user_var);
+                               (flags & SPIFFS_VIS_CHECK_PH) ? objid :
+                               objlu_buf[cur_entry - entry_offset],
+                               cur_block, cur_entry, user_const, user_var);
 
                       if (ret == SPIFFS_VIS_COUNTINUE ||
                           ret == SPIFFS_VIS_COUNTINUE_RELOAD)
                         {
                           if (ret == SPIFFS_VIS_COUNTINUE_RELOAD)
                             {
+                              physoff = cur_block_addr +
+                                        SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page);
+
                               ret =  spiffs_cache_read(fs,
                                                        SPIFFS_OP_T_OBJ_LU |
                                                        SPIFFS_OP_C_READ, 0,
-                                                       cur_block_addr +
-                                                       SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
+                                                       physoff,
                                                        SPIFFS_GEO_PAGE_SIZE(fs),
                                                        fs->lu_work);
                               if (ret < 0)
@@ -1279,10 +1286,10 @@ int spiffs_page_delete(FAR struct spiffs_s *fs, int16_t pgndx)
 #ifdef CONFIG_SPIFFS_NO_BLIND_WRITES
   /* Perform read-modify-write operation */
 
-  ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_DA | SPIFFS_OP_C_READ, 0,
-                          SPIFFS_PAGE_TO_PADDR(fs, pgndx) +
-                          offsetof(struct spiffs_page_header_s, flags),
-                          sizeof(flags), &flags);
+  physoff = SPIFFS_PAGE_TO_PADDR(fs, pgndx) +
+            offsetof(struct spiffs_page_header_s, flags)
+  ret     = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_DA | SPIFFS_OP_C_READ, 0,
+                              physoff, sizeof(flags), &flags);
   if (ret < 0)
     {
       ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -1392,7 +1399,7 @@ int spiffs_object_create(FAR struct spiffs_s *fs,
       *objhdr_pgndx = SPIFFS_OBJ_LOOKUP_ENTRY_TO_PIX(fs, blkndx, entry);
     }
 
-  return ret;
+  return ret < 0 ? ret : OK;
 }
 
 /****************************************************************************
@@ -1631,28 +1638,29 @@ int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
                               uint16_t mode)
 {
   struct spiffs_pgobj_ndxheader_s objndx_hdr;
+  off_t physoff;
   int16_t objid;
   int16_t blkndx;
   int entry;
   int ret = OK;
 
-  ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_IX | SPIFFS_OP_C_READ,
-                          fobj->objid, SPIFFS_PAGE_TO_PADDR(fs, pgndx),
-                          sizeof(struct spiffs_pgobj_ndxheader_s),
-                          (FAR uint8_t *)&objndx_hdr);
+  physoff = SPIFFS_PAGE_TO_PADDR(fs, pgndx);
+  ret     = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_IX | SPIFFS_OP_C_READ,
+                              fobj->objid, physoff,
+                              sizeof(struct spiffs_pgobj_ndxheader_s),
+                              (FAR uint8_t *)&objndx_hdr);
   if (ret < 0)
     {
       ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
       return ret;
     }
 
-  blkndx = SPIFFS_BLOCK_FOR_PAGE(fs, pgndx);
-  entry  = SPIFFS_OBJ_LOOKUP_ENTRY_FOR_PAGE(fs, pgndx);
+  blkndx  = SPIFFS_BLOCK_FOR_PAGE(fs, pgndx);
+  entry   = SPIFFS_OBJ_LOOKUP_ENTRY_FOR_PAGE(fs, pgndx);
 
-  ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ, 0,
-                          SPIFFS_BLOCK_TO_PADDR(fs, blkndx) +
-                          entry * sizeof(int16_t), sizeof(int16_t),
-                          (FAR uint8_t *)&objid);
+  physoff = SPIFFS_BLOCK_TO_PADDR(fs, blkndx) + entry * sizeof(int16_t);
+  ret     = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ, 0,
+                              physoff, sizeof(int16_t), (FAR uint8_t *)&objid);
 
   fobj->objhdr_pgndx = pgndx;
   fobj->size         = objndx_hdr.size;
