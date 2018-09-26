@@ -68,14 +68,13 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
- * The interfaces sem_wait() and sem_timedwait() are cancellation points.
- *
- * REVISIT:  The fact that sem_wait() and sem_timedwait() are cancellation
- * points is an issue and may cause violations:  It use of these internally
- * will cause the calling function to become a cancellation points!
+ * REVISIT:  In the flat build, the same functions must be used both by
+ * the OS and by applications.  We have to use the normal user functions
+ * in this case or we will fail to set the errno or fail to create the
+ * cancellation point.
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  define _SEM_INIT(s,p,c)      nxsem_init(s,p,c)
 #  define _SEM_DESTROY(s)       nxsem_destroy(s)
 #  define _SEM_WAIT(s)          nxsem_wait(s)

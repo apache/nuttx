@@ -68,15 +68,13 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
- * The interfaces sigtimedwait(), sigwait(), sigwaitinfo(), sleep(),
- * nanosleep(), and usleep()  are cancellation points.
- *
- * REVISIT:  The fact that these interfaces are cancellation points is an
- * issue and may cause violations:  It use of these internally will cause
- * the calling function to become a cancellation points!
+ * REVISIT:  In the flat build, the same functions must be used both by
+ * the OS and by applications.  We have to use the normal user functions
+ * in this case or we will fail to set the errno or fail to create the
+ * cancellation point.
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  define _MQ_SEND(d,m,l,p)           nxmq_send(d,m,l,p)
 #  define _MQ_TIMEDSEND(d,m,l,p,t)    nxmq_timedsend(d,m,l,p,t)
 #  define _MQ_RECEIVE(d,m,l,p)        nxmq_receive(d,m,l,p)

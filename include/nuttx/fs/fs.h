@@ -73,16 +73,21 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
- * The interfaces open(), close(), creat(), read(), pread(), write(),
- * pwrite(), poll(), select(), fcntl(), and aio_suspend() are all
- * cancellation points.
+ * REVISIT:  In the flat build, the same functions must be used both by
+ * the OS and by applications.  We have to use the normal user functions
+ * in this case or we will fail to set the errno or fail to create the
+ * cancellation point.
+ *
+ * The interfaces close(), creat(), read(), pread(), write(), pwrite(),
+ * poll(), select(), fcntl(), and aio_suspend() are all cancellation
+ * points.
  *
  * REVISIT:  These cancellation points are an issue and may cause
  * violations:  It use of these internally will cause the calling function
  * to become a cancellation points!
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define _NX_OPEN(p,f,...)  nx_open(p,f,##__VA_ARGS__)
 #  else

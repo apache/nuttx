@@ -65,6 +65,11 @@
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
  *
+ * REVISIT:  In the flat build, the same functions must be used both by
+ * the OS and by applications.  We have to use the normal user functions
+ * in this case or we will fail to set the errno or fail to create the
+ * cancellation point.
+ *
  * The interfaces accept(), read(), recv(), recvfrom(), write(), send(),
  * sendto() are all cancellation points.
  *
@@ -73,7 +78,7 @@
  * to become a cancellation points!
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  define _NX_SEND(s,b,l,f)         nx_send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         nx_recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) nx_recvfrom(s,b,l,f,a,n)

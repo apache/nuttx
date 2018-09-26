@@ -188,9 +188,14 @@
  * used both by the OS (libkc.a and libknx.a) or by the applications
  * (libuc.a and libunx.a).  The that case, the correct interface must be
  * used for the build context.
+ *
+ * REVISIT:  In the flat build, the same functions must be used both by
+ * the OS and by applications.  We have to use the normal user functions
+ * in this case or we will fail to set the errno or fail to create the
+ * cancellation point.
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  define _SCHED_GETPARAM(t,p)       nxsched_getparam(t,p)
 #  define _SCHED_SETPARAM(t,p)       nxsched_setparam(t,p)
 #  define _SCHED_GETSCHEDULER(t)     nxsched_getscheduler(t)
