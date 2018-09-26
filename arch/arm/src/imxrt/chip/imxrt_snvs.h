@@ -200,10 +200,11 @@
 
 /* SNVS_LP Control Register */
 
-                                                /* Bits 0-1: Reserved */
+#define SVNS_LPCR_SRTCENV             (1 << 0)  /* Bit 0:  Start SVNS RTC time counter */
+#define SVNS_LPCR_LPTAEN              (1 << 1)  /* Bit 1:  Enable SVNS RTC time alarm */
 #define SNVS_LPCR_MCENV               (1 << 2)  /* Bit 2:  Monotonic Counter Enabled and Valid */
 #define SNVS_LPCR_LPWUIEN             (1 << 3)  /* Bit 3:  LP Wake-Up Interrupt Enable */
-                                                /* Bit 4: Reserved */
+                                                /* Bit 4:  Reserved */
 #define SNVS_LPCR_DPEN                (1 << 5)  /* Bit 5:  Dumb PMIC Enabled */
 #define SNVS_LPCR_TOP                 (1 << 6)  /* Bit 6:  Turn off System Power */
 #define SNVS_LPCR_PWRGLITCHEN         (1 << 7)  /* Bit 7:  Power Glitch Enable */

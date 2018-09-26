@@ -86,10 +86,10 @@ static void imxrt_lpsrtc_enable(void)
   /* Enable the LPSRTC */
 
   regval  = getreg32(IMXRT_SNVS_LPCR);
-  regval |= SNVS_LPCR_MCENV;
+  regval |= SVNS_LPCR_SRTCENV;
   putreg32(regval, IMXRT_SNVS_LPCR);
 
-  while ((getreg32(IMXRT_SNVS_LPCR) & SNVS_LPCR_MCENV) == 0)
+  while ((getreg32(IMXRT_SNVS_LPCR) & SVNS_LPCR_SRTCENV) == 0)
     {
     }
 }
