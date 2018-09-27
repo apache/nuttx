@@ -173,6 +173,7 @@ Using MSYS
     pacman -S git
     pacman -S make
     pacman -S gcc
+    pacman -S gdb
 
   And possibly others depending upon your usage.  Then you will need to
   build and install kconfig-frontends per the instructions of the top-level

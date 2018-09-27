@@ -348,7 +348,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
   int16_t pgndx;
   int ret;
 
-  finfo("relpath: %s oflags; %04x\n", relpath, oflags);
+  finfo("relpath=%s oflags; %04x\n", relpath, oflags);
   DEBUGASSERT(filep->f_priv == NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -500,7 +500,7 @@ static int spiffs_close(FAR struct file *filep)
   FAR struct spiffs_s *fs;
   FAR struct spiffs_file_s *fobj;
 
-  finfo("filep: %p\n", filep);
+  finfo("filep=%p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -562,7 +562,7 @@ static ssize_t spiffs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct spiffs_file_s *fobj;
   ssize_t nread;
 
-  finfo("filep: %p buffer: %p buflen: %lu\n",
+  finfo("filep=%p buffer=%p buflen=%lu\n",
         filep, buffer, (unsigned long)buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
@@ -610,7 +610,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
   off_t offset;
   int ret;
 
-  finfo("filep: %p buffer: %p buflen: %lu\n",
+  finfo("filep=%p buffer=%p buflen=%lu\n",
         filep, buffer, (unsigned long)buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
@@ -1142,7 +1142,7 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
   off_t fsize;
   int ret;
 
-  finfo("filep: %p length: %ld\n", filep, (long)length);
+  finfo("filep=%p length=%ld\n", filep, (long)length);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL &&  length >= 0);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -1194,7 +1194,7 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
 static int spiffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR struct fs_dirent_s *dir)
 {
-  finfo("mountpt: %p relpath: %s dir: %p\n",
+  finfo("mountpt=%p relpath=%s dir=%p\n",
         mountpt, relpath, dir);
 
   DEBUGASSERT(mountpt != NULL && relpath != NULL && dir != NULL);
@@ -1213,7 +1213,7 @@ static int spiffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int spiffs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
-  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt=%p dir=%p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* There is nothing to be done */
@@ -1233,7 +1233,7 @@ static int spiffs_readdir(FAR struct inode *mountpt,
   int entry;
   int ret;
 
-  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt=%p dir=%p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* Get the mountpoint private data from the inode structure */
@@ -1269,7 +1269,7 @@ static int spiffs_readdir(FAR struct inode *mountpt,
 static int spiffs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  finfo("mountpt: %p dir: %p\n",  mountpt, dir);
+  finfo("mountpt=%p dir=%p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
   /* Reset as when opendir() was called. */
@@ -1296,7 +1296,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   size_t addrmask;
   int ret;
 
-  finfo("mtdinode: %p data: %p handle: %p\n", mtdinode, data, handle);
+  finfo("mtdinode=%p data=%p handle=%p\n", mtdinode, data, handle);
   DEBUGASSERT(mtdinode != NULL && handle != NULL);
 
   /* Extract the MTD interface reference */
@@ -1437,7 +1437,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
   FAR struct spiffs_file_s *fobj;
   int ret;
 
-  finfo("handle: %p mtdinode: %p flags: %02x\n",
+  finfo("handle=%p mtdinode=%p flags=%02x\n",
         handle, mtdinode, flags);
   DEBUGASSERT(fs != NULL);
 
@@ -1502,7 +1502,7 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   uint32_t nfile_objs;
   uint32_t used;
 
-  finfo("mountpt: %p buf: %p\n", mountpt, buf);
+  finfo("mountpt=%p buf=%p\n", mountpt, buf);
   DEBUGASSERT(mountpt != NULL && buf != NULL);
 
   /* Get the mountpoint private data from the inode structure */
@@ -1564,7 +1564,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   int16_t pgndx;
   int ret;
 
-  finfo("mountpt: %p relpath: %s\n", mountpt, relpath);
+  finfo("mountpt=%p relpath=%s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   if (strlen(relpath) > CONFIG_SPIFFS_NAME_MAX - 1)
@@ -1661,7 +1661,7 @@ errout_with_lock:
 static int spiffs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                        mode_t mode)
 {
-  finfo("mountpt: %p relpath: %s mode: %04x\n", mountpt, relpath, mode);
+  finfo("mountpt=%p relpath=%s mode=%04x\n", mountpt, relpath, mode);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Directories are not supported */
@@ -1675,7 +1675,7 @@ static int spiffs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
 static int spiffs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  finfo("mountpt: %p relpath: %s\n", mountpt, relpath);
+  finfo("mountpt=%p relpath=%s\n", mountpt, relpath);
   DEBUGASSERT(mountpt != NULL && relpath != NULL);
 
   /* Directories are not supported */
@@ -1696,7 +1696,7 @@ static int spiffs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   int16_t newpgndx;
   int ret;
 
-  finfo("mountpt: %p oldrelpath: %s newrelpath: %s\n",
+  finfo("mountpt=%p oldrelpath=%s newrelpath=%s\n",
         mountpt, oldrelpath, newrelpath);
   DEBUGASSERT(mountpt != NULL && oldrelpath != NULL && newrelpath != NULL);
 

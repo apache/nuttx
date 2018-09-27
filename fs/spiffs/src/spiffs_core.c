@@ -1713,7 +1713,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
   if (offset > fobj->size)
     {
       finfo("Offset replaced with size\n");
-      offset = fobj->size;
+      offset = fobj->size < 0 ? 0 : fobj->size;
     }
 
   /* Add an extra page of data worth for meta */
@@ -1869,7 +1869,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
             {
               /* load object index header page, must always exist */
 
-              finfo("append: %04x load objndxhdr page %04x:%04x\n",
+              finfo("objid=%04x load objndxhdr page %04x:%04x\n",
                     fobj->objid, cur_objndx_pgndx, cur_objndx_spndx);
 
               ret = spiffs_cache_read(fs,
