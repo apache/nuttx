@@ -116,7 +116,7 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkmask   = blksize - 1;
       blkoffset = offset & blkmask;
       blkstart  = offset / blksize;
-      blkend    = (offset + len) / blksize;
+      blkend    = (offset + len - 1) / blksize;
 
       /* Check if we have to do a read-modify-write on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
@@ -269,7 +269,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkmask   = blksize - 1;
       blkoffset = offset & blkmask;
       blkstart  = offset / blksize;
-      blkend    = (offset + len) / blksize;
+      blkend    = (offset + len - 1) / blksize;
 
       /* Check if we have to do a partial read on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
