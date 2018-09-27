@@ -145,6 +145,7 @@ struct spiffs_s
   FAR struct mtd_dev_s *mtd;        /* The contained MTD interface */
   FAR uint8_t *lu_work;             /* Primary work buffer, size of a logical page */
   FAR uint8_t *work;                /* Secondary work buffer, size of a logical page */
+  FAR uint8_t *mtd_work;            /* MTD I/O buffer for read-modify-write */
   FAR void *cache;                  /* Cache memory */
 #ifdef CONFIG_HAVE_LONG_LONG
   off64_t media_size;               /* Physical size of the SPI flash */

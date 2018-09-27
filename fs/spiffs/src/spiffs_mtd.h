@@ -66,6 +66,24 @@ extern "C"
 #define SPIFFS_GEO_PAGE_SIZE(fs)        ((fs)->geo.blocksize)
 #define SPIFFS_GEO_PAGES_PER_BLOCK(fs)  ((fs)->pages_per_block)
 
+/* Debug */
+
+#ifdef CONFIG_SPIFFS_MTDDBG
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define spiffs_mtdinfo(format, ...) _info(format, ##__VA_ARGS__)
+#  else
+#    define spiffs_mtdinfo              _info
+#  endif
+#else
+#  ifdef CONFIG_CPP_HAVE_VARARGS
+#    define spiffs_mtdinfo(format, ...)
+#  else
+#    define spiffs_mtdinfo              (void)
+#  endif
+#endif
+
+/* Commonly used Macros */
+
 #ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif

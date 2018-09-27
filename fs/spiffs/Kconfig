@@ -38,6 +38,8 @@ config SPIFFS_CACHEDBG
 	bool "Enable cache debug output"
 	default n
 	depends on DEBUG_FS_INFO
+	---help---
+		Dumps cache debug output.  Depends on CONFIG_DEBUG_FS_INFO
 
 comment "Garbage Collection (GC) Options"
 
@@ -95,6 +97,8 @@ config SPIFFS_GCDBG
 	bool "Enable garbage collection debug output"
 	default n
 	depends on DEBUG_FS_INFO
+	---help---
+		Dumps garbage collection debug output.  Depends on CONFIG_DEBUG_FS_INFO
 
 comment "Consistency Check Options"
 
@@ -109,6 +113,24 @@ config SPIFFS_CHECK_ONMOUNT
 config SPIFFS_CHECK_OUTPUT
 	bool "Enable consistency check SYSLOG output"
 	default n
+
+comment "MTD Interface Options"
+
+config SPIFFS_MTDDBG
+	bool "Enable MTD Interface DEBUG"
+	default n
+	depends on DEBUG_FS_INFO
+	---help---
+		Dumps MTD debug output.  Depends on CONFIG_DEBUG_FS_INFO
+
+config SPIFFS_MTDDUMP
+	bool "Enable MTD Data Dump"
+	default n
+	depends on SPIFFS_MTDDBG
+	---help---
+		Dumps every byte of data going to and coming from FLASH.  You
+		probably do not want this unless you are debugging a particular
+		MTD interfacing issue.
 
 comment "SPIFFS Core Options"
 

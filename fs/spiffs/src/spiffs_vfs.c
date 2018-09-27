@@ -1355,13 +1355,16 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
 
   spiffs_cache_initialize(fs);
 
-  /* Allocate the memory work buffer comprising 2*config->page_size bytes
+  /* Allocate the memory work buffer comprising 3*config->page_size bytes
    * used throughout all file system operations.
    *
    * NOTE: Currently page size is equivalent to block size.
+   *
+   * REVISIT:  The MTD work buffer was added.  With some careful analysis,
+   * it should, however, be possible to get by with fewer page buffers.
    */
 
-  work_size = SPIFFS_GEO_PAGE_SIZE(fs) << 1;
+  work_size = 3 * SPIFFS_GEO_PAGE_SIZE(fs);
   work      = (FAR uint8_t *)kmm_malloc(work_size);
 
   if (work == NULL)
@@ -1371,8 +1374,9 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
       goto errout_with_cache;
     }
 
-  fs->work         = &work[0];
-  fs->lu_work      = &work[work_size >> 1];
+  fs->work      = &work[0];
+  fs->lu_work   = &work[SPIFFS_GEO_PAGE_SIZE(fs)];
+  fs->mtd_work  = &work[2 * SPIFFS_GEO_PAGE_SIZE(fs)];
 
   (void)nxsem_init(&fs->exclsem.sem, 0, 1);
 

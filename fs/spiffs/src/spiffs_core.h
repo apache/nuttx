@@ -361,7 +361,7 @@ begin_packed_struct struct spiffs_page_header_s
   uint8_t flags;                        /* flags */
 } end_packed_struct;
 
-/* object index header page header */
+/* Object index header page header */
 
 begin_packed_struct struct spiffs_pgobj_ndxheader_s
 {
@@ -371,7 +371,7 @@ begin_packed_struct struct spiffs_pgobj_ndxheader_s
   uint8_t name[CONFIG_SPIFFS_NAME_MAX]; /* name of object */
 } end_packed_struct;
 
-/* object index page header */
+/* Object index page header */
 
 begin_packed_struct struct spiffs_page_objndx_s
 {

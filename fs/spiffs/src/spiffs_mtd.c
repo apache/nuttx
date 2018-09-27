@@ -52,8 +52,20 @@
 #include "spiffs_mtd.h"
 
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SPIFFS_MTDDUMP
+static inline void spiffs_mtd_dump(FAR const char *msg,
+                                   FAR const uint8_t *buffer,
+                                   unsigned int buflen)
+{
+  lib_dumpbuffer(msg, buffer, buflen);
+}
+
+#else
+#  define spiffs_mtd_dump(m,b,l)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -80,16 +92,17 @@
 ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
                          FAR const uint8_t *src)
 {
-  int16_t blksize;
-  size_t blkoffset;
   size_t remaining;
-  ssize_t nblocks;
   ssize_t ret;
   off_t blkmask;
   off_t blkstart;
   off_t blkend;
+  int16_t blksize;
+  int16_t nblocks;
+  int16_t blkoffset;
 
-  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
+  spiffs_mtdinfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
+  spiffs_mtd_dump("Writing", src, len);
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && src != NULL && len > 0);
 
@@ -118,8 +131,8 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkstart  = offset / blksize;
       blkend    = (offset + len - 1) / blksize;
 
-      finfo("blkoffset=%lu blkstart=%ld blkend=%ld\n",
-            blkoffset, blkstart, blkend);
+      spiffs_mtdinfo("blkoffset=%d blkstart=%ld blkend=%ld\n",
+                     blkoffset, (long)blkstart, (long)blkend);
 
       /* Check if we have to do a read-modify-write on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
@@ -128,11 +141,10 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (blkoffset != 0)
         {
-          FAR uint8_t *wptr = fs->work;
-          size_t maxcopy;
-          ssize_t nbytes;
+          FAR uint8_t *wptr = fs->mtd_work;
+          int16_t maxcopy;
+          int16_t nbytes;
 
-#warning "REVISIT: is fs->work available here?"
           ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
             {
@@ -140,14 +152,22 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
               return (ssize_t)ret;
             }
 
+          spiffs_mtd_dump("Read leading partial block", wptr, blksize);
+
           /* Copy the data in place */
 
           maxcopy = blksize - blkoffset;
           nbytes  = MIN(remaining, maxcopy);
 
+          spiffs_mtdinfo("Leading partial block: "
+                         "blkstart=%ld blkoffset=%d nbytes=%d\n",
+                         (long)blkstart, blkoffset, nbytes);
+
           memcpy(&wptr[blkoffset], src, nbytes);
 
           /* Write back the modified block */
+
+          spiffs_mtd_dump("Write leading partial block", wptr, blksize);
 
           ret = MTD_BWRITE(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
@@ -174,12 +194,14 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
           nblocks++;
         }
 
-      finfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
-            nblocks, (unsigned long)blkstart,
-            (unsigned long)remaining);
+      spiffs_mtdinfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
+                     nblocks, (unsigned long)blkstart,
+                     (unsigned long)remaining);
 
       if (nblocks > 0)
         {
+          spiffs_mtd_dump("Write whole blocks", src, blksize * nblocks);
+
           ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
           if (ret < 0)
             {
@@ -202,21 +224,30 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (remaining > 0)
         {
-#warning "REVISIT: is fs->work available here?"
-          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
+          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
               ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
               return (ssize_t)ret;
             }
 
+          spiffs_mtd_dump("Read trailing partial block",
+                          fs->mtd_work, blksize);
+
           /* Copy the data in place */
 
-          memcpy(fs->work, src, remaining);
+          spiffs_mtdinfo("Trailing partial block: "
+                         "blkend=%ld remaining=%lu\n",
+                         (long)blkend, (unsigned long)remaining);
+
+          memcpy(fs->mtd_work, src, remaining);
 
           /* Write back the modified block */
 
-          ret = MTD_BWRITE(fs->mtd, blkend, 1, fs->work);
+          spiffs_mtd_dump("Write trailing partial block",
+                          fs->mtd_work, blksize);
+
+          ret = MTD_BWRITE(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
               ferr("ERROR: MTD_BWRITE() failed: %d\n", ret);
@@ -249,16 +280,19 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
                         FAR uint8_t *dest)
 {
-  int16_t blksize;
-  int16_t nblocks;
-  size_t blkoffset;
+#ifdef CONFIG_SPIFFS_MTDDUMP
+  FAR uint8_t *saved_dest = dest;
+#endif
   size_t remaining;
   ssize_t ret;
   off_t blkmask;
   off_t blkstart;
   off_t blkend;
+  int16_t blksize;
+  int16_t nblocks;
+  int16_t blkoffset;
 
-  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
+  spiffs_mtdinfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL && dest != NULL && len > 0);
 
@@ -285,8 +319,8 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkstart  = offset / blksize;
       blkend    = (offset + len - 1) / blksize;
 
-      finfo("blkoffset=%lu blkstart=%ld blkend=%ld\n",
-            blkoffset, blkstart, blkend);
+      spiffs_mtdinfo("blkoffset=%d blkstart=%ld blkend=%ld\n",
+                     blkoffset, (long)blkstart, (long)blkend);
 
       /* Check if we have to do a partial read on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
@@ -295,11 +329,10 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (blkoffset != 0)
         {
-          FAR uint8_t *wptr = fs->work;
+          FAR uint8_t *wptr = fs->mtd_work;
           size_t maxcopy;
           ssize_t nbytes;
 
-#warning "REVISIT: is fs->work available here?"
           ret = MTD_BREAD(fs->mtd, blkstart, 1, wptr);
           if (ret < 0)
             {
@@ -307,10 +340,16 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
               return (ssize_t)ret;
             }
 
+          spiffs_mtd_dump("Read leading partial block", wptr, blksize);
+
           /* Copy the data from the block */
 
           maxcopy = blksize - blkoffset;
           nbytes  = MIN(remaining, maxcopy);
+
+          spiffs_mtdinfo("Leading partial block: "
+                         "blkstart=%ld blkoffset=%d nbytes=%d\n",
+                         (long)blkstart, blkoffset, nbytes);
 
           memcpy(dest, &wptr[blkoffset], nbytes);
 
@@ -332,9 +371,9 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
           nblocks++;
         }
 
-      finfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
-            nblocks, (unsigned long)blkstart,
-            (unsigned long)remaining);
+      spiffs_mtdinfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
+                     nblocks, (unsigned long)blkstart,
+                     (unsigned long)remaining);
 
       if (nblocks > 0)
         {
@@ -344,6 +383,8 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
               ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
               return (ssize_t)ret;
             }
+
+          spiffs_mtd_dump("Read whole blocks", dest, blksize * nblocks);
 
           dest      += (remaining & ~blkmask);
           remaining  = (remaining & blkmask);
@@ -360,8 +401,7 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       if (remaining > 0)
         {
-#warning "REVISIT: is fs->work available here?"
-          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->work);
+          ret = MTD_BREAD(fs->mtd, blkend, 1, fs->mtd_work);
           if (ret < 0)
             {
               ferr("ERROR: MTD_BREAD() failed: %d\n", ret);
@@ -370,10 +410,17 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
           /* Copy the data from the block */
 
-          memcpy(dest, fs->work, remaining);
+          spiffs_mtdinfo("Trailing partial block: "
+                         "blkend=%ld remaining=%lu\n",
+                         (long)blkend, (unsigned long)remaining);
+          spiffs_mtd_dump("Read trailing partial block",
+                          fs->mtd_work, blksize);
+
+          memcpy(dest, fs->mtd_work, remaining);
         }
     }
 
+  spiffs_mtd_dump("Read", saved_dest, len);
   return (ssize_t)len;
 }
 
@@ -401,7 +448,7 @@ ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len)
   off_t eblkend;
   ssize_t nerased;
 
-  finfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
+  spiffs_mtdinfo("offset=%ld len=%lu\n", (long)offset, (unsigned long)len);
 
   DEBUGASSERT(fs != NULL && fs->mtd != NULL);
 

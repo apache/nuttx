@@ -400,6 +400,9 @@ ssize_t spiffs_cache_read(FAR struct spiffs_s *fs, uint8_t op, int16_t objid,
   FAR struct spiffs_cache_page_s *cp;
   int ret = OK;
 
+  spiffs_cacheinfo("op=%02x, objid=%04x addr=%ld len=%lu\n",
+                   op, objid, (long)addr, (unsigned long)len);
+
   cache = spiffs_get_cache(fs);
   cp    = spiffs_cache_page_get(fs, SPIFFS_PADDR_TO_PAGE(fs, addr));
 
@@ -511,6 +514,9 @@ size_t spiffs_cache_write(FAR struct spiffs_s *fs, uint8_t op, int16_t objid,
   FAR struct spiffs_cache_page_s *cp;
   int16_t pgndx;
   int ret = OK;
+
+  spiffs_cacheinfo("op=%02x, objid=%04x addr=%ld len=%lu\n",
+                   op, objid, (long)addr, (unsigned long)len);
 
   pgndx = SPIFFS_PADDR_TO_PAGE(fs, addr);
   cache = spiffs_get_cache(fs);
