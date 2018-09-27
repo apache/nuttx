@@ -1114,9 +1114,14 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
                 fs->stats_p_allocated - fs->stats_p_deleted;
 
+  spiffs_gcinfo("len=%ld free_blocks=%lu\n free_pages=%ld",
+                (long)len, (unsigned long)fs->free_blocksm,
+                (long)free_pages);
+
   if (fs->free_blocks > 3 &&
       (int32_t)len < free_pages * (int32_t)SPIFFS_DATA_PAGE_SIZE(fs))
     {
+      spiffs_gcinfo("Sufficient free space is available  Do nothing.\n");
       return OK;
     }
 
@@ -1225,7 +1230,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
                 fs->stats_p_allocated - fs->stats_p_deleted;
 
-  if ((int32_t) len > free_pages * (int32_t) SPIFFS_DATA_PAGE_SIZE(fs))
+  if ((int32_t) len > free_pages * (int32_t)SPIFFS_DATA_PAGE_SIZE(fs))
     {
       ret = -ENOSPC;
     }

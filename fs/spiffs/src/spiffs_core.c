@@ -2556,7 +2556,7 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
       /* Delete original data page */
 
       ret = spiffs_page_delete(fs, orig_data_pgndx);
-      if (ret != OK)
+      if (ret < 0)
         {
           ferr("ERROR: spiffs_page_delete() failed: %d\n", ret);
           break;
@@ -2939,7 +2939,7 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
           /* Delete full data page */
 
           ret = spiffs_page_data_check(fs, fobj, data_pgndx, data_spndx);
-          if (ret != SPIFFS_ERR_DELETED && ret != OK &&
+          if (ret != SPIFFS_ERR_DELETED && ret < 0 &&
               ret != SPIFFS_ERR_INDEX_REF_FREE)
             {
               ferr("ERROR: Failed to validate data pgndx=%d\n", ret);
