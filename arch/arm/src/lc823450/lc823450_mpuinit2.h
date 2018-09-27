@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifdef CONFIG_ARM_MPU
 void lc823450_mpuinitialize(void);
 #else
 #  define lc823450_mpuinitialize()
@@ -83,7 +83,7 @@ void lc823450_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifdef CONFIG_ARM_MPU
 void lc823450_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define lc823450_mpu_uheap(start,size)

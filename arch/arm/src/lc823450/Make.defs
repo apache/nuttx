@@ -63,7 +63,7 @@ CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+CMN_CSRCS += up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
@@ -184,5 +184,9 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += lc823450_userspace.c
+endif
+
+ifeq ($(CONFIG_ARM_MPU),y)
+CMN_CSRCS  += up_mpu.c
 CHIP_CSRCS += lc823450_mpuinit2.c
 endif

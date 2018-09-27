@@ -60,6 +60,10 @@
 
 #include "lc823450_syscontrol.h"
 
+#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ARM_MPU)
+#  include "lc823450_mpuinit2.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -112,6 +116,13 @@ static void cpu1_boot(void)
   if (cpu == 1)
     {
       putreg32((uint32_t)&_stext, NVIC_VECTAB); /* use CPU0 vectors */
+
+#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ARM_MPU)
+      lc823450_mpuinitialize();
+
+      irq_attach(LC823450_IRQ_MEMFAULT, up_memfault, NULL);
+      up_enable_irq(LC823450_IRQ_MEMFAULT);
+#endif
 
       irq_attach(LC823450_IRQ_CTXM3_01, lc823450_pause_handler, NULL);
       up_enable_irq(LC823450_IRQ_CTXM3_01);

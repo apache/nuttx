@@ -352,6 +352,9 @@ void __start(void)
 #ifdef CONFIG_BUILD_PROTECTED
   lc823450_userspace();
 #endif
+#if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ARM_MPU)
+  lc823450_mpuinitialize();
+#endif
   showprogress('E');
 
 #ifdef CONFIG_MM_MULTIHEAP

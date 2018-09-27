@@ -46,9 +46,10 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
+#include "up_internal.h"
 #include "lc823450_mpuinit2.h"
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
+#ifdef CONFIG_ARM_MPU
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -85,6 +86,7 @@
 
 void lc823450_mpuinitialize(void)
 {
+#ifdef CONFIG_BUILD_PROTECTED
   uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
   uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
@@ -101,6 +103,19 @@ void lc823450_mpuinitialize(void)
                  USERSPACE->us_textend - USERSPACE->us_textstart);
 
   mpu_user_intsram(datastart, dataend - datastart);
+#endif
+
+#ifdef CONFIG_BUILD_FLAT
+  uint32_t size = (uint32_t)((uint32_t)&_eronly - (uint32_t)&_stext);
+
+  /* 128KB align */
+
+  size = size & 0x20000;
+
+  /* Protect text area in SRAM as privileged flash */
+
+  mpu_priv_flash((uintptr_t)&_stext, size);
+#endif
 
   /* Then enable the MPU */
 
@@ -122,5 +137,5 @@ void lc823450_mpu_uheap(uintptr_t start, size_t size)
   mpu_user_intsram(start, size);
 }
 
-#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
+#endif /* CONFIG_ARM_MPU */
 
