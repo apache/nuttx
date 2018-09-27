@@ -118,6 +118,9 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkstart  = offset / blksize;
       blkend    = (offset + len - 1) / blksize;
 
+      finfo("blkoffset=%lu blkstart=%ld blkend=%ld\n",
+            blkoffset, blkstart, blkend);
+
       /* Check if we have to do a read-modify-write on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
        * write only the data at the end of the block.
@@ -163,8 +166,19 @@ ssize_t spiffs_mtd_write(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       /* Write all intervening complete blocks... all at once */
 
-      nblocks = blkend - blkstart + 1;
-      if (nblocks > 0 && remaining >= blksize)
+      nblocks = blkend - blkstart;
+      if (remaining > 0 && (remaining & blkmask) == 0)
+        {
+          /* The final block is a complete transfer */
+
+          nblocks++;
+        }
+
+      finfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
+            nblocks, (unsigned long)blkstart,
+            (unsigned long)remaining);
+
+      if (nblocks > 0)
         {
           ret = MTD_BWRITE(fs->mtd, blkstart, nblocks, src);
           if (ret < 0)
@@ -271,6 +285,9 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
       blkstart  = offset / blksize;
       blkend    = (offset + len - 1) / blksize;
 
+      finfo("blkoffset=%lu blkstart=%ld blkend=%ld\n",
+            blkoffset, blkstart, blkend);
+
       /* Check if we have to do a partial read on the first block.  We
        * need to do this if the blkoffset is not zero.  In that case we need
        * read only the data at the end of the block.
@@ -307,8 +324,19 @@ ssize_t spiffs_mtd_read(FAR struct spiffs_s *fs, off_t offset, size_t len,
 
       /* Read all intervening complete blocks... all at once */
 
-      nblocks = blkend - blkstart + 1;
-      if (nblocks > 0 && remaining >= blksize)
+      nblocks = blkend - blkstart;
+      if (remaining > 0 && (remaining & blkmask) == 0)
+        {
+          /* The final block is a complete transfer */
+
+          nblocks++;
+        }
+
+      finfo("Whole blocks=%d blkstart=%lu remaining=%lu\n",
+            nblocks, (unsigned long)blkstart,
+            (unsigned long)remaining);
+
+      if (nblocks > 0)
         {
           ret = MTD_BREAD(fs->mtd, blkstart, nblocks, dest);
           if (ret < 0)
