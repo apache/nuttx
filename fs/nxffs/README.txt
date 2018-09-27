@@ -142,12 +142,16 @@ The file system supports to ioctls:
 FIOC_REFORMAT:  Will force the flash to be erased and a fresh, empty
   NXFFS file system to be written on it.
 FIOC_OPTIMIZE:  Will force immediate repacking of the file system.  This
-  will increase the amount of wear on the FLASH if you use this!
+  will avoid the delays to repack the file system in the emergency case
+  when all of the FLASH memory has been used.  Instead, you can defer
+  the garbage collection to time when the system is not busy.  Calling
+  this function on a thrashing file system will increase the amount of
+  wear on the FLASH if you use this frequently!
 
 Things to Do
 ============
 
-- The statfs() implementation is minimal.  It whould have some calcuation
+- The statfs() implementation is minimal.  It should have some calculation
   of the f_bfree, f_bavail, f_files, f_ffree return values.
 - There are too many allocs and frees.  More structures may need to be
   pre-allocated.
@@ -169,17 +173,20 @@ Things to Do
   front of the device, the level of wear on the blocks at the end of the
   FLASH increases.
 - When the time comes to reorganization the FLASH, the system may be
-  inavailable for a long time.  That is a bad behavior.  What is needed,
+  unavailable for a long time.  That is a bad behavior.  What is needed,
   I think, is a garbage collection task that runs periodically so that
-  when the big reorganizaiton event occurs, most of the work is already
-  done.  That garbarge collection should search for valid blocks that no
+  when the big reorganization event occurs, most of the work is already
+  done.  That garbage collection should search for valid blocks that no
   longer contain valid data.  It should pre-erase them, put them in
   a good but empty state... all ready for file system re-organization.
+  NOTE:  There is the FIOC_OPTIMIZE IOCTL command that can be used by an
+  application for force garbage collection when the system is not busy.
+  If used judiciously by the application, this can eliminate the problem.
 - And worse, when NXFSS reorganization the FLASH a power cycle can
   damage the file system content if it happens at the wrong time.
 - The current design does not permit re-opening of files for write access
   unless the file is truncated to zero length.  This effectively prohibits
-  implementation of a proper turncate() method which should alter the
-  size of a previously written file.  There is some fragmentray logic in
+  implementation of a proper truncate() method which should alter the
+  size of a previously written file.  There is some fragmentary logic in
   place but even this is conditioned out with __NO_TRUNCATE_SUPPORT__.
 

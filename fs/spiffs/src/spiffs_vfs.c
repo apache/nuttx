@@ -954,7 +954,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * OUT: None
        */
 
-      case BIOC_CHECK:
+      case FIOC_INTEGRITY:
         {
           ret = spiffs_consistency_check(fs);
         }
@@ -965,7 +965,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * OUT: None
        */
 
-      case BIOC_FORMAT:
+      case FIOC_REFORMAT:
         {
           /* Check if the MTD driver supports the MTDIOC_BULKERASE command */
 
@@ -995,7 +995,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * OUT: None
        */
 
-      case BIOC_GC:
+      case FIOC_OPTIMIZE:
         {
           ret = spiffs_gc_check(fs, (size_t)arg);
         }
