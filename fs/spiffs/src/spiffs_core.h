@@ -160,19 +160,41 @@
  *      obj.objid:0123 span.ndx:0005 flags:DATA
  */
 
+/* Internal error numbers.
+ *
+ * REVISIT:  These should all be converted to standard errors as defined in
+ * errno.h.  -EFTYPE might be a good choice for most.  Only three are
+ * actually referenced from within SPIFFS a require special naming.
+  */
+
 #define SPIFFS_ERR_INTERNAL             (-256)
 
-/* visitor result, continue searching */
+#define SPIFFS_ERR_DELETED              (SPIFFS_ERR_INTERNAL - 1)
+#define SPIFFS_ERR_NOT_FINALIZED        (SPIFFS_ERR_INTERNAL - 2)
+#define SPIFFS_ERR_NOT_INDEX            (SPIFFS_ERR_INTERNAL - 3)
+#define SPIFFS_ERR_IS_INDEX             (SPIFFS_ERR_INTERNAL - 4)
+#define SPIFFS_ERR_IS_FREE              (SPIFFS_ERR_INTERNAL - 5)
+#define SPIFFS_ERR_INDEX_SPAN_MISMATCH  (SPIFFS_ERR_INTERNAL - 6)
+#define SPIFFS_ERR_DATA_SPAN_MISMATCH   (SPIFFS_ERR_INTERNAL - 7)
+#define SPIFFS_ERR_INDEX_REF_FREE       (SPIFFS_ERR_INTERNAL - 8)
+#define SPIFFS_ERR_INDEX_REF_LU         (SPIFFS_ERR_INTERNAL - 9)
+#define SPIFFS_ERR_INDEX_REF_INVALID    (SPIFFS_ERR_INTERNAL - 10)
+#define SPIFFS_ERR_INDEX_FREE           (SPIFFS_ERR_INTERNAL - 11)
+#define SPIFFS_ERR_INDEX_LU             (SPIFFS_ERR_INTERNAL - 12)
+#define SPIFFS_ERR_INDEX_INVALID        (SPIFFS_ERR_INTERNAL - 13)
 
-#define SPIFFS_VIS_COUNTINUE            (SPIFFS_ERR_INTERNAL - 20)
+/* These are not errors, but live in the same number space */
+/* Visitor result, continue searching */
 
-/* visitor result, continue searching after reloading lu buffer */
+#define SPIFFS_VIS_COUNTINUE            (SPIFFS_ERR_INTERNAL - 14)
 
-#define SPIFFS_VIS_COUNTINUE_RELOAD     (SPIFFS_ERR_INTERNAL - 21)
+/* Visitor result, continue searching after reloading lu buffer */
 
-/* visitor result, stop searching */
+#define SPIFFS_VIS_COUNTINUE_RELOAD     (SPIFFS_ERR_INTERNAL - 15)
 
-#define SPIFFS_VIS_END                  (SPIFFS_ERR_INTERNAL - 22)
+/* Visitor result, stop searching */
+
+#define SPIFFS_VIS_END                  (SPIFFS_ERR_INTERNAL - 16)
 
 /* Events */
 

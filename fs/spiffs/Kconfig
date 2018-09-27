@@ -8,7 +8,7 @@ config FS_SPIFFS
 	default n
 	select FS_READABLE
 	select FS_WRITABLE
-	depends on !DISABLE_MOUNTPOINT && EXPERIMENTAL
+	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the SPIFFS file system.  This is a port of version 0.3.7 of
 		the SPIFFS file system by  Peter Andersson.  It was originally

@@ -64,20 +64,6 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SPIFFS_ERR_DELETED              -10004
-#define SPIFFS_ERR_NOT_FINALIZED        -10005
-#define SPIFFS_ERR_NOT_INDEX            -10006
-#define SPIFFS_ERR_IS_INDEX             -10011
-#define SPIFFS_ERR_IS_FREE              -10012
-#define SPIFFS_ERR_INDEX_SPAN_MISMATCH  -10013
-#define SPIFFS_ERR_DATA_SPAN_MISMATCH   -10014
-#define SPIFFS_ERR_INDEX_REF_FREE       -10015
-#define SPIFFS_ERR_INDEX_REF_LU         -10016
-#define SPIFFS_ERR_INDEX_REF_INVALID    -10017
-#define SPIFFS_ERR_INDEX_FREE           -10018
-#define SPIFFS_ERR_INDEX_LU             -10019
-#define SPIFFS_ERR_INDEX_INVALID        -10020
-
 /* Flags on open file/directory options */
 
 #define SFO_FLAG_UNLINKED               (1 << 0)

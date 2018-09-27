@@ -162,6 +162,17 @@ const struct mountpt_operations spiffs_operations =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spiffs_map_errno
+ ****************************************************************************/
+
+static inline int spiffs_map_errno(int errcode)
+{
+  /* Don't return any or our internal error codes to the application */
+
+  return errcode < SPIFFS_ERR_INTERNAL ? -EFTYPE : errcode;
+}
+
+/****************************************************************************
  * Name: spiffs_lock_reentrant
  ****************************************************************************/
 
@@ -281,7 +292,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
         }
     }
 
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -311,7 +322,7 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
   if (ret < 0)
     {
       ferr("ERROR: spiffs_cache_read failed: %d\n", ret);
-      return ret;
+      return spiffs_map_errno(ret);
     }
 
   if ((objid & SPIFFS_OBJID_NDXFLAG) &&
@@ -487,7 +498,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 errout_with_fileobject:
   kmm_free(fobj);
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -970,7 +981,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   ret = spiffs_erase_block(fs, blkndx);
                   if (ret < 0)
                     {
-                      return ret;
+                      return spiffs_map_errno(ret);
                     }
 
                   blkndx++;
@@ -998,7 +1009,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1040,7 +1051,7 @@ static int spiffs_sync(FAR struct file *filep)
   ret = spiffs_fflush_cache(fs, fobj);
 
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1127,7 +1138,7 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     }
 
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1184,7 +1195,7 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
     }
 
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1259,7 +1270,7 @@ static int spiffs_readdir(FAR struct inode *mountpt,
   /* Release the lock on the file system */
 
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1427,7 +1438,7 @@ errout_with_cache:
 
 errout_with_volume:
   kmm_free(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1487,7 +1498,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
 
 errout_with_lock:
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1655,7 +1666,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
 errout_with_lock:
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1775,7 +1786,7 @@ errout_with_fobj:
 
 errout_with_lock:
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
@@ -1824,7 +1835,7 @@ static int spiffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
 errout_with_lock:
   spiffs_unlock_volume(fs);
-  return ret;
+  return spiffs_map_errno(ret);
 }
 
 /****************************************************************************
