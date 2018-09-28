@@ -541,18 +541,21 @@ static int spiffs_close(FAR struct file *filep)
 
   filep->f_priv = NULL;
 
-  /* If the reference count decremented to zero and the file has been
-   * unlinked, then free resources related to the open file.
+  /* If the reference count decremented to zero then free resources related
+   * to the open file.
    */
 
-  if (fobj->crefs == 0 && (fobj->flags & SFO_FLAG_UNLINKED) != 0)
+  if (fobj->crefs == 0)
     {
       /* Free the file object while we hold the lock?  Weird but this
        * should be safe because the object is unlinked and could not
        * have any other references.
+       *
+       * If the file was unlinked while it was opened, then now would be
+       * the time to perform the unlink operation.
        */
 
-      spiffs_fobj_free(fs, fobj);
+      spiffs_fobj_free(fs, fobj, (fobj->flags & SFO_FLAG_UNLINKED) != 0);
       return OK;
     }
 
@@ -727,9 +730,11 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
               off_t offset_in_cpage;
 
               offset_in_cpage = offset - fobj->cache_page->offset;
+
               spiffs_cacheinfo("Storing to cache page %d for fobj %d offset=%d:%d buflen=%d\n",
                                fobj->cache_page->cpndx, fobj->objid, offset,
                                offset_in_cpage, buflen);
+
               cache = spiffs_get_cache(fs);
               cpage_data = spiffs_get_cache_page(fs, cache, fobj->cache_page->cpndx);
 
@@ -1489,7 +1494,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
     {
       /* Free the file object */
 
-      spiffs_fobj_free(fs, fobj);
+      spiffs_fobj_free(fs, fobj, false);
     }
 
  /* Free allocated working buffers */
@@ -1638,7 +1643,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
     }
   else
     {
-      /* Otherwise, we will ne to re-open the file */
+      /* Otherwise, we will need to re-open the file */
       /* Allocate  new file object */
 
       fobj = (FAR struct spiffs_file_s *)kmm_zalloc(sizeof(struct spiffs_file_s));

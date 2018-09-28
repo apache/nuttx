@@ -319,15 +319,17 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
  *   Free all resources used by a file object
  *
  * Input Parameters:
- *   fs   - A reference to the volume structure
- *   fobj - A reference to the file object to be removed
+ *   fs     - A reference to the volume structure
+ *   fobj   - A reference to the file object to be removed
+ *   unlink - Remove the file is it is appropriate to do so
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void spiffs_fobj_free(FAR struct spiffs_s *fs, FAR struct spiffs_file_s *fobj);
+void spiffs_fobj_free(FAR struct spiffs_s *fs,
+                      FAR struct spiffs_file_s *fobj, bool unlink);
 
 #if defined(__cplusplus)
 }

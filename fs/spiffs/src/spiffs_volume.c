@@ -290,32 +290,34 @@ ssize_t spiffs_fobj_write(FAR struct spiffs_s *fs,
                           FAR const void *buffer, off_t offset, size_t len)
 {
   ssize_t remaining = len;
-  ssize_t nwritten = 0;
+  ssize_t total = 0;
 
-  if (fobj->size != SPIFFS_UNDEFINED_LEN && offset < fobj->size)
+  if (fobj->size != SPIFFS_UNDEFINED_LEN)
     {
-      FAR const uint8_t *tmp;
-      ssize_t wrsize;
-
-      wrsize   = MIN((ssize_t)(fobj->size - offset), len);
-      nwritten = spiffs_object_modify(fs, fobj, offset,
-                                      (FAR uint8_t *)buffer, wrsize);
-      if (nwritten <= 0)
+      while (offset < fobj->size)
         {
-          return nwritten;
+          ssize_t nwritten;
+          ssize_t wrsize;
+
+          wrsize   = MIN((ssize_t)(fobj->size - offset), remaining);
+          nwritten = spiffs_object_modify(fs, fobj, offset,
+                                          (FAR uint8_t *)buffer, wrsize);
+          if (nwritten <= 0)
+            {
+              return nwritten;
+            }
+
+          remaining -= nwritten;
+          buffer    += nwritten;
+          offset    += nwritten;
+          total     += nwritten;
         }
-
-      remaining -= nwritten;
-
-      tmp        = (FAR const uint8_t *)buffer;
-      tmp       += nwritten;
-      buffer     = tmp;
-      offset    += nwritten;
     }
 
-  if (remaining > 0)
+  while (remaining > 0)
     {
       ssize_t nappend;
+
       nappend = spiffs_object_append(fs, fobj, offset,
                                      (FAR uint8_t *)buffer, remaining);
       if (nappend < 0)
@@ -323,10 +325,13 @@ ssize_t spiffs_fobj_write(FAR struct spiffs_s *fs,
           return (ssize_t)nappend;
         }
 
-      nwritten += nappend;
+      remaining -= nappend;
+      buffer    += nappend;
+      offset    += nappend;
+      total     += nappend;
     }
 
-  return (ssize_t)nwritten;
+  return (ssize_t)total;
 }
 
 /****************************************************************************
@@ -354,6 +359,7 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
                          size_t buflen, off_t fpos)
 {
   ssize_t nread;
+  ssize_t total;
 
   /* Make sure that read access is supported */
 
@@ -380,32 +386,32 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
       /* Truncate */
 
       buflen = fobj->size - fpos;
-
-      /* Check if we are already at or beyond the end of the file */
-
-      if (buflen <= 0)
-        {
-          /* Return zero (meaning EOF) */
-
-          nread = 0;
-        }
-      else
-        {
-          /* Then read from the file object */
-
-          nread = spiffs_object_read(fs, fobj, fpos, buflen,
-                                     (FAR uint8_t *)buffer);
-        }
     }
-  else
+
+  /* Read data from the file object until either we have read all of the
+   * requested data, or until a read error occurs.
+   */
+
+  total = 0;
+  while (buflen > 0)
     {
-      /* Reading within file size */
+      /* Read from the file object */
 
       nread = spiffs_object_read(fs, fobj, fpos, buflen,
                                  (FAR uint8_t *)buffer);
+      if (nread < 0)
+        {
+          ferr("ERROR: spiffs_object_read() failed: %d\n", (int)nread);
+          return nread;
+        }
+
+      total  += nread;
+      buffer += nread;
+      fpos   += nread;
+      buflen -= nread;
     }
 
-  return nread;
+  return total;
 }
 
 /****************************************************************************
@@ -423,7 +429,8 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
  *
  ****************************************************************************/
 
-void spiffs_fobj_free(FAR struct spiffs_s *fs, FAR struct spiffs_file_s *fobj)
+void spiffs_fobj_free(FAR struct spiffs_s *fs,
+                      FAR struct spiffs_file_s *fobj, bool unlink)
 {
   FAR struct spiffs_file_s *curr;
   int ret;
@@ -459,12 +466,17 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs, FAR struct spiffs_file_s *fobj)
 
   DEBUGASSERT(curr != NULL);
 
-  /* Now we can remove the file by truncating it to zero length */
+  /* Now we can remove the file by truncating it to zero length if it was
+   * unlinked.
+   */
 
-  ret = spiffs_object_truncate(fs, fobj, 0, true);
-  if (ret < 0)
+  if (unlink)
     {
-      ferr("ERROR: spiffs_object_truncate failed: %d\n", ret);
+      ret = spiffs_object_truncate(fs, fobj, 0, true);
+      if (ret < 0)
+        {
+          ferr("ERROR: spiffs_object_truncate failed: %d\n", ret);
+        }
     }
 
   /* Then free the file object itself (which contains the lock we hold) */

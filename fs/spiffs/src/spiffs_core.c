@@ -1604,7 +1604,7 @@ void spiffs_object_event(FAR struct spiffs_s *fs,
 
               /* Remove the file object */
 
-              spiffs_fobj_free(fs, fobj);
+              spiffs_fobj_free(fs, fobj, true);
             }
         }
 
