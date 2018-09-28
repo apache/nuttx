@@ -62,6 +62,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <string.h>
 #include <debug.h>
 
@@ -2027,3 +2028,147 @@ int spiffs_check_objidconsistency(FAR struct spiffs_s *fs)
 
   return ret;
 }
+
+
+/****************************************************************************
+ * Name: spiffs_dump
+ *
+ * Description:
+ *   Dump logical flash content
+ *
+ * Input Parameters:
+ *   fs - A reference to the volume structure
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPIFFS_DUMP
+int spiffs_dump(FAR struct spiffs_s *fs)
+{
+  FAR int16_t *objlu_buf = (FAR int16_t *)fs->lu_work;
+  uint32_t pages_per_block;
+  uint32_t blocks;
+  uint32_t obj_lupages;
+  uint32_t data_pgsize;
+  uint32_t ndata_pages;
+  int16_t pgndx = 0;
+  int16_t erase_count;
+  char buffer[80];
+  int entries_per_page;
+  int len = 0;
+  int ret = OK;
+
+  entries_per_page = (SPIFFS_GEO_PAGE_SIZE(fs) / sizeof(int16_t));
+
+  while (pgndx < SPIFFS_GEO_PAGE_COUNT(fs))
+    {
+      /* Check each object lookup page */
+
+      int obj_lookup_page = 0;
+      int cur_entry = 0;
+
+      while (ret >= 0 && obj_lookup_page < (int)SPIFFS_OBJ_LOOKUP_PAGES(fs))
+        {
+          int entry_offset = obj_lookup_page * entries_per_page;
+
+          ret = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
+                                  0, pgndx * SPIFFS_GEO_PAGE_SIZE(fs) +
+                                  SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
+                                  SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
+
+          /* Check each entry */
+
+          while (ret >= 0 &&
+                 cur_entry - entry_offset < entries_per_page &&
+                 cur_entry < (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
+                 SPIFFS_OBJ_LOOKUP_PAGES(fs)))
+          {
+            int16_t objid = objlu_buf[cur_entry-entry_offset];
+
+            if (cur_entry == 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, "%04x ", pgndx);
+              }
+            else if ((cur_entry & 0x3f) == 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, "     ");
+              }
+
+            if ((objid == SPIFFS_OBJID_FREE) != 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, ".");
+              }
+            else if ((objid == SPIFFS_OBJID_DELETED) != 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, "x");
+              }
+            else if ((objid & SPIFFS_OBJID_NDXFLAG) != 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, "I");
+              }
+            else
+              {
+                len += snprintf(&buffer[len], 80 - len, "D");
+              }
+
+            cur_entry++;
+
+            if ((cur_entry & 0x3f) == 0)
+              {
+                len += snprintf(&buffer[len], 80 - len, "\n");
+                spiffs_checkinfo("%s", buffer);
+                len = 0;
+              }
+          }
+
+        obj_lookup_page++;
+      }
+
+    ret = spiffs_cache_read(fs, SPIFFS_OP_C_READ | SPIFFS_OP_T_OBJ_LU2, 0,
+                            SPIFFS_ERASE_COUNT_PADDR(fs, pgndx),
+                            sizeof(int16_t), (FAR uint8_t *)&erase_count);
+    if (ret < 0)
+      {
+        ferr("ERROR: spiffs_mtd_read() failed: %d\n", ret);
+        return ret;
+      }
+
+    if (erase_count != (int16_t)-1)
+      {
+        len += snprintf(&buffer[len], 80 - len, "  era_cnt=%d\n", erase_count);
+      }
+    else
+      {
+        len += snprintf(&buffer[len], 80 - len, "  era_cnt (N/A)\n");
+      }
+
+   spiffs_checkinfo("%s", buffer);
+   len = 0;
+
+    pgndx++;
+  }
+
+  spiffs_checkinfo("era_cnt_max: %d\n", fs->max_erase_count);
+  spiffs_checkinfo("blocks:      %d\n", SPIFFS_GEO_PAGE_COUNT(fs));
+  spiffs_checkinfo("free_blocks: %d\n", fs->free_blocks);
+  spiffs_checkinfo("page_alloc:  %d\n", fs->alloc_pages);
+  spiffs_checkinfo("page_delet:  %d\n", fs->deleted_pages);
+
+  /* The following duplicates some logic from spiffs_statfs() */
+   /* -2 for  spare blocks, +1 for emergency page */
+
+  pages_per_block  = SPIFFS_GEO_PAGES_PER_BLOCK(fs);
+  blocks           = SPIFFS_GEO_BLOCK_COUNT(fs);
+  obj_lupages      = SPIFFS_OBJ_LOOKUP_PAGES(fs);
+  data_pgsize      = SPIFFS_DATA_PAGE_SIZE(fs);
+  ndata_pages      = (blocks - 2) * (pages_per_block - obj_lupages) + 1;
+
+  spiffs_checkinfo("used:        %ld of %ld\n",
+                   (long)(fs->alloc_pages * data_pgsize),
+                   (long)(ndata_pages * data_pgsize));
+  return OK;
+}
+#endif

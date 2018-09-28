@@ -147,6 +147,26 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs);
 
 int spiffs_check_objidconsistency(FAR struct spiffs_s *fs);
 
+
+/****************************************************************************
+ * Name: spiffs_dump
+ *
+ * Description:
+ *   Dump logical flash content
+ *
+ * Input Parameters:
+ *   fs - A reference to the volume structure
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPIFFS_DUMP
+int spiffs_dump(FAR struct spiffs_s *fs);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

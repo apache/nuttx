@@ -1002,6 +1002,19 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* Dump logical content of FLASH.
+       * IN:  None
+       * OUT: None
+       */
+
+#ifdef CONFIG_SPIFFS_DUMP
+      case FIOC_DUMP:
+        {
+          ret = spiffs_dump(fs);
+        }
+        break;
+#endif
+
       default:
         /* Pass through to the contained MTD driver */
 

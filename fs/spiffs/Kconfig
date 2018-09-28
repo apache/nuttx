@@ -114,6 +114,14 @@ config SPIFFS_CHECK_OUTPUT
 	bool "Enable consistency check SYSLOG output"
 	default n
 
+config SPIFFS_DUMP
+	bool "Dump Logical FLASH Content"
+	default n
+	depends on SPIFFS_CHECK_OUTPUT
+	---help---
+		Enables support for the FIOC_DUMP IOCTL command which will dump a
+		terse summary of the state of each FLASH page.
+
 comment "MTD Interface Options"
 
 config SPIFFS_MTDDBG

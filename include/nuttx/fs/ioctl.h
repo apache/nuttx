@@ -149,17 +149,20 @@
                                            *      file system media.
                                            * IN:  None
                                            * OUT: None */
+#define FIOC_DUMP       _FIOC(0x0006)     /* Dump logical content of media.
+                                           * IN:  None
+                                           * OUT: None */
 
-#define FIONREAD        _FIOC(0x0006)     /* IN:  Location to return value (int *)
+#define FIONREAD        _FIOC(0x0007)     /* IN:  Location to return value (int *)
                                            * OUT: Bytes readable from this fd
                                            */
-#define FIONWRITE       _FIOC(0x0007)     /* IN:  Location to return value (int *)
+#define FIONWRITE       _FIOC(0x0008)     /* IN:  Location to return value (int *)
                                            * OUT: Number bytes in send queue
                                            */
-#define FIONSPACE       _FIOC(0x0008)     /* IN:  Location to return value (int *)
+#define FIONSPACE       _FIOC(0x0009)     /* IN:  Location to return value (int *)
                                            * OUT: Free space in send queue.
                                            */
-#define FIONUSERFS      _FIOC(0x0009)     /* IN:  Pointer to struct usefs_config_s
+#define FIONUSERFS      _FIOC(0x000a)     /* IN:  Pointer to struct usefs_config_s
                                            *      holding userfs configuration.
                                            * OUT: Instance number is returned on
                                            *      success.
