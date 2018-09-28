@@ -101,6 +101,7 @@ struct ram_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* The RAM MTD driver may be useful just as it is, but another good use of
  * the RAM MTD driver is as a FLASH simulation -- to support testing of FLASH
  * based logic without having FLASH.  CONFIG_RAMMTD_FLASHSIM will add some
@@ -128,10 +129,6 @@ static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
                              size_t nbytes, FAR const uint8_t *buf);
 #endif
 static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
