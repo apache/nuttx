@@ -490,6 +490,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Add the new file object to the tail of the open file list */
 
+  finfo("Adding fobj for objid=%04x\n", fobj->objid);
   dq_addlast((FAR dq_entry_t *)fobj, &fs->objq);
 
   spiffs_unlock_volume(fs);
@@ -1515,7 +1516,6 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   uint32_t data_pgsize;
   uint32_t ndata_pages;
   uint32_t nfile_objs;
-  uint32_t used;
 
   finfo("mountpt=%p buf=%p\n", mountpt, buf);
   DEBUGASSERT(mountpt != NULL && buf != NULL);
@@ -1539,7 +1539,6 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
    /* -2 for  spare blocks, +1 for emergency page */
 
   ndata_pages      = (blocks - 2) * (pages_per_block - obj_lupages) + 1;
-  used             = fs->stats_p_allocated * data_pgsize;
 
   /* Count the number of file objects */
 
@@ -1557,7 +1556,7 @@ static int spiffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   buf->f_namelen   = CONFIG_SPIFFS_NAME_MAX - 1;
   buf->f_bsize     = data_pgsize;
   buf->f_blocks    = ndata_pages;
-  buf->f_bfree     = ndata_pages - used;
+  buf->f_bfree     = ndata_pages - fs->alloc_pages;
   buf->f_bavail    = buf->f_bfree;
   buf->f_files     = nfile_objs;
   buf->f_ffree     = buf->f_bfree;  /* SWAG */
@@ -1599,12 +1598,12 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   /* Find the page index to the object header associated with this path */
 
   ret = spiffs_find_objhdr_pgndx(fs, (FAR const uint8_t *)relpath, &pgndx);
-  if (ret < OK)
+  if (ret == -ENOENT)
     {
       fwarn("WARNING: No objhdr found for relpath '%s': %d\n", relpath, ret);
       goto errout_with_lock;
     }
-  else if (ret != -ENOENT)
+  else if (ret < 0)
     {
       ferr("ERROR: spiffs_find_objhdr_pgndx failed: %d\n", ret);
       goto errout_with_lock;

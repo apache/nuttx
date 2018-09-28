@@ -223,11 +223,11 @@ static int spiffs_objlu_scan_callback(FAR struct spiffs_s *fs, int16_t objid,
     }
   else if (objid == SPIFFS_OBJID_DELETED)
     {
-      fs->stats_p_deleted++;
+      fs->deleted_pages++;
     }
   else
     {
-      fs->stats_p_allocated++;
+      fs->alloc_pages++;
     }
 
   return SPIFFS_VIS_COUNTINUE;
@@ -850,9 +850,9 @@ int spiffs_objlu_scan(FAR struct spiffs_s *fs)
 
   /* Count blocks */
 
-  fs->free_blocks       = 0;
-  fs->stats_p_allocated = 0;
-  fs->stats_p_deleted   = 0;
+  fs->free_blocks   = 0;
+  fs->alloc_pages   = 0;
+  fs->deleted_pages = 0;
 
   ret = spiffs_foreach_objlu(fs, 0, 0, 0, 0, spiffs_objlu_scan_callback,
                              0, 0, &blkndx, &entry);
@@ -1082,7 +1082,7 @@ int spiffs_page_allocate_data(FAR struct spiffs_s *fs, int16_t objid,
       return ret;
     }
 
-  fs->stats_p_allocated++;
+  fs->alloc_pages++;
 
   /* Write page header */
 
@@ -1225,7 +1225,7 @@ int spiffs_page_move(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  fs->stats_p_allocated++;
+  fs->alloc_pages++;
 
   if (was_final)
     {
@@ -1276,8 +1276,8 @@ int spiffs_page_delete(FAR struct spiffs_s *fs, int16_t pgndx)
       return ret;
     }
 
-  fs->stats_p_deleted++;
-  fs->stats_p_allocated--;
+  fs->deleted_pages++;
+  fs->alloc_pages--;
 
   /* Mark deleted in source page */
 
@@ -1363,7 +1363,7 @@ int spiffs_object_create(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  fs->stats_p_allocated++;
+  fs->alloc_pages++;
 
   /* Write empty object index page */
 

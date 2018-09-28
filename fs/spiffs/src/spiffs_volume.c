@@ -428,6 +428,8 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs, FAR struct spiffs_file_s *fobj)
   FAR struct spiffs_file_s *curr;
   int ret;
 
+  finfo("Removing fobj for objid=%04x\n", fobj->objid);
+
   /* Flush any buffered write data */
 
   ret = spiffs_fflush_cache(fs, fobj);
@@ -451,6 +453,7 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs, FAR struct spiffs_file_s *fobj)
           /* Yes, remove it from the list of of file objects */
 
           dq_rem((FAR dq_entry_t *)curr, &fs->objq);
+          break;
         }
     }
 

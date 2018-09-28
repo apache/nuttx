@@ -205,8 +205,8 @@ static int spiffs_gc_epage_stats(FAR struct spiffs_s *fs, int16_t blkndx)
 
   spiffs_gcinfo("Wipe pallo=%d pdele=%d\n", allo,  dele);
 
-  fs->stats_p_allocated -= allo;
-  fs->stats_p_deleted   -= dele;
+  fs->alloc_pages   -= allo;
+  fs->deleted_pages -= dele;
   return ret;
 }
 
@@ -1052,7 +1052,7 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
         {
           /* Found a fully deleted block */
 
-          fs->stats_p_deleted -= deleted_pages_in_block;
+          fs->deleted_pages -= deleted_pages_in_block;
           ret = spiffs_gc_erase_block(fs, cur_block);
           return ret;
         }
@@ -1112,10 +1112,10 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
   free_pages = (SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
-                fs->stats_p_allocated - fs->stats_p_deleted;
+                fs->alloc_pages - fs->deleted_pages;
 
   spiffs_gcinfo("len=%ld free_blocks=%lu\n free_pages=%ld",
-                (long)len, (unsigned long)fs->free_blocksm,
+                (long)len, (unsigned long)fs->free_blocks,
                 (long)free_pages);
 
   if (fs->free_blocks > 3 &&
@@ -1135,16 +1135,16 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
     {
       spiffs_gcinfo("Full freeblk=%d" needed=%d" free=%d dele=%d\n",
                     fs->free_blocks, needed_pages, free_pages,
-                    fs->stats_p_deleted);
+                    fs->deleted_pages);
       return -ENOSPC;
     }
 #endif
 
-  if ((int32_t)needed_pages > (int32_t)(free_pages + fs->stats_p_deleted))
+  if ((int32_t)needed_pages > (int32_t)(free_pages + fs->deleted_pages))
     {
       spiffs_gcinfo("Full freeblk=%d needed=%d free=%d dele=%d\n",
                     fs->free_blocks, needed_pages, free_pages,
-                    fs->stats_p_deleted);
+                    fs->deleted_pages);
       return -ENOSPC;
     }
 
@@ -1157,8 +1157,8 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
       spiffs_gcinfo("#%d: run gc free_blocks=%d pfree=%d pallo=%d pdele=%d [%d] len=%d of %d\n",
                     tries, fs->free_blocks, free_pages,
-                    fs->stats_p_allocated,  fs->stats_p_deleted,
-                    (free_pages + fs->stats_p_allocated + fs->stats_p_deleted),
+                    fs->alloc_pages, fs->deleted_pages,
+                    (free_pages + fs->alloc_pages + fs->deleted_pages),
                     len, (uint32_t)(free_pages * SPIFFS_DATA_PAGE_SIZE(fs)));
 
       /* If the fs is crammed, ignore block age when selecting candidate - kind
@@ -1209,7 +1209,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
       free_pages = (SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
                     SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
-                    fs->stats_p_allocated - fs->stats_p_deleted;
+                    fs->alloc_pages - fs->deleted_pages;
 
       if (prev_free_pages <= 0 && prev_free_pages == free_pages)
         {
@@ -1228,7 +1228,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
   free_pages = (SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
-                fs->stats_p_allocated - fs->stats_p_deleted;
+                fs->alloc_pages - fs->deleted_pages;
 
   if ((int32_t) len > free_pages * (int32_t)SPIFFS_DATA_PAGE_SIZE(fs))
     {
@@ -1237,7 +1237,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
   spiffs_gcinfo("Finished, %d dirty, blocks, %d free, %d pages free, "
                 "%d tries, ret=%d\n",
-                fs->stats_p_allocated + fs->stats_p_deleted,
+                fs->alloc_pages + fs->deleted_pages,
                 fs->free_blocks, free_pages, tries, ret);
 
   return ret;

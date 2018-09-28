@@ -142,8 +142,8 @@ struct spiffs_s
   int lu_entry;                     /* Cursor when searching, entry index */
   uint32_t total_pages;             /* Total number of pages on the media */
   uint32_t free_blocks;             /* Current number of free blocks */
-  uint32_t stats_p_allocated;       /* Current number of busy pages */
-  uint32_t stats_p_deleted;         /* Current number of deleted pages */
+  uint32_t alloc_pages;             /* Current number of busy pages */
+  uint32_t deleted_pages;           /* Current number of deleted pages */
 #ifdef CONFIG_SPIFFS_GCDBG
   uint32_t stats_gc_runs;
 #endif
