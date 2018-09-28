@@ -698,19 +698,19 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                               return ret;
                             }
 
-                          spiffs_object_event(fs,
-                                              (FAR struct spiffs_page_objndx_s *)&phdr,
-                                              SPIFFS_EV_NDXMOV, id,
-                                              phdr.spndx, new_pgndx, 0);
+                          spiffs_fobj_event(fs,
+                                            (FAR struct spiffs_page_objndx_s *)&phdr,
+                                            SPIFFS_EV_NDXMOV, id,
+                                            phdr.spndx, new_pgndx, 0);
 
                           /* Move wipes obj_lu, reload it */
 
                           ret = spiffs_cache_read(fs,
-                                               SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
-                                               0,
-                                               blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
-                                               SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
-                                               SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
+                                                  SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ,
+                                                  0,
+                                                  blkndx * SPIFFS_GEO_BLOCK_SIZE(fs) +
+                                                  SPIFFS_PAGE_TO_PADDR(fs, obj_lookup_page),
+                                                  SPIFFS_GEO_PAGE_SIZE(fs), fs->lu_work);
                           if (ret < 0)
                             {
                               ferr("ERROR: spiffs_cache_read() failed: %d\n", ret);
@@ -730,13 +730,13 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                           ret = spiffs_page_delete(fs, cur_pgndx);
                           if (ret < 0)
                             {
-                              ferr("ERROR: spiffs_object_event() failed: %d\n", ret);
+                              ferr("ERROR: spiffs_fobj_event() failed: %d\n", ret);
                               return ret;
                             }
 
-                          spiffs_object_event(fs, NULL,
-                                              SPIFFS_EV_NDXDEL, id,
-                                              phdr.spndx, cur_pgndx, 0);
+                          spiffs_fobj_event(fs, NULL,
+                                            SPIFFS_EV_NDXDEL, id,
+                                            phdr.spndx, cur_pgndx, 0);
                         }
                     }
                   break;
@@ -784,7 +784,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                                       (FAR uint8_t *)&phdr);
               if (ret < 0)
                 {
-                  ferr("ERROR: spiffs_object_event() failed: %d\n", ret);
+                  ferr("ERROR: spiffs_fobj_event() failed: %d\n", ret);
                   return ret;
                 }
 
@@ -794,9 +794,9 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
               spiffs_gcinfo("Find objndx spndx=%04x\n", gc.cur_objndx_spndx);
 
               ret = spiffs_objlu_find_id_and_span(fs,
-                                                   gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
-                                                   gc.cur_objndx_spndx, 0,
-                                                   &objndx_pgndx);
+                                                  gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
+                                                  gc.cur_objndx_spndx, 0,
+                                                  &objndx_pgndx);
               if (ret == -ENOENT)
                 {
                   /* On borked systems we might get an ERR_NOT_FOUND here -
@@ -883,17 +883,17 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
               {
                 /* Store object index header page */
 
-                ret = spiffs_object_update_index_hdr(fs, 0,
-                                                     gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
-                                                     gc.cur_objndx_pgndx, fs->work, 0,
-                                                     0, &new_objndx_pgndx);
+                ret = spiffs_fobj_update_ndxhdr(fs, 0,
+                                                gc.cur_objid | SPIFFS_OBJID_NDXFLAG,
+                                                gc.cur_objndx_pgndx, fs->work, 0,
+                                                0, &new_objndx_pgndx);
 
                 spiffs_gcinfo("Store modified objhdr page=%04x:%04x\n",
                               new_objndx_pgndx, 0);
 
                 if (ret < 0)
                   {
-                    ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n", ret);
+                    ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n", ret);
                     return ret;
                   }
               }
@@ -915,11 +915,11 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                     return ret;
                   }
 
-                spiffs_object_event(fs,
-                                    (FAR struct spiffs_page_objndx_s *)fs->work,
-                                    SPIFFS_EV_NDXUPD, gc.cur_objid,
-                                    objndx->phdr.spndx,
-                                    new_objndx_pgndx, 0);
+                spiffs_fobj_event(fs,
+                                  (FAR struct spiffs_page_objndx_s *)fs->work,
+                                  SPIFFS_EV_NDXUPD, gc.cur_objid,
+                                  objndx->phdr.spndx,
+                                  new_objndx_pgndx, 0);
               }
           }
           break;

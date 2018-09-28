@@ -234,7 +234,7 @@ ssize_t spiffs_fflush_cache(FAR struct spiffs_s *fs,
    * flushing the cache.
    */
 
-  if ((fobj->flags & O_DIRECT) == 0)
+  if ((fobj->oflags & O_DIRECT) == 0)
     {
       if (fobj->cache_page == 0)
         {
@@ -300,8 +300,8 @@ ssize_t spiffs_fobj_write(FAR struct spiffs_s *fs,
           ssize_t wrsize;
 
           wrsize   = MIN((ssize_t)(fobj->size - offset), remaining);
-          nwritten = spiffs_object_modify(fs, fobj, offset,
-                                          (FAR uint8_t *)buffer, wrsize);
+          nwritten = spiffs_fobj_modify(fs, fobj, offset,
+                                        (FAR uint8_t *)buffer, wrsize);
           if (nwritten <= 0)
             {
               return nwritten;
@@ -318,8 +318,8 @@ ssize_t spiffs_fobj_write(FAR struct spiffs_s *fs,
     {
       ssize_t nappend;
 
-      nappend = spiffs_object_append(fs, fobj, offset,
-                                     (FAR uint8_t *)buffer, remaining);
+      nappend = spiffs_fobj_append(fs, fobj, offset,
+                                   (FAR uint8_t *)buffer, remaining);
       if (nappend < 0)
         {
           return (ssize_t)nappend;
@@ -363,7 +363,7 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
 
   /* Make sure that read access is supported */
 
-  if ((fobj->flags & O_RDONLY) == 0)
+  if ((fobj->oflags & O_RDONLY) == 0)
     {
       return -EACCES;
     }
@@ -472,10 +472,10 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 
   if (unlink)
     {
-      ret = spiffs_object_truncate(fs, fobj, 0, true);
+      ret = spiffs_fobj_truncate(fs, fobj, 0, true);
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_truncate failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_truncate failed: %d\n", ret);
         }
     }
 

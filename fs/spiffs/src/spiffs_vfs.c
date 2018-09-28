@@ -431,11 +431,11 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_fileobject;
         }
 
-      ret = spiffs_object_create(fs, objid, (FAR const uint8_t *)relpath,
-                                 DTYPE_FILE, &pgndx);
+      ret = spiffs_fobj_create(fs, objid, (FAR const uint8_t *)relpath,
+                               DTYPE_FILE, &pgndx);
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_create() failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_create() failed: %d\n", ret);
           goto errout_with_fileobject;
         }
 
@@ -451,10 +451,10 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Open the file */
 
-  ret = spiffs_object_open_bypage(fs, pgndx, fobj, oflags, mode);
+  ret = spiffs_fobj_open_bypage(fs, pgndx, fobj);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_object_open_bypage() failed: %d\n", ret);
+      ferr("ERROR: spiffs_fobj_open_bypage() failed: %d\n", ret);
       goto errout_with_fileobject;
     }
 
@@ -462,10 +462,10 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_TRUNC) != 0)
     {
-      ret = spiffs_object_truncate(fs, fobj, 0, false);
+      ret = spiffs_fobj_truncate(fs, fobj, 0, false);
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_truncate() failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_truncate() failed: %d\n", ret);
           goto errout_with_fileobject;
         }
     }
@@ -556,7 +556,6 @@ static int spiffs_close(FAR struct file *filep)
        */
 
       spiffs_fobj_free(fs, fobj, (fobj->flags & SFO_FLAG_UNLINKED) != 0);
-      return OK;
     }
 
   /* Release the lock on the file system */
@@ -570,7 +569,7 @@ static int spiffs_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t spiffs_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
+                           size_t buflen)
 {
   FAR struct inode *inode;
   FAR struct spiffs_s *fs;
@@ -664,7 +663,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
       fobj->cache_page = spiffs_cache_page_get_byobjid(fs, fobj);
     }
 
-  if ((fobj->flags & O_DIRECT) == 0)
+  if ((fobj->oflags & O_DIRECT) == 0)
     {
       if (buflen < (size_t)SPIFFS_GEO_PAGE_SIZE(fs))
         {
@@ -871,7 +870,8 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
           break;
 
       default:
-          return -EINVAL;
+          ret = -EINVAL;
+          goto errout_with_lock;
     }
 
   /* Verify the resulting file position */
@@ -987,7 +987,8 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   ret = spiffs_erase_block(fs, blkndx);
                   if (ret < 0)
                     {
-                      return spiffs_map_errno(ret);
+                      ferr("ERROR: spiffs_erase_block() failed: %d\n", ret);
+                      break;
                     }
 
                   blkndx++;
@@ -1191,12 +1192,12 @@ static int spiffs_truncate(FAR struct file *filep, off_t length)
 
   spiffs_lock_volume(fs);
 
-  /* REVISIT:  spiffs_object_truncate() can only truncate to smaller sizes. */
+  /* REVISIT:  spiffs_fobj_truncate() can only truncate to smaller sizes. */
 
-  ret = spiffs_object_truncate(fs, fobj, length, false);
+  ret = spiffs_fobj_truncate(fs, fobj, length, false);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_object_truncate failed: %d/n", ret);
+      ferr("ERROR: spiffs_fobj_truncate failed: %d/n", ret);
     }
 
   /* Check if we need to reset the file pointer.  Probably could use
@@ -1656,22 +1657,22 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
       /* Use the page index to open the file */
 
-      ret = spiffs_object_open_bypage(fs, pgndx, fobj, 0, 0);
+      ret = spiffs_fobj_open_bypage(fs, pgndx, fobj);
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_open_bypage failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_open_bypage failed: %d\n", ret);
           kmm_free(fobj);
           goto errout_with_lock;
         }
 
       /* Now we can remove the file by truncating it to zero length */
 
-      ret = spiffs_object_truncate(fs, fobj, 0, true);
+      ret = spiffs_fobj_truncate(fs, fobj, 0, true);
       kmm_free(fobj);
 
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_truncate failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_truncate failed: %d\n", ret);
           goto errout_with_lock;
         }
     }
@@ -1780,12 +1781,13 @@ static int spiffs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   fobj = (FAR struct spiffs_file_s *)kmm_zalloc(sizeof(struct spiffs_file_s));
   if (fobj == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_with_lock;
     }
 
   /* Use the page index to open the file */
 
-  ret = spiffs_object_open_bypage(fs, oldpgndx, fobj, 0, 0);
+  ret = spiffs_fobj_open_bypage(fs, oldpgndx, fobj);
   if (ret < 0)
     {
       goto errout_with_fobj;
@@ -1793,10 +1795,10 @@ static int spiffs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   /* Then update the file name */
 
-  ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                       fobj->objhdr_pgndx, 0,
-                                       (FAR const uint8_t *)newrelpath, 0,
-                                       &newpgndx);
+  ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                  fobj->objhdr_pgndx, 0,
+                                  (FAR const uint8_t *)newrelpath, 0,
+                                  &newpgndx);
 
 errout_with_fobj:
   kmm_free(fobj);
@@ -1815,12 +1817,22 @@ static int spiffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct spiffs_s *fs;
   int16_t pgndx;
+  int len;
   int ret;
 
   finfo("mountpt=%p relpath=%s buf=%p\n", mountpt, relpath, buf);
   DEBUGASSERT(mountpt != NULL && relpath != NULL && buf != NULL);
 
-  if (strlen(relpath) > CONFIG_SPIFFS_NAME_MAX - 1)
+  /* Skip over any leading directory separators (shouldn't be any) */
+
+  for (; *relpath == '/'; relpath++)
+    {
+    }
+
+  /* Handle long file names */
+
+  len = strlen(relpath);
+  if (len > CONFIG_SPIFFS_NAME_MAX - 1)
     {
       return -ENAMETOOLONG;
     }
@@ -1834,20 +1846,35 @@ static int spiffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   spiffs_lock_volume(fs);
 
-  /* Find the object associated with this relative path */
+  /* Handle stat of the SPIFFS root directory */
 
-  ret = spiffs_find_objhdr_pgndx(fs, (FAR const uint8_t *)relpath, &pgndx);
-  if (ret < 0)
+  if (len == 0)
     {
-      goto errout_with_lock;
+      memset(buf, 0, sizeof(struct stat));
+
+      buf->st_mode    = S_IFDIR | S_IRWXO | S_IRWXG | S_IRWXU;
+      buf->st_blksize = fs->geo.blocksize;
+      buf->st_blocks  = fs->media_size / fs->geo.blocksize;
+      ret             = OK;
     }
-
-  /* And get information about the object */
-
-  ret = spiffs_stat_pgndx(fs, pgndx, 0, buf);
-  if (ret < 0)
+  else
     {
-      ferr("ERROR: spiffs_stat_pgndx failed: %d\n", ret);
+      /* Find the object associated with this relative path */
+
+      ret = spiffs_find_objhdr_pgndx(fs, (FAR const uint8_t *)relpath,
+                                     &pgndx);
+      if (ret < 0)
+        {
+          goto errout_with_lock;
+        }
+
+      /* And get information about the object */
+
+      ret = spiffs_stat_pgndx(fs, pgndx, 0, buf);
+      if (ret < 0)
+        {
+          ferr("ERROR: spiffs_stat_pgndx failed: %d\n", ret);
+        }
     }
 
 errout_with_lock:

@@ -446,28 +446,27 @@ int     spiffs_page_move(FAR struct spiffs_s *fs,
           FAR struct spiffs_page_header_s *page_hdr, int16_t src_pgndx,
           FAR int16_t *dst_pgndx);
 int     spiffs_page_delete(FAR struct spiffs_s *fs, int16_t pgndx);
-int     spiffs_object_create(FAR struct spiffs_s *fs,
+int     spiffs_fobj_create(FAR struct spiffs_s *fs,
           int16_t objid, const uint8_t name[], uint8_t type,
           FAR int16_t *objhdr_pgndx);
-int     spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
+int     spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, int16_t objid, int16_t objhdr_pgndx,
           FAR uint8_t *new_objhdr_data, const uint8_t name[],
           uint32_t size, FAR int16_t *new_pgndx);
-void    spiffs_object_event(FAR struct spiffs_s *fs,
+void    spiffs_fobj_event(FAR struct spiffs_s *fs,
           FAR struct spiffs_page_objndx_s * objndx, int ev, int16_t objid,
           int16_t spndx, int16_t new_pgndx, uint32_t new_size);
-int     spiffs_object_open_bypage(FAR struct spiffs_s *fs,
-          int16_t pgndx, FAR struct spiffs_file_s *f, uint16_t flags,
-          uint16_t mode);
-int     spiffs_object_append(FAR struct spiffs_s *fs,
+int     spiffs_fobj_open_bypage(FAR struct spiffs_s *fs,
+          int16_t pgndx, FAR struct spiffs_file_s *f);
+int     spiffs_fobj_append(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t offset, FAR uint8_t *data,
           size_t len);
 ssize_t spiffs_object_read(FAR struct spiffs_s *fs, FAR
           FAR struct spiffs_file_s *fobj, off_t offset, size_t len,
           FAR uint8_t *dest);
-int     spiffs_object_truncate(FAR struct spiffs_s *fs,
+int     spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t new_size, bool remove_full);
-int     spiffs_object_modify(FAR struct spiffs_s *fs,
+int     spiffs_fobj_modify(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t offset, FAR uint8_t *data,
           size_t len);
 int     spiffs_find_objhdr_pgndx(FAR struct spiffs_s *fs,

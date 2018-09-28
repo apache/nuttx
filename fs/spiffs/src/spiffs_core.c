@@ -1312,16 +1312,16 @@ int spiffs_page_delete(FAR struct spiffs_s *fs, int16_t pgndx)
 }
 
 /****************************************************************************
- * Name: spiffs_object_create
+ * Name: spiffs_fobj_create
  *
  * Description:
  *   Create an object index header page with empty index and undefined length
  *
  ****************************************************************************/
 
-int spiffs_object_create(FAR struct spiffs_s *fs,
-                         int16_t objid, const uint8_t name[],
-                         uint8_t type, FAR int16_t *objhdr_pgndx)
+int spiffs_fobj_create(FAR struct spiffs_s *fs,
+                       int16_t objid, const uint8_t name[],
+                       uint8_t type, FAR int16_t *objhdr_pgndx)
 {
   struct spiffs_pgobj_ndxheader_s objndx_hdr;
   int16_t blkndx;
@@ -1389,10 +1389,10 @@ int spiffs_object_create(FAR struct spiffs_s *fs,
       return ret;
     }
 
-  spiffs_object_event(fs, (FAR struct spiffs_page_objndx_s *)&objndx_hdr,
-                      SPIFFS_EV_NDXNEW, objid, 0,
-                      SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, blkndx, entry),
-                      SPIFFS_UNDEFINED_LEN);
+  spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)&objndx_hdr,
+                    SPIFFS_EV_NDXNEW, objid, 0,
+                    SPIFFS_OBJ_LOOKUP_ENTRY_TO_PGNDX(fs, blkndx, entry),
+                    SPIFFS_UNDEFINED_LEN);
 
   if (objhdr_pgndx)
     {
@@ -1403,7 +1403,7 @@ int spiffs_object_create(FAR struct spiffs_s *fs,
 }
 
 /****************************************************************************
- * Name: spiffs_object_update_index_hdr
+ * Name: spiffs_fobj_update_ndxhdr
  *
  * Description:
  *   Update object index header with any combination of name/size/index.
@@ -1413,12 +1413,12 @@ int spiffs_object_create(FAR struct spiffs_s *fs,
  *
  ****************************************************************************/
 
-int spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
-                                   FAR struct spiffs_file_s *fobj,
-                                   int16_t objid, int16_t objhdr_pgndx,
-                                   FAR uint8_t *new_objhdr_data,
-                                   const uint8_t name[],
-                                   uint32_t size, FAR int16_t *new_pgndx)
+int spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
+                              FAR struct spiffs_file_s *fobj,
+                              int16_t objid, int16_t objhdr_pgndx,
+                              FAR uint8_t *new_objhdr_data,
+                              const uint8_t name[],
+                              uint32_t size, FAR int16_t *new_pgndx)
 {
   FAR struct spiffs_pgobj_ndxheader_s *objhdr;
   int16_t new_objhdr_pgndx;
@@ -1484,11 +1484,11 @@ int spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
 
       /* callback on object index update */
 
-      spiffs_object_event(fs, (FAR struct spiffs_page_objndx_s *)objhdr,
-                          new_objhdr_data ? SPIFFS_EV_NDXUPD :
-                          SPIFFS_EV_NDXUPD_HDR, objid,
-                          objhdr->phdr.spndx, new_objhdr_pgndx,
-                          objhdr->size);
+      spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)objhdr,
+                        new_objhdr_data ? SPIFFS_EV_NDXUPD :
+                        SPIFFS_EV_NDXUPD_HDR, objid,
+                        objhdr->phdr.spndx, new_objhdr_pgndx,
+                        objhdr->size);
       if (fobj != NULL)
         {
           fobj->objhdr_pgndx = new_objhdr_pgndx;  /* If this is not in the
@@ -1500,16 +1500,16 @@ int spiffs_object_update_index_hdr(FAR struct spiffs_s *fs,
 }
 
 /****************************************************************************
- * Name: spiffs_object_event
+ * Name: spiffs_fobj_event
  *
  * Description:
  *
  ****************************************************************************/
 
-void spiffs_object_event(FAR struct spiffs_s *fs,
-                         FAR struct spiffs_page_objndx_s *objndx,
-                         int ev, int16_t objid_raw, int16_t spndx,
-                         int16_t new_pgndx, uint32_t new_size)
+void spiffs_fobj_event(FAR struct spiffs_s *fs,
+                       FAR struct spiffs_page_objndx_s *objndx,
+                       int ev, int16_t objid_raw, int16_t spndx,
+                       int16_t new_pgndx, uint32_t new_size)
 {
 #ifdef CONFIG_DEBUG_FS_INFO
    FAR static const char *evname[] =
@@ -1626,16 +1626,15 @@ void spiffs_object_event(FAR struct spiffs_s *fs,
 }
 
 /****************************************************************************
- * Name: spiffs_object_open_bypage
+ * Name: spiffs_fobj_open_bypage
  *
  * Description:
  *   Open object by page index
  *
  ****************************************************************************/
 
-int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
-                              FAR struct spiffs_file_s *fobj, uint16_t flags,
-                              uint16_t mode)
+int spiffs_fobj_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
+                            FAR struct spiffs_file_s *fobj)
 {
   struct spiffs_pgobj_ndxheader_s objndx_hdr;
   off_t physoff;
@@ -1662,13 +1661,16 @@ int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
   ret     = spiffs_cache_read(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_READ, 0,
                               physoff, sizeof(int16_t), (FAR uint8_t *)&objid);
 
+  /* Fill in the parts of the open file structure known only to the core
+   * logic.
+   */
+
   fobj->objhdr_pgndx = pgndx;
   fobj->size         = objndx_hdr.size;
   fobj->offset       = 0;
   fobj->objndx_pgndx = pgndx;
   fobj->objndx_spndx = 0;
   fobj->objid        = objid;
-  fobj->flags        = flags;
 
   ret = spiffs_validate_objndx(&objndx_hdr.phdr, fobj->objid, 0);
   if (ret < 0)
@@ -1682,7 +1684,7 @@ int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
 }
 
 /****************************************************************************
- * Name: spiffs_object_append
+ * Name: spiffs_fobj_append
  *
  * Description:
  *   Append to object.  Deep current object index (header) page in fs->work
@@ -1690,9 +1692,9 @@ int spiffs_object_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
  *
  ****************************************************************************/
 
-int spiffs_object_append(FAR struct spiffs_s *fs,
-                         FAR struct spiffs_file_s *fobj, off_t offset,
-                         FAR uint8_t *data, size_t len)
+int spiffs_fobj_append(FAR struct spiffs_s *fs,
+                       FAR struct spiffs_file_s *fobj, off_t offset,
+                       FAR uint8_t *data, size_t len)
 {
   struct spiffs_page_header_s phdr;
   FAR struct spiffs_pgobj_ndxheader_s *objhdr;
@@ -1795,14 +1797,14 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
                     {
                       /* Was a nonempty object, update to new page */
 
-                      ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                                           fobj->objhdr_pgndx,
-                                                           fs->work, 0,
-                                                           offset + written,
-                                                           &new_objhdr_page);
+                      ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                                      fobj->objhdr_pgndx,
+                                                      fs->work, 0,
+                                                      offset + written,
+                                                      &new_objhdr_page);
                       if (ret < 0)
                         {
-                          ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+                          ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                                ret);
                           return ret;
                         }
@@ -1835,20 +1837,20 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
                       return ret;
                     }
 
-                  spiffs_object_event(fs, (FAR struct spiffs_page_objndx_s *)fs->work,
-                                      SPIFFS_EV_NDXUPD, fobj->objid,
-                                      objndx->phdr.spndx, cur_objndx_pgndx,
-                                      0);
+                  spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)fs->work,
+                                    SPIFFS_EV_NDXUPD, fobj->objid,
+                                    objndx->phdr.spndx, cur_objndx_pgndx,
+                                    0);
 
                   /* Update length in object index header page */
 
-                  ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                                       fobj->objhdr_pgndx, 0, 0,
-                                                       offset + written,
-                                                       &new_objhdr_page);
+                  ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                                  fobj->objhdr_pgndx, 0, 0,
+                                                  offset + written,
+                                                  &new_objhdr_page);
                   if (ret < 0)
                     {
-                      ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+                      ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                            ret);
                       return ret;
                     }
@@ -1924,10 +1926,10 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
                   memset(fs->work, 0xff, SPIFFS_GEO_PAGE_SIZE(fs));
                   memcpy(fs->work, &phdr, sizeof(struct spiffs_page_header_s));
 
-                  spiffs_object_event(fs,
-                                      (FAR struct spiffs_page_objndx_s *)fs->work,
-                                      SPIFFS_EV_NDXNEW, fobj->objid,
-                                      cur_objndx_spndx, cur_objndx_pgndx, 0);
+                  spiffs_fobj_event(fs,
+                                    (FAR struct spiffs_page_objndx_s *)fs->work,
+                                    SPIFFS_EV_NDXNEW, fobj->objid,
+                                    cur_objndx_spndx, cur_objndx_pgndx, 0);
 
                   finfo("objid=%04x create objndx page, %04x:%04x, written=%d\n",
                         fobj->objid, cur_objndx_pgndx, cur_objndx_spndx,
@@ -2133,17 +2135,17 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
           return ret2;
         }
 
-      spiffs_object_event(fs,
-                          (FAR struct spiffs_page_objndx_s *)fs->work,
-                          SPIFFS_EV_NDXUPD, fobj->objid,
-                          objndx->phdr.spndx, cur_objndx_pgndx, 0);
+      spiffs_fobj_event(fs,
+                        (FAR struct spiffs_page_objndx_s *)fs->work,
+                        SPIFFS_EV_NDXUPD, fobj->objid,
+                        objndx->phdr.spndx, cur_objndx_pgndx, 0);
 
       /* Update size in object header index page */
 
-      ret2 = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                            fobj->objhdr_pgndx, 0, 0,
-                                            offset + written,
-                                            &new_objhdr_page);
+      ret2 = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                       fobj->objhdr_pgndx, 0, 0,
+                                       offset + written,
+                                       &new_objhdr_page);
 
       finfo("objid=%04x store new size II %d in objhdr, %04x:%04x, "
             "written=%d, ret=%d\n",
@@ -2152,7 +2154,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
 
       if (ret2 < 0)
         {
-          ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+          ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                ret2);
           return ret2;
         }
@@ -2189,11 +2191,11 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
               return ret2;
             }
 
-          spiffs_object_event(fs,
-                              (FAR struct spiffs_page_objndx_s *)fs->work,
-                              SPIFFS_EV_NDXUPD_HDR, fobj->objid,
-                              objhdr->phdr.spndx, cur_objndx_pgndx,
-                              objhdr->size);
+          spiffs_fobj_event(fs,
+                            (FAR struct spiffs_page_objndx_s *)fs->work,
+                            SPIFFS_EV_NDXUPD_HDR, fobj->objid,
+                            objhdr->phdr.spndx, cur_objndx_pgndx,
+                            objhdr->size);
         }
       else
         {
@@ -2201,11 +2203,10 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
            * copy.
            */
 
-          ret2 = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                                fobj->objhdr_pgndx,
-                                                fs->work, 0,
-                                                offset + written,
-                                                &new_objhdr_page);
+          ret2 = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                           fobj->objhdr_pgndx, fs->work, 0,
+                                           offset + written,
+                                           &new_objhdr_page);
 
           finfo("objid=%04x store modified objhdr page, %04x:%04x, "
                 "written=%d\n",
@@ -2213,7 +2214,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
 
           if (ret2 < 0)
             {
-              ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+              ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                    ret2);
               return ret2;
             }
@@ -2224,7 +2225,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
 }
 
 /****************************************************************************
- * Name: spiffs_object_modify
+ * Name: spiffs_fobj_modify
  *
  * Description:
  *   Modify object.  Keep current object index (header) page in fs->work
@@ -2232,7 +2233,7 @@ int spiffs_object_append(FAR struct spiffs_s *fs,
  *
  ****************************************************************************/
 
-int spiffs_object_modify(FAR struct spiffs_s *fs,
+int spiffs_fobj_modify(FAR struct spiffs_s *fs,
                          FAR struct spiffs_file_s *fobj, off_t offset,
                          FAR uint8_t *data, size_t len)
 {
@@ -2296,17 +2297,17 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
                 {
                   /* Store previous object index header page */
 
-                  ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                                       fobj->objhdr_pgndx,
-                                                       fs->work, 0, 0,
-                                                       &new_objhdr_pgndx);
+                  ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                                  fobj->objhdr_pgndx,
+                                                  fs->work, 0, 0,
+                                                  &new_objhdr_pgndx);
 
                   finfo("Store modified objhdr page, %04x:%04x, written=%d\n",
                         new_objhdr_pgndx, 0, written);
 
                   if (ret < 0)
                     {
-                      ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+                      ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                            ret);
                       return ret;
                     }
@@ -2338,7 +2339,7 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
                       return ret;
                     }
 
-                  spiffs_object_event(fs,
+                  spiffs_fobj_event(fs,
                                       (FAR struct spiffs_page_objndx_s *)objndx,
                                       SPIFFS_EV_NDXUPD, fobj->objid,
                                       objndx->phdr.spndx, new_objndx_pgndx,
@@ -2632,24 +2633,24 @@ int spiffs_object_modify(FAR struct spiffs_s *fs,
           return ret2;
         }
 
-      spiffs_object_event(fs, (FAR struct spiffs_page_objndx_s *)objndx,
-                          SPIFFS_EV_NDXUPD, fobj->objid, objndx->phdr.spndx,
-                          new_objndx_pgndx, 0);
+      spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)objndx,
+                        SPIFFS_EV_NDXUPD, fobj->objid, objndx->phdr.spndx,
+                        new_objndx_pgndx, 0);
     }
   else
     {
       /* Wrote within object index header page */
 
-      ret2 = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                            fobj->objhdr_pgndx, fs->work, 0,
-                                            0, &new_objhdr_pgndx);
+      ret2 = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                       fobj->objhdr_pgndx, fs->work, 0, 0,
+                                       &new_objhdr_pgndx);
 
       finfo("Store modified objhdr page, %04x:%04x, written=%d\n",
             new_objhdr_pgndx, 0, written);
 
       if (ret2 < 0)
         {
-          ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+          ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                ret2);
           return ret2;
         }
@@ -2700,7 +2701,7 @@ int spiffs_find_objhdr_pgndx(FAR struct spiffs_s *fs,
 }
 
 /****************************************************************************
- * Name: spiffs_object_truncate
+ * Name: spiffs_fobj_truncate
  *
  * Description:
  *  Truncates object to new size. If new size is NULL, object may be removed
@@ -2708,9 +2709,9 @@ int spiffs_find_objhdr_pgndx(FAR struct spiffs_s *fs,
  *
  ****************************************************************************/
 
-int spiffs_object_truncate(FAR struct spiffs_s *fs,
-                           FAR struct spiffs_file_s *fobj, off_t new_size,
-                           bool remove_full)
+int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
+                         FAR struct spiffs_file_s *fobj, off_t new_size,
+                         bool remove_full)
 {
   FAR struct spiffs_pgobj_ndxheader_s *objhdr;
   FAR struct spiffs_page_objndx_s *objndx;
@@ -2818,8 +2819,8 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
                   return ret;
                 }
 
-              spiffs_object_event(fs, NULL, SPIFFS_EV_NDXDEL, fobj->objid,
-                                  objndx->phdr.spndx, objndx_pgndx, 0);
+              spiffs_fobj_event(fs, NULL, SPIFFS_EV_NDXDEL, fobj->objid,
+                                objndx->phdr.spndx, objndx_pgndx, 0);
               if (prev_objndx_spndx > 0)
                 {
                   /* Update object index header page, unless we totally want
@@ -2840,14 +2841,14 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
                       finfo("Update objndx hdr page %04x:%04x to size=%d\n",
                             fobj->objhdr_pgndx, prev_objndx_spndx, cur_size);
 
-                      ret = spiffs_object_update_index_hdr(fs, fobj,
-                                                           fobj->objid,
-                                                           fobj->objhdr_pgndx,
-                                                           0, 0, cur_size,
-                                                           &new_objhdr_pgndx);
+                      ret = spiffs_fobj_update_ndxhdr(fs, fobj,
+                                                      fobj->objid,
+                                                      fobj->objhdr_pgndx,
+                                                      0, 0, cur_size,
+                                                      &new_objhdr_pgndx);
                       if (ret < 0)
                         {
-                          ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+                          ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                                ret);
                           return ret;
                         }
@@ -3115,8 +3116,8 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
                   return ret;
                 }
 
-              spiffs_object_event(fs, NULL, SPIFFS_EV_NDXDEL, fobj->objid,
-                                  0, objndx_pgndx, 0);
+              spiffs_fobj_event(fs, NULL, SPIFFS_EV_NDXDEL, fobj->objid,
+                                0, objndx_pgndx, 0);
             }
           else
             {
@@ -3129,13 +3130,13 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
                      SPIFFS_GEO_PAGE_SIZE(fs) -
                      sizeof(struct spiffs_pgobj_ndxheader_s));
 
-              ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                                   objndx_pgndx, fs->work,
-                                                   0, SPIFFS_UNDEFINED_LEN,
-                                                   &new_objhdr_pgndx);
-              if (ret < 0)
+              ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                              objndx_pgndx, fs->work,
+                                              0, SPIFFS_UNDEFINED_LEN,
+                                              &new_objhdr_pgndx);
+
                 {
-                  ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+                  ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                        ret);
                   return ret;
                 }
@@ -3147,12 +3148,12 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
 
           finfo("Update object index header page with indices and size\n");
 
-          ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
-                                               objndx_pgndx, fs->work, 0,
-                                               cur_size, &new_objhdr_pgndx);
+          ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
+                                          objndx_pgndx, fs->work, 0,
+                                          cur_size, &new_objhdr_pgndx);
           if (ret < 0)
             {
-              ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n",
+              ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n",
                    ret);
               return ret;
             }
@@ -3183,9 +3184,9 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
           return ret;
         }
 
-      spiffs_object_event(fs, (FAR struct spiffs_page_objndx_s *)objhdr,
-                          SPIFFS_EV_NDXUPD, fobj->objid, objndx->phdr.spndx,
-                          new_objndx_pgndx, 0);
+      spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)objhdr,
+                        SPIFFS_EV_NDXUPD, fobj->objid, objndx->phdr.spndx,
+                        new_objndx_pgndx, 0);
 
       finfo("Store modified objndx page, %04x:%04x\n",
             new_objndx_pgndx, cur_objndx_spndx);
@@ -3196,12 +3197,12 @@ int spiffs_object_truncate(FAR struct spiffs_s *fs,
 
       /* Update object index header page with new size */
 
-      ret = spiffs_object_update_index_hdr(fs, fobj, fobj->objid,
+      ret = spiffs_fobj_update_ndxhdr(fs, fobj, fobj->objid,
                                            fobj->objhdr_pgndx, 0, 0,
                                            cur_size, &new_objhdr_pgndx);
       if (ret < 0)
         {
-          ferr("ERROR: spiffs_object_update_index_hdr() failed: %d\n", ret);
+          ferr("ERROR: spiffs_fobj_update_ndxhdr() failed: %d\n", ret);
           return ret;
         }
     }
