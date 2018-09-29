@@ -246,7 +246,7 @@ int spiffs_find_fobj_byobjid(FAR struct spiffs_s *fs, int16_t objid,
                              FAR struct spiffs_file_s **ppfobj);
 
 /****************************************************************************
- * Name: spiffs_fflush_cache
+ * Name: spiffs_fobj_flush
  *
  * Description:
  *   Checks if there are any cached writes for the object ID associated with
@@ -262,8 +262,8 @@ int spiffs_find_fobj_byobjid(FAR struct spiffs_s *fs, int16_t objid,
  *
  ****************************************************************************/
 
-ssize_t spiffs_fflush_cache(FAR struct spiffs_s *fs,
-                            FAR struct spiffs_file_s *fobj);
+ssize_t spiffs_fobj_flush(FAR struct spiffs_s *fs,
+                          FAR struct spiffs_file_s *fobj);
 
 /****************************************************************************
  * Name: spiffs_fobj_write

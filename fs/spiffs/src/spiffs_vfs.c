@@ -511,6 +511,7 @@ static int spiffs_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct spiffs_s *fs;
   FAR struct spiffs_file_s *fobj;
+  int ret;
 
   finfo("filep=%p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
@@ -547,9 +548,24 @@ static int spiffs_close(FAR struct file *filep)
 
   if (fobj->crefs == 0)
     {
+      ssize_t nflushed;
+
+      /* Flush any cached writes for the file object being closed.
+       * This could result in an ENOSPC error being reported if the
+       * cache could not flushed to FALSH (and the file will appear to
+       * to have been truncated).
+       */
+
+      nflushed = spiffs_fobj_flush(fs, fobj);
+      if (nflushed < 0)
+        {
+          ferr("ERROR: spiffs_fobj_flush() failed: %d\n", ret);
+          ret = (int)nflushed;
+        }
+
       /* Free the file object while we hold the lock?  Weird but this
-       * should be safe because the object is unlinked and could not
-       * have any other references.
+       * should be safe because the object is does not have any other
+       * references.
        *
        * If the file was unlinked while it was opened, then now would be
        * the time to perform the unlink operation.
@@ -561,7 +577,7 @@ static int spiffs_close(FAR struct file *filep)
   /* Release the lock on the file system */
 
   spiffs_unlock_volume(fs);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -820,6 +836,7 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct inode *inode;
   FAR struct spiffs_s *fs;
   FAR struct spiffs_file_s *fobj;
+  ssize_t nflushed;
   int16_t data_spndx;
   int16_t objndx_spndx;
   off_t fsize;
@@ -847,7 +864,11 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Get the new file offset */
 
-  spiffs_fflush_cache(fs, fobj);
+  nflushed = spiffs_fobj_flush(fs, fobj);
+  if (nflushed < 0)
+    {
+      ferr("ERROR: spiffs_fobj_flush() failed: %d\n", ret);
+    }
 
   fsize = fobj->size == SPIFFS_UNDEFINED_LEN ? 0 : fobj->size;
 
@@ -1045,7 +1066,8 @@ static int spiffs_sync(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct spiffs_s *fs;
   FAR struct spiffs_file_s *fobj;
-  int ret;
+  ssize_t nflushed;
+  int ret = OK;
 
   finfo("filep=%p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
@@ -1068,7 +1090,12 @@ static int spiffs_sync(FAR struct file *filep)
 
   /* Flush all cached write data */
 
-  ret = spiffs_fflush_cache(fs, fobj);
+  nflushed = spiffs_fobj_flush(fs, fobj);
+  if (nflushed < 0)
+    {
+      ferr("ERROR: spiffs_fobj_flush() failed: %d\n", ret);
+      ret = (int)nflushed;
+    }
 
   spiffs_unlock_volume(fs);
   return spiffs_map_errno(ret);
@@ -1149,7 +1176,7 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Flush the cache and perform the common stat() operation */
 
-  spiffs_fflush_cache(fs, fobj);
+  spiffs_fobj_flush(fs, fobj);
 
   ret = spiffs_stat_pgndx(fs, fobj->objhdr_pgndx, fobj->objid, buf);
   if (ret < 0)
@@ -1650,7 +1677,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
       fobj = (FAR struct spiffs_file_s *)kmm_zalloc(sizeof(struct spiffs_file_s));
       if (fobj == NULL)
         {
-          fwarn("WARNING: Failed to allocate fobjs\n");
+          fwarn("WARNING: Failed to allocate fobj\n");
           ret = -ENOMEM;
           goto errout_with_lock;
         }

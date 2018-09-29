@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 26, 2018)
+NuttX TODO List (Last updated September 29, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -23,7 +23,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
  (12)  Libraries (libc/, libm/)
- (10)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -2057,6 +2057,40 @@ o File system / Generic drivers (fs/, drivers/)
                   checksum fails and the entire directory sequence is
                   ignored by readdir() logic.  This is why the file does
                   not appear in the 'ls'.
+
+  Title:       SILENT SPIFFS FILE TRUNCATION
+  Description: Under certain corner case conditions, SPIFFS will truncate
+               files.  All of the writes to the file will claim that the
+               data has been written but after the file is closed, it may
+               be a little shorter than expected.
+
+               This is due to how the caching is implemented in SPIFFS:
+
+               1. On each write, the data is not written to the FLASH but
+                  rather to an internal cache in memory.
+               2. When the a write causes the cache to become full, the
+                  content of cache is flushed to memory.  If that flush
+                  fails because the FLASH has become full, write will
+                  return the file system full error (ENOSPC).
+               3. The cache is also flushed when the file is closed (or
+                  when fsync() is called).  These will also fail if the
+                  file system becomes full.
+
+               The problem is when the file is closed, the final file
+               size could be smaller than the number of successful writes
+               to the file.
+
+               This error is probably not so significant in a real world
+               file system usage, but does cause the test at
+               apps/examples/fstest to fail.  That test fails with an error
+               of a "Partial Read" because the file being read is smaller
+               than number bytes written to the file.  This happens very
+               rarely on only may 1 out of 100 files and only if you write
+               constantly until the file system is full.  The
+               configs/sim/spiffs test can used to demonstrate this error.
+  Status:      Open
+  Priority:    Medium.  It is certain a file system failure, but I think that
+               the exposure in real world uses cases is very small.
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

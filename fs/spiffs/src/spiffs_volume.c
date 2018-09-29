@@ -209,7 +209,7 @@ int spiffs_find_fobj_byobjid(FAR struct spiffs_s *fs, int16_t objid,
 }
 
 /****************************************************************************
- * Name: spiffs_fflush_cache
+ * Name: spiffs_fobj_flush
  *
  * Description:
  *   Checks if there are any cached writes for the object ID associated with
@@ -225,8 +225,8 @@ int spiffs_find_fobj_byobjid(FAR struct spiffs_s *fs, int16_t objid,
  *
  ****************************************************************************/
 
-ssize_t spiffs_fflush_cache(FAR struct spiffs_s *fs,
-                            FAR struct spiffs_file_s *fobj)
+ssize_t spiffs_fobj_flush(FAR struct spiffs_s *fs,
+                          FAR struct spiffs_file_s *fobj)
 {
   ssize_t nwritten = 0;
 
@@ -382,7 +382,7 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
       return 0;
     }
 
-  spiffs_fflush_cache(fs, fobj);
+  spiffs_fobj_flush(fs, fobj);
 
   /* Check for attempts to read beyond the end of the file */
 
@@ -444,10 +444,10 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 
   /* Flush any buffered write data */
 
-  ret = spiffs_fflush_cache(fs, fobj);
+  ret = spiffs_fobj_flush(fs, fobj);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_fflush_cache failed: %d\n", ret);
+      ferr("ERROR: spiffs_fobj_flush failed: %d\n", ret);
     }
 
   /* Remove the file object from the list of file objects in the volume
