@@ -322,7 +322,12 @@ ssize_t spiffs_fobj_write(FAR struct spiffs_s *fs,
                                    (FAR uint8_t *)buffer, remaining);
       if (nappend < 0)
         {
-          return (ssize_t)nappend;
+          if (nappend == -ENOSPC && total > 0)
+            {
+              return total;
+            }
+
+          return nappend;
         }
 
       remaining -= nappend;

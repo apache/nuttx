@@ -459,10 +459,10 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
   spiffs_gcinfo("Cleaning block %04x\n", blkndx);
 
   memset(&gc, 0, sizeof(struct spiffs_gc_s));
-  gc.state = FIND_OBJ_DATA;
+  gc.state  = FIND_OBJ_DATA;
 
   objlu_buf = (FAR int16_t *)fs->lu_work;
-  objhdr    = (FAR struct spiffs_pgobj_ndxheader_s *) fs->work;
+  objhdr    = (FAR struct spiffs_pgobj_ndxheader_s *)fs->work;
   objndx    = (struct spiffs_page_objndx_s *)fs->work;
 
   if (fs->free_blkndx == blkndx)
@@ -473,7 +473,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
       fs->free_blkndx = (blkndx + 1) % SPIFFS_GEO_BLOCK_COUNT(fs);
       fs->free_entry = 0;
-      spiffs_gcinfo("Move free cursor to block=%0rx\n", fs->free_blkndx);
+      spiffs_gcinfo("Move free cursor to block=%04x\n", fs->free_blkndx);
     }
 
   while (ret >= 0 && gc.state != FINISHED)
@@ -942,6 +942,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
   return ret;
 }
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1114,7 +1115,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -
                 fs->alloc_pages - fs->deleted_pages;
 
-  spiffs_gcinfo("len=%ld free_blocks=%lu\n free_pages=%ld",
+  spiffs_gcinfo("len=%ld free_blocks=%lu free_pages=%ld\n",
                 (long)len, (unsigned long)fs->free_blocks,
                 (long)free_pages);
 
@@ -1224,7 +1225,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
          (fs->free_blocks <= 2 ||
           (int32_t) len > free_pages * (int32_t) SPIFFS_DATA_PAGE_SIZE(fs)));
 
-  /* Re-caculate the number of free pages */
+  /* Re-calculate the number of free pages */
 
   free_pages = (SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
                 SPIFFS_OBJ_LOOKUP_PAGES(fs)) * (SPIFFS_GEO_BLOCK_COUNT(fs) - 2) -

@@ -458,7 +458,7 @@ void    spiffs_fobj_event(FAR struct spiffs_s *fs,
           int16_t spndx, int16_t new_pgndx, uint32_t new_size);
 int     spiffs_fobj_open_bypage(FAR struct spiffs_s *fs,
           int16_t pgndx, FAR struct spiffs_file_s *f);
-int     spiffs_fobj_append(FAR struct spiffs_s *fs,
+ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t offset, FAR uint8_t *data,
           size_t len);
 ssize_t spiffs_object_read(FAR struct spiffs_s *fs, FAR
@@ -466,7 +466,7 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs, FAR
           FAR uint8_t *dest);
 int     spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t new_size, bool remove_full);
-int     spiffs_fobj_modify(FAR struct spiffs_s *fs,
+ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
           FAR struct spiffs_file_s *fobj, off_t offset, FAR uint8_t *data,
           size_t len);
 int     spiffs_find_objhdr_pgndx(FAR struct spiffs_s *fs,
