@@ -161,7 +161,7 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 
   (void)SPI_SNDBLOCK(priv->spi, &value, 2);
 
-  /* Deselect */
+  /* De-select */
 
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
 
@@ -214,37 +214,108 @@ static ssize_t max7219_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct max7219_dev_s *priv = inode->i_private;
-  FAR const char *leds = (FAR char *) buffer;
   uint16_t data;
+  uint8_t digits[8];
+  uint8_t digcnt = 0;
   uint8_t i;
 
-  if (!leds)
+  if (buffer == NULL)
     {
-      snerr("ERROR: Buffer is null\n");
+      lederr("ERROR: Buffer is null\n");
       return -1;
     }
 
-  /* At least one display, so 1 byte */
+  /* We need at least one display, so 1 byte */
 
   if (buflen < 1)
     {
-      snerr("ERROR: You need to control at least 1 digit!\n");
+      lederr("ERROR: You need to control at least 1 digit!\n");
       return -1;
     }
 
-  /* It can control up to 8 digits (8 7-segment displays) */
+  /* Get and count the valid digits */
 
-  if (buflen > 8)
+  for (i = 0; i < buflen; i++)
     {
-      snerr("ERROR: The limit is 8 digits!\n");
-      return -1;
+      if (buffer[i] >= '0' && buffer[i] <= '9')
+        {
+          digits[digcnt] = buffer[i] - '0';
+          digcnt++;
+        }
+      else
+        {
+          switch (buffer[i])
+            {
+            case '-':
+              digits[digcnt] = 0x0a;
+              digcnt++;
+              break;
+
+            case 'E':
+              digits[digcnt] = 0x0b;
+              digcnt++;
+              break;
+
+            case 'H':
+              digits[digcnt] = 0x0c;
+              digcnt++;
+              break;
+
+            case 'L':
+              digits[digcnt] = 0x0d;
+              digcnt++;
+              break;
+
+            case 'P':
+              digits[digcnt] = 0x0e;
+              digcnt++;
+              break;
+
+            case ' ':
+              digits[digcnt] = 0x0f;
+              digcnt++;
+              break;
+
+            case '.':
+              if (i == 0)
+                {
+                  digits[0] = 0x0f | 0x80;
+                  digcnt++;
+                }
+              else
+                {
+                  digits[digcnt - 1] |= 0x80;
+                }
+              break;
+
+            default:
+              lederr("Digit code unsupported\n");
+              break;
+            }
+        }
+
+      /* If we reach 8 digits then stop */
+
+      if (digcnt >= 8 && buffer[i + 1] != '.')
+        {
+          ledwarn("ERROR: The limit is 8 digits!\n");
+          break;
+        }
+    }
+
+  /* Blank the display */
+
+  for (i = 0; i < 8; i++)
+    {
+      data = (MAX7219_DIGIT0 + i) | (0x0f << 8);
+      max7219_write16(priv, data);
     }
 
   /* Write each digit */
 
-  for (i = 0; i < buflen; i++)
+  for (i = 0; i < digcnt; i++)
     {
-      data = (MAX7219_DIGIT0 + i) | (leds[i] - '0') << 8;
+      data = (MAX7219_DIGIT0 + i) | (digits[digcnt - i - 1]) << 8;
       max7219_write16(priv, data);
     }
 
@@ -258,7 +329,7 @@ static ssize_t max7219_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: max7219_register
+ * Name: max7219_leds_register
  *
  * Description:
  *   Register the MAX7219 character device as 'devpath'
@@ -281,22 +352,18 @@ int max7219_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   FAR struct max7219_dev_s *priv;
   uint16_t data;
   int ret;
+  int i;
 
   /* Initialize the MAX7219 device structure */
 
   priv = (FAR struct max7219_dev_s *)kmm_malloc(sizeof(struct max7219_dev_s));
   if (!priv)
     {
-      snerr("ERROR: Failed to allocate instance\n");
+      lederr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
   priv->spi = spi;
-
-  /* Leave the shutdown mode */
-
-  data = (MAX7219_SHUTDOWN) | (MAX7219_POWER_ON << 8);
-  max7219_write16(priv, data);
 
   /* Setup defined intensity */
 
@@ -309,12 +376,30 @@ int max7219_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
   data = (MAX7219_DECODE_MODE) | (ENABLE_DECODE << 8);
   max7219_write16(priv, data);
 
+  /* Display all digits */
+
+  data = (MAX7219_SCAN_LIMIT) | (0x07 << 8);
+  max7219_write16(priv, data);
+
+  /* Leave the shutdown mode */
+
+  data = (MAX7219_SHUTDOWN) | (MAX7219_POWER_ON << 8);
+  max7219_write16(priv, data);
+
+  /* Blank the display */
+
+  for (i = 0; i < 8; i++)
+    {
+      data = (MAX7219_DIGIT0 + i) | (0x0f << 8);
+      max7219_write16(priv, data);
+    }
+
   /* Register the character driver */
 
   ret = register_driver(devpath, &g_max7219fops, 0666, priv);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
+      lederr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
     }
 
