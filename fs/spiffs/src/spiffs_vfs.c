@@ -407,7 +407,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
     {
       /* It does not exist and we were not asked to create it */
 
-      fwarn("WARNING: File does not exist a O_CREAT not set\n");
+      fwarn("WARNING: File does not exist and O_CREAT not set\n");
       goto errout_with_fileobject;
     }
   else if (ret >= 0 && (oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
