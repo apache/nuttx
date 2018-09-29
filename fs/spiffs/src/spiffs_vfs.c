@@ -1153,6 +1153,7 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct inode *inode;
   FAR struct spiffs_s *fs;
   FAR struct spiffs_file_s *fobj;
+  ssize_t nflushed;
   int ret;
 
   finfo("filep=%p buf=%p\n", filep, buf);
@@ -1176,12 +1177,16 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Flush the cache and perform the common stat() operation */
 
-  spiffs_fobj_flush(fs, fobj);
+  nflushed = spiffs_fobj_flush(fs, fobj);
+  if (nflushed < 0)
+    {
+      ferr("ERROR: spiffs_fobj_flush() failed: %d\n", ret);
+    }
 
   ret = spiffs_stat_pgndx(fs, fobj->objhdr_pgndx, fobj->objid, buf);
   if (ret < 0)
     {
-      ferr("ERROR: spiffs_stat_pgndx failed: %d\n", ret);
+      ferr("ERROR: spiffs_stat_pgndx() failed: %d\n", ret);
     }
 
   spiffs_unlock_volume(fs);

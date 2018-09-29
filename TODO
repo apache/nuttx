@@ -2081,13 +2081,20 @@ o File system / Generic drivers (fs/, drivers/)
                to the file.
 
                This error is probably not so significant in a real world
-               file system usage, but does cause the test at
-               apps/examples/fstest to fail.  That test fails with an error
-               of a "Partial Read" because the file being read is smaller
-               than number bytes written to the file.  This happens very
-               rarely on only may 1 out of 100 files and only if you write
-               constantly until the file system is full.  The
-               configs/sim/spiffs test can used to demonstrate this error.
+               file system usage:  It requires that you write continuously
+               to SPIFFS, never deleting files or freeing FLASH resources
+               in any way.  And it requires the unlikely circumstance that
+               the final file written has its last few hundred bytes in
+               cache when the file is closed but there are even fewer bytes
+               available on the FLASH.  That would be rare with a cache
+               size of a few hundred bytes and very large serial FLASH.
+
+               This issue does cause the test at apps/examples/fstest to
+               fail.  That test fails with a "Partial Read" because the
+               file being read is smaller than number bytes written to the
+               file.  That test does write small files continuously until
+               file system is full and even the the error is rare.  The
+               configs/sim/spiffs test can used to demonstrate the error.
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.
