@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/environ/env_unsetenv.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,19 +95,27 @@ int unsetenv(FAR const char *name)
       /* Reallocate the new environment buffer */
 
       newsize = group->tg_envsize;
-      newenvp = (FAR char *)kumm_realloc(group->tg_envp, newsize);
-      if (!newenvp)
+      if (newsize <= 0)
         {
-          set_errno(ENOMEM);
-          ret = ERROR;
+          group->tg_envp    = NULL;
+          group->tg_envsize = 0;
         }
       else
         {
-          /* Save the new environment pointer (it might have changed due to
-           * reallocation.
-           */
+          newenvp = (FAR char *)kumm_realloc(group->tg_envp, newsize);
+          if (newenvp == NULL)
+            {
+              set_errno(ENOMEM);
+              ret = ERROR;
+            }
+          else
+            {
+              /* Save the new environment pointer (it might have changed due
+               * to reallocation).
+               */
 
-          group->tg_envp = newenvp;
+              group->tg_envp = newenvp;
+            }
         }
     }
 
