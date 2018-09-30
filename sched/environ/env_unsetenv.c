@@ -97,11 +97,20 @@ int unsetenv(FAR const char *name)
       newsize = group->tg_envsize;
       if (newsize <= 0)
         {
-          group->tg_envp    = NULL;
+          /* Free the old environment (if there was one) */
+
+          if (group->tg_envp != NULL)
+            {
+              kumm_free(group->tg_envp);
+              group->tg_envp = NULL;
+            }
+
           group->tg_envsize = 0;
         }
       else
         {
+          /* Reallocate the environment to reclaim a little memory */
+
           newenvp = (FAR char *)kumm_realloc(group->tg_envp, newsize);
           if (newenvp == NULL)
             {
