@@ -1091,7 +1091,7 @@ static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
 
   /* Output the header */
 
-  linesize        = snprintf(info->procfile->line, STATUS_LINELEN, "%-16s %s\n",
+  linesize        = snprintf(info->procfile->line, STATUS_LINELEN, "%s=%s\n",
                              name, value);
   copysize        = procfs_memcpy(info->procfile->line, linesize, info->buffer,
                                   info->remaining, &info->offset);
@@ -1119,8 +1119,6 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
                  off_t offset)
 {
   FAR struct task_group_s *group = tcb->group;
-  size_t linesize;
-  size_t copysize;
   struct proc_envinfo_s info;
 
   DEBUGASSERT(group != NULL);
@@ -1133,22 +1131,6 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
   info.buflen     = buflen;
   info.remaining  = buflen;
   info.totalsize  = 0;
-
-  /* Output the header */
-
-  linesize        = snprintf(info.procfile->line, STATUS_LINELEN, "\n%-16s %s\n",
-                             "VAR", "VALUE");
-  copysize        = procfs_memcpy(info.procfile->line, linesize, info.buffer,
-                                  info.remaining, &info.offset);
-
-  info.totalsize += copysize;
-  info.buffer    += copysize;
-  info.remaining -= copysize;
-
-  if (info.totalsize >= info.buflen)
-    {
-      return info.totalsize;
-    }
 
   /* Generate output for each environment variable */
 
