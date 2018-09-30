@@ -582,7 +582,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
       if ((pghdr->objid | SPIFFS_OBJID_NDXFLAG) !=
           (lu_objid | SPIFFS_OBJID_NDXFLAG))
         {
-          spiffs_checkinfo("LU: pgndx %04x differ in objid lu="
+          spiffs_checkinfo("pgndx %04x differ in objid lu="
                            "%04x ph:%04x\n", cur_pgndx, lu_objid,
                            pghdr->objid);
           delete_page = true;
@@ -947,7 +947,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
         }
       else if ((pghdr->flags & SPIFFS_PH_FLAG_FINAL))
         {
-          spiffs_checkinfo("LU: pgndx %04x busy but not final\n",
+          spiffs_checkinfo("pgndx=%04x busy but not final\n",
                            cur_pgndx);
 
           /* Page can be removed if not referenced by object index */
@@ -1010,7 +1010,7 @@ static int spiffs_check_luentry_validate(FAR struct spiffs_s *fs,
 
   if (delete_page)
     {
-      spiffs_checkinfo("LU: FIXUP: deleting page %04x\n", cur_pgndx);
+      spiffs_checkinfo("Deleting page %04x\n", cur_pgndx);
       ret = spiffs_page_delete(fs, cur_pgndx);
       if (ret < 0)
         {

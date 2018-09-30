@@ -255,7 +255,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   status = spiffs_check_luconsistency(fs);
   if (status < 0)
     {
-      fwarn("WARNING spiffs_check_luconsistency failed: %d\n", status);
+      fwarn("WARNING: spiffs_check_luconsistency failed: %d\n", status);
       if (ret >= 0)
         {
           ret = status;
@@ -265,7 +265,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   status = spiffs_check_objidconsistency(fs);
   if (status < 0)
     {
-      fwarn("WARNING spiffs_check_objidconsistency failed: %d\n", status);
+      fwarn("WARNING: spiffs_check_objidconsistency failed: %d\n", status);
       if (ret >= 0)
         {
           ret = status;
@@ -275,7 +275,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   status = spiffs_check_pgconsistency(fs);
   if (status < 0)
     {
-      fwarn("WARNING spiffs_check_pgconsistency failed: %d\n", status);
+      fwarn("WARNING: spiffs_check_pgconsistency failed: %d\n", status);
       if (ret >= 0)
         {
           ret = status;
@@ -285,7 +285,7 @@ static int spiffs_consistency_check(FAR struct spiffs_s *fs)
   status = spiffs_objlu_scan(fs);
   if (status < 0)
     {
-      fwarn("WARNING spiffs_objlu_scan failed: %d\n", status);
+      fwarn("WARNING: spiffs_objlu_scan failed: %d\n", status);
       if (ret >= 0)
         {
           ret = status;

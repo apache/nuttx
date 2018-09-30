@@ -481,7 +481,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
       int obj_lookup_page;
       uint8_t scan;
 
-      spiffs_gcinfo("gc_clean: state=%d entry=%d\n", gc.state, cur_entry);
+      spiffs_gcinfo("state=%d entry=%d\n", gc.state, cur_entry);
 
       gc.objid_found  = false;  /* Reset (to no found data page) */
 

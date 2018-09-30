@@ -560,9 +560,10 @@ int spiffs_phys_cpy(FAR struct spiffs_s *fs,
  *                       SPIFFS_VIS_CHECK_PH, SPIFFS_VIS_NO_WRAP
  *   objid             - Argument object ID
  *   cb                - Visitor callback function
- *   user_const        - Any const pointer, passed to the callback visitor function
+ *   user_const        - Any const pointer, passed to the callback visitor
+ *                       function
  *   user_var          - Any pointer, passed to the callback visitor function
- *   blkndx          - Reported block index where match was found
+ *   blkndx            - Reported block index where match was found
  *   lu_entry          - Reported look up index where match was found
  *
  ****************************************************************************/
@@ -1482,7 +1483,7 @@ int spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
           *new_pgndx = new_objhdr_pgndx;
         }
 
-      /* callback on object index update */
+      /* Object index update */
 
       spiffs_fobj_event(fs, (FAR struct spiffs_page_objndx_s *)objhdr,
                         new_objhdr_data ? SPIFFS_EV_NDXUPD :
@@ -1599,7 +1600,7 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
                   spiffs_cache_page_release(fs, fobj->cache_page);
                 }
 
-              finfo("callback: release objid=%d span=%04x objndx_pgndx to %04x\n",
+              finfo("Release objid=%d span=%04x objndx_pgndx to %04x\n",
                     fobj->objid, spndx, new_pgndx);
 
               /* Remove the file object */
@@ -1612,7 +1613,7 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
         {
           if (ev != SPIFFS_EV_NDXDEL)
             {
-              finfo("callback: setting objid=%d span=%04x objndx_pgndx to %04x\n",
+              finfo("Setting objid=%d span=%04x objndx_pgndx to %04x\n",
                      fobj->objid, spndx, new_pgndx);
 
               fobj->objndx_pgndx = new_pgndx;
@@ -1679,7 +1680,7 @@ int spiffs_fobj_open_bypage(FAR struct spiffs_s *fs, int16_t pgndx,
       return ret;
     }
 
-  finfo("open: objid=%d\n", fobj->objid);
+  finfo("objid=%d\n", fobj->objid);
   return ret;
 }
 
