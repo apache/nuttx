@@ -4035,7 +4035,7 @@ static int stm32l4_epin_configure(FAR struct stm32l4_ep_s *privep, uint8_t eptyp
       regval &= ~(OTGFS_DIEPCTL_MPSIZ_MASK | OTGFS_DIEPCTL_EPTYP_MASK | OTGFS_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << OTGFS_DIEPCTL_EPTYP_SHIFT);
-      regval |= (eptype << OTGFS_DIEPCTL_TXFNUM_SHIFT);
+      regval |= (privep->epphy << OTGFS_DIEPCTL_TXFNUM_SHIFT);
       regval |= (OTGFS_DIEPCTL_SD0PID | OTGFS_DIEPCTL_USBAEP);
       stm32l4_putreg(regval, regaddr);
 

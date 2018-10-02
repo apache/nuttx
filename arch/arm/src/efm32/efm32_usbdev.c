@@ -3929,7 +3929,7 @@ static int efm32_epin_configure(FAR struct efm32_ep_s *privep, uint8_t eptype,
                   _USB_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << _USB_DIEPCTL_EPTYPE_SHIFT);
-      regval |= (eptype << _USB_DIEPCTL_TXFNUM_SHIFT);
+      regval |= (privep->epphy << _USB_DIEPCTL_TXFNUM_SHIFT);
       regval |= (USB_DIEPCTL_SETD0PIDEF | USB_DIEPCTL_USBACTEP);
       efm32_putreg(regval, regaddr);
 

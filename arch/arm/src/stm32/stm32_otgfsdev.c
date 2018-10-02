@@ -3980,7 +3980,7 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep, uint8_t eptype,
       regval &= ~(OTGFS_DIEPCTL_MPSIZ_MASK | OTGFS_DIEPCTL_EPTYP_MASK | OTGFS_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << OTGFS_DIEPCTL_EPTYP_SHIFT);
-      regval |= (eptype << OTGFS_DIEPCTL_TXFNUM_SHIFT);
+      regval |= (privep->epphy << OTGFS_DIEPCTL_TXFNUM_SHIFT);
       regval |= (OTGFS_DIEPCTL_SD0PID | OTGFS_DIEPCTL_USBAEP);
       stm32_putreg(regval, regaddr);
 
