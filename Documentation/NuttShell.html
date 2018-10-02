@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  October 1, 2018</p>
+      <p>Last Updated:  October 2, 2018</p>
     </td>
   </tr>
 </table>
@@ -1766,6 +1766,13 @@ nsh> env
 PATH=/bin
 foo=bar
 </pre></ul>
+    <p>
+      A group-wide environment variable is created with the same value as the local NSH variable; the local NSH variable is removed.
+    </p>
+    <blockquote><small>
+     <b>NOTE:</b> This behavior differs from the <i>Bash</i> shell.
+     <i>Bash</i> would retain the local Bash variable which will shadow the environment variable of the same name.
+    </small></blockquote>
   </li>
   <li>
     <p>
@@ -2980,51 +2987,60 @@ foovalue
 nsh&gt;
 </pre></ul>
 <p>
-  If <code>CONFIG_NSH_VARS</code> is set, the effect of this <code>set</code> command is to set the local NSH variable.  Otherwise, the group-wide environment variable will be set.
+  If <code>CONFIG_NSH_VARS</code> is selected, the effect of this <code>set</code> command is to set the local NSH variable.  Otherwise, the group-wide environment variable will be set.
+</p>
+  If the local NSH variable has already been <i>promoted</i> to an environment variable via the <a href="#cmdexport"><code>export</code></a>, then the <code>set</code> command will set the value of the environment variable rather than the local NSH variable.
 </p>
 <p>
-    Set the 'exit on error control' and/or 'print a trace' of commands when parsing
-    scripts in NSH.  The settings are in effect from the point of execution, until
-    they are changed again, or in the case of the init script, the settings are
-    returned to the default settings when it exits. Included child scripts will run
-    with the parents settings and changes made in the child script will effect the
-    parent on return.
+  <blockquote><small>
+  <b>NOTE:</b>  The <i>Bash</i> shell does not work this way.
+  <i>Bash</i> would set the value of the local <i>Bash</i> variable and would not modify the environment variable.
+  The local <i>Bash</i> variable would that then shadow the environment variable with a differing value.
+  </small></blockquote>
 </p>
 <p>
-    Use 'set -e' to enable and 'set +e' to disable (ignore) the exit condition on commands.
-    The default is -e. Errors cause script to exit.
+  Set the <i>exit on error control</i> and/or <i>print a trace</i> of commands when parsing scripts in NSH.
+  The settings are in effect from the point of execution, until they are changed again, or in the case of the initialization script, the settings are returned to the default settings when it exits.
+  Included child scripts will run with the parents settings and changes made in the child script will effect the parent on return.
 </p>
+<ul>
+<li><p>
+  Use <code>set -e</code> to enable and <code>set +e</code> to disable (ignore) the exit condition on commands.
+  The default is -e. Errors cause script to exit.
+</p></li>
+<li><p>
+  Use <code>set -x</code> to enable and <code>set +x</code> to disable (silence) printing a trace of the script commands as they are executed.
+  The default is <code>+x</code>: no printing of a trace of script commands as they are executed.
+</p></li>
+</ul>
 <p>
-    Use 'set -x' to enable and 'set +x' to disable (silence) printing a trace of the script
-    commands as they are executed.
-    The default is +x: no printing of a trace of script commands as they are executed.
-</p>
-
   Example 1 - no exit on command not found
+</p>
 <ul><pre>
-    set +e
-    notacommand
+set +e
+notacommand
 </pre></ul>
-
+<p>
   Example 2 - will exit on command not found
+</p>
 <ul><pre>
-    set -e
-    notacommand
+set -e
+notacommand
 </pre></ul>
-
+<p>
   Example 3 - will exit on command not found, and print a trace of the script commands
+</p>
 <ul><pre>
-    set -ex
+set -ex
 </pre></ul>
-
-  Example 4 - will exit on command not found, and print a trace of the script commands
-              and set foobar to foovalue.
+<p>
+  Example 4 - will exit on command not found, and print a trace of the script commands and set foobar to foovalue.
+</p>
 <ul><pre>
-    set -ex foobar foovalue
-    nsh&gt; echo $foobar
-    foovalue
+set -ex foobar foovalue
+nsh&gt; echo $foobar
+foovalue
 </pre></ul>
-
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
