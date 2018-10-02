@@ -1771,7 +1771,7 @@ foo=bar
     </p>
     <blockquote><small>
      <b>NOTE:</b> This behavior differs from the <i>Bash</i> shell.
-     <i>Bash</i> would retain the local Bash variable which will shadow the environment variable of the same name.
+     <i>Bash</i> would retain the local Bash variable which will shadow the environment variable of the same name and same value.
     </small></blockquote>
   </li>
   <li>
@@ -2994,8 +2994,7 @@ nsh&gt;
 <p>
   <blockquote><small>
   <b>NOTE:</b>  The <i>Bash</i> shell does not work this way.
-  <i>Bash</i> would set the value of the local <i>Bash</i> variable and would not modify the environment variable.
-  The local <i>Bash</i> variable would that then shadow the environment variable with a differing value.
+  <i>Bash</i> would set the value of both the local <i>Bash</i> variable and the environment variable of the same name to the same value.
   </small></blockquote>
 </p>
 <p>
