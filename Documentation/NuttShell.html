@@ -4136,19 +4136,26 @@ set FOOBAR ABC_${FOO}_${BAR}
       </p>
       <table border="1">
         <tr>
-          <td valign="top"><b>CMD</b></td>
-          <td valign="top"><b>w/o <code>CONFIG_NSH_VARS</code></b></td>
-          <td valign="top"><b>w/ <code>CONFIG_NSH_VARS</code></b></td>
+          <td valign="top" width="15%"><b>CMD</b></td>
+          <td valign="top" width="30%"><b>w/o <code>CONFIG_NSH_VARS</code></b></td>
+          <td valign="top" width="45%"><b>w/ <code>CONFIG_NSH_VARS</code></b></td>
         </tr>
         <tr>
           <td valign="top"><code>set &lt;a&gt; &lt;b&gt;</code></td>
           <td valign="top">Set environment variable &lt;a&gt; to &lt;b&gt;</td>
-          <td valign="top">Set NSH variable &lt;a&gt; to &lt;b&gt;</td>
+          <td valign="top">Set NSH variable &lt;a&gt; to &lt;b&gt;
+          (Unless the NSH variable has been <i>promoted</i> via <code>export</code>, in which case the environment variable of the same name is set to &lt;b&gt;).
+          </td>
         </tr>
         <tr>
-          <td><code>unset &lt;a&gt;</code></td>
-          <td>Unsets environment variable &lt;a&gt;</td>
-          <td>Unsets both environment variable and NSH variable &lt;a&gt;</td>
+          <td valign="top"><code>set</code></td>
+          <td valign="top">Causes an error.</td>
+          <td valign="top">Lists all NSH variables.</td>
+        </tr>
+        <tr>
+          <td valign="top"><code>unset &lt;a&gt;</code></td>
+          <td valign="top">Unsets environment variable &lt;a&gt;</td>
+          <td valign="top">Unsets both environment variable <i>and</i> NSH variable with and name &lt;a&gt;</td>
         </tr>
         <tr>
           <td valign="top"><code>export &lt;a&gt; &lt;b&gt;</code></td>
@@ -4158,12 +4165,12 @@ set FOOBAR ABC_${FOO}_${BAR}
         <tr>
           <td valign="top"><code>export &lt;a&gt;</code></td>
           <td valign="top">Causes an error.</td>
-          <td valign="top">Sets environment variable &lt;a&gt; to the value of NSH variable &lt;a&gt; (or "" if undefined).  Unsets NSH local variable &lt;a&gt;.</td>
+          <td valign="top">Sets environment variable &lt;a&gt; to the value of NSH variable &lt;a&gt; (or &quot;&quot; if the NSH variable has not been set).  Unsets NSH local variable &lt;a&gt;.</td>
         </tr>
         <tr>
           <td valign="top"><code>env</code></td>
           <td valign="top">Lists all environment variables</td>
-          <td valign="top">Lists all environment variables (only)</td>
+          <td valign="top">Lists all environment variables (<i>only</i>)</td>
         </tr>
      </table>
    </tr>
