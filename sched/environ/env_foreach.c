@@ -57,8 +57,7 @@
  * Name: env_foreach
  *
  * Description:
- *   Search the provided environment structure for the variable of the
- *   specified name.
+ *   Visit each name-value pair in the environment.
  *
  * Input Parameters:
  *   group - The task group containing environment array to be searched.

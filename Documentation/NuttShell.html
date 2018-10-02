@@ -2999,6 +2999,13 @@ nsh&gt;
   </small></blockquote>
 </p>
 <p>
+  If <code>CONFIG_NSH_VARS=y</code> is selected and no arguments are provided, then the <code>set</code> command will list all of the local NSH variables.
+</p>
+<ul><pre>
+nsh> set
+foolbar=foovalue
+</pre></ul>
+<p>
   Set the <i>exit on error control</i> and/or <i>print a trace</i> of commands when parsing scripts in NSH.
   The settings are in effect from the point of execution, until they are changed again, or in the case of the initialization script, the settings are returned to the default settings when it exits.
   Included child scripts will run with the parents settings and changes made in the child script will effect the parent on return.
