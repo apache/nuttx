@@ -193,7 +193,6 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   if ((flags & AI_PASSIVE) != 0 && hostname == NULL)
     {
       struct in6_addr addr;
-      int ret;
 
       memset(&addr, 0, sizeof(struct in6_addr));
 
