@@ -779,7 +779,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               if (*buf)
                 {
                   FAR char *endptr;
-                  int       errsave;
+                  int errsave;
 #ifdef CONFIG_HAVE_DOUBLE
                   double dvalue;
 #endif
@@ -839,6 +839,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   buf += (endptr - tmp);
                   set_errno(errsave);
+
                   if (!noassign)
                     {
 
@@ -849,7 +850,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                       if (lflag)
                         {
-
                           /* Return the double value */
 
                           linfo("vsscanf: Return %f to %p\n", dvalue, pd);
@@ -858,7 +858,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       else
 #endif
                         {
-
                           /* Return the float value */
 
                           linfo("vsscanf: Return %f to %p\n", (double)fvalue, pf);
