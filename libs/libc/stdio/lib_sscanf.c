@@ -778,6 +778,13 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               if (*buf)
                 {
+                  FAR char *endptr;
+                  int       errsave;
+#ifdef CONFIG_HAVE_DOUBLE
+                  double dvalue;
+#endif
+                  float fvalue;
+
                   /* Skip over any white space before the real string */
 
                   while (isspace(*buf))
@@ -791,30 +798,49 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       /* No... Guess a field width using some heuristics */
 
-                      width = findwidth(buf, fmt);
+                      int tmpwidth = findwidth(buf, fmt);
+                      width = MIN(sizeof(tmp) - 1, tmpwidth);
                     }
 
                   /* Copy the real string into a temporary working buffer. */
 
                   strncpy(tmp, buf, width);
                   tmp[width] = '\0';
-                  buf += width;
 
                   linfo("vsscanf: tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the floating point conversion */
+                  /* Preserve the errno value */
 
+                  errsave = get_errno();
+                  set_errno(0);
+
+#ifdef CONFIG_HAVE_DOUBLE
+                  if (lflag)
+                    {
+                      /* Get the converted double value */
+
+                      dvalue = strtod(tmp, &endptr);
+                    }
+                  else
+#endif
+                    {
+                      fvalue = strtof(tmp, &endptr);
+                    }
+
+                  /* Check if the number was successfully converted */
+
+                  if (tmp == endptr || get_errno() == ERANGE)
+                    {
+                      return count;
+                    }
+
+                  /* Move by the actual number of characters converted */
+
+                  buf += (endptr - tmp);
+                  set_errno(errsave);
                   if (!noassign)
                     {
-                      /* strtod always returns a double */
-
-                      FAR char *endptr;
-                      int       errsave;
-
-                      /* Preserve the errno value */
-
-                      errsave = get_errno();
-                      set_errno(0);
 
                       /* We have to check whether we need to return a float
                        * or a double.
@@ -823,18 +849,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #ifdef CONFIG_HAVE_DOUBLE
                       if (lflag)
                         {
-                          /* Get the converted double value */
-
-                          double dvalue = strtod(tmp, &endptr);
-
-                          /* Check if the number was successfully converted */
-
-                          if (tmp == endptr || get_errno() == ERANGE)
-                            {
-                              return count;
-                            }
-
-                          set_errno(errsave);
 
                           /* Return the double value */
 
@@ -844,18 +858,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       else
 #endif
                         {
-                          /* Get the converted float value */
-
-                          float fvalue = strtof(tmp, &endptr);
-
-                          /* Check if the number was successfully converted */
-
-                          if (tmp == endptr || get_errno() == ERANGE)
-                            {
-                              return count;
-                            }
-
-                          set_errno(errsave);
 
                           /* Return the float value */
 
