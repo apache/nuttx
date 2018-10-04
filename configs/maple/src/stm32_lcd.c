@@ -82,7 +82,7 @@ static xcpt_t g_isr;
 
 static int up_lcdextcominisr(int irq, void *context, void *arg)
 {
-  STM32_TIM_ACKINT(tim, 0);
+  STM32_TIM_ACKINT(tim, ATIM_SR_UIF);
   if (g_isr == NULL)
     {
       lcderr("ERROR: error, irq not attached, disabled\n");
@@ -99,12 +99,12 @@ static int up_lcdirqattach(xcpt_t isr, void * arg)
 
   if (isr != NULL)
     {
-      STM32_TIM_SETISR(tim, up_lcdextcominisr, arg, 0);
+      STM32_TIM_SETISR(tim, up_lcdextcominisr, arg, ATIM_SR_UIF);
       g_isr = isr;
     }
   else
     {
-      STM32_TIM_SETISR(tim, NULL, NULL, 0);
+      STM32_TIM_SETISR(tim, NULL, NULL, ATIM_SR_UIF);
       g_isr = NULL;
     }
 
@@ -118,12 +118,12 @@ static void up_lcddispcontrol(bool on)
   if (on)
     {
       stm32_gpiowrite(GPIO_MEMLCD_DISP, 1);
-      STM32_TIM_ENABLEINT(tim, 0);
+      STM32_TIM_ENABLEINT(tim, ATIM_SR_UIF);
     }
   else
     {
       stm32_gpiowrite(GPIO_MEMLCD_DISP, 0);
-      STM32_TIM_DISABLEINT(tim, 0);
+      STM32_TIM_DISABLEINT(tim, ATIM_SR_UIF);
     }
 }
 

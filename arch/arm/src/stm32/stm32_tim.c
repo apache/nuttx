@@ -1672,7 +1672,7 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   DEBUGASSERT(dev != NULL);
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, source);
 }
 
 /************************************************************************************
@@ -1682,7 +1682,7 @@ static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   DEBUGASSERT(dev != NULL);
-  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
+  stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, source, 0);
 }
 
 /************************************************************************************
@@ -1691,7 +1691,7 @@ static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
+  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~source);
 }
 
 /************************************************************************************
@@ -1701,7 +1701,7 @@ static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   uint16_t regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
-  return (regval & ATIM_SR_UIF) ? 1 : 0;
+  return (regval & source) ? 1 : 0;
 }
 
 /************************************************************************************

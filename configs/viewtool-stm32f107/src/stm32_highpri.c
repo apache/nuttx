@@ -130,7 +130,7 @@ void tim6_handler(void)
 
   /* Acknowledge the timer interrupt */
 
-  STM32_TIM_ACKINT(g_highpri.dev, 0);
+  STM32_TIM_ACKINT(g_highpri.dev, ATIM_SR_UIF);
 
   /* Increment the count associated with the current basepri */
 
@@ -217,7 +217,7 @@ int highpri_main(int argc, char *argv[])
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
   up_enable_irq(STM32_IRQ_TIM6);
-  STM32_TIM_ENABLEINT(dev, 0);
+  STM32_TIM_ENABLEINT(dev, ATIM_SR_UIF);
 
   /* Monitor interrupts */
 
