@@ -290,28 +290,34 @@ static inline void rcc_enableapb1(void)
   regval = getreg32(STM32_RCC_APB1LENR);
 
 
-#ifdef CONFIG_STM32F7_I2C1
+#ifdef CONFIG_STM32H7_SPI2
+  /* SPI2 clock enable */
+
+  regval |= RCC_APB1LENR_SPI2EN;
+#endif
+
+#ifdef CONFIG_STM32H7_SPI3
+  /* SPI3 clock enable */
+
+  regval |= RCC_APB1LENR_SPI3EN;
+#endif
+
+#ifdef CONFIG_STM32H7_I2C1
   /* I2C1 clock enable */
 
   regval |= RCC_APB1LENR_I2C1EN;
 #endif
 
-#ifdef CONFIG_STM32F7_I2C2
+#ifdef CONFIG_STM32H7_I2C2
   /* I2C2 clock enable */
 
   regval |= RCC_APB1LENR_I2C2EN;
 #endif
 
-#ifdef CONFIG_STM32F7_I2C3
+#ifdef CONFIG_STM32H7_I2C3
   /* I2C3 clock enable */
 
   regval |= RCC_APB1LENR_I2C3EN;
-#endif
-
-#ifdef CONFIG_STM32F7_I2C4
-  /* I2C4 clock enable */
-
-  regval |= RCC_APB1LENR_I2C4EN;
 #endif
 
   // TODO: ...
@@ -342,6 +348,24 @@ static inline void rcc_enableapb2(void)
    */
 
   regval = getreg32(STM32_RCC_APB2ENR);
+
+#ifdef CONFIG_STM32H7_SPI1
+  /* SPI1 clock enable */
+
+  regval |= RCC_APB2ENR_SPI1EN;
+#endif
+
+#ifdef CONFIG_STM32H7_SPI4
+  /* SPI4 clock enable */
+
+  regval |= RCC_APB2ENR_SPI4EN;
+#endif
+
+#ifdef CONFIG_STM32H7_SPI5
+  /* SPI5 clock enable */
+
+  regval |= RCC_APB2ENR_SPI5EN;
+#endif
 
   // TODO: ...
 
@@ -388,6 +412,18 @@ static inline void rcc_enableapb4(void)
    */
 
   regval = getreg32(STM32_RCC_APB4ENR);
+
+#ifdef CONFIG_STM32H7_I2C4
+  /* I2C4 clock enable */
+
+  regval |= RCC_APB4ENR_I2C4EN;
+#endif
+
+#ifdef CONFIG_STM32H7_SPI6
+  /* SPI6 clock enable */
+
+  regval |= RCC_APB4ENR_SPI6EN;
+#endif
 
   // TODO: ...
 
@@ -615,6 +651,29 @@ static void stm32_stdclockconfig(void)
       regval = getreg32(STM32_RCC_D3CCIPR);
       regval &= ~RCC_D3CCIPR_I2C4SEL_MASK;
       regval |= STM32_RCC_D3CCIPR_I2C4SRC;
+      putreg32(regval, STM32_RCC_D3CCIPR);
+#endif
+
+      /* Configure SPI source clock */
+
+#if defined(STM32_RCC_D2CCIP1R_SPI123SRC)
+      regval = getreg32(STM32_RCC_D2CCIP1R);
+      regval &= ~RCC_D2CCIP1R_SPI123SEL_MASK;
+      regval |= STM32_RCC_D2CCIP1R_SPI123SRC;
+      putreg32(regval, STM32_RCC_D2CCIP1R);
+#endif
+
+#if defined(STM32_RCC_D2CCIP1R_SPI45SRC)
+      regval = getreg32(STM32_RCC_D2CCIP1R);
+      regval &= ~RCC_D2CCIP1R_SPI45SEL_MASK;
+      regval |= STM32_RCC_D2CCIP1R_SPI45SRC;
+      putreg32(regval, STM32_RCC_D2CCIP1R);
+#endif
+
+#if defined(STM32_RCC_D3CCIPR_SPI6SRC)
+      regval = getreg32(STM32_RCC_D3CCIPR);
+      regval &= ~RCC_D3CCIPR_SPI6SEL_MASK;
+      regval |= STM32_RCC_D3CCIPR_SPI6SRC;
       putreg32(regval, STM32_RCC_D3CCIPR);
 #endif
 
