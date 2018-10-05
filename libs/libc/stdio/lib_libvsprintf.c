@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libvsprintf.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,15 +52,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If you have floating point but no fieldwidth, then use a fixed (but
- * configurable) floating point precision.
- */
-
-#if defined(CONFIG_LIBC_FLOATINGPOINT) && \
-    defined(CONFIG_NOPRINTF_FIELDWIDTH) && \
-   !defined(CONFIG_LIBC_FIXEDPRECISION)
-#  define CONFIG_LIBC_FIXEDPRECISION 3
-#endif
 
 #define FLAG_SHOWPLUS            0x01
 #define FLAG_ALTFORM             0x02
@@ -148,65 +139,66 @@ enum
 #ifdef CONFIG_PTR_IS_NOT_INT
 static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
                    FAR void *p);
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static int  getsizesize(uint8_t fmt, uint8_t flags, FAR void *p)
-#endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_PTR_IS_NOT_INT */
 
 /* Unsigned int to ASCII conversion */
 
-static void utodec(FAR struct lib_outstream_s *obj, unsigned int n);
+static void utodec(FAR struct lib_outstream_s *obj, unsigned int n,
+                   int width);
 static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
-                   uint8_t a);
-static void utooct(FAR struct lib_outstream_s *obj, unsigned int n);
-static void utobin(FAR struct lib_outstream_s *obj, unsigned int n);
+                   uint8_t a, int width);
+static void utooct(FAR struct lib_outstream_s *obj, unsigned int n,
+                   int width);
+static void utobin(FAR struct lib_outstream_s *obj, unsigned int n,
+                   int width);
 static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                     uint8_t flags, unsigned int lln);
+                     uint8_t flags, unsigned int lln, int uwidth);
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void fixup(uint8_t fmt, FAR uint8_t *flags, int *n);
 static int  getusize(uint8_t fmt, uint8_t flags, unsigned int lln);
-#endif
 
 /* Unsigned long int to ASCII conversion */
 
 #ifdef CONFIG_LONG_IS_NOT_INT
-static void lutodec(FAR struct lib_outstream_s *obj, unsigned long ln);
+static void lutodec(FAR struct lib_outstream_s *obj, unsigned long ln,
+                    int width);
 static void lutohex(FAR struct lib_outstream_s *obj, unsigned long ln,
-                    uint8_t a);
-static void lutooct(FAR struct lib_outstream_s *obj, unsigned long ln);
-static void lutobin(FAR struct lib_outstream_s *obj, unsigned long ln);
+                    uint8_t a, int width);
+static void lutooct(FAR struct lib_outstream_s *obj, unsigned long ln,
+                    int width);
+static void lutobin(FAR struct lib_outstream_s *obj, unsigned long ln,
+                    int width);
 static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                      uint8_t flags, unsigned long ln);
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
+                      uint8_t flags, unsigned long ln, int width);
+
 static void lfixup(uint8_t fmt, FAR uint8_t *flags, long *ln);
 static int  getlusize(uint8_t fmt, FAR uint8_t flags, unsigned long ln);
-#endif
 #endif
 
 /* Unsigned long long int to ASCII conversions */
 
 #if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
-static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long lln);
+static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long lln,
+                     int width);
 static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln,
-                     uint8_t a);
-static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln);
-static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long lln);
+                     uint8_t a, int width);
+static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln,
+                     int width);
+static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long lln,
+                     int width);
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, unsigned long long lln);
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
+                       uint8_t flags, unsigned long long lln, int width);
+
 static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln);
 static int  getllusize(uint8_t fmt, FAR uint8_t flags,
                        FAR unsigned long long lln);
 #endif
-#endif
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        uint8_t flags, int fieldwidth, int valwidth);
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                         uint8_t flags, int fieldwidth, int valwidth);
-#endif
 
 /****************************************************************************
  * Private Constant Data
@@ -270,7 +262,6 @@ static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
  * Name: getpsize
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static int getpsize(uint8_t flags, FAR void *p)
 {
   struct lib_outstream_s nulloutstream;
@@ -280,24 +271,27 @@ static int getpsize(uint8_t flags, FAR void *p)
   return nulloutstream.nput;
 }
 
-#endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_PTR_IS_NOT_INT */
 
 /****************************************************************************
  * Name: utodec
  ****************************************************************************/
 
-static void utodec(FAR struct lib_outstream_s *obj, unsigned int n)
+static void utodec(FAR struct lib_outstream_s *obj, unsigned int n,
+                   int width)
 {
-  unsigned int remainder = n % 10;
-  unsigned int dividend  = n / 10;
-
-  if (dividend)
+  if (width > 0)
     {
-      utodec(obj, dividend);
-    }
+      unsigned int remainder = n % 10;
+      unsigned int dividend  = n / 10;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          utodec(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -305,12 +299,14 @@ static void utodec(FAR struct lib_outstream_s *obj, unsigned int n)
  ****************************************************************************/
 
 static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
-                   uint8_t a)
+                   uint8_t a, int width)
 {
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned int); bits > 0; bits -= 4)
+  for (bits = 8 * sizeof(unsigned int);
+       width > 0 && bits > 0;
+       width--, bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -328,7 +324,7 @@ static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
         }
     }
 
-  if (!nonzero)
+  if (width > 0 && !nonzero)
     {
       obj->put(obj, '0');
     }
@@ -338,34 +334,40 @@ static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
  * Name: utooct
  ****************************************************************************/
 
-static void utooct(FAR struct lib_outstream_s *obj, unsigned int n)
+static void utooct(FAR struct lib_outstream_s *obj, unsigned int n, int width)
 {
-  unsigned int remainder = n & 0x7;
-  unsigned int dividend = n >> 3;
-
-  if (dividend)
+  if (width > 0)
     {
-      utooct(obj, dividend);
-    }
+      unsigned int remainder = n & 0x7;
+      unsigned int dividend = n >> 3;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          utooct(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
  * Name: utobin
  ****************************************************************************/
 
-static void utobin(FAR struct lib_outstream_s *obj, unsigned int n)
+static void utobin(FAR struct lib_outstream_s *obj, unsigned int n, int width)
 {
-  unsigned int remainder = n & 1;
-  unsigned int dividend = n >> 1;
-
-  if (dividend)
+  if (width > 0)
     {
-      utobin(obj, dividend);
-    }
+      unsigned int remainder = n & 1;
+      unsigned int dividend  = n >> 1;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          utobin(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -373,7 +375,7 @@ static void utobin(FAR struct lib_outstream_s *obj, unsigned int n)
  ****************************************************************************/
 
 static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                     uint8_t flags, unsigned int n)
+                     uint8_t flags, unsigned int n, int width)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -381,37 +383,12 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
     {
       case 'd':
       case 'i':
-        /* Signed base 10 */
-        {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if ((int)n < 0)
-            {
-              obj->put(obj, '-');
-              n = (unsigned int)(-(int)n);
-            }
-          else if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
-
-          utodec(obj, n);
-        }
-        break;
-
       case 'u':
-        /* Unigned base 10 */
+        /* Signed/unsigned base 10 */
         {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
+          /* Convert the integer value to a string. */
 
-          utodec(obj, n);
+          utodec(obj, n, width);
         }
         break;
 
@@ -428,19 +405,26 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
             {
               /* Prefix the number with "0x" */
 
-              obj->put(obj, '0');
-              obj->put(obj, 'x');
+              if (width-- > 0)
+                {
+                  obj->put(obj, '0');
+                }
+
+              if (width-- > 0)
+                {
+                  obj->put(obj, 'x');
+                }
             }
 
           /* Convert the unsigned value to a string. */
 
           if (fmt == 'X')
             {
-              utohex(obj, n, 'A');
+              utohex(obj, n, 'A', width);
             }
           else
             {
-              utohex(obj, n, 'a');
+              utohex(obj, n, 'a', width);
             }
         }
         break;
@@ -454,12 +438,15 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
              {
                /* Prefix the number with '0' */
 
-               obj->put(obj, '0');
+              if (width-- > 0)
+                {
+                   obj->put(obj, '0');
+                }
              }
 
            /* Convert the unsigned value to a string. */
 
-           utooct(obj, n);
+           utooct(obj, n, width);
          }
          break;
 
@@ -468,7 +455,7 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         {
           /* Convert the unsigned value to a string. */
 
-          utobin(obj, n);
+          utobin(obj, n, width);
         }
         break;
 
@@ -484,7 +471,6 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: fixup
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void fixup(uint8_t fmt, FAR uint8_t *flags, FAR int *n)
 {
   /* Perform the integer conversion according to the format specifier */
@@ -532,7 +518,7 @@ static int getusize(uint8_t fmt, uint8_t flags, unsigned int n)
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
 
-  utoascii(&nulloutstream, fmt, flags, n);
+  utoascii(&nulloutstream, fmt, flags, n, INT_MAX);
   return nulloutstream.nput;
 }
 
@@ -550,24 +536,27 @@ static int getdblsize(uint8_t fmt, int trunc, uint8_t flags, double n)
   return nulloutstream.nput;
 }
 #endif
-#endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 
 #ifdef CONFIG_LONG_IS_NOT_INT
+
 /****************************************************************************
  * Name: lutodec
  ****************************************************************************/
 
-static void lutodec(FAR struct lib_outstream_s *obj, unsigned long n)
+static void lutodec(FAR struct lib_outstream_s *obj, unsigned long n, int width)
 {
-  unsigned int  remainder = n % 10;
-  unsigned long dividend  = n / 10;
-
-  if (dividend)
+  if (width > 0)
     {
-      lutodec(obj, dividend);
-    }
+      unsigned int  remainder = n % 10;
+      unsigned long dividend  = n / 10;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          lutodec(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -575,12 +564,14 @@ static void lutodec(FAR struct lib_outstream_s *obj, unsigned long n)
  ****************************************************************************/
 
 static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
-                    uint8_t a)
+                    uint8_t a, int width)
 {
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned long); bits > 0; bits -= 4)
+  for (bits = 8 * sizeof(unsigned long);
+       width > 0 && bits > 0;
+       width--, bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -598,7 +589,7 @@ static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
         }
     }
 
-  if (!nonzero)
+  if (width > 0 && !nonzero)
     {
       obj->put(obj, '0');
     }
@@ -608,34 +599,42 @@ static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
  * Name: lutooct
  ****************************************************************************/
 
-static void lutooct(FAR struct lib_outstream_s *obj, unsigned long n)
+static void lutooct(FAR struct lib_outstream_s *obj, unsigned long n,
+                    int width)
 {
-  unsigned int  remainder = n & 0x7;
-  unsigned long dividend  = n >> 3;
-
-  if (dividend)
+  if (width > 0)
     {
-      lutooct(obj, dividend);
-    }
+      unsigned int  remainder = n & 0x7;
+      unsigned long dividend  = n >> 3;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          lutooct(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
  * Name: lutobin
  ****************************************************************************/
 
-static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n)
+static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n,
+                    int width)
 {
-  unsigned int  remainder = n & 1;
-  unsigned long dividend  = n >> 1;
-
-  if (dividend)
+  if (width > 0)
     {
-      lutobin(obj, dividend);
-    }
+      unsigned int  remainder = n & 1;
+      unsigned long dividend  = n >> 1;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          lutobin(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -643,7 +642,7 @@ static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n)
  ****************************************************************************/
 
 static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                      uint8_t flags, unsigned long ln)
+                      uint8_t flags, unsigned long ln, int width)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -651,37 +650,12 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
     {
       case 'd':
       case 'i':
-        /* Signed base 10 */
-        {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if ((long)ln < 0)
-            {
-              obj->put(obj, '-');
-              ln    = (unsigned long)(-(long)ln);
-            }
-          else if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
-
-          lutodec(obj, ln);
-        }
-        break;
-
       case 'u':
-        /* Unigned base 10 */
+        /* Signed/unsigned base 10 */
         {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
+          /* Convert the long integer value to a string. */
 
-          lutodec(obj, ln);
+          lutodec(obj, ln, width);
         }
         break;
 
@@ -695,19 +669,26 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
             {
               /* Prefix the number with "0x" */
 
-              obj->put(obj, '0');
-              obj->put(obj, 'x');
+              if (width-- > 0)
+                {
+                  obj->put(obj, '0');
+                }
+
+              if (width-- > 0)
+                {
+                  obj->put(obj, 'x');
+                }
             }
 
           /* Convert the unsigned value to a string. */
 
           if (fmt == 'X')
             {
-              lutohex(obj, ln, 'A');
+              lutohex(obj, ln, 'A', width);
             }
           else
             {
-              lutohex(obj, ln, 'a');
+              lutohex(obj, ln, 'a', width);
             }
         }
         break;
@@ -721,12 +702,15 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
              {
                /* Prefix the number with '0' */
 
-               obj->put(obj, '0');
+              if (width-- > 0)
+                {
+                   obj->put(obj, '0');
+                }
              }
 
            /* Convert the unsigned value to a string. */
 
-           lutooct(obj, ln);
+           lutooct(obj, ln, width);
          }
          break;
 
@@ -735,7 +719,7 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         {
           /* Convert the unsigned value to a string. */
 
-          lutobin(obj, ln);
+          lutobin(obj, ln, width);
         }
         break;
 
@@ -749,7 +733,6 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: lfixup
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void lfixup(uint8_t fmt, FAR uint8_t *flags, FAR long *ln)
 {
   /* Perform the integer conversion according to the format specifier */
@@ -797,11 +780,10 @@ static int getlusize(uint8_t fmt, uint8_t flags, unsigned long ln)
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
 
-  lutoascii(&nulloutstream, fmt, flags, ln);
+  lutoascii(&nulloutstream, fmt, flags, ln, INT_MAX);
   return nulloutstream.nput;
 }
 
-#endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_LONG_IS_NOT_INT */
 
 #if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
@@ -809,17 +791,21 @@ static int getlusize(uint8_t fmt, uint8_t flags, unsigned long ln)
  * Name: llutodec
  ****************************************************************************/
 
-static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long n)
+static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long n,
+                     int width)
 {
-  unsigned int remainder = n % 10;
-  unsigned long long dividend = n / 10;
-
-  if (dividend)
+  if (width > 0)
     {
-      llutodec(obj, dividend);
-    }
+      unsigned int remainder = n % 10;
+      unsigned long long dividend = n / 10;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          llutodec(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -827,12 +813,14 @@ static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long n)
  ****************************************************************************/
 
 static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
-                     uint8_t a)
+                     uint8_t a, int width)
 {
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned long long); bits > 0; bits -= 4)
+  for (bits = 8 * sizeof(unsigned long long);
+       width > 0 && bits > 0;
+       width--, bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -850,7 +838,7 @@ static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
         }
     }
 
-  if (!nonzero)
+  if (width > 0 && !nonzero)
     {
       obj->put(obj, '0');
     }
@@ -860,34 +848,42 @@ static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
  * Name: llutooct
  ****************************************************************************/
 
-static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long n)
+static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long n,
+                     int width)
 {
-  unsigned int remainder = n & 0x7;
-  unsigned long long dividend = n >> 3;
-
-  if (dividend)
+  if (width > 0)
     {
-      llutooct(obj, dividend);
-    }
+      unsigned int remainder = n & 0x7;
+      unsigned long long dividend = n >> 3;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          llutooct(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
  * Name: llutobin
  ****************************************************************************/
 
-static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n)
+static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n,
+                     int width)
 {
-  unsigned int remainder = n & 1;
-  unsigned long long dividend = n >> 1;
-
-  if (dividend)
+  if (width > 0)
     {
-      llutobin(obj, dividend);
-    }
+      unsigned int remainder = n & 1;
+      unsigned long long dividend = n >> 1;
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+      if (dividend != 0)
+        {
+          llutobin(obj, dividend, width - 1);
+        }
+
+      obj->put(obj, (remainder + (unsigned int)'0'));
+    }
 }
 
 /****************************************************************************
@@ -895,7 +891,7 @@ static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n)
  ****************************************************************************/
 
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, unsigned long long lln)
+                       uint8_t flags, unsigned long long lln, int width)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -903,37 +899,12 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
     {
       case 'd':
       case 'i':
-        /* Signed base 10 */
-        {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if ((long long)lln < 0)
-            {
-              obj->put(obj, '-');
-              lln    = (unsigned long long)(-(long long)lln);
-            }
-          else if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
-
-          llutodec(obj, (unsigned long long)lln);
-        }
-        break;
-
       case 'u':
-        /* Unigned base 10 */
+        /* Signed/unsigned base 10 */
         {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-          if (IS_SHOWPLUS(flags))
-            {
-              obj->put(obj, '+');
-            }
-#endif
-          /* Convert the unsigned value to a string. */
+          /* Convert the long long integer value to a string. */
 
-          llutodec(obj, (unsigned long long)lln);
+          llutodec(obj, (unsigned long long)lln, width);
         }
         break;
 
@@ -947,19 +918,26 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
             {
               /* Prefix the number with "0x" */
 
-              obj->put(obj, '0');
-              obj->put(obj, 'x');
+              if (width-- > 0)
+                {
+                  obj->put(obj, '0');
+                }
+
+              if (width-- > 0)
+                {
+                  obj->put(obj, 'x');
+                }
             }
 
           /* Convert the unsigned value to a string. */
 
           if (fmt == 'X')
             {
-              llutohex(obj, (unsigned long long)lln, 'A');
+              llutohex(obj, (unsigned long long)lln, 'A', width);
             }
           else
             {
-              llutohex(obj, (unsigned long long)lln, 'a');
+              llutohex(obj, (unsigned long long)lln, 'a', width);
             }
         }
         break;
@@ -973,12 +951,15 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
              {
                /* Prefix the number with '0' */
 
-               obj->put(obj, '0');
+              if (width-- > 0)
+                {
+                  obj->put(obj, '0');
+                }
              }
 
            /* Convert the unsigned value to a string. */
 
-           llutooct(obj, (unsigned long long)lln);
+           llutooct(obj, (unsigned long long)lln, width);
          }
          break;
 
@@ -987,7 +968,7 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         {
           /* Convert the unsigned value to a string. */
 
-          llutobin(obj, (unsigned long long)lln);
+          llutobin(obj, (unsigned long long)lln, width);
         }
         break;
 
@@ -1001,7 +982,6 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: llfixup
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln)
 {
   /* Perform the integer conversion according to the format specifier */
@@ -1050,18 +1030,16 @@ static int getllusize(uint8_t fmt, uint8_t flags, unsigned long long lln)
   lib_nulloutstream(&nulloutstream);
 
 
-  llutoascii(&nulloutstream, fmt, flags, lln);
+  llutoascii(&nulloutstream, fmt, flags, lln, INT_MAX);
   return nulloutstream.nput;
 }
 
-#endif /* CONFIG_NOPRINTF_FIELDWIDTH */
 #endif /* CONFIG_HAVE_LONG_LONG */
 
 /****************************************************************************
  * Name: prejustify
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        uint8_t flags, int fieldwidth, int valwidth)
 {
@@ -1121,13 +1099,11 @@ static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
         break;
     }
 }
-#endif
 
 /****************************************************************************
  * Name: postjustify
  ****************************************************************************/
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                         uint8_t flags, int fieldwidth, int valwidth)
 {
@@ -1155,7 +1131,6 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
         break;
     }
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -1169,11 +1144,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
                  va_list ap)
 {
   FAR char        *ptmp;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
   int             width;
   int             trunc;
   uint8_t         fmt;
-#endif
   uint8_t         flags;
 #ifdef CONFIG_ARCH_ROMGETC
   char            ch;
@@ -1210,11 +1183,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
       /* Assume defaults */
 
       flags = 0;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
       fmt   = FMT_RJUST;
       width = 0;
       trunc = 0;
-#endif
 
       /* Process each format qualifier. */
 
@@ -1231,33 +1202,26 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           else if (FMT_CHAR == '-')
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_LJUST;
-#endif
             }
 
           /* Check for leading zero fill right justification. */
 
           else if (FMT_CHAR == '0')
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_RJUST0;
-#endif
             }
 #if 0
           /* Center justification. */
 
           else if (FMT_CHAR == '~')
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_CENTER;
-#endif
             }
 #endif
 
           else if (FMT_CHAR == '*')
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int value = va_arg(ap, int);
               if (IS_HASDOT(flags))
                 {
@@ -1269,20 +1233,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
                   width = value;
                   SET_HASASTERISKWIDTH(flags);
                 }
-#endif
             }
 
           /* Check for field width */
 
           else if (FMT_CHAR >= '1' && FMT_CHAR <= '9')
             {
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              do
-                {
-                  FMT_NEXT;
-                }
-              while (FMT_CHAR >= '0' && FMT_CHAR <= '9');
-#else
               /* Accumulate the field width integer. */
 
               int n = ((int)(FMT_CHAR)) - (int)'0';
@@ -1307,7 +1263,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
                 {
                   width = n;
                 }
-#endif
+
               /* Back up to the last digit. */
 
               FMT_PREV;
@@ -1317,9 +1273,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           else if (FMT_CHAR == '.')
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               SET_HASDOT(flags);
-#endif
             }
 
           /* Check for leading plus sign. */
@@ -1351,10 +1305,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
       if (FMT_CHAR == 's')
         {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
           int swidth;
           int left;
-#endif
+
           /* Get the string to output */
 
           ptmp = va_arg(ap, FAR char *);
@@ -1367,31 +1320,27 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
            * operations.
            */
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
           swidth = (IS_HASDOT(flags) && trunc >= 0)
                       ? strnlen(ptmp, trunc) : strlen(ptmp);
           prejustify(obj, fmt, 0, width, swidth);
           left = swidth;
-#endif
+
           /* Concatenate the string into the output */
 
           while (*ptmp)
             {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               if (left-- <= 0)
                 {
                   break;
                 }
-#endif
+
               obj->put(obj, *ptmp);
               ptmp++;
             }
 
           /* Perform left-justification operations. */
 
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
           postjustify(obj, fmt, 0, width, swidth);
-#endif
           continue;
         }
 
@@ -1432,18 +1381,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
           if (IS_LONGLONGPRECISION(flags) && FMT_CHAR != 'p')
             {
               long long lln;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int lluwidth;
-#endif
               /* Extract the long long value. */
 
               lln = va_arg(ap, long long);
 
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              /* Output the number */
-
-              llutoascii(obj, FMT_CHAR, flags, (unsigned long long)lln);
-#else
               /* Resolve sign-ness and format issues */
 
               llfixup(FMT_CHAR, &flags, &lln);
@@ -1451,6 +1393,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               lluwidth = getllusize(FMT_CHAR, flags, lln);
+              if (trunc > 0 && lluwidth > trunc)
+                {
+                  lluwidth = trunc;
+                }
 
               /* Perform left field justification actions */
 
@@ -1458,12 +1404,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Output the number */
 
-              llutoascii(obj, FMT_CHAR, flags, (unsigned long long)lln);
+              llutoascii(obj, FMT_CHAR, flags, (unsigned long long)lln,
+                         lluwidth);
 
               /* Perform right field justification actions */
 
               postjustify(obj, fmt, flags, width, lluwidth);
-#endif
             }
           else
 #endif /* CONFIG_HAVE_LONG_LONG */
@@ -1471,18 +1417,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
           if (IS_LONGPRECISION(flags) && FMT_CHAR != 'p')
             {
               long ln;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int luwidth;
-#endif
+
               /* Extract the long value. */
 
               ln = va_arg(ap, long);
 
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              /* Output the number */
-
-              lutoascii(obj, FMT_CHAR, flags, (unsigned long)ln);
-#else
               /* Resolve sign-ness and format issues */
 
               lfixup(FMT_CHAR, &flags, &ln);
@@ -1490,6 +1430,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               luwidth = getlusize(FMT_CHAR, flags, ln);
+              if (trunc > 0 && luwidth > trunc)
+                {
+                  luwidth = trunc;
+                }
 
               /* Perform left field justification actions */
 
@@ -1497,12 +1441,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Output the number */
 
-              lutoascii(obj, FMT_CHAR, flags, (unsigned long)ln);
+              lutoascii(obj, FMT_CHAR, flags, (unsigned long)ln, luwidth);
 
               /* Perform right field justification actions */
 
               postjustify(obj, fmt, flags, width, luwidth);
-#endif
             }
           else
 #endif /* CONFIG_LONG_IS_NOT_INT */
@@ -1510,18 +1453,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
           if (FMT_CHAR == 'p')
             {
               void *p;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int pwidth;
-#endif
+
               /* Extract the integer value. */
 
               p = va_arg(ap, void *);
 
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              /* Output the pointer value */
-
-              ptohex(obj, flags, p);
-#else
               /* Resolve sign-ness and format issues */
 
               lfixup(FMT_CHAR, &flags, &ln);
@@ -1541,24 +1478,17 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Perform right field justification actions */
 
               postjustify(obj, fmt, flags, width, pwidth);
-#endif
             }
           else
 #endif
             {
-              int n;
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int uwidth;
-#endif
+              int n;
+
               /* Extract the long long value. */
 
               n = va_arg(ap, int);
 
-#ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              /* Output the number */
-
-              utoascii(obj, FMT_CHAR, flags, (unsigned int)n);
-#else
               /* Resolve sign-ness and format issues */
 
               fixup(FMT_CHAR, &flags, &n);
@@ -1566,6 +1496,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               uwidth = getusize(FMT_CHAR, flags, n);
+              if (trunc > 0 &&  uwidth > trunc)
+                {
+                  uwidth = trunc;
+                }
 
               /* Perform left field justification actions */
 
@@ -1573,12 +1507,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Output the number */
 
-              utoascii(obj, FMT_CHAR, flags, (unsigned int)n);
+              utoascii(obj, FMT_CHAR, flags, (unsigned int)n, uwidth);
 
               /* Perform right field justification actions */
 
               postjustify(obj, fmt, flags, width, uwidth);
-#endif
             }
         }
 
@@ -1587,7 +1520,6 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 #ifdef CONFIG_LIBC_FLOATINGPOINT
       else if (strchr("eEfgG", FMT_CHAR))
         {
-#ifndef CONFIG_NOPRINTF_FIELDWIDTH
           double dblval = va_arg(ap, double);
           int dblsize;
 
@@ -1606,12 +1538,6 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
           /* Perform right field justification actions */
 
           postjustify(obj, fmt, 0, width, dblsize);
-#else
-          /* Output the number with a fixed precision */
-
-          double dblval = va_arg(ap, double);
-          lib_dtoa(obj, FMT_CHAR, CONFIG_LIBC_FIXEDPRECISION, flags, dblval);
-#endif
         }
 #endif /* CONFIG_LIBC_FLOATINGPOINT */
     }
