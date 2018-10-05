@@ -360,10 +360,9 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed/unsigned base 10 */
       case 'i':
       case 'u':
-        /* Signed/unsigned base 10 */
         {
           /* Convert the integer value to a string. */
 
@@ -372,11 +371,10 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         break;
 
 #ifndef CONFIG_PTR_IS_NOT_INT
-      case 'p':
+      case 'p':  /* Hexadecimal */
 #endif
       case 'x':
       case 'X':
-        /* Hexadecimal */
         {
           /* Check for alternate form */
 
@@ -401,8 +399,7 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         }
         break;
 
-      case 'o':
-        /* Octal */
+      case 'o':  /* Octal */
          {
            /* Check for alternate form */
 
@@ -419,8 +416,7 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
          }
          break;
 
-      case 'b':
-        /* Binary */
+      case 'b': /* Binary */
         {
           /* Convert the unsigned value to a string. */
 
@@ -446,30 +442,24 @@ static void fixup(uint8_t fmt, FAR uint8_t *flags, FAR int *n)
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed base 10 */
       case 'i':
-        /* Signed base 10 */
-
         if (*n < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
-            *n    = -*n;
+            *n = -*n;
           }
         break;
 
-      case 'u':
-        /* Unsigned base 10 */
+      case 'u':  /* Unsigned base 10 */
         break;
 
-      case 'p':
+      case 'p':  /* Hexadecimal */
       case 'x':
       case 'X':
-        /* Hexadecimal */
-      case 'o':
-        /* Octal */
-      case 'b':
-        /* Binary */
+      case 'o':  /* Octal */
+      case 'b':  /* Binary */
         CLR_SIGNED(*flags);
         break;
 
@@ -604,10 +594,9 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed/unsigned base 10 */
       case 'i':
       case 'u':
-        /* Signed/unsigned base 10 */
         {
           /* Convert the long integer value to a string. */
 
@@ -615,9 +604,8 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         }
         break;
 
-      case 'x':
+      case 'x':  /* Hexadecimal */
       case 'X':
-        /* Hexadecimal */
         {
           /* Check for alternate form */
 
@@ -642,8 +630,7 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         }
         break;
 
-      case 'o':
-        /* Octal */
+      case 'o':  /* Octal */
          {
            /* Check for alternate form */
 
@@ -660,8 +647,7 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
          }
          break;
 
-      case 'b':
-        /* Binary */
+      case 'b':  /* Binary */
         {
           /* Convert the unsigned value to a string. */
 
@@ -685,30 +671,24 @@ static void lfixup(uint8_t fmt, FAR uint8_t *flags, FAR long *ln)
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed base 10 */
       case 'i':
-        /* Signed base 10 */
-
         if (*ln < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
-            *ln    = -*ln;
+            *ln = -*ln;
           }
         break;
 
-      case 'u':
-        /* Unsigned base 10 */
+      case 'u':  /* Unsigned base 10 */
         break;
 
-      case 'p':
+      case 'p':  /* Hexadecimal */
       case 'x':
       case 'X':
-        /* Hexadecimal */
-      case 'o':
-        /* Octal */
-      case 'b':
-        /* Binary */
+      case 'o':  /* Octal */
+      case 'b':  /* Binary */
         CLR_SIGNED(*flags);
         break;
 
@@ -829,10 +809,9 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed/unsigned base 10 */
       case 'i':
       case 'u':
-        /* Signed/unsigned base 10 */
         {
           /* Convert the long long integer value to a string. */
 
@@ -840,9 +819,8 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         }
         break;
 
-      case 'x':
+      case 'x':  /* Hexadecimal */
       case 'X':
-        /* Hexadecimal */
         {
           /* Check for alternate form */
 
@@ -867,8 +845,7 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
         }
         break;
 
-      case 'o':
-        /* Octal */
+      case 'o':  /* Octal */
          {
            /* Check for alternate form */
 
@@ -885,8 +862,7 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
          }
          break;
 
-      case 'b':
-        /* Binary */
+      case 'b':  /* Binary */
         {
           /* Convert the unsigned value to a string. */
 
@@ -910,30 +886,24 @@ static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln)
 
   switch (fmt)
     {
-      case 'd':
+      case 'd':  /* Signed base 10 */
       case 'i':
-        /* Signed base 10 */
-
         if (*lln < 0)
           {
             SET_NEGATE(*flags);
             CLR_SHOWPLUS(*flags);
-            *lln    = -*lln;
+            *lln = -*lln;
           }
         break;
 
-      case 'u':
-        /* Unsigned base 10 */
+      case 'u':  /* Unsigned base 10 */
         break;
 
-      case 'p':
+      case 'p':  /* Hexadecimal */
       case 'x':
       case 'X':
-        /* Hexadecimal */
-      case 'o':
-        /* Octal */
-      case 'b':
-        /* Binary */
+      case 'o':  /* Octal */
+      case 'b':  /* Binary */
         CLR_SIGNED(*flags);
         break;
 
@@ -951,7 +921,6 @@ static int getllusize(uint8_t fmt, uint8_t flags, unsigned long long lln)
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
 
-
   llutoascii(&nulloutstream, fmt, flags, lln);
   return nulloutstream.nput;
 }
@@ -967,6 +936,8 @@ static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        int trunc)
 {
   int i;
+
+  /* If there is integer precision, then use FMT_RJUST vs FMT_RJUST0 */
 
   if (trunc > 0 && fmt == FMT_RJUST0)
     {
@@ -1371,6 +1342,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
             {
               long long lln;
               int lluwidth;
+
               /* Extract the long long value. */
 
               lln = va_arg(ap, long long);

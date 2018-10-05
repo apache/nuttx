@@ -22,7 +22,7 @@ nuttx/:
  (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
- (11)  Libraries (libs/libc/, libs/libm/)
+ (12)  Libraries (libs/libc/, libs/libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
@@ -2043,6 +2043,23 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.
+
+  Title:       DISCREPANCY IN PRINTF OUTUPUT
+  Description: Under glibc, this printf statment:
+
+                 printf("%05.3#x %05.3#x %05.3#x %05.3#x %05.3#x\n",
+                        9, 99, 999, 9999, 99999);
+
+               Generates this output:
+
+                 0x009 0x063 0x3e7 0x270f 0x1869f
+
+               But under NuttX, the same printf statement generates:
+
+                   0x9  0x63 0x3e7 0x270f 0x1869f
+
+  Status:      Open
+  Priority:    Low.  That is a very obscure use to case.
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
