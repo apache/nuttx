@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 29, 2018)
+NuttX TODO List (Last updated October 5, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -22,7 +22,7 @@ nuttx/:
  (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
- (12)  Libraries (libc/, libm/)
+ (11)  Libraries (libs/libc/, libs/libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
@@ -618,8 +618,8 @@ o Signals (sched/signal, arch/)
                TCB of the parent so that the pthread could be bound to the correct
                group.
 
-               There is also some user-space logic in libc/aio/lio_listio.c.  That
-               logic could use the user-space work queue for the callbacks.
+               There is also some user-space logic in libs/libc/aio/lio_listio.c.
+               That logic could use the user-space work queue for the callbacks.
   Status:      Low, there are alternative designs.  However, these features
                are required by the POSIX standard.
   Priority:    Low for now
@@ -824,8 +824,9 @@ o Kernel/Protected Build
                 by simply reading this variable.
 
                "This one would be easy: Just a change to include/nuttx/userspace.h,
-                configs/*/kernel/up_userspace.c, libc/, sched/sched_addreadytorun.c, and
-                sched/sched_removereadytorun.c. That would eliminate 59% of the syscalls."
+                configs/*/kernel/up_userspace.c, libs/libc/,
+                sched/sched_addreadytorun.c, and sched/sched_removereadytorun.c.
+                That would eliminate 59% of the syscalls."
 
                Update:
                This is probably also just a symptom of the OS test that does mostly
@@ -1661,8 +1662,8 @@ o USB (drivers/usbdev, drivers/usbhost)
   Status:      Open
   Priority:    Medium-Low unless you really need host CDC/ACM support.
 
-o Libraries (libc/, libm/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^
+o Libraries (libs/libc/, libs/libm/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SIGNED time_t
   Description: The NuttX time_t is type uint32_t. I think this is consistent
@@ -1684,11 +1685,12 @@ o Libraries (libc/, libm/)
   Description: Need some minimal termios support... at a minimum, enough to
                switch between raw and "normal" modes to support behavior like
                that needed for readline().
-               UPDATE:  There is growing functionality in libc/termios/ and in the
-               ioctl methods of several MCU serial drivers (stm32, lpc43, lpc17,
-               pic32).  However, as phrased, this bug cannot yet be closed since
-               this "growing functionality" does not address all termios.h
-               functionality and not all serial drivers support termios.
+               UPDATE:  There is growing functionality in libs/libc/termios/
+               and in the ioctl methods of several MCU serial drivers (stm32,
+               lpc43, lpc17, pic32, and others).  However, as phrased, this
+               bug cannot yet be closed since this "growing functionality"
+               does not address all termios.h functionality and not all
+               serial drivers support termios.
   Status:      Open
   Priority:    Low
 
@@ -1739,7 +1741,7 @@ o Libraries (libc/, libm/)
   Priority:
 
   Title:       OLD dtoa NEEDS TO BE UPDATED
-  Description: This implementation of dtoa in libc/stdio is old and will not
+  Description: This implementation of dtoa in libs/libc/stdio is old and will not
                work with some newer compilers.  See
                http://patrakov.blogspot.com/2009/03/dont-use-old-dtoac.html
   Status:      Open
@@ -1812,63 +1814,6 @@ o Libraries (libc/, libm/)
                the process address environment where they belong.  It is
                difficult to make this compatible with the FLAT build,
                however.
-  Status:      Open
-  Priority:    Low
-
-  Title:       FORMATTING FIXED WIDTH INTEGERS
-  Description: Formats like this: lib_vsprintf(_, "%6.6u", 0) do not work.
-               There is no support for the precision/width option with
-               integer types.  The format is simply is ignored and so can
-               even cause crashes.
-
-               For example:
-
-               int hello_main(int argc, char *argv[])
-               {
-                 printf("Hello, World!!\n");
-                 printf("%3.3u %3.3u %3.3u %3.3u %3.3u\n", 9, 99, 999, 9999, 99999);
-                 return 0;
-               }
-
-               Generates this incorrect output:
-
-               NuttShell (NSH) NuttX-7.20
-               nsh> hello
-               Hello, World!!
-                 9  99 999 9999 99999
-               nsh>
-
-               That output, of course, should have been:
-
-                 9  99 999 999 999
-
-               The period and the precision value were being ignored (if
-               floating point was disabled).  In that case, parsing of the
-               variable arguments could get out of sync.  But a side
-               effect of the referenced change is that precision value is
-               now always parsed (but still incorrectly ignored for the
-               case of integer formats).
-
-               The fix would not be too difficult but would involve change
-               several functions.  It would involve clipping the size of the
-               number string.  For example:
-
-               /* Get the width of the output */
-
-               uwidth = getusize(FMT_CHAR, flags, n);
-               if (trunc > 0 && uwidth > trunc)
-                 {
-                   uwidth = trunc;
-                 }
-
-               Then limiting the length of the output string to uwidth.
-               This would probably mean passing an additional parameter to
-               the many *toascii() functions like:
-
-               /* Output the number */
-
-               utoascii(obj, FMT_CHAR, flags, (unsigned int)n, uwidth);
-
   Status:      Open
   Priority:    Low
 
