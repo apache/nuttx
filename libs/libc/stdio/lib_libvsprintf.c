@@ -185,9 +185,11 @@ static int  getllusize(uint8_t fmt, FAR uint8_t flags,
 #endif
 
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, int fieldwidth, int valwidth);
+                       uint8_t flags, int fieldwidth, int valwidth,
+                       int trunc);
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                        uint8_t flags, int fieldwidth, int valwidth);
+                        uint8_t flags, int fieldwidth, int valwidth,
+                        int trunc);
 
 /****************************************************************************
  * Private Constant Data
@@ -961,61 +963,121 @@ static int getllusize(uint8_t fmt, uint8_t flags, unsigned long long lln)
  ****************************************************************************/
 
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, int fieldwidth, int valwidth)
+                       uint8_t flags, int fieldwidth, int valwidth,
+                       int trunc)
 {
   int i;
+
+  if (trunc > 0 && fmt == FMT_RJUST0)
+    {
+      /* Force right justification in the case.  Leading zeros application
+       * only to "precision" which is implied anyway.
+       */
+
+     fmt = FMT_RJUST;
+    }
 
   switch (fmt)
     {
       default:
       case FMT_RJUST:
-        if (IS_SIGNED(flags))
-          {
-            valwidth++;
-          }
+        {
+          /* Pad with spaces up to the  size of the precision (aka 'trunc')
+           * then with zeroes to the size of the value width.
+           */
 
-        for (i = fieldwidth - valwidth; i > 0; i--)
-          {
-            obj->put(obj, ' ');
-          }
+          if (trunc > valwidth)
+            {
+              int padlen = fieldwidth - trunc;
 
-        if (IS_NEGATE(flags))
-          {
-            obj->put(obj, '-');
-          }
-        else if (IS_SHOWPLUS(flags))
-          {
-            obj->put(obj, '+');
-          }
+              if (IS_SIGNED(flags))
+                {
+                  padlen--;
+                }
+
+              for (i = padlen; i > 0; i--)
+                {
+                  obj->put(obj, ' ');
+                }
+
+              if (IS_NEGATE(flags))
+                {
+                  obj->put(obj, '-');
+                }
+              else if (IS_SHOWPLUS(flags))
+                {
+                  obj->put(obj, '+');
+                }
+
+              for (i = trunc - valwidth; i > 0; i--)
+                {
+                  obj->put(obj, '0');
+                }
+            }
+          else
+            {
+              /* Add a leading minus sign */
+
+              if (IS_SIGNED(flags))
+                {
+                  valwidth++;
+                }
+
+              for (i = fieldwidth - valwidth; i > 0; i--)
+                {
+                  obj->put(obj, ' ');
+                }
+
+              if (IS_NEGATE(flags))
+                {
+                  obj->put(obj, '-');
+                }
+              else if (IS_SHOWPLUS(flags))
+                {
+                  obj->put(obj, '+');
+                }
+            }
+        }
         break;
 
       case FMT_RJUST0:
-         if (IS_NEGATE(flags))
-          {
-            obj->put(obj, '-');
-            valwidth++;
-          }
-        else if (IS_SHOWPLUS(flags))
-          {
-            obj->put(obj, '+');
-            valwidth++;
-          }
+        {
+          if (IS_NEGATE(flags))
+            {
+              obj->put(obj, '-');
+              valwidth++;
+            }
+          else if (IS_SHOWPLUS(flags))
+            {
+              obj->put(obj, '+');
+              valwidth++;
+            }
 
-        for (i = fieldwidth - valwidth; i > 0; i--)
-          {
-            obj->put(obj, '0');
-          }
+          for (i = fieldwidth - valwidth; i > 0; i--)
+            {
+              obj->put(obj, '0');
+            }
+        }
         break;
 
       case FMT_LJUST:
-         if (IS_NEGATE(flags))
-          {
-            obj->put(obj, '-');
-          }
-        else if (IS_SHOWPLUS(flags))
-          {
-            obj->put(obj, '+');
-          }
+        {
+          if (IS_NEGATE(flags))
+           {
+             obj->put(obj, '-');
+           }
+         else if (IS_SHOWPLUS(flags))
+           {
+             obj->put(obj, '+');
+           }
+
+          /* Pad with zeros up to the size of the value width. */
+
+          for (i = trunc - valwidth; i > 0; i--)
+            {
+              obj->put(obj, '0');
+            }
+        }
         break;
     }
 }
@@ -1025,7 +1087,8 @@ static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
  ****************************************************************************/
 
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                        uint8_t flags, int fieldwidth, int valwidth)
+                        uint8_t flags, int fieldwidth, int valwidth,
+                        int trunc)
 {
   int i;
 
@@ -1039,15 +1102,21 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
         break;
 
       case FMT_LJUST:
-        if (IS_SIGNED(flags))
-          {
-            valwidth++;
-          }
+        {
+          int width;
 
-        for (i = fieldwidth - valwidth; i > 0; i--)
-          {
-            obj->put(obj, ' ');
-          }
+          if (IS_SIGNED(flags))
+            {
+              valwidth++;
+            }
+
+          width = valwidth < trunc ? trunc : valwidth;
+
+          for (i = fieldwidth - width; i > 0; i--)
+            {
+              obj->put(obj, ' ');
+            }
+        }
         break;
     }
 }
@@ -1242,7 +1311,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           swidth = (IS_HASDOT(flags) && trunc >= 0)
                       ? strnlen(ptmp, trunc) : strlen(ptmp);
-          prejustify(obj, fmt, 0, width, swidth);
+          prejustify(obj, fmt, 0, width, swidth, 0);
           left = swidth;
 
           /* Concatenate the string into the output */
@@ -1260,7 +1329,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           /* Perform left-justification operations. */
 
-          postjustify(obj, fmt, 0, width, swidth);
+          postjustify(obj, fmt, 0, width, swidth, 0);
           continue;
         }
 
@@ -1313,21 +1382,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               lluwidth = getllusize(FMT_CHAR, flags, lln);
-              if (trunc > 0)
-                {
-                  if (lluwidth > trunc)
-                    {
-                      lluwidth = trunc;
-                    }
-
-                  /* Right justify and zero pad */
-
-                  fmt = FMT_RJUST0;
-                }
 
               /* Perform left field justification actions */
 
-              prejustify(obj, fmt, flags, width, lluwidth);
+              prejustify(obj, fmt, flags, width, lluwidth, trunc);
 
               /* Output the number */
 
@@ -1335,7 +1393,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Perform right field justification actions */
 
-              postjustify(obj, fmt, flags, width, lluwidth);
+              postjustify(obj, fmt, flags, width, lluwidth, trunc);
             }
           else
 #endif /* CONFIG_HAVE_LONG_LONG */
@@ -1356,21 +1414,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               luwidth = getlusize(FMT_CHAR, flags, ln);
-              if (trunc > 0)
-                {
-                  if (luwidth > trunc)
-                    {
-                      luwidth = trunc;
-                    }
-
-                  /* Right justify and zero pad */
-
-                  fmt = FMT_RJUST0;
-                }
 
               /* Perform left field justification actions */
 
-              prejustify(obj, fmt, flags, width, luwidth);
+              prejustify(obj, fmt, flags, width, trunc);
 
               /* Output the number */
 
@@ -1378,7 +1425,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Perform right field justification actions */
 
-              postjustify(obj, fmt, flags, width, luwidth);
+              postjustify(obj, fmt, flags, width, luwidth, trunc);
             }
           else
 #endif /* CONFIG_LONG_IS_NOT_INT */
@@ -1402,7 +1449,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Perform left field justification actions */
 
-              prejustify(obj, fmt, flags, width, pwidth);
+              prejustify(obj, fmt, flags, width, pwidth, 0);
 
               /* Output the pointer value */
 
@@ -1410,7 +1457,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Perform right field justification actions */
 
-              postjustify(obj, fmt, flags, width, pwidth);
+              postjustify(obj, fmt, flags, width, pwidth, 0);
             }
           else
 #endif
@@ -1429,21 +1476,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
               /* Get the width of the output */
 
               uwidth = getusize(FMT_CHAR, flags, n);
-              if (trunc > 0)
-                {
-                  if (uwidth > trunc)
-                    {
-                      uwidth = trunc;
-                    }
-
-                  /* Right justify and zero pad */
-
-                  fmt = FMT_RJUST0;
-                }
 
               /* Perform left field justification actions */
 
-              prejustify(obj, fmt, flags, width, uwidth);
+              prejustify(obj, fmt, flags, width, uwidth, trunc);
 
               /* Output the number */
 
@@ -1451,7 +1487,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
               /* Perform right field justification actions */
 
-              postjustify(obj, fmt, flags, width, uwidth);
+              postjustify(obj, fmt, flags, width, uwidth, trunc);
             }
         }
 
@@ -1469,7 +1505,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           /* Perform left field justification actions */
 
-          prejustify(obj, fmt, 0, width, dblsize);
+          prejustify(obj, fmt, 0, width, dblsize, 0);
 
           /* Output the number */
 
@@ -1477,7 +1513,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
           /* Perform right field justification actions */
 
-          postjustify(obj, fmt, 0, width, dblsize);
+          postjustify(obj, fmt, 0, width, dblsize, 0);
         }
 #endif /* CONFIG_LIBC_FLOATINGPOINT */
     }
