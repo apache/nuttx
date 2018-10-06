@@ -384,6 +384,11 @@ must be is one of the following.
 
     The STM32 free-running timer is also required.
 
+  hidkbd
+  
+     This is another NSH configuration that supports a USB HID Keyboard
+     device and the HID keyboard example at apps/examples/hidkbd.
+
   kelf:
 
     This is a protected mode version of the apps/examples/elf test of
