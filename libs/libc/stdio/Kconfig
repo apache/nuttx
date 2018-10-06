@@ -50,13 +50,6 @@ config NUNGET_CHARS
 	---help---
 		Number of characters that can be buffered by ungetc() (Only if NFILE_STREAMS > 0)
 
-config NOPRINTF_FIELDWIDTH
-	bool "Disable sprintf support fieldwidth"
-	default n
-	---help---
-		sprintf-related logic is a little smaller if we do not support field
-		widths.
-
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default n
