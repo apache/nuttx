@@ -46,7 +46,6 @@
 #include <errno.h>
 
 #include <nuttx/kthread.h>
-#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
