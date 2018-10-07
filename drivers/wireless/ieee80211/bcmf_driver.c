@@ -71,16 +71,20 @@
 #define BCMF_AUTH_TIMEOUT_MS   20000  /* was 10000 */
 #define BCMF_SCAN_RESULT_SIZE  1024
 
-/* clm file is cut into pieces of MAX_CHUNK_LEN.
+/* CLM file is cut into pieces of MAX_CHUNK_LEN.
  * It is relatively small because dongles (FW) have a small maximum size input
  * payload restriction for ioctl's ... something like 1900'ish bytes. So chunk
  * len should not exceed 1400 bytes
+ *
+ * NOTE:  CONFIG_NET_ETH_PKTSIZE is the MTU plus the size of the Ethernet
+ * header (14 bytes).
  */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_FWFILES  /* REVISIT */
 #  define MAX_CHUNK_LEN (100)
 #else
-#  define MAX_CHUNK_LEN (CONFIG_NET_ETH_MTU > 1500 ? 1400 : CONFIG_NET_ETH_MTU - 100)
+#  define MAX_CHUNK_LEN \
+     (CONFIG_NET_ETH_PKTSIZE > 1514 ? 1400 : CONFIG_NET_ETH_PKTSIZE - 114)
 #endif
 
 /* Helper to get iw_event size */
@@ -88,7 +92,7 @@
 #define BCMF_IW_EVENT_SIZE(field) \
   (offsetof(struct iw_event, u) + sizeof(((union iwreq_data *)0)->field))
 
-/* Clm blob marcos */
+/* CLM blob macros */
 
 #define DLOAD_HANDLER_VER     1       /* Downloader version */
 #define DLOAD_FLAG_VER_MASK   0xf000  /* Downloader version mask */
@@ -102,7 +106,7 @@
  * Private Types
  ****************************************************************************/
 
-/* clm blob download head */
+/* CLM blob download head */
 
 struct wl_dload_data
 {
@@ -139,7 +143,9 @@ static void bcmf_free_device(FAR struct bcmf_dev_s *priv);
 
 static int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
 
+#ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
 static int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv);
+#endif
 
 /* FIXME only for debug purpose */
 
@@ -257,10 +263,10 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
   return OK;
 }
 
+#ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
 #ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
 int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 {
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   FAR uint8_t *downloadbuff;
   struct file finfo;
   ssize_t nread;
@@ -270,15 +276,15 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 
   wlinfo("Download %d bytes\n", datalen);
 
-  ret = file_open(&tmp, CONFIG_IEEE80211_BROADCOM_FWCLMNAME,
+  ret = file_open(&finfo, CONFIG_IEEE80211_BROADCOM_FWCLMNAME,
                   O_RDONLY | O_BINARY);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to open the FILE MTD file \n", ret);
-       return ret
+      return ret;
     }
 
-  /* Divide clm blob into chunks */
+  /* Divide CLM blob into chunks */
 
   downloadbuff = kmm_malloc(sizeof(struct wl_dload_data) + MAX_CHUNK_LEN);
   if (downloadbuff == NULL)
@@ -341,9 +347,10 @@ errout_with_buffer:
   kmm_free(downloadbuff);
 
 errout_with_file:
-  file_close_detached(&finfo);
+  file_close(&finfo);
   return ret;
 }
+
 #else
 int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 {
@@ -356,7 +363,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 
   if (srcbuff == NULL || datalen <= 0)
     {
-      wlinfo("Skip clm blob...\n");
+      wlinfo("Skip CLM blob...\n");
       return 0;
     }
   else
@@ -364,12 +371,12 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
       wlinfo("Download %d bytes @ 0x%08x\n", datalen, srcbuff);
     }
 
-  /* Divide clm blob into chunks */
+  /* Divide CLM blob into chunks */
 
   downloadbuff = kmm_malloc(sizeof(struct wl_dload_data) + MAX_CHUNK_LEN);
   if (!downloadbuff)
     {
-      wlerr("No memory for clm data\n");
+      wlerr("No memory for CLM data\n");
       return -ENOMEM;
     }
 
@@ -413,6 +420,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
   return ret;
 }
 #endif
+#endif /* CONFIG_IEEE80211_BROADCOM_HAVE_CLM */
 
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
@@ -422,13 +430,15 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   uint8_t tmp_buf[64];
   int interface = CHIP_STA_INTERFACE;
 
-  /* Download clm blob if needed */
+#ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
+  /* Download CLM blob if needed */
 
   ret = bcmf_driver_download_clm(priv);
   if (ret != OK)
     {
       return -EIO;
     }
+#endif
 
   /* Disable TX Gloming feature */
 

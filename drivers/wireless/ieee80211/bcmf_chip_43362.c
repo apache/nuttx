@@ -33,16 +33,32 @@
  *
  ****************************************************************************/
 
-#include "bcmf_sdio.h"
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 #include <stdint.h>
 
+#include "bcmf_sdio.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #define WRAPPER_REGISTER_OFFSET  0x100000
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 extern const char bcm43362_nvram_image[];
 extern const unsigned int bcm43362_nvram_image_len;
 
+#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
 extern const uint8_t bcm43362_firmware_image[];
 extern const unsigned int bcm43362_firmware_image_len;
+#endif
 
 const struct bcmf_sdio_chip bcmf_43362_config_sdio =
 {
@@ -67,9 +83,11 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio =
   /* Firmware images */
   /* TODO find something smarter than using image_len references */
 
-  .firmware_image      = (uint8_t *)bcm43362_firmware_image,
-  .firmware_image_size = (unsigned int *)&bcm43362_firmware_image_len,
+  .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,
+  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len
 
-  .nvram_image         = (uint8_t *)bcm43362_nvram_image,
-  .nvram_image_size    = (unsigned int *)&bcm43362_nvram_image_len
+#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
+  .firmware_image      = (FAR uint8_t *)bcm43362_firmware_image,
+  .firmware_image_size = (FAR unsigned int *)&bcm43362_firmware_image_len,
+#endif
 };

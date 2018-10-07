@@ -39,13 +39,13 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
-#include <nuttx/kmalloc.h>
 
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include "bcmf_core.h"
 #include "bcmf_sdio.h"
@@ -255,7 +255,7 @@ int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
     }
   while (nread == BCMF_UPLOAD_TRANSFER_SIZE);
 
-  file_close_detached(&finfo);
+  file_close(&finfo);
   kmm_free(buf);
 
   wlinfo("Upload complete\n");
@@ -265,7 +265,7 @@ errout_with_buf:
   kmm_free(buf);
 
 errout_with_file:
-  file_close_detached(&finfo);
+  file_close(&finfo);
   return ret;
 }
 #endif
