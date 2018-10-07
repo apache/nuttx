@@ -746,6 +746,18 @@ Configuration Sub-Directories
        CONFIG_DEBUG_INFO=y
        CONFIG_DEBUG_FTPC=y
 
+  hidkbd:
+    This configuration directory supports a variant of an NSH configuration.
+    It is set up to perform the HID keyboard test at apps/examples/hidkbd.
+
+    NOTES:
+
+    1. Default platform/toolchain: This is how the build is configured by
+       be default.  These options can easily be re-confured, however.
+
+       CONFIG_HOST_LINUX=y                     : Linux
+       CONFIG_ARMV7M_TOOLCHAIN_EABIL=y         : Generic EABI toolchain
+
   hidmouse:
     This configuration directory supports a variant of an NSH configuration.
     It is set up to perform the touchscreen test at apps/examples/touchscreen
