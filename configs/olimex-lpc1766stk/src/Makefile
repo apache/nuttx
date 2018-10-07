@@ -1,7 +1,7 @@
 ############################################################################
 # configs/olimex-lpc1766stk/src/Makefile
 #
-#   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010, 2012, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = lpc17_boot.c lpc17_leds.c lpc17_ssp.c
+CSRCS = lpc17_boot.c lpc17_bringup.c lpc17_leds.c lpc17_ssp.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc17_appinit.c
@@ -52,10 +52,6 @@ endif
 
 ifeq ($(CONFIG_CAN),y)
 CSRCS += lpc17_can.c
-endif
-
-ifeq ($(CONFIG_USBHOST_HIDMOUSE),y)
-CSRCS += lpc17_hidmouse.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

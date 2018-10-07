@@ -251,6 +251,22 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: lpc17_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ************************************************************************************/
+
+int lpc17_bringup(void);
+
+/************************************************************************************
  * Name: lpc1766stk_sspdev_initialize
  *
  * Description:
@@ -272,27 +288,5 @@ void weak_function lpc1766stk_sspdev_initialize(void);
 int lpc1766stk_can_setup(void);
 #endif
 
-/************************************************************************************
- * Name: lpc1766stk_hidmouse_setup
- *
- * Description:
- *   This function is called by board-bringup logic to configure the HID mouse
- *   device.  This function will register the driver as /dev/inputN where N is the
- *   minor device number.
- *
- * Input Parameters:
- *   minor - The input device minor number
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_USBHOST_HIDMOUSE
-int lpc1766stk_hidmouse_setup(int minor);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_H */
-

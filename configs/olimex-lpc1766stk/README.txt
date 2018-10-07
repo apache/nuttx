@@ -747,7 +747,7 @@ Configuration Sub-Directories
        CONFIG_DEBUG_FTPC=y
 
   hidmouse:
-    This configuration directory supports a variant of an NSH configution.
+    This configuration directory supports a variant of an NSH configuration.
     It is set up to perform the touchscreen test at apps/examples/touchscreen
     using a USB HIB mouse instead a touchsceen device.
 
