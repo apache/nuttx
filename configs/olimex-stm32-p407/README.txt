@@ -228,8 +228,8 @@ OTGFS Host
   flaky.  Sometimes the LEDs become very bright (indicating that it is being
   swamped with interrupts).  Data input is not clean with apps/examples/hidkbd:
   There are missing characters and sometimes duplicated characters.  This implies
-  some logic issues, probably in drivers/usbhost/usbhost_hidkbd, with polling and
-  data filtering.
+  some logic issues, probably in drivers/usbhost/usbhost_hidkbd.c, with polling
+  and data filtering.
 
 Protected Mode Build
 ====================
@@ -388,6 +388,14 @@ must be is one of the following.
   
      This is another NSH configuration that supports a USB HID Keyboard
      device and the HID keyboard example at apps/examples/hidkbd.
+
+    STATUS:
+      2018-10-07:  Not all keyboards will connect successfully. I have not
+        looked into the details but it may be that those keyboards are not
+        compatible with the driver (which only accepts "boot" keyboards).
+        Also, when typing input into the HID keyboard, characters are often
+        missing and sometimes duplicated.  This is like some issue with the
+        read logic of drivers/usbhost_hidkbc.c.
 
   kelf:
 
