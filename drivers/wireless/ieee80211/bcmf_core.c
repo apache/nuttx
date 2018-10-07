@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/kmalloc.h>
 
 #include <debug.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/arch.h>
 
@@ -178,6 +180,96 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
   return OK;
 }
 
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
+                     FAR const char *path)
+{
+  struct file finfo;
+  FAR uint8_t *buf;
+  size_t total_read;
+  ssize_t nread;
+  int ret;
+
+  /* Open the file in the detached state */
+
+  ret = file_open(&finfo, path, O_RDONLY | O_BINARY);
+  if (ret <0)
+    {
+       wlerr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);
+       return ret;
+    }
+
+  /* Allocate an I/O buffer */
+
+  buf = (FAR uint8_t *)kmm_malloc(BCMF_UPLOAD_TRANSFER_SIZE);
+  if (buf == NULL)
+    {
+       wlerr("ERROR: Failed allocate an I/O buffer\n");
+       ret = -ENOMEM;
+       goto errout_with_file;
+    }
+
+  /* Loop until the firmware has been loaded */
+
+  do
+    {
+      /* Set the backplane window to include the start address */
+
+      nread = file_read(&finfo, buf, BCMF_UPLOAD_TRANSFER_SIZE);
+      if (nread < 0)
+        {
+          ret = (int)nread;
+          wlerr("ERROR: Failed to read file: %d\n", ret);
+          goto errout_with_buf;
+        }
+
+      if (nread == 0)
+        {
+          break;
+        }
+
+      wlinfo("Read %ld bytes\n", (long)nread);
+
+      ret = bcmf_core_set_backplane_window(sbus, address);
+      if (ret < 0)
+        {
+          wlerr("ERROR: bcmf_core_set_backplane_window() failed: %d\n", ret);
+          goto errout_with_buf;
+        }
+
+      total_read = nread;
+
+      /* Transfer firmware data */
+
+      ret = bcmf_transfer_bytes(sbus, true, 1,
+                                address & SBSDIO_SB_OFT_ADDR_MASK, buf,
+                                total_read);
+      if (ret < 0)
+        {
+          wlerr("ERROR: Transfer failed address=%lx total_read=%lu: %d\n",
+                (unsigned long)address, (unsigned long)total_read, ret);
+          goto errout_with_buf;
+        }
+
+      address += total_read;
+    }
+  while (nread == BCMF_UPLOAD_TRANSFER_SIZE);
+
+  file_close_detached(&finfo);
+  kmm_free(buf);
+
+  wlinfo("Upload complete\n");
+  return OK;
+
+errout_with_buf:
+  kmm_free(buf);
+
+errout_with_file:
+  file_close_detached(&finfo);
+  return ret;
+}
+#endif
+
 int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 {
   int ret;
@@ -302,24 +394,29 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Flash chip firmware */
 
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+  ret = bcmf_upload_file(sbus, 0, CONFIG_IEEE80211_BROADCOM_FWFILENAME);
+#else
   wlinfo("firmware size is %d bytes\n", *sbus->chip->firmware_image_size);
+
   ret = bcmf_upload_binary(sbus, 0, sbus->chip->firmware_image,
                            *sbus->chip->firmware_image_size);
+#endif
 
-  if (ret != OK)
+  if (ret < 0)
     {
-        wlerr("Failed to upload firmware\n");
-        return ret;
+      wlerr("ERROR: Failed to upload firmware\n");
+      return ret;
     }
 
   /* Flash NVRAM configuration file */
 
   wlinfo("upload nvram configuration\n");
   ret = bcmf_upload_nvram(sbus);
-  if (ret != OK)
+  if (ret < 0)
     {
-        wlerr("Failed to upload nvram\n");
-        return ret;
+      wlerr("ERROR: Failed to upload NVRAM\n");
+      return ret;
     }
 
   /* Firmware upload done, restart ARMCM3 core */

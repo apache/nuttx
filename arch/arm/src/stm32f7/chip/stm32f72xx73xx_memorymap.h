@@ -155,7 +155,7 @@
 #define STM32_SPI5_BASE      0x40015000     /* 0x40015000-0x400153ff: SPI5 */
 #define STM32_SAI1_BASE      0x40015800     /* 0x40015800-0x40015bff: SAI1 */
 #define STM32_SAI2_BASE      0x40015c00     /* 0x40015c00-0x40015fff: SAI2 */
-#define STM32_OTGPHY_BASE    0x40017c00     /* 0x40017C00-0x40017fff: OTG PHY HS */
+#define STM32_USBPHYC_BASE   0x40017c00     /* 0x40017C00-0x40017fff: OTG PHY HS */
 
 /* AHB1 Base Addresses **************************************************************/
 

@@ -44,6 +44,8 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 #include <net/ethernet.h>
 
@@ -66,7 +68,7 @@
 
 #define DOT11_BSSTYPE_ANY      2
 #define BCMF_SCAN_TIMEOUT_TICK (5*CLOCKS_PER_SEC)
-#define BCMF_AUTH_TIMEOUT_MS   10000
+#define BCMF_AUTH_TIMEOUT_MS   20000  /* was 10000 */
 #define BCMF_SCAN_RESULT_SIZE  1024
 
 /* clm file is cut into pieces of MAX_CHUNK_LEN.
@@ -75,7 +77,11 @@
  * len should not exceed 1400 bytes
  */
 
-#define MAX_CHUNK_LEN (CONFIG_NET_ETH_PKTSIZE > 1500 ? 1400 : CONFIG_NET_ETH_PKTSIZE - 100)
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES  /* REVISIT */
+#  define MAX_CHUNK_LEN (100)
+#else
+#  define MAX_CHUNK_LEN (CONFIG_NET_ETH_MTU > 1500 ? 1400 : CONFIG_NET_ETH_MTU - 100)
+#endif
 
 /* Helper to get iw_event size */
 
@@ -251,6 +257,94 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
   return OK;
 }
 
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
+{
+  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+  FAR uint8_t *downloadbuff;
+  struct file finfo;
+  ssize_t nread;
+  uint16_t dl_flag;
+  unsigned int datalen = 7222;
+  int ret;
+
+  wlinfo("Download %d bytes\n", datalen);
+
+  ret = file_open(&tmp, CONFIG_IEEE80211_BROADCOM_FWCLMNAME,
+                  O_RDONLY | O_BINARY);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to open the FILE MTD file \n", ret);
+       return ret
+    }
+
+  /* Divide clm blob into chunks */
+
+  downloadbuff = kmm_malloc(sizeof(struct wl_dload_data) + MAX_CHUNK_LEN);
+  if (downloadbuff == NULL)
+    {
+      wlerr("ERROR:  Failed allocate memory for CLM data\n");
+      ret = -ENOMEM;
+      goto errout_with_file;
+    }
+
+  dl_flag = DL_BEGIN;
+  do
+    {
+      FAR struct wl_dload_data *dlhead;
+      unsigned int chunk_len;
+      uint32_t out_len;
+
+      chunk_len = datalen >= MAX_CHUNK_LEN ? MAX_CHUNK_LEN : datalen;
+
+      nread = file_read(&finfo, downloadbuff + sizeof(struct wl_dload_data),
+                        chunk_len);
+      if (nread < 0)
+        {
+          ret = (int)nread;
+          wlerr("ERROR: Failed to read CLM data: %d\n", ret);
+          goto errout_with_buffer;
+        }
+
+      wlinfo("Read blob %d bytes on %d\n", nread, chunk_len);
+
+      datalen -= chunk_len;
+      if (datalen <= 0)
+        {
+          dl_flag |= DL_END;
+        }
+
+      /* CLM header */
+
+      dlhead             = (struct wl_dload_data *)downloadbuff;
+      dlhead->flag       = (DLOAD_HANDLER_VER << DLOAD_FLAG_VER_SHIFT) | dl_flag;
+      dlhead->dload_type = DL_TYPE_CLM;
+      dlhead->len        = chunk_len;
+      dlhead->crc        = 0;
+
+      out_len            = chunk_len + sizeof(struct wl_dload_data);
+      out_len            = (out_len + 7) & ~0x7U;
+
+      ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                                   IOVAR_STR_CLMLOAD, downloadbuff,
+                                   &out_len);
+
+      wlinfo("datalen=%d, ret=%d\n", datalen, ret);
+
+      dl_flag &= (uint16_t)~DL_BEGIN;
+    }
+  while ((datalen > 0) && (ret == OK));
+
+  wlinfo("Done writing blob");
+
+errout_with_buffer:
+  kmm_free(downloadbuff);
+
+errout_with_file:
+  file_close_detached(&finfo);
+  return ret;
+}
+#else
 int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 {
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
@@ -283,19 +377,20 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
   do
     {
       FAR struct wl_dload_data *dlhead;
-      unsigned int chunk_len = datalen >= MAX_CHUNK_LEN ? MAX_CHUNK_LEN : datalen;
+      unsigned int chunk_len = datalen;
       uint32_t out_len;
 
+      chunk_len = datalen >= MAX_CHUNK_LEN ? MAX_CHUNK_LEN : datalen;
       memcpy(downloadbuff + sizeof(struct wl_dload_data), srcbuff, chunk_len);
-      datalen -= chunk_len;
-      srcbuff += chunk_len;
+      datalen  -= chunk_len;
+      srcbuff  += chunk_len;
 
       if (datalen <= 0)
         {
           dl_flag |= DL_END;
         }
 
-      /* clm header */
+      /* CLM header */
 
       dlhead             = (struct wl_dload_data *)downloadbuff;
       dlhead->flag       = (DLOAD_HANDLER_VER << DLOAD_FLAG_VER_SHIFT) | dl_flag;
@@ -317,6 +412,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
   kmm_free(downloadbuff);
   return ret;
 }
+#endif
 
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
@@ -489,6 +585,7 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
 /* bcmf_wl_scan_event_handler must run at high priority else
  * race condition may occur on priv->scan_result field
  */
+
 void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                                    struct bcmf_event_s *event, unsigned int len)
 {

@@ -49,15 +49,16 @@
 extern const char ap6212_nvram_image[];
 extern const unsigned int ap6212_nvram_image_len;
 
+#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
 extern const uint8_t ap6212_firmware_image[];
 extern const unsigned int ap6212_firmware_len;
 
 extern const uint8_t ap6212_clm_blob[];
 extern const unsigned int ap6212_clm_blob_len;
+#endif
 
 const struct bcmf_sdio_chip bcmf_43438_config_sdio =
 {
-
   /* General chip stats */
 
   .ram_size = 512*1024,
@@ -78,12 +79,22 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
   /* Firmware images */
   /* TODO find something smarter than using image_len references */
 
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+  .firmware_image      = (uint8_t *)NULL,
+  .firmware_image_size = (unsigned int *)NULL,
+#else
   .firmware_image      = (uint8_t *)ap6212_firmware_image,
   .firmware_image_size = (unsigned int *)&ap6212_firmware_len,
+#endif
 
   .nvram_image         = (uint8_t *)ap6212_nvram_image,
   .nvram_image_size    = (unsigned int *)&ap6212_nvram_image_len,
 
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+  .clm_blob_image      = (uint8_t *)NULL,
+  .clm_blob_image_size = (unsigned int *)NULL,
+#else
   .clm_blob_image      = (uint8_t *)ap6212_clm_blob,
   .clm_blob_image_size = (unsigned int *)&ap6212_clm_blob_len,
+#endif
 };
