@@ -38,6 +38,9 @@ config IEEE80211_BROADCOM_FWFILES
 
 		The latest files from Cypress are available in the Linux kernel:
 		https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/brcm
+		The 43438 is a variant of the 43430 and will even identify itself as
+		such.  The calibration file used in the past is called:
+		brcmfmac43430-sdio.AP6212.txt. The firmware is brcmfmac43430-sdio.bin
 
 		If not defined, then your board support logic will have to
 		to provide the firmware files (and CLM files for the CBM43438)
@@ -54,6 +57,17 @@ config IEEE80211_BROADCOM_FWFILES
 
 		  const uint8_t ap6212_clm_blob[];
 		  const unsigned int ap6212_clm_blob_len;
+
+		NVRAM files are currently only supported from memory.  The following
+		must be provided all configurations.  For the BCM43362:
+
+		  const char bcm43362_nvram_image[];
+		  const unsigned int bcm43362_nvram_image_len;
+
+		And for the BCM43438:
+
+		  const char ap6212_nvram_image[];
+		  const unsigned int ap6212_nvram_image_len;
 
 config IEEE80211_BROADCOM_FWFILENAME
 	string "Firmware file"

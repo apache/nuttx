@@ -117,7 +117,7 @@ o Task/Scheduler (sched/)
                3. They do not obey any setup of PIC or address
                   environments. Do they need to?
                4. In the case of task_delete() and pthread_cancel() without
-                  defferred cancellation, these callbacks will run on the
+                  deferred cancellation, these callbacks will run on the
                   thread of execution and address context of the caller of
                   task_delete() or pthread_cancel().  That is very bad!
 
@@ -176,7 +176,7 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better and compatible with
                thread-aware GLIBC (although its incompatibilities could show
                up in porting some code).  I will retain this issue for
-               referencei only.
+               reference only.
   Priority:    N/A
 
   Title:       SCALABILITY
@@ -317,7 +317,7 @@ o Task/Scheduler (sched/)
 
                   That omits these architectures: sh1, sim, xtensa, z16, z80,
                   ez80, and z8.  All would have to support this common
-                  globlal variable.
+                  global variable.
 
                   Also, the stack itself may be 8-, 16-, or 32-bits wide,
                   depending upon the architecture and do have differing
@@ -395,10 +395,10 @@ o Task/Scheduler (sched/)
   Priority:    Low.  This is an enhancement.  And does anyone actually use
                the sporadic scheduler?
 
-  Title:       REMOVE NESTED CANCELATION POINT SUPPORT
-  Description: The current implementation support nested cancelation points.
+  Title:       REMOVE NESTED CANCELLATION POINT SUPPORT
+  Description: The current implementation support nested cancellation points.
                The TCB field cpcount keeps track of that nesting level.
-               However, cancelation points should not be calling other
+               However, cancellation points should not be calling other
                cancellation points so this design could be simplified by
                removing all support for nested cancellation points.
   Status:      Open
@@ -449,19 +449,19 @@ o SMP
                The basic behavior is still correct:  The task that has
                locked pre-emption will not be suspended.  However, there
                is no longer any protection for use as a critical section:
-               tasks running on other CPUs may still execute that that
-               unprotect code regsion.
+               tasks running on other CPUs may still execute that
+               unprotected code region.
 
                The solution is to replace the use of sched_lock() with
                stronger protection such as spin_lock_irqsave().
   Status:      Open
   Priority:    Medium for SMP system.  Not critical to single CPU systems.
-               NOTE:  There are no known bugs from this protential problem.
+               NOTE:  There are no known bugs from this potential problem.
 
   Title:       CORTEX-A GIC SGI INTERRUPT MASKING
   Description: In the ARMv7-A GICv2 architecture, the inter-processor
                interrupts (SGIs) are non maskable and will occur even if
-               interrupts are disabled.  This adde a lot of complexity
+               interrupts are disabled.  This adds a lot of complexity
                to the ARMV7-A critical section design.
 
                Masayuki Ishakawa has suggested the use of the GICv2 ICCMPR
@@ -476,7 +476,7 @@ o SMP
                set/restore the ICCMPR register, (2) register setup logic in
                arch/arm/src/armv7-a for task start-up and signal dispatch
                would have to set the ICCMPR correctly, and (3) the 'xcp'
-               structure sould have to be extended to hold the ICCMPR
+               structure would have to be extended to hold the ICCMPR
                register;  logic would have to added be save/restore the
                ICCMPR register in the 'xcp' structure on each interrupt and
                context switch.
@@ -487,7 +487,7 @@ o SMP
   Priority:    Low.  There are no know issues with the current non-maskable
                SGI implementation.  This change would, however, lead to
                simplification in the design and permit commonality with
-               other, non-GIC imoplementations.
+               other, non-GIC implementations.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -921,12 +921,12 @@ o Kernel/Protected Build
                To do this, NuttX system calls should be reorganized.  The
                system calls should go to the internal OS functions (like
                nxsem_wait() vs sem_wait()) which do not set the errno value.
-               The implementation available to appplications (sem_wait() in
+               The implementation available to applications (sem_wait() in
                this example) should call the internal OS function then set the
                errno variable in TLS.
   Status:      Open
   Priority:    Low, this primarily an aesthetic issue but may also have some
-               performance implications if the the errno varaible is accessed
+               performance implications if the the errno variable is accessed
                via a system call at high rates.
 
 o C++ Support
@@ -1294,7 +1294,7 @@ o Network (net/, drivers/net)
                window for that concurrency, but does not create it.
 
                The current Ethernet designs depend upon a single work queue to
-               serialize data.  In the case of muliple LP threads, some
+               serialize data.  In the case of multiple LP threads, some
                additional mechanism would have to be added to enforce that
                serialization.
 
@@ -1312,7 +1312,7 @@ o Network (net/, drivers/net)
   Description: Many network drivers run the network on the high priority work
                queue thread (or support an option to do so).  Networking should
                not be done on the high priority work thread because it interferes
-               with realtime behavior.  Fix by forcing all network drivers to
+               with real-time behavior.  Fix by forcing all network drivers to
                run on the low priority work queue.
   Status:      Open
   Priority:    Low.  Not such big deal for demo network test and demo
@@ -1350,7 +1350,7 @@ o Network (net/, drivers/net)
   Title:       ICMPv6 FOR 6LoWPAN
   Description: The current ICMPv6 and neighbor-related logic only works with
                Ethernet MAC.  For 6LoWPAN, a new more conservative IPv6
-               neigbor discovery is provided by RFC 6775.  This RFC needs to
+               neighbour discovery is provided by RFC 6775.  This RFC needs to
                be supported in order to support ping6 on a 6LoWPAN network.
                If RFC 6775 were implemented, then arbitrary IPv6 addresses,
                including addresses from DHCPv6 could be used.
@@ -1598,7 +1598,7 @@ o USB (drivers/usbdev, drivers/usbhost)
 
               - I test for incoming data by doing 'nsh> cat /dev/ttyACM0' on
                 the Olimex LPC1766STK host.  The bulk data reception still
-                works okay whether or not the interupt IN channel is enabled.
+                works okay whether or not the interrupt IN channel is enabled.
                 If the interrupt IN channel is enabled, then polling of that
                 channel appears to stop when the bulk in channel becomes
                 active.
@@ -1651,7 +1651,7 @@ o USB (drivers/usbdev, drivers/usbhost)
                still immature and you could experience issues in some
                configurations if you use it.
 
-               That all being said, I know of know no issues with the current
+               That all being said, I know of no issues with the current
                CDC/ACM driver on the Olimex LPC1766STK platform if the interrupt
                IN endpoint is not used, i.e., in "reduced" mode.  The only loss
                of functionality is output flow control.
@@ -1957,7 +1957,7 @@ o File system / Generic drivers (fs/, drivers/)
                  nsh> ls -l /mnt/sdcard
 
                I have determined that the problem is because, for some as-
-               of-yet-unkown reason the short file name is treated as a long
+               of-yet-unknown reason the short file name is treated as a long
                file name.  The name then fails the long filename checksum
                test and is skipped.
 
@@ -2129,8 +2129,8 @@ o Graphics Subsystem (graphics/)
   Status:      Open
   Priority:    Low for many, but I imagine higher in countries that use wide fonts
 
-  Title:       LOW-RES FRAMEBUFFER RENDERERING
-  Description: There are obvious issues in the low-res, < 8 BPP, implemenation of
+  Title:       LOW-RES FRAMEBUFFER RENDERING
+  Description: There are obvious issues in the low-res, < 8 BPP, implementation of
                the framebuffer rendering logic of graphics/nxglib/fb.  I see two
                obvious problems in reviewing nxglib_copyrectangle():
 
