@@ -33,9 +33,27 @@ config IEEE80211_BROADCOM_FWFILES
 		This selection enables an option to load the firmware and CLM
 		files from a mounted file system.
 
+		A snapshot of file for the BCM43362 are available in the nonbsd
+		repository:  https://bitbucket.org/nuttx/nonbsd/src/master/bcm43438/
+
+		The latest files from Cypress are available in the Linux kernel:
+		https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/brcm
+
 		If not defined, then your board support logic will have to
 		to provide the firmware files (and CLM files for the CBM43438)
-		in board/src directory.
+		in board/src directory.  For the BCM43362, the following would
+		need to be provided:
+
+		  const uint8_t bcm43362_firmware_image[];
+		  const unsigned int bcm43362_firmware_image_len;
+
+		For the BCM43438, the following would need to be provided.
+
+		  const uint8_t ap6212_firmware_image[];
+		  const unsigned int ap6212_firmware_len;
+
+		  const uint8_t ap6212_clm_blob[];
+		  const unsigned int ap6212_clm_blob_len;
 
 config IEEE80211_BROADCOM_FWFILENAME
 	string "Firmware file"
