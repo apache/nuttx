@@ -2628,11 +2628,14 @@ static void up_dma_reenable(struct up_dev_s *priv)
                  RXDMA_BUFFER_SIZE,
                  SERIAL_DMA_CONTROL_WORD);
 
-  /* Reset our DMA shadow pointer to match the address just
-   * programmed above.
+  /* Reset our DMA shadow pointer and Rx data availability count to match
+   * the address just programmed above.
    */
 
-  priv->rxdmanext = 0;
+  priv->rxdmanext  = 0;
+#ifdef CONFIG_ARMV7M_DCACHE
+  priv->rxdmaavail = 0;
+#endif
 
   /* Start the DMA channel, and arrange for callbacks at the half and
    * full points in the FIFO.  This ensures that we have half a FIFO
@@ -2643,7 +2646,7 @@ static void up_dma_reenable(struct up_dev_s *priv)
 
   /* Clear DMA suspended flag. */
 
-  priv->rxdmasusp = false;
+  priv->rxdmasusp  = false;
 }
 #endif
 
