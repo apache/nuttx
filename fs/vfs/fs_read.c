@@ -119,7 +119,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
  * Name: nx_read
  *
  * Description:
- *   nx_read() is an interanl OS interface.  It is functionally similar to
+ *   nx_read() is an internal OS interface.  It is functionally similar to
  *   the standard read() interface except:
  *
  *    - It does not modify the errno variable, and
@@ -138,8 +138,6 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 
 ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 {
-  ssize_t ret;
-
   /* Did we get a valid file descriptor? */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -163,6 +161,7 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
   else
     {
       FAR struct file *filep;
+      ssize_t ret;
 
       /* The descriptor is in a valid range to file descriptor... do the
        * read.  First, get the file structure.  Note that on failure,
