@@ -340,13 +340,13 @@
  * Compliance Level: Required.
  */
 
-#define CP0_CONFIG1_FP              (1 << 0 FPU implemented
-#define CP0_CONFIG1_EP              (1 << 1 EJTAG implemented
-#define CP0_CONFIG1_CA              (1 << 2 Code compression (MIPS16) implemented
-#define CP0_CONFIG1_WR              (1 << 3 Watch registers implemented
-#define CP0_CONFIG1_PC              (1 << 4 Performance Counter registers implemented
-#define CP0_CONFIG1_MD              (1 << 5 MDMX ASE implemented (MIPS64)
-#define CP0_CONFIG1_C2              (1 << 6 Coprocessor 2 implemented
+#define CP0_CONFIG1_FP              (1 << 0)  /* FPU implemented */
+#define CP0_CONFIG1_EP              (1 << 1)  /* EJTAG implemented */
+#define CP0_CONFIG1_CA              (1 << 2)  /* Code compression (MIPS16) implemented */
+#define CP0_CONFIG1_WR              (1 << 3)  /* Watch registers implemented */
+#define CP0_CONFIG1_PC              (1 << 4)  /* Performance Counter registers implemented */
+#define CP0_CONFIG1_MD              (1 << 5)  /* MDMX ASE implemented (MIPS64) */
+#define CP0_CONFIG1_C2              (1 << 6)  /* Coprocessor 2 implemented */
 #define CP0_CONFIG1_DA_SHIFT        (7)       /* Bits 7-9: Dcache associativity */
 #define CP0_CONFIG1_DA_MASK         (7 << CP0_CONFIG1_DA_SHIFT)
 #  define CP0_CONFIG1_DA_DIRECT     (0 << CP0_CONFIG1_DA_SHIFT) /* Direct mapped */
