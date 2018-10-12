@@ -382,7 +382,7 @@ static uart_dev_t g_usart3port =
 #  define TTYS1_DEV         g_usart0port    /* USART0=ttyS1 */
 #  define USART0_ASSIGNED 1
 #elif defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
-#  define TTYS1_DEV         g_usart1port    /* USART1=ttyS1 */
+#  define TTYS1_DEV         g_uart1port     /* USART1=ttyS1 */
 #  define UART1_ASSIGNED 1
 #elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
 #  define TTYS1_DEV         g_usart2port    /* USART2=ttyS1 */
@@ -395,7 +395,7 @@ static uart_dev_t g_usart3port =
 /* Assign ttyS2.  USART0 has already been assigned if it was configured. */
 
 #if defined(CONFIG_LPC43_UART1) && !defined(UART1_ASSIGNED)
-#  define TTYS2_DEV         g_usart1port    /* USART1=ttyS2 */
+#  define TTYS2_DEV         g_uart1port     /* USART1=ttyS2 */
 #  define UART1_ASSIGNED 1
 #elif defined(CONFIG_LPC43_USART2) && !defined(USART2_ASSIGNED)
 #  define TTYS2_DEV         g_usart2port    /* USART2=ttyS2 */
