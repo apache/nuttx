@@ -1285,16 +1285,18 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
               imxrt_lpi2c_traceevent(priv, I2CEVENT_NOSTART, priv->msgc);
             }
 
+          priv->msgv++;
+          priv->msgc--;
+
           if ((priv->flags & I2C_M_READ) != 0)
             {
 #ifndef CONFIG_I2C_POLLED
               /* Stop TX interrupt */
 
               imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MIER_OFFSET,
-                                    LPI2C_MIER_TDIE, 0);
+                                    LPI2C_MIER_TDIE, LPI2C_MIER_RDIE);
 #endif
               /* Set LPI2C in read mode */
-
               imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MTDR_OFFSET, LPI2C_MTDR_CMD_RXD | LPI2C_MTDR_DATA((priv->dcnt - 1)));
             }
           else
@@ -1305,10 +1307,13 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
               imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MTDR_OFFSET,
                                  LPI2C_MTDR_CMD_TXD | LPI2C_MTDR_DATA(*priv->ptr++));
               priv->dcnt--;
+              if ((priv->msgc <= 0) && (priv->dcnt == 0))
+                {
+                  imxrt_lpi2c_sendstop(priv);
+                }
           }
 
-          priv->msgv++;
-          priv->msgc--;
+
         }
       else if (priv->msgv && ((status & LPI2C_MSR_SDF) != 0))
         {

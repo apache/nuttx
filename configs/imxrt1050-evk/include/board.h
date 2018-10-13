@@ -162,6 +162,9 @@
 #define GPIO_LPI2C1_SDA   GPIO_LPI2C1_SDA_2  /* GPIO_AD_B1_01 */
 #define GPIO_LPI2C1_SCL   GPIO_LPI2C1_SCL_2  /* GPIO_AD_B1_00 */
 
+#define GPIO_LPI2C3_SDA   GPIO_LPI2C3_SDA_2  /* GPIO_AD_B1_01 */
+#define GPIO_LPI2C3_SCL   GPIO_LPI2C3_SCL_2  /* GPIO_AD_B1_00 */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

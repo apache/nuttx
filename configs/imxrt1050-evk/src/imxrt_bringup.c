@@ -57,7 +57,7 @@
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
+#if defined(CONFIG_I2C_DRIVER)
 static void imxrt_i2c_register(int bus)
 {
   FAR struct i2c_master_s *i2c;
@@ -114,6 +114,16 @@ int imxrt_bringup(void)
 #if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
   imxrt_i2c_register(1);
 #endif
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C2)
+  imxrt_i2c_register(2);
+#endif
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C3)
+  imxrt_i2c_register(3);
+#endif
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C4)
+  imxrt_i2c_register(4);
+#endif
+
 
   UNUSED(ret);
   return OK;
