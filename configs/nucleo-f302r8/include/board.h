@@ -218,4 +218,24 @@
 
 /* DMA channels *************************************************************/
 
+
+/* PWM configuration ********************************************************/
+
+/* TIM1 PWM */
+
+#define STM32_TIM1_TRGO 0
+
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PA8 */
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3    /* PA11 */
+#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PA9 */
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_2    /* PA12 */
+#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PA10 */
+#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3    /* PB1 */
+
+/* TIM2 PWM */
+
+#define GPIO_TIM2_CH1OUT  GPIO_TIM2_CH1_ETR_1 /* PA0 */
+#define GPIO_TIM2_CH2OUT  GPIO_TIM2_CH2OUT_1  /* PA1 */
+#define GPIO_TIM2_CH3OUT  GPIO_TIM2_CH3OUT_1  /* PA9 */
+
 #endif /* __CONFIG_NUCLEO_F302R8_INCLUDE_BOARD_H */

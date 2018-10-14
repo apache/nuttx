@@ -52,4 +52,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

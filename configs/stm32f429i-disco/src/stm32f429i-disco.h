@@ -391,5 +391,17 @@ FAR struct spi_dev_s *stm32_spi5initialize(void);
 int stm32_l3gd20initialize(FAR const char *devpath);
 #endif
 
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */

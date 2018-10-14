@@ -44,6 +44,39 @@
  * Pre-processor Definitions
  ****************************************************************************************************/
 
+/* TIM version **************************************************************************************/
+
+/* Chip has extended version of ADV Timers (F3/F7/H7/L4/L4+):
+     - CCMR3, CCR5 and CCR6 registers
+     - OC5 and OC6
+     - 32-bit CCMR register
+     - UIFREMAP bit in CR1 register
+     - TRGO2 configuration in CR2 register
+     - OCCS bit and 4-bit SMS in SMCR register
+
+   Chip has extended version of General Timers 2-5 (F3/F7/H7/L4/L4+):
+     - UIFREMAP bit in CR1 register
+     - 4-bit SMS in SMCR register
+*/
+
+#ifdef CONFIG_STM32_HAVE_IP_TIMERS_V2
+#  define HAVE_IP_TIMERS_V2
+#endif
+
+/* TIM16 has OR register (F3/L4) */
+
+#ifdef CONFIG_STM32_STM32F30XX
+#  define HAVE_TIM16_OR
+#endif
+
+/* General Timers have CCxNP bits (not in F1) */
+
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32F4XXX)
+#  define HAVE_GTIM_CCXNP
+#endif
+
 /* Register Offsets *********************************************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
@@ -96,7 +129,7 @@
  * Only available in the STM32 F1 Value Line and the STM32 F3 family.
  */
 
-#define STM32_GTIM_RCR_OFFSET      0x002c  /* Repetition counter register (TIM16/TIM17) */
+#define STM32_GTIM_RCR_OFFSET      0x0030  /* Repetition counter register (TIM16/TIM17) */
 #define STM32_GTIM_BDTR_OFFSET     0x0044  /* Break and dead-time register (TIM16/TIM17) */
 
 /* Advanced Timers - TIM1 and TIM8 */
@@ -124,7 +157,7 @@
 
 /* *Note that many of the above registers are 32-bits wide on the F3 */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define STM32_ATIM_CCMR3_OFFSET  0x0054  /* Capture/compare mode register 3 (32-bit) */
 #  define STM32_ATIM_CCR5_OFFSET   0x0058  /* Capture/compare register 4 (16-bit) */
 #  define STM32_ATIM_CCR6_OFFSET   0x005c  /* Capture/compare register 4 (32-bit) */
@@ -155,7 +188,7 @@
 #  define STM32_TIM1_BDTR         (STM32_TIM1_BASE+STM32_ATIM_BDTR_OFFSET)
 #  define STM32_TIM1_DCR          (STM32_TIM1_BASE+STM32_ATIM_DCR_OFFSET)
 #  define STM32_TIM1_DMAR         (STM32_TIM1_BASE+STM32_ATIM_DMAR_OFFSET)
-#  ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #    define STM32_TIM1_CCMR3      (STM32_TIM1_BASE+STM32_ATIM_CCMR3_OFFSET)
 #    define STM32_TIM1_CCR5       (STM32_TIM1_BASE+STM32_ATIM_CCR5_OFFSET)
 #    define STM32_TIM1_CCR6       (STM32_TIM1_BASE+STM32_ATIM_CCR6_OFFSET)
@@ -183,7 +216,7 @@
 #  define STM32_TIM8_BDTR         (STM32_TIM8_BASE+STM32_ATIM_BDTR_OFFSET)
 #  define STM32_TIM8_DCR          (STM32_TIM8_BASE+STM32_ATIM_DCR_OFFSET)
 #  define STM32_TIM8_DMAR         (STM32_TIM8_BASE+STM32_ATIM_DMAR_OFFSET)
-#  ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #    define STM32_TIM8_CCMR3      (STM32_TIM8_BASE+STM32_ATIM_CCMR3_OFFSET)
 #    define STM32_TIM8_CCR5       (STM32_TIM8_BASE+STM32_ATIM_CCR5_OFFSET)
 #    define STM32_TIM8_CCR6       (STM32_TIM8_BASE+STM32_ATIM_CCR6_OFFSET)
@@ -471,8 +504,7 @@
 #  define ATIM_CR1_TCKINT         (0 << ATIM_CR1_CKD_SHIFT) /* 00: tDTS=tCK_INT */
 #  define ATIM_CR1_2TCKINT        (1 << ATIM_CR1_CKD_SHIFT) /* 01: tDTS=2*tCK_INT */
 #  define ATIM_CR1_4TCKINT        (2 << ATIM_CR1_CKD_SHIFT) /* 10: tDTS=4*tCK_INT */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CR1_UIFREMAP       (1 << 11) /* Bit 11: UIF status bit remapping */
 #endif
 
@@ -499,8 +531,7 @@
 #define ATIM_CR2_OIS3             (1 << 12) /* Bit 12: Output Idle state 3 (OC3 output) */
 #define ATIM_CR2_OIS3N            (1 << 13) /* Bit 13: Output Idle state 3 (OC3N output) */
 #define ATIM_CR2_OIS4             (1 << 14) /* Bit 14: Output Idle state 4 (OC4 output) */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CR2_OIS5             (1 << 16) /* Bit 16: OOutput Idle state 5 (OC5 output) */
 #  define ATIM_CR2_OIS6             (1 << 18) /* Bit 18: Output Idle state 6 (OC6 output) */
 #  define ATIM_CR2_MMS2_SHIFT       (20)      /* Bits 20-23: Master Mode Selection 2 */
@@ -535,7 +566,7 @@
 #  define ATIM_SMCR_GATED         (5 << ATIM_SMCR_SMS_SHIFT) /* 101: Gated Mode */
 #  define ATIM_SMCR_TRIGGER       (6 << ATIM_SMCR_SMS_SHIFT) /* 110: Trigger Mode */
 #  define ATIM_SMCR_EXTCLK1       (7 << ATIM_SMCR_SMS_SHIFT) /* 111: External Clock Mode 1 */
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_SMCR_OCCS          (1 << 3)  /* Bit 3: OCREF clear selection */
 #endif
 #define ATIM_SMCR_TS_SHIFT        (4)       /* Bits 4-6: Trigger selection */
@@ -575,7 +606,7 @@
 #  define ATIM_SMCR_ETRPd8        (3 << ATIM_SMCR_ETPS_SHIFT) /* 11: ETRP frequency divided by 8 */
 #define ATIM_SMCR_ECE             (1 << 14) /* Bit 14: External clock enable */
 #define ATIM_SMCR_ETP             (1 << 15) /* Bit 15: External trigger polarity */
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_SMCR_SMS           (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
 #endif
 
@@ -586,27 +617,15 @@
 #define ATIM_DIER_CC2IE           (1 << 2)  /* Bit 2: Capture/Compare 2 interrupt enable */
 #define ATIM_DIER_CC3IE           (1 << 3)  /* Bit 3: Capture/Compare 3 interrupt enable */
 #define ATIM_DIER_CC4IE           (1 << 4)  /* Bit 4: Capture/Compare 4 interrupt enable */
-
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_DIER_COMIE         (1 << 5)  /* Bit 5: COM interrupt enable */
-#endif
-
+#define ATIM_DIER_COMIE           (1 << 5)  /* Bit 5: COM interrupt enable */
 #define ATIM_DIER_TIE             (1 << 6)  /* Bit 6: Trigger interrupt enable */
-
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_DIER_BIE           (1 << 7)  /* Bit 7: Break interrupt enable */
-#endif
-
+#define ATIM_DIER_BIE             (1 << 7)  /* Bit 7: Break interrupt enable */
 #define ATIM_DIER_UDE             (1 << 8)  /* Bit 8: Update DMA request enable */
 #define ATIM_DIER_CC1DE           (1 << 9)  /* Bit 9: Capture/Compare 1 DMA request enable */
 #define ATIM_DIER_CC2DE           (1 << 10) /* Bit 10: Capture/Compare 2 DMA request enable */
 #define ATIM_DIER_CC3DE           (1 << 11) /* Bit 11: Capture/Compare 3 DMA request enable */
 #define ATIM_DIER_CC4DE           (1 << 12) /* Bit 12: Capture/Compare 4 DMA request enable */
-
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_DIER_COMDE         (1 << 13) /* Bit 13: COM DMA request enable */
-#endif
-
+#define ATIM_DIER_COMDE           (1 << 13) /* Bit 13: COM DMA request enable */
 #define ATIM_DIER_TDE             (1 << 14) /* Bit 14: Trigger DMA request enable */
 
 /* Status register */
@@ -618,20 +637,15 @@
 #define ATIM_SR_CC4IF             (1 << 4)  /* Bit 4:  Capture/Compare 4 interrupt Flag */
 #define ATIM_SR_COMIF             (1 << 5)  /* Bit 5:  COM interrupt Flag */
 #define ATIM_SR_TIF               (1 << 6)  /* Bit 6:  Trigger interrupt Flag */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define ATIM_SR_BIF             (1 << 7)  /* Bit 7:  Break interrupt Flag */
-#elif defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_SR_BIF             (1 << 7)  /* Bit 7:  Break interrupt Flag */
+#define ATIM_SR_BIF               (1 << 7)  /* Bit 7:  Break interrupt Flag */
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_SR_B2IF            (1 << 8)  /* Bit 8:  Break 2 interrupt Flag */
 #endif
-
 #define ATIM_SR_CC1OF             (1 << 9)  /* Bit 9:  Capture/Compare 1 Overcapture Flag */
 #define ATIM_SR_CC2OF             (1 << 10) /* Bit 10: Capture/Compare 2 Overcapture Flag */
 #define ATIM_SR_CC3OF             (1 << 11) /* Bit 11: Capture/Compare 3 Overcapture Flag */
 #define ATIM_SR_CC4OF             (1 << 12) /* Bit 12: Capture/Compare 4 Overcapture Flag */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_SR_CC5IF           (1 << 16) /* Bit 16: Compare 5 interrupt flag */
 #  define ATIM_SR_CC6IF           (1 << 17) /* Bit 17: Compare 6 interrupt flag */
 #endif
@@ -643,17 +657,10 @@
 #define ATIM_EGR_CC2G             (1 << 2)  /* Bit 2: Capture/Compare 2 Generation */
 #define ATIM_EGR_CC3G             (1 << 3)  /* Bit 3: Capture/Compare 3 Generation */
 #define ATIM_EGR_CC4G             (1 << 4)  /* Bit 4: Capture/Compare 4 Generation */
-
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_EGR_COMG           (1 << 5)  /* Bit 5: Capture/Compare Control Update Generation */
-#endif
-
+#define ATIM_EGR_COMG             (1 << 5)  /* Bit 5: Capture/Compare Control Update Generation */
 #define ATIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger Generation */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define ATIM_EGR_BG             (1 << 7)  /* Bit 7: Break Generation */
-#elif defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_EGR_BG             (1 << 7)  /* Bit 7: Break Generation */
+#define ATIM_EGR_BG               (1 << 7)  /* Bit 7: Break Generation */
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_EGR_B2G            (1 << 8)  /* Bit 8: Break 2 Generation */
 #endif
 
@@ -677,8 +684,7 @@
 #define ATIM_CCMR1_OC2M_MASK      (7 << ATIM_CCMR1_OC2M_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
 #define ATIM_CCMR1_OC2CE          (1 << 15) /* Bit 15: Output Compare 2 Clear Enable */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCMR1_OC1M         (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
 #  define ATIM_CCMR1_OC2M         (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
 #endif
@@ -768,8 +774,7 @@
 #define ATIM_CCMR2_OC4M_MASK      (7 << ATIM_CCMR2_OC4M_SHIFT)
                                             /* (See common (unshifted) bit field definitions above) */
 #define ATIM_CCMR2_OC4CE          (1 << 15) /* Bit 15: Output Compare 4 Clear Enable */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCMR2_OC3M         (1 << 16) /* Bit 16: Output Compare 3 mode - bit 3 */
 #  define ATIM_CCMR2_OC4M         (1 << 24) /* Bit 24: Output Compare 4 mode - bit 3 */
 #endif
@@ -793,7 +798,7 @@
 
 /* Capture/compare mode register 3 -- Output compare mode */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCMR3_OC5FE        (1 << 2)  /* Bit 2: Output Compare 5 Fast enable */
 #  define ATIM_CCMR3_OC5PE        (1 << 3)  /* Bit 3: Output Compare 5 Preload enable */
 #  define ATIM_CCMR3_OC5M_SHIFT   (4)       /* Bits 6-4: Output Compare 5 Mode */
@@ -806,7 +811,6 @@
 #  define ATIM_CCMR3_OC6M_MASK    (7 << ATIM_CCMR3_OC6M_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
 #  define ATIM_CCMR3_OC6CE        (1 << 15) /* Bit 15: Output Compare 7 Clear Enable */
-
 #  define ATIM_CCMR3_OC5M         (1 << 16) /* Bit 16: Output Compare 5 mode - bit 3 */
 #  define ATIM_CCMR3_OC6M         (1 << 24) /* Bit 24: Output Compare 6 mode - bit 3 */
 #endif
@@ -827,13 +831,11 @@
 #define ATIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 Complementary output polarity */
 #define ATIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable */
 #define ATIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity */
-
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-    defined(CONFIG_STM32_STM32L15XX)
-#  define ATIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
-#elif defined(CONFIG_STM32_STM32F30XX)
-#  define ATIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity */
+#define ATIM_CCER_CC4NP           (1 << 15) /* Bit 15: Capture/Compare 4 Complementary output polarity
+                                             *   NOTE: Some ST documents show CC4NP bit but there is
+                                             *   no CC4N output, so it does not make sense!
+                                             */
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCER_CC5E          (1 << 16) /* Bit 16: Capture/Compare 5 output enable */
 #  define ATIM_CCER_CC5P          (1 << 17) /* Bit 17: Capture/Compare 5 output Polarity */
 #  define ATIM_CCER_CC6E          (1 << 20) /* Bit 20: Capture/Compare 6 output enable */
@@ -844,28 +846,25 @@
 
 #define ATIM_CNT_SHIFT            (0)       /* Bits 0-15: Timer counter value */
 #define ATIM_CNT_MASK             (0xffff << ATIM_CNT_SHIFT)
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCER_UIFCPY        (1 << 31) /* Bit 31: UIF copy */
 #endif
 
 /* Repetition counter register */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_RCR_REP_SHIFT      (0)       /* Bits 0-15: Repetition Counter Value */
 #  define ATIM_RCR_REP_MASK       (0xffff << ATIM_RCR_REP_SHIFT)
-
 #  define ATIM_RCR_REP_MAX        32768    /* REVISIT */
 #else
 #  define ATIM_RCR_REP_SHIFT      (0)       /* Bits 0-7: Repetition Counter Value */
 #  define ATIM_RCR_REP_MASK       (0xff << ATIM_RCR_REP_SHIFT)
-
 #  define ATIM_RCR_REP_MAX        128
 #endif
 
 /* Capture/compare registers (CCR) */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_CCR5_GC5C1         (1 << 29)  /* Bit 29: Group Channel 5 and Channel 1 */
 #  define ATIM_CCR5_GC5C2         (1 << 30)  /* Bit 30: Group Channel 5 and Channel 2 */
 #  define ATIM_CCR5_GC5C3         (1 << 31)  /* Bit 31: Group Channel 5 and Channel 3 */
@@ -889,8 +888,7 @@
 #define ATIM_BDTR_BKP             (1 << 13) /* Bit 13: Break Polarity */
 #define ATIM_BDTR_AOE             (1 << 14) /* Bit 14: Automatic Output enable */
 #define ATIM_BDTR_MOE             (1 << 15) /* Bit 15: Main Output enable */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define ATIM_BDTR_BKF_SHIFT     (16)      /* Bits 16-19: Break filter */
 #  define ATIM_BDTR_BKF_MASK      (15 << ATIM_BDTR_BKF_SHIFT)
 #    define ATIM_BDTR_BKF_NOFILT    (0 << ATIM_BDTR_BKF_SHIFT)   /* 0000: No filter, BRK acts asynchronously */
@@ -958,8 +956,7 @@
 #  define GTIM_CR1_TCKINT         (0 << GTIM_CR1_CKD_SHIFT) /* 00: tDTS = tCK_INT */
 #  define GTIM_CR1_2TCKINT        (1 << GTIM_CR1_CKD_SHIFT) /* 01: tDTS = 2 x tCK_INT */
 #  define GTIM_CR1_4TCKINT        (2 << GTIM_CR1_CKD_SHIFT) /* 10: tDTS = 4 x tCK_INT */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define GTIM_CR1_UIFREMAP       (1 << 11) /* Bit 11: UIF status bit remapping */
 #endif
 
@@ -1032,7 +1029,7 @@
 #  define GTIM_SMCR_ETRPd8        (3 << GTIM_SMCR_ETPS_SHIFT) /* 11: ETRP frequency divided by 8 */
 #define GTIM_SMCR_ECE             (1 << 14) /* Bit 14: External Clock enable */
 #define GTIM_SMCR_ETP             (1 << 15) /* Bit 15: External Trigger Polarity */
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define GTIM_SMCR_SMS           (1 << 16) /* Bit 16: Slave mode selection - bit 3 */
 #endif
 
@@ -1100,8 +1097,7 @@
 #define GTIM_CCMR1_OC2M_MASK      (7 << GTIM_CCMR1_OC2M_SHIFT)
                                             /* (See common CCMR Output Compare Mode definitions below) */
 #define GTIM_CCMR1_OC2CE          (1 << 15) /* Bit 15: Output Compare 2 Clear Enable */
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define GTIM_CCMR1_OC1M         (1 << 16) /* Bit 16: Output Compare 1 mode - bit 3 */
 #  define GTIM_CCMR1_OC2M         (1 << 24) /* Bit 24: Output Compare 2 mode - bit 3 */
 #endif
@@ -1205,30 +1201,40 @@
 #define GTIM_CCMR2_IC4F_MASK      (0x0f << GTIM_CCMR2_IC4F_SHIFT)
                                             /* (See common CCMR Input Capture Filter definitions below) */
 
-/* Capture/compare enable register (TIM1 and TIM8, TIM2-5 and TIM9-14) */
+/* Capture/compare enable register (TIM2-5 and TIM9-14) */
 
 #define GTIM_CCER_CC1E            (1 << 0)  /* Bit 0: Capture/Compare 1 output enable */
 #define GTIM_CCER_CC1P            (1 << 1)  /* Bit 1: Capture/Compare 1 output polarity */
 #define GTIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 complementary output enable (TIM1 and TIM8 only) */
-#define GTIM_CCER_CC1NP           (1 << 3)  /* Bit 3: Capture/Compare 1 output Polarity (F2,F3,F4 and TIM15-17) */
+#ifdef HAVE_GTIM_CCXNP
+#  define GTIM_CCER_CC1NP         (1 << 3)  /* Bit 3: Capture/Compare 1 output Polarity (F2,F3,F4 and TIM15-17) */
+#endif
 #define GTIM_CCER_CC2E            (1 << 4)  /* Bit 4: Capture/Compare 2 output enable (TIM2-5,9&12 only) */
 #define GTIM_CCER_CC2P            (1 << 5)  /* Bit 5: Capture/Compare 2 output polarity (TIM2-5,9&12 only) */
 #define GTIM_CCER_CC2NE           (1 << 6)  /* Bit 6: Capture/Compare 2 complementary output enable (TIM1 and TIM8 only) */
-#define GTIM_CCER_CC2NP           (1 << 7)  /* Bit 7: Capture/Compare 2 output Polarity (F2,F3,F4 and TIM2-5,9,12&15 only) */
+#ifdef HAVE_GTIM_CCXNP
+#  define GTIM_CCER_CC2NP         (1 << 7)  /* Bit 7: Capture/Compare 2 output Polarity (F2,F3,F4 and TIM2-5,9,12&15 only) */
+#endif
 #define GTIM_CCER_CC3E            (1 << 8)  /* Bit 8: Capture/Compare 3 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC3P            (1 << 9)  /* Bit 9: Capture/Compare 3 output Polarity (TIM2-5 only) */
 #define GTIM_CCER_CC3NE           (1 << 10) /* Bit 10: Capture/Compare 3 complementary output enable (TIM1 and TIM8 only) */
-#define GTIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 output Polarity (F2,F4 and TIM2-5 only) */
+#ifdef HAVE_GTIM_CCXNP
+#  define GTIM_CCER_CC3NP         (1 << 11) /* Bit 11: Capture/Compare 3 output Polarity (F2,F4 and TIM2-5 only) */
+#endif
 #define GTIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity (TIM2-5 only) */
-#define GTIM_CCER_CC4NP           (1 << 15) /* Bit 15: Capture/Compare 4 output Polarity */
+#ifdef HAVE_GTIM_CCXNP
+#  define GTIM_CCER_CC4NP         (1 << 15) /* Bit 15: Capture/Compare 4 output Polarity
+                                             *   NOTE: Some ST documents show CC4NP bit but there is
+                                             *   no CC4N output, so it does not make sense!
+                                             */
+#endif
 
 /* 16-bit counter register */
 
 #define GTIM_CNT_SHIFT            (0)       /* Bits 0-15: Timer counter value */
 #define GTIM_CNT_MASK             (0xffff << ATIM_CNT_SHIFT)
-
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_IP_TIMERS_V2
 #  define GTIM_CCER_UIFCPY        (1 << 31) /* Bit 31: UIF copy */
 #endif
 
@@ -1306,7 +1312,7 @@
 
 /* Timer 16 Option Register */
 
-#ifdef CONFIG_STM32_STM32F30XX
+#ifdef HAVE_TIM16_OR
 #  define TIM16_OR_RMP_SHIFT      (0)     /* Bits 0-1: Timer 16 input 1 connection */
 #  define TIM16_OR_RMP_MASK       (3 << TIM16_OR_RMP_SHIFT)
 #    define TIM16_OR_RMP_GPRIO    (3 << TIM16_OR_RMP_SHIFT) /* TIM16 TI1 is connected to GPIO */
