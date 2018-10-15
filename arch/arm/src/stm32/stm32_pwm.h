@@ -928,7 +928,6 @@ enum stm32_chan_e
 struct pwm_lowerhalf_s;
 struct stm32_pwm_ops_s
 {
-
   /* Update CCR register */
 
   int (*ccr_update)(FAR struct pwm_lowerhalf_s *dev, uint8_t index, uint32_t ccr);
@@ -956,6 +955,16 @@ struct stm32_pwm_ops_s
   /* PWM configure */
 
   int (*configure)(FAR struct pwm_lowerhalf_s *dev);
+
+  /* Software break */
+
+  int (*soft_break)(FAR struct pwm_lowerhalf_s *dev, bool state);
+
+#ifdef HAVE_COMPLEMENTARY
+  /* Deadtime update */
+
+  int (*dt_update)(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);
+#endif
 };
 
 #endif

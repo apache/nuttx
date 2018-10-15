@@ -3158,7 +3158,7 @@ config STM32_ONESHOT_MAXTIMERS
 		timers that you can use.
 
 config STM32_PWM_LL_OPS
-	bool "PWM low-lewel operations"
+	bool "PWM low-level operations"
 	default n
 	---help---
 		Enable low-level PWM ops.

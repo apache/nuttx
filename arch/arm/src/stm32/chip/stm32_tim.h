@@ -1073,7 +1073,7 @@
 #define GTIM_EGR_CC2G             (1 << 2)  /* Bit 2: Capture/compare 2 generation (TIM2-5,9,12,&15 only) */
 #define GTIM_EGR_CC3G             (1 << 3)  /* Bit 3: Capture/compare 3 generation (TIM2-5 only) */
 #define GTIM_EGR_CC4G             (1 << 4)  /* Bit 4: Capture/compare 4 generation (TIM2-5 only) */
-#define GTIM_EGR_COMIG            (1 << 5)  /* Bit 5: Capture/Compare control update generation (TIM15-17 only) */
+#define GTIM_EGR_COMG             (1 << 5)  /* Bit 5: Capture/Compare control update generation (TIM15-17 only) */
 #define GTIM_EGR_TG               (1 << 6)  /* Bit 6: Trigger generation (TIM2-5,9,12&16-17 only) */
 #define GTIM_EGR_BG               (1 << 7)  /* Bit 7: Break generation (TIM15-17 only) */
 
@@ -1245,7 +1245,7 @@
 
 #define GTIM_RCR_REP_MAX          128
 
-/* Break and dead-time register (TIM15-17 only */
+/* Break and dead-time register (TIM15-17 only) */
 
 #define GTIM_BDTR_DTG_SHIFT       (0)       /* Bits 7:0 [7:0]: Dead-Time Generator set-up */
 #define GTIM_BDTR_DTG_MASK        (0xff << GTIM_BDTR_DTG_SHIFT)

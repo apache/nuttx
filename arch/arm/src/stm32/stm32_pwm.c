@@ -343,6 +343,15 @@
 #  define HAVE_COMPLEMENTARY
 #endif
 
+/* Break support */
+
+#if defined(CONFIG_STM32_TIM1_BREAK1) || defined(CONFIG_STM32_TIM1_BREAK2) || \
+    defined(CONFIG_STM32_TIM8_BREAK1) || defined(CONFIG_STM32_TIM8_BREAK2) || \
+    defined(CONFIG_STM32_TIM15_BREAK1) || defined(CONFIG_STM32_TIM16_BREAK1) || \
+    defined(CONFIG_STM32_TIM17_BREAK1)
+#  defined HAVE_BREAK
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
@@ -368,10 +377,19 @@ struct stm32_pwm_out_s
 
 /* PWM break configuration */
 
+#ifdef HAVE_BREAK
 struct stm32_pwm_break_s
 {
-  uint32_t _res;                         /* Reserved */
+  uint8_t en1:1;                        /* Break 1 enable */
+  uint8_t pol1:1;                       /* Break 1 polarity */
+  uint8_t _res:6;                       /* Reserved */
+#ifdef HAVE_IP_TIMERS_V2
+  uint8_t en2:1;                        /* Break 2 enable */
+  uint8_t pol2:1;                       /* Break 2 polarity */
+  uint8_t flt2:6;                       /* Break 2 filter */
+#endif
 };
+#endif
 
 /* PWM channel configuration */
 struct stm32_pwmchan_s
@@ -379,7 +397,9 @@ struct stm32_pwmchan_s
   uint8_t                  channel:4;   /* Timer output channel: {1,..4} */
   uint8_t                  mode:4;      /* PWM channel mode (see stm32_chan_mode_e) */
   struct stm32_pwm_out_s   out1;        /* PWM output configuration */
+#ifdef HAVE_BREAK
   struct stm32_pwm_break_s brk;         /* PWM break configuration */
+#endif
 #ifdef HAVE_COMPLEMENTARY
   struct stm32_pwm_out_s   out2;        /* PWM complementary output configuration */
 #endif
@@ -454,7 +474,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
                               bool state);
 static int pwm_soft_update(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_configure(FAR struct pwm_lowerhalf_s *dev);
+static int pwm_soft_break(FAR struct pwm_lowerhalf_s *dev, bool state);
 static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
                           uint32_t ccr);
 static int pwm_arr_update(FAR struct pwm_lowerhalf_s *dev, uint32_t arr);
@@ -463,17 +483,22 @@ static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty);
 
 #ifdef HAVE_ADVTIM
-static int pwm_break_configure(FAR struct stm32_pwmtimer_s *priv);
+static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv);
 #endif
 #ifdef HAVE_TRGO
 static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t trgo);
 #endif
-#ifdef HAVE_COMPLEMENTARY
-static int pwm_deadtime_configure(FAR struct stm32_pwmtimer_s *priv);
-static int pwm_deadtime_update(FAR struct stm32_pwmtimer_s *priv, uint8_t dt);
+#if defined(HAVE_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
+static int pwm_deadtime_update(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);
 #endif
 #ifdef CONFIG_STM32_PWM_LL_OPS
 static uint32_t pwm_ccr_get(FAR struct pwm_lowerhalf_s *dev, uint8_t index);
+#endif
+
+#ifdef CONFIG_PWM_PULSECOUNT
+static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev);
+#else
+static int pwm_configure(FAR struct pwm_lowerhalf_s *dev);
 #endif
 #ifdef CONFIG_PWM_PULSECOUNT
 static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
@@ -530,12 +555,16 @@ static const struct pwm_ops_s g_pwmops =
 static const struct stm32_pwm_ops_s g_llpwmops =
 {
   .configure       = pwm_configure,
+  .soft_break      = pwm_soft_break,
   .ccr_update      = pwm_ccr_update,
   .ccr_get         = pwm_ccr_get,
   .arr_update      = pwm_arr_update,
   .arr_get         = pwm_arr_get,
   .outputs_enable  = pwm_outputs_enable,
   .soft_update     = pwm_soft_update,
+#ifdef HAVE_COMPLEMENTARY
+  .dt_update       = pwm_deadtime_update,
+#endif
 };
 #endif
 
@@ -549,6 +578,20 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
   {
     .channel = 1,
     .mode    = CONFIG_STM32_TIM1_CH1MODE,
+#ifdef HAVE_BREAK
+    .brk =
+    {
+#ifdef CONFIG_STM32_TIM1_BREAK1
+      .en1 = 1,
+      .pol1 = CONFIG_STM32_TIM1_BRK1POL,
+#endif
+#ifdef CONFIG_STM32_TIM1_BREAK2
+      .en2 = 1,
+      .pol2 = CONFIG_STM32_TIM1_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM1_BRK2FLT,
+#endif
+    },
+#endif
 #ifdef CONFIG_STM32_TIM1_CH1OUT
     .out1 =
     {
@@ -1065,6 +1108,20 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
   {
     .channel = 1,
     .mode    = CONFIG_STM32_TIM8_CH1MODE,
+#ifdef HAVE_BREAK
+    .brk =
+    {
+#ifdef CONFIG_STM32_TIM8_BREAK1
+      .en1 = 1,
+      .pol1 = CONFIG_STM32_TIM8_BRK1POL,
+#endif
+#ifdef CONFIG_STM32_TIM8_BREAK2
+      .en2 = 1,
+      .pol2 = CONFIG_STM32_TIM8_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM8_BRK2FLT,
+#endif
+    },
+#endif
 #ifdef CONFIG_STM32_TIM8_CH1OUT
     .out1 =
     {
@@ -1525,6 +1582,16 @@ static struct stm32_pwmchan_s g_pwm15channels[] =
   {
     .channel = 1,
     .mode    = CONFIG_STM32_TIM15_CH1MODE,
+#ifdef HAVE_BREAK
+    .brk =
+    {
+#ifdef CONFIG_STM32_TIM15_BREAK1
+      .en1 = 1,
+      .pol1 = CONFIG_STM32_TIM15_BRK1POL,
+#endif
+      /* No BREAK2 */
+    },
+#endif
 #ifdef CONFIG_STM32_TIM15_CH1OUT
     .out1    =
     {
@@ -1600,6 +1667,16 @@ static struct stm32_pwmchan_s g_pwm16channels[] =
   {
     .channel = 1,
     .mode    = CONFIG_STM32_TIM16_CH1MODE,
+#ifdef HAVE_BREAK
+    .brk =
+    {
+#ifdef CONFIG_STM32_TIM16_BREAK1
+      .en1 = 1,
+      .pol1 = CONFIG_STM32_TIM16_BRK1POL,
+#endif
+      /* No BREAK2 */
+    },
+#endif
 #ifdef CONFIG_STM32_TIM16_CH1OUT
     .out1    =
     {
@@ -1659,6 +1736,16 @@ static struct stm32_pwmchan_s g_pwm17channels[] =
   {
     .channel = 1,
     .mode    = CONFIG_STM32_TIM17_CH1MODE,
+#ifdef HAVE_BREAK
+    .brk =
+    {
+#ifdef CONFIG_STM32_TIM17_BREAK1
+      .en1 = 1,
+      .pol1 = CONFIG_STM32_TIM17_BRK1POL,
+#endif
+      /* No BREAK2 */
+    },
+#endif
 #ifdef CONFIG_STM32_TIM17_CH1OUT
     .out1    =
     {
@@ -1958,7 +2045,7 @@ static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
 
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-  uint32_t offset;
+  uint32_t offset = 0;
 
   /* Only ADV timers have CC5 and CC6 */
 
@@ -2032,7 +2119,7 @@ static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
 static uint32_t pwm_ccr_get(FAR struct pwm_lowerhalf_s *dev, uint8_t index)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-  uint32_t offset;
+  uint32_t offset = 0;
 
   switch (index)
     {
@@ -2133,8 +2220,8 @@ static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-  uint32_t reload;
-  uint32_t ccr;
+  uint32_t reload = 0;
+  uint32_t ccr    = 0;
 
   /* We don't want compilation warnings if no DEBUGASSERT */
 
@@ -2182,8 +2269,8 @@ static int pwm_frequency_update(FAR struct pwm_lowerhalf_s *dev,
                                 uint32_t frequency)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-  uint32_t reload = 0;
-  uint32_t timclk = 0;
+  uint32_t reload    = 0;
+  uint32_t timclk    = 0;
   uint32_t prescaler = 0;
 
   /* Calculate optimal values for the timer prescaler and for the timer reload
@@ -2444,15 +2531,24 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
 
           ccmr1 &= ~(ATIM_CCMR1_CC1S_MASK | ATIM_CCMR1_OC1M_MASK | ATIM_CCMR1_OC1PE);
 
-          /* Set the CCMR1 mode values (leave CCMR2 zero) */
+          /* Configure CC1 as output */
 
-          ocmode1 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC1S_SHIFT)
-                     | (chanmode << ATIM_CCMR1_OC1M_SHIFT) | ATIM_CCMR1_OC1PE;
+          ocmode1 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC1S_SHIFT);
+
+          /* Configure Compare 1 mode */
+
+          ocmode1 |= (chanmode << ATIM_CCMR1_OC1M_SHIFT);
+
+          /* Enable CCR2 preload */
+
+          ocmode1 |= ATIM_CCMR1_OC1PE;
 
 #ifdef HAVE_IP_TIMERS_V2
           /* Reset current OC bit */
 
           ccmr1 &= ~(ATIM_CCMR1_OC1M);
+
+          /* Set an additional OC1M bit */
 
           if (ocmbit)
             {
@@ -2468,15 +2564,24 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
 
           ccmr1 &= ~(ATIM_CCMR1_CC2S_MASK | ATIM_CCMR1_OC2M_MASK | ATIM_CCMR1_OC2PE);
 
-          /* Set the CCMR1 mode values (leave CCMR2 zero) */
+          /* Configure CC2 as output */
 
-          ocmode1 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC2S_SHIFT)
-                     | (chanmode << ATIM_CCMR1_OC2M_SHIFT) | ATIM_CCMR1_OC2PE;
+          ocmode1 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC2S_SHIFT);
+
+          /* Configure Compare 2 mode */
+
+          ocmode1 |= (chanmode << ATIM_CCMR1_OC2M_SHIFT);
+
+          /* Enable CCR2 preload */
+
+          ocmode1 |= ATIM_CCMR1_OC2PE;
 
 #ifdef HAVE_IP_TIMERS_V2
           /* Reset current OC bit */
 
           ccmr1 &= ~(ATIM_CCMR1_OC2M);
+
+          /* Set an additional OC2M bit */
 
           if (ocmbit)
             {
@@ -2492,15 +2597,24 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
 
           ccmr2 &= ~(ATIM_CCMR2_CC3S_MASK | ATIM_CCMR2_OC3M_MASK | ATIM_CCMR2_OC3PE);
 
-          /* Set the CCMR2 mode values (leave CCMR1 zero) */
+          /* Configure CC3 as output */
 
-          ocmode2 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC3S_SHIFT)
-                     | (chanmode << ATIM_CCMR2_OC3M_SHIFT) | ATIM_CCMR2_OC3PE;
+          ocmode2 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC3S_SHIFT);
+
+          /* Configure Compare 3 mode */
+
+          ocmode2 |= (chanmode << ATIM_CCMR2_OC3M_SHIFT);
+
+          /* Enable CCR3 preload */
+
+          ocmode2 |= ATIM_CCMR2_OC3PE;
 
 #ifdef HAVE_IP_TIMERS_V2
           /* Reset current OC bit */
 
           ccmr2 &= ~(ATIM_CCMR2_OC3M);
+
+          /* Set an additional OC3M bit */
 
           if (ocmbit)
             {
@@ -2516,15 +2630,24 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
 
           ccmr2 &= ~(ATIM_CCMR2_CC4S_MASK | ATIM_CCMR2_OC4M_MASK | ATIM_CCMR2_OC4PE);
 
-          /* Set the CCMR2 mode values (leave CCMR1 zero) */
+          /* Configure Compare 4 mode */
 
-          ocmode2 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC4S_SHIFT)
-                     | (chanmode << ATIM_CCMR2_OC4M_SHIFT) | ATIM_CCMR2_OC4PE;
+          ocmode2 |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC4S_SHIFT);
+
+          /* Enable CCR4 preload */
+
+          ocmode2 |= (chanmode << ATIM_CCMR2_OC4M_SHIFT);
+
+          /* Enable CCR4 preload */
+
+          ocmode2 |= ATIM_CCMR2_OC4PE;
 
 #ifdef HAVE_IP_TIMERS_V2
           /* Reset current OC bit */
 
           ccmr2 &= ~(ATIM_CCMR2_OC4M);
+
+          /* Set an additional OC4M bit */
 
           if (ocmbit)
             {
@@ -2681,7 +2804,6 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
                               bool state)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-
   uint32_t ccer   = 0;
   uint32_t regval = 0;
 
@@ -2724,38 +2846,24 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
   return OK;
 }
 
-#ifdef HAVE_COMPLEMENTARY
-/****************************************************************************
- * Name: pwm_deadtime_configure
- *
- * Description:
- *   Configure a PWM deadtime for given timer
- *
- ****************************************************************************/
-
-static int pwm_deadtime_configure(FAR struct stm32_pwmtimer_s *priv)
-{
-  /* Set the clock division to zero for all (but the basic timers, but there
-   * should be no basic timers in this context
-   */
-
-  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CKD_MASK,
-                priv->t_dts<<ATIM_CR1_CKD_SHIFT);
-
-  /* Initialize deadtime */
-
-  pwm_deadtime_update(priv, priv->deadtime);
-
-  return OK;
-}
+#if defined(HAVE_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
 
 /****************************************************************************
  * Name: pwm_deadtime_update
  ****************************************************************************/
 
-static int pwm_deadtime_update(FAR struct stm32_pwmtimer_s *priv, uint8_t dt)
+static int pwm_deadtime_update(FAR struct pwm_lowerhalf_s *dev, uint8_t dt)
 {
   uint32_t bdtr = 0;
+  int      ret  = OK;
+
+  /* Check if locked */
+
+  if (priv->lock > 0)
+    {
+      ret = -EACCES;
+      goto errout;
+    }
 
   /* Get current register state */
 
@@ -2772,51 +2880,12 @@ static int pwm_deadtime_update(FAR struct stm32_pwmtimer_s *priv, uint8_t dt)
 
   pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
 
-  return OK;
+errout:
+  return ret;
 }
 #endif
 
-/****************************************************************************
- * Name: pwm_break_configure
- *
- * Description:
- *   Configure a PWM break function for a given timer
- *
- ****************************************************************************/
-
-#ifdef HAVE_ADVTIM
-static int pwm_break_configure(FAR struct stm32_pwmtimer_s *priv)
-{
-  uint32_t bdtr = 0;
-
-  /* Get current register state */
-
-  bdtr = pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET);
-
-  /* TODO: Configure BRK */
-
-#ifdef HAVE_IP_TIMERS_V2
-  /* TODO: Configure BRK2 */
-
-  /* TODO: Configure BRK and BRK2 filters */
-#endif
-
-  /* Set the main output enable (MOE) bit and clear the OSSI and OSSR
-   * bits in the BDTR register.
-   *
-   * REVISIT: not sure if it belongs here
-   */
-
-  bdtr |= ATIM_BDTR_MOE;
-  bdtr &= ~(ATIM_BDTR_OSSI | ATIM_BDTR_OSSR);
-
-  /* Write BDTR register */
-
-  pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
-
-  return OK;
-}
-#endif
+#ifdef HAVE_TRGO
 
 /****************************************************************************
  * Name: pwm_sync_configure
@@ -2826,7 +2895,6 @@ static int pwm_break_configure(FAR struct stm32_pwmtimer_s *priv)
  *
  ****************************************************************************/
 
-#ifdef HAVE_TRGO
 static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t trgo)
 {
   uint32_t cr2 = 0;
@@ -2867,6 +2935,34 @@ static int pwm_soft_update(FAR struct pwm_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: pwm_soft_break
+ *
+ * Description:
+ *   Generate an software break event
+ *
+ ****************************************************************************/
+
+static int pwm_soft_break(FAR struct pwm_lowerhalf_s *dev, bool state)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  if (state == true)
+    {
+      /* Set MOE bit */
+
+      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
+    }
+  else
+    {
+      /* Reset MOE bit */
+
+      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: pwm_outputs_from_channels
  *
  * Description:
@@ -2877,8 +2973,8 @@ static int pwm_soft_update(FAR struct pwm_lowerhalf_s *dev)
 static uint16_t pwm_outputs_from_channels(FAR struct stm32_pwmtimer_s *priv)
 {
   uint16_t outputs = 0;
-  uint8_t channel = 0;
-  uint8_t i = 0;
+  uint8_t  channel = 0;
+  uint8_t  i       = 0;
 
   for(i = 0; i < priv->chan_num; i += 1)
     {
@@ -2910,6 +3006,90 @@ static uint16_t pwm_outputs_from_channels(FAR struct stm32_pwmtimer_s *priv)
 
   return outputs;
 }
+
+#ifdef HAVE_ADVTIM
+
+/****************************************************************************
+ * Name: pwm_break_dt_configure
+ *
+ * Description:
+ *   Configure break and deadtime
+ *
+ * NOTE: we have to configure all BDTR registers at once due to possible
+ *       lock configuration
+ *
+ ****************************************************************************/
+
+static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv)
+{
+  uint32_t bdtr = 0;
+
+  /* Set the clock division to zero for all (but the basic timers, but there
+   * should be no basic timers in this context
+   */
+
+  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CKD_MASK,
+                priv->t_dts<<GTIM_CR1_CKD_SHIFT);
+
+#ifdef HAVE_COMPLEMENTARY
+  /* Initialize deadtime */
+
+  bdtr |= (priv->deadtime << ATIM_BDTR_DTG_SHIFT);
+#endif
+
+#ifdef HAVE_BREAK
+  /* Configure Break 1 */
+
+  if (priv->brk.en1 == 1)
+    {
+      /* Enable Break 1 */
+
+      bdtr |= ATIM_BDTR_BKE;
+
+      /* Set Break 1 polarity */
+
+      bdtr |= (priv->brk.pol1 == STM32_POL_NEG ? ATIM_BDTR_BKP : 0);
+    }
+
+#ifdef HAVE_IP_TIMERS_V2
+  /* Configure Break 1 */
+
+  if (priv->brk.en2 == 1)
+    {
+      /* Enable Break 2 */
+
+      bdtr |= ATIM_BDTR_BK2E;
+
+      /* Set Break 2 polarity */
+
+      bdtr |= (priv->brk.pol2 == STM32_POL_NEG ? ATIM_BDTR_BK2P : 0);
+
+      /* Configure BRK2 filter */
+
+      bdtr |= (priv->brk.flt2 << ATIM_BDTR_BK2F_SHIFT);
+
+    }
+#endif  /* HAVE_IP_TIMERS_V2 */
+#endif  /* HAVE_BREAK */
+
+  /* Clear the OSSI and OSSR bits in the BDTR register.
+   *
+   * REVISIT: this should be configurable
+   */
+
+  bdtr &= ~(ATIM_BDTR_OSSI | ATIM_BDTR_OSSR);
+
+  /* Configure lock */
+
+  bdtr |= priv->lock<<GTIM_BDTR_LOCK_SHIFT;
+
+  /* Write BDTR register at once */
+
+  pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
+
+  return OK;
+}
+#endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
 
@@ -2956,20 +3136,19 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
       goto errout;
     }
 
-#ifdef HAVE_COMPLEMENTARY
-  /* Configure deadtime */
+  /* Configure break and deadtime register */
 
-  ret = pwm_deadtime_configure(priv);
+  ret = pwm_break_dt_configure(priv);
   if (ret < 0)
     {
       goto errout;
     }
-#endif
 
-  /* Configure break */
+  /* Disable software break */
 
-  ret = pwm_break_configure(priv);
+  ret = pwm_soft_break(dev, false);
   if (ret < 0)
+
     {
       goto errout;
     }
@@ -3206,19 +3385,9 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 #ifdef HAVE_ADVTIM
   if (priv->timtype == TIMTYPE_ADVANCED || priv->timtype == TIMTYPE_COUNTUP16_N)
     {
-#ifdef HAVE_COMPLEMENTARY
-      /* Configure deadtime */
+      /* Configure break and deadtime register */
 
-      ret = pwm_deadtime_configure(priv);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-#endif
-
-      /* Configure break */
-
-      ret = pwm_break_configure(priv);
+      ret = pwm_break_dt_configure(priv);
       if (ret < 0)
         {
           goto errout;
@@ -3260,6 +3429,14 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
               goto errout;
             }
         }
+    }
+
+  /* Disable software break */
+
+  ret = pwm_soft_break(dev, false);
+  if (ret < 0)
+    {
+      goto errout;
     }
 
 errout:
@@ -3479,9 +3656,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
        * quickly as possible.
        */
 
-      regval = pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET);
-      regval &= ~ATIM_BDTR_MOE;
-      pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
+      pwm_soft_break(dev, false);
 
       /* Disable first interrtups, stop and reset the timer */
 
