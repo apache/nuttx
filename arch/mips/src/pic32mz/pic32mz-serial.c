@@ -102,7 +102,7 @@
 #    define UART5_ASSIGNED      1
 #elif defined(CONFIG_UART6_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart6port /* UART6 is console */
-#    define TTYS5_DEV           g_uart6port /* UART6 is ttyS0 */
+#    define TTYS0_DEV           g_uart6port /* UART6 is ttyS0 */
 #    define UART6_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
