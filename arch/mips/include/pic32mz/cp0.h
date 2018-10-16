@@ -273,6 +273,7 @@
 #  define CP0_SRSCTL_HSS_1SET       (0 << CP0_SRSCTL_HSS_SHIFT) /* One shadow set (normal GPR set) */
 #  define CP0_SRSCTL_HSS_2SETS      (1 << CP0_SRSCTL_HSS_SHIFT) /* Two shadow sets */
 #  define CP0_SRSCTL_HSS_4SETS      (3 << CP0_SRSCTL_HSS_SHIFT) /* Four shadow sets */
+#  define CP0_SRSCTL_HSS_8SETS      (7 << CP0_SRSCTL_HSS_SHIFT) /* Eight shadow sets */
 
 /* Register Number: 12 Sel: 3 Name: SRSMap */
 
