@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/mips32/Toolchain.defs
 #
-#   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2013, 2015, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,15 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOL) \
       $(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF) \
     ),y)
   CONFIG_MIPS32_TOOLCHAIN ?= GNU_ELF
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_MIPS32_TOOLCHAIN_PINGUINOL) \
+    ),y)
+  CONFIG_MIPS32_TOOLCHAIN ?= PINGUINOL
 endif
 
 ifeq ($(filter y, \
@@ -137,7 +142,6 @@ else
 endif
 
 # Generic GNU mip32 toolchain on OS X or Linux
-# including Pinguino mips-elf toolchain
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   CROSSDEV ?= mips-elf-
@@ -146,6 +150,17 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
+endif
+
+# Pinguino toolchain under Linux
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOL)
+  CROSSDEV ?= p32-
+  MAXOPTIMIZATION ?= -O2
+  ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
+  ARCHPICFLAGS = -fpic -membedded-pic
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = pinguino-debug.ld
 endif
 
 # Microchip XC32 toolchain under Linux
