@@ -1896,8 +1896,6 @@ nuttx/
  |   |   `- README.txt
  |   |- p112/
  |   |   `- README.txt
- |   |- pcblogic-pic32mx/
- |   |   `- README.txt
  |   |- pcduino-a10/
  |   |   `- README.txt
  |   |- photon/

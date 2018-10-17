@@ -395,9 +395,9 @@ LCD1602
 =======
 
   The on-board LCD is a 2x16 segment LCD and appears to be compatible with
-  the LCD1602 and is like an LCD1602 LCD here.
+  the LCD1602 and is treated like an LCD1602 LCD here.
 
-  LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
+  LCD pin mapping
 
     --------------------- ---------- ----------------------------------
     PIC32                  Sure JP1   Sure Signal Description

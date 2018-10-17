@@ -512,14 +512,6 @@ configs/olimex-strp711
 configs/or1k
   Generic OpenRISC board.
 
-configs/pcblogic-pic32mx
-  This is the port of NuttX to the PIC32MX board from PCB Logic Design Co.
-  This board features the MicroChip PIC32MX460F512L.
-  The board is a very simple -- little more than a carrier for the PIC32
-  MCU plus voltage regulation, debug interface, and an OTG connector.
-  STATUS:  Code complete but testing has been stalled due to tool related problems
-  (PICkit 2 does not work with the PIC32).
-
 configs/pcduino-a10
   This directory contains the port of NuttX to the pcDuino v1 board
   See http://www.pcduino.com/ for information about pcDuino Lite, v1,
