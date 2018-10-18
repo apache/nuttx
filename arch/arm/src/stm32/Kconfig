@@ -8465,7 +8465,73 @@ config STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
-endmenu
+if STM32_SPI1
+
+config STM32_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+
+endif # STM32_SPI1
+
+if STM32_SPI2
+
+config STM32_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.
+
+endif # STM32_SPI2
+
+if STM32_SPI3
+
+config STM32_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.
+
+endif # STM32_SPI2
+
+if STM32_SPI4
+
+config STM32_SPI4_DMA
+	bool "SPI4 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+
+endif # STM32_SPI4
+
+if STM32_SPI5
+
+config STM32_SPI5_DMA
+	bool "SPI5 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.
+
+endif # STM32_SPI5
+
+if STM32_SPI6
+
+config STM32_SPI6_DMA
+	bool "SPI6 DMA"
+	default n
+	depends on STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.
+
+endif # STM32_SPI6
+
+endmenu # SPI Configuration
 
 menu "I2S Configuration"
 	depends on STM32_I2S3
