@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_spi.c
  *
- *   Copyright (C) 2009-2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1613,7 +1613,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)) ||
       up_interrupt_context())
     {
-      /* Invalid DMA channels, unsupported memory region, or interrupt context, fall back to non-DMA method. */
+      /* Invalid DMA channels, unsupported memory region, or interrupt context, fall
+       * back to non-DMA method.
+       */
 
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
@@ -1781,12 +1783,12 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
       nxsem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
       nxsem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
 
-      /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA channel.
-       * if the channel is not available, then stm32_dmachannel() will block and wait
-       * until the channel becomes available.  WARNING: If you have another device sharing
-       * a DMA channel with SPI and the code never releases that channel, then the call
-       * to stm32_dmachannel()  will hang forever in this function!  Don't let your
-       * design do that!
+      /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA
+       * channel.  If the channel is not available, then stm32_dmachannel() will
+       * block and wait until the channel becomes available.  WARNING: If you have
+       * another device sharing a DMA channel with SPI and the code never releases
+       * that channel, then the call to stm32_dmachannel()  will hang forever in
+       * this function!  Don't let your design do that!
        */
 
       priv->rxdma = stm32_dmachannel(priv->rxch);
@@ -1794,7 +1796,6 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
       DEBUGASSERT(priv->rxdma && priv->txdma);
 
       spi_modifycr2(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
-
     }
   else
     {
@@ -1803,7 +1804,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
     }
 #endif
 
-  /* Enable spi */
+  /* Enable SPI */
 
   spi_modifycr1(priv, SPI_CR1_SPE, 0);
 }
