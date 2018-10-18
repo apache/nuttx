@@ -1375,7 +1375,7 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->erasesize    = (1 << S25FL1_SECTOR512_SHIFT);
               geo->neraseblocks = priv->nsectors << (priv->sectorshift - S25FL1_SECTOR512_SHIFT);
 #else
-              geo->blocksize    = (1 << priv->sectorshift);
+              geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
               geo->neraseblocks = priv->nsectors;
 #endif
