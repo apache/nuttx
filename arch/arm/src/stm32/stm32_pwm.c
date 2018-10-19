@@ -3468,7 +3468,7 @@ static int pwm_duty_channels_update(FAR struct pwm_lowerhalf_s *dev,
 #endif
     {
 #ifdef CONFIG_PWM_MULTICHAN
-      duty = info->channels[i].duty;
+      duty    = info->channels[i].duty;
       channel = info->channels[i].channel;
 
       /* A value of zero means to skip this channel */
@@ -3505,7 +3505,9 @@ static int pwm_duty_channels_update(FAR struct pwm_lowerhalf_s *dev,
             {
               goto errout;
             }
+#ifdef CONFIG_PWM_MULTICHAN
         }
+#endif
     }
 
 errout:
