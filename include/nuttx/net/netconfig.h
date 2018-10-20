@@ -83,7 +83,7 @@
 
 /* Layer 2 Configuration Options ********************************************/
 
-/* The default data link laye is Ethernet.  If CONFIG_NET_SLIP is defined in
+/* The default link layer is Ethernet.  If CONFIG_NET_SLIP is defined in
  * the NuttX header file, then SLIP will be supported.  The basic
  * differences between the SLIP and Ethernet configurations is that when SLIP
  * is selected:

@@ -112,7 +112,7 @@
  * Public Types
  ****************************************************************************/
 
-/* Data link layer type.  This type is used with netdev_register in order to
+/* Link layer type.  This type is used with netdev_register in order to
  * identify the type of the network driver.
  */
 

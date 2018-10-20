@@ -320,8 +320,8 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
  *   Stateless auto-configuration exploits several other features in IPv6,
  *   including link-local addresses, multi-casting, the Neighbor Discovery
  *   protocol, and the ability to generate the interface identifier of an
- *   address from the underlying data link layer address. The general idea
- *   is to have a device generate a temporary address until it can determine
+ *   address from the underlying link layer address. The general idea is
+ *   to have a device generate a temporary address until it can determine
  *   the characteristics of the network it is on, and then create a permanent
  *   address it can use based on that information.
  *
@@ -378,7 +378,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    addresses. Link-local addresses have "1111 1110 10" for the first
    *    ten bits. The generated address uses those ten bits followed by 54
    *    zeroes and then the 64 bit interface identifier. Typically this
-   *    will be derived from the data link layer (MAC) address.
+   *    will be derived from the link layer (MAC) address.
    *
    *    IEEE 802 MAC addresses, used by Ethernet and other IEEE 802 Project
    *    networking technologies, have 48 bits.  The IEEE has also defined a

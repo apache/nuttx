@@ -88,7 +88,7 @@ const net_ipv6addr_t g_ipv6_allrouters =  /* All link local routers */
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 /* Link-Local Address: Link-local addresses have "1111 1110 10" for the
  * first ten bits followed by 54 zeroes and then the 64 bit interface
- * identifier (typically derived from the data link layer address).
+ * identifier (typically derived from the link layer MAC address).
  */
 
 const net_ipv6addr_t g_ipv6_llnetmask =   /* Netmask for local link address */

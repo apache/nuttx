@@ -237,7 +237,7 @@ struct net_driver_s
 
   uint8_t d_flags;
 
-  /* Multi network devices using multiple data links protocols are selected */
+  /* Multi network devices using multiple link layer protocols are supported */
 
   uint8_t d_lltype;             /* See enum net_lltype_e */
   uint8_t d_llhdrlen;           /* Link layer header size */
