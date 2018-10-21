@@ -737,8 +737,11 @@
 #define SYSCON_SDIOCLKCTRL_CCLK_SMPDLYACTIVE   (1 << 31) /* Bit 31: Enables sample delay */
 
 /* FRO oscillator control */
+
 #define SYSCON_FROCTRL_
+
 /* System oscillator control */
+
 #define SYSCON_SYSOSCCTRL_
 
 /* Watchdog oscillator control */

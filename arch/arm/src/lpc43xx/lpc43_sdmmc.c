@@ -1412,9 +1412,9 @@ static sdio_statset_t lpc43_status(FAR struct sdio_dev_s *dev)
       priv->cdstatus |= SDIO_STATUS_PRESENT;
     }
   else
-  {
+    {
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
-  }
+    }
 #endif
 
   mcinfo("cdstatus=%02x\n", priv->cdstatus);
@@ -1690,8 +1690,6 @@ static int lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 static void lpc43_blocksetup(FAR struct sdio_dev_s *dev,
                              unsigned int blocklen, unsigned int nblocks)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-
   mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n",
          blocklen, blocklen*nblocks, nblocks);
 
@@ -1727,11 +1725,10 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                            size_t nbytes)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
-  uint32_t blocksize;
-  uint32_t bytecnt;
 #ifdef CONFIG_LPC43_SDMMC_DMA
   uint32_t regval;
 #endif
+
   mcinfo("nbytes=%ld\n", (long) nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);

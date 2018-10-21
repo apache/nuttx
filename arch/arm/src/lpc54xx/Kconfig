@@ -426,6 +426,7 @@ config LPC54_SDMMC
 	bool "SD/MMC"
 	default n
 	select ARCH_HAVE_SDIO
+	select SDIO_BLOCKSETUP
 	depends on EXPERIMENTAL
 
 config LPC54_WWDT

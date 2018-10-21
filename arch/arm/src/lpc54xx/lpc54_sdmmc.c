@@ -124,6 +124,10 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
+#ifndef CONFIG_SDIO_BLOCKSETUP
+#  error "Driver requires CONFIG_SDIO_BLOCKSETUP to be set"
+#endif
+
 /* Timing */
 
 #define SDCARD_CMDTIMEOUT       (10000)
@@ -312,6 +316,10 @@ static int  lpc54_attach(FAR struct sdio_dev_s *dev);
 
 static int  lpc54_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void lpc54_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocklen, unsigned int nblocks);
+#endif
 static int  lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  lpc54_sendsetup(FAR struct sdio_dev_s *dev,
@@ -367,6 +375,9 @@ struct lpc54_dev_s g_scard_dev =
     .clock            = lpc54_clock,
     .attach           = lpc54_attach,
     .sendcmd          = lpc54_sendcmd,
+#ifdef CONFIG_SDIO_BLOCKSETUP
+    .blocksetup       = lpc54_blocksetup,
+#endif
     .recvsetup        = lpc54_recvsetup,
     .sendsetup        = lpc54_sendsetup,
     .cancel           = lpc54_cancel,
@@ -1395,6 +1406,17 @@ static sdio_statset_t lpc54_status(FAR struct sdio_dev_s *dev)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
 
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+  if ((lpc54_getreg(LPC54_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
+    {
+      priv->cdstatus |= SDIO_STATUS_PRESENT;
+    }
+  else
+    {
+      priv->cdstatus &= ~SDIO_STATUS_PRESENT;
+    }
+#endif
+
   mcinfo("cdstatus=%02x\n", priv->cdstatus);
 
   return priv->cdstatus;
@@ -1649,6 +1671,36 @@ static int lpc54_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 }
 
 /****************************************************************************
+ * Name: lpc54_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   blocklen  - The selected block size.
+ *   nblocklen - The number of blocks to transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void lpc54_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocklen, unsigned int nblocks)
+{
+  mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n",
+         blocklen, blocklen*nblocks, nblocks);
+
+  /* Configure block size for next transfer */
+
+  lpc54_putreg(blocklen, LPC54_SDMMC_BLKSIZ);
+  lpc54_putreg(blocklen * nblocks, LPC54_SDMMC_BYTCNT);
+}
+#endif
+
+/****************************************************************************
  * Name: lpc54_recvsetup
  *
  * Description:
@@ -1673,8 +1725,6 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                            size_t nbytes)
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
-  uint32_t blocksize;
-  uint32_t bytecnt;
 #ifdef CONFIG_LPC54_SDMMC_DMA
   uint32_t regval;
 #endif
@@ -1692,23 +1742,6 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #ifdef CONFIG_LPC54_SDMMC_DMA
   priv->dmamode   = false;
 #endif
-
-  /* Then set up the SD card data path */
-
-  if (nbytes < 64)
-    {
-      blocksize = nbytes;
-      bytecnt   = nbytes;
-    }
-  else
-    {
-      blocksize = 64;
-      bytecnt   = nbytes;
-      DEBUGASSERT((nbytes & 0x3f) == 0);
-    }
-
-  lpc54_putreg(blocksize, LPC54_SDMMC_BLKSIZ);
-  lpc54_putreg(bytecnt, LPC54_SDMMC_BYTCNT);
 
   /* Configure the FIFO so that we will receive the RXDR interrupt whenever
    * there are more than 1 words (at least 8 bytes) in the RX FIFO.
@@ -2739,8 +2772,9 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 
   lpc54_sdmmc_enableclk();
 
-  /* REVISIT: The delay values on the sample and drive inputs and outputs
+  /* The delay values on the sample and drive inputs and outputs
    * can be adjusted using the SDIOCLKCTRL register in the SYSCON block.
+   * Here we just leave these at the default settings.
    */
 
   /* Initialize semaphores */
