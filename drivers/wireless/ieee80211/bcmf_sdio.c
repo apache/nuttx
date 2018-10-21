@@ -594,7 +594,7 @@ int bcmf_transfer_bytes(FAR struct bcmf_sdio_dev_s *sbus, bool write,
         /* Use block mode */
 
         blocklen = 64;
-        nblocks = (len+63) / 64;
+        nblocks = (len + 63) / 64;
       }
     else
       {

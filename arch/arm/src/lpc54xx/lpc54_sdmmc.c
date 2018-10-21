@@ -2501,7 +2501,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       /* Another descriptor is needed */
 
       g_sdmmc_dmadd[i].des0 = ctrl;
-      g_sdmmc_dmadd[i].des3 = (uint32_t) &g_sdmmc_dmadd[i + 1];
+      g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
       i++;
     }
 
