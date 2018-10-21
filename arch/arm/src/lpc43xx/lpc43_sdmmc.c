@@ -120,6 +120,10 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
+#ifndef CONFIG_SDIO_BLOCKSETUP
+#  error "Driver requires CONFIG_SDIO_BLOCKSETUP to be set"
+#endif
+
 /* Timing */
 
 #define SDCARD_CMDTIMEOUT       (10000)
@@ -308,6 +312,10 @@ static int  lpc43_attach(FAR struct sdio_dev_s *dev);
 
 static int  lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void lpc43_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocklen, unsigned int nblocks);
+#endif
 static int  lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  lpc43_sendsetup(FAR struct sdio_dev_s *dev,
@@ -363,6 +371,9 @@ struct lpc43_dev_s g_scard_dev =
     .clock            = lpc43_clock,
     .attach           = lpc43_attach,
     .sendcmd          = lpc43_sendcmd,
+#ifdef CONFIG_SDIO_BLOCKSETUP
+    .blocksetup       = lpc43_blocksetup,
+#endif
     .recvsetup        = lpc43_recvsetup,
     .sendsetup        = lpc43_sendsetup,
     .cancel           = lpc43_cancel,
@@ -1395,6 +1406,17 @@ static sdio_statset_t lpc43_status(FAR struct sdio_dev_s *dev)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
 
+#ifdef CONFIG_MMCSD_HAVE_CARDDETECT
+  if ((lpc43_getreg(LPC43_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
+    {
+      priv->cdstatus |= SDIO_STATUS_PRESENT;
+    }
+  else
+  {
+      priv->cdstatus &= ~SDIO_STATUS_PRESENT;
+  }
+#endif
+
   mcinfo("cdstatus=%02x\n", priv->cdstatus);
 
   return priv->cdstatus;
@@ -1649,6 +1671,38 @@ static int lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 }
 
 /****************************************************************************
+ * Name: lpc43_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   blocklen  - The selected block size.
+ *   nblocklen - The number of blocks to transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void lpc43_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocklen, unsigned int nblocks)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n",
+         blocklen, blocklen*nblocks, nblocks);
+
+  /* Configure block size for next transfer */
+
+  lpc43_putreg(blocklen, LPC43_SDMMC_BLKSIZ);
+  lpc43_putreg(blocklen * nblocks, LPC43_SDMMC_BYTCNT);
+}
+#endif
+
+/****************************************************************************
  * Name: lpc43_recvsetup
  *
  * Description:
@@ -1678,7 +1732,6 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #ifdef CONFIG_LPC43_SDMMC_DMA
   uint32_t regval;
 #endif
-
   mcinfo("nbytes=%ld\n", (long) nbytes);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
@@ -1692,23 +1745,6 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #ifdef CONFIG_LPC43_SDMMC_DMA
   priv->dmamode   = false;
 #endif
-
-  /* Then set up the SD card data path */
-
-  if (nbytes < 64)
-    {
-      blocksize = nbytes;
-      bytecnt   = nbytes;
-    }
-  else
-    {
-      blocksize = 64;
-      bytecnt   = nbytes;
-      DEBUGASSERT((nbytes & 0x3f) == 0);
-    }
-
-  lpc43_putreg(blocksize, LPC43_SDMMC_BLKSIZ);
-  lpc43_putreg(bytecnt, LPC43_SDMMC_BYTCNT);
 
   /* Configure the FIFO so that we will receive the RXDR interrupt whenever
    * there are more than 1 words (at least 8 bytes) in the RX FIFO.
@@ -2737,6 +2773,10 @@ FAR struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno)
   regval |= CCU_CLK_CFG_AUTO;
   regval |= CCU_CLK_CFG_WAKEUP;
   lpc43_putreg(regval, LPC43_CCU1_M4_SDIO_CFG);
+
+  /* Setup the delay register */
+
+  lpc43_putreg(LPC43_SDMMC_DELAY_DEFAULT, LPC43_SDMMC_DELAY);
 
   /* Initialize semaphores */
 

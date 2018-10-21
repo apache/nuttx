@@ -218,6 +218,34 @@
 #  define BOARD_SPIFI_FREQUENCY     (102000000) /* 204MHz / 14 = 14.57MHz */
 #endif
 
+/* SD/MMC or SDIO interface ************************************************/
+
+#define BOARD_SDMMC_CEIL(a,b)    (((a) + (b) - 1) / (b))
+
+/* For LPC4330 family there is no predivider for the clock */
+
+#define BOARD_SDMMC_FREQUENCY    BOARD_MAIN_CLK
+
+/* Mode-dependent function clock division
+ *
+ * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
+ * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
+ * of 255 means divide by 2 * 255 = 510, and so on.
+ *
+ * SD/MMC logic will write the value ((clkdiv + 1) >> 1) as the divisor.  So an
+ * odd value calculated below will be moved up to next higher divider value.  So
+ * the value 3 will cause 2 to be written as the divider value and the effective
+ * divider will be 4.
+ *
+ * NOTE: The SDIO function clock to the interface can be up to 52 MHZ.
+ *       See UM10503 Section 22.2.
+ */
+
+#define BOARD_CLKDIV_INIT       BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 400000)
+#define BOARD_CLKDIV_MMCXFR     BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 20000000)
+#define BOARD_CLKDIV_SDWIDEXFR  BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
+#define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
+
 /* UART clocking ***********************************************************/
 /* Configure all U[S]ARTs to use the XTAL input frequency */
 
