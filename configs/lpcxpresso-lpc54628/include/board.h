@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpcxpresso-lpc54628/include/board.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -194,26 +194,41 @@
 #define BOARD_EMC_FREQUENCY      (BOARD_CPU_FREQUENCY / BOARD_EMC_CLKDIV)
 
 /* SD/MMC or SDIO interface/
-/* SD/MMC function clock
+/* SD/MMC function clock.  The SDMMC source clock (Fsdmmc) is the main clock
+ * which may be divided down by the SYSCON module (8-bit divider, functional
+ * range, 1-256).  The SD clock is obtained by dividing the source clock
+ * down once again (8-bit divider with functional range 1 (bypass) then 2-510
+ * in steps of 2).
  *
- * NOTE: The SDIO function clock to the interface can be up to 50 MHZ.
- * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=5, Finput=44MHz.
+ *   Fsdmmc = Fmck / SYSDIV
+ *   Fsd    = Fsdmmc / SDDIV
+ *
+ * The optimal SYSCON divisor (SYSDIV) is the smallest smallest that will
+ * assure that the smallest usable SD frequency (Fmin = 400KHz) can be
+ * attained without overflowing the final 8-bit divider (SDDIV).  That is:
+ *
+ *  SYSDIV = Fmck / 400,000 / 510
+ *
+ * Example:  BOARD_MAIN_CLK=220MHz, CLKDIV=2, Finput=110MHz.
+ *
+ * REVISIT:  We could get getter timing resolution if we were to reset the
+ * optimal SYSCON divider with each frequency change.  For example, at 220
+ * MHz, we could set he divider to 1 for all operational frequencies.
  */
 
-#define BOARD_SDMMC_MAXFREQ      50000000
 #define BOARD_SDMMC_CEIL(a,b)    (((a) + (b) - 1) / (b))
 
 #define BOARD_SDMMC_CLKSRC       SYSCON_SDIOCLKSEL_MAINCLK
-#define BOARD_SDMMC_CLKDIV       BOARD_SDMMC_CEIL(BOARD_MAIN_CLK, BOARD_SDMMC_MAXFREQ)
+#define BOARD_SDMMC_CLKDIV       BOARD_SDMMC_CEIL(BOARD_MAIN_CLK, 400000 * 510)
 #define BOARD_SDMMC_FREQUENCY    (BOARD_MAIN_CLK / BOARD_SDMMC_CLKDIV)
 
 /* Mode-dependent function clock division
  *
- * Example:  BOARD_SDMMC_FREQUENCY=44MHz
- *           BOARD_CLKDIV_INIT=110,    Fsdmmc=400KHz  (400KHz max)
- *           BOARD_CLKDIV_MMCXFR=4[3], Fsdmmc=11Mhz   (20MHz max) See NOTE:
- *           BOARD_CLKDIV_SDWIDEXFR=2, Fsdmmc=22MHz   (25MHz max)
- *           BOARD_CLKDIV_SDXFR=2,     Fsdmmc=22MHz   (25MHz max)
+ * Example:  BOARD_SDMMC_FREQUENCY=110MHz
+ *           BOARD_CLKDIV_INIT=276[275],  Fsdmmc=399KHz  (400KHz max)
+ *           BOARD_CLKDIV_MMCXFR=6,       Fsdmmc=18Mhz   (20MHz max)
+ *           BOARD_CLKDIV_SDWIDEXFR=6[5], Fsdmmc=18MHz   (25MHz max)
+ *           BOARD_CLKDIV_SDXFR=6[5],     Fsdmmc=18MHz   (25MHz max)
  *
  * NOTE:  Clock division is 2*n. For example, value of 0 means divide by
  * 2 * 0 = 0 (no division, bypass), value of 1 means divide by 2 * 1 = 2, value
