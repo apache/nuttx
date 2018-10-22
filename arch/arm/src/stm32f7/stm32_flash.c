@@ -360,18 +360,26 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
   uint8_t *byte = (uint8_t *)buf;
   size_t written = count;
+  uintptr_t flash_base;
 
   /* Check for valid address range */
 
-  if (addr >= STM32_FLASH_BASE)
+  if (addr >= STM32_FLASH_BASE &&
+      addr + count <= STM32_FLASH_BASE + STM32_FLASH_SIZE)
     {
-      addr -= STM32_FLASH_BASE;
+      flash_base = STM32_FLASH_BASE;
     }
-
-  if ((addr+count) > STM32_FLASH_SIZE)
+  else if (addr >= STM32_OPT_BASE &&
+           addr + count <= STM32_OPT_BASE + STM32_OPT_SIZE)
+    {
+      flash_base = STM32_OPT_BASE;
+    }
+  else
     {
       return -EFAULT;
     }
+
+  addr -= flash_base;
 
   sem_lock();
 
@@ -385,7 +393,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PSIZE_MASK, FLASH_CR_PSIZE_X8);
 
-  for (addr += STM32_FLASH_BASE; count; count -= 1, byte++, addr += 1)
+  for (addr += flash_base; count; count -= 1, byte++, addr += 1)
     {
       /* Write half-word and wait to complete */
 

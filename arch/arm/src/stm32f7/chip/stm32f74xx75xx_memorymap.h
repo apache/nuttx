@@ -77,15 +77,16 @@
 #define STM32_LOADER_BASE    0x01000000     /* 0x01000000-            Bootloader */
 #define STM32_FLASH_AXIM     0x08000000     /* 0x08000000-0x080fffff: FLASH memory (AXIM) */
 #define STM32_FLASH_BASE     STM32_FLASH_AXIM
-#define STM32_OPTIONS_BASE   0x1fff0000     /* 0x1ff00000-0x1fff001f: OTP (AXIM) */
+#define STM32_OPTIONS_BASE   0x1fff0000     /* 0x1ff00000-0x1fff001f: Option bytes (AXIM) */
 
 /* Information Addresses ************************************************************/
-
 
 #define STM32_SYSMEM_AXIM    0x1ff00000     /* 0x1ff00000-0x1ff0edbf: System memory (AXIM) */
 #define STM32_SYSMEM_UID     0x1ff0f420     /* The 96-bit unique device identifier */
 #define STM32_OTP_ICTM       0x0010f000     /* 0x0010f000-0x0010edbf: OTP (ITCM) */
 #define STM32_OTP_AXIM       0x1ff0f000     /* 0x1ff00000-0x1ff0f41f: OTP (AXIM) */
+#define STM32_OPT_BASE       STM32_OTP_AXIM
+#define STM32_OPT_SIZE       1056
 
 /* SRAM Base Addresses **************************************************************/
 
