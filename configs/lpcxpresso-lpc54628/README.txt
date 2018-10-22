@@ -97,9 +97,24 @@ STATUS
     is "basic" in the sense that it supports only polled mode (no DMA).
   2018-01-18:  Added the lvgl configuration.  See notes under "Configuration
     Sub-directories" for additional status.
+  2018-10-22:  Dave Marples recently fixed the LPC43 version of the USB
+    device controller driver.  That driver is a clone from the LPC54 USB
+    DCD.  I have backported Dave's changes to the LPC54 DCD.  Unfortunately,
+    it did not fixe the problem.  Then I discovered this errata for the LPC54:
+
+      For the 4-bit mode to work successfully, four otherwise unused upper
+      data bits (SD_D[4] to SD_D[7]) must be functionally assigned to GPIO
+      pins with pull-up resistor. These pins do not need to be physically
+      connected on the hardware.
+
+    With that change (and a lot of other fidgeting), there is some
+    improvement.  I am able to mount and read the SD card .. at least most
+    of the time.  I still get CRC errors when writing and I have not
+    successfully written to the SD card.  It is closer but more TLC is
+    needed.
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is
-  a complete but not-yet-functional SD card driver and and tested SPI
+  a complete but not entirely functional SD card driver and and tested SPI
   driver.  There are no on-board devices to support SPI testing.
 
 Configurations

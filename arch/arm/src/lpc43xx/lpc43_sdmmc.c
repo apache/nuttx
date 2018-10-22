@@ -1691,7 +1691,7 @@ static void lpc43_blocksetup(FAR struct sdio_dev_s *dev,
                              unsigned int blocklen, unsigned int nblocks)
 {
   mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n",
-         blocklen, blocklen*nblocks, nblocks);
+         blocklen, blocklen * nblocks, nblocks);
 
   /* Configure block size for next transfer */
 

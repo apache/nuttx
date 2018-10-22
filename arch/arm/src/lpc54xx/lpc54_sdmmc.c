@@ -1691,7 +1691,7 @@ static void lpc54_blocksetup(FAR struct sdio_dev_s *dev,
                              unsigned int blocklen, unsigned int nblocks)
 {
   mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n",
-         blocklen, blocklen*nblocks, nblocks);
+         blocklen, blocklen * nblocks, nblocks);
 
   /* Configure block size for next transfer */
 
@@ -2768,14 +2768,21 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
   lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKDIV);
   lpc54_putreg(regval | SYSCON_SDIOCLKDIV_REQFLAG, LPC54_SYSCON_SDIOCLKDIV);
 
+#if 1 /* REVISIT */
+  /* Set delay values on the sample and drive inputs and outputs using the
+   * SDIOCLKCTRL register in the SYSCON block.
+   */
+
+  regval = SYSCON_SDIOCLKCTRL_DRVPHASE_DEFAULT |
+           SYSCON_SDIOCLKCTRL_SMPPHASE_DEFAULT |
+           SYSCON_SDIOCLKCTRL_DRVDLY_DEFAULT |
+           SYSCON_SDIOCLKCTRL_SMPDLY_DEFAULT;
+  lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKCTRL);
+#endif
+
   /* Enable clocking to the SD/MMC peripheral */
 
   lpc54_sdmmc_enableclk();
-
-  /* The delay values on the sample and drive inputs and outputs
-   * can be adjusted using the SDIOCLKCTRL register in the SYSCON block.
-   * Here we just leave these at the default settings.
-   */
 
   /* Initialize semaphores */
 
@@ -2810,6 +2817,17 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 #endif
 #ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
   lpc54_gpio_config(GPIO_SD_WR_PRT);
+#endif
+
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+  /* REVISIT: Due to a chip errata, DAT4-7 must also be configured.
+   * Otherwise the SD interface will not work.
+   */
+
+  lpc54_gpio_config(GPIO_SD_D4);
+  lpc54_gpio_config(GPIO_SD_D5);
+  lpc54_gpio_config(GPIO_SD_D6);
+  lpc54_gpio_config(GPIO_SD_D7);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured

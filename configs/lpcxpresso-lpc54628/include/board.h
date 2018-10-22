@@ -436,6 +436,15 @@
 #define GPIO_SD_POW_EN             GPIO_SD_POW_EN_2         /* P2.5 */
 #define GPIO_SD_WR_PRT             GPIO_SD_WR_PRT_2         /* P2.15 */
 
+/* Due to a chip errata, DAT4-7 must also be configured.  Otherwise the SD
+ * interface will not work.
+ */
+
+#define GPIO_SD_D4                 (GPIO_SD_D4_3 | GPIO_PULLUP) /* P4.29 */
+#define GPIO_SD_D5                 (GPIO_SD_D5_3 | GPIO_PULLUP) /* P4.30 */
+#define GPIO_SD_D6                 (GPIO_SD_D6_3 | GPIO_PULLUP) /* P4.31 */
+#define GPIO_SD_D7                 (GPIO_SD_D7_3 | GPIO_PULLUP) /* P5.0 */
+
 /* LCD
  *
  *   There are no alternatives for LCD pins except for the VD0-VD3 pins.
