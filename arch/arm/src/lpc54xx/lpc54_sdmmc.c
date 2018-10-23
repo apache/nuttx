@@ -200,7 +200,7 @@
  * Eg. Fsd = 44MHz, ticks = 660,000
  */
 
-#define DEBOUNCE_TICKS          (15 * BOARD_SDMMC_FREQUENCY / 1000)
+#define DEBOUNCE_TICKS          (15 * (BOARD_SDMMC_FREQUENCY / 1000))
 
 /****************************************************************************
  * Private Types
@@ -2581,6 +2581,9 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 {
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)dev;
   uint32_t regval;
+  uint32_t ctrl;
+  uint32_t maxs;
+  int i;
 
   /* Don't bother with DMA if the entire transfer will fit in the TX FIFO or
    * if we do not have a 4-bit wide bus.
@@ -2631,10 +2634,54 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Setup DMA descriptor list */
 
-  g_sdmmc_dmadd[0].des0 = MCI_DMADES0_OWN | MCI_DMADES0_CH | MCI_DMADES0_LD;
-  g_sdmmc_dmadd[0].des1 = 512;
-  g_sdmmc_dmadd[0].des2 = (uint32_t)priv->buffer;
-  g_sdmmc_dmadd[0].des3 = (uint32_t)&g_sdmmc_dmadd[1];
+  i = 0;
+  while (buflen > 0)
+    {
+      /* Limit size of the transfer to maximum buffer size */
+
+      maxs = buflen;
+
+      if (maxs > MCI_DMADES1_MAXTR)
+        {
+          maxs = MCI_DMADES1_MAXTR;
+        }
+
+      buflen -= maxs;
+
+      /* Set buffer size */
+
+      g_sdmmc_dmadd[i].des1 = MCI_DMADES1_BS1(maxs);
+
+      /* Setup buffer address (chained) */
+
+      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer + (i * MCI_DMADES1_MAXTR);
+
+      /* Setup basic control */
+
+      ctrl = MCI_DMADES0_OWN | MCI_DMADES0_CH;
+
+      if (i == 0)
+        {
+          ctrl |= MCI_DMADES0_FS; /* First DMA buffer */
+        }
+
+      /* No more data?  Then this is the last descriptor */
+
+      if (buflen == 0)
+        {
+          ctrl |= MCI_DMADES0_LD;
+        }
+      else
+        {
+          ctrl |= MCI_DMADES0_DIC;
+        }
+
+      /* Another descriptor is needed */
+
+      g_sdmmc_dmadd[i].des0 = ctrl;
+      g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
+      i++;
+    }
 
   lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
 
