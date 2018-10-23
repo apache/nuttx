@@ -73,23 +73,26 @@
 void imxrt_wdog_disable_all(void)
 {
   uint32_t reg;
+  irqstate_t flags;
 
-  reg = getreg32(IMXRT_WDOG1_WCR);
+  reg = getreg16(IMXRT_WDOG1_WCR);
   if (reg & WDOG_WCR_WDE)
     {
       reg &= ~WDOG_WCR_WDE;
-      putreg32(reg, IMXRT_WDOG1_WCR);
+      putreg16(reg, IMXRT_WDOG1_WCR);
     }
 
-  reg = getreg32(IMXRT_WDOG2_WCR);
+  reg = getreg16(IMXRT_WDOG2_WCR);
   if (reg & WDOG_WCR_WDE)
   {
     reg &= ~WDOG_WCR_WDE;
-    putreg32(reg, IMXRT_WDOG2_WCR);
+    putreg16(reg, IMXRT_WDOG2_WCR);
   }
 
+  flags = enter_critical_section();
   putreg32(RTWDOG_UPDATE_KEY, IMXRT_RTWDOG_CNT);
   putreg32(0xFFFF, IMXRT_RTWDOG_TOVAL);
   modifyreg32(IMXRT_RTWDOG_CS, RTWDOG_CS_EN, RTWDOG_CS_UPDATE);
+  leave_critical_section(flags);
 
 }

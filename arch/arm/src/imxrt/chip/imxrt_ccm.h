@@ -2,7 +2,8 @@
  * arch/arm/src/imxrt/imxrt_ccm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Janne Rosberg <janne@offcode.fi>
+ *   Authors:  Janne Rosberg <janne@offcode.fi>
+ *             David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -159,6 +160,10 @@
 #define IMXRT_CCM_ANALOG_MISC1                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC1_OFFSET)
 #define IMXRT_CCM_ANALOG_MISC2                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC2_OFFSET)
 
+/* Helper Macros *********************************************************************************/
+
+#define CCM_PODF_FROM_DIVISOR(n)                   ((n)-1)  /* PODF Values are divisor-1 */
+
 /* Register bit definitions *********************************************************************************/
 
 /* Control Register */
@@ -210,7 +215,12 @@
 #define CCM_CBCDR_SEMC_PODF_MASK                 (0x3 << CCM_CBCDR_SEMC_PODF_SHIFT)
 # define CCM_CBCDR_SEMC_PODF(n)                  ((uint32_t)(n) << CCM_CBCDR_SEMC_PODF_SHIFT)
                                                            /* Bits 19-24: Reserved */
-#define CCM_CBCDR_SEMC_PERIPH_CLK_SEL            (1 << 25) /* Bit 25:     Selector for peripheral main clock */
+#define CCM_CBCDR_PERIPH_CLK_SEL_SHIFT           (25)      /* Bit 25:     Selector for peripheral main clock */
+#define CCM_CBCDR_PERIPH_CLK_SEL_MASK            (1 << CCM_CBCDR_PERIPH_CLK_SEL_SHIFT)
+#  define CCM_CBCDR_PERIPH_CLK_SEL(n)            ((uint32_t)(n) << CCM_CBCDR_PERIPH_CLK_SEL_SHIFT)
+#  define CCM_CBCDR_PERIPH_CLK_SEL_PRE_PERIPH    (0)
+#  define CCM_CBCDR_PERIPH_CLK_SEL_PERIPH_CLK2   (1)
+
                                                            /* Bit 26:     Reserved */
 #define CCM_CBCDR_PERIPH_CLK2_PODF_SHIFT         (27)      /* Bits 27-29: Divider for periph_clk2_podf */
 #define CCM_CBCDR_PERIPH_CLK2_PODF_MASK          (0x7 << CCM_CBCDR_PERIPH_CLK2_PODF_SHIFT)
@@ -228,7 +238,7 @@
 #  define CCM_CBCMR_LPSPI_CLK_SEL_PLL2           ((uint32_t)(2) << CCM_CBCMR_LPSPI_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_LPSPI_CLK_SEL_PLL2_PFD2      ((uint32_t)(3) << CCM_CBCMR_LPSPI_CLK_SEL_SHIFT)
                                                            /* Bits 6-11:  Reserved */
-#define CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT          (12)      /* Bits 13-13: Selector for peripheral clk2 clock multiplexer */
+#define CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT          (12)      /* Bits 12-13: Selector for peripheral clk2 clock multiplexer */
 #define CCM_CBCMR_PERIPH_CLK2_SEL_MASK           (0x3 << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT)
 #  define CCM_CBCMR_PERIPH_CLK2_SEL(n)           ((uint32_t)(n) << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT)
 #  define CCM_CBCMR_PERIPH_CLK2_SEL_PLL3_SW      ((uint32_t)(0) << CCM_CBCMR_PERIPH_CLK2_SEL_SHIFT)
@@ -245,10 +255,10 @@
 #define CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT       (18)      /* Bits 18-19: Selector for pre_periph clock multiplexer */
 #define CCM_CBCMR_PRE_PERIPH_CLK_SEL_MASK        (0x3 << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_PRE_PERIPH_CLK_SEL(n)        ((uint32_t)(n) << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
-#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2      ((uint32_t)(0) << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
-#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD2 ((uint32_t)(1) << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
-#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD0 ((uint32_t)(2) << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
-#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL1      ((uint32_t)(3) << CCM_CBCMR_PRE_PERIPH_CLK_SEL_SHIFT)
+#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2      (0)
+#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD2 (1)
+#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL2_PFD0 (2)
+#  define CCM_CBCMR_PRE_PERIPH_CLK_SEL_PLL1      (3)
                                                            /* Bits 20-22: Reserved */
 #define CCM_CBCMR_LCDIF_PODF_SHIFT               (23)      /* Bits 23-25: Post-divider for LCDIF clock */
 #define CCM_CBCMR_LCDIF_PODF_MASK                (0x7 << CCM_CBCMR_LCDIF_PODF_SHIFT)
@@ -262,7 +272,11 @@
 #define CCM_CSCMR1_PERCLK_PODF_SHIFT             (0)       /* Bits 0-5:   Divider for perclk podf  */
 #define CCM_CSCMR1_PERCLK_PODF_MASK              (0x3f << CCM_CSCMR1_PERCLK_PODF_SHIFT)
 #  define CCM_CSCMR1_PERCLK_PODF(n)              ((uint32_t)(n) << CCM_CSCMR1_PERCLK_PODF_SHIFT)
-#define CCM_CSCMR1_PERCLK_CLK_SEL                (1 << 6)  /* Bit 6:      Selector for the perclk clock multiplexer */
+#define CCM_CSCMR1_PERCLK_CLK_SEL_SHIFT          (6)       /* Bit 6:      Selector for the perclk clock multiplexer */
+#define CCM_CSCMR1_PERCLK_CLK_SEL_MASK           (1 << CCM_CSCMR1_PERCLK_CLK_SEL_SHIFT)
+#  define CCM_CSCMR1_PERCLK_CLK_SEL(n)           ((uint32_t)(n) << CCM_CSCMR1_PERCLK_CLK_SEL_SHIFT)
+#  define CCM_CSCMR1_PERCLK_CLK_SEL_IPG_CLK_ROOT (0)
+#  define CCM_CSCMR1_PERCLK_CLK_SEL_OSC_CLK      (1)
                                                            /* Bits 7-9:   Reserved */
 #define CCM_CSCMR1_SAI1_CLK_SEL_SHIFT            (10)      /* Bits 10-11: Selector for sai1 clock multiplexer */
 #define CCM_CSCMR1_SAI1_CLK_SEL_MASK             (0x3 << CCM_CSCMR1_SAI1_CLK_SEL_SHIFT)
@@ -821,8 +835,8 @@
 #define CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT             (0)       /* Bits 0-1:   This field controls the PLL loop divider 20 or 22 */
 #define CCM_ANALOG_PLL_SYS_DIV_SELECT_MASK              (0x3 << CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT)
 #  define CCM_ANALOG_PLL_SYS_DIV_SELECT(n)              ((uint32_t)(n) << CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_SYS_DIV_SELECT_20              ((uint32_t)(0) << CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_SYS_DIV_SELECT_22              ((uint32_t)(1) << CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT)
+#  define CCM_ANALOG_PLL_SYS_DIV_SELECT_20              (0)
+#  define CCM_ANALOG_PLL_SYS_DIV_SELECT_22              (1)
 #define CCM_ANALOG_PLL_SYS_POWERDOWN                    (1 << 12) /* Bit 12:     Powers down the PLL */
 #define CCM_ANALOG_PLL_SYS_ENABLE                       (1 << 13) /* Bit 13:     Enable the PLL clock output */
 #define CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_SHIFT         (14)      /* Bits 14-15: Determines the bypass source */
