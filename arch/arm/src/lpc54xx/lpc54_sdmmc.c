@@ -2768,7 +2768,6 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
   lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKDIV);
   lpc54_putreg(regval | SYSCON_SDIOCLKDIV_REQFLAG, LPC54_SYSCON_SDIOCLKDIV);
 
-#if 1 /* REVISIT */
   /* Set delay values on the sample and drive inputs and outputs using the
    * SDIOCLKCTRL register in the SYSCON block.
    */
@@ -2778,7 +2777,6 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
            SYSCON_SDIOCLKCTRL_DRVDLY_DEFAULT |
            SYSCON_SDIOCLKCTRL_SMPDLY_DEFAULT;
   lpc54_putreg(regval, LPC54_SYSCON_SDIOCLKCTRL);
-#endif
 
   /* Enable clocking to the SD/MMC peripheral */
 
@@ -2820,8 +2818,8 @@ FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 #endif
 
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-  /* REVISIT: Due to a chip errata, DAT4-7 must also be configured.
-   * Otherwise the SD interface will not work.
+  /* REVISIT: Due to chip errata, Rev. 1.7, Issue 3.7, DAT4-7 must also be
+   * configured.  Otherwise the SD interface will not work.
    */
 
   lpc54_gpio_config(GPIO_SD_D4);
