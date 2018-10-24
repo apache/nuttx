@@ -133,15 +133,26 @@
 
 /* SPI */
 
-/* SPI1 is available on the Arduino protocol at positions D11/12/13 */
+#if 1
+/* On Arduino the SPI bus is available at positions D10 (SPI_CS), D11
+ * (SPI_MOSI), D12 (SPI_MISO), D13 (SPI_SCK). On the nucleo-1432kc board
+ * the SPI bus is available at PA11 (SPI_CS, made by GPIO), PB5 (SPI1_MOSI),
+ * PB4 (SPI1_MISO), PB3 (SPI1_SCK).
+ */
 
-#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_1 /*PA6*/
-#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_1 /*PA7*/
-#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1  /*PA5*/
+#  define GPIO_SPI1_MISO  GPIO_SPI1_MISO_3  /* PB4 */
+#  define GPIO_SPI1_MOSI  GPIO_SPI1_MOSI_3  /* PB5 */
+#  define GPIO_SPI1_SCK   GPIO_SPI1_SCK_3   /* PB3 */
 
-#define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1 /*PB14*/
-#define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1 /*PB15*/
-#define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2  /*PB13*/
+#else
+/* Optionally it is possible to use SPI bus on pins PA5, PA6 and PA7 but this
+ * is incompatible with Arduino nano specification.
+ */
+
+#  define GPIO_SPI1_MISO  GPIO_SPI1_MISO_1  /* PA6 */
+#  define GPIO_SPI1_MOSI  GPIO_SPI1_MOSI_1  /* PA7 */
+#  define GPIO_SPI1_SCK   GPIO_SPI1_SCK_1   /* PA5 */
+#endif
 
 /* LEDs
  *
