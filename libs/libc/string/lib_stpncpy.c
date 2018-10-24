@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strncpy
+ * Name: stpncpy
  *
  * Description:
  *   Copies the string pointed to by 'src' (including the terminating NUL
@@ -68,8 +68,8 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_ARCH_STRNCPY
-FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
+#ifndef CONFIG_LIBC_ARCH_STPNCPY
+FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *end = dest + n; /* End of dest buffer + 1 byte */
   FAR char *ret;            /* Value to be returned */

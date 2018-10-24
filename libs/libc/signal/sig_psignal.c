@@ -79,7 +79,7 @@ void psignal(int signum, FAR const char *message)
 
   if (message != NULL)
     {
-      (void)fprintf(stderr, "%s: %s\n", strsignal(signum));
+      (void)fprintf(stderr, "%s: %s\n", message, strsignal(signum));
     }
   else
     {
