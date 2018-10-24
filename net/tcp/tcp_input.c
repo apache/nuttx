@@ -512,7 +512,8 @@ found:
               nwarn("         sndseq=%u unacked=%u unackseq=%u ackseq=%u\n",
                     tcp_getsequence(conn->sndseq), conn->unacked, unackseq,
                     ackseq);
-              goto reset;
+
+              conn->unacked = 0;
             }
         }
 
