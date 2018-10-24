@@ -669,11 +669,48 @@ menuconfig RNDIS
 		   Protocol"
 		- "Remote NDIS To USB Mapping"
 
-		This option may requierd CONFIG_NETDEV_LATEINIT=y otherwise, the
+		This option may required CONFIG_NETDEV_LATEINIT=y otherwise, the
 		power-up initialization may call the non-existent up_netinitialize().
 		This option is not automatically selected because it may be that
 		you have an additional network device that requires the early
 		up_netinitialize() call.
+
+if RNDIS
+
+config RNDIS_VENDORID
+	hex "RNDIS Vendor ID"
+	default 0x584e
+	---help---
+		The vendor ID (VID).  The value here is bogus.  You should not use
+		it in any commercial products!  You must go through the proper
+		channels to request a vendor ID for your company if you do not
+		already have one!
+
+config RNDIS_VENDORSTR
+	string "RNDIS vendor string"
+	default "NuttX"
+	---help---
+		The vendor ID code/string
+
+config RNDIS_PRODUCTID
+	hex "RNDIS Product ID"
+	default 0x5342
+	---help---
+		The product ID (PID).
+
+config RNDIS_PRODUCTSTR
+	string "RNDIS product string"
+	default "RNDIS gadget"
+
+config RNDIS_SERIALSTR
+	hex "RNDIS serial string"
+	default "0x1234"
+
+config RNDIS_VERSIONNO
+	hex "RNDIS Version Number"
+	default 0x0001
+
+endif # RNDIS
 
 menuconfig NET_CDCECM
 	bool "CDC-ECM Ethernet-over-USB"
