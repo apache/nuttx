@@ -1018,7 +1018,7 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
         }
 #endif
 
-      /* Handle idata transfer events ***************************************/
+      /* Handle data transfer events ****************************************/
 
       pending = enabled & priv->xfrmask;
       if (pending != 0)

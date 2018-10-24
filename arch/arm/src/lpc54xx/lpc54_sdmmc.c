@@ -144,6 +144,10 @@
 #define LPC54_TXFIFO_SIZE       (LPC54_TXFIFO_DEPTH | LPC54_TXFIFO_WIDTH)
 #define LPC54_RXFIFO_SIZE       (LPC54_RXFIFO_DEPTH | LPC54_RXFIFO_WIDTH)
 
+/* Number of DMA Descriptors */
+
+#define NUM_DMA_DESCRIPTORS     (1 + (0x10000 / MCI_DMADES1_MAXTR))
+
 /* Data transfer interrupt mask bits */
 
 #define SDCARD_RECV_MASK        (SDMMC_INT_DTO  | SDMMC_INT_DCRC | SDMMC_INT_DRTO | \
@@ -401,7 +405,7 @@ struct lpc54_dev_s g_scard_dev =
 };
 
 #ifdef CONFIG_LPC54_SDMMC_DMA
-static struct sdmmc_dma_s g_sdmmc_dmadd[1 + (0x10000 / MCI_DMADES1_MAXTR)];
+static struct sdmmc_dma_s g_sdmmc_dmadd[NUM_DMA_DESCRIPTORS];
 #endif
 
 /****************************************************************************
@@ -1014,7 +1018,7 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
         }
 #endif
 
-      /* Handle idata transfer events ***************************************/
+      /* Handle data transfer events ****************************************/
 
       pending = enabled & priv->xfrmask;
       if (pending != 0)
@@ -2453,7 +2457,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       return lpc54_recvsetup(dev, buffer, buflen);
     }
 
-  mcinfo("buflen=%lu\n", (unsigned long)buflen);
+  mcinfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen, buffer);
   DEBUGASSERT(buffer != NULL && buflen > 0 && ((uint32_t)buffer & 3) == 0);
 
   /* Reset DMA controller internal registers.  The SWR bit automatically
@@ -2475,7 +2479,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
-  while ((lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET) != 0)
+  while ((lpc54_getreg(LPC54_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
     {
     }
 
@@ -2525,18 +2529,19 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       if (buflen == 0)
         {
           ctrl |= MCI_DMADES0_LD;
+          g_sdmmc_dmadd[i].des3 = 0;
         }
       else
         {
           ctrl |= MCI_DMADES0_DIC;
+          g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
         }
 
-      /* Another descriptor is needed */
-
       g_sdmmc_dmadd[i].des0 = ctrl;
-      g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
       i++;
     }
+
+  DEBUGASSERT(i < NUM_DMA_DESCRIPTORS);
 
   lpc54_putreg((uint32_t)&g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
 
@@ -2546,7 +2551,7 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   regval |= SDMMC_CTRL_INTDMA;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
-  regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
+  regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS;
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
   /* Setup DMA error interrupts */
@@ -2620,7 +2625,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
-  while ((lpc54_getreg(LPC54_SDMMC_CTRL) & SDMMC_CTRL_DMARESET) != 0)
+  while ((lpc54_getreg(LPC54_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
     {
     }
 
@@ -2670,18 +2675,19 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
       if (buflen == 0)
         {
           ctrl |= MCI_DMADES0_LD;
+          g_sdmmc_dmadd[i].des3 = 0;
         }
       else
         {
           ctrl |= MCI_DMADES0_DIC;
+          g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
         }
 
-      /* Another descriptor is needed */
-
       g_sdmmc_dmadd[i].des0 = ctrl;
-      g_sdmmc_dmadd[i].des3 = (uint32_t)&g_sdmmc_dmadd[i + 1];
       i++;
     }
+
+  DEBUGASSERT(i < NUM_DMA_DESCRIPTORS);
 
   lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
 
@@ -2691,7 +2697,7 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
   regval |= SDMMC_CTRL_INTDMA;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 
-  regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS | SDMMC_BMOD_DSL(4);
+  regval = SDMMC_BMOD_DE | SDMMC_BMOD_PBL_4XFRS;
   lpc54_putreg(regval, LPC54_SDMMC_BMOD);
 
   /* Setup DMA error interrupts */
