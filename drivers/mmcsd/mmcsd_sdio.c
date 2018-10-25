@@ -1196,10 +1196,13 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
         }
 
       /* Check for the programming state. This is not an error.  It means
-       * that the card is still busy from the last (write) transfer.
+       * that the card is still busy from the last (write) transfer.  The
+       * card can also still be receiving data, for example, if hardware
+       * receive FIFOs are not yet empty.
        */
 
-      else if (!IS_STATE(r1, MMCSD_R1_STATE_PRG))
+      else if (!IS_STATE(r1, MMCSD_R1_STATE_PRG) &&
+               !IS_STATE(r1, MMCSD_R1_STATE_RCV))
         {
           /* Any other state would be an error in this context.  There is
            * a possibility that the card is not selected.  In this case,
