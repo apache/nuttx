@@ -297,7 +297,7 @@ static int lpc54_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 void up_irqinitialize(void)
 {
   uint32_t regaddr;
-#ifdef CONFIG_DEBUG_FEATURES
+#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   uint32_t regval;
 #endif
   int num_priority_registers;
