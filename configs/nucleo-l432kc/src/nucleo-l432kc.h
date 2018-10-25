@@ -54,6 +54,7 @@
 
 #define HAVE_PROC             1
 #define HAVE_RTC_DRIVER       1
+#define HAVE_AT45DB           1
 
 #if !defined(CONFIG_FS_PROCFS)
 #  undef HAVE_PROC
@@ -70,6 +71,12 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
+/* Check if we can support AT45DB FLASH file system */
+
+#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MTD_AT45DB)
+#  undef HAVE_AT45DB
+#endif
+
 /* LED.  User LD3: the green LED is a user LED connected to Arduino signal D13
  * corresponding to MCU I/O PB3 (pin 26)
  * target.
@@ -82,6 +89,14 @@
   (GPIO_PORTB | GPIO_PIN3 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
 #define LED_DRIVER_PATH "/dev/userleds"
+
+/* SPI chip selects */
+
+#ifdef CONFIG_MTD_AT45DB
+#  define AT45DB_SPI1_CS \
+     (GPIO_PORTA | GPIO_PIN11 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PUSHPULL | \
+      GPIO_SPEED_50MHz)
+#endif
 
 /************************************************************************************
  * Public Data
@@ -154,6 +169,18 @@ int stm32l4_adc_setup(void);
 
 #ifdef CONFIG_DAC7571
 int stm32_dac7571initialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
+ * Name: stm32_at45dbinitialize
+ *
+ * Description:
+ *   Initialize and register the AT45DB driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_MTD_AT45DB
+int stm32_at45dbinitialize(int minor);
 #endif
 
 /****************************************************************************

@@ -108,7 +108,7 @@
 
 #define NR_IRQS 48
 
-/* Common register save structgure created by up_saveusercontext() and by
+/* Common register save structure created by up_saveusercontext() and by
  * ISR/IRQ interrupt processing.
  */
 

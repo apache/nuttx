@@ -52,6 +52,7 @@ Contents
     - USARTs and Serial Consoles
   - QFN32
   - mbed
+  - SPI Flash support
   - Configurations
 
 Nucleo-32 Boards
@@ -440,6 +441,61 @@ Serial Consoles
   -------
   As shipped, SB62 and SB63 are open and SB13 and SB14 closed, so the
   virtual COM port is enabled.
+
+SPI Flash support:
+=====================
+
+  We can use an external SPI Serial Flash with nucleo-l432kc board. In this
+  case we tested with AT45DB081D (8Mbit = 1MiB).
+
+  You can connect the AT45DB081D memory in the nucleo-l432kc board this way:
+
+  --------------------------------
+  | Memory        nucleo-l432kc  |
+  |------------------------------|
+  | SI      --->  D11 (PB5)      |
+  | SCK     --->  D13 (PB3)      |
+  | /RESET  --->  3V3            |
+  | /CS     --->  D10 (PA11)     |
+  | /WP     --->  3V3            |
+  | VCC     --->  3V3            |
+  | GND     --->  GND            |
+  | SO      --->  D12 (PB4)      |
+  --------------------------------
+
+  You can start with default "nucleo-l432kc/nsh" configuration option and
+  enable/disable these options using "make menuconfig" :
+
+  System Type  --->
+      STM32L4 Peripheral Support  --->
+          [*] SPI1
+
+  Device Drivers  --->
+      -*- Memory Technology Device (MTD) Support  --->
+              -*-   SPI-based AT45DB flash
+              (1000000) AT45DB Frequency
+
+  File Systems  --->
+      [*] NXFFS file system
+
+
+  Then after compiling and flashing the file nuttx.bin you can test the flash
+  this way:
+
+  nsh> ls /mnt
+  /mnt:
+   at45db/
+
+  nsh> echo "Testing" > /mnt/at45db/file.txt
+
+  nsh> ls /mnt/at45db
+  /mnt/at45db:
+   file.txt
+
+  nsh> cat /mnt/at45db/file.txt
+  Testing
+
+  nsh>
 
 Configurations
 ==============

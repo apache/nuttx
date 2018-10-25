@@ -82,20 +82,39 @@ struct spi_dev_s *g_spi2;
 void stm32l4_spiinitialize(void)
 {
 #ifdef CONFIG_STM32L4_SPI1
+  /* Configure SPI1-based devices */
 
   g_spi1 = stm32l4_spibus_initialize(1);
-
-  spiinfo("SPI1 initialized\n");
-#endif
-
-#ifdef CONFIG_STM32L4_SPI2
-  /* Configure SPI-based devices */
-
-  g_spi2 = stm32l4_spibus_initialize(2);
+  if (!g_spi1)
+    {
+      spierr("ERROR: FAILED to initialize SPI port 1\n");
+    }
+  else
+    {
+      spiinfo("INFO: SPI port 1 initialized\n");
+    }
 
   /* Setup CS, EN & IRQ line IOs */
 
-  spiinfo("SPI2 initialized\n");
+#ifdef CONFIG_MTD_AT45DB
+  (void)stm32l4_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_SPI2
+  /* Configure SPI2-based devices */
+
+  g_spi2 = stm32l4_spibus_initialize(2);
+  if (!g_spi2)
+    {
+      spierr("ERROR: FAILED to initialize SPI port 2\n");
+    }
+  else
+    {
+      spiinfo("INFO: SPI port 2 initialized\n");
+    }
+
+  /* Setup CS, EN & IRQ line IOs */
 #endif
 }
 
@@ -129,6 +148,12 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected
 {
   spiinfo("devid: %08X CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
+#ifdef CONFIG_MTD_AT45DB
+  if (devid == SPIDEV_FLASH(0))
+    {
+      stm32l4_gpiowrite(AT45DB_SPI1_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32l4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)

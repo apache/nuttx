@@ -56,6 +56,10 @@ ifeq ($(CONFIG_DAC7571),y)
 CSRCS += stm32_dac7571.c
 endif
 
+ifeq ($(CONFIG_MTD_AT45DB),y)
+CSRCS += stm32_at45db.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif

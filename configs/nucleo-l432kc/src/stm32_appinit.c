@@ -170,6 +170,18 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef HAVE_AT45DB
+  /* Initialize and register the ATDB FLASH file system. */
+
+  ret = stm32_at45dbinitialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize AT45DB minor %d: %d\n",
+             0, ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
