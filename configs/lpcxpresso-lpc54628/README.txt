@@ -112,6 +112,9 @@ STATUS
     of the time.  I still get CRC errors when writing and I have not
     successfully written to the SD card.  It is closer but more TLC is
     needed.
+  2018-10-24:  Dave Marples now has the LPC43 SD/MMC working reliably.  I
+    have ported all of Dave's change to the LPC54 but have done no further
+    testing as of this writing.  The feature is still marked EXPERIMENTAL.
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is
   a complete but not entirely functional SD card driver and and tested SPI

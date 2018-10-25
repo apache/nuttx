@@ -128,10 +128,10 @@
 #  error "Driver requires CONFIG_SDIO_BLOCKSETUP to be set"
 #endif
 
-/* Timing */
+/* Timing : 100mS short timeout, 2 seconds for long one */
 
-#define SDCARD_CMDTIMEOUT       (10000)
-#define SDCARD_LONGTIMEOUT      (0x7fffffff)
+#define SDCARD_CMDTIMEOUT       MSEC2TICK(100)
+#define SDCARD_LONGTIMEOUT      MSEC2TICK(2000)
 
 /* Type of Card Bus Size */
 
@@ -621,28 +621,36 @@ static inline void lpc54_sdcard_clock(bool enable)
  *   arg - The argument to use with the command.
  *
  * Returned Value:
- *   None
+ *   Returns zero on success.  One will be returned on a timeout.
  *
  ****************************************************************************/
 
 static int lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg)
 {
-  volatile int32_t tmo = SDCARD_CMDTIMEOUT;
+  clock_t watchtime;
 
   mcinfo("cmd=%04lx arg=%04lx\n", (unsigned long)cmd, (unsigned long)arg);
+  DEBUGASSERT((lpc54_getreg(LPC54_SDMMC_CMD) & SDMMC_CMD_STARTCMD) == 0);
 
   /* Set command arg reg */
 
   lpc54_putreg(arg, LPC54_SDMMC_CMDARG);
   lpc54_putreg(SDMMC_CMD_STARTCMD | cmd, LPC54_SDMMC_CMD);
 
-  /* Poll until command is accepted by the CIU */
+  /* Poll until command is accepted by the CIU, or we timeout */
 
-  while (--tmo > 0 && (lpc54_getreg(LPC54_SDMMC_CMD) & SDMMC_CMD_STARTCMD) != 0)
+  watchtime = clock_systimer();
+
+  while ((lpc54_getreg(LPC54_SDMMC_CMD) & SDMMC_CMD_STARTCMD) != 0)
     {
+      if (watchtime - clock_systimer() > SDCARD_CMDTIMEOUT)
+        {
+          mcerr("TMO Timed out (%08X)\n",lpc54_getreg(LPC54_SDMMC_CMD));
+          return 1;
+        }
     }
 
-  return (tmo < 1) ? 1 : 0;
+  return 0;
 }
 
 /****************************************************************************
@@ -1031,7 +1039,6 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               /* Transfer data to the TX FIFO */
 
-              mcinfo("Write FIFO\n");
               DEBUGASSERT(priv->wrdir);
 
               for (status = lpc54_getreg(LPC54_SDMMC_STATUS);
@@ -1043,20 +1050,6 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
                   priv->buffer++;
                   priv->remaining -= 4;
                 }
-
-              /* If all of the data has been transferred to the FIFO, then
-               * disable further TX data requests and wait for the data end
-               * event.
-               */
-
-              if (priv->remaining <= 0)
-                {
-                  uint32_t intmask = lpc54_getreg(LPC54_SDMMC_INTMASK);
-                  intmask &= ~SDMMC_INT_TXDR;
-                  lpc54_putreg(intmask, LPC54_SDMMC_INTMASK);
-
-                  priv->xfrmask &= ~SDMMC_INT_TXDR;
-                }
             }
           else if ((pending & SDMMC_INT_RXDR) != 0)
             {
@@ -1064,7 +1057,6 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               /* Transfer data from the RX FIFO */
 
-              mcinfo("Read from FIFO\n");
               DEBUGASSERT(!priv->wrdir);
 
               for (status = lpc54_getreg(LPC54_SDMMC_STATUS);
@@ -1075,18 +1067,6 @@ static int lpc54_sdmmc_interrupt(int irq, void *context, FAR void *arg)
                   *priv->buffer = lpc54_getreg(LPC54_SDMMC_DATA);
                   priv->buffer++;
                   priv->remaining -= 4;
-                }
-
-              /* If all of the data has been transferred to the FIFO, then
-               * just force DTO event processing (the DTO interrupt is not
-               * actually even enabled in this use case).
-               */
-
-              if (priv->remaining <= 0)
-                {
-                  /* Force the DTO event */
-
-                  pending |= SDMMC_INT_DTO;
                 }
             }
 
@@ -1348,7 +1328,7 @@ static void lpc54_reset(FAR struct sdio_dev_s *dev)
 
   /* Define MAX Timeout */
 
-  lpc54_putreg(SDCARD_LONGTIMEOUT, LPC54_SDMMC_TMOUT);
+  lpc54_putreg(0x7fffffff, LPC54_SDMMC_TMOUT);
 
   /* Disable clock to CIU (needs latch) */
 
@@ -1763,6 +1743,10 @@ static int lpc54_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 #endif
 
+  /* Flush ints before we start */
+
+  lpc54_putreg(SDCARD_TRANSFER_ALL, LPC54_SDMMC_RINTSTS);
+
   /* Configure the transfer interrupts */
 
   lpc54_config_xfrints(priv, SDCARD_RECV_MASK);
@@ -1826,6 +1810,10 @@ static int lpc54_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
   regval &= ~SDMMC_CTRL_INTDMA;
   lpc54_putreg(regval, LPC54_SDMMC_CTRL);
 #endif
+
+  /* Flush ints before we start */
+
+  lpc54_putreg(SDCARD_TRANSFER_ALL, LPC54_SDMMC_RINTSTS);
 
   /* Configure the transfer interrupts */
 
@@ -1894,6 +1882,7 @@ static int lpc54_cancel(FAR struct sdio_dev_s *dev)
 static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
   volatile int32_t timeout;
+  clock_t watchtime;
   uint32_t events;
 
   mcinfo("cmd=%04x\n", cmd);
@@ -1933,13 +1922,15 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout or error) */
 
+  watchtime = clock_systimer();
   while ((lpc54_getreg(LPC54_SDMMC_RINTSTS) & events) != events)
     {
-      if (--timeout <= 0)
+      if (clock_systimer() - watchtime > timeout)
         {
           mcerr("ERROR: Timeout cmd: %04x events: %04x STA: %08x RINTSTS: %08x\n",
                 cmd, events, lpc54_getreg(LPC54_SDMMC_STATUS),
                 lpc54_getreg(LPC54_SDMMC_RINTSTS));
+
           return -ETIMEDOUT;
         }
       else if ((lpc54_getreg(LPC54_SDMMC_RINTSTS) & SDCARD_INT_RESPERR) != 0)
@@ -1947,6 +1938,7 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
           mcerr("ERROR: SDMMC failure cmd: %04x events: %04x STA: %08x RINTSTS: %08x\n",
                 cmd, events, lpc54_getreg(LPC54_SDMMC_STATUS),
                 lpc54_getreg(LPC54_SDMMC_RINTSTS));
+
           return -EIO;
         }
     }
@@ -2545,7 +2537,11 @@ static int lpc54_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   lpc54_putreg((uint32_t)&g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
 
-   /* Enable internal DMA, burst size of 4, fixed burst */
+  /* Flush ints before we start */
+
+  lpc54_putreg(SDCARD_TRANSFER_ALL, LPC54_SDMMC_RINTSTS);
+
+  /* Enable internal DMA, burst size of 4, fixed burst */
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
   regval |= SDMMC_CTRL_INTDMA;
@@ -2691,7 +2687,11 @@ static int lpc54_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   lpc54_putreg((uint32_t) &g_sdmmc_dmadd[0], LPC54_SDMMC_DBADDR);
 
-   /* Enable internal DMA, burst size of 4, fixed burst */
+  /* Flush ints before we start */
+
+  lpc54_putreg(SDCARD_TRANSFER_ALL, LPC54_SDMMC_RINTSTS);
+
+  /* Enable internal DMA, burst size of 4, fixed burst */
 
   regval  = lpc54_getreg(LPC54_SDMMC_CTRL);
   regval |= SDMMC_CTRL_INTDMA;

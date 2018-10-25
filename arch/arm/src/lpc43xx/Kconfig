@@ -256,7 +256,6 @@ config LPC43_SDMMC
 	default n
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
-	depends on EXPERIMENTAL
 
 config LPC43_SPI
 	bool "SPI"
