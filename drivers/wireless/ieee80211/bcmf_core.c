@@ -327,6 +327,8 @@ int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       return ret;
     }
 
+  address &= SBSDIO_SB_OFT_ADDR_MASK;
+
   /* Map to 32-bit access if len == 4 */
 
   if (len == 4)
@@ -334,8 +336,7 @@ int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       address |= SBSDIO_SB_ACCESS_2_4B_FLAG;
     }
 
-  return bcmf_transfer_bytes(sbus, false, 1,
-                             address & SBSDIO_SB_OFT_ADDR_MASK, reg, len);
+  return bcmf_transfer_bytes(sbus, false, 1, address, reg, len);
 }
 
 /****************************************************************************
@@ -352,6 +353,8 @@ int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       return ret;
     }
 
+  address &= SBSDIO_SB_OFT_ADDR_MASK;
+
   /* Map to 32-bit access if len == 4 */
 
   if (len == 4)
@@ -359,8 +362,7 @@ int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       address |= SBSDIO_SB_ACCESS_2_4B_FLAG;
     }
 
-  return bcmf_transfer_bytes(sbus, true, 1, address & SBSDIO_SB_OFT_ADDR_MASK,
-                             reg, len);
+  return bcmf_transfer_bytes(sbus, true, 1, address, reg, len);
 }
 
 /****************************************************************************
