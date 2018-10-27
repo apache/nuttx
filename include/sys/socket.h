@@ -228,14 +228,14 @@
   * accommodate all supported protocol-specific address structures, and (2)
   * aligned at an appropriate boundary so that pointers to it can be cast
   * as pointers to protocol-specific address structures and used to access
-  * the fields of those structures without alignment problems
+  * the fields of those structures without alignment problems.
   */
 
 #ifdef CONFIG_NET_IPv6
 struct sockaddr_storage
 {
   sa_family_t ss_family;       /* Address family */
-  char        ss_data[18];     /* 18-bytes of address data */
+  char        ss_data[26];     /* 26-bytes of address data */
 };
 #else
 struct sockaddr_storage
