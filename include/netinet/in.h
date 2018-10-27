@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -82,6 +83,16 @@
 #define IPPROTO_UDPLITE       136  /* UDP-Lite (RFC 3828) */
 #define IPPROTO_MPLS          137  /* MPLS in IP (RFC 4023) */
 #define IPPROTO_RAW           255  /* Raw IP packets */
+
+/* Values for option_name argument of getsockopt() or setsockopt() */
+
+#define IPV6_JOIN_GROUP       (__SO_PROTOCOL + 1) /* Join a multicast group */
+#define IPV6_LEAVE_GROUP      (__SO_PROTOCOL + 2) /* Quit a multicast group */
+#define IPV6_MULTICAST_HOPS   (__SO_PROTOCOL + 3) /* Multicast hop limit */
+#define IPV6_MULTICAST_IF     (__SO_PROTOCOL + 4) /* Interface to use for outgoing multicast packets */
+#define IPV6_MULTICAST_LOOP   (__SO_PROTOCOL + 5) /* Multicast packets are delivered back to the local application */
+#define IPV6_UNICAST_HOPS     (__SO_PROTOCOL + 6) /* Unicast hop limit */
+#define IPV6_V6ONLY           (__SO_PROTOCOL + 7) /* Restrict AF_INET6 socket to IPv6 communications only */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
@@ -176,10 +187,18 @@ struct in6_addr
 
 struct sockaddr_in6
 {
-  sa_family_t     sin6_family; /* Address family: AF_INET */
-  uint16_t        sin6_port;   /* Port in network byte order */
-  struct in6_addr sin6_addr;   /* IPv6 internet address */
+  sa_family_t     sin6_family;   /* Address family: AF_INET6 */
+  in_port_t       sin6_port;     /* Port in network byte order */
+  uint32_t        sin6_flowinfo; /* IPv6 traffic class and flow information */
+  struct in6_addr sin6_addr;     /* IPv6 internet address */
+  uint32_t        sin6_scope_id; /* Set of interfaces for a scope */
 };
+
+struct ipv6_mreq
+  {
+    struct in6_addr ipv6mr_multiaddr; /* IPv6 multicast address of group */
+    unsigned int ipv6mr_interface; /* local interface */
+  };
 
 /****************************************************************************
  * Public Data
