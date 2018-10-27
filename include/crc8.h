@@ -59,7 +59,8 @@ extern "C"
  * Name: crc8part
  *
  * Description:
- *   Continue CRC calculation on a part of the buffer.
+ *   Continue CRC calculation on a part of the buffer using the polynomial
+ *   x^8+x^6+x^3+x^2+1 (Koopman, et al. "0xA6" poly).
  *
  ****************************************************************************/
 
@@ -75,6 +76,17 @@ uint8_t crc8part(FAR const uint8_t *src, size_t len, uint8_t crc8val);
  ****************************************************************************/
 
 uint8_t crc8(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
+ * Name: crc8ccitt
+ *
+ * Description:
+ *   Return an 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the polynomial x^8+x^2+x^1+1 (aka "0x07" poly).
+ *
+ ****************************************************************************/
+
+uint8_t crc8ccitt(FAR const uint8_t *src, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus
