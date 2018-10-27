@@ -309,17 +309,26 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * address yet assigned to the device).  We should actually pick off
    * certain multicast address (all hosts multicast address, and the
    * solicited-node multicast address).  We will cheat here and accept
-   * all multicast packets that are sent to the ff02::/16 addresses.
+   * all multicast packets that are sent to the ff00::/8 addresses.
    */
 
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
-  if (ipv6->proto == IP_PROTO_UDP &&
-      ipv6->destipaddr[0] == HTONS(0xff02))
+  if (ipv6->proto == IP_PROTO_UDP && net_is_addr_mcast(ipv6->destipaddr))
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
-      /* Forward broadcast packets */
 
-      ipv6_forward_broadcast(dev, ipv6);
+      /* Packets sent to ffx0 are reserved, ffx1 are interface-local, and ffx2
+       * are interface-local, and therefore, should not be forwarded
+       */
+
+      if ((ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff00)) &&
+          (ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff01)) &&
+          (ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff02)))
+        {
+          /* Forward broadcast packets */
+
+          ipv6_forward_broadcast(dev, ipv6);
+        }
 #endif
       return udp_ipv6_input(dev);
     }
