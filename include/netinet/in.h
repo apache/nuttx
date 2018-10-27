@@ -163,14 +163,14 @@ typedef uint32_t in_addr_t;
 
 struct in_addr
 {
-  in_addr_t       s_addr;      /* Address (network byte order) */
+  in_addr_t       s_addr;           /* Address (network byte order) */
 };
 
 struct sockaddr_in
 {
-  sa_family_t     sin_family;  /* Address family: AF_INET */
-  uint16_t        sin_port;    /* Port in network byte order */
-  struct in_addr  sin_addr;    /* Internet address */
+  sa_family_t     sin_family;       /* Address family: AF_INET */
+  uint16_t        sin_port;         /* Port in network byte order */
+  struct in_addr  sin_addr;         /* Internet address */
 };
 
 /* IPv6 Internet address */
@@ -187,18 +187,18 @@ struct in6_addr
 
 struct sockaddr_in6
 {
-  sa_family_t     sin6_family;   /* Address family: AF_INET6 */
-  in_port_t       sin6_port;     /* Port in network byte order */
-  uint32_t        sin6_flowinfo; /* IPv6 traffic class and flow information */
-  struct in6_addr sin6_addr;     /* IPv6 internet address */
-  uint32_t        sin6_scope_id; /* Set of interfaces for a scope */
+  sa_family_t     sin6_family;      /* Address family: AF_INET6 */
+  in_port_t       sin6_port;        /* Port in network byte order */
+  uint32_t        sin6_flowinfo;    /* IPv6 traffic class and flow information */
+  struct in6_addr sin6_addr;        /* IPv6 internet address */
+  uint32_t        sin6_scope_id;    /* Set of interfaces for a scope */
 };
 
 struct ipv6_mreq
-  {
-    struct in6_addr ipv6mr_multiaddr; /* IPv6 multicast address of group */
-    unsigned int ipv6mr_interface; /* local interface */
-  };
+{
+  struct in6_addr ipv6mr_multiaddr; /* IPv6 multicast address of group */
+  unsigned int    ipv6mr_interface; /* Local interface index */
+};
 
 /****************************************************************************
  * Public Data
