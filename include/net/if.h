@@ -247,6 +247,14 @@ struct ifconf
  * Public Function Prototypes
  *******************************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /*******************************************************************************************
  * Name: if_nametoindex
  *
@@ -281,5 +289,10 @@ unsigned int if_nametoindex(FAR const char *ifname);
  *******************************************************************************************/
 
 FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __INCLUDE_NET_IF_H */
