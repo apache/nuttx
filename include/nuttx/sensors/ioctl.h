@@ -174,4 +174,8 @@
 #define SNIOC_LSM303AGRSENSORREAD  _SNIOC(0x0051) /* Arg: file *filep, FAR char *buffer,size_t buflen */
 #define SNIOC_START_SELFTEST       _SNIOC(0x0052) /* Arg: file *filep, FAR char *buffer,size_t mode */
 
+/* IOCTL commands unique to the MLX90614 */
+
+#define SNIOC_CHANGE_SMBUSADDR     _SNIOC(0x0053) /* Arg: uint8_t value */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
