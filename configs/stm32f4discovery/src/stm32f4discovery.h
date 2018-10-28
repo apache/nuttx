@@ -718,6 +718,19 @@ int stm32_max31855initialize(FAR const char *devpath, int bus,
                              uint16_t devid);
 #endif
 
+/***********************************************************************************
+ * Name: stm32_mlx90614init
+ *
+ * Description:
+ *   Called to configure an I2C and to register MLX90614 for the stm32f103-minimum
+ *   board.
+ *
+ ***********************************************************************************/
+
+#ifdef CONFIG_SENSORS_MLX90614
+int stm32_mlx90614init(FAR const char *devpath);
+#endif
+
 /****************************************************************************
  * Name: stm32_max6675initialize
  *

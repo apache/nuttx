@@ -232,6 +232,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_MLX90614
+  ret = stm32_mlx90614init("/dev/therm0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MLX90614, error %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
