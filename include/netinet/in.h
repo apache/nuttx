@@ -84,21 +84,51 @@
 #define IPPROTO_MPLS          137  /* MPLS in IP (RFC 4023) */
 #define IPPROTO_RAW           255  /* Raw IP packets */
 
-/* SOL_IPV6 protocol-level socket options.  Values for option_name argument
- * of getsockopt() or setsockopt()
- */
+/* SOL_IP protocol-level socket options.  */
 
-#define IPV6_JOIN_GROUP       (__SO_PROTOCOL + 1) /* Join a multicast group */
-#define IPV6_LEAVE_GROUP      (__SO_PROTOCOL + 2) /* Quit a multicast group */
-#define IPV6_MULTICAST_HOPS   (__SO_PROTOCOL + 3) /* Multicast hop limit */
-#define IPV6_MULTICAST_IF     (__SO_PROTOCOL + 4) /* Interface to use for
-                                                   * outgoing multicast packets */
-#define IPV6_MULTICAST_LOOP   (__SO_PROTOCOL + 5) /* Multicast packets are
-                                                   * delivered back to the local
-                                                   * application */
-#define IPV6_UNICAST_HOPS     (__SO_PROTOCOL + 6) /* Unicast hop limit */
-#define IPV6_V6ONLY           (__SO_PROTOCOL + 7) /* Restrict AF_INET6 socket
-                                                   * to IPv6 communications only */
+#define IP_MULTICAST_IF       (__SO_PROTOCOL + 1)  /* Set local device for a
+                                                    * multicast socket */
+#define IP_MULTICAST_TTL      (__SO_PROTOCOL + 2)  /* Set/read the time-to-
+                                                    * live value of outgoing
+                                                    * multicast packets */
+#define IP_MULTICAST_LOOP     (__SO_PROTOCOL + 3)  /* Set/read boolean that
+                                                    * etermines whether sent
+                                                    * multicast packets should
+                                                    * be looped back to local
+                                                    * sockets. */
+#define IP_ADD_MEMBERSHIP     (__SO_PROTOCOL + 4)  /* Join a multicast group */
+#define IP_DROP_MEMBERSHIP    (__SO_PROTOCOL + 5)  /* Leave a multicast group */
+#define IP_UNBLOCK_SOURCE     (__SO_PROTOCOL + 6)  /* Unblock previously
+                                                    * blocked multicast source */
+#define IP_BLOCK_SOURCE       (__SO_PROTOCOL + 7)  /* Stop receiving multicast
+                                                    * data from source */
+#define IP_ADD_SOURCE_MEMBERSHIP (__SO_PROTOCOL + 8) /* Join a multicast group;
+                                                    * allow receive only from
+                                                    * source */
+#define IP_DROP_SOURCE_MEMBERSHIP (__SO_PROTOCOL + 9) /* Leave a source-specific
+                                                    * group.  Stop receiving
+                                                    * data from a given
+                                                    * multicast group the come
+                                                    * from a given source */
+#define IP_MSFILTER           (__SO_PROTOCOL + 10) /* Access advanced, full-
+                                                    * state filtering API */
+#define IP_MULTICAST_ALL      (__SO_PROTOCOL + 11) /* Modify the delivery policy
+                                                    * of mutlicast messages bound
+                                                    * in INADDR_ANY */
+
+/* SOL_IPV6 protocol-level socket options. */
+
+#define IPV6_JOIN_GROUP       (__SO_PROTOCOL + 1)  /* Join a multicast group */
+#define IPV6_LEAVE_GROUP      (__SO_PROTOCOL + 2)  /* Quit a multicast group */
+#define IPV6_MULTICAST_HOPS   (__SO_PROTOCOL + 3)  /* Multicast hop limit */
+#define IPV6_MULTICAST_IF     (__SO_PROTOCOL + 4)  /* Interface to use for
+                                                    * outgoing multicast packets */
+#define IPV6_MULTICAST_LOOP   (__SO_PROTOCOL + 5)  /* Multicast packets are
+                                                    * delivered back to the local
+                                                    * application */
+#define IPV6_UNICAST_HOPS     (__SO_PROTOCOL + 6)  /* Unicast hop limit */
+#define IPV6_V6ONLY           (__SO_PROTOCOL + 7)  /* Restrict AF_INET6 socket
+                                                    * to IPv6 communications only */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
@@ -182,6 +212,37 @@ struct sockaddr_in
   sa_family_t     sin_family;       /* Address family: AF_INET */
   in_port_t       sin_port;         /* Port in network byte order */
   struct in_addr  sin_addr;         /* Internet address */
+};
+
+/* Used with certain IPv4 socket options */
+
+struct ip_mreq
+{
+  struct in_addr  ipmr_multiaddr;   /* IPv4 multicast address of group */
+  struct in_addr  ipmr_interface;   /* Local IPv4 address of interface */
+};
+
+struct ip_mreqn
+{
+  struct in_addr  ipmr_multiaddr;   /* IPv4 multicast address of group */
+  struct in_addr  ipmr_interface;   /* Local IPv4 address of interface */
+  unsigned int    ipmr_interface;   /* Local interface index */
+};
+
+struct ip_mreq_source
+{
+  struct in_addr  imr_multiaddr;    /* IPv4 multicast group address */
+  struct in_addr  imr_interface;    /* IPv4 address of local interface */
+  struct in_addr  imr_sourceaddr;   /* IPv4 address of multicast source */
+};
+
+struct ip_msfilter
+{
+  struct in_addr imsf_multiaddr;    /* IPv4 multicast group address */
+  struct in_addr imsf_interface;    /* IPv4 address of local interface */
+  uint32_t       imsf_fmode;        /* Filter-mode */
+  uint32_t       imsf_numsrc;       /* Number of sources in the following array */
+  struct in_addr imsf_slist[1];     /* Array of source addresses */
 };
 
 /* IPv6 Internet address */
