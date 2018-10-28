@@ -92,7 +92,7 @@
                                                     * live value of outgoing
                                                     * multicast packets */
 #define IP_MULTICAST_LOOP     (__SO_PROTOCOL + 3)  /* Set/read boolean that
-                                                    * etermines whether sent
+                                                    * determines whether sent
                                                     * multicast packets should
                                                     * be looped back to local
                                                     * sockets. */
@@ -108,13 +108,13 @@
 #define IP_DROP_SOURCE_MEMBERSHIP (__SO_PROTOCOL + 9) /* Leave a source-specific
                                                     * group.  Stop receiving
                                                     * data from a given
-                                                    * multicast group the come
+                                                    * multicast group that come
                                                     * from a given source */
 #define IP_MSFILTER           (__SO_PROTOCOL + 10) /* Access advanced, full-
                                                     * state filtering API */
 #define IP_MULTICAST_ALL      (__SO_PROTOCOL + 11) /* Modify the delivery policy
                                                     * of mutlicast messages bound
-                                                    * in INADDR_ANY */
+                                                    * to INADDR_ANY */
 
 /* SOL_IPV6 protocol-level socket options. */
 
@@ -154,6 +154,11 @@
 
 #define IN6ADDR_ANY_INIT      {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
 #define IN6ADDR_LOOPBACK_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}}}
+
+/* Sizes of addresses (per OpenGroup.org) */
+
+#define INET_ADDRSTRLEN       16   /* nnn.nnn.nnn.nnn */
+#define INET6_ADDRSTRLEN      46   /* xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx */
 
 /* struct in6_addr union selectors */
 
@@ -218,15 +223,15 @@ struct sockaddr_in
 
 struct ip_mreq
 {
-  struct in_addr  ipmr_multiaddr;   /* IPv4 multicast address of group */
-  struct in_addr  ipmr_interface;   /* Local IPv4 address of interface */
+  struct in_addr  imr_multiaddr;    /* IPv4 multicast address of group */
+  struct in_addr  imr_interface;    /* Local IPv4 address of interface */
 };
 
 struct ip_mreqn
 {
-  struct in_addr  ipmr_multiaddr;   /* IPv4 multicast address of group */
-  struct in_addr  ipmr_interface;   /* Local IPv4 address of interface */
-  unsigned int    ipmr_interface;   /* Local interface index */
+  struct in_addr  imr_multiaddr;    /* IPv4 multicast address of group */
+  struct in_addr  imr_interface;    /* Local IPv4 address of interface */
+  unsigned int    imr_ifindex;      /* Local interface index */
 };
 
 struct ip_mreq_source
@@ -240,7 +245,7 @@ struct ip_msfilter
 {
   struct in_addr imsf_multiaddr;    /* IPv4 multicast group address */
   struct in_addr imsf_interface;    /* IPv4 address of local interface */
-  uint32_t       imsf_fmode;        /* Filter-mode */
+  uint32_t       imsf_fmode;        /* Filter mode */
   uint32_t       imsf_numsrc;       /* Number of sources in the following array */
   struct in_addr imsf_slist[1];     /* Array of source addresses */
 };
