@@ -70,7 +70,20 @@
 
 void stm32_spidev_initialize(void)
 {
-  /* Configure SPI CS GPIO for output */
+  /* NOTE: Clocking for SPI1 and/or SPI3 was already provided in stm32_rcc.c.
+   *       Configurations of SPI pins is performed in stm32_spi.c.
+   *       Here, we only initialize chip select pins unique to the board
+   *       architecture.
+   */
+
+#ifdef CONFIG_STM32H7_SPI3
+#  ifdef CONFIG_WL_NRF24L01
+  /* Configure the SPI-based NRF24L01 chip select GPIO */
+  spiinfo("Configure GPIO for SPI3/CS\n");
+  stm32_configgpio(GPIO_NRF24L01_CS);
+  stm32_gpiowrite(GPIO_NRF24L01_CS, true);
+#  endif
+#endif
 }
 
 /****************************************************************************
@@ -127,13 +140,36 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_STM32H7_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
-  spiinfo("devid: %08lx CS: %s\n",
-          (unsigned long)devid, selected ? "assert" : "de-assert");
+  switch (devid)
+    {
+#ifdef CONFIG_WL_NRF24L01
+      case SPIDEV_WIRELESS(0):
+        spiinfo("nRF24L01 device %s\n", selected ? "asserted" : "de-asserted");
+
+        /* Set the GPIO low to select and high to de-select */
+
+        stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
+        break;
+#endif
+      default:
+        break;
+    }
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+  switch (devid)
+    {
+#ifdef CONFIG_WL_NRF24L01
+      case SPIDEV_WIRELESS(0):
+        status |= SPI_STATUS_PRESENT;
+        break;
+#endif
+      default:
+        break;
+    }
+  return status;
 }
 #endif
 

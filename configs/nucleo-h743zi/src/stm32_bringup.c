@@ -70,7 +70,7 @@
 
 int stm32_bringup(void)
 {
-  int ret;
+  int ret = OK;
 
   UNUSED(ret);
 
@@ -129,6 +129,14 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
     }
 #endif  /* CONFIG_SENSORS_LSM303AGR */
+
+#ifdef CONFIG_WL_NRF24L01
+  ret = stm32_wlinitialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
+    }
+#endif  /* CONFIG_WL_NRF24L01 */
 
   return OK;
 }

@@ -56,6 +56,7 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"
+#include "stm32_spi.h"
 #include "stm32_rcc.h"
 #include "stm32_lowputc.h"
 

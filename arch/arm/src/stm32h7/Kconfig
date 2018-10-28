@@ -93,11 +93,39 @@ config STM32H7_HAVE_SPI6
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
+config STM32H7_ADC
+	bool
+	default n
+
+config STM32H7_CAN
+	bool
+	default n
+
+config STM32H7_DAC
+	bool
+	default n
+
+config STM32H7_DMA
+	bool
+	default n
+
 config STM32H7_I2C
 	bool
 	default n
 
+config STM32H7_SAI
+	bool
+	default n
+
+config STM32H7_SDMMC
+	bool
+	default n
+
 config STM32H7_SPI
+	bool
+	default n
+
+config STM32H7_TIM
 	bool
 	default n
 
@@ -106,6 +134,18 @@ config STM32H7_USART
 	default n
 
 # These are the peripheral selections proper
+
+config STM32H7_DMA1
+	bool "DMA1"
+	default n
+	select STM32H7_DMA
+	select ARCH_DMA
+
+config STM32H7_DMA2
+	bool "DMA2"
+	default n
+	select STM32H7_DMA
+	select ARCH_DMA
 
 menu "STM32H7 I2C Selection"
 
@@ -136,39 +176,42 @@ menu "STM32H7 SPI Selection"
 config STM32H7_SPI1
 	bool "SPI1"
 	default n
+	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI2
 	bool "SPI2"
 	default n
+	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI3
 	bool "SPI3"
 	default n
+  depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI4
 	bool "SPI4"
 	default n
-	depends on STM32H7_HAVE_SPI4
+	depends on STM32H7_HAVE_SPI4 && EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI5
 	bool "SPI5"
 	default n
-	depends on STM32H7_HAVE_SPI5
+	depends on STM32H7_HAVE_SPI5 && EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI6
 	bool "SPI6"
 	default n
-	depends on STM32H7_HAVE_SPI6
+	depends on STM32H7_HAVE_SPI6 && EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 

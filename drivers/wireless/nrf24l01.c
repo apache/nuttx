@@ -223,7 +223,7 @@ static void nrf24l01_worker(FAR void *arg);
 #endif
 
 #ifdef CONFIG_DEBUG_WIRELESS
-static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen)
+static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen);
 #endif
 
 /* POSIX API */
@@ -759,7 +759,7 @@ static void nrf24l01_worker(FAR void *arg)
          }
        else
          {
-           wlerr("invalid length in rx: %d\n", (int)pktlen);
+           /* wlerr("invalid length in rx: %d\n", (int)pktlen); */
          }
     }
 

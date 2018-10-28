@@ -1079,6 +1079,15 @@
 
 /* TODO: DMAMUX12 request generator interrupt clear flag register */
 
+/* DMA Stream mapping.
+ * TODO:
+ */
+
+#define STM32_DMA_MAP(d,s,c)       ((d) << 7 | (s) << 4 | (c))
+#define STM32_DMA_CONTROLLER(m)    (((m) >> 7) & 1)
+#define STM32_DMA_STREAM(m)        (((m) >> 4) & 7)
+#define STM32_DMA_CHANNEL(m)       ((m) & 15)
+
 /* DMAMUX1 mapping ****************************************************/
 
 /* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7.

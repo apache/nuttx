@@ -197,9 +197,184 @@
 #define SPI_CR2_TSER_SHIFT        (16)        /* Bits 16-31 */
 #define SPI_CR2_TSER_MASK         (0xff << SPI_CR2_TSER_SHIFT)
 
-/* TODO: SPI configuration register 1 */
+/* SPI configuration register 1 */
 
-/* TODO: SPI configuration register 2 */
+#define SPI_CFG1_DSIZE_SHIFT      (0) /* Bits 0-4: number of bits in at single SPI data frame */
+#define SPI_CFG1_DSIZE_VAL(n)     ((n-1) << SPI_CFG1_DSIZE_SHIFT)
+#define SPI_CFG1_DSIZE_MASK       (0x1f << SPI_CFG1_DSIZE_SHIFT)
+                                      /* 00000 - 00010 - not used */
+#  define SPI_CFG1_DSIZE_4BIT     (3 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_5BIT     (4 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_6BIT     (5 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_7BIT     (6 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_8BIT     (7 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_9BIT     (8 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_10BIT    (9 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_11BIT    (10 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_12BIT    (11 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_13BIT    (12 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_14BIT    (13 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_15BIT    (14 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_16BIT    (15 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_17BIT    (16 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_18BIT    (17 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_19BIT    (18 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_20BIT    (19 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_21BIT    (20 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_22BIT    (21 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_23BIT    (22 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_24BIT    (23 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_25BIT    (24 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_26BIT    (25 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_27BIT    (26 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_28BIT    (27 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_29BIT    (28 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_30BIT    (29 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_31BIT    (30 << SPI_CFG1_DSIZE_SHIFT)
+#  define SPI_CFG1_DSIZE_32BIT    (31 << SPI_CFG1_DSIZE_SHIFT)
+#define SPI_CFG1_FTHLV_SHIFT      (5) /* Bits 5-8: FIFO threshold level */
+#define SPI_CFG1_FTHLV_MASK       (0xf << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_1DATA    (0 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_2DATA    (1 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_3DATA    (2 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_4DATA    (3 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_5DATA    (4 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_6DATA    (5 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_7DATA    (6 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_8DATA    (7 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_9DATA    (8 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_10DATA   (9 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_11DATA   (10 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_12DATA   (11 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_13DATA   (12 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_14DATA   (13 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_15DATA   (14 << SPI_CFG1_FTHLV_SHIFT)
+#  define SPI_CFG1_FTHLV_16DATA   (15 << SPI_CFG1_FTHLV_SHIFT)
+#define SPI_CFG1_UDRCFG_SHIFT     (9) /* Bits 9-10: behavior of slave transmitter at underrun condition */
+#define SPI_CFG1_UDRCFG_MASK      (0x3 << SPI_CFG1_UDRCFG_SHIFT)
+#  define SPI_CFG1_UDRCFG_CONST   (0 << SPI_CFG1_UDRCFG_SHIFT)
+#  define SPI_CFG1_UDRCFG_LASTRX  (1 << SPI_CFG1_UDRCFG_SHIFT)
+#  define SPI_CFG1_UDRCFG_LASTTX  (2 << SPI_CFG1_UDRCFG_SHIFT)
+                                       /* 11: Reserved */
+#define SPI_CFG1_UDRDET_SHIFT     (11) /* Bits 11-12: detection of underrun condition at slave transmitter */
+#define SPI_CFG1_UDRDET_MASK      (0x3 << SPI_CFG1_UDRDET_SHIFT)
+#  define SPI_CFG1_UDRDET_BEG     (0 << SPI_CFG1_UDRDET_SHIFT)
+#  define SPI_CFG1_UDRDET_END     (1 << SPI_CFG1_UDRDET_SHIFT)
+#  define SPI_CFG1_UDRDET_SS      (2 << SPI_CFG1_UDRDET_SHIFT)
+                                       /* 11: Reserved */
+                                       /* Bit 13: Reserved */
+#define SPI_CFG1_RXDMAEN          (1 << 14) /* Bit 14: RX-DMA stream enable */
+#define SPI_CFG1_TXDMAEN          (1 << 15) /* Bit 15: TX-DMA stream enable */
+#define SPI_CFG1_CRCSIZE_SHIFT    (16) /* Bits 16-20: length of CRC frame to be transacted and compared */
+#define SPI_CFG1_CRCSIZE_VAL(n)   ((n-1) << SPI_CFG1_CRCSIZE_SHIFT)
+#define SPI_CFG1_CRCSIZE_MASK     (0x1f << SPI_CFG1_CRCSIZE_SHIFT)
+                                       /* 00000-00010: Reserved */
+#  define SPI_CFG1_CRCSIZE_4BIT   (3 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_5BIT   (4 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_6BIT   (5 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_7BIT   (6 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_8BIT   (7 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_9BIT   (8 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_10BIT  (9 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_11BIT  (10 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_12BIT  (11 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_13BIT  (12 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_14BIT  (13 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_15BIT  (14 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_16BIT  (15 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_17BIT  (16 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_18BIT  (17 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_19BIT  (18 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_20BIT  (19 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_21BIT  (20 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_22BIT  (21 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_23BIT  (22 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_24BIT  (23 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_25BIT  (24 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_26BIT  (25 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_27BIT  (26 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_28BIT  (27 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_29BIT  (28 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_30BIT  (29 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_31BIT  (30 << SPI_CFG1_CRCSIZE_SHIFT)
+#  define SPI_CFG1_CRCSIZE_32BIT  (31 << SPI_CFG1_CRCSIZE_SHIFT)
+                                       /* Bit 21: Reserved */
+#define SPI_CFG1_CRCEN            (1 << 22) /* Bit 22: hardware CRC computation enable */
+                                       /* Bits 23-27: Reserved */
+#define SPI_CFG1_MBR_SHIFT        (28) /* Bits 28-30: master baud rate */
+#define SPI_CFG1_MBR_MASK         (0x7 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd2    (0 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd4    (1 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd8    (2 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd16   (3 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd32   (4 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd64   (5 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd128  (6 << SPI_CFG1_MBR_SHIFT)
+#  define SPI_CFG1_MBR_FPCLKd256  (7 << SPI_CFG1_MBR_SHIFT)
+                                       /* Bit 31: Reserved */
+
+/* SPI configuration register 2 */
+
+#define SPI_CFG2_MSSI_SHIFT       (0)  /* Bits 0-3:master SS idleness */
+#define SPI_CFG2_MSSI_MASK        (0xf << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_0CLK      (0 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_1CLK      (1 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_2CLK      (2 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_3CLK      (3 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_4CLK      (4 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_5CLK      (5 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_6CLK      (6 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_7CLK      (7 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_8CLK      (8 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_9CLK      (9 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_10CLK     (10 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_11CLK     (11 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_12CLK     (12 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_13CLK     (13 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_14CLK     (14 << SPI_CFG2_MSSI_SHIFT)
+#  define SPI_CFG2_MSSI_15CLK     (15 << SPI_CFG2_MSSI_SHIFT)
+#define SPI_CFG2_MIDI_SHIFT       (0)  /* Bits 4-7: master Inter-Data idleness */
+#define SPI_CFG2_MIDI_MASK        (0xf << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_0CLK      (0 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_1CLK      (1 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_2CLK      (2 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_3CLK      (3 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_4CLK      (4 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_5CLK      (5 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_6CLK      (6 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_7CLK      (7 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_8CLK      (8 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_9CLK      (9 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_10CLK     (10 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_11CLK     (11 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_12CLK     (12 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_13CLK     (13 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_14CLK     (14 << SPI_CFG2_MIDI_SHIFT)
+#  define SPI_CFG2_MIDI_15CLK     (15 << SPI_CFG2_MIDI_SHIFT)
+                                       /* Bits 8-14: Reserved */
+#define SPI_CFG2_IOSWP            (1 << 15) /* Bit 15: swap functionality of MISO and MOSI pins */
+                                       /* Bit 16: Reserved */
+#define SPI_CFG2_COMM_SHIFT       (17) /* Bits 17-18: SPI communication mode */
+#define SPI_CFG2_COMM_MASK        (0x3 << SPI_CFG2_COMM_SHIFT)
+#  define SPI_CFG2_COMM_FULL      (0 << SPI_CFG2_COMM_SHIFT)
+#  define SPI_CFG2_COMM_STX       (1 << SPI_CFG2_COMM_SHIFT)
+#  define SPI_CFG2_COMM_SRX       (2 << SPI_CFG2_COMM_SHIFT)
+#  define SPI_CFG2_COMM_HALF      (3 << SPI_CFG2_COMM_SHIFT)
+#define SPI_CFG2_SP_SHIFT         (19) /* Bits 19-21: serial protocol */
+#define SPI_CFG2_SP_MASK          (0x7 << SPI_CFG2_SP_SHIFT)
+#  define SPI_CFG2_SP_MOTOROLA    (0 << SPI_CFG2_SP_SHIFT)
+#  define SPI_CFG2_SP_TI          (1 << SPI_CFG2_SP_SHIFT)
+                                       /* 010-111: Reserved */
+#define SPI_CFG2_MASTER           (1 << 22) /* Bit 22: SPI master */
+#define SPI_CFG2_LSBFRST          (1 << 23) /* Bit 23: data frame format */
+#define SPI_CFG2_CPHA             (1 << 24) /* Bit 24: clock phase */
+#define SPI_CFG2_CPOL             (1 << 25) /* Bit 25: clock polarity */
+#define SPI_CFG2_SSM              (1 << 26) /* Bit 26: software management of SS signal input */
+                                       /* Bit 27: Reserved */
+#define SPI_CFG2_SSIOP            (1 << 28) /* Bit 28: SS input/output polarity */
+#define SPI_CFG2_SSOE             (1 << 29) /* Bit 29: SS output enable */
+#define SPI_CFG2_SSOM             (1 << 30) /* Bit 30: SS output management in master mode */
+#define SPI_CFG2_AFCNTR           (1 << 31) /* Bit 31: alternate function GPIOs control */
 
 /* SPI/I2S status register */
 

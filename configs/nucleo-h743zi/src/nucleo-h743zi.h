@@ -88,6 +88,18 @@
 #define GPIO_LSM6DSL_INT1 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN4)
 #define GPIO_LSM6DSL_INT2 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN5)
 
+/* NRF24L01
+ * CS  - PA4
+ * CE  - PF12 (D8)
+ * IRQ - PD15 (D9)
+ */
+
+#define GPIO_NRF24L01_CS   (GPIO_OUTPUT | GPIO_SPEED_50MHz| \
+                            GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_NRF24L01_CE   (GPIO_OUTPUT | GPIO_SPEED_50MHz| \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTF | GPIO_PIN12)
+#define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTD | GPIO_PIN15)
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -155,6 +167,17 @@ int stm32_lsm6dsl_initialize(char *devpath);
 
 #ifdef CONFIG_SENSORS_LSM6DSL
 int stm32_lsm303agr_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_wlinitialize
+ *
+ * Description:
+ *   Initialize NRF24L01 wireless interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_WL_NRF24L01
+int stm32_wlinitialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */

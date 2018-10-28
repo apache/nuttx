@@ -289,7 +289,6 @@ static inline void rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1LENR);
 
-
 #ifdef CONFIG_STM32H7_SPI2
   /* SPI2 clock enable */
 
@@ -412,6 +411,10 @@ static inline void rcc_enableapb4(void)
    */
 
   regval = getreg32(STM32_RCC_APB4ENR);
+
+  /* System configuration controller clock enable */
+
+  regval |= RCC_APB4ENR_SYSCFGEN;
 
 #ifdef CONFIG_STM32H7_I2C4
   /* I2C4 clock enable */
@@ -562,6 +565,8 @@ static void stm32_stdclockconfig(void)
 #endif
       putreg32(regval, STM32_RCC_PLLCKSELR);
 
+      /* Each PLL offers 3 outputs with post-dividers (PLLxP/PLLxQ/PLLxR) */
+
       /* Configure PLL1 dividers */
 
       regval = (STM32_PLLCFG_PLL1N |
@@ -625,7 +630,7 @@ static void stm32_stdclockconfig(void)
 
       putreg32(regval, STM32_FLASH_ACR);
 
-      /* Select the PLL1 as system clock source */
+      /* Select the PLL1P as system clock source */
 
       regval = getreg32(STM32_RCC_CFGR);
       regval &= ~RCC_CFGR_SW_MASK;
