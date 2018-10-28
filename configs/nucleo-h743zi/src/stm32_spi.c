@@ -79,7 +79,9 @@ void stm32_spidev_initialize(void)
 #ifdef CONFIG_STM32H7_SPI3
 #  ifdef CONFIG_WL_NRF24L01
   /* Configure the SPI-based NRF24L01 chip select GPIO */
+
   spiinfo("Configure GPIO for SPI3/CS\n");
+
   stm32_configgpio(GPIO_NRF24L01_CS);
   stm32_gpiowrite(GPIO_NRF24L01_CS, true);
 #  endif

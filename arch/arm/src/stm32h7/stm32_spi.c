@@ -87,7 +87,6 @@
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
-/* #include "stm32_dma.h" */
 #include "stm32_spi.h"
 
 #if defined(CONFIG_STM32H7_SPI1) || defined(CONFIG_STM32H7_SPI2) || \
@@ -127,9 +126,9 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-#if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
+#  if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
 #    error "Illegal value for CONFIG_SPI_DMAPRIO"
-#endif
+#  endif
 
 /* DMA channel configuration */
 
@@ -768,7 +767,6 @@ static void spi_dumpregs(FAR struct stm32_spidev_s *priv)
           spi_getreg(priv, STM32_SPI_IER_OFFSET),
           spi_getreg(priv, STM32_SPI_SR_OFFSET),
           spi_getreg(priv, STM32_SPI_I2SCFGR_OFFSET));
-
 }
 #endif
 
@@ -1883,9 +1881,7 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
    *   Master:                        CFG2.MSTR=1
    *   8-bit:                         CFG1.DSIZE=7
    *   MSB tranmitted first:          CFG2.LSBFRST=0
-
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CFG2.SSM=1 (prevents MODF error)
-
    *   Two lines full duplex:         CFG2.COMM=0
    */
 

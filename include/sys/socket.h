@@ -253,7 +253,7 @@ struct sockaddr_storage
 struct sockaddr
 {
   sa_family_t sa_family;       /* Address family: See AF_* definitions */
-  char        sa_data[14];     /* 14-bytes of address data */
+  char        sa_data[14];     /* 14-bytes data (actually variable length) */
 };
 
 /* Used with the SO_LINGER socket option */

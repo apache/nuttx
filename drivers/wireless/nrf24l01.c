@@ -757,10 +757,6 @@ static void nrf24l01_worker(FAR void *arg)
 
            nxsem_post(&dev->sem_tx);
          }
-       else
-         {
-           /* wlerr("invalid length in rx: %d\n", (int)pktlen); */
-         }
     }
 
   if (dev->state == ST_RX)
