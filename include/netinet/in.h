@@ -84,15 +84,21 @@
 #define IPPROTO_MPLS          137  /* MPLS in IP (RFC 4023) */
 #define IPPROTO_RAW           255  /* Raw IP packets */
 
-/* Values for option_name argument of getsockopt() or setsockopt() */
+/* SOL_IPV6 protocol-level socket options.  Values for option_name argument
+ * of getsockopt() or setsockopt()
+ */
 
 #define IPV6_JOIN_GROUP       (__SO_PROTOCOL + 1) /* Join a multicast group */
 #define IPV6_LEAVE_GROUP      (__SO_PROTOCOL + 2) /* Quit a multicast group */
 #define IPV6_MULTICAST_HOPS   (__SO_PROTOCOL + 3) /* Multicast hop limit */
-#define IPV6_MULTICAST_IF     (__SO_PROTOCOL + 4) /* Interface to use for outgoing multicast packets */
-#define IPV6_MULTICAST_LOOP   (__SO_PROTOCOL + 5) /* Multicast packets are delivered back to the local application */
+#define IPV6_MULTICAST_IF     (__SO_PROTOCOL + 4) /* Interface to use for
+                                                   * outgoing multicast packets */
+#define IPV6_MULTICAST_LOOP   (__SO_PROTOCOL + 5) /* Multicast packets are
+                                                   * delivered back to the local
+                                                   * application */
 #define IPV6_UNICAST_HOPS     (__SO_PROTOCOL + 6) /* Unicast hop limit */
-#define IPV6_V6ONLY           (__SO_PROTOCOL + 7) /* Restrict AF_INET6 socket to IPv6 communications only */
+#define IPV6_V6ONLY           (__SO_PROTOCOL + 7) /* Restrict AF_INET6 socket
+                                                   * to IPv6 communications only */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
@@ -106,9 +112,12 @@
 
 /* Special values of in_addr_t */
 
-#define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any incoming messages */
-#define INADDR_BROADCAST      ((in_addr_t)0xffffffff) /* Address to send to all hosts */
-#define INADDR_NONE           ((in_addr_t)0xffffffff) /* Address indicating an error return */
+#define INADDR_ANY            ((in_addr_t)0x00000000) /* Address to accept any
+                                                       * incoming messages */
+#define INADDR_BROADCAST      ((in_addr_t)0xffffffff) /* Address to send to
+                                                       * all hosts */
+#define INADDR_NONE           ((in_addr_t)0xffffffff) /* Address indicating an
+                                                       * error return */
 #define INADDR_LOOPBACK       ((in_addr_t)0x7f000001) /* Inet 127.0.0.1.  */
 
 /* Special initializer for in6_addr_t */
@@ -155,6 +164,8 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* IPv4/IPv6 port number */
+
 typedef uint16_t in_port_t;
 
 /* IPv4 Internet address */
@@ -169,7 +180,7 @@ struct in_addr
 struct sockaddr_in
 {
   sa_family_t     sin_family;       /* Address family: AF_INET */
-  uint16_t        sin_port;         /* Port in network byte order */
+  in_port_t       sin_port;         /* Port in network byte order */
   struct in_addr  sin_addr;         /* Internet address */
 };
 
@@ -193,6 +204,8 @@ struct sockaddr_in6
   struct in6_addr sin6_addr;        /* IPv6 Internet address */
   uint32_t        sin6_scope_id;    /* Set of interfaces for a scope */
 };
+
+/* Used with certain IPv6 socket options */
 
 struct ipv6_mreq
 {
