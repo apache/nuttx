@@ -169,18 +169,18 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
-       /* Is this a response on the same device that we sent the request out
-        * on?
-        */
+      /* Is this a response on the same device that we sent the request out
+       * on?
+       */
 
-       psock = pstate->recv_sock;
-       DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-       conn  = psock->s_conn;
-       if (dev != conn->dev)
-         {
-           ninfo("Wrong device\n");
-           return flags;
-         }
+      psock = pstate->recv_sock;
+      DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+      conn  = psock->s_conn;
+      if (dev != conn->dev)
+        {
+          ninfo("Wrong device\n");
+          return flags;
+        }
 
       /* Check if we have just received a ICMP ECHO reply. */
 

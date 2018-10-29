@@ -65,7 +65,6 @@
 struct net_stats_s g_netstats;
 #endif
 
-
 #ifdef CONFIG_NET_IPv4_REASSEMBLY
 /* Reassembly timer (units: deci-seconds) */
 

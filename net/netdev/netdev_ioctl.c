@@ -95,6 +95,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
 
 #undef HAVE_WRITABLE_IPv4ROUTE
@@ -694,7 +695,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
 #endif
-
 
 #ifdef CONFIG_NET_IPv4
       case SIOCSIFADDR:  /* Set IP address */

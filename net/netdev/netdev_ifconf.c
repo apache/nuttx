@@ -102,7 +102,7 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
   DEBUGASSERT(dev != NULL && info != NULL && info->ifc != NULL);
   ifc = info->ifc;
 
-  /* Check if this adaptor has an IPv4 address assigned and is in the UP
+  /* Check if this adapter has an IPv4 address assigned and is in the UP
    * state.
    */
 
@@ -124,25 +124,25 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
        * cases.
        */
 
-       if (ifc->ifc_len + sizeof(struct ifreq) <= info->bufsize)
-         {
-           FAR struct ifreq *req =
-             (FAR struct ifreq *)&ifc->ifc_buf[ifc->ifc_len];
-           FAR struct sockaddr_in *inaddr =
-             (FAR struct sockaddr_in *)&req->ifr_addr;
+      if (ifc->ifc_len + sizeof(struct ifreq) <= info->bufsize)
+        {
+          FAR struct ifreq *req =
+            (FAR struct ifreq *)&ifc->ifc_buf[ifc->ifc_len];
+          FAR struct sockaddr_in *inaddr =
+            (FAR struct sockaddr_in *)&req->ifr_addr;
 
-           /* There is space for information about another adaptor.  Within
-            * each ifreq structure, ifr_name will receive the interface name
-            * and ifr_addr the address.  The actual number of bytes
-            * transferred is returned in ifc_len.
-            */
+          /* There is space for information about another adapter.  Within
+           * each ifreq structure, ifr_name will receive the interface name
+           * and ifr_addr the address.  The actual number of bytes
+           * transferred is returned in ifc_len.
+           */
 
-           strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+          strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
 
-           inaddr->sin_family = AF_INET;
-           inaddr->sin_port   = 0;
-           net_ipv4addr_copy(inaddr->sin_addr.s_addr, dev->d_ipaddr);
-         }
+          inaddr->sin_family = AF_INET;
+          inaddr->sin_port   = 0;
+          net_ipv4addr_copy(inaddr->sin_addr.s_addr, dev->d_ipaddr);
+        }
 
        /* Increment the size of the buffer in any event */
 
@@ -179,7 +179,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
   DEBUGASSERT(dev != NULL && info != NULL && info->lifc != NULL);
   lifc = info->lifc;
 
-  /* Check if this adaptor has an IPv6 address assigned and is in the UP
+  /* Check if this adapter has an IPv6 address assigned and is in the UP
    * state.
    */
 
@@ -201,25 +201,25 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
        * cases.
        */
 
-       if (lifc->lifc_len + sizeof(struct lifreq) <= info->bufsize)
-         {
-           FAR struct lifreq *req =
-             (FAR struct lifreq *)&lifc->lifc_buf[lifc->lifc_len];
-           FAR struct sockaddr_in6 *inaddr =
-             (FAR struct sockaddr_in6 *)&req->lifr_addr;
+      if (lifc->lifc_len + sizeof(struct lifreq) <= info->bufsize)
+        {
+          FAR struct lifreq *req =
+            (FAR struct lifreq *)&lifc->lifc_buf[lifc->lifc_len];
+          FAR struct sockaddr_in6 *inaddr =
+            (FAR struct sockaddr_in6 *)&req->lifr_addr;
 
-           /* There is space for information about another adaptor.  Within
-            * each ifreq structure, lifr_name will receive the interface
-            * name and lifr_addr the address.  The actual number of bytes
-            * transferred is returned in lifc_len.
-            */
+          /* There is space for information about another adapter.  Within
+           * each ifreq structure, lifr_name will receive the interface
+           * name and lifr_addr the address.  The actual number of bytes
+           * transferred is returned in lifc_len.
+           */
 
-           strncpy(req->lifr_name, dev->d_ifname, IFNAMSIZ);
+          strncpy(req->lifr_name, dev->d_ifname, IFNAMSIZ);
 
-           inaddr->sin6_family = AF_INET6;
-           inaddr->sin6_port   = 0;
-           net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16, dev->d_ipv6addr);
-         }
+          inaddr->sin6_family = AF_INET6;
+          inaddr->sin6_port   = 0;
+          net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16, dev->d_ipv6addr);
+        }
 
        /* Increment the size of the buffer in any event */
 
@@ -238,7 +238,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
  * Name: netdev_ipv4_ifconf
  *
  * Description:
- *   Return the IPv4 configuration of each network adaptor that (1) has
+ *   Return the IPv4 configuration of each network adapter that (1) has
  *   and IPv4 address assigned and (2) is in the UP state
  *
  * Input Parameters:
@@ -271,7 +271,7 @@ int netdev_ipv4_ifconf(FAR struct ifconf *ifc)
  * Name: netdev_ipv6_ifconf
  *
  * Description:
- *   Return the IPv6 configuration of each network adaptor that (1) has
+ *   Return the IPv6 configuration of each network adapter that (1) has
  *   and IPv6 address assigned and (2) is in the UP state.
  *
  * Input Parameters:

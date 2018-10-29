@@ -112,8 +112,18 @@ int main(int argc, char **argv, char **envp)
 
       /* Check for a blank line */
 
-      if (line[0] == '\n')
+      for (n = 0; line[n] != '\n' && isspace((int)line[n]); n++)
         {
+        }
+
+      if (line[n] == '\n')
+        {
+          if (n > 0)
+            {
+              fprintf(stderr, "Blank line contains whitespace at line %d\n",
+                      lineno);
+            }
+
           if (lineno == blank_lineno + 1)
             {
               fprintf(stderr,  "Too many blank lines at line %d\n", lineno);
@@ -123,16 +133,20 @@ int main(int argc, char **argv, char **envp)
         }
       else /* this line is non-blank */
         {
+          /* Check for a missing blank line after a comment */
+
           if (lineno == comment_lineno + 1)
             {
-              /* TODO:  This generates a false alarm if the current line
-               * contains a right brace or a pre-processor line.  No blank line
-               * should be present in those cases.
+              /* No blank line should be present if the current line contains
+               * a right brace or a pre-processor line.
                */
 
-              fprintf(stderr,
-                      "Missing blank line after comment line. Found at line %d\n",
-                      comment_lineno);
+              if (line[n] != '}' && line[n] != '#')
+                {
+                  fprintf(stderr,
+                          "Missing blank line after comment line. Found at line %d\n",
+                          comment_lineno);
+                }
             }
         }
 

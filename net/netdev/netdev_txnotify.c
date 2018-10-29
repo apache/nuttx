@@ -87,7 +87,6 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
 }
 #endif /* CONFIG_NET_IPv4 */
 
-
 /****************************************************************************
  * Name: netdev_ipv6_txnotify
  *

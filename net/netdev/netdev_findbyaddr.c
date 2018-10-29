@@ -70,10 +70,11 @@
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   lipaddr - Local, IPv4 address of assigned to the device
+ *   lipaddr - Local, IPv4 address assigned to the network device.  Or any
+ *             IPv4 address on the sub-net served by the network device.
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   Pointer to driver on success; null on failure
  *
  ****************************************************************************/
 
@@ -120,10 +121,11 @@ FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   lipaddr - Local, IPv6 address of assigned to the device
+ *   lipaddr - Local, IPv6 address assigned to the network device.  Or any
+ *             IPv6 address on the sub-net served by the network device.
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   Pointer to driver on success; null on failure
  *
  ****************************************************************************/
 
@@ -169,11 +171,12 @@ FAR struct net_driver_s *netdev_findby_lipv6addr(const net_ipv6addr_t lipaddr)
  *   IPv4 address that can be reached by the device.
  *
  * Input Parameters:
- *   lipaddr - Local, bound address of a connection.
+ *   lipaddr - Local, bound address of a connection (used only if ripaddr is
+ *             the broadcast address).
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   Pointer to driver on success; null on failure
  *
  ****************************************************************************/
 
@@ -258,11 +261,12 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
  *   IPv6 address that can be reached by the device.
  *
  * Input Parameters:
- *   lipaddr - Local, bound address of a connection.
+ *   lipaddr - Local, bound address of a connection (used only if ripaddr is
+ *             a multicast address).
  *   ripaddr - Remote address of a connection to use in the lookup
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
+ *   Pointer to driver on success; null on failure
  *
  ****************************************************************************/
 

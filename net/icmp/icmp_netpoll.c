@@ -109,18 +109,18 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   if (info != NULL)
     {
-       /* Is this a response on the same device that we sent the request out
-        * on?
-        */
+      /* Is this a response on the same device that we sent the request out
+       * on?
+       */
 
-       psock = info->psock;
-       DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-       conn  = psock->s_conn;
-       if (dev != conn->dev)
-         {
-           ninfo("Wrong device\n");
-           return flags;
-         }
+      psock = info->psock;
+      DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+      conn  = psock->s_conn;
+      if (dev != conn->dev)
+        {
+          ninfo("Wrong device\n");
+          return flags;
+        }
 
       /* Check for data or connection availability events. */
 
