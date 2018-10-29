@@ -424,7 +424,6 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
   uint8_t prefcount = UNCOMPRESS_PREFLEN(prefpost);
   uint8_t postcount = UNCOMPRESS_POSTLEN(prefpost);
   int destndx;
-  int endndx;
   int i;
 
   /* The value 16 is encoded as 0xf in the 4 bit-fields. */
