@@ -223,7 +223,7 @@ int arp_send(in_addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-  dev = netdev_findby_ipv4addr(INADDR_ANY, ipaddr);
+  dev = netdev_findby_ripv4addr(INADDR_ANY, ipaddr);
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);

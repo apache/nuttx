@@ -95,7 +95,7 @@ static int tcp_find_ipv4_device(FAR struct tcp_conn_s *conn, in_addr_t addr)
    * based on the provided IP address.
    */
 
-  conn->dev = netdev_findby_ipv4addr(addr, addr);
+  conn->dev = netdev_findby_ripv4addr(addr, addr);
 
   /* Return success if we found the device */
 
@@ -145,7 +145,7 @@ static int tcp_find_ipv6_device(FAR struct tcp_conn_s *conn,
    * based on the provided IP address.
    */
 
-  conn->dev = netdev_findby_ipv6addr(addr, addr);
+  conn->dev = netdev_findby_ripv6addr(addr, addr);
 
   /* Return success if we found the device */
 

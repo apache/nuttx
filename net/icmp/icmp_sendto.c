@@ -397,7 +397,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Get the device that will be used to route this ICMP ECHO request */
 
-  dev = netdev_findby_ipv4addr(INADDR_ANY, inaddr->sin_addr.s_addr);
+  dev = netdev_findby_ripv4addr(INADDR_ANY, inaddr->sin_addr.s_addr);
   if (dev == NULL)
     {
       nerr("ERROR: Not reachable\n");

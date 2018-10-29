@@ -436,7 +436,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
   srcipaddr  = net_ip4addr_conv32(ipv4->srcipaddr);
 
-  fwddev     = netdev_findby_ipv4addr(srcipaddr, destipaddr);
+  fwddev     = netdev_findby_ripv4addr(srcipaddr, destipaddr);
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");

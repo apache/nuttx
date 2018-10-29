@@ -222,7 +222,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
   /* Get the device that can route this request */
 
-  dev = netdev_findby_ipv6addr(g_ipv6_unspecaddr, ipaddr);
+  dev = netdev_findby_ripv6addr(g_ipv6_unspecaddr, ipaddr);
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);

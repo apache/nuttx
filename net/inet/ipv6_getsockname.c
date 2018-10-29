@@ -155,7 +155,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       ripaddr = lipaddr;
     }
 
-  dev = netdev_findby_ipv6addr(*lipaddr, *ripaddr);
+  dev = netdev_findby_ripv6addr(*lipaddr, *ripaddr);
   if (!dev)
     {
       net_unlock();

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,8 +178,10 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 
 int netdev_foreach(netdev_callback_t callback, FAR void *arg);
 
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+
 /****************************************************************************
- * Name: netdev_finddevice_ipv4addr
+ * Name: netdev_findby_lipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -187,7 +189,7 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg);
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   ripaddr - Remote address of a connection to use in the lookup
+ *   lipaddr - Local, IPv4 address of assigned to the device
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -195,11 +197,11 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr);
 #endif
 
 /****************************************************************************
- * Name: netdev_finddevice_ipv6addr
+ * Name: netdev_findby_lipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -207,7 +209,7 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr);
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   ripaddr - Remote address of a connection to use in the lookup
+ *   lipaddr - Local, IPv6 address of assigned to the device
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -215,12 +217,11 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *
-netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_lipv6addr(const net_ipv6addr_t lipaddr);
 #endif
 
 /****************************************************************************
- * Name: netdev_findby_ipv4addr
+ * Name: netdev_findby_ripv4addr
  *
  * Description:
  *   Find a previously registered network device by matching the remote
@@ -235,14 +236,13 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr);
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_NET_IPv4
-FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
-                                                in_addr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
+                                                 in_addr_t ripaddr);
 #endif
 
 /****************************************************************************
- * Name: netdev_findby_ipv6addr
+ * Name: netdev_findby_ripv6addr
  *
  * Description:
  *   Find a previously registered network device by matching the remote
@@ -258,10 +258,10 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
-                                                const net_ipv6addr_t ripaddr);
+FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
+                                                 const net_ipv6addr_t ripaddr);
 #endif
-#endif
+#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: netdev_findbyindex

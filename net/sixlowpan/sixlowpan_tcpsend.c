@@ -813,7 +813,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   /* Route outgoing message to the correct device */
 
-  dev = netdev_findby_ipv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+  dev = netdev_findby_ripv6addr(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
   if (dev == NULL)
     {
       nwarn("WARNING: Not routable\n");

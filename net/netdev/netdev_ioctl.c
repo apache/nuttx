@@ -1134,7 +1134,7 @@ static FAR struct net_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
    * of the local device.
    */
 
-  return netdev_finddevice_ipv4addr(imsf->imsf_interface.s_addr);
+  return netdev_findby_lipv4addr(imsf->imsf_interface.s_addr);
 }
 #endif
 

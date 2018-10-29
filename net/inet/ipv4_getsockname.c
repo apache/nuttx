@@ -154,7 +154,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       ripaddr = lipaddr;
     }
 
-  dev = netdev_findby_ipv4addr(lipaddr, ripaddr);
+  dev = netdev_findby_ripv4addr(lipaddr, ripaddr);
 
   if (dev == NULL)
     {

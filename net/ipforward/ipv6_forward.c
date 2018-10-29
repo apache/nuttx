@@ -573,7 +573,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
   /* Search for a device that can forward this packet. */
 
-  fwddev = netdev_findby_ipv6addr(ipv6->srcipaddr, ipv6->destipaddr);
+  fwddev = netdev_findby_ripv6addr(ipv6->srcipaddr, ipv6->destipaddr);
   if (fwddev == NULL)
     {
       nwarn("WARNING: Not routable\n");

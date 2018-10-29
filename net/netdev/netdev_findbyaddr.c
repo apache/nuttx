@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_finddevice_ipv4addr
+ * Name: netdev_findby_lipv4addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -70,7 +70,7 @@
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   ripaddr - Remote address of a connection to use in the lookup
+ *   lipaddr - Local, IPv4 address of assigned to the device
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -78,7 +78,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
+FAR struct net_driver_s *netdev_findby_lipv4addr(in_addr_t lipaddr)
 {
   FAR struct net_driver_s *dev;
 
@@ -93,7 +93,7 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipv4addr_maskcmp(dev->d_ipaddr, ripaddr,
+          if (net_ipv4addr_maskcmp(dev->d_ipaddr, lipaddr,
                                    dev->d_netmask))
             {
               /* Its a match */
@@ -112,7 +112,7 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Name: netdev_finddevice_ipv6addr
+ * Name: netdev_findby_lipv6addr
  *
  * Description:
  *   Find a previously registered network device by matching a local address
@@ -120,7 +120,7 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
  *   (since a "down" device has no meaningful address).
  *
  * Input Parameters:
- *   ripaddr - Remote address of a connection to use in the lookup
+ *   lipaddr - Local, IPv6 address of assigned to the device
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -128,8 +128,7 @@ FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *
-netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
+FAR struct net_driver_s *netdev_findby_lipv6addr(const net_ipv6addr_t lipaddr)
 {
   FAR struct net_driver_s *dev;
 
@@ -144,7 +143,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
         {
           /* Yes.. check for an address match (under the netmask) */
 
-          if (net_ipv6addr_maskcmp(dev->d_ipv6addr, ripaddr,
+          if (net_ipv6addr_maskcmp(dev->d_ipv6addr, lipaddr,
                                    dev->d_ipv6netmask))
             {
               /* Its a match */
@@ -163,7 +162,7 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
- * Name: netdev_findby_ipv4addr
+ * Name: netdev_findby_ripv4addr
  *
  * Description:
  *   Find a previously registered network device by matching the remote
@@ -179,8 +178,8 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
-                                                in_addr_t ripaddr)
+FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
+                                                 in_addr_t ripaddr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
@@ -208,13 +207,13 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
         {
           /* Return the device associated with the local address */
 
-          return netdev_finddevice_ipv4addr(lipaddr);
+          return netdev_findby_lipv4addr(lipaddr);
         }
     }
 
   /* Check if the address maps to a locally available network */
 
-  dev = netdev_finddevice_ipv4addr(ripaddr);
+  dev = netdev_findby_lipv4addr(ripaddr);
   if (dev)
     {
       return dev;
@@ -234,7 +233,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
        * router address
        */
 
-      dev = netdev_finddevice_ipv4addr(router);
+      dev = netdev_findby_lipv4addr(router);
       if (dev)
         {
           return dev;
@@ -252,7 +251,7 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
- * Name: netdev_findby_ipv6addr
+ * Name: netdev_findby_ripv6addr
  *
  * Description:
  *   Find a previously registered network device by matching the remote
@@ -268,8 +267,8 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
-                                                const net_ipv6addr_t ripaddr)
+FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
+                                                 const net_ipv6addr_t ripaddr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
@@ -299,13 +298,13 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
         {
           /* Return the device associated with the local address */
 
-          return netdev_finddevice_ipv6addr(lipaddr);
+          return netdev_findby_lipv6addr(lipaddr);
         }
     }
 
   /* Check if the address maps to a locally available network */
 
-  dev = netdev_finddevice_ipv6addr(ripaddr);
+  dev = netdev_findby_lipv6addr(ripaddr);
   if (dev)
     {
       return dev;
@@ -325,7 +324,7 @@ FAR struct net_driver_s *netdev_findby_ipv6addr(const net_ipv6addr_t lipaddr,
        * router address
        */
 
-      dev = netdev_finddevice_ipv6addr(router);
+      dev = netdev_findby_lipv6addr(router);
       if (dev)
         {
           return dev;
