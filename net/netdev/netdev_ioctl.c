@@ -1125,16 +1125,16 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #ifdef CONFIG_NET_IGMP
 static FAR struct net_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
 {
-  if (!imsf)
+  if (imsf == NULL)
     {
       return NULL;
     }
 
-  /* Find the network device associated with the device name
-   * in the request data.
+  /* Find the network device associated with the address of the IP address
+   * of the local device.
    */
 
-  return netdev_findbyname(imsf->imsf_name);
+  return netdev_finddevice_ipv4addr(imsf->imsf_interface.s_addr);
 }
 #endif
 
@@ -1507,6 +1507,7 @@ ssize_t net_ioctl_arglen(int cmd)
       case SIOCSIFFLAGS:
       case SIOCGIFFLAGS:
         return sizeof(struct ifreq);
+
       case SIOCGLIFADDR:
       case SIOCSLIFADDR:
       case SIOCGLIFDSTADDR:
@@ -1518,26 +1519,34 @@ ssize_t net_ioctl_arglen(int cmd)
       case SIOCGLIFMTU:
       case SIOCIFAUTOCONF:
         return sizeof(struct lifreq);
+
       case SIOCGIFCONF:
         return sizeof(struct ifconf);
+
       case SIOCGLIFCONF:
         return sizeof(struct lifconf);
+
       case SIOCGIPMSFILTER:
       case SIOCSIPMSFILTER:
         return sizeof(struct ip_msfilter);
+
       case SIOCSARP:
       case SIOCDARP:
       case SIOCGARP:
         return sizeof(struct arpreq);
+
       case SIOCADDRT:
       case SIOCDELRT:
         return sizeof(struct rtentry);
+
       case SIOCMIINOTIFY:
         return sizeof(struct mii_iotcl_notify_s);
+
       case SIOCGMIIPHY:
       case SIOCGMIIREG:
       case SIOCSMIIREG:
         return sizeof(struct mii_ioctl_data_s);
+
       default:
 #ifdef CONFIG_NETDEV_IOCTL
 #  ifdef CONFIG_NETDEV_WIRELESS_IOCTL

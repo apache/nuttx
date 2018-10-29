@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +58,7 @@
 #include "netdev/netdev.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -77,7 +78,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
+FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
 
@@ -127,7 +128,7 @@ static FAR struct net_driver_s *netdev_finddevice_ipv4addr(in_addr_t ripaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-static FAR struct net_driver_s *
+FAR struct net_driver_s *
 netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 {
   FAR struct net_driver_s *dev;
@@ -162,15 +163,11 @@ netdev_finddevice_ipv6addr(const net_ipv6addr_t ripaddr)
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: netdev_findby_ipv4addr
  *
  * Description:
- *   Find a previously registered network device by matching an arbitrary
- *   IPv4 address.
+ *   Find a previously registered network device by matching the remote
+ *   IPv4 address that can be reached by the device.
  *
  * Input Parameters:
  *   lipaddr - Local, bound address of a connection.
@@ -258,8 +255,8 @@ FAR struct net_driver_s *netdev_findby_ipv4addr(in_addr_t lipaddr,
  * Name: netdev_findby_ipv6addr
  *
  * Description:
- *   Find a previously registered network device by matching an arbitrary
- *   IPv6 address.
+ *   Find a previously registered network device by matching the remote
+ *   IPv6 address that can be reached by the device.
  *
  * Input Parameters:
  *   lipaddr - Local, bound address of a connection.

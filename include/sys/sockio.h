@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/sockio.h
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,49 +58,25 @@
  * Type Definitions
  ****************************************************************************/
 
- /* RFC3678: IPv4 Options
-  *
-  * o  ioctl() SIOCGIPMSFILTER: to retrieve the list of source addresses
-  *    that comprise the source filter along with the current filter mode.
-  *
-  * o  ioctl() SIOCSIPMSFILTER: to set or modify the source filter content
-  *    (e.g., unicast source address list) or mode (exclude or include).
-  *
-  * Ioctl option                  Argument type
-  * ----------------------------- ----------------------
-  * SIOCGIPMSFILTER               struct ip_msfilter
-  * SIOCSIPMSFILTER               struct ip_msfilter
-  *
-  * The imsf_fmode mode is a 32-bit integer that identifies the filter
-  * mode.  The value of this field must be either MCAST_INCLUDE or
-  * MCAST_EXCLUDE, which are likewise defined in <netinet/in.h>.
-  */
-
-#if 0 /* REVISIT: Current NuttX implementation is non-standard.
-       * Lookup is by device name, not IP address.
-       */
-
-struct ip_msfilter
-{
-   struct in_addr imsf_multiaddr;  /* IP multicast address of group */
-   struct in_addr imsf_interface;  /* Local IP address of interface */
-   uint32_t       imsf_fmode;      /* Filter mode */
-#ifdef CONFIG_NET_IGMPv3
-   uint32_t       imsf_numsrc;     /* number of sources in src_list */
-   struct in_addr imsf_slist[1];   /* start of source list */
-#endif
-};
-
-#else
-
-struct ip_msfilter
-{
-   char imsf_name[IMSFNAMSIZ];     /* Network device name, e.g., "eth0" */
-   struct in_addr imsf_multiaddr;  /* IP multicast address of group */
-   uint32_t       imsf_fmode;      /* Filter mode */
-};
-
-#endif
+/* RFC3678: IPv4 Options
+ *
+ * o  ioctl() SIOCGIPMSFILTER: to retrieve the list of source addresses
+ *    that comprise the source filter along with the current filter mode.
+ *
+ * o  ioctl() SIOCSIPMSFILTER: to set or modify the source filter content
+ *    (e.g., unicast source address list) or mode (exclude or include).
+ *
+ * Ioctl option                  Argument type
+ * ----------------------------- ----------------------
+ * SIOCGIPMSFILTER               struct ip_msfilter
+ * SIOCSIPMSFILTER               struct ip_msfilter
+ *
+ * The structure ip_msfilter, defined in <netinet/in.h> is used with
+ * these IOCTL commands to pass filter information.  The field
+ * imsf_fmode is a 32-bit integer that identifies the filter mode.
+ * The value of this field must be either MCAST_INCLUDE or
+ * MCAST_EXCLUDE, which are likewise defined in <netinet/in.h>.
+ */
 
 /****************************************************************************
  * Public Function Prototypes
