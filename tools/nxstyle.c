@@ -145,7 +145,7 @@ int main(int argc, char **argv, char **envp)
                * follow another with no space separation.
                */
 
-              if (line[n] != '}' && line[n] != '#')
+              if (line[n] != '}' /* && line[n] != '#' */)
                 {
                   fprintf(stderr,
                           "Missing blank line after comment line. Found at line %d\n",
