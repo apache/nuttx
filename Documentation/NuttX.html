@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 8, 2018</p>
+      <p>Last Updated: October 30, 2018</p>
     </td>
   </tr>
 </table>
@@ -1561,12 +1561,14 @@
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>Renesas/Hitachi:
     <ul>
-        <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
-        <li><a href="#m16c">Renesas M16C/26</a> (1/2)</li>
+      <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
+      <li><a href="#m16c">Renesas M16C/26</a> (1/2)</li>
     </ul>
   </li>
-  <li><a href="#riscv">RISC-V</a> (1)
+  <li><a href="#riscv">RISC-V</a> (2)
     <ul>
+      <li><a href="#nr5mxx"> NEXT RISC-V NR5Mxx</a> (1)</li>
+      <li><a href="#gwgap8">GreenWaves GAP8 (1)</li>
     </ul>
   </li>
   <li>Xtensa LX6:
@@ -1609,6 +1611,10 @@
   <li>Expressif
     <ul>
       <li><a href="#esp32">ESP32</a> <small>(Dual Xtensa LX6)</small></li>
+    </ul>
+  <li>GreenWaves
+    <ul>
+      <li><a href="#gwgap8">GAP8</a> <small>(RISC-V RV32IM)</small></li>
     </ul>
   </li>
   <li>Host PC based simulations
@@ -6106,8 +6112,17 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
   <td><br></td>
   <td>
     <p>
-      <b>RISC-V Architectural Support</b>.
-      Basic support for the RISC-V architecture was contributed by Ken Pettit in NuttX-7.19.  The initial release is <i>thin</i> but a great starting point for anyone interested in RISC-V development with NuttX.
+      <a name="nr5mxx"><b>RISC-V Architectural Support</b></a>.
+      Basic support for the RISC-V architecture was contributed by Ken Pettit in NuttX-7.19.
+      This support is for a custom NEXT RISC-V NR5Mxx (RV32IM).
+      The initial release is <i>thin</i> but a great starting point for anyone interested in RISC-V development with NuttX.
+    </p>
+    <p>
+      <a name="gwgap8"><b>GreenWaves GAP8 (RV32IM)</b></a>.
+      Basic support GreenWaves GAP8 <i>gapuino</i> board was added by hhuysqt in NuttX-7.27.
+      The GAP8 is a 1+8-core DSP-like RISC-V MCU.
+      The GAP8 features a RI5CY core called Fabric Controller(FC), and a cluster of 8 RI5CY cores that runs at a bit slower speed.
+      The GAP8 is an implementation of the opensource PULP platform, a Parallel-Ultra-Low-Power design.
     </p>
   </td>
 </tr>
