@@ -205,11 +205,12 @@ reset_handler:
   li a0, 0x1C000000 /* Set MTVEC */
   csrw mtvec, a0
 
-  /* stack initilization */
+  /* Stack initilization */
 
   la  x2, _idle_stack_end
 
-  /* clear BSS */
+  /* Clear BSS */
+
   la x26, _sbss
   la x27, _ebss
 
@@ -219,15 +220,10 @@ zero_loop:
   sw x0, 0(x26)
   addi x26, x26, 4
   ble x26, x27, zero_loop
+
 zero_loop_end:
 
   /* TODO: initialize data section */
-
-#if 0
-  /* Run global initialization functions */
-
-  call    __libc_init_array
-#endif
 
   /* Initialize cache and clock */
 
