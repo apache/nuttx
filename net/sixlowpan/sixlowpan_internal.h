@@ -109,7 +109,7 @@
       (ptr)[index]     = ((uint16_t)(value) >> 8) & 0xff; \
       (ptr)[index + 1] = (uint16_t)(value) & 0xff; \
     } \
-  while(0)
+  while (0)
 
 /* Return values ************************************************************/
 

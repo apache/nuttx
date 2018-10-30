@@ -59,6 +59,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This is an allocated container that holds the poll-related information */
 
 struct udp_poll_s

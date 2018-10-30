@@ -381,8 +381,8 @@ static inline FAR struct tcp_conn_s *
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
-4 *
+ *   This function is called from network logic with the network locked.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6

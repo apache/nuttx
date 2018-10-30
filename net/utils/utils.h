@@ -330,6 +330,7 @@ uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_IPv6
 /* REVIST: Is this used? */
+
 uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev);
 #endif
 

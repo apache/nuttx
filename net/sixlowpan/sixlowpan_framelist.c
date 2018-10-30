@@ -685,6 +685,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
 
           ninfo("Fragment offset=%d, paysize=%d, rb_dgramtag=%d\n",
                 outlen >> 3, paysize, reass->rb_dgramtag);
+
           sixlowpan_dumpbuffer("Outgoing frame",
                                (FAR const uint8_t *)iob->io_data,
                                iob->io_len);

@@ -826,7 +826,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 #endif /* CONFIG_NET_ARP_SEND */
 
-
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
 #ifdef CONFIG_NET_ARP_SEND
   else

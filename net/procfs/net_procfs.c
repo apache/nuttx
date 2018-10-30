@@ -492,7 +492,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
 
       if (index >= level1->base.nentries)
         {
-         /* We signal the end of the directory by returning the special
+          /* We signal the end of the directory by returning the special
            * error -ENOENT.
            */
 

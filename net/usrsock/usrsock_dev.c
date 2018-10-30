@@ -88,7 +88,7 @@ struct usrsockdev_s
     sem_t   acksem;              /* Request acknowledgment notification */
     uint8_t ack_xid;             /* Exchange id for which waiting ack */
     uint16_t nbusy;              /* Number of requests blocked from different
-                                    threads */
+                                  * threads */
   } req;
 
   FAR struct usrsock_conn_s *datain_conn; /* Connection instance to receive
@@ -733,9 +733,9 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
   FAR struct usrsock_conn_s *conn;
   unsigned int hdrlen;
   ssize_t ret;
-  ssize_t (* handle_response)(FAR struct usrsockdev_s *dev,
-                              FAR struct usrsock_conn_s *conn,
-                              FAR const void *buffer);
+  ssize_t (*handle_response)(FAR struct usrsockdev_s *dev,
+                             FAR struct usrsock_conn_s *conn,
+                             FAR const void *buffer);
 
   switch (hdr->head.msgid)
     {

@@ -276,7 +276,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
       if (pos < 0)
         {
           nerr("ERROR: net_readroute_ipv4 failed: %ld\n", (long)pos);
-          ret =(int)pos;
+          ret = (int)pos;
           goto errout_with_fshandle;
         }
 
@@ -302,7 +302,7 @@ int net_delroute_ipv4(in_addr_t target, in_addr_t netmask)
       if (pos < 0)
         {
           nerr("ERROR: net_readroute_ipv4 failed: %ld\n", (long)pos);
-          ret =(int)pos;
+          ret = (int)pos;
           goto errout_with_fshandle;
         }
 
@@ -425,7 +425,7 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
       if (pos < 0)
         {
           nerr("ERROR: net_readroute_ipv6 failed: %ld\n", (long)pos);
-          ret =(int)pos;
+          ret = (int)pos;
           goto errout_with_fshandle;
         }
 
@@ -451,7 +451,7 @@ int net_delroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask)
       if (pos < 0)
         {
           nerr("ERROR: net_readroute_ipv6 failed: %ld\n", (long)pos);
-          ret =(int)pos;
+          ret = (int)pos;
           goto errout_with_fshandle;
         }
 

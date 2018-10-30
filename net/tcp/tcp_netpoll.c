@@ -60,6 +60,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This is an allocated container that holds the poll-related information */
 
 struct tcp_poll_s

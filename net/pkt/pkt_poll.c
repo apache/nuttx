@@ -80,7 +80,7 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 {
   /* Verify that the packet connection is valid */
 
-  if (conn)
+  if (conn != NULL)
     {
       /* Setup for the application callback */
 
@@ -92,11 +92,10 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 
       (void)pkt_callback(dev, conn, PKT_POLL);
 
-      /* If the application has data to send, setup the UDP/IP header */
+      /* Check if the application has data to send */
 
       if (dev->d_sndlen > 0)
         {
-          //devif_pkt_send(dev, conn);
           return;
         }
     }

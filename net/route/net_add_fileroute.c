@@ -46,7 +46,6 @@
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
-//#include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 
 #include "route/fileroute.h"

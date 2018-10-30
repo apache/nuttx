@@ -131,7 +131,7 @@ int main(int argc, char **argv, char **envp)
 
           blank_lineno = lineno;
         }
-      else /* this line is non-blank */
+      else /* This line is non-blank */
         {
           /* Check for a missing blank line after a comment */
 
@@ -139,6 +139,10 @@ int main(int argc, char **argv, char **envp)
             {
               /* No blank line should be present if the current line contains
                * a right brace or a pre-processor line.
+               *
+               * REVISIT: Generates a false alarm if the current line is also
+               * a comment.  Generally it is acceptable for one comment to
+               * follow another with no space separation.
                */
 
               if (line[n] != '}' && line[n] != '#')
@@ -534,6 +538,10 @@ int main(int argc, char **argv, char **envp)
 
                         if (prevdeclnest <= 0 || declnest > 0)
                           {
+                            /* REVISIT:  Generates false alarms on named structures
+                             * that are fields of other structures or unions.
+                             */
+
                             fprintf(stderr,
                                     "Garbage follows right bracket at line %d:%d\n",
                                     lineno, n);

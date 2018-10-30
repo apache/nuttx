@@ -231,7 +231,7 @@ ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 
   (void)enter_cancellation_point();
 
-  /* Let nx_send() and psock_send() do all of the work*/
+  /* Let nx_send() and psock_send() do all of the work */
 
   ret = nx_send(sockfd, buf, len, flags);
   if (ret < 0)

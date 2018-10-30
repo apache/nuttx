@@ -389,16 +389,16 @@ static int sendto_next_transfer(FAR struct socket *psock,
       return ret;
     }
 
- /* Get the device that will handle the remote packet transfers.  This
-  * should never be NULL.
-  */
+  /* Get the device that will handle the remote packet transfers.  This
+   * should never be NULL.
+   */
 
- dev = udp_find_raddr_device(conn);
- if (dev == NULL)
-   {
-     nerr("ERROR: udp_find_raddr_device failed\n");
-     return -ENETUNREACH;
-   }
+  dev = udp_find_raddr_device(conn);
+  if (dev == NULL)
+    {
+      nerr("ERROR: udp_find_raddr_device failed\n");
+      return -ENETUNREACH;
+    }
 
   /* Make sure that the device is in the UP state */
 

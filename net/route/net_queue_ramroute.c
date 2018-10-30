@@ -162,7 +162,7 @@ FAR struct net_route_ipv6_entry_s *
  *
  * Description:
  *   Remove the entry in the IPv4/IPv6 routing table list after the specified
-     entry.
+ *   entry.
  *
  * Input Parameters:
  *   entry - A pointer to the new entry to add to the list

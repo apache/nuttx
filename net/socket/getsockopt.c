@@ -211,8 +211,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
               /* Return the actual socket type */
 
-              *(int*)value = conn->type;
-              *value_len   = sizeof(int);
+              *(FAR int *)value = conn->type;
+              *value_len        = sizeof(int);
 
               break;
             }

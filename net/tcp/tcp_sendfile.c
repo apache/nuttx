@@ -662,7 +662,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   if (state.snd_datacb == NULL)
     {
       nerr("ERROR: Failed to allocate data callback\n");
-      ret =- ENOMEM;
+      ret = -ENOMEM;
       goto errout_locked;
     }
 
