@@ -58,7 +58,7 @@ struct gap8_tim_instance
 {
   BASIC_TIM_reg_t *reg;
   uint32_t core_clock;
-}
+};
 
 /****************************************************************************
  * Private Data
