@@ -703,8 +703,8 @@ config RNDIS_PRODUCTSTR
 	default "RNDIS gadget"
 
 config RNDIS_SERIALSTR
-	hex "RNDIS serial string"
-	default "0x1234"
+	string "RNDIS serial string"
+	default "1234"
 
 config RNDIS_VERSIONNO
 	hex "RNDIS Version Number"
