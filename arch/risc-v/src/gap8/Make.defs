@@ -1,0 +1,67 @@
+############################################################################
+# arch/risc-v/src/gapuino/Make.defs
+#
+#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+#   Author: hhuysqt <1020988872@qq.com>
+#
+# # Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Specify our HEAD assembly file.  This will be linked as the first object
+# file, so it will appear at address 0
+
+HEAD_ASRC = startup_gap8.S
+
+# Specify our general Assembly files
+
+CHIP_ASRCS = up_syscall.S
+
+# Override the arch to enable hardware MUL during assembly.
+# This is to support our hardware mul test.  For that test,
+# we have to disable hardware mul for C code so the soft
+# math libs will be used to compare software mul vs hw mul.
+# But hw mul must be enabled to compile the .S file, or we
+# will get an illegal instruction error.
+
+ASARCHCPUFLAGS += -march=rv32imcxgap8 -mPE=8 -mFC=1 -D__riscv__ -D__pulp__ -D__GAP8__
+
+# Specify C code within the common directory to be included
+
+CMN_CSRCS  += up_initialize.c up_swint.c
+CMN_CSRCS  += up_createstack.c up_dumpstate.c up_exit.c
+CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
+CMN_CSRCS  += up_interruptcontext.c up_releasepending.c up_reprioritizertr.c
+CMN_CSRCS  += up_releasestack.c up_stackframe.c up_sigdeliver.c
+CMN_CSRCS  += up_unblocktask.c up_usestack.c
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+CMN_CSRCS  += up_vfork.c
+endif
+
+# Specify our C code within this directory to be included
+
+CHIP_CSRCS  = gap8_allocateheap.c gap8_fll.c gap8_gpio.c gap8_interrupt.c
+CHIP_CSRCS += gap8_tim.c gap8_uart.c gap8_udma.c gap8_idle.c gap8_schedulesigaction.c

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/risc-v/include/limits.h
+ * arch/risc-v/src/common/up_allocateheap.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,58 +33,63 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_INCLUDE_LIMITS_H
-#define __ARCH_RISCV_INCLUDE_LIMITS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-#define CHAR_BIT    8
-#define SCHAR_MIN  (-SCHAR_MAX - 1)
-#define SCHAR_MAX   127
-#define UCHAR_MAX   255
+/****************************************************************************
+ * Name: up_allocate_heap
+ *
+ * Description:
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
+ *
+ ****************************************************************************/
 
-/* These could be different on machines where char is unsigned */
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+{
+  /* These values come from GAP8.ld */
 
-#ifdef __CHAR_UNSIGNED__
-#define CHAR_MIN    0
-#define CHAR_MAX    UCHAR_MAX
-#else
-#define CHAR_MIN    SCHAR_MIN
-#define CHAR_MAX    SCHAR_MAX
-#endif
+  extern uint8_t *_heap_start, *_heap_end;
+  uint32_t hstart = (uint32_t)&_heap_start;
+  uint32_t hend = (uint32_t)&_heap_end;
 
-#define SHRT_MIN    (-SHRT_MAX - 1)
-#define SHRT_MAX    32767
-#define USHRT_MAX   65535U
+  *heap_start = &_heap_start;
+  *heap_size = hend - hstart;
+}
 
-#define INT_MIN     (-INT_MAX - 1)
-#define INT_MAX     2147483647
-#define UINT_MAX    4294967295U
+/************************************************************************************
+ * Name: up_addregion
+ *
+ * Description:
+ *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
+ *   that may be used for heap.
+ *
+ ************************************************************************************/
 
-/* These change on 32-bit and 64-bit platforms */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-
-#define LONG_MIN    (-LONG_MAX - 1)
-#define LONG_MAX    2147483647L
-#define ULONG_MAX   4294967295UL
-
-#define LLONG_MIN   (-LLONG_MAX - 1)
-#define LLONG_MAX   9223372036854775807LL
-#define ULLONG_MAX  18446744073709551615ULL
-
-/* A pointer is 4 bytes */
-
-#define PTR_MIN     (-PTR_MAX - 1)
-#define PTR_MAX     2147483647
-#define UPTR_MAX    4294967295U
-
-#endif /* defined(CONFIG_ARCH_32IM) || defined(CONFIG_ARCH_32I) */
-
-#endif /* __ARCH_RISCV_INCLUDE_LIMITS_H */
+void up_addregion(void)
+{
+  // TODO: add L1 memories
+}

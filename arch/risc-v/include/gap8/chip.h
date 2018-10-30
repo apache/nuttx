@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/risc-v/include/limits.h
+ * arch/risc-v/include/gap8/chip.h
+ * Gapuino chip features
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: hhuysqt <1020988872@qq.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,9 +15,6 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,8 +31,12 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_INCLUDE_LIMITS_H
-#define __ARCH_RISCV_INCLUDE_LIMITS_H
+/* This file should never be included directed but, rather, only indirectly
+ * through nuttx/irq.h
+ */
+
+#ifndef __ARCH_RISCV_INCLUDE_GAP8_CHIP_H
+#define __ARCH_RISCV_INCLUDE_GAP8_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -44,47 +46,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CHAR_BIT    8
-#define SCHAR_MIN  (-SCHAR_MAX - 1)
-#define SCHAR_MAX   127
-#define UCHAR_MAX   255
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-/* These could be different on machines where char is unsigned */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
 
-#ifdef __CHAR_UNSIGNED__
-#define CHAR_MIN    0
-#define CHAR_MAX    UCHAR_MAX
-#else
-#define CHAR_MIN    SCHAR_MIN
-#define CHAR_MAX    SCHAR_MAX
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#define SHRT_MIN    (-SHRT_MAX - 1)
-#define SHRT_MAX    32767
-#define USHRT_MAX   65535U
-
-#define INT_MIN     (-INT_MAX - 1)
-#define INT_MAX     2147483647
-#define UINT_MAX    4294967295U
-
-/* These change on 32-bit and 64-bit platforms */
-
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
-
-#define LONG_MIN    (-LONG_MAX - 1)
-#define LONG_MAX    2147483647L
-#define ULONG_MAX   4294967295UL
-
-#define LLONG_MIN   (-LLONG_MAX - 1)
-#define LLONG_MAX   9223372036854775807LL
-#define ULLONG_MAX  18446744073709551615ULL
-
-/* A pointer is 4 bytes */
-
-#define PTR_MIN     (-PTR_MAX - 1)
-#define PTR_MAX     2147483647
-#define UPTR_MAX    4294967295U
-
-#endif /* defined(CONFIG_ARCH_32IM) || defined(CONFIG_ARCH_32I) */
-
-#endif /* __ARCH_RISCV_INCLUDE_LIMITS_H */
+#endif /* __ARCH_RISCV_INCLUDE_GAP8_CHIP_H */

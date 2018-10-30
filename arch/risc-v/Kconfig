@@ -16,6 +16,13 @@ config ARCH_CHIP_NR5
 	---help---
 		NEXT RISC-V NR5Mxx architectures (RISC-V RV32IM cores).
 
+config ARCH_CHIP_GAP8
+	bool "GreenwavesTechnologies GAP8"
+	select ARCH_RV32IM
+	---help---
+		GreenwavesTechnologies GAP8 features a 1+8-core RI5CY DSP-like
+		processor, which originally comes from the ETH PULP platform.
+
 endchoice
 
 config ARCH_RV32I
@@ -33,6 +40,7 @@ config ARCH_FAMILY
 config ARCH_CHIP
 	string
 	default "nr5m100"	if ARCH_CHIP_NR5
+	default "gap8"		if ARCH_CHIP_GAP8
 
 config NR5_MPU
 	bool "MPU support"
@@ -49,6 +57,9 @@ source arch/risc-v/src/rv32im/Kconfig
 endif
 if ARCH_CHIP_NR5
 source arch/risc-v/src/nr5m100/Kconfig
+endif
+if ARCH_CHIP_GAP8
+source arch/risc-v/src/gap8/Kconfig
 endif
 
 endif

@@ -52,6 +52,10 @@ ifeq ($(filter y, $(CONFIG_RV32IM_TOOLCHAIN_GNU_RVGW)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVGW
 endif
 
+ifeq ($(filter y, $(CONFIG_RI5CY_GAP8_TOOLCHAIN)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RISCY
+endif
+
 #
 # Supported toolchains
 #
@@ -95,10 +99,15 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RISCY)
+  CROSSDEV ?= riscv32-unknown-elf-
+  ARCROSSDEV ?= riscv32-unknown-elf-
+  ARCHCPUFLAGS = -march=rv32imcxgap8 -mPE=8 -mFC=1 -D__riscv__ -D__pulp__ -D__GAP8__
+endif
+
 # Individual tools may limit the optimizatin level but, by default, the
 # optimization level will be set to to -Os
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),)
 MAXOPTIMIZATION ?= -Os
 endif
-

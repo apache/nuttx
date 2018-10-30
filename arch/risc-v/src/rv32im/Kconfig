@@ -25,6 +25,15 @@ config RV32IM_TOOLCHAIN_GNU_RVGW
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.
 
+config RI5CY_GAP8_TOOLCHAIN
+	bool "toolchain from gap_riscv_toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+			Choose the toolchain of riscv32-unknown-elf with full support
+			for PULP extensions. gap_sdk also uses it.
+			https://github.com/GreenWaves-Technologies/gap_riscv_toolchain/
+
+
 endchoice
 
 config RV32IM_HW_MULDIV

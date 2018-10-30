@@ -272,6 +272,13 @@ config ARCH_BOARD_FREEDOM_KL26Z
 		This is the configuration for the NXP/FreeScale Freedom KL26Z board.  This
 		board has the K26Z128VLH4 chip with a built-in SDA debugger.
 
+config ARCH_BOARD_GAPUINO
+	bool "GWT gapuino board"
+	depends on ARCH_CHIP_GAP8
+	select UART_SERIALDRIVER
+	---help---
+		Nuttx port for gapuino, a GAP8 evaluation board.
+
 config ARCH_BOARD_HYMINI_STM32V
 	bool "HY-Mini STM32v board"
 	depends on ARCH_CHIP_STM32F103VC
@@ -1698,6 +1705,7 @@ config ARCH_BOARD
 	default "freedom-k66f"             if ARCH_BOARD_FREEDOM_K66F
 	default "freedom-kl25z"            if ARCH_BOARD_FREEDOM_KL25Z
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
+	default "gapuino"                  if ARCH_BOARD_GAPUINO
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
@@ -1944,6 +1952,9 @@ source "configs/freedom-kl25z/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_KL26Z
 source "configs/freedom-kl26z/Kconfig"
+endif
+if ARCH_BOARD_GAPUINO
+source "configs/gapuino/Kconfig"
 endif
 if ARCH_BOARD_HYMINI_STM32V
 source "configs/hymini-stm32v/Kconfig"

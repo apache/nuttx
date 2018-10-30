@@ -1791,6 +1791,8 @@ nuttx/
  |   |   `- README.txt
  |   |- freedom-kl26z/
  |   |   `- README.txt
+ |   |- gapuino/
+ |   |   `- README.txt
  |   |- hymini-stm32v/
  |   |   `- README.txt
  |   |- imxrt1050-evk
