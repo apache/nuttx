@@ -9,7 +9,7 @@
 #include <syslog.h>
 #include <errno.h>
 
-#include "chip.h"
+#include "gap8.h"
 #include "gap8_fll.h"
 
 /****************************************************************************

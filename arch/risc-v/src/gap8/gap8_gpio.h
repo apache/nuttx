@@ -50,7 +50,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip.h"
+#include "gap8.h"
 
 /************************************************************************************
  * Pre-Processor Definitions

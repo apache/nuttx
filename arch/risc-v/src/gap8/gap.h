@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/risc-v/src/gap8/chip.h
+ * arch/risc-v/src/gap8/gap8.h
  * Peripheral registers on GAP8
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -35,8 +35,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_GAP8_CHIP_H
-#define __ARCH_RISC_V_SRC_GAP8_CHIP_H
+#ifndef __ARCH_RISC_V_SRC_GAP8_GAP8_H
+#define __ARCH_RISC_V_SRC_GAP8_GAP8_H
 
 /************************************************************************************
  * Included Files
@@ -2025,4 +2025,4 @@ typedef struct
 
 #endif
 
-#endif  /* __ARCH_RISC_V_SRC_GAP8_CHIP_H */
+#endif  /* __ARCH_RISC_V_SRC_GAP8_GAP8_H */

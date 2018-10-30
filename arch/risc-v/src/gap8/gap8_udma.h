@@ -53,7 +53,7 @@
 
 #include <stdbool.h>
 
-#include "chip.h"
+#include "gap8.h"
 
 /************************************************************************************
  * Pre-processor Definitions

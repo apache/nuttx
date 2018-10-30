@@ -45,7 +45,7 @@
  * Included Files
  ************************************************************************************/
 
-#include "chip.h"
+#include "gap8.h"
 #include "gap8_udma.h"
 #include "gap8_gpio.h"
 
