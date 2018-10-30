@@ -124,12 +124,17 @@ int main(int argc, char **argv, char **envp)
                       lineno);
             }
 
-          if (lineno == blank_lineno + 1)
+          if (lineno == 1)
+            {
+              fprintf(stderr,  "File begins with a blank line\n");
+            }
+          else if (lineno == blank_lineno + 1)
             {
               fprintf(stderr,  "Too many blank lines at line %d\n", lineno);
             }
 
           blank_lineno = lineno;
+          continue;
         }
       else /* This line is non-blank */
         {
@@ -138,7 +143,8 @@ int main(int argc, char **argv, char **envp)
           if (lineno == comment_lineno + 1)
             {
               /* No blank line should be present if the current line contains
-               * a right brace or a pre-processor line.
+               * a right brace, a pre-processor line, the start of another
+               * comment.
                *
                * REVISIT: Generates a false alarm if the current line is also
                * a comment.  Generally it is acceptable for one comment to
@@ -208,7 +214,10 @@ int main(int argc, char **argv, char **envp)
           if (line[indent] == '/' && line[indent +1] == '*' &&
               lptr - line == linelen - 3)
             {
-              if (comment_lineno != lineno - 1 &&
+              /* Check if there should be a blank line before the comment */
+
+              if (lineno > 1 &&
+                  comment_lineno != lineno - 1 &&
                   blank_lineno   != lineno - 1 &&
                   noblank_lineno != lineno - 1)
                 {
@@ -395,9 +404,18 @@ int main(int argc, char **argv, char **envp)
                     }
 #endif
 
+                  /* Handle nested comments */
+
                   if (ncomment > 0)
                     {
-                      ncomment--;
+                      /* Remember the line number of the line containing the
+                       * closing of the outermost comment.
+                       */
+
+                      if (--ncomment == 0)
+                        {
+                          comment_lineno = lineno;
+                        }
                     }
                   else
                     {
@@ -406,6 +424,9 @@ int main(int argc, char **argv, char **envp)
                               "Closing without opening comment at line %d:%d\n",
                               lineno, n);
                     }
+
+                  n++;
+                  continue;
                 }
 
               /* Check for C++ style comments
@@ -665,19 +686,6 @@ int main(int argc, char **argv, char **envp)
                   }
                   break;
 
-                /* Check for space at the end of the line */
-
-                case '\n':
-                  {
-                    if (n > 0 && isspace((int)line[n - 1]))
-                      {
-                        fprintf(stderr,
-                                "Dangling whitespace at the end of line %d:%d\n",
-                                lineno, n);
-                      }
-                  }
-                  break;
-
                 /* Check for space around various operators */
 
                 case '-':
@@ -885,6 +893,15 @@ int main(int argc, char **argv, char **envp)
                   break;
                 }
             }
+        }
+
+      /* Loop terminates when NUL or newline character found */
+      /* Check for space at the end of the line */
+
+      if (n > 1 && line[n] == '\n' && isspace((int)line[n - 1]))
+        {
+          fprintf(stderr, "Dangling whitespace at the end of line %d:%d\n",
+                  lineno, n);
         }
 
       /* STEP 4: Check alignment */
