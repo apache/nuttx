@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <netinet/in.h>
 
@@ -82,10 +83,16 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
                     FAR const void *value, socklen_t value_len)
 {
 #ifdef CONFIG_NET_MLD
+  int ret;
+
+  ninfo("option: %d\n", option);
+
   /* Handle MLD-related socket options */
 
   switch (option)
     {
+      /* The following IPv6 socket options are defined, but not implemented */
+
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
       case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
       case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
@@ -96,12 +103,18 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
       case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
                                    * communications only */
+#warning Missing logic
+        nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
+        ret = -ENOSYS;
+        break;
+
       default:
+        nerr("ERROR: Unrecognized IPv6 option: %d\n", option);
+        ret = -ENOPROTOOPT;
         break;
     }
 
-#warning Missing logic
-  return -ENOSYS;
+  return ret;
 #else
   return -ENOPROTOOPT;
 #endif

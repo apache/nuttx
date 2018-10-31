@@ -40,12 +40,16 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/net.h>
 
 #include <netinet/in.h>
 
+#include "netdev/netdev.h"
+#include "igmp/igmp.h"
 #include "inet/inet.h"
 
 #ifdef CONFIG_NET_IPv4
@@ -82,6 +86,10 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
                     FAR const void *value, socklen_t value_len)
 {
 #ifdef CONFIG_NET_IGMP
+  int ret;
+
+  ninfo("option: %d\n", option);
+
   /* With IPv4, the multicast-related socket options are simply an alternative
    * way to access IGMP.  That IGMP functionality can also be accessed via
    * IOCTL commands (see netdev/netdev_ioctl.c)
@@ -91,6 +99,42 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
   switch (option)
     {
+      case IP_MSFILTER:    /* Access advanced, full-state filtering API */
+        {
+          FAR const struct ip_msfilter *imsf;
+          FAR struct net_driver_s *dev;
+
+          imsf = (FAR const struct ip_msfilter *)value;
+          if (imsf == NULL || value_len < sizeof(struct ip_msfilter))
+            {
+              nerr("ERROR: Bad value or value_len\n");
+              ret = -EINVAL;
+            }
+          else
+            {
+              /* Get the device associated with the local interface address */
+
+              dev = netdev_findby_lipv4addr(imsf->imsf_interface.s_addr);
+              if (dev == NULL)
+                {
+                  nwarn("WARNING: Could not find device for imsf_interface\n");
+                  ret = -ENODEV;
+                }
+              else if (imsf->imsf_fmode == MCAST_INCLUDE)
+                {
+                  ret = igmp_joingroup(dev, &imsf->imsf_multiaddr);
+                }
+              else
+                {
+                  DEBUGASSERT(imsf->imsf_fmode == MCAST_EXCLUDE);
+                  ret = igmp_leavegroup(dev, &imsf->imsf_multiaddr);
+                }
+            }
+        }
+        break;
+
+      /* The following IPv4 socket options are defined, but not implemented */
+
       case IP_MULTICAST_IF:           /* Set local device for a multicast
                                        * socket */
       case IP_MULTICAST_TTL:          /* Set/read the time-to-live value of
@@ -110,17 +154,21 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
       case IP_DROP_SOURCE_MEMBERSHIP: /* Leave a source-specific group.  Stop
                                        * receiving data from a given multicast
                                        * group that come from a given source */
-      case IP_MSFILTER:               /* Access advanced, full-state filtering
-                                       * API */
       case IP_MULTICAST_ALL:          /* Modify the delivery policy of
                                        * multicast messages bound to
                                        * INADDR_ANY */
+#warning Missing logic
+        nwarn("WARNING: Unimplemented IPv4 option: %d\n", option);
+        ret = -ENOSYS;
+        break;
+
       default:
+        nerr("ERROR: Unrecognized IPv4 option: %d\n", option);
+        ret = -ENOPROTOOPT;
         break;
     }
 
-#warning Missing logic
-  return -ENOSYS;
+  return ret;
 #else
   return -ENOPROTOOPT;
 #endif
