@@ -64,10 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
-#  error "IGMP for IPv6 not supported"
-#endif
-
 /* IGMP packet types */
 
 #define IGMP_MEMBERSHIP_QUERY    0x11    /* Membership Query */
@@ -110,6 +106,8 @@
 #define IS_IDLEMEMBER(f)         (((f) & IGMP_IDLEMEMBER) != 0)
 #define IS_SCHEDMSG(f)           (((f) & IGMP_SCHEDMSG) != 0)
 #define IS_WAITMSG(f)            (((f) & IGMP_WAITMSG) != 0)
+
+/* Time-to-Live must be one */
 
 #define IGMP_TTL                 1
 

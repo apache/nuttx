@@ -114,7 +114,7 @@
 #define IP_MSFILTER           (__SO_PROTOCOL + 10) /* Access advanced, full-
                                                     * state filtering API */
 #define IP_MULTICAST_ALL      (__SO_PROTOCOL + 11) /* Modify the delivery policy
-                                                    * of mutlicast messages bound
+                                                    * of multicast messages bound
                                                     * to INADDR_ANY */
 
 /* SOL_IPV6 protocol-level socket options. */

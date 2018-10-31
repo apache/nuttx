@@ -59,6 +59,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* MLD is a sub-protocol of ICMPv6, that is, MLD message types are a subset
+ * of ICMPv6 messages, and MLD messages are identified in IPv6 packets by a
+ * preceding Next Header value of IP_PROTO_ICMP6 (58).  All MLD messages
+ * MUST be sent with a link-local IPv6 Source Address, an IPv6 Hop Limit of
+ * 1, and an IPv6 Router Alert option (RFC2711) in a Hop-by-Hop Options
+ * header.  (The Router Alert option is necessary to cause routers to
+ * examine MLD messages sent to IPv6 multicast addresses in which the
+ * routers themselves have no interest.)  MLD Reports can be sent with the
+ * source address set to the unspecified address (RFC3513), if a valid
+ * link-local IPv6 source address has not been acquired yet for the sending
+ * interface.
+ */
+
+#define MLD_TTL                (1)
+
 /* Maximum response code bit definitions.
  *
  *  If MRC < 32768

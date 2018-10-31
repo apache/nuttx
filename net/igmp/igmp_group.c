@@ -69,12 +69,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-#  error "IGMP for IPv6 not supported"
-#endif
-
 /* Debug ********************************************************************/
 
 #undef IGMP_GRPDEBUG /* Define to enable detailed IGMP group debug */
