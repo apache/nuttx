@@ -306,7 +306,7 @@ static int  kinetis_ifdown(struct net_driver_s *dev);
 static void kinetis_txavail_work(FAR void *arg);
 static int  kinetis_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  kinetis_addmac(struct net_driver_s *dev,
               FAR const uint8_t *mac);
 static int  kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -1393,7 +1393,7 @@ static int kinetis_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct kinetis_driver_s *priv =
@@ -1423,7 +1423,7 @@ static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct kinetis_driver_s *priv =
@@ -2123,7 +2123,7 @@ int kinetis_netinitialize(int intf)
   priv->dev.d_ifup    = kinetis_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = kinetis_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = kinetis_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = kinetis_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = kinetis_rmmac;    /* Remove multicast MAC address */
 #endif

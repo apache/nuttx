@@ -139,7 +139,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...);
 static int emac_ifup(struct net_driver_s *dev);
 static int emac_ifdown(struct net_driver_s *dev);
 static int emac_txavail(struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -681,7 +681,7 @@ static int emac_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
@@ -710,7 +710,7 @@ static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
@@ -769,7 +769,7 @@ int emac_initialize(int intf)
   priv->d_dev.d_ifup    = emac_ifup;     /* I/F down callback */
   priv->d_dev.d_ifdown  = emac_ifdown;   /* I/F up (new IP address) callback */
   priv->d_dev.d_txavail = emac_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->d_dev.d_addmac  = emac_addmac;   /* Add multicast MAC address */
   priv->d_dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
 #endif

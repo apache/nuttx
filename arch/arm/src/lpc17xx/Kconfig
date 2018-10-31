@@ -718,11 +718,11 @@ config LPC17_ETH_HASH
 
 config LPC17_MULTICAST
 	bool "Multicast"
-	default y if NET_IGMP
-	default n if !NET_IGMP
+	default y if NET_MCASTGROUP
+	default n if !NET_MCASTGROUP
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
-		if NET_IGMP is selected.
+		if NET_MCASTGROUP is selected.
 
 choice
 	prompt "Work queue"

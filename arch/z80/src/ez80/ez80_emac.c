@@ -424,7 +424,7 @@ static int  ez80emac_ifdown(struct net_driver_s *dev);
 static void ez80emac_txavail_work(FAR void *arg);
 static int  ez80emac_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -2216,7 +2216,7 @@ static int ez80emac_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
@@ -2246,7 +2246,7 @@ static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
@@ -2534,7 +2534,7 @@ int up_netinitialize(void)
   priv->dev.d_ifup    = ez80emac_ifup;      /* I/F down callback */
   priv->dev.d_ifdown  = ez80emac_ifdown;    /* I/F up (new IP address) callback */
   priv->dev.d_txavail = ez80emac_txavail;   /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = ez80emac_addmac;    /* Add multicast MAC address */
   priv->dev.d_rmmac   = ez80emac_rmmac;     /* Remove multicast MAC address */
 #endif

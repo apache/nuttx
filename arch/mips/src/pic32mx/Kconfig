@@ -1089,11 +1089,11 @@ config PIC32MX_ETH_PRIORITY
 
 config PIC32MX_MULTICAST
 	bool "Multicast"
-	default y if NET_IGMP
+	default y if NET_MCASTGROUP
 	depends on PIC32MX_ETHERNET
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set if
-		NET_IGMP is selected.
+		NET_MCASTGROUP is selected.
 
 choice
 	prompt "Work queue"

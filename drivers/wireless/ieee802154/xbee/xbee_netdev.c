@@ -211,7 +211,7 @@ static int  xbeenet_ifdown(FAR struct net_driver_s *dev);
 static void xbeenet_txavail_work(FAR void *arg);
 static int  xbeenet_txavail(FAR struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  xbeenet_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 static int  xbeenet_rmmac(FAR struct net_driver_s *dev,
@@ -961,7 +961,7 @@ static int xbeenet_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int xbeenet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct xbeenet_driver_s *priv = (FAR struct xbeenet_driver_s *)dev->d_private;
@@ -992,7 +992,7 @@ static int xbeenet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int xbeenet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct xbeenet_driver_s *priv = (FAR struct xbeenet_driver_s *)dev->d_private;
@@ -1383,7 +1383,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
   dev->d_ifup         = xbeenet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = xbeenet_ifdown;     /* I/F down callback */
   dev->d_txavail      = xbeenet_txavail;    /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   dev->d_addmac       = xbeenet_addmac;     /* Add multicast MAC address */
   dev->d_rmmac        = xbeenet_rmmac;      /* Remove multicast MAC address */
 #endif

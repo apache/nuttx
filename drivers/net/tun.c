@@ -188,7 +188,7 @@ static void tun_poll_expiry(int argc, wdparm_t arg, ...);
 static int tun_ifup(FAR struct net_driver_s *dev);
 static int tun_ifdown(FAR struct net_driver_s *dev);
 static int tun_txavail(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tun_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int tun_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -1117,7 +1117,7 @@ static int tun_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table */
@@ -1144,7 +1144,7 @@ static int tun_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tun_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table */
@@ -1201,7 +1201,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
   priv->dev.d_ifup    = tun_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = tun_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = tun_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = tun_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tun_rmmac;    /* Remove multicast MAC address */
 #endif

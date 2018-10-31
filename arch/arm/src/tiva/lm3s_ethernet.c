@@ -270,7 +270,7 @@ static int  tiva_ifdown(struct net_driver_s *dev);
 static void tiva_txavail_work(void *arg);
 static int  tiva_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  tiva_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int  tiva_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
@@ -1593,7 +1593,7 @@ static int tiva_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tiva_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
@@ -1623,7 +1623,7 @@ static int tiva_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tiva_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
@@ -1683,7 +1683,7 @@ static inline int tiva_ethinitialize(int intf)
   priv->ld_dev.d_ifup    = tiva_ifup;     /* I/F down callback */
   priv->ld_dev.d_ifdown  = tiva_ifdown;   /* I/F up (new IP address) callback */
   priv->ld_dev.d_txavail = tiva_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->ld_dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
   priv->ld_dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
 #endif

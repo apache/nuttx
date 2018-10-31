@@ -324,7 +324,7 @@ ZKit-ARM Configuration Options
       Also needs CONFIG_DEBUG_FEATURES.
     CONFIG_LPC17_ETH_HASH - Enable receipt of near-perfect match frames.
     CONFIG_LPC17_MULTICAST - Enable receipt of multicast (and unicast) frames.
-      Automatically set if CONFIG_NET_IGMP is selected.
+      Automatically set if CONFIG_NET_MCASTGROUP is selected.
 
   LPC17xx USB Device Configuration
 

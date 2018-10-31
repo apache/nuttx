@@ -727,10 +727,10 @@ static int  tiva_ifdown(struct net_driver_s *dev);
 static void tiva_txavail_work(FAR void *arg);
 static int  tiva_txavail(struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
@@ -2526,7 +2526,7 @@ static int tiva_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static uint32_t tiva_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc = 0xffffffff;
@@ -2551,7 +2551,7 @@ static uint32_t tiva_calcethcrc(const uint8_t *data, size_t length)
 
   return ~crc;
 }
-#endif /* CONFIG_NET_IGMP || CONFIG_NET_ICMPv6 */
+#endif /* CONFIG_NET_MCASTGROUP || CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: tiva_addmac
@@ -2571,7 +2571,7 @@ static uint32_t tiva_calcethcrc(const uint8_t *data, size_t length)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
@@ -2628,7 +2628,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
@@ -4041,7 +4041,7 @@ int tiva_ethinitialize(int intf)
   priv->dev.d_ifup    = tiva_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = tiva_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = tiva_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
 #endif

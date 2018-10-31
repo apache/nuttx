@@ -9,6 +9,7 @@ menuconfig NET_MLD
 	bool "Multicast Listener Discovery (MLD)"
 	default n
 	depends on EXPERIMENTAL
+	select NET_MCASTGROUP
 	---help---
 		Enable Multicast Listener Discovery (MLD) support.
 

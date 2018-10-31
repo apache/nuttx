@@ -124,7 +124,7 @@
 
 /* If IGMP is enabled, then accept multi-cast frames. */
 
-#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_PIC32MZ_MULTICAST)
+#if defined(CONFIG_NET_MCASTGROUP) && !defined(CONFIG_PIC32MZ_MULTICAST)
 #  define CONFIG_PIC32MZ_MULTICAST 1
 #endif
 
@@ -441,7 +441,7 @@ static int pic32mz_ifdown(struct net_driver_s *dev);
 static void pic32mz_txavail_work(void *arg);
 static int pic32mz_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
@@ -2530,7 +2530,7 @@ static int pic32mz_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
@@ -2560,7 +2560,7 @@ static int pic32mz_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int pic32mz_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev->d_private;
@@ -3374,7 +3374,7 @@ static inline int pic32mz_ethinitialize(int intf)
   priv->pd_dev.d_ifup    = pic32mz_ifup;    /* I/F down callback */
   priv->pd_dev.d_ifdown  = pic32mz_ifdown;  /* I/F up (new IP address) callback */
   priv->pd_dev.d_txavail = pic32mz_txavail; /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->pd_dev.d_addmac  = pic32mz_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mz_rmmac;   /* Remove multicast MAC address */
 #endif

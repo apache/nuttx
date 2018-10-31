@@ -201,10 +201,10 @@ static int  cdcecm_ifdown(FAR struct net_driver_s *dev);
 static void cdcecm_txavail_work(FAR void *arg);
 static int  cdcecm_txavail(FAR struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int  cdcecm_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  cdcecm_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 #endif
@@ -929,7 +929,7 @@ static int cdcecm_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int cdcecm_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct cdcecm_driver_s *priv =
@@ -958,7 +958,7 @@ static int cdcecm_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int cdcecm_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct cdcecm_driver_s *priv =
@@ -2101,7 +2101,7 @@ static int cdcecm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   self->dev.d_ifup    = cdcecm_ifup;     /* I/F up (new IP address) callback */
   self->dev.d_ifdown  = cdcecm_ifdown;   /* I/F down callback */
   self->dev.d_txavail = cdcecm_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   self->dev.d_addmac  = cdcecm_addmac;   /* Add multicast MAC address */
   self->dev.d_rmmac   = cdcecm_rmmac;    /* Remove multicast MAC address */
 #endif

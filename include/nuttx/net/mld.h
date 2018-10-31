@@ -224,7 +224,7 @@ struct mld_mcast_addrec_v2_s
 {
   uint8_t rectype;           /* Record type.  See definitions above. */
   uint8_t auxdatlen;         /* Auxiliary data length */
-  uin16_t nsources;          /* Number of sources */
+  uint16_t nsources;         /* Number of sources */
   net_ipv6addr_t mcast;      /* 128-bit IPv6 multicast address */
   net_ipv6addr_t srcaddr[1]; /* Array of source IPv6 address (actual size is
                               * nsources) */

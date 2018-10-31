@@ -114,7 +114,7 @@
 
 #define ETH_ZLEN 60
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 # define MACCR_ENABLE_ALL (FTMAC100_MACCR_XMT_EN  | \
                            FTMAC100_MACCR_RCV_EN  | \
                            FTMAC100_MACCR_XDMA_EN | \
@@ -229,9 +229,9 @@ static int ftmac100_ifdown(FAR struct net_driver_s *dev);
 static void ftmac100_txavail_work(FAR void *arg);
 static int ftmac100_txavail(FAR struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int ftmac100_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int ftmac100_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
@@ -1351,7 +1351,7 @@ static int ftmac100_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
@@ -1405,7 +1405,7 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int ftmac100_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
@@ -1551,7 +1551,7 @@ int ftmac100_initialize(int intf)
   priv->ft_dev.d_ifup    = ftmac100_ifup;     /* I/F up (new IP address) callback */
   priv->ft_dev.d_ifdown  = ftmac100_ifdown;   /* I/F down callback */
   priv->ft_dev.d_txavail = ftmac100_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->ft_dev.d_addmac  = ftmac100_addmac;   /* Add multicast MAC address */
   priv->ft_dev.d_rmmac   = ftmac100_rmmac;    /* Remove multicast MAC address */
 #endif

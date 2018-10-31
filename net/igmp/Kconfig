@@ -6,7 +6,8 @@
 config NET_IGMP
 	bool "IGMPv2 client support"
 	default n
-	depends on NET
+	depends on NET_IPv4
+	select NET_MCASTGROUP
 	---help---
 		Enable IGMPv2 client support.
 

@@ -171,7 +171,7 @@ static int  btnet_ifdown(FAR struct net_driver_s *netdev);
 static void btnet_txavail_work(FAR void *arg);
 static int  btnet_txavail(FAR struct net_driver_s *netdev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  btnet_addmac(FAR struct net_driver_s *netdev,
               FAR const uint8_t *mac);
 static int  btnet_rmmac(FAR struct net_driver_s *netdev,
@@ -788,7 +788,7 @@ static int btnet_txavail(FAR struct net_driver_s *netdev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int btnet_addmac(FAR struct net_driver_s *netdev,
                         FAR const uint8_t *mac)
 {
@@ -818,7 +818,7 @@ static int btnet_addmac(FAR struct net_driver_s *netdev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int btnet_rmmac(FAR struct net_driver_s *netdev,
                        FAR const uint8_t *mac)
 {
@@ -1029,7 +1029,7 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   netdev->d_ifup      = btnet_ifup;        /* I/F up (new IP address) callback */
   netdev->d_ifdown    = btnet_ifdown;      /* I/F down callback */
   netdev->d_txavail   = btnet_txavail;     /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   netdev->d_addmac    = btnet_addmac;      /* Add multicast MAC address */
   netdev->d_rmmac     = btnet_rmmac;       /* Remove multicast MAC address */
 #endif

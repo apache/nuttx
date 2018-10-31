@@ -410,11 +410,17 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       dev->flink  = g_netdevices;
       g_netdevices = dev;
 
+#ifdef CONFIG_NET_IGMP
       /* Configure the device for IGMP support */
 
-#ifdef CONFIG_NET_IGMP
       igmp_devinit(dev);
 #endif
+
+#ifdef CONFIG_NET_MLD
+      /* Configure the device for MLD support */
+#warning Missing Logic
+#endif
+
       net_unlock();
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)

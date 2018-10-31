@@ -420,7 +420,7 @@ static int c5471_ifdown(struct net_driver_s *dev);
 static void c5471_txavail_work(FAR void *arg);
 static int c5471_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -2031,7 +2031,7 @@ static int c5471_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
@@ -2061,7 +2061,7 @@ static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
@@ -2444,7 +2444,7 @@ void up_netinitialize(void)
   g_c5471[0].c_dev.d_ifup    = c5471_ifup;      /* I/F down callback */
   g_c5471[0].c_dev.d_ifdown  = c5471_ifdown;    /* I/F up (new IP address) callback */
   g_c5471[0].c_dev.d_txavail = c5471_txavail;   /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   g_c5471[0].c_dev.d_addmac  = c5471_addmac;    /* Add multicast MAC address */
   g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;     /* Remove multicast MAC address */
 #endif

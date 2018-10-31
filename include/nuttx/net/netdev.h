@@ -63,6 +63,10 @@
 #  include <nuttx/net/igmp.h>
 #endif
 
+#ifdef CONFIG_NET_MLD
+#  include <nuttx/net/mld.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -336,8 +340,8 @@ struct net_driver_s
 
   uint16_t d_sndlen;
 
-#ifdef CONFIG_NET_IGMP
-  /* IGMP group list */
+#ifdef CONFIG_NET_MCASTGROUP
+  /* IGMP/MLD group list */
 
   sq_queue_t grplist;
 #endif
@@ -380,7 +384,7 @@ struct net_driver_s
   int (*d_ifup)(FAR struct net_driver_s *dev);
   int (*d_ifdown)(FAR struct net_driver_s *dev);
   int (*d_txavail)(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif

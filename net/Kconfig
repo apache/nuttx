@@ -19,6 +19,10 @@ config NET_READAHEAD
 	bool
 	default n
 
+config NET_MCASTGROUP
+	bool
+	default n
+
 config NET
 	bool "Networking support"
 	default n

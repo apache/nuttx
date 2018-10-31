@@ -340,7 +340,7 @@ static int  imxrt_txavail(struct net_driver_s *dev);
 
 static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  imxrt_addmac(struct net_driver_s *dev,
               FAR const uint8_t *mac);
 static int  imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
@@ -976,7 +976,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
   uint32_t pending;
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   uint32_t gaurStore;
   uint32_t galrStore;
 #endif
@@ -1013,7 +1013,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
        * reset/renegotiate the phy.
        */
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
       /* Just before we pull the rug lets make sure we retain the
        * multicast hash table.
        */
@@ -1025,7 +1025,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
       (void)imxrt_ifdown(&priv->dev);
       (void)imxrt_ifup_action(&priv->dev, false);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
       /* Now write the multicast table back */
 
       putreg32(gaurStore, IMXRT_ENET_GAUR);
@@ -1556,7 +1556,7 @@ static int imxrt_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc    = 0xFFFFFFFFU;
@@ -1605,7 +1605,7 @@ static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
 {
   uint32_t crc;
@@ -1639,7 +1639,7 @@ static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
@@ -1687,7 +1687,7 @@ static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
@@ -2512,7 +2512,7 @@ int imxrt_netinitialize(int intf)
   priv->dev.d_ifup    = imxrt_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = imxrt_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = imxrt_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = imxrt_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = imxrt_rmmac;    /* Remove multicast MAC address */
 #endif

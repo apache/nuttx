@@ -126,7 +126,7 @@ static int lo_ifup(FAR struct net_driver_s *dev);
 static int lo_ifdown(FAR struct net_driver_s *dev);
 static void lo_txavail_work(FAR void *arg);
 static int lo_txavail(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -446,7 +446,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* There is no multicast support in the loopback driver */
@@ -473,7 +473,7 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   /* There is no multicast support in the loopback driver */
@@ -514,7 +514,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_ifup    = lo_ifup;      /* I/F up (new IP address) callback */
   priv->lo_dev.d_ifdown  = lo_ifdown;    /* I/F down callback */
   priv->lo_dev.d_txavail = lo_txavail;   /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->lo_dev.d_addmac  = lo_addmac;    /* Add multicast MAC address */
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif

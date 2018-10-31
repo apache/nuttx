@@ -74,7 +74,7 @@ static const struct ether_addr g_broadcast_ethaddr =
   }
 };
 
-/* Support for IGMP multicast addresses.
+/* Support for MLD multicast addresses.
  *
  * Well-known ethernet multicast address:
  *
@@ -90,7 +90,7 @@ static const struct ether_addr g_broadcast_ethaddr =
  * The following is the first three octects of the IGMP address:
  */
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MLD
 static const uint8_t g_multicast_ethaddr[3] =
 {
   0x01, 0x00, 0x5e
@@ -174,7 +174,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
              ETHER_ADDR_LEN);
     }
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MLD
   /* Check if the destination address is a multicast address
    *
    *   IPv6 multicast addresses are have the high-order octet of the

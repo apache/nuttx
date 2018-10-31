@@ -404,7 +404,7 @@ static int dm9x_ifdown(struct net_driver_s *dev);
 static void dm9x_txavail_work(FAR void *arg);
 static int dm9x_txavail(struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -1693,7 +1693,7 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
@@ -1723,7 +1723,7 @@ static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
@@ -1945,7 +1945,7 @@ int dm9x_initialize(void)
   g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;     /* I/F down callback */
   g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;   /* I/F up (new IP address) callback */
   g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;   /* Add multicast MAC address */
   g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;    /* Remove multicast MAC address */
 #endif

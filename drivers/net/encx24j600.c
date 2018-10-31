@@ -356,7 +356,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...);
 static int  enc_ifup(struct net_driver_s *dev);
 static int  enc_ifdown(struct net_driver_s *dev);
 static int  enc_txavail(struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -2395,7 +2395,7 @@ static int enc_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
@@ -2433,7 +2433,7 @@ static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
@@ -2812,7 +2812,7 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = enc_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
 #endif

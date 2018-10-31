@@ -211,7 +211,7 @@ static int  macnet_ifdown(FAR struct net_driver_s *dev);
 static void macnet_txavail_work(FAR void *arg);
 static int  macnet_txavail(FAR struct net_driver_s *dev);
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  macnet_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 static int  macnet_rmmac(FAR struct net_driver_s *dev,
@@ -960,7 +960,7 @@ static int macnet_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int macnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
@@ -991,7 +991,7 @@ static int macnet_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int macnet_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)dev->d_private;
@@ -1391,7 +1391,7 @@ int mac802154netdev_register(MACHANDLE mac)
   dev->d_ifup         = macnet_ifup;       /* I/F up (new IP address) callback */
   dev->d_ifdown       = macnet_ifdown;     /* I/F down callback */
   dev->d_txavail      = macnet_txavail;    /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   dev->d_addmac       = macnet_addmac;     /* Add multicast MAC address */
   dev->d_rmmac        = macnet_rmmac;      /* Remove multicast MAC address */
 #endif

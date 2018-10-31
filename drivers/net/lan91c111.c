@@ -145,10 +145,10 @@ static int  lan91c111_ifdown(FAR struct net_driver_s *dev);
 static void lan91c111_txavail_work(FAR void *arg);
 static int  lan91c111_txavail(FAR struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int  lan91c111_addmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  lan91c111_rmmac(FAR struct net_driver_s *dev,
               FAR const uint8_t *mac);
 #endif
@@ -1312,7 +1312,7 @@ static int lan91c111_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static uint32_t lan91c111_crc32(FAR const uint8_t *src, size_t len)
 {
   uint32_t crc = 0xffffffff;
@@ -1386,7 +1386,7 @@ static int lan91c111_addmac(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int lan91c111_rmmac(FAR struct net_driver_s *dev,
                            FAR const uint8_t *mac)
 {
@@ -1614,7 +1614,7 @@ int lan91c111_initialize(uintptr_t base, int irq)
   dev->d_ifup    = lan91c111_ifup;    /* I/F up (new IP address) callback */
   dev->d_ifdown  = lan91c111_ifdown;  /* I/F down callback */
   dev->d_txavail = lan91c111_txavail; /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   dev->d_addmac  = lan91c111_addmac;  /* Add multicast MAC address */
   dev->d_rmmac   = lan91c111_rmmac;   /* Remove multicast MAC address */
 #endif

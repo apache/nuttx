@@ -184,7 +184,7 @@ static int slip_rxtask(int argc, FAR char *argv[]);
 static int slip_ifup(FAR struct net_driver_s *dev);
 static int slip_ifdown(FAR struct net_driver_s *dev);
 static int slip_txavail(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
@@ -866,7 +866,7 @@ static int slip_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
@@ -895,7 +895,7 @@ static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int slip_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
@@ -948,7 +948,7 @@ int slip_initialize(int intf, FAR const char *devname)
   priv->dev.d_ifup    = slip_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = slip_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = slip_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = slip_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = slip_rmmac;    /* Remove multicast MAC address */
 #endif

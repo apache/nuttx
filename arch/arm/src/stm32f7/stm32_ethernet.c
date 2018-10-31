@@ -726,10 +726,10 @@ static int  stm32_ifdown(struct net_driver_s *dev);
 static void stm32_txavail_work(void *arg);
 static int  stm32_txavail(struct net_driver_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int  stm32_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int  stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
@@ -2603,7 +2603,7 @@ static int stm32_txavail(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc = 0xffffffff;
@@ -2648,7 +2648,7 @@ static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
+#if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
@@ -2685,7 +2685,7 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   return OK;
 }
-#endif /* CONFIG_NET_IGMP || CONFIG_NET_ICMPv6 */
+#endif /* CONFIG_NET_MCASTGROUP || CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
  * Function: stm32_rmmac
@@ -2705,7 +2705,7 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
 static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
@@ -4096,7 +4096,7 @@ int stm32_ethinitialize(int intf)
   priv->dev.d_ifup    = stm32_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = stm32_ifdown;   /* I/F down callback */
   priv->dev.d_txavail = stm32_txavail;  /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MCASTGROUP
   priv->dev.d_addmac  = stm32_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = stm32_rmmac;    /* Remove multicast MAC address */
 #endif

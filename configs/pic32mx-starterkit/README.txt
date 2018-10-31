@@ -983,7 +983,7 @@ PIC32MX specific PHY/Ethernet device driver settings
     CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
       CONFIG_DEBUG_FEATURES.
     CONFIG_PIC32MX_MULTICAST - Enable receipt of multicast (and unicast) frames.
-      Automatically set if CONFIG_NET_IGMP is selected.
+      Automatically set if CONFIG_NET_MCASTGROUP is selected.
 
   Related DEVCFG3 Configuration Settings:
     CONFIG_PIC32MX_FETHIO: Ethernet I/O Pin Selection bit:
