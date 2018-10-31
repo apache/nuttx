@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/imxrt/src/imxrt_mmcsd.c
+ * configs/imxrt/src/imxrt_mmcsd_spi.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
@@ -49,6 +49,8 @@
 #include "chip.h"
 #include "imxrt_lpspi.h"
 
+#ifdef CONFIG_MMCSD_SPI
+
 /*****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -97,13 +99,14 @@ int imxrt_lpspi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 
 /*****************************************************************************
- * Name: imxrt_mmcsd_initialize
+ * Name: imxrt_mmcsd_spi_initialize
  *
  * Description:
  *   Initialize SPI-based SD card and card detect thread.
+ *
  ****************************************************************************/
 
-int imxrt_mmcsd_initialize(int minor)
+int imxrt_mmcsd_spi_initialize(int minor)
 {
   struct spi_dev_s *spi;
   int rv;
@@ -128,3 +131,5 @@ int imxrt_mmcsd_initialize(int minor)
   spiinfo("INFO: mmcsd card has been initialized successfully\n");
   return OK;
 }
+
+#endif /* CONFIG_MMCSD_SPI */

@@ -66,8 +66,8 @@ ifeq ($(CONFIG_IMXRT_LPSPI),y)
 CSRCS += imxrt_spi.c
 endif
 
-ifeq ($(CONFIG_MMCSD),y)
-CSRCS += imxrt_mmcsd.c
+ifeq ($(CONFIG_MMCSD_SPI),y)
+CSRCS += imxrt_mmcsd_spi.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

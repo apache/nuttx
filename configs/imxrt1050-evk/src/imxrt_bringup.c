@@ -126,10 +126,12 @@ int imxrt_bringup(void)
   imxrt_i2c_register(1);
 #endif
 
-#ifdef CONFIG_MMCSD
+#ifdef CONFIG_MMCSD_SPI
+  /* Initialize SPI-based MMC/SD card support */
+
   imxrt_spidev_initialize();
 
-  ret = imxrt_mmcsd_initialize(MMCSD_MINOR);
+  ret = imxrt_mmcsd_spi_initialize(MMCSD_MINOR);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SD slot %d: %d\n", ret);

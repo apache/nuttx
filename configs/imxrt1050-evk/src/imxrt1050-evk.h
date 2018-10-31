@@ -158,17 +158,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imxrt_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the imxrt1050-evk
- *   board.
- *
- ****************************************************************************/
-
-void weak_function imxrt_spidev_initialize(void);
-
-/****************************************************************************
  * Name: imxrt_bringup
  *
  * Description:
@@ -178,6 +167,28 @@ void weak_function imxrt_spidev_initialize(void);
 
 #if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 int imxrt_bringup(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the i.MXRT1050 EVK.
+ *
+ ****************************************************************************/
+
+void imxrt_spidev_initialize(void);
+
+/*****************************************************************************
+ * Name: imxrt_mmcsd_spi_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card and card detect thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD_SPI
+int imxrt_mmcsd_spi_initialize(int minor)
 #endif
 
 /****************************************************************************
@@ -196,18 +207,6 @@ int imxrt_bringup(void);
 
 #ifdef CONFIG_ARCH_LEDS
 void imxrt_autoled_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: imxrt_spidev_initialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the i.MXRT1050 EVK.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_IMXRT_HAVE_SPI
-void imxrt_spidev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
