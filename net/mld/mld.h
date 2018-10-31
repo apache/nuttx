@@ -1,5 +1,6 @@
 /****************************************************************************
- * net/netlink/netlink.h
+ * net/mld/mld.h
+ * Multicast Listener Discovery (MLD) Definitions
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_NETLINK_NETLINK_H
-#define __NET_NETLINK_NETLINK_H
+#ifndef __NET_NETLINK_MLD_H
+#define __NET_NETLINK_MLD_H
 
 /****************************************************************************
  * Included Files
@@ -49,7 +50,7 @@
 #include "devif/devif.h"
 #include "socket/socket.h"
 
-#ifdef CONFIG_NET_NETLINK
+#ifdef CONFIG_NET_MLD
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,16 +59,6 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
-struct netlink_conn_s
-{
-  dq_entry_t node;                   /* Supports a doubly linked list */
-  uint8_t    crefs;                  /* Reference counts on this instance */
-
-  /* Defines the list of netlink callbacks */
-
-  FAR struct devif_callback_s *list;
-};
 
 /****************************************************************************
  * Public Data
@@ -81,76 +72,78 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-EXTERN const struct sock_intf_s g_netlink_sockif;
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+struct net_driver_s;                 /* Forward reference */
+struct mld_mcast_listen_query_s;     /* Forward reference */
+struct mld_mcast_listen_report_v1_s; /* Forward reference */
+struct mld_mcast_listen_report_v2_s; /* Forward reference */
+struct mld_mcast_listen_done_v1_s;   /* Forward reference */
+
 /****************************************************************************
- * Name: netlink_initialize()
+ * Name: mld_initialize()
  *
  * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
+ *   Initialize the MLD structures.  Called once and only from the
+ *   networking layer.
  *
  ****************************************************************************/
 
-void netlink_initialize(void);
+void mld_initialize(void);
 
 /****************************************************************************
- * Name: netlink_alloc()
+ * Name: mld_query
  *
  * Description:
- *   Allocate a new, uninitialized netlink connection structure.  This is
- *   normally something done by the implementation of the socket() API
+ *  Called from icmpv6_input() when a Multicast Listener Query is received.
  *
  ****************************************************************************/
 
-FAR struct netlink_conn_s *netlink_alloc(void);
+int mld_query_input(FAR struct net_driver_s *dev,
+                    FAR const struct mld_mcast_listen_query_s *query);
 
 /****************************************************************************
- * Name: netlink_free()
+ * Name: mld_report_v1
  *
  * Description:
- *   Free a netlink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *  Called from icmpv6_input() when a Version 1 Multicast Listener Report is
+ *   received.
  *
  ****************************************************************************/
 
-void netlink_free(FAR struct netlink_conn_s *conn);
+int mld_report_v1(FAR struct net_driver_s *dev,
+                  FAR const struct mld_mcast_listen_report_v1_s *report);
 
 /****************************************************************************
- * Name: netlink_nextconn()
+ * Name: mld_report_v2
  *
  * Description:
- *   Traverse the list of allocated netlink connections
- *
- * Assumptions:
- *   This function is called from netlink device logic.
+ *  Called from icmpv6_input() when a Version 2 Multicast Listener Report is
+ *   received.
  *
  ****************************************************************************/
 
-FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
+int mld_report_v2(FAR struct net_driver_s *dev,
+                  FAR const struct mld_mcast_listen_report_v2_s *report);
 
 /****************************************************************************
- * Name: netlink_active()
+ * Name: mld_done_v1
  *
  * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided netlink address
- *
- * Assumptions:
+ *  Called from icmpv6_input() when a Version 1 Multicast Listener Done is
+ *  received.
  *
  ****************************************************************************/
 
-struct sockaddr_nl;  /* Forward reference */
-FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
+int mld_done_v1(FAR struct net_driver_s *dev,
+                FAR const struct mld_mcast_listen_done_v1_s *done);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_NET_NETLINK */
-#endif /* __NET_NETLINK_NETLINK_H */
+#endif /* CONFIG_NET_MLD */
+#endif /* __NET_NETLINK_MLD_H */

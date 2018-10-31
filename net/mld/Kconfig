@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if NET_ICMPv6
+
+menuconfig NET_MLD
+	bool "Multicast Listener Discovery (MLD)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable Multicast Listener Discovery (MLD) support.
+
+if NET_MLD
+
+endif # NET_MLD
+endif # NET_ICMPv6

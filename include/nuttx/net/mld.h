@@ -1,5 +1,6 @@
 /****************************************************************************
  * include/nuttx/net/mld.h
+ * Multicast Listener Discovery (MLD) Definitions
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

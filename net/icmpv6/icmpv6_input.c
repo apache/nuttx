@@ -57,6 +57,7 @@
 #include "neighbor/neighbor.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
+#include "mld/mld.h"
 
 #ifdef CONFIG_NET_ICMPv6
 
@@ -81,6 +82,15 @@
   ((struct icmpv6_neighbor_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 #define ICMPv6RADVERTISE \
   ((struct icmpv6_router_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+
+#define MLDQUEURY \
+  ((FAR struct mld_mcast_listen_query_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define MLDREPORT_V1 \
+  ((FAR struct mld_mcast_listen_report_v1_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define MLDREPORT_V2 \
+  ((FAR struct mld_mcast_listen_report_v2_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define MLDDONE_V1 \
+  ((FAR struct mld_mcast_listen_done_v1_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Functions
@@ -471,6 +481,71 @@ void icmpv6_input(FAR struct net_driver_s *dev)
           }
 
           goto icmpv6_send_nothing;
+      }
+      break;
+#endif
+
+#ifdef CONFIG_NET_MLD
+    /* Dispatch received Multicast Listener Discovery (MLD) packets. */
+
+    case ICMPV6_MCAST_LISTEN_QUERY:      /* Multicast Listener Query, RFC 2710 and RFC 3810 */
+      {
+        FAR struct mld_mcast_listen_query_s *query = MLDQUEURY;
+        int ret;
+
+        ret = mld_query_input(dev, query);
+        if (ret < 0)
+          {
+            goto icmpv6_drop_packet;
+          }
+
+        goto icmpv6_send_nothing; /* REVISIT */
+      }
+      break;
+
+    case ICMPV6_MCAST_LISTEN_REPORT_V1:  /* Version 1 Multicast Listener Report, RFC 2710 */
+      {
+        FAR struct mld_mcast_listen_report_v1_s *report = MLDREPORT_V1;
+        int ret;
+
+        ret = mld_report_v1(dev, report);
+        if (ret < 0)
+          {
+            goto icmpv6_drop_packet;
+          }
+
+        goto icmpv6_send_nothing; /* REVISIT */
+      }
+      break;
+
+
+    case ICMPV6_MCAST_LISTEN_REPORT_V2:  /* Version 2 Multicast Listener Report, RFC 3810 */
+      {
+        FAR struct mld_mcast_listen_report_v2_s *report = MLDREPORT_V2;
+        int ret;
+
+        ret = mld_report_v2(dev, report);
+        if (ret < 0)
+          {
+            goto icmpv6_drop_packet;
+          }
+
+        goto icmpv6_send_nothing; /* REVISIT */
+      }
+      break;
+
+    case ICMPV6_MCAST_LISTEN_DONE_V1:    /* Version 1 Multicast Listener Done, RFC 2710 */
+      {
+        FAR struct mld_mcast_listen_done_v1_s *done = MLDDONE_V1;
+        int ret;
+
+        ret = mld_done_v1(dev, done);
+        if (ret < 0)
+          {
+            goto icmpv6_drop_packet;
+          }
+
+        goto icmpv6_send_nothing; /* REVISIT */
       }
       break;
 #endif
