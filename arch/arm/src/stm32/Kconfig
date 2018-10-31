@@ -2359,7 +2359,7 @@ config STM32_BKP
 config STM32_BKPSRAM
 	bool "Enable BKP RAM Domain"
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F4XXX
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 
 config STM32_CAN1
 	bool "CAN1"
@@ -2399,7 +2399,7 @@ config STM32_CRC
 config STM32_CRYP
 	bool "CRYP"
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F4XXX
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 
 config STM32_DMA1
 	bool "DMA1"
@@ -2447,7 +2447,7 @@ endif #STM32_DAC2
 config STM32_DCMI
 	bool "DCMI"
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F4XXX
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 
 config STM32_ETHMAC
 	bool "Ethernet MAC"
@@ -2464,7 +2464,7 @@ config STM32_FSMC
 config STM32_HASH
 	bool "HASH"
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F4XXX
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 
 config STM32_HRTIM
 	bool
@@ -2597,7 +2597,7 @@ config STM32_OTGFS
 config STM32_OTGHS
 	bool "OTG HS"
 	default n
-	depends on STM32_STM32F205 || STM32_STM32F207 || STM32_STM32F4XXX || STM32_STM32F429
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 	select STM32_USBHOST
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
@@ -2672,7 +2672,7 @@ config STM32_SPI6
 config STM32_SYSCFG
 	bool "SYSCFG"
 	default y
-	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F33XX || STM32_STM32F37XX || STM32_STM32F207 || STM32_STM32F4XXX || STM32_CONNECTIVITYLINE
+	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F33XX || STM32_STM32F37XX || STM32_STM32F20XX || STM32_STM32F4XXX || STM32_CONNECTIVITYLINE
 
 config STM32_TIM1
 	bool "TIM1"
@@ -3056,7 +3056,7 @@ config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y if STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default n
-	depends on STM32_STM32F207 || STM32_STM32F4XXX
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 	---help---
 		Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled
 		on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
@@ -8848,7 +8848,7 @@ config STM32_MII
 choice
 	prompt "MII clock configuration"
 	default STM32_MII_MCO if STM32_STM32F10XX
-	default STM32_MII_MCO1 if STM32_STM32F207 || STM32_STM32F4XXX
+	default STM32_MII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
 	depends on STM32_MII
 
 config STM32_MII_MCO
@@ -8859,13 +8859,13 @@ config STM32_MII_MCO
 
 config STM32_MII_MCO1
 	bool "Use MC01 as MII clock"
-	depends on (STM32_STM32F207 || STM32_STM32F4XXX)
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
 	---help---
 		Use MCO1 to clock the MII interface.  Default:  Use MC01
 
 config STM32_MII_MCO2
 	bool "Use MC02 as MII clock"
-	depends on (STM32_STM32F207 || STM32_STM32F4XXX)
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
 	---help---
 		Use MCO2 to clock the MII interface.  Default:  Use MC01
 
@@ -8996,7 +8996,7 @@ config STM32_RMII
 choice
 	prompt "RMII clock configuration"
 	default STM32_RMII_MCO if STM32_STM32F10XX
-	default STM32_RMII_MCO1 if STM32_STM32F207 || STM32_STM32F4XXX
+	default STM32_RMII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
 	depends on STM32_RMII
 
 config STM32_RMII_MCO
@@ -9007,13 +9007,13 @@ config STM32_RMII_MCO
 
 config STM32_RMII_MCO1
 	bool "Use MC01 as RMII clock"
-	depends on (STM32_STM32F207 || STM32_STM32F4XXX)
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
 	---help---
 		Use MCO1 to clock the RMII interface.  Default:  Use MC01
 
 config STM32_RMII_MCO2
 	bool "Use MC02 as RMII clock"
-	depends on (STM32_STM32F207 || STM32_STM32F4XXX)
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
 	---help---
 		Use MCO2 to clock the RMII interface.  Default:  Use MC01
 
