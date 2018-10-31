@@ -712,6 +712,18 @@ config RNDIS_VERSIONNO
 
 endif # RNDIS
 
+menuconfig DFU
+	bool "DFU Device Firmware Upgrade"
+	default n
+	---help---
+		References:
+		- "Universal Serial Bus Device Class Specification for Device
+		   Firmware Upgrade, Version 1.1, Aug 5, 2004"
+		
+		This driver implements the application-part of DFU protocol. It enables
+		a host application to send DFU_DETACH request and to cause the device
+		to reboot into a bootloader mode.
+
 menuconfig NET_CDCECM
 	bool "CDC-ECM Ethernet-over-USB"
 	default n
