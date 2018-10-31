@@ -46,18 +46,29 @@
 #include <syslog.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <imxrt_lpi2c.h>
+#include <imxrt_lpspi.h>
 
 #include "imxrt1050-evk.h"
+
+#include <arch/board/board.h>  /* Must always be included last */
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Checking needed by MMC/SDCard */
+
+#ifdef CONFIG_NSH_MMCSDMINOR
+#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#else
+#  define MMCSD_MINOR 0
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_I2C_DRIVER)
+#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C)
 static void imxrt_i2c_register(int bus)
 {
   FAR struct i2c_master_s *i2c;
@@ -114,16 +125,16 @@ int imxrt_bringup(void)
 #if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
   imxrt_i2c_register(1);
 #endif
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C2)
-  imxrt_i2c_register(2);
-#endif
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C3)
-  imxrt_i2c_register(3);
-#endif
-#if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C4)
-  imxrt_i2c_register(4);
-#endif
 
+#ifdef CONFIG_MMCSD
+  imxrt_spidev_initialize();
+
+  ret = imxrt_mmcsd_initialize(MMCSD_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SD slot %d: %d\n", ret);
+    }
+#endif
 
   UNUSED(ret);
   return OK;

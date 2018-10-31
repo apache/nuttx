@@ -212,5 +212,21 @@ void imxrt_clockconfig(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_LPSPI
+  /* Set LPSPI close source to PLL3 PFD0 */
+
+  reg  = getreg32(IMXRT_CCM_CBCMR);
+  reg &= CCM_CBCMR_LPSPI_CLK_SEL_MASK;
+  reg |= CCM_CBCMR_LPSPI_CLK_SEL_PLL3_PFD0;
+  putreg32(reg, IMXRT_CCM_CBCMR);
+
+  /* Set LPSPI divider to 5 */
+
+  reg  = getreg32(IMXRT_CCM_CBCMR);
+  reg &= CCM_CBCMR_LPSPI_PODF_MASK;
+  reg |= CCM_CBCMR_LPSPI_PODF(7);
+  putreg32(reg, IMXRT_CCM_CBCMR);
+#endif
+
 #endif
 }

@@ -194,6 +194,19 @@
 #define GPIO_LPI2C3_SDA   GPIO_LPI2C3_SDA_2  /* GPIO_AD_B1_01 */
 #define GPIO_LPI2C3_SCL   GPIO_LPI2C3_SCL_2  /* GPIO_AD_B1_00 */
 
+/* LPSPI
+ *
+ * Arduino Connector
+ *
+ *   J24 D09   GPIO_AD_B0_02  LPSPI3_SDI
+ *   J24 D14   GPIO_AD_B0_01  LPSPI3_SDO
+ *   J24 D15   GPIO_AD_B0_00  LPSPI3_SCK
+ */
+
+#define GPIO_LPSPI3_SCK   GPIO_LPSPI3_SCK_2 /* GPIO_AD_B0_00 */
+#define GPIO_LPSPI3_MISO  GPIO_LPSPI3_SDI_2 /* GPIO_AD_B0_02 */
+#define GPIO_LPSPI3_MOSI  GPIO_LPSPI3_SDO_2 /* GPIO_AD_B0_01 */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

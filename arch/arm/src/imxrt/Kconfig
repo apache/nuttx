@@ -66,6 +66,10 @@ config IMXRT_LPI2C
 	bool
 	default n
 
+config IMXRT_LPSPI
+	bool
+	default n
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA
@@ -153,17 +157,17 @@ menuconfig IMXRT_LPI2C1
 
 if IMXRT_LPI2C1
 
-	config LPI2C1_BUSYIDLE
-		int "Bus idle timeout period in clock cycles"
-		default 0
+config LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
 
-	config LPI2C1_FILTSCL
-		int "I2C master digital glitch filters for SCL input in clock cycles"
-		default 0
+config LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
 
-	config LPI2C1_FILTSDA
-		int "I2C master digital glitch filters for SDA input in clock cycles"
-		default 0
+config LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
 
 endif # IMXRT_LPI2C1
 
@@ -174,17 +178,17 @@ menuconfig IMXRT_LPI2C2
 
 if IMXRT_LPI2C2
 
-	config LPI2C2_BUSYIDLE
-		int "Bus idle timeout period in clock cycles"
-		default 0
+config LPI2C2_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
 
-	config LPI2C2_FILTSCL
-		int "I2C master digital glitch filters for SCL input in clock cycles"
-		default 0
+config LPI2C2_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
 
-	config LPI2C2_FILTSDA
-		int "I2C master digital glitch filters for SDA input in clock cycles"
-		default 0
+config LPI2C2_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
 
 endif # IMXRT_LPI2C2
 
@@ -195,41 +199,65 @@ menuconfig IMXRT_LPI2C3
 
 if IMXRT_LPI2C3
 
-	config LPI2C3_BUSYIDLE
-		int "Bus idle timeout period in clock cycles"
-		default 0
+config LPI2C3_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
 
-	config LPI2C3_FILTSCL
-		int "I2C master digital glitch filters for SCL input in clock cycles"
-		default 0
+config LPI2C3_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
 
-	config LPI2C3_FILTSDA
-		int "I2C master digital glitch filters for SDA input in clock cycles"
-		default 0
+config LPI2C3_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
 
 endif # IMXRT_LPI2C3
 
-config IMXRT_LPI2C4
+menuconfig IMXRT_LPI2C4
 	bool "LPI2C4"
 	default n
 	select IMXRT_LPI2C
 
 if IMXRT_LPI2C4
 
-	config LPI2C4_BUSYIDLE
-		int "Bus idle timeout period in clock cycles"
-		default 0
+config LPI2C4_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
 
-	config LPI2C4_FILTSCL
-		int "I2C master digital glitch filters for SCL input in clock cycles"
-		default 0
+config LPI2C4_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
 
-	config LPI2C4_FILTSDA
-		int "I2C master digital glitch filters for SDA input in clock cycles"
-		default 0
+config LPI2C4_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
 
 endif # IMXRT_LPI2C4
 endmenu # LPI2C Peripherals
+
+menu "LPSPI Peripherals"
+
+menuconfig IMXRT_LPSPI1
+	bool "LPSPI1"
+	default n
+	select IMXRT_LPSPI
+
+config IMXRT_LPSPI2
+	bool "LPSPI2"
+	default n
+	select IMXRT_LPSPI
+
+config IMXRT_LPSPI3
+	bool "LPSPI3"
+	default n
+	select IMXRT_LPSPI
+
+config IMXRT_LPSPI4
+	bool "LPSPI4"
+	default n
+	select IMXRT_LPSPI
+
+endmenu # LPSPI Peripherals
 
 config IMXRT_SEMC
 	bool "Smart External Memory Controller (SEMC)"

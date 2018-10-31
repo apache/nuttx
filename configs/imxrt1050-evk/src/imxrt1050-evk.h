@@ -88,8 +88,8 @@
  * The IMXRT board has one external user button
  *
  * 1. SW8 (IRQ88)   GPIO5-00
- *
  */
+
 #define IOMUX_SW8       (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
                          IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
                          _IOMUX_PULL_ENABLE)
@@ -121,6 +121,28 @@
 #define GPIO_ENET_RST   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                           GPIO_PORT1 | GPIO_PIN9 | IOMUX_ENET_RST)
 
+/* LPSPI1 CS:  GPIO_SD_B0_01 */
+
+#define IOMUX_LPSPI1_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI1_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                         GPIO_PORT3 | GPIO_PIN13 | IOMUX_LPSPI1_CS)
+
+#define IOMUX_MMCSD_EN  (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_MMCSD_EN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+                         GPIO_PORT3 | GPIO_PIN2 | IOMUX_MMCSD_EN)
+
+/* LPSPI3 CS:  GPIO_AD_B0_03 */
+
+#define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+                         IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
+                         _IOMUX_PULL_ENABLE)
+#define GPIO_LPSPI3_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+                         GPIO_PORT1 | GPIO_PIN3 | IOMUX_LPSPI3_CS)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -134,6 +156,17 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: imxrt_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the imxrt1050-evk
+ *   board.
+ *
+ ****************************************************************************/
+
+void weak_function imxrt_spidev_initialize(void);
 
 /****************************************************************************
  * Name: imxrt_bringup

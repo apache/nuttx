@@ -187,7 +187,7 @@
 #define LPSPI_SR_REF                   (1 << 12) /* Bit 12: Receive Error Flag */
 #define LPSPI_SR_DMF                   (1 << 13) /* Bit 13: Data Match Flag */
                                                  /* Bits 14-23:  Reserved */
- #define LPSPI_SR_REF                  (1 << 24) /* Bit 24: Module Busy Flag*/
+#define LPSPI_SR_MBF                   (1 << 24) /* Bit 24: Module Busy Flag */
                                                  /* Bits 25-31:  Reserved */
 
 /* Interrupt Enable Register */
@@ -310,6 +310,7 @@
                                                  /* Bits 24-31:  Reserved */
 
 /* Transmit Command Register */
+
 #define LPSPI_TCR_FRAMESZ_SHIFT        (0)       /* Bits 0-11: Frame Size */
 #define LPSPI_TCR_FRAMESZ_MASK         (0xfff << LPSPI_TCR_FRAMESZ_SHIFT)
 #    define LPSPI_TCR_FRAMESZ(n)       ((uint32_t)(n) << LPSPI_TCR_FRAMESZ_SHIFT)

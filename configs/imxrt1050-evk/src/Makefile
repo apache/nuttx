@@ -62,4 +62,12 @@ ifeq ($(CONFIG_IMXRT_ENET),y)
 CSRCS += imxrt_ethernet.c
 endif
 
+ifeq ($(CONFIG_IMXRT_LPSPI),y)
+CSRCS += imxrt_spi.c
+endif
+
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += imxrt_mmcsd.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
