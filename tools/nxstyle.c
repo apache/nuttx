@@ -414,7 +414,13 @@ int main(int argc, char **argv, char **envp)
 
                       if (--ncomment == 0)
                         {
+#if 0
+                          /* REVISIT: causes false alarms when comment appears to
+                           * the right of a statement.
+                           */
+
                           comment_lineno = lineno;
+#endif
                         }
                     }
                   else
