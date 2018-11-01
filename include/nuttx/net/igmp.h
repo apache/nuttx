@@ -123,7 +123,6 @@
  * (0x11); in other messages it is set to 0 and ignored by the receiver.
  */
 
-#ifdef CONFIG_NET_IPv4
 struct igmp_iphdr_s
 {
   /* IPv4 IP header */
@@ -159,43 +158,6 @@ struct igmp_iphdr_s
   uint16_t chksum;           /* 16-bit Checksum */
   uint16_t grpaddr[2];       /* 32-bit Group address */
 };
-#endif
-
-#ifdef CONFIG_NET_IPv6
-struct igmp_ipv6hdr_s
-{
-  /* IPv6 Ip header */
-
-  uint8_t  vtc;              /* Bits 0-3: version, bits 4-7: traffic class (MS) */
-  uint8_t  tcf;              /* Bits 0-3: traffic class (LS), bits 4-7: flow label (MS) */
-  uint16_t flow;             /* 16-bit flow label (LS) */
-  uint8_t  len[2];           /* 16-bit Payload length */
-  uint8_t  proto;            /*  8-bit Next header (same as IPv4 protocol field) */
-  uint8_t  ttl;              /*  8-bit Hop limit (like IPv4 TTL field) */
-  net_ipv6addr_t srcipaddr;  /* 128-bit Source address */
-  net_ipv6addr_t destipaddr; /* 128-bit Destination address */
-
-  /* Router Alert IP header option */
-
-  uint16_t ra[2];
-
-  /* IGMPv2 header:
-   *
-   *  0                   1                   2                   3
-   *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   * |      Type     | Max Resp Time |           Checksum            |
-   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   * |                         Group Address                         |
-   * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   */
-
-  uint8_t  type;             /* 8-bit IGMP packet type */
-  uint8_t  maxresp;          /* 8-bit Max response time */
-  uint16_t chksum;           /* 16-bit Checksum */
-  uint16_t grpaddr[2];       /* 32-bit Group address */
-};
-#endif
 
 #ifdef CONFIG_NET_STATISTICS
 struct igmp_stats_s

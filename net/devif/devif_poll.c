@@ -167,7 +167,7 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ICMPv6
           if (pkttype == DEVIF_ICMP6)
             {
-              /* This packet came from a response to TCP polling and is
+              /* This packet came from a response to ICMPv6 polling and is
                * directed to a radio using 6LoWPAN.  Verify that the outgoing
                * packet is IPv6 with TCP protocol.
                */
