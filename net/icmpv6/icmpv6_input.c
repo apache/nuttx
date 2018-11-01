@@ -498,7 +498,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
         FAR struct mld_mcast_listen_query_s *query = MLDQUERY;
         int ret;
 
-        ret = mld_query_input(dev, query);
+        ret = mld_query(dev, query);
         if (ret < 0)
           {
             goto icmpv6_drop_packet;

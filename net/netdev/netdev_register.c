@@ -57,6 +57,7 @@
 
 #include "utils/utils.h"
 #include "igmp/igmp.h"
+#include "mld/mld.h"
 #include "netdev/netdev.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -418,7 +419,8 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
 #ifdef CONFIG_NET_MLD
       /* Configure the device for MLD support */
-#warning Missing Logic
+
+      mld_devinit(dev);
 #endif
 
       net_unlock();

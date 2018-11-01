@@ -37,8 +37,9 @@
 
 ifeq ($(CONFIG_NET_MLD),y)
 
-SOCK_CSRCS += 
-NET_CSRCS +=
+NET_CSRCS += mld_done.c mld_initialize.c mld_leave.c mld_msg.c mld_query.c
+NET_CSRCS += mld_send.c mld_group.c mld_join.c mld_mcastmac.c mld_poll.c
+NET_CSRCS += mld_report.c mld_timer.c
 
 # Include MLD build support
 

@@ -93,12 +93,29 @@ EXTERN uint16_t g_ipid;
 #ifdef CONFIG_NET_IPv6
 EXTERN const net_ipv6addr_t g_ipv6_unspecaddr;  /* An address of all zeroes */
 EXTERN const net_ipv6addr_t g_ipv6_allnodes;    /* All link local nodes */
-#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
+
+#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER) || \
+    defined(CONFIG_NET_MLD)
+/* IPv6 Multi-cast IP addresses.  See RFC 2375 */
+
 EXTERN const net_ipv6addr_t g_ipv6_allrouters;  /* All link local routers */
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
 EXTERN const net_ipv6addr_t g_ipv6_llnetmask;   /* Netmask for local link address */
 #endif
-#endif
+
+#ifdef CONFIG_NET_ETHERNET
+/* IPv6 Multi-cast Ethernet addresses.  Formed from the 16-bit prefix:
+ *
+ *   0x33:0x33:xx:xx:xx:xx:
+ *
+ * and the last 32-bits of the IPv6 IP address
+ */
+
+EXTERN const struct ether_addr g_ipv6_ethallnodes;     /* All link local nodes */
+EXTERN const struct ether_addr g_ipv6_ethallrouters;   /* All link local routers */
+
+#endif /* CONFIG_NET_ETHERNET */
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF || CONFIG_NET_ICMPv6_ROUTER || CONFIG_NET_MLD */
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************

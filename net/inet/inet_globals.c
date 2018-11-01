@@ -77,7 +77,8 @@ const net_ipv6addr_t g_ipv6_allnodes =    /* All link local nodes */
   HTONS(0x0001)
 };
 
-#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER)
+#if defined(CONFIG_NET_ICMPv6_AUTOCONF) || defined(CONFIG_NET_ICMPv6_ROUTER) || \
+    defined(CONFIG_NET_MLD)
 const net_ipv6addr_t g_ipv6_allrouters =  /* All link local routers */
 {
   HTONS(0xff02),
@@ -117,7 +118,7 @@ const struct ether_addr g_ipv6_ethallrouters =   /* All link local routers */
 };
 
 #endif /* CONFIG_NET_ETHERNET */
-#endif /* CONFIG_NET_ICMPv6_AUTOCONF || CONFIG_NET_ICMPv6_ROUTER */
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF || CONFIG_NET_ICMPv6_ROUTER || CONFIG_NET_MLD */
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************

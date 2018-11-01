@@ -66,6 +66,9 @@
 #ifdef CONFIG_NET_IGMP
 #  include <nuttx/net/igmp.h>
 #endif
+#ifdef CONFIG_NET_MLD
+#  include <nuttx/net/mld.h>
+#endif
 
 #ifdef CONFIG_NET_STATISTICS
 
@@ -101,6 +104,10 @@ struct net_stats_s
 
 #ifdef CONFIG_NET_IGMP
   struct igmp_stats_s igmp;     /* IGMP statistics */
+#endif
+
+#ifdef CONFIG_NET_IGMP
+  struct mld_stats_s  mld;      /* MLD statistics */
 #endif
 
 #ifdef CONFIG_NET_TCP

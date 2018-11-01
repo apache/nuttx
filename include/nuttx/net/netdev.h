@@ -51,8 +51,12 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
-#include <net/if.h>
 
+#ifdef CONFIG_NET_MCASTGROUP
+#  include <queue.h>
+#endif
+
+#include <net/if.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 

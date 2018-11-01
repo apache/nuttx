@@ -1,7 +1,6 @@
 /************************************************************************************************************
  * include/nuttx/net/ipopt.h
- *
- * Defines values for the IP header options
+ * Defines values for the IPv4 header options
  *
  *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -65,7 +64,7 @@
  *   Pointer:      8-bits:
  *   Option Data: (depends on Length)
  *
- * The IP Option Type byte consists of the following subfields:
+ * The IPv4 Option Type byte consists of the following subfields:
  */
 
 #define IPOPT_TYPE_OPTION_SHIFT       (0)      /* Bits 0-5: Option number*/

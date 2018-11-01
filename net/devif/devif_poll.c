@@ -57,8 +57,9 @@
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
 #include "icmp/icmp.h"
-#include "icmpv6/icmpv6.h"
 #include "igmp/igmp.h"
+#include "icmpv6/icmpv6.h"
+#include "mld/mld.h"
 #include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
 
@@ -422,6 +423,36 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_IGMP */
 
 /****************************************************************************
+ * Name: devif_poll_mld
+ *
+ * Description:
+ *   Poll all MLD connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_MLD
+static inline int devif_poll_mld(FAR struct net_driver_s *dev,
+                                 devif_poll_callback_t callback)
+{
+  /* Perform the MLD TX poll */
+
+  mld_poll(dev);
+
+  /* Perform any necessary conversions on outgoing ICMPv6 packets */
+
+  devif_packet_conversion(dev, DEVIF_ICMP6);
+
+  /* Call back into the driver */
+
+  return callback(dev);
+}
+#endif /* CONFIG_NET_MLD */
+
+/****************************************************************************
  * Name: devif_poll_udp_connections
  *
  * Description:
@@ -622,6 +653,15 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
       /* Check for pending IGMP messages */
 
       bstop = devif_poll_igmp(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_MLD
+    {
+      /* Check for pending MLD messages */
+
+      bstop = devif_poll_mld(dev, callback);
     }
 
   if (!bstop)

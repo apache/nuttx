@@ -201,7 +201,7 @@ struct mld_mcast_listen_query_s
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint16_t mrc;              /* Maximum response code */
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
-  net_ipv6addr_t mcast;      /* 128-bit IPv6 multicast address */
+  net_ipv6addr_t grpaddr;    /* 128-bit IPv6 multicast group address */
   uint8_t  flags;            /* See S and QRV flag definitions */
   uint8_t  qqic;             /* Querier's Query Interval Cod */
   uint16_t nsources;         /* Number of sources that follow */
@@ -219,12 +219,12 @@ struct mld_mcast_listen_query_s
  * routers) the current multicast listening state, or changes in the
  * multicast listening state, of their interfaces.
  *
- * Version 1 Multicast Listener Reports (RFC 2710)
+ * Version 1 Multicast Listener Report (RFC 2710)
  */
 
 struct mld_mcast_listen_report_v1_s
 {
-  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_REPORT */
+  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_REPORT_V1 */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
@@ -232,7 +232,7 @@ struct mld_mcast_listen_report_v1_s
   net_ipv6addr_t mcastaddr;  /* Multicast address */
 };
 
-/* Version 2 Multicast Listener Reports (RFC 3810). */
+/* Version 2 Multicast Listener Report (RFC 3810). */
 /* This is the form of the address record used in the listener report */
 
 struct mld_mcast_addrec_v2_s
@@ -282,13 +282,38 @@ struct mld_mcast_listen_report_v2_s
 
 struct mld_mcast_listen_done_v1_s
 {
-  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_DONE */
+  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_DONE_V1 */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   uint16_t reserved3;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t mcastaddr;  /* Multicast address */
 };
+
+#ifdef CONFIG_NET_STATISTICS
+/* MLD statistic counters */
+
+struct mld_stats_s
+{
+  net_stats_t joins;                 /* Requests to join a group */
+  net_stats_t leaves;                /* Requests to leave a group */
+  net_stats_t report_sched;          /* Version 1 REPORT packets scheduled */
+  net_stats_t done_sched;            /* Version 1 DONE packets scheduled */
+  net_stats_t report_sent;           /* Version 1 REPORT packets sent */
+  net_stats_t done_sent;             /* Version 1 DONE packets sent */
+  net_stats_t gmq_query_received;    /* General multicast QUERY received */
+  net_stats_t mas_query_received;    /* Multicast Address Specific QUERY received */
+  net_stats_t massq_query_received;  /* Multicast Address and Source Specific QUERY received */
+  net_stats_t ucast_query_received;  /* Unicast query received */
+  net_stats_t v1report_received;     /* Version 1 REPORT packets received */
+  net_stats_t v2report_received;     /* Version 2 REPORT packets received */
+  net_stats_t done_received;         /* DONE packets received */
+};
+
+# define MLD_STATINCR(p) ((p)++)
+#else
+# define MLD_STATINCR(p)
+#endif
 
 /****************************************************************************
  * Public Data
