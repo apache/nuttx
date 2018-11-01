@@ -630,6 +630,23 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                       wlinfo("XBee Retries: %d\n",
                              frame->io_data[frame->io_offset]);
                     }
+                  else if (memcmp(command, "MM", 2) == 0)
+                    {
+                      wlinfo("Mac Mode: %d\n",
+                             frame->io_data[frame->io_offset]);
+                    }
+                  else if (memcmp(command, "PL", 2) == 0)
+                    {
+                      wlinfo("Power Level: %d\n",
+                             frame->io_data[frame->io_offset]);
+                      priv->pwrlvl = frame->io_data[frame->io_offset++];
+                    }
+                  else if (memcmp(command, "PM", 2) == 0)
+                    {
+                      wlinfo("Boost Mode (Power Mode): %d\n",
+                             frame->io_data[frame->io_offset]);
+                      priv->boostmode = frame->io_data[frame->io_offset++];
+                    }
                   else
                     {
                       wlwarn("Unhandled AT Response: %.*s\n", 2, command);
@@ -775,6 +792,8 @@ static void xbee_process_rxframe(FAR struct xbee_priv_s *priv,
   frame->io_len--; /* Remove the checksum */
 
   xbee_notify(priv, primitive);
+
+  wlinfo("Received frame. RSSI: -%d dbm\n", dataind->rssi);
 }
 
 /****************************************************************************
@@ -812,7 +831,14 @@ static void xbee_process_txstatus(FAR struct xbee_priv_s *priv, uint8_t frameid,
         break;
     }
 
-  wlinfo("TX done. Frame ID: %d Status: 0x%02X\n", frameid, status);
+  if (status != IEEE802154_STATUS_SUCCESS)
+    {
+      wlwarn("TX done. Frame ID: %d Status: 0x%02x\n", frameid, status);
+    }
+  else
+    {
+      wlinfo("TX done. Frame ID: %d Status: 0x%02x\n", frameid, status);
+    }
 
   xbee_notify(priv, primitive);
 }
@@ -1438,6 +1464,67 @@ void xbee_set_chan(FAR struct xbee_priv_s *priv, uint8_t chan)
 }
 
 /****************************************************************************
+ * Name: xbee_set_powerlevel
+ *
+ * Description:
+ *   Sends API frame with AT command request in order to set the RF power level
+ *   of the device.
+ *
+ ****************************************************************************/
+
+void xbee_set_powerlevel(FAR struct xbee_priv_s *priv, uint8_t level)
+{
+  uint8_t frame[9];
+
+  priv->pwrlvl = level;
+
+  frame[0] = XBEE_STARTBYTE;
+  frame[1] = 0;
+  frame[2] = 5;
+  frame[3] = XBEE_APIFRAME_ATCOMMMAND;
+  frame[4] = 0;
+  frame[5] = 'P';
+  frame[6] = 'L';
+  frame[7]  = level;
+
+  xbee_insert_checksum(frame, 9);
+
+  xbee_send_apiframe(priv, frame, 9);
+}
+
+/****************************************************************************
+ * Name: xbee_set_boostmode
+ *
+ * Description:
+ *   Sends API frame with AT command request in order to set the Boost mode
+ *   setting of the device. NOTE: XBee Pro always enables boost mode and
+ *   does not support this command
+ *
+ ****************************************************************************/
+
+void xbee_set_boostmode(FAR struct xbee_priv_s *priv, uint8_t mode)
+{
+  uint8_t frame[9];
+
+  if (mode > 1) return;
+
+  priv->boostmode = mode;
+
+  frame[0] = XBEE_STARTBYTE;
+  frame[1] = 0;
+  frame[2] = 5;
+  frame[3] = XBEE_APIFRAME_ATCOMMMAND;
+  frame[4] = 0;
+  frame[5] = 'P';
+  frame[6] = 'M';
+  frame[7]  = mode;
+
+  xbee_insert_checksum(frame, 9);
+
+  xbee_send_apiframe(priv, frame, 9);
+}
+
+/****************************************************************************
  * Name: xbee_set_epassocflags
  *
  * Description:
@@ -1561,6 +1648,10 @@ void xbee_regdump(FAR struct xbee_priv_s *priv)
   xbee_send_atquery(priv, "CE");
   xbee_send_atquery(priv, "A1");
   xbee_send_atquery(priv, "A2");
+  xbee_send_atquery(priv, "AI");
   xbee_send_atquery(priv, "SP");
   xbee_send_atquery(priv, "RR");
+  xbee_send_atquery(priv, "MM");
+  xbee_send_atquery(priv, "PL");
+  xbee_send_atquery(priv, "PM");
 }

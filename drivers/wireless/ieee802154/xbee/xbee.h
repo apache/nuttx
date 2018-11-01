@@ -198,6 +198,8 @@ struct xbee_priv_s
   /****************** PHY attributes ***********************/
 
   uint8_t chan;
+  uint8_t pwrlvl;
+  bool boostmode;
 };
 
 /****************************************************************************
@@ -350,6 +352,28 @@ void xbee_send_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand);
 #define xbee_query_chan(priv) xbee_atquery(priv, "CH")
 
 /****************************************************************************
+ * Name: xbee_query_powerlevel
+ *
+ * Description:
+ *   Sends API frame with AT command request in order to get the RF Power
+ *   Level from the device.
+ *
+ ****************************************************************************/
+
+#define xbee_query_powerlevel(priv) xbee_atquery(priv, "PL")
+
+/****************************************************************************
+ * Name: xbee_query_powermode
+ *
+ * Description:
+ *   Sends API frame with AT command request in order to get the RF Power Mode
+ *   from the device.
+ *
+ ****************************************************************************/
+
+#define xbee_query_powermode(priv) xbee_atquery(priv, "PM")
+
+/****************************************************************************
  * Name: xbee_query_assoc
  *
  * Description:
@@ -392,6 +416,17 @@ void xbee_set_saddr(FAR struct xbee_priv_s *priv, FAR const uint8_t *saddr);
  ****************************************************************************/
 
 void xbee_set_chan(FAR struct xbee_priv_s *priv, uint8_t chan);
+
+/****************************************************************************
+ * Name: xbee_set_powerlevel
+ *
+ * Description:
+ *   Sends API frame with AT command request in order to set the RF power level
+ *   of the device.
+ *
+ ****************************************************************************/
+
+void xbee_set_powerlevel(FAR struct xbee_priv_s *priv, uint8_t level);
 
 /****************************************************************************
  * Name: xbee_set_epassocflags

@@ -56,7 +56,7 @@
 
 #define XBEE_ASSOC_POLLDELAY 100
 
-#define XBEE_RESPONSE_TIMEOUT MSEC2TICK(100)
+#define XBEE_RESPONSE_TIMEOUT MSEC2TICK(200)
 
 /****************************************************************************
  * Private Types
@@ -457,6 +457,17 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
         }
         break;
 
+      case IEEE802154_ATTR_PHY_TX_POWER:
+        {
+          /* TODO: Convert pwrlvl and boost mode settings to int32_t dbm. This
+           * depends on whether device is XBee or XBee Pro to do this look-up.
+           */
+
+          xbee_query_powerlevel(priv);
+          attrval->phy.txpwr = priv->pwrlvl;
+        }
+        break;
+
       case IEEE802154_ATTR_RADIO_REGDUMP:
         {
           xbee_regdump(priv);
@@ -527,6 +538,15 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
             {
               xbee_set_coordassocflags(priv, 0);
             }
+        }
+        break;
+      case IEEE802154_ATTR_PHY_TX_POWER:
+        {
+          /* TODO: Convert int32_t dbm input to closest PM/PL settings. Need to
+           * know whether device is XBee or XBee Pro to do this look-up.
+           */
+
+          xbee_set_powerlevel(priv, attrval->phy.txpwr);
         }
         break;
 #if 0
