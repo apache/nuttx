@@ -47,7 +47,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/ipopt.h>
+#include <nuttx/net/ipv6ext.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/mld.h>
 
@@ -77,9 +77,9 @@
 /* Buffer layout */
 
 #define IPv6BUF    ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define RABUF      ((FAR uint8_t *)&dev->d_buf[NET_LL_HDRLEN(dev)] + \
-                    IPv6_HDRLEN)
-#define RASIZE     (4 * sizeof(uint16_t))
+#define RABUF      ((FAR struct ipv6_router_alert_s *) \
+                    &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN)
+#define RASIZE     sizeof(struct ipv6_router_alert_s)
 #define REPORTBUF  ((FAR struct mld_mcast_listen_report_v1_s *) \
                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
 #define DONEBUF    ((FAR struct mld_mcast_listen_done_v1_s *) \
@@ -114,7 +114,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
               FAR const net_ipv6addr_t destipaddr)
 {
   FAR struct ipv6_hdr_s *ipv6;
-  FAR uint8_t *ra;
+  FAR struct ipv6_router_alert_s *ra;
   unsigned int mldsize;
 
   ninfo("msgid: %02x \n", group->msgid);
@@ -169,7 +169,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   ipv6->flow     = 0;                        /* Flow label (LS) */
   ipv6->len[0]   = (dev->d_sndlen >> 8);     /* Length excludes the IPv6 header */
   ipv6->len[1]   = (dev->d_sndlen & 0xff);
-  ipv6->proto    = IP_PROTO_ICMP6;           /* ICMPv6 payload */
+  ipv6->proto    = NEXT_HOPBYBOT_EH;         /* Hop-to-hop extension header */
   ipv6->ttl      = MLD_TTL;                  /* MLD Time-to-live */
 
   net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
@@ -178,14 +178,15 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   /* Add the router alert IP header option.
    *
    * The IPv6 router alert option (type 5) is defined in RFC 2711.
-   * REVISIT:  This should go into a new header file ipv6opt.h
    */
 
   ra             = RABUF;
-  ra[0]          = 5;                        /* Option type */
-  ra[1]          = 2;                        /* Option length */
-  ra[2]          = 0;                        /* Router alert value */
-  ra[3]          = 0;
+  memset(ra, 0, RASIZE);
+
+  ra->h2h.nxthdr = IP_PROTO_ICMP6;           /* ICMPv6 payload follows extension header */
+  ra->h2h.len    = 1;                        /* One 8-octect option follows */
+  ra->type       = HOP2HOP_ROUTER_ALERT;     /* Router alert */
+  ra->len        = 2;                        /* Length */
 
   /* Format the MLD ICMPv6 payload into place after the IPv6 header (with
    * router alert)
