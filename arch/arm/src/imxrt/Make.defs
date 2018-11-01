@@ -120,6 +120,10 @@ ifeq ($(CONFIG_IMXRT_EDMA),y)
 CHIP_CSRCS += imxrt_edma.c
 endif
 
+ifdef CONFIG_IMXRT_USDHC
+CHIP_CSRCS += imxrt_usdhc.c
+endif
+
 ifeq ($(CONFIG_IMXRT_SNVS_LPSRTC),y)
 CHIP_CSRCS += imxrt_lpsrtc.c
 CHIP_CSRCS += imxrt_hprtc.c

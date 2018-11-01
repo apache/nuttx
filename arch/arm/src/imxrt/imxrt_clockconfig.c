@@ -228,5 +228,21 @@ void imxrt_clockconfig(void)
   putreg32(reg, IMXRT_CCM_CBCMR);
 #endif
 
+#ifdef CONFIG_IMXRT_USDHC
+  /* Set USDHC1 & 2 to generate clocks from PPL2 PFD2 (396 MHz) */
+
+  reg  = getreg32(IMXRT_CCM_CSCMR1);
+  reg &= CCM_CSCMR1_USDHC1_CLK_SEL | CCM_CSCMR1_USDHC2_CLK_SEL;
+  reg |= CCM_CSCMR1_USDHC1_CLK_SEL_PLL2_PFD0 | CCM_CSCMR1_USDHC2_CLK_SEL_PLL2_PFD0;
+  putreg32(reg, IMXRT_CCM_CSCMR1);
+
+  /* Now divide down clocks by 2 ( --> 198 MHz) */
+
+  reg  = getreg32(IMXRT_CCM_CSCDR1);
+  reg &= CCM_CSCDR1_USDHC1_PODF_MASK | CCM_CSCDR1_USDHC2_PODF_MASK;
+  reg |= CCM_CSCDR1_USDHC1_PODF(1) | CCM_CSCDR1_USDHC2_PODF(1);
+  putreg32(reg, IMXRT_CCM_CSCDR1);
+#endif
+
 #endif
 }

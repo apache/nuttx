@@ -48,6 +48,10 @@
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
 
+#ifdef CONFIG_IMXRT_USDHC
+#  include "imxrt_usdhc.h"
+#endif
+
 #include "imxrt1050-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -91,6 +95,37 @@ static void imxrt_i2c_register(int bus)
 }
 #endif
 
+#ifdef CONFIG_IMXRT_USDHC
+static int nsh_sdmmc_initialize(void)
+{
+  struct sdio_dev_s *sdmmc;
+  int ret = 0;
+
+  /* Get an instance of the SDIO interface */
+
+  sdmmc = imxrt_usdhc_initialize(0);
+  if (!sdmmc)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SD/MMC\n");
+    }
+  else
+    {
+      /* Bind the SDIO interface to the MMC/SD driver */
+
+      ret = mmcsd_slotinitialize(0, sdmmc);
+      if (ret != OK)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+                 ret);
+        }
+    }
+  return OK;
+  }
+#else
+#  define nsh_sdmmc_initialize() (OK)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -124,6 +159,12 @@ int imxrt_bringup(void)
 
 #if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C1)
   imxrt_i2c_register(1);
+#endif
+
+#ifdef CONFIG_IMXRT_USDHC
+  /* Initialize SDHC-base MMC/SD card support */
+
+  nsh_sdmmc_initialize();
 #endif
 
 #ifdef CONFIG_MMCSD_SPI

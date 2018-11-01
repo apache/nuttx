@@ -272,6 +272,13 @@ config IMXRT_SNVS_HPRTC
 	bool "HP RTC"
 	default n
 
+config IMXRT_USDHC
+	bool "USDHC"
+	default n
+	select ARCH_HAVE_SDIO
+	---help---
+		Support SD host controller
+
 endmenu # i.MX RT Peripheral Selection
 
 menuconfig IMXRT_GPIO_IRQ
@@ -507,6 +514,26 @@ config IMXRT_SRAM_HEAPOFFSET
 
 endmenu  # i.MX6 Primary RAM
 endmenu # Memory Configuration
+
+menu "USDHC Configuration"
+	depends on IMXRT_USDHC
+
+config IMXRT_USDHC_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
+config IMXRT_USDHC_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+endmenu # USDHC Configuration
 
 menu "eDMA Configuration"
 	depends on IMXRT_EDMA

@@ -161,6 +161,39 @@
 
 #define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
 
+/* SDIO *****************************************************************************/
+
+/* Pin drive characteristics - drive strength in particular may need tuning for specific boards */
+
+#define PADCTL_USDHC1_DATAX (PADCTL_SRE|PADCTL_DSE_60OHM|PADCTL_HYS)
+#define PADCTL_USDHC1_CMD    PADCTL_USDHC1_DATAX
+#define PADCTL_USDHC1_CLK   (PADCTL_SRE|PADCTL_DSE_60OHM|PADCTL_SPEED_MAX)
+#define PADCTL_USDHC1_CD    (0)
+
+#define PIN_USDHC1_D0 GPIO_USDHC1_DATA0
+#define PIN_USDHC1_D1 GPIO_USDHC1_DATA1
+#define PIN_USDHC1_D2 GPIO_USDHC1_DATA2
+#define PIN_USDHC1_D3 GPIO_USDHC1_DATA3
+#define PIN_USDHC1_DCLK GPIO_USDHC1_CLK
+#define PIN_USDHC1_CMD GPIO_USDHC1_CMD
+#define PIN_USDHC1_CD GPIO_USDHC1_CD_2
+
+/* 386 KHz for initial inquiry stuff */
+
+#define BOARD_USDHC_IDMODE_PRESCALER    USDHC_SYSCTL_SDCLKFS_DIV256
+#define BOARD_USDHC_IDMODE_DIVISOR      USDHC_SYSCTL_DVS_DIV(2)
+
+/* 24.8MHz for other modes */
+
+#define BOARD_USDHC_MMCMODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_USDHC_SD1MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+
 /* PIO Disambiguation ***************************************************************/
 /* LPUARTs
  *
