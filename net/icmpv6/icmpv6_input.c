@@ -83,7 +83,7 @@
 #define ICMPv6RADVERTISE \
   ((struct icmpv6_router_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
-#define MLDQUEURY \
+#define MLDQUERY \
   ((FAR struct mld_mcast_listen_query_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 #define MLDREPORT_V1 \
   ((FAR struct mld_mcast_listen_report_v1_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
@@ -246,6 +246,11 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
 #endif
+
+  /* REVISIT:
+   * - Verify that the message length is valid.
+   * - Verify the ICMPv6 checksum
+   */
 
   /* Handle the ICMPv6 message by its type */
 
@@ -490,7 +495,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
     case ICMPV6_MCAST_LISTEN_QUERY:      /* Multicast Listener Query, RFC 2710 and RFC 3810 */
       {
-        FAR struct mld_mcast_listen_query_s *query = MLDQUEURY;
+        FAR struct mld_mcast_listen_query_s *query = MLDQUERY;
         int ret;
 
         ret = mld_query_input(dev, query);

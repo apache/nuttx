@@ -216,7 +216,7 @@ void igmp_input(struct net_driver_s *dev)
               }
             else /* if (IGMPBUF->grpaddr != 0) */
               {
-                ninfo("Group-specific multicast queury\n");
+                ninfo("Group-specific multicast query\n");
 
                 /* We first need to re-lookup the group since we used dest last time.
                  * Use the incoming IPaddress!
