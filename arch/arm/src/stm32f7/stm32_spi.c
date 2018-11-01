@@ -144,31 +144,32 @@
 
 struct stm32_spidev_s
 {
-  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
-  uint32_t         spibase;    /* SPIn base address */
-  uint32_t         spiclock;   /* Clocking for the SPI module */
+  struct spi_dev_s spidev;       /* Externally visible part of the SPI interface */
+  uint32_t         spibase;      /* SPIn base address */
+  uint32_t         spiclock;     /* Clocking for the SPI module */
 #ifdef CONFIG_STM32F7_SPI_INTERRUPTS
-  uint8_t          spiirq;     /* SPI IRQ number */
+  uint8_t          spiirq;       /* SPI IRQ number */
 #endif
 #ifdef CONFIG_STM32F7_SPI_DMA
-  volatile uint8_t rxresult;   /* Result of the RX DMA */
-  volatile uint8_t txresult;   /* Result of the RX DMA */
-  uint8_t          rxch;       /* The RX DMA channel number */
-  uint8_t          txch;       /* The TX DMA channel number */
-  DMA_HANDLE       rxdma;      /* DMA channel handle for RX transfers */
-  DMA_HANDLE       txdma;      /* DMA channel handle for TX transfers */
-  sem_t            rxsem;      /* Wait for RX DMA to complete */
-  sem_t            txsem;      /* Wait for TX DMA to complete */
-  uint32_t         txccr;      /* DMA control register for TX transfers */
-  uint32_t         rxccr;      /* DMA control register for RX transfers */
+  volatile uint8_t rxresult;     /* Result of the RX DMA */
+  volatile uint8_t txresult;     /* Result of the RX DMA */
+  uint8_t          rxch;         /* The RX DMA channel number */
+  uint8_t          txch;         /* The TX DMA channel number */
+  DMA_HANDLE       rxdma;        /* DMA channel handle for RX transfers */
+  DMA_HANDLE       txdma;        /* DMA channel handle for TX transfers */
+  sem_t            rxsem;        /* Wait for RX DMA to complete */
+  sem_t            txsem;        /* Wait for TX DMA to complete */
+  uint32_t         txccr;        /* DMA control register for TX transfers */
+  uint32_t         rxccr;        /* DMA control register for RX transfers */
 #endif
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
-  uint32_t         frequency;  /* Requested clock frequency */
-  uint32_t         actual;     /* Actual clock frequency */
-  int8_t           nbits;      /* Width of word in bits */
-  uint8_t          mode;       /* Mode 0,1,2,3 */
+  bool             initialized;  /* Has SPI interface been initialized */
+  sem_t            exclsem;      /* Held while chip is selected for mutual exclusion */
+  uint32_t         frequency;    /* Requested clock frequency */
+  uint32_t         actual;       /* Actual clock frequency */
+  int8_t           nbits;        /* Width of word in bits */
+  uint8_t          mode;         /* Mode 0,1,2,3 */
 #ifdef CONFIG_PM
-  struct pm_callback_s pm_cb;  /* PM callbacks */
+  struct pm_callback_s pm_cb;    /* PM callbacks */
 #endif
 };
 
@@ -1927,7 +1928,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -1938,6 +1939,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
@@ -1951,7 +1953,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
@@ -1962,6 +1964,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
@@ -1975,7 +1978,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
@@ -1986,6 +1989,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
@@ -1999,7 +2003,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI4 pins: SCK, MISO, and MOSI */
 
@@ -2010,6 +2014,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
@@ -2023,7 +2028,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI5 pins: SCK, MISO, and MOSI */
 
@@ -2034,6 +2039,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
@@ -2047,7 +2053,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_SPE) == 0)
+      if (!priv->initialized)
         {
           /* Configure SPI6 pins: SCK, MISO, and MOSI */
 
@@ -2058,6 +2064,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Set up default configuration: Master, 8-bit, etc. */
 
           spi_bus_initialize(priv);
+          priv->initialized = true;
         }
     }
   else
