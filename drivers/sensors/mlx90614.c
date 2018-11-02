@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/ioctl.h>
 #include <nuttx/sensors/mlx90614.h>
@@ -200,6 +201,7 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 {
   struct i2c_config_s config;
   uint8_t pkgcrc[5];
+  uint8_t *buffer;
   uint8_t crc;
   int ret;
 
@@ -211,20 +213,23 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   /* First write 0x00 0x00 to erase the EEPROM */
 
-  pkgcrc[0] = cmd;
-  pkgcrc[1] = 0x00;
+  pkgcrc[0] = I2C_WRITEADDR8(priv->addr);
+  pkgcrc[1] = cmd;
   pkgcrc[2] = 0x00;
+  pkgcrc[3] = 0x00;
 
   /* Generate the CRC to put in the PEC field */
 
-  crc = crc8ccitt(pkgcrc, 3);
+  crc = crc8ccitt(pkgcrc, 4);
   sninfo("Generated CRC: 0x%02X\n", crc);
 
-  pkgcrc[3] = crc;
+  pkgcrc[4] = crc;
+
+  buffer = &(pkgcrc[1]);
 
   /* Write the Command + 2 Bytes + PEC to device */
 
-  ret = i2c_write(priv->i2c, &config, (FAR const uint8_t *) pkgcrc, 4);
+  ret = i2c_write(priv->i2c, &config, (FAR const uint8_t *) buffer, 4);
   if (ret < 0)
     {
       snerr ("i2c_writeread failed: %d\n", ret);
@@ -233,29 +238,32 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   /* Wait the EEPROM erase */
 
-  nxsig_usleep(100 * 1000);
+  nxsig_usleep(10 * 1000);
 
   /* Create the I2C command that will be sent to device */
 
-  pkgcrc[0] = cmd;
-  pkgcrc[1] = (regval & 0xff);
-  pkgcrc[2] = (regval & 0xff00) >> 8;
+  pkgcrc[0] = I2C_WRITEADDR8(priv->addr);
+  pkgcrc[1] = cmd;
+  pkgcrc[2] = (regval & 0xff);
+  pkgcrc[3] = (regval & 0xff00) >> 8;
 
   /* Generate the CRC to put in the PEC field */
 
-  crc = crc8ccitt(pkgcrc, 3);
+  crc = crc8ccitt(pkgcrc, 4);
   sninfo("Generated CRC: 0x%02X\n", crc);
 
-  pkgcrc[3] = crc;
+  pkgcrc[4] = crc;
 
   /* Write the Command + 2 Bytes + PEC to device */
 
-  ret = i2c_write(priv->i2c, &config, (FAR const uint8_t *) pkgcrc, 4);
+  ret = i2c_write(priv->i2c, &config, (FAR const uint8_t *) buffer, 4);
   if (ret < 0)
     {
       snerr ("i2c_writeread failed: %d\n", ret);
       return ret;
     }
+
+  sninfo("New address 0x%02x stored correctly!\n", regval);
 
   return OK;
 }
@@ -376,18 +384,24 @@ static int mlx90614_ioctl(FAR struct file *filep, int cmd,
 
       case SNIOC_CHANGE_SMBUSADDR:
         {
+          FAR struct mlx90614_dev_s newdev;
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
           uint16_t newaddr;
           uint8_t smbcmd;
 
+          /* EEPROM reflash only happen when sent at I2C address 0x00 */
+
+          newdev.i2c  = priv->i2c;
+          newdev.addr = 0x00;
+
           /* The I2C address is put in the high byte position */
 
-          newaddr = (uint16_t) (*ptr << 8);
-          snerr("Setting new address: 0x%02x\n", newaddr);
+          newaddr = (uint16_t) *ptr;
+          sninfo("Setting new address: 0x%02x\n", newaddr);
 
           smbcmd = MLX90614_CMD_EEPROM_ACCESS | MLX90614_SMBUS_ADDR;
 
-          ret = mlx90614_write_word(priv, smbcmd, newaddr);
+          ret = mlx90614_write_word(&newdev, smbcmd, newaddr);
           if (ret < 0)
             {
               snerr("ERROR: Failed to change the I2C/SMBus address!\n");
