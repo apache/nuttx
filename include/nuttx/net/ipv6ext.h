@@ -106,40 +106,44 @@
  * 10. Upper Layer TCP (6), UDP (17), ICMPv6 (58)
  */
 
-#define NEXT_HOPBYBOT_EH       0    /*   0  Hop-by-Hop Options Header */
-                                    /*   6  See IP_PROTO_TCP in
-                                     *   include/nuttx/net/ip.h. */
-                                    /*  17  See IP_PROTO_TCP in
-                                     *      include/nuttx/net/ip.h. */
-#define NEXT_ENCAP_EH         41    /*  41  Encapsulated IPv6 Header */
-#define NEXT_ROUTING_EH       43    /*  43  Routing Header */
-#define NEXT_FRAGMENT_EH      44    /*  44  Fragment Header */
-#define NEXT_RRSVP_EH         46    /*  46  Resource ReSerVation Protocol */
-#define NEXT_ENCAPSEC_EH      50    /*  50  Encapsulating Security Payload */
-#define NEXT_AUTH_EH          51    /*  51  Authentication Header */
-                                    /*  58  See IP_PROTO_ICMP6 in
-                                     *      include/nuttx/net/ip.h. */
-#define NEXT_NOHEADER         59    /*  59  No next header */
-#define NEXT_DESTOPT_EH       60    /*  60  Destination Options Header */
-#define NEXT_MOBILITY_EH      135   /* 135  Mobility */
-#define NEXT_HOSTID_EH        139   /* 139  Host Identity Protocol */
-#define NEXT_SHIM6_EH         140   /* 140  Shim6 Protocol */
-                                    /* 253, 254 Reserved for experimentation
-                                     * and testing */
+#define NEXT_HOPBYBOT_EH       0     /*   0  Hop-by-Hop Options Header */
+                                     /*   6  See IP_PROTO_TCP in
+                                      *   include/nuttx/net/ip.h. */
+                                     /*  17  See IP_PROTO_TCP in
+                                      *      include/nuttx/net/ip.h. */
+#define NEXT_ENCAP_EH          41    /*  41  Encapsulated IPv6 Header */
+#define NEXT_ROUTING_EH        43    /*  43  Routing Header */
+#define NEXT_FRAGMENT_EH       44    /*  44  Fragment Header */
+#define NEXT_RRSVP_EH          46    /*  46  Resource ReSerVation Protocol */
+#define NEXT_ENCAPSEC_EH       50    /*  50  Encapsulating Security Payload */
+#define NEXT_AUTH_EH           51    /*  51  Authentication Header */
+                                     /*  58  See IP_PROTO_ICMP6 in
+                                      *      include/nuttx/net/ip.h. */
+#define NEXT_NOHEADER          59    /*  59  No next header */
+#define NEXT_DESTOPT_EH        60    /*  60  Destination Options Header */
+#define NEXT_MOBILITY_EH       135   /* 135  Mobility */
+#define NEXT_HOSTID_EH         139   /* 139  Host Identity Protocol */
+#define NEXT_SHIM6_EH          140   /* 140  Shim6 Protocol */
+                                     /* 253, 254 Reserved for experimentation
+                                      * and testing */
+
+/* Size of the extension header */
+
+#define EXTHDR_LEN(hdrlen)     ((hdrlen + 1) << 3)
 
 /* Values of the Two High-Order Bits in the Hop-to-hop Option Type Field */
 
-#define HOP2HOP_TYPE_MASK      0xc0
-#define HOP2HOP_TYPE_SKIP      0x00 /* Skip the option */
-#define HOP2HOP_TYPE_DISCARD   0x40 /* Silently discard the packet */
-#define HOP2HOP_TYPE_DISCARD1  0x80 /* Discard and send problem message if
+#define HOPBYHOP_TYPE_MASK     0xc0
+#define HOPBYHOP_TYPE_SKIP     0x00 /* Skip the option */
+#define HOPBYHOP_TYPE_DISCARD  0x40 /* Silently discard the packet */
+#define HOPBYHOP_TYPE_DISCARD1 0x80 /* Discard and send problem message if
                                      * ucast or mcast */
-#define HOP2HOP_TYPE_DISCARD2  0xc0 /* Discard and send problem message if
+#define HOPBYHOP_TYPE_DISCARD2 0xc0 /* Discard and send problem message if
                                      * not mcast */
 
 /* Hop-to-hop Option Types */
 
-#define HOP2HOP_ROUTER_ALERT   5
+#define HOPBYHOP_ROUTER_ALERT  5
 
 /* Hop-to-hop Router Alert Values */
 
@@ -154,13 +158,21 @@
  * Public Types
  ****************************************************************************/
 
+/* "Generic" extension option header.  Actual size is a multiple of 8 bytes */
+
+struct ipv6_extension_s
+{
+  uint8_t  nxthdr;      /* Next header */
+  uint8_t  len;         /* Extension header length */
+};
+
 /* Hop-by-hop Option Header */
 
 struct ipv6_hopbyhop_extension_s
 {
   uint8_t  nxthdr;      /* Next header */
   uint8_t  len;         /* Extension header length */
-  uint8_t  options[3];  /* Options */
+  uint8_t  options[6];  /* Options */
 };
 
 struct ipv6_routing_extension_s
@@ -196,14 +208,14 @@ struct ipv6_destoptions_extension_s
 {
   uint8_t  nxthdr;     /* Next header */
   uint8_t  len;        /* Extension header length */
-  uint8_t  options[3]; /* Options */
+  uint8_t  options[6]; /* Options */
 };
 
 /* Router Alert Hop-to-Hop option */
 
 struct ipv6_router_alert_s
 {
-  struct ipv6_hopbyhop_extension_s h2h;
+  struct ipv6_hopbyhop_extension_s hbyh;
 
   uint8_t type;       /* Hop-by-hop option number (5) */
   uint8_t len;        /* Length = 2 */

@@ -49,7 +49,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/mld.h>
 
-#include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "mld/mld.h"
 
 #ifdef CONFIG_NET_MLD
@@ -62,7 +62,17 @@
  * Name:  mld_leavegroup
  *
  * Description:
- *   Remove the specified group address to the group.
+ *   Remove the specified group address to the group.  This function
+ *   implements the logic for the IPV6_LEAVE_GROUP socket option.
+ *
+ *   The IPV6_JOIN_GROUP socket option is used to join a multicast group.
+ *   This is accomplished by using the setsockopt() API and specifying the
+ *   address of the ipv6_mreq structure containing the IPv6 multicast address
+ *   and the local IPv6 multicast interface index.  The stack chooses a
+ *   default multicast interface if an interface index of 0 is passed. The
+ *   values specified in the IPV6_MREQ structure used by IPV6_JOIN_GROUP
+ *   and IPV6_LEAVE_GROUP must be symmetrical. The format of the ipv6_mreq
+ *   structure can be found in include/netinet/in.h
  *
  * State transition diagram for a router in Querier state (RFC 2710):
  *                            ________________
@@ -128,20 +138,48 @@
  *
  ****************************************************************************/
 
-int mld_leavegroup(struct net_driver_s *dev, FAR const struct in6_addr *grpaddr)
+int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 {
+  FAR struct net_driver_s *dev;
   struct mld_group_s *group;
 
-  DEBUGASSERT(dev != NULL && grpaddr != NULL);
+  DEBUGASSERT(dev != NULL && mrec != NULL);
+
+  /* Get the device from the interface index.  Use the default network device
+   * if an interface index of 0 is provided.
+   */
+
+  if (mrec->ipv6mr_interface == 0)
+    {
+      dev = netdev_default();
+    }
+  else
+    {
+      dev = netdev_findbyindex(mrec->ipv6mr_interface);
+    }
+
+  if (dev == NULL)
+    {
+      return -ENODEV;
+    }
+
+  ninfo("Leave group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        mrec->ipv6mr_multiaddr.s6_addr16[0],
+        mrec->ipv6mr_multiaddr.s6_addr16[1],
+        mrec->ipv6mr_multiaddr.s6_addr16[2],
+        mrec->ipv6mr_multiaddr.s6_addr16[3],
+        mrec->ipv6mr_multiaddr.s6_addr16[4],
+        mrec->ipv6mr_multiaddr.s6_addr16[5],
+        mrec->ipv6mr_multiaddr.s6_addr16[5],
+        mrec->ipv6mr_multiaddr.s6_addr16[7);
 
   /* Find the entry corresponding to the address leaving the group */
 
-  group = mld_grpfind(dev, grpaddr->s6_addr16);
-
-  ninfo("Leaving group: %p\n", group);
-
+  group = mld_grpfind(dev, mrec->ipv6mr_multiaddr.s6_addr16);
   if (group != NULL)
     {
+      ninfo("Leaving group: %p\n", group);
+
       /* Cancel the timer and discard any queued Reports.  Canceling the
        * timer will prevent any new Reports from being sent;  clearing the
        * flags will discard any pending Reports that could interfere with
@@ -170,9 +208,9 @@ int mld_leavegroup(struct net_driver_s *dev, FAR const struct in6_addr *grpaddr)
 
       mld_grpfree(dev, group);
 
-      /* And remove the group address from the ethernet drivers MAC filter set */
+      /* And remove the group address from the Ethernet drivers MAC filter set */
 
-      mld_removemcastmac(dev, grpaddr->s6_addr16);
+      mld_removemcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
       return OK;
     }
 

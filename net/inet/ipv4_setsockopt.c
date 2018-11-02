@@ -101,6 +101,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
     {
       case IP_MSFILTER:    /* Access advanced, full-state filtering API */
         {
+#if 0 /* REVISIT:  This is not a proper implementation of IP_MSGFILTER */
           FAR const struct ip_msfilter *imsf;
           FAR struct net_driver_s *dev;
 
@@ -130,6 +131,55 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
                   ret = igmp_leavegroup(dev, &imsf->imsf_multiaddr);
                 }
             }
+#else
+          ret = -ENOSYS;
+#endif
+        }
+        break;
+
+      case IP_ADD_MEMBERSHIP:         /* Join a multicast group */
+      case IP_DROP_MEMBERSHIP:        /* Leave a multicast group */
+        {
+          FAR const struct ip_mreq *mrec;
+          FAR struct net_driver_s *dev;
+
+          /* REVISIT:  This is not a proper implementation of IP_MSGFILTER */
+
+          mrec = (FAR const struct ip_mreq *)value;
+          if (mrec == NULL || value_len < sizeof(struct ip_mreq))
+            {
+              nerr("ERROR: Bad value or value_len\n");
+              ret = -EINVAL;
+            }
+          else
+            {
+              /* Use the default network device is imr_interface is INADDRY_ANY. */
+
+              if (mrec->imr_interface.s_addr == INADDR_ANY)
+                {
+                  dev = netdev_default();
+                }
+              else
+                {
+                  /* Get the device associated with the local interface address */
+
+                  dev = netdev_findby_lipv4addr(mrec->imr_interface.s_addr);
+                }
+
+              if (dev == NULL)
+                {
+                  nwarn("WARNING: Could not find device for imr_interface\n");
+                  ret = -ENODEV;
+                }
+              else if (option == IP_ADD_MEMBERSHIP)
+                {
+                  ret = igmp_joingroup(dev, &mrec->imr_multiaddr);
+                }
+              else
+                {
+                  ret = igmp_leavegroup(dev, &mrec->imr_multiaddr);
+                }
+            }
         }
         break;
 
@@ -143,8 +193,6 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
                                        * whether sent multicast packets
                                        * should be looped back to local
                                        * sockets. */
-      case IP_ADD_MEMBERSHIP:         /* Join a multicast group */
-      case IP_DROP_MEMBERSHIP:        /* Leave a multicast group */
       case IP_UNBLOCK_SOURCE:         /* Unblock previously blocked multicast
                                        * source */
       case IP_BLOCK_SOURCE:           /* Stop receiving multicast data from

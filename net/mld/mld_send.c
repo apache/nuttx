@@ -180,13 +180,13 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * The IPv6 router alert option (type 5) is defined in RFC 2711.
    */
 
-  ra             = RABUF;
+  ra              = RABUF;
   memset(ra, 0, RASIZE);
 
-  ra->h2h.nxthdr = IP_PROTO_ICMP6;           /* ICMPv6 payload follows extension header */
-  ra->h2h.len    = 1;                        /* One 8-octect option follows */
-  ra->type       = HOP2HOP_ROUTER_ALERT;     /* Router alert */
-  ra->len        = 2;                        /* Length */
+  ra->hbyh.nxthdr = IP_PROTO_ICMP6;          /* ICMPv6 payload follows extension header */
+  ra->hbyh.len    = 1;                       /* One 8-octet option follows */
+  ra->type        = HOPBYHOP_ROUTER_ALERT;   /* Router alert */
+  ra->len         = 2;                       /* Length */
 
   /* Format the MLD ICMPv6 payload into place after the IPv6 header (with
    * router alert)

@@ -47,7 +47,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/mld.h>
 
-#include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "mld/mld.h"
 
 #ifdef CONFIG_NET_MLD
@@ -60,7 +60,17 @@
  * Name:  mld_joingroup
  *
  * Description:
- *   Add the specified group address to the group.
+ *   Add the specified group address to the group.  This function
+ *   implements the logic for the IPV6_JOIN_GROUP socket option.
+ *
+ *   The IPV6_JOIN_GROUP socket option is used to join a multicast group.
+ *   This is accomplished by using the setsockopt() API and specifying the
+ *   address of the ipv6_mreq structure containing the IPv6 multicast address
+ *   and the local IPv6 multicast interface index.  The stack chooses a
+ *   default multicast interface if an interface index of 0 is passed. The
+ *   values specified in the IPV6_MREQ structure used by IPV6_JOIN_GROUP
+ *   and IPV6_LEAVE_GROUP must be symmetrical. The format of the ipv6_mreq
+ *   structure can be found in include/netinet/in.h
  *
  * State transition diagram for a router in Querier state (RFC 2710):
  *                            ________________
@@ -126,46 +136,71 @@
  *
  ****************************************************************************/
 
-int mld_joingroup(struct net_driver_s *dev, FAR const struct in6_addr *grpaddr)
+int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 {
+  FAR struct net_driver_s *dev;
   struct mld_group_s *group;
 
-  DEBUGASSERT(dev != NULL && grpaddr != NULL);
+  DEBUGASSERT(dev != NULL && mrec != NULL);
+
+  /* Get the device from the interface index.  Use the default network device
+   * if an interface index of 0 is provided.
+   */
+
+  if (mrec->ipv6mr_interface == 0)
+    {
+      dev = netdev_default();
+    }
+  else
+    {
+      dev = netdev_findbyindex(mrec->ipv6mr_interface);
+    }
+
+  if (dev == NULL)
+    {
+      return -ENODEV;
+    }
+
+  ninfo("Join group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        mrec->ipv6mr_multiaddr.s6_addr16[0],
+        mrec->ipv6mr_multiaddr.s6_addr16[1],
+        mrec->ipv6mr_multiaddr.s6_addr16[2],
+        mrec->ipv6mr_multiaddr.s6_addr16[3],
+        mrec->ipv6mr_multiaddr.s6_addr16[4],
+        mrec->ipv6mr_multiaddr.s6_addr16[5],
+        mrec->ipv6mr_multiaddr.s6_addr16[5],
+        mrec->ipv6mr_multiaddr.s6_addr16[7);
 
   /* Check if a this address is already in the group */
 
-  group = mld_grpfind(dev, grpaddr->s6_addr16);
+  group = mld_grpfind(dev, mrec->ipv6mr_multiaddr.s6_addr16);
   if (group == NULL)
     {
-       /* No... allocate a new entry */
+      /* No... allocate a new entry */
 
-       ninfo("Join to new group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-             grpaddr->s6_addr16[0], grpaddr->s6_addr16[1],
-             grpaddr->s6_addr16[2], grpaddr->s6_addr16[3],
-             grpaddr->s6_addr16[4], grpaddr->s6_addr16[5],
-             grpaddr->s6_addr16[5], grpaddr->s6_addr16[7);
+      ninfo("Allocate new group entry\n");
 
-       group = mld_grpalloc(dev, grpaddr->s6_addr16);
-       if (group == NULL)
-         {
-           return -ENOMEM;
-         }
+      group = mld_grpalloc(dev, mrec->ipv6mr_multiaddr.s6_addr16);
+      if (group == NULL)
+        {
+          return -ENOMEM;
+        }
 
-       MLD_STATINCR(g_netstats.mld.joins);
+      MLD_STATINCR(g_netstats.mld.joins);
 
-       /* Send the Version 1 Multicast Listener Report */
+      /* Send the Version 1 Multicast Listener Report */
 
-       MLD_STATINCR(g_netstats.mld.report_sched);
-       mld_waitmsg(group, ICMPV6_MCAST_LISTEN_REPORT_V1);
+      MLD_STATINCR(g_netstats.mld.report_sched);
+      mld_waitmsg(group, ICMPV6_MCAST_LISTEN_REPORT_V1);
 
-       /* And start the timer at 10*100 msec */
+      /* And start the timer at 10*100 msec */
 
-       mld_starttimer(group, 10);
+      mld_starttimer(group, 10);
 
-       /* Add the group (MAC) address to the ether drivers MAC filter list */
+      /* Add the group (MAC) address to the Ethernet drivers MAC filter list */
 
-       mld_addmcastmac(dev, grpaddr->s6_addr16);
-       return OK;
+      mld_addmcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
+      return OK;
     }
 
   /* Return EEXIST if the address is already a member of the group */

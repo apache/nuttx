@@ -47,6 +47,7 @@
 
 #include <nuttx/net/net.h>
 
+#include "mld/mld.h"
 #include "inet/inet.h"
 
 #ifdef CONFIG_NET_IPv6
@@ -91,10 +92,40 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
   switch (option)
     {
+      case IPV6_JOIN_GROUP:       /* Join a multicast group */
+        {
+          FAR const struct ipv6_mreq *mrec ;
+
+          mrec = (FAR const struct ipv6_mreq *)value;
+          if (mrec == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = mld_joingroup(mrec);
+            }
+        }
+        break;
+
+      case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
+        {
+          FAR const struct ipv6_mreq *mrec ;
+
+          mrec = (FAR const struct ipv6_mreq *)value;
+          if (mrec == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = mld_leavegroup(mrec);
+            }
+        }
+        break;
+
       /* The following IPv6 socket options are defined, but not implemented */
 
-      case IPV6_JOIN_GROUP:       /* Join a multicast group */
-      case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
       case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
       case IPV6_MULTICAST_IF:     /* Interface to use for outgoing multicast
                                    * packets */
@@ -103,7 +134,6 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
       case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
                                    * communications only */
-#warning Missing logic
         nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
         ret = -ENOSYS;
         break;

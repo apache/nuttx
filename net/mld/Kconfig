@@ -10,6 +10,7 @@ menuconfig NET_MLD
 	default n
 	depends on EXPERIMENTAL
 	select NET_MCASTGROUP
+	select NETDEV_IFINDEX
 	---help---
 		Enable Multicast Listener Discovery (MLD) support.
 

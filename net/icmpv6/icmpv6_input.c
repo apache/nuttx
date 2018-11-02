@@ -65,32 +65,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF \
-  ((struct eth_hdr_s *)&dev->d_buf[0])
-#define IPv6BUF \
-  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPICMPv6 \
-  ((struct icmpv6_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPv6REPLY \
-  ((FAR struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define ICMPv6SIZE \
- ((dev)->d_len - IPv6_HDRLEN)
+#define IPv6BUF         ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6REPLY      ((FAR struct icmpv6_echo_reply_s *)icmpv6)
+#define ICMPv6SIZE       ((dev)->d_len - IPv6_HDRLEN)
 
-#define ICMPv6SOLICIT \
-  ((struct icmpv6_neighbor_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define ICMPv6ADVERTISE \
-  ((struct icmpv6_neighbor_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define ICMPv6RADVERTISE \
-  ((struct icmpv6_router_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define ICMPv6SOLICIT    ((struct icmpv6_neighbor_solicit_s *)icmpv6)
+#define ICMPv6ADVERTISE  ((struct icmpv6_neighbor_advertise_s *)icmpv6)
+#define ICMPv6RADVERTISE ((struct icmpv6_router_advertise_s *)icmpv6)
 
-#define MLDQUERY \
-  ((FAR struct mld_mcast_listen_query_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define MLDREPORT_V1 \
-  ((FAR struct mld_mcast_listen_report_v1_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define MLDREPORT_V2 \
-  ((FAR struct mld_mcast_listen_report_v2_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-#define MLDDONE_V1 \
-  ((FAR struct mld_mcast_listen_done_v1_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define MLDQUERY         ((FAR struct mld_mcast_listen_query_s *)icmpv6)
+#define MLDREPORT_V1     ((FAR struct mld_mcast_listen_report_v1_s *)icmpv6)
+#define MLDREPORT_V2     ((FAR struct mld_mcast_listen_report_v2_s *)icmpv6)
+#define MLDDONE_V1       ((FAR struct mld_mcast_listen_done_v1_s *)icmpv6)
 
 /****************************************************************************
  * Private Functions
@@ -228,8 +214,10 @@ drop:
  *   Handle incoming ICMPv6 input
  *
  * Input Parameters:
- *   dev - The device driver structure containing the received ICMPv6
- *         packet
+ *   dev    - The device driver structure containing the received ICMPv6
+ *            packet
+ *   icmpv6 - Start of the ICMPv6 packet which may lie at an offset from
+ *            the IPv6 if IPv6 extension headers are present.
  *
  * Returned Value:
  *   None
@@ -239,9 +227,10 @@ drop:
  *
  ****************************************************************************/
 
-void icmpv6_input(FAR struct net_driver_s *dev)
+void icmpv6_input(FAR struct net_driver_s *dev,
+                  FAR struct icmpv6_hdr_s *icmpv6)
 {
-  FAR struct icmpv6_iphdr_s *ipicmp = IPICMPv6;
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
@@ -254,7 +243,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
   /* Handle the ICMPv6 message by its type */
 
-  switch (ipicmp->type)
+  switch (icmpv6->type)
     {
     /* If we get a neighbor solicitation for our address we should send
      * a neighbor advertisement message back.
@@ -273,7 +262,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
              * solicitation came from.
              */
 
-            icmpv6_advertise(dev, ipicmp->srcipaddr);
+            icmpv6_advertise(dev, ipv6->srcipaddr);
 
             /* All statistics have been updated.  Nothing to do but exit. */
 
@@ -301,7 +290,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
          */
 
         adv = ICMPv6ADVERTISE;
-        if (net_ipv6addr_cmp(ipicmp->destipaddr, dev->d_ipv6addr))
+        if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
           {
             /* This message is required to support the Target link-layer
              * address option.
@@ -311,12 +300,12 @@ void icmpv6_input(FAR struct net_driver_s *dev)
               {
                 /* Save the sender's address mapping in our Neighbor Table. */
 
-                neighbor_add(dev, ipicmp->srcipaddr, adv->tgtlladdr);
+                neighbor_add(dev, ipv6->srcipaddr, adv->tgtlladdr);
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
                 /* Then notify any logic waiting for the Neighbor Advertisement */
 
-                icmpv6_notify(ipicmp->srcipaddr);
+                icmpv6_notify(ipv6->srcipaddr);
 #endif
 
                 /* We consumed the packet but we don't send anything in
@@ -361,7 +350,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
         /* Get the length of the option data */
 
-        pktlen = (uint16_t)ipicmp->len[0] << 8 | ipicmp->len[1];
+        pktlen = (uint16_t)ipv6->len[0] << 8 | ipv6->len[1];
         if (pktlen <= ICMPv6_RADV_MINLEN)
           {
             /* Too small to contain any options */
@@ -386,7 +375,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
             if (sllopt->opttype == 1 && sllopt->optlen == 1)
               {
-                neighbor_add(dev, ipicmp->srcipaddr, sllopt->srclladdr);
+                neighbor_add(dev, ipv6->srcipaddr, sllopt->srclladdr);
               }
 
             FAR struct icmpv6_prefixinfo_s *opt =
@@ -402,7 +391,7 @@ void icmpv6_input(FAR struct net_driver_s *dev)
               {
                 /* Yes.. Notify any waiting threads */
 
-                icmpv6_rnotify(dev, ipicmp->srcipaddr, opt->prefix, opt->preflen);
+                icmpv6_rnotify(dev, ipv6->srcipaddr, opt->prefix, opt->preflen);
                 goto icmpv6_send_nothing;
               }
 
@@ -425,13 +414,13 @@ void icmpv6_input(FAR struct net_driver_s *dev)
          * ICMPv6 checksum before we return the packet.
          */
 
-        ipicmp->type = ICMPv6_ECHO_REPLY;
+        icmpv6->type = ICMPv6_ECHO_REPLY;
 
-        net_ipv6addr_copy(ipicmp->destipaddr, ipicmp->srcipaddr);
-        net_ipv6addr_copy(ipicmp->srcipaddr, dev->d_ipv6addr);
+        net_ipv6addr_copy(ipv6->destipaddr, ipv6->srcipaddr);
+        net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
 
-        ipicmp->chksum = 0;
-        ipicmp->chksum = ~icmpv6_chksum(dev);
+        icmpv6->chksum = 0;
+        icmpv6->chksum = ~icmpv6_chksum(dev);
       }
       break;
 
@@ -557,13 +546,13 @@ void icmpv6_input(FAR struct net_driver_s *dev)
 
     default:
       {
-        nwarn("WARNING: Unknown ICMPv6 type: %d\n", ipicmp->type);
+        nwarn("WARNING: Unknown ICMPv6 type: %d\n", icmpv6->type);
         goto icmpv6_type_error;
       }
     }
 
   ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
-          dev->d_len, (ipicmp->len[0] << 8) | ipicmp->len[1]);
+          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.sent++;

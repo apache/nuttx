@@ -82,6 +82,7 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 #include <string.h>
 
@@ -91,6 +92,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/ipv6ext.h>
 
 #include "neighbor/neighbor.h"
 #include "tcp/tcp.h"
@@ -110,11 +112,43 @@
 
 /* Macros */
 
-#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define PAYLOAD ((FAR uint8_t *)&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv6_exthdr
+ *
+ * Description:
+ *   Return true if the next header value is an IPv6 extension header.
+ *
+ ****************************************************************************/
+
+static bool ipv6_exthdr(uint8_t nxthdr)
+{
+  switch (nxthdr)
+    {
+      case NEXT_HOPBYBOT_EH:    /* Hop-by-Hop Options Header */
+      case NEXT_ENCAP_EH:       /* Encapsulated IPv6 Header */
+      case NEXT_ROUTING_EH:     /* Routing Header */
+      case NEXT_FRAGMENT_EH:    /* Fragment Header */
+      case NEXT_RRSVP_EH:       /* Resource ReSerVation Protocol */
+      case NEXT_ENCAPSEC_EH:    /* Encapsulating Security Payload */
+      case NEXT_AUTH_EH:        /* Authentication Header */
+      case NEXT_DESTOPT_EH:     /* Destination Options Header */
+      case NEXT_MOBILITY_EH:    /* Mobility */
+      case NEXT_HOSTID_EH:      /* Host Identity Protocol */
+      case NEXT_SHIM6_EH:       /* Shim6 Protocol */
+        return true;
+
+      case NEXT_NOHEADER:       /* No next header */
+      default:
+        return false;
+    }
+}
 
 /****************************************************************************
  * Name: check_dev_destipaddr
@@ -240,8 +274,11 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
 int ipv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  FAR uint8_t *payload;
   uint16_t hdrlen;
   uint16_t pktlen;
+  uint8_t nxthdr;
+  bool exthdrs;
 #ifdef CONFIG_NET_IPFORWARD
   int ret;
 #endif
@@ -390,15 +427,52 @@ int ipv6_input(FAR struct net_driver_s *dev)
         }
     }
 
+  /* Parse IPv6 extension headers (parsed but ignored) */
+
+  payload = PAYLOAD;      /* Assume payload starts right after IPv6 header */ 
+  nxthdr  = ipv6->proto;  /* Next header determined by IPv6 header prototype */
+  exthdrs = false;        /* No IPv6 extension headers found */
+
+  while (ipv6_exthdr(nxthdr))
+    {
+      FAR struct ipv6_extension_s *exthdr;
+
+      /* Just skip over the extension header */
+
+      exthdr   = (FAR struct ipv6_extension_s *)payload;
+      payload += EXTHDR_LEN((unsigned int)exthdr->len);
+      exthdr   = (FAR struct ipv6_extension_s *)payload;
+      nxthdr   = exthdr->nxthdr;
+      exthdrs  = true;
+    }
+
+#ifdef CONFIG_NET_ICMPv6
+  /* Currently only icmpv6_input() can handle the presence of IPv6 extension
+   * headers.  The issue is that with extension headers present, the
+   * transport layer header lies at a variable offset from the end of the
+   * IPv6 header and currently only ICMPv6 can deal with that offset.
+   */
+
+  if (exthdrs && nxthdr != IP_PROTO_ICMP6)
+#else
+  if (exthdrs)
+#endif
+    {
+      nwarn("WARNING: Extension headers with proto=%u\n", nxthdr);
+      goto drop;
+    }
+
   /* Make sure that all packet processing logic knows that there is an IPv6
    * packet in the device buffer.
    */
 
   IFF_SET_IPv6(dev->d_flags);
 
-  /* Now process the incoming packet according to the protocol. */
+  /* Now process the incoming packet according to the protocol specified in
+   * the next header IPv6 field.
+   */
 
-  switch (ipv6->proto)
+  switch (nxthdr)
     {
 #ifdef NET_TCP_HAVE_STACK
       case IP_PROTO_TCP:   /* TCP input */
@@ -444,13 +518,13 @@ int ipv6_input(FAR struct net_driver_s *dev)
         break;
 #endif
 
-  /* Check for ICMP input */
-
 #ifdef CONFIG_NET_ICMPv6
+      /* Check for ICMP input */
+
       case IP_PROTO_ICMP6: /* ICMP6 input */
         /* Forward the ICMPv6 packet */
 
-        icmpv6_input(dev);
+        icmpv6_input(dev, (FAR struct icmpv6_hdr_s *)payload);
 
 #ifdef CONFIG_NET_6LOWPAN
         /* All outgoing ICMPv6 messages come through one of two mechanisms:

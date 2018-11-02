@@ -191,7 +191,9 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
         {
           unsigned int recvsize;
 
-          /* Check if it is for us */
+          /* Check if it is for us.
+           * REVISIT:  What if there are IPv6 extension headers present?
+           */
 
           icmpv6 = ICMPv6_BUF;
           if (conn->id != icmpv6->id)
@@ -213,7 +215,9 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
               recvsize = pstate->recv_buflen;
             }
 
-          /* Copy the ICMPv6 ECHO reply to the user provided buffer */
+          /* Copy the ICMPv6 ECHO reply to the user provided buffer
+           * REVISIT:  What if there are IPv6 extension headers present?
+           */
 
           memcpy(pstate->recv_buf, ICMPv6_BUF, recvsize);
 

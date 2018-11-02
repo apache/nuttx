@@ -186,6 +186,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+struct ipv6_mreq;                    /* Forward reference */
 struct net_driver_s;                 /* Forward reference */
 struct mld_mcast_listen_query_s;     /* Forward reference */
 struct mld_mcast_listen_report_v1_s; /* Forward reference */
@@ -369,23 +370,41 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
  * Name:  mld_joingroup
  *
  * Description:
- *   Add the specified group address to the group.
+ *   Add the specified group address to the group.  This function
+ *   implements the logic for the IPV6_JOIN_GROUP socket option.
+ *
+ *   The IPV6_JOIN_GROUP socket option is used to join a multicast group.
+ *   This is accomplished by using the setsockopt() API and specifying the
+ *   address of the ipv6_mreq structure containing the IPv6 multicast address
+ *   and the local IPv6 multicast interface index.  The stack chooses a
+ *   default multicast interface if an interface index of 0 is passed. The
+ *   values specified in the IPV6_MREQ structure used by IPV6_JOIN_GROUP
+ *   and IPV6_LEAVE_GROUP must be symmetrical. The format of the ipv6_mreq
+ *   structure can be found in include/netinet/in.h
  *
  ****************************************************************************/
 
-int mld_joingroup(FAR struct net_driver_s *dev,
-                  FAR const struct in6_addr *grpaddr);
+int mld_joingroup(FAR const struct ipv6_mreq *mrec);
 
 /****************************************************************************
  * Name:  mld_leavegroup
  *
  * Description:
- *   Remove the specified group address to the group.
+ *   Remove the specified group address to the group.  This function
+ *   implements the logic for the IPV6_LEAVE_GROUP socket option.
+ *
+ *   The IPV6_JOIN_GROUP socket option is used to join a multicast group.
+ *   This is accomplished by using the setsockopt() API and specifying the
+ *   address of the ipv6_mreq structure containing the IPv6 multicast address
+ *   and the local IPv6 multicast interface index.  The stack chooses a
+ *   default multicast interface if an interface index of 0 is passed. The
+ *   values specified in the IPV6_MREQ structure used by IPV6_JOIN_GROUP
+ *   and IPV6_LEAVE_GROUP must be symmetrical. The format of the ipv6_mreq
+ *   structure can be found in include/netinet/in.h
  *
  ****************************************************************************/
 
-int mld_leavegroup(FAR struct net_driver_s *dev,
-                   FAR const struct in6_addr *grpaddr);
+int mld_leavegroup(FAR const struct ipv6_mreq *mrec);
 
 /****************************************************************************
  * Name:  mld_startticks and mld_starttimer
