@@ -70,6 +70,12 @@
 #define USB_REQ_DFU_DETACH      0
 #define USB_REQ_DFU_GETSTATUS   3
 
+#ifdef CONFIG_DFU_MSFT_OS_DESCRIPTORS
+#define DFU_MAX_DESCRIPTOR_LEN 256
+#else
+#define DFU_MAX_DESCRIPTOR_LEN sizeof(struct dfu_cfgdesc_s)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -232,14 +238,90 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
   
   *dest = g_dfu_cfgdesc;
   dest->ifdesc.ifno += devinfo->ifnobase;
+  dest->ifdesc.iif = devinfo->strbase;
   
   return sizeof(g_dfu_cfgdesc);
 }
 
+static int convert_to_utf16(FAR uint8_t *dest, FAR const char *src)
+{
+  int bytes = 0;
+  while (*src)
+  {
+    *dest++ = *src++;
+    *dest++ = 0x00;
+    bytes += 2;
+  }
+  return bytes;
+}
+
 static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 {
-  return -EINVAL;
+  FAR const char *str;
+
+  if (id == 0)
+    {
+      str = CONFIG_DFU_INTERFACE_NAME;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  strdesc->len  = 2 + convert_to_utf16(strdesc->data, str);
+  strdesc->type = USB_DESC_TYPE_STRING;
+  return strdesc->len;
 }
+
+#ifdef CONFIG_DFU_MSFT_OS_DESCRIPTORS
+
+static int dfu_make_msft_extprop_desc(FAR uint8_t *buf)
+{
+  FAR const char *propname = "DeviceInterfaceGUIDs";
+  FAR const char *propval = CONFIG_DFU_INTERFACE_GUID;
+  FAR struct usb_msft_os_extprop_hdr_s *hdr = (FAR struct usb_msft_os_extprop_hdr_s*)buf;
+  FAR uint8_t *payload = buf + sizeof(struct usb_msft_os_extprop_hdr_s);
+  int namelen, valuelen, proplen, totallen;
+  
+  namelen = strlen(propname) * 2 + 2;
+  valuelen = strlen(propval) * 2 + 4;
+  proplen = 14 + namelen + valuelen;
+  totallen = sizeof(struct usb_msft_os_extprop_hdr_s) + proplen;
+  
+  memset(buf, 0, totallen);
+  hdr->len[0] = LSBYTE(totallen);
+  hdr->len[1] = MSBYTE(totallen);
+  hdr->version[1] = 0x01;
+  hdr->index[0] = MSFTOSDESC_INDEX_EXTPROP;
+  hdr->count[0] = 1;
+  
+  *payload++ = LSBYTE(proplen); // dwSize
+  *payload++ = MSBYTE(proplen);
+  *payload++ = 0;
+  *payload++ = 0;
+  *payload++ = 7; // dwPropertyDataType = REG_MULTI_SZ
+  *payload++ = 0;
+  *payload++ = 0;
+  *payload++ = 0;
+  *payload++ = LSBYTE(namelen); // wPropertyNameLength
+  *payload++ = MSBYTE(namelen);
+  payload += convert_to_utf16(payload, propname); // bPropertyName
+  *payload++ = 0; // Null terminator
+  *payload++ = 0;
+  *payload++= LSBYTE(valuelen); // dwPropertyDataLength
+  *payload++= MSBYTE(valuelen);
+  *payload++ = 0;
+  *payload++ = 0;
+  payload += convert_to_utf16(payload, propval);
+  *payload++ = 0; // Null terminator for string
+  *payload++ = 0;
+  *payload++ = 0; // Null terminator for array
+  *payload++ = 0;
+  
+  return totallen;
+}
+
+#endif
 
 static void dfu_workqueue_callback(void *arg)
 {
@@ -312,6 +394,12 @@ static int  usbclass_setup(FAR struct usbdevclass_driver_s *driver,
       ret = sizeof(struct dfu_getstatus_response_s);
     }
   }
+#ifdef CONFIG_DFU_MSFT_OS_DESCRIPTORS
+  else if (ctrl->req == USB_REQ_GETMSFTOSDESCRIPTOR)
+  {
+    ret = dfu_make_msft_extprop_desc(ctrlreq->buf);
+  }
+#endif
   
   /* Respond to the setup command if data was returned.  On an error return
    * value (ret < 0), the USB driver will stall.
@@ -337,7 +425,7 @@ static int  usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 {
   FAR struct dfu_driver_s *priv = (FAR struct dfu_driver_s *)driver;
   
-  priv->ctrlreq = usbclass_allocreq(dev->ep0, sizeof(g_dfu_cfgdesc));
+  priv->ctrlreq = usbclass_allocreq(dev->ep0, DFU_MAX_DESCRIPTOR_LEN);
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCCTRLREQ), 0);
@@ -427,8 +515,12 @@ void usbdev_dfu_get_composite_devdesc(struct composite_devdesc_s *dev)
   dev->configid     = 0;
   dev->cfgdescsize  = sizeof(g_dfu_cfgdesc);
   dev->devinfo.ninterfaces = 1;
-  dev->devinfo.nstrings    = 0;
+  dev->devinfo.nstrings    = 1;
   dev->devinfo.nendpoints  = 0;
+
+#ifdef CONFIG_DFU_MSFT_OS_DESCRIPTORS
+  memcpy(dev->msft_compatible_id, "WINUSB", 6);
+#endif
 }
 
 

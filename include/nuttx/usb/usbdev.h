@@ -234,6 +234,11 @@ struct composite_devdesc_s
   int cfgdescsize; /* The size of the config descriptor */
   int minor;
 
+#ifdef CONFIG_COMPOSITE_MSFT_OS_DESCRIPTORS
+  uint8_t msft_compatible_id[8];
+  uint8_t msft_sub_id[8];
+#endif
+  
   struct usbdev_devinfo_s devinfo;
 };
 #endif
