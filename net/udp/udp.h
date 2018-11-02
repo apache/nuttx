@@ -520,7 +520,10 @@ int udp_ipv4_input(FAR struct net_driver_s *dev);
  *   Handle incoming UDP input in an IPv6 packet
  *
  * Input Parameters:
- *   dev - The device driver structure containing the received UDP packet
+ *   dev   - The device driver structure containing the received UDP packet
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   OK  The packet has been processed  and can be deleted
@@ -533,7 +536,7 @@ int udp_ipv4_input(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int udp_ipv6_input(FAR struct net_driver_s *dev);
+int udp_ipv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
 #endif
 
 /****************************************************************************

@@ -73,9 +73,9 @@
  *   Handle incoming TCP input
  *
  * Input Parameters:
- *   dev   - The device driver structure containing the received TCP packet.
+ *   dev    - The device driver structure containing the received TCP packet.
  *   domain - IP domain (PF_INET or PF_INET6)
- *   iplen - Lngth of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
+ *   iplen  - Length of the IP header (IPv4_HDRLEN or IPv6_HDRLEN).
  *
  * Returned Value:
  *   None
@@ -1048,7 +1048,10 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
  *   Handle incoming TCP input with IPv4 header
  *
  * Input Parameters:
- *   dev - The device driver structure containing the received TCP packet.
+ *   dev   - The device driver structure containing the received TCP packet.
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   None
@@ -1059,7 +1062,7 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-void tcp_ipv6_input(FAR struct net_driver_s *dev)
+void tcp_ipv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
   /* Configure to receive an TCP IPv6 packet */
 
@@ -1067,7 +1070,7 @@ void tcp_ipv6_input(FAR struct net_driver_s *dev)
 
   /* Then process in the TCP IPv6 input */
 
-  tcp_input(dev, PF_INET6, IPv6_HDRLEN);
+  tcp_input(dev, PF_INET6, iplen);
 }
 #endif
 

@@ -157,8 +157,8 @@ struct pollfd;       /* Forward reference */
  * Input Parameters:
  *   dev    - The device driver structure containing the received ICMPv6
  *            packet
- *   icmpv6 - Start of the ICMPv6 packet which may lie at an offset from
- *            the IPv6 if IPv6 extension headers are present.
+ *   icmpv6 - Start of the ICMPv6 payload which may lie at an offset from
+ *            the IPv6 header if IPv6 extension headers are present.
  *
  * Returned Value:
  *   None

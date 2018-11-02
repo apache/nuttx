@@ -275,10 +275,10 @@ int ipv6_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR uint8_t *payload;
-  uint16_t hdrlen;
+  uint16_t llhdrlen;
+  uint16_t iphdrlen;
   uint16_t pktlen;
   uint8_t nxthdr;
-  bool exthdrs;
 #ifdef CONFIG_NET_IPFORWARD
   int ret;
 #endif
@@ -296,25 +296,62 @@ int ipv6_input(FAR struct net_driver_s *dev)
     {
       /* IP version and header length. */
 
+      nwarn("WARNING: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
+
 #ifdef CONFIG_NET_STATISTICS
-      g_netstats.ipv6.drop++;
       g_netstats.ipv6.vhlerr++;
 #endif
-
-      nwarn("WARNING: Invalid IPv6 version: %d\n", ipv6->vtc >> 4);
       goto drop;
     }
 
   /* Get the size of the packet minus the size of link layer header */
 
-  hdrlen = NET_LL_HDRLEN(dev);
-  if ((hdrlen + IPv6_HDRLEN) > dev->d_len)
+  llhdrlen = NET_LL_HDRLEN(dev);
+  if ((llhdrlen + IPv6_HDRLEN) > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv6 header\n");
       goto drop;
     }
 
-  dev->d_len -= hdrlen;
+  dev->d_len -= llhdrlen;
+
+  /* Make sure that all packet processing logic knows that there is an IPv6
+   * packet in the device buffer.
+   */
+
+  IFF_SET_IPv6(dev->d_flags);
+
+  /* Parse IPv6 extension headers (parsed but ignored) */
+
+  payload  = PAYLOAD;     /* Assume payload starts right after IPv6 header */
+  iphdrlen = IPv6_HDRLEN; /* Total length of the IPv6 header */
+  nxthdr   = ipv6->proto; /* Next header determined by IPv6 header prototype */
+
+  while (ipv6_exthdr(nxthdr))
+    {
+      FAR struct ipv6_extension_s *exthdr;
+      uint16_t extlen;
+
+      /* Just skip over the extension header */
+
+      exthdr    = (FAR struct ipv6_extension_s *)payload;
+      extlen    = EXTHDR_LEN((unsigned int)exthdr->len);
+      payload  += extlen;
+      iphdrlen += extlen;
+
+      /* Check for a short packet */
+
+      if (iphdrlen > dev->d_len)
+        {
+          nwarn("WARNING: Packet shorter than IPv6 header\n");
+          goto drop;
+        }
+
+      /* Set up for the next time through the loop */
+
+      exthdr    = (FAR struct ipv6_extension_s *)payload;
+      nxthdr    = exthdr->nxthdr;
+    }
 
   /* Check the size of the packet. If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet
@@ -326,10 +363,12 @@ int ipv6_input(FAR struct net_driver_s *dev)
    * that follows the header.  The device interface uses the d_len variable
    * for holding the size of the entire packet, including the IP header but
    * without the link layer header.
+   *
+   * REVISIT:  Length will be set to zero if the extension header carries
+   * a Jumbo payload option.
    */
 
-  pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
-           IPv6_HDRLEN;
+  pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] + iphdrlen;
 
   if (pktlen <= dev->d_len)
     {
@@ -367,7 +406,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
           ipv6_forward_broadcast(dev, ipv6);
         }
 #endif
-      return udp_ipv6_input(dev);
+      return udp_ipv6_input(dev, iphdrlen);
     }
 
   /* In other cases, the device must be assigned a non-zero IP address
@@ -405,7 +444,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
             {
               /* The packet was forwarded.  Return success; d_len will
                * be set appropriately by the forwarding logic:  Cleared
-               * if the packet is forward via anoother device or non-
+               * if the packet is forward via another device or non-
                * zero if it will be forwarded by the same device that
                * it was received on.
                */
@@ -418,55 +457,10 @@ int ipv6_input(FAR struct net_driver_s *dev)
               /* Not destined for us and not forwardable... drop the packet. */
 
               nwarn("WARNING: Not destined for us; not forwardable... Dropping!\n");
-
-#ifdef CONFIG_NET_STATISTICS
-              g_netstats.ipv6.drop++;
-#endif
               goto drop;
             }
         }
     }
-
-  /* Parse IPv6 extension headers (parsed but ignored) */
-
-  payload = PAYLOAD;      /* Assume payload starts right after IPv6 header */ 
-  nxthdr  = ipv6->proto;  /* Next header determined by IPv6 header prototype */
-  exthdrs = false;        /* No IPv6 extension headers found */
-
-  while (ipv6_exthdr(nxthdr))
-    {
-      FAR struct ipv6_extension_s *exthdr;
-
-      /* Just skip over the extension header */
-
-      exthdr   = (FAR struct ipv6_extension_s *)payload;
-      payload += EXTHDR_LEN((unsigned int)exthdr->len);
-      exthdr   = (FAR struct ipv6_extension_s *)payload;
-      nxthdr   = exthdr->nxthdr;
-      exthdrs  = true;
-    }
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Currently only icmpv6_input() can handle the presence of IPv6 extension
-   * headers.  The issue is that with extension headers present, the
-   * transport layer header lies at a variable offset from the end of the
-   * IPv6 header and currently only ICMPv6 can deal with that offset.
-   */
-
-  if (exthdrs && nxthdr != IP_PROTO_ICMP6)
-#else
-  if (exthdrs)
-#endif
-    {
-      nwarn("WARNING: Extension headers with proto=%u\n", nxthdr);
-      goto drop;
-    }
-
-  /* Make sure that all packet processing logic knows that there is an IPv6
-   * packet in the device buffer.
-   */
-
-  IFF_SET_IPv6(dev->d_flags);
 
   /* Now process the incoming packet according to the protocol specified in
    * the next header IPv6 field.
@@ -478,16 +472,16 @@ int ipv6_input(FAR struct net_driver_s *dev)
       case IP_PROTO_TCP:   /* TCP input */
         /* Forward the IPv6 TCP packet */
 
-        tcp_ipv6_input(dev);
+        tcp_ipv6_input(dev, iphdrlen);
 
 #ifdef CONFIG_NET_6LOWPAN
-        /* TCP output comes through three different mechansims.  Either from:
+        /* TCP output comes through three different mechanisms.  Either from:
          *
          *   1. TCP socket output.  For the case of TCP output to an
          *      IEEE802.15.4, the TCP output is caught in the socket
          *      send()/sendto() logic and and redirected to 6LoWPAN logic.
          *   2. TCP output from the TCP state machine.  That will occur
-         *      during TCP packet processing by the TCP state meachine.
+         *      during TCP packet processing by the TCP state machine.
          *   3. TCP output resulting from TX or timer polling
          *
          * Case 3 is handled here.  Logic here detects if (1) an attempt
@@ -514,7 +508,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       case IP_PROTO_UDP:   /* UDP input */
         /* Forward the IPv6 UDP packet */
 
-        udp_ipv6_input(dev);
+        udp_ipv6_input(dev, iphdrlen);
         break;
 #endif
 
@@ -555,12 +549,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
 #endif /* CONFIG_NET_ICMPv6 */
 
       default:              /* Unrecognized/unsupported protocol */
+        nwarn("WARNING: Unrecognized IP protocol: %04x\n", ipv6->proto);
+
 #ifdef CONFIG_NET_STATISTICS
-        g_netstats.ipv6.drop++;
         g_netstats.ipv6.protoerr++;
 #endif
-
-        nwarn("WARNING: Unrecognized IP protocol: %04x\n", ipv6->proto);
         goto drop;
     }
 
@@ -573,6 +566,9 @@ int ipv6_input(FAR struct net_driver_s *dev)
    */
 
 drop:
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv6.drop++;
+#endif
   dev->d_len = 0;
   return OK;
 }
