@@ -196,7 +196,7 @@ void igmp_input(struct net_driver_s *dev)
                   }
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
-                for (member = (FAR struct igmp_group_s *)dev->grplist.head;
+                for (member = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
                      member;
                      member = member->next)
                   {

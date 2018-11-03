@@ -156,7 +156,7 @@ void mld_poll(FAR struct net_driver_s *dev)
 
   /* Check each member of the group */
 
-  for (group = (FAR struct mld_group_s *)dev->grplist.head;
+  for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
        group;
        group = group->next)
     {

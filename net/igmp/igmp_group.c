@@ -143,7 +143,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
 
       /* Add the group structure to the list in the device structure */
 
-      sq_addfirst((FAR sq_entry_t *)group, &dev->grplist);
+      sq_addfirst((FAR sq_entry_t *)group, &dev->d_igmp_grplist);
       net_unlock();
     }
 
@@ -166,7 +166,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
   grpinfo("Searching for addr %08x\n", (int)*addr);
 
   net_lock();
-  for (group = (FAR struct igmp_group_s *)dev->grplist.head;
+  for (group = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
        group;
        group = group->next)
     {
@@ -225,7 +225,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Remove the group structure from the group list in the device structure */
 
-  sq_rem((FAR sq_entry_t *)group, &dev->grplist);
+  sq_rem((FAR sq_entry_t *)group, &dev->d_igmp_grplist);
 
   /* Destroy the wait semaphore */
 

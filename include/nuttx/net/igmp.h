@@ -140,7 +140,7 @@ struct igmp_iphdr_s
 
   /* Router Alert IP header option */
 
-  uint16_t ra[2];
+  uint16_t ra[2];            /* RFC 2113 */
 
   /* IGMPv2 header:
    *

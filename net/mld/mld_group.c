@@ -138,7 +138,7 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
 
       /* Add the group structure to the list in the device structure */
 
-      sq_addfirst((FAR sq_entry_t *)group, &dev->grplist);
+      sq_addfirst((FAR sq_entry_t *)group, &dev->d_mld_grplist);
       net_unlock();
     }
 
@@ -161,7 +161,7 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
   grpinfo("Searching for addr %08x\n", (int)*addr);
 
   net_lock();
-  for (group = (FAR struct mld_group_s *)dev->grplist.head;
+  for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
        group;
        group = group->next)
     {
@@ -227,7 +227,7 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   /* Remove the group structure from the group list in the device structure */
 
-  sq_rem((FAR sq_entry_t *)group, &dev->grplist);
+  sq_rem((FAR sq_entry_t *)group, &dev->d_mld_grplist);
 
   /* Destroy the wait semaphore */
 

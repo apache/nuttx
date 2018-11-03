@@ -129,7 +129,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
 
   dev->d_sndlen        = IGMP_HDRLEN;
 
-  /* Add the router alert option */
+  /* Add the router alert option (RFC 2113) */
 
   IGMPBUF->ra[0]       = HTONS(IPOPT_RA >> 16);
   IGMPBUF->ra[1]       = HTONS(IPOPT_RA & 0xffff);

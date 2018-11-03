@@ -133,7 +133,7 @@ int mld_query(FAR struct net_driver_s *dev,
           ninfo("General multicast query\n");
           MLD_STATINCR(g_netstats.mld.gmq_query_received);
 
-          for (member = (FAR struct mld_group_s *)dev->grplist.head;
+          for (member = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
                member;
                member = member->next)
             {
