@@ -347,15 +347,10 @@ struct net_driver_s
   /* Multicast group support */
 
 #ifdef CONFIG_NET_IGMP
-  /* IGMP group list */
-
-  sq_queue_t d_igmp_grplist;
+  sq_queue_t d_igmp_grplist;    /* IGMP group list */
 #endif
-
-#ifdef CONFIG_NET_MCASTGROUP
-  /* MLD group list */
-
-  sq_queue_t d_mld_grplist;
+#ifdef CONFIG_NET_MLD
+  sq_queue_t d_mld_grplist;     /* MLD group list */
 #endif
 
 #ifdef CONFIG_NETDEV_STATISTICS
