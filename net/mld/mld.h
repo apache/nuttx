@@ -123,33 +123,49 @@
 
 /* Group flags */
 
-#define MLD_PREALLOCATED         (1 << 0)
-#define MLD_LASTREPORT           (1 << 1)
-#define MLD_IDLEMEMBER           (1 << 2)
-#define MLD_SCHEDMSG             (1 << 3)
-#define MLD_WAITMSG              (1 << 4)
+#define MLD_QUERIER              (1 << 0)  /* Querier */
+#define MLD_STARTUP              (1 << 2)  /* Startup unsolicited Reports */
+#define MLD_V1COMPAT             (1 << 3)  /* Version 1 compatibility mode */
+#define MLD_LASTREPORT           (1 << 3)  /* We were the last to report */
+#define MLD_SCHEDMSG             (1 << 4)  /* Outgoing message scheduled */
+#define MLD_WAITMSG              (1 << 5)  /* Block until message sent */
 
-#define SET_MLD_PREALLOCATED(f)  do { (f) |= MLD_PREALLOCATED; } while (0)
+#define SET_MLD_QUERIER(f)       do { (f) |= MLD_QUERIER; } while (0)
+#define SET_MLD_STARTUP(f)       do { (f) |= MLD_STARTUP; } while (0)
+#define SET_MLD_V1COMPAT(f)      do { (f) |= MLD_V1COMPAT; } while (0)
 #define SET_MLD_LASTREPORT(f)    do { (f) |= MLD_LASTREPORT; } while (0)
-#define SET_MLD_IDLEMEMBER(f)    do { (f) |= MLD_IDLEMEMBER; } while (0)
 #define SET_MLD_SCHEDMSG(f)      do { (f) |= MLD_SCHEDMSG; } while (0)
 #define SET_MLD_WAITMSG(f)       do { (f) |= MLD_WAITMSG; } while (0)
 
-#define CLR_MLD_PREALLOCATED(f)  do { (f) &= ~MLD_PREALLOCATED; } while (0)
+#define CLR_MLD_QUERIER(f)       do { (f) &= ~MLD_QUERIER; } while (0)
+#define CLR_MLD_STARTUP(f)       do { (f) &= ~MLD_STARTUP; } while (0)
+#define CLR_MLD_V1COMPAT(f)      do { (f) &= ~MLD_V1COMPAT; } while (0)
 #define CLR_MLD_LASTREPORT(f)    do { (f) &= ~MLD_LASTREPORT; } while (0)
-#define CLR_MLD_IDLEMEMBER(f)    do { (f) &= ~MLD_IDLEMEMBER; } while (0)
 #define CLR_MLD_SCHEDMSG(f)      do { (f) &= ~MLD_SCHEDMSG; } while (0)
 #define CLR_MLD_WAITMSG(f)       do { (f) &= ~MLD_WAITMSG; } while (0)
 
-#define IS_MLD_PREALLOCATED(f)   (((f) & MLD_PREALLOCATED) != 0)
+#define IS_MLD_QUERIER(f)        (((f) & MLD_QUERIER) != 0)
+#define IS_MLD_STARTUP(f)        (((f) & MLD_STARTUP) != 0)
+#define IS_MLD_V1COMPAT(f)       (((f) & MLD_V1COMPAT) != 0)
 #define IS_MLD_LASTREPORT(f)     (((f) & MLD_LASTREPORT) != 0)
-#define IS_MLD_IDLEMEMBER(f)     (((f) & MLD_IDLEMEMBER) != 0)
 #define IS_MLD_SCHEDMSG(f)       (((f) & MLD_SCHEDMSG) != 0)
 #define IS_MLD_WAITMSG(f)        (((f) & MLD_WAITMSG) != 0)
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* These are the types of messages that may be sent in response to a device
+ * poll.
+ */
+
+enum mld_msgtype_e
+{
+  MLD_SEND_NONE = 0,           /* Nothing to send */
+  MLD_SEND_GENQUERY,           /* Send General Query */
+  MLD_SEND_REPORT,             /* Send Unsolicited report */
+  MLD_SEND_DONE                /* Send Done message */
+};
 
 /* This structure represents one group member.  There is a list of groups
  * for each device interface structure.
@@ -167,7 +183,8 @@ struct mld_group_s
   WDOG_ID             wdog;    /* WDOG used to detect timeouts */
   sem_t               sem;     /* Used to wait for message transmission */
   volatile uint8_t    flags;   /* See MLD_ flags definitions */
-  uint8_t             msgid;   /* Pending message ID (if non-zero) */
+  uint8_t             msgtype; /* Pending message type to send (if non-zero) */
+  uint8_t             count;   /* Report repetition count */
 };
 
 /****************************************************************************
@@ -315,7 +332,7 @@ void mld_grpfree(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgid);
+void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype);
 
 /****************************************************************************
  * Name: mld_waitmsg
@@ -326,7 +343,7 @@ void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgid);
  *
  ****************************************************************************/
 
-void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgid);
+void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype);
 
 /****************************************************************************
  * Name:  mld_poll
@@ -407,15 +424,14 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec);
 int mld_leavegroup(FAR const struct ipv6_mreq *mrec);
 
 /****************************************************************************
- * Name:  mld_startticks and mld_starttimer
+ * Name:  mld_starttimer
  *
  * Description:
  *   Start the MLD timer with differing time units (ticks or deciseconds).
  *
  ****************************************************************************/
 
-void mld_startticks(FAR struct mld_group_s *group, unsigned int ticks);
-void mld_starttimer(FAR struct mld_group_s *group, uint8_t decisecs);
+void mld_starttimer(FAR struct mld_group_s *group, clock_t ticks);
 
 /****************************************************************************
  * Name:  mld_cmptimer
@@ -425,7 +441,7 @@ void mld_starttimer(FAR struct mld_group_s *group, uint8_t decisecs);
  *   value. If maxticks > ticks-remaining, then (1) cancel the timer (to
  *   avoid race conditions) and return true.
  *
- *   If true is returned then the caller must call mld_startticks() to
+ *   If true is returned then the caller must call mld_starttimer() to
  *    restart the timer
  *
  ****************************************************************************/

@@ -58,6 +58,109 @@
 #define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mld_mrc2mrd
+ *
+ * Description:
+ *  Convert the MLD Maximum Response Code (MRC) to the Maximum Response
+ *  Delay (MRD) in units of system clock ticks.
+ *
+ ****************************************************************************/
+
+static clock_t mld_mrc2mrd(uint16_t mrc)
+{
+  uint32_t mrd;  /* Units of milliseconds */
+
+  /* If bit 15 is not set (i.e., mrc < 32768), then no conversion is required. */
+
+  if (mrc < 32768)
+    {
+      mrd = mrc;
+    }
+  else
+    {
+      /* Conversion required */
+
+      mrd = MLD_MRD_VALUE(mrc);
+    }
+
+  /* Return the MRD in units of clock ticks */
+
+  return MSEC2TICK((clock_t)mrd);
+}
+
+/****************************************************************************
+ * Name: mld_cmpaddr
+ *
+ * Description:
+ *  Perform a numerical comparison of the IPv6 Source Address and the IPv6
+ *  address of the link.  Return true if the source address is less than
+ *  the link address.
+ *
+ ****************************************************************************/
+
+static bool mld_cmpaddr(FAR struct net_driver_s *dev,
+                        const net_ipv6addr_t srcaddr)
+{
+  int i;
+
+  for (i = 0; i < 8; i++)
+    {
+      if (srcaddr[i] < dev->d_ipv6addr[i])
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: mld_check_querier
+ *
+ * Description:
+ *  Perform a numerical comparison of the IPv6 Source Address and the IPv6
+ *  address of the link.  Return true if the source address is less than
+ *  the link address.
+ *
+ ****************************************************************************/
+
+static void mld_check_querier(FAR struct net_driver_s *dev,
+                              FAR struct ipv6_hdr_s *ipv6,
+                              FAR struct mld_group_s *member,
+                              uint16_t mrc)
+{
+  clock_t ticks;
+
+  /* Check if this member is a Querier */
+
+  if (IS_MLD_QUERIER(member->flags))
+    {
+      /* This is a querier, check if the IPv6 source address is numerically
+       * less than the IPv6 address assigned to this link.
+       */
+
+      if (mld_cmpaddr(dev, ipv6->srcipaddr))
+        {
+          /* This is a querier, then switch to non-querier and set a timeout.
+           * If additional queries are received within this timeout period,
+           * then we need to revert to Querier.
+           */
+
+          ticks =  mld_mrc2mrd(mrc);
+          if (mld_cmptimer(member, ticks))
+            {
+              mld_starttimer(member, ticks);
+              CLR_MLD_QUERIER(member->flags);
+            }
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -65,7 +168,22 @@
  * Name: mld_query
  *
  * Description:
- *  Called from icmpv6_input() when a Multicast Listener Query is received.
+ *   Called from icmpv6_input() when a Multicast Listener Query is received.
+ *
+ *   A router may assume one of two roles: Querier or Non-Querier.  There is
+ *   normally only one Querier per link.  All routers start up as a Querier
+ *   on each of their attached links.  If a router hears a Query message
+ *   whose IPv6 Source Address is numerically less than its own selected
+ *   address for that link, it MUST become a Non-Querier on that link.  If a
+ *   delay passes without receiving, from a particular attached link, any
+ *   Queries from a router with an address less than its own, a router
+ *   resumes the role of Querier on that link.
+ *
+ *   A Querier for a link periodically sends a General Query on that link,
+ *   to solicit reports of all multicast addresses of interest on that link.
+ *   On startup, a router SHOULD send multiple General Queries spaced closely
+ *   together Interval] on all attached links in order to quickly and
+ *   reliably discover the presence of multicast listeners on those links.
  *
  ****************************************************************************/
 
@@ -74,7 +192,7 @@ int mld_query(FAR struct net_driver_s *dev,
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
-  unsigned int ticks;
+  uint16_t mrc;
   bool unspec;
 
   ninfo("Multicast Listener Query\n");
@@ -101,6 +219,7 @@ int mld_query(FAR struct net_driver_s *dev,
   /* Check if the query was sent to all systems */
 
   unspec = net_ipv6addr_cmp(query->grpaddr, g_ipv6_unspecaddr);
+  mrc    = NTOHS(query->mrc);
 
   if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allnodes))
     {
@@ -141,40 +260,41 @@ int mld_query(FAR struct net_driver_s *dev,
 
               if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
                 {
-                  ticks = net_dsec2tick((int)query->mrc);
-                  if (IS_MLD_IDLEMEMBER(member->flags) ||
-                      mld_cmptimer(member, ticks))
-                    {
-                      mld_startticks(member, ticks);
-                      CLR_MLD_IDLEMEMBER(member->flags);
-                    }
+                   /* REVISIT: Missing logic.  No action is taken on the query. */
+
+                   mld_check_querier(dev, ipv6, member, mrc);
                 }
             }
         }
       else if (!unspec && query->nsources == 0)
         {
           ninfo("Multicast Address Specific Query\n");
-
-          /* We first need to re-lookup the group since we used dest last time.
-           * Use the incoming IPaddress!
-           */
-
           MLD_STATINCR(g_netstats.mld.mas_query_received);
 
-          group = mld_grpallocfind(dev, query->grpaddr);
-          ticks = net_dsec2tick((int)query->mrc);
+          /* We first need to re-lookup the group since we used the incoming
+           * dest last time.  Use the group address in the query.
+           */
 
-          if (IS_MLD_IDLEMEMBER(group->flags) || mld_cmptimer(group, ticks))
-            {
-              mld_startticks(group, ticks);
-              CLR_MLD_IDLEMEMBER(group->flags);
-            }
+          group = mld_grpallocfind(dev, query->grpaddr);
+
+          /* REVISIT: Missing logic.  No action is taken on the query. */
+
+          mld_check_querier(dev, ipv6, group, mrc);
         }
       else
         {
           ninfo("Multicast Address and Source Specific Query\n");
           MLD_STATINCR(g_netstats.mld.massq_query_received);
-#warning Missing logic
+
+          /* We first need to re-lookup the group since we used the incoming
+           * dest last time.  Use the group address in the query.
+           */
+
+          group = mld_grpallocfind(dev, query->grpaddr);
+
+          /* REVISIT: Missing logic.  No action is taken on the query. */
+
+          mld_check_querier(dev, ipv6, group, mrc);
         }
     }
 
@@ -185,14 +305,7 @@ int mld_query(FAR struct net_driver_s *dev,
       ninfo("Unicast query\n");
       MLD_STATINCR(g_netstats.mld.ucast_query_received);
 
-      ninfo("Query to a specific group with the group address as destination\n");
-
-      ticks = net_dsec2tick((int)query->mrc);
-      if (IS_MLD_IDLEMEMBER(group->flags) || mld_cmptimer(group, ticks))
-        {
-          mld_startticks(group, ticks);
-          CLR_MLD_IDLEMEMBER(group->flags);
-        }
+      mld_check_querier(dev, ipv6, group, mrc);
     }
 
   return OK;

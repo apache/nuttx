@@ -69,40 +69,47 @@
  ****************************************************************************/
 
 static inline void mld_sched_send(FAR struct net_driver_s *dev,
-                                   FAR struct mld_group_s *group)
+                                  FAR struct mld_group_s *group)
 {
   const net_ipv6addr_t *dest;
 
-  /* Check what kind of message we need to send.  There are only two
+  /* Check what kind of message we need to send.  There are only three
    * possibilities:
    */
 
-  if (group->msgid == ICMPV6_MCAST_LISTEN_REPORT_V1)
+  if (group->msgtype == MLD_SEND_GENQUERY)
+    {
+      dest = &g_ipv6_allrouters;
+
+      ninfo("Send General Query, flags=%02x\n", group->flags);
+      ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+            ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
+            ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
+            ipv6->destipaddr[6], ipv6->destipaddr[7]);
+    }
+  else if (group->msgtype == MLD_SEND_REPORT)
     {
       dest = &group->grpaddr;
 
-      ninfo("Send ICMPV6_MCAST_LISTEN_REPORT_V1, flags=%02x\n", group->flags);
+      ninfo("Send Report, flags=%02x\n", group->flags);
       ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
             ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
             ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
             ipv6->destipaddr[6], ipv6->destipaddr[7]);
 
-      MLD_STATINCR(g_netstats.mld.report_sched);
       SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
     {
-      DEBUGASSERT(group->msgid == ICMPV6_MCAST_LISTEN_DONE_V1);
+      DEBUGASSERT(group->msgtype == MLD_SEND_DONE);
 
       dest = &g_ipv6_allrouters;
 
-      ninfo("Send ICMPV6_MCAST_LISTEN_DONE_V1, flags=%02x\n", group->flags);
+      ninfo("Send Done message, flags=%02x\n", group->flags);
       ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
             ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
             ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
             ipv6->destipaddr[6], ipv6->destipaddr[7]);
-
-      MLD_STATINCR(g_netstats.mld.done_sched);
     }
 
   /* Send the message */
@@ -112,7 +119,7 @@ static inline void mld_sched_send(FAR struct net_driver_s *dev,
   /* Indicate that the message has been sent */
 
   CLR_MLD_SCHEDMSG(group->flags);
-  group->msgid = 0;
+  group->msgtype = 0;
 
   /* If there is a thread waiting fore the message to be sent, wake it up */
 

@@ -132,7 +132,11 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       group->wdog = wd_create();
       DEBUGASSERT(group->wdog);
 
-      /* Interrupts must be disabled in order to modify the group list */
+      /* All routers start up as a Querier on each of their attached links. */
+
+      SET_MLD_QUERIER(group->flags);
+
+      /* The network must be locked in order to modify the group list */
 
       net_lock();
 

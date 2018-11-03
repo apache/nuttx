@@ -90,7 +90,7 @@
 #define MLD_MRC_MANT_MASK      (0xfff << MLD_MRC_MANT_SHIFT)
 #  define MLD_MRC_MANT(n)      ((uint16_t)(n) << MLD_MRC_MANT_SHIFT)
 
-/* MRD conversion (for the case of MRC >= 32768) */
+/* Conversion of MRC to MRD in milliseconds (for the case of MRC >= 32768) */
 
 #define MLD_MRC_GETEXP(mrc)    (((mrc) & MLD_MRC_EXP_MASK) >> MLD_MRC_EXP_SHIFT)
 #define MLD_MRC_GETMANT(mrc)   (((mrc) & MLD_MRC_MANT_MASK) >> MLD_MRC_MANT_SHIFT)
@@ -113,7 +113,7 @@
 #define MLD_QQIC_MANT_MASK     (15 << MLD_QQIC_MANT_SHIFT)
 #  define MLD_QQIC_MANT(n)     ((uint8_t)(n) << MLD_QQIC_MANT_SHIFT)
 
-/* QQI conversion (for the case of QQIC >= 128) */
+/* Conversion of QQIC to QQI in seconds (for the case of MRC >= 128) */
 
 #define MLD_QQIC_GETEXP(qqic)  (((qqic) & MLD_QQIC_EXP_MASK) >> MLD_QQIC_EXP_SHIFT)
 #define MLD_QQIC_GETMANT(qqic) (((qqic) & MLD_QQIC_MANT_MASK) >> MLD_QQIC_MANT_SHIFT)
@@ -165,6 +165,81 @@
                                           * the node no longer wishes to listen
                                           * to. */
 
+/* MLD default values (RFC 3810) of tunable parameters.
+ *
+ * MLD_ROBUSTNESS         Robustness Variable.  The Robustness Variable
+ *                        allows tuning for the expected packet loss on
+ *                        a link.
+ * MLD_QUERY_MSEC         Query Interval. The Query Interval variable
+ *                        denotes the interval between General Queries
+ *                        sent by the Querier.
+ * MLD_QRESP_MSEC         Query Response Interval.  The Maximum Response
+ *                        Delay used to calculate the Maximum Response
+ *                        Code inserted into the periodic General Queries.
+ * MLD_MCASTLISTEN_MSEC   Multicast Address Listening Interval.  The
+ *                        amount of time that must pass before a multicast
+ *                        router decides there are no more listeners of a
+ *                        multicast address or a particular source on a
+ *                        link.
+ * MLD_OQUERY_MSEC        Other Querier Present Timeout.  The length of
+ *                        time that must pass before a multicast router
+ *                        decides that there is no longer another multicast
+ *                        router which should be the Querier.
+ * MLD_STARTUP_MSEC       Startup Query Interval.  The interval between
+ *                        General Queries sent by a Querier on startup.
+ * MLD_STARTUP_COUNT      Startup Query Count.  The number of Queries sent
+ *                        out on startup separated by the Startup Query
+ *                        Interval.
+ * MLD_LASTLISTEN_MSEC    Last Listener Query Interval.  The Maximum
+ *                        Response Delay used to calculate the Maximum
+ *                        Response Code inserted into Multicast Address
+ *                        Specific Queries sent in response to Version 1
+ *                        Multicast Listener Done messages.  It is also
+ *                        the Maximum Response Delay used to calculate
+ *                        the Maximum Response Code inserted into Multicast
+ *                        Address and Source Specific Query messages.
+ * MLD_LASTLISTEN_COUNT   Last Listener Query Count.  The number of
+ *                        Multicast Address Specific Queries sent before
+ *                        the router assumes there are no local listeners.
+ *                        The Last Listener Query Count is also the number
+ *                        of Multicast Address and Source Specific Queries
+ *                        sent before the router assumes there are no
+ *                        listeners for a particular source.
+ * MLD_LLQUERY_MSEC       Last Listener Query Time.  The time value
+ *                        represented by the Last Listener Query Interval
+ *                        multiplied by Last Listener Query Count.
+ * MLD_UNSOLREPORT_MSEC   Unsolicited Report Interval.  The time between
+ *                        repetitions of a node's initial report of
+ *                        interest in a multicast address.
+ * MLD_V1PRESENT_MSEC(m)  Older Version Querier Present Timeout. The time-
+ *                        out for transitioning a host back to MLDv2 Host
+ *                        Compatibility Mode.  'm' is the Query Interval
+ *                        in the last Query received in units of msec.
+ * MLD_V1HOST_MSEC        Older Version Host Present Timeout.  The time-out
+ *                        for transitioning a router back to MLDv2 Multicast
+ *                        Address Compatibility Mode for a specific multicast
+ *                        address.  When an MLDv1 report is received for that
+ *                        multicast address, routers set their Older Version
+ *                        Host Present Timer to the Older Version Host Present
+ *                        Timeout.
+ */
+
+#define MLD_ROBUSTNESS         (2)
+#define MLD_QUERY_MSEC         (125 * 1000)
+#define MLD_QRESP_SEC          (10)
+#define MLD_QRESP_MSEC         (MLD_QRESP_SEC * 1000)
+#define MLD_MCASTLISTEN_MSEC   (MLD_ROBUSTNESS * MLD_QUERY_MSEC + MLD_QRESP_MSEC)
+#define MLD_OQUERY_MSEC        (MLD_ROBUSTNESS * MLD_QUERY_MSEC + (MLD_QRESP_MSEC / 2))
+#define MLD_STARTUP_MSEC       (MLD_QUERY_MSEC / 4)
+#define MLD_STARTUP_COUNT      MLD_ROBUSTNESS
+#define MLD_LASTLISTEN_MSEC    (1000)
+#define MLD_LASTLISTEN_COUNT   MLD_ROBUSTNESS
+#define MLD_LLQUERY_MSEC       (MLD_LASTLISTEN_MSEC * MLD_LASTLISTEN_COUNT)
+#define MLD_UNSOLREPORT_MSEC   (1000)
+#define MLD_UNSOLREPORT_COUNT  MLD_ROBUSTNESS
+#define MLD_V1PRESENT_MSEC(m)  (MLD_ROBUSTNESS * (m) + MLD_QRESP_MSEC)
+#define MLD_V1HOST_MSEC        (MLD_ROBUSTNESS * MLD_QUERY_MSEC + MLD_QRESP_MSEC)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -203,7 +278,7 @@ struct mld_mcast_listen_query_s
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t grpaddr;    /* 128-bit IPv6 multicast group address */
   uint8_t  flags;            /* See S and QRV flag definitions */
-  uint8_t  qqic;             /* Querier's Query Interval Cod */
+  uint8_t  qqic;             /* Querier's Query Interval Code */
   uint16_t nsources;         /* Number of sources that follow */
   net_ipv6addr_t srcaddr[1]; /* Array of source IPv6 address (actual size is
                               * nsources) */
@@ -212,8 +287,8 @@ struct mld_mcast_listen_query_s
 /* The actual size of the query structure depends on the number of sources */
 
 #define SIZEOF_MLD_MCAST_LISTEN_QUERY_S(nsources) \
-  (sizeof(struct mld_multicast_listener_query_s) + \
-   sizeof(net_ipv6addr_t) * ((nsources) - 1)
+  (sizeof(struct mld_mcast_listen_query_s) + \
+   sizeof(net_ipv6addr_t) * ((nsources) - 1))
 
 /* Multicast Listener Reports are sent by IP nodes to report (to neighboring
  * routers) the current multicast listening state, or changes in the
@@ -297,10 +372,12 @@ struct mld_stats_s
 {
   net_stats_t joins;                 /* Requests to join a group */
   net_stats_t leaves;                /* Requests to leave a group */
-  net_stats_t report_sched;          /* Version 1 REPORT packets scheduled */
-  net_stats_t done_sched;            /* Version 1 DONE packets scheduled */
-  net_stats_t report_sent;           /* Version 1 REPORT packets sent */
-  net_stats_t done_sent;             /* Version 1 DONE packets sent */
+  net_stats_t query_sched;           /* General QUERY packets scheduled */
+  net_stats_t report_sched;          /* Unsolicited REPORT packets scheduled */
+  net_stats_t done_sched;            /* DONE packets scheduled */
+  net_stats_t query_sent;            /* General QUERY packets sent */
+  net_stats_t report_sent;           /* Unsolicited REPORT packets sent */
+  net_stats_t done_sent;             /* DONE packets sent */
   net_stats_t gmq_query_received;    /* General multicast QUERY received */
   net_stats_t mas_query_received;    /* Multicast Address Specific QUERY received */
   net_stats_t massq_query_received;  /* Multicast Address and Source Specific QUERY received */

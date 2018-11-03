@@ -64,13 +64,13 @@
  *
  ****************************************************************************/
 
-void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgid)
+void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
 {
   /* The following should be atomic */
 
   net_lock();
   DEBUGASSERT(!IS_MLD_SCHEDMSG(group->flags));
-  group->msgid = msgid;
+  group->msgtype = msgtype;
   SET_MLD_SCHEDMSG(group->flags);
   net_unlock();
 }
@@ -84,7 +84,7 @@ void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgid)
  *
  ****************************************************************************/
 
-void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgid)
+void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
 {
   int ret;
 
@@ -93,7 +93,7 @@ void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgid)
   net_lock();
   DEBUGASSERT(!IS_MLD_WAITMSG(group->flags));
   SET_MLD_WAITMSG(group->flags);
-  mld_schedmsg(group, msgid);
+  mld_schedmsg(group, msgtype);
 
   /* Then wait for the message to be sent */
 

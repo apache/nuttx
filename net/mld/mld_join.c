@@ -105,34 +105,7 @@
  *
  * State transition diagram for a router in Non-Querier state is
  * similar, but non-Queriers do not send any messages and are only
- * driven by message reception.
- *
- *                             ________________
- *                            |                |
- *                            |                |
- *               timer expired|                |timer expired
- *          (notify routing -)|  No Listeners  |(notify routing -)
- *                  --------->|    Present     |<---------
- *                 |          |                |          |
- *                 |          |                |          |
- *                 |          |                |          |
- *                 |          |________________|          |
- *                 |                   |                  |
- *                 |                   |report received   |
- *                 |                   |(notify routing +,|
- *                 |                   | start timer)     |
- *         ________|________           |          ________|________
- *        |                 |<---------          |                 |
- *        |                 |  report received   |                 |
- *        |                 |  (start timer)     |                 |
- *        |    Listeners    |<-------------------|     Checking    |
- *        |     Present     | m-a-s query rec'd  |    Listeners    |
- *        |                 | (start timer*)     |                 |
- *   ---->|                 |------------------->|                 |
- *  |     |_________________|                    |_________________|
- *  | report received |
- *  | (start timer)   |
- *   -----------------
+ * driven by message reception (See RFC 2710/3810 or net/mld.h).
  *
  ****************************************************************************/
 
@@ -193,9 +166,11 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
       MLD_STATINCR(g_netstats.mld.report_sched);
       mld_waitmsg(group, ICMPV6_MCAST_LISTEN_REPORT_V1);
 
-      /* And start the timer at 10*100 msec */
+      /* And start the timer at 1 second */
 
-      mld_starttimer(group, 10);
+      SET_MLD_STARTUP(group->flags);
+      group->count = MLD_UNSOLREPORT_COUNT - 1;
+      mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
 
       /* Add the group (MAC) address to the Ethernet drivers MAC filter list */
 

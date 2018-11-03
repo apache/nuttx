@@ -81,32 +81,6 @@
 #define IGMP_HDRLEN              8
 #define IPIGMP_HDRLEN            (IGMP_HDRLEN + IPv4_HDRLEN + 4)
 
-/* Group flags */
-
-#define IGMP_PREALLOCATED        (1 << 0)
-#define IGMP_LASTREPORT          (1 << 1)
-#define IGMP_IDLEMEMBER          (1 << 2)
-#define IGMP_SCHEDMSG            (1 << 3)
-#define IGMP_WAITMSG             (1 << 4)
-
-#define SET_PREALLOCATED(f)      do { (f) |= IGMP_PREALLOCATED; } while (0)
-#define SET_LASTREPORT(f)        do { (f) |= IGMP_LASTREPORT; } while (0)
-#define SET_IDLEMEMBER(f)        do { (f) |= IGMP_IDLEMEMBER; } while (0)
-#define SET_SCHEDMSG(f)          do { (f) |= IGMP_SCHEDMSG; } while (0)
-#define SET_WAITMSG(f)           do { (f) |= IGMP_WAITMSG; } while (0)
-
-#define CLR_PREALLOCATED(f)      do { (f) &= ~IGMP_PREALLOCATED; } while (0)
-#define CLR_LASTREPORT(f)        do { (f) &= ~IGMP_LASTREPORT; } while (0)
-#define CLR_IDLEMEMBER(f)        do { (f) &= ~IGMP_IDLEMEMBER; } while (0)
-#define CLR_SCHEDMSG(f)          do { (f) &= ~IGMP_SCHEDMSG; } while (0)
-#define CLR_WAITMSG(f)           do { (f) &= ~IGMP_WAITMSG; } while (0)
-
-#define IS_PREALLOCATED(f)       (((f) & IGMP_PREALLOCATED) != 0)
-#define IS_LASTREPORT(f)         (((f) & IGMP_LASTREPORT) != 0)
-#define IS_IDLEMEMBER(f)         (((f) & IGMP_IDLEMEMBER) != 0)
-#define IS_SCHEDMSG(f)           (((f) & IGMP_SCHEDMSG) != 0)
-#define IS_WAITMSG(f)            (((f) & IGMP_WAITMSG) != 0)
-
 /* Time-to-Live must be one */
 
 #define IGMP_TTL                 1

@@ -47,6 +47,12 @@
 #include "mld/mld.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -54,15 +60,52 @@
  * Name: mld_done_v1
  *
  * Description:
- *  Called from icmpv6_input() when a Version 1 Multicast Listener Done is
- *  received.
+ *   Called from icmpv6_input() when a Version 1 Multicast Listener Done is
+ *   received.
+ *
+ *   When a router in Querier state receives a Done message from a link,
+ *   if the Multicast Address identified in the message is present in the
+ *   Querier's list of addresses having listeners on that link, the Querier
+ *   periodically sends multiple Multicast-Address-Specific Queries to that
+ *   multicast address.  If no Reports for the address are received from the
+ *   link after the maximum response delay in the Multicast-Address-Specific
+ *   Queries of the last query has passed, the routers on the link assume
+ *   that the address no longer has any listeners there; the address is
+ *   therefore deleted from the list and its disappearance is made known to
+ *   the multicast routing component.
+ *
+ *   Routers in Non-Querier state MUST ignore Done messages.
  *
  ****************************************************************************/
 
 int mld_done_v1(FAR struct net_driver_s *dev,
                 FAR const struct mld_mcast_listen_done_v1_s *done)
 {
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  FAR struct mld_group_s *group;
+
   MLD_STATINCR(g_netstats.mld.done_received);
-#warning Missing logic
-  return -ENOSYS;
+
+   /* Find the group (or create a new one) using the incoming IP address */
+
+  group = mld_grpfind(dev, ipv6->destipaddr);
+  if (group == NULL)
+    {
+      return -ENOENT;  /* REVISIT:  Or should it return OK? */
+    }
+
+  /* Ignore the Done message is this is not a Querier */
+
+  if (IS_MLD_QUERIER(group->flags))
+    {
+      /* REVISIT:  Here we just remove the group from this list immediately.
+       * The RFC requires that we send  Multicast-Address-Specific Queries
+       * repeatedly before doing this to assure that the listener is not
+       * present.
+       */
+
+      mld_grpfree(dev, group);
+    }
+
+  return OK;
 }

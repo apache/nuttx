@@ -80,6 +80,8 @@
 #define RABUF      ((FAR struct ipv6_router_alert_s *) \
                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN)
 #define RASIZE     sizeof(struct ipv6_router_alert_s)
+#define QUERYBUF  ((FAR struct mld_mcast_listen_query_s *) \
+                    &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
 #define REPORTBUF  ((FAR struct mld_mcast_listen_report_v1_s *) \
                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
 #define DONEBUF    ((FAR struct mld_mcast_listen_done_v1_s *) \
@@ -117,7 +119,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   FAR struct ipv6_router_alert_s *ra;
   unsigned int mldsize;
 
-  ninfo("msgid: %02x \n", group->msgid);
+  ninfo("msgtype: %02x \n", group->msgtype);
   ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
         destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
@@ -131,20 +133,20 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * This will change.
    */
 
-  switch (group->msgid)
+  switch (group->msgtype)
     {
-      case ICMPV6_MCAST_LISTEN_REPORT_V1:
+      case MLD_SEND_GENQUERY:           /* Send General Query */
+        mldsize = SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0);
+        break;
+
+      case MLD_SEND_REPORT:             /* Send Unsolicited report */
         mldsize = sizeof(struct mld_mcast_listen_report_v1_s);
         break;
 
-      case ICMPV6_MCAST_LISTEN_DONE_V1:
+      case MLD_SEND_DONE:               /* Send Done message */
         mldsize = sizeof(struct mld_mcast_listen_done_v1_s);
         break;
 
-      /* Not yet supported */
-
-      case ICMPV6_MCAST_LISTEN_QUERY:
-      case ICMPV6_MCAST_LISTEN_REPORT_V2:
       default:
         DEBUGPANIC();
         return;
@@ -192,17 +194,42 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * router alert)
    */
 
-  switch (group->msgid)
+  switch (group->msgtype)
     {
-      case ICMPV6_MCAST_LISTEN_REPORT_V1:
+      case MLD_SEND_GENQUERY:
+        {
+          FAR struct mld_mcast_listen_query_s *query = QUERYBUF;
+
+          /* Initializer the Query payload.  In a General Query, both the
+           * Multicast Address field and the Number of Sources (N)
+           * field are zero.
+           */
+
+          memset(query, 0, sizeof(struct mld_mcast_listen_report_v1_s));
+          net_ipv6addr_hdrcopy(query->grpaddr, &group->grpaddr);
+          query->type   = ICMPV6_MCAST_LISTEN_QUERY;
+          query->mrc    = MLD_QRESP_MSEC;
+          query->flags  = MLD_ROBUSTNESS;
+          query->qqic   = MLD_QRESP_SEC;
+
+          /* Calculate the ICMPv6 checksum. */
+
+          query->chksum = 0;
+          query->chksum = ~icmpv6_chksum(dev);
+
+          MLD_STATINCR(g_netstats.mld.query_sent);
+        }
+        break;
+
+      case MLD_SEND_REPORT:
         {
           FAR struct mld_mcast_listen_report_v1_s *report = REPORTBUF;
 
           /* Initializer the Report payload */
 
           memset(report, 0, sizeof(struct mld_mcast_listen_report_v1_s));
-          report->type    = ICMPV6_MCAST_LISTEN_REPORT_V1;
           net_ipv6addr_hdrcopy(report->mcastaddr, &group->grpaddr);
+          report->type    = ICMPV6_MCAST_LISTEN_REPORT_V1;
 
           /* Calculate the ICMPv6 checksum. */
 
@@ -213,7 +240,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         }
         break;
 
-      case ICMPV6_MCAST_LISTEN_DONE_V1:
+      case MLD_SEND_DONE:
         {
           FAR struct mld_mcast_listen_done_v1_s *done = DONEBUF;
 

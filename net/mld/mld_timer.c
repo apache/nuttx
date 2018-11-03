@@ -60,27 +60,27 @@
 
 /* Debug ********************************************************************/
 
-#undef MLD_GTMRDEBUG /* Define to enable detailed MLD group debug */
+#undef MLD_MTMRDEBUG /* Define to enable detailed MLD group debug */
 
 #ifndef CONFIG_NET_MLD
-#  undef MLD_GTMRDEBUG
+#  undef MLD_MTMRDEBUG
 #endif
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef MLD_GTMRDEBUG
-#    define gtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define gtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
+#  ifdef MLD_MTMRDEBUG
+#    define mtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
+#    define mtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
 #  else
-#    define gtmrerr(x...)
-#    define gtmrinfo(x...)
+#    define mtmrerr(x...)
+#    define mtmrinfo(x...)
 #  endif
 #else
-#  ifdef MLD_GTMRDEBUG
-#    define gtmrerr    nerr
-#    define gtmrinfo   ninfo
+#  ifdef MLD_MTMRDEBUG
+#    define mtmrerr    nerr
+#    define mtmrinfo   ninfo
 #  else
-#    define gtmrerr    (void)
-#    define gtmrinfo   (void)
+#    define mtmrerr    (void)
+#    define mtmrinfo   (void)
 #  endif
 #endif
 
@@ -110,30 +110,53 @@ static void mld_timeout(int argc, uint32_t arg, ...)
   group = (FAR struct mld_group_s *)arg;
   DEBUGASSERT(argc == 1 && group);
 
-  /* If the group exists and is no an IDLE MEMBER, then it must be a DELAYING
-   * member.  Race conditions are avoided because (1) the timer is not started
-   * until after the first MLDv2_MEMBERSHIP_REPORT during the join, and (2)
-   * the timer is canceled before sending the ICMPV6_MCAST_LISTEN_DONE_V1
-   * during a leave.
-   */
+  /* Check if this a new join to the multicast group. */
 
-  if (!IS_MLD_IDLEMEMBER(group->flags))
+  if (IS_MLD_STARTUP(group->flags))
     {
-      /* Schedule (and forget) the Report.  NOTE:  Since we are executing
-       * from a timer interrupt, we cannot wait for the message to be sent.
-       */
+      /* Schedule (and forget) the Report. */
 
       MLD_STATINCR(g_netstats.mld.report_sched);
-      mld_schedmsg(group, ICMPV6_MCAST_LISTEN_REPORT_V1);
+      mld_schedmsg(group, MLD_SEND_REPORT);
 
-      /* Also note:  The Report is sent at most two times because the timer
-       * is not reset here.  Hmm.. does this mean that the group is stranded
-       * if both reports were lost?  This is consistent with the
-       * RFC that states: "To cover the possibility of the initial Report
-       * being lost or damaged, it is recommended that it be repeated once
-       * or twice after short delays [Unsolicited Report Interval]...."
-       * (RFC 2710).
+      /* Send the report until the unsolicited report count goes to zero
+       * then terminate the start-up sequence.
        */
+
+      if (group->count > 1)
+        {
+          /* Decrement the count and restart the timer */
+
+          group->count--;
+          mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
+        }
+      else
+        {
+          /* Terminate the start-up sequence */
+
+          CLR_MLD_STARTUP(group->flags);
+
+          /* If in Querier mode, start the Querier timer */
+
+         if (IS_MLD_QUERIER(group->flags))
+           {
+             mld_starttimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+           }
+        }
+    }
+
+  /* Check if this is querier */
+
+  else if (IS_MLD_QUERIER(group->flags))
+    {
+      /* Schedule (and forget) the general query. */
+
+      MLD_STATINCR(g_netstats.mld.query_sched);
+      mld_schedmsg(group, MLD_SEND_GENQUERY);
+
+      /* Restart the Querier timer */
+
+      mld_starttimer(group, MSEC2TICK(MLD_QUERY_MSEC));
     }
 }
 
@@ -142,38 +165,28 @@ static void mld_timeout(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mld_startticks and mld_starttimer
+ * Name:  mld_starttimer
  *
  * Description:
- *   Start the MLD timer with differing time units (ticks or deciseconds).
+ *   Start the MLD timer.
  *
  * Assumptions:
  *   This function may be called from most any context.
  *
  ****************************************************************************/
 
-void mld_startticks(FAR struct mld_group_s *group, unsigned int ticks)
+void mld_starttimer(FAR struct mld_group_s *group, clock_t ticks)
 {
   int ret;
 
   /* Start the timer */
 
-  gtmrinfo("ticks: %d\n", ticks);
+  mtmrinfo("ticks: %ld\n", (unsigned long)ticks);
 
   ret = wd_start(group->wdog, ticks, mld_timeout, 1, (uint32_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
-}
-
-void mld_starttimer(FAR struct mld_group_s *group, uint8_t decisecs)
-{
-  /* Convert the decisec value to system clock ticks and start the timer.
-   * Important!! this should be a random timer from 0 to decisecs
-   */
-
-  gtmrinfo("decisecs: %d\n", decisecs);
-  mld_startticks(group, net_dsec2tick(decisecs));
 }
 
 /****************************************************************************
@@ -186,7 +199,7 @@ void mld_starttimer(FAR struct mld_group_s *group, uint8_t decisecs)
  *
  * Assumptions:
  *   This function may be called from most any context.  If true is returned
- *   then the caller must call mld_startticks() to restart the timer
+ *   then the caller must call mld_starttimer() to restart the timer
  *
  ****************************************************************************/
 
@@ -212,7 +225,7 @@ bool mld_cmptimer(FAR struct mld_group_s *group, int maxticks)
    * test as well.
    */
 
-  gtmrinfo("maxticks: %d remaining: %d\n", maxticks, remaining);
+  mtmrinfo("maxticks: %d remaining: %d\n", maxticks, remaining);
   if (maxticks > remaining)
     {
       /* Cancel the watchdog timer and return true */

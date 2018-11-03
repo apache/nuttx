@@ -107,34 +107,7 @@
  *
  * State transition diagram for a router in Non-Querier state is
  * similar, but non-Queriers do not send any messages and are only
- * driven by message reception.
- *
- *                             ________________
- *                            |                |
- *                            |                |
- *               timer expired|                |timer expired
- *          (notify routing -)|  No Listeners  |(notify routing -)
- *                  --------->|    Present     |<---------
- *                 |          |                |          |
- *                 |          |                |          |
- *                 |          |                |          |
- *                 |          |________________|          |
- *                 |                   |                  |
- *                 |                   |report received   |
- *                 |                   |(notify routing +,|
- *                 |                   | start timer)     |
- *         ________|________           |          ________|________
- *        |                 |<---------          |                 |
- *        |                 |  report received   |                 |
- *        |                 |  (start timer)     |                 |
- *        |    Listeners    |<-------------------|     Checking    |
- *        |     Present     | m-a-s query rec'd  |    Listeners    |
- *        |                 | (start timer*)     |                 |
- *   ---->|                 |------------------->|                 |
- *  |     |_________________|                    |_________________|
- *  | report received |
- *  | (start timer)   |
- *   -----------------
+ * driven by message reception (See RFC 2710/3810 or net/mld.h).
  *
  ****************************************************************************/
 
