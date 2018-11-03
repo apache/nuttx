@@ -43,6 +43,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netstats.h>
@@ -89,10 +90,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mld_timeout
+ * Name:  mld_timeout_work
  *
  * Description:
- *   Timeout watchdog handler.
+ *   Timeout watchdog work
  *
  * Assumptions:
  *   This function is called from the wdog timer handler which runs in the
@@ -100,24 +101,29 @@
  *
  ****************************************************************************/
 
-static void mld_timeout(int argc, uint32_t arg, ...)
+static void mld_timeout_work(FAR void *arg)
 {
   FAR struct mld_group_s *group;
+  int ret;
 
-  /* If the state is DELAYING_MEMBER then we send a report for this group */
+  /* Recover the reference to the group */
 
-  ninfo("Timeout!\n");
   group = (FAR struct mld_group_s *)arg;
-  DEBUGASSERT(argc == 1 && group);
+  DEBUGASSERT(group != NULL);
 
   /* Check if this a new join to the multicast group. */
 
+  net_lock();
   if (IS_MLD_STARTUP(group->flags))
     {
       /* Schedule (and forget) the Report. */
 
       MLD_STATINCR(g_netstats.mld.report_sched);
-      mld_schedmsg(group, MLD_SEND_REPORT);
+      ret = mld_schedmsg(group, MLD_SEND_REPORT);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to schedule message: %d\n", ret);
+        }
 
       /* Send the report until the unsolicited report count goes to zero
        * then terminate the start-up sequence.
@@ -152,11 +158,52 @@ static void mld_timeout(int argc, uint32_t arg, ...)
       /* Schedule (and forget) the general query. */
 
       MLD_STATINCR(g_netstats.mld.query_sched);
-      mld_schedmsg(group, MLD_SEND_GENQUERY);
+      ret = mld_schedmsg(group, MLD_SEND_GENQUERY);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to schedule message: %d\n", ret);
+        }
 
       /* Restart the Querier timer */
 
       mld_starttimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
+ * Name:  mld_timeout
+ *
+ * Description:
+ *   Timeout watchdog handler.
+ *
+ * Assumptions:
+ *   This function is called from the wdog timer handler which runs in the
+ *   context of the timer interrupt handler.
+ *
+ ****************************************************************************/
+
+static void mld_timeout(int argc, uint32_t arg, ...)
+{
+  FAR struct mld_group_s *group;
+  int ret;
+
+  ninfo("Timeout!\n");
+
+  /* Recover the reference to the group */
+
+  group = (FAR struct mld_group_s *)arg;
+  DEBUGASSERT(argc == 1 && group != NULL);
+
+  /* Perform the timeout-related operations on (preferably) the low prioirity
+   * work queue.
+   */
+
+  ret = work_queue(LPWORK, &group->work, mld_timeout_work, group, 0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to queue timeout work: %d\n", ret);
     }
 }
 

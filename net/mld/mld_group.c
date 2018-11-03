@@ -100,6 +100,9 @@
  * Description:
  *   Allocate a new group from heap memory.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
@@ -132,18 +135,17 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       group->wdog = wd_create();
       DEBUGASSERT(group->wdog);
 
+      /* Save the interface index */
+
+      group->ifindex = dev->d_ifindex;
+
       /* All routers start up as a Querier on each of their attached links. */
 
       SET_MLD_QUERIER(group->flags);
 
-      /* The network must be locked in order to modify the group list */
-
-      net_lock();
-
       /* Add the group structure to the list in the device structure */
 
       sq_addfirst((FAR sq_entry_t *)group, &dev->d_mld_grplist);
-      net_unlock();
     }
 
   return group;
@@ -155,6 +157,9 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
  * Description:
  *   Find an existing group.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
@@ -164,7 +169,6 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
 
   grpinfo("Searching for addr %08x\n", (int)*addr);
 
-  net_lock();
   for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
        group;
        group = group->next)
@@ -180,11 +184,11 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
       if (net_ipv6addr_cmp(group->grpaddr, addr))
         {
           grpinfo("Match!\n");
+          DEBUGASSERT(group->ifindex == dev->d_ifindex);
           break;
         }
     }
 
-  net_unlock();
   return group;
 }
 
@@ -218,6 +222,9 @@ FAR struct mld_group_s *mld_grpallocfind(FAR struct net_driver_s *dev,
  * Description:
  *   Release a previously allocated group.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
@@ -226,7 +233,6 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   /* Cancel the wdog */
 
-  net_lock();
   wd_cancel(group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
@@ -243,10 +249,8 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   /* Then release the group structure resources. */
 
-  net_unlock();
   grpinfo("Call sched_kfree()\n");
   sched_kfree(group);
 }
 
 #endif /* CONFIG_NET_MLD */
-

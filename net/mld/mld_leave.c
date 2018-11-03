@@ -74,40 +74,8 @@
  *   and IPV6_LEAVE_GROUP must be symmetrical. The format of the ipv6_mreq
  *   structure can be found in include/netinet/in.h
  *
- * State transition diagram for a router in Querier state (RFC 2710):
- *                            ________________
- *                           |                |
- *                           |                |timer expired
- *              timer expired|                |(notify routing -,
- *         (notify routing -)|  No Listeners  |clear rxmt tmr)
- *                   ------->|    Present     |<---------
- *                  |        |                |          |
- *                  |        |                |          |
- *                  |        |________________|          |  ---------------
- *                  |                    |               | | rexmt timer   |
- *                  |     report received|               | |  expired      |
- *                  |  (notify routing +,|               | | (send m-a-s   |
- *                  |        start timer)|               | |  query,       |
- *        __________|______              |       ________|_|______ st rxmt |
- *       |                 |<------------       |                 | tmr)   |
- *       |                 |                    |                 |<-------
- *       |                 | report received    |                 |
- *       |                 | (start timer,      |                 |
- *       |                 |  clear rxmt tmr)   |                 |
- *       |    Listeners    |<-------------------|    Checking     |
- *       |     Present     | done received      |    Listeners    |
- *       |                 | (start timer*,     |                 |
- *       |                 |  start rxmt timer, |                 |
- *       |                 |  send m-a-s query) |                 |
- *   --->|                 |------------------->|                 |
- *  |    |_________________|                    |_________________|
- *  | report received |
- *  | (start timer)   |
- *   -----------------
- *
- * State transition diagram for a router in Non-Querier state is
- * similar, but non-Queriers do not send any messages and are only
- * driven by message reception (See RFC 2710/3810 or net/mld.h).
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -115,6 +83,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 {
   FAR struct net_driver_s *dev;
   struct mld_group_s *group;
+  int ret;
 
   DEBUGASSERT(dev != NULL && mrec != NULL);
 
@@ -159,11 +128,9 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
        * leaving the group.
        */
 
-      net_lock();
       wd_cancel(group->wdog);
       CLR_MLD_SCHEDMSG(group->flags);
       CLR_MLD_WAITMSG(group->flags);
-      net_unlock();
 
       MLD_STATINCR(g_netstats.mld.leaves);
 
@@ -171,10 +138,15 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
       if (IS_MLD_LASTREPORT(group->flags))
         {
-          ninfo("Schedule Leave Group message\n");
+          ninfo("Schedule Done message\n");
 
           MLD_STATINCR(g_netstats.mld.done_sched);
-          mld_waitmsg(group, ICMPV6_MCAST_LISTEN_DONE_V1);
+
+          ret = mld_waitmsg(group, MLD_SEND_DONE);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to schedule message: %d\n", ret);
+            }
         }
 
       /* Free the group structure */

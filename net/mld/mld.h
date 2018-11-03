@@ -110,6 +110,7 @@
 #include <queue.h>
 #include <semaphore.h>
 
+#include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
@@ -180,9 +181,11 @@ struct mld_group_s
 {
   struct mld_group_s *next;    /* Implements a singly-linked list */
   net_ipv6addr_t      grpaddr; /* Group IPv6 address */
+  struct work_s       work;    /* For deferred timeout operations */
   WDOG_ID             wdog;    /* WDOG used to detect timeouts */
   sem_t               sem;     /* Used to wait for message transmission */
-  volatile uint8_t    flags;   /* See MLD_ flags definitions */
+  uint8_t             ifindex; /* Interface index */
+  uint8_t             flags;   /* See MLD_ flags definitions */
   uint8_t             msgtype; /* Pending message type to send (if non-zero) */
   uint8_t             count;   /* Report repetition count */
 };
@@ -332,7 +335,7 @@ void mld_grpfree(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype);
+int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype);
 
 /****************************************************************************
  * Name: mld_waitmsg
@@ -343,7 +346,7 @@ void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype);
  *
  ****************************************************************************/
 
-void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype);
+int mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype);
 
 /****************************************************************************
  * Name:  mld_poll

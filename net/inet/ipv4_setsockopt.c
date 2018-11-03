@@ -97,6 +97,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
    * REVISIT:  Clone the logic from netdev_ioctl.c here.
    */
 
+  net_lock();
   switch (option)
     {
       case IP_MSFILTER:    /* Access advanced, full-state filtering API */
@@ -216,6 +217,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         break;
     }
 
+  net_unlock();
   return ret;
 #else
   return -ENOPROTOOPT;

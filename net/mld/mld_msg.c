@@ -45,6 +45,7 @@
 #include <nuttx/net/mld.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "mld/mld.h"
 
 #ifdef CONFIG_NET_MLD
@@ -60,19 +61,34 @@
  *   Schedule a message to be send at the next driver polling interval.
  *
  * Assumptions:
- *   This function may be called in most any context.
+ *   The network is locked
  *
  ****************************************************************************/
 
-void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
+int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
 {
-  /* The following should be atomic */
+  FAR struct net_driver_s *dev;
 
-  net_lock();
-  DEBUGASSERT(!IS_MLD_SCHEDMSG(group->flags));
+  DEBUGASSERT(group != NULL && !IS_MLD_SCHEDMSG(group->flags));
+  DEBUGASSERT(group->ifindex > 0);
+
+  /* Get the device instance associated with the interface index of the group */
+
+  dev = netdev_findbyindex(group->ifindex);
+  if (dev == NULL)
+    {
+      nerr("ERROR: No device for this interface index: %u\n",
+           group->ifindex);
+      return -ENODEV;
+    }
+
   group->msgtype = msgtype;
   SET_MLD_SCHEDMSG(group->flags);
-  net_unlock();
+
+  /* Notify the device that we have a packet to send */
+
+  netdev_txnotify_dev(dev);
+  return OK;
 }
 
 /****************************************************************************
@@ -82,18 +98,26 @@ void mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
  *   Schedule a message to be send at the next driver polling interval and
  *   block, waiting for the message to be sent.
  *
+ * Assumptions:
+ *   The network is locked
+ *
  ****************************************************************************/
 
-void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
+int mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
 {
   int ret;
 
   /* Schedule to send the message */
 
-  net_lock();
   DEBUGASSERT(!IS_MLD_WAITMSG(group->flags));
   SET_MLD_WAITMSG(group->flags);
-  mld_schedmsg(group, msgtype);
+
+  ret = mld_schedmsg(group, msgtype);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to schedule the message: %d\n", ret);
+      goto errout;
+    }
 
   /* Then wait for the message to be sent */
 
@@ -104,19 +128,24 @@ void mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
       while ((ret = net_lockedwait(&group->sem)) < 0)
         {
           /* The only error that should occur from net_lockedwait() is if
-           * the wait is awakened by a signal.
+           * the wait is awakened by a signal or, perhaps, canceled.
            */
 
           DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
+          if (ret != -EINTR && ret != -ECANCELED)
+            {
+              break;
+            }
 
-      UNUSED(ret);
+          ret = OK;
+        }
     }
 
   /* The message has been sent and we are no longer waiting */
 
+errout:
   CLR_MLD_WAITMSG(group->flags);
-  net_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_NET_MLD */

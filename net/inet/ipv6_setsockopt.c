@@ -90,6 +90,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
   /* Handle MLD-related socket options */
 
+  net_lock();
   switch (option)
     {
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
@@ -144,6 +145,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         break;
     }
 
+  net_unlock();
   return ret;
 #else
   return -ENOPROTOOPT;

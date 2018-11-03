@@ -73,6 +73,7 @@
 void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   /* The following should be atomic */
+  /* REVISIT: Need to notify the device that we have a packet to send */
 
   net_lock();
   DEBUGASSERT(!IS_SCHEDMSG(group->flags));
