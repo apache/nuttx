@@ -90,7 +90,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mld_timeout_work
+ * Name: mld_report_msgtype
+ *
+ * Description:
+ *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
+ *   current state of compatibility mode flag.
+ *
+ ****************************************************************************/
+
+static inline uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
+{
+  if (IS_MLD_V1COMPAT(group->flags))
+    {
+      return MLD_SEND_V1REPORT;
+    }
+  else
+    {
+      return MLD_SEND_V2REPORT;
+    }
+}
+
+/****************************************************************************
+ * Name:  mld_polldog_work
  *
  * Description:
  *   Timeout watchdog work
@@ -100,7 +121,7 @@
  *
  ****************************************************************************/
 
-static void mld_timeout_work(FAR void *arg)
+static void mld_polldog_work(FAR void *arg)
 {
   FAR struct mld_group_s *group;
   int ret;
@@ -118,7 +139,7 @@ static void mld_timeout_work(FAR void *arg)
       /* Schedule (and forget) the Report. */
 
       MLD_STATINCR(g_netstats.mld.report_sched);
-      ret = mld_schedmsg(group, MLD_SEND_REPORT);
+      ret = mld_schedmsg(group, mld_report_msgtype(group));
       if (ret < 0)
         {
           nerr("ERROR: Failed to schedule message: %d\n", ret);
@@ -133,7 +154,7 @@ static void mld_timeout_work(FAR void *arg)
           /* Decrement the count and restart the timer */
 
           group->count--;
-          mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
+          mld_start_polltimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
         }
       else
         {
@@ -145,7 +166,7 @@ static void mld_timeout_work(FAR void *arg)
 
          if (IS_MLD_QUERIER(group->flags))
            {
-             mld_starttimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+             mld_start_polltimer(group, MSEC2TICK(MLD_QUERY_MSEC));
            }
         }
     }
@@ -165,25 +186,25 @@ static void mld_timeout_work(FAR void *arg)
 
       /* Restart the Querier timer */
 
-      mld_starttimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+      mld_start_polltimer(group, MSEC2TICK(MLD_QUERY_MSEC));
     }
 
   net_unlock();
 }
 
 /****************************************************************************
- * Name:  mld_timeout
+ * Name:  mld_polldog_timout
  *
  * Description:
  *   Timeout watchdog handler.
  *
  * Assumptions:
- *   This function is called from the wdog timer handler which runs in the
+ *   This function is called from the polldog timer handler which runs in the
  *   context of the timer interrupt handler.
  *
  ****************************************************************************/
 
-static void mld_timeout(int argc, uint32_t arg, ...)
+static void mld_polldog_timout(int argc, uint32_t arg, ...)
 {
   FAR struct mld_group_s *group;
   int ret;
@@ -199,7 +220,92 @@ static void mld_timeout(int argc, uint32_t arg, ...)
    * work queue.
    */
 
-  ret = work_queue(LPWORK, &group->work, mld_timeout_work, group, 0);
+  ret = work_queue(LPWORK, &group->work, mld_polldog_work, group, 0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to queue timeout work: %d\n", ret);
+    }
+}
+
+/****************************************************************************
+ * Name:  mld_v1dog_work
+ *
+ * Description:
+ *   Timeout watchdog work
+ *
+ * Assumptions:
+ *   This function is called from a work queue thread.
+ *
+ ****************************************************************************/
+
+static void mld_v1dog_work(FAR void *arg)
+{
+  FAR struct mld_group_s *group;
+
+  /* Recover the reference to the group */
+
+  group = (FAR struct mld_group_s *)arg;
+  DEBUGASSERT(group != NULL);
+
+  net_lock();
+  if (IS_MLD_V1COMPAT(group->flags))
+    {
+      /* Exit MLDv1 compatibility mode. */
+
+      CLR_MLD_V1COMPAT(group->flags);
+
+      /* Whenever a host changes its compatibility mode, it cancels all its
+       * pending responses and retransmission timers.
+       */
+
+      wd_cancel(group->polldog);
+
+      /* REVISIT:  We cannot cancel a pending message if there is a waiter.
+       * Some additional logic would be required to avoid a hang.
+       */
+
+      if (!IS_MLD_WAITMSG(group->flags))
+        {
+          CLR_MLD_SCHEDMSG(group->flags);
+        }
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
+ * Name:  mld_v1dog_timout
+ *
+ * Description:
+ *   Timeout watchdog handler.
+ *
+ * Assumptions:
+ *   This function is called from the v1dog timer handler which runs in the
+ *   context of the timer interrupt handler.
+ *
+ ****************************************************************************/
+
+static void mld_v1dog_timout(int argc, uint32_t arg, ...)
+{
+  FAR struct mld_group_s *group;
+  int ret;
+
+  ninfo("Timeout!\n");
+
+  /* Recover the reference to the group */
+
+  group = (FAR struct mld_group_s *)arg;
+  DEBUGASSERT(argc == 1 && group != NULL);
+
+  /* Cancels all its pending responses and retransmission timers */
+
+  wd_cancel(group->polldog);
+
+  /* Perform the timeout-related operations on (preferably) the low priority
+   * work queue.
+   */
+
+  ret = work_queue(LPWORK, &group->work, mld_v1dog_work, group, 0);
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue timeout work: %d\n", ret);
@@ -211,78 +317,47 @@ static void mld_timeout(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mld_starttimer
+ * Name:  mld_start_polltimer
  *
  * Description:
- *   Start the MLD timer.
- *
- * Assumptions:
- *   This function may be called from most any context.
+ *   Start the MLD poll timer.
  *
  ****************************************************************************/
 
-void mld_starttimer(FAR struct mld_group_s *group, clock_t ticks)
+void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks)
 {
   int ret;
 
   /* Start the timer */
 
-  mtmrinfo("ticks: %ld\n", (unsigned long)ticks);
+  mtmrinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(group->wdog, ticks, mld_timeout, 1, (uint32_t)group);
+  ret = wd_start(group->polldog, ticks, mld_polldog_timout, 1, (uint32_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
 
 /****************************************************************************
- * Name:  mld_cmptimer
+ * Name:  mld_start_v1timer
  *
  * Description:
- *   Compare the timer remaining on the watching timer to the deci-second
- *   value. If maxticks > ticks-remaining, then (1) cancel the timer (to
- *   avoid race conditions) and return true.
- *
- * Assumptions:
- *   This function may be called from most any context.  If true is returned
- *   then the caller must call mld_starttimer() to restart the timer
+ *   Start the MLDv1 compatibility timer.
  *
  ****************************************************************************/
 
-bool mld_cmptimer(FAR struct mld_group_s *group, int maxticks)
+void mld_start_v1timer(FAR struct mld_group_s *group, clock_t ticks)
 {
-  irqstate_t flags;
-  int remaining;
+  int ret;
 
-  /* Disable interrupts so that there is no race condition with the actual
-   * timer expiration.
-   */
+  /* Start the timer */
 
-  flags = enter_critical_section();
+  mtmrinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  /* Get the timer remaining on the watchdog.  A time of <= zero means that
-   * the watchdog was never started.
-   */
+  ret = wd_start(group->v1dog, ticks, mld_v1dog_timout, 1, (uint32_t)group);
 
-  remaining = wd_gettime(group->wdog);
-
-  /* A remaining time of zero means that the watchdog was never started
-   * or has already expired.  That case should be covered in the following
-   * test as well.
-   */
-
-  mtmrinfo("maxticks: %d remaining: %d\n", maxticks, remaining);
-  if (maxticks > remaining)
-    {
-      /* Cancel the watchdog timer and return true */
-
-      wd_cancel(group->wdog);
-      leave_critical_section(flags);
-      return true;
-    }
-
-  leave_critical_section(flags);
-  return false;
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 }
 
 #endif /* CONFIG_NET_MLD */

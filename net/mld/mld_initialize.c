@@ -85,6 +85,7 @@ void mld_devinit(struct net_driver_s *dev)
 
   /* Allow the MLD messages at the MAC level */
 
-  mld_addmcastmac(dev, g_ipv6_allrouters);
   mld_addmcastmac(dev, g_ipv6_allnodes);
+  mld_addmcastmac(dev, g_ipv6_allrouters);
+  mld_addmcastmac(dev, g_ipv6_allmldv2routers);
 }

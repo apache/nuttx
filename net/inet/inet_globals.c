@@ -98,6 +98,20 @@ const net_ipv6addr_t g_ipv6_llnetmask =   /* Netmask for local link address */
 };
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 
+#ifdef CONFIG_NET_MLD
+/* Version 2 Multicast Listener Reports are sent with an IP destination
+ * address of FF02:0:0:0:0:0:0:16, to which all MLDv2-capable multicast
+ * routers listen (RFC 3810)
+ */
+
+const net_ipv6addr_t g_ipv6_allmldv2routers =  /* All MLDv2 link local routers */
+{
+  HTONS(0xff02),
+  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+  HTONS(0x0016)
+};
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
 
 /* IPv6 Multi-cast Ethernet addresses.  Formed from the 16-bit prefix:

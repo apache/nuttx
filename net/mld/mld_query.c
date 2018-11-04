@@ -37,6 +37,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -60,6 +61,97 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mld_setup_v1compat
+ *
+ * Description:
+ *   If this is for MLDv1 query, then select MLDv1 compatibility mode and
+ *   start (or re-start) the compatibility timer.  We need to make this
+ *   check BEFORE sending the report.
+ *
+ ****************************************************************************/
+
+static void mld_setup_v1compat(FAR struct mld_group_s *group,
+                               FAR const struct mld_mcast_listen_query_s *query,
+                               bool mldv1)
+{
+  unsigned int respmsec;
+
+  if (mldv1)
+    {
+#if 0 /* REVISIT */
+      /* Get the QQI from the query.  Since this is MLDv1, we know that
+       * the value is not encoded.
+       */
+
+      respmsec = MSEC_PER_SEC * MLD_QQI_VALUE(query->qqic);
+#else
+      /* REVISIT:  I am confused.  Per RFC 3810:
+       * "The Older Version Querier Present Timeout is the time-out for
+       *  transitioning a host back to MLDv2 Host Compatibility Mode.  When
+       *  an MLDv1 query is received, MLDv2 hosts set their Older Version
+       *  Querier Present Timer to [Older Version Querier Present Timeout].
+       *
+       * "This value MUST be ([Robustness Variable] times (the [Query
+       *  Interval] in the last Query received)) plus ([Query Response
+       *  Interval])."
+       *
+       * I am not sure how to do that since the MLDv1 version has no QQI
+       * field.  That is an MLDv2 extension.
+       */
+
+      respmsec = MLD_QUERY_MSEC;
+#endif
+
+      /* Select MLDv1 compatibility mode (might already be selected) */
+
+      SET_MLD_V1COMPAT(group->flags);
+
+      /* Whenever a host changes its compatibility mode, it cancels all its
+       * pending responses and retransmission timers.
+       */
+
+      wd_cancel(group->polldog);
+
+      /* REVISIT:  We cannot cancel a pending message if there is a waiter.
+       * Some additional logic would be required to avoid a hang.
+       */
+
+      if (!IS_MLD_WAITMSG(group->flags))
+        {
+          CLR_MLD_SCHEDMSG(group->flags);
+        }
+
+      /* And start the MLDv1 compatibility timer.  If the timer is already
+       * running, this will reset the timer.
+       */
+
+      mld_start_v1timer(group,
+                        MSEC2TICK(MLD_V1PRESENT_MSEC((clock_t)respmsec)));
+    }
+}
+
+/****************************************************************************
+ * Name: mld_report_msgtype
+ *
+ * Description:
+ *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
+ *   current state of compatibility mode flag.
+ *
+ ****************************************************************************/
+
+static inline uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
+{
+  if (IS_MLD_V1COMPAT(group->flags))
+    {
+      return MLD_SEND_V1REPORT;
+    }
+  else
+    {
+      return MLD_SEND_V2REPORT;
+    }
+}
 
 /****************************************************************************
  * Name: mld_mrc2mrd
@@ -125,7 +217,7 @@ static bool mld_cmpaddr(FAR struct net_driver_s *dev,
  *
  * Description:
  *   Check if we are still the querier for this group (assuming that we are
- *   currently the querier).  This comparies the IPv6 Source Address of the
+ *   currently the querier).  This compares the IPv6 Source Address of the
  *   query against and the IPv6 address of the link.  Ff the source address
  *   is numerically less than the link address, when we are no longer the
  *   querier.
@@ -152,9 +244,9 @@ static void mld_check_querier(FAR struct net_driver_s *dev,
 
           if (!IS_MLD_STARTUP(group->flags))
             {
-              /* Yes.. cancel the timer */
+              /* Yes.. cancel the poll timer */
 
-              wd_cancel(group->wdog);
+              wd_cancel(group->polldog);
             }
 
           /* Switch to non-Querier mode */
@@ -196,6 +288,8 @@ int mld_query(FAR struct net_driver_s *dev,
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
+  unsigned int mldsize;
+  bool mldv1 = false;
 
   ninfo("Multicast Listener Query\n");
 
@@ -206,6 +300,29 @@ int mld_query(FAR struct net_driver_s *dev,
 
   mrc = NTOHS(query->mrc);
 #endif
+
+  /* The MLD version of a Multicast Listener Query message is determined
+   * as follows:
+   *
+   *   MLDv1 Query: length = 24 octets
+   *   MLDv2 Query: length >= 28 octets
+   *
+   * Query messages that do not match any of the above conditions (e.g., a
+   * Query of length 26 octets) MUST be silently ignored.
+   */
+
+  mldsize = ipv6->len[0] << 8 | ipv6->len[1];
+  if (mldsize == sizeof(struct mld_mcast_listen_report_v1_s))
+    {
+      mldv1 = true;
+    }
+  else if (mldsize < SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0))
+    {
+      nwarn("WARNING:  Invalid size for MLD query: %u\n", mldsize);
+
+      dev->d_len = 0;
+      return -EINVAL;
+    }
 
   /* There are three variants of the Query message (RFC 3810):
    *
@@ -267,6 +384,16 @@ int mld_query(FAR struct net_driver_s *dev,
               /* Check if we are still the querier for this group */
 
                mld_check_querier(dev, ipv6, member);
+
+               /* Warn if we received a MLDv2 query in MLDv1 compatibility
+                * mode.
+                */
+
+               if (!mldv1 && IS_MLD_V1COMPAT(member->flags))
+                 {
+                   nwarn("WARNING: MLDv2 query received in MLDv1 "
+                         "compatibility mode\n");
+                 }
             }
         }
 
@@ -290,9 +417,14 @@ int mld_query(FAR struct net_driver_s *dev,
 
           if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
             {
+
+              /* Check MLDv1 compatibility mode */
+
+              mld_setup_v1compat(member, query, mldv1);
+
               /* Send one report and break out of the loop */
 
-              mld_send(dev, member, MLD_SEND_REPORT);
+              mld_send(dev, member, mld_report_msgtype(member));
               rptsent = true;
               break;
             }
@@ -326,6 +458,13 @@ int mld_query(FAR struct net_driver_s *dev,
 
   mld_check_querier(dev, ipv6, group);
 
+  /* Warn if we received a MLDv2 query in MLDv1 compatibility mode. */
+
+  if (!mldv1 && IS_MLD_V1COMPAT(group->flags))
+    {
+      nwarn("WARNING: MLDv2 query received in MLDv1 compatibility mode\n");
+    }
+
   /* Check for Multicast Address Specific Query */
 
   if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allrouters))
@@ -341,9 +480,13 @@ int mld_query(FAR struct net_driver_s *dev,
           MLD_STATINCR(g_netstats.mld.massq_query_received);
         }
 
+      /* Check MLDv1 compatibility mode */
+
+      mld_setup_v1compat(group, query, mldv1);
+
       /* Send the report */
 
-      mld_send(dev, group, MLD_SEND_REPORT);
+      mld_send(dev, group,  mld_report_msgtype(group));
     }
 
   /* Not sent to all systems.  Check for Unicast General Query */
@@ -353,9 +496,13 @@ int mld_query(FAR struct net_driver_s *dev,
       ninfo("Unicast query\n");
       MLD_STATINCR(g_netstats.mld.ucast_query_received);
 
+      /* Check MLDv1 compatibility mode */
+
+      mld_setup_v1compat(group, query, mldv1);
+
       /* Send the report */
 
-       mld_send(dev, group, MLD_SEND_REPORT);
+      mld_send(dev, group,  mld_report_msgtype(group));
     }
   else
     {

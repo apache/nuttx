@@ -132,13 +132,15 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 
       MLD_STATINCR(g_netstats.mld.joins);
 
-      /* Send the Version 1 Multicast Listener Report */
+      /* Send the Version 2 Multicast Listener Report (Assumes MLDv2 mode
+       * initially?).
+       */
 
       MLD_STATINCR(g_netstats.mld.report_sched);
-      ret = mld_waitmsg(group, MLD_SEND_REPORT);
+      ret = mld_waitmsg(group, MLD_SEND_V2REPORT);
       if (ret < 0)
         {
-          nerr("ERROR: Failed to schedule message: %d\n", ret);
+          nerr("ERROR: Failed to schedule Report: %d\n", ret);
           mld_grpfree(dev, group);
           return ret;
         }
@@ -147,7 +149,7 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 
       SET_MLD_STARTUP(group->flags);
       group->count = MLD_UNSOLREPORT_COUNT - 1;
-      mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
+      mld_start_polltimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
 
       /* Add the group (MAC) address to the Ethernet drivers MAC filter list */
 

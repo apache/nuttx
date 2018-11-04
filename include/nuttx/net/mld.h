@@ -271,12 +271,17 @@
 
 struct mld_mcast_listen_query_s
 {
+  /* The initial fields are common for MLDv1 and MLDv2 (24-bytes) */
+
   uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_QUERY */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint16_t mrc;              /* Maximum response code */
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t grpaddr;    /* 128-bit IPv6 multicast group address */
+
+  /* These fields apply only to the MLDv2 query */
+
   uint8_t  flags;            /* See S and QRV flag definitions */
   uint8_t  qqic;             /* Querier's Query Interval Code */
   uint16_t nsources;         /* Number of sources that follow */
@@ -329,7 +334,7 @@ struct mld_mcast_addrec_v2_s
 #define SIZEOF_MLD_MCAST_ADDREC_V2_S(nsources, auxdatlen) \
   (sizeof(struct mld_mcast_addrec_v2_s) + \
    sizeof(net_ipv6addr_t) * ((nsources) - 1) + \
-   (auxdatlen)
+   (auxdatlen))
 
 struct mld_mcast_listen_report_v2_s
 {
@@ -348,10 +353,10 @@ struct mld_mcast_listen_report_v2_s
  * size of each variable length address record (addreclen).
  */
 
-#define SIZEOF_MLD_MCAST_ADDREC_V2_S(addreclen) \
+#define SIZEOF_MLD_MCAST_LISTEN_REPORT_V2_S(addreclen) \
   (sizeof(struct mld_mcast_addrec_v2_s) - \
    sizeof(net_ipv6addr_t) + \
-   (addreclen)
+   (addreclen))
 
 /* Version 1 Multicast Listener Done (RFC 2710) */
 

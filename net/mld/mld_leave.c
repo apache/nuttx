@@ -122,13 +122,14 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
     {
       ninfo("Leaving group: %p\n", group);
 
-      /* Cancel the timer and discard any queued Reports.  Canceling the
+      /* Cancel the timers and discard any queued Reports.  Canceling the
        * timer will prevent any new Reports from being sent;  clearing the
        * flags will discard any pending Reports that could interfere with
        * leaving the group.
        */
 
-      wd_cancel(group->wdog);
+      wd_cancel(group->polldog);
+      wd_cancel(group->v1dog);
       CLR_MLD_SCHEDMSG(group->flags);
       CLR_MLD_WAITMSG(group->flags);
 
@@ -139,9 +140,12 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
        * LAST REPORT flag.  In this case we know that there are other
        * members of the group and we do not have to send the Done message.
        *
-       * The router responds to the Done message with a multicast-address-s
-       * pecific (MAS) Query. If any other node responds to the Query with a
+       * The MLDv1 router responds to the Done message with a multicast-address-
+       * specific (MAS) Query. If any other node responds to the Query with a
        * Report message the there are still listeners present.
+       *
+       * REVISIT:  What if we are in MLDv2 mode?  There is no Done MLDv2 Done
+       * messages.  What should be sent (if anything) instead?
        */
 
       if (IS_MLD_LASTREPORT(group->flags))
@@ -150,7 +154,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
           MLD_STATINCR(g_netstats.mld.done_sched);
 
-          ret = mld_waitmsg(group, MLD_SEND_DONE);
+          ret = mld_waitmsg(group, MLD_SEND_V1DONE);
           if (ret < 0)
             {
               nerr("ERROR: Failed to schedule message: %d\n", ret);

@@ -164,8 +164,9 @@ enum mld_msgtype_e
 {
   MLD_SEND_NONE = 0,           /* Nothing to send */
   MLD_SEND_GENQUERY,           /* Send General Query */
-  MLD_SEND_REPORT,             /* Send Unsolicited report */
-  MLD_SEND_DONE                /* Send Done message */
+  MLD_SEND_V1REPORT,           /* Send MLDv1 Report message */
+  MLD_SEND_V2REPORT,           /* Send MLDv2 Report message */
+  MLD_SEND_V1DONE              /* Send MLDv1 Done message */
 };
 
 /* This structure represents one group member.  There is a list of groups
@@ -182,7 +183,8 @@ struct mld_group_s
   struct mld_group_s *next;    /* Implements a singly-linked list */
   net_ipv6addr_t      grpaddr; /* Group IPv6 address */
   struct work_s       work;    /* For deferred timeout operations */
-  WDOG_ID             wdog;    /* WDOG used to detect timeouts */
+  WDOG_ID             polldog; /* Timer used for periodic or delayed events */
+  WDOG_ID             v1dog;   /* MLDv1 compatibility mode timer */
   sem_t               sem;     /* Used to wait for message transmission */
   uint8_t             ifindex; /* Interface index */
   uint8_t             flags;   /* See MLD_ flags definitions */
@@ -427,29 +429,24 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec);
 int mld_leavegroup(FAR const struct ipv6_mreq *mrec);
 
 /****************************************************************************
- * Name:  mld_starttimer
+ * Name:  mld_start_polltimer
  *
  * Description:
- *   Start the MLD timer with differing time units (ticks or deciseconds).
+ *   Start the MLD poll timer.
  *
  ****************************************************************************/
 
-void mld_starttimer(FAR struct mld_group_s *group, clock_t ticks);
+void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks);
 
 /****************************************************************************
- * Name:  mld_cmptimer
+ * Name:  mld_start_v1timer
  *
  * Description:
- *   Compare the timer remaining on the watching timer to the deci-second
- *   value. If maxticks > ticks-remaining, then (1) cancel the timer (to
- *   avoid race conditions) and return true.
- *
- *   If true is returned then the caller must call mld_starttimer() to
- *    restart the timer
+ *   Start the MLDv1 compatibility timer.
  *
  ****************************************************************************/
 
-bool mld_cmptimer(FAR struct mld_group_s *group, int maxticks);
+void mld_start_v1timer(FAR struct mld_group_s *group, clock_t ticks);
 
 /****************************************************************************
  * Name:  mld_addmcastmac

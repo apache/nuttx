@@ -49,12 +49,6 @@
 #include "mld/mld.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -67,9 +61,8 @@
  *
  ****************************************************************************/
 
-int mld_report(FAR struct net_driver_s *dev)
+int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
 
   /* Reports are send to the group multicast address.  Hence, the IPv6
@@ -77,9 +70,8 @@ int mld_report(FAR struct net_driver_s *dev)
    */
 
   ninfo("grpaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-        ipv6->destipaddr[6], ipv6->destipaddr[7]);
+        grpaddr[0], grpaddr[1], grpaddr[2], grpaddr[3],
+        grpaddr[4], grpaddr[5], grpaddr[6], grpaddr[7]);
 
   /* Find the group (or create a new one) using the incoming IP address.
    * If we are not a router (and I assume we are not), then can ignore
@@ -89,7 +81,7 @@ int mld_report(FAR struct net_driver_s *dev)
    */
 
 #ifdef CONFIG_MLD_ROUTER
-  group = mld_grpallocfind(dev, ipv6->destipaddr);
+  group = mld_grpallocfind(dev, grpaddr);
   if (group == NULL)
     {
       nerr("ERROR: Failed to allocate group\n");
@@ -97,7 +89,7 @@ int mld_report(FAR struct net_driver_s *dev)
     }
 
 #else
-  group = mld_grpfind(dev, ipv6->destipaddr);
+  group = mld_grpfind(dev, grpaddr);
   if (group == NULL)
     {
       nwarn("WARNING: Ignoring group.  We are not a member\n");
@@ -144,15 +136,20 @@ int mld_report(FAR struct net_driver_s *dev)
  *  so it is deleted from the list and its disappearance is made known to
  *  the multicast routing component.
  *
+ *  A node MUST accept and process any version 1 Report whose IP
+ *  Destination Address field contains *any* of the IPv6 addresses (unicast
+ *  or multicast) assigned to the interface on which the Report arrives.
+ *
  ****************************************************************************/
 
 int mld_report_v1(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v1_s *report)
 {
   ninfo("Version 1 Multicast Listener Report\n");
+  DEBUGASSERT(dev != NULL && report != NULL);
 
   MLD_STATINCR(g_netstats.mld.v1report_received);
-  return mld_report(dev);
+  return mld_report(dev, report->mcastaddr);
 }
 
 /****************************************************************************
@@ -169,13 +166,42 @@ int mld_report_v1(FAR struct net_driver_s *dev,
  *   any of these checks fails, the packet is dropped.  If the validity of
  *   the MLD message is verified, the router starts to process the Report.
  *
+ *   Version 2 Multicast Listener Reports are sent with an IP destination
+ *   address of FF02:0:0:0:0:0:0:16, to which all MLDv2-capable multicast
+ *   routers listen
+ *
  ****************************************************************************/
 
 int mld_report_v2(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v2_s *report)
 {
+  int ret = -ENOENT;
+  int i;
+
   ninfo("Version 2 Multicast Listener Report\n");
+  DEBUGASSERT(dev != NULL && report != NULL);
 
   MLD_STATINCR(g_netstats.mld.v2report_received);
-  return mld_report(dev);
+
+  for (i = 0; i < report->naddrec; i++)
+    {
+      /* Handle this mcast address in the list */
+
+      int status = mld_report(dev, report->addrec[i].mcast);
+      if (status == OK)
+        {
+          /* Return success if any address in the listed was processed */
+
+          ret = OK;
+        }
+      else if (status != -ENOENT)
+        {
+          /* Any result other than -ENOENT would be a problem */
+
+          ret = status;
+          break;
+        }
+    }
+
+  return ret;
 }

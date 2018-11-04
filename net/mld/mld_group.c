@@ -130,10 +130,13 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       nxsem_init(&group->sem, 0, 0);
       nxsem_setprotocol(&group->sem, SEM_PRIO_NONE);
 
-      /* Initialize the group timer (but don't start it yet) */
+      /* Initialize the group timers */
 
-      group->wdog = wd_create();
-      DEBUGASSERT(group->wdog);
+      group->polldog = wd_create();
+      DEBUGASSERT(group->polldog);
+
+      group->v1dog = wd_create();
+      DEBUGASSERT(group->v1dog);
 
       /* Save the interface index */
 
@@ -231,9 +234,10 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 {
   grpinfo("Free: %p flags: %02x\n", group, group->flags);
 
-  /* Cancel the wdog */
+  /* Cancel the timers */
 
-  wd_cancel(group->wdog);
+  wd_cancel(group->polldog);
+  wd_cancel(group->v1dog);
 
   /* Remove the group structure from the group list in the device structure */
 
@@ -243,9 +247,10 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   (void)nxsem_destroy(&group->sem);
 
-  /* Destroy the wdog */
+  /* Destroy the timers */
 
-  wd_delete(group->wdog);
+  wd_delete(group->polldog);
+  wd_delete(group->v1dog);
 
   /* Then release the group structure resources. */
 
