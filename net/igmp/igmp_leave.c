@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_leave.c
  *
- *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -119,11 +119,16 @@
  *   |  < current timer) |
  *   +-------------------+
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
-int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
+int igmp_leavegroup(struct net_driver_s *dev,
+                    FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
+  int ret;
 
   DEBUGASSERT(dev && grpaddr);
 
@@ -139,11 +144,9 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
        * could interfere with the Leave Group.
        */
 
-      net_lock();
       wd_cancel(group->wdog);
       CLR_SCHEDMSG(group->flags);
       CLR_WAITMSG(group->flags);
-      net_unlock();
 
       IGMP_STATINCR(g_netstats.igmp.leaves);
 
@@ -153,7 +156,12 @@ int igmp_leavegroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
         {
           ninfo("Schedule Leave Group message\n");
           IGMP_STATINCR(g_netstats.igmp.leave_sched);
-          igmp_waitmsg(group, IGMP_LEAVE_GROUP);
+
+          ret = igmp_waitmsg(group, IGMP_LEAVE_GROUP);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to schedule message: %d\n", ret);
+            }
         }
 
       /* Free the group structure (state is now Non-Member */

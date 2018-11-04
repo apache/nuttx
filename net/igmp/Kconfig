@@ -8,6 +8,7 @@ config NET_IGMP
 	default n
 	depends on NET_IPv4
 	select NET_MCASTGROUP
+	select NETDEV_IFINDEX
 	---help---
 		Enable IGMPv2 client support.
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_join.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -111,38 +111,48 @@
  *   |  < current timer) |
  *   +-------------------+
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 int igmp_joingroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
+  int ret;
 
-  DEBUGASSERT(dev && grpaddr);
+  DEBUGASSERT(dev != NULL && grpaddr != NULL);
 
   /* Check if a this address is already in the group */
 
   group = igmp_grpfind(dev, &grpaddr->s_addr);
   if (!group)
     {
-       /* No... allocate a new entry */
+      /* No... allocate a new entry */
 
-       ninfo("Join to new group: %08x\n", grpaddr->s_addr);
-       group = igmp_grpalloc(dev, &grpaddr->s_addr);
-       IGMP_STATINCR(g_netstats.igmp.joins);
+      ninfo("Join to new group: %08x\n", grpaddr->s_addr);
+      group = igmp_grpalloc(dev, &grpaddr->s_addr);
+      IGMP_STATINCR(g_netstats.igmp.joins);
 
-       /* Send the Membership Report */
+      /* Send the Membership Report */
 
-       IGMP_STATINCR(g_netstats.igmp.report_sched);
-       igmp_waitmsg(group, IGMPv2_MEMBERSHIP_REPORT);
+      IGMP_STATINCR(g_netstats.igmp.report_sched);
+      ret = igmp_waitmsg(group, IGMPv2_MEMBERSHIP_REPORT);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to schedule message: %d\n", ret);
+          igmp_grpfree(dev, group);
+          return ret;
+        }
 
-       /* And start the timer at 10*100 msec */
+      /* And start the timer at 10*100 msec */
 
-       igmp_starttimer(group, 10);
+      igmp_starttimer(group, 10);
 
-       /* Add the group (MAC) address to the ether drivers MAC filter list */
+      /* Add the group (MAC) address to the ether drivers MAC filter list */
 
-       igmp_addmcastmac(dev, (FAR in_addr_t *)&grpaddr->s_addr);
-       return OK;
+      igmp_addmcastmac(dev, (FAR in_addr_t *)&grpaddr->s_addr);
+      return OK;
     }
 
   /* Return EEXIST if the address is already a member of the group */

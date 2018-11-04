@@ -2,7 +2,7 @@
  * net/igmp/igmp_group.c
  * IGMP group data structure management logic
  *
- *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -105,6 +105,9 @@
  * Description:
  *   Allocate a new group from heap memory.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
@@ -137,14 +140,13 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
       group->wdog = wd_create();
       DEBUGASSERT(group->wdog);
 
-      /* Interrupts must be disabled in order to modify the group list */
+      /* Save the interface index */
 
-      net_lock();
+      group->ifindex = dev->d_ifindex;
 
       /* Add the group structure to the list in the device structure */
 
       sq_addfirst((FAR sq_entry_t *)group, &dev->d_igmp_grplist);
-      net_unlock();
     }
 
   return group;
@@ -156,6 +158,9 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
  * Description:
  *   Find an existing group.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
@@ -165,7 +170,6 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
 
   grpinfo("Searching for addr %08x\n", (int)*addr);
 
-  net_lock();
   for (group = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
        group;
        group = group->next)
@@ -174,11 +178,11 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
       if (net_ipv4addr_cmp(group->grpaddr, *addr))
         {
           grpinfo("Match!\n");
+          DEBUGASSERT(group->ifindex == dev->d_ifindex);
           break;
         }
     }
 
-  net_unlock();
   return group;
 }
 
@@ -188,6 +192,9 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
  * Description:
  *   Find an existing group.  If not found, create a new group for the
  *   address.
+ *
+ * Assumptions:
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -212,6 +219,9 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
  * Description:
  *   Release a previously allocated group.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
 void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
@@ -220,7 +230,6 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Cancel the wdog */
 
-  net_lock();
   wd_cancel(group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
@@ -237,10 +246,8 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Then release the group structure resources. */
 
-  net_unlock();
   grpinfo("Call sched_kfree()\n");
   sched_kfree(group);
 }
 
 #endif /* CONFIG_NET_IGMP */
-

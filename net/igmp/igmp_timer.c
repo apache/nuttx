@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_timer.c
  *
- *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -49,6 +49,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netstats.h>
@@ -95,6 +96,60 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  igmp_timeout_work
+ *
+ * Description:
+ *   Timeout watchdog work.
+ *
+ * Assumptions:
+ *   This function is called from a work queue thread.
+ *
+ ****************************************************************************/
+
+static void igmp_timeout_work(FAR void *arg)
+{
+  FAR struct igmp_group_s *group;
+  int ret;
+
+  /* If the state is DELAYING_MEMBER then we send a report for this group */
+
+  group = (FAR struct igmp_group_s *)arg;
+  DEBUGASSERT(group != NULL);
+
+  /* If the group exists and is no an IDLE MEMBER, then it must be a DELAYING
+   * member.  Race conditions are avoided because (1) the timer is not started
+   * until after the first IGMPv2_MEMBERSHIP_REPORT during the join, and (2)
+   * the timer is cancelled before sending the IGMP_LEAVE_GROUP during a leave.
+   */
+
+  net_lock();
+  if (!IS_IDLEMEMBER(group->flags))
+    {
+      /* Schedule (and forget) the Membership Report.  NOTE:
+       * Since we are executing from a timer interrupt, we cannot wait
+       * for the message to be sent.
+       */
+
+      IGMP_STATINCR(g_netstats.igmp.report_sched);
+      ret = igmp_schedmsg(group, IGMPv2_MEMBERSHIP_REPORT);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to schedule message: %d\n", ret);
+        }
+
+      /* Also note:  The Membership Report is sent at most two times becasue
+       * the timer is not reset here.  Hmm.. does this mean that the group
+       * is stranded if both reports were lost?  This is consistent with the
+       * RFC that states: "To cover the possibility of the initial Membership
+       * Report being lost or damaged, it is recommended that it be repeated
+       * once or twice after short delays [Unsolicited Report Interval]..."
+       */
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
  * Name:  igmp_timeout
  *
  * Description:
@@ -109,36 +164,23 @@
 static void igmp_timeout(int argc, uint32_t arg, ...)
 {
   FAR struct igmp_group_s *group;
-
-  /* If the state is DELAYING_MEMBER then we send a report for this group */
+  int ret;
 
   ninfo("Timeout!\n");
-  group = (FAR struct igmp_group_s *)arg;
-  DEBUGASSERT(argc == 1 && group);
 
-  /* If the group exists and is no an IDLE MEMBER, then it must be a DELAYING
-   * member.  Race conditions are avoided because (1) the timer is not started
-   * until after the first IGMPv2_MEMBERSHIP_REPORT during the join, and (2)
-   * the timer is cancelled before sending the IGMP_LEAVE_GROUP during a leave.
+  /* Recover the reference to the group */
+
+  group = (FAR struct igmp_group_s *)arg;
+  DEBUGASSERT(argc == 1 && group != NULL);
+
+  /* Perform the timeout-related operations on (preferably) the low priority
+   * work queue.
    */
 
-  if (!IS_IDLEMEMBER(group->flags))
+  ret = work_queue(LPWORK, &group->work, igmp_timeout_work, group, 0);
+  if (ret < 0)
     {
-      /* Schedule (and forget) the Membership Report.  NOTE:
-       * Since we are executing from a timer interrupt, we cannot wait
-       * for the message to be sent.
-       */
-
-      IGMP_STATINCR(g_netstats.igmp.report_sched);
-      igmp_schedmsg(group, IGMPv2_MEMBERSHIP_REPORT);
-
-      /* Also note:  The Membership Report is sent at most two times becasue
-       * the timer is not reset here.  Hmm.. does this mean that the group
-       * is stranded if both reports were lost?  This is consistent with the
-       * RFC that states: "To cover the possibility of the initial Membership
-       * Report being lost or damaged, it is recommended that it be repeated
-       * once or twice after short delays [Unsolicited Report Interval]..."
-       */
+      nerr("ERROR: Failed to queue timeout work: %d\n", ret);
     }
 }
 

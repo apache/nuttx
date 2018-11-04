@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_msg.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -51,6 +51,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
@@ -66,20 +67,36 @@
  *   Schedule a message to be send at the next driver polling interval.
  *
  * Assumptions:
- *   This function may be called in most any context.
+ *   The network is locked.
  *
  ****************************************************************************/
 
-void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  /* The following should be atomic */
-  /* REVISIT: Need to notify the device that we have a packet to send */
+  FAR struct net_driver_s *dev;
 
-  net_lock();
-  DEBUGASSERT(!IS_SCHEDMSG(group->flags));
+  DEBUGASSERT(group != NULL && !IS_SCHEDMSG(group->flags));
+  DEBUGASSERT(group->ifindex > 0);
+
+  /* Get the device instance associated with the interface index of the group */
+
+  dev = netdev_findbyindex(group->ifindex);
+  if (dev == NULL)
+    {
+      nerr("ERROR: No device for this interface index: %u\n",
+           group->ifindex);
+      return -ENODEV;
+    }
+
+  /* Schedule the message */
+
   group->msgid = msgid;
   SET_SCHEDMSG(group->flags);
-  net_unlock();
+
+  /* Notify the device that we have a packet to send */
+
+  netdev_txnotify_dev(dev);
+  return OK;
 }
 
 /****************************************************************************
@@ -89,18 +106,26 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
  *   Schedule a message to be send at the next driver polling interval and
  *   block, waiting for the message to be sent.
  *
+ * Assumptions:
+ *   The network is locked.
+ *
  ****************************************************************************/
 
-void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+int igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   int ret;
 
   /* Schedule to send the message */
 
-  net_lock();
   DEBUGASSERT(!IS_WAITMSG(group->flags));
   SET_WAITMSG(group->flags);
-  igmp_schedmsg(group, msgid);
+
+  ret = igmp_schedmsg(group, msgid);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to schedule the message: %d\n", ret);
+      goto errout;
+    }
 
   /* Then wait for the message to be sent */
 
@@ -111,19 +136,24 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
       while ((ret = net_lockedwait(&group->sem)) < 0)
         {
           /* The only error that should occur from net_lockedwait() is if
-           * the wait is awakened by a signal.
+           * the wait is awakened by a signal or, perhaps, canceled.
            */
 
           DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
+          if (ret != -EINTR)
+            {
+              break;
+            }
 
-      UNUSED(ret);
+          ret = OK;
+        }
     }
 
   /* The message has been sent and we are no longer waiting */
 
+errout:
   CLR_WAITMSG(group->flags);
-  net_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_NET_IGMP */

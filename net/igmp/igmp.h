@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,7 @@
 
 #include <sys/types.h>
 
+#include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IGMP
@@ -123,10 +124,12 @@ typedef FAR struct wdog_s *WDOG_ID;
 struct igmp_group_s
 {
   struct igmp_group_s *next;    /* Implements a singly-linked list */
+  struct work_s        work;    /* For deferred timeout operations */
   in_addr_t            grpaddr; /* Group IPv4 address */
   WDOG_ID              wdog;    /* WDOG used to detect timeouts */
   sem_t                sem;     /* Used to wait for message transmission */
-  volatile uint8_t     flags;   /* See IGMP_ flags definitions */
+  uint8_t              ifindex; /* Interface index */
+  uint8_t              flags;   /* See IGMP_ flags definitions */
   uint8_t              msgid;   /* Pending message ID (if non-zero) */
 };
 
@@ -233,7 +236,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 
 /****************************************************************************
  * Name: igmp_waitmsg
@@ -244,7 +247,7 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
  *
  ****************************************************************************/
 
-void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+int igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 
 /****************************************************************************
  * Name:  igmp_poll
