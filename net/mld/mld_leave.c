@@ -134,7 +134,15 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
       MLD_STATINCR(g_netstats.mld.leaves);
 
-      /* Send a leave if the flag is set according to the state diagram */
+      /* Send a leave if the LASTREPORT flag is set for the group.  If there
+       * are other members of the group, then their reports will clear the
+       * LAST REPORT flag.  In this case we know that there are other
+       * members of the group and we do not have to send the Done message.
+       *
+       * The router responds to the Done message with a multicast-address-s
+       * pecific (MAS) Query. If any other node responds to the Query with a
+       * Report message the there are still listeners present.
+       */
 
       if (IS_MLD_LASTREPORT(group->flags))
         {

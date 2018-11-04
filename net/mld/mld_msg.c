@@ -82,6 +82,8 @@ int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
       return -ENODEV;
     }
 
+  /* Schedule the message */
+
   group->msgtype = msgtype;
   SET_MLD_SCHEDMSG(group->flags);
 
@@ -132,7 +134,7 @@ int mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
            */
 
           DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-          if (ret != -EINTR && ret != -ECANCELED)
+          if (ret != -EINTR)
             {
               break;
             }

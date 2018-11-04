@@ -55,6 +55,69 @@
 #define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mld_report
+ *
+ * Description:
+ *   Common report handling.  Since we are not a router, we do very little
+ *   on the receipt of a report from another member of the group.
+ *
+ ****************************************************************************/
+
+int mld_report(FAR struct net_driver_s *dev)
+{
+  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  FAR struct mld_group_s *group;
+
+  /* Reports are send to the group multicast address.  Hence, the IPv6
+   * destipaddr idenfies the group.
+   */
+
+  ninfo("grpaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
+        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
+        ipv6->destipaddr[6], ipv6->destipaddr[7]);
+
+  /* Find the group (or create a new one) using the incoming IP address.
+   * If we are not a router (and I assume we are not), then can ignore
+   * reports from groups that we are not a member of.
+   *
+   * REVISIT:  Router support is not yet implemented.
+   */
+
+#ifdef CONFIG_MLD_ROUTER
+  group = mld_grpallocfind(dev, ipv6->destipaddr);
+  if (group == NULL)
+    {
+      nerr("ERROR: Failed to allocate group\n");
+      return -ENOMEM;
+    }
+
+#else
+  group = mld_grpfind(dev, ipv6->destipaddr);
+  if (group == NULL)
+    {
+      nwarn("WARNING: Ignoring group.  We are not a member\n");
+      return -ENOENT;
+    }
+#endif
+
+  /* There are certainly other members of this group, we can clear the
+   * LASTREPORT flag.
+   */
+
+  CLR_MLD_LASTREPORT(group->flags);
+
+  /* Need to set d_len to zero to indication that nothing is being sent */
+
+  dev->d_len = 0;
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -86,35 +149,10 @@
 int mld_report_v1(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v1_s *report)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct mld_group_s *group;
-
   ninfo("Version 1 Multicast Listener Report\n");
-  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-        ipv6->destipaddr[6], ipv6->destipaddr[7]);
 
   MLD_STATINCR(g_netstats.mld.v1report_received);
-
-  /* Find the group (or create a new one) using the incoming IP address */
-
-  group = mld_grpallocfind(dev, ipv6->destipaddr);
-  if (group == NULL)
-    {
-      nerr("ERROR: Failed to allocate/find group\n");
-      return -ENOENT;
-    }
-
-  /* If we are a Querier, then reset the timer for that group. */
-
-  if (IS_MLD_QUERIER(group->flags))
-    {
-      mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
-      CLR_MLD_LASTREPORT(group->flags);
-    }
-
-   return OK;
+  return mld_report(dev);
 }
 
 /****************************************************************************
@@ -136,51 +174,8 @@ int mld_report_v1(FAR struct net_driver_s *dev,
 int mld_report_v2(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v2_s *report)
 {
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct mld_group_s *group;
-
   ninfo("Version 2 Multicast Listener Report\n");
-  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-        ipv6->destipaddr[6], ipv6->destipaddr[7]);
 
   MLD_STATINCR(g_netstats.mld.v2report_received);
-
-  /* Check for a valid report
-   *
-   * REVISIT: Missing required test for Router Alert option.  That has
-   * already been handled in ipv6_input() but is not available here
-   * unless we re-parse the extension options.
-   */
-
-  if (!net_is_addr_linklocal(ipv6->srcipaddr) || ipv6->ttl != 1)
-    {
-      nwarn("WARNING: Bad Report, ttl=%u\n", ipv6->ttl);
-      nwarn("         srcipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            ipv6->srcipaddr[0], ipv6->srcipaddr[1], ipv6->srcipaddr[2],
-            ipv6->srcipaddr[3], ipv6->srcipaddr[4], ipv6->srcipaddr[5],
-            ipv6->srcipaddr[6], ipv6->srcipaddr[7]);
-
-      return -EINVAL;
-    }
-
-  /* Find the group (or create a new one) using the incoming IP address */
-
-  group = mld_grpallocfind(dev, ipv6->destipaddr);
-  if (group == NULL)
-    {
-      nerr("ERROR: Failed to allocate/find group\n");
-      return -ENOENT;
-    }
-
-  /* If we are a Querier, then reset the timer for that group. */
-
-  if (IS_MLD_QUERIER(group->flags))
-    {
-      mld_starttimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
-      CLR_MLD_LASTREPORT(group->flags);
-    }
-
-   return OK;
+  return mld_report(dev);
 }

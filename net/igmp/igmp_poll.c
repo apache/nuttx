@@ -90,7 +90,6 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
       dest = &group->grpaddr;
       ninfo("Send IGMPv2_MEMBERSHIP_REPORT, dest=%08x flags=%02x\n",
              *dest, group->flags);
-      IGMP_STATINCR(g_netstats.igmp.report_sched);
       SET_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
@@ -99,12 +98,11 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
       dest = &g_ipv4_allrouters;
       ninfo("Send IGMP_LEAVE_GROUP, dest=%08x flags=%02x\n",
              *dest, group->flags);
-      IGMP_STATINCR(g_netstats.igmp.leave_sched);
     }
 
   /* Send the message */
 
-  igmp_send(dev, group, dest);
+  igmp_send(dev, group, dest, group->msgid);
 
   /* Indicate that the message has been sent */
 
@@ -164,10 +162,6 @@ void igmp_poll(FAR struct net_driver_s *dev)
           /* Yes, create the IGMP message in the driver buffer */
 
           igmp_sched_send(dev, group);
-
-          /* Mark the message as sent and break out */
-
-          CLR_SCHEDMSG(group->flags);
           break;
         }
     }

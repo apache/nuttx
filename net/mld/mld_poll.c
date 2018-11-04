@@ -47,7 +47,6 @@
 #include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
-#include "inet/inet.h"
 #include "mld/mld.h"
 
 /****************************************************************************
@@ -71,63 +70,6 @@
 static inline void mld_sched_send(FAR struct net_driver_s *dev,
                                   FAR struct mld_group_s *group)
 {
-  const net_ipv6addr_t *dest;
-
-  /* Check what kind of message we need to send.  There are only three
-   * possibilities:
-   */
-
-  if (group->msgtype == MLD_SEND_GENQUERY)
-    {
-      dest = &g_ipv6_allrouters;
-
-      ninfo("Send General Query, flags=%02x\n", group->flags);
-      ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-            ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-            ipv6->destipaddr[6], ipv6->destipaddr[7]);
-    }
-  else if (group->msgtype == MLD_SEND_REPORT)
-    {
-      dest = &group->grpaddr;
-
-      ninfo("Send Report, flags=%02x\n", group->flags);
-      ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-            ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-            ipv6->destipaddr[6], ipv6->destipaddr[7]);
-
-      SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
-    }
-  else
-    {
-      DEBUGASSERT(group->msgtype == MLD_SEND_DONE);
-
-      dest = &g_ipv6_allrouters;
-
-      ninfo("Send Done message, flags=%02x\n", group->flags);
-      ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-            ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-            ipv6->destipaddr[6], ipv6->destipaddr[7]);
-    }
-
-  /* Send the message */
-
-  mld_send(dev, group, *dest);
-
-  /* Indicate that the message has been sent */
-
-  CLR_MLD_SCHEDMSG(group->flags);
-  group->msgtype = 0;
-
-  /* If there is a thread waiting fore the message to be sent, wake it up */
-
-  if (IS_MLD_WAITMSG(group->flags))
-    {
-      ninfo("Awakening waiter\n");
-      nxsem_post(&group->sem);
-    }
 }
 
 /****************************************************************************
@@ -171,13 +113,27 @@ void mld_poll(FAR struct net_driver_s *dev)
 
       if (IS_MLD_SCHEDMSG(group->flags))
         {
-          /* Yes, create the MLD message in the driver buffer */
+          /* Yes.. create the MLD message in the driver buffer */
 
-          mld_sched_send(dev, group);
+          mld_send(dev, group, group->msgtype);
 
-          /* Mark the message as sent and break out */
+          /* Indicate that the message has been sent */
 
-          CLR_MLD_SCHEDMSG(group->flags);
+         CLR_MLD_SCHEDMSG(group->flags);
+         group->msgtype = MLD_SEND_NONE;
+
+         /* If there is a thread waiting fore the message to be sent, wake
+          * it up.
+          */
+
+         if (IS_MLD_WAITMSG(group->flags))
+           {
+             ninfo("Awakening waiter\n");
+             nxsem_post(&group->sem);
+           }
+
+          /* And break out of the loop */
+
           break;
         }
     }

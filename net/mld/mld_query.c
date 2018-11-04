@@ -70,6 +70,7 @@
  *
  ****************************************************************************/
 
+#if 0 /* Not used */
 static clock_t mld_mrc2mrd(uint16_t mrc)
 {
   uint32_t mrd;  /* Units of milliseconds */
@@ -91,6 +92,7 @@ static clock_t mld_mrc2mrd(uint16_t mrc)
 
   return MSEC2TICK((clock_t)mrd);
 }
+#endif
 
 /****************************************************************************
  * Name: mld_cmpaddr
@@ -122,22 +124,21 @@ static bool mld_cmpaddr(FAR struct net_driver_s *dev,
  * Name: mld_check_querier
  *
  * Description:
- *  Perform a numerical comparison of the IPv6 Source Address and the IPv6
- *  address of the link.  Return true if the source address is less than
- *  the link address.
+ *   Check if we are still the querier for this group (assuming that we are
+ *   currently the querier).  This comparies the IPv6 Source Address of the
+ *   query against and the IPv6 address of the link.  Ff the source address
+ *   is numerically less than the link address, when we are no longer the
+ *   querier.
  *
  ****************************************************************************/
 
 static void mld_check_querier(FAR struct net_driver_s *dev,
                               FAR struct ipv6_hdr_s *ipv6,
-                              FAR struct mld_group_s *member,
-                              uint16_t mrc)
+                              FAR struct mld_group_s *group)
 {
-  clock_t ticks;
-
   /* Check if this member is a Querier */
 
-  if (IS_MLD_QUERIER(member->flags))
+  if (IS_MLD_QUERIER(group->flags))
     {
       /* This is a querier, check if the IPv6 source address is numerically
        * less than the IPv6 address assigned to this link.
@@ -145,17 +146,20 @@ static void mld_check_querier(FAR struct net_driver_s *dev,
 
       if (mld_cmpaddr(dev, ipv6->srcipaddr))
         {
-          /* This is a querier, then switch to non-querier and set a timeout.
-           * If additional queries are received within this timeout period,
-           * then we need to revert to Querier.
+          /* Are we past the start up phase (where the timer is used for a
+           * different purpose)?
            */
 
-          ticks =  mld_mrc2mrd(mrc);
-          if (mld_cmptimer(member, ticks))
+          if (!IS_MLD_STARTUP(group->flags))
             {
-              mld_starttimer(member, ticks);
-              CLR_MLD_QUERIER(member->flags);
+              /* Yes.. cancel the timer */
+
+              wd_cancel(group->wdog);
             }
+
+          /* Switch to non-Querier mode */
+
+           CLR_MLD_QUERIER(group->flags);
         }
     }
 }
@@ -192,120 +196,175 @@ int mld_query(FAR struct net_driver_s *dev,
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
-  uint16_t mrc;
-  bool unspec;
 
   ninfo("Multicast Listener Query\n");
-  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ipv6->destipaddr[0], ipv6->destipaddr[1], ipv6->destipaddr[2],
-        ipv6->destipaddr[3], ipv6->destipaddr[4], ipv6->destipaddr[5],
-        ipv6->destipaddr[6], ipv6->destipaddr[7]);
 
-  /* Find the group (or create a new one) using the incoming IP address */
+#if 0 /* Not used */
+  /* Max Response Delay.  The Max Response Code field specifies the maximum
+   * allowed time before sending a responding report in units of 1/10 second.
+   */
 
-  group = mld_grpallocfind(dev, ipv6->destipaddr);
-  if (group == NULL)
+  mrc = NTOHS(query->mrc);
+#endif
+
+  /* There are three variants of the Query message (RFC 3810):
+   *
+   * 1. A "General Query" is sent by the Querier to learn which
+   *    multicast addresses have listeners on an attached link.  In a
+   *    General Query, both the Multicast Address field and the Number
+   *    of Sources (N) field are zero.
+   * 2. A "Multicast Address Specific Query" is sent by the Querier to
+   *    learn if a particular multicast address has any listeners on an
+   *    attached link.  In a Multicast Address Specific Query, the
+   *    Multicast Address field contains the multicast address of
+   *    interest, while the Number of Sources (N) field is set to zero.
+   * 3. A "Multicast Address and Source Specific Query" is sent by the
+   *    Querier to learn if any of the sources from the specified list for
+   *    the particular multicast address has any listeners on an attached
+   *    link or not.  In a Multicast Address and Source Specific Query the
+   *    Multicast Address field contains the multicast address of
+   *    interest, while the Source Address [i] field(s) contain(s) the
+   *    source address(es) of interest.
+   *
+   * Another possibility is a Unicast query that is sent specifically
+   * to our local IP address.
+   */
+
+  /* Check the destination address.  This varies with the type of message
+   * being sent:
+   *
+   *   MESSAGE                 DESTINATION ADDRESS
+   *   General Query Message:  The link-local, all nodes multicast address
+   *   MAS Query Messages:     The group multicast address
+   */
+
+  /* Check for a General Query */
+
+  if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allnodes) &&
+      net_ipv6addr_cmp(query->grpaddr, g_ipv6_unspecaddr) &&
+      query->nsources == 0)
     {
-      nerr("ERROR: Failed to allocate/find group\n");
+      FAR struct mld_group_s *member;
+      bool rptsent = false;
+
+      /* This is the general query */
+
+      ninfo("General multicast query\n");
+      MLD_STATINCR(g_netstats.mld.gmq_query_received);
+
+      /* Two passes through the member list.  On the first, just check if we
+       * are still the querier for the qroup.
+       */
+
+      for (member = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
+           member;
+           member = member->next)
+        {
+          /* Skip over the all systems group entry */
+
+          if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
+            {
+              /* Check if we are still the querier for this group */
+
+               mld_check_querier(dev, ipv6, member);
+            }
+        }
+
+      /* On the second time through, we send the Report in response to the
+       * query.  This has to be done twice because because there is only
+       * a single packet buffer that is used for both incoming and outgoing
+       * packets.  When the report is sent, it will clobber the incoming
+       * query.  Any attempt to send an additional Report would also clobber
+       * a preceding report
+       *
+       * REVISIT:  This is a design flaw:  Only a single report can be sent
+       * in this context because there is no mechanism to preserve the
+       * incoming request nor to queue multiple outgoing reports.
+       */
+
+      for (member = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
+           member;
+           member = member->next)
+        {
+          /* Skip over the all systems group entry */
+
+          if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
+            {
+              /* Send one report and break out of the loop */
+
+              mld_send(dev, member, MLD_SEND_REPORT);
+              rptsent = true;
+              break;
+            }
+        }
+
+      /* Need to set d_len to zero if nothing is being sent */
+
+      if (!rptsent)
+        {
+          dev->d_len = 0;
+        }
+
+      return OK;
+    }
+
+  /* Find the group using associated with this group address.  For the purpose
+   * of sending reports, we only care about the query if we are a member of
+   * the group.
+   */
+
+  group = mld_grpfind(dev, query->grpaddr);
+  if (group != NULL)
+    {
+      ninfo("We are not a member of this group\n");
+
+      dev->d_len = 0;
       return -ENOENT;
     }
 
-  /* Max Response Time.  The Max Response Time field is meaningful only in
-   * Query  messages, and specifies the maximum allowed time before sending
-   * a responding report in units of 1/10 second.  In all other messages,
-   * it is set to zero by the sender and ignored by receivers.
-   */
+  /* Check if we are still the querier for this group */
 
-  /* Check if the query was sent to all systems */
+  mld_check_querier(dev, ipv6, group);
 
-  unspec = net_ipv6addr_cmp(query->grpaddr, g_ipv6_unspecaddr);
-  mrc    = NTOHS(query->mrc);
+  /* Check for Multicast Address Specific Query */
 
-  if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allnodes))
+  if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allrouters))
     {
-      /* There are three variants of the Query message (RFC 3810):
-       *
-       * 1. A "General Query" is sent by the Querier to learn which
-       *    multicast addresses have listeners on an attached link.  In a
-       *    General Query, both the Multicast Address field and the Number
-       *    of Sources (N) field are zero.
-       * 2. A "Multicast Address Specific Query" is sent by the Querier to
-       *    learn if a particular multicast address has any listeners on an
-       *    attached link.  In a Multicast Address Specific Query, the
-       *    Multicast Address field contains the multicast address of
-       *    interest, while the Number of Sources (N) field is set to zero.
-       * 3. A "Multicast Address and Source Specific Query" is sent by the
-       *    Querier to learn if any of the sources from the specified list for
-       *    the particular multicast address has any listeners on an attached
-       *    link or not.  In a Multicast Address and Source Specific Query the
-       *    Multicast Address field contains the multicast address of
-       *    interest, while the Source Address [i] field(s) contain(s) the
-       *    source address(es) of interest.
-       */
-
-      if (unspec && query->nsources == 0)
-        {
-          FAR struct mld_group_s *member;
-
-          /* This is the general query */
-
-          ninfo("General multicast query\n");
-          MLD_STATINCR(g_netstats.mld.gmq_query_received);
-
-          for (member = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
-               member;
-               member = member->next)
-            {
-              /* Skip over the all systems group entry */
-
-              if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
-                {
-                   /* REVISIT: Missing logic.  No action is taken on the query. */
-
-                   mld_check_querier(dev, ipv6, member, mrc);
-                }
-            }
-        }
-      else if (!unspec && query->nsources == 0)
+      if (query->nsources == 0)
         {
           ninfo("Multicast Address Specific Query\n");
           MLD_STATINCR(g_netstats.mld.mas_query_received);
-
-          /* We first need to re-lookup the group since we used the incoming
-           * dest last time.  Use the group address in the query.
-           */
-
-          group = mld_grpallocfind(dev, query->grpaddr);
-
-          /* REVISIT: Missing logic.  No action is taken on the query. */
-
-          mld_check_querier(dev, ipv6, group, mrc);
         }
       else
         {
           ninfo("Multicast Address and Source Specific Query\n");
           MLD_STATINCR(g_netstats.mld.massq_query_received);
-
-          /* We first need to re-lookup the group since we used the incoming
-           * dest last time.  Use the group address in the query.
-           */
-
-          group = mld_grpallocfind(dev, query->grpaddr);
-
-          /* REVISIT: Missing logic.  No action is taken on the query. */
-
-          mld_check_querier(dev, ipv6, group, mrc);
         }
+
+      /* Send the report */
+
+      mld_send(dev, group, MLD_SEND_REPORT);
     }
 
-  /* Not sent to all systems -- Unicast query */
+  /* Not sent to all systems.  Check for Unicast General Query */
 
-  else if (!unspec)
+  else if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
     {
       ninfo("Unicast query\n");
       MLD_STATINCR(g_netstats.mld.ucast_query_received);
 
-      mld_check_querier(dev, ipv6, group, mrc);
+      /* Send the report */
+
+       mld_send(dev, group, MLD_SEND_REPORT);
+    }
+  else
+    {
+      nwarn("WARNING:  Unhandled query\n");
+      MLD_STATINCR(g_netstats.mld.bad_query_received);
+
+      /* Need to set d_len to zero to indication that nothing is being sent */
+
+      dev->d_len = 0;
     }
 
   return OK;

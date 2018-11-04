@@ -99,10 +99,10 @@
  *   the IP header and calculates the IP header checksum.
  *
  * Input Parameters:
- *   dev        - The device driver structure to use in the send operation.
- *   group      - Describes the multicast group member and identifies the
- *                message to be sent.
- *   destipaddr - The IP address of the recipient of the message
+ *   dev     - The device driver structure to use in the send operation.
+ *   group   - Describes the multicast group member and identifies the
+ *             message to be sent.
+ *   msgtype - The type of the message to be sent (see enum mld_msgtype_e)
  *
  * Returned Value:
  *   None
@@ -113,16 +113,12 @@
  ****************************************************************************/
 
 void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
-              FAR const net_ipv6addr_t destipaddr)
+              uint8_t msgtype)
 {
   FAR struct ipv6_hdr_s *ipv6;
   FAR struct ipv6_router_alert_s *ra;
+  FAR const uint16_t *destipaddr;
   unsigned int mldsize;
-
-  ninfo("msgtype: %02x \n", group->msgtype);
-  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
-        destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
 
   /* Select IPv6 */
 
@@ -133,21 +129,25 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * This will change.
    */
 
-  switch (group->msgtype)
+  switch (msgtype)
     {
       case MLD_SEND_GENQUERY:           /* Send General Query */
+        ninfo("Send General Query, flags=%02x\n", group->flags);
         mldsize = SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0);
         break;
 
       case MLD_SEND_REPORT:             /* Send Unsolicited report */
+        ninfo("Send Report, flags=%02x\n", group->flags);
         mldsize = sizeof(struct mld_mcast_listen_report_v1_s);
         break;
 
       case MLD_SEND_DONE:               /* Send Done message */
+        ninfo("Send Done message, flags=%02x\n", group->flags);
         mldsize = sizeof(struct mld_mcast_listen_done_v1_s);
         break;
 
       default:
+        nerr("Bad msgtype: %02x \n", msgtype);
         DEBUGPANIC();
         return;
     }
@@ -174,7 +174,41 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   ipv6->proto    = NEXT_HOPBYBOT_EH;         /* Hop-to-hop extension header */
   ipv6->ttl      = MLD_TTL;                  /* MLD Time-to-live */
 
+  /* Select the IPv6 source address (the local interface assigned to the
+   * network device).
+   */
+
   net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
+
+  /* Select the IPv6 destination address.  This varies with the type of message
+   * being sent:
+   *
+   *   MESSAGE                 DESTINATION ADDRESS
+   *   General Query Message:  The link-local, all nodes multicast address
+   *   MAS Query Messages:     The group multicast address
+   *   Report Message:         The group multicast address
+   *   Done Message:           The link-local, all routers multicast address.
+   */
+
+  switch (msgtype)
+    {
+      case MLD_SEND_GENQUERY:           /* Send General Query */
+        destipaddr = g_ipv6_allnodes;
+        break;
+
+      case MLD_SEND_REPORT:             /* Send Unsolicited report */
+        destipaddr = group->grpaddr;
+        break;
+
+      case MLD_SEND_DONE:               /* Send Done message */
+        destipaddr = g_ipv6_allrouters;
+        break;
+    }
+
+  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
+        destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
+
   net_ipv6addr_hdrcopy(ipv6->destipaddr, destipaddr);
 
   /* Add the router alert IP header option.
@@ -194,7 +228,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * router alert)
    */
 
-  switch (group->msgtype)
+  switch (msgtype)
     {
       case MLD_SEND_GENQUERY:
         {
@@ -236,6 +270,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           report->chksum  = 0;
           report->chksum  = ~icmpv6_chksum(dev);
 
+          SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
           MLD_STATINCR(g_netstats.mld.report_sent);
         }
         break;
@@ -258,14 +293,6 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           MLD_STATINCR(g_netstats.mld.done_sent);
         }
         break;
-
-      /* Not yet supported */
-
-      case ICMPV6_MCAST_LISTEN_QUERY:
-      case ICMPV6_MCAST_LISTEN_REPORT_V2:
-      default:
-        DEBUGPANIC();
-        return;
     }
 
   MLD_STATINCR(g_netstats.icmpv6.sent);

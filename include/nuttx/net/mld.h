@@ -382,6 +382,7 @@ struct mld_stats_s
   net_stats_t mas_query_received;    /* Multicast Address Specific QUERY received */
   net_stats_t massq_query_received;  /* Multicast Address and Source Specific QUERY received */
   net_stats_t ucast_query_received;  /* Unicast query received */
+  net_stats_t bad_query_received;    /* Unhandled query received */
   net_stats_t v1report_received;     /* Version 1 REPORT packets received */
   net_stats_t v2report_received;     /* Version 2 REPORT packets received */
   net_stats_t done_received;         /* DONE packets received */

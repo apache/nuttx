@@ -275,6 +275,7 @@ void igmp_poll(FAR struct net_driver_s *dev);
  *   group      - Describes the multicast group member and identifies the
  *                message to be sent.
  *   destipaddr - The IP address of the recipient of the message
+ *   msgid      - ID of message to send
  *
  * Returned Value:
  *   None
@@ -285,7 +286,7 @@ void igmp_poll(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
-                  FAR in_addr_t *dest);
+               FAR in_addr_t *destipaddr, uint8_t msgid);
 
 /****************************************************************************
  * Name:  igmp_joingroup

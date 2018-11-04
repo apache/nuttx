@@ -96,8 +96,7 @@
  *   Timeout watchdog work
  *
  * Assumptions:
- *   This function is called from the wdog timer handler which runs in the
- *   context of the timer interrupt handler.
+ *   This function is called from a work queue thread.
  *
  ****************************************************************************/
 
@@ -196,7 +195,7 @@ static void mld_timeout(int argc, uint32_t arg, ...)
   group = (FAR struct mld_group_s *)arg;
   DEBUGASSERT(argc == 1 && group != NULL);
 
-  /* Perform the timeout-related operations on (preferably) the low prioirity
+  /* Perform the timeout-related operations on (preferably) the low priority
    * work queue.
    */
 

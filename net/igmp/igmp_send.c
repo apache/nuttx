@@ -105,6 +105,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  *   group      - Describes the multicast group member and identifies the
  *                message to be sent.
  *   destipaddr - The IP address of the recipient of the message
+ *   msgid      - ID of message to send
  *
  * Returned Value:
  *   None
@@ -115,9 +116,9 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  ****************************************************************************/
 
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
-               FAR in_addr_t *destipaddr)
+               FAR in_addr_t *destipaddr, uint8_t msgid)
 {
-  ninfo("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
+  ninfo("msgid: %02x destipaddr: %08x\n", msgid, (int)*destipaddr);
 
   /* The total length to send is the size of the IP and IGMP headers and 4
    * bytes for the ROUTER ALERT (and, eventually, the Ethernet header)
@@ -158,7 +159,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Set up the IGMP message */
 
-  IGMPBUF->type        = group->msgid;
+  IGMPBUF->type        = msgid;
   IGMPBUF->maxresp     = 0;
   net_ipv4addr_hdrcopy(IGMPBUF->grpaddr, &group->grpaddr);
 

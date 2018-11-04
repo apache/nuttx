@@ -370,10 +370,10 @@ void mld_poll(FAR struct net_driver_s *dev);
  *   the IP header and calculates the IP header checksum.
  *
  * Input Parameters:
- *   dev        - The device driver structure to use in the send operation.
- *   group      - Describes the multicast group member and identifies the
- *                message to be sent.
- *   destipaddr - The IP address of the recipient of the message
+ *   dev    - The device driver structure to use in the send operation.
+ *   group  - Describes the multicast group member and identifies the
+ *            message to be sent.
+ *   msgtype - The type of the message to be sent (see enum mld_msgtype_e)
  *
  * Returned Value:
  *   None
@@ -384,7 +384,7 @@ void mld_poll(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
-              FAR const net_ipv6addr_t dest);
+              uint8_t msgtype);
 
 /****************************************************************************
  * Name:  mld_joingroup

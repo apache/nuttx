@@ -492,8 +492,6 @@ void icmpv6_input(FAR struct net_driver_s *dev,
           {
             goto icmpv6_drop_packet;
           }
-
-        goto icmpv6_send_nothing; /* REVISIT */
       }
       break;
 
@@ -507,8 +505,6 @@ void icmpv6_input(FAR struct net_driver_s *dev,
           {
             goto icmpv6_drop_packet;
           }
-
-        goto icmpv6_send_nothing; /* REVISIT */
       }
       break;
 
@@ -523,8 +519,6 @@ void icmpv6_input(FAR struct net_driver_s *dev,
           {
             goto icmpv6_drop_packet;
           }
-
-        goto icmpv6_send_nothing; /* REVISIT */
       }
       break;
 
@@ -538,8 +532,6 @@ void icmpv6_input(FAR struct net_driver_s *dev,
           {
             goto icmpv6_drop_packet;
           }
-
-        goto icmpv6_send_nothing; /* REVISIT */
       }
       break;
 #endif
@@ -551,13 +543,17 @@ void icmpv6_input(FAR struct net_driver_s *dev,
       }
     }
 
-  ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
-          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
-
 #ifdef CONFIG_NET_STATISTICS
-  g_netstats.icmpv6.sent++;
-  g_netstats.ipv6.sent++;
+  if (dev->d_len > 0)
+    {
+      ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
+            dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+
+      g_netstats.icmpv6.sent++;
+      g_netstats.ipv6.sent++;
+    }
 #endif
+
   return;
 
 icmpv6_type_error:

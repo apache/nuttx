@@ -81,17 +81,23 @@
 int mld_done_v1(FAR struct net_driver_s *dev,
                 FAR const struct mld_mcast_listen_done_v1_s *done)
 {
+#ifdef CONFIG_MLD_ROUTER
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
 
+  ninfo("Version 1 Multicast Listener Done\n");
   MLD_STATINCR(g_netstats.mld.done_received);
 
-   /* Find the group (or create a new one) using the incoming IP address */
+   /* The done message is sent to the link-local, all routers multicast
+    * address. Find the group using the group address in the Done message.
+    */
 
-  group = mld_grpfind(dev, ipv6->destipaddr);
+  group = mld_grpfind(dev, done->grpaddr);
   if (group == NULL)
     {
-      return -ENOENT;  /* REVISIT:  Or should it return OK? */
+      /* We know nothing of this group */
+
+      return -ENOENT;
     }
 
   /* Ignore the Done message is this is not a Querier */
@@ -106,6 +112,15 @@ int mld_done_v1(FAR struct net_driver_s *dev,
 
       mld_grpfree(dev, group);
     }
+#else
+  /* We are not a router so we can just ignore Done messages */
 
+  ninfo("Version 1 Multicast Listener Done\n");
+  MLD_STATINCR(g_netstats.mld.done_received);
+#endif
+
+  /* Need to set d_len to zero to indication that nothing is being sent */
+
+  dev->d_len = 0;
   return OK;
 }

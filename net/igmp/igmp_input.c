@@ -137,15 +137,32 @@ void igmp_input(struct net_driver_s *dev)
       return;
     }
 
-  /* Find the group (or create a new one) using the incoming IP address */
+  /* Find the group (or create a new one) using the incoming IP address.
+   * If we are not a router (and I assume we are not), then can ignore
+   * querys for and reports from groups that we are not a member of.
+   *
+   * REVISIT:  Router support is not yet implemented.
+   */
 
   destipaddr = net_ip4addr_conv32(IGMPBUF->destipaddr);
+
+#ifdef CONFIG_IGMP_ROUTER
   group = igmp_grpallocfind(dev, &destipaddr);
-  if (!group)
+  if (group == NULL)
     {
-      nerr("ERROR: Failed to allocate/find group: %08x\n", destipaddr);
+      nerr("ERROR: Failed to allocate group: %08x\n", destipaddr);
       return;
     }
+
+#else
+  group = igmp_grpfind(dev, &destipaddr);
+  if (group == NULL)
+    {
+      nwarn("WARNING: Ignoring group.  We are not a member: %08x\n",
+           destipaddr);
+      return;
+    }
+#endif
 
   /* Now handle the message based on the IGMP message type */
 
@@ -183,6 +200,7 @@ void igmp_input(struct net_driver_s *dev)
             if (IGMPBUF->grpaddr == 0)
               {
                 FAR struct igmp_group_s *member;
+                bool rptsent = false;
 
                 /* This is the general query */
 
@@ -196,6 +214,11 @@ void igmp_input(struct net_driver_s *dev)
                   }
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
+
+                /* Two passes through the member list.  On the first, just
+                 * perform IDLE member checks.
+                 */
+
                 for (member = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
                      member;
                      member = member->next)
@@ -213,6 +236,42 @@ void igmp_input(struct net_driver_s *dev)
                           }
                       }
                   }
+
+                /* On the second time through, we send the Report in
+                 * response to the query.  This has to be done twice because
+                 * because there is only a single packet buffer that is used
+                 * for both incoming and outgoing packets.  When the report
+                 * is sent, it will clobber the incoming query.  Any attempt
+                 * to send an additional Report would also clobber a preceding
+                 * report
+                 *
+                 * REVISIT:  This is a design flaw:  Only a single report can
+                 * be sent in this context because there is no mechanism to
+                 * preserve the incoming request nor to queue multiple
+                 * outgoing reports.
+                 */
+
+                for (member = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
+                     member;
+                     member = member->next)
+                  {
+                    /* Skip over the all systems group entry */
+
+                    if (!net_ipv4addr_cmp(member->grpaddr, g_ipv4_allsystems))
+                      {
+                        /* Send one REPORT and break out of the loop. */
+
+                        igmp_send(dev, member, &member->grpaddr,
+                                  IGMPv2_MEMBERSHIP_REPORT);
+                        rptsent = true;
+                        break;
+                      }
+                  }
+
+                if (!rptsent)
+                  {
+                    goto noresponse;
+                  }
               }
             else /* if (IGMPBUF->grpaddr != 0) */
               {
@@ -223,13 +282,28 @@ void igmp_input(struct net_driver_s *dev)
                  */
 
                 IGMP_STATINCR(g_netstats.igmp.ucast_query);
+
                 grpaddr = net_ip4addr_conv32(IGMPBUF->grpaddr);
-                group   = igmp_grpallocfind(dev, &grpaddr);
-                ticks   = net_dsec2tick((int)IGMPBUF->maxresp);
-                if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
+                group   = igmp_grpfind(dev, &grpaddr);
+
+                if (group != NULL)
                   {
-                    igmp_startticks(group, ticks);
-                    CLR_IDLEMEMBER(group->flags);
+                    ticks   = net_dsec2tick((int)IGMPBUF->maxresp);
+
+                    if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
+                      {
+                        igmp_startticks(group, ticks);
+                        CLR_IDLEMEMBER(group->flags);
+                      }
+
+                    /* Send the REPORT */
+
+                    igmp_send(dev, group, &group->grpaddr,
+                              IGMPv2_MEMBERSHIP_REPORT);
+                  }
+                else
+                  {
+                    goto noresponse;
                   }
               }
           }
@@ -249,6 +323,11 @@ void igmp_input(struct net_driver_s *dev)
                 igmp_startticks(group, ticks);
                 CLR_IDLEMEMBER(group->flags);
               }
+
+            /* Send the REPORT */
+
+            igmp_send(dev, group, &group->grpaddr,
+                      IGMPv2_MEMBERSHIP_REPORT);
           }
         break;
 
@@ -265,15 +344,24 @@ void igmp_input(struct net_driver_s *dev)
               SET_IDLEMEMBER(group->flags);
               CLR_LASTREPORT(group->flags);
             }
+
+          goto noresponse;
         }
       break;
 
       default:
         {
           nwarn("WARNING: Unexpected msg %02x\n", IGMPBUF->type);
+          goto noresponse;
         }
       break;
     }
+
+  return;
+
+noresponse:
+  dev->d_len = 0;
+  return;
 }
 
 #endif /* CONFIG_NET_IGMP */
