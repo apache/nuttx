@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 6, 2018)
+NuttX TODO List (Last updated Novemer 5, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1137,6 +1137,26 @@ o Network (net/, drivers/net)
                solution is simple: A mutex will be needed to make sure that each
                send that is started is able to be the exclusive sender until all of
                the data to be sent has been ACKed.
+
+               There are probably also more reasons than just ACKs that concurrent
+               sends cannot be performed.  So this probably applies to all protocols.
+               For example, the tcp_conn_s structure is designed to held in a list.
+               It begins with:
+
+                 struct tcp_conn_s
+                   {
+                     dq_entry_t node;        /* Implements a doubly linked list */
+                     ...
+
+               When the TCP socket has to wait for anything, the tcp_conn_s struct is
+               put into a list.  If you try to put the same tcp_conn_s structure into
+               a list twice, the list will be corrupted and the network will fail.
+
+               I have not verified this, but I assume that the issue goes away if
+               TCP write buffering is enabled.  In that case, the data is serialized
+               in the write buffers and all issues associated with ACKs and any
+               other concurrent access issues should be eliminated.
+
   Status:      Open.  There is some temporary logic to apps/nshlib that does
                this same fix and that temporary logic should be removed when
                send() is fixed.
