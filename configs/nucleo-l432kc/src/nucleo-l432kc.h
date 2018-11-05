@@ -184,6 +184,18 @@ int stm32_at45dbinitialize(int minor);
 #endif
 
 /****************************************************************************
+ * Name: stm32_ina226initialize
+ *
+ * Description:
+ *   Initialize and register the INA226 driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_INA226
+int stm32_ina226initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: board_timer_driver_initialize
  *
  * Description:

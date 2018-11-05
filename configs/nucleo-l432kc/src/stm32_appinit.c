@@ -212,6 +212,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_INA226
+  /* Initialize and register INA226 */
+
+  ret = stm32_ina226initialize("/dev/ina226");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ina226initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_TIMER
   /* Initialize and register the timer driver */
 
