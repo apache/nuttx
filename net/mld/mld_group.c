@@ -133,10 +133,18 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       /* Initialize the group timers */
 
       group->polldog = wd_create();
-      DEBUGASSERT(group->polldog);
+      DEBUGASSERT(group->polldog != NULL);
+      if (group->polldog == NULL)
+        {
+          goto errout_with_sem;
+        }
 
       group->v1dog = wd_create();
-      DEBUGASSERT(group->v1dog);
+      DEBUGASSERT(group->v1dog != NULL);
+      if (group->v1dog == NULL)
+        {
+          goto errout_with_polldog;
+        }
 
       /* Save the interface index */
 
@@ -152,6 +160,14 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
     }
 
   return group;
+
+errout_with_polldog:
+  wd_delete(group->polldog);
+
+errout_with_sem:
+  (void)nxsem_destroy(&group->sem);
+  kmm_free(group);
+  return NULL;
 }
 
 /****************************************************************************
@@ -255,7 +271,7 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
   /* Then release the group structure resources. */
 
   grpinfo("Call sched_kfree()\n");
-  sched_kfree(group);
+  kmm_free(group);
 }
 
 #endif /* CONFIG_NET_MLD */
