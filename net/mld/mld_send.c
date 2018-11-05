@@ -78,16 +78,16 @@
 
 #define IPv6BUF     ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define RABUF       ((FAR struct ipv6_router_alert_s *) \
-                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN)
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN))
 #define RASIZE      sizeof(struct ipv6_router_alert_s)
 #define QUERYBUF    ((FAR struct mld_mcast_listen_query_s *) \
-                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
 #define V1REPORTBUF ((FAR struct mld_mcast_listen_report_v1_s *) \
-                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
 #define V2REPORTBUF ((FAR struct mld_mcast_listen_report_v2_s *) \
-                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
 #define DONEBUF     ((FAR struct mld_mcast_listen_done_v1_s *) \
-                     &dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE)
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
 
 /****************************************************************************
  * Public Functions
@@ -224,6 +224,9 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
       case MLD_SEND_V1DONE:             /* Send MLDv1 Done message */
         destipaddr = g_ipv6_allrouters;
         break;
+
+      default:                          /* Can't happen, but eliminates a warning */
+        return;
     }
 
   ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -243,7 +246,6 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   ra->hbyh.nxthdr = IP_PROTO_ICMP6;          /* ICMPv6 payload follows extension header */
   ra->hbyh.len    = 1;                       /* One 8-octet option follows */
   ra->type        = HOPBYHOP_ROUTER_ALERT;   /* Router alert */
-  ra->len         = 2;                       /* Length */
 
   /* Format the MLD ICMPv6 payload into place after the IPv6 header (with
    * router alert)
@@ -348,6 +350,9 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           MLD_STATINCR(g_netstats.mld.done_sent);
         }
         break;
+
+      default:                          /* Can't happen, but eliminates a warning */
+        return;
     }
 
   MLD_STATINCR(g_netstats.icmpv6.sent);

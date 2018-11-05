@@ -113,7 +113,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
         mrec->ipv6mr_multiaddr.s6_addr16[4],
         mrec->ipv6mr_multiaddr.s6_addr16[5],
         mrec->ipv6mr_multiaddr.s6_addr16[5],
-        mrec->ipv6mr_multiaddr.s6_addr16[7);
+        mrec->ipv6mr_multiaddr.s6_addr16[7]);
 
   /* Find the entry corresponding to the address leaving the group */
 

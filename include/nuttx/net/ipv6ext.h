@@ -164,6 +164,7 @@ struct ipv6_extension_s
 {
   uint8_t  nxthdr;      /* Next header */
   uint8_t  len;         /* Extension header length */
+  uint8_t  pad[6];      /* Pad to a multiple of 8 bytes */
 };
 
 /* Hop-by-hop Option Header */
@@ -220,6 +221,7 @@ struct ipv6_router_alert_s
   uint8_t type;       /* Hop-by-hop option number (5) */
   uint8_t len;        /* Length = 2 */
   uint16_t value;     /* Value.  See OPT_RA_* Definitions */
+  uint8_t pad[4];     /* Pad to a multiple of 8 bytes */
 };
 
 #endif /* __INCLUDE_NUTTX_NET_IPV6EXT_H */

@@ -95,8 +95,6 @@ void mld_poll(FAR struct net_driver_s *dev)
 {
   FAR struct mld_group_s *group;
 
-  ninfo("Entry\n");
-
   /* Setup the poll operation */
 
   dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN];
