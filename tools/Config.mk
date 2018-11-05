@@ -268,6 +268,18 @@ define MOVEFILE
 endef
 endif
 
+# COPYFILE - Copy one file
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define COPYFILE
+	$(Q) if exist $1 (copy /y /b $1 $2)
+endef
+else
+define COPYFILE
+	$(Q) cp -f $1 $2
+endef
+endif
+
 # CATFILE - Cat and append a list of files
 #
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)

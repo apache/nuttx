@@ -202,7 +202,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, ":a:bcdfhlmnu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdfghlmnu")) > 0)
     {
       switch (ch)
         {
@@ -917,6 +917,59 @@ static void substitute(char *str, int ch1, int ch2)
     }
 }
 
+static char *double_appdir_backslashes(char *old_appdir)
+{
+  char *new_appdir = NULL;
+  char *p_old = NULL;
+  char *p_new = NULL;
+  int oldlen = 0;
+  int occurrences = 0;
+  int alloclen = 0;
+
+  p_old = old_appdir;
+  while ((p_old = strchr(p_old, '\\')) != NULL)
+    {
+      occurrences++;
+      p_old++;
+    }
+
+  if (occurrences != 0)
+    {
+      oldlen = strlen(old_appdir);
+      alloclen = oldlen + occurrences + sizeof((char) '\0');
+      new_appdir = malloc(alloclen);
+
+      if (new_appdir != NULL)
+        {
+          p_old = old_appdir;
+          p_new = new_appdir;
+          while (oldlen)
+            {
+              if (*p_old != '\\')
+                {
+                  *p_new++ = *p_old;
+                }
+                else
+                {
+                  *p_new++ = '\\';
+                  *p_new++ = '\\';
+                }
+
+              ++p_old;
+              --oldlen;
+            }
+
+          *p_new = '\0';
+        }
+    }
+  else
+    {
+      new_appdir = strdup(old_appdir);
+    }
+
+  return new_appdir;
+}
+
 static void copy_optional(void)
 {
   int i;
@@ -1155,6 +1208,24 @@ static void configure(void)
             }
         }
 
+      /* Looks like prebuilt winnative kconfig-conf interprets "..\apps" as
+       * "..apps" (possibly '\a' as escape-sequence) so expand winnative path
+       * to double-backslashed variant "..\\apps".
+       */
+
+      if (g_winnative)
+        {
+          char *tmp_appdir = double_appdir_backslashes(appdir);
+          if (NULL == tmp_appdir)
+            {
+              fprintf(stderr, "ERROR: Failed to double appdir backslashes\n");
+              exit(EXIT_FAILURE);
+            }
+
+          free(appdir);
+          appdir = tmp_appdir;
+        }
+
       /* Open the file for appending */
 
       stream = fopen(destconfig, "a");
@@ -1185,7 +1256,7 @@ static void refresh(void)
       exit(EXIT_FAILURE);
     }
 
-  printf("  Refreshing...");
+  printf("  Refreshing...\n");
   fflush(stdout);
 
 #ifdef WIN32

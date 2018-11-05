@@ -89,7 +89,7 @@ goto :End
 )
 
 xcopy %src% %link% /c /q /s /e /y /i
-echo FAKELNK > include\apps\.fakelnk
+echo FAKELNK > %link%\.fakelnk
 goto :End
 
 :ShowUsage

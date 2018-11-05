@@ -219,7 +219,7 @@ static void append(char **base, char *str)
     }
   else
     {
-      alloclen = strlen(oldbase) + strlen(str) + 2;
+      alloclen = strlen(oldbase) + strlen(str) + sizeof((char) ' ') + sizeof((char) '\0');
       newbase = (char *)malloc(alloclen);
       if (!newbase)
         {
@@ -227,7 +227,7 @@ static void append(char **base, char *str)
           exit(EXIT_FAILURE);
         }
 
-      snprintf(newbase, alloclen, "%s %s\n", oldbase, str);
+      snprintf(newbase, alloclen, "%s %s", oldbase, str);
       free(oldbase);
    }
 
