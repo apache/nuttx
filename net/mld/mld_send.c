@@ -74,20 +74,24 @@
 #  define mld_dumppkt(b,n)
 #endif
 
+/* IPv6 header size with extensions */
+
+#define RASIZE      sizeof(struct ipv6_router_alert_s)
+#define MLD_HDRLEN  (IPv6_HDRLEN + RASIZE)
+
 /* Buffer layout */
 
 #define IPv6BUF     ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define RABUF       ((FAR struct ipv6_router_alert_s *) \
                      (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN))
-#define RASIZE      sizeof(struct ipv6_router_alert_s)
 #define QUERYBUF    ((FAR struct mld_mcast_listen_query_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 #define V1REPORTBUF ((FAR struct mld_mcast_listen_report_v1_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 #define V2REPORTBUF ((FAR struct mld_mcast_listen_report_v2_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 #define DONEBUF     ((FAR struct mld_mcast_listen_done_v1_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN + RASIZE))
+                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 
 /****************************************************************************
  * Public Functions
@@ -174,11 +178,13 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * header length)
    */
 
-  dev->d_len     = IPv6_HDRLEN + RASIZE + mldsize;
+  dev->d_len     = MLD_HDRLEN + mldsize;
 
-  /* The total size of the data is the size of the ICMPv6 payload */
+  /* The total size of the data is the size of the ICMPv6 payload PLUS the
+   * size of the IPv6 extension headers.
+   */
 
-  dev->d_sndlen  = mldsize;
+  dev->d_sndlen  = RASIZE + mldsize;
 
   /* Set up the IPv6 header */
 
@@ -187,7 +193,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   ipv6->tcf      = 0;                        /* Traffic class(LS)/Flow label(MS) */
   ipv6->flow     = 0;                        /* Flow label (LS) */
   ipv6->len[0]   = (dev->d_sndlen >> 8);     /* Length excludes the IPv6 header */
-  ipv6->len[1]   = (dev->d_sndlen & 0xff);
+  ipv6->len[1]   = (dev->d_sndlen & 0xff);   /* but includes the extension headers */
   ipv6->proto    = NEXT_HOPBYBOT_EH;         /* Hop-to-hop extension header */
   ipv6->ttl      = MLD_TTL;                  /* MLD Time-to-live */
 
@@ -281,7 +287,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           query->chksum = 0;
-          query->chksum = ~icmpv6_chksum(dev);
+          query->chksum = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           MLD_STATINCR(g_netstats.mld.query_sent);
         }
@@ -300,7 +306,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           report->chksum  = 0;
-          report->chksum  = ~icmpv6_chksum(dev);
+          report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
           MLD_STATINCR(g_netstats.mld.report_sent);
@@ -316,7 +322,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
           memset(report, 0, mldsize);
           report->type    = ICMPV6_MCAST_LISTEN_REPORT_V2;
-          report->naddrec = 1;
+          report->naddrec = HTONS(1);
 
           addrec          = report->addrec;
           addrec->rectype = MODE_IS_INCLUDE;
@@ -325,7 +331,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           report->chksum  = 0;
-          report->chksum  = ~icmpv6_chksum(dev);
+          report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
           MLD_STATINCR(g_netstats.mld.report_sent);
@@ -345,7 +351,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           done->chksum    = 0;
-          done->chksum    = ~icmpv6_chksum(dev);
+          done->chksum    = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           MLD_STATINCR(g_netstats.mld.done_sent);
         }

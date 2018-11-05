@@ -155,10 +155,11 @@ struct pollfd;       /* Forward reference */
  *   Handle incoming ICMPv6 input
  *
  * Input Parameters:
- *   dev    - The device driver structure containing the received ICMPv6
- *            packet
- *   icmpv6 - Start of the ICMPv6 payload which may lie at an offset from
- *            the IPv6 header if IPv6 extension headers are present.
+ *   dev   - The device driver structure containing the received ICMPv6
+ *           packet
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   None
@@ -168,8 +169,7 @@ struct pollfd;       /* Forward reference */
  *
  ****************************************************************************/
 
-void icmpv6_input(FAR struct net_driver_s *dev,
-                  FAR struct icmpv6_hdr_s *icmpv6);
+void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
 
 /****************************************************************************
  * Name: icmpv6_neighbor

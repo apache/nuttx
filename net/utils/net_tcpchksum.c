@@ -82,7 +82,7 @@ uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev)
 {
-  return ipv6_upperlayer_chksum(dev, IP_PROTO_TCP);
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_TCP, IPv6_HDRLEN);
 }
 #endif /* CONFIG_NET_IPv6 */
 #endif /* !CONFIG_NET_ARCH_CHKSUM */

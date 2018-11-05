@@ -85,9 +85,9 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-uint16_t icmpv6_chksum(FAR struct net_driver_s *dev)
+uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen)
 {
-  return ipv6_upperlayer_chksum(dev, IP_PROTO_ICMP6);
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_ICMP6, iplen);
 }
 #endif
 

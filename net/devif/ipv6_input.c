@@ -518,7 +518,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       case IP_PROTO_ICMP6: /* ICMP6 input */
         /* Forward the ICMPv6 packet */
 
-        icmpv6_input(dev, (FAR struct icmpv6_hdr_s *)payload);
+        icmpv6_input(dev, iphdrlen);
 
 #ifdef CONFIG_NET_6LOWPAN
         /* All outgoing ICMPv6 messages come through one of two mechanisms:

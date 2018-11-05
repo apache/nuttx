@@ -295,6 +295,9 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
  *   dev   - The network driver instance.  The packet data is in the d_buf
  *           of the device.
  *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   The calculated checksum
@@ -302,7 +305,8 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
  ****************************************************************************/
 
 #if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv6)
-uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
+uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
+                                uint8_t proto, unsigned int iplen);
 #endif
 
 /****************************************************************************
@@ -387,7 +391,7 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-uint16_t icmpv6_chksum(FAR struct net_driver_s *dev);
+uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen);
 #endif
 
 #undef EXTERN

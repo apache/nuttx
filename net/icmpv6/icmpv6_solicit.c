@@ -163,7 +163,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   /* Calculate the checksum over both the ICMP header and payload */
 
   sol->chksum   = 0;
-  sol->chksum   = ~icmpv6_chksum(dev);
+  sol->chksum   = ~icmpv6_chksum(dev, IPv6_HDRLEN);
 
   /* Set the size to the size of the IPv6 header and the payload size */
 

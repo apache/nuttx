@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/utils/net_ipchksum.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017-2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
@@ -64,7 +66,7 @@
  * Name: ipv4_upperlayer_chksum
  *
  * Description:
- *   Perform the checksum calcaultion over the IPv4, protocol headers, and
+ *   Perform the checksum calculation over the IPv4, protocol headers, and
  *   data payload as necessary.
  *
  * Input Parameters:
@@ -125,6 +127,9 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
  *   dev   - The network driver instance.  The packet data is in the d_buf
  *           of the device.
  *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   The calculated checksum
@@ -132,17 +137,25 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
  ****************************************************************************/
 
 #if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv6)
-uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
+uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
+                                uint8_t proto, unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   uint16_t upperlen;
   uint16_t sum;
 
+  DEBUGASSERT(dev != NULL && iplen >= IPv6_HDRLEN);
+
   /* The length reported in the IPv6 header is the length of the payload
-   * that follows the header.
+   * that follows the header.  If extension heders are present, then this
+   * size includes the size of the IPv6 extension headers.
    */
 
   upperlen = ((uint16_t)ipv6->len[0] << 8) + ipv6->len[1];
+
+  /* Adjust for the presence of any extension headers */
+
+  upperlen -= (iplen - IPv6_HDRLEN);
 
   /* Verify some minimal assumptions */
 
@@ -164,7 +177,7 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum IP payload data. */
 
-  sum = chksum(sum, &dev->d_buf[IPv6_HDRLEN + NET_LL_HDRLEN(dev)], upperlen);
+  sum = chksum(sum, &dev->d_buf[NET_LL_HDRLEN(dev) + iplen], upperlen);
   return (sum == 0) ? 0xffff : htons(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */

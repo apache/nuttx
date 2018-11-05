@@ -2,7 +2,7 @@
  * net/icmpv6/icmpv6_input.c
  * Handling incoming ICMPv6 input
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -66,8 +66,10 @@
  ****************************************************************************/
 
 #define IPv6BUF         ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6BUF        ((FAR struct icmpv6_hdr_s *) \
+                          (&dev->d_buf[NET_LL_HDRLEN(dev)]) + iplen)
 #define ICMPv6REPLY      ((FAR struct icmpv6_echo_reply_s *)icmpv6)
-#define ICMPv6SIZE       ((dev)->d_len - IPv6_HDRLEN)
+#define ICMPv6SIZE       ((dev)->d_len - iplen)
 
 #define ICMPv6SOLICIT    ((struct icmpv6_neighbor_solicit_s *)icmpv6)
 #define ICMPv6ADVERTISE  ((struct icmpv6_neighbor_advertise_s *)icmpv6)
@@ -214,10 +216,11 @@ drop:
  *   Handle incoming ICMPv6 input
  *
  * Input Parameters:
- *   dev    - The device driver structure containing the received ICMPv6
- *            packet
- *   icmpv6 - Start of the ICMPv6 payload which may lie at an offset from
- *            the IPv6 header if IPv6 extension headers are present.
+ *   dev   - The device driver structure containing the received ICMPv6
+ *           packet
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
  *
  * Returned Value:
  *   None
@@ -227,10 +230,10 @@ drop:
  *
  ****************************************************************************/
 
-void icmpv6_input(FAR struct net_driver_s *dev,
-                  FAR struct icmpv6_hdr_s *icmpv6)
+void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+  FAR struct icmpv6_hdr_s *icmpv6 = ICMPv6BUF;
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;
@@ -420,7 +423,7 @@ void icmpv6_input(FAR struct net_driver_s *dev,
         net_ipv6addr_copy(ipv6->srcipaddr, dev->d_ipv6addr);
 
         icmpv6->chksum = 0;
-        icmpv6->chksum = ~icmpv6_chksum(dev);
+        icmpv6->chksum = ~icmpv6_chksum(dev, iplen);
       }
       break;
 

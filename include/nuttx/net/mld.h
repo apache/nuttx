@@ -354,8 +354,8 @@ struct mld_mcast_listen_report_v2_s
  */
 
 #define SIZEOF_MLD_MCAST_LISTEN_REPORT_V2_S(addreclen) \
-  (sizeof(struct mld_mcast_addrec_v2_s) - \
-   sizeof(net_ipv6addr_t) + \
+  (sizeof(struct mld_mcast_listen_report_v2_s) - \
+   sizeof(struct mld_mcast_addrec_v2_s) + \
    (addreclen))
 
 /* Version 1 Multicast Listener Done (RFC 2710) */

@@ -311,7 +311,7 @@ int mld_query(FAR struct net_driver_s *dev,
    * Query of length 26 octets) MUST be silently ignored.
    */
 
-  mldsize = ipv6->len[0] << 8 | ipv6->len[1];
+  mldsize = (unsigned int)ipv6->len[0] << 8 | ipv6->len[1];
   if (mldsize == sizeof(struct mld_mcast_listen_report_v1_s))
     {
       mldv1 = true;

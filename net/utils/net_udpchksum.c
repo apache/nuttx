@@ -78,7 +78,7 @@ uint16_t udp_ipv4_chksum(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_UDP_CHECKSUMS) && defined(CONFIG_NET_IPv6)
 uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev)
 {
-  return ipv6_upperlayer_chksum(dev, IP_PROTO_UDP);
+  return ipv6_upperlayer_chksum(dev, IP_PROTO_UDP, IPv6_HDRLEN);
 }
 #endif
 
