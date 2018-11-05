@@ -85,7 +85,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
   struct mld_group_s *group;
   int ret;
 
-  DEBUGASSERT(dev != NULL && mrec != NULL);
+  DEBUGASSERT(mrec != NULL);
 
   /* Get the device from the interface index.  Use the default network device
    * if an interface index of 0 is provided.
