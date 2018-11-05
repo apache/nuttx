@@ -189,7 +189,7 @@ struct mld_group_s
   uint8_t             ifindex; /* Interface index */
   uint8_t             flags;   /* See MLD_ flags definitions */
   uint8_t             msgtype; /* Pending message type to send (if non-zero) */
-  uint8_t             count;   /* Report repetition count */
+  uint8_t             count;   /* Reports remaining in repetition count */
 };
 
 /****************************************************************************

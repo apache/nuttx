@@ -149,7 +149,7 @@ static void mld_polldog_work(FAR void *arg)
        * then terminate the start-up sequence.
        */
 
-      if (group->count > 1)
+      if (group->count > 0)
         {
           /* Decrement the count and restart the timer */
 
