@@ -582,6 +582,7 @@ clean: subdir_clean
 	$(call DELFILE, nuttx_user*)
 	$(call DELFILE, .cproject)
 	$(call DELFILE, .project)
+	$(call DELDIR, staging)
 	$(call CLEAN)
 
 subdir_distclean:
@@ -599,7 +600,6 @@ endif
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)
-	$(call DELDIR, staging)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,

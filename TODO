@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated Novemer 5, 2018)
+NuttX TODO List (Last updated November 6, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1130,38 +1130,40 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low
 
-  Title:       CONCURRENT TCP SEND OPERATIONS
+  Title:       CONCURRENT, UNBUFFERED TCP SEND OPERATIONS
   Description: At present, there cannot be two concurrent active TCP send
-               operations in progress using the same socket.  This is because
-               the uIP ACK logic will support only one transfer at a time.  The
-               solution is simple: A mutex will be needed to make sure that each
-               send that is started is able to be the exclusive sender until all of
-               the data to be sent has been ACKed.
+               operations in progress using the same socket *unless*
+               CONFIG_TCP_WRITE_BUFFER.  This is because the uIP ACK logic
+               will support only one transfer at a time.
 
-               There are probably also more reasons than just ACKs that concurrent
-               sends cannot be performed.  So this probably applies to all protocols.
-               For example, the tcp_conn_s structure is designed to held in a list.
-               It begins with:
+               Such a situation could occur if explicit TCP send operations
+               are performed using the same socket (or dup's of the same)
+               socket on two different threads.  It can also occur implicitly
+               when you execute more than one thread over and NSH Telenet
+               session.
 
-                 struct tcp_conn_s
-                   {
-                     dq_entry_t node;        /* Implements a doubly linked list */
-                     ...
+               There are two possible solutions:
 
-               When the TCP socket has to wait for anything, the tcp_conn_s struct is
-               put into a list.  If you try to put the same tcp_conn_s structure into
-               a list twice, the list will be corrupted and the network will fail.
+               1. Remove option to build the network without write buffering
+                  enabled.  This is is simplest and perhaps the best option.
+                  Certainly a system can be produced with a smaller RAM
+                  footprint without write buffering.  However, that probably
+                  does not justify permitted a crippled system.
 
-               I have not verified this, but I assume that the issue goes away if
-               TCP write buffering is enabled.  In that case, the data is serialized
-               in the write buffers and all issues associated with ACKs and any
-               other concurrent access issues should be eliminated.
+               2. Another option is to serialize the non-buffered writes for
+                  a socket with a mutex. i.e., add a mutex to make sure that
+                  each send that is started is able to be the exclusive
+                  sender until all of the data to be sent has been ACKed.
+                  That can be a very significant delay involving the send,
+                  waiting for the ACK or a timeout and possible retransmissions!
 
-  Status:      Open.  There is some temporary logic to apps/nshlib that does
-               this same fix and that temporary logic should be removed when
-               send() is fixed.
-  Priority:    Medium-Low.  This is an important issue for applications that
-               send on the same TCP socket from multiple threads.
+                Although it uses more memory, I believe that option 1 is the
+                better solution and will avoid difficult TCP bugs in the future.
+
+  Status:      Open.
+  Priority:    Medium-Low.  This is only an important issue for people who
+               use multi-threaded, unbuffered TCP networking without a full
+               understanding of the issues.
 
   Title:       POLL/SELECT ON TCP/UDP SOCKETS NEEDS READ-AHEAD
   Description: poll()/select() only works for availability of buffered TCP/UDP
