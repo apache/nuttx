@@ -62,13 +62,7 @@
 
 /* Debug */
 
-#undef MLD_DUMPPKT       /* Define to enable packet dump */
-
-#ifndef CONFIG_DEBUG_NET
-#  undef MLD_DUMPPKT
-#endif
-
-#ifdef MLD_DUMPPKT
+#ifdef CONFIG_NET_MLD_TXDUMP
 #  define mld_dumppkt(b,n) lib_dumpbuffer("MLD", (FAR const uint8_t*)(b), (n))
 #else
 #  define mld_dumppkt(b,n)
@@ -136,14 +130,14 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
     {
       case MLD_SEND_GENQUERY:           /* Send General Query */
         {
-          ninfo("Send General Query, flags=%02x\n", group->flags);
+          mldinfo("Send General Query, flags=%02x\n", group->flags);
           mldsize = SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0);
         }
         break;
 
       case MLD_SEND_V1REPORT:           /* Send MLDv1 Report message */
         {
-          ninfo("Send MLDv1 Report, flags=%02x\n", group->flags);
+          mldinfo("Send MLDv1 Report, flags=%02x\n", group->flags);
           mldsize = sizeof(struct mld_mcast_listen_report_v1_s);
         }
         break;
@@ -152,7 +146,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         {
           unsigned int addreclen;
 
-          ninfo("Send MLDv2 Report, flags=%02x\n", group->flags);
+          mldinfo("Send MLDv2 Report, flags=%02x\n", group->flags);
           addreclen = SIZEOF_MLD_MCAST_ADDREC_V2_S(0, 0);
           mldsize   = SIZEOF_MLD_MCAST_LISTEN_REPORT_V2_S(addreclen);
         }
@@ -160,14 +154,14 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
       case MLD_SEND_V1DONE:             /* Send MLDv1 Done message */
         {
-          ninfo("Send Done message, flags=%02x\n", group->flags);
+          mldinfo("Send Done message, flags=%02x\n", group->flags);
           mldsize = sizeof(struct mld_mcast_listen_done_v1_s);
         }
         break;
 
       default:
         {
-          nerr("Bad msgtype: %02x \n", msgtype);
+          mlderr("Bad msgtype: %02x \n", msgtype);
           DEBUGPANIC();
         }
         return;
@@ -235,9 +229,9 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         return;
     }
 
-  ninfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
-        destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
+  mldinfo("destipaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          destipaddr[0], destipaddr[1], destipaddr[2], destipaddr[3],
+          destipaddr[4], destipaddr[5], destipaddr[6], destipaddr[7]);
 
   net_ipv6addr_hdrcopy(ipv6->destipaddr, destipaddr);
 
@@ -364,8 +358,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   MLD_STATINCR(g_netstats.icmpv6.sent);
   MLD_STATINCR(g_netstats.ipv6.sent);
 
-  ninfo("Outgoing ICMPv6 MLD packet length: %d (%d)\n",
-        dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
+  mldinfo("Outgoing ICMPv6 MLD packet length: %d (%d)\n",
+          dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
-  mld_dumppkt(RA, IPMLD_HDRLEN + RASIZE);
+  mld_dumppkt((FAR const uint8_t *)IPv6BUF, MLD_HDRLEN + mldsize);
 }

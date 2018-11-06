@@ -105,22 +105,22 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
       return -ENODEV;
     }
 
-  ninfo("Leave group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        mrec->ipv6mr_multiaddr.s6_addr16[0],
-        mrec->ipv6mr_multiaddr.s6_addr16[1],
-        mrec->ipv6mr_multiaddr.s6_addr16[2],
-        mrec->ipv6mr_multiaddr.s6_addr16[3],
-        mrec->ipv6mr_multiaddr.s6_addr16[4],
-        mrec->ipv6mr_multiaddr.s6_addr16[5],
-        mrec->ipv6mr_multiaddr.s6_addr16[5],
-        mrec->ipv6mr_multiaddr.s6_addr16[7]);
+  mldinfo("Leave group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          mrec->ipv6mr_multiaddr.s6_addr16[0],
+          mrec->ipv6mr_multiaddr.s6_addr16[1],
+          mrec->ipv6mr_multiaddr.s6_addr16[2],
+          mrec->ipv6mr_multiaddr.s6_addr16[3],
+          mrec->ipv6mr_multiaddr.s6_addr16[4],
+          mrec->ipv6mr_multiaddr.s6_addr16[5],
+          mrec->ipv6mr_multiaddr.s6_addr16[5],
+          mrec->ipv6mr_multiaddr.s6_addr16[7]);
 
   /* Find the entry corresponding to the address leaving the group */
 
   group = mld_grpfind(dev, mrec->ipv6mr_multiaddr.s6_addr16);
   if (group != NULL)
     {
-      ninfo("Leaving group: %p\n", group);
+      mldinfo("Leaving group: %p\n", group);
 
       /* Cancel the timers and discard any queued Reports.  Canceling the
        * timer will prevent any new Reports from being sent;  clearing the
@@ -150,14 +150,14 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
       if (IS_MLD_LASTREPORT(group->flags))
         {
-          ninfo("Schedule Done message\n");
+          mldinfo("Schedule Done message\n");
 
           MLD_STATINCR(g_netstats.mld.done_sched);
 
           ret = mld_waitmsg(group, MLD_SEND_V1DONE);
           if (ret < 0)
             {
-              nerr("ERROR: Failed to schedule message: %d\n", ret);
+              mlderr("ERROR: Failed to schedule message: %d\n", ret);
             }
         }
 
@@ -173,7 +173,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
   /* Return ENOENT if the address is not a member of the group */
 
-  ninfo("Return -ENOENT\n");
+  mldinfo("Return -ENOENT\n");
   return -ENOENT;
 }
 

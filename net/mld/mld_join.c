@@ -100,20 +100,20 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 
   if (dev == NULL)
     {
-      nerr("ERROR: No device for this interface index: %u\n",
-           mrec->ipv6mr_interface);
+      mlderr("ERROR: No device for this interface index: %u\n",
+             mrec->ipv6mr_interface);
       return -ENODEV;
     }
 
-  ninfo("Join group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        mrec->ipv6mr_multiaddr.s6_addr16[0],
-        mrec->ipv6mr_multiaddr.s6_addr16[1],
-        mrec->ipv6mr_multiaddr.s6_addr16[2],
-        mrec->ipv6mr_multiaddr.s6_addr16[3],
-        mrec->ipv6mr_multiaddr.s6_addr16[4],
-        mrec->ipv6mr_multiaddr.s6_addr16[5],
-        mrec->ipv6mr_multiaddr.s6_addr16[5],
-        mrec->ipv6mr_multiaddr.s6_addr16[7]);
+  mldinfo("Join group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          mrec->ipv6mr_multiaddr.s6_addr16[0],
+          mrec->ipv6mr_multiaddr.s6_addr16[1],
+          mrec->ipv6mr_multiaddr.s6_addr16[2],
+          mrec->ipv6mr_multiaddr.s6_addr16[3],
+          mrec->ipv6mr_multiaddr.s6_addr16[4],
+          mrec->ipv6mr_multiaddr.s6_addr16[5],
+          mrec->ipv6mr_multiaddr.s6_addr16[5],
+          mrec->ipv6mr_multiaddr.s6_addr16[7]);
 
   /* Check if a this address is already in the group */
 
@@ -122,7 +122,7 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
     {
       /* No... allocate a new entry */
 
-      ninfo("Allocate new group entry\n");
+      mldinfo("Allocate new group entry\n");
 
       group = mld_grpalloc(dev, mrec->ipv6mr_multiaddr.s6_addr16);
       if (group == NULL)
@@ -140,7 +140,7 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
       ret = mld_waitmsg(group, MLD_SEND_V2REPORT);
       if (ret < 0)
         {
-          nerr("ERROR: Failed to schedule Report: %d\n", ret);
+          mlderr("ERROR: Failed to schedule Report: %d\n", ret);
           mld_grpfree(dev, group);
           return ret;
         }

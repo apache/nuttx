@@ -56,36 +56,6 @@
 #ifdef CONFIG_NET_MLD
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#undef MLD_MTMRDEBUG /* Define to enable detailed MLD group debug */
-
-#ifndef CONFIG_NET_MLD
-#  undef MLD_MTMRDEBUG
-#endif
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef MLD_MTMRDEBUG
-#    define mtmrerr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define mtmrinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
-#  else
-#    define mtmrerr(x...)
-#    define mtmrinfo(x...)
-#  endif
-#else
-#  ifdef MLD_MTMRDEBUG
-#    define mtmrerr    nerr
-#    define mtmrinfo   ninfo
-#  else
-#    define mtmrerr    (void)
-#    define mtmrinfo   (void)
-#  endif
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -142,7 +112,7 @@ static void mld_polldog_work(FAR void *arg)
       ret = mld_schedmsg(group, mld_report_msgtype(group));
       if (ret < 0)
         {
-          nerr("ERROR: Failed to schedule message: %d\n", ret);
+          mlderr("ERROR: Failed to schedule message: %d\n", ret);
         }
 
       /* Send the report until the unsolicited report count goes to zero
@@ -181,7 +151,7 @@ static void mld_polldog_work(FAR void *arg)
       ret = mld_schedmsg(group, MLD_SEND_GENQUERY);
       if (ret < 0)
         {
-          nerr("ERROR: Failed to schedule message: %d\n", ret);
+          mlderr("ERROR: Failed to schedule message: %d\n", ret);
         }
 
       /* Restart the Querier timer */
@@ -209,7 +179,7 @@ static void mld_polldog_timout(int argc, uint32_t arg, ...)
   FAR struct mld_group_s *group;
   int ret;
 
-  ninfo("Timeout!\n");
+  mldinfo("Timeout!\n");
 
   /* Recover the reference to the group */
 
@@ -223,7 +193,7 @@ static void mld_polldog_timout(int argc, uint32_t arg, ...)
   ret = work_queue(LPWORK, &group->work, mld_polldog_work, group, 0);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to queue timeout work: %d\n", ret);
+      mlderr("ERROR: Failed to queue timeout work: %d\n", ret);
     }
 }
 
@@ -290,7 +260,7 @@ static void mld_v1dog_timout(int argc, uint32_t arg, ...)
   FAR struct mld_group_s *group;
   int ret;
 
-  ninfo("Timeout!\n");
+  mldinfo("Timeout!\n");
 
   /* Recover the reference to the group */
 
@@ -308,7 +278,7 @@ static void mld_v1dog_timout(int argc, uint32_t arg, ...)
   ret = work_queue(LPWORK, &group->work, mld_v1dog_work, group, 0);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to queue timeout work: %d\n", ret);
+      mlderr("ERROR: Failed to queue timeout work: %d\n", ret);
     }
 }
 
@@ -330,7 +300,7 @@ void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks)
 
   /* Start the timer */
 
-  mtmrinfo("ticks: %lu\n", (unsigned long)ticks);
+  mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
   ret = wd_start(group->polldog, ticks, mld_polldog_timout, 1, (uint32_t)group);
 
@@ -352,7 +322,7 @@ void mld_start_v1timer(FAR struct mld_group_s *group, clock_t ticks)
 
   /* Start the timer */
 
-  mtmrinfo("ticks: %lu\n", (unsigned long)ticks);
+  mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
   ret = wd_start(group->v1dog, ticks, mld_v1dog_timout, 1, (uint32_t)group);
 

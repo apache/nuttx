@@ -109,6 +109,7 @@
 #include <sys/types.h>
 #include <queue.h>
 #include <semaphore.h>
+#include <debug.h>
 
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
@@ -151,6 +152,30 @@
 #define IS_MLD_LASTREPORT(f)     (((f) & MLD_LASTREPORT) != 0)
 #define IS_MLD_SCHEDMSG(f)       (((f) & MLD_SCHEDMSG) != 0)
 #define IS_MLD_WAITMSG(f)        (((f) & MLD_WAITMSG) != 0)
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_NET_MLD_DEBUG
+#    define mlderr(format, ...)    _err(format, ##__VA_ARGS__)
+#    define mldwarn(format, ...)   _warn(format, ##__VA_ARGS__)
+#    define mldinfo(format, ...)   _info(format, ##__VA_ARGS__)
+#  else
+#    define mlderr(format, ...)    nerr(format, ##__VA_ARGS__)
+#    define mldwarn(format, ...)   nwarn(format, ##__VA_ARGS__)
+#    define mldinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_NET_MLD_DEBUG
+#    define mlderr    _err
+#    define mldwarn   _warn
+#    define mldinfo   _info
+#  else
+#    define mlderr    nerr
+#    define mldwarn   nwarn
+#    define mldinfo   ninfo
+#  endif
+#endif
 
 /****************************************************************************
  * Public Type Definitions

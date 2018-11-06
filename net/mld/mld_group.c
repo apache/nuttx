@@ -61,36 +61,6 @@
 #ifdef CONFIG_NET_MLD
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#undef MLD_GRPDEBUG /* Define to enable detailed MLD group debug */
-
-#ifndef CONFIG_NET_MLD
-#  undef MLD_GRPDEBUG
-#endif
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef MLD_GRPDEBUG
-#    define grperr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define grpinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
-#  else
-#    define grperr(x...)
-#    define grpinfo(x...)
-#  endif
-#else
-#  ifdef MLD_GRPDEBUG
-#    define grperr    nerr
-#    define grpinfo   ninfo
-#  else
-#    define grperr    (void)
-#    define grpinfo   (void)
-#  endif
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -110,10 +80,10 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
 {
   FAR struct mld_group_s *group;
 
-  ninfo("addr: %08x dev: %p\n", *addr, dev);
+  mldinfo("addr: %08x dev: %p\n", *addr, dev);
   group = (FAR struct mld_group_s *)kmm_zalloc(sizeof(struct mld_group_s));
 
-  grpinfo("group: %p\n", group);
+  mldinfo("group: %p\n", group);
 
   /* Check if we successfully allocated a group structure */
 
@@ -186,23 +156,23 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
 {
   FAR struct mld_group_s *group;
 
-  grpinfo("Searching for addr %08x\n", (int)*addr);
+  mldinfo("Searching for addr %08x\n", (int)*addr);
 
   for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
        group;
        group = group->next)
     {
-      grpinfo("Compare: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            group->grpaddr[0], group->grpaddr[1], group->grpaddr[2],
-            group->grpaddr[3], group->grpaddr[4], group->grpaddr[5],
-            group->grpaddr[6], group->grpaddr[7]);
-      grpinfo("Versus:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            addr[0], addr[1], addr[2], addr[3],
-            addr[4], addr[5], addr[6], addr[7]);
+      mldinfo("Compare: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+              group->grpaddr[0], group->grpaddr[1], group->grpaddr[2],
+              group->grpaddr[3], group->grpaddr[4], group->grpaddr[5],
+              group->grpaddr[6], group->grpaddr[7]);
+      mldinfo("Versus:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+              addr[0], addr[1], addr[2], addr[3],
+              addr[4], addr[5], addr[6], addr[7]);
 
       if (net_ipv6addr_cmp(group->grpaddr, addr))
         {
-          grpinfo("Match!\n");
+          mldinfo("Match!\n");
           DEBUGASSERT(group->ifindex == dev->d_ifindex);
           break;
         }
@@ -225,13 +195,13 @@ FAR struct mld_group_s *mld_grpallocfind(FAR struct net_driver_s *dev,
 {
   FAR struct mld_group_s *group = mld_grpfind(dev, addr);
 
-  grpinfo("group: %p addr: %08x\n", group, (int)*addr);
+  mldinfo("group: %p addr: %08x\n", group, (int)*addr);
   if (!group)
     {
       group = mld_grpalloc(dev, addr);
     }
 
-  grpinfo("group: %p\n", group);
+  mldinfo("group: %p\n", group);
   return group;
 }
 
@@ -248,7 +218,7 @@ FAR struct mld_group_s *mld_grpallocfind(FAR struct net_driver_s *dev,
 
 void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 {
-  grpinfo("Free: %p flags: %02x\n", group, group->flags);
+  mldinfo("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the timers */
 
@@ -270,7 +240,7 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   /* Then release the group structure resources. */
 
-  grpinfo("Call sched_kfree()\n");
+  mldinfo("Call sched_kfree()\n");
   kmm_free(group);
 }
 

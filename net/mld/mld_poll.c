@@ -126,7 +126,7 @@ void mld_poll(FAR struct net_driver_s *dev)
 
          if (IS_MLD_WAITMSG(group->flags))
            {
-             ninfo("Awakening waiter\n");
+             mldinfo("Awakening waiter\n");
              nxsem_post(&group->sem);
            }
 

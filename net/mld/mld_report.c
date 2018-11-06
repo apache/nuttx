@@ -69,9 +69,9 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
    * destipaddr idenfies the group.
    */
 
-  ninfo("grpaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        grpaddr[0], grpaddr[1], grpaddr[2], grpaddr[3],
-        grpaddr[4], grpaddr[5], grpaddr[6], grpaddr[7]);
+  mldinfo("grpaddr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          grpaddr[0], grpaddr[1], grpaddr[2], grpaddr[3],
+          grpaddr[4], grpaddr[5], grpaddr[6], grpaddr[7]);
 
   /* Find the group (or create a new one) using the incoming IP address.
    * If we are not a router (and I assume we are not), then can ignore
@@ -84,7 +84,7 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
   group = mld_grpallocfind(dev, grpaddr);
   if (group == NULL)
     {
-      nerr("ERROR: Failed to allocate group\n");
+      mlderr("ERROR: Failed to allocate group\n");
       return -ENOMEM;
     }
 
@@ -92,7 +92,7 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
   group = mld_grpfind(dev, grpaddr);
   if (group == NULL)
     {
-      nwarn("WARNING: Ignoring group.  We are not a member\n");
+      mldinfo("WARNING: Ignoring group.  We are not a member\n");
       return -ENOENT;
     }
 #endif
@@ -145,7 +145,7 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
 int mld_report_v1(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v1_s *report)
 {
-  ninfo("Version 1 Multicast Listener Report\n");
+  mldinfo("Version 1 Multicast Listener Report\n");
   DEBUGASSERT(dev != NULL && report != NULL);
 
   MLD_STATINCR(g_netstats.mld.v1report_received);
@@ -178,7 +178,7 @@ int mld_report_v2(FAR struct net_driver_s *dev,
   int ret = -ENOENT;
   int i;
 
-  ninfo("Version 2 Multicast Listener Report\n");
+  mldinfo("Version 2 Multicast Listener Report\n");
   DEBUGASSERT(dev != NULL && report != NULL);
 
   MLD_STATINCR(g_netstats.mld.v2report_received);

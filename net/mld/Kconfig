@@ -16,5 +16,22 @@ menuconfig NET_MLD
 
 if NET_MLD
 
+config NET_MLD_DEBUG
+	bool "Force MLD debug"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Normally, MLD debug output is controlled by CONFIG_DEBUG_NET_*.
+		This option will force debug output from MLD files even if network
+		debug is not enabled.  This feature does still depend on global
+		debug output CONFIG_DEBUG_INFO, CONFIG_DEBUG_WARN, and
+		CONFIG_DEBUG_ERROR.
+
+config NET_MLD_TXDUMP
+	bool "Enable TX Packet Dump"
+	default n
+	---help---
+		Dump the content of all outgoing packets.
+
 endif # NET_MLD
 endif # NET_ICMPv6

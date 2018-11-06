@@ -76,7 +76,7 @@ void mld_initialize(void)
 
 void mld_devinit(struct net_driver_s *dev)
 {
-  ninfo("MLD initializing dev %p\n", dev);
+  mldinfo("MLD initializing dev %p\n", dev);
   DEBUGASSERT(dev->d_mld_grplist.head == NULL);
 
   /* Add the all nodes address to the group */

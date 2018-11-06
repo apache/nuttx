@@ -85,7 +85,7 @@ int mld_done_v1(FAR struct net_driver_s *dev,
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
 
-  ninfo("Version 1 Multicast Listener Done\n");
+  mldinfo("Version 1 Multicast Listener Done\n");
   MLD_STATINCR(g_netstats.mld.done_received);
 
    /* The done message is sent to the link-local, all routers multicast
@@ -115,7 +115,7 @@ int mld_done_v1(FAR struct net_driver_s *dev,
 #else
   /* We are not a router so we can just ignore Done messages */
 
-  ninfo("Version 1 Multicast Listener Done\n");
+  mldinfo("Version 1 Multicast Listener Done\n");
   MLD_STATINCR(g_netstats.mld.done_received);
 #endif
 

@@ -291,7 +291,7 @@ int mld_query(FAR struct net_driver_s *dev,
   unsigned int mldsize;
   bool mldv1 = false;
 
-  ninfo("Multicast Listener Query\n");
+  mldinfo("Multicast Listener Query\n");
 
 #if 0 /* Not used */
   /* Max Response Delay.  The Max Response Code field specifies the maximum
@@ -318,7 +318,7 @@ int mld_query(FAR struct net_driver_s *dev,
     }
   else if (mldsize < SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0))
     {
-      nwarn("WARNING:  Invalid size for MLD query: %u\n", mldsize);
+      mldinfo("WARNING:  Invalid size for MLD query: %u\n", mldsize);
 
       dev->d_len = 0;
       return -EINVAL;
@@ -366,7 +366,7 @@ int mld_query(FAR struct net_driver_s *dev,
 
       /* This is the general query */
 
-      ninfo("General multicast query\n");
+      mldinfo("General multicast query\n");
       MLD_STATINCR(g_netstats.mld.gmq_query_received);
 
       /* Two passes through the member list.  On the first, just check if we
@@ -391,8 +391,8 @@ int mld_query(FAR struct net_driver_s *dev,
 
                if (!mldv1 && IS_MLD_V1COMPAT(member->flags))
                  {
-                   nwarn("WARNING: MLDv2 query received in MLDv1 "
-                         "compatibility mode\n");
+                   mldinfo("WARNING: MLDv2 query received in MLDv1 "
+                           "compatibility mode\n");
                  }
             }
         }
@@ -448,7 +448,7 @@ int mld_query(FAR struct net_driver_s *dev,
   group = mld_grpfind(dev, query->grpaddr);
   if (group != NULL)
     {
-      ninfo("We are not a member of this group\n");
+      mldinfo("We are not a member of this group\n");
 
       dev->d_len = 0;
       return -ENOENT;
@@ -462,7 +462,7 @@ int mld_query(FAR struct net_driver_s *dev,
 
   if (!mldv1 && IS_MLD_V1COMPAT(group->flags))
     {
-      nwarn("WARNING: MLDv2 query received in MLDv1 compatibility mode\n");
+      mldinfo("WARNING: MLDv2 query received in MLDv1 compatibility mode\n");
     }
 
   /* Check for Multicast Address Specific Query */
@@ -471,12 +471,12 @@ int mld_query(FAR struct net_driver_s *dev,
     {
       if (query->nsources == 0)
         {
-          ninfo("Multicast Address Specific Query\n");
+          mldinfo("Multicast Address Specific Query\n");
           MLD_STATINCR(g_netstats.mld.mas_query_received);
         }
       else
         {
-          ninfo("Multicast Address and Source Specific Query\n");
+          mldinfo("Multicast Address and Source Specific Query\n");
           MLD_STATINCR(g_netstats.mld.massq_query_received);
         }
 
@@ -493,7 +493,7 @@ int mld_query(FAR struct net_driver_s *dev,
 
   else if (net_ipv6addr_cmp(ipv6->destipaddr, dev->d_ipv6addr))
     {
-      ninfo("Unicast query\n");
+      mldinfo("Unicast query\n");
       MLD_STATINCR(g_netstats.mld.ucast_query_received);
 
       /* Check MLDv1 compatibility mode */
@@ -506,7 +506,7 @@ int mld_query(FAR struct net_driver_s *dev,
     }
   else
     {
-      nwarn("WARNING:  Unhandled query\n");
+      mldinfo("WARNING:  Unhandled query\n");
       MLD_STATINCR(g_netstats.mld.bad_query_received);
 
       /* Need to set d_len to zero to indication that nothing is being sent */

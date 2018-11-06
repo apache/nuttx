@@ -77,8 +77,8 @@ int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
   dev = netdev_findbyindex(group->ifindex);
   if (dev == NULL)
     {
-      nerr("ERROR: No device for this interface index: %u\n",
-           group->ifindex);
+      mlderr("ERROR: No device for this interface index: %u\n",
+             group->ifindex);
       return -ENODEV;
     }
 
@@ -117,7 +117,7 @@ int mld_waitmsg(FAR struct mld_group_s *group, uint8_t msgtype)
   ret = mld_schedmsg(group, msgtype);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to schedule the message: %d\n", ret);
+      mlderr("ERROR: Failed to schedule the message: %d\n", ret);
       goto errout;
     }
 
