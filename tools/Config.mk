@@ -38,6 +38,10 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+export SHELL=cmd
+endif
+
 # These are configuration variables that are quoted by configuration tool
 # but which must be unquoated when used in the build system.
 
