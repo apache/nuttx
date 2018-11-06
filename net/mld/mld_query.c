@@ -367,7 +367,7 @@ int mld_query(FAR struct net_driver_s *dev,
       /* This is the general query */
 
       mldinfo("General multicast query\n");
-      MLD_STATINCR(g_netstats.mld.gmq_query_received);
+      MLD_STATINCR(g_netstats.mld.gm_query_received);
 
       /* Two passes through the member list.  On the first, just check if we
        * are still the querier for the qroup.
@@ -477,7 +477,7 @@ int mld_query(FAR struct net_driver_s *dev,
       else
         {
           mldinfo("Multicast Address and Source Specific Query\n");
-          MLD_STATINCR(g_netstats.mld.massq_query_received);
+          MLD_STATINCR(g_netstats.mld.mass_query_received);
         }
 
       /* Check MLDv1 compatibility mode */

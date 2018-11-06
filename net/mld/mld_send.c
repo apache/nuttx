@@ -265,7 +265,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
            * encoded and must follow the rules for MLDv1.
            */
 
-          memset(query, 0, sizeof(struct mld_mcast_listen_report_v1_s));
+          memset(query, 0, sizeof(struct mld_mcast_listen_query_s));
           net_ipv6addr_hdrcopy(query->grpaddr, &group->grpaddr);
           query->type   = ICMPV6_MCAST_LISTEN_QUERY;
           query->mrc    = MLD_QRESP_MSEC;
@@ -303,7 +303,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
-          MLD_STATINCR(g_netstats.mld.report_sent);
+          MLD_STATINCR(g_netstats.mld.v1report_sent);
         }
         break;
 
@@ -328,7 +328,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
-          MLD_STATINCR(g_netstats.mld.report_sent);
+          MLD_STATINCR(g_netstats.mld.v2report_sent);
         }
         break;
 

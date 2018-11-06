@@ -381,11 +381,12 @@ struct mld_stats_s
   net_stats_t report_sched;          /* Unsolicited REPORT packets scheduled */
   net_stats_t done_sched;            /* DONE packets scheduled */
   net_stats_t query_sent;            /* General QUERY packets sent */
-  net_stats_t report_sent;           /* Unsolicited REPORT packets sent */
+  net_stats_t v1report_sent;         /* Version 1 REPORT packets sent */
+  net_stats_t v2report_sent;         /* Version 2 REPORT packets sent */
   net_stats_t done_sent;             /* DONE packets sent */
-  net_stats_t gmq_query_received;    /* General multicast QUERY received */
+  net_stats_t gm_query_received;     /* General multicast QUERY received */
   net_stats_t mas_query_received;    /* Multicast Address Specific QUERY received */
-  net_stats_t massq_query_received;  /* Multicast Address and Source Specific QUERY received */
+  net_stats_t mass_query_received;   /* Multicast Address and Source Specific QUERY received */
   net_stats_t ucast_query_received;  /* Unicast query received */
   net_stats_t bad_query_received;    /* Unhandled query received */
   net_stats_t v1report_received;     /* Version 1 REPORT packets received */

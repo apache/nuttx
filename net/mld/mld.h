@@ -126,8 +126,8 @@
 /* Group flags */
 
 #define MLD_QUERIER              (1 << 0)  /* Querier */
-#define MLD_STARTUP              (1 << 2)  /* Startup unsolicited Reports */
-#define MLD_V1COMPAT             (1 << 3)  /* Version 1 compatibility mode */
+#define MLD_STARTUP              (1 << 1)  /* Startup unsolicited Reports */
+#define MLD_V1COMPAT             (1 << 2)  /* Version 1 compatibility mode */
 #define MLD_LASTREPORT           (1 << 3)  /* We were the last to report */
 #define MLD_SCHEDMSG             (1 << 4)  /* Outgoing message scheduled */
 #define MLD_WAITMSG              (1 << 5)  /* Block until message sent */

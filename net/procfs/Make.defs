@@ -45,6 +45,9 @@ NET_CSRCS += net_procfs.c netdev_statistics.c
 
 ifeq ($(CONFIG_NET_STATISTICS),y)
   NET_CSRCS += net_statistics.c
+ifeq ($(CONFIG_NET_MLD),y)
+  NET_CSRCS += net_mld.c
+endif
 endif
 
 # Routing table

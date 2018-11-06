@@ -71,18 +71,23 @@
 
 /* Directory entry indices */
 
-#if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_ROUTE)
-#  define STAT_INDEX  0
-#  define ROUTE_INDEX 1
-#  define DEV_INDEX   2
-#elif defined(CONFIG_NET_STATISTICS)
-#  define STAT_INDEX  0
-#  define DEV_INDEX   1
-#elif defined(CONFIG_NET_ROUTE)
-#  define ROUTE_INDEX 0
-#  define DEV_INDEX   1
+#ifdef CONFIG_NET_STATISTICS
+#  define STAT_INDEX     0
+#  ifdef CONFIG_NET_MLD
+#    define MLD_INDEX    1
+#    define _ROUTE_INDEX 2
+#  else
+#    define _ROUTE_INDEX 1
+#  endif
 #else
-#  define DEV_INDEX   0
+#  define _ROUTE_INDEX   0
+#endif
+
+#ifdef CONFIG_NET_ROUTE
+#  define ROUTE_INDEX    _ROUTE_INDEX
+#  define DEV_INDEX      (_ROUTE_INDEX + 1)
+#else
+#  define DEV_INDEX      _ROUTE_INDEX
 #endif
 
 /****************************************************************************
@@ -176,6 +181,16 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       dev   = NULL;
     }
   else
+#ifdef CONFIG_NET_MLD
+  /* "net/mld" is an acceptable value for the relpath only if MLD is enabled. */
+
+  if (strcmp(relpath, "net/mld") == 0)
+    {
+      entry = NETPROCFS_SUBDIR_MLD;
+      dev   = NULL;
+    }
+  else
+#endif
 #endif
 
 #ifdef CONFIG_NET_ROUTE
@@ -295,6 +310,14 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
 
         nreturned = netprocfs_read_netstats(priv, buffer, buflen);
         break;
+
+#ifdef CONFIG_NET_MLD
+      case NETPROCFS_SUBDIR_MLD:
+        /* Show the MLD statistics */
+
+        nreturned = netprocfs_read_mldstats(priv, buffer, buflen);
+        break;
+#endif
 #endif
 
 #ifdef CONFIG_NET_ROUTE
@@ -408,11 +431,14 @@ static int netprocfs_opendir(FAR const char *relpath,
 
       ndevs = netdev_count();
 
-      /* Initialze base structure components */
+      /* Initialize base structure components */
 
       level1->base.nentries = ndevs;
 #ifdef CONFIG_NET_STATISTICS
       level1->base.nentries++;
+#ifdef CONFIG_NET_MLD
+      level1->base.nentries++;
+#endif
 #endif
 #ifdef CONFIG_NET_ROUTE
       level1->base.nentries++;
@@ -501,7 +527,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
         }
 
 #ifdef CONFIG_NET_STATISTICS
-      else if (index == STAT_INDEX)
+      if (index == STAT_INDEX)
         {
           /* Copy the network statistics directory entry */
 
@@ -509,6 +535,16 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir)
           strncpy(dir->fd_dir.d_name, "stat", NAME_MAX + 1);
         }
       else
+#ifdef CONFIG_NET_MLD
+      if (index == MLD_INDEX)
+        {
+          /* Copy the MLD directory entry */
+
+          dir->fd_dir.d_type = DTYPE_FILE;
+          strncpy(dir->fd_dir.d_name, "mld", NAME_MAX + 1);
+        }
+      else
+#endif
 #endif
 #ifdef CONFIG_NET_ROUTE
       if (index == ROUTE_INDEX)
@@ -631,6 +667,15 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
       buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
     }
   else
+#ifdef CONFIG_NET_MLD
+  /* Check for MLD statistics "net/mld" */
+
+  if (strcmp(relpath, "net/mld") == 0)
+    {
+      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+    }
+  else
+#endif
 #endif
 #ifdef CONFIG_NET_ROUTE
   /* Check for network statistics "net/stat" */

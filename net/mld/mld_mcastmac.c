@@ -79,9 +79,9 @@ static void mld_mcastmac(FAR const net_ipv6addr_t ipaddr, FAR uint8_t *mac)
   mac[0] = 0x33;
   mac[1] = 0x33;
   mac[2] = ipaddr8[12];  /* Bits: 96-103 */
-  mac[2] = ipaddr8[13];  /* Bits: 104-111 */
-  mac[2] = ipaddr8[14];  /* Bits: 112-119 */
-  mac[2] = ipaddr8[15];  /* Bits: 120-127 */
+  mac[3] = ipaddr8[13];  /* Bits: 104-111 */
+  mac[4] = ipaddr8[14];  /* Bits: 112-119 */
+  mac[5] = ipaddr8[15];  /* Bits: 120-127 */
 
   mldinfo("Mcast MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
