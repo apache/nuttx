@@ -122,52 +122,87 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
     {
       mldinfo("Leaving group: %p\n", group);
 
-      /* Cancel the timers and discard any queued Reports.  Canceling the
-       * timer will prevent any new Reports from being sent;  clearing the
-       * flags will discard any pending Reports that could interfere with
-       * leaving the group.
+      /* Indicate one fewer members of the group from this host */
+
+      DEBUGASSERT(group->njoins > 0);
+      group->njoins--;
+      MLD_STATINCR(g_netstats.mld.nleaves);
+
+      /* Take no further actions if there are other members of this group
+       * on this host.
        */
 
-      wd_cancel(group->polldog);
-      wd_cancel(group->v1dog);
-      CLR_MLD_SCHEDMSG(group->flags);
-      CLR_MLD_WAITMSG(group->flags);
-
-      MLD_STATINCR(g_netstats.mld.leaves);
-
-      /* Send a leave if the LASTREPORT flag is set for the group.  If there
-       * are other members of the group, then their reports will clear the
-       * LAST REPORT flag.  In this case we know that there are other
-       * members of the group and we do not have to send the Done message.
-       *
-       * The MLDv1 router responds to the Done message with a multicast-address-
-       * specific (MAS) Query. If any other node responds to the Query with a
-       * Report message the there are still listeners present.
-       *
-       * REVISIT:  What if we are in MLDv2 mode?  There is no Done MLDv2 Done
-       * messages.  What should be sent (if anything) instead?
-       */
-
-      if (IS_MLD_LASTREPORT(group->flags))
+      if (group->njoins > 0)
         {
-          mldinfo("Schedule Done message\n");
-
-          MLD_STATINCR(g_netstats.mld.done_sched);
-
-          ret = mld_waitmsg(group, MLD_SEND_V1DONE);
-          if (ret < 0)
-            {
-              mlderr("ERROR: Failed to schedule message: %d\n", ret);
-            }
+          return OK;
         }
 
-      /* Free the group structure */
+      /* Perform actions that would be performed only when the number of
+       * njoins from this host goes to zero.
+       */
 
-      mld_grpfree(dev, group);
+      if (group->njoins == 0)
+        {
+          /* Send a leave if the LASTREPORT flag is set for the group.  If
+           * there are other members of the group, then their reports will
+           * clear the LAST REPORT flag.  In this case we know that there are
+           * other members of the group and we do not have to send the Done
+           * message.
+           *
+           * The MLDv1 router responds to the Done message with a multicast-
+           * address- specific (MAS) Query. If any other node responds to
+           * the Query with a Report message the there are still listeners
+           * present.
+           */
 
-      /* And remove the group address from the Ethernet drivers MAC filter set */
+          if (IS_MLD_LASTREPORT(group->flags))
+            {
+              mldinfo("Schedule Done message\n");
 
-      mld_removemcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
+              MLD_STATINCR(g_netstats.mld.done_sched);
+
+              /* REVIST:  This will interfere is the are any other tasks
+               * waiting for a message to be sent.  Can that happen?
+               */
+
+              ret = mld_waitmsg(group, MLD_SEND_V1DONE);
+              if (ret < 0)
+                {
+                  mlderr("ERROR: Failed to schedule message: %d\n", ret);
+                }
+            }
+
+          /* Remove the group address from the Ethernet drivers MAC filter
+           * set
+           */
+
+          mld_removemcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
+
+          /* Perform additional actions if not a router OR if a router and the
+           * number of members not on this host is also zero.
+           */
+
+#ifdef CONFIG_NET_MLD_ROUTER
+          if (group->members == 0 && group->lstmbrs == 0)
+#endif
+            {
+              /* Cancel the timers and discard any queued Reports.  Canceling
+               * the timer will prevent any new Reports from being sent;
+               * clearing the flags will discard any pending Reports that
+               * could interfere with freeing the group.
+               */
+
+              wd_cancel(group->polldog);
+              wd_cancel(group->v1dog);
+              CLR_MLD_SCHEDMSG(group->flags);
+              CLR_MLD_WAITMSG(group->flags);
+
+             /* Free the group structure */
+
+             mld_grpfree(dev, group);
+           }
+        }
+
       return OK;
     }
 

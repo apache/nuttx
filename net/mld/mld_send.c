@@ -284,6 +284,15 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           query->chksum = ~icmpv6_chksum(dev, MLD_HDRLEN);
 
           MLD_STATINCR(g_netstats.mld.query_sent);
+
+#ifdef CONFIG_NET_MLD_ROUTER
+          /* Save the number of members that reported in the previous query cycle;
+           * reset the number of members that have reported in the new query cycle.
+           */
+
+          group->lstmbrs = group->members;
+          group->members = 0;
+#endif
         }
         break;
 

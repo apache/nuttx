@@ -8,13 +8,20 @@ if NET_ICMPv6
 menuconfig NET_MLD
 	bool "Multicast Listener Discovery (MLD)"
 	default n
-	depends on EXPERIMENTAL
 	select NET_MCASTGROUP
 	select NETDEV_IFINDEX
 	---help---
 		Enable Multicast Listener Discovery (MLD) support.
 
 if NET_MLD
+
+config NET_MLD_ROUTER
+	bool # "MLD Router support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enables a few hooks that will be needed for router support in the
+		future.  Not yet ready for prime time.
 
 config NET_MLD_DEBUG
 	bool "Force MLD debug"

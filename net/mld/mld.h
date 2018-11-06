@@ -211,10 +211,15 @@ struct mld_group_s
   WDOG_ID             polldog; /* Timer used for periodic or delayed events */
   WDOG_ID             v1dog;   /* MLDv1 compatibility mode timer */
   sem_t               sem;     /* Used to wait for message transmission */
+#ifdef CONFIG_NET_MLD_ROUTER
+  uint16_t            members; /* Number of members currently reporting (excludes us) */
+  uint16_t            lstmbrs; /* Number of members reporting (last query) */
+#endif
   uint8_t             ifindex; /* Interface index */
   uint8_t             flags;   /* See MLD_ flags definitions */
   uint8_t             msgtype; /* Pending message type to send (if non-zero) */
   uint8_t             count;   /* Reports remaining in repetition count */
+  uint8_t             njoins;  /* Number of joins from this host */
 };
 
 /****************************************************************************

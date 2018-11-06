@@ -81,7 +81,7 @@
 int mld_done_v1(FAR struct net_driver_s *dev,
                 FAR const struct mld_mcast_listen_done_v1_s *done)
 {
-#ifdef CONFIG_MLD_ROUTER
+#ifdef CONFIG_NET_MLD_ROUTER
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
   FAR struct mld_group_s *group;
 

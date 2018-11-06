@@ -57,6 +57,53 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  mld_group_startup
+ *
+ * Description:
+ *   Set up the startup actions when the first member from this host joins
+ *   the group.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static int mld_group_startup(FAR const struct ipv6_mreq *mrec,
+                             FAR struct net_driver_s *dev,
+                             FAR struct mld_group_s *group)
+{
+  int ret;
+
+  /* Send the Version 2 Multicast Listener Report (Assumes MLDv2 mode
+   * initially).
+   */
+
+  MLD_STATINCR(g_netstats.mld.report_sched);
+
+  ret = mld_waitmsg(group, MLD_SEND_V2REPORT);
+  if (ret < 0)
+    {
+      mlderr("ERROR: Failed to schedule Report: %d\n", ret);
+      return ret;
+    }
+
+  /* And start the timer at 1 second */
+
+  SET_MLD_STARTUP(group->flags);
+  group->count = MLD_UNSOLREPORT_COUNT - 1;
+  mld_start_polltimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
+
+  /* Add the group (MAC) address to the Ethernet drivers MAC filter list */
+
+  mld_addmcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
+  return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name:  mld_joingroup
  *
  * Description:
@@ -80,7 +127,7 @@
 int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 {
   FAR struct net_driver_s *dev;
-  struct mld_group_s *group;
+  FAR struct mld_group_s *group;
   int ret;
 
   DEBUGASSERT(mrec != NULL);
@@ -130,36 +177,66 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
           return -ENOMEM;
         }
 
-      MLD_STATINCR(g_netstats.mld.joins);
+      /* Indicate one request to join the group from this this host */
 
-      /* Send the Version 2 Multicast Listener Report (Assumes MLDv2 mode
-       * initially?).
-       */
+      group->njoins = 1;
 
-      MLD_STATINCR(g_netstats.mld.report_sched);
-      ret = mld_waitmsg(group, MLD_SEND_V2REPORT);
+      /* Set up the group startup operations */
+
+      ret = mld_group_startup(mrec, dev, group);
       if (ret < 0)
         {
-          mlderr("ERROR: Failed to schedule Report: %d\n", ret);
+          mlderr("ERROR: Failed to start group: %d\n", ret);
           mld_grpfree(dev, group);
           return ret;
         }
 
-      /* And start the timer at 1 second */
+      MLD_STATINCR(g_netstats.mld.njoins);
+    }
+  else
+    {
+      /* The group already exists; a task from this host is joining an
+       * existing group.
+       */
 
-      SET_MLD_STARTUP(group->flags);
-      group->count = MLD_UNSOLREPORT_COUNT - 1;
-      mld_start_polltimer(group, MSEC2TICK(MLD_UNSOLREPORT_MSEC));
+      mldinfo("Join existing group\n");
 
-      /* Add the group (MAC) address to the Ethernet drivers MAC filter list */
+#ifdef CONFIG_NET_MLD_ROUTER
+      /* In the Router case this could still be the first join from this
+       * host.  If this is the first join from this host, then we need to
+       * perform the group startup operations.
+       */
 
-      mld_addmcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
-      return OK;
+      if (group->join == 0)
+        {
+          /* This is the for join from this host.  Perform out start up
+           * operations.
+           */
+
+          ret = mld_group_startup(mrec, dev, group);
+          if (ret < 0)
+            {
+              mlderr("ERROR: Failed to start group: %d\n", ret);
+              mld_grpfree(dev, group);
+              return ret;
+            }
+        }
+#else
+      /* Not a router?  There there must be another join from this host or
+       * how could the group have been created?
+       */
+
+      DEBUGASSERT(group->njoins > 0);
+#endif
+
+      /* Indicate one more request to join the group from this this host */
+
+      DEBUGASSERT(group->njoins < UINT8_MAX);
+      group->njoins++;
+      MLD_STATINCR(g_netstats.mld.njoins);
     }
 
-  /* Return EEXIST if the address is already a member of the group */
-
-  return -EEXIST;
+  return OK;
 }
 
 #endif /* CONFIG_NET_MLD */

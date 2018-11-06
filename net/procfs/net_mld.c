@@ -123,9 +123,9 @@ static int netprocfs_joinleave(FAR struct netprocfs_file_s *netfile)
   int len;
 
   len  = snprintf(netfile->line, NET_LINELEN, "Joins: %04x ",
-                  g_netstats.mld.joins);
+                  g_netstats.mld.njoins);
   len += snprintf(&netfile->line[len], NET_LINELEN - len, "Leaves: %04x\n",
-                  g_netstats.mld.leaves);
+                  g_netstats.mld.nleaves);
   return len;
 }
 

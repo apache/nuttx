@@ -375,8 +375,8 @@ struct mld_mcast_listen_done_v1_s
 
 struct mld_stats_s
 {
-  net_stats_t joins;                 /* Requests to join a group */
-  net_stats_t leaves;                /* Requests to leave a group */
+  net_stats_t njoins;                /* Requests to join a group */
+  net_stats_t nleaves;               /* Requests to leave a group */
   net_stats_t query_sched;           /* General QUERY packets scheduled */
   net_stats_t report_sched;          /* Unsolicited REPORT packets scheduled */
   net_stats_t done_sched;            /* DONE packets scheduled */

@@ -80,7 +80,7 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
    * REVISIT:  Router support is not yet implemented.
    */
 
-#ifdef CONFIG_MLD_ROUTER
+#ifdef CONFIG_NET_MLD_ROUTER
   group = mld_grpallocfind(dev, grpaddr);
   if (group == NULL)
     {
@@ -102,6 +102,12 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
    */
 
   CLR_MLD_LASTREPORT(group->flags);
+
+#ifdef CONFIG_NET_MLD_ROUTER
+  /* Increment the number of members that reported in this query cycle. */
+
+  group->members++;
+#endif
 
   /* Need to set d_len to zero to indication that nothing is being sent */
 

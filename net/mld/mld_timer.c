@@ -145,18 +145,40 @@ static void mld_polldog_work(FAR void *arg)
 
   else if (IS_MLD_QUERIER(group->flags))
     {
-      /* Schedule (and forget) the general query. */
-
-      MLD_STATINCR(g_netstats.mld.query_sched);
-      ret = mld_schedmsg(group, MLD_SEND_GENQUERY);
-      if (ret < 0)
+#ifdef CONFIG_NET_MLD_ROUTER
+      if (group->njoins == 0 group->members == 0 && group->lstmbrs == 0)
         {
-          mlderr("ERROR: Failed to schedule message: %d\n", ret);
+          /* Cancel the timers and discard any queued Reports.  Canceling
+           * the timer will prevent any new Reports from being sent;
+           * clearing the flags will discard any pending Reports that
+           * could interfere with freeing the group.
+           */
+
+          wd_cancel(group->polldog);
+          wd_cancel(group->v1dog);
+          CLR_MLD_SCHEDMSG(group->flags);
+          CLR_MLD_WAITMSG(group->flags);
+
+          /* Free the group structure */
+
+          mld_grpfree(dev, group);
         }
+      else
+#endif
+        {
+          /* Schedule (and forget) the general query. */
 
-      /* Restart the Querier timer */
+          MLD_STATINCR(g_netstats.mld.query_sched);
+          ret = mld_schedmsg(group, MLD_SEND_GENQUERY);
+          if (ret < 0)
+            {
+              mlderr("ERROR: Failed to schedule message: %d\n", ret);
+            }
 
-      mld_start_polltimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+          /* Restart the Querier timer */
+
+          mld_start_polltimer(group, MSEC2TICK(MLD_QUERY_MSEC));
+        }
     }
 
   net_unlock();
