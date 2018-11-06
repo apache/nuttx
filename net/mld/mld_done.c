@@ -88,9 +88,9 @@ int mld_done_v1(FAR struct net_driver_s *dev,
   mldinfo("Version 1 Multicast Listener Done\n");
   MLD_STATINCR(g_netstats.mld.done_received);
 
-   /* The done message is sent to the link-local, all routers multicast
-    * address. Find the group using the group address in the Done message.
-    */
+  /* The done message is sent to the link-local, all routers multicast
+   * address. Find the group using the group address in the Done message.
+   */
 
   group = mld_grpfind(dev, done->grpaddr);
   if (group == NULL)

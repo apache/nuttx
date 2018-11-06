@@ -385,24 +385,24 @@ int mld_query(FAR struct net_driver_s *dev,
 
                mld_check_querier(dev, ipv6, member);
 
-               /* Warn if we received a MLDv2 query in MLDv1 compatibility
-                * mode.
-                */
+              /* Warn if we received a MLDv2 query in MLDv1 compatibility
+               * mode.
+               */
 
-               if (!mldv1 && IS_MLD_V1COMPAT(member->flags))
-                 {
-                   mldinfo("WARNING: MLDv2 query received in MLDv1 "
-                           "compatibility mode\n");
-                 }
+              if (!mldv1 && IS_MLD_V1COMPAT(member->flags))
+                {
+                  mldinfo("WARNING: MLDv2 query received in MLDv1 "
+                          "compatibility mode\n");
+                }
 
 #ifdef CONFIG_NET_MLD_ROUTER
-               /* Save the number of members that reported in the previous
-                * query cycle; reset the number of members that have
-                * reported in the new query cycle.
-                */
+              /* Save the number of members that reported in the previous
+               * query cycle; reset the number of members that have
+               * reported in the new query cycle.
+               */
 
-               member->lstmbrs = member->members;
-               member->members = 0;
+              member->lstmbrs = member->members;
+              member->members = 0;
 #endif
             }
         }

@@ -117,18 +117,18 @@ void mld_poll(FAR struct net_driver_s *dev)
 
           /* Indicate that the message has been sent */
 
-         CLR_MLD_SCHEDMSG(group->flags);
-         group->msgtype = MLD_SEND_NONE;
+          CLR_MLD_SCHEDMSG(group->flags);
+          group->msgtype = MLD_SEND_NONE;
 
-         /* If there is a thread waiting fore the message to be sent, wake
-          * it up.
-          */
+          /* If there is a thread waiting fore the message to be sent, wake
+           * it up.
+           */
 
-         if (IS_MLD_WAITMSG(group->flags))
-           {
-             mldinfo("Awakening waiter\n");
-             nxsem_post(&group->sem);
-           }
+          if (IS_MLD_WAITMSG(group->flags))
+            {
+              mldinfo("Awakening waiter\n");
+              nxsem_post(&group->sem);
+            }
 
           /* And break out of the loop */
 
