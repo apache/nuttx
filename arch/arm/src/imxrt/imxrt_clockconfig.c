@@ -46,7 +46,7 @@
 #include "chip/imxrt_ccm.h"
 #include "chip/imxrt_dcdc.h"
 #include "imxrt_clockconfig.h"
-#include "chip/imxrt105x_memorymap.h"
+#include "chip/imxrt_memorymap.h"
 
 /****************************************************************************
  * Public Functions

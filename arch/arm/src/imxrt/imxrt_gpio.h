@@ -2,7 +2,8 @@
  * arch/arm/src/imxrt/imxrt_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,6 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "chip.h"
 #include "chip/imxrt_gpio.h"
 
 /************************************************************************************
@@ -53,14 +55,19 @@
 
 /* 32-bit Encoding:
  *
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
  *   ENCODING    IIXX XXXX XXXX XXXX  MMMM MMMM MMMM MMMM
- *   GPIO INPUT  00.. ..EE .GGP PPPP  MMMM MMMM MMMM MMMM
- *   GPIO OUTPUT 01V. .S.. .GGP PPPP  MMMM MMMM MMMM MMMM
- *   PERIPHERAL  10AA AS.. IIII IIII  MMMM MMMM MMMM MMMM
+ *   GPIO INPUT  00.. .EEG GGGP PPPP  MMMM MMMM MMMM MMMM
+ *   INT INPUT   11.. .EEG GGGP PPPP  MMMM MMMM MMMM MMMM
+ *   GPIO OUTPUT 01V. ..SG GGGP PPPP  MMMM MMMM MMMM MMMM
+ *   PERIPHERAL  10AA AAS. IIII IIII  MMMM MMMM MMMM MMMM
  */
 
 /* Input/Output Selection:
  *
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
  *   ENCODING    II.. .... .... ....  .... .... .... ....
  */
 
@@ -81,20 +88,29 @@
 
 /* GPIO Port Number
  *
- *   GPIO INPUT  00.. .... .GG. ....  .... .... .... ....
- *   GPIO OUTPUT 01.. .... .GG. ....  .... .... .... ....
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
+ *   GPIO INPUT  00.. ...G GGG. ....  .... .... .... ....
+ *   GPIO OUTPUT 01.. ...G GGG. ....  .... .... .... ....
  */
 
 #define GPIO_PORT_SHIFT        (21)      /* Bits 21-23: GPIO port index */
-#define GPIO_PORT_MASK         (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_MASK         (15 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT1           (GPIO1 << GPIO_PORT_SHIFT) /* GPIO1 */
 #  define GPIO_PORT2           (GPIO2 << GPIO_PORT_SHIFT) /* GPIO2 */
 #  define GPIO_PORT3           (GPIO3 << GPIO_PORT_SHIFT) /* GPIO3 */
 #  define GPIO_PORT4           (GPIO4 << GPIO_PORT_SHIFT) /* GPIO4 */
-#  define GPIO_PORT5           (GPIO5 << GPIO_PORT_SHIFT) /* GPIO4 */
-
+#  define GPIO_PORT5           (GPIO5 << GPIO_PORT_SHIFT) /* GPIO5 */
+#if IMXRT_GPIO_NPORTS > 5
+#  define GPIO_PORT6           (GPIO6 << GPIO_PORT_SHIFT) /* GPIO6 */
+#  define GPIO_PORT7           (GPIO7 << GPIO_PORT_SHIFT) /* GPIO7 */
+#  define GPIO_PORT8           (GPIO8 << GPIO_PORT_SHIFT) /* GPIO8 */
+#  define GPIO_PORT9           (GPIO9 << GPIO_PORT_SHIFT) /* GPIO9 */
+#endif
 /* GPIO Pin Number:
  *
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
  *   GPIO INPUT  00.. .... ...P PPPP  .... .... .... ....
  *   GPIO OUTPUT 01.. .... ...P PPPP  .... .... .... ....
  */
@@ -136,11 +152,13 @@
 
 /* Peripheral Alternate Function:
  *
- *   PERIPHERAL  ..AA A... .... ....  .... .... .... ....
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
+ *   PERIPHERAL  ..AA AA.. .... ....  .... .... .... ....
  */
 
-#define GPIO_ALT_SHIFT         (27)      /* Bits 27-29: Peripheral alternate function */
-#define GPIO_ALT_MASK          (7 << GPIO_ALT_SHIFT)
+#define GPIO_ALT_SHIFT         (26)      /* Bits 26-29: Peripheral alternate function */
+#define GPIO_ALT_MASK          (0xf << GPIO_ALT_SHIFT)
 #  define GPIO_ALT0            (0 << GPIO_ALT_SHIFT)  /* Alternate function 0 */
 #  define GPIO_ALT1            (1 << GPIO_ALT_SHIFT)  /* Alternate function 1 */
 #  define GPIO_ALT2            (2 << GPIO_ALT_SHIFT)  /* Alternate function 2 */
@@ -149,22 +167,28 @@
                                                       /* Alternate function 5 is GPIO */
 #  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 6 */
 #  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 7 */
+#  define GPIO_ALT8            (8 << GPIO_ALT_SHIFT)  /* Alternate function 8 */
+#  define GPIO_ALT9            (9 << GPIO_ALT_SHIFT)  /* Alternate function 9 */
 
 /* Peripheral Software Input On Field:
  *
- *   PERIPHERAL  .... .S.. .... ....  .... .... .... ....
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
+ *   PERIPHERAL  .... ..S. .... ....  .... .... .... ....
  */
 
-#define GPIO_SION_SHIFT        (26)      /* Bits 26: Peripheral SION function */
+#define GPIO_SION_SHIFT        (25)      /* Bits 25: Peripheral SION function */
 #define GPIO_SION_MASK         (1 << GPIO_SION_SHIFT)
 #  define GPIO_SION_ENABLE     (1 << GPIO_SION_SHIFT)  /* enable SION */
 
 /* Interrupt edge/level configuration
  *
- *   GPIO INPUT  ... ..EE .... ....  .... .... .... ....
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
+ *   INT INPUT   11.. .EE. .... ....  .... .... .... ....
  */
 
-#define GPIO_INTCFG_SHIFT      (24)      /* Bits 24-25: Interrupt edge/level configuration */
+#define GPIO_INTCFG_SHIFT      (25)      /* Bits 25-26: Interrupt edge/level configuration */
 #define GPIO_INTCFG_MASK       (3 << GPIO_INTCFG_SHIFT)
 #  define GPIO_INT_LOWLEVEL    (GPIO_ICR_LOWLEVEL << GPIO_INTCFG_SHIFT)
 #  define GPIO_INT_HIGHLEVEL   (GPIO_ICR_HIGHLEVEL << GPIO_INTCFG_SHIFT)
@@ -173,6 +197,8 @@
 
 /* Pad Mux Register Index:
  *
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
  *   PERIPHERAL  .... .... IIII IIII  .... .... .... ....
  */
 
@@ -182,6 +208,8 @@
 
 /* IOMUX Pin Configuration:
  *
+ *               3322 2222 2222 1111  1111 1100 0000 0000
+ *               1098 7654 3210 9876  5432 1098 7654 3210
  *   ENCODING    .... .... .... ....  MMMM MMMM MMMM MMMM
  *
  * See imxrt_iomuxc.h for detailed content.
@@ -192,7 +220,7 @@
 
 /* Helper addressing macros */
 
-#define IMXRT_GPIO_BASE(n)       g_gpio_base[n]  /* Use GPIO1..GPIO5 macros as indices */
+#define IMXRT_GPIO_BASE(n)       g_gpio_base[n]  /* Use GPIO1..GPIOn macros as indices */
 
 #define IMXRT_GPIO_DR(n)         (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_DR_OFFSET)
 #define IMXRT_GPIO_GDIR(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_GDIR_OFFSET)
@@ -202,6 +230,9 @@
 #define IMXRT_GPIO_IMR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_IMR_OFFSET)
 #define IMXRT_GPIO_ISR(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_ISR_OFFSET)
 #define IMXRT_GPIO_EDGE(n)       (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_EDGE_OFFSET)
+#define IMXRT_GPIO_SET(n)        (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_SET_OFFSET)
+#define IMXRT_GPIO_CLEAR(n)      (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_CLEAR_OFFSET)
+#define IMXRT_GPIO_TOGGLE(n)     (IMXRT_GPIO_BASE(n) + IMXRT_GPIO_TOGGLE_OFFSET)
 
 /************************************************************************************
  * Public Types
@@ -224,7 +255,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Look-up table that maps GPIO1..GPIO5 indexes into GPIO register base addresses */
+/* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base addresses */
 
 EXTERN uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
 

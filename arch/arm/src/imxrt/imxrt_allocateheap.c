@@ -96,12 +96,18 @@
  * banks.  This logic assumes that there is at most one of each (or at least
  * only one contiguous block of addresses for each).  This would need to
  * be exceed considerably to support multiple SDRAM or SRAM memory regions.
+ *
+ * SOC with 512KiB
+ *
+ *     IMXRT_DTCM_BASE           0x20000000     512KB DTCM
+ *                               0x20080000     512KB DTCM Reserved
+ *                               0x20100000     1MB Reserved
+ *    IMXRT_OCRAM_BASE           0x20200000     512KB OCRAM
+ *
+ * SOC with 1MiB
+ *    IMXRT_OCRAM2_BASE          0x20200000     512KB OCRAM2
+ *    IMXRT_OCRAM_BASE           0x20280000     512KB OCRAM FlexRAM
  */
-
-#define IMXRT_DTCM_BASE           0x20000000  /* 512KB DTCM */
-                               /* 0x20080000     512KB DTCM Reserved */
-                               /* 0x20100000     1MB Reserved */
-#define IMXRT_OCRAM_BASE          0x20200000  /* 512KB OCRAM */
 
 /* There there then several memory configurations with a one primary memory
  * region and up to two additional memory regions which may be OCRAM,
@@ -114,10 +120,21 @@
 
 /* REVISIT: Assume that if OCRAM is the primary RAM, then DTCM and ITCM are
  * not being used.
+ * When configured DTCM and ITCM consume OCRAM from the address space
+ * labeled IMXRT_OCRAM_BASE that uses the FlexRAM controller to allocate
+ * the function of OCRAM.
+ *
+ * The 1 MB version of the SOC have a second 512Kib of OCRAM that can not
+ * be consumed by the DTCM or ITCM.
  */
 
+#if defined(IMXRT_OCRAM2_BASE)
+# define _IMXRT_OCRAM_BASE IMXRT_OCRAM2_BASE
+#else
+# define _IMXRT_OCRAM_BASE IMXRT_OCRAM_BASE
+#endif
 #if defined(CONFIG_IMXRT_OCRAM_PRIMARY)
-#  define PRIMARY_RAM_START    IMXRT_OCRAM_BASE         /* CONFIG_RAM_START */
+#  define PRIMARY_RAM_START    _IMXRT_OCRAM_BASE        /* CONFIG_RAM_START */
 #  define PRIMARY_RAM_SIZE     IMXRT_OCRAM_SIZE         /* CONFIG_RAM_SIZE */
 #  define IMXRT_OCRAM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_SDRAM_PRIMARY)
@@ -137,12 +154,16 @@
 /* REVISIT:  I am not sure how this works.  But I am assuming that if DTCM
  * is enabled, then ITCM is not and we can just use the DTCM base address to
  * access OCRAM.
+ *
+ * The FlexRAM controller manages the allocation of DTCM and ITCM from the
+ * OCRAM. The amount allocated it 2^n KiB where n is 2-9 and is configured in
+ * the GPR register space.
  */
 
 #ifdef CONFIG_IMXRT_DTCM
 #  define IMXRT_OCRAM_START    IMXRT_DTCM_BASE
 #else
-#  define IMXRT_OCRAM_START    IMXRT_OCRAM_BASE
+#  define IMXRT_OCRAM_START    _IMXRT_OCRAM_BASE
 #endif
 
 #if CONFIG_MM_REGIONS > 1

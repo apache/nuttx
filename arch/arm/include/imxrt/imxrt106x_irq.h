@@ -1,8 +1,9 @@
 /****************************************************************************************
- * arch/arm/include/imxrt/imxrt105x_irq.h
+ * arch/arm/include/imxrt/imxrt106x_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,8 +38,8 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_IMXRT_IMXRT105X_IRQ_H
-#define __ARCH_ARM_INCLUDE_IMXRT_IMXRT105X_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
+#define __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
 
 /****************************************************************************************
  * Included Files
@@ -157,7 +158,7 @@
 #define IMXRT_IRQ_FLEXPWM1_2   (IMXRT_IRQ_EXTINT + 104) /* FLEXPWM1 capture/compare/reload 2 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_3   (IMXRT_IRQ_EXTINT + 105) /* FLEXPWM1 capture/compare/reload 3 interrupt */
 #define IMXRT_IRQ_FLEXPWM1_F   (IMXRT_IRQ_EXTINT + 106) /* FLEXPWM1 fault interrupt */
-#define IMXRT_IRQ_RESERVED107  (IMXRT_IRQ_EXTINT + 107) /* Reserved */
+#define IMXRT_IRQ_FLEXSPI2     (IMXRT_IRQ_EXTINT + 107) /* FlexSPI2 interrupt */
 #define IMXRT_IRQ_FLEXSPI      (IMXRT_IRQ_EXTINT + 108) /* FlexSPI interrupt */
 #define IMXRT_IRQ_SEMC         (IMXRT_IRQ_EXTINT + 109) /* SEMC interrupt */
 #define IMXRT_IRQ_USDHC1       (IMXRT_IRQ_EXTINT + 110) /* USDHC1 interrupt */
@@ -201,12 +202,12 @@
 #define IMXRT_IRQ_FLEXPWM4_2   (IMXRT_IRQ_EXTINT + 149) /* LEXPWM4 capture/compare/reload 2 interrupt */
 #define IMXRT_IRQ_FLEXPWM4_3   (IMXRT_IRQ_EXTINT + 150) /* LEXPWM4 capture/compare/reload 3 interrupt */
 #define IMXRT_IRQ_FLEXPWM4_F   (IMXRT_IRQ_EXTINT + 151) /* LEXPWM4 fault interrupt */
-#define IMXRT_IRQ_RESERVED152  (IMXRT_IRQ_EXTINT + 152) /* Reserved */
-#define IMXRT_IRQ_RESERVED153  (IMXRT_IRQ_EXTINT + 153) /* Reserved */
-#define IMXRT_IRQ_RESERVED154  (IMXRT_IRQ_EXTINT + 154) /* Reserved */
+#define IMXRT_IRQ_ENET2        (IMXRT_IRQ_EXTINT + 152) /* ENET2 MAC0 interrupt */
+#define IMXRT_IRQ_ENET2_1588   (IMXRT_IRQ_EXTINT + 153) /* ENET2 MAC 0 1588 Timer Interrupt */
+#define IMXRT_IRQ_CAN3         (IMXRT_IRQ_EXTINT + 154) /* CAN3 interrupt */
 #define IMXRT_IRQ_RESERVED155  (IMXRT_IRQ_EXTINT + 155) /* Reserved */
-#define IMXRT_IRQ_RESERVED156  (IMXRT_IRQ_EXTINT + 156) /* Reserved */
-#define IMXRT_IRQ_RESERVED157  (IMXRT_IRQ_EXTINT + 157) /* Reserved */
+#define IMXRT_IRQ_FLEXIO3      (IMXRT_IRQ_EXTINT + 156)  /* IPI compare interrupt */
+#define IMXRT_IRQ_GPIO_6789    (IMXRT_IRQ_EXTINT + 157) /* GPIO {6789} or'ed Interrupt */
 #define IMXRT_IRQ_RESERVED158  (IMXRT_IRQ_EXTINT + 158) /* Reserved */
 #define IMXRT_IRQ_RESERVED159  (IMXRT_IRQ_EXTINT + 159) /* Reserved */
 
@@ -470,14 +471,220 @@
 #  define IMXRT_IRQ_GPIO5_31   (_IMXRT_GPIO5_16_31_BASE + 15) /* GPIO5 pin 31 interrupt */
 
 #  define _IMXRT_GPIO5_16_31_NIRQS 16
+#  define _IMXRT_GPIO6_0_15_BASE (_IMXRT_GPIO5_16_31_BASE + _IMXRT_GPIO5_16_31_NIRQS)
 #  define IMXRT_GPIO5_NIRQS    (_IMXRT_GPIO5_0_15_NIRQS + _IMXRT_GPIO5_16_31_NIRQS)
 #else
+#  define _IMXRT_GPIO6_0_15_BASE _IMXRT_GPIO5_16_31_BASE
 #  define IMXRT_GPIO5_NIRQS    _IMXRT_GPIO5_0_15_NIRQS
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO6_0_15_IRQ
+#  define IMXRT_IRQ_GPIO6_0    (_IMXRT_GPIO6_0_15_BASE + 0)   /* GPIO6 pin 0 interrupt */
+#  define IMXRT_IRQ_GPIO6_1    (_IMXRT_GPIO6_0_15_BASE + 1)   /* GPIO6 pin 1 interrupt */
+#  define IMXRT_IRQ_GPIO6_2    (_IMXRT_GPIO6_0_15_BASE + 2)   /* GPIO6 pin 2 interrupt */
+#  define IMXRT_IRQ_GPIO6_3    (_IMXRT_GPIO6_0_15_BASE + 3)   /* GPIO6 pin 3 interrupt */
+#  define IMXRT_IRQ_GPIO6_4    (_IMXRT_GPIO6_0_15_BASE + 4)   /* GPIO6 pin 4 interrupt */
+#  define IMXRT_IRQ_GPIO6_5    (_IMXRT_GPIO6_0_15_BASE + 5)   /* GPIO6 pin 5 interrupt */
+#  define IMXRT_IRQ_GPIO6_6    (_IMXRT_GPIO6_0_15_BASE + 6)   /* GPIO6 pin 6 interrupt */
+#  define IMXRT_IRQ_GPIO6_7    (_IMXRT_GPIO6_0_15_BASE + 7)   /* GPIO6 pin 7 interrupt */
+#  define IMXRT_IRQ_GPIO6_8    (_IMXRT_GPIO6_0_15_BASE + 8)   /* GPIO6 pin 8 interrupt */
+#  define IMXRT_IRQ_GPIO6_9    (_IMXRT_GPIO6_0_15_BASE + 9)   /* GPIO6 pin 9 interrupt */
+#  define IMXRT_IRQ_GPIO6_10   (_IMXRT_GPIO6_0_15_BASE + 10)  /* GPIO6 pin 10 interrupt */
+#  define IMXRT_IRQ_GPIO6_11   (_IMXRT_GPIO6_0_15_BASE + 11)  /* GPIO6 pin 11 interrupt */
+#  define IMXRT_IRQ_GPIO6_12   (_IMXRT_GPIO6_0_15_BASE + 12)  /* GPIO6 pin 12 interrupt */
+#  define IMXRT_IRQ_GPIO6_13   (_IMXRT_GPIO6_0_15_BASE + 13)  /* GPIO6 pin 13 interrupt */
+#  define IMXRT_IRQ_GPIO6_14   (_IMXRT_GPIO6_0_15_BASE + 14)  /* GPIO6 pin 14 interrupt */
+#  define IMXRT_IRQ_GPIO6_15   (_IMXRT_GPIO6_0_15_BASE + 15)  /* GPIO6 pin 15 interrupt */
+
+#  define _IMXRT_GPIO6_0_15_NIRQS 16
+#  define _IMXRT_GPIO6_16_31_BASE (_IMXRT_GPIO6_0_15_BASE + _IMXRT_GPIO6_0_15_NIRQS)
+#else
+#  define _IMXRT_GPIO6_0_15_NIRQS 0
+#  define _IMXRT_GPIO6_16_31_BASE _IMXRT_GPIO6_0_15_BASE
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO6_16_31_IRQ
+#  define IMXRT_IRQ_GPIO6_16   (_IMXRT_GPIO6_16_31_BASE + 0)  /* GPIO6 pin 16 interrupt */
+#  define IMXRT_IRQ_GPIO6_17   (_IMXRT_GPIO6_16_31_BASE + 1)  /* GPIO6 pin 17 interrupt */
+#  define IMXRT_IRQ_GPIO6_18   (_IMXRT_GPIO6_16_31_BASE + 2)  /* GPIO6 pin 18 interrupt */
+#  define IMXRT_IRQ_GPIO6_19   (_IMXRT_GPIO6_16_31_BASE + 3)  /* GPIO6 pin 19 interrupt */
+#  define IMXRT_IRQ_GPIO6_20   (_IMXRT_GPIO6_16_31_BASE + 4)  /* GPIO6 pin 20 interrupt */
+#  define IMXRT_IRQ_GPIO6_21   (_IMXRT_GPIO6_16_31_BASE + 5)  /* GPIO6 pin 21 interrupt */
+#  define IMXRT_IRQ_GPIO6_22   (_IMXRT_GPIO6_16_31_BASE + 6)  /* GPIO6 pin 22 interrupt */
+#  define IMXRT_IRQ_GPIO6_23   (_IMXRT_GPIO6_16_31_BASE + 7)  /* GPIO6 pin 23 interrupt */
+#  define IMXRT_IRQ_GPIO6_24   (_IMXRT_GPIO6_16_31_BASE + 8)  /* GPIO6 pin 24 interrupt */
+#  define IMXRT_IRQ_GPIO6_25   (_IMXRT_GPIO6_16_31_BASE + 9)  /* GPIO6 pin 25 interrupt */
+#  define IMXRT_IRQ_GPIO6_26   (_IMXRT_GPIO6_16_31_BASE + 10) /* GPIO6 pin 26 interrupt */
+#  define IMXRT_IRQ_GPIO6_27   (_IMXRT_GPIO6_16_31_BASE + 11) /* GPIO6 pin 27 interrupt */
+#  define IMXRT_IRQ_GPIO6_28   (_IMXRT_GPIO6_16_31_BASE + 12) /* GPIO6 pin 28 interrupt */
+#  define IMXRT_IRQ_GPIO6_29   (_IMXRT_GPIO6_16_31_BASE + 13) /* GPIO6 pin 29 interrupt */
+#  define IMXRT_IRQ_GPIO6_30   (_IMXRT_GPIO6_16_31_BASE + 14) /* GPIO6 pin 30 interrupt */
+#  define IMXRT_IRQ_GPIO6_31   (_IMXRT_GPIO6_16_31_BASE + 15) /* GPIO6 pin 31 interrupt */
+
+#  define _IMXRT_GPIO6_16_31_NIRQS 16
+#  define _IMXRT_GPIO7_0_15_BASE (_IMXRT_GPIO6_16_31_BASE + _IMXRT_GPIO6_16_31_NIRQS)
+#  define IMXRT_GPIO6_NIRQS    (_IMXRT_GPIO6_0_15_NIRQS + _IMXRT_GPIO6_16_31_NIRQS)
+#else
+#  define _IMXRT_GPIO7_0_15_BASE _IMXRT_GPIO6_16_31_BASE
+#  define IMXRT_GPIO6_NIRQS    _IMXRT_GPIO6_0_15_NIRQS
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO7_0_15_IRQ
+#  define IMXRT_IRQ_GPIO7_0    (_IMXRT_GPIO7_0_15_BASE + 0)   /* GPIO7 pin 0 interrupt */
+#  define IMXRT_IRQ_GPIO7_1    (_IMXRT_GPIO7_0_15_BASE + 1)   /* GPIO7 pin 1 interrupt */
+#  define IMXRT_IRQ_GPIO7_2    (_IMXRT_GPIO7_0_15_BASE + 2)   /* GPIO7 pin 2 interrupt */
+#  define IMXRT_IRQ_GPIO7_3    (_IMXRT_GPIO7_0_15_BASE + 3)   /* GPIO7 pin 3 interrupt */
+#  define IMXRT_IRQ_GPIO7_4    (_IMXRT_GPIO7_0_15_BASE + 4)   /* GPIO7 pin 4 interrupt */
+#  define IMXRT_IRQ_GPIO7_5    (_IMXRT_GPIO7_0_15_BASE + 5)   /* GPIO7 pin 5 interrupt */
+#  define IMXRT_IRQ_GPIO7_6    (_IMXRT_GPIO7_0_15_BASE + 6)   /* GPIO7 pin 6 interrupt */
+#  define IMXRT_IRQ_GPIO7_7    (_IMXRT_GPIO7_0_15_BASE + 7)   /* GPIO7 pin 7 interrupt */
+#  define IMXRT_IRQ_GPIO7_8    (_IMXRT_GPIO7_0_15_BASE + 8)   /* GPIO7 pin 8 interrupt */
+#  define IMXRT_IRQ_GPIO7_9    (_IMXRT_GPIO7_0_15_BASE + 9)   /* GPIO7 pin 9 interrupt */
+#  define IMXRT_IRQ_GPIO7_10   (_IMXRT_GPIO7_0_15_BASE + 10)  /* GPIO7 pin 10 interrupt */
+#  define IMXRT_IRQ_GPIO7_11   (_IMXRT_GPIO7_0_15_BASE + 11)  /* GPIO7 pin 11 interrupt */
+#  define IMXRT_IRQ_GPIO7_12   (_IMXRT_GPIO7_0_15_BASE + 12)  /* GPIO7 pin 12 interrupt */
+#  define IMXRT_IRQ_GPIO7_13   (_IMXRT_GPIO7_0_15_BASE + 13)  /* GPIO7 pin 13 interrupt */
+#  define IMXRT_IRQ_GPIO7_14   (_IMXRT_GPIO7_0_15_BASE + 14)  /* GPIO7 pin 14 interrupt */
+#  define IMXRT_IRQ_GPIO7_15   (_IMXRT_GPIO7_0_15_BASE + 15)  /* GPIO7 pin 15 interrupt */
+
+#  define _IMXRT_GPIO7_0_15_NIRQS 16
+#  define _IMXRT_GPIO7_16_31_BASE (_IMXRT_GPIO7_0_15_BASE + _IMXRT_GPIO7_0_15_NIRQS)
+#else
+#  define _IMXRT_GPIO7_0_15_NIRQS 0
+#  define _IMXRT_GPIO7_16_31_BASE _IMXRT_GPIO7_0_15_BASE
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO7_16_31_IRQ
+#  define IMXRT_IRQ_GPIO7_16   (_IMXRT_GPIO7_16_31_BASE + 0)  /* GPIO7 pin 16 interrupt */
+#  define IMXRT_IRQ_GPIO7_17   (_IMXRT_GPIO7_16_31_BASE + 1)  /* GPIO7 pin 17 interrupt */
+#  define IMXRT_IRQ_GPIO7_18   (_IMXRT_GPIO7_16_31_BASE + 2)  /* GPIO7 pin 18 interrupt */
+#  define IMXRT_IRQ_GPIO7_19   (_IMXRT_GPIO7_16_31_BASE + 3)  /* GPIO7 pin 19 interrupt */
+#  define IMXRT_IRQ_GPIO7_20   (_IMXRT_GPIO7_16_31_BASE + 4)  /* GPIO7 pin 20 interrupt */
+#  define IMXRT_IRQ_GPIO7_21   (_IMXRT_GPIO7_16_31_BASE + 5)  /* GPIO7 pin 21 interrupt */
+#  define IMXRT_IRQ_GPIO7_22   (_IMXRT_GPIO7_16_31_BASE + 6)  /* GPIO7 pin 22 interrupt */
+#  define IMXRT_IRQ_GPIO7_23   (_IMXRT_GPIO7_16_31_BASE + 7)  /* GPIO7 pin 23 interrupt */
+#  define IMXRT_IRQ_GPIO7_24   (_IMXRT_GPIO7_16_31_BASE + 8)  /* GPIO7 pin 24 interrupt */
+#  define IMXRT_IRQ_GPIO7_25   (_IMXRT_GPIO7_16_31_BASE + 9)  /* GPIO7 pin 25 interrupt */
+#  define IMXRT_IRQ_GPIO7_26   (_IMXRT_GPIO7_16_31_BASE + 10) /* GPIO7 pin 26 interrupt */
+#  define IMXRT_IRQ_GPIO7_27   (_IMXRT_GPIO7_16_31_BASE + 11) /* GPIO7 pin 27 interrupt */
+#  define IMXRT_IRQ_GPIO7_28   (_IMXRT_GPIO7_16_31_BASE + 12) /* GPIO7 pin 28 interrupt */
+#  define IMXRT_IRQ_GPIO7_29   (_IMXRT_GPIO7_16_31_BASE + 13) /* GPIO7 pin 29 interrupt */
+#  define IMXRT_IRQ_GPIO7_30   (_IMXRT_GPIO7_16_31_BASE + 14) /* GPIO7 pin 30 interrupt */
+#  define IMXRT_IRQ_GPIO7_31   (_IMXRT_GPIO7_16_31_BASE + 15) /* GPIO7 pin 31 interrupt */
+
+#  define _IMXRT_GPIO7_16_31_NIRQS 16
+#  define _IMXRT_GPIO8_0_15_BASE (_IMXRT_GPIO7_16_31_BASE + _IMXRT_GPIO7_16_31_NIRQS)
+#  define IMXRT_GPIO7_NIRQS    (_IMXRT_GPIO7_0_15_NIRQS + _IMXRT_GPIO7_16_31_NIRQS)
+#else
+#  define _IMXRT_GPIO8_0_15_BASE _IMXRT_GPIO7_16_31_BASE
+#  define IMXRT_GPIO7_NIRQS    _IMXRT_GPIO7_0_15_NIRQS
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO8_0_15_IRQ
+#  define IMXRT_IRQ_GPIO8_0    (_IMXRT_GPIO8_0_15_BASE + 0)   /* GPIO8 pin 0 interrupt */
+#  define IMXRT_IRQ_GPIO8_1    (_IMXRT_GPIO8_0_15_BASE + 1)   /* GPIO8 pin 1 interrupt */
+#  define IMXRT_IRQ_GPIO8_2    (_IMXRT_GPIO8_0_15_BASE + 2)   /* GPIO8 pin 2 interrupt */
+#  define IMXRT_IRQ_GPIO8_3    (_IMXRT_GPIO8_0_15_BASE + 3)   /* GPIO8 pin 3 interrupt */
+#  define IMXRT_IRQ_GPIO8_4    (_IMXRT_GPIO8_0_15_BASE + 4)   /* GPIO8 pin 4 interrupt */
+#  define IMXRT_IRQ_GPIO8_5    (_IMXRT_GPIO8_0_15_BASE + 5)   /* GPIO8 pin 5 interrupt */
+#  define IMXRT_IRQ_GPIO8_6    (_IMXRT_GPIO8_0_15_BASE + 6)   /* GPIO8 pin 6 interrupt */
+#  define IMXRT_IRQ_GPIO8_7    (_IMXRT_GPIO8_0_15_BASE + 7)   /* GPIO8 pin 7 interrupt */
+#  define IMXRT_IRQ_GPIO8_8    (_IMXRT_GPIO8_0_15_BASE + 8)   /* GPIO8 pin 8 interrupt */
+#  define IMXRT_IRQ_GPIO8_9    (_IMXRT_GPIO8_0_15_BASE + 9)   /* GPIO8 pin 9 interrupt */
+#  define IMXRT_IRQ_GPIO8_10   (_IMXRT_GPIO8_0_15_BASE + 10)  /* GPIO8 pin 10 interrupt */
+#  define IMXRT_IRQ_GPIO8_11   (_IMXRT_GPIO8_0_15_BASE + 11)  /* GPIO8 pin 11 interrupt */
+#  define IMXRT_IRQ_GPIO8_12   (_IMXRT_GPIO8_0_15_BASE + 12)  /* GPIO8 pin 12 interrupt */
+#  define IMXRT_IRQ_GPIO8_13   (_IMXRT_GPIO8_0_15_BASE + 13)  /* GPIO8 pin 13 interrupt */
+#  define IMXRT_IRQ_GPIO8_14   (_IMXRT_GPIO8_0_15_BASE + 14)  /* GPIO8 pin 14 interrupt */
+#  define IMXRT_IRQ_GPIO8_15   (_IMXRT_GPIO8_0_15_BASE + 15)  /* GPIO8 pin 15 interrupt */
+
+#  define _IMXRT_GPIO8_0_15_NIRQS 16
+#  define _IMXRT_GPIO8_16_31_BASE (_IMXRT_GPIO8_0_15_BASE + _IMXRT_GPIO8_0_15_NIRQS)
+#else
+#  define _IMXRT_GPIO8_0_15_NIRQS 0
+#  define _IMXRT_GPIO8_16_31_BASE _IMXRT_GPIO8_0_15_BASE
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO8_16_31_IRQ
+#  define IMXRT_IRQ_GPIO8_16   (_IMXRT_GPIO8_16_31_BASE + 0)  /* GPIO8 pin 16 interrupt */
+#  define IMXRT_IRQ_GPIO8_17   (_IMXRT_GPIO8_16_31_BASE + 1)  /* GPIO8 pin 17 interrupt */
+#  define IMXRT_IRQ_GPIO8_18   (_IMXRT_GPIO8_16_31_BASE + 2)  /* GPIO8 pin 18 interrupt */
+#  define IMXRT_IRQ_GPIO8_19   (_IMXRT_GPIO8_16_31_BASE + 3)  /* GPIO8 pin 19 interrupt */
+#  define IMXRT_IRQ_GPIO8_20   (_IMXRT_GPIO8_16_31_BASE + 4)  /* GPIO8 pin 20 interrupt */
+#  define IMXRT_IRQ_GPIO8_21   (_IMXRT_GPIO8_16_31_BASE + 5)  /* GPIO8 pin 21 interrupt */
+#  define IMXRT_IRQ_GPIO8_22   (_IMXRT_GPIO8_16_31_BASE + 6)  /* GPIO8 pin 22 interrupt */
+#  define IMXRT_IRQ_GPIO8_23   (_IMXRT_GPIO8_16_31_BASE + 7)  /* GPIO8 pin 23 interrupt */
+#  define IMXRT_IRQ_GPIO8_24   (_IMXRT_GPIO8_16_31_BASE + 8)  /* GPIO8 pin 24 interrupt */
+#  define IMXRT_IRQ_GPIO8_25   (_IMXRT_GPIO8_16_31_BASE + 9)  /* GPIO8 pin 25 interrupt */
+#  define IMXRT_IRQ_GPIO8_26   (_IMXRT_GPIO8_16_31_BASE + 10) /* GPIO8 pin 26 interrupt */
+#  define IMXRT_IRQ_GPIO8_27   (_IMXRT_GPIO8_16_31_BASE + 11) /* GPIO8 pin 27 interrupt */
+#  define IMXRT_IRQ_GPIO8_28   (_IMXRT_GPIO8_16_31_BASE + 12) /* GPIO8 pin 28 interrupt */
+#  define IMXRT_IRQ_GPIO8_29   (_IMXRT_GPIO8_16_31_BASE + 13) /* GPIO8 pin 29 interrupt */
+#  define IMXRT_IRQ_GPIO8_30   (_IMXRT_GPIO8_16_31_BASE + 14) /* GPIO8 pin 30 interrupt */
+#  define IMXRT_IRQ_GPIO8_31   (_IMXRT_GPIO8_16_31_BASE + 15) /* GPIO8 pin 31 interrupt */
+
+#  define _IMXRT_GPIO8_16_31_NIRQS 16
+#  define _IMXRT_GPIO9_0_15_BASE (_IMXRT_GPIO8_16_31_BASE + _IMXRT_GPIO8_16_31_NIRQS)
+#  define IMXRT_GPIO8_NIRQS    (_IMXRT_GPIO8_0_15_NIRQS + _IMXRT_GPIO8_16_31_NIRQS)
+#else
+#  define _IMXRT_GPIO9_0_15_BASE _IMXRT_GPIO8_16_31_BASE
+#  define IMXRT_GPIO8_NIRQS    _IMXRT_GPIO8_0_15_NIRQS
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO9_0_15_IRQ
+#  define IMXRT_IRQ_GPIO9_0    (_IMXRT_GPIO9_0_15_BASE + 0)   /* GPIO9 pin 0 interrupt */
+#  define IMXRT_IRQ_GPIO9_1    (_IMXRT_GPIO9_0_15_BASE + 1)   /* GPIO9 pin 1 interrupt */
+#  define IMXRT_IRQ_GPIO9_2    (_IMXRT_GPIO9_0_15_BASE + 2)   /* GPIO9 pin 2 interrupt */
+#  define IMXRT_IRQ_GPIO9_3    (_IMXRT_GPIO9_0_15_BASE + 3)   /* GPIO9 pin 3 interrupt */
+#  define IMXRT_IRQ_GPIO9_4    (_IMXRT_GPIO9_0_15_BASE + 4)   /* GPIO9 pin 4 interrupt */
+#  define IMXRT_IRQ_GPIO9_5    (_IMXRT_GPIO9_0_15_BASE + 5)   /* GPIO9 pin 5 interrupt */
+#  define IMXRT_IRQ_GPIO9_6    (_IMXRT_GPIO9_0_15_BASE + 6)   /* GPIO9 pin 6 interrupt */
+#  define IMXRT_IRQ_GPIO9_7    (_IMXRT_GPIO9_0_15_BASE + 7)   /* GPIO9 pin 7 interrupt */
+#  define IMXRT_IRQ_GPIO9_8    (_IMXRT_GPIO9_0_15_BASE + 8)   /* GPIO9 pin 8 interrupt */
+#  define IMXRT_IRQ_GPIO9_9    (_IMXRT_GPIO9_0_15_BASE + 9)   /* GPIO9 pin 9 interrupt */
+#  define IMXRT_IRQ_GPIO9_10   (_IMXRT_GPIO9_0_15_BASE + 10)  /* GPIO9 pin 10 interrupt */
+#  define IMXRT_IRQ_GPIO9_11   (_IMXRT_GPIO9_0_15_BASE + 11)  /* GPIO9 pin 11 interrupt */
+#  define IMXRT_IRQ_GPIO9_12   (_IMXRT_GPIO9_0_15_BASE + 12)  /* GPIO9 pin 12 interrupt */
+#  define IMXRT_IRQ_GPIO9_13   (_IMXRT_GPIO9_0_15_BASE + 13)  /* GPIO9 pin 13 interrupt */
+#  define IMXRT_IRQ_GPIO9_14   (_IMXRT_GPIO9_0_15_BASE + 14)  /* GPIO9 pin 14 interrupt */
+#  define IMXRT_IRQ_GPIO9_15   (_IMXRT_GPIO9_0_15_BASE + 15)  /* GPIO9 pin 15 interrupt */
+
+#  define _IMXRT_GPIO9_0_15_NIRQS 16
+#  define _IMXRT_GPIO9_16_31_BASE (_IMXRT_GPIO9_0_15_BASE + _IMXRT_GPIO9_0_15_NIRQS)
+#else
+#  define _IMXRT_GPIO9_0_15_NIRQS 0
+#  define _IMXRT_GPIO9_16_31_BASE _IMXRT_GPIO9_0_15_BASE
+#endif
+
+#ifdef CONFIG_IMXRT_GPIO9_16_31_IRQ
+#  define IMXRT_IRQ_GPIO9_16   (_IMXRT_GPIO9_16_31_BASE + 0)  /* GPIO9 pin 16 interrupt */
+#  define IMXRT_IRQ_GPIO9_17   (_IMXRT_GPIO9_16_31_BASE + 1)  /* GPIO9 pin 17 interrupt */
+#  define IMXRT_IRQ_GPIO9_18   (_IMXRT_GPIO9_16_31_BASE + 2)  /* GPIO9 pin 18 interrupt */
+#  define IMXRT_IRQ_GPIO9_19   (_IMXRT_GPIO9_16_31_BASE + 3)  /* GPIO9 pin 19 interrupt */
+#  define IMXRT_IRQ_GPIO9_20   (_IMXRT_GPIO9_16_31_BASE + 4)  /* GPIO9 pin 20 interrupt */
+#  define IMXRT_IRQ_GPIO9_21   (_IMXRT_GPIO9_16_31_BASE + 5)  /* GPIO9 pin 21 interrupt */
+#  define IMXRT_IRQ_GPIO9_22   (_IMXRT_GPIO9_16_31_BASE + 6)  /* GPIO9 pin 22 interrupt */
+#  define IMXRT_IRQ_GPIO9_23   (_IMXRT_GPIO9_16_31_BASE + 7)  /* GPIO9 pin 23 interrupt */
+#  define IMXRT_IRQ_GPIO9_24   (_IMXRT_GPIO9_16_31_BASE + 8)  /* GPIO9 pin 24 interrupt */
+#  define IMXRT_IRQ_GPIO9_25   (_IMXRT_GPIO9_16_31_BASE + 9)  /* GPIO9 pin 25 interrupt */
+#  define IMXRT_IRQ_GPIO9_26   (_IMXRT_GPIO9_16_31_BASE + 10) /* GPIO9 pin 26 interrupt */
+#  define IMXRT_IRQ_GPIO9_27   (_IMXRT_GPIO9_16_31_BASE + 11) /* GPIO9 pin 27 interrupt */
+#  define IMXRT_IRQ_GPIO9_28   (_IMXRT_GPIO9_16_31_BASE + 12) /* GPIO9 pin 28 interrupt */
+#  define IMXRT_IRQ_GPIO9_29   (_IMXRT_GPIO9_16_31_BASE + 13) /* GPIO9 pin 29 interrupt */
+#  define IMXRT_IRQ_GPIO9_30   (_IMXRT_GPIO9_16_31_BASE + 14) /* GPIO9 pin 30 interrupt */
+#  define IMXRT_IRQ_GPIO9_31   (_IMXRT_GPIO9_16_31_BASE + 15) /* GPIO9 pin 31 interrupt */
+
+#  define _IMXRT_GPIO9_16_31_NIRQS 16
+#  define IMXRT_GPIO9_NIRQS    (_IMXRT_GPIO9_0_15_NIRQS + _IMXRT_GPIO9_16_31_NIRQS)
+#else
+#  define IMXRT_GPIO9_NIRQS    _IMXRT_GPIO9_0_15_NIRQS
 #endif
 
 #define IMXRT_GPIO_NIRQS       (IMXRT_GPIO1_NIRQS + IMXRT_GPIO2_NIRQS + \
                                 IMXRT_GPIO3_NIRQS + IMXRT_GPIO4_NIRQS + \
-                                IMXRT_GPIO5_NIRQS)
+                                IMXRT_GPIO5_NIRQS + IMXRT_GPIO6_NIRQS + \
+                                IMXRT_GPIO7_NIRQS + IMXRT_GPIO9_NIRQS + \
+                                IMXRT_GPIO9_NIRQS )
 #define IMXRT_GPIO_IRQ_LAST    (_IMXRT_GPIO1_0_15_BASE + IMXRT_GPIO_NIRQS)
 
 /* Total number of IRQ numbers **********************************************************/
@@ -515,4 +722,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_IMXRT_IMXRT105X_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H */

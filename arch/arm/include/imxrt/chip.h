@@ -2,7 +2,8 @@
  * arch/arm/include/imxrt/chip.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,18 +49,31 @@
 
 /* Get customizations for each supported chip */
 
-/* MIMXRT1051CVL5A - Industrial, Reduced Features, 528MHz
- * MIMXRT1051CVL5A - Consumer, Reduced Features, 600MHz
- * MIMXRT1052CVL5A - Industrial, Full Feature, 528MHz
- * MIMXRT1052CVL5A - Consumer, Full Feature, 600MHz
- */
-
 #if defined(CONFIG_ARCH_CHIP_MIMXRT1051DVL6A) || \
     defined(CONFIG_ARCH_CHIP_MIMXRT1051CVL5A) || \
     defined(CONFIG_ARCH_CHIP_MIMXRT1052DVL6A) || \
     defined(CONFIG_ARCH_CHIP_MIMXRT1052CVL5A)
+/* MIMXRT1051CVL5A - Industrial, Reduced Features, 528MHz
+ * MIMXRT1051DVL6A - Consumer, Reduced Features, 600MHz
+ * MIMXRT1052CVL5A - Industrial, Full Feature, 528MHz
+ * MIMXRT1052DVL6A - Consumer, Full Feature, 600MHz
+ */
 
 #  define IMXRT_OCRAM_SIZE            (512 * 1024) /* 512Kb OCRAM */
+#  define IMXRT_GPIO_NPORTS            5           /* Five total ports */
+
+#elif defined(CONFIG_ARCH_CHIP_MIMXRT1061DVL6A) || \
+    defined(CONFIG_ARCH_CHIP_MIMXRT1061CVL5A) || \
+    defined(CONFIG_ARCH_CHIP_MIMXRT1062DVL6A) || \
+    defined(CONFIG_ARCH_CHIP_MIMXRT1062CVL5A)
+/* MIMXRT1061CVL5A - Industrial, Reduced Features, 528MHz
+ * MIMXRT1061DVL6A - Consumer, Reduced Features, 600MHz
+ * MIMXRT1062CVL5A - Industrial, Full Feature, 528MHz
+ * MIMXRT1062DVL6A - Consumer, Full Feature, 600MHz
+ */
+
+#  define IMXRT_OCRAM_SIZE            (1024 * 1024) /* 1024Kb OCRAM */
+#  define IMXRT_GPIO_NPORTS            9            /* Nine total ports */
 #else
 #  error "Unknown i.MX RT chip type"
 #endif

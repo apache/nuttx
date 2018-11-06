@@ -28,6 +28,22 @@ config ARCH_CHIP_MIMXRT1052CVL5A
 	bool "MIMXRT1052DVL6A"
 	select ARCH_FAMILY_MIMXRT1052CVL5A
 
+config ARCH_CHIP_MIMXRT1061DVL6A
+	bool "MIMXRT1061DVL6A"
+	select ARCH_FAMILY_MXRT106xDVL6A
+
+config ARCH_CHIP_MIMXRT1061CVL5A
+	bool "MIMXRT1061CVL5A"
+	select ARCH_FAMILY_IMIMXRT106xCVL5A
+
+config ARCH_CHIP_MIMXRT1062DVL6A
+	bool "MIMXRT1062DVL6A"
+	select ARCH_FAMILY_MXRT106xDVL6A
+
+config ARCH_CHIP_MIMXRT1062CVL5A
+	bool "MIMXRT1062DVL6A"
+	select ARCH_FAMILY_MIMXRT1062CVL5A
+
 endchoice # i.MX RT Chip Selection
 
 # i.MX RT Families
@@ -56,6 +72,31 @@ config ARCH_FAMILY_IMXRT105x
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 
+config ARCH_FAMILY_MXRT106xDVL6A
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT106x
+	---help---
+		i.MX RT1060 Crossover Processors for Consumer Products
+
+config ARCH_FAMILY_MIMXRT1062CVL5A
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT106x
+	---help---
+		i.MX RT1056 Crossover Processors for Industrial Products
+
+config ARCH_FAMILY_IMXRT106x
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select IMXRT_HIGHSPEED_GPIO
+
 # Peripheral support
 
 config IMXRT_HAVE_LPUART
@@ -67,6 +108,10 @@ config IMXRT_LPI2C
 	default n
 
 config IMXRT_LPSPI
+	bool
+	default n
+
+config IMXRT_HIGHSPEED_GPIO
 	bool
 	default n
 
@@ -327,6 +372,46 @@ config IMXRT_GPIO5_16_31_IRQ
 	bool "GPIO5 Pins 16-31 interrupts"
 	default n
 
+config IMXRT_GPIO6_0_15_IRQ
+	bool "GPIO6 Pins 8-15 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO6_16_31_IRQ
+	bool "GPIO6 Pins 16-31 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO7_0_15_IRQ
+	bool "GPIO7 Pins 0-15 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO7_16_31_IRQ
+	bool "GPIO7 Pins 16-31 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO8_0_15_IRQ
+	bool "GPIO8 Pins 0-15 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO8_16_31_IRQ
+	bool "GPIO8 Pins 16-31 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO9_0_15_IRQ
+	bool "GPIO9 Pins 0-15 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
+config IMXRT_GPIO9_16_31_IRQ
+	bool "GPIO9 Pins 16-31 interrupts"
+	default n
+	depends on IMXRT_HIGHSPEED_GPIO
+
 endif # IMXRT_GPIO_IRQ
 
 menu "Ethernet Configuration"
@@ -446,7 +531,7 @@ config IMXRT_BOOT_SRAM
 endchoice # i.MX RT Boot Configuration
 
 choice
-	prompt "i.MX6 Primary RAM"
+	prompt "i.MX RT Primary RAM"
 	default IMXRT_OCRAM_PRIMARY
 	---help---
 		The primary RAM is the RAM that contains the system BLOB's .data and
@@ -464,7 +549,7 @@ config IMXRT_SRAM_PRIMARY
 	bool "External SRAM primary"
 	depends on IMXRT_SEMC_SRAM
 
-endchoice # i.MX6 Primary RAM
+endchoice # i.MX RT Primary RAM
 
 menu "i.MX RT Heap Configuration"
 
@@ -512,7 +597,7 @@ config IMXRT_SRAM_HEAPOFFSET
 		Used to reserve memory at the beginning of SRAM for, as an example,
 		a framebuffer.
 
-endmenu  # i.MX6 Primary RAM
+endmenu  # i.MX RT Heap Configuration
 endmenu # Memory Configuration
 
 menu "USDHC Configuration"

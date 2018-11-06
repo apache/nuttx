@@ -44,6 +44,8 @@
 
 #if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
 #  include "chip/imxrt105x_memorymap.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include "chip/imxrt106x_memorymap.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif

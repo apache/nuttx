@@ -2,7 +2,8 @@
  * arch/arm/src/imxrt/imxrt_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,7 +42,14 @@
  ********************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/imxrt_memorymap.h"
+
+#if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include "chip/imxrt105x_gpio.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include "chip/imxrt106x_gpio.h"
+#else
+#  error Unrecognized i.MX RT architecture
+#endif
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -52,67 +60,13 @@
 #define GPIO3                     2      /* Port 3 index */
 #define GPIO4                     3      /* Port 4 index */
 #define GPIO5                     4      /* Port 5 index */
-
-#define IMXRT_GPIO_NPORTS         5      /* Five total ports */
+#if IMXRT_GPIO_NPORTS > 5
+#define GPIO6                     5      /* Port 6 index */
+#define GPIO7                     6      /* Port 7 index */
+#define GPIO8                     7      /* Port 8 index */
+#define GPIO9                     8      /* Port 9 index */
+#endif
 #define IMXRT_GPIO_NPINS         32      /* Up to 32 pins per port */
-
-/* Register offsets *************************************************************************/
-
-#define IMXRT_GPIO_DR_OFFSET     0x0000  /* GPIO data register */
-#define IMXRT_GPIO_GDIR_OFFSET   0x0004  /* GPIO direction register */
-#define IMXRT_GPIO_PSR_OFFSET    0x0008  /* GPIO pad status register */
-#define IMXRT_GPIO_ICR1_OFFSET   0x000c  /* GPIO interrupt configuration register1 */
-#define IMXRT_GPIO_ICR2_OFFSET   0x0010  /* GPIO interrupt configuration register2 */
-#define IMXRT_GPIO_IMR_OFFSET    0x0014  /* GPIO interrupt mask register */
-#define IMXRT_GPIO_ISR_OFFSET    0x0018  /* GPIO interrupt status register */
-#define IMXRT_GPIO_EDGE_OFFSET   0x001c  /* GPIO edge select register */
-
-/* Register addresses ***********************************************************************/
-
-#define IMXRT_GPIO1_DR           (IMXRT_GPIO1_BASE + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO1_GDIR         (IMXRT_GPIO1_BASE + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO1_PSR          (IMXRT_GPIO1_BASE + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO1_ICR1         (IMXRT_GPIO1_BASE + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO1_ICR2         (IMXRT_GPIO1_BASE + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO1_IMR          (IMXRT_GPIO1_BASE + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO1_ISR          (IMXRT_GPIO1_BASE + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO1_EDGE         (IMXRT_GPIO1_BASE + IMXRT_GPIO_EDGE_OFFSET)
-
-#define IMXRT_GPIO2_DR           (IMXRT_GPIO2_BASE + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO2_GDIR         (IMXRT_GPIO2_BASE + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO2_PSR          (IMXRT_GPIO2_BASE + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO2_ICR1         (IMXRT_GPIO2_BASE + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO2_ICR2         (IMXRT_GPIO2_BASE + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO2_IMR          (IMXRT_GPIO2_BASE + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO2_ISR          (IMXRT_GPIO2_BASE + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO2_EDGE         (IMXRT_GPIO2_BASE + IMXRT_GPIO_EDGE_OFFSET)
-
-#define IMXRT_GPIO3_DR           (IMXRT_GPIO3_BASE + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO3_GDIR         (IMXRT_GPIO3_BASE + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO3_PSR          (IMXRT_GPIO3_BASE + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO3_ICR1         (IMXRT_GPIO3_BASE + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO3_ICR2         (IMXRT_GPIO3_BASE + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO3_IMR          (IMXRT_GPIO3_BASE + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO3_ISR          (IMXRT_GPIO3_BASE + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO3_EDGE         (IMXRT_GPIO3_BASE + IMXRT_GPIO_EDGE_OFFSET)
-
-#define IMXRT_GPIO4_DR           (IMXRT_GPIO4_BASE + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO4_GDIR         (IMXRT_GPIO4_BASE + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO4_PSR          (IMXRT_GPIO4_BASE + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO4_ICR1         (IMXRT_GPIO4_BASE + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO4_ICR2         (IMXRT_GPIO4_BASE + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO4_IMR          (IMXRT_GPIO4_BASE + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO4_ISR          (IMXRT_GPIO4_BASE + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO4_EDGE         (IMXRT_GPIO4_BASE + IMXRT_GPIO_EDGE_OFFSET)
-
-#define IMXRT_GPIO5_DR           (IMXRT_GPIO5_BASE + IMXRT_GPIO_DR_OFFSET)
-#define IMXRT_GPIO5_GDIR         (IMXRT_GPIO5_BASE + IMXRT_GPIO_GDIR_OFFSET)
-#define IMXRT_GPIO5_PSR          (IMXRT_GPIO5_BASE + IMXRT_GPIO_PSR_OFFSET)
-#define IMXRT_GPIO5_ICR1         (IMXRT_GPIO5_BASE + IMXRT_GPIO_ICR1_OFFSET)
-#define IMXRT_GPIO5_ICR2         (IMXRT_GPIO5_BASE + IMXRT_GPIO_ICR2_OFFSET)
-#define IMXRT_GPIO5_IMR          (IMXRT_GPIO5_BASE + IMXRT_GPIO_IMR_OFFSET)
-#define IMXRT_GPIO5_ISR          (IMXRT_GPIO5_BASE + IMXRT_GPIO_ISR_OFFSET)
-#define IMXRT_GPIO5_EDGE         (IMXRT_GPIO5_BASE + IMXRT_GPIO_EDGE_OFFSET)
 
 /* Register bit definitions *****************************************************************/
 

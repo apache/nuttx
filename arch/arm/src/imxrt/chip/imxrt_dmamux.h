@@ -2,7 +2,8 @@
  * arch/arm/src/imxrt/chip/imxrt_dmamux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,6 +46,8 @@
 
 #if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
 #  include "chip/imxrt105x_dmamux.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include "chip/imxrt106x_dmamux.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
