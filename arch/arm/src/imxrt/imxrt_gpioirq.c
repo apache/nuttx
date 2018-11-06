@@ -98,7 +98,6 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
     }
   else
 #endif
-
 #ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
   if (irq < _IMXRT_GPIO2_16_31_BASE)
     {
@@ -115,7 +114,6 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
     }
   else
 #endif
-
 #ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
   if (irq < _IMXRT_GPIO3_16_31_BASE)
     {
@@ -132,7 +130,6 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
     }
   else
 #endif
-
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
   if (irq < _IMXRT_GPIO4_16_31_BASE)
     {
@@ -149,7 +146,6 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
     }
   else
 #endif
-
 #ifdef CONFIG_IMXRT_GPIO5_0_15_IRQ
   if (irq < _IMXRT_GPIO5_16_31_BASE)
     {
@@ -166,74 +162,70 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
     }
   else
 #endif
-
-#  ifdef CONFIG_IMXRT_GPIO6_0_15_IRQ
+#ifdef CONFIG_IMXRT_GPIO6_0_15_IRQ
   if (irq < _IMXRT_GPIO6_16_31_BASE)
     {
       *regaddr = IMXRT_GPIO6_IMR;
       *pin     = irq - _IMXRT_GPIO6_0_15_BASE;
     }
   else
-#  endif
-#  ifdef CONFIG_IMXRT_GPIO6_16_31_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO6_16_31_IRQ
   if (irq < _IMXRT_GPIO7_0_15_BASE)
     {
       *regaddr = IMXRT_GPIO6_IMR;
       *pin     = irq - _IMXRT_GPIO6_16_31_BASE + 16;
     }
   else
-#  endif
-
-#  ifdef CONFIG_IMXRT_GPIO7_0_15_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO7_0_15_IRQ
   if (irq < _IMXRT_GPIO7_16_31_BASE)
     {
       *regaddr = IMXRT_GPIO7_IMR;
       *pin     = irq - _IMXRT_GPIO7_0_15_BASE;
     }
   else
-#  endif
-#  ifdef CONFIG_IMXRT_GPIO7_16_31_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO7_16_31_IRQ
   if (irq < _IMXRT_GPIO8_0_15_BASE)
     {
       *regaddr = IMXRT_GPIO7_IMR;
       *pin     = irq - _IMXRT_GPIO7_16_31_BASE + 16;
     }
   else
-#  endif
-
-#  ifdef CONFIG_IMXRT_GPIO8_0_15_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO8_0_15_IRQ
   if (irq < _IMXRT_GPIO8_16_31_BASE)
     {
       *regaddr = IMXRT_GPIO8_IMR;
       *pin     = irq - _IMXRT_GPIO8_0_15_BASE;
     }
   else
-#  endif
-#  ifdef CONFIG_IMXRT_GPIO8_16_31_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO8_16_31_IRQ
   if (irq < _IMXRT_GPIO9_0_15_BASE)
     {
       *regaddr = IMXRT_GPIO8_IMR;
       *pin     = irq - _IMXRT_GPIO8_16_31_BASE + 16;
     }
   else
-#  endif
-
-#  ifdef CONFIG_IMXRT_GPIO9_0_15_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO9_0_15_IRQ
   if (irq < _IMXRT_GPIO9_16_31_BASE)
     {
       *regaddr = IMXRT_GPIO9_IMR;
       *pin     = irq - _IMXRT_GPIO9_0_15_BASE;
     }
   else
-#  endif
-#  ifdef CONFIG_IMXRT_GPIO9_16_31_IRQ
+#endif
+#ifdef CONFIG_IMXRT_GPIO9_16_31_IRQ
   if (irq < IMXRT_GPIO_IRQ_LAST)
     {
       *regaddr = IMXRT_GPIO9_IMR;
       *pin     = irq - _IMXRT_GPIO9_16_31_BASE + 16;
     }
   else
-#  endif
+#endif
     {
       return -EINVAL;
     }
