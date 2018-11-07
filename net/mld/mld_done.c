@@ -47,21 +47,14 @@
 #include "mld/mld.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mld_done_v1
+ * Name: mld_done
  *
  * Description:
- *   Called from icmpv6_input() when a Version 1 Multicast Listener Done is
- *   received.
+ *   Called from icmpv6_input() when a Multicast Listener Done is received.
  *
  *   When a router in Querier state receives a Done message from a link,
  *   if the Multicast Address identified in the message is present in the
@@ -78,46 +71,28 @@
  *
  ****************************************************************************/
 
-int mld_done_v1(FAR struct net_driver_s *dev,
-                FAR const struct mld_mcast_listen_done_v1_s *done)
+int mld_done(FAR struct net_driver_s *dev,
+             FAR const struct mld_mcast_listen_done_s *done)
 {
-#ifdef CONFIG_NET_MLD_ROUTER
-  FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct mld_group_s *group;
-
-  mldinfo("Version 1 Multicast Listener Done\n");
+  mldinfo("Multicast Listener Done\n");
   MLD_STATINCR(g_netstats.mld.done_received);
 
-  /* The done message is sent to the link-local, all routers multicast
-   * address. Find the group using the group address in the Done message.
+  /* The Done message is sent to the link-local, all routers multicast
+   * address. We basically ignore the Done message:
+   *
+   * We cannot free the group if there are other members of the group.  We
+   * know how many local tasks have joined the group, but we are less
+   * certain of how many non-local members of the group there are.
+   *
+   * The RFC requires that we send  Multicast-Address-Specific Queries
+   * repeatedly before removing the group to assure that the no listeners
+   * are present.
+   *
+   * If we are the Querier, then the Query timer logic will accomplish
+   * this requirement for us.  If there is another Querier on the subnet,
+   * it will drive the Queries.  No Querier?  We will let the 'Other
+   * Querier Present Timeout' handle that case.
    */
-
-  group = mld_grpfind(dev, done->grpaddr);
-  if (group == NULL)
-    {
-      /* We know nothing of this group */
-
-      return -ENOENT;
-    }
-
-  /* Ignore the Done message is this is not a Querier */
-
-  if (IS_MLD_QUERIER(group->flags))
-    {
-      /* REVISIT:  Here we just remove the group from this list immediately.
-       * The RFC requires that we send  Multicast-Address-Specific Queries
-       * repeatedly before doing this to assure that the listener is not
-       * present.
-       */
-
-      mld_grpfree(dev, group);
-    }
-#else
-  /* We are not a router so we can just ignore Done messages */
-
-  mldinfo("Version 1 Multicast Listener Done\n");
-  MLD_STATINCR(g_netstats.mld.done_received);
-#endif
 
   /* Need to set d_len to zero to indication that nothing is being sent */
 

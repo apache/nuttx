@@ -165,7 +165,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
                * waiting for a message to be sent.  Can that happen?
                */
 
-              ret = mld_waitmsg(group, MLD_SEND_V1DONE);
+              ret = mld_waitmsg(group, MLD_SEND_DONE);
               if (ret < 0)
                 {
                   mlderr("ERROR: Failed to schedule message: %d\n", ret);
@@ -178,8 +178,8 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
           mld_removemcastmac(dev, mrec->ipv6mr_multiaddr.s6_addr16);
 
-          /* Perform additional actions if not a router OR if a router and the
-           * number of members not on this host is also zero.
+          /* Perform additional the number of members not on this host is
+           * also zero.
            */
 
 #ifdef CONFIG_NET_MLD_ROUTER
@@ -200,6 +200,11 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
              /* Free the group structure */
 
              mld_grpfree(dev, group);
+
+             /* REVISIT: It is expected that higher level logic will remove
+              * the routing table entry for the old multicast address.  That
+              * is not done here.
+              */
            }
         }
 

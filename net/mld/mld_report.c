@@ -76,8 +76,6 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
   /* Find the group (or create a new one) using the incoming IP address.
    * If we are not a router (and I assume we are not), then can ignore
    * reports from groups that we are not a member of.
-   *
-   * REVISIT:  Router support is not yet implemented.
    */
 
 #ifdef CONFIG_NET_MLD_ROUTER

@@ -192,6 +192,11 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
         }
 
       MLD_STATINCR(g_netstats.mld.njoins);
+
+      /* REVISIT: It is expected that higher level logic will set up
+       * the routing table entry for the new multicast address.  That
+       * is not done here.
+       */
     }
   else
     {
@@ -222,7 +227,7 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
             }
         }
 #else
-      /* Not a router?  There there must be another join from this host or
+      /* Not a router?  Then there must be another join from this host or
        * how could the group have been created?
        */
 

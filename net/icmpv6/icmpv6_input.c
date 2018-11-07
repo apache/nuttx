@@ -78,7 +78,7 @@
 #define MLDQUERY         ((FAR struct mld_mcast_listen_query_s *)icmpv6)
 #define MLDREPORT_V1     ((FAR struct mld_mcast_listen_report_v1_s *)icmpv6)
 #define MLDREPORT_V2     ((FAR struct mld_mcast_listen_report_v2_s *)icmpv6)
-#define MLDDONE_V1       ((FAR struct mld_mcast_listen_done_v1_s *)icmpv6)
+#define MLDDONE          ((FAR struct mld_mcast_listen_done_s *)icmpv6)
 
 /****************************************************************************
  * Private Functions
@@ -525,12 +525,12 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
       }
       break;
 
-    case ICMPV6_MCAST_LISTEN_DONE_V1:    /* Version 1 Multicast Listener Done, RFC 2710 */
+    case ICMPV6_MCAST_LISTEN_DONE:       /* Multicast Listener Done, RFC 2710 */
       {
-        FAR struct mld_mcast_listen_done_v1_s *done = MLDDONE_V1;
+        FAR struct mld_mcast_listen_done_s *done = MLDDONE;
         int ret;
 
-        ret = mld_done_v1(dev, done);
+        ret = mld_done(dev, done);
         if (ret < 0)
           {
             goto icmpv6_drop_packet;

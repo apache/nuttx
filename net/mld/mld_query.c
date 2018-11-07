@@ -238,20 +238,22 @@ static void mld_check_querier(FAR struct net_driver_s *dev,
 
       if (mld_cmpaddr(dev, ipv6->srcipaddr))
         {
+          /* Switch to non-Querier mode */
+
+           CLR_MLD_QUERIER(group->flags);
+
           /* Are we past the start up phase (where the timer is used for a
            * different purpose)?
            */
 
           if (!IS_MLD_STARTUP(group->flags))
             {
-              /* Yes.. cancel the poll timer */
+              /* Yes.. cancel the poll timer and start the 'Other Querier
+               * Present' Timeout.
+               */
 
-              wd_cancel(group->polldog);
+              mld_start_polltimer(group, MSEC2TICK(MLD_OQUERY_MSEC));
             }
-
-          /* Switch to non-Querier mode */
-
-           CLR_MLD_QUERIER(group->flags);
         }
     }
 }
@@ -450,9 +452,9 @@ int mld_query(FAR struct net_driver_s *dev,
       return OK;
     }
 
-  /* Find the group using associated with this group address.  For the purpose
-   * of sending reports, we only care about the query if we are a member of
-   * the group.
+  /* Find the group associated with this group address.  For the purpose of
+   * sending reports, we only care about the query if we are a member of the
+   * group.
    */
 
   group = mld_grpfind(dev, query->grpaddr);

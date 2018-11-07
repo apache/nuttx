@@ -84,7 +84,7 @@
                      (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 #define V2REPORTBUF ((FAR struct mld_mcast_listen_report_v2_s *) \
                      (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
-#define DONEBUF     ((FAR struct mld_mcast_listen_done_v1_s *) \
+#define DONEBUF     ((FAR struct mld_mcast_listen_done_s *) \
                      (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
 
 /****************************************************************************
@@ -152,10 +152,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         }
         break;
 
-      case MLD_SEND_V1DONE:             /* Send MLDv1 Done message */
+      case MLD_SEND_DONE:               /* Send Done message */
         {
           mldinfo("Send Done message, flags=%02x\n", group->flags);
-          mldsize = sizeof(struct mld_mcast_listen_done_v1_s);
+          mldsize = sizeof(struct mld_mcast_listen_done_s);
         }
         break;
 
@@ -221,7 +221,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         destipaddr = g_ipv6_allmldv2routers;
         break;
 
-      case MLD_SEND_V1DONE:             /* Send MLDv1 Done message */
+      case MLD_SEND_DONE:               /* Send Done message */
         destipaddr = g_ipv6_allrouters;
         break;
 
@@ -341,14 +341,14 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
         }
         break;
 
-      case MLD_SEND_V1DONE:             /* Send MLDv1 Done message */
+      case MLD_SEND_DONE:               /* Send Done message */
         {
-          FAR struct mld_mcast_listen_done_v1_s *done = DONEBUF;
+          FAR struct mld_mcast_listen_done_s *done = DONEBUF;
 
           /* Initialize the Done payload */
 
-          memset(done, 0, sizeof(struct mld_mcast_listen_done_v1_s));
-          done->type      = ICMPV6_MCAST_LISTEN_DONE_V1;
+          memset(done, 0, sizeof(struct mld_mcast_listen_done_s));
+          done->type      = ICMPV6_MCAST_LISTEN_DONE;
           net_ipv6addr_hdrcopy(done->mcastaddr, &group->grpaddr);
 
           /* Calculate the ICMPv6 checksum. */

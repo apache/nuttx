@@ -191,7 +191,7 @@ enum mld_msgtype_e
   MLD_SEND_GENQUERY,           /* Send General Query */
   MLD_SEND_V1REPORT,           /* Send MLDv1 Report message */
   MLD_SEND_V2REPORT,           /* Send MLDv2 Report message */
-  MLD_SEND_V1DONE              /* Send MLDv1 Done message */
+  MLD_SEND_DONE                /* Send Done message */
 };
 
 /* This structure represents one group member.  There is a list of groups
@@ -243,7 +243,7 @@ struct net_driver_s;                 /* Forward reference */
 struct mld_mcast_listen_query_s;     /* Forward reference */
 struct mld_mcast_listen_report_v1_s; /* Forward reference */
 struct mld_mcast_listen_report_v2_s; /* Forward reference */
-struct mld_mcast_listen_done_v1_s;   /* Forward reference */
+struct mld_mcast_listen_done_s;      /* Forward reference */
 
 /****************************************************************************
  * Name: mld_initialize()
@@ -303,16 +303,15 @@ int mld_report_v2(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v2_s *report);
 
 /****************************************************************************
- * Name: mld_done_v1
+ * Name: mld_done
  *
  * Description:
- *  Called from icmpv6_input() when a Version 1 Multicast Listener Done is
- *  received.
+ *  Called from icmpv6_input() when a Multicast Listener Done is received.
  *
  ****************************************************************************/
 
-int mld_done_v1(FAR struct net_driver_s *dev,
-                FAR const struct mld_mcast_listen_done_v1_s *done);
+int mld_done(FAR struct net_driver_s *dev,
+             FAR const struct mld_mcast_listen_done_s *done);
 
 /****************************************************************************
  * Name:  mld_grpalloc

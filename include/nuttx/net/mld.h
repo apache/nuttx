@@ -358,11 +358,11 @@ struct mld_mcast_listen_report_v2_s
    sizeof(struct mld_mcast_addrec_v2_s) + \
    (addreclen))
 
-/* Version 1 Multicast Listener Done (RFC 2710) */
+/* Multicast Listener Done (RFC 2710) */
 
-struct mld_mcast_listen_done_v1_s
+struct mld_mcast_listen_done_s
 {
-  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_DONE_V1 */
+  uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_DONE */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
   uint16_t chksum;           /* Checksum of ICMP header and data */
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
