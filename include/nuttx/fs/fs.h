@@ -641,9 +641,38 @@ int unregister_blockdriver(FAR const char *path);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD
+#ifdef CONFIG_MTD_PARTITION
 int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
                        mode_t mode, FAR void *priv);
+#endif
+
+/****************************************************************************
+ * Name: register_mtdpartition
+ *
+ * Description:
+ *   Register a mtd partition driver inode the pseudo file system.
+ *
+ * Input Parameters:
+ *   partition  - The path to the partition inode
+ *   parent     - The path to the parent inode
+ *   firstblock - The offset in block to the partition
+ *   nblocks    - The number of block in the partition
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+int register_mtdpartition(FAR const char *partition,
+                          mode_t mode, FAR const char *parent,
+                          off_t firstblock, size_t nblocks);
 #endif
 
 /****************************************************************************
