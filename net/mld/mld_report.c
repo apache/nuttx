@@ -74,12 +74,15 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
           grpaddr[0], grpaddr[1], grpaddr[2], grpaddr[3],
           grpaddr[4], grpaddr[5], grpaddr[6], grpaddr[7]);
 
-  /* Find the group (or create a new one) using the incoming IP address.
-   * If we are not a router (and I assume we are not), then can ignore
-   * reports from groups that we are not a member of.
-   */
-
 #ifdef CONFIG_NET_MLD_ROUTER
+  /* Assure that the group address is an IPv6 multicast address */
+
+  if (!net_is_addr_mcast(mrec->ipv6mr_multiaddr.s6_addr16))
+    {
+      return -EINVAL;
+    }
+
+
   group = mld_grpallocfind(dev, grpaddr);
   if (group == NULL)
     {
@@ -88,6 +91,10 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
     }
 
 #else
+  /* Find the group using the incoming IP address.  If we are not a router,
+   * then can ignore reports from groups that we are not a member of.
+   */
+
   group = mld_grpfind(dev, grpaddr);
   if (group == NULL)
     {

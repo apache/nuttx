@@ -132,6 +132,13 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
 
   DEBUGASSERT(mrec != NULL);
 
+  /* Assure that the group address is an IPv6 multicast address */
+
+  if (!net_is_addr_mcast(mrec->ipv6mr_multiaddr.s6_addr16))
+    {
+      return -EINVAL;
+    }
+
   /* Get the device from the interface index.  Use the default network device
    * if an interface index of 0 is provided.
    */
