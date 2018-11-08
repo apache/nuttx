@@ -298,7 +298,13 @@
 #  ifndef CONFIG_DISABLE_POLL
 #    define SYS_poll                   __SYS_poll
 #    define SYS_select                 (__SYS_poll + 1)
-#    define __SYS_ifindex              (__SYS_poll + 2)
+#    ifndef CONFIG_DISABLE_SIGNALS
+#      define SYS_ppoll                (__SYS_poll + 2)
+#      define SYS_pselect              (__SYS_poll + 3)
+#      define __SYS_ifindex            (__SYS_poll + 4)
+#    else
+#      define __SYS_ifindex            (__SYS_poll + 2)
+#    endif
 #  else
 #    define __SYS_ifindex               __SYS_poll
 #  endif

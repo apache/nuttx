@@ -52,6 +52,10 @@ ifeq ($(CONFIG_SIG_EVTHREAD),y)
 CSRCS += sig_evthread.c
 endif
 
+ifneq ($(CONFIG_DISABLE_POLL),y)
+CSRCS += sig_ppoll.c sig_pselect.c
+endif
+
 # Include signal build support
 
 DEPPATH += --dep-path signal

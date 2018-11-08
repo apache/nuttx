@@ -317,8 +317,6 @@ int nxsig_kill(pid_t pid, int signo);
 
 int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout);
-int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
-                    FAR const struct timespec *timeout);
 
 /****************************************************************************
  * Name: nxsig_nanosleep

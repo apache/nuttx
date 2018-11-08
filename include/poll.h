@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <signal.h>
 #include <semaphore.h>
 
 /****************************************************************************
@@ -152,6 +153,10 @@ extern "C"
  ****************************************************************************/
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout);
+
+int ppoll(FAR struct pollfd *fds, nfds_t nfds,
+          FAR const struct timespec *timeout_ts,
+          FAR const sigset_t *sigmask);
 
 #undef EXTERN
 #if defined(__cplusplus)

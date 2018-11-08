@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <signal.h>
 #include <time.h>
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
@@ -122,6 +123,10 @@ extern "C"
 struct timeval;
 int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
            FAR fd_set *exceptfds, FAR struct timeval *timeout);
+
+int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
+            FAR fd_set *exceptfds, FAR const struct timespec *timeout,
+            FAR const sigset_t *sigmask);
 
 #undef EXTERN
 #if defined(__cplusplus)
