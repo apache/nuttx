@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-void nxsig_unmask_pendingsignal(void)
+bool nxsig_unmask_pendingsignal(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   sigset_t unmaskedset;
@@ -79,10 +79,15 @@ void nxsig_unmask_pendingsignal(void)
    */
 
   unmaskedset = ~(rtcb->sigprocmask) & nxsig_pendingset(rtcb);
+  if (unmaskedset == NULL_SIGNAL_SET)
+    {
+      sched_unlock();
+      return false;
+    }
 
   /* Loop while there are unmasked pending signals to be processed. */
 
-  while (unmaskedset != NULL_SIGNAL_SET)
+  do
     {
       /* Pending signals will be processed from lowest numbered signal
        * to highest
@@ -117,7 +122,9 @@ void nxsig_unmask_pendingsignal(void)
             }
         }
     }
+  while (unmaskedset != NULL_SIGNAL_SET);
 
   sched_unlock();
+  return true;
 }
 
