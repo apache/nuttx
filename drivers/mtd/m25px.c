@@ -1065,6 +1065,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.write  = m25p_write;
 #endif
       priv->mtd.ioctl  = m25p_ioctl;
+      priv->mtd.name   = "m25px";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -1083,12 +1084,6 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
           return NULL;
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "m25px");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

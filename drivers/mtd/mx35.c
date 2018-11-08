@@ -910,6 +910,7 @@ FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.read   = mx35_read;
       priv->mtd.write  = mx35_write;
       priv->mtd.ioctl  = mx35_ioctl;
+      priv->mtd.name   = "mx35";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -936,15 +937,6 @@ FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev)
           mx35err("ERROR: Unrecognized\n");
           kmm_free(priv);
           return NULL;
-        }
-      else
-        {
-
-#ifdef CONFIG_MTD_REGISTRATION
-       /* Register the MTD with the procfs system if enabled */
-
-       mtd_register(&priv->mtd, "mx35");
-#endif
         }
 
       mx35_enableECC(priv);

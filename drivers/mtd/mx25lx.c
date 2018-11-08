@@ -1021,6 +1021,7 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev)
       priv->mtd.bwrite = mx25l_bwrite;
       priv->mtd.read   = mx25l_read;
       priv->mtd.ioctl  = mx25l_ioctl;
+      priv->mtd.name   = "mx25l";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -1052,12 +1053,6 @@ FAR struct mtd_dev_s *mx25l_initialize_spi(FAR struct spi_dev_s *dev)
               kmm_free(priv);
               return NULL;
             }
-#endif
-
-#ifdef CONFIG_MTD_REGISTRATION
-          /* Register the MTD with the procfs system if enabled */
-
-          mtd_register(&priv->mtd, "mx25l");
 #endif
         }
     }

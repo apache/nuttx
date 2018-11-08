@@ -568,14 +568,9 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
   priv->mtd.write  = file_bytewrite;
 #endif
   priv->mtd.ioctl  = filemtd_ioctl;
+  priv->mtd.name   = "filemtd";
   priv->offset     = offset;
   priv->nblocks    = nblocks;
-
-#ifdef CONFIG_MTD_REGISTRATION
-  /* Register the MTD with the procfs system if enabled */
-
-  mtd_register(&priv->mtd, "filemtd");
-#endif
 
   return &priv->mtd;
 }

@@ -972,6 +972,7 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.write  = is25xp_write;
 #endif
       priv->mtd.ioctl  = is25xp_ioctl;
+      priv->mtd.name   = "is25xp";
       priv->dev        = dev;
       priv->lastwaswrite = false;
 
@@ -997,12 +998,6 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
           is25xp_unprotect(priv);
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "is25xp");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

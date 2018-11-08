@@ -372,6 +372,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   priv->mtd.bwrite   = mtd_bwrite; /* Our MTD bwrite method */
   priv->mtd.read     = mtd_read;   /* Our MTD read method */
   priv->mtd.ioctl    = mtd_ioctl;  /* Our MTD ioctl method */
+  priv->mtd.name     = "rwbuffer";
 
   priv->dev          = mtd;        /* The contained MTD instance */
 
@@ -412,12 +413,6 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
       kmm_free(priv);
       return NULL;
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "rwbuffer");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

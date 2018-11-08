@@ -114,7 +114,8 @@ static struct progmem_dev_s g_progmem =
 #ifdef CONFIG_MTD_BYTE_WRITE
     progmem_write,
 #endif
-    progmem_ioctl
+    progmem_ioctl,
+    "progmem",
   }
 };
 
@@ -412,12 +413,6 @@ FAR struct mtd_dev_s *progmem_initialize(void)
       g_progmem.blkshift    = blkshift;
       g_progmem.ersshift    = ersshift;
       g_progmem.initialized = true;
-
-#ifdef CONFIG_MTD_REGISTRATION
-      /* Register the MTD with the procfs system if enabled */
-
-      mtd_register(&priv->mtd, "progmem");
-#endif
     }
 
   /* Return the implementation-specific state structure as the MTD device */

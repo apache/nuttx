@@ -684,13 +684,8 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev)
       priv->mtd.bwrite = at24c_bwrite;
       priv->mtd.read   = at24c_read;
       priv->mtd.ioctl  = at24c_ioctl;
+      priv->mtd.name   = "at24xx";
       priv->dev        = dev;
-
-      /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-      mtd_register(&priv->mtd, "at24xx");
-#endif
       priv->initd      = true;
     }
 

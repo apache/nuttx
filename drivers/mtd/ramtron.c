@@ -989,6 +989,7 @@ FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.bwrite = ramtron_bwrite;
       priv->mtd.read   = ramtron_read;
       priv->mtd.ioctl  = ramtron_ioctl;
+      priv->mtd.name   = "ramtron";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -1005,12 +1006,6 @@ FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev)
           return NULL;
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "ramtron");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

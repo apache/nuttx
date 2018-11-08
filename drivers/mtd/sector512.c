@@ -615,6 +615,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
       priv->mtd.bwrite   = s512_bwrite;
       priv->mtd.read     = s512_read;
       priv->mtd.ioctl    = s512_ioctl;
+      priv->mtd.name     = "sector512";
 
       priv->dev          = mtd;
       priv->eblocksize   = geo.erasesize;
@@ -634,12 +635,6 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
           priv = NULL;
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "sector512");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

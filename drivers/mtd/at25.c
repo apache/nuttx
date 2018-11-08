@@ -664,6 +664,7 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.bwrite = at25_bwrite;
       priv->mtd.read   = at25_read;
       priv->mtd.ioctl  = at25_ioctl;
+      priv->mtd.name   = "at25";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -692,12 +693,6 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
           SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "at25");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

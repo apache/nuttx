@@ -205,7 +205,8 @@ static struct sst39vf_dev_s g_sst39vf =
 #ifdef CONFIG_MTD_BYTE_WRITE
     NULL,                   /* write method */
 #endif
-    sst39vf_ioctl           /* ioctl method */
+    sst39vf_ioctl,          /* ioctl method */
+    "sst39vf",
   },
   NULL                      /* Chip */
 };
@@ -844,12 +845,6 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
       ferr("ERROR: Unrecognized chip ID: %04x\n", chipid);
       return NULL;
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "sst39vf");
-#endif
 
   /* Return the state structure as the MTD device */
 

@@ -102,11 +102,6 @@ config FS_PROCFS_EXCLUDE_NET
 	depends on NET
 	default n
 
-config FS_PROCFS_EXCLUDE_MTD
-	bool "Exclude mtd"
-	depends on MTD
-	default n
-
 config FS_PROCFS_EXCLUDE_PARTITIONS
 	bool "Exclude partitions"
 	depends on MTD_PARTITION

@@ -327,14 +327,6 @@ FAR struct mtd_dev_s *skel_initialize(void)
    * device structure.
    */
 
-  /* Perform initialization as necessary */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  /* Register the MTD with the procfs system if enabled */
-
-  mtd_register(&priv->mtd, "skeleton");
-#endif
-
   /* Return the implementation-specific state structure as the MTD device */
 
   return (FAR struct mtd_dev_s *)&g_skeldev;

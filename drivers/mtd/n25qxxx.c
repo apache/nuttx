@@ -1423,6 +1423,7 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
       priv->mtd.bwrite = n25qxxx_bwrite;
       priv->mtd.read   = n25qxxx_read;
       priv->mtd.ioctl  = n25qxxx_ioctl;
+      priv->mtd.name   = "n25qxxx";
       priv->qspi       = qspi;
 
       /* Allocate a 4-byte buffer to support DMA-able command data */
@@ -1487,12 +1488,6 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
         }
 #endif
     }
-
-#ifdef CONFIG_MTD_REGISTRATION
-  /* Register the MTD with the procfs system if enabled */
-
-  mtd_register(&priv->mtd, "n25qxxx");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

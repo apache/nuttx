@@ -1330,6 +1330,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 #if defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY)
       priv->mtd.write  = w25_write;
 #endif
+      priv->mtd.name   = "w25";
       priv->spi        = spi;
 
       /* Deselect the FLASH */
@@ -1370,12 +1371,6 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 #endif
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "w25");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

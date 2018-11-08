@@ -1194,6 +1194,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
       priv->mtd.bwrite = sst25_bwrite;
       priv->mtd.read   = sst25_read;
       priv->mtd.ioctl  = sst25_ioctl;
+      priv->mtd.name   = "sst25";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -1234,12 +1235,6 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
 #endif
         }
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "sst25");
-#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

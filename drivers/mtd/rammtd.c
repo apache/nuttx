@@ -469,15 +469,10 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   priv->mtd.write  = ram_bytewrite;
 #endif
   priv->mtd.ioctl  = ram_ioctl;
+  priv->mtd.name   = "rammtd";
 
   priv->start      = start;
   priv->nblocks    = nblocks;
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "rammtd");
-#endif
 
   return &priv->mtd;
 }

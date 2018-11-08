@@ -944,6 +944,7 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
       priv->mtd.write  = sst26_write;
 #endif
       priv->mtd.ioctl  = sst26_ioctl;
+      priv->mtd.name   = "sst26";
       priv->dev        = dev;
 
       /* Deselect the FLASH */
@@ -967,12 +968,6 @@ FAR struct mtd_dev_s *sst26_initialize_spi(FAR struct spi_dev_s *dev)
           sst26_writeenable(priv);
           sst26_globalunlock(priv);
           sst26_writedisable(priv);
-
-#ifdef CONFIG_MTD_REGISTRATION
-          /* Register the MTD with the procfs system if enabled */
-
-          mtd_register(&priv->mtd, "sst26");
-#endif
         }
     }
 

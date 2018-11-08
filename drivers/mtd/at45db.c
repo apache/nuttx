@@ -851,6 +851,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
       priv->mtd.bwrite = at45db_bwrite;
       priv->mtd.read   = at45db_read;
       priv->mtd.ioctl  = at45db_ioctl;
+      priv->mtd.name   = "at45db";
       priv->spi        = spi;
 
       /* Deselect the FLASH */
@@ -900,12 +901,6 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
       at45db_pwrdown(priv);
       at45db_unlock(priv);
     }
-
-  /* Register the MTD with the procfs system if enabled */
-
-#ifdef CONFIG_MTD_REGISTRATION
-  mtd_register(&priv->mtd, "at45db");
-#endif
 
   finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
