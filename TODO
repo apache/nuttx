@@ -44,7 +44,17 @@ o Task/Scheduler (sched/)
   Title:       CHILD PTHREAD TERMINATION
   Description: When a tasks exits, shouldn't all of its child pthreads also be
                terminated?
-  Status:      Closed.  No, this behavior will not be implemented.
+
+               This behavior was implemented as an options controlled by the
+               configuration setting CONFIG_SCHED_EXIT_KILL_CHILDREN.  This
+               option must be used with caution, however.  It  should not be
+               used unless you are certain of what you are doing.  Uninformed
+               of this option can often lead to memory leaks since, for
+               example, memory allocations held by threads are not
+               automatically freed!
+
+  Status:      Closed.  No, this behavior will not be implemented unless
+               specifically selected.
   Priority:    Medium, required for good emulation of process/pthread model.
                The current behavior allows for the main thread of a task to
                exit() and any child pthreads will persist.  That does raise

@@ -1,7 +1,7 @@
 /****************************************************************************
  *  sched/group/group_foreachchild.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,9 @@ int group_foreachchild(FAR struct task_group_s *group,
 
   DEBUGASSERT(group);
 
-  for (i = 0; i < group->tg_nmembers; i++)
+  /* Visit the main thread last (if present) */
+
+  for (i = group->tg_nmembers - 1; i >= 0; i--)
     {
       ret = handler(group->tg_members[i], arg);
       if (ret != 0)

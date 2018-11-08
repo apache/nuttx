@@ -76,7 +76,7 @@
  * Returned Value:
  *   OK on success; or ERROR on failure
  *
- * Assumeptions:
+ * Assumptions:
  *   Executing within a critical section established by the caller.
  *
  ****************************************************************************/
