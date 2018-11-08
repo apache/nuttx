@@ -54,6 +54,13 @@ menuconfig NETDB_DNSCLIENT
 
 if NETDB_DNSCLIENT
 
+config NETDB_DNSCLIENT_RECV_TIMEOUT
+	int "DNS receive tiemout"
+	default 30
+	---help---
+		This the timeout value when DNS receive response after
+		dns_send_query, unit: seconds
+
 config NETDB_DNSCLIENT_ENTRIES
 	int "Number of DNS resolver entries"
 	default 0 if DEFAULT_SMALL

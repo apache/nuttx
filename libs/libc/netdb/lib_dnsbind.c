@@ -107,7 +107,7 @@ int dns_bind(void)
 
   /* Set up a receive timeout */
 
-  tv.tv_sec  = 30;
+  tv.tv_sec  = CONFIG_NETDB_DNSCLIENT_RECV_TIMEOUT;
   tv.tv_usec = 0;
 
   ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
