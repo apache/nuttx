@@ -453,8 +453,6 @@ int nxsig_usleep(useconds_t usec);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SIG_EVTHREAD) && defined(CONFIG_BUILD_FLAT)
-int nxsig_evthread(pid_t pid, FAR struct sigevent *event);
-#endif
+int nxsig_notification(pid_t pid, FAR struct sigevent *event, int code);
 
 #endif /* __INCLUDE_NUTTX_SIGNAL_H */

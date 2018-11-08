@@ -1,9 +1,8 @@
 /****************************************************************************
- * sched/signal/sig_mqnotempty.c
+ * sched/signal/sig_notification.c
  *
- *   Copyright (C) 2007-2009, 2013, 2015, 2017 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
+ *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,14 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <signal.h>
-#include <sched.h>
-#include <errno.h>
 #include <debug.h>
-
-#include <nuttx/signal.h>
+#include <signal.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -56,62 +50,64 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_mqnotempty
+ * Name: nxsig_notification
  *
  * Description:
- *   This function is equivalent to nxsig_queue(), but supports the
- *   messaging system's requirement to signal a task when a message queue
- *   becomes non-empty.  It is identical to nxsig_queue(), except that it
- *   sets the si_code field in the siginfo structure to SI_MESGQ rather than
- *   SI_QUEUE.
+ *   Notify a client an event via either a singal or function call
+ *   base on the sigev_notify field.
+ *
+ * Input Parameters:
+ *   pid   - The task/thread ID a the client thread to be signaled.
+ *   event - The instance of struct sigevent that describes how to signal
+ *           the client.
+ *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-int nxsig_mqnotempty(int pid, int signo, union sigval value)
-#else
-int nxsig_mqnotempty(int pid, int signo, void *sival_ptr)
-#endif
+int nxsig_notification(pid_t pid, FAR struct sigevent *event, int code)
 {
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = this_task();
-#endif
-  siginfo_t info;
-  int ret;
+  sinfo("pid=%p signo=%d code=%d sival_ptr=%p\n",
+         pid, event->sigev_signo, code, event->value.sival_ptr);
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  sinfo("pid=%p signo=%d value=%d\n", pid, signo, value.sival_int);
-#else
-  sinfo("pid=%p signo=%d sival_ptr=%p\n", pid, signo, sival_ptr);
-#endif
+  /* Notify client via a signal? */
 
-  /* Verify that we can perform the signalling operation */
-
-  if (!GOOD_SIGNO(signo))
+  if (event->sigev_notify == SIGEV_SIGNAL)
     {
-      return -EINVAL;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+      FAR struct tcb_s *rtcb = this_task();
+#endif
+      siginfo_t info;
+
+      /* Yes.. Create the siginfo structure */
+
+      info.si_signo  = event->sigev_signo;
+      info.si_code   = code;
+      info.si_errno  = OK;
+      info.si_value  = event->sigev_value;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+      info.si_pid    = rtcb->pid;
+      info.si_status = OK;
+#endif
+
+      /* Send the signal */
+
+      return nxsig_dispatch(pid, &info);
     }
 
-  /* Create the siginfo structure */
+#ifdef CONFIG_SIG_EVTHREAD
+  /* Notify the client via a function call */
 
-  info.si_signo           = signo;
-  info.si_code            = SI_MESGQ;
-  info.si_errno           = OK;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  info.si_value           = value;
-#else
-  info.si_value.sival_ptr = sival_ptr;
-#endif
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
+  else if (event->sigev_notify == SIGEV_THREAD)
+    {
+      return nxsig_evthread(pid, event);
+    }
 #endif
 
-  /* Process the receipt of the signal */
-
-  sched_lock();
-  ret = nxsig_dispatch(pid, &info);
-  sched_unlock();
-
-  return ret;
+  return event->sigev_notify == SIGEV_NONE ? OK : -ENOSYS;
 }
+

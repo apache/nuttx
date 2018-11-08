@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/aio/lio_listio.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -191,25 +191,8 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
 
       /* Signal the client */
 
-      if (sighand->sig->sigev_notify == SIGEV_SIGNAL)
-        {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          DEBUGASSERT(sigqueue(sighand->pid, sighand->sig->sigev_signo,
-                               sighand->sig->sigev_value));
-#else
-          DEBUGASSERT(sigqueue(sighand->pid, sighand->sig->sigev_signo,
-                               sighand->sig->sigev_value.sival_ptr));
-#endif
-        }
-
-#ifdef CONFIG_SIG_EVTHREAD
-      /* Notify the client via a function call */
-
-      else if (ighand->sig->sigev_notify == SIGEV_THREAD)
-        {
-          DEBUGASSERT(nxsig_evthread(sighand->pid, &sighand->sig));
-        }
-#endif
+      DEBUGVERIFY(nxsig_notification(sighand->pid, &sighand->sig,
+                                     SI_ASYNCIO));
 
       /* And free the container */
 
@@ -303,7 +286,8 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
 
   /* Attach our signal handler */
 
-  printf("waiter_main: Registering signal handler\n");
+  finfo("Registering signal handler\n");
+
   act.sa_sigaction = lio_sighandler;
   act.sa_flags = SA_SIGINFO;
 
@@ -314,7 +298,9 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   if (status != OK)
     {
       int errcode = get_errno();
+
       ferr("ERROR sigaction failed: %d\n", errcode);
+
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -374,11 +360,12 @@ static int lio_waitall(FAR struct aiocb * const *list, int nent)
       ret = sigwaitinfo(&set, NULL);
       if (ret < 0)
         {
+          int errcode = get_errno();
+
           /* The most likely reason that we would get here is because some
            * unrelated signal has been received.
            */
 
-          int errcode = get_errno();
           ferr("ERROR: sigwaitinfo failed: %d\n", errcode);
           DEBUGASSERT(errcode > 0);
           return -errcode;
@@ -670,7 +657,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
    *   caller ourself?
    */
 
-  else if (sig && sig->sigev_notify == SIGEV_SIGNAL)
+  else if (sig == NULL)
     {
       if (nqueued > 0)
         {
@@ -689,42 +676,19 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
         }
       else
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          status = sigqueue(getpid(), sig->sigev_signo,
-                            sig->sigev_value);
-#else
-          status = sigqueue(getpid(), sig->sigev_signo,
-                            sig->sigev_value.sival_ptr);
-#endif
+          status = nxsig_notification(sighand->pid, &sighand->sig,
+                                      SI_ASYNCIO);
           if (status < 0 && ret == OK)
             {
-              /* Something bad happened while signalling ourself and this is
-               * the first error to be reported.
+              /* Something bad happened while performing the notification
+               * and this is the first error to be reported.
                */
 
-              retcode = get_errno();
-              ret     = ERROR;
+               retcode = -status;
+               ret     = ERROR;
             }
         }
     }
-
-#ifdef CONFIG_SIG_EVTHREAD
-  /* Notify the client via a function call */
-
-  else if (sig && sig->sigev_notify == SIGEV_THREAD)
-    {
-      status = nxsig_evthread(sighand->pid, &sighand->sig);
-      if (status < 0 && ret == OK)
-        {
-         /* Something bad happened while performing the notification
-          * and this is the first error to be reported.
-          */
-
-          retcode = -status;
-          ret     = ERROR;
-        }
-    }
-#endif
 
   /* Case 3: mode == LIO_NOWAIT and sig == NULL
    *

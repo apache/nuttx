@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/aio/aio_signal.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,33 +91,11 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 
   /* Signal the client */
 
-  if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
+  ret = nxsig_notification(pid, &aiocbp->aio_sigevent, SI_ASYNCIO);
+  if (ret < 0)
     {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      ret = nxsig_queue(pid, aiocbp->aio_sigevent.sigev_signo,
-                        aiocbp->aio_sigevent.sigev_value);
-#else
-      ret = nxsig_queue(pid, aiocbp->aio_sigevent.sigev_sign,
-                        aiocbp->aio_sigevent.sigev_value.sival_ptr);
-#endif
-      if (ret < 0)
-        {
-          ferr("ERROR: nxsig_queue #1 failed: %d\n", ret);
-        }
+      ferr("ERROR: nxsig_notification failed: %d\n", ret);
     }
-
-#ifdef CONFIG_SIG_EVTHREAD
-  /* Notify the client via a function call */
-
-  else if (aiocbp->aio_sigevent.sigev_notify == SIGEV_THREAD)
-    {
-      ret = nxsig_evthread(pid, &aiocbp->aio_sigevent);
-      if (ret < 0)
-        {
-          ferr("ERROR: nxsig_evthread failed: %d\n", ret);
-        }
-    }
-#endif
 
   /* Send the poll signal in any event in case the caller is waiting
    * on sig_suspend();
