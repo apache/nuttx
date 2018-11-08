@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include <nuttx/fs/ioctl.h>
 
@@ -138,6 +139,14 @@ struct gpio_operations_s
                             enum gpio_pintype_e pintype);
 };
 
+ /* Signal information */
+
+struct gpio_signal_s
+{
+  struct sigevent gp_event;
+  pid_t gp_pid;        /* The task to be signaled */
+};
+
 /* Pin interface definition.  Must lie in writable memory. */
 
 struct gpio_dev_s
@@ -150,8 +159,7 @@ struct gpio_dev_s
 
   /* Writable storage used by the upper half driver */
 
-  uint8_t gp_signo;    /* signo to use when signaling a GPIO interrupt */
-  pid_t gp_pid;        /* The task to be signalled */
+  struct gpio_signal_s gp_signals[CONFIG_DEV_GPIO_NSIGNALS];
 
   /* Read-only pointer to GPIO device operations (also provided by the
    * lower half driver).
