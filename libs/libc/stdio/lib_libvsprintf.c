@@ -235,7 +235,7 @@ static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
   u.dw = 0;
   u.p  = p;
 
-  for (bits = 8*sizeof(void *); bits > 0; bits -= 4)
+  for (bits = CHAR_BIT * sizeof(FAR void *); bits > 0; bits -= 4)
     {
       uint8_t nibble = (uint8_t)((u.dw >> (bits - 4)) & 0xf);
       if (nibble < 10)
@@ -270,15 +270,20 @@ static int getpsize(uint8_t flags, FAR void *p)
 
 static void utodec(FAR struct lib_outstream_s *obj, unsigned int n)
 {
-  unsigned int remainder = n % 10;
-  unsigned int dividend  = n / 10;
+  char buf[16];
+  int i = 0;
 
-  if (dividend != 0)
+  do
     {
-      utodec(obj, dividend);
+      buf[i++] = n % 10 + '0';
+      n /= 10;
     }
+  while (n > 0);
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  while (i > 0)
+    {
+      obj->put(obj, buf[--i]);
+    }
 }
 
 /****************************************************************************
@@ -291,7 +296,7 @@ static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned int); bits > 0; bits -= 4)
+  for (bits = CHAR_BIT * sizeof(unsigned int); bits > 0; bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -321,15 +326,23 @@ static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
 
 static void utooct(FAR struct lib_outstream_s *obj, unsigned int n)
 {
-  unsigned int remainder = n & 0x7;
-  unsigned int dividend = n >> 3;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned int); bits > 0; bits -= 3)
     {
-      utooct(obj, dividend);
+      uint8_t tribit = (uint8_t)((n >> (bits - 3)) & 0x7);
+      if (tribit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (tribit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
@@ -338,15 +351,23 @@ static void utooct(FAR struct lib_outstream_s *obj, unsigned int n)
 
 static void utobin(FAR struct lib_outstream_s *obj, unsigned int n)
 {
-  unsigned int remainder = n & 1;
-  unsigned int dividend = n >> 1;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned int); bits > 0; bits -= 1)
     {
-      utobin(obj, dividend);
+      uint8_t unibit = (uint8_t)((n >> (bits - 1)) & 0x1);
+      if (unibit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (unibit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
@@ -498,15 +519,20 @@ static int getdblsize(uint8_t fmt, int trunc, uint8_t flags, double n)
 
 static void lutodec(FAR struct lib_outstream_s *obj, unsigned long n)
 {
-  unsigned int  remainder = n % 10;
-  unsigned long dividend  = n / 10;
+  char buf[32];
+  int i = 0;
 
-  if (dividend != 0)
+  do
     {
-      lutodec(obj, dividend);
+      buf[i++] = n % 10 + '0';
+      n /= 10;
     }
+  while (n > 0);
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  while (i > 0)
+    {
+      obj->put(obj, buf[--i]);
+    }
 }
 
 /****************************************************************************
@@ -519,7 +545,7 @@ static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned long); bits > 0; bits -= 4)
+  for (bits = CHAR_BIT * sizeof(unsigned long); bits > 0; bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -549,15 +575,23 @@ static void lutohex(FAR struct lib_outstream_s *obj, unsigned long n,
 
 static void lutooct(FAR struct lib_outstream_s *obj, unsigned long n)
 {
-  unsigned int  remainder = n & 0x7;
-  unsigned long dividend  = n >> 3;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned long); bits > 0; bits -= 3)
     {
-      lutooct(obj, dividend);
+      uint8_t tribit = (uint8_t)((n >> (bits - 3)) & 0x7);
+      if (tribit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (tribit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
@@ -566,15 +600,23 @@ static void lutooct(FAR struct lib_outstream_s *obj, unsigned long n)
 
 static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n)
 {
-  unsigned int  remainder = n & 1;
-  unsigned long dividend  = n >> 1;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned long); bits > 0; bits -= 1)
     {
-      lutobin(obj, dividend);
+      uint8_t unibit = (uint8_t)((n >> (bits - 1)) & 0x1);
+      if (unibit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (unibit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
@@ -707,15 +749,20 @@ static int getlusize(uint8_t fmt, uint8_t flags, unsigned long ln)
 
 static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long n)
 {
-  unsigned int remainder = n % 10;
-  unsigned long long dividend = n / 10;
+  char buf[32];
+  int i = 0;
 
-  if (dividend != 0)
+  do
     {
-      llutodec(obj, dividend);
+      buf[i++] = n % 10 + '0';
+      n /= 10;
     }
+  while (n > 0);
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  while (i > 0)
+    {
+      obj->put(obj, buf[--i]);
+    }
 }
 
 /****************************************************************************
@@ -728,7 +775,7 @@ static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
   bool    nonzero = false;
   uint8_t bits;
 
-  for (bits = 8*sizeof(unsigned long long); bits > 0; bits -= 4)
+  for (bits = CHAR_BIT*sizeof(unsigned long long); bits > 0; bits -= 4)
     {
       uint8_t nibble = (uint8_t)((n >> (bits - 4)) & 0xf);
       if (nibble || nonzero)
@@ -758,15 +805,23 @@ static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long n,
 
 static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long n)
 {
-  unsigned int remainder = n & 0x7;
-  unsigned long long dividend = n >> 3;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned long long); bits > 0; bits -= 3)
     {
-      llutooct(obj, dividend);
+      uint8_t tribit = (uint8_t)((n >> (bits - 3)) & 0x7);
+      if (tribit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (tribit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
@@ -775,15 +830,23 @@ static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long n)
 
 static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n)
 {
-  unsigned int remainder = n & 1;
-  unsigned long long dividend = n >> 1;
+  bool    nonzero = false;
+  uint8_t bits;
 
-  if (dividend != 0)
+  for (bits = CHAR_BIT * sizeof(unsigned long long); bits > 0; bits -= 1)
     {
-      llutobin(obj, dividend);
+      uint8_t unibit = (uint8_t)((n >> (bits - 1)) & 0x1);
+      if (unibit || nonzero)
+        {
+          nonzero = true;
+          obj->put(obj, (unibit + '0'));
+        }
     }
 
-  obj->put(obj, (remainder + (unsigned int)'0'));
+  if (!nonzero)
+    {
+      obj->put(obj, '0');
+    }
 }
 
 /****************************************************************************
