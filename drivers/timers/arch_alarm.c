@@ -79,7 +79,7 @@ static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
  ****************************************************************************/
 
 static inline void timespec_from_usec(FAR struct timespec *ts,
-                                      unsigned int microseconds)
+                                      uint64_t microseconds)
 {
   ts->tv_sec    = microseconds / USEC_PER_SEC;
   microseconds -= (uint64_t)ts->tv_sec * USEC_PER_SEC;
@@ -162,24 +162,30 @@ static void udelay_coarse(useconds_t microseconds)
     }
 }
 
-static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower, FAR void *arg)
+static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
+                             FAR void *arg)
 {
-#ifdef CONFIG_SCHED_TICKLESS
   struct timespec now;
 
+#ifdef CONFIG_SCHED_TICKLESS
   ONESHOT_CURRENT(g_oneshot_lower, &now);
   sched_alarm_expiration(&now);
 #else
-  struct timespec now;
-  struct timespec next;
   struct timespec delta;
-  static uint64_t tick = 1;
 
-  timespec_from_usec(&next, ++tick * USEC_PER_TICK);
-  ONESHOT_CURRENT(g_oneshot_lower, &now);
-  clock_timespec_subtract(&next, &now, &delta);
+  do
+    {
+      static uint64_t tick = 1;
+      struct timespec next;
+
+      sched_process_timer();
+      timespec_from_usec(&next, ++tick * USEC_PER_TICK);
+      ONESHOT_CURRENT(g_oneshot_lower, &now);
+      clock_timespec_subtract(&next, &now, &delta);
+    }
+  while (delta.tv_sec == 0 && delta.tv_nsec == 0);
+
   ONESHOT_START(g_oneshot_lower, oneshot_callback, NULL, &delta);
-  sched_process_timer();
 #endif
 }
 
