@@ -143,6 +143,7 @@ int parse_block_partition(FAR const char *path,
                           FAR void *arg)
 {
   struct partition_state_s state;
+  struct mtd_geometry_s mgeo;
   struct geometry geo;
   int ret;
 
@@ -152,15 +153,29 @@ int parse_block_partition(FAR const char *path,
       return ret;
     }
 
-  ret = state.blk->u.i_bops->geometry(state.blk, &geo);
+  state.mtd = NULL;
+
+  ret = state.blk->u.i_bops->ioctl(state.blk, MTDIOC_GEOMETRY, (unsigned long)&mgeo);
   if (ret >= 0)
     {
-      state.mtd       = NULL;
-      state.blocksize = geo.geo_sectorsize;
-      state.erasesize = geo.geo_sectorsize;
-      state.nblocks   = geo.geo_nsectors;
+      state.blocksize = mgeo.blocksize;
+      state.erasesize = mgeo.erasesize;
+      state.nblocks   = mgeo.neraseblocks;
+      state.nblocks  *= mgeo.erasesize / mgeo.blocksize;
 
       ret = parse_partition(&state, handler, arg);
+    }
+  else
+    {
+      ret = state.blk->u.i_bops->geometry(state.blk, &geo);
+      if (ret >= 0)
+        {
+          state.blocksize = geo.geo_sectorsize;
+          state.erasesize = geo.geo_sectorsize;
+          state.nblocks   = geo.geo_nsectors;
+
+          ret = parse_partition(&state, handler, arg);
+        }
     }
 
   close_blockdriver(state.blk);
@@ -188,10 +203,10 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
                         FAR void *arg)
 {
   struct partition_state_s state;
-  struct mtd_geometry_s geo;
+  struct mtd_geometry_s mgeo;
   int ret;
 
-  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)&geo);
+  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)&mgeo);
   if (ret < 0)
     {
       return ret;
@@ -199,11 +214,10 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
 
   state.blk       = NULL;
   state.mtd       = mtd;
-  state.blocksize = geo.blocksize;
-  state.erasesize = geo.erasesize;
-  state.nblocks   = geo.neraseblocks;
-  state.nblocks  *= geo.erasesize / geo.blocksize;
+  state.blocksize = mgeo.blocksize;
+  state.erasesize = mgeo.erasesize;
+  state.nblocks   = mgeo.neraseblocks;
+  state.nblocks  *= mgeo.erasesize / mgeo.blocksize;
 
   return parse_partition(&state, handler, arg);
 }
-

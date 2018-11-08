@@ -45,6 +45,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/kmalloc.h>
 
 #include "driver/driver.h"
@@ -234,16 +235,33 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   if (parent->u.i_bops->ioctl)
     {
-      ret = parent->u.i_bops->ioctl(parent, cmd, arg);
-      if (ret >= 0 && cmd == BIOC_XIPBASE)
+      if (cmd == MTDIOC_PROTECT || cmd == MTDIOC_UNPROTECT)
         {
-          FAR void **base = (FAR void **)arg;
-          struct geometry geo;
+          FAR struct mtd_protect_s *prot = (FAR struct mtd_protect_s *)arg;
 
-          ret = parent->u.i_bops->geometry(parent, &geo);
-          if (ret >= 0)
+          prot->startblock += dev->firstsector;
+        }
+
+      ret = parent->u.i_bops->ioctl(parent, cmd, arg);
+      if (ret >= 0)
+        {
+          if (cmd == BIOC_XIPBASE || cmd == MTDIOC_XIPBASE)
             {
-              *base += dev->firstsector * geo.geo_sectorsize;
+              FAR void **base = (FAR void **)arg;
+              struct geometry geo;
+
+              ret = parent->u.i_bops->geometry(parent, &geo);
+              if (ret >= 0)
+                {
+                  *base += dev->firstsector * geo.geo_sectorsize;
+                }
+            }
+          else if (cmd == MTDIOC_GEOMETRY)
+            {
+              FAR struct mtd_geometry_s *mgeo = (FAR struct mtd_geometry_s *)arg;
+              uint32_t blkper = mgeo->erasesize / mgeo->blocksize;
+
+              mgeo->neraseblocks = dev->nsectors / blkper;
             }
         }
     }
