@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/mount/fs_mount.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015, 2017, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -287,31 +288,36 @@ int mount(FAR const char *source, FAR const char *target,
   /* Find the specified filesystem.  Try the block driver file systems first */
 
 #ifdef BDFS_SUPPORT
-  if (source != NULL && (mops = mount_findfs(g_bdfsmap, filesystemtype)) != NULL)
+  if (source != NULL &&
+      (ret = find_blockdriver(source, mountflags, &drvr_inode)) >= 0)
     {
-      /* Find the block driver */
+      /* Find the block based file system */
 
-      ret = find_blockdriver(source, mountflags, &drvr_inode);
-      if (ret < 0)
+      mops = mount_findfs(g_bdfsmap, filesystemtype);
+      if (mops == NULL)
         {
-          ferr("ERROR: Failed to find block driver %s\n", source);
-          errcode = -ret;
-          goto errout;
+          ferr("ERROR: Failed to find block based file system %s\n",
+               filesystemtype);
+
+          errcode = ENODEV;
+          goto errout_with_inode;
         }
     }
   else
 #endif /* BDFS_SUPPORT */
 #ifdef MDFS_SUPPORT
-  if (source != NULL && (mops = mount_findfs(g_mdfsmap, filesystemtype)) != NULL)
+  if (source != NULL && (ret = find_mtddriver(source, &drvr_inode)) >= 0)
     {
-      /* Find the named MTD driver.  NOTE: mountflags are ignored. */
+      /* Find the MTD based file system */
 
-      ret = find_mtddriver(source, &drvr_inode);
-      if (ret < 0)
+      mops = mount_findfs(g_mdfsmap, filesystemtype);
+      if (mops == NULL)
         {
-          ferr("ERROR: Failed to find MTD driver %s\n", source);
-          errcode = -ret;
-          goto errout;
+          ferr("ERROR: Failed to find MTD based file system %s\n",
+               filesystemtype);
+
+          errcode = ENODEV;
+          goto errout_with_inode;
         }
     }
   else
@@ -323,8 +329,9 @@ int mount(FAR const char *source, FAR const char *target,
   else
 #endif /* NODFS_SUPPORT */
     {
-      ferr("ERROR: Failed to find file system %s\n", filesystemtype);
-      errcode = ENODEV;
+      ferr("ERROR: Failed to find block driver %s\n", source);
+
+      errcode = ENOTBLK;
       goto errout;
     }
 
@@ -472,28 +479,16 @@ int mount(FAR const char *source, FAR const char *target,
   /* A lot of goto's!  But they make the error handling much simpler */
 
 errout_with_mountpt:
-  mountpt_inode->i_crefs = 0;
   inode_remove(target);
-  inode_semgive();
-
-#if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
-#ifdef NODFS_SUPPORT
-  if (drvr_inode != NULL)
-#endif
-    {
-       inode_release(drvr_inode);
-    }
-#endif
-
   inode_release(mountpt_inode);
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
-#endif
-  goto errout;
 
 errout_with_semaphore:
   inode_semgive();
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RELEASE_SEARCH(&desc);
+#endif
 
+errout_with_inode:
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
 #ifdef NODFS_SUPPORT
   if (drvr_inode != NULL)
@@ -501,10 +496,6 @@ errout_with_semaphore:
     {
       inode_release(drvr_inode);
     }
-#endif
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  RELEASE_SEARCH(&desc);
 #endif
 
 errout:
