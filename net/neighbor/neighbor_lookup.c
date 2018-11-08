@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/neighbor/neighbor.c
+ * net/neighbor/neighbor_lookup.c
  *
  *   Copyright (C) 2007-2009, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

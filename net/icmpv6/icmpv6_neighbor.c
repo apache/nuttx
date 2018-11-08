@@ -215,7 +215,9 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   if (net_ipv6addr_cmp(ipaddr, g_ipv6_unspecaddr) ||
       net_is_addr_mcast(ipaddr))
     {
-      /* We don't need to send the Neighbor Solicitation */
+      /* We don't need to send the Neighbor Solicitation.  But for the case
+       * of the Multicast address, a routing able entry will be required.
+       */
 
       return OK;
     }

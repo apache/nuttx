@@ -593,7 +593,8 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  *   An IPv6 multicast address is an identifier for a group of interfaces
  *   (typically on different nodes).  An interface may belong to any number
- *   of multicast groups.  Multicast addresses have the following format:
+ *   of multicast groups.  Multicast addresses have the following format
+ *   (in host order):
  *
  *     |   8    |  4 |  4 |                  112 bits                   |
  *     +------ -+----+----+---------------------------------------------+

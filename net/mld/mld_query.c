@@ -44,6 +44,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/mld.h>
 
@@ -241,20 +242,20 @@ static void mld_check_querier(FAR struct net_driver_s *dev,
           /* Switch to non-Querier mode */
 
            CLR_MLD_QUERIER(group->flags);
-
-          /* Are we past the start up phase (where the timer is used for a
-           * different purpose)?
-           */
-
-          if (!IS_MLD_STARTUP(group->flags))
-            {
-              /* Yes.. cancel the poll timer and start the 'Other Querier
-               * Present' Timeout.
-               */
-
-              mld_start_polltimer(group, MSEC2TICK(MLD_OQUERY_MSEC));
-            }
         }
+    }
+
+  /* Check if the member is a Non-Querier AND that we are past the start up
+   * phase (where the timer is used for a different purpose)?
+   */
+
+  if (!IS_MLD_QUERIER(group->flags) && !IS_MLD_STARTUP(group->flags))
+    {
+      /* Yes.. cancel the poll timer and [re-]start the 'Other Querier
+       * Present' Timeout.
+       */
+
+      mld_start_polltimer(group, MSEC2TICK(MLD_OQUERY_MSEC));
     }
 }
 

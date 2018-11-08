@@ -42,6 +42,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/mld.h>
 

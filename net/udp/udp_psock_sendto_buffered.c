@@ -508,9 +508,10 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
   if (dev->d_sndlen <= 0 && (flags & UDP_NEWDATA) == 0 &&
       (flags & UDP_POLL) != 0 && !sq_empty(&conn->write_q))
     {
-      /* Check if the destination IP address is in the ARP  or Neighbor
-       * table.  If not, then the send won't actually make it out... it
-       * will be replaced with an ARP request or Neighbor Solicitation.
+      /* Check if the destination IP address is in the ARP, Neighbor
+       * table, or routing table.  If not, then the send won't actually
+       * make it out... it will be replaced with an ARP request or
+       * Neighbor Solicitation.
        */
 
       if (sendto_addrcheck(conn, dev))

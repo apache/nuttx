@@ -106,7 +106,7 @@ struct net_stats_s
   struct igmp_stats_s igmp;     /* IGMP statistics */
 #endif
 
-#ifdef CONFIG_NET_IGMP
+#ifdef CONFIG_NET_MLD
   struct mld_stats_s  mld;      /* MLD statistics */
 #endif
 

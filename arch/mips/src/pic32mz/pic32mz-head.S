@@ -540,7 +540,7 @@ __start:
 	mtc0	t0, PIC32MZ_CP0_STATUS
 
 #ifdef CONFIG_MIPS_MICROMIPS
-	/* Exception handlers are also being compiled for microMIPS, so enable 
+	/* Exception handlers are also being compiled for microMIPS, so enable
 	 * config3ISAOnExc now that exception vectors have been [re]located.
 	 */
 
