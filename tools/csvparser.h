@@ -50,7 +50,7 @@
 #define LINESIZE      (PATH_MAX > 256 ? PATH_MAX : 256)
 
 #define MAX_FIELDS    16
-#define MAX_PARMSIZE  128
+#define MAX_PARMSIZE  256
 #define NAME_INDEX    0
 #define HEADER_INDEX  1
 #define COND_INDEX    2
