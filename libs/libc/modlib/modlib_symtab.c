@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/modlib/modlib_symtab.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,11 +46,38 @@
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_MODLIB_HAVE_SYMTAB
+  /* Symbol table used by dlsym */
+
+#  ifndef CONFIG_MODLIB_SYMTAB_ARRAY
+#    error "CONFIG_MODLIB_SYMTAB_ARRAY must be defined"
+#  endif
+
+  /* Number of Symbols in the Table */
+
+#  ifndef CONFIG_MODLIB_NSYMBOLS_VAR
+#    error "CONFIG_MODLIB_NSYMBOLS_VAR must be defined"
+#  endif
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
-FAR const struct symtab_s *g_modlib_symtab;
-FAR int g_modlib_nsymbols;
+#ifdef CONFIG_MODLIB_HAVE_SYMTAB
+extern const struct symtab_s CONFIG_MODLIB_SYMTAB_ARRAY[];
+extern int CONFIG_MODLIB_NSYMBOLS_VAR;
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR const struct symtab_s *g_modlib_symtab;
+static FAR int g_modlib_nsymbols;
 
 /****************************************************************************
  * Public Functions
@@ -64,7 +91,8 @@ FAR int g_modlib_nsymbols;
  *
  * Input Parameters:
  *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol
+ *   table.
  *
  * Returned Value:
  *   None
@@ -78,6 +106,14 @@ void modlib_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
   /* Borrow the registry lock to assure atomic access */
 
   modlib_registry_lock();
+#ifdef CONFIG_MODLIB_HAVE_SYMTAB
+  if (g_modlib_symtab == NULL)
+    {
+      g_modlib_symtab = CONFIG_MODLIB_SYMTAB_ARRAY;
+      g_modlib_nsymbols = CONFIG_MODLIB_NSYMBOLS_VAR;
+    }
+#endif
+
   *symtab   = g_modlib_symtab;
   *nsymbols = g_modlib_nsymbols;
   modlib_registry_unlock();

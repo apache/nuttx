@@ -222,8 +222,6 @@ struct mod_loadinfo_s
  ****************************************************************************/
 
 struct symtab_s;
-FAR const struct symtab_s *g_modlib_symtab;
-FAR int g_modlib_nsymbols;
 
 /****************************************************************************
  * Public Function Prototypes

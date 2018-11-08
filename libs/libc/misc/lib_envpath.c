@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/binfmt_exepath.c
+ * libs/libc/misc/lib_envpath.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,120 +47,124 @@
 #include <string.h>
 #include <assert.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/binfmt/binfmt.h>
+#include <nuttx/envpath.h>
 
-#if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_BINFMT_EXEPATH)
+#include "libc.h"
+
+#if defined(CONFIG_LIB_ENVPATH)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct exepath_s
+struct envpath_s
 {
   FAR char *next; /* Pointer to the next (unterminated) value in the PATH variable */
   char path[1];
 };
-#define SIZEOF_EXEPATH_S(n) (sizeof(struct exepath_s) + (n) - 1)
+
+#define SIZEOF_ENVPATH_S(n) (sizeof(struct envpath_s) + (n) - 1)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: exepath_init
+ * Name: envpath_init
  *
  * Description:
  *   Initialize for the traversal of each value in the PATH variable.  The
  *   usage is sequence is as follows:
  *
- *   1) Call exepath_init() to initialize for the traversal.  exepath_init()
+ *   1) Call envpath_init() to initialize for the traversal.  envpath_init()
  *      will return an opaque handle that can then be provided to
- *      exepath_next() and exepath_release().
- *   2) Call exepath_next() repeatedly to examine every file that lies
+ *      envpath_next() and envpath_release().
+ *   2) Call envpath_next() repeatedly to examine every file that lies
  *      in the directories of the PATH variable
- *   3) Call exepath_release() to free resources set aside by exepath_init().
+ *   3) Call envpath_release() to free resources set aside by envpath_init().
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   On success, exepath_init() return a non-NULL, opaque handle that may
- *   subsequently be used in calls to exepath_next() and exepath_release().
+ *   On success, envpath_init() return a non-NULL, opaque handle that may
+ *   subsequently be used in calls to envpath_next() and envpath_release().
  *   On error, a NULL handle value will be returned.  The most likely cause
  *   of an error would be that there is no value associated with the PATH
  *   variable.
  *
  ****************************************************************************/
 
-EXEPATH_HANDLE exepath_init(void)
+ENVPATH_HANDLE envpath_init(FAR const char *name)
 {
-  FAR struct exepath_s *exepath;
+  FAR struct envpath_s *envpath;
   FAR char *path;
 
   /* Get the value of the PATH variable */
 
-  path = getenv("PATH");
+  path = getenv(name);
   if (!path)
     {
       /* getenv() will return a NULL value if the PATH variable does not
        * exist in the environment.
        */
 
-      return (EXEPATH_HANDLE)NULL;
+      return (ENVPATH_HANDLE)NULL;
     }
 
   /* Allocate a container for the PATH variable contents */
 
-  exepath = (FAR struct exepath_s *)kmm_malloc(SIZEOF_EXEPATH_S(strlen(path) + 1));
-  if (!exepath)
+  envpath = (FAR struct envpath_s *)
+    lib_malloc(SIZEOF_ENVPATH_S(strlen(path) + 1));
+
+  if (!envpath)
     {
       /* Ooops.. we are out of memory */
 
-      return (EXEPATH_HANDLE)NULL;
+      return (ENVPATH_HANDLE)NULL;
     }
 
   /* Populate the container */
 
-  strcpy(exepath->path, path);
-  exepath->next = exepath->path;
+  strcpy(envpath->path, path);
+  envpath->next = envpath->path;
 
   /* And return the containing cast to an opaque handle */
 
-  return (EXEPATH_HANDLE)exepath;
+  return (ENVPATH_HANDLE)envpath;
 }
 
 /****************************************************************************
- * Name: exepath_next
+ * Name: envpath_next
  *
  * Description:
  *   Traverse all possible values in the PATH variable in attempt to find
- *   the full path to an executable file when only a relative path is
+ *   the full path to an envcutable file when only a relative path is
  *   provided.
  *
  * Input Parameters:
- *   handle - The handle value returned by exepath_init
+ *   handle - The handle value returned by envpath_init
  *   relpath - The relative path to the file to be found.
  *
  * Returned Value:
  *   On success, a non-NULL pointer to a null-terminated string is provided.
  *   This is the full path to a file that exists in the file system.  This
  *   function will verify that the file exists (but will not verify that it
- *   is marked executable).
+ *   is marked envcutable).
  *
  *   NOTE: The string pointer return in the success case points to allocated
- *   memory.  This memory must be freed by the called by calling kmm_free().
+ *   memory.  This memory must be freed by the called by calling lib_free().
  *
  *   NULL is returned if no path is found to any file with the provided
  *   'relpath' from any absolute path in the PATH variable.  In this case,
- *   there is no point in calling exepath_next() further; exepath_release()
+ *   there is no point in calling envpath_next() further; envpath_release()
  *   must be called to release resources set aside by expath_init().
  *
  ****************************************************************************/
 
-FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
+FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
 {
-  FAR struct exepath_s *exepath = (FAR struct exepath_s *)handle;
+  FAR struct envpath_s *envpath = (FAR struct envpath_s *)handle;
   struct stat buf;
   FAR char *endptr;
   FAR char *path;
@@ -170,7 +174,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
 
   /* Verify that a value handle and relative path were provided */
 
-  DEBUGASSERT(exepath && relpath);
+  DEBUGASSERT(envpath && relpath);
   DEBUGASSERT(relpath[0] != '\0' && relpath[0] != '/');
 
   /* Loop until (1) we find a file with this relative path from one of the
@@ -180,9 +184,9 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
 
   for (; ; )
     {
-      /* Make sure that exepath->next points to the beginning of a string */
+      /* Make sure that envpath->next points to the beginning of a string */
 
-      path = exepath->next;
+      path = envpath->next;
       if (*path == '\0')
        {
           /* If it points to a NULL it means that either (1) the PATH varialbe
@@ -199,7 +203,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
        */
 
       endptr = strchr(path, ':');
-      if (!endptr)
+      if (endptr == NULL)
         {
           /* If strchr returns NUL it means that ':' does not appear in the
            * string.  Therefore, this must be the final path in the PATH
@@ -207,19 +211,19 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
            */
 
           endptr = &path[strlen(path)];
-          exepath->next = endptr;
+          envpath->next = endptr;
           DEBUGASSERT(*endptr == '\0');
         }
       else
         {
           DEBUGASSERT(*endptr == ':');
-          exepath->next = endptr + 1;
+          envpath->next = endptr + 1;
           *endptr = '\0';
         }
 
       pathlen  = strlen(path) + strlen(relpath) + 2;
-      fullpath = (FAR char *)kmm_malloc(pathlen);
-      if (!fullpath)
+      fullpath = (FAR char *)lib_malloc(pathlen);
+      if (fullpathi == NULL)
         {
           /* Failed to allocate memory */
 
@@ -242,33 +246,33 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
        * continue to try the next path.
        */
 
-       kmm_free(fullpath);
+       lib_free(fullpath);
     }
 
   /* We will not get here */
 }
 
 /****************************************************************************
- * Name: exepath_release
+ * Name: envpath_release
  *
  * Description:
- *   Release all resources set aside by exepath_init() when the handle value
+ *   Release all resources set aside by envpath_init() when the handle value
  *   was created.  The handle value is invalid on return from this function.
- *   Attempts to all exepath_next() or exepath_release() with such a 'stale'
+ *   Attempts to all envpath_next() or envpath_release() with such a 'stale'
  *   handle will result in undefined (i.e., not good) behavior.
  *
  * Input Parameters:
- *   handle - The handle value returned by exepath_init
+ *   handle - The handle value returned by envpath_init
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void exepath_release(EXEPATH_HANDLE handle)
+void envpath_release(ENVPATH_HANDLE handle)
 {
-  kmm_free(handle);
+  lib_free(handle);
 }
 
-#endif /* !CONFIG_BINFMT_DISABLE && CONFIG_BINFMT_EXEPATH */
+#endif /* CONFIG_LIBC_ENVPATH */
 

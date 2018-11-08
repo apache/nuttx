@@ -98,7 +98,7 @@
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
- *              CONFIG_BINFMT_EXEPATH is defined in the configuration, then
+ *              CONFIG_LIB_ENVPATH is defined in the configuration, then
  *              this may be a relative path from the current working
  *              directory. Otherwise, path must be the absolute path to the
  *              program.

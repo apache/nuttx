@@ -71,7 +71,7 @@ Here is a simple test configuration using the NuttX simulator:
    This enables general BINFMT support:
 
      CONFIG_DEBUG_BINFMT=y
-     CONFIG_BINFMT_EXEPATH=y
+     CONFIG_LIB_ENVPATH=y
 
    This enables building of the P-Code virtual machine:
 

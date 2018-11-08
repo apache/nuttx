@@ -200,7 +200,7 @@
 #    define __SYS_posix_spawn          __SYS_exec
 #  endif
 #  ifdef CONFIG_LIBC_EXECFUNCS
-#    ifdef CONFIG_BINFMT_EXEPATH
+#    ifdef CONFIG_LIB_ENVPATH
 #      define SYS_posix_spawnp         __SYS_posix_spawn
 #    else
 #      define SYS_posix_spawn          __SYS_posix_spawn

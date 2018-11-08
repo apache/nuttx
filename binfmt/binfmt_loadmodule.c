@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/envpath.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
@@ -190,12 +191,12 @@ int load_module(FAR struct binary_s *bin)
        * be loaded?  Absolute paths start with '/'.
        */
 
-#ifdef CONFIG_BINFMT_EXEPATH
+#ifdef CONFIG_LIB_ENVPATH
       if (bin->filename[0] != '/')
         {
           FAR const char *relpath;
           FAR char *fullpath;
-          EXEPATH_HANDLE handle;
+          ENVPATH_HANDLE handle;
 
           /* Set aside the relative path */
 
@@ -204,12 +205,12 @@ int load_module(FAR struct binary_s *bin)
 
           /* Initialize to traverse the PATH variable */
 
-          handle = exepath_init();
+          handle = envpath_init("PATH");
           if (handle)
             {
               /* Get the next absolute file path */
 
-              while ((fullpath = exepath_next(handle, relpath)) != NULL)
+              while ((fullpath = envpath_next(handle, relpath)) != NULL)
                 {
                   /* Try to load the file at this path */
 
@@ -230,7 +231,7 @@ int load_module(FAR struct binary_s *bin)
 
               /* Release the traversal handle */
 
-              exepath_release(handle);
+              envpath_release(handle);
             }
 
           /* Restore the relative path.  This is not needed for anything

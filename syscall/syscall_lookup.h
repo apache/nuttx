@@ -135,7 +135,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(exec,                     4, STUB_exec)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
-#ifdef CONFIG_BINFMT_EXEPATH
+#ifdef CONFIG_LIB_ENVPATH
   SYSCALL_LOOKUP(posix_spawnp,             6, STUB_posix_spawnp)
 #else
   SYSCALL_LOOKUP(posix_spawn,              6, STUB_posix_spawn)

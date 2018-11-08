@@ -875,7 +875,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
    <li>
      <code>filename</code>:
      The path to the program to be executed.
-     If <code>CONFIG_BINFMT_EXEPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
+     If <code>CONFIG_LIB_ENVPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
      Otherwise, <code>path</code> must be the absolute path to the program.
    </li>
    <li>
@@ -969,7 +969,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
    <li>
      <code>path</code>:
      The path to the program to be executed.
-     If <code>CONFIG_BINFMT_EXEPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
+     If <code>CONFIG_LIB_ENVPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
      Otherwise, <code>path</code> must be the absolute path to the program.
    <li>
    </li>
@@ -1013,7 +1013,7 @@ int execl(FAR const char *path, ...);
    <li>
      <code>path</code>:
      The path to the program to be executed.
-     If <code>CONFIG_BINFMT_EXEPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
+     If <code>CONFIG_LIB_ENVPATH</code> is defined in the configuration, then this may be a relative path from the current working directory.
      Otherwise, <code>path</code> must be the absolute path to the program.
    <li>
    </li>
@@ -1074,7 +1074,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
      </p>
      <p>
        NOTE: NuttX provides only one implementation:
-       If <code>CONFIG_BINFMT_EXEPATH</code> is defined, then only <code>posix_spawnp()</code> behavior is supported; otherwise, only <code>posix_spawn</code> behavior is supported.
+       If <code>CONFIG_LIB_ENVPATH</code> is defined, then only <code>posix_spawnp()</code> behavior is supported; otherwise, only <code>posix_spawn</code> behavior is supported.
    </li>
    <li>
      <p>
@@ -1156,8 +1156,8 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
 </p>
 <ul>
   <li>
-    NuttX provides only <code>posix_spawn()</code> or <code>posix_spawnp()</code> behavior depending upon the setting of <code>CONFIG_BINFMT_EXEPATH</code>:
-    If <code>CONFIG_BINFMT_EXEPATH</code> is defined, then only <code>posix_spawnp()</code> behavior is supported; otherwise, only <code>posix_spawn()</code> behavior is supported.
+    NuttX provides only <code>posix_spawn()</code> or <code>posix_spawnp()</code> behavior depending upon the setting of <code>CONFIG_LIB_ENVPATH</code>:
+    If <code>CONFIG_LIB_ENVPATH</code> is defined, then only <code>posix_spawnp()</code> behavior is supported; otherwise, only <code>posix_spawn()</code> behavior is supported.
   </li>
   <li>
     The <code>envp</code> argument is not used and the <code>environ</code> variable is not altered (NuttX does not support the <code>environ</code> variable).

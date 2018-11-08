@@ -70,7 +70,7 @@
  *     child task in the variable pointed to by a non-NULL 'pid' argument.|
  *
  *   path - The 'path' argument identifies the file to execute.  If
- *     CONFIG_BINFMT_EXEPATH is defined, this may be either a relative or
+ *     CONFIG_LIB_ENVPATH is defined, this may be either a relative or
  *     or an absolute path.  Otherwise, it must be an absolute path.
  *
  *   attr - If the value of the 'attr' parameter is NULL, the all default

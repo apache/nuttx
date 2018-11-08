@@ -337,6 +337,7 @@ int modlib_symvalue(FAR struct module_s *modp,
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
   uintptr_t secbase;
+  int nsymbols;
   int ret;
 
   switch (sym->st_shndx)
@@ -399,12 +400,13 @@ int modlib_symvalue(FAR struct module_s *modp,
 
         if (symbol == NULL)
           {
+            modlib_getsymtab(&symbol, &nsymbols);
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-            symbol = symtab_findorderedbyname(g_modlib_symtab, exportinfo.name,
-                                              g_modlib_nsymbols);
+            symbol = symtab_findorderedbyname(symbol, exportinfo.name,
+                                              nsymbols);
 #else
-            symbol = symtab_findbyname(g_modlib_symtab, exportinfo.name,
-                                       g_modlib_nsymbols);
+            symbol = symtab_findbyname(symbol, exportinfo.name,
+                                       nsymbols);
 #endif
           }
 

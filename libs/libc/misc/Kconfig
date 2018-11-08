@@ -102,3 +102,11 @@ config LIB_SLCDCODEC
 		include/nuttx/lcd/slcd_codec.h.  While not correctly a part of the C
 		library, it is included here because the encoding side of this
 		interface must be accessible by end user programs.
+
+config LIB_ENVPATH
+	bool "Support PATH Environment Variable"
+	default n
+	depends on !DISABLE_ENVIRON
+	---help---
+		Use the contents of the common environment variable to locate executable
+		or library files.  Default: n

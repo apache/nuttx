@@ -12,18 +12,10 @@ config BINFMT_DISABLE
 
 if !BINFMT_DISABLE
 
-config BINFMT_EXEPATH
-	bool "Support PATH variable"
-	default n
-	depends on !DISABLE_ENVIRON
-	---help---
-		Use the contents of the PATH environment variable to locate executable
-		files.  Default: n
-
 config PATH_INITIAL
 	string "Initial PATH Value"
 	default ""
-	depends on BINFMT_EXEPATH
+	depends on LIB_ENVPATH
 	---help---
 		The initial value of the PATH variable.  This is the colon-separated
 		list of absolute paths.  E.g., "/bin:/usr/bin:/sbin"

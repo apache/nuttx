@@ -103,6 +103,12 @@ ifeq ($(CONFIG_LIB_SLCDCODEC),y)
 CSRCS += lib_slcdencode.c lib_slcddecode.c
 endif
 
+# Environment search path support
+
+ifeq ($(CONFIG_LIB_ENVPATH),y)
+CSRCS += lib_envpath.c
+endif
+
 # Add the misc directory to the build
 
 DEPPATH += --dep-path misc
