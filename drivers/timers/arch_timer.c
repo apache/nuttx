@@ -43,8 +43,6 @@
 #include <nuttx/clock.h>
 #include <nuttx/timers/arch_timer.h>
 
-#include <string.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -217,8 +215,8 @@ static bool timer_callback(FAR uint32_t *next_interval_us, FAR void *arg)
   struct timer_status_s status;
   uint32_t next_interval;
 
-  g_timer.timebase += *next_interval_us;
-  next_interval = g_timer.maxtimeout;
+  g_timer.timebase     += *next_interval_us;
+  next_interval         = g_timer.maxtimeout;
   g_timer.next_interval = &next_interval;
   sched_timer_expiration();
   g_timer.next_interval = NULL;
@@ -229,6 +227,7 @@ static bool timer_callback(FAR uint32_t *next_interval_us, FAR void *arg)
       g_timer.timebase += status.timeout - status.timeleft;
       *next_interval_us = next_interval;
     }
+
 #else
   g_timer.timebase += USEC_PER_TICK;
   sched_process_timer();
@@ -263,7 +262,7 @@ void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   the archtecture-specific timer was initialized).  This function is
+ *   the architecture-specific timer was initialized).  This function is
  *   functionally equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
@@ -294,14 +293,15 @@ void up_timer_set_lowerhalf(FAR struct timer_lowerhalf_s *lower)
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 int up_timer_getcounter(FAR uint64_t *cycles)
 {
-  if (!g_timer.lower)
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
     {
-      *cycles = 0;
-      return 0;
+      *cycles = current_usec() / USEC_PER_TICK;
+      ret = 0;
     }
 
-  *cycles = current_usec() / USEC_PER_TICK;
-  return 0;
+  return ret;
 }
 
 void up_timer_getmask(FAR uint64_t *mask)
@@ -322,14 +322,15 @@ void up_timer_getmask(FAR uint64_t *mask)
 #elif defined(CONFIG_SCHED_TICKLESS)
 int up_timer_gettime(FAR struct timespec *ts)
 {
-  if (!g_timer.lower)
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
     {
-      memset(ts, 0, sizeof(*ts));
-      return 0;
+      timespec_from_usec(ts, current_usec());
+      ret = 0;
     }
 
-  timespec_from_usec(ts, current_usec());
-  return 0;
+  return ret;
 }
 #endif
 
@@ -372,13 +373,15 @@ int up_timer_gettime(FAR struct timespec *ts)
 #ifdef CONFIG_SCHED_TICKLESS
 int up_timer_cancel(FAR struct timespec *ts)
 {
-  if (!g_timer.lower)
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
     {
-      return -EAGAIN;
+      timespec_from_usec(ts, update_timeout(g_timer.maxtimeout));
+      ret = 0;
     }
 
-  timespec_from_usec(ts, update_timeout(g_timer.maxtimeout));
-  return 0;
+  return ret;
 }
 #endif
 
@@ -410,13 +413,15 @@ int up_timer_cancel(FAR struct timespec *ts)
 #ifdef CONFIG_SCHED_TICKLESS
 int up_timer_start(FAR const struct timespec *ts)
 {
-  if (!g_timer.lower)
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
     {
-      return -EAGAIN;
+      update_timeout(timespec_to_usec(ts));
+      ret = 0;
     }
 
-  update_timeout(timespec_to_usec(ts));
-  return 0;
+  return ret;
 }
 #endif
 
@@ -446,11 +451,11 @@ void up_mdelay(unsigned int milliseconds)
 
 void up_udelay(useconds_t microseconds)
 {
-  if (g_timer.lower)
+  if (g_timer.lower != NULL)
     {
       udelay_accurate(microseconds);
     }
-  else /* period timer doesn't init yet */
+  else /* Period timer hasn't been initialized yet */
     {
       udelay_coarse(microseconds);
     }
