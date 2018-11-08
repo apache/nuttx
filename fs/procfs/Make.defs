@@ -38,11 +38,16 @@ ifeq ($(CONFIG_FS_PROCFS),y)
 
 ASRCS +=
 CSRCS += fs_procfs.c fs_procfsutil.c fs_procfsproc.c fs_procfsuptime.c
-CSRCS += fs_procfscpuload.c fs_procfsmeminfo.c
+CSRCS += fs_procfscpuload.c fs_procfsmeminfo.c fs_procfsversion.c
 
 # Include procfs build support
 
 DEPPATH += --dep-path procfs
 VPATH += :procfs
+
+# To ensure version information is newest,
+# add fs_procfsversion to phony target for force rebuild
+
+.PHONY: fs_procfsversion$(OBJEXT)
 
 endif
