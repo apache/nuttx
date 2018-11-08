@@ -1,8 +1,8 @@
 /****************************************************************************
- * fs/driver/fs_blockproxy.c
+ * fs/driver/fs_mtdproxy.c
  *
- *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Pinecone Inc. All rights reserved.
+ *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,10 +42,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
@@ -53,11 +50,9 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/mtd/mtd.h>
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
-    !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
+#include "driver/driver.h"
 
 /****************************************************************************
  * Private Data
@@ -71,7 +66,7 @@ static sem_t g_devno_sem = SEM_INITIALIZER(1);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unique_chardev
+ * Name: unique_blkdev
  *
  * Description:
  *   Create a unique temporary device name in the /dev/ directory of the
@@ -88,7 +83,7 @@ static sem_t g_devno_sem = SEM_INITIALIZER(1);
  *
  ****************************************************************************/
 
-static FAR char *unique_chardev(void)
+static FAR char *unique_blkdev(void)
 {
   struct stat statbuf;
   char devbuf[16];
@@ -121,7 +116,7 @@ static FAR char *unique_chardev(void)
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, 16, "/dev/tmpc%06lx", (unsigned long)devno);
+      snprintf(devbuf, 16, "/dev/tmpb%06lx", (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 
@@ -141,20 +136,22 @@ static FAR char *unique_chardev(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: block_proxy
+ * Name: mtd_proxy
  *
  * Description:
- *   Create a temporary char driver using drivers/bch to mediate character
- *   oriented accessed to the block driver.
+ *   Create a temporary block driver using drivers/mtd/ftl to mediate block
+ *   oriented accessed to the mtd driver.
  *
  * Input Parameters:
- *   blkdev - The path to the block driver
- *   oflags - Character driver open flags
+ *   mtddev  - The path to the mtd driver
+ *   mountflags - if MS_RDONLY is not set, then driver must support write
+ *     operations (see include/sys/mount.h)
+ *   ppinode - address of the location to return the inode reference
  *
  * Returned Value:
- *   If positive, non-zero file descriptor is returned on success.  This
- *   is the file descriptor of the nameless character driver that mediates
- *   accesses to the block driver.
+ *   If zero, non-zero inode pointer is returned on success.  This
+ *   is the inode pointer of the nameless block driver that mediates
+ *   accesses to the mtd driver.
  *
  *   Errors that may be returned:
  *
@@ -162,80 +159,63 @@ static FAR char *unique_chardev(void)
  *
  *   Plus:
  *
- *     - Errors reported from bchdev_register()
+ *     - Errors reported from ftl_initialize()
  *     - Errors reported from open() or unlink()
  *
  ****************************************************************************/
 
-int block_proxy(FAR const char *blkdev, int oflags)
+int mtd_proxy(FAR const char *mtddev, int mountflags,
+              FAR struct inode **ppinode)
 {
-  FAR char *chardev;
-  bool readonly;
+  FAR struct inode *mtd;
+  FAR char *blkdev;
   int ret;
-  int fd;
 
-  DEBUGASSERT(blkdev);
+  /* Create a unique temporary file name for the block device */
 
-  /* Create a unique temporary file name for the character device */
-
-  chardev = unique_chardev();
-  if (chardev == NULL)
+  blkdev = unique_blkdev();
+  if (blkdev == NULL)
     {
       ferr("ERROR: Failed to create temporary device name\n");
       return -ENOMEM;
     }
 
-  /* Should this character driver be read-only? */
+  /* Wrap the mtd driver with an instance of the ftl driver */
 
-  readonly = ((oflags & O_WROK) == 0);
-
-  /* Wrap the block driver with an instance of the BCH driver */
-
-  ret = bchdev_register(blkdev, chardev, readonly);
+  ret = find_mtddriver(mtddev, &mtd);
   if (ret < 0)
     {
-      ferr("ERROR: bchdev_register(%s, %s) failed: %d\n",
-           blkdev, chardev, ret);
-
-      goto errout_with_chardev;
+      ferr("ERROR: Failed to find %s mtd driver\n", mtddev);
+      goto out_with_blkdev;
     }
 
-  /* Open the newly created character driver */
-
-  oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  fd = nx_open(chardev, oflags);
-  if (fd < 0)
+  ret = ftl_initialize_by_path(blkdev, mtd->u.i_mtd);
+  inode_release(mtd);
+  if (ret < 0)
     {
-      ret = fd;
-      ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
-      goto errout_with_bchdev;
+      ferr("ERROR: ftl_initialize_by_path(%s, %s) failed: %d\n",
+           mtddev, blkdev, ret);
+      goto out_with_blkdev;
     }
 
-  /* Unlink the character device name.  The driver instance will persist,
+  /* Open the newly created block driver */
+
+  ret = open_blockdriver(blkdev, mountflags, ppinode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to open %s: %d\n", blkdev, ret);
+      goto out_with_fltdev;
+    }
+
+  /* Unlink and free the block device name.  The driver instance will persist,
    * provided that CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y (otherwise, we have
    * a problem here!)
    */
 
-  ret = unlink(chardev);
-  if (ret < 0)
-    {
-      ret = -errno;
-      ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
-    }
-
-  /* Free the allocate character driver name and return the open file
-   * descriptor.
-   */
-
-  kmm_free(chardev);
-  return fd;
-
-errout_with_bchdev:
-  (void)unlink(chardev);
-
-errout_with_chardev:
-  kmm_free(chardev);
+out_with_fltdev:
+  unlink(blkdev);
+out_with_blkdev:
+  kmm_free(blkdev);
   return ret;
 }
 
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && !CONFIG_DISABLE_PSEUDOFS_OPERATIONS */

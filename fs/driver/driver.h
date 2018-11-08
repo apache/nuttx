@@ -123,6 +123,40 @@ int block_proxy(FAR const char *blkdev, int oflags);
 #endif
 
 /****************************************************************************
+ * Name: mtd_proxy
+ *
+ * Description:
+ *   Create a temporary block driver using drivers/mtd/ftl to mediate block
+ *   oriented accessed to the mtd driver.
+ *
+ * Input Parameters:
+ *   mtddev  - The path to the mtd driver
+ *   mountflags - if MS_RDONLY is not set, then driver must support write
+ *     operations (see include/sys/mount.h)
+ *   ppinode - address of the location to return the inode reference
+ *
+ * Returned Value:
+ *   If zero, non-zero inode pointer is returned on success.  This
+ *   is the inode pointer of the nameless block driver that mediates
+ *   accesses to the mtd driver.
+ *
+ *   Errors that may be returned:
+ *
+ *     ENOMEM - Failed to create a temporay path name.
+ *
+ *   Plus:
+ *
+ *     - Errors reported from ftl_initialize()
+ *     - Errors reported from open() or unlink()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD
+int mtd_proxy(FAR const char *mtddev, int mountflags,
+              FAR struct inode **ppinode);
+#endif
+
+/****************************************************************************
  * Name: find_mtddriver
  *
  * Description:

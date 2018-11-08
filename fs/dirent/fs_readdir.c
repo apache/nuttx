@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/dirent/fs_readdir.c
  *
- *   Copyright (C) 2007-2009, 2011, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,9 +65,9 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
 
   if (!idir->u.pseudo.fd_next)
     {
-      /* End of file and error conditions are not distinguishable
-       * with readdir.  Here we return -ENOENT to signal the end
-       * of the directory.
+      /* End of file and error conditions are not distinguishable with
+       * readdir.  Here we return -ENOENT to signal the end of the
+       * directory.
        */
 
       return -ENOENT;
@@ -74,17 +75,17 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
 
   /* Copy the inode name into the dirent structure */
 
-  strncpy(idir->fd_dir.d_name, idir->u.pseudo.fd_next->i_name, NAME_MAX+1);
+  strncpy(idir->fd_dir.d_name, idir->u.pseudo.fd_next->i_name,
+          NAME_MAX + 1);
 
-  /* If the node has file operations, we will say that it is
-   * a file.
-   */
+  /* If the node has file operations, we will say that it is a file. */
 
   idir->fd_dir.d_type = 0;
   if (idir->u.pseudo.fd_next->u.i_ops)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next))
+      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next) ||
+         INODE_IS_MTD(idir->u.pseudo.fd_next))
         {
            idir->fd_dir.d_type |= DTYPE_BLK;
         }
@@ -249,4 +250,3 @@ errout:
   set_errno(ret);
   return NULL;
 }
-

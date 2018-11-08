@@ -386,7 +386,7 @@ union inode_ops_u
 #ifndef CONFIG_DISABLE_MQUEUE
   FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
 #endif
-#ifndef CONFIGMTD
+#ifdef CONFIG_MTD
   FAR struct mtd_dev_s                 *i_mtd;    /* MTD device driver */
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS

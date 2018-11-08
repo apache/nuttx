@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/vfs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
       /* Perform the socket ioctl */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           return net_poll(fd, fds, setup);
         }
@@ -352,7 +352,8 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * reading and writing."
        */
 
-      if (INODE_IS_MOUNTPT(inode) || INODE_IS_BLOCK(inode))
+      if (INODE_IS_MOUNTPT(inode) || INODE_IS_BLOCK(inode) ||
+          INODE_IS_MTD(inode))
         {
           if (setup)
             {
