@@ -203,7 +203,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
   struct icmpv6_notify_s notify;
   struct timespec delay;
   struct icmpv6_neighbor_s state;
-  FAR const uint16_t *lookup;
+  net_ipv6addr_t lookup;
   int ret;
 
   /* First check if destination is a local broadcast or a multicast address.
@@ -250,12 +250,10 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
     {
       /* Yes.. use the input address for the lookup */
 
-      lookup = ipaddr;
+      net_ipv6addr_copy(lookup, ipaddr);
     }
   else
     {
-      net_ipv6addr_t dripaddr;
-
       /* Destination address is not on the local network */
 
 #ifdef CONFIG_NET_ROUTE
@@ -266,18 +264,14 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
        * destination address when determining the MAC address.
        */
 
-      netdev_ipv6_router(dev, ipaddr, dripaddr);
+      netdev_ipv6_router(dev, ipaddr, lookup);
 #else
       /* Use the device's default router IP address instead of the
        * destination address when determining the MAC address.
        */
 
-      net_ipv6addr_copy(dripaddr, dev->d_ipv6draddr);
+      net_ipv6addr_copy(lookup, dev->d_ipv6draddr);
 #endif
-
-      /* Use the router address for the lookup */
-
-      lookup = dripaddr;
     }
 
   /* Allocate resources to receive a callback.  This and the following
