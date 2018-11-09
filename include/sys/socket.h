@@ -58,12 +58,12 @@
 #define PF_UNIX        1 /* Local communication */
 #define PF_LOCAL       1 /* Local communication */
 #define PF_INET        2 /* IPv4 Internet protocols */
-#define PF_INET6       3 /* IPv6 Internet protocols */
-#define PF_PACKET      4 /* Low level packet interface */
-#define PF_BLUETOOTH   5 /* Bluetooth sockets */
-#define PF_IEEE802154  6 /* Low level IEEE 802.15.4 radio frame interface */
-#define PF_PKTRADIO    7 /* Low level packet radio interface */
-#define PF_NETLINK     8 /* Netlink IPC socket */
+#define PF_INET6      10 /* IPv6 Internet protocols */
+#define PF_NETLINK    16 /* Netlink IPC socket */
+#define PF_PACKET     17 /* Low level packet interface */
+#define PF_BLUETOOTH  31 /* Bluetooth sockets */
+#define PF_IEEE802154 36 /* Low level IEEE 802.15.4 radio frame interface */
+#define PF_PKTRADIO   64 /* Low level packet radio interface */
 
 /* Supported Address Families. Opengroup.org requires only AF_UNSPEC,
  * AF_UNIX, AF_INET and AF_INET6.
@@ -74,11 +74,11 @@
 #define AF_LOCAL       PF_LOCAL
 #define AF_INET        PF_INET
 #define AF_INET6       PF_INET6
+#define AF_NETLINK     PF_NETLINK
 #define AF_PACKET      PF_PACKET
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
 #define AF_PKTRADIO    PF_PKTRADIO
-#define AF_NETLINK     PF_NETLINK
 
 /* The socket created by socket() has the indicated type, which specifies
  * the communication semantics.
@@ -92,17 +92,17 @@
 #define SOCK_DGRAM     2 /* Supports  datagrams (connectionless, unreliable
                           * messages of a fixed maximum length).
                           */
-#define SOCK_SEQPACKET 3 /* Provides a sequenced, reliable, two-way
+#define SOCK_RAW       3 /* Provides raw network protocol access. */
+#define SOCK_RDM       4 /* Provides a reliable datagram layer that does not
+                          * guarantee ordering.
+                          */
+#define SOCK_SEQPACKET 5 /* Provides a sequenced, reliable, two-way
                           * connection-based data transmission path for
                           * datagrams of fixed maximum length; a consumer is
                           * required to read an entire packet with each read
                           * system call.
                           */
-#define SOCK_RAW       4 /* Provides raw network protocol access. */
-#define SOCK_RDM       5 /* Provides a reliable datagram layer that does not
-                          * guarantee ordering.
-                          */
-#define SOCK_PACKET    6 /* Obsolete and should not be used in new programs */
+#define SOCK_PACKET    10 /* Obsolete and should not be used in new programs */
 
 /* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
  * recognized by Linus, not all are supported by NuttX.
