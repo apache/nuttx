@@ -223,7 +223,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
 
       pathlen  = strlen(path) + strlen(relpath) + 2;
       fullpath = (FAR char *)lib_malloc(pathlen);
-      if (fullpathi == NULL)
+      if (fullpath == NULL)
         {
           /* Failed to allocate memory */
 
