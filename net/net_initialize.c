@@ -50,7 +50,6 @@
 #include "netdev/netdev.h"
 #include "ipforward/ipforward.h"
 #include "sixlowpan/sixlowpan.h"
-#include "neighbor/neighbor.h"
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"
 #include "mld/mld.h"
@@ -100,10 +99,6 @@ void net_initialize(void)
   net_lockinitialize();
 
 #ifdef CONFIG_NET_IPv6
-  /* Initialize the Neighbor Table data structures */
-
-  neighbor_initialize();
-
 #ifdef CONFIG_NET_MLD
   /* Initialize ICMPv6 Multicast Listener Discovery (MLD) logic */
 

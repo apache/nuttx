@@ -64,8 +64,6 @@
 #  define CONFIG_NET_IPv6_NCONF_ENTRIES 8
 #endif
 
-#define NEIGHBOR_MAXTIME 128
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -96,7 +94,7 @@ struct neighbor_entry
 {
   net_ipv6addr_t         ne_ipaddr;  /* IPv6 address of the Neighbor */
   struct neighbor_addr_s ne_addr;    /* Link layer address of the Neighbor */
-  uint8_t                ne_time;    /* For aging, units of half seconds */
+  clock_t                ne_time;    /* For aging, units of tick */
 };
 
 /****************************************************************************
@@ -114,25 +112,6 @@ extern struct neighbor_entry g_neighbors[CONFIG_NET_IPv6_NCONF_ENTRIES];
  ****************************************************************************/
 
 struct net_driver_s; /* Forward reference */
-
-/****************************************************************************
- * Name: neighbor_initialize
- *
- * Description:
- *   Initialize Neighbor table data structures.  This function is called
- *   prior to platform-specific driver initialization so that the networking
- *   subsystem is prepared to deal with network driver initialization
- *   actions.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void neighbor_initialize(void);
 
 /****************************************************************************
  * Name: neighbor_findentry
@@ -207,23 +186,6 @@ FAR const struct neighbor_addr_s *neighbor_lookup(const net_ipv6addr_t ipaddr);
  ****************************************************************************/
 
 void neighbor_update(const net_ipv6addr_t ipaddr);
-
-/****************************************************************************
- * Name: neighbor_periodic
- *
- * Description:
- *   Called from the timer poll logic in order to perform agin operations on
- *   entries in the Neighbor Table
- *
- * Input Parameters:
- *   hsec - Elapsed time in half seconds since the last check
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void neighbor_periodic(int hsec);
 
 /****************************************************************************
  * Name: neighbor_dumpentry
