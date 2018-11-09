@@ -77,21 +77,26 @@ int syslog_putc(int ch)
   if (up_interrupt_context() || sched_idletask())
     {
 #if defined(CONFIG_SYSLOG_INTBUFFER)
-      /* Buffer the character in the interrupt buffer.  The interrupt buffer
-       * will be flushed before the next normal, non-interrupt SYSLOG output.
-       */
+      if (up_interrupt_context())
+        {
+          /* Buffer the character in the interrupt buffer.  The interrupt buffer
+           * will be flushed before the next normal, non-interrupt SYSLOG output.
+           */
 
-      return syslog_add_intbuffer(ch);
-#else
-      /* Force the character to the SYSLOG device immediately (if possible).
-       * This means that the interrupt data may not be in synchronization
-       * with output data that may have been buffered by sc_putc().
-       */
-
-      DEBUGASSERT(g_syslog_channel->sc_force != NULL);
-
-      return g_syslog_channel->sc_force(ch);
+          return syslog_add_intbuffer(ch);
+        }
+      else
 #endif
+        {
+          /* Force the character to the SYSLOG device immediately (if possible).
+           * This means that the interrupt data may not be in synchronization
+           * with output data that may have been buffered by sc_putc().
+           */
+
+          DEBUGASSERT(g_syslog_channel->sc_force != NULL);
+
+          return g_syslog_channel->sc_force(ch);
+        }
     }
   else
     {
