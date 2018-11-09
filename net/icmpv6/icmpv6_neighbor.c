@@ -326,7 +326,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
        * issue.
        */
 
-      if (neighbor_findentry(lookup) != NULL)
+      if (neighbor_lookup(lookup, NULL) >= 0)
         {
           /* We have it!  Break out with success */
 

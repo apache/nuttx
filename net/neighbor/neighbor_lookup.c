@@ -43,11 +43,67 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/net/ip.h>
 
+#include "netdev/netdev.h"
 #include "neighbor/neighbor.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct neighbor_table_info_s
+{
+  net_ipv6addr_t              ni_ipaddr; /* IPv6 address for lookup */
+  FAR struct neighbor_addr_s *ni_laddr;  /* Location to return the link
+                                          * layer address */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: neighbor_match
+ *
+ * Description:
+ *   This is a callback that checks if the network device has the
+ *   indicated IPv6 address assigned to it.
+ *
+ ****************************************************************************/
+
+static int neighbor_match(FAR struct net_driver_s *dev, FAR void *arg)
+{
+  FAR struct neighbor_table_info_s *info = arg;
+
+  /* Check if the network device has been assigned the IP address of the
+   * lookup.
+   */
+
+  if (!net_ipv6addr_cmp(dev->d_ipv6addr, info->ni_ipaddr))
+    {
+      return 0;
+    }
+
+  /* Yes.. Return the matching link layer address if the caller of
+   * neighbor_lookup() provided a non-NULL location.
+   */
+
+  if (info->ni_laddr != NULL)
+    {
+      info->ni_laddr->na_lltype = dev->d_lltype;
+      info->ni_laddr->na_llsize = netdev_dev_lladdrsize(dev);
+      memcpy(&info->ni_laddr->u, &dev->d_mac, info->ni_laddr->na_llsize);
+    }
+
+  /* Return success in any event */
+
+  return 1;
+}
 
 /****************************************************************************
  * Public Functions
@@ -61,23 +117,57 @@
  *
  * Input Parameters:
  *   ipaddr - The IPv6 address to use in the lookup;
- *   lladdr - The location to return the link layer address
+ *   laddr  - Location to return the corresponding link layer address.
+ *            This address may be NULL.  In that case, this function may be
+ *            used simply to determine if the link layer address is available.
  *
  * Returned Value:
- *   Returns OK if the address was successfully obtain; a negated errno
- *   value is returned on failure.
+ *   Zero (OK) if the link layer address is returned.  A negated errno value
+ *   is returned on any error.
  *
  ****************************************************************************/
 
-FAR const struct neighbor_addr_s *neighbor_lookup(const net_ipv6addr_t ipaddr)
+int neighbor_lookup(FAR const net_ipv6addr_t ipaddr,
+                    FAR struct neighbor_addr_s *laddr)
 {
   FAR struct neighbor_entry *neighbor;
+  struct neighbor_table_info_s info;
+
+  /* Check if the IPv6 address is already in the neighbor table. */
 
   neighbor = neighbor_findentry(ipaddr);
   if (neighbor != NULL)
     {
-      return &neighbor->ne_addr;
+      /* Yes.. return the link layer address if the caller has provided a
+       * non-NULL address in 'laddr'.
+       */
+
+      if (laddr != NULL)
+        {
+          memcpy(laddr, &neighbor->ne_addr, sizeof(*laddr));
+        }
+
+      /* Return success in any case meaning that a valid link layer
+       * address mapping is available for the IPv6 address.
+       */
+
+      return OK;
     }
 
-  return NULL;
+  /* No.. check if the IPv6 address is the address assigned to a local
+   * network device.  If so, return a mapping of that IPv6 address
+   * to the linker layer address assigned to the network device.
+   */
+
+  net_ipv6addr_copy(info.ni_ipaddr, ipaddr);
+  info.ni_laddr = laddr;
+
+  if (netdev_foreach(neighbor_match, &info) != 0)
+    {
+      return OK;
+    }
+
+  /* Not found */
+
+  return -ENOENT;
 }

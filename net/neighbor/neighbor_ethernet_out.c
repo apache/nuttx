@@ -134,9 +134,9 @@ static const uint8_t g_multicast_ethaddr[3] =
 
 void neighbor_out(FAR struct net_driver_s *dev)
 {
-  FAR const struct neighbor_addr_s *naddr;
   FAR struct eth_hdr_s *eth = ETHBUF;
   FAR struct ipv6_hdr_s *ip = IPv6BUF;
+  struct neighbor_addr_s laddr;
   net_ipv6addr_t ipaddr;
 
   /* Skip sending Neighbor Solicitations when the frame to be transmitted was
@@ -220,8 +220,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
       /* Check if we already have this destination address in the Neighbor Table */
 
-      naddr = neighbor_lookup(ipaddr);
-      if (!naddr)
+      if (neighbor_lookup(ipaddr, &laddr) < 0)
         {
            ninfo("IPv6 Neighbor solicitation for IPv6\n");
 
@@ -236,7 +235,7 @@ void neighbor_out(FAR struct net_driver_s *dev)
 
       /* Build an Ethernet header. */
 
-      memcpy(eth->dest, naddr->u.na_ethernet.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(eth->dest, laddr.u.na_ethernet.ether_addr_octet, ETHER_ADDR_LEN);
     }
 
   /* Finish populating the Ethernet header */

@@ -176,7 +176,7 @@ static inline bool ipfwd_addrchk(FAR struct forward_s *fwd)
     {
 #if defined(CONFIG_NET_ICMPv6_NEIGHBOR)
       FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)fwd->f_iob->io_data;
-      return (neighbor_findentry(ipv6->destipaddr) != NULL);
+      return (neighbor_lookup(ipv6->destipaddr, NULL) >= 0);
 #else
       return true;
 #endif

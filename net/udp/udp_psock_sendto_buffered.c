@@ -294,7 +294,7 @@ static inline bool sendto_addrcheck(FAR struct udp_conn_s *conn,
 #endif
     {
 #if !defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-      return (neighbor_findentry(conn->u.ipv6.raddr) != NULL);
+      return (neighbor_lookup(conn->u.ipv6.raddr, NULL) >= 0);
 #else
       return true;
 #endif
