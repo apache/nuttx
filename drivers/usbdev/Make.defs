@@ -61,6 +61,10 @@ ifeq ($(CONFIG_RNDIS),y)
   CSRCS += rndis.c
 endif
 
+ifeq ($(CONFIG_DFU),y)
+  CSRCS += dfu.c
+endif
+
 ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
 endif

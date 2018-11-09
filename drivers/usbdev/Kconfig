@@ -190,6 +190,19 @@ config COMPOSITE_VERSIONNO
 	default 0x1010
 	---help---
 		Interface version number.
+
+config COMPOSITE_MSFT_OS_DESCRIPTORS
+	bool "Add support for Microsoft OS Descriptors"
+	default n
+	---help---
+		Microsoft Windows cannot always automatically determine appropriate
+		drivers for different interfaces of a USB composite device. There is
+		a vendor-specific mechanism called "Microsoft OS Descriptors" that
+		allows the interface to provide further ID code to help with driver
+		loading. See https://msdn.microsoft.com/en-us/windows/hardware/gg463179
+		Enabling this feature in composite driver will pass these requests
+		onwards to the interface drivers.
+
 endif
 
 config PL2303
@@ -720,9 +733,52 @@ config RNDIS_VERSIONNO
 	hex "RNDIS Version Number"
 	default 0x0001
 
-endif # RNDIS
+endif # !RNDIS_COMPOSITE
 
-endif # RNDIS_COMPOSITE
+menuconfig DFU
+	bool "DFU Device Firmware Upgrade"
+	default n
+	---help---
+		References:
+		  - "Universal Serial Bus Device Class Specification for Device
+		     Firmware Upgrade, Version 1.1, Aug 5, 2004"
+
+		This driver implements the application-part of DFU protocol. It enables
+		a host application to send DFU_DETACH request and to cause the device
+		to reboot into a bootloader mode.
+
+if DFU
+
+config DFU_MSFT_OS_DESCRIPTORS
+	bool "Microsoft OS descriptor support"
+	default n
+	depends on COMPOSITE_MSFT_OS_DESCRIPTORS
+	---help---
+		Enabling this option will cause the DFU driver to return "WINUSB" as
+		the compatible ID of the DFU interface. This will automatically load
+		the appropriate driver for use with e.g. libusb and dfu-util.
+		Note that as of 2018 there are some issues with libusb and
+		composite devices, you may need a patched version:
+		https://sourceforge.net/p/libusb/mailman/message/36304399/
+
+config DFU_INTERFACE_NAME
+	string "DFU interface string"
+	default "DFU interface"
+	---help---
+		String to assign as a name for the DFU interface.
+
+if DFU_MSFT_OS_DESCRIPTORS
+
+config DFU_INTERFACE_GUID
+	string "DFU interface GUID"
+	default "{8FE6D4D7-49DD-41E7-9486-49AFC6BFE475}"
+	---help---
+		DeviceInterfaceGUID to use for DFU interface in Microsoft OS descriptors.
+		Actual value does not matter for libusb, but if using WinUSB API directly
+		you can request your device by this GUID.
+
+endif # DFU_MSFT_OS_DESCRIPTORS
+endif # DFU
 
 menuconfig NET_CDCECM
 	bool "CDC-ECM Ethernet-over-USB"
