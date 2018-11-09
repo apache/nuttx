@@ -109,8 +109,9 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
                                    unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6;
-  struct sockaddr_in6 inaddr;
+  FAR struct icmpv6_hdr_s *icmpv6;
   FAR struct iob_s *iob;
+  struct sockaddr_in6 inaddr;
   uint16_t offset;
   uint16_t buflen;
   uint8_t addrsize;
@@ -171,6 +172,8 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   /* Copy the new ICMPv6 reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPv6SIZE;
+  icmpv6 = ICMPv6BUF;
+
   ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPv6REPLY, buflen, offset, true);
   if (ret < 0)
     {
