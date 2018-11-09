@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/usb.h
  *
- *   Copyright (C) 2008, 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010, 2012, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* A packet identifier (PID) immediately follows the SYNC field of every USB packet.
  * A PID consists of a four-bit packet type field followed by a four-bit check field
  * USB Tokens (See Table 8-1 in the USB specification)
@@ -260,6 +261,7 @@
 #define USB_MAX_DEVICES                         (127)
 
 /* Microsoft OS Descriptor specific values */
+
 #define USB_REQ_GETMSFTOSDESCRIPTOR             (0xEE)
 #define MSFTOSDESC_INDEX_FUNCTION               4
 #define MSFTOSDESC_INDEX_EXTPROP                5
@@ -278,6 +280,7 @@ struct usb_ctrlreq_s
   uint8_t index[2];
   uint8_t len[2];
 };
+
 #define USB_SIZEOF_CTRLREQ 8
 
 /* Generic descriptor */
@@ -307,6 +310,7 @@ struct usb_devdesc_s
   uint8_t serno;             /* Serial number */
   uint8_t nconfigs;          /* Number of configurations */
 };
+
 #define USB_SIZEOF_DEVDESC 18
 
 /* Configuration descriptor */
@@ -322,6 +326,7 @@ struct usb_cfgdesc_s
   uint8_t attr;              /* Attributes */
   uint8_t mxpower;           /* Max power (mA/2) */
 };
+
 #define USB_SIZEOF_CFGDESC 9
 
 struct usb_otherspeedconfigdesc_s
@@ -335,6 +340,7 @@ struct usb_otherspeedconfigdesc_s
   uint8_t  attr;              /* Attributes */
   uint8_t  mxpower;           /* Max power (mA/2) */
 };
+
 #define USB_SIZEOF_OTHERSPEEDCONFIGDESC 9
 
 /* String descriptor */
@@ -360,6 +366,7 @@ struct usb_ifdesc_s
   uint8_t protocol;          /* Interface protocol */
   uint8_t iif;               /* iInterface */
 };
+
 #define USB_SIZEOF_IFDESC 9
 
 /* Endpoint descriptor */
@@ -373,6 +380,7 @@ struct usb_epdesc_s
   uint8_t  mxpacketsize[2];   /* Maximum packet size */
   uint8_t  interval;          /* Interval */
 };
+
 #define USB_SIZEOF_EPDESC 7
 
 struct usb_audioepdesc_s
@@ -381,6 +389,7 @@ struct usb_audioepdesc_s
   uint8_t  refresh;
   uint8_t  synchaddr;
 };
+
 #define USB_SIZEOF_AUDIOEPDESC 9
 
 /* Device qualifier descriptor */
@@ -397,6 +406,7 @@ struct usb_qualdesc_s
   uint8_t  nconfigs;          /* Number of configurations */
   uint8_t  reserved;
 };
+
 #define USB_SIZEOF_QUALDESC 10
 
 /* Interface association descriptor
@@ -420,6 +430,7 @@ struct usb_iaddesc_s
   uint8_t  protocol;          /* Protocol code */
   uint8_t  ifunction;         /* Index to string identifying the function */
 };
+
 #define USB_SIZEOF_IADDESC 8
 
 /* Microsoft OS function descriptor.
@@ -460,6 +471,7 @@ struct usb_msft_os_feature_desc_s
  * The interface will have one extended properties descriptor, which may contain
  * multiple properties inside it.
  */
+
 struct usb_msft_os_extprop_hdr_s
 {
   uint8_t len[4];            /* Descriptor length */

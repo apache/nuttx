@@ -91,3 +91,4 @@ void usbdev_dfu_activate_bootloader();
 #endif
 
 #endif /* __INCLUDE_NUTTX_USB_DFU_H */
+

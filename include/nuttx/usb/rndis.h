@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/rndis.h
  *
- *   Copyright (C) 2011-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2018 Gregory Nutt. All rights reserved.
  *   Authors: Sakari Kapanen <sakari.m.kapanen@gmail.com>,
               Petteri Aimonen <jpa@git.mail.kapsi.fi>
  *
@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* Indexes for devinfo.epno[] array. Used for composite device configuration. */
+
 #define RNDIS_EP_INTIN_IDX      (0)
 #define RNDIS_EP_BULKIN_IDX     (1)
 #define RNDIS_EP_BULKOUT_IDX    (2)
@@ -110,7 +111,8 @@ int usbdev_rndis_initialize(FAR const uint8_t *mac_address);
  *
  ****************************************************************************/
 
-int usbdev_rndis_set_host_mac_addr(FAR struct net_driver_s *netdev, FAR const uint8_t *mac_address);
+int usbdev_rndis_set_host_mac_addr(FAR struct net_driver_s *netdev,
+                                   FAR const uint8_t *mac_address);
 
 /****************************************************************************
  * Name: usbdev_rndis_get_composite_devdesc
