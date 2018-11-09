@@ -129,19 +129,6 @@ static void sched_timer_start(unsigned int ticks);
  * Private Data
  ****************************************************************************/
 
-/* This is the duration of the currently active timer or, when
- * sched_timer_expiration() is called, the duration of interval timer
- * that just expired.  The value zero means that no timer was active.
- */
-
-static unsigned int g_timer_interval;
-
-#ifdef CONFIG_SCHED_SPORADIC
-/* This is the time of the last scheduler assessment */
-
-static struct timespec g_sched_time;
-#endif
-
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 /* This is the time that the timer was stopped.  All future times are
  * calculated against this time.  It must be valid at all times when
@@ -149,6 +136,19 @@ static struct timespec g_sched_time;
  */
 
 static struct timespec g_stop_time;
+#else
+/* This is the duration of the currently active timer or, when
+ * sched_timer_expiration() is called, the duration of interval timer
+ * that just expired.  The value zero means that no timer was active.
+ */
+
+static unsigned int g_timer_interval;
+#endif
+
+#ifdef CONFIG_SCHED_SPORADIC
+/* This is the time of the last scheduler assessment */
+
+static struct timespec g_sched_time;
 #endif
 
 /****************************************************************************
@@ -183,8 +183,8 @@ static struct timespec g_stop_time;
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
 {
-  FAR struct tcb_s *rtcb  = current_task(cpu);
-  FAR struct tcb_s *ntcb  = current_task(cpu);
+  FAR struct tcb_s *rtcb = current_task(cpu);
+  FAR struct tcb_s *ntcb = current_task(cpu);
   uint32_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
@@ -343,7 +343,7 @@ static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
 {
   unsigned int cmptime = UINT_MAX;
-  unsigned int rettime  = 0;
+  unsigned int rettime = 0;
   unsigned int tmp;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -368,7 +368,7 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
   tmp = sched_process_scheduler(ticks, noswitches);
   if (tmp > 0 && tmp < cmptime)
     {
-      rettime  = tmp;
+      rettime = tmp;
     }
 
   return rettime;
@@ -394,15 +394,12 @@ static void sched_timer_start(unsigned int ticks)
   uint64_t usecs;
   uint64_t secs;
 #else
-  uint64_t usecs;
-  uint64_t secs;
+  uint32_t usecs;
+  uint32_t secs;
 #endif
   uint32_t nsecs;
   int ret;
 
-  /* Set up the next timer interval (or not) */
-
-  g_timer_interval = 0;
   if (ticks > 0)
     {
       struct timespec ts;
@@ -413,10 +410,6 @@ static void sched_timer_start(unsigned int ticks)
           ticks = g_oneshot_maxticks;
         }
 #endif
-
-      /* Save new timer interval */
-
-      g_timer_interval = ticks;
 
       /* Convert ticks to a struct timespec that up_timer_start() can
        * understand.
@@ -445,6 +438,10 @@ static void sched_timer_start(unsigned int ticks)
       ret = up_alarm_start(&ts);
 
 #else
+      /* Save new timer interval */
+
+      g_timer_interval = ticks;
+
       /* [Re-]start the interval timer */
 
       ret = up_timer_start(&ts);
@@ -487,8 +484,16 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
 {
   unsigned int elapsed;
   unsigned int nexttime;
+  struct timespec delta;
 
   DEBUGASSERT(ts);
+
+  /* Calculate elapsed */
+
+  clock_timespec_subtract(ts, &g_stop_time, &delta);
+
+  elapsed  = SEC2TICK(delta.tv_sec);
+  elapsed += delta.tv_nsec / NSEC_PER_TICK;
 
   /* Save the time that the alarm occurred */
 
@@ -502,10 +507,14 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
   g_sched_time.tv_nsec = ts->tv_nsec;
 #endif
 
-  /* Get the interval associated with last expiration */
+  /* Correct g_stop_time cause of the elapsed have remainder */
 
-  elapsed          = g_timer_interval;
-  g_timer_interval = 0;
+  g_stop_time.tv_nsec -= delta.tv_nsec % NSEC_PER_TICK;
+  if (g_stop_time.tv_nsec < 0)
+    {
+      g_stop_time.tv_nsec += NSEC_PER_SEC;
+      g_stop_time.tv_sec--;
+    }
 
   /* Process the timer ticks and set up the next interval (or not) */
 
@@ -589,9 +598,8 @@ unsigned int sched_timer_cancel(void)
    * current time.
    */
 
-  ts.tv_sec        = g_stop_time.tv_sec;
-  ts.tv_nsec       = g_stop_time.tv_nsec;
-  g_timer_interval = 0;
+  ts.tv_sec  = g_stop_time.tv_sec;
+  ts.tv_nsec = g_stop_time.tv_nsec;
 
   (void)up_alarm_cancel(&g_stop_time);
 
@@ -609,7 +617,16 @@ unsigned int sched_timer_cancel(void)
   /* Convert to ticks */
 
   elapsed  = SEC2TICK(ts.tv_sec);
-  elapsed += NSEC2TICK(ts.tv_nsec);
+  elapsed += ts.tv_nsec / NSEC_PER_TICK;
+
+  /* Correct g_stop_time cause of the elapsed have remainder */
+
+  g_stop_time.tv_nsec -= ts.tv_nsec % NSEC_PER_TICK;
+  if (g_stop_time.tv_nsec < 0)
+    {
+      g_stop_time.tv_nsec += NSEC_PER_SEC;
+      g_stop_time.tv_sec--;
+    }
 
   /* Process the timer ticks and return the next interval */
 
