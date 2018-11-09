@@ -221,6 +221,18 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_FS_WRITABLE
+static int ftl_alloc_eblock(FAR struct ftl_struct_s *dev)
+{
+  if (dev->eblock == NULL)
+    {
+       /* Allocate one, in-memory erase block buffer */
+
+       dev->eblock = (FAR uint8_t *)kmm_malloc(dev->geo.erasesize);
+    }
+
+   return dev->eblock != NULL ? OK : -ENOMEM;
+}
+
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                          off_t startblock, size_t nblocks)
 {
@@ -251,6 +263,13 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       /* Check if the write is shorter than to the end of the erase block */
 
       bool short_write = (remaining < (alignedblock - startblock));
+
+      ret = ftl_alloc_eblock(dev);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to allocate an erase block buffer\n");
+          return ret;
+        }
 
       /* Read the full erase block into the buffer */
 
@@ -350,9 +369,16 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
   if (remaining > 0)
     {
+      ret = ftl_alloc_eblock(dev);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to allocate an erase block buffer\n");
+          return ret;
+        }
+
       /* Read the full erase block into the buffer */
 
-     nxfrd = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
+      nxfrd = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
           ferr("ERROR: Read erase block %d failed: %d\n", alignedblock, nxfrd);
@@ -565,18 +591,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
           return ret;
         }
 
-      /* Allocate one, in-memory erase block buffer */
-
-#ifdef CONFIG_FS_WRITABLE
-      dev->eblock  = (FAR uint8_t *)kmm_malloc(dev->geo.erasesize);
-      if (!dev->eblock)
-        {
-          ferr("ERROR: Failed to allocate an erase block buffer\n");
-          kmm_free(dev);
-          return -ENOMEM;
-        }
-#endif
-
       /* Get the number of R/W blocks per erase block */
 
       dev->blkper = dev->geo.erasesize / dev->geo.blocksize;
@@ -603,9 +617,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           ferr("ERROR: rwb_initialize failed: %d\n", ret);
-#ifdef CONFIG_FS_WRITABLE
-          kmm_free(dev->eblock);
-#endif
           kmm_free(dev);
           return ret;
         }
@@ -617,9 +628,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           ferr("ERROR: register_blockdriver failed: %d\n", -ret);
-#ifdef CONFIG_FS_WRITABLE
-          kmm_free(dev->eblock);
-#endif
           kmm_free(dev);
         }
     }
