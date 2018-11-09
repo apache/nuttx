@@ -488,8 +488,9 @@ errout_with_semaphore:
   RELEASE_SEARCH(&desc);
 #endif
 
-errout_with_inode:
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
+errout_with_inode:
+
 #ifdef NODFS_SUPPORT
   if (drvr_inode != NULL)
 #endif
