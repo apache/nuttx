@@ -104,7 +104,7 @@
 #    define htobe64(n)        (n)
 #    define htole64(n)        __swap_uint64((uint64_t)n)
 #    define be64toh(n)        (n)
-#    define le64toh(n)        __swap_uint64(uint64_t)n)
+#    define le64toh(n)        __swap_uint64((uint64_t)n)
 #  endif
 
 #else
@@ -125,9 +125,9 @@
 #  define le32toh(n)          (n)
 
 #  ifdef CONFIG_HAVE_LONG_LONG
-#    define htobe64(n)        __swap_uint64(uint64_t)n)
+#    define htobe64(n)        __swap_uint64((uint64_t)n)
 #    define htole64(n)        (n)
-#    define be64toh(n)        __swap_uint64(uint64_t)n)
+#    define be64toh(n)        __swap_uint64((uint64_t)n)
 #    define le64toh(n)        (n)
 #  endif
 #endif

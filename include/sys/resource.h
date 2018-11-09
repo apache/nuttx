@@ -105,7 +105,7 @@ struct rlimit
 
 /* Minimal, compliant rusage structure */
 
-struct rlimit
+struct rusage
 {
   struct timeval ru_utime;  /* User time used */
   struct timeval ru_stime;  /* System time used */
