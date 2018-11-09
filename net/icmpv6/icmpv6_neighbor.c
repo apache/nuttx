@@ -136,16 +136,14 @@ static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      /* It looks like we are good to send the data */
-      /* Copy the packet data into the device packet buffer and send it */
+      /* It looks like we are good to send the data.
+       *
+       * Copy the packet data into the device packet buffer and send it.
+       */
 
       icmpv6_solicit(dev, state->snd_ipaddr);
 
-      /* Make sure no additional Neighbor Solicitation overwrites this one.
-       * This flag will be cleared in icmpv6_out().
-       */
-
-      IFF_SET_NOARP(dev->d_flags);
+      IFF_SET_IPv6(dev->d_flags);
 
       /* Don't allow any further call backs. */
 
@@ -230,18 +228,6 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
       ret = -EHOSTUNREACH;
       goto errout;
-    }
-
-  /* Send the Neighbor Solicitation request only if this device uses the
-   * Ethernet link layer protocol.
-   *
-   * REVISIT:  Other link layer protocols may require Neighbor Discovery
-   * as well.
-   */
-
-  if (dev->d_lltype != NET_LL_ETHERNET)
-    {
-      return OK;
     }
 
   /* Check if the destination address is on the local network. */

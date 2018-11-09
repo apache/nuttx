@@ -265,6 +265,13 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
         sol = ICMPv6SOLICIT;
         if (net_ipv6addr_cmp(sol->tgtaddr, dev->d_ipv6addr))
           {
+            if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
+              {
+                /* Save the sender's address mapping in our Neighbor Table. */
+
+                neighbor_add(dev, ipicmp->srcipaddr, sol->srclladdr);
+              }
+
             /* Yes..  Send a neighbor advertisement back to where the neighbor
              * solicitation came from.
              */
@@ -308,19 +315,19 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                 /* Save the sender's address mapping in our Neighbor Table. */
 
                 neighbor_add(dev, ipv6->srcipaddr, adv->tgtlladdr);
+              }
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-                /* Then notify any logic waiting for the Neighbor Advertisement */
+            /* Then notify any logic waiting for the Neighbor Advertisement */
 
-                icmpv6_notify(ipv6->srcipaddr);
+            icmpv6_notify(ipv6->srcipaddr);
 #endif
 
-                /* We consumed the packet but we don't send anything in
-                 * response.
-                 */
+            /* We consumed the packet but we don't send anything in
+             * response.
+             */
 
-                goto icmpv6_send_nothing;
-              }
+            goto icmpv6_send_nothing;
           }
 
         goto icmpv6_drop_packet;
@@ -351,6 +358,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
       {
         FAR struct icmpv6_router_advertise_s *adv;
         FAR uint8_t *options;
+        bool prefix = false;
         uint16_t pktlen;
         uint16_t optlen;
         int ndx;
@@ -380,7 +388,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
             FAR struct icmpv6_srclladdr_s *sllopt =
               (FAR struct icmpv6_srclladdr_s *)&options[ndx];
 
-            if (sllopt->opttype == 1 && sllopt->optlen == 1)
+            if (sllopt->opttype == ICMPv6_OPT_SRCLLADDR)
               {
                 neighbor_add(dev, ipv6->srcipaddr, sllopt->srclladdr);
               }
@@ -392,19 +400,23 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
              * the "A" flag set?
              */
 
-            if (opt->opttype &&
-                opt->optlen == 4 &&
+            if (opt->opttype == ICMPv6_OPT_PREFIX &&
                (opt->flags & ICMPv6_PRFX_FLAG_A) != 0)
               {
                 /* Yes.. Notify any waiting threads */
 
                 icmpv6_rnotify(dev, ipv6->srcipaddr, opt->prefix, opt->preflen);
-                goto icmpv6_send_nothing;
+                prefix = true;
               }
 
             /* Skip to the next option (units of octets) */
 
             ndx += (opt->optlen << 3);
+          }
+
+        if (prefix)
+          {
+            goto icmpv6_send_nothing;
           }
 
         goto icmpv6_drop_packet;
@@ -514,7 +526,6 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
           }
       }
       break;
-
 
     case ICMPV6_MCAST_LISTEN_REPORT_V2:  /* Version 2 Multicast Listener Report, RFC 3810 */
       {

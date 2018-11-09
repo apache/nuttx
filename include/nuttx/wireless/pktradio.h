@@ -103,8 +103,8 @@
 
 struct pktradio_addr_s
 {
-  uint8_t pa_addrlen;                   /* Length of the following address */
   uint8_t pa_addr[RADIO_MAX_ADDRLEN];
+  uint8_t pa_addrlen;                   /* Length of the following address */
 };
 
 /* Different packet radios may have different properties.  If there are

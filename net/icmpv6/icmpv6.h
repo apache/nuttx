@@ -238,7 +238,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev);
  *   Set up to send an ICMPv6 Neighbor Solicitation message
  *
  * Input Parameters:
- *   dev - Reference to an Ethernet device driver structure
+ *   dev - Reference to a device driver structure
  *   ipaddr - IP address of Neighbor to be solicited
  *
  * Returned Value:
@@ -256,7 +256,6 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
  *   Set up to send an ICMPv6 Router Solicitation message.  This version
  *   is for a standalone solicitation.  If formats:
  *
- *   - The Ethernet header
  *   - The IPv6 header
  *   - The ICMPv6 Neighbor Router Message
  *
@@ -264,7 +263,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
  *   prior to calling this function.
  *
  * Input Parameters:
- *   dev - Reference to an Ethernet device driver structure
+ *   dev - Reference to a device driver structure
  *
  * Returned Value:
  *   None

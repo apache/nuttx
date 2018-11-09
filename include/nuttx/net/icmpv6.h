@@ -128,8 +128,8 @@
  * layer address taking into account a header of the two-bytes.
  */
 
-#define ICMPv6_OPT_SIZE(a)    (((a) + 2 + 7) & ~7)
-#define ICMPv6_OPT_OCTECTS(a) (((a) + 2 + 7) >> 3)
+#define ICMPv6_OPT_SIZE(a)    ((a) > 0 ? ((a) + 2 + 7) & ~7 : 0)
+#define ICMPv6_OPT_OCTECTS(a) ((a) > 0 ? ((a) + 2 + 7) >> 3 : 0)
 
 /****************************************************************************
  * Public Type Definitions

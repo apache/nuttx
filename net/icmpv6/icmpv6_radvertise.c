@@ -64,7 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF   ((struct eth_hdr_s *)&dev->d_buf[0])
 #define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 #define ICMPv6ADVERTISE \
@@ -207,7 +206,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;
   mtu->reserved     = 0;
-  mtu->mtu          = HTONL(CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN);
+  mtu->mtu          = HTONL(dev->d_pktsize - dev->d_llhdrlen);
 
   /* Set up the prefix option */
 
@@ -241,34 +240,6 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Set the size to the size of the IPv6 header and the payload size */
 
   dev->d_len   = IPv6_HDRLEN + l3size;
-
-#ifdef CONFIG_NET_ETHERNET
-  /* Add the size of the Ethernet header */
-
-  dev->d_len  += ETH_HDRLEN;
-
-  /* Move the source and to the destination addresses in the Ethernet header
-   * and use our MAC as the new source address
-   */
-
-  if (dev->d_lltype == NET_LL_ETHERNET)
-    {
-      FAR struct eth_hdr_s *eth = ETHBUF;
-
-      memcpy(eth->dest, g_ipv6_ethallnodes.ether_addr_octet, ETHER_ADDR_LEN);
-      memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
-
-      /* Set the IPv6 Ethernet type */
-
-      eth->type  = HTONS(ETHTYPE_IP6);
-    }
-#endif
-
-  /* No additional neighbor lookup is required on this packet (We are using
-   * a multicast address).
-   */
-
-  IFF_SET_NOARP(dev->d_flags);
 
   ninfo("Outgoing ICMPv6 Router Advertise length: %d (%d)\n",
           dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);

@@ -58,7 +58,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF   ((struct eth_hdr_s *)&dev->d_buf[0])
 #define IPv6BUF  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPv6RSOLICIT \
   ((struct icmpv6_router_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
@@ -74,7 +73,6 @@
  *   Set up to send an ICMPv6 Router Solicitation message.  This version
  *   is for a standalone solicitation.  If formats:
  *
- *   - The Ethernet header
  *   - The IPv6 header
  *   - The ICMPv6 Router Solicitation Message
  *
@@ -82,7 +80,7 @@
  *   prior to calling this function.
  *
  * Input Parameters:
- *   dev - Reference to an Ethernet device driver structure
+ *   dev - Reference to a device driver structure
  *
  * Returned Value:
  *   None
@@ -93,7 +91,6 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6;
   FAR struct icmpv6_router_solicit_s *sol;
-  FAR struct eth_hdr_s *eth;
   uint16_t lladdrsize;
   uint16_t l3size;
 
@@ -139,9 +136,7 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
   sol->opttype  = ICMPv6_OPT_SRCLLADDR;           /* Option type */
   sol->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize); /* Option length in octets */
 
-  /* Copy our link layer address into the message
-   * REVISIT:  What if the link layer is not Ethernet?
-   */
+  /* Copy our link layer address into the message */
 
   memcpy(sol->srclladdr, &dev->d_mac, lladdrsize);
 
@@ -154,40 +149,6 @@ void icmpv6_rsolicit(FAR struct net_driver_s *dev)
 
   dev->d_len    = IPv6_HDRLEN + l3size;
 
-#ifdef CONFIG_NET_ETHERNET
-  if (dev->d_lltype == NET_LL_ETHERNET)
-    {
-      /* Set the destination IPv6 all-routers multicast Ethernet
-       * address
-       */
-
-      eth = ETHBUF;
-      memcpy(eth->dest, g_ipv6_ethallrouters.ether_addr_octet, ETHER_ADDR_LEN);
-
-      /* Move our source Ethernet addresses into the Ethernet header */
-
-      memcpy(eth->src, dev->d_mac.ether.ether_addr_octet, ETHER_ADDR_LEN);
-
-      /* Set the IPv6 Ethernet type */
-
-      eth->type  = HTONS(ETHTYPE_IP6);
-#if 0
-      /* No additional neighbor lookup is required on this packet.
-       * REVISIT:  It is inappropriate to set this bit if we get here
-       * via neighbor_out(); It is no necessary to set this bit if we
-       * get here via icmpv6_input().  Is it ever necessary?
-       */
-
-      IFF_SET_NOARP(dev->d_flags);
-#endif
-    }
-#endif
-
-  /* Add the size of the layer layer header to the total size of the
-   * outgoing packet.
-   */
-
-  dev->d_len += netdev_ipv6_hdrlen(dev);
   ninfo("Outgoing ICMPv6 Router Solicitation length: %d (%d)\n",
           dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 

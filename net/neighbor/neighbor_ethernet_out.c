@@ -42,7 +42,7 @@
 #include <string.h>
 #include <debug.h>
 
-#include <nuttx/net/arp.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
@@ -61,15 +61,6 @@
  * Private Data
  ****************************************************************************/
 
-/* Support for broadcast address */
-
-static const struct ether_addr g_broadcast_ethaddr =
-{
-  {
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-  }
-};
-
 /* Support for MLD multicast addresses.
  *
  * Well-known ethernet multicast address:
@@ -83,16 +74,7 @@ static const struct ether_addr g_broadcast_ethaddr =
  * 01-00-5e-xx-xx-xx 0x0800 IPv4 IGMP Multicast Address
  * 33-33-00-00-00-00 0x86DD IPv6 Neighbor Discovery
  * 33-33-xx-xx-xx-xx 0x86DD IPv6 Multicast Address (RFC3307)
- *
- * The following is the first three octects of the IGMP address:
  */
-
-#ifdef CONFIG_NET_MLD
-static const uint8_t g_multicast_ethaddr[3] =
-{
-  0x01, 0x00, 0x5e
-};
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -134,11 +116,9 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
   FAR struct eth_hdr_s *eth = ETHBUF;
   FAR struct ipv6_hdr_s *ip = IPv6BUF;
   struct neighbor_addr_s laddr;
-  net_ipv6addr_t ipaddr;
 
   /* Skip sending Neighbor Solicitations when the frame to be transmitted was
-   * written into a packet socket or if we are sending certain Neighbor
-   * messages (solicitation, advertisement, echo request).
+   * written into a packet socket.
    */
 
   if (IFF_IS_NOARP(dev->d_flags))
@@ -157,31 +137,12 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
    * packet with an Neighbor Solicitation Request for the IPv6 address.
    */
 
-  /* First check if destination is a IPv6 multicast address.
-   *
-   * REVISIT: Need to revisit IPv6 broadcast support.  Broadcast
-   * IP addresses are not used with IPv6; multicast is used instead.
-   * Does this mean that all multicast address should go to the
-   * broadcast Ethernet address?
-   */
+  /* First check if destination isn't IPv6 multicast address. */
 
-  if (net_is_addr_mcast(ip->destipaddr))
+  if (!net_is_addr_mcast(ip->destipaddr))
     {
-      memcpy(eth->dest, g_broadcast_ethaddr.ether_addr_octet,
-             ETHER_ADDR_LEN);
-    }
+      net_ipv6addr_t ipaddr;
 
-#ifdef CONFIG_NET_MLD
-  /* Check if the destination address is a multicast address
-   *
-   *   IPv6 multicast addresses are have the high-order octet of the
-   *   addresses=0xff (ff00::/8.)
-   */
-#warning Missing logic
-#endif
-
-  else
-    {
       /* Check if the destination address is on the local network. */
 
       if (!net_ipv6addr_maskcmp(ip->destipaddr, dev->d_ipv6addr,
@@ -224,11 +185,18 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
            */
 
           icmpv6_solicit(dev, ipaddr);
-          return;
         }
+    }
 
-      /* Build an Ethernet header. */
+  /* Build an Ethernet header. */
 
+  if (net_is_addr_mcast(ip->destipaddr))
+    {
+      eth->dest[0] = eth->dest[1] = 0x33;
+      memcpy(&eth->dest[2], &ip->destipaddr[6], 4);
+    }
+  else
+    {
       memcpy(eth->dest, laddr.u.na_ethernet.ether_addr_octet, ETHER_ADDR_LEN);
     }
 

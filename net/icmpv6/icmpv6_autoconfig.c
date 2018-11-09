@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,6 @@
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
-
-#include <net/ethernet.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
@@ -150,8 +148,10 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      /* It looks like we are good to send the data */
-      /* Copy the packet data into the device packet buffer and send it */
+      /* It looks like we are good to send the data.
+       *
+       * Copy the packet data into the device packet buffer and send it.
+       */
 
       if (state->snd_advertise)
         {
@@ -166,11 +166,7 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
           icmpv6_rsolicit(dev);
         }
 
-      /* Make sure no additional Router Solicitation overwrites this one.
-       * This flag will be cleared in icmpv6_out().
-       */
-
-      IFF_SET_NOARP(dev->d_flags);
+      IFF_SET_IPv6(dev->d_flags);
 
       /* Don't allow any further call backs. */
 
@@ -336,13 +332,6 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
 
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
-#ifndef CONFIG_NET_ETHERNET
-  /* Only Ethernet supported for now */
-
-  nerr("ERROR: Only Ethernet is supported\n");
-  return -ENOSYS;
-
-#else /* CONFIG_NET_ETHERNET */
   struct icmpv6_rnotify_s notify;
   net_ipv6addr_t lladdr;
   int retries;
@@ -352,14 +341,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(dev);
   ninfo("Auto-configuring %s\n", dev->d_ifname);
-
-  /* Only Ethernet devices are supported for now */
-
-  if (dev->d_lltype != NET_LL_ETHERNET)
-    {
-      nerr("ERROR: Only Ethernet is supported\n");
-      return -ENOSYS;
-    }
 
   /* The interface should be in the down state */
 
@@ -534,7 +515,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   netdev_ifup(dev);
   net_unlock();
   return OK;
-#endif /* CONFIG_NET_ETHERNET */
 }
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
