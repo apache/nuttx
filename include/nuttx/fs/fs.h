@@ -641,7 +641,7 @@ int unregister_blockdriver(FAR const char *path);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD_PARTITION
+#ifdef CONFIG_MTD
 int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
                        mode_t mode, FAR void *priv);
 #endif
