@@ -726,8 +726,6 @@ errout_locked:
   nxsem_destroy(&state. snd_sem);
   net_unlock();
 
-errout:
-
   if (ret < 0)
     {
       return ret;

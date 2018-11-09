@@ -1284,10 +1284,13 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
                              size_t count)
 {
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-  return tcp_sendfile(psock, infile, offset, size_t count);
-#else
-  return -ENOSYS;
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_sendfile(psock, infile, offset, count);
+    }
 #endif
+
+  return -ENOSYS;
 }
 #endif
 

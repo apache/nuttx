@@ -326,6 +326,7 @@ EXTERN struct net_driver_s *g_netdevices;
  * Public Function Prototypes
  ****************************************************************************/
 
+struct file;      /* Forward reference */
 struct sockaddr;  /* Forward reference */
 struct socket;    /* Forward reference */
 struct pollfd;    /* Forward reference */

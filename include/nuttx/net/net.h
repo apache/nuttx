@@ -148,6 +148,7 @@ typedef uint8_t sockcaps_t;
  * a given address family.
  */
 
+struct file;    /* Forward reference */
 struct socket;  /* Forward reference */
 struct pollfd;  /* Forward reference */
 
