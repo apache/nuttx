@@ -65,10 +65,11 @@
  *
  ******************************************************************************/
 
-static void neighbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen)
+static void neighbor_dump_address(FAR const void *buf, unsigned int buflen)
 {
   char outbuf[16*3 + 9]; /* 6-byte header header + 16 hex bytes +
                           * 2 space separator + NUL termination */
+  FAR const uint8_t *buffer = buf;
   FAR char *ptr;
   unsigned int i;
   unsigned int j;
@@ -78,11 +79,11 @@ static void neighbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen
     {
       if (i == 0)
         {
-          ninfo("  at: ");
+          sprintf(outbuf, "  at: ");
         }
       else
         {
-          ninfo("      ");
+          sprintf(outbuf, "      ");
         }
 
       maxj = 16;
@@ -91,7 +92,7 @@ static void neighbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen
           maxj = buflen - i;
         }
 
-      ptr = outbuf;
+      ptr = outbuf + 6;
       for (j = 0; j < maxj; j++)
         {
           if (j == 8)
@@ -105,7 +106,7 @@ static void neighbor_dump_address(FAR const uint8_t *buffer, unsigned int buflen
         }
 
       *ptr = '\0';
-      wlinfo("  %s\n", ptr);
+      ninfo("%s\n", ptr);
     }
 }
 
@@ -138,25 +139,8 @@ void neighbor_dumpentry(FAR const char *msg,
         ntohs(neighbor->ne_ipaddr[4]), ntohs(neighbor->ne_ipaddr[5]),
         ntohs(neighbor->ne_ipaddr[6]), ntohs(neighbor->ne_ipaddr[7]));
 
-#ifdef CONFIG_NET_ETHERNET
-#ifdef CONFIG_NET_6LOWPAN
-  if (neighbor->ne_addr.na_lltype == NET_LL_ETHERNET)
-#endif
-    {
-      neighbor_dump_address(neighbor->ne_addr.u.na_ethernet.ether_addr_octet,
-                            neighbor->ne_addr.na_llsize);
-    }
-#endif
-
-#ifdef CONFIG_NET_6LOWPAN
-#ifdef CONFIG_NET_ETHERNET
-  else
-#endif
-    {
-      neighbor_dump_address(neighbor->ne_addr.u.na_sixlowpan.nm_addr,
-                            neighbor->ne_addr.na_llsize);
-    }
-#endif /* CONFIG_NET_6LOWPAN */
+  neighbor_dump_address(&neighbor->ne_addr.u,
+                        neighbor->ne_addr.na_llsize);
 }
 
 /****************************************************************************
