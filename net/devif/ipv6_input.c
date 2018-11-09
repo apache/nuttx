@@ -425,11 +425,6 @@ int ipv6_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ICMPv6
   if (net_ipv6addr_cmp(dev->d_ipv6addr, g_ipv6_unspecaddr))
     {
-      /* If we are configured to use ping IP address configuration and
-       * hasn't been assigned an IP address yet, we accept all ICMP
-       * packets.
-       */
-
       nwarn("WARNING: No IP address assigned\n");
       goto drop;
     }
