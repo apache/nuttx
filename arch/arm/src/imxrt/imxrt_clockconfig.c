@@ -177,14 +177,14 @@ void imxrt_clockconfig(void)
   /* Set UART source to PLL3 80M */
 
   reg  = getreg32(IMXRT_CCM_CSCDR1);
-  reg &= CCM_CSCDR1_UART_CLK_SEL;
+  reg &= ~CCM_CSCDR1_UART_CLK_SEL;
   reg |= CCM_CSCDR1_UART_CLK_SEL_PLL3_80;
   putreg32(reg, IMXRT_CCM_CSCDR1);
 
   /* Set UART divider to 1 */
 
   reg  = getreg32(IMXRT_CCM_CSCDR1);
-  reg &= CCM_CSCDR1_UART_CLK_PODF_MASK;
+  reg &= ~CCM_CSCDR1_UART_CLK_PODF_MASK;
   reg |= CCM_CSCDR1_UART_CLK_PODF(0);
   putreg32(reg, IMXRT_CCM_CSCDR1);
 
@@ -192,7 +192,7 @@ void imxrt_clockconfig(void)
   /* Set LPI2C source to PLL3 60M */
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
-  reg &= CCM_CSCDR2_LPI2C_CLK_SEL;
+  reg &= ~CCM_CSCDR2_LPI2C_CLK_SEL;
   reg |= CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M;
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
@@ -203,7 +203,7 @@ void imxrt_clockconfig(void)
   /* Set LPI2C divider to 5  for 12 Mhz */
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
-  reg &= CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
+  reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
   reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5);
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
@@ -213,34 +213,44 @@ void imxrt_clockconfig(void)
 #endif
 
 #ifdef CONFIG_IMXRT_LPSPI
-  /* Set LPSPI close source to PLL3 PFD0 */
+  /* Set LPSPI clock source to PLL3 PFD0 */
 
   reg  = getreg32(IMXRT_CCM_CBCMR);
-  reg &= CCM_CBCMR_LPSPI_CLK_SEL_MASK;
+  reg &= ~CCM_CBCMR_LPSPI_CLK_SEL_MASK;
   reg |= CCM_CBCMR_LPSPI_CLK_SEL_PLL3_PFD0;
   putreg32(reg, IMXRT_CCM_CBCMR);
 
-  /* Set LPSPI divider to 5 */
+  /* Set LPSPI divider to IMXRT_LSPI_PODF_DIVIDER */
 
   reg  = getreg32(IMXRT_CCM_CBCMR);
-  reg &= CCM_CBCMR_LPSPI_PODF_MASK;
-  reg |= CCM_CBCMR_LPSPI_PODF(7);
+  reg &= ~CCM_CBCMR_LPSPI_PODF_MASK;
+  reg |= CCM_CBCMR_LPSPI_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_LSPI_PODF_DIVIDER));
   putreg32(reg, IMXRT_CCM_CBCMR);
 #endif
 
 #ifdef CONFIG_IMXRT_USDHC
-  /* Set USDHC1 & 2 to generate clocks from PPL2 PFD2 (396 MHz) */
+  /* Optionally set USDHC1 & 2 to generate clocks from IMXRT_USDHC1_CLK_SELECT */
 
   reg  = getreg32(IMXRT_CCM_CSCMR1);
-  reg &= CCM_CSCMR1_USDHC1_CLK_SEL | CCM_CSCMR1_USDHC2_CLK_SEL;
-  reg |= CCM_CSCMR1_USDHC1_CLK_SEL_PLL2_PFD0 | CCM_CSCMR1_USDHC2_CLK_SEL_PLL2_PFD0;
+  reg &= ~(CCM_CSCMR1_USDHC1_CLK_SEL | CCM_CSCMR1_USDHC2_CLK_SEL);
+#if defined(IMXRT_USDHC1_CLK_SELECT)
+  reg |= IMXRT_USDHC1_CLK_SELECT
+#endif
+#if defined(IMXRT_USDHC2_CLK_SELECT)
+  reg |= IMXRT_USDHC2_CLK_SELECT
+#endif
   putreg32(reg, IMXRT_CCM_CSCMR1);
 
-  /* Now divide down clocks by 2 ( --> 198 MHz) */
+  /* Now divide down clocks by IMXRT_USDHC[1|2]_PODF_DIVIDER */
 
   reg  = getreg32(IMXRT_CCM_CSCDR1);
-  reg &= CCM_CSCDR1_USDHC1_PODF_MASK | CCM_CSCDR1_USDHC2_PODF_MASK;
-  reg |= CCM_CSCDR1_USDHC1_PODF(1) | CCM_CSCDR1_USDHC2_PODF(1);
+  reg &= ~(CCM_CSCDR1_USDHC1_PODF_MASK | CCM_CSCDR1_USDHC2_PODF_MASK);
+#if defined(IMXRT_USDHC1_PODF_DIVIDER)
+  reg |= CCM_CSCDR1_USDHC1_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_USDHC1_PODF_DIVIDER));
+#endif
+#if defined(IMXRT_USDHC2_PODF_DIVIDER)
+  reg |= CCM_CSCDR1_USDHC2_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_USDHC2_PODF_DIVIDER));
+#endif
   putreg32(reg, IMXRT_CCM_CSCDR1);
 #endif
 
