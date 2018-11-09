@@ -96,16 +96,14 @@ static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
         }
     }
 
-  /* REVISIT:  If no device was bound or the bound device is no longer valid,
-   * then just return the arbitrary device at the head of the list of
-   * registered devices.  This is lunacy if there are multiple, registered
-   * network devices but makes perfectly good since if there is only one.
+  /* If no device was bound or the bound device is no longer valid,
+   * then let's try the default network device.
    */
 
-  return dev == NULL ? g_netdevices : dev;
+  return dev == NULL ? netdev_default() : dev;
 }
 #else
-#  define upd_bound_device(c) g_netdevices
+#  define upd_bound_device(c) netdev_default();
 #endif
 
 
