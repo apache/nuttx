@@ -83,7 +83,7 @@ struct arp_entry_s
 {
   in_addr_t         at_ipaddr;   /* IP address */
   struct ether_addr at_ethaddr;  /* Hardware address */
-  uint8_t           at_time;     /* Time of last usage */
+  clock_t           at_time;     /* Time of last usage */
 };
 
 /* Used with the SIOCSARP, SIOCDARP, and SIOCGARP IOCTL commands to set,

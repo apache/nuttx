@@ -54,6 +54,7 @@
 #include <netinet/in.h>
 #include <net/ethernet.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -64,6 +65,12 @@
 #include <netdev/netdev.h>
 
 #ifdef CONFIG_NET_ARP
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ARP_MAXAGE_TICK SEC2TICK(10 * CONFIG_NET_ARP_MAXAGE)
 
 /****************************************************************************
  * Private Types
@@ -82,7 +89,6 @@ struct arp_table_info_s
 /* The table of known address mappings */
 
 static struct arp_entry_s g_arptable[CONFIG_NET_ARPTAB_SIZE];
-static uint8_t g_arptime;
 
 /****************************************************************************
  * Private Functions
@@ -134,56 +140,39 @@ static int arp_match(FAR struct net_driver_s *dev, FAR void *arg)
   return 1;
 }
 
+
+/****************************************************************************
+ * Name: arp_return_old_entry
+ *
+ * Description:
+ *   Compare and return the old ARP table entry.
+ *
+ ****************************************************************************/
+
+static FAR struct arp_entry_s *
+arp_return_old_entry(FAR struct arp_entry_s *e1, FAR struct arp_entry_s *e2)
+{
+  if (e1->at_ipaddr == 0)
+    {
+      return e1;
+    }
+  else if (e2->at_ipaddr == 0)
+    {
+      return e2;
+    }
+  else if ((int)(e1->at_time - e2->at_time) <= 0)
+    {
+      return e1;
+    }
+  else
+    {
+      return e2;
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: arp_reset
- *
- * Description:
- *   Re-initialize the ARP table.
- *
- ****************************************************************************/
-
-void arp_reset(void)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      memset(&g_arptable[i].at_ipaddr, 0, sizeof(in_addr_t));
-    }
-}
-
-/****************************************************************************
- * Name: arp_timer
- *
- * Description:
- *   This function performs periodic timer processing in the ARP module
- *   and should be called at regular intervals. The recommended interval
- *   is 10 seconds between the calls.  It is responsible for flushing old
- *   entries in the ARP table.
- *
- ****************************************************************************/
-
-void arp_timer(void)
-{
-  FAR struct arp_entry_s *tabptr;
-  int i;
-
-  ++g_arptime;
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-
-      if (tabptr->at_ipaddr != 0 &&
-          g_arptime - tabptr->at_time >= CONFIG_NET_ARP_MAXAGE)
-        {
-          tabptr->at_ipaddr = 0;
-        }
-    }
-}
 
 /****************************************************************************
  * Name: arp_update
@@ -207,8 +196,8 @@ void arp_timer(void)
 
 int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 {
-  struct arp_entry_s *tabptr = NULL;
-  int               i;
+  FAR struct arp_entry_s *tabptr = &g_arptable[0];
+  int i;
 
   /* Walk through the ARP mapping table and try to find an entry to
    * update. If none is found, the IP -> MAC address mapping is
@@ -217,69 +206,33 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
-      tabptr = &g_arptable[i];
+      /* Check if the source IP address of the incoming packet matches
+       * the IP address in this ARP table entry.
+       */
 
-      /* Only check those entries that are actually in use. */
-
-      if (tabptr->at_ipaddr != 0)
+      if (g_arptable[i].at_ipaddr != 0 &&
+          net_ipv4addr_cmp(ipaddr, g_arptable[i].at_ipaddr))
         {
-          /* Check if the source IP address of the incoming packet matches
-           * the IP address in this ARP table entry.
-           */
+          /* An old entry found, break. */
 
-          if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr))
-            {
-              /* An old entry found, update this and return. */
-
-              memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-              tabptr->at_time = g_arptime;
-              return OK;
-            }
-        }
-    }
-
-  /* If we get here, no existing ARP table entry was found, so we create one. */
-  /* First, we try to find an unused entry in the ARP table. */
-
-  for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
-    {
-      tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr == 0)
-        {
+          tabptr = &g_arptable[i];
           break;
         }
-    }
-
-  /* If no unused entry is found, we try to find the oldest entry and
-   * throw it away.
-   */
-
-  if (i == CONFIG_NET_ARPTAB_SIZE)
-    {
-      uint8_t tmpage = 0;
-      int j = 0;
-
-      for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
+      else
         {
-          tabptr = &g_arptable[i];
-          if (g_arptime - tabptr->at_time > tmpage)
-            {
-              tmpage = g_arptime - tabptr->at_time;
-              j = i;
-            }
-        }
+          /* Record the oldest entry. */
 
-      i = j;
-      tabptr = &g_arptable[i];
+          tabptr = arp_return_old_entry(tabptr, &g_arptable[i]);
+        }
     }
 
-  /* Now, i is the ARP table entry which we will fill with the new
+  /* Now, tabptr is the ARP table entry which we will fill with the new
    * information.
    */
 
   tabptr->at_ipaddr = ipaddr;
   memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-  tabptr->at_time = g_arptime;
+  tabptr->at_time = clock_systimer();
   return OK;
 }
 
@@ -337,7 +290,8 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr)
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &g_arptable[i];
-      if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr))
+      if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr) &&
+          clock_systimer() - tabptr->at_time <= ARP_MAXAGE_TICK)
         {
           return tabptr;
         }
@@ -442,3 +396,4 @@ void arp_delete(in_addr_t ipaddr)
 
 #endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */
+

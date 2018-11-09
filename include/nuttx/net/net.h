@@ -256,7 +256,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_setup
+ * Name: net_initialize
  *
  * Description:
  *   This is called from the OS initialization logic at power-up reset in
@@ -269,25 +269,6 @@ extern "C"
  *   facilities such as semaphores are available but this logic cannot
  *   depend upon OS resources such as interrupts or timers which are not
  *   yet available.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void net_setup(void);
-
-/****************************************************************************
- * Name: net_initialize
- *
- * Description:
- *   This function is called from the OS initialization logic at power-up
- *   reset AFTER initialization of hardware facilities such as timers and
- *   interrupts.   This logic completes the initialization started by
- *   net_setup().
  *
  * Input Parameters:
  *   None
