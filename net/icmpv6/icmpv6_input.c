@@ -269,7 +269,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
               {
                 /* Save the sender's address mapping in our Neighbor Table. */
 
-                neighbor_add(dev, ipicmp->srcipaddr, sol->srclladdr);
+                neighbor_add(dev, ipv6->srcipaddr, sol->srclladdr);
               }
 
             /* Yes..  Send a neighbor advertisement back to where the neighbor
