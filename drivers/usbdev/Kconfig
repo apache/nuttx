@@ -677,6 +677,16 @@ menuconfig RNDIS
 
 if RNDIS
 
+config RNDIS_COMPOSITE
+    bool "RNDIS composite support"
+    default n
+    depends on USBDEV_COMPOSITE
+    ---help---
+        Configure the RNDIS driver as part of a composite driver
+        (only if USBDEV_COMPOSITE is also defined)
+
+if !RNDIS_COMPOSITE
+
 config RNDIS_VENDORID
 	hex "RNDIS Vendor ID"
 	default 0x584e
@@ -711,6 +721,8 @@ config RNDIS_VERSIONNO
 	default 0x0001
 
 endif # RNDIS
+
+endif # RNDIS_COMPOSITE
 
 menuconfig NET_CDCECM
 	bool "CDC-ECM Ethernet-over-USB"

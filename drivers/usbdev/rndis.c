@@ -57,6 +57,7 @@
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/usb/rndis.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
@@ -77,10 +78,12 @@
 #define RNDIS_NCONFIGS          (1)
 #define RNDIS_CONFIGID          (1)
 #define RNDIS_CONFIGIDNONE      (0)
+#define RNDIS_NINTERFACES       (2)
 
 #define RNDIS_EPINTIN_ADDR      USB_EPIN(3)
 #define RNDIS_EPBULKIN_ADDR     USB_EPIN(1)
 #define RNDIS_EPBULKOUT_ADDR    USB_EPOUT(2)
+#define RNDIS_NUM_EPS           (3)
 
 #define RNDIS_MANUFACTURERSTRID (1)
 #define RNDIS_PRODUCTSTRID      (2)
@@ -128,6 +131,8 @@ struct rndis_req_s
 struct rndis_dev_s
 {
   struct net_driver_s      netdev;       /* Network driver structure */
+  struct usbdev_devinfo_s  devinfo;
+
   FAR struct usbdev_s     *usbdev;       /* usbdev driver pointer */
   FAR struct usbdev_ep_s  *epintin;      /* Interrupt IN endpoint structure */
   FAR struct usbdev_ep_s  *epbulkin;     /* Bulk IN endpoint structure */
@@ -144,6 +149,8 @@ struct rndis_dev_s
   struct work_s rxwork;                  /* Worker for dispatching RX packets */
   WDOG_ID txpoll;                        /* TX poll watchdog */
   struct work_s pollwork;                /* TX poll worker */
+
+  bool registered;                       /* Has netdev_register() been called */
 
   uint8_t config;                        /* USB Configuration number */
   FAR struct rndis_req_s *net_req;       /* Pointer to request whose buffer is assigned to network */
@@ -182,7 +189,9 @@ struct rndis_alloc_s
 
 struct rndis_cfgdesc_s
 {
+#ifndef CONFIG_RNDIS_COMPOSITE
   struct usb_cfgdesc_s cfgdesc;        /* Configuration descriptor */
+#endif
   struct usb_iaddesc_s assoc_desc;     /* Interface association descriptor */
   struct usb_ifdesc_s  comm_ifdesc;    /* Communication interface descriptor */
   struct usb_epdesc_s  epintindesc;    /* Interrupt endpoint descriptor */
@@ -245,6 +254,7 @@ const static struct usbdevclass_driverops_s g_driverops =
   NULL
 };
 
+#ifndef CONFIG_RNDIS_COMPOSITE
 static const struct usb_devdesc_s g_devdesc =
 {
   USB_SIZEOF_DEVDESC,                           /* len */
@@ -265,24 +275,27 @@ static const struct usb_devdesc_s g_devdesc =
   RNDIS_SERIALSTRID,                            /* serno */
   RNDIS_NCONFIGS                                /* nconfigs */
 };
+#endif
 
 const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
 {
+#ifndef CONFIG_RNDIS_COMPOSITE
   {
     .len          = USB_SIZEOF_CFGDESC,
     .type         = USB_DESC_TYPE_CONFIG,
     .totallen     = {0, 0},
-    .ninterfaces  = 2,
+    .ninterfaces  = RNDIS_NINTERFACES,
     .cfgvalue     = RNDIS_CONFIGID,
     .icfg         = 0,
     .attr         = USB_CONFIG_ATTR_ONE | USB_CONFIG_ATTR_SELFPOWER,
     .mxpower      = (CONFIG_USBDEV_MAXPOWER + 1) / 2
   },
+#endif
   {
     .len          = USB_SIZEOF_IADDESC,
     .type         = USB_DESC_TYPE_INTERFACEASSOCIATION,
     .firstif      = 0,
-    .nifs         = 2,
+    .nifs         = RNDIS_NINTERFACES,
     .classid      = 0xef,
     .subclass     = 0x04,
     .protocol     = 0x01,
@@ -1766,8 +1779,7 @@ static FAR struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int usbclass_mkstrdesc(FAR struct rndis_dev_s *priv, uint8_t id,
-                              FAR struct usb_strdesc_s *strdesc)
+static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 {
   FAR const char *str;
   int len;
@@ -1776,6 +1788,7 @@ static int usbclass_mkstrdesc(FAR struct rndis_dev_s *priv, uint8_t id,
 
   switch (id)
     {
+#ifndef CONFIG_RNDIS_COMPOSITE
       case 0:
         {
           /* Descriptor 0 is the language id */
@@ -1798,6 +1811,7 @@ static int usbclass_mkstrdesc(FAR struct rndis_dev_s *priv, uint8_t id,
       case RNDIS_SERIALSTRID:
         str = CONFIG_RNDIS_SERIALSTR;
         break;
+#endif
 
       default:
         return -EINVAL;
@@ -1832,9 +1846,10 @@ static int usbclass_mkstrdesc(FAR struct rndis_dev_s *priv, uint8_t id,
  *
  ****************************************************************************/
 
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
+static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
+                                  FAR struct usbdev_devinfo_s *devinfo)
 {
-  FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
+  FAR struct rndis_cfgdesc_s *dest = (FAR struct rndis_cfgdesc_s*)buf;
   uint16_t totallen;
 
   /* This is the total length of the configuration (not necessarily the
@@ -1842,12 +1857,22 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
    */
 
   totallen = sizeof(g_rndis_cfgdesc);
-  memcpy(cfgdesc, &g_rndis_cfgdesc, totallen);
+  memcpy(dest, &g_rndis_cfgdesc, totallen);
 
-  /* Finally, fill in the total size of the configuration descriptor */
+#ifndef CONFIG_RNDIS_COMPOSITE
+  /* For a stand-alone device, just fill in the total length */
+  dest->cfgdesc.totallen[0] = LSBYTE(totallen);
+  dest->cfgdesc.totallen[1] = MSBYTE(totallen);
+#else
+  /* For composite device, apply possible offset to the interface numbers */
+  dest->assoc_desc.firstif += devinfo->ifnobase;
+  dest->comm_ifdesc.ifno += devinfo->ifnobase;
+  dest->epintindesc.addr = USB_EPIN(devinfo->epno[RNDIS_EP_INTIN_IDX]);
+  dest->data_ifdesc.ifno += devinfo->ifnobase;
+  dest->epbulkindesc.addr = USB_EPIN(devinfo->epno[RNDIS_EP_BULKIN_IDX]);
+  dest->epbulkoutdesc.addr = USB_EPOUT(devinfo->epno[RNDIS_EP_BULKOUT_IDX]);
+#endif
 
-  cfgdesc->totallen[0] = LSBYTE(totallen);
-  cfgdesc->totallen[1] = MSBYTE(totallen);
   return totallen;
 }
 
@@ -1904,7 +1929,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN interrupt endpoint */
 
-  priv->epintin = DEV_ALLOCEP(dev, RNDIS_EPINTIN_ADDR, true, USB_EP_ATTR_XFER_INT);
+  priv->epintin = DEV_ALLOCEP(dev, USB_EPIN(priv->devinfo.epno[RNDIS_EP_INTIN_IDX]), true, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
@@ -1926,7 +1951,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, RNDIS_EPBULKIN_ADDR, true, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, USB_EPIN(priv->devinfo.epno[RNDIS_EP_BULKIN_IDX]), true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -1938,7 +1963,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, RNDIS_EPBULKOUT_ADDR, false, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, USB_EPOUT(priv->devinfo.epno[RNDIS_EP_BULKOUT_IDX]), false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
@@ -2003,7 +2028,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
     }
 
   /* Report if we are selfpowered */
-
+#ifndef CONFIG_RNDIS_COMPOSITE
 #ifdef CONFIG_USBDEV_SELFPOWERED
   DEV_SETSELFPOWERED(dev);
 #endif
@@ -2011,6 +2036,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
   /* And pull-up the data line for the soft connect function */
 
   DEV_CONNECT(dev);
+#endif
 
   return OK;
 
@@ -2205,16 +2231,18 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
               switch (ctrl->value[1])
                 {
+#ifndef CONFIG_RNDIS_COMPOSITE
                 case USB_DESC_TYPE_DEVICE:
                   {
                     ret = USB_SIZEOF_DEVDESC;
                     memcpy(ctrlreq->buf, &g_devdesc, ret);
                   }
                   break;
+#endif
 
                 case USB_DESC_TYPE_CONFIG:
                   {
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf);
+                    ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
                   }
                   break;
 
@@ -2222,7 +2250,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                   {
                     /* index == language code. */
 
-                    ret = usbclass_mkstrdesc(priv, ctrl->value[0], (struct usb_strdesc_s *)ctrlreq->buf);
+                    ret = usbclass_mkstrdesc(ctrl->value[0], (struct usb_strdesc_s *)ctrlreq->buf);
                   }
                   break;
 
@@ -2518,6 +2546,98 @@ errout:
 }
 
 /****************************************************************************
+ * Name: usbclass_classobject
+ *
+ * Description:
+ *   Allocate memory for the RNDIS driver class object
+ *
+ * Returned Value:
+ *   0 on success, negative error code on failure.
+ *
+ ****************************************************************************/
+static int usbclass_classobject(int minor,
+                                FAR struct usbdev_devinfo_s *devinfo,
+                                FAR struct usbdevclass_driver_s **classdev)
+{
+  FAR struct rndis_alloc_s *alloc;
+  FAR struct rndis_dev_s *priv;
+  FAR struct rndis_driver_s *drvr;
+  int ret;
+
+  /* Allocate the structures needed */
+
+  alloc = (FAR struct rndis_alloc_s *)kmm_zalloc(sizeof(struct rndis_alloc_s));
+  if (!alloc)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
+      return -ENOMEM;
+    }
+
+  /* Convenience pointers into the allocated blob */
+
+  priv = &alloc->dev;
+  drvr = &alloc->drvr;
+  *classdev = &drvr->drvr;
+
+#ifdef CONFIG_RNDIS_COMPOSITE
+  priv->devinfo = *devinfo;
+#else
+  priv->devinfo.epno[RNDIS_EP_INTIN_IDX] = USB_EPNO(RNDIS_EPINTIN_ADDR);
+  priv->devinfo.epno[RNDIS_EP_BULKIN_IDX] = USB_EPNO(RNDIS_EPBULKIN_ADDR);
+  priv->devinfo.epno[RNDIS_EP_BULKOUT_IDX] = USB_EPNO(RNDIS_EPBULKOUT_ADDR);
+#endif
+
+  /* Initialize the USB ethernet driver structure */
+
+  sq_init(&priv->reqlist);
+  memcpy(priv->host_mac_address, g_rndis_default_mac_addr, 6);
+  priv->txpoll = wd_create();
+  priv->netdev.d_private = priv;
+  priv->netdev.d_ifup = &rndis_ifup;
+  priv->netdev.d_ifdown = &rndis_ifdown;
+  priv->netdev.d_txavail = &rndis_txavail;
+
+  /* MAC address filtering is purposefully left out of this driver. Since
+   * in the RNDIS USB scenario there are only two devices in the network
+   * (host and us), there shouldn't be any packets received that don't
+   * belong to us.
+   */
+
+  /* Initialize the USB class driver structure */
+
+  drvr->drvr.speed         = USB_SPEED_FULL;
+  drvr->drvr.ops           = &g_driverops;
+  drvr->dev                = priv;
+
+  ret = netdev_register(&priv->netdev, NET_LL_ETHERNET);
+  if (ret)
+    {
+      uerr("Failed to register net device");
+      return ret;
+    }
+
+  drvr->dev->registered = true;
+
+  return OK;
+}
+
+static void usbclass_uninitialize(FAR struct usbdevclass_driver_s *classdev)
+{
+  FAR struct rndis_driver_s *drvr = (FAR struct rndis_driver_s*)classdev;
+  FAR struct rndis_alloc_s *alloc = (FAR struct rndis_alloc_s *)drvr->dev;
+
+  if (drvr->dev->registered)
+    {
+      netdev_unregister(&drvr->dev->netdev);
+      drvr->dev->registered = false;
+    }
+  else
+    {
+      kmm_free(alloc);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2536,81 +2656,110 @@ errout:
  *   0 on success, -errno on failure
  *
  ****************************************************************************/
-
+#ifndef CONFIG_RNDIS_COMPOSITE
 int usbdev_rndis_initialize(FAR const uint8_t *mac_address)
 {
-  FAR struct rndis_alloc_s *alloc;
-  FAR struct rndis_dev_s *priv;
-  FAR struct rndis_driver_s *drvr;
   int ret;
+  FAR struct usbdevclass_driver_s *classdev;
+  FAR struct rndis_driver_s *drvr;
 
-  /* Allocate the structures needed */
-
-  alloc = (FAR struct rndis_alloc_s *)kmm_malloc(sizeof(struct rndis_alloc_s));
-  if (!alloc)
+  ret = usbclass_classobject(0, NULL, &classdev);
+  if (ret)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
-      return -ENOMEM;
+      nerr("usbclass_classobject failed: %d\n", ret);
+      return ret;
     }
 
-  /* Convenience pointers into the allocated blob */
-
-  priv = &alloc->dev;
-  drvr = &alloc->drvr;
-
-  /* Initialize the USB ethernet driver structure */
-
-  memset(priv, 0, sizeof(struct rndis_dev_s));
-  sq_init(&priv->reqlist);
+  drvr = (FAR struct rndis_driver_s*)classdev;
 
   if (mac_address)
     {
-      memcpy(priv->host_mac_address, mac_address, 6);
+      memcpy(drvr->dev->host_mac_address, mac_address, 6);
     }
-  else
-    {
-      memcpy(priv->host_mac_address, g_rndis_default_mac_addr, 6);
-    }
-
-  priv->txpoll = wd_create();
-
-  memset(&priv->netdev, 0, sizeof(struct net_driver_s));
-  priv->netdev.d_private = priv;
-  priv->netdev.d_ifup = &rndis_ifup;
-  priv->netdev.d_ifdown = &rndis_ifdown;
-  priv->netdev.d_txavail = &rndis_txavail;
-
-  /* MAC address filtering is purposefully left out of this driver. Since
-   * in the RNDIS USB scenario there are only two devices in the network
-   * (host and us), there shouldn't be any packets received that don't
-   * belong to us.
-   */
-
-  /* Initialize the USB class driver structure */
-
-  drvr->drvr.speed         = USB_SPEED_FULL;
-  drvr->drvr.ops           = &g_driverops;
-  drvr->dev                = priv;
-
-  /* Register the USB serial class driver */
 
   ret = usbdev_register(&drvr->drvr);
   if (ret)
     {
+      nerr("usbdev_register failed: %d\n", ret);
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER), (uint16_t)-ret);
-      goto errout_with_alloc;
-    }
-
-  ret = netdev_register(&priv->netdev, NET_LL_ETHERNET);
-  if (ret)
-    {
-      uerr("Failed to register net device");
-      goto errout_with_alloc;
+      usbclass_uninitialize(classdev);
+      return ret;
     }
 
   return OK;
-
-errout_with_alloc:
-  kmm_free(alloc);
-  return ret;
 }
+#endif
+
+/****************************************************************************
+ * Name: usbdev_rndis_set_host_mac_addr
+ *
+ * Description:
+ *   Set host MAC address. Mainly for use with composite devices where
+ *   the MAC cannot be given directly to usbdev_rndis_initialize().
+ *
+ * Input Parameters:
+ *   netdev:      pointer to the network interface. Can be obtained from
+ *                e.g. netdev_findbyname().
+ *
+ *   mac_address: pointer to an array of six octets which is the MAC address
+ *                of the host side of the interface. May be NULL to use the
+ *                default MAC address.
+ *
+ * Returned Value:
+ *   0 on success, -errno on failure
+ *
+ ****************************************************************************/
+int usbdev_rndis_set_host_mac_addr(FAR struct net_driver_s *netdev, FAR const uint8_t *mac_address)
+{
+  FAR struct rndis_dev_s *dev = (FAR struct rndis_dev_s*)netdev;
+
+  if (mac_address)
+    {
+      memcpy(dev->host_mac_address, mac_address, 6);
+    }
+  else
+    {
+      memcpy(dev->host_mac_address, g_rndis_default_mac_addr, 6);
+    }
+  
+  return OK;
+}
+
+
+/****************************************************************************
+ * Name: usbdev_rndis_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RNDIS_COMPOSITE
+void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev)
+{
+  memset(dev, 0, sizeof(struct composite_devdesc_s));
+
+  dev->mkconfdesc   = usbclass_mkcfgdesc;
+  dev->mkstrdesc    = usbclass_mkstrdesc;
+  dev->classobject  = usbclass_classobject;
+  dev->uninitialize = usbclass_uninitialize;
+  dev->nconfigs     = RNDIS_NCONFIGS;
+  dev->configid     = RNDIS_CONFIGID;
+  dev->cfgdescsize  = sizeof(g_rndis_cfgdesc);
+  dev->devinfo.ninterfaces = RNDIS_NINTERFACES;
+  dev->devinfo.nstrings    = 0;
+  dev->devinfo.nendpoints  = RNDIS_NUM_EPS;
+
+  /* Default endpoint indexes, board-specific logic can override these */
+  dev->devinfo.epno[RNDIS_EP_INTIN_IDX] = USB_EPNO(RNDIS_EPINTIN_ADDR);
+  dev->devinfo.epno[RNDIS_EP_BULKIN_IDX] = USB_EPNO(RNDIS_EPBULKIN_ADDR);
+  dev->devinfo.epno[RNDIS_EP_BULKOUT_IDX] = USB_EPNO(RNDIS_EPBULKOUT_ADDR);
+}
+#endif

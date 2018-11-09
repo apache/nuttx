@@ -42,6 +42,16 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbdev.h>
+
+/****************************************************************************
+ * Preprocessor definitions
+ ****************************************************************************/
+
+/* Indexes for devinfo.epno[] array. Used for composite device configuration. */
+#define RNDIS_EP_INTIN_IDX      (0)
+#define RNDIS_EP_BULKIN_IDX     (1)
+#define RNDIS_EP_BULKOUT_IDX    (2)
 
 /************************************************************************************
  * Public Data
@@ -76,7 +86,50 @@ extern "C"
  *
  ************************************************************************************/
 
+#ifndef CONFIG_RNDIS_COMPOSITE
 int usbdev_rndis_initialize(FAR const uint8_t *mac_address);
+#endif
+
+/****************************************************************************
+ * Name: usbdev_rndis_set_host_mac_addr
+ *
+ * Description:
+ *   Set host MAC address. Mainly for use with composite devices where
+ *   the MAC cannot be given directly to usbdev_rndis_initialize().
+ *
+ * Input Parameters:
+ *   netdev:      pointer to the network interface. Can be obtained from
+ *                e.g. netdev_findbyname().
+ *
+ *   mac_address: pointer to an array of six octets which is the MAC address
+ *                of the host side of the interface. May be NULL to use the
+ *                default MAC address.
+ *
+ * Returned Value:
+ *   0 on success, -errno on failure
+ *
+ ****************************************************************************/
+
+int usbdev_rndis_set_host_mac_addr(FAR struct net_driver_s *netdev, FAR const uint8_t *mac_address);
+
+/****************************************************************************
+ * Name: usbdev_rndis_get_composite_devdesc
+ *
+ * Description:
+ *   Helper function to fill in some constants into the composite
+ *   configuration struct.
+ *
+ * Input Parameters:
+ *     dev - Pointer to the configuration struct we should fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RNDIS_COMPOSITE
+void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

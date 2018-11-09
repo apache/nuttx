@@ -486,7 +486,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                   uint8_t strid = ctrl->value[0];
                   FAR struct usb_strdesc_s *buf = (FAR struct usb_strdesc_s *)ctrlreq->buf;
 
-                  if (strid <= COMPOSITE_NSTRIDS)
+                  if (strid < COMPOSITE_NSTRIDS)
                     {
                       ret = composite_mkstrdesc(strid, buf);
                     }
