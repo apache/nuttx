@@ -147,6 +147,16 @@ config NET_TCPBACKLOG
 		Incoming connections pend in a backlog until accept() is called.
 		The size of the backlog is selected when listen() is called.
 
+if NET_TCPBACKLOG
+
+config NET_TCPBACKLOG_CONNS
+	int "TCP backlog conns threshold"
+	default 8
+	---help---
+		Maximum number of TCP backlog connections (all tasks).
+
+endif # NET_TCPBACKLOG
+
 config NET_TCP_SPLIT
 	bool "Enable packet splitting"
 	default n
