@@ -131,16 +131,16 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Pre-pend the message with the current time, if available */
 
-  (void)lib_sprintf(&stream.public, "[%5d.%06d] ",
+  ret = lib_sprintf(&stream.public, "[%5d.%06d] ",
                     ts.tv_sec, ts.tv_nsec/1000);
+#else
+  ret = 0;
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Pre-pend the prefix, if available */
 
-  ret = lib_sprintf(&stream.public, "%s", CONFIG_SYSLOG_PREFIX_STRING);
-#else
-  ret = 0;
+  ret += lib_sprintf(&stream.public, "%s", CONFIG_SYSLOG_PREFIX_STRING);
 #endif
 
   /* Generate the output */
