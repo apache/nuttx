@@ -195,6 +195,7 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
  * Name: rwb_wrtimeout
  ****************************************************************************/
 
+#ifdef CONFIG_DRVR_WRITEBUFFER
 static void rwb_wrtimeout(FAR void *arg)
 {
   /* The following assumes that the size of a pointer is 4-bytes or less */
@@ -211,11 +212,13 @@ static void rwb_wrtimeout(FAR void *arg)
   rwb_wrflush(rwb);
   rwb_semgive(&rwb->wrsem);
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_wrstarttimeout
  ****************************************************************************/
 
+#ifdef CONFIG_DRVR_WRITEBUFFER
 static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
 {
   /* CONFIG_DRVR_WRDELAY provides the delay period in milliseconds. CLK_TCK
@@ -225,15 +228,18 @@ static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
   int ticks = (CONFIG_DRVR_WRDELAY + CLK_TCK/2) / CLK_TCK;
   (void)work_queue(LPWORK, &rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_wrcanceltimeout
  ****************************************************************************/
 
+#ifdef CONFIG_DRVR_WRITEBUFFER
 static inline void rwb_wrcanceltimeout(struct rwbuffer_s *rwb)
 {
   (void)work_cancel(LPWORK, &rwb->work);
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_writebuffer
@@ -832,6 +838,7 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
               if (ret < 0)
                 {
                   ferr("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
+                  rwb_semgive(&rwb->rhsem);
                   return (ssize_t)ret;
                 }
             }
@@ -910,7 +917,9 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
         {
           /* Buffer the data in the write buffer */
 
+          rwb_semtake(&rwb->wrsem);
           ret = rwb_writebuffer(rwb, startblock, nblocks, wrbuffer);
+          rwb_semgive(&rwb->wrsem);
         }
 
       /* On success, return the number of blocks that we were requested to
