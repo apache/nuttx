@@ -421,6 +421,11 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
+      /* We might start getting events for this socket right after
+       * returning to daemon, so setup 'newconn' already here. */
+
+      newconn->state = USRSOCK_CONN_STATE_READY;
+
       /* Request user-space daemon to accept socket. */
 
       ret = do_accept_request(conn, inaddrlen);
@@ -440,7 +445,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           if (ret >= 0)
             {
-              newconn->state     = USRSOCK_CONN_STATE_READY;
               newconn->connected = true;
               newconn->type      = conn->type;
               newconn->crefs     = 1;
