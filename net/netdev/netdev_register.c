@@ -52,6 +52,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/bluetooth.h>
 
 #include "utils/utils.h"
