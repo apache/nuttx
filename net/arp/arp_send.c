@@ -342,16 +342,9 @@ int arp_send(in_addr_t ipaddr)
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = arp_send_eventhandler;
 
-      /* Notify the device driver that new TX data is available.
-       * NOTES: This is in essence what netdev_ipv4_txnotify() does, which
-       * is not possible to call since it expects a in_addr_t as
-       * its single argument to lookup the network interface.
-       */
+      /* Notify the device driver that new TX data is available. */
 
-      if (dev->d_txavail)
-        {
-          dev->d_txavail(dev);
-        }
+      netdev_txnotify_dev(dev);
 
       /* Wait for the send to complete or an error to occur.
        * net_lockedwait will also terminate if a signal is received.

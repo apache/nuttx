@@ -243,7 +243,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 
   /* Notify the device driver that new TX data is available. */
 
-  dev->d_txavail(dev);
+  netdev_txnotify_dev(dev);
 
   /* Wait for the send to complete or an error to occur
    * net_lockedwait will also terminate if a signal is received.
