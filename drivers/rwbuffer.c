@@ -167,8 +167,6 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
 {
   int ret;
 
-  finfo("Timeout!\n");
-
   if (rwb->wrnblocks > 0)
     {
       finfo("Flushing: blockstart=0x%08lx nblocks=%d from buffer=%p\n",
@@ -202,6 +200,8 @@ static void rwb_wrtimeout(FAR void *arg)
 
   FAR struct rwbuffer_s *rwb = (struct rwbuffer_s *)arg;
   DEBUGASSERT(rwb != NULL);
+
+  finfo("Timeout!\n");
 
   /* If a timeout elapses with with write buffer activity, this watchdog
    * handler function will be evoked on the thread of execution of the
@@ -1118,6 +1118,26 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
       return ret;
     }
 #endif
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: rwb_flush
+ *
+ * Description:
+ *   Flush the write buffer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRVR_WRITEBUFFER
+int rwb_flush(FAR struct rwbuffer_s *rwb)
+{
+  rwb_semtake(&rwb->wrsem);
+  rwb_wrcanceltimeout(rwb);
+  rwb_wrflush(rwb);
+  rwb_semgive(&rwb->wrsem);
 
   return OK;
 }

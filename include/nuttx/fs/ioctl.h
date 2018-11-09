@@ -257,6 +257,10 @@
                                            *      to return geometry.
                                            * OUT: Data return in user-provided
                                            *      buffer. */
+#define BIOC_FLUSH      _BIOC(0x000d)     /* Flush the block device write buffer
+                                           * IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

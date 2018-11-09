@@ -156,7 +156,11 @@ static int ftl_open(FAR struct inode *inode)
 
 static int ftl_close(FAR struct inode *inode)
 {
-  finfo("Entry\n");
+#ifdef CONFIG_FTL_WRITEBUFFER
+  struct ftl_struct_s *dev = (struct ftl_struct_s *)inode->i_private;
+  rwb_flush(&dev->rwb);
+#endif
+
   return OK;
 }
 
@@ -464,6 +468,8 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
 
+  dev = (struct ftl_struct_s *)inode->i_private;
+
   /* Only one block driver ioctl command is supported by this driver (and
    * that command is just passed on to the MTD driver in a slightly
    * different form).
@@ -488,13 +494,18 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
       cmd = MTDIOC_XIPBASE;
     }
+#ifdef CONFIG_FTL_WRITEBUFFER
+  else if (cmd == BIOC_FLUSH)
+    {
+      return rwb_flush(&dev->rwb);
+    }
+#endif
 
   /* No other block driver ioctl commmands are not recognized by this
    * driver.  Other possible MTD driver ioctl commands are passed through
    * to the MTD driver (unchanged).
    */
 
-  dev = (struct ftl_struct_s *)inode->i_private;
   ret = MTD_IOCTL(dev->mtd, cmd, arg);
   if (ret < 0)
     {
