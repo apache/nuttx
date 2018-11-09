@@ -116,6 +116,8 @@
 #define IP_MULTICAST_ALL      (__SO_PROTOCOL + 11) /* Modify the delivery policy
                                                     * of multicast messages bound
                                                     * to INADDR_ANY */
+#define IP_PKTINFO            (__SO_PROTOCOL + 12) /* Get some information about
+                                                    * the incoming packet */
 
 /* SOL_IPV6 protocol-level socket options. */
 
@@ -130,6 +132,8 @@
 #define IPV6_UNICAST_HOPS     (__SO_PROTOCOL + 6)  /* Unicast hop limit */
 #define IPV6_V6ONLY           (__SO_PROTOCOL + 7)  /* Restrict AF_INET6 socket
                                                     * to IPv6 communications only */
+#define IPV6_PKTINFO          (__SO_PROTOCOL + 8)  /* Get some information about
+                                                    * the incoming packet */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 
@@ -251,6 +255,13 @@ struct ip_msfilter
   struct in_addr imsf_slist[1];     /* Array of source addresses */
 };
 
+struct in_pktinfo
+{
+  int            ipi_ifindex;       /* Interface index */
+  struct in_addr ipi_spec_dst;      /* Local address */
+  struct in_addr ipi_addr;          /* Header Destination address */
+};
+
 /* IPv6 Internet address */
 
 struct in6_addr
@@ -278,6 +289,12 @@ struct ipv6_mreq
 {
   struct in6_addr ipv6mr_multiaddr; /* IPv6 multicast address of group */
   unsigned int    ipv6mr_interface; /* Local interface index */
+};
+
+struct in6_pktinfo
+{
+  struct in6_addr ipi6_addr;        /* src/dst IPv6 address */
+  int             ipi6_ifindex;     /* send/recv interface index */
 };
 
 /****************************************************************************
