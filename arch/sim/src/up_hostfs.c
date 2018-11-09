@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#define _BSD_SOURCE
+#define _GNU_SOURCE 1
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -88,9 +88,13 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
     {
       buf->st_mode |= NUTTX_S_IFLNK;
     }
-  else /* if (hostbuf->st_mode & S_IFIFO) */
+  else if (hostbuf->st_mode & S_IFIFO)
     {
       buf->st_mode |= NUTTX_S_IFIFO;
+    }
+  else if (hostbuf->st_mode & S_IFSOCK)
+    {
+      buf->st_mode |= NUTTX_S_IFSOCK;
     }
 
   buf->st_size    = hostbuf->st_size;
@@ -151,6 +155,16 @@ int host_open(const char *pathname, int flags, int mode)
   if (flags & NUTTX_O_NONBLOCK)
     {
       mapflags |= O_NONBLOCK;
+    }
+
+  if (flags & NUTTX_O_SYNC)
+    {
+      mapflags |= O_SYNC;
+    }
+
+  if (flags & NUTTX_O_DIRECT)
+    {
+      mapflags |= O_DIRECT;
     }
 
   return open(pathname, mapflags, mode);
@@ -219,7 +233,7 @@ void host_sync(int fd)
 {
   /* Just call the sync routine */
 
-  sync();
+  fsync(fd);
 }
 
 /****************************************************************************
@@ -305,6 +319,10 @@ int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
       else if (ent->d_type == DT_DIR)
         {
           entry->d_type = NUTTX_DTYPE_DIRECTORY;
+        }
+      else if (ent->d_type == DT_LNK)
+        {
+          entry->d_type = NUTTX_DTYPE_LINK;
         }
 
       return 0;
