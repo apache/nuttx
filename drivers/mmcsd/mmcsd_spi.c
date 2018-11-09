@@ -54,6 +54,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mmcsd.h>
@@ -445,8 +446,9 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
 
       if (elapsed > MMCSD_DELAY_10MS)
       {
-        // Give other threads time to run
-        usleep(10000);
+        /* Give other threads time to run */
+
+        nxsig_usleep(10000);
       }
     }
   while (elapsed < MMCSD_DELAY_500MS);

@@ -758,7 +758,9 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 #if defined(CONFIG_FAT_LFN_ALIAS_TRAILCHARS) && CONFIG_FAT_LFN_ALIAS_TRAILCHARS > 0
       /* Take first 6-N characters from beginning of filename and last N
        * characters from end of the filename. Useful for filenames like
-       * "datafile123.txt". */
+       * "datafile123.txt".
+       */
+
       if (ndx == 6 - CONFIG_FAT_LFN_ALIAS_TRAILCHARS
           && namechars > CONFIG_FAT_LFN_ALIAS_TRAILCHARS)
         {
@@ -849,10 +851,14 @@ static inline int fat_uniquealias(struct fat_mountpt_s *fs,
   DEBUGASSERT(dirinfo->fd_name[lsdigit] == '1');
 
 #ifdef CONFIG_FAT_LFN_ALIAS_HASH
-  /* Add a hash of the long filename to the short filename, to reduce collisions. */
+  /* Add a hash of the long filename to the short filename, to reduce
+   * collisions.
+   */
+
   if ((ret = fat_findalias(fs, dirinfo)) == OK)
     {
       uint16_t hash = dirinfo->fd_seq.ds_offset;
+
       for (i = 0; dirinfo->fd_lfname[i] != '\0'; i++)
         {
           hash = ((hash << 5) + hash) ^ dirinfo->fd_lfname[i];
