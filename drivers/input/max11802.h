@@ -71,14 +71,18 @@
 #define MAX11802_CMD_MODE_WR   (0x0B << 1)
 #define MAX11802_CMD_MODE_RD   ((0x0B << 1) | 1)
 #define MAX11802_CMD_AVG_WR    (0x03 << 1)
+#define MAX11802_CMD_SAMPLE_WR (0x04 << 1)
 #define MAX11802_CMD_TIMING_WR (0x05 << 1)
 #define MAX11802_CMD_DELAY_WR  (0x06 << 1)
+#define MAX11802_CMD_PULL_WR   (0x07 << 1)
 
 /* Register values to set */
-#define MAX11802_MODE    0x0E
+#define MAX11802_MODE    0x06
 #define MAX11802_AVG     0x55
+#define MAX11802_SAMPLE  0xAA
 #define MAX11802_TIMING  0x77
 #define MAX11802_DELAY   0x55
+#define MAX11802_PULL    0x33
 
 /* Driver support **************************************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
@@ -144,7 +148,7 @@ struct max11802_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_ADS7843E_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_MAX11802_NPOLLWAITERS];
 #endif
 };
 
