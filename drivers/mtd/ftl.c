@@ -85,6 +85,8 @@ struct ftl_struct_s
   struct rwbuffer_s     rwb;     /* Read-ahead/write buffer support */
 #endif
   uint16_t              blkper;  /* R/W blocks per erase block */
+  uint16_t              refs;    /* Number of references */
+  bool                  unlinked;/* The driver has been unlinked */
 #ifdef CONFIG_FS_WRITABLE
   FAR uint8_t          *eblock;  /* One, in-memory erase block */
 #endif
@@ -108,6 +110,9 @@ static ssize_t ftl_write(FAR struct inode *inode, const unsigned char *buffer,
 #endif
 static int     ftl_geometry(FAR struct inode *inode, struct geometry *geometry);
 static int     ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     ftl_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -126,7 +131,7 @@ static const struct block_operations g_bops =
   ftl_geometry, /* geometry */
   ftl_ioctl     /* ioctl    */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0           /* unlink   */
+  , ftl_unlink  /* unlink   */
 #endif
 };
 
@@ -143,7 +148,12 @@ static const struct block_operations g_bops =
 
 static int ftl_open(FAR struct inode *inode)
 {
-  finfo("Entry\n");
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct ftl_struct_s *)inode->i_private;
+
+  dev->refs++;
   return OK;
 }
 
@@ -156,10 +166,28 @@ static int ftl_open(FAR struct inode *inode)
 
 static int ftl_close(FAR struct inode *inode)
 {
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct ftl_struct_s *)inode->i_private;
+
 #ifdef CONFIG_FTL_WRITEBUFFER
-  struct ftl_struct_s *dev = (struct ftl_struct_s *)inode->i_private;
   rwb_flush(&dev->rwb);
 #endif
+
+  if (--dev->refs == 0 && dev->unlinked)
+    {
+#ifdef FTL_HAVE_RWBUFFER
+      rwb_uninitialize(&dev->rwb);
+#endif
+#ifdef CONFIG_FS_WRITABLE
+      if (dev->eblock)
+        {
+          kmm_free(dev->eblock);
+        }
+#endif
+      kmm_free(dev);
+    }
 
   return OK;
 }
@@ -542,6 +570,40 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: ftl_unlink
+ *
+ * Description: Unlink the device
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int ftl_unlink(FAR struct inode *inode)
+{
+  FAR struct ftl_struct_s *dev;
+
+  DEBUGASSERT(inode && inode->i_private);
+  dev = (FAR struct ftl_struct_s *)inode->i_private;
+
+  dev->unlinked = true;
+  if (dev->refs == 0)
+    {
+#ifdef FTL_HAVE_RWBUFFER
+      rwb_uninitialize(&dev->rwb);
+#endif
+#ifdef CONFIG_FS_WRITABLE
+      if (dev->eblock)
+        {
+          kmm_free(dev->eblock);
+        }
+#endif
+      kmm_free(dev);
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -628,6 +690,9 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           ferr("ERROR: register_blockdriver failed: %d\n", -ret);
+#ifdef FTL_HAVE_RWBUFFER
+          rwb_uninitialize(&dev->rwb);
+#endif
           kmm_free(dev);
         }
     }
