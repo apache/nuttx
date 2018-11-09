@@ -40,7 +40,7 @@ CSRCS += lib_inetaddr.c lib_inetaton.c lib_inetntoa.c
 CSRCS += lib_inetntop.c lib_inetpton.c
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += lib_shutdown.c
+CSRCS += lib_recvmsg.c lib_sendmsg.c lib_shutdown.c
 endif
 
 # Routing table support
