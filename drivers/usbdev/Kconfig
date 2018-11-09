@@ -734,6 +734,7 @@ config RNDIS_VERSIONNO
 	default 0x0001
 
 endif # !RNDIS_COMPOSITE
+endif # RNDIS
 
 menuconfig DFU
 	bool "DFU Device Firmware Upgrade"
