@@ -292,6 +292,12 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 
   if (g_wdactivelist.head == NULL)
     {
+#ifdef CONFIG_SCHED_TICKLESS
+      /* Update clock tickbase */
+
+      g_wdtickbase = clock_systimer();
+#endif
+
       /* Add the watchdog to the head == tail of the queue. */
 
       sq_addlast((FAR sq_entry_t *)wdog, &g_wdactivelist);
@@ -461,13 +467,18 @@ unsigned int wd_timer(int ticks)
 
       /* There are.  Decrement the lag counter */
 
-      wdog->lag -= decr;
-      ticks     -= decr;
+      wdog->lag    -= decr;
+      ticks        -= decr;
+      g_wdtickbase += decr;
 
       /* Check if the watchdog at the head of the list is ready to run */
 
       wd_expiration();
     }
+
+  /* Update clock tickbase */
+
+  g_wdtickbase += ticks;
 
   /* Return the delay for the next watchdog to expire */
 

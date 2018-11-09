@@ -88,6 +88,7 @@ int wd_gettime(WDOG_ID wdog)
           delay += curr->lag;
           if (curr == wdog)
             {
+              delay -= wd_elapse();
               leave_critical_section(flags);
               return delay;
             }

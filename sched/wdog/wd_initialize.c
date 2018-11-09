@@ -67,6 +67,14 @@ sq_queue_t g_wdactivelist;
 
 uint16_t g_wdnfree;
 
+/* This is wdog tickbase, for wd_gettime() may called many times
+ * between 2 times of wd_timer(), we use it to update wd_gettime().
+ */
+
+#ifdef CONFIG_SCHED_TICKLESS
+clock_t g_wdtickbase;
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
