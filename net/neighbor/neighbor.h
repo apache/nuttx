@@ -191,6 +191,37 @@ int neighbor_lookup(FAR const net_ipv6addr_t ipaddr,
 void neighbor_update(const net_ipv6addr_t ipaddr);
 
 /****************************************************************************
+ * Name: neighbor_ethernet_out
+ *
+ * Description:
+ *   This function should be called before sending out an IPv6 packet. The
+ *   function checks the destination IPv6 address of the IPv6 packet to see
+ *   what Ethernet MAC address that should be used as a destination MAC
+ *   address on the Ethernet.
+ *
+ *   If the destination IPv6 address is in the local network (determined
+ *   by logical ANDing of netmask and our IPv6 address), the function
+ *   checks the Neighbor Table to see if an entry for the destination IPv6
+ *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   beginning of the packet and the function returns.
+ *
+ *   If no Neighbor Table entry is found for the destination IPv6 address,
+ *   the packet in the d_buf is replaced by an ICMPv6 Neighbor Solicit
+ *   request packet for the IPv6 address. The IPv6 packet is dropped and
+ *   it is assumed that the higher level protocols (e.g., TCP) eventually
+ *   will retransmit the dropped packet.
+ *
+ *   Upon return in either the case, a packet to be sent is present in the
+ *   d_buf buffer and the d_len field holds the length of the Ethernet
+ *   frame that should be transmitted.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ETHERNET
+void neighbor_ethernet_out(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
  * Name: neighbor_dumpentry
  *
  * Description:
