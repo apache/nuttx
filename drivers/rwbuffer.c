@@ -63,12 +63,12 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#endif
-
 #ifndef CONFIG_DRVR_WRDELAY
 #  define CONFIG_DRVR_WRDELAY 350
+#endif
+
+#if !defined(CONFIG_SCHED_WORKQUEUE) && CONFIG_DRVR_WRDELAY != 0
+#  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
 /****************************************************************************
@@ -195,7 +195,7 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
  * Name: rwb_wrtimeout
  ****************************************************************************/
 
-#ifdef CONFIG_DRVR_WRITEBUFFER
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static void rwb_wrtimeout(FAR void *arg)
 {
   /* The following assumes that the size of a pointer is 4-bytes or less */
@@ -221,12 +221,14 @@ static void rwb_wrtimeout(FAR void *arg)
 #ifdef CONFIG_DRVR_WRITEBUFFER
 static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
 {
+#if CONFIG_DRVR_WRDELAY != 0
   /* CONFIG_DRVR_WRDELAY provides the delay period in milliseconds. CLK_TCK
    * provides the clock tick of the system (frequency in Hz).
    */
 
-  int ticks = (CONFIG_DRVR_WRDELAY + CLK_TCK/2) / CLK_TCK;
+  int ticks = MSEC2TICK(CONFIG_DRVR_WRDELAY);
   (void)work_queue(LPWORK, &rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
+#endif
 }
 #endif
 
@@ -237,7 +239,9 @@ static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
 #ifdef CONFIG_DRVR_WRITEBUFFER
 static inline void rwb_wrcanceltimeout(struct rwbuffer_s *rwb)
 {
+#if CONFIG_DRVR_WRDELAY != 0
   (void)work_cancel(LPWORK, &rwb->work);
+#endif
 }
 #endif
 
