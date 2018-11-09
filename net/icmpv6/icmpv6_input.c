@@ -105,7 +105,8 @@
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
-                                   FAR struct icmpv6_conn_s *conn)
+                                   FAR struct icmpv6_conn_s *conn,
+                                   unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6;
   struct sockaddr_in6 inaddr;
@@ -468,7 +469,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
              * ahead buffer.
              */
 
-            nbuffered = icmpv6_datahandler(dev, conn);
+            nbuffered = icmpv6_datahandler(dev, conn, iplen);
             if (nbuffered == 0)
               {
                 /* Could not buffer the data.. drop the packet */
