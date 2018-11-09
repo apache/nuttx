@@ -34,6 +34,7 @@
 ############################################################################
 
 ifeq ($(CONFIG_NET_ICMPv6),y)
+ifneq ($(CONFIG_NET_ICMPv6_NO_STACK),y)
 
 # ICMPv6 source files
 
@@ -70,4 +71,5 @@ endif
 DEPPATH += --dep-path icmpv6
 VPATH += :icmpv6
 
-endif
+endif # !CONFIG_NET_ICMPv6_NO_STACK
+endif # CONFIG_NET_ICMPv6

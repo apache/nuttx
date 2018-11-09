@@ -52,11 +52,13 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_ICMPv6
+#if defined(CONFIG_NET_ICMPv6) && !defined(CONFIG_NET_ICMPv6_NO_STACK)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+ #define NET_ICMPv6_HAVE_STACK 1
 
 /* Allocate a new ICMPv6 data callback */
 
@@ -706,5 +708,6 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 }
 #endif
 
-#endif /* CONFIG_NET_ICMPv6 */
+#endif /* CONFIG_NET_ICMPv6 && !CONFIG_NET_ICMPv6_NO_STACK */
 #endif /* __NET_ICMPv6_ICMPv6_H */
+

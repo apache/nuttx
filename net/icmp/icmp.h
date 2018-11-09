@@ -51,11 +51,13 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_ICMP
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define NET_ICMP_HAVE_STACK 1
 
 /* Allocate/free an ICMP data callback */
 
@@ -360,5 +362,5 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 }
 #endif
 
-#endif /* CONFIG_NET_ICMP */
+#endif /* CONFIG_NET_ICMP && !CONFIG_NET_ICMP_NO_STACK */
 #endif /* __NET_ICMP_ICMP_H */

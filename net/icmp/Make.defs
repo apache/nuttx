@@ -34,6 +34,7 @@
 ############################################################################
 
 ifeq ($(CONFIG_NET_ICMP),y)
+ifneq ($(CONFIG_NET_ICMP_NO_STACK),y)
 
 # ICMP source files
 
@@ -51,4 +52,6 @@ endif
 
 DEPPATH += --dep-path icmp
 VPATH += :icmp
-endif
+
+endif # !CONFIG_NET_ICMP_NO_STACK
+endif # CONFIG_NET_ICMP

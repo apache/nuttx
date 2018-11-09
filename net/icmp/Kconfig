@@ -13,7 +13,14 @@ config NET_ICMP
 		Enable minimal ICMP support. Includes built-in support
 		for sending replies to received ECHO (ping) requests.
 
-if NET_ICMP
+config NET_ICMP_NO_STACK
+	bool "Disable ICMP stack"
+	default n
+	select NET_ICMP
+	---help---
+		Build without ICMP stack even if ICMP networking support enabled.
+
+if NET_ICMP && !NET_ICMP_NO_STACK
 
 config NET_ICMP_SOCKET
 	bool "IPPROTO_ICMP socket support"
@@ -31,6 +38,6 @@ config NET_ICMP_NCONNS
 	depends on MM_IOB
 
 endif # NET_ICMP_SOCKET
-endif # NET_ICMP
+endif # NET_ICMP && !NET_ICMP_NO_STACK
 endmenu # ICMP Networking Support
 endif # NET_IPv4

@@ -512,9 +512,9 @@ int ipv6_input(FAR struct net_driver_s *dev)
         break;
 #endif
 
-#ifdef CONFIG_NET_ICMPv6
       /* Check for ICMP input */
 
+#ifdef NET_ICMPv6_HAVE_STACK
       case IP_PROTO_ICMP6: /* ICMP6 input */
         /* Forward the ICMPv6 packet */
 
@@ -546,7 +546,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
           }
 #endif /* CONFIG_NET_6LOWPAN */
         break;
-#endif /* CONFIG_NET_ICMPv6 */
+#endif /* NET_ICMPv6_HAVE_STACK */
 
       default:              /* Unrecognized/unsupported protocol */
         nwarn("WARNING: Unrecognized IP protocol: %04x\n", ipv6->proto);

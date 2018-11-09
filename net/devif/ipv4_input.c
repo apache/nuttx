@@ -548,7 +548,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
         break;
 #endif
 
-#ifdef CONFIG_NET_ICMP
+#ifdef NET_ICMP_HAVE_STACK
   /* Check for ICMP input */
 
       case IP_PROTO_ICMP:  /* ICMP input */
