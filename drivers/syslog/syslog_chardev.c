@@ -46,7 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/syslog/syslog.h>
+#include <syslog.h>
 
 #include "syslog.h"
 
@@ -90,7 +90,8 @@ static const struct file_operations syslog_fops =
 static ssize_t syslog_chardev_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t len)
 {
-  return syslog_write(buffer, len);
+  syslog(LOG_INFO, "%.*s", (int)len, buffer);
+  return len;
 }
 
 /****************************************************************************

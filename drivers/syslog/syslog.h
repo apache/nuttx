@@ -188,6 +188,24 @@ int syslog_console_channel(void);
 #endif
 
 /****************************************************************************
+ * Name: syslog_register
+ *
+ * Description:
+ *   Register a simple character driver at /dev/syslog whose write() method
+ *   will transfer data to the SYSLOG device.  This can be useful if, for
+ *   example, you want to redirect the output of a program to the SYSLOG.
+ *
+ *   NOTE that unlike other syslog output, this data is unformatted raw
+ *   byte output with no time-stamping or any other SYSLOG features
+ *   supported.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_CHARDEV
+void syslog_register(void);
+#endif
+
+/****************************************************************************
  * Name: syslog_add_intbuffer
  *
  * Description:

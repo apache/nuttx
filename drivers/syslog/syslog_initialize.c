@@ -109,6 +109,13 @@ int syslog_initialize(enum syslog_init_e phase)
 
 #endif
 
+#ifdef CONFIG_SYSLOG_CHARDEV
+  if (phase == SYSLOG_INIT_EARLY)
+    {
+      syslog_register();
+    }
+#endif
+
   return ret;
 }
 
