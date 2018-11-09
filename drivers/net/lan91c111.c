@@ -530,18 +530,13 @@ static int lan91c111_txpoll(FAR struct net_driver_s *dev)
        */
 
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
       if (IFF_IS_IPv4(dev->d_flags))
-#endif
         {
           arp_out(dev);
         }
 #endif /* CONFIG_NET_IPv4 */
-
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      else
-#endif
+      if (IFF_IS_IPv6(dev->d_flags))
         {
           neighbor_out(dev);
         }
@@ -598,22 +593,13 @@ static void lan91c111_reply(FAR struct net_driver_s *dev)
       /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-      /* Check for an outgoing IPv4 packet */
-
       if (IFF_IS_IPv4(dev->d_flags))
-#endif
         {
           arp_out(dev);
         }
 #endif
-
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-      /* Otherwise, it must be an outgoing IPv6 packet */
-
-      else
-#endif
+      if (IFF_IS_IPv6(dev->d_flags))
         {
           neighbor_out(dev);
         }
@@ -752,14 +738,9 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
 
       arp_arpin(dev);
 
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field d_len will set to a value > 0.
-       */
+      /* Check for a reply to the ARP packet */
 
-      if (dev->d_len > 0)
-        {
-          lan91c111_transmit(dev);
-        }
+      lan91c111_reply(dev);
     }
   else
 #endif
