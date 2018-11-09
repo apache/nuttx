@@ -98,7 +98,7 @@ static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_dev_lladdrsize
+ * Name: netdev_lladdrsize
  *
  * Description:
  *   Returns the size of the MAC address associated with a network device.
@@ -111,7 +111,7 @@ static inline int netdev_pktradio_addrlen(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-int netdev_dev_lladdrsize(FAR struct net_driver_s *dev)
+int netdev_lladdrsize(FAR struct net_driver_s *dev)
 {
   DEBUGASSERT(dev != NULL);
 

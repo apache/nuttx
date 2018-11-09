@@ -153,7 +153,7 @@ icmpv6_linkipaddr_8(FAR const void *mac_, net_ipv6addr_t ipaddr)
 
 void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr)
 {
-  switch (netdev_dev_lladdrsize(dev))
+  switch (netdev_lladdrsize(dev))
     {
       case 1:
         icmpv6_linkipaddr_1(&dev->d_mac, ipaddr);

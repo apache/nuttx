@@ -117,7 +117,7 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
   net_ipv6addr_copy(g_neighbors[oldest_ndx].ne_ipaddr, ipaddr);
 
   g_neighbors[oldest_ndx].ne_addr.na_lltype = lltype;
-  g_neighbors[oldest_ndx].ne_addr.na_llsize = netdev_dev_lladdrsize(dev);
+  g_neighbors[oldest_ndx].ne_addr.na_llsize = netdev_lladdrsize(dev);
 
   memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr,
          g_neighbors[oldest_ndx].ne_addr.na_llsize);

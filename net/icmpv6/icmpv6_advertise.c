@@ -107,7 +107,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Length excludes the IPv6 header */
 
-  lladdrsize   = netdev_dev_lladdrsize(dev);
+  lladdrsize   = netdev_lladdrsize(dev);
   l3size       = SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(lladdrsize);
   ipv6->len[0] = (l3size >> 8);
   ipv6->len[1] = (l3size & 0xff);

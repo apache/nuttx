@@ -160,7 +160,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   /* Length excludes the IPv6 header */
 
-  lladdrsize   = netdev_dev_lladdrsize(dev);
+  lladdrsize   = netdev_lladdrsize(dev);
   l3size       = sizeof(struct icmpv6_router_advertise_s) +
                  SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize) +
                  sizeof(struct icmpv6_mtu_s) +

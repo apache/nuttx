@@ -500,22 +500,6 @@ int netdev_ipv6_ifconf(FAR struct lifconf *lifc);
 #endif
 
 /****************************************************************************
- * Name: netdev_dev_lladdrsize
- *
- * Description:
- *   Returns the size of the MAC address associated with a network device.
- *
- * Input Parameters:
- *   dev - A reference to the device of interest
- *
- * Returned Value:
- *   The size of the MAC address associated with this device
- *
- ****************************************************************************/
-
-int netdev_dev_lladdrsize(FAR struct net_driver_s *dev);
-
-/****************************************************************************
  * Name: netdown_notifier_setup
  *
  * Description:

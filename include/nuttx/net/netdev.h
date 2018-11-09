@@ -744,4 +744,20 @@ uint16_t ipv6_chksum(FAR struct net_driver_s *dev);
 #  define netdev_ipv6_hdrlen(dev) dev->d_llhdrlen
 #endif /* CONFIG_NET_IPv6 */
 
+/****************************************************************************
+ * Name: netdev_lladdrsize
+ *
+ * Description:
+ *   Returns the size of the MAC address associated with a network device.
+ *
+ * Input Parameters:
+ *   dev - A reference to the device of interest
+ *
+ * Returned Value:
+ *   The size of the MAC address associated with this device
+ *
+ ****************************************************************************/
+
+int netdev_lladdrsize(FAR struct net_driver_s *dev);
+
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
