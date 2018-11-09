@@ -121,7 +121,11 @@
 /* TX poll delay = 1 second = 1000000 microseconds. */
 
 #define SLIP_WDDELAY   (1*1000000)
-#define SLIP_POLLHSEC  (1*2)
+
+/* This is a helper pointer for accessing the contents of the ip header */
+
+#define IPv4BUF        ((FAR struct ipv4_hdr_s *)priv->dev.d_buf)
+#define IPv6BUF        ((FAR struct ipv6_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -712,6 +716,14 @@ static int slip_rxtask(int argc, FAR char *argv[])
        */
 
       slip_receive(priv);
+
+      /* Handle the IP input.  Get exclusive access to the network. */
+
+      slip_semtake(priv);
+      priv->dev.d_buf = priv->rxbuf;
+      priv->dev.d_len = priv->rxlen;
+
+      net_lock();
       NETDEV_RXPACKETS(&priv->dev);
 
       /* All packets are assumed to be IP packets (we don't have a choice..
@@ -720,17 +732,10 @@ static int slip_rxtask(int argc, FAR char *argv[])
        * enough to hold an IP header.
        */
 
-      if (priv->rxlen >= IPv4_HDRLEN)
+#ifdef CONFIG_NET_IPv4
+      if ((IPv4BUF->vhl & IP_VERSION_MASK) == IPv4_VERSION)
         {
           NETDEV_RXIPV4(&priv->dev);
-
-          /* Handle the IP input.  Get exclusive access to the network. */
-
-          slip_semtake(priv);
-          priv->dev.d_buf = priv->rxbuf;
-          priv->dev.d_len = priv->rxlen;
-
-          net_lock();
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -741,16 +746,34 @@ static int slip_rxtask(int argc, FAR char *argv[])
           if (priv->dev.d_len > 0)
             {
               slip_transmit(priv);
-              (void)nxsig_kill(priv->txpid, SIGALRM);
             }
-
-          net_unlock();
-          slip_semgive(priv);
         }
       else
+#endif
+#ifdef CONFIG_NET_IPv6
+      if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
+        {
+          NETDEV_RXIPV6(&priv->dev);
+          ipv6_input(&priv->dev);
+
+          /* If the above function invocation resulted in data that should
+           * be sent out on the network, the field  d_len will set to a
+           * value > 0.  NOTE that we are transmitting using the RX buffer!
+           */
+
+          if (priv->dev.d_len > 0)
+            {
+              slip_transmit(priv);
+            }
+        }
+      else
+#endif
         {
           NETDEV_RXERRORS(&priv->dev);
         }
+
+      net_unlock();
+      slip_semgive(priv);
     }
 
   /* We won't get here */
@@ -779,9 +802,17 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
+#ifdef CONFIG_NET_IPv4
   nerr("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+#endif
+#ifdef CONFIG_NET_IPv6
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
+        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
+        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+#endif
 
   /* Mark the interface up */
 
@@ -935,7 +966,6 @@ int slip_initialize(int intf, FAR const char *devname)
   FAR struct slip_driver_s *priv;
   char buffer[8];
   FAR char *argv[2];
-  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -959,21 +989,14 @@ int slip_initialize(int intf, FAR const char *devname)
   priv->fd            = nx_open(devname, O_RDWR, 0666);
   if (priv->fd < 0)
     {
-      ret = priv->fd;
-      nerr("ERROR: Failed to open %s: %d\n", devname, ret);
-      return ret;
+      nerr("ERROR: Failed to open %s: %d\n", devname, priv->fd);
+      return priv->fd;
     }
 
   /* Initialize the wait semaphore */
 
   nxsem_init(&priv->waitsem, 0, 0);
   nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling slip_ifdown().
-   */
-
-  slip_ifdown(&priv->dev);
 
   /* Start the SLIP receiver kernel thread */
 
@@ -987,7 +1010,7 @@ int slip_initialize(int intf, FAR const char *devname)
   if (priv->rxpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");
-      return -errno;
+      return priv->rxpid;
     }
 
   /* Wait and make sure that the receive task is started. */
@@ -1002,7 +1025,7 @@ int slip_initialize(int intf, FAR const char *devname)
   if (priv->txpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");
-      return -errno;
+      return priv->txpid;
     }
 
   /* Wait and make sure that the transmit task is started. */
