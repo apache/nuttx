@@ -703,6 +703,29 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
+/****************************************************************************
+ * Name: icmpv6_linkipaddr
+ *
+ * Description:
+ *   Generate the device link scope ipv6 address as below:
+ *    128  112  96   80    64   48   32   16
+ *    ---- ---- ---- ----  ---- ---- ---- ----
+ *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxff fexx xxxx 6-byte normal address IEEE 48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *
+ * Input Parameters:
+ *   dev    - The device driver structure containing the link layer address
+ *   ipaddr - Receive the device link scope ipv6 address
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

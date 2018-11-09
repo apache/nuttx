@@ -379,23 +379,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    ten bits. The generated address uses those ten bits followed by 54
    *    zeroes and then the 64 bit interface identifier. Typically this
    *    will be derived from the link layer (MAC) address.
-   *
-   *    IEEE 802 MAC addresses, used by Ethernet and other IEEE 802 Project
-   *    networking technologies, have 48 bits.  The IEEE has also defined a
-   *    format called the 64-bit extended unique identifier, abbreviated
-   *    EUI-64.  To get the modified EUI-64 interface ID for a device, you
-   *    simply take the EUI-64 address and change the 7th bit from the left
-   *    (the"universal/local" or "U/L" bit) from a zero to a one.
-   *
-   *    128  112  96   80    64   48   32   16
-   *    ---- ---- ---- ----  ---- ---- ---- ----
-   *    fe80 0000 0000 0000  0000 xxxx xxxx xxxx
    */
 
-  lladdr[0] = HTONS(0xfe80);                        /* 10-bit address + 6 zeroes */
-  memset(&lladdr[1], 0, 4 * sizeof(uint16_t));      /* 64 more zeroes */
-  memcpy(&lladdr[5], dev->d_mac.ether.ether_addr_octet,
-        sizeof(struct ether_addr));                 /* 48-bit Ethernet address */
+  icmpv6_linkipaddr(dev, lladdr);
 
   ninfo("lladdr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         lladdr[0], lladdr[1], lladdr[2], lladdr[3],

@@ -179,9 +179,7 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
 
   /* Source IP address must be set to link-local IP */
 
-  ipv6->srcipaddr[0] = HTONS(0xfe80);
-  memset(&ipv6->srcipaddr[1], 0, 4 * sizeof(uint16_t));
-  memcpy(&ipv6->srcipaddr[5], &dev->d_mac.ether.ether_addr_octet, sizeof(struct ether_addr));
+  icmpv6_linkipaddr(dev, ipv6->srcipaddr);
 
   /* Set up the ICMPv6 Router Advertise response */
 
