@@ -380,16 +380,20 @@ int ipv6_input(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-  /* If UDP broadcast support is configured, we check for a multicast
-   * UDP packet, which may be destined to us (even if there is no IP
-   * address yet assigned to the device).  We should actually pick off
-   * certain multicast address (all hosts multicast address, and the
-   * solicited-node multicast address).  We will cheat here and accept
-   * all multicast packets that are sent to the ff00::/8 addresses.
+#ifdef CONFIG_NET_BROADCAST
+  /* Check for a multicast packet, which may be destined to us (even if
+   * there is no IP address yet assigned to the device).  We only expect
+   * multicast packets destined for sockets that have joined a multicast
+   * group or for ICMPv6 Autoconfiguration and Neighbor discovery or ICMPv6
+   * MLD packets.
+   *
+   * We should actually pick off certain multicast address (all hosts
+   * multicast address, and the solicited-node multicast address).  We
+   * will cheat here and accept all multicast packets that are sent to the
+   * ff00::/8 addresses (see net_is_addr_mcast).
    */
 
-#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
-  if (ipv6->proto == IP_PROTO_UDP && net_is_addr_mcast(ipv6->destipaddr))
+  if (net_is_addr_mcast(ipv6->destipaddr))
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
 
@@ -406,7 +410,10 @@ int ipv6_input(FAR struct net_driver_s *dev)
           ipv6_forward_broadcast(dev, ipv6);
         }
 #endif
-      return udp_ipv6_input(dev, iphdrlen);
+
+      /* Fall through with no further address checks and handle the multicast
+       * address by its IPv6 nexthdr field.
+       */
     }
 
   /* In other cases, the device must be assigned a non-zero IP address
