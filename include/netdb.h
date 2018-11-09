@@ -169,6 +169,7 @@
 
 #define HOST_NOT_FOUND 1
 #define NO_DATA        2
+#define NO_ADDRESS     NO_DATA
 #define NO_RECOVERY    3
 #define TRY_AGAIN      4
 
