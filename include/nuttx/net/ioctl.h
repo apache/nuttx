@@ -93,14 +93,6 @@
 #define SIOCGIPMSFILTER  _SIOC(0x001c)  /* Retrieve source filter addresses */
 #define SIOCSIPMSFILTER  _SIOC(0x001d)  /* Set source filter content */
 
-/* ARP Table.  Argument is a reference to sruct arpreq as defined
- * include/nuttx/net/arp.h
- */
-
-#define SIOCSARP         _SIOC(0x001e)  /* Set an ARP mapping */
-#define SIOCDARP         _SIOC(0x001f)  /* Delete an ARP mapping */
-#define SIOCGARP         _SIOC(0x0020)  /* Get an ARP mapping */
-
 /* Routing table.  Argument is a reference to struct rtentry as defined in
  * include/net/route.h
  */
