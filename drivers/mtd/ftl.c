@@ -206,7 +206,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
 
   dev = (FAR struct ftl_struct_s *)inode->i_private;
-#ifdef CONFIG_FTL_READAHEAD
+#ifdef FTL_HAVE_RWBUFFER
   return rwb_read(&dev->rwb, start_sector, nsectors, buffer);
 #else
   return ftl_reload(dev, buffer, start_sector, nsectors);
@@ -407,7 +407,7 @@ static ssize_t ftl_write(FAR struct inode *inode, const unsigned char *buffer,
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
-#ifdef CONFIG_FTL_WRITEBUFFER
+#ifdef FTL_HAVE_RWBUFFER
   return rwb_write(&dev->rwb, start_sector, nsectors, buffer);
 #else
   return ftl_flush(dev, buffer, start_sector, nsectors);
@@ -588,15 +588,15 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       dev->rwb.blocksize   = dev->geo.blocksize;
       dev->rwb.nblocks     = dev->geo.neraseblocks * dev->blkper;
       dev->rwb.dev         = (FAR void *)dev;
+      dev->rwb.wrflush     = ftl_flush;
+      dev->rwb.rhreload    = ftl_reload;
 
 #if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FTL_WRITEBUFFER)
       dev->rwb.wrmaxblocks = dev->blkper;
-      dev->rwb.wrflush     = ftl_flush;
 #endif
 
 #ifdef CONFIG_FTL_READAHEAD
       dev->rwb.rhmaxblocks = dev->blkper;
-      dev->rwb.rhreload    = ftl_reload;
 #endif
 
       ret = rwb_initialize(&dev->rwb);
