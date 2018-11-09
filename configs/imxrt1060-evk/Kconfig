@@ -3,16 +3,16 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_IMXRT1050_EVK
+if ARCH_BOARD_IMXRT1060_EVK
 
 choice
 	prompt "Boot Flash"
-	default IMXRT1050_EVK_HYPER_FLASH
+	default IMXRT1060_EVK_QSPI_FLASH
 
-config IMXRT1050_EVK_HYPER_FLASH
+config IMXRT1060_EVK_HYPER_FLASH
 	bool "HYPER Flash"
 
-config IMXRT1050_EVK_QSPI_FLASH
+config IMXRT1060_EVK_QSPI_FLASH
 	bool "QSPI Flash"
 
 endchoice # Boot Flash

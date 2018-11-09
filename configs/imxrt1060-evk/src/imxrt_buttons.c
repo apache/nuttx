@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/imxrt1050-evk/src/imxrt_buttons.c
+ * configs/imxrt1060-evk/src/imxrt_buttons.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,7 +52,7 @@
 #include "imxrt_config.h"
 #include "imxrt_irq.h"
 #include "imxrt_gpio.h"
-#include "imxrt1050-evk.h"
+#include "imxrt1060-evk.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

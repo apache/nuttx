@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/imxrt1050-evk/src/imxrt_buttons.c
+ * configs/imxrt1060-evk/src/imxrt_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,111 +34,66 @@
  *
  ****************************************************************************/
 
+/* There are four LED status indicators located on the EVK Board.  The
+ * functions of these LEDs include:
+ *
+ *   - Main Power Supply(D3)
+ *     Green: DC 5V main supply is normal.
+ *     Red:   J2 input voltage is over 5.6V.
+ *     Off:   The board is not powered.
+ *   - Reset RED LED(D15)
+ *   - OpenSDA LED(D16)
+ *   - USER LED(D18)
+ *
+ * Only a single LED, D18, is under software control.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <errno.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-
-#include "imxrt_config.h"
-#include "imxrt_irq.h"
 #include "imxrt_gpio.h"
-#include "imxrt1050-evk.h"
+#include "imxrt_iomuxc.h"
+#include <arch/board/board.h>
+#include "imxrt1060-evk.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The IMXRT has 1 user button (SW8)):
- *
- * 1. SW8 (IRQ88)   GPIO5-00
- */
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_button_initialize
- *
- * Description:
- *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state
- *   of all buttons or board_button_irq() may be called to register button
- *   interrupt handlers.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_button_initialize(void)
+void board_userled_initialize(void)
 {
-   /* Configure the button as input */
+  /* Configure LED GPIO for output */
 
-   imxrt_config_gpio(GPIO_SW8);
+  imxrt_config_gpio(GPIO_LED);
 }
 
 /****************************************************************************
- * Name: board_buttons
- *
- * Description:
- *   After board_button_initialize() has been called, board_buttons() may be
- *   called to collect the state of all buttons.  board_buttons() returns an
- *   8-bit bit set with each bit associated with a button.  See the
- *   BUTTON_*_BIT  definitions in board.h for the meaning of each bit.
- *
+ * Name: board_userled
  ****************************************************************************/
 
-uint8_t board_buttons(void)
+void board_userled(int led, bool ledon)
 {
-  uint8_t ret = 0;
-
-  if (!imxrt_gpio_read(GPIO_SW8))
-    {
-      ret |= BUTTON_SW8_BIT;
-    }
-
-  return ret;
+  imxrt_gpio_write(GPIO_LED, !ledon);  /* Low illuminates */
 }
 
 /****************************************************************************
- * Name: board_button_irq
- *
- * Description:
- *   board_button_irq() may be called to register an interrupt handler that
- *   will be called when a button is depressed or released.  The ID value is
- *   a button enumeration value that uniquely identifies a button resource.
- *   See the BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.
- *
+ * Name: board_userled_all
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-int board_button_irq(int id, xcpt_t irqhandler)
+void board_userled_all(uint8_t ledset)
 {
-  int ret = -EINVAL;
+  /* Low illuminates */
 
-  /* The button has already been configured as an interrupting input (by
-   * board_button_initialize() above).
-   *
-   * Attach the new button handler.
-   */
-
-  ret = irq_attach(id, irqhandler, NULL);
-
-  /* Then make sure that interrupts are enabled on the pin */
-
-  up_enable_irq(id);
-  return ret;
+  imxrt_gpio_write(GPIO_LED, (ledset & BOARD_USERLED_BIT) == 0);
 }
-#endif
-#endif /* CONFIG_ARCH_BUTTONS */
+
+#endif /* !CONFIG_ARCH_LEDS */

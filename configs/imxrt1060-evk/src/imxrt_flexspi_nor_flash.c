@@ -1,8 +1,9 @@
 /****************************************************************************
- * config/imxrt1050-evk/src/imxrt_flexspi_nor_flash.c
+ * config/imxrt1060-evk/src/imxrt_flexspi_nor_flash.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
+ *   Authors: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,7 +45,7 @@
  * Public Data
  ******************************************************************************/
 
-#if defined (CONFIG_IMXRT1050_EVK_HYPER_FLASH)
+#if defined (CONFIG_IMXRT1060_EVK_HYPER_FLASH)
 __attribute__((section(".boot_hdr.conf")))
 const struct flexspi_nor_config_s flash_config =
 {
@@ -82,7 +83,7 @@ const struct flexspi_nor_config_s flash_config =
   .is_uniform_blocksize     = 1,
 };
 
-#elif defined (CONFIG_IMXRT1050_EVK_QSPI_FLASH)
+#elif defined (CONFIG_IMXRT1060_EVK_QSPI_FLASH)
 __attribute__((section(".boot_hdr.conf")))
 const struct flexspi_nor_config_s flash_config =
 {

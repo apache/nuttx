@@ -1,8 +1,9 @@
 /****************************************************************************
- * configs/imxrt1050-evk/scripts/memory.ld
+ * configs/imxrt1060-evk/scripts/memory.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +34,8 @@
  *
  ****************************************************************************/
 
-/* The i.MXRT1050-EVK has 64Mb of Hyper FLASH beginning at address,
- * 0x0060:0000, 512Kb of DTCM RAM beginning at 0x2000:0000, and 512Kb OCRAM
+/* The i.MXRT1060-EVK has 8MiB of Hyper FLASH beginning at address,
+ * 0x0060:0000, Upto 512Kb of DTCM RAM beginning at 0x2000:0000, and 1MiB OCRAM
  * beginning at 0x2020:0000.  Neither DTCM or SDRAM are used in this
  * configuratin.
  *
@@ -68,15 +69,15 @@
 
 MEMORY
 {
-  /* 64Mb of HyperFLASH */
+  /* 8MiB of HyperFLASH */
 
   kflash (rx)  : ORIGIN = 0x60000000, LENGTH = 1M
   uflash (rx)  : ORIGIN = 0x60200000, LENGTH = 1M
-  flash  (rx)  : ORIGIN = 0x60400000, LENGTH = 62M
+  flash  (rx)  : ORIGIN = 0x60400000, LENGTH = 6M
 
-  /* 512Kb of OCRAM */
+  /* 1MiB of OCRAM */
 
   dtcm   (rwx) : ORIGIN = 0x20000000, LENGTH = 512K
-  kocram (rwx) : ORIGIN = 0x20200000, LENGTH = 256K
-  uocram (rwx) : ORIGIN = 0x20240000, LENGTH = 256K
+  kocram (rwx) : ORIGIN = 0x20200000, LENGTH = 512K
+  uocram (rwx) : ORIGIN = 0x20240000, LENGTH = 512K
 }
