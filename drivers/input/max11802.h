@@ -60,11 +60,11 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* Configuration ****************************************************************************/
 
 /* MAX11802 Interfaces *********************************************************************/
 
 /* LSB of register addresses specifies read (1) or write (0). */
+
 #define MAX11802_CMD_XPOSITION ((0x52 << 1) | 1)
 #define MAX11802_CMD_YPOSITION ((0x54 << 1) | 1)
 #define MAX11802_CMD_MEASUREXY (0x70 << 1)
@@ -77,6 +77,7 @@
 #define MAX11802_CMD_PULL_WR   (0x07 << 1)
 
 /* Register values to set */
+
 #define MAX11802_MODE    0x06
 #define MAX11802_AVG     0x55
 #define MAX11802_SAMPLE  0xAA
@@ -169,3 +170,4 @@ extern "C" {
 #endif
 
 #endif /* __DRIVERS_INPUT_ADS7843E_H */
+
