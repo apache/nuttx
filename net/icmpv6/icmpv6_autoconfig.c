@@ -260,49 +260,6 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
- * Name: icmpv6_wait_radvertise
- *
- * Description:
- *   Wait for the receipt of the Router Advertisement matching the Router
- *   Solicitation that we just sent.
- *
- * Input Parameters:
- *   dev    - The device to use to send the solicitation
- *   notify - The pre-initialized notification structure
- *
- * Returned Value:
- *   Zero (OK) is returned on success; On error a negated errno value is
- *   returned.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
-                                  FAR struct icmpv6_rnotify_s *notify)
-{
-  struct timespec delay;
-  int ret;
-
-  /* Wait for response to the Router Advertisement to be received.  The
-   * optimal delay would be the work case round trip time.
-   * NOTE: The network is locked.
-   */
-
-  delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
-  delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
-
-  ret = icmpv6_rwait(notify, &delay);
-
-  /* icmpv6_wait will return OK if and only if the matching Router
-   * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
-   */
-
-  return ret;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -333,6 +290,7 @@ static int icmpv6_wait_radvertise(FAR struct net_driver_s *dev,
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
   struct icmpv6_rnotify_s notify;
+  struct timespec delay;
   net_ipv6addr_t lladdr;
   int retries;
   int ret;
@@ -419,6 +377,11 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   netdev_ifup(dev);
 
+  /* The optimal delay would be the work case round trip time. */
+
+  delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
+  delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
+
   /* 4. Router Contact: The node next attempts to contact a local router for
    *    more information on continuing the configuration. This is done either
    *    by listening for Router Advertisement messages sent periodically by
@@ -445,7 +408,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_wait_radvertise(dev, &notify);
+      ret = icmpv6_rwait(&notify, &delay);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that
@@ -455,6 +418,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           break;
         }
 
+      /* Double the delay time for the next loop */
+
+      clock_timespec_add(&delay, &delay, &delay);
       ninfo("Timed out... retrying %d\n", retries + 1);
     }
 

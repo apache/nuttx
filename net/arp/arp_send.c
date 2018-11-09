@@ -321,6 +321,11 @@ int arp_send(in_addr_t ipaddr)
    * sending the ARP request if it is not.
    */
 
+  /* The optimal delay would be the work case round trip time. */
+
+  delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
+  delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;
+
   ret = -ETIMEDOUT; /* Assume a timeout failure */
 
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
@@ -377,13 +382,7 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
-      /* Now wait for response to the ARP response to be received.  The
-       * optimal delay would be the work case round trip time.
-       * NOTE: The network is locked.
-       */
-
-      delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
-      delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;
+      /* Now wait for response to the ARP response to be received. */
 
       ret = arp_wait(&notify, &delay);
 
@@ -398,9 +397,10 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
-      /* Increment the retry count */
+      /* Increment the retry count and double the delay time */
 
       state.snd_retries++;
+      clock_timespec_add(&delay, &delay, &delay);
       nerr("ERROR: arp_wait failed: %d\n", ret);
     }
 

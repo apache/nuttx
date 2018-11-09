@@ -295,6 +295,11 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    * re-sending the Neighbor Solicitation if it is not.
    */
 
+  /* The optimal delay would be the work case round trip time. */
+
+  delay.tv_sec  = CONFIG_ICMPv6_NEIGHBOR_DELAYSEC;
+  delay.tv_nsec = CONFIG_ICMPv6_NEIGHBOR_DELAYNSEC;
+
   ret = -ETIMEDOUT; /* Assume a timeout failure */
 
   while (state.snd_retries < CONFIG_ICMPv6_NEIGHBOR_MAXTRIES)
@@ -341,13 +346,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
         }
       while (!state.snd_sent);
 
-      /* Now wait for response to the Neighbor Advertisement to be received.
-       * The optimal delay would be the work case round trip time.
-       * NOTE: The network is locked.
-       */
-
-      delay.tv_sec  = CONFIG_ICMPv6_NEIGHBOR_DELAYSEC;
-      delay.tv_nsec = CONFIG_ICMPv6_NEIGHBOR_DELAYNSEC;
+      /* Now wait for response to the Neighbor Advertisement to be received. */
 
       ret = icmpv6_wait(&notify, &delay);
 
@@ -360,8 +359,9 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
           break;
         }
 
-      /* Increment the retry count */
+      /* Increment the retry count and double the delay time */
 
+      clock_timespec_add(&delay, &delay, &delay);
       state.snd_retries++;
     }
 
