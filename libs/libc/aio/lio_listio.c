@@ -657,7 +657,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
    *   caller ourself?
    */
 
-  else if (sig == NULL)
+  else if (sig != NULL)
     {
       if (nqueued > 0)
         {
@@ -676,8 +676,7 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
         }
       else
         {
-          status = nxsig_notification(sighand->pid, &sighand->sig,
-                                      SI_ASYNCIO);
+          status = nxsig_notification(getpid(), sig, SI_ASYNCIO);
           if (status < 0 && ret == OK)
             {
               /* Something bad happened while performing the notification
