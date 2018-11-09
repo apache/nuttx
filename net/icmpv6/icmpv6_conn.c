@@ -170,27 +170,14 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   UNUSED(ret);
 
-  /* Is this the last reference on the connection?  It might not be if the
-   * socket was cloned.
-   */
+  /* Remove the connection from the active list */
 
-  if (conn->crefs > 1)
-    {
-      /* No.. just decrement the reference count */
+  dq_rem(&conn->node, &g_active_icmpv6_connections);
 
-      conn->crefs--;
-    }
-  else
-    {
-      /* Remove the connection from the active list */
+  /* Free the connection */
 
-      dq_rem(&conn->node, &g_active_icmpv6_connections);
-
-      /* Free the connection */
-
-      dq_addlast(&conn->node, &g_free_icmpv6_connections);
-      nxsem_post(&g_free_sem);
-    }
+  dq_addlast(&conn->node, &g_free_icmpv6_connections);
+  nxsem_post(&g_free_sem);
 }
 
 /****************************************************************************
