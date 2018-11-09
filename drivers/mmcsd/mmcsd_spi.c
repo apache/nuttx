@@ -50,6 +50,7 @@
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
+#include <unistd.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
@@ -441,6 +442,12 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
         }
 
       elapsed = ELAPSED_TIME(start);
+
+      if (elapsed > MMCSD_DELAY_10MS)
+      {
+        // Give other threads time to run
+        usleep(10000);
+      }
     }
   while (elapsed < MMCSD_DELAY_500MS);
 

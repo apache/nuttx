@@ -1465,7 +1465,7 @@ int fat_dirtruncate(struct fat_mountpt_s *fs, FAR uint8_t *direntry)
 
   writetime = fat_systime2fattime();
   DIR_PUTWRTTIME(direntry, writetime & 0xffff);
-  DIR_PUTWRTDATE(direntry, writetime > 16);
+  DIR_PUTWRTDATE(direntry, writetime >> 16);
 
   /* This sector needs to be written back to disk eventually */
 
@@ -1526,7 +1526,7 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
 
   writetime = fat_systime2fattime();
   DIR_PUTWRTTIME(direntry, writetime & 0xffff);
-  DIR_PUTWRTDATE(direntry, writetime > 16);
+  DIR_PUTWRTDATE(direntry, writetime >> 16);
 
   /* This sector needs to be written back to disk eventually */
 

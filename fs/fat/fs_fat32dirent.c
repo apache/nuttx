@@ -754,6 +754,17 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
               return OK;
             }
         }
+
+#if defined(CONFIG_FAT_LFN_ALIAS_TRAILCHARS) && CONFIG_FAT_LFN_ALIAS_TRAILCHARS > 0
+      /* Take first 6-N characters from beginning of filename and last N
+       * characters from end of the filename. Useful for filenames like
+       * "datafile123.txt". */
+      if (ndx == 6 - CONFIG_FAT_LFN_ALIAS_TRAILCHARS
+          && namechars > CONFIG_FAT_LFN_ALIAS_TRAILCHARS)
+        {
+          src += namechars - CONFIG_FAT_LFN_ALIAS_TRAILCHARS;
+        }
+#endif
     }
 }
 #endif
@@ -836,6 +847,33 @@ static inline int fat_uniquealias(struct fat_mountpt_s *fs,
 
   lsdigit = tilde + 1;
   DEBUGASSERT(dirinfo->fd_name[lsdigit] == '1');
+
+#ifdef CONFIG_FAT_LFN_ALIAS_HASH
+  /* Add a hash of the long filename to the short filename, to reduce collisions. */
+  if ((ret = fat_findalias(fs, dirinfo)) == OK)
+    {
+      uint16_t hash = dirinfo->fd_seq.ds_offset;
+      for (i = 0; dirinfo->fd_lfname[i] != '\0'; i++)
+        {
+          hash = ((hash << 5) + hash) ^ dirinfo->fd_lfname[i];
+        }
+
+      for (i = 0; i < tilde - 2; i++)
+        {
+          uint8_t nibble = (hash >> (i * 4)) & 0x0F;
+          const char *digits = "0123456789ABCDEF";
+          dirinfo->fd_name[tilde - 1 - i] = digits[nibble];
+        }
+    }
+  else if (ret == -ENOENT)
+    {
+      return OK; /* Alias was unique already */
+    }
+  else
+    {
+      return ret; /* Other error */
+    }
+#endif
 
   /* Search for the single short file name directory entry in this directory */
 
