@@ -563,8 +563,6 @@ clean: subdir_clean
 	$(call DELFILE, nuttx-export*)
 	$(call DELFILE, nuttx_user*)
 	$(call DELFILE, .gdbinit)
-	$(call DELFILE, .cproject)
-	$(call DELFILE, .project)
 	$(call DELDIR, staging)
 	$(call CLEAN)
 
