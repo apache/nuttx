@@ -12,6 +12,14 @@ choice
 	default ARCH_CHIP_STM32L476RG
 	depends on ARCH_CHIP_STM32L4
 
+config ARCH_CHIP_STM32L412KB
+	bool "STM32L412KB"
+	select STM32L4_STM32L412XX
+	select STM32L4_FLASH_CONFIG_B
+	select STM32L4_IO_CONFIG_K
+	---help---
+		STM32 L4 Cortex M4, 128 Kb FLASH, 40 Kb SRAM
+
 config ARCH_CHIP_STM32L432KB
 	bool "STM32L432KB"
 	select STM32L4_STM32L432XX
@@ -558,6 +566,19 @@ config STM32L4_STM32L4XR
 
 # Chip subfamilies:
 
+config STM32L4_STM32L412XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_ADC2
+
+config STM32L4_STM32L422XX
+	bool
+	default n
+	select STM32L4_STM32L4X2
+	select STM32L4_HAVE_ADC2
+	select STM32L4_HAVE_AES
+
 config STM32L4_STM32L431XX
 	bool
 	default n
@@ -717,6 +738,7 @@ choice
 		that designates the FLASH size.
 
 			Designator  Size in KiB
+			     8          64
 			     B         128
 			     C         256
 			     E         512
@@ -738,6 +760,9 @@ choice
 config STM32L4_FLASH_OVERRIDE_DEFAULT
 	bool "Default"
 
+config STM32L4_FLASH_OVERRIDE_8
+	bool "8 64 KB"
+
 config STM32L4_FLASH_OVERRIDE_B
 	bool "B 128 KB"
 
@@ -756,6 +781,11 @@ config STM32L4_FLASH_OVERRIDE_I
 endchoice # "Override Flash Size Designator"
 
 # Flash configurations
+
+config STM32L4_FLASH_CONFIG_8
+	bool
+	default n
+	depends on STM32L4_STM32L412XX
 
 config STM32L4_FLASH_CONFIG_B
 	bool
@@ -784,6 +814,10 @@ config STM32L4_FLASH_CONFIG_I
 # Pin/package configurations
 
 config STM32L4_IO_CONFIG_K
+	bool
+	default n
+
+config STM32L4_IO_CONFIG_T
 	bool
 	default n
 

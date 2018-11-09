@@ -365,7 +365,7 @@ void up_addregion(void)
 
   up_heap_color((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
 
-  /* Add the SRAM2 user heap region. */
+  /* Add the SRAM3 user heap region. */
 
   kumm_addregion((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
 
