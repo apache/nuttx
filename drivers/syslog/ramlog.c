@@ -127,9 +127,6 @@ static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifdef CONFIG_RAMLOG_SYSLOG
 static const struct syslog_channel_s g_ramlog_syslog_channel =
 {
-#ifdef CONFIG_SYSLOG_WRITE
-  syslog_default_write,
-#endif
   ramlog_putc,
   ramlog_putc,
   ramlog_flush

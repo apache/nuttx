@@ -272,26 +272,6 @@ int syslog_putc(int ch);
 ssize_t syslog_write(FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
- * Name: syslog_default_write
- *
- * Description:
- *   This provides a default write method for syslog devices that do not
- *   support multiple byte writes  This functions simply loops, outputting
- *   one cahracter at a time.
- *
- * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
- *
- * Returned Value:
- *   On success, the number of characters written is returned.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-ssize_t syslog_default_write(FAR const char *buffer, size_t buflen);
-
-/****************************************************************************
  * Name: syslog_force
  *
  * Description:

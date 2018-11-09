@@ -48,7 +48,7 @@
 #include "syslog.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -57,7 +57,7 @@
  * Description:
  *   This provides a default write method for syslog devices that do not
  *   support multiple byte writes  This functions simply loops, outputting
- *   one cahracter at a time.
+ *   one character at a time.
  *
  * Input Parameters:
  *   buffer - The buffer containing the data to be output
@@ -69,20 +69,48 @@
  *
  ****************************************************************************/
 
-ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
+static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 {
   size_t nwritten;
-  int ret;
 
-  for (nwritten = 0; nwritten < buflen; nwritten++)
+  if (up_interrupt_context() || sched_idletask())
     {
-      int ch = *buffer++;
-      ret = syslog_putc(ch);
-      UNUSED(ret);
+      for (nwritten = 0; nwritten < buflen; nwritten++)
+        {
+#ifdef CONFIG_SYSLOG_INTBUFFER
+          if (up_interrupt_context())
+            {
+              syslog_add_intbuffer(*buffer++);
+            }
+          else
+#endif
+            {
+              DEBUGASSERT(g_syslog_channel->sc_force != NULL);
+              g_syslog_channel->sc_force(*buffer++);
+            }
+        }
+    }
+#ifdef CONFIG_SYSLOG_WRITE
+  else if (g_syslog_channel->sc_write)
+    {
+      nwritten = g_syslog_channel->sc_write(buffer, buflen);
+    }
+#endif
+  else
+    {
+      for (nwritten = 0; nwritten < buflen; nwritten++)
+        {
+          DEBUGASSERT(g_syslog_channel->sc_putc != NULL);
+          g_syslog_channel->sc_putc(*buffer++);
+        }
     }
 
   return buflen;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: syslog_write
@@ -102,22 +130,15 @@ ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 
 ssize_t syslog_write(FAR const char *buffer, size_t buflen)
 {
-#ifdef CONFIG_SYSLOG_WRITE
+#ifdef CONFIG_SYSLOG_INTBUFFER
   if (!up_interrupt_context() && !sched_idletask())
     {
-#ifdef CONFIG_SYSLOG_INTBUFFER
       /* Flush any characters that may have been added to the interrupt
        * buffer.
        */
 
       (void)syslog_flush_intbuffer(g_syslog_channel, false);
-#endif
-
-      return g_syslog_channel->sc_write(buffer, buflen);
     }
-  else
 #endif
-    {
-      return syslog_default_write(buffer, buflen);
-    }
+  return syslog_default_write(buffer, buflen);
 }

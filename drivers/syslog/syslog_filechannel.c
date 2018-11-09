@@ -72,12 +72,12 @@ static int syslog_file_force(int ch);
 
 static const struct syslog_channel_s g_syslog_file_channel =
 {
-#ifdef CONFIG_SYSLOG_WRITE
-  syslog_dev_write,
-#endif
   syslog_dev_putc,
   syslog_file_force,
   syslog_dev_flush,
+#ifdef CONFIG_SYSLOG_WRITE
+  syslog_dev_write,
+#endif
 };
 
 /****************************************************************************
