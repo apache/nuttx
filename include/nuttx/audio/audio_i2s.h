@@ -41,6 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifdef CONFIG_AUDIO_I2S
+
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
 
@@ -50,5 +53,7 @@
 
 FAR struct audio_lowerhalf_s *audio_i2s_initialize(FAR struct i2s_dev_s *i2s,
                                                    bool playback);
+
+#endif /* CONFIG_AUDIO_I2S */
 
 #endif
