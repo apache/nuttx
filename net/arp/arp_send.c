@@ -107,6 +107,16 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
 
   if (state)
     {
+      /* Is this the device that we need to route this request? */
+
+      if (strncmp((FAR const char *)dev->d_ifname,
+                  (FAR const char *)state->snd_ifname, IFNAMSIZ) != 0)
+        {
+          /* No... pass on this one and wait for the device that we want */
+
+          return flags;
+        }
+
       /* Check if the network is still up */
 
       if ((flags & NETDEV_DOWN) != 0)
