@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/power/pm_update.c
  *
- *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,9 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* CONFIG_PM_MEMORY is the total number of time slices (including the current
- * time slice.  The histor or previous values is then CONFIG_PM_MEMORY-1.
+ * time slice).  The history of previous values is then CONFIG_PM_MEMORY-1.
  */
 
 #if CONFIG_PM_MEMORY > 1
@@ -124,9 +125,8 @@ static const uint16_t g_pmcount[3] =
  *
  * Input Parameters:
  *   domain - The PM domain associated with the accumulator
- *   accum - The value of the activity accumulator at the end of the time
- *     slice.
- *   elapsed - The elapsed time from last called pm_update, unit ms
+ *   accum  - The value of the activity accumulator at the end of the time
+ *            slice.
  *
  * Returned Value:
  *   None.
@@ -138,10 +138,9 @@ static const uint16_t g_pmcount[3] =
  *
  ****************************************************************************/
 
-void pm_update(int domain, int16_t accum_, clock_t elapsed)
+void pm_update(int domain, int16_t accum)
 {
   FAR struct pm_domain_s *pdom;
-  int16_t accum = 0;
   int32_t Y;
   int index;
 #if CONFIG_PM_MEMORY > 1
@@ -155,153 +154,142 @@ void pm_update(int domain, int16_t accum_, clock_t elapsed)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdom        = &g_pmglobals.domain[domain];
 
-  while (elapsed >= TIME_SLICE_TICKS)
-    {
-      if (elapsed - TIME_SLICE_TICKS < TIME_SLICE_TICKS)
-        {
-          accum = accum_;
-        }
-
 #if CONFIG_PM_MEMORY > 1
-      /* We won't bother to do anything until we have accumulated
-       * CONFIG_PM_MEMORY-1 samples.
-       */
+  /* We won't bother to do anything until we have accumulated
+   * CONFIG_PM_MEMORY-1 samples.
+   */
 
-      if (pdom->mcnt < CONFIG_PM_MEMORY-1)
+  if (pdom->mcnt < CONFIG_PM_MEMORY-1)
+    {
+      index               = pdom->mcnt++;
+      pdom->memory[index] = accum;
+      return;
+    }
+
+  /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
+   * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
+   * weight applied to each value, and X is the current activity.
+   *
+   * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
+   * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
+   *
+   * First, calculate Y = An*X
+   */
+
+  Y     = CONFIG_PM_COEFN * accum;
+  denom = CONFIG_PM_COEFN;
+
+  /* Then calculate Y +=  SUM(Ai*Yi), i = 1..n-1.  The oldest sample will
+   * reside at the domain's mndx (and this is the value that we will overwrite
+   * with the new value).
+   */
+
+  for (i = 0, j = pdom->mndx;
+       i < CONFIG_PM_MEMORY-1;
+       i++, j++)
+    {
+      if (j >= CONFIG_PM_MEMORY-1)
         {
-          index = pdom->mcnt++;
-          pdom->memory[index] = accum;
-          continue;
+          j = 0;
         }
 
-      /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
-       * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
-       * weight applied to each value, and X is the current activity.
-       *
-       * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
-       * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
-       *
-       * First, calclate Y = An*X
-       */
+      Y     += g_pmcoeffs[i] * pdom->memory[j];
+      denom += g_pmcoeffs[i];
+    }
 
-      Y     = CONFIG_PM_COEFN * accum;
-      denom = CONFIG_PM_COEFN;
+  /* Compute and save the new activity value */
 
-      /* Then calculate Y +=  SUM(Ai*Yi), i = 1..n-1.  The oldest sample will
-       * reside at the domain's mndx (and this is the value that we will overwrite
-       * with the new value).
-       */
+  Y /= denom;
 
-      for (i = 0, j = pdom->mndx;
-           i < CONFIG_PM_MEMORY-1;
-           i++, j++)
-        {
-          if (j >= CONFIG_PM_MEMORY-1)
-            {
-              j = 0;
-            }
-
-          Y     += g_pmcoeffs[i] * pdom->memory[j];
-          denom += g_pmcoeffs[i];
-        }
-
-      /* Compute and save the new activity value */
-
-      Y /= denom;
-
-      index = pdom->mndx++;
-      pdom->memory[index] = Y;
-      if (pdom->mndx >= CONFIG_PM_MEMORY-1)
-        {
-          pdom->mndx = 0;
-        }
-
+  index = pdom->mndx++;
+  pdom->memory[index] = Y;
+  if (pdom->mndx >= CONFIG_PM_MEMORY-1)
+    {
+      pdom->mndx = 0;
+    }
 #else
 
-      /* No smoothing */
+  /* No smoothing */
 
-      Y = accum;
-
+  Y = accum;
 #endif
 
-      /* First check if increased activity should cause us to return to the
-       * normal operating state.  This would be unlikely for the lowest power
-       * consumption states because the CPU is probably asleep.  However this
-       * probably does apply for the IDLE state.
+  /* First check if increased activity should cause us to return to the
+   * normal operating state.  This would be unlikely for the lowest power
+   * consumption states because the CPU is probably asleep.  However this
+   * probably does apply for the IDLE state.
+   */
+
+  if (pdom->state > PM_NORMAL)
+    {
+      /* Get the table index for the current state (which will be the
+       * current state minus one)
        */
 
-      if (pdom->state > PM_NORMAL)
+      index = pdom->state - 1;
+
+      /* Has the threshold to return to normal power consumption state been
+       * exceeded?
+       */
+
+      if (Y > g_pmexitthresh[index])
         {
-          /* Get the table index for the current state (which will be the
-           * current state minus one)
-           */
+          /* Yes... reset the count and recommend the normal state. */
 
-          index = pdom->state - 1;
+          pdom->btime       = clock_systimer();
+          pdom->recommended = PM_NORMAL;
+          return;
+        }
+    }
 
-          /* Has the threshold to return to normal power consumption state been
-           * exceeded?
-           */
+  /* Now, compare this new activity level to the thresholds and counts for
+   * the next lower power consumption state. If we are already in the SLEEP
+   * state, then there is nothing more to be done (in fact, I would be
+   * surprised to be executing!).
+   */
 
-          if (Y > g_pmexitthresh[index])
-            {
-              /* Yes... reset the count and recommend the normal state. */
+  if (pdom->state < PM_SLEEP)
+    {
+      unsigned int nextstate;
 
-              pdom->thrcnt      = 0;
-              pdom->recommended = PM_NORMAL;
-              return;
-            }
+      /* Get the next state and the table index for the next state (which will
+       * be the current state)
+       */
+
+      index     = pdom->state;
+      nextstate = pdom->state + 1;
+
+      /* Has the threshold to enter the next lower power consumption state
+       * been exceeded?
+       */
+
+      if (Y > g_pmenterthresh[index])
+        {
+          /* No... reset the count and recommend the current state */
+
+          pdom->btime       = clock_systimer();
+          pdom->recommended = pdom->state;
         }
 
-      /* Now, compare this new activity level to the thresholds and counts for
-       * the next lower power consumption state. If we are already in the SLEEP
-       * state, then there is nothing more to be done (in fact, I would be
-       * surprised to be executing!).
-       */
+      /* Yes.. have we already recommended this state? If so, do nothing */
 
-      if (pdom->state < PM_SLEEP)
+      else if (pdom->recommended < nextstate)
         {
-          unsigned int nextstate;
-
-          /* Get the next state and the table index for the next state (which will
-           * be the current state)
+          /* No.. calculate the count.  Has it passed the count required
+           * for a state transition?
            */
 
-          index     = pdom->state;
-          nextstate = pdom->state + 1;
-
-          /* Has the threshold to enter the next lower power consumption state
-           * been exceeded?
-           */
-
-          if (Y > g_pmenterthresh[index])
+          if (clock_systimer() - pdom->btime >=
+                  g_pmcount[index] * TIME_SLICE_TICKS)
             {
-              /* No... reset the count and recommend the current state */
-
-              pdom->thrcnt      = 0;
-              pdom->recommended = pdom->state;
-            }
-
-          /* Yes.. have we already recommended this state? If so, do nothing */
-
-          else if (pdom->recommended < nextstate)
-            {
-              /* No.. increment the count.  Has it passed the count required
-               * for a state transition?
+              /* Yes, recommend the new state and set up for the next
+               * transition.
                */
 
-              if (++pdom->thrcnt >= g_pmcount[index])
-                {
-                  /* Yes, recommend the new state and set up for the next
-                   * transition.
-                   */
-
-                  pdom->thrcnt      = 0;
-                  pdom->recommended = nextstate;
-                }
+              pdom->btime       = clock_systimer();
+              pdom->recommended = nextstate;
             }
         }
-
-      elapsed -= TIME_SLICE_TICKS;
     }
 }
 

@@ -98,6 +98,7 @@ void pm_initialize(void)
     {
       pdom = &g_pmglobals.domain[i];
       pdom->stime = clock_systimer();
+      pdom->btime = clock_systimer();
     }
 }
 

@@ -138,7 +138,7 @@ void pm_activity(int domain, int priority)
           pdom->stime = now;
           pdom->accum = 0;
 
-          (void)pm_update(domain, tmp, elapsed);
+          (void)pm_update(domain, tmp);
         }
 
       leave_critical_section(flags);

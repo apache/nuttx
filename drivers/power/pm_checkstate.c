@@ -126,7 +126,7 @@ enum pm_state_e pm_checkstate(int domain)
       pdom->stime = now;
       pdom->accum = 0;
 
-      (void)pm_update(domain, accum, elapsed);
+      (void)pm_update(domain, accum);
     }
 
   /* Consider the possible power state lock here */
