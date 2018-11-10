@@ -100,7 +100,7 @@ const net_ipv6addr_t g_ipv6_llnetmask =   /* Netmask for local link address */
 
 #ifdef CONFIG_NET_MLD
 /* Version 2 Multicast Listener Reports are sent with an IP destination
- * address of FF02:0:0:0:0:0:0:16, to which all MLDv2-capable multicast
+ * address of FF02:0:0:0:0:0:0:16 on which all MLDv2-capable multicast
  * routers listen (RFC 3810)
  */
 
