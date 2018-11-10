@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 6, 2018)
+NuttX TODO List (Last updated November 10, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1488,6 +1488,17 @@ o Network (net/, drivers/net)
   Priority:    Medium High.  This makes using local datagram sockets in
                anything but a well-known point-to-point configuration
                impossible.
+
+  Title:       MLD QUERIER DESIGN
+  Description: The MLD implementation does not follow the RFC correct when it is
+               the Querier.  The Querier should use a general query and get
+               query messages from all members of all groups.  This would be
+               driven by a single timer since all groups are queried at once.
+               Instead, the design currently uses a Multicast Address Specific
+               Query with one timer per group and ignores groups that we are
+               not members of.
+  Status:      Open
+  Priority:    Low.  There are no customers of MLD as far as I know.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -156,7 +156,9 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
 {
   FAR struct mld_group_s *group;
 
-  mldinfo("Searching for addr %08x\n", (int)*addr);
+  mldinfo("Searching for group: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+          addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6],
+          addr[7]);
 
   for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
        group;
@@ -166,9 +168,6 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
               group->grpaddr[0], group->grpaddr[1], group->grpaddr[2],
               group->grpaddr[3], group->grpaddr[4], group->grpaddr[5],
               group->grpaddr[6], group->grpaddr[7]);
-      mldinfo("Versus:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-              addr[0], addr[1], addr[2], addr[3],
-              addr[4], addr[5], addr[6], addr[7]);
 
       if (net_ipv6addr_cmp(group->grpaddr, addr))
         {

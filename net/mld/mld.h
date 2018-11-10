@@ -189,6 +189,7 @@ enum mld_msgtype_e
 {
   MLD_SEND_NONE = 0,           /* Nothing to send */
   MLD_SEND_GENQUERY,           /* Send General Query */
+  MLD_SEND_MASQUERY,           /* Send Multicast Address Specific (MAS) Query */
   MLD_SEND_V1REPORT,           /* Send MLDv1 Report message */
   MLD_SEND_V2REPORT,           /* Send MLDv2 Report message */
   MLD_SEND_DONE                /* Send Done message */

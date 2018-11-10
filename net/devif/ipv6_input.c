@@ -277,7 +277,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
   FAR uint8_t *payload;
   uint16_t llhdrlen;
   uint16_t iphdrlen;
-  uint16_t pktlen;
+  uint16_t paylen;
   uint8_t nxthdr;
 #ifdef CONFIG_NET_IPFORWARD
   int ret;
@@ -321,6 +321,37 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
   IFF_SET_IPv6(dev->d_flags);
 
+  /* Check the size of the packet. If the size reported to us in d_len is
+   * smaller the size reported in the IP header, we assume that the packet
+   * has been corrupted in transit. If the size of d_len is larger than the
+   * size reported in the IP packet header, the packet has been padded and
+   * we set d_len to the correct value.
+   *
+   * The length reported in the IPv6 header is the length of the payload
+   * that follows the header.  The device interface uses the d_len variable
+   * for holding the size of the entire packet, including the IP header but
+   * without the link layer header (subtracted out above).
+   *
+   * NOTE: The payload length in the includes the size of the Ipv6 extension
+   * options, but not the size of the IPv6 header.
+   *
+   * REVISIT:  Length will be set to zero if the extension header carries
+   * a Jumbo payload option.
+   */
+
+  paylen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] +
+           IPv6_HDRLEN;
+
+  if (paylen <= dev->d_len)
+    {
+      dev->d_len = paylen;
+    }
+  else
+    {
+      nwarn("WARNING: IP packet shorter than length in IP header\n");
+      goto drop;
+    }
+
   /* Parse IPv6 extension headers (parsed but ignored) */
 
   payload  = PAYLOAD;     /* Assume payload starts right after IPv6 header */
@@ -338,46 +369,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
       extlen    = EXTHDR_LEN((unsigned int)exthdr->len);
       payload  += extlen;
       iphdrlen += extlen;
-
-      /* Check for a short packet */
-
-      if (iphdrlen > dev->d_len)
-        {
-          nwarn("WARNING: Packet shorter than IPv6 header\n");
-          goto drop;
-        }
-
-      /* Set up for the next time through the loop */
-
-      exthdr    = (FAR struct ipv6_extension_s *)payload;
       nxthdr    = exthdr->nxthdr;
-    }
-
-  /* Check the size of the packet. If the size reported to us in d_len is
-   * smaller the size reported in the IP header, we assume that the packet
-   * has been corrupted in transit. If the size of d_len is larger than the
-   * size reported in the IP packet header, the packet has been padded and
-   * we set d_len to the correct value.
-   *
-   * The length reported in the IPv6 header is the length of the payload
-   * that follows the header.  The device interface uses the d_len variable
-   * for holding the size of the entire packet, including the IP header but
-   * without the link layer header.
-   *
-   * REVISIT:  Length will be set to zero if the extension header carries
-   * a Jumbo payload option.
-   */
-
-  pktlen = ((uint16_t)ipv6->len[0] << 8) + (uint16_t)ipv6->len[1] + iphdrlen;
-
-  if (pktlen <= dev->d_len)
-    {
-      dev->d_len = pktlen;
-    }
-  else
-    {
-      nwarn("WARNING: IP packet shorter than length in IP header\n");
-      goto drop;
     }
 
 #ifdef CONFIG_NET_BROADCAST

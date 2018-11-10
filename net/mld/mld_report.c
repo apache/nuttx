@@ -187,6 +187,7 @@ int mld_report_v1(FAR struct net_driver_s *dev,
 int mld_report_v2(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v2_s *report)
 {
+  uint16_t naddrec;
   int ret = -ENOENT;
   int i;
 
@@ -195,7 +196,8 @@ int mld_report_v2(FAR struct net_driver_s *dev,
 
   MLD_STATINCR(g_netstats.mld.v2report_received);
 
-  for (i = 0; i < report->naddrec; i++)
+  naddrec = NTOHS(report->naddrec);
+  for (i = 0; i < naddrec; i++)
     {
       /* Handle this mcast address in the list */
 

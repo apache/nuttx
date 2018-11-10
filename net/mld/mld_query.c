@@ -453,13 +453,14 @@ int mld_query(FAR struct net_driver_s *dev,
       return OK;
     }
 
-  /* Find the group associated with this group address.  For the purpose of
+  /* All of other Queries are sent with the group address set.  Find the
+   * group instance associated with this group address.  For the purpose of
    * sending reports, we only care about the query if we are a member of the
    * group.
    */
 
   group = mld_grpfind(dev, query->grpaddr);
-  if (group != NULL)
+  if (group == NULL)
     {
       mldinfo("We are not a member of this group\n");
 
@@ -487,9 +488,12 @@ int mld_query(FAR struct net_driver_s *dev,
       mldinfo("WARNING: MLDv2 query received in MLDv1 compatibility mode\n");
     }
 
-  /* Check for Multicast Address Specific Query */
+  /* Check for Multicast Address Specific (MAS) Query or a Multicast Address
+   * and Source Specific (MASS) Query.  MAS and MASS queries are sent with
+   * an IP destination address equal to the multicast address of interest.
+   */
 
-  if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allrouters))
+  if (net_ipv6addr_cmp(ipv6->destipaddr, group->grpaddr))
     {
       if (query->nsources == 0)
         {

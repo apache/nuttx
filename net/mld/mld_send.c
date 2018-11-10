@@ -129,6 +129,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   switch (msgtype)
     {
       case MLD_SEND_GENQUERY:           /* Send General Query */
+      case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         {
           mldinfo("Send General Query, flags=%02x\n", group->flags);
           mldsize = SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0);
@@ -201,15 +202,16 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * being sent:
    *
    *   MESSAGE                 DESTINATION ADDRESS
-   *   General Query Message:  The link-local, all nodes multicast address
-   *   MAS Query Messages:     The group multicast address
-   *   Report Message:         The group multicast address
+   *   General Query Message:  The link-local, all nodes multicast address.
+   *   MAS Query Messages:     The group multicast address.
+   *   Report Message:         The group multicast address.
    *   Done Message:           The link-local, all routers multicast address.
    */
 
   switch (msgtype)
     {
       case MLD_SEND_GENQUERY:           /* Send General Query */
+      case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         destipaddr = g_ipv6_allnodes;
         break;
 
@@ -253,7 +255,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
   switch (msgtype)
     {
-      case MLD_SEND_GENQUERY:
+      case MLD_SEND_GENQUERY:           /* Send General Query */
+      case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         {
           FAR struct mld_mcast_listen_query_s *query = QUERYBUF;
 
@@ -266,9 +269,23 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
            */
 
           memset(query, 0, sizeof(struct mld_mcast_listen_query_s));
-          net_ipv6addr_hdrcopy(query->grpaddr, &group->grpaddr);
           query->type   = ICMPV6_MCAST_LISTEN_QUERY;
           query->mrc    = MLD_QRESP_MSEC;
+
+          /* The General Query and the MAS Query differ only in that the
+           * setting of the group multicast address field.  This field
+           * is the unspecified address for General Query, but the group
+           * multicast address for the MAS query.
+           */
+
+          if (msgtype == MLD_SEND_GENQUERY)
+            {
+              net_ipv6addr_hdrcopy(query->grpaddr, g_ipv6_unspecaddr);
+            }
+          else
+            {
+              net_ipv6addr_hdrcopy(query->grpaddr, group->grpaddr);
+            }
 
           /* Fields unique to the extended MLDv2 query */
 
