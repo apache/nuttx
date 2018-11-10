@@ -321,7 +321,7 @@ int arp_send(in_addr_t ipaddr)
    * sending the ARP request if it is not.
    */
 
-  /* The optimal delay would be the work case round trip time. */
+  /* The optimal delay would be the worst case round trip time. */
 
   delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
   delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;

@@ -300,11 +300,21 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   DEBUGASSERT(dev);
   ninfo("Auto-configuring %s\n", dev->d_ifname);
 
-  /* The interface should be in the down state */
+  /* Lock the network.
+   *
+   * NOTE:  Normally it is required that the network be in the "down" state
+   * when re-configuring the network interface.  This is thought not to be
+   * a problem here because.
+   *
+   *   1. The ICMPv6 logic here runs with the network locked so there can be
+   *      no outgoing packets with bad source IP addresses from any
+   *      asynchronous network activity using the device being reconfigured.
+   *   2. Incoming packets depend only upon the MAC filtering.  Network
+   *      drivers do not use the IP address; they filter incoming packets
+   *      using only the MAC address which is not being changed here.
+   */
 
   net_lock();
-  netdev_ifdown(dev);
-  net_unlock();
 
   /* IPv6 Stateless Autoconfiguration
    * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
@@ -327,13 +337,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
         lladdr[4], lladdr[6], lladdr[6], lladdr[7]);
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-  /* Bring the interface up with no IP address */
-
-  net_lock();
-  netdev_ifup(dev);
-  net_unlock();
-
-  /* 2. Link-Local Address Uniqueness Test: The node tests to ensure that
+  /* 2. Link-Local Address Uniqueness Test:  The node tests to ensure that
    *    the address it generated isn't for some reason already in use on the
    *    local network. (This is very unlikely to be an issue if the link-local
    *    address came from a MAC address but more likely if it was based on a
@@ -346,20 +350,15 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    */
 
   ret = icmpv6_neighbor(lladdr);
-
-  /* Take the interface back down */
-
-  net_lock();
-  netdev_ifdown(dev);
-  net_unlock();
-
-  if (ret == OK)
+  if (ret >= 0)
     {
       /* Hmmm... someone else responded to our Neighbor Solicitation.  We
-       * have not back-up plan in place.  Just bail.
+       * have no back-up plan in place.  Just bail.
        */
 
       nerr("ERROR: IP conflict\n");
+
+      net_unlock();
       return -EEXIST;
     }
 #endif
@@ -370,14 +369,9 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    on the wider Internet (since link-local addresses are not routed).
    */
 
-  net_lock();
   net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
 
-  /* Bring the interface up with the new, temporary IP address */
-
-  netdev_ifup(dev);
-
-  /* The optimal delay would be the work case round trip time. */
+  /* The optimal delay would be the worst case round trip time. */
 
   delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
   delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
@@ -424,9 +418,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       ninfo("Timed out... retrying %d\n", retries + 1);
     }
 
-  /* Check for failures.  Note:  On successful return, the network will be
-   * in the down state, but not in the event of failures.
-   */
+  /* Check for failures. */
 
   if (ret < 0)
     {
@@ -441,7 +433,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       if (ret < 0)
         {
           nerr("ERROR: Failed send neighbor advertisement: %d\n", ret);
-          netdev_ifdown(dev);
         }
 
       /* No off-link communications; No router address. */
@@ -451,13 +442,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
       /* Set a netmask for the local link address */
 
       net_ipv6addr_copy(dev->d_ipv6netmask, g_ipv6_llnetmask);
-
-      /* Leave the network up and return success (even though things did not
-       * work out quite the way we wanted).
-       */
-
-      net_unlock();
-      return ret;
     }
 
   /* 5. Router Direction: The router provides direction to the node on how to
@@ -474,13 +458,10 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
    *    first step.
    */
 
-  /* On success, the new address was already set (in icmpv_rnotify()).  We
-   * need only to bring the network back to the up state and return success.
-   */
+  /* On success, the new address was already set (in icmpv_rnotify()). */
 
-  netdev_ifup(dev);
   net_unlock();
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */

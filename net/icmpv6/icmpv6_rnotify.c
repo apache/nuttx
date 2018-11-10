@@ -94,9 +94,21 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 {
   unsigned int i;
 
-  /* Make sure that the network is down before changing any addresses */
+  /* Lock the network.
+   *
+   * NOTE:  Normally it is required that the network be in the "down" state
+   * when re-configuring the network interface.  This is thought not to be
+   * a problem here because.
+   *
+   *   1. The ICMPv6 logic here runs with the network locked so there can be
+   *      no outgoing packets with bad source IP addresses from any
+   *      asynchronous network activity using the device being reconfigured.
+   *   2. Incoming packets depend only upon the MAC filtering.  Network
+   *      drivers do not use the IP address; they filter incoming packets
+   *      using only the MAC address which is not being changed here.
+   */
 
-  netdev_ifdown(dev);
+  net_lock();
 
   /* Create an address mask from the prefix */
 
@@ -136,6 +148,8 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
         dev->d_ipv6draddr[0], dev->d_ipv6draddr[1], dev->d_ipv6draddr[2],
         dev->d_ipv6draddr[3], dev->d_ipv6draddr[4], dev->d_ipv6draddr[6],
         dev->d_ipv6draddr[6], dev->d_ipv6draddr[7]);
+
+  net_unlock();
 }
 
 /****************************************************************************
@@ -203,7 +217,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
   irqstate_t flags;
   int ret = -ENOENT;
 
-  ninfo("Cancelling...\n");
+  ninfo("Canceling...\n");
 
   /* Remove our wait structure from the list (we may no longer be at the
    * head of the list).
@@ -298,9 +312,6 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
  *   Called each time that a Router Advertisement is received in order to
  *   wake-up any threads that may be waiting for this particular Router
  *   Advertisement.
- *
- *   NOTE:  On success the network has the new address applied and is in
- *   the down state.
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through

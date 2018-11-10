@@ -492,9 +492,6 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
  *   wake-up any threads that may be waiting for this particular Router
  *   Advertisement.
  *
- *   NOTE:  On success the network has the new address applied and is in
- *   the down state.
- *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
  *   icmpv6_icmpv6in() will execute with the network locked.
