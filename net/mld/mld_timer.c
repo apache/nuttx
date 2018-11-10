@@ -188,10 +188,22 @@ static void mld_polldog_work(FAR void *arg)
 
   if (IS_MLD_QUERIER(group->flags))
     {
-      /* Schedule (and forget) the general query. */
+      /* Schedule (and forget) the general query or MAS query. */
 
       MLD_STATINCR(g_netstats.mld.query_sched);
+
+#ifdef CONFIG_NET_MLD_ROUTER
+      /* REVISIT:  In order to support the RFC correctly, we would need
+       * separate, single general query timer that is not part of the
+       * group structure. The Querier should query across all groups,
+       * with a single query, not very via multiple MAS queries as is
+       * done here.
+       */
+
       ret = mld_schedmsg(group, MLD_SEND_GENQUERY);
+#else
+      ret = mld_schedmsg(group, MLD_SEND_MASQUERY);
+#endif
       if (ret < 0)
         {
           mlderr("ERROR: Failed to schedule message: %d\n", ret);
@@ -362,6 +374,8 @@ void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks)
  *
  * Description:
  *   Start the MLDv1 compatibility timer.
+ *
+ *   REVISIT:  This should be a single global timer, not a per-group timer.
  *
  ****************************************************************************/
 

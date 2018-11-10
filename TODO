@@ -19,7 +19,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
- (18)  Network (net/, drivers/net)
+ (19)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
  (11)  Libraries (libs/libc/, libs/libm/)
@@ -1497,6 +1497,9 @@ o Network (net/, drivers/net)
                Instead, the design currently uses a Multicast Address Specific
                Query with one timer per group and ignores groups that we are
                not members of.
+
+               Similary, the MLDv1 compatibility timer should be a single,
+               separate timer, not a per-group timer.
   Status:      Open
   Priority:    Low.  There are no customers of MLD as far as I know.
 
