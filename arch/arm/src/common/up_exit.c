@@ -98,7 +98,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
       if (inode)
         {
           sinfo("      fd=%d refcount=%d\n",
-                i, inode->i_crefssinfo);
+                i, inode->i_crefs);
         }
     }
 #endif
