@@ -89,6 +89,16 @@ struct pm_global_s g_pmglobals =
 
 void pm_initialize(void)
 {
+  FAR struct pm_domain_s *pdom;
+  int i;
+
+  /* Init saved time slice */
+
+  for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
+    {
+      pdom = &g_pmglobals.domain[i];
+      pdom->stime = clock_systimer();
+    }
 }
 
 #endif /* CONFIG_PM */
