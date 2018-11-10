@@ -204,17 +204,18 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    *   MESSAGE                 DESTINATION ADDRESS
    *   General Query Message:  The link-local, all nodes multicast address.
    *   MAS Query Messages:     The group multicast address.
-   *   Report Message:         The group multicast address.
+   *   V1 Report Message:      The group multicast address.
+   *   V2 Report Message:      The link-local, all MLDv2 router multicast address.
    *   Done Message:           The link-local, all routers multicast address.
    */
 
   switch (msgtype)
     {
       case MLD_SEND_GENQUERY:           /* Send General Query */
-      case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         destipaddr = g_ipv6_allnodes;
         break;
 
+      case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
       case MLD_SEND_V1REPORT:           /* Send MLDv1 Report message */
         destipaddr = group->grpaddr;
         break;
