@@ -381,7 +381,7 @@ static void _up_assert(int errorcode)
 #endif
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-          board_reset(0);
+          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
 #ifdef CONFIG_ARCH_LEDS
           board_autoled_on(LED_PANIC);
@@ -394,7 +394,7 @@ static void _up_assert(int errorcode)
   else
     {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(0);
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
       exit(errorcode);
     }

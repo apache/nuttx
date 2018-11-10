@@ -134,7 +134,7 @@ static void xtensa_assert(int errorcode)
         for (; ; )
           {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-            board_reset(0);
+            board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
 #ifdef CONFIG_ARCH_LEDS
             board_autoled_on(LED_PANIC);
@@ -149,7 +149,7 @@ static void xtensa_assert(int errorcode)
       /* Assertions in other contexts only cause the thread to exit */
 
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
-      board_reset(0);
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
       exit(errorcode);
     }

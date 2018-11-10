@@ -2430,6 +2430,16 @@ config BOARD_RESET_ON_ASSERT
 		>= 2 up_assert from user or kernel thread will reset the machine.
 		     The default behavior is just to kill the asserting thread.
 
+config BOARD_ASSERT_RESET_VALUE
+	int "Board reset argument"
+	default 0
+	depends on BOARDCTL_RESET
+	---help---
+		Parameter that will be passed to board_reset() by when an
+		assertion occurs.  This may be used by board_reset()
+		implementations to handle the reset differently for the
+		case of a crash.
+
 config BOARDCTL_UNIQUEID
 	bool "Return board unique ID"
 	default n
