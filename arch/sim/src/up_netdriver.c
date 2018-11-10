@@ -126,7 +126,7 @@ static int sim_txpoll(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(&g_sim_dev))
+      if (IFF_IS_IPv4(g_sim_dev.d_flags))
 #endif
         {
           arp_out(&g_sim_dev);
