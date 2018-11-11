@@ -134,27 +134,6 @@ static void mld_setup_v1compat(FAR struct mld_group_s *group,
 }
 
 /****************************************************************************
- * Name: mld_report_msgtype
- *
- * Description:
- *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
- *   current state of compatibility mode flag.
- *
- ****************************************************************************/
-
-static inline uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
-{
-  if (IS_MLD_V1COMPAT(group->flags))
-    {
-      return MLD_SEND_V1REPORT;
-    }
-  else
-    {
-      return MLD_SEND_V2REPORT;
-    }
-}
-
-/****************************************************************************
  * Name: mld_mrc2mrd
  *
  * Description:
@@ -416,10 +395,6 @@ int mld_query(FAR struct net_driver_s *dev,
        * packets.  When the report is sent, it will clobber the incoming
        * query.  Any attempt to send an additional Report would also clobber
        * a preceding report
-       *
-       * REVISIT:  This is a design flaw:  Only a single report can be sent
-       * in this context because there is no mechanism to preserve the
-       * incoming request nor to queue multiple outgoing reports.
        */
 
       for (member = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
@@ -430,16 +405,28 @@ int mld_query(FAR struct net_driver_s *dev,
 
           if (!net_ipv6addr_cmp(member->grpaddr, g_ipv6_allnodes))
             {
-
               /* Check MLDv1 compatibility mode */
 
               mld_setup_v1compat(member, query, mldv1);
 
-              /* Send one report and break out of the loop */
+              /* Have we already sent a report from this loop? */
 
-              mld_send(dev, member, mld_report_msgtype(member));
-              rptsent = true;
-              break;
+              if (rptsent)
+                {
+                  /* Yes.. Just mark that a report as pending.  The pending
+                   * flag will checked on the next driver poll.
+                   */
+
+                  SET_MLD_RPTPEND(member->flags);
+                }
+              else
+                {
+                  /* No.. Send one report now. */
+
+                  mld_send(dev, member, mld_report_msgtype(member));
+                  rptsent = true;
+                  CLR_MLD_RPTPEND(member->flags);
+                }
             }
         }
 

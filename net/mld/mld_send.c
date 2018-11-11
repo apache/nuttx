@@ -304,8 +304,12 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           MLD_STATINCR(g_netstats.mld.query_sent);
 
 #ifdef CONFIG_NET_MLD_ROUTER
-          /* Save the number of members that reported in the previous query cycle;
-           * reset the number of members that have reported in the new query cycle.
+          /* Save the number of members that reported in the previous query
+           * cycle;  reset the number of members that have reported in the
+           * new query cycle.
+           *
+           * REVISIT: This would have to be done for all groups, not just
+           * this one.
            */
 
           group->lstmbrs = group->members;
@@ -389,4 +393,25 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
   mld_dumppkt((FAR const uint8_t *)IPv6BUF, MLD_HDRLEN + mldsize);
+}
+
+/****************************************************************************
+ * Name: mld_report_msgtype
+ *
+ * Description:
+ *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
+ *   current state of compatibility mode flag.
+ *
+ ****************************************************************************/
+
+uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
+{
+  if (IS_MLD_V1COMPAT(group->flags))
+    {
+      return MLD_SEND_V1REPORT;
+    }
+  else
+    {
+      return MLD_SEND_V2REPORT;
+    }
 }

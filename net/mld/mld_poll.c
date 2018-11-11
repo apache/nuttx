@@ -50,29 +50,6 @@
 #include "mld/mld.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  mld_sched_send
- *
- * Description:
- *   Construct and send the MLD message.
- *
- * Returned Value:
- *   Returns a non-zero value if an MLD message is sent.
- *
- * Assumptions:
- *   This function ust be called with the network locked.
- *
- ****************************************************************************/
-
-static inline void mld_sched_send(FAR struct net_driver_s *dev,
-                                  FAR struct mld_group_s *group)
-{
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -127,8 +104,27 @@ void mld_poll(FAR struct net_driver_s *dev)
           if (IS_MLD_WAITMSG(group->flags))
             {
               mldinfo("Awakening waiter\n");
+
+              CLR_MLD_WAITMSG(group->flags);
               nxsem_post(&group->sem);
             }
+
+          /* And break out of the loop */
+
+          break;
+        }
+
+      /* No.. does this message have a pending report still to be sent? */
+
+      else if (IS_MLD_RPTPEND(group->flags))
+        {
+          /* Yes.. create the MLD message in the driver buffer */
+
+          mld_send(dev, group, mld_report_msgtype(group));
+
+          /* Indicate that the report is no longer pending */
+
+          CLR_MLD_RPTPEND(group->flags);
 
           /* And break out of the loop */
 

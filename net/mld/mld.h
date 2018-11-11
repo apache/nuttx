@@ -131,6 +131,7 @@
 #define MLD_LASTREPORT           (1 << 3)  /* We were the last to report */
 #define MLD_SCHEDMSG             (1 << 4)  /* Outgoing message scheduled */
 #define MLD_WAITMSG              (1 << 5)  /* Block until message sent */
+#define MLD_RPTPEND              (1 << 6)  /* Report pending */
 
 #define SET_MLD_QUERIER(f)       do { (f) |= MLD_QUERIER; } while (0)
 #define SET_MLD_STARTUP(f)       do { (f) |= MLD_STARTUP; } while (0)
@@ -138,6 +139,7 @@
 #define SET_MLD_LASTREPORT(f)    do { (f) |= MLD_LASTREPORT; } while (0)
 #define SET_MLD_SCHEDMSG(f)      do { (f) |= MLD_SCHEDMSG; } while (0)
 #define SET_MLD_WAITMSG(f)       do { (f) |= MLD_WAITMSG; } while (0)
+#define SET_MLD_RPTPEND(f)       do { (f) |= MLD_RPTPEND; } while (0)
 
 #define CLR_MLD_QUERIER(f)       do { (f) &= ~MLD_QUERIER; } while (0)
 #define CLR_MLD_STARTUP(f)       do { (f) &= ~MLD_STARTUP; } while (0)
@@ -145,6 +147,7 @@
 #define CLR_MLD_LASTREPORT(f)    do { (f) &= ~MLD_LASTREPORT; } while (0)
 #define CLR_MLD_SCHEDMSG(f)      do { (f) &= ~MLD_SCHEDMSG; } while (0)
 #define CLR_MLD_WAITMSG(f)       do { (f) &= ~MLD_WAITMSG; } while (0)
+#define CLR_MLD_RPTPEND(f)       do { (f) &= ~MLD_RPTPEND; } while (0)
 
 #define IS_MLD_QUERIER(f)        (((f) & MLD_QUERIER) != 0)
 #define IS_MLD_STARTUP(f)        (((f) & MLD_STARTUP) != 0)
@@ -152,6 +155,7 @@
 #define IS_MLD_LASTREPORT(f)     (((f) & MLD_LASTREPORT) != 0)
 #define IS_MLD_SCHEDMSG(f)       (((f) & MLD_SCHEDMSG) != 0)
 #define IS_MLD_WAITMSG(f)        (((f) & MLD_WAITMSG) != 0)
+#define IS_MLD_RPTPEND(f)        (((f) & MLD_RPTPEND) != 0)
 
 /* Debug ********************************************************************/
 
@@ -417,6 +421,17 @@ void mld_poll(FAR struct net_driver_s *dev);
 
 void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
               uint8_t msgtype);
+
+/****************************************************************************
+ * Name: mld_report_msgtype
+ *
+ * Description:
+ *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
+ *   current state of compatibility mode flag.
+ *
+ ****************************************************************************/
+
+uint8_t mld_report_msgtype(FAR struct mld_group_s *group);
 
 /****************************************************************************
  * Name:  mld_joingroup

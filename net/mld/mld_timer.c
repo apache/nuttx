@@ -60,27 +60,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mld_report_msgtype
- *
- * Description:
- *   Determine which type of Report to send, MLDv1 or MLDv2, depending on
- *   current state of compatibility mode flag.
- *
- ****************************************************************************/
-
-static inline uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
-{
-  if (IS_MLD_V1COMPAT(group->flags))
-    {
-      return MLD_SEND_V1REPORT;
-    }
-  else
-    {
-      return MLD_SEND_V2REPORT;
-    }
-}
-
-/****************************************************************************
  * Name:  mld_polldog_work
  *
  * Description:
