@@ -61,6 +61,40 @@
 #ifdef CONFIG_NET_MLD
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  mld_ngroups
+ *
+ * Description:
+ *   Return the number of groups joined by applications.
+ *
+ ****************************************************************************/
+
+static int mld_ngroups(FAR struct net_driver_s *dev)
+{
+  FAR struct mld_group_s *group;
+  int ngroups;
+
+  /* Count the number of groups in the group list */
+
+  for (group = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
+       group != NULL;
+       group = group->next)
+    {
+      ngroups++;
+    }
+
+  /* REVISIT:  Subtract one for the IPv6 allnodes group.  Why is this here?
+   * what do we need it for?  It was cloned from IGMP and is probably not
+   * needed.
+   */
+
+  return ngroups - 1;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -118,7 +152,7 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
        * group member of the group.
        */
 
-      if (dev->d_mld.grplist.head == NULL)
+      if (mld_ngroups(dev) < 1)
         {
           mld_start_gentimer(dev, MSEC2TICK(MLD_QUERY_MSEC));
         }
@@ -240,9 +274,12 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 #ifndef CONFIG_CONFIG_NET_MLD_ROUTER
   /* If there are no longer any groups, then stop the general query and v1
    * compatibility timers.
+   *
+   * REVISIT:  Does not work.  Continues to query after the last group
+   * leaves.
    */
 
-  if (dev->d_mld.grplist.head == NULL)
+  if (mld_ngroups(dev) < 1)
     {
       wd_cancel(dev->d_mld.gendog);
       wd_cancel(dev->d_mld.v1dog);
