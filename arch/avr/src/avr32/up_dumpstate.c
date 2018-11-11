@@ -174,6 +174,11 @@ void up_dumpstate(void)
 
       up_stackdump(sp, istackbase);
     }
+  else if (g_current_regs)
+    {
+      _alert("ERROR: Stack pointer is not within the interrupt stack\n");
+      up_stackdump(istackbase - istacksize, istackbase);
+    }
 
   /* Extract the user stack pointer if we are in an interrupt handler.
    * If we are not in an interrupt handler.  Then sp is the user stack
@@ -201,6 +206,11 @@ void up_dumpstate(void)
     {
       up_stackdump(sp, ustackbase);
     }
+  else
+    {
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      up_stackdump(ustackbase - ustacksize, ustackbase);
+    }
 #else
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
@@ -216,6 +226,7 @@ void up_dumpstate(void)
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
+      up_stackdump(ustackbase - ustacksize, ustackbase);
     }
   else
     {

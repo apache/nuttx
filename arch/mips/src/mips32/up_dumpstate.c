@@ -191,6 +191,11 @@ void up_dumpstate(void)
       sp = g_intstackbase;
       _alert("sp:     %08x\n", sp);
     }
+  else if (g_current_regs)
+    {
+      _alert("ERROR: Stack pointer is not within the interrupt stack\n");
+      up_stackdump(istackbase - istacksize, istackbase);
+    }
 
   /* Show user stack info */
 
@@ -209,9 +214,8 @@ void up_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-#endif
+      up_stackdump(ustackbase - ustacksize, ustackbase);
     }
   else
     {

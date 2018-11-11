@@ -255,6 +255,11 @@ void xtensa_dumpstate(void)
       sp = &g_instack[INTERRUPTSTACK_SIZE - sizeof(uint32_t)];
       _alert("sp:     %08x\n", sp);
     }
+  else if (CURRENT_REGS)
+    {
+      _alert("ERROR: Stack pointer is not within the interrupt stack\n");
+      xtensa_stackdump(istackbase - istacksize, istackbase);
+    }
 
   /* Show user stack info */
 
@@ -279,9 +284,8 @@ void xtensa_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#ifdef HAVE_INTERRUPTSTACK
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-#endif
+      xtensa_stackdump(ustackbase - ustacksize, ustackbase);
     }
   else
     {

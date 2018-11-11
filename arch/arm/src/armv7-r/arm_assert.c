@@ -306,6 +306,11 @@ static void up_dumpstate(void)
       sp = g_intstackbase;
       _alert("User sp: %08x\n", sp);
     }
+  else if (CURRENT_REGS)
+    {
+      _alert("ERROR: Stack pointer is not within the interrupt stack\n");
+      up_stackdump(istackbase - istacksize, istackbase);
+    }
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -323,12 +328,20 @@ static void up_dumpstate(void)
    * kernel stack memory.
    */
 
-  if (sp >= (uint32_t)rtcb->xcp.kstack && sp < kstackbase)
+  else if (sp >= (uint32_t)rtcb->xcp.kstack && sp < kstackbase)
     {
       _alert("Kernel Stack\n", sp);
       up_stackdump(sp, kstackbase);
     }
 #endif
+  else
+    {
+      _alert("ERROR: Stack pointer is not within the allocated stack\n");
+      up_stackdump(ustackbase - ustacksize, ustackbase);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+      up_stackdump((uint32_t)rtcb->xcp.kstack, kstackbase);
+#endif
+    }
 
   /* Then dump the registers (if available) */
 

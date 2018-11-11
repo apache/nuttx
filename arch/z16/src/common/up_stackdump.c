@@ -66,6 +66,7 @@ static void up_stackdump(void)
   chipreg_t sp = up_getsp();
   chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
+  chipreg_t stack;
 
   _alert("stack_base: %08x\n", stack_base);
   _alert("stack_size: %08x\n", stack_size);
@@ -74,19 +75,19 @@ static void up_stackdump(void)
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
       _err("ERROR: Stack pointer is not within allocated stack\n");
-      return;
+      stack = stack_base - stack_size;
     }
   else
     {
-      chipreg_t stack = sp & ~0x0f;
+      stack = sp;
+    }
 
-      for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(chipreg_t))
-        {
-          chipreg_t *ptr = (chipreg_t*)stack;
-          _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-                stack, ptr[0], ptr[1], ptr[2], ptr[3],
-                ptr[4], ptr[5], ptr[6], ptr[7]);
-        }
+  for (stack = stack & ~0x0f; stack < stack_base; stack += 8*sizeof(chipreg_t))
+    {
+      chipreg_t *ptr = (chipreg_t*)stack;
+      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+            stack, ptr[0], ptr[1], ptr[2], ptr[3],
+            ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
 

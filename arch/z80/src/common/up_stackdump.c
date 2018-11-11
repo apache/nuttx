@@ -67,6 +67,7 @@ static void up_stackdump(void)
   uint16_t sp = up_getsp();
   uint16_t stack_base = (uint16_t)rtcb->adj_stack_ptr;
   uint16_t stack_size = (uint16_t)rtcb->adj_stack_size;
+  uint16_t stack;
 
   _alert("stack_base: %04x\n", stack_base);
   _alert("stack_size: %04x\n", stack_size);
@@ -75,19 +76,19 @@ static void up_stackdump(void)
   if (sp >= stack_base || sp < stack_base - stack_size)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      return;
+      stack = stack_base - stack_size;
     }
   else
     {
-      uint16_t stack = sp & ~0x0f;
+      stack = sp;
+    }
 
-      for (stack = sp & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16_t))
-        {
-          uint16_t *ptr = (uint16_t*)stack;
-          _alert("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-                stack, ptr[0], ptr[1], ptr[2], ptr[3],
-                ptr[4], ptr[5], ptr[6], ptr[7]);
-        }
+  for (stack = stack & ~0x0f; stack < stack_base; stack += 8*sizeof(uint16_t))
+    {
+      uint16_t *ptr = (uint16_t*)stack;
+      _alert("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+            stack, ptr[0], ptr[1], ptr[2], ptr[3],
+            ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
 
