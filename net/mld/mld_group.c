@@ -75,7 +75,7 @@
 static int mld_ngroups(FAR struct net_driver_s *dev)
 {
   FAR struct mld_group_s *group;
-  int ngroups;
+  int ngroups = 0;
 
   /* Count the number of groups in the group list */
 
@@ -274,9 +274,6 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 #ifndef CONFIG_CONFIG_NET_MLD_ROUTER
   /* If there are no longer any groups, then stop the general query and v1
    * compatibility timers.
-   *
-   * REVISIT:  Does not work.  Continues to query after the last group
-   * leaves.
    */
 
   if (mld_ngroups(dev) < 1)

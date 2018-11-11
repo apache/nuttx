@@ -196,15 +196,15 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
               CLR_MLD_SCHEDMSG(group->flags);
               CLR_MLD_WAITMSG(group->flags);
 
-             /* Free the group structure */
+              /* Free the group structure */
 
-             mld_grpfree(dev, group);
+              mld_grpfree(dev, group);
 
-             /* REVISIT: It is expected that higher level logic will remove
-              * the routing table entry for the old multicast address.  That
-              * is not done here.
-              */
-           }
+              /* REVISIT: It is expected that higher level logic will remove
+               * the routing table entry for the old multicast address.  That
+               * is not done here.
+               */
+            }
         }
 
       return OK;
