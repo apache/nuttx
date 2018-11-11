@@ -19,7 +19,7 @@ nuttx/:
   (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
- (19)  Network (net/, drivers/net)
+ (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
  (11)  Libraries (libs/libc/, libs/libm/)
@@ -1488,20 +1488,6 @@ o Network (net/, drivers/net)
   Priority:    Medium High.  This makes using local datagram sockets in
                anything but a well-known point-to-point configuration
                impossible.
-
-  Title:       MLD QUERIER DESIGN
-  Description: The MLD implementation does not follow the RFC correct when it is
-               the Querier.  The Querier should use a general query and get
-               query messages from all members of all groups.  This would be
-               driven by a single timer per network device since all groups on
-               the sub-net are queried at once.  Instead, the design currently
-               uses a Multicast Address Specific Query with one timer per group
-               and ignores groups that we are not members of.
-
-               Similary, the MLDv1 compatibility timer should be a single,
-               separate timer per network device, not a per-group timer.
-  Status:      Open
-  Priority:    Low.  There are no customers of MLD as far as I know.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

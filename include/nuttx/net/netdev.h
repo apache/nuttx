@@ -346,7 +346,7 @@ struct net_driver_s
   sq_queue_t d_igmp_grplist;    /* IGMP group list */
 #endif
 #ifdef CONFIG_NET_MLD
-  sq_queue_t d_mld_grplist;     /* MLD group list */
+  struct mld_netdev_s d_mld;    /* MLD state information */
 #endif
 
 #ifdef CONFIG_NETDEV_STATISTICS

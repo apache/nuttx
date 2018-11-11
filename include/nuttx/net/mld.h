@@ -51,7 +51,9 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
+#include <queue.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/icmpv6.h>
 
@@ -368,6 +370,22 @@ struct mld_mcast_listen_done_s
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   uint16_t reserved3;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t mcastaddr;  /* Multicast address */
+};
+
+/* This structure represents the overall MLD state for a single network.
+ * This structure in included withing the net_driver_s structure.
+ *
+ * There will be a group for the all systems group address but this
+ * will not run the state machine as it is used to kick off reports
+ * from all the other groups
+ */
+
+struct mld_netdev_s
+{
+  sq_queue_t grplist;                /* MLD group list */
+  WDOG_ID gendog;                    /* General query timer */
+  WDOG_ID v1dog;                     /* MLDv1 compatibility timer */
+  uint8_t flags;                     /* See MLD_ flags definitions */
 };
 
 #ifdef CONFIG_NET_STATISTICS

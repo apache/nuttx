@@ -193,7 +193,6 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
                */
 
               wd_cancel(group->polldog);
-              wd_cancel(group->v1dog);
               CLR_MLD_SCHEDMSG(group->flags);
               CLR_MLD_WAITMSG(group->flags);
 

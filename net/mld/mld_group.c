@@ -109,30 +109,27 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
           goto errout_with_sem;
         }
 
-      group->v1dog = wd_create();
-      DEBUGASSERT(group->v1dog != NULL);
-      if (group->v1dog == NULL)
-        {
-          goto errout_with_polldog;
-        }
-
       /* Save the interface index */
 
       group->ifindex = dev->d_ifindex;
 
-      /* All routers start up as a Querier on each of their attached links. */
+#ifndef CONFIG_CONFIG_NET_MLD_ROUTER
+      /* Start the query timer if we are the Querier and this is the first
+       * group member of the group.
+       */
 
-      SET_MLD_QUERIER(group->flags);
+      if (dev->d_mld.grplist.head == NULL)
+        {
+          mld_start_gentimer(dev, MSEC2TICK(MLD_QUERY_MSEC));
+        }
+#endif
 
       /* Add the group structure to the list in the device structure */
 
-      sq_addfirst((FAR sq_entry_t *)group, &dev->d_mld_grplist);
+      sq_addfirst((FAR sq_entry_t *)group, &dev->d_mld.grplist);
     }
 
   return group;
-
-errout_with_polldog:
-  wd_delete(group->polldog);
 
 errout_with_sem:
   (void)nxsem_destroy(&group->sem);
@@ -160,7 +157,7 @@ FAR struct mld_group_s *mld_grpfind(FAR struct net_driver_s *dev,
           addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6],
           addr[7]);
 
-  for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
+  for (group = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
        group;
        group = group->next)
     {
@@ -222,11 +219,10 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
   /* Cancel the timers */
 
   wd_cancel(group->polldog);
-  wd_cancel(group->v1dog);
 
   /* Remove the group structure from the group list in the device structure */
 
-  sq_rem((FAR sq_entry_t *)group, &dev->d_mld_grplist);
+  sq_rem((FAR sq_entry_t *)group, &dev->d_mld.grplist);
 
   /* Destroy the wait semaphore */
 
@@ -235,12 +231,53 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
   /* Destroy the timers */
 
   wd_delete(group->polldog);
-  wd_delete(group->v1dog);
 
   /* Then release the group structure resources. */
 
   mldinfo("Call sched_kfree()\n");
   kmm_free(group);
+
+#ifndef CONFIG_CONFIG_NET_MLD_ROUTER
+  /* If there are no longer any groups, then stop the general query and v1
+   * compatibility timers.
+   */
+
+  if (dev->d_mld.grplist.head == NULL)
+    {
+      wd_cancel(dev->d_mld.gendog);
+      wd_cancel(dev->d_mld.v1dog);
+    }
+#endif
 }
+
+/****************************************************************************
+ * Name:  mld_new_pollcycle
+ *
+ * Description:
+ *   Update accumulated membership at the beginning of each new poll cycle
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_MLD_ROUTER
+void mld_new_pollcycle(FAR struct net_driver_s *dev)
+{
+  FAR struct mld_group_s *member;
+
+  /* Update member ship in every group  */
+
+   for (member = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
+        member;
+        member = member->next)
+     {
+       /* Save the number of members that reported in the previous query
+        * cycle; reset the number of members that have reported in the new
+        * query cycle.
+        */
+
+       member->lstmbrs = member->members;
+       member->members = 0;
+     }
+}
+#endif
 
 #endif /* CONFIG_NET_MLD */

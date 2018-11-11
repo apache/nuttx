@@ -123,35 +123,45 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Group flags */
+/* Global flags */
 
 #define MLD_QUERIER              (1 << 0)  /* Querier */
+#define MLD_V1COMPAT             (1 << 1)  /* MLDv1 compatibility mode */
+#define MLD_GENPEND              (1 << 2)  /* General query pending */
+
+#define SET_MLD_QUERIER(f)       do { (f) |= MLD_QUERIER; } while (0)
+#define SET_MLD_V1COMPAT(f)      do { (f) |= MLD_V1COMPAT; } while (0)
+#define SET_MLD_GENPEND(f)       do { (f) |= MLD_GENPEND; } while (0)
+
+#define CLR_MLD_QUERIER(f)       do { (f) &= ~MLD_QUERIER; } while (0)
+#define CLR_MLD_V1COMPAT(f)      do { (f) &= ~MLD_V1COMPAT; } while (0)
+#define CLR_MLD_GENPEND(f)       do { (f) &= ~MLD_GENPEND; } while (0)
+
+#define IS_MLD_QUERIER(f)        (((f) & MLD_QUERIER) != 0)
+#define IS_MLD_V1COMPAT(f)       (((f) & MLD_V1COMPAT) != 0)
+#define IS_MLD_GENPEND(f)        (((f) & MLD_GENPEND) != 0)
+
+/* Group flags */
+
 #define MLD_STARTUP              (1 << 1)  /* Startup unsolicited Reports */
-#define MLD_V1COMPAT             (1 << 2)  /* Version 1 compatibility mode */
 #define MLD_LASTREPORT           (1 << 3)  /* We were the last to report */
 #define MLD_SCHEDMSG             (1 << 4)  /* Outgoing message scheduled */
 #define MLD_WAITMSG              (1 << 5)  /* Block until message sent */
 #define MLD_RPTPEND              (1 << 6)  /* Report pending */
 
-#define SET_MLD_QUERIER(f)       do { (f) |= MLD_QUERIER; } while (0)
 #define SET_MLD_STARTUP(f)       do { (f) |= MLD_STARTUP; } while (0)
-#define SET_MLD_V1COMPAT(f)      do { (f) |= MLD_V1COMPAT; } while (0)
 #define SET_MLD_LASTREPORT(f)    do { (f) |= MLD_LASTREPORT; } while (0)
 #define SET_MLD_SCHEDMSG(f)      do { (f) |= MLD_SCHEDMSG; } while (0)
 #define SET_MLD_WAITMSG(f)       do { (f) |= MLD_WAITMSG; } while (0)
 #define SET_MLD_RPTPEND(f)       do { (f) |= MLD_RPTPEND; } while (0)
 
-#define CLR_MLD_QUERIER(f)       do { (f) &= ~MLD_QUERIER; } while (0)
 #define CLR_MLD_STARTUP(f)       do { (f) &= ~MLD_STARTUP; } while (0)
-#define CLR_MLD_V1COMPAT(f)      do { (f) &= ~MLD_V1COMPAT; } while (0)
 #define CLR_MLD_LASTREPORT(f)    do { (f) &= ~MLD_LASTREPORT; } while (0)
 #define CLR_MLD_SCHEDMSG(f)      do { (f) &= ~MLD_SCHEDMSG; } while (0)
 #define CLR_MLD_WAITMSG(f)       do { (f) &= ~MLD_WAITMSG; } while (0)
 #define CLR_MLD_RPTPEND(f)       do { (f) &= ~MLD_RPTPEND; } while (0)
 
-#define IS_MLD_QUERIER(f)        (((f) & MLD_QUERIER) != 0)
 #define IS_MLD_STARTUP(f)        (((f) & MLD_STARTUP) != 0)
-#define IS_MLD_V1COMPAT(f)       (((f) & MLD_V1COMPAT) != 0)
 #define IS_MLD_LASTREPORT(f)     (((f) & MLD_LASTREPORT) != 0)
 #define IS_MLD_SCHEDMSG(f)       (((f) & MLD_SCHEDMSG) != 0)
 #define IS_MLD_WAITMSG(f)        (((f) & MLD_WAITMSG) != 0)
@@ -201,10 +211,6 @@ enum mld_msgtype_e
 
 /* This structure represents one group member.  There is a list of groups
  * for each device interface structure.
- *
- * There will be a group for the all systems group address but this
- * will not run the state machine as it is used to kick off reports
- * from all the other groups
  */
 
 typedef FAR struct wdog_s *WDOG_ID;
@@ -214,7 +220,6 @@ struct mld_group_s
   net_ipv6addr_t      grpaddr; /* Group IPv6 address */
   struct work_s       work;    /* For deferred timeout operations */
   WDOG_ID             polldog; /* Timer used for periodic or delayed events */
-  WDOG_ID             v1dog;   /* MLDv1 compatibility mode timer */
   sem_t               sem;     /* Used to wait for message transmission */
 #ifdef CONFIG_NET_MLD_ROUTER
   uint16_t            members; /* Number of members currently reporting (excludes us) */
@@ -287,7 +292,7 @@ int mld_query(FAR struct net_driver_s *dev,
  * Name: mld_report_v1
  *
  * Description:
- *  Called from icmpv6_input() when a Version 1 Multicast Listener Report is
+ *  Called from icmpv6_input() when a MLDv1 Multicast Listener Report is
  *   received.
  *
  ****************************************************************************/
@@ -364,6 +369,18 @@ void mld_grpfree(FAR struct net_driver_s *dev,
                  FAR struct mld_group_s *group);
 
 /****************************************************************************
+ * Name:  mld_new_pollcycle
+ *
+ * Description:
+ *   Update accumulated membership at the beginning of each new poll cycle
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_MLD_ROUTER
+void mld_new_pollcycle(FAR struct net_driver_s *dev);
+#endif
+
+/****************************************************************************
  * Name: mld_schedmsg
  *
  * Description:
@@ -431,7 +448,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
  *
  ****************************************************************************/
 
-uint8_t mld_report_msgtype(FAR struct mld_group_s *group);
+uint8_t mld_report_msgtype(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name:  mld_joingroup
@@ -474,14 +491,14 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec);
 int mld_leavegroup(FAR const struct ipv6_mreq *mrec);
 
 /****************************************************************************
- * Name:  mld_start_polltimer
+ * Name:  mld_start_gentimer
  *
  * Description:
- *   Start the MLD poll timer.
+ *   Start/Re-start the general query timer.
  *
  ****************************************************************************/
 
-void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks);
+void mld_start_gentimer(FAR struct net_driver_s *dev, clock_t ticks);
 
 /****************************************************************************
  * Name:  mld_start_v1timer
@@ -491,7 +508,17 @@ void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks);
  *
  ****************************************************************************/
 
-void mld_start_v1timer(FAR struct mld_group_s *group, clock_t ticks);
+void mld_start_v1timer(FAR struct net_driver_s *dev, clock_t ticks);
+
+/****************************************************************************
+ * Name:  mld_start_polltimer
+ *
+ * Description:
+ *   Start the MLD poll timer.
+ *
+ ****************************************************************************/
+
+void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks);
 
 /****************************************************************************
  * Name:  mld_addmcastmac

@@ -157,7 +157,7 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
 int mld_report_v1(FAR struct net_driver_s *dev,
                   FAR const struct mld_mcast_listen_report_v1_s *report)
 {
-  mldinfo("Version 1 Multicast Listener Report\n");
+  mldinfo("MLDv1 Multicast Listener Report\n");
   DEBUGASSERT(dev != NULL && report != NULL);
 
   MLD_STATINCR(g_netstats.mld.v1report_received);

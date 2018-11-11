@@ -120,6 +120,11 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
   FAR const uint16_t *destipaddr;
   unsigned int mldsize;
 
+  /* Only a general query message can have a NULL group */
+
+  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(msgtype == MLD_SEND_GENQUERY || group != NULL);
+
   /* Select IPv6 */
 
   IFF_SET_IPv6(dev->d_flags);
@@ -131,7 +136,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
       case MLD_SEND_GENQUERY:           /* Send General Query */
       case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         {
-          mldinfo("Send General Query, flags=%02x\n", group->flags);
+          mldinfo("Send General/MAS Query, flags=%02x\n",
+                  group != NULL ? group->flags : dev->d_mld.flags);
           mldsize = SIZEOF_MLD_MCAST_LISTEN_QUERY_S(0);
         }
         break;
@@ -290,7 +296,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
           /* Fields unique to the extended MLDv2 query */
 
-          if (!IS_MLD_V1COMPAT(group->flags))
+          if (!IS_MLD_V1COMPAT(dev->d_mld.flags))
             {
               query->flags  = MLD_ROBUSTNESS;
               query->qqic   = MLD_QRESP_SEC;
@@ -307,13 +313,21 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Save the number of members that reported in the previous query
            * cycle;  reset the number of members that have reported in the
            * new query cycle.
-           *
-           * REVISIT: This would have to be done for all groups, not just
-           * this one.
            */
 
-          group->lstmbrs = group->members;
-          group->members = 0;
+          if (msgtype == MLD_SEND_GENQUERY)
+            {
+              /* Update accumulated membership for all groups. */
+
+              mld_new_pollcycle(dev)
+            }
+          else
+            {
+              /* Updated accumulated membership only for this group */
+
+              group->lstmbrs = group->members;
+              group->members = 0;
+            }
 #endif
         }
         break;
@@ -404,9 +418,9 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
  *
  ****************************************************************************/
 
-uint8_t mld_report_msgtype(FAR struct mld_group_s *group)
+uint8_t mld_report_msgtype(FAR struct net_driver_s *dev)
 {
-  if (IS_MLD_V1COMPAT(group->flags))
+  if (IS_MLD_V1COMPAT(dev->d_mld.flags))
     {
       return MLD_SEND_V1REPORT;
     }

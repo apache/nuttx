@@ -78,9 +78,28 @@ void mld_poll(FAR struct net_driver_s *dev)
   dev->d_len     = 0;
   dev->d_sndlen  = 0;
 
+  /* Check if a general query is pending */
+
+  if (IS_MLD_GENPEND(dev->d_mld.flags))
+    {
+      /* Clear the pending flag */
+
+      CLR_MLD_GENPEND(dev->d_mld.flags);
+
+      /* Are we still the querier? */
+
+      if (IS_MLD_QUERIER(dev->d_mld.flags))
+        {
+          /* Yes, send the general query and return */
+
+          mld_send(dev, NULL, MLD_SEND_GENQUERY);
+          return;
+        }
+    }
+
   /* Check each member of the group */
 
-  for (group = (FAR struct mld_group_s *)dev->d_mld_grplist.head;
+  for (group = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
        group;
        group = group->next)
     {
@@ -120,7 +139,7 @@ void mld_poll(FAR struct net_driver_s *dev)
         {
           /* Yes.. create the MLD message in the driver buffer */
 
-          mld_send(dev, group, mld_report_msgtype(group));
+          mld_send(dev, group, mld_report_msgtype(dev));
 
           /* Indicate that the report is no longer pending */
 
