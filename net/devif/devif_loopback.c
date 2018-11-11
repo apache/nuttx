@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <debug.h>
 
 #include <nuttx/net/ip.h>
