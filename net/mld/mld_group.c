@@ -91,7 +91,7 @@ static int mld_ngroups(FAR struct net_driver_s *dev)
    * needed.
    */
 
-  return ngroups - 1;
+  return ngroups > 0 ? ngroups - 1 : 0;
 }
 
 /****************************************************************************
@@ -147,12 +147,12 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
 
       group->ifindex = dev->d_ifindex;
 
-#ifndef CONFIG_CONFIG_NET_MLD_ROUTER
+#ifndef CONFIG_NET_MLD_ROUTER
       /* Start the query timer if we are the Querier and this is the first
        * group member of the group.
        */
 
-      if (mld_ngroups(dev) < 1)
+      if (mld_ngroups(dev) == 0)
         {
           mld_start_gentimer(dev, MSEC2TICK(MLD_QUERY_MSEC));
         }
@@ -271,12 +271,12 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
   mldinfo("Call sched_kfree()\n");
   kmm_free(group);
 
-#ifndef CONFIG_CONFIG_NET_MLD_ROUTER
+#ifndef CONFIG_NET_MLD_ROUTER
   /* If there are no longer any groups, then stop the general query and v1
    * compatibility timers.
    */
 
-  if (mld_ngroups(dev) < 1)
+  if (mld_ngroups(dev) == 0)
     {
       wd_cancel(dev->d_mld.gendog);
       wd_cancel(dev->d_mld.v1dog);

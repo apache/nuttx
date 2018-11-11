@@ -105,7 +105,7 @@ void mld_devinit(struct net_driver_s *dev)
   mld_addmcastmac(dev, g_ipv6_allrouters);
   mld_addmcastmac(dev, g_ipv6_allmldv2routers);
 
-#ifdef CONFIG_CONFIG_NET_MLD_ROUTER
+#ifdef CONFIG_NET_MLD_ROUTER
   /* Start the general query timer. */
 
   mld_start_gentimer(dev, MSEC2TICK(MLD_QUERY_MSEC));
