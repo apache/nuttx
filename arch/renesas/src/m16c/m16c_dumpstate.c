@@ -53,6 +53,12 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t s_last_regs[XCPTCONTEXT_REGS];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -112,23 +118,27 @@ static inline void m16c_registerdump(void)
 
   /* Are user registers available from interrupt processing? */
 
-  if (ptr)
+  if (ptr == NULL)
     {
-      /* Yes.. dump the interrupt registers */
+      /* No.. capture user registers by hand */
 
-      _alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
-            ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC+1],
-            ptr[REG_FLGPCHI] >> 8, ptr[REG_FLG],
-            ptr[REG_FB], ptr[REG_FB+1],
-            ptr[REG_SB], ptr[REG_SB+1],
-            ptr[REG_SP], ptr[REG_SP+1]);
-
-      _alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
-            ptr[REG_R0], ptr[REG_R0+1], ptr[REG_R1], ptr[REG_R1+1],
-            ptr[REG_R2], ptr[REG_R2+1], ptr[REG_R3], ptr[REG_R3+1],
-            ptr[REG_A0], ptr[REG_A0+1], ptr[REG_A1], ptr[REG_A1+1]);
-
+      up_saveusercontext((uint32_t *)s_last_regs);
+      regs = s_last_regs;
     }
+
+  /* Dump the interrupt registers */
+
+  _alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
+        ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC+1],
+        ptr[REG_FLGPCHI] >> 8, ptr[REG_FLG],
+        ptr[REG_FB], ptr[REG_FB+1],
+        ptr[REG_SB], ptr[REG_SB+1],
+        ptr[REG_SP], ptr[REG_SP+1]);
+
+  _alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
+        ptr[REG_R0], ptr[REG_R0+1], ptr[REG_R1], ptr[REG_R1+1],
+        ptr[REG_R2], ptr[REG_R2+1], ptr[REG_R3], ptr[REG_R3+1],
+        ptr[REG_A0], ptr[REG_A0+1], ptr[REG_A1], ptr[REG_A1+1]);
 }
 
 /****************************************************************************

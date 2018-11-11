@@ -50,6 +50,12 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -62,6 +68,12 @@ static void up_registerdump(void)
 #ifdef CONFIG_DEBUG_INFO
   FAR uint32_t *regs32 = (FAR uint32_t*)g_current_regs;
 
+  if (regs32 == NULL)
+    {
+      up_saveusercontext(s_last_regs);
+      regs32 = (FAR uint32_t *)s_last_regs;
+    }
+
   _alert("R0 :%08x R1 :%08x R2 :%08x R3 :%08x "
         "R4 :%08x R5 :%08x R6 :%08x R7 :%08x\n"
         regs32[REG_R0/2],  regs32[REG_R1/2], regs32[REG_R2/2], regs32[REG_R3/2],
@@ -70,7 +82,7 @@ static void up_registerdump(void)
         regs32[REG_R8/2],  regs32[REG_R9/2], regs32[REG_R10/2], regs3[REG_R11/2],
         regs32[REG_R12/2], regs32[REG_R13/2]);
   _alert("FP :%08x SP :%08x FLG:%04x\n"
-        regs32[REG_R14/2], regs32[REG_R15/2], g_current_regs[REG_FLAGS]);
+        regs32[REG_R14/2], regs32[REG_R15/2], regs32[REG_FLAGS]);
 #endif
 }
 

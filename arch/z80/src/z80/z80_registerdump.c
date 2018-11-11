@@ -50,6 +50,12 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -59,17 +65,22 @@
 
 static void z80_registerdump(void)
 {
-  if (g_current_regs)
+  volatile chipreg_t *regs = g_current_regs;
+
+  if (regs == NULL)
     {
-      _alert("AF: %04x  I: %04x\n",
-            g_current_regs[XCPT_AF], g_current_regs[XCPT_I]);
-      _alert("BC: %04x DE: %04x HL: %04x\n",
-            g_current_regs[XCPT_BC], g_current_regs[XCPT_DE], g_current_regs[XCPT_HL]);
-      _alert("IX: %04x IY: %04x\n",
-            g_current_regs[XCPT_IX], g_current_regs[XCPT_IY]);
-      _alert("SP: %04x PC: %04x\n"
-            g_current_regs[XCPT_SP], g_current_regs[XCPT_PC]);
+      z80_saveusercontext(s_last_regs);
+      regs = s_last_regs;
     }
+
+  _alert("AF: %04x  I: %04x\n",
+        regs[XCPT_AF], regs[XCPT_I]);
+  _alert("BC: %04x DE: %04x HL: %04x\n",
+        regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
+  _alert("IX: %04x IY: %04x\n",
+        regs[XCPT_IX], regs[XCPT_IY]);
+  _alert("SP: %04x PC: %04x\n"
+        regs[XCPT_SP], regs[XCPT_PC]);
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */

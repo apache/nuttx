@@ -52,6 +52,12 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -100,24 +106,29 @@ static inline void sh1_registerdump(void)
 
   /* Are user registers available from interrupt processing? */
 
-  if (ptr)
+  if (ptr == NULL)
     {
-      /* Yes.. dump the interrupt registers */
+      /* No.. capture user registers by hand */
 
-      _alert("PC: %08x SR=%08x\n",
-            ptr[REG_PC], ptr[REG_SR]);
-
-      _alert("PR: %08x GBR: %08x MACH: %08x MACL: %08x\n",
-            ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
-
-      _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 0,
-            ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
-            ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
-
-      _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
-            ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
-            ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
+      up_saveusercontext(s_last_regs);
+      regs = s_last_regs;
     }
+
+  /* Dump the interrupt registers */
+
+  _alert("PC: %08x SR=%08x\n",
+        ptr[REG_PC], ptr[REG_SR]);
+
+  _alert("PR: %08x GBR: %08x MACH: %08x MACL: %08x\n",
+        ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
+
+  _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 0,
+        ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
+        ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
+
+  _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
+        ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
+        ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
 }
 
 /****************************************************************************

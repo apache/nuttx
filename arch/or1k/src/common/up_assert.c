@@ -70,6 +70,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_STACKDUMP
+static uint32_t s_last_regs[XCPTCONTEXT_REGS];
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -160,31 +168,33 @@ static inline void up_showtasks(void)
 #ifdef CONFIG_ARCH_STACKDUMP
 static inline void up_registerdump(void)
 {
+  volatile uint32_t *regs = CURRENT_REGS;
+
   /* Are user registers available from interrupt processing? */
 
-  if (CURRENT_REGS)
+  if (regs == NULL)
     {
-      /* Yes.. dump the interrupt registers */
+      /* No.. capture user registers by hand */
 
-      _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
-            CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
-            CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
-            CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
-      _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
-            CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
-            CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
-            CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
-#ifdef CONFIG_BUILD_PROTECTED
-      _alert("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
-            CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK],
-            CURRENT_REGS[REG_EXC_RETURN]);
-#else
-      _alert("xPSR: %08x PRIMASK: %08x\n",
-            CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK]);
-#endif
+      up_saveusercontext(s_last_regs);
+      regs = s_last_regs;
     }
+
+  /* Dump the interrupt registers */
+
+  _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
+        regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+  _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+#ifdef CONFIG_BUILD_PROTECTED
+  _alert("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
+        regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
+#else
+  _alert("xPSR: %08x PRIMASK: %08x\n",
+        regs[REG_XPSR], regs[REG_PRIMASK]);
+#endif
 }
 #else
 # define up_registerdump()
