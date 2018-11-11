@@ -132,14 +132,6 @@ int up_hardfault(int irq, FAR void *context, FAR void *arg)
   hfalert("  IRQ: %d regs: %p\n", irq, regs);
   hfalert("  PRIMASK: %08x IPSR: %08x\n",
           getprimask(), getipsr());
-  hfalert("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  hfalert("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  hfalert("  xPSR: %08x PRIMASK: %08x (saved)\n",
-          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
 #endif
 
   (void)up_irq_save();

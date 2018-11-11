@@ -77,10 +77,6 @@
 
 int up_memfault(int irq, FAR void *context, FAR void *arg)
 {
-#if defined(CONFIG_DEBUG_MEMFAULT)
-  uint32_t *regs = (uint32_t *)context;
-#endif
-
   /* Dump some memory management fault info */
 
   (void)up_irq_save();
@@ -90,32 +86,6 @@ int up_memfault(int irq, FAR void *context, FAR void *arg)
         getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
   mfinfo("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
          getbasepri(), getprimask(), getipsr(), getcontrol());
-  mfinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  mfinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-#  ifdef REG_EXC_RETURN
-  mfinfo("  xPSR: %08x BASEPRI: %08x EXC_RETURN: %08x (saved)\n",
-         CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI],
-         CURRENT_REGS[REG_EXC_RETURN]);
-#  else
-  mfinfo("  xPSR: %08x BASEPRI: %08x (saved)\n",
-         CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI]);
-#  endif
-#else
-#  ifdef REG_EXC_RETURN
-  mfinfo("  xPSR: %08x PRIMASK: %08x EXC_RETURN: %08x (saved)\n",
-         CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK],
-         CURRENT_REGS[REG_EXC_RETURN]);
-#  else
-  mfinfo("  xPSR: %08x PRIMASK: %08x (saved)\n",
-         CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
-#  endif
-#endif
 
   PANIC();
   return OK; /* Won't get here */

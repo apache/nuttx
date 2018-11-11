@@ -88,13 +88,10 @@
 
 int up_hardfault(int irq, FAR void *context, FAR void *arg)
 {
-#if defined(CONFIG_DEBUG_HARDFAULT_ALERT) || !defined(CONFIG_ARMV7M_USEBASEPRI)
-  uint32_t *regs = (uint32_t *)context;
-#endif
-
   /* Get the value of the program counter where the fault occurred */
 
 #ifndef CONFIG_ARMV7M_USEBASEPRI
+  uint32_t *regs = (uint32_t *)context;
   uint16_t *pc = (uint16_t *)regs[REG_PC] - 1;
 
   /* Check if the pc lies in known FLASH memory.
@@ -138,39 +135,13 @@ int up_hardfault(int irq, FAR void *context, FAR void *arg)
   /* Dump some hard fault info */
 
   hfalert("Hard Fault:\n");
-  hfalert("  IRQ: %d regs: %p\n", irq, regs);
+  hfalert("  IRQ: %d regs: %p\n", irq, context);
   hfalert("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
   hfalert("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
           getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
           getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
           getreg32(NVIC_AFAULTS));
-  hfalert("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  hfalert("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-#  ifdef REG_EXC_RETURN
-  hfalert("  xPSR: %08x BASEPRI: %08x EXC_RETURN: %08x (saved)\n",
-          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI],
-          CURRENT_REGS[REG_EXC_RETURN]);
-#  else
-  hfalert("  xPSR: %08x BASEPRI: %08x (saved)\n",
-          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_BASEPRI]);
-#  endif
-#else
-#  ifdef REG_EXC_RETURN
-  hfalert("  xPSR: %08x PRIMASK: %08x EXC_RETURN: %08x (saved)\n",
-          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK],
-          CURRENT_REGS[REG_EXC_RETURN]);
-#  else
-  hfalert("  xPSR: %08x PRIMASK: %08x (saved)\n",
-          CURRENT_REGS[REG_XPSR],  CURRENT_REGS[REG_PRIMASK]);
-#  endif
-#endif
 
   (void)up_irq_save();
   _alert("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
