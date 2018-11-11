@@ -160,6 +160,10 @@ void up_dumpstate(void)
   uint16_t istacksize;
 #endif
 
+  /* Dump the registers (if available) */
+
+  m16c_registerdump();
+
   /* Get the limits on the user stack memory */
 
   if (rtcb->pid == 0)
@@ -239,10 +243,6 @@ void up_dumpstate(void)
     {
       m16c_stackdump(sp, ustackbase);
     }
-
-  /* Then dump the registers (if available) */
-
-  m16c_registerdump();
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */

@@ -176,8 +176,8 @@ void up_assert(void)
 #endif
 #endif
 
-  up_stackdump();
   REGISTER_DUMP();
+  up_stackdump();
 
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */

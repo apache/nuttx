@@ -236,6 +236,10 @@ static void up_dumpstate(void)
   uint32_t kstackbase = 0;
 #endif
 
+  /* Dump the registers (if available) */
+
+  up_registerdump();
+
   /* Get the limits on the user stack memory */
 
   if (rtcb->pid == 0)
@@ -342,10 +346,6 @@ static void up_dumpstate(void)
       up_stackdump((uint32_t)rtcb->xcp.kstack, kstackbase);
 #endif
     }
-
-  /* Then dump the registers (if available) */
-
-  up_registerdump();
 
   /* Dump the state of all tasks (if available) */
 

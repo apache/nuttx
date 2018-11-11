@@ -144,6 +144,10 @@ void lm32_dumpstate(void)
   uint32_t istacksize;
 #endif
 
+  /* Dump the registers (if available) */
+
+  up_registerdump();
+
   /* Get the limits on the user stack memory */
 
   if (rtcb->pid == 0)
@@ -217,10 +221,6 @@ void lm32_dumpstate(void)
     {
       up_stackdump(sp, ustackbase);
     }
-
-  /* Then dump the registers (if available) */
-
-  up_registerdump();
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */
