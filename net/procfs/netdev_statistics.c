@@ -124,6 +124,7 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
 {
   FAR struct netdev_varaddr_s *addr;
   FAR struct net_driver_s *dev;
+  int i;
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev  = netfile->dev;
@@ -139,38 +140,22 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
                   dev->d_ifname);
 #endif
 
-  switch (addr->nv_addrlen)
+  if (addr->nv_addrlen < 1 || addr->nv_addrlen > RADIO_MAX_ADDRLEN)
     {
-      default:
-      case 0:
-        nwarn("WARNING: Bad or undefined node address: %u\n", addr->nv_addrlen);
-        len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                        "--");
-        break;
+      nwarn("WARNING: Bad or undefined node address: %u\n", addr->nv_addrlen);
+      len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                      "--");
+    }
+  else
+    {
+      len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                      "%02x", addr->nv_addr[0]);
 
-#ifdef CONFIG_WIRELESS_PKTRADIO
-      case 1:
-        len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                        "%02x", addr->nv_addr[0]);
-        break;
-#endif
-
-#if defined(CONFIG_WIRELESS_PKTRADIO) || defined(CONFIG_WIRELESS_IEEE802154)
-       case 2:
-        len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                        "%02x:%02x",
-                        addr->nv_addr[0], addr->nv_addr[1]);
-        break;
-
-      case 8:
-        len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                        "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
-                         addr->nv_addr[0], addr->nv_addr[1],
-                         addr->nv_addr[2], addr->nv_addr[3],
-                         addr->nv_addr[4], addr->nv_addr[5],
-                         addr->nv_addr[6], addr->nv_addr[7]);
-        break;
-#endif
+      for (i = 1; i < nv_addrlen; i++)
+        {
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          ":%02x", addr->nv_addr[i]);
+        }
     }
 
   return len;
