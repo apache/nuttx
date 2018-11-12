@@ -292,20 +292,9 @@ errout_in_critical_section:
 
 void clock_inittimekeeping(void)
 {
-  struct tm rtctime;
-
   up_timer_getmask(&g_clock_mask);
-
-  /* Get the broken-errout_in_critical_section time from the date/time RTC. */
-
-  (void)up_rtc_getdatetime(&rtctime);
-
-  /* And use the broken-errout_in_critical_section time to initialize the
-   * system time.
-   */
-
-  g_clock_wall_time.tv_sec  = mktime(&rtctime);
-  g_clock_wall_time.tv_nsec = 0;
+  clock_basetime(&g_clock_wall_time);
+  up_timer_getcounter(&g_clock_last_counter);
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */

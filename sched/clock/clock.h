@@ -87,6 +87,8 @@ extern struct timespec   g_basetime;
  * Public Function Prototypes
  ****************************************************************************/
 
+int  clock_basetime(FAR struct timespec *tp);
+
 void weak_function clock_initialize(void);
 #ifndef CONFIG_SCHED_TICKLESS
 void weak_function clock_timer(void);

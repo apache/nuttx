@@ -91,7 +91,7 @@ struct timespec   g_basetime;
 #if defined(CONFIG_RTC_DATETIME)
 /* Initialize the system time using a broken out date/time structure */
 
-static inline int clock_basetime(FAR struct timespec *tp)
+int clock_basetime(FAR struct timespec *tp)
 {
   struct tm rtctime;
   long nsecs = 0;
@@ -119,7 +119,7 @@ static inline int clock_basetime(FAR struct timespec *tp)
 
 /* Initialize the system time using a high-resolution structure */
 
-static inline int clock_basetime(FAR struct timespec *tp)
+int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the complete time from the hi-res RTC. */
 
@@ -130,7 +130,7 @@ static inline int clock_basetime(FAR struct timespec *tp)
 
 /* Initialize the system time using seconds only */
 
-static inline int clock_basetime(FAR struct timespec *tp)
+int clock_basetime(FAR struct timespec *tp)
 {
   /* Get the seconds (only) from the lo-resolution RTC */
 
@@ -142,7 +142,7 @@ static inline int clock_basetime(FAR struct timespec *tp)
 #endif /* CONFIG_RTC_HIRES */
 #else /* CONFIG_RTC */
 
-static inline int clock_basetime(FAR struct timespec *tp)
+int clock_basetime(FAR struct timespec *tp)
 {
   time_t jdn = 0;
 
