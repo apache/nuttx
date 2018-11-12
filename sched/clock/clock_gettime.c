@@ -93,40 +93,11 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * reset.
        */
 
-#if defined(CONFIG_CLOCK_TIMEKEEPING)
-      ret = clock_timekeeping_get_monotonic_time(tp);
-#elif defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_SCHED_TICKLESS)
       ret = up_timer_gettime(tp);
 #else
       ret = clock_systimespec(tp);
 #endif
-
-#ifndef CONFIG_CLOCK_TIMEKEEPING
-      if (ret == OK)
-        {
-          irqstate_t flags;
-
-          /* Add the offset time to this. The offset time allows
-           * CLOCK_MONOTONIC be introduced additional increases to systime.
-           */
-
-          flags = spin_lock_irqsave();
-
-          tp->tv_sec  += (uint32_t)g_monotonic_basetime.tv_sec;
-          tp->tv_nsec += (uint32_t)g_monotonic_basetime.tv_nsec;
-
-          spin_unlock_irqrestore(flags);
-
-          /* Handle carry to seconds. */
-
-          if (tp->tv_nsec >= NSEC_PER_SEC)
-            {
-              carry        = tp->tv_nsec / NSEC_PER_SEC;
-              tp->tv_sec  += carry;
-              tp->tv_nsec -= (carry * NSEC_PER_SEC);
-            }
-        }
-#endif /* CONFIG_CLOCK_TIMEKEEPING */
     }
   else
 #endif

@@ -63,7 +63,6 @@
  **********************************************************************/
 
 static struct timespec g_clock_wall_time;
-static struct timespec g_clock_monotonic_time;
 static uint64_t        g_clock_last_counter;
 static uint64_t        g_clock_mask;
 static long            g_clock_adjust;
@@ -117,15 +116,6 @@ errout_in_critical_section:
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: clock_timekeeping_get_monotonic_time
- ****************************************************************************/
-
-int clock_timekeeping_get_monotonic_time(FAR struct timespec *ts)
-{
-  return clock_get_current_time(ts, &g_clock_monotonic_time);
-}
 
 /****************************************************************************
  * Name: clock_timekeeping_get_wall_time
@@ -257,14 +247,6 @@ void clock_update_wall_time(void)
   sec   = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
 
-  g_clock_monotonic_time.tv_sec += sec;
-  g_clock_monotonic_time.tv_nsec += nsec;
-  if (g_clock_monotonic_time.tv_nsec > NSEC_PER_SEC)
-    {
-      g_clock_monotonic_time.tv_nsec -= NSEC_PER_SEC;
-      g_clock_monotonic_time.tv_sec += 1;
-    }
-
   nsec += g_clock_wall_time.tv_nsec;
   if (nsec > NSEC_PER_SEC)
     {
@@ -324,8 +306,6 @@ void clock_inittimekeeping(void)
 
   g_clock_wall_time.tv_sec  = mktime(&rtctime);
   g_clock_wall_time.tv_nsec = 0;
-
-  memset(&g_clock_monotonic_time, 0, sizeof(g_clock_monotonic_time));
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */

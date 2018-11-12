@@ -81,10 +81,6 @@ extern volatile uint32_t g_system_timer;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec   g_basetime;
-
-#ifdef CONFIG_CLOCK_MONOTONIC
-extern struct timespec   g_monotonic_basetime;
-#endif
 #endif
 
 /****************************************************************************

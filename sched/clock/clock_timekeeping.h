@@ -51,7 +51,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int clock_timekeeping_get_monotonic_time(FAR struct timespec *ts);
 int clock_timekeeping_get_wall_time(FAR struct timespec *ts);
 int clock_timekeeping_set_wall_time(FAR struct timespec *ts);
 
