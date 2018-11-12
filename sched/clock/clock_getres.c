@@ -64,22 +64,25 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
 
   sinfo("clock_id=%d\n", clock_id);
 
-  /* Only CLOCK_REALTIME is supported */
-
-  if (clock_id != CLOCK_REALTIME)
+  switch (clock_id)
     {
-      serr("Returning ERROR\n");
-      set_errno(EINVAL);
-      ret = ERROR;
-    }
-  else
-    {
-      /* Form the timspec using clock resolution in nanoseconds */
+      default:
+        serr("Returning ERROR\n");
+        set_errno(EINVAL);
+        ret = ERROR;
+        break;
 
-      res->tv_sec  = 0;
-      res->tv_nsec = NSEC_PER_TICK;
+#ifdef CONFIG_CLOCK_MONOTONIC
+      case CLOCK_MONOTONIC:
+#endif
+      case CLOCK_REALTIME:
+        /* Form the timspec using clock resolution in nanoseconds */
 
-      sinfo("Returning res=(%d,%d)\n", (int)res->tv_sec, (int)res->tv_nsec);
+        res->tv_sec  = 0;
+        res->tv_nsec = NSEC_PER_TICK;
+
+        sinfo("Returning res=(%d,%d)\n", (int)res->tv_sec, (int)res->tv_nsec);
+        break;
     }
 
   return ret;
