@@ -108,6 +108,7 @@
   (BOARD_XTAL_FREQUENCY * (IMXRT_ARM_PLL_DIV_SELECT / 2)) / IMXRT_ARM_PODF_DIVIDER
 
 /* LED definitions ******************************************************************/
+
 /* There are four LED status indicators located on the EVK Board.  The functions of
  * these LEDs include:
  *
@@ -156,6 +157,7 @@
  */
 
 /* Button definitions ***************************************************************/
+
 /* The IMXRT board has one external user button
  *
  * 1. SW8 (IRQ88)   GPIO5-00
@@ -167,20 +169,23 @@
 
 /* SDIO *****************************************************************************/
 
-/* Pin drive characteristics - drive strength in particular may need tuning for specific boards */
+/* Pin drive characteristics - drive strength in particular may need tuning for
+ * specific boards.
+ */
 
-#define PADCTL_USDHC1_DATAX (PADCTL_SRE|PADCTL_DSE_60OHM|PADCTL_HYS)
-#define PADCTL_USDHC1_CMD    PADCTL_USDHC1_DATAX
-#define PADCTL_USDHC1_CLK   (PADCTL_SRE|PADCTL_DSE_60OHM|PADCTL_SPEED_MAX)
-#define PADCTL_USDHC1_CD    (0)
+#define PINSET_USDHC1_DATAX (IOMUX_SLEW_FAST | IOMUX_DRIVE_60OHM | \
+                             IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
+#define PINSET_USDHC1_CMD   (PINSET_USDHC1_DATAX)
+#define PINSET_USDHC1_CLK   (IOMUX_SLEW_FAST | IOMUX_DRIVE_60OHM | IOMUX_SPEED_MAX)
+#define PINSET_USDHC1_CD    (0)
 
-#define PIN_USDHC1_D0 GPIO_USDHC1_DATA0
-#define PIN_USDHC1_D1 GPIO_USDHC1_DATA1
-#define PIN_USDHC1_D2 GPIO_USDHC1_DATA2
-#define PIN_USDHC1_D3 GPIO_USDHC1_DATA3
-#define PIN_USDHC1_DCLK GPIO_USDHC1_CLK
-#define PIN_USDHC1_CMD GPIO_USDHC1_CMD
-#define PIN_USDHC1_CD GPIO_USDHC1_CD_2
+#define PIN_USDHC1_D0       GPIO_USDHC1_DATA0
+#define PIN_USDHC1_D1       GPIO_USDHC1_DATA1
+#define PIN_USDHC1_D2       GPIO_USDHC1_DATA2
+#define PIN_USDHC1_D3       GPIO_USDHC1_DATA3
+#define PIN_USDHC1_DCLK     GPIO_USDHC1_CLK
+#define PIN_USDHC1_CMD      GPIO_USDHC1_CMD
+#define PIN_USDHC1_CD       GPIO_USDHC1_CD_2
 
 /* 386 KHz for initial inquiry stuff */
 
@@ -190,15 +195,16 @@
 /* 24.8MHz for other modes */
 
 #define BOARD_USDHC_MMCMODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4)  // FIXME 1
 
 #define BOARD_USDHC_SD1MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4) // FIXME 1
 
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
+#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4) // FIXME 1
 
 /* PIO Disambiguation ***************************************************************/
+
 /* LPUARTs
  *
  * Virtual console port provided by OpenSDA:

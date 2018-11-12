@@ -155,10 +155,12 @@
 /* Block Attributes Register */
 
 #define USDHC_BLKATTR_SIZE_SHIFT         (0)           /* Bits 0-12: Transfer Block Size */
-#define USDHC_BLKATTR_SIZE_MASK          (0x1fff << USDHC_BLKATTR_BLKSIZE_SHIFT)
+#define USDHC_BLKATTR_SIZE_MASK          (0x1fff << USDHC_BLKATTR_SIZE_SHIFT)
+#  define USDHC_BLKATTR_SIZE(n)          ((n) << USDHC_BLKATTR_SIZE_SHIFT)
                                                        /* Bits 13-15: Reserved */
 #define USDHC_BLKATTR_CNT_SHIFT          (16)          /* Bits 16-31: Blocks Count For Current Transfer */
-#define USDHC_BLKATTR_CNT_MASK           (0xffff << USDHC_BLKATTR_BLKCNT_SHIFT)
+#define USDHC_BLKATTR_CNT_MASK           (0xffff << USDHC_BLKATTR_CNT_SHIFT)
+#  define USDHC_BLKATTR_CNT(n)           ((n) << USDHC_BLKATTR_CNT_SHIFT)
 
 /* Command Argument Register (32-bit cmd/arg data) */
 
@@ -266,7 +268,7 @@
 #define USDHC_SYSCTL_RES0                (0x0F << 0)  /* Bit 0-3:  Reserved, set to 1 */
 #define USDHC_SYSCTL_DVS_SHIFT           (4)          /* Bits 4-7: Divisor */
 #define USDHC_SYSCTL_DVS_MASK            (0x0f << USDHC_SYSCTL_DVS_SHIFT)
-#  define USDHC_SYSCTL_DVS_DIV(n)        (((n)-1) << USDHC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
+#  define USDHC_SYSCTL_DVS_DIV(n)        (((n) - 1) << USDHC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
 #define USDHC_SYSCTL_SDCLKFS_SHIFT       (8)          /* Bits 8-15: SDCLK Frequency Select */
 #define USDHC_SYSCTL_SDCLKFS_MASK        (0xff << USDHC_SYSCTL_SDCLKFS_SHIFT)
 #  define USDHC_SYSCTL_SDCLKFS_BYPASS    (0x00 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Bypass the prescaler */
@@ -280,7 +282,7 @@
 #  define USDHC_SYSCTL_SDCLKFS_DIV256    (0x80 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 256 */
 #define USDHC_SYSCTL_DTOCV_SHIFT         (16)         /* Bits 16-19: Data Timeout Counter Value */
 #define USDHC_SYSCTL_DTOCV_MASK          (0x0f << USDHC_SYSCTL_DTOCV_SHIFT)
-#  define USDHC_SYSCTL_DTOCV_MUL(n)      (((n)-213) << USDHC_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
+#  define USDHC_SYSCTL_DTOCV_MUL(n)      (((n) - 213) << USDHC_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
                                                       /* Bits 20-22: Reserved */
 #define USDHC_SYSCTL_IPPRSTN             (1 << 23)    /* Bit 23: Card /reset (default 1) */
 #define USDHC_SYSCTL_RSTA                (1 << 24)    /* Bit 24: Software Reset For ALL */
@@ -346,7 +348,7 @@
                                                       /* Bits 3-7: Reserved */
 #define USDHC_HTCAPBLT_TCR_SHIFT         (8)          /* Bits 8-11: Time count retuning */
 #define USDHC_HTCAPBLT_TCR_MASK          (0xF << USDHC_HTCAPBLT_TCR_SHIFT)
-#define USDHC_HTCAPBLT_TCR(x)            (((x)&0x0f) << USDHC_HTCAPBLT_TCR_SHIFT)
+#  define USDHC_HTCAPBLT_TCR(n)          ((n) << USDHC_HTCAPBLT_TCR_SHIFT)
 #define USDHC_HTCAPBLT_USE_TUNING_SDR50  (1 << 13)    /* Bit 13: Use tuning for SDR50 */
 #define USDHC_HTCAPBLT_RET_MODE_SHIFT    (14)         /* bit 14-15: Retuning mode */
 #define USDHC_HTCAPBLT_RET_MODE_MASK     (3<<SDHC_HTCAPBLT_RET_MODE_SHIFT)
@@ -373,17 +375,17 @@
 
 #define USDHC_WML_RD_SHIFT               (0)          /* Bits 0-7: Read Watermark Level */
 #define USDHC_WML_RD_MASK                (0xff << USDHC_WML_RDWML_SHIFT)
-#define USDHC_WML_RD(x)                  ((x)&0xff)<<SDHC_WML_RDWML_SHIFT)
+#  define USDHC_WML_RD(n)                ((n) << SDHC_WML_RDWML_SHIFT)
 #define USDHC_WML_RD_BL_SHIFT            (8)          /* Bits 8-12: Read Watermark Burst Length */
 #define USDHC_WML_RD_BL_MASK             (0x1f << USDHC_WML_RD_BL_SHIFT)
-#define USDHC_WML_RD_BL(x)               (((x)&0x1f)<<SDHC_WML_RD_BLL_SHIFT)
+#  define USDHC_WML_RD_BL(n)             ((n) << SDHC_WML_RD_BLL_SHIFT)
                                                       /* Bits 13-15: Reserved */
 #define USDHC_WML_WR_SHIFT               (16)         /* Bits 16-23: Write Watermark Level */
 #define USDHC_WML_WR_MASK                (0xff << USDHC_WML_WRWML_SHIFT)
-#define USDHC_WML_WR(x)                  ((x)&0xff)<<SDHC_WML_WRWML_SHIFT)
+#  define USDHC_WML_WR(n)                ((n) << SDHC_WML_WRWML_SHIFT)
 #define USDHC_WML_WR_BL_SHIFT            (24)         /* Bits 24-28: Write Watermark Burst Length */
 #define USDHC_WML_WR_BL_MASK             (0x1f << USDHC_WML_WD_BL_SHIFT)
-#define USDHC_WML_WR_BL(x)               (((x)&0x1f)<<SDHC_WML_WD_BLL_SHIFT)
+#  define USDHC_WML_WR_BL(n)             ((n) << SDHC_WML_WD_BLL_SHIFT)
                                                       /* Bits 29-31: Reserved */
 
 /* Mixer Control Register */
@@ -453,22 +455,22 @@
 #define USDHC_DL_CTRL_SLV_FORCE_UP       (1 << 2)     /* Bit 2: SLV Force update */
 #define USDHC_DL_SLV_DLY_TGT0_SHIFT      (3)          /* Bits 3-6: Delay Target 0 */
 #define USDHC_DL_SLV_DLY_TGT0_MASK       (0xf << USDHC_DL_SLV_DLY_TGT0_SHIFT)
-#  define USDHC_DL_SLV_DLY_TGT0(x)       (((x)&0x0f) << USDHC_DL_SLV_DLY_TGT0_SHIFT)
+#  define USDHC_DL_SLV_DLY_TGT0(n)       ((n) << USDHC_DL_SLV_DLY_TGT0_SHIFT)
 #define USDHC_DL_CTRL_SLV_UPD            (1 << 7)     /* Bit 7: Delay Control Gate update */
 #define USDHC_DL_CTRL_SLV_OVR            (1 << 8)     /* Bit 8: Delay Control Gate override */
 #define USDHC_DL_CTRL_OVR_VAL_SHIFT      (9)          /* Bits 9-15: Override Value */
 #define USDHC_DL_CTRL_OVR_VAL_MASK       (0x7f << USDHC_DL_CTRL_OVR_VAL_SHIFT)
-#  define USDHC_DL_CTRL_OVR_VAL(x)       (((x)&0x7f) << USDHC_DL_CTRL_OVR_VAL_SHIFT)
+#  define USDHC_DL_CTRL_OVR_VAL(n)       ((n) << USDHC_DL_CTRL_OVR_VAL_SHIFT)
 #define USDHC_DL_SLV_DLY_TGT1_SHIFT      (16)         /* Bits 16-18: Delay Target 1 */
 #define USDHC_DL_SLV_DLY_TGT1_MASK       (0x7 << USDHC_DL_SLV_DLY_TGT1_SHIFT)
-#  define USDHC_DL_SLV_DLY_TGT1(x)       (((x)&0x07) << USDHC_DL_SLV_DLY_TGT1_SHIFT)
+#  define USDHC_DL_SLV_DLY_TGT1(n)       ((n) << USDHC_DL_SLV_DLY_TGT1_SHIFT)
                                                       /* Bit 19: Reserved */
 #define USDHC_DL_CTRL_SLV_UPDINT_SHIFT   (20)         /* Bits 20-27: DLL Control SLV Update Interval */
 #define USDHC_DL_CTRL_SLV_UPDINT_MASK    (0xff << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
-#  define USDHC_DL_CTRL_SLV_UPDINT(x)    (((x)&0xff) << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
+#  define USDHC_DL_CTRL_SLV_UPDINT(n)    ((n) << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
 #define USDHC_DL_CTRL_REF_UPDINT_SHIFT   (28)         /* Bits 28-31: DLL Control Refernce Update Interval */
 #define USDHC_DL_CTRL_REF_UPDINT_MASK    (0xf << USDHC_DL_CTRL_REF_UPDINT_SHIFT)
-#  define USDHC_DL_CTRL_REF_UPDINT(x)    (((x)&0xf) << USDHC_DL_CTRL_REF_UPDINT_SHIFT)
+#  define USDHC_DL_CTRL_REF_UPDINT(n)    ((n)<< USDHC_DL_CTRL_REF_UPDINT_SHIFT)
 
 /* Delay Line Status */
 
@@ -476,10 +478,10 @@
 #define USDHC_DL_STAT_REF_LOCK           (1 << 1)     /* Bit 1: Reference delay-line lock status */
 #define USDHC_DL_STAT_SLV_SEL_SHIFT      (2)          /* Bits 2-8: Slave delay line select status */
 #define USDHC_DL_STAT_SLV_SEL_MASK       (0x7f << USDHC_DL_STAT_SLV_SEL_SHIFT)
-#  define USDHC_DL_STAT_SLV_SEL(x)       (((x)&0x07f) << USDHC_DL_STAT_SLV_SEL_SHIFT)
+#  define USDHC_DL_STAT_SLV_SEL(n)       ((n) << USDHC_DL_STAT_SLV_SEL_SHIFT)
 #define USDHC_DL_STAT_REF_SEL_SHIFT      (9)           /* Bits 9-15: Reference delay line select taps */
 #define USDHC_DL_STAT_REF_SEL_MASK       (0x7f << USDHC_DL_STAT_REF_SEL_SHIFT)
-#  define USDHC_DL_STAT_REF_SEL(x)       (((x)&0x07f) << USDHC_DL_STAT_REF_SEL_SHIFT)
+#  define USDHC_DL_STAT_REF_SEL(n)       ((n) << USDHC_DL_STAT_REF_SEL_SHIFT)
                                                       /* Bits 16-31: Reserved */
 
 /* Clk tuning control and status */
@@ -500,7 +502,7 @@
 
 #define USDHC_MMCBOOT_DTOCVACK_SHIFT     (0)          /* Bits 0-3: Boot ACK time out counter value */
 #define USDHC_MMCBOOT_DTOCVACK_MASK      (0x0f << USDHC_MMCBOOT_DTOCVACK_SHIFT)
-#  define USDHC_MMCBOOT_DTOCVACK_MUL(n)  ((n-8) << USDHC_MMCBOOT_DTOCVACK_SHIFT) /* SDCLK x 2^n, n=8..22 */
+#  define USDHC_MMCBOOT_DTOCVACK_MUL(n)  ((n - 8) << USDHC_MMCBOOT_DTOCVACK_SHIFT) /* SDCLK x 2^n, n=8..22 */
 #define USDHC_MMCBOOT_BOOTACK            (1 << 4)     /* Bit 4:  Boot ack mode select */
 #define USDHC_MMCBOOT_BOOTMODE           (1 << 5)     /* Bit 5:  Boot mode select */
 #define USDHC_MMCBOOT_BOOTEN             (1 << 6)     /* Bit 6:  Boot mode enable */
@@ -526,14 +528,14 @@
 
 #define USDHC_TC_STARTTAP_SHIFT          (0)          /* Bits 0-7: Start TAP for CMD19 tuning */
 #define USDHC_TC_STARTTAP_MASK           (0xff << USDHC_TC_STARTTAP_SHIFT)
-#  define USDHC_TC_STARTTAP(x)           (((x)&0xff) << USDHC_TC_STARTTAP_SHIFT)
+#  define USDHC_TC_STARTTAP(n)           ((n) << USDHC_TC_STARTTAP_SHIFT)
 #define USDHC_TC_COUNT_SHIFT             (8)          /* Bits 8-25: Count for CMD19 tuning */
 #define USDHC_TC_COUNT_MASK              (0xff << USDHC_TC_COUNT_SHIFT)
-#  define USDHC_TC_COUNT(x)              (((x)&0xff) << USDHC_TC_COUNT_SHIFT)
+#  define USDHC_TC_COUNT(n)              ((n) << USDHC_TC_COUNT_SHIFT)
                                                       /* Bit 19: Reserved */
 #define USDHC_TC_WINDOW_SHIFT            (20)         /* Bits 20-22: Tuning window */
 #define USDHC_TC_WINDOW_MASK             (0x7 << USDHC_TC_WINDOWS_SHIFT)
-#  define USDHC_TC_WINDOW(x)             (((x)&7) << USDHC_TC_WINDOW_SHIFT)
+#  define USDHC_TC_WINDOW(n)             ((n) << USDHC_TC_WINDOW_SHIFT)
                                                       /* Bit 23: Reserved */
 #define USDHC_TC_TUNINGEN                (1 << 24)    /* Bit 24: Tuning enable */
                                                       /* Bits 25-31: Reserved */

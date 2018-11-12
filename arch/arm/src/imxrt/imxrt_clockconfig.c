@@ -234,10 +234,10 @@ void imxrt_clockconfig(void)
   reg  = getreg32(IMXRT_CCM_CSCMR1);
   reg &= ~(CCM_CSCMR1_USDHC1_CLK_SEL | CCM_CSCMR1_USDHC2_CLK_SEL);
 #if defined(IMXRT_USDHC1_CLK_SELECT)
-  reg |= IMXRT_USDHC1_CLK_SELECT
+  reg |= IMXRT_USDHC1_CLK_SELECT;
 #endif
 #if defined(IMXRT_USDHC2_CLK_SELECT)
-  reg |= IMXRT_USDHC2_CLK_SELECT
+  reg |= IMXRT_USDHC2_CLK_SELECT;
 #endif
   putreg32(reg, IMXRT_CCM_CSCMR1);
 
