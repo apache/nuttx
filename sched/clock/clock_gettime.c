@@ -93,11 +93,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * reset.
        */
 
-#if defined(CONFIG_SCHED_TICKLESS)
-      ret = up_timer_gettime(tp);
-#else
       ret = clock_systimespec(tp);
-#endif
     }
   else
 #endif
@@ -118,13 +114,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
 #if defined(CONFIG_CLOCK_TIMEKEEPING)
       ret = clock_timekeeping_get_wall_time(tp);
-#elif defined(CONFIG_SCHED_TICKLESS)
-      ret = up_timer_gettime(&ts);
 #else
       ret = clock_systimespec(&ts);
-#endif
-
-#ifndef CONFIG_CLOCK_TIMEKEEPING
       if (ret == OK)
         {
           irqstate_t flags;
