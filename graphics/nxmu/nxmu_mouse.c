@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxmu/nxmu__mouse.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +54,10 @@
  * Private Data
  ****************************************************************************/
 
-static struct nxgl_point_s   g_mpos;
-static struct nxgl_point_s   g_mrange;
-static uint8_t               g_mbutton;
-static struct nxbe_window_s *g_mwnd;
+static struct nxgl_point_s       g_mpos;
+static struct nxgl_point_s       g_mrange;
+static uint8_t                   g_mbutton;
+static FAR struct nxbe_window_s *g_mwnd;
 
 /****************************************************************************
  * Private Functions
@@ -71,7 +72,8 @@ static struct nxbe_window_s *g_mwnd;
  *
  ****************************************************************************/
 
-static struct nxbe_window_s *nxmu_revalidate_g_mwnd(struct nxbe_window_s *wnd)
+static struct nxbe_window_s *
+nxmu_revalidate_g_mwnd(FAR struct nxbe_window_s *wnd)
 {
   if (!g_mwnd)
     {
@@ -147,7 +149,8 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
           outmsg.buttons = g_mbutton;
           nxgl_vectsubtract(&outmsg.pos, &g_mpos, &wnd->bounds.pt1);
 
-          return nxmu_sendclientwindow(wnd, &outmsg, sizeof(struct nxclimsg_mousein_s));
+          return nxmu_sendclientwindow(wnd, &outmsg,
+                                       sizeof(struct nxclimsg_mousein_s));
         }
     }
 
@@ -169,7 +172,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
 int nxmu_mousein(FAR struct nxfe_state_s *fe,
                  FAR const struct nxgl_point_s *pos, int buttons)
 {
-  struct nxbe_window_s *wnd;
+  FAR struct nxbe_window_s *wnd;
   nxgl_coord_t x = pos->x;
   nxgl_coord_t y = pos->y;
   uint8_t oldbuttons;
@@ -227,6 +230,7 @@ int nxmu_mousein(FAR struct nxfe_state_s *fe,
           else
             {
               /* Ignore events until the button is released */
+
               return OK;
             }
         }

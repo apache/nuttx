@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libnx/nxtk/nxtk_bitmapwindow.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,26 +49,6 @@
 #include "nxtk.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -96,7 +76,8 @@
 
 int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
                       FAR const void **src,
-                      FAR const struct nxgl_point_s *origin, unsigned int stride)
+                      FAR const struct nxgl_point_s *origin,
+                      unsigned int stride)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_point_s wndorigin;
@@ -118,10 +99,11 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
   nxtk_subwindowclip(fwnd, &clipdest, dest, &fwnd->fwrect);
 
   /* Just return if completely outside screen */
+
   if (nxgl_nullrect(&clipdest))
-  {
-    return OK;
-  }
+    {
+      return OK;
+    }
 
   /* Now, move the bitmap origin so that it is relative to the containing
    * window, not the sub-window.
@@ -131,8 +113,8 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
 
   nxgl_vectoradd(&wndorigin, origin, &fwnd->fwrect.pt1);
 
-  /* Then move the origin so that is relative to the containing window, not the
-   * client subwindow
+  /* Then move the origin so that is relative to the containing window, not
+   * the client subwindow
    */
 
   nxgl_vectsubtract(&wndorigin, &wndorigin, &fwnd->wnd.bounds.pt1);
