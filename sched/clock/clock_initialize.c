@@ -65,9 +65,9 @@
 
 #ifndef CONFIG_SCHED_TICKLESS
 #ifdef CONFIG_SYSTEM_TIME64
-volatile uint64_t g_system_timer;
+volatile uint64_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
 #else
-volatile uint32_t g_system_timer;
+volatile uint32_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
 #endif
 #endif
 
@@ -170,37 +170,31 @@ static inline int clock_basetime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_RTC
 static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-#ifndef CONFIG_RTC_HIRES
+  struct timespec ts;
+
   clock_basetime(&g_basetime);
-#endif
-#ifndef CONFIG_SCHED_TICKLESS
-  g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
-  if (g_system_timer > 0)
+  clock_systimespec(&ts);
+
+  /* Adjust base time to hide initial timer ticks. */
+
+  g_basetime.tv_sec  -= ts.tv_sec;
+  g_basetime.tv_nsec -= ts.tv_nsec;
+  while (g_basetime.tv_nsec < 0)
     {
-      struct timespec ts;
-
-      (void)clock_ticks2time((sclock_t)g_system_timer, &ts);
-
-      /* Adjust base time to hide initial timer ticks. */
-
-      g_basetime.tv_sec  -= ts.tv_sec;
-      g_basetime.tv_nsec -= ts.tv_nsec;
-      while (g_basetime.tv_nsec < 0)
-        {
-          g_basetime.tv_nsec += NSEC_PER_SEC;
-          g_basetime.tv_sec--;
-        }
+      g_basetime.tv_nsec += NSEC_PER_SEC;
+      g_basetime.tv_sec--;
     }
-#endif /* !CONFIG_SCHED_TICKLESS */
 #else
   clock_inittimekeeping();
 #endif
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -222,11 +216,11 @@ void clock_initialize(void)
    */
 
   up_rtc_initialize();
-#endif
 
   /* Initialize the time value to match the RTC */
 
   clock_inittime();
+#endif
 }
 
 /****************************************************************************
