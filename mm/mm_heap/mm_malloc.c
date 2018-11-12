@@ -42,6 +42,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/mm/mm.h>
 
@@ -183,6 +184,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
   mm_givesemaphore(heap);
+
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  if (ret)
+    {
+       memset(ret, 0xAA, alignsize - SIZEOF_MM_ALLOCNODE);
+    }
+#endif
 
   /* If CONFIG_DEBUG_MM is defined, then output the result of the allocation
    * to the SYSLOG.

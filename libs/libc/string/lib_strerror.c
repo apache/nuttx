@@ -76,6 +76,7 @@ struct errno_strmap_s
 
 static const struct errno_strmap_s g_errnomap[] =
 {
+  { 0,                   "Success"           },
   { EPERM,               EPERM_STR           },
   { ENOENT,              ENOENT_STR          },
   { ESRCH,               ESRCH_STR           },
@@ -208,6 +209,7 @@ static const struct errno_strmap_s g_errnomap[] =
 
 static const struct errno_strmap_s g_errnomap[] =
 {
+  { 0,                   "OK"                },
   { EPERM,               "EPERM"             },
   { ENOENT,              "ENOENT"            },
   { ESRCH,               "ESRCH"             },

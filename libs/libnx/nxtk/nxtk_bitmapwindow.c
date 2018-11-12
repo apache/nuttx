@@ -117,6 +117,12 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
 
   nxtk_subwindowclip(fwnd, &clipdest, dest, &fwnd->fwrect);
 
+  /* Just return if completely outside screen */
+  if (nxgl_nullrect(&clipdest))
+  {
+    return OK;
+  }
+
   /* Now, move the bitmap origin so that it is relative to the containing
    * window, not the sub-window.
    *

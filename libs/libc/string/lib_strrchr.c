@@ -53,7 +53,7 @@ FAR char *strrchr(FAR const char *s, int c)
 {
   if (s)
     {
-      const char *p = &s[strlen(s) - 1];
+      const char *p = &s[strlen(s)];
       for (; p >= s; p--)
         {
           if (*p == c)

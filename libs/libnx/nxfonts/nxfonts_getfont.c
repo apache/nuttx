@@ -495,7 +495,7 @@ static inline FAR const struct nx_fontset_s *
    * font.
    */
 
-  if (ch != ' ')
+  if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
     {
       gwarn("WARNING: No bitmap for code %02x\n", ch);
     }

@@ -81,11 +81,17 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Map the memory chunk into a free node */
 
   node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
+
+  /* Sanity check against double-frees */
+
+  DEBUGASSERT(node->preceding & MM_ALLOC_BIT);
+
   node->preceding &= ~MM_ALLOC_BIT;
 
   /* Check if the following node is free and, if so, merge it */
 
   next = (FAR struct mm_freenode_s *)((FAR char *)node + node->size);
+  DEBUGASSERT((next->preceding & ~MM_ALLOC_BIT) == node->size);
   if ((next->preceding & MM_ALLOC_BIT) == 0)
     {
       FAR struct mm_allocnode_s *andbeyond;
@@ -120,6 +126,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
    */
 
   prev = (FAR struct mm_freenode_s *)((FAR char *)node - node->preceding);
+  DEBUGASSERT((node->preceding & ~MM_ALLOC_BIT) == prev->size);
   if ((prev->preceding & MM_ALLOC_BIT) == 0)
     {
       /* Remove the node.  There must be a predecessor, but there may
