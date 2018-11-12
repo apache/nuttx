@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32_adc_ipv1l1.h
+ * arch/arm/src/stm32/chip/stm32_adc_v1l1.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV1L1_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV1L1_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V1L1_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V1L1_H
 
 /****************************************************************************************************
  * Included Files
@@ -560,4 +560,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV1L1_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V1L1_H */

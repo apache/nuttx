@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32_adc_ipv2.h
+ * arch/arm/src/stm32/chip/stm32_adc_v2.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V2_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V2_H
 
 /****************************************************************************************************
  * Included Files
@@ -732,4 +732,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_V2_H */
