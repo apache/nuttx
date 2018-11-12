@@ -137,7 +137,7 @@
 
 /* AHB3 Base Addresses **************************************************************/
 
-#define STM32_ADC12_BASE      0x50000000     /* 0x50000000-0x500003ff: ADC12 */
+#define STM32_ADC12_BASE      0x50000000     /* 0x50000000-0x500003ff: ADC12 Base */
 
 /* Cortex-M4 Base Addresses *********************************************************/
 /* Other registers -- see armv7-m/nvic.h for standard Cortex-M4 registers in this

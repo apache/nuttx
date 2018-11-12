@@ -198,4 +198,9 @@
 #define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
 #define GPIO_USART3_TX     GPIO_USART3_TX_3  /* PD8 */
 
+/* DMA **********************************************************************/
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1
+#define ADC3_DMA_CHAN DMACHAN_ADC3
+
 #endif /* __CONFIG_NUCLEO_F303ZE_INCLUDE_BOARD_H */

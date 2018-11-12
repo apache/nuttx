@@ -61,6 +61,10 @@
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.
+ *
+ * It implements support for both:
+ *   1. STM32 TIMER IP version 1 - F0, F1, F2, F37x, F4, L0, L1
+ *   2. STM32 TIMER IP version 2 - F3 (no F37x), F7, H7, L4, L4+
  */
 
 #if defined(CONFIG_STM32_TIM1_PWM)  || defined(CONFIG_STM32_TIM2_PWM)  || \
@@ -3148,7 +3152,6 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 
   ret = pwm_soft_break(dev, false);
   if (ret < 0)
-
     {
       goto errout;
     }

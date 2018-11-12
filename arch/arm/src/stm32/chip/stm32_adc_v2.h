@@ -1,9 +1,9 @@
 /****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32f33xxx_adc.h
+ * arch/arm/src/stm32/chip/stm32_adc_ipv2.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Modified for STM32F334 by Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F33XXX_ADC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F33XXX_ADC_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H
 
 /****************************************************************************************************
  * Included Files
@@ -45,24 +45,65 @@
 
 #include "chip.h"
 
+/* This is implementation for STM32 ADC IPv2 - F0, F3 (without F37x), H7, L0, L4, L4+ */
+
+#define HAVE_IP_ADC_V2
+#undef HAVE_IP_ADC_V1           /* No ADC IPv1 */
+#undef HAVE_ADC_CLOCK_HSI       /* No ADC clock from HSI */
+#undef HAVE_ADC_POWERDOWN       /* No ADC power down */
+#define HAVE_ADC_VBAT           /* VBAT channel support */
+
+/* F0 and L0 have basic version of ADC hardware (not present here for now):
+ *   - channel selection register (CHSELR)
+ *   - sampling time configuration common for all channels
+ *   - one TR register
+ *   - no SQR registers
+ *   - ...
+ *
+ * TODO: definitions for basic STM32 ADC IPv2 (F0, L0)
+ */
+
+#ifdef CONFIG_STM32_HAVE_IP_ADC_V2_BASIC
+#  define HAVE_BASIC_ADC
+#  error TODO
+#else
+#  undef HAVE_BASIC_ADC
+#endif
+
+/* F30X and F33x dont have CFGR2 register */
+
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
+#  undef HAVE_ADC_CFGR2
+#else
+#  define HAVE_ADC_CFGR2
+#endif
+
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
 
 #define STM32_ADC1_OFFSET            0x0000
 #define STM32_ADC2_OFFSET            0x0100
-#define STM32_ADC12_CMN_OFFSET       0x0300
+#define STM32_ADC3_OFFSET            0x0000
+#define STM32_ADC4_OFFSET            0x0100
+#define STM32_ADCCMN_OFFSET          0x0300
 
 #define STM32_ADC1_BASE              (STM32_ADC1_OFFSET+STM32_ADC12_BASE) /* ADC1 Master ADC */
 #define STM32_ADC2_BASE              (STM32_ADC2_OFFSET+STM32_ADC12_BASE) /* ADC2 Slave ADC */
-#define STM32_ADC12_CMN_BASE         (STM32_ADC12_CMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
+#define STM32_ADC3_BASE              (STM32_ADC3_OFFSET+STM32_ADC34_BASE) /* ADC3 Master ADC */
+#define STM32_ADC4_BASE              (STM32_ADC4_OFFSET+STM32_ADC34_BASE) /* ADC4 Slave ADC */
+#define STM32_ADC12CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
+#define STM32_ADC34CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC34_BASE) /* ADC3, ADC4 common */
 
 /* Register Offsets *********************************************************************************/
 
 #define STM32_ADC_ISR_OFFSET         0x0000  /* ADC interrupt and status register */
 #define STM32_ADC_IER_OFFSET         0x0004  /* ADC interrupt enable register */
 #define STM32_ADC_CR_OFFSET          0x0008  /* ADC control register */
-#define STM32_ADC_CFGR_OFFSET        0x000c  /* ADC configuration register */
+#define STM32_ADC_CFGR1_OFFSET       0x000c  /* ADC configuration register 1 */
+#ifdef HAVE_ADC_CFGR2
+#  define STM32_ADC_CFGR2_OFFSET     0x0010  /* ADC configuration register 2 */
+#endif
 #define STM32_ADC_SMPR1_OFFSET       0x0014  /* ADC sample time register 1 */
 #define STM32_ADC_SMPR2_OFFSET       0x0018  /* ADC sample time register 2 */
 #define STM32_ADC_TR1_OFFSET         0x0020  /* ADC watchdog threshold register 1 */
@@ -95,65 +136,149 @@
 
 /* Register Addresses *******************************************************************************/
 
-#define STM32_ADC1_ISR               (STM32_ADC1_BASE+STM32_ADC_ISR_OFFSET)
-#define STM32_ADC1_IER               (STM32_ADC1_BASE+STM32_ADC_IER_OFFSET)
-#define STM32_ADC1_CR                (STM32_ADC1_BASE+STM32_ADC_CR_OFFSET)
-#define STM32_ADC1_CFGR              (STM32_ADC1_BASE+STM32_ADC_CFGR_OFFSET)
-#define STM32_ADC1_SMPR1             (STM32_ADC1_BASE+STM32_ADC_SMPR1_OFFSET)
-#define STM32_ADC1_SMPR2             (STM32_ADC1_BASE+STM32_ADC_SMPR2_OFFSET)
-#define STM32_ADC1_TR1               (STM32_ADC1_BASE+STM32_ADC_TR1_OFFSET)
-#define STM32_ADC1_TR2               (STM32_ADC1_BASE+STM32_ADC_TR2_OFFSET)
-#define STM32_ADC1_TR3               (STM32_ADC1_BASE+STM32_ADC_TR3_OFFSET)
-#define STM32_ADC1_SQR1              (STM32_ADC1_BASE+STM32_ADC_SQR1_OFFSET)
-#define STM32_ADC1_SQR2              (STM32_ADC1_BASE+STM32_ADC_SQR2_OFFSET)
-#define STM32_ADC1_SQR3              (STM32_ADC1_BASE+STM32_ADC_SQR3_OFFSET)
-#define STM32_ADC1_SQR4              (STM32_ADC1_BASE+STM32_ADC_SQR4_OFFSET)
-#define STM32_ADC1_DR                (STM32_ADC1_BASE+STM32_ADC_DR_OFFSET)
-#define STM32_ADC1_JSQR              (STM32_ADC1_BASE+STM32_ADC_JSQR_OFFSET)
-#define STM32_ADC1_OFR1              (STM32_ADC1_BASE+STM32_ADC_OFR1_OFFSET)
-#define STM32_ADC1_OFR2              (STM32_ADC1_BASE+STM32_ADC_OFR2_OFFSET)
-#define STM32_ADC1_OFR3              (STM32_ADC1_BASE+STM32_ADC_OFR3_OFFSET)
-#define STM32_ADC1_OFR4              (STM32_ADC1_BASE+STM32_ADC_OFR4_OFFSET)
-#define STM32_ADC1_JDR1              (STM32_ADC1_BASE+STM32_ADC_JDR1_OFFSET)
-#define STM32_ADC1_JDR2              (STM32_ADC1_BASE+STM32_ADC_JDR2_OFFSET)
-#define STM32_ADC1_JDR3              (STM32_ADC1_BASE+STM32_ADC_JDR3_OFFSET)
-#define STM32_ADC1_JDR4              (STM32_ADC1_BASE+STM32_ADC_JDR4_OFFSET)
-#define STM32_ADC1_AWD2CR            (STM32_ADC1_BASE+STM32_ADC_AWD2CR_OFFSET)
-#define STM32_ADC1_AWD3CR            (STM32_ADC1_BASE+STM32_ADC_AWD3CR_OFFSET)
-#define STM32_ADC1_DIFSEL            (STM32_ADC1_BASE+STM32_ADC_DIFSEL_OFFSET)
-#define STM32_ADC1_CALFACT           (STM32_ADC1_BASE+STM32_ADC_CALFACT_OFFSET)
+#if STM32_NADC > 0
+#  define STM32_ADC1_ISR             (STM32_ADC1_BASE+STM32_ADC_ISR_OFFSET)
+#  define STM32_ADC1_IER             (STM32_ADC1_BASE+STM32_ADC_IER_OFFSET)
+#  define STM32_ADC1_CR              (STM32_ADC1_BASE+STM32_ADC_CR_OFFSET)
+#  define STM32_ADC1_CFGR1           (STM32_ADC1_BASE+STM32_ADC_CFGR1_OFFSET)
+#  ifdef HAVE_ADC_CFGR2
+#    define STM32_ADC1_CFGR2         (STM32_ADC1_BASE+STM32_ADC_CFGR2_OFFSET)
+#  endif
+#  define STM32_ADC1_SMPR1           (STM32_ADC1_BASE+STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC1_SMPR2           (STM32_ADC1_BASE+STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC1_TR1             (STM32_ADC1_BASE+STM32_ADC_TR1_OFFSET)
+#  define STM32_ADC1_TR2             (STM32_ADC1_BASE+STM32_ADC_TR2_OFFSET)
+#  define STM32_ADC1_TR3             (STM32_ADC1_BASE+STM32_ADC_TR3_OFFSET)
+#  define STM32_ADC1_SQR1            (STM32_ADC1_BASE+STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC1_SQR2            (STM32_ADC1_BASE+STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC1_SQR3            (STM32_ADC1_BASE+STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC1_SQR4            (STM32_ADC1_BASE+STM32_ADC_SQR4_OFFSET)
+#  define STM32_ADC1_DR              (STM32_ADC1_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC1_JSQR            (STM32_ADC1_BASE+STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC1_OFR1            (STM32_ADC1_BASE+STM32_ADC_OFR1_OFFSET)
+#  define STM32_ADC1_OFR2            (STM32_ADC1_BASE+STM32_ADC_OFR2_OFFSET)
+#  define STM32_ADC1_OFR3            (STM32_ADC1_BASE+STM32_ADC_OFR3_OFFSET)
+#  define STM32_ADC1_OFR4            (STM32_ADC1_BASE+STM32_ADC_OFR4_OFFSET)
+#  define STM32_ADC1_JDR1            (STM32_ADC1_BASE+STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC1_JDR2            (STM32_ADC1_BASE+STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC1_JDR3            (STM32_ADC1_BASE+STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC1_JDR4            (STM32_ADC1_BASE+STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC1_AWD2CR          (STM32_ADC1_BASE+STM32_ADC_AWD2CR_OFFSET)
+#  define STM32_ADC1_AWD3CR          (STM32_ADC1_BASE+STM32_ADC_AWD3CR_OFFSET)
+#  define STM32_ADC1_DIFSEL          (STM32_ADC1_BASE+STM32_ADC_DIFSEL_OFFSET)
+#  define STM32_ADC1_CALFACT         (STM32_ADC1_BASE+STM32_ADC_CALFACT_OFFSET)
+#endif
 
-#define STM32_ADC2_ISR               (STM32_ADC2_BASE+STM32_ADC_ISR_OFFSET)
-#define STM32_ADC2_IER               (STM32_ADC2_BASE+STM32_ADC_IER_OFFSET)
-#define STM32_ADC2_CR                (STM32_ADC2_BASE+STM32_ADC_CR_OFFSET)
-#define STM32_ADC2_CFGR              (STM32_ADC2_BASE+STM32_ADC_CFGR_OFFSET)
-#define STM32_ADC2_SMPR1             (STM32_ADC2_BASE+STM32_ADC_SMPR1_OFFSET)
-#define STM32_ADC2_SMPR2             (STM32_ADC2_BASE+STM32_ADC_SMPR2_OFFSET)
-#define STM32_ADC2_TR1               (STM32_ADC2_BASE+STM32_ADC_TR1_OFFSET)
-#define STM32_ADC2_TR2               (STM32_ADC2_BASE+STM32_ADC_TR2_OFFSET)
-#define STM32_ADC2_TR3               (STM32_ADC2_BASE+STM32_ADC_TR3_OFFSET)
-#define STM32_ADC2_SQR1              (STM32_ADC2_BASE+STM32_ADC_SQR1_OFFSET)
-#define STM32_ADC2_SQR2              (STM32_ADC2_BASE+STM32_ADC_SQR2_OFFSET)
-#define STM32_ADC2_SQR3              (STM32_ADC2_BASE+STM32_ADC_SQR3_OFFSET)
-#define STM32_ADC2_SQR4              (STM32_ADC2_BASE+STM32_ADC_SQR4_OFFSET)
-#define STM32_ADC2_DR                (STM32_ADC2_BASE+STM32_ADC_DR_OFFSET)
-#define STM32_ADC2_JSQR              (STM32_ADC2_BASE+STM32_ADC_JSQR_OFFSET)
-#define STM32_ADC2_OFR1              (STM32_ADC2_BASE+STM32_ADC_OFR1_OFFSET)
-#define STM32_ADC2_OFR2              (STM32_ADC2_BASE+STM32_ADC_OFR2_OFFSET)
-#define STM32_ADC2_OFR3              (STM32_ADC2_BASE+STM32_ADC_OFR3_OFFSET)
-#define STM32_ADC2_OFR4              (STM32_ADC2_BASE+STM32_ADC_OFR4_OFFSET)
-#define STM32_ADC2_JDR1              (STM32_ADC2_BASE+STM32_ADC_JDR1_OFFSET)
-#define STM32_ADC2_JDR2              (STM32_ADC2_BASE+STM32_ADC_JDR2_OFFSET)
-#define STM32_ADC2_JDR3              (STM32_ADC2_BASE+STM32_ADC_JDR3_OFFSET)
-#define STM32_ADC2_JDR4              (STM32_ADC2_BASE+STM32_ADC_JDR4_OFFSET)
-#define STM32_ADC2_AWD2CR            (STM32_ADC2_BASE+STM32_ADC_AWD2CR_OFFSET)
-#define STM32_ADC2_AWD3CR            (STM32_ADC2_BASE+STM32_ADC_AWD3CR_OFFSET)
-#define STM32_ADC2_DIFSEL            (STM32_ADC2_BASE+STM32_ADC_DIFSEL_OFFSET)
-#define STM32_ADC2_CALFACT           (STM32_ADC2_BASE+STM32_ADC_CALFACT_OFFSET)
+#if STM32_NADC > 1
+#  define STM32_ADC2_ISR             (STM32_ADC2_BASE+STM32_ADC_ISR_OFFSET)
+#  define STM32_ADC2_IER             (STM32_ADC2_BASE+STM32_ADC_IER_OFFSET)
+#  define STM32_ADC2_CR              (STM32_ADC2_BASE+STM32_ADC_CR_OFFSET)
+#  define STM32_ADC2_CFGR1           (STM32_ADC2_BASE+STM32_ADC_CFGR1_OFFSET)
+#  ifdef HAVE_ADC_CFGR2
+#    define STM32_ADC2_CFGR2         (STM32_ADC2_BASE+STM32_ADC_CFGR2_OFFSET)
+#  endif
+#  define STM32_ADC2_SMPR1           (STM32_ADC2_BASE+STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC2_SMPR2           (STM32_ADC2_BASE+STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC2_TR1             (STM32_ADC2_BASE+STM32_ADC_TR1_OFFSET)
+#  define STM32_ADC2_TR2             (STM32_ADC2_BASE+STM32_ADC_TR2_OFFSET)
+#  define STM32_ADC2_TR3             (STM32_ADC2_BASE+STM32_ADC_TR3_OFFSET)
+#  define STM32_ADC2_SQR1            (STM32_ADC2_BASE+STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC2_SQR2            (STM32_ADC2_BASE+STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC2_SQR3            (STM32_ADC2_BASE+STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC2_SQR4            (STM32_ADC2_BASE+STM32_ADC_SQR4_OFFSET)
+#  define STM32_ADC2_DR              (STM32_ADC2_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC2_JSQR            (STM32_ADC2_BASE+STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC2_OFR1            (STM32_ADC2_BASE+STM32_ADC_OFR1_OFFSET)
+#  define STM32_ADC2_OFR2            (STM32_ADC2_BASE+STM32_ADC_OFR2_OFFSET)
+#  define STM32_ADC2_OFR3            (STM32_ADC2_BASE+STM32_ADC_OFR3_OFFSET)
+#  define STM32_ADC2_OFR4            (STM32_ADC2_BASE+STM32_ADC_OFR4_OFFSET)
+#  define STM32_ADC2_JDR1            (STM32_ADC2_BASE+STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC2_JDR2            (STM32_ADC2_BASE+STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC2_JDR3            (STM32_ADC2_BASE+STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC2_JDR4            (STM32_ADC2_BASE+STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC2_AWD2CR          (STM32_ADC2_BASE+STM32_ADC_AWD2CR_OFFSET)
+#  define STM32_ADC2_AWD3CR          (STM32_ADC2_BASE+STM32_ADC_AWD3CR_OFFSET)
+#  define STM32_ADC2_DIFSEL          (STM32_ADC2_BASE+STM32_ADC_DIFSEL_OFFSET)
+#  define STM32_ADC2_CALFACT         (STM32_ADC2_BASE+STM32_ADC_CALFACT_OFFSET)
+#endif
 
-#define STM32_ADC12_CSR              (STM32_ADC12_CMN_BASE+STM32_ADC_CSR_OFFSET)
-#define STM32_ADC12_CCR              (STM32_ADC12_CMN_BASE+STM32_ADC_CCR_OFFSET)
-#define STM32_ADC12_CDR              (STM32_ADC12_CMN_BASE+STM32_ADC_CDR_OFFSET)
+#if STM32_NADC > 2
+#  define STM32_ADC3_ISR             (STM32_ADC3_BASE+STM32_ADC_ISR_OFFSET)
+#  define STM32_ADC3_IER             (STM32_ADC3_BASE+STM32_ADC_IER_OFFSET)
+#  define STM32_ADC3_CR              (STM32_ADC3_BASE+STM32_ADC_CR_OFFSET)
+#  define STM32_ADC3_CFGR1           (STM32_ADC3_BASE+STM32_ADC_CFGR1_OFFSET)
+#  ifdef HAVE_ADC_CFGR2
+#    define STM32_ADC3_CFGR2         (STM32_ADC3_BASE+STM32_ADC_CFGR2_OFFSET)
+#  endif
+#  define STM32_ADC3_SMPR1           (STM32_ADC3_BASE+STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC3_SMPR2           (STM32_ADC3_BASE+STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC3_TR1             (STM32_ADC3_BASE+STM32_ADC_TR1_OFFSET)
+#  define STM32_ADC3_TR2             (STM32_ADC3_BASE+STM32_ADC_TR2_OFFSET)
+#  define STM32_ADC3_TR3             (STM32_ADC3_BASE+STM32_ADC_TR3_OFFSET)
+#  define STM32_ADC3_SQR1            (STM32_ADC3_BASE+STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC3_SQR2            (STM32_ADC3_BASE+STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC3_SQR3            (STM32_ADC3_BASE+STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC3_SQR4            (STM32_ADC3_BASE+STM32_ADC_SQR4_OFFSET)
+#  define STM32_ADC3_DR              (STM32_ADC3_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC3_JSQR            (STM32_ADC3_BASE+STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC3_OFR1            (STM32_ADC3_BASE+STM32_ADC_OFR1_OFFSET)
+#  define STM32_ADC3_OFR2            (STM32_ADC3_BASE+STM32_ADC_OFR2_OFFSET)
+#  define STM32_ADC3_OFR3            (STM32_ADC3_BASE+STM32_ADC_OFR3_OFFSET)
+#  define STM32_ADC3_OFR4            (STM32_ADC3_BASE+STM32_ADC_OFR4_OFFSET)
+#  define STM32_ADC3_JDR1            (STM32_ADC3_BASE+STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC3_JDR2            (STM32_ADC3_BASE+STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC3_JDR3            (STM32_ADC3_BASE+STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC3_JDR4            (STM32_ADC3_BASE+STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC3_AWD2CR          (STM32_ADC3_BASE+STM32_ADC_AWD2CR_OFFSET)
+#  define STM32_ADC3_AWD3CR          (STM32_ADC3_BASE+STM32_ADC_AWD3CR_OFFSET)
+#  define STM32_ADC3_DIFSEL          (STM32_ADC3_BASE+STM32_ADC_DIFSEL_OFFSET)
+#  define STM32_ADC3_CALFACT         (STM32_ADC3_BASE+STM32_ADC_CALFACT_OFFSET)
+#endif
+
+#if STM32_NADC > 3
+#  define STM32_ADC4_ISR             (STM32_ADC4_BASE+STM32_ADC_ISR_OFFSET)
+#  define STM32_ADC4_IER             (STM32_ADC4_BASE+STM32_ADC_IER_OFFSET)
+#  define STM32_ADC4_CR              (STM32_ADC4_BASE+STM32_ADC_CR_OFFSET)
+#  define STM32_ADC4_CFGR1           (STM32_ADC4_BASE+STM32_ADC_CFGR1_OFFSET)
+#  ifdef HAVE_ADC_CFGR2
+#    define STM32_ADC4_CFGR2         (STM32_ADC4_BASE+STM32_ADC_CFGR2_OFFSET)
+#  endif
+#  define STM32_ADC4_SMPR1           (STM32_ADC4_BASE+STM32_ADC_SMPR1_OFFSET)
+#  define STM32_ADC4_SMPR2           (STM32_ADC4_BASE+STM32_ADC_SMPR2_OFFSET)
+#  define STM32_ADC4_TR1             (STM32_ADC4_BASE+STM32_ADC_TR1_OFFSET)
+#  define STM32_ADC4_TR2             (STM32_ADC4_BASE+STM32_ADC_TR2_OFFSET)
+#  define STM32_ADC4_TR3             (STM32_ADC4_BASE+STM32_ADC_TR3_OFFSET)
+#  define STM32_ADC4_SQR1            (STM32_ADC4_BASE+STM32_ADC_SQR1_OFFSET)
+#  define STM32_ADC4_SQR2            (STM32_ADC4_BASE+STM32_ADC_SQR2_OFFSET)
+#  define STM32_ADC4_SQR3            (STM32_ADC4_BASE+STM32_ADC_SQR3_OFFSET)
+#  define STM32_ADC4_SQR4            (STM32_ADC4_BASE+STM32_ADC_SQR4_OFFSET)
+#  define STM32_ADC4_DR              (STM32_ADC4_BASE+STM32_ADC_DR_OFFSET)
+#  define STM32_ADC4_JSQR            (STM32_ADC4_BASE+STM32_ADC_JSQR_OFFSET)
+#  define STM32_ADC4_OFR1            (STM32_ADC4_BASE+STM32_ADC_OFR1_OFFSET)
+#  define STM32_ADC4_OFR2            (STM32_ADC4_BASE+STM32_ADC_OFR2_OFFSET)
+#  define STM32_ADC4_OFR3            (STM32_ADC4_BASE+STM32_ADC_OFR3_OFFSET)
+#  define STM32_ADC4_OFR4            (STM32_ADC4_BASE+STM32_ADC_OFR4_OFFSET)
+#  define STM32_ADC4_JDR1            (STM32_ADC4_BASE+STM32_ADC_JDR1_OFFSET)
+#  define STM32_ADC4_JDR2            (STM32_ADC4_BASE+STM32_ADC_JDR2_OFFSET)
+#  define STM32_ADC4_JDR3            (STM32_ADC4_BASE+STM32_ADC_JDR3_OFFSET)
+#  define STM32_ADC4_JDR4            (STM32_ADC4_BASE+STM32_ADC_JDR4_OFFSET)
+#  define STM32_ADC4_AWD2CR          (STM32_ADC4_BASE+STM32_ADC_AWD2CR_OFFSET)
+#  define STM32_ADC4_AWD3CR          (STM32_ADC4_BASE+STM32_ADC_AWD3CR_OFFSET)
+#  define STM32_ADC4_DIFSEL          (STM32_ADC4_BASE+STM32_ADC_DIFSEL_OFFSET)
+#  define STM32_ADC4_CALFACT         (STM32_ADC4_BASE+STM32_ADC_CALFACT_OFFSET)
+#endif
+
+#if STM32_NADC > 0
+#  define STM32_ADC12_CSR            (STM32_ADC12CMN_BASE+STM32_ADC_CSR_OFFSET)
+#  define STM32_ADC12_CCR            (STM32_ADC12CMN_BASE+STM32_ADC_CCR_OFFSET)
+#  define STM32_ADC12_CDR            (STM32_ADC12CMN_BASE+STM32_ADC_CDR_OFFSET)
+#endif
+
+#if STM32_NADC > 2
+#  define STM32_ADC34_CSR            (STM32_ADC34CMN_BASE+STM32_ADC_CSR_OFFSET)
+#  define STM32_ADC34_CCR            (STM32_ADC34CMN_BASE+STM32_ADC_CCR_OFFSET)
+#  define STM32_ADC34_CDR            (STM32_ADC34CMN_BASE+STM32_ADC_CDR_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ********************************************************************/
 /* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
@@ -186,57 +311,92 @@
 #define ADC_CR_ADCALDIF              (1 << 30) /* Bit 30: Differential mode for calibration */
 #define ADC_CR_ADCAL                 (1 << 31) /* Bit 31: ADC calibration */
 
-/* ADC configuration register */
+/* ADC configuration register 1 */
 
-#define ADC_CFGR_DMAEN               (1 << 0)  /* Bit 0:  Direct memory access enable */
-#define ADC_CFGR_DMACFG              (1 << 1)  /* Bit 1:  Direct memory access configuration */
-#define ADC_CFGR_RES_SHIFT           (3)       /* Bits 3-4: Data resolution */
-#define ADC_CFGR_RES_MASK            (3 << ADC_CFGR_RES_SHIFT)
-#  define ADC_CFGR_RES_12BIT         (0 << ADC_CFGR_RES_SHIFT) /* 15 ADCCLK cycles */
-#  define ADC_CFGR_RES_10BIT         (1 << ADC_CFGR_RES_SHIFT) /* 13 ADCCLK cycles */
-#  define ADC_CFGR_RES_8BIT          (2 << ADC_CFGR_RES_SHIFT) /* 11 ADCCLK cycles  */
-#  define ADC_CFGR_RES_6BIT          (3 << ADC_CFGR_RES_SHIFT) /* 9 ADCCLK cycles  */
-#define ADC_CFGR_ALIGN               (1 << 5)  /* Bit 5:  Data Alignment */
-#define ADC_CFGR_EXTSEL_SHIFT        (6)       /* Bits 6-9: External Event Select for regular group */
-#define ADC_CFGR_EXTSEL_MASK         (15 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T1CC1    (0 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T1CC2    (1 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T1CC3    (2 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T2CC2    (3 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T3TRGO   (4 << ADC_CFGR_EXTSEL_SHIFT)
-                                                                   /* 0101: Reserved */
-#  define ADC12_CFGR_EXTSEL_EXTI11   (6 << ADC_CFGR_EXTSEL_SHIFT)  /* 0110: EXTI line 11 */
-#  define ADC12_CFGR_EXTSEL_HRT1TRG1 (7 << ADC_CFGR_EXTSEL_SHIFT)  /* 0111: HRTIM1 ADCTRG1 event */
-#  define ADC12_CFGR_EXTSEL_HRT1TRG3 (8 << ADC_CFGR_EXTSEL_SHIFT)  /* 1000: HRTIM1 ADCTRG3 event */
-#  define ADC12_CFGR_EXTSEL_T1TRGO   (9 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T1TRGO2  (10 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T2TRGO   (11 << ADC_CFGR_EXTSEL_SHIFT)
+#define ADC_CFGR1_DMAEN               (1 << 0)  /* Bit 0:  Direct memory access enable */
+#define ADC_CFGR1_DMACFG              (1 << 1)  /* Bit 1:  Direct memory access configuration */
+#define ADC_CFGR1_RES_SHIFT           (3)       /* Bits 3-4: Data resolution */
+#define ADC_CFGR1_RES_MASK            (3 << ADC_CFGR1_RES_SHIFT)
+#  define ADC_CFGR1_RES_12BIT         (0 << ADC_CFGR1_RES_SHIFT) /* 15 ADCCLK cycles */
+#  define ADC_CFGR1_RES_10BIT         (1 << ADC_CFGR1_RES_SHIFT) /* 13 ADCCLK cycles */
+#  define ADC_CFGR1_RES_8BIT          (2 << ADC_CFGR1_RES_SHIFT) /* 11 ADCCLK cycles  */
+#  define ADC_CFGR1_RES_6BIT          (3 << ADC_CFGR1_RES_SHIFT) /* 9 ADCCLK cycles  */
+#define ADC_CFGR1_ALIGN               (1 << 5)  /* Bit 5:  Data Alignment */
+#define ADC_CFGR1_EXTSEL_SHIFT        (6)       /* Bits 6-9: External Event Select for regular group */
+#define ADC_CFGR1_EXTSEL_MASK         (15 << ADC_CFGR1_EXTSEL_SHIFT)
+#if defined(CONFIG_STM32_STM32F33XX)
+#  define ADC12_CFGR1_EXTSEL_T1CC1    (0 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1CC2    (1 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1CC3    (2 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T2CC2    (3 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T3TRGO   (4 << ADC_CFGR1_EXTSEL_SHIFT)
+                                                                     /* 0101: Reserved */
+#  define ADC12_CFGR1_EXTSEL_EXTI11   (6 << ADC_CFGR1_EXTSEL_SHIFT)  /* 0110: EXTI line 11 */
+#  define ADC12_CFGR1_EXTSEL_HRT1TRG1 (7 << ADC_CFGR1_EXTSEL_SHIFT)  /* 0111: HRTIM1 ADCTRG1 event */
+#  define ADC12_CFGR1_EXTSEL_HRT1TRG3 (8 << ADC_CFGR1_EXTSEL_SHIFT)  /* 1000: HRTIM1 ADCTRG3 event */
+#  define ADC12_CFGR1_EXTSEL_T1TRGO   (9 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1TRGO2  (10 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T2TRGO   (11 << ADC_CFGR1_EXTSEL_SHIFT)
                                                                     /* 1100: Reserved */
-#  define ADC12_CFGR_EXTSEL_T6TRGO   (13 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T15TRGO  (14 << ADC_CFGR_EXTSEL_SHIFT)
-#  define ADC12_CFGR_EXTSEL_T3CC4    (15 << ADC_CFGR_EXTSEL_SHIFT)
-#define ADC_CFGR_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
-#define ADC_CFGR_EXTEN_MASK          (3 << ADC_CFGR_EXTEN_SHIFT)
-#  define ADC_CFGR_EXTEN_NONE        (0 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection disabled */
-#  define ADC_CFGR_EXTEN_RISING      (1 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the rising edge */
-#  define ADC_CFGR_EXTEN_FALLING     (2 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the falling edge */
-#  define ADC_CFGR_EXTEN_BOTH        (3 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on both edges */
-#define ADC_CFGR_OVRMOD              (1 << 12) /* Bit 12: Overrun Mode */
-#define ADC_CFGR_CONT                (1 << 13) /* Bit 13: Continuous mode for regular conversions */
-#define ADC_CFGR_AUTDLY              (1 << 14) /* Bit 14: Delayed conversion mode */
-#define ADC_CFGR_DISCEN              (1 << 16) /* Bit 16: Discontinuous mode on regular channels */
-#define ADC_CFGR_DISCNUM_SHIFT       (17)      /* Bits 17-19: Discontinuous mode channel count */
-#define ADC_CFGR_DISCNUM_MASK        (7 << ADC_CFGR_DISCNUM_SHIFT)
-#  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT) /* n = 1..8 channels */
-#define ADC_CFGR_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
-#define ADC_CFGR_JQM                 (1 << 21) /* Bit 21: JSQR queue mode */
-#define ADC_CFGR_AWD1SGL             (1 << 22) /* Bit 22: Enable watchdog on single/all channels */
-#define ADC_CFGR_AWD1EN              (1 << 23) /* Bit 23: Analog watchdog enable 1 regular channels */
-#define ADC_CFGR_JAWD1EN             (1 << 22) /* Bit 22: Analog watchdog enable 1 injected channels */
-#define ADC_CFGR_JAUTO               (1 << 25) /* Bit 25: Automatic Injected Group conversion */
-#define ADC_CFGR_AWD1CH_SHIFT        (26)      /* Bits 26-30: Analog watchdog 1 channel select bits */
-#define ADC_CFGR_AWD1CH_MASK         (31 << ADC_CFGR_AWD1CH_SHIFT)
-#  define ADC_CFGR_AWD1CH_DISABLED   (0 << ADC_CFGR_AWD1CH_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T6TRGO   (13 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T15TRGO  (14 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T3CC4    (15 << ADC_CFGR1_EXTSEL_SHIFT)
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  define ADC12_CFGR1_EXTSEL_T1CC1     (0 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1CC2     (1 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1CC3     (2 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T2CC2     (3 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T3TRGO    (4 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T4CC4     (5 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_EXTI11    (6 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T8TRGO    (7 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T1TRGO    (9 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T2TRGO    (11 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T4TRGO    (12 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T6TRGO    (13 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T15TRGO   (14 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC12_CFGR1_EXTSEL_T3CC4     (15 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T3CC1     (0 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T2CC3     (1 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T1CC3     (2 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T8CC1     (3 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T8TRGO    (4 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T20TRGO   (5 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T4CC1     (6 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T2TRGO    (7 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T1TRGO    (9 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T3TRGO    (11 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T4TRGO    (12 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T7TRGO    (13 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T15TRGO   (14 << ADC_CFGR1_EXTSEL_SHIFT)
+#  define ADC34_CFGR1_EXTSEL_T2CC1     (15 << ADC_CFGR1_EXTSEL_SHIFT)
+#else
+#  error TODO EXTSEL
+#endif
+#define ADC_CFGR1_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
+#define ADC_CFGR1_EXTEN_MASK          (3 << ADC_CFGR1_EXTEN_SHIFT)
+#  define ADC_CFGR1_EXTEN_NONE        (0 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection disabled */
+#  define ADC_CFGR1_EXTEN_RISING      (1 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on the rising edge */
+#  define ADC_CFGR1_EXTEN_FALLING     (2 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on the falling edge */
+#  define ADC_CFGR1_EXTEN_BOTH        (3 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on both edges */
+#define ADC_CFGR1_OVRMOD              (1 << 12) /* Bit 12: Overrun Mode */
+#define ADC_CFGR1_CONT                (1 << 13) /* Bit 13: Continuous mode for regular conversions */
+#define ADC_CFGR1_AUTDLY              (1 << 14) /* Bit 14: Delayed conversion mode */
+#define ADC_CFGR1_DISCEN              (1 << 16) /* Bit 16: Discontinuous mode on regular channels */
+#define ADC_CFGR1_DISCNUM_SHIFT       (17)      /* Bits 17-19: Discontinuous mode channel count */
+#define ADC_CFGR1_DISCNUM_MASK        (7 << ADC_CFGR1_DISCNUM_SHIFT)
+#  define ADC_CFGR1_DISCNUM(n)        (((n) - 1) << ADC_CFGR1_DISCNUM_SHIFT) /* n = 1..8 channels */
+#define ADC_CFGR1_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
+#define ADC_CFGR1_JQM                 (1 << 21) /* Bit 21: JSQR queue mode */
+#define ADC_CFGR1_AWD1SGL             (1 << 22) /* Bit 22: Enable watchdog on single/all channels */
+#define ADC_CFGR1_AWD1EN              (1 << 23) /* Bit 23: Analog watchdog enable 1 regular channels */
+#define ADC_CFGR1_JAWD1EN             (1 << 22) /* Bit 22: Analog watchdog enable 1 injected channels */
+#define ADC_CFGR1_JAUTO               (1 << 25) /* Bit 25: Automatic Injected Group conversion */
+#define ADC_CFGR1_AWD1CH_SHIFT        (26)      /* Bits 26-30: Analog watchdog 1 channel select bits */
+#define ADC_CFGR1_AWD1CH_MASK         (31 << ADC_CFGR1_AWD1CH_SHIFT)
+#  define ADC_CFGR1_AWD1CH_DISABLED   (0 << ADC_CFGR1_AWD1CH_SHIFT)
+
+/* TODO: ADC configuration register 2 */
 
 /* ADC sample time register 1 */
 
@@ -388,6 +548,7 @@
 #  define ADC_JSQR_JL(n)              (((n)-1) << ADC_JSQR_JL_SHIFT) /* n=1..4 */
 #define ADC_JSQR_JEXTSEL_SHIFT        (2)       /* Bits 2-5: External Trigger Selection for injected group */
 #define ADC_JSQR_JEXTSEL_MASK         (15 << ADC_JSQR_JEXTSEL_SHIFT)
+#if  defined(CONFIG_STM32_STM32F33XX)
 #  define ADC12_JSQR_JEXTSEL_T1TRGO   (0 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC12_JSQR_JEXTSEL_T1CC4    (1 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC12_JSQR_JEXTSEL_T2TRGO   (2 << ADC_JSQR_JEXTSEL_SHIFT)
@@ -404,6 +565,38 @@
 #  define ADC12_JSQR_JEXTSEL_T3CC1    (13 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC12_JSQR_JEXTSEL_T6TRGO   (14 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC12_JSQR_JEXTSEL_T15TRGO  (15 << ADC_JSQR_JEXTSEL_SHIFT)
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  define ADC12_JSQR_JEXTSEL_T1TRGO   (0 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T1CC4    (1 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T2TRGO   (2 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T2CC1    (3 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T3CC4    (4 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T4TRGO   (5 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T20TRGO  (6 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T8CC4    (7 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T8TRGO   (9 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T3CC3    (11 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T3TRGO   (12 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T3CC1    (13 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T6TRGO   (14 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC12_JSQR_JEXTSEL_T15TRGO  (15 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T1TRGO   (0 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T1CC4    (1 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T4CC3    (2 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T8CC2    (3 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T8CC4    (4 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T20TRGO  (5 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T4CC4    (6 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T4TRGO   (7 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T8TRGO   (9 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T1CC3    (11 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T3TRGO   (12 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T2TRGO   (13 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T7TRGO   (14 << ADC_JSQR_JEXTSEL_SHIFT)
+#  define ADC34_JSQR_JEXTSEL_T15TRGO  (15 << ADC_JSQR_JEXTSEL_SHIFT)
+#else
+#  error TODO JEXTSEL
+#endif
 #  define ADC_JSQR_JEXTEN_SHIFT       (6)       /* Bits 6-7: External trigger selection for injected greoup */
 #  define ADC_JSQR_JEXTEN_MASK        (3 << ADC_JSQR_JEXTEN_SHIFT)
 #    define ADC_JSQR_JEXTEN_NONE      (0 << ADC_JSQR_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
@@ -539,4 +732,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F33XXX_ADC_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_IPV2_H */

@@ -1381,6 +1381,8 @@ config STM32_STM32L15XX
 	select STM32_HAVE_TIM3
 	select STM32_HAVE_TIM4
 	select STM32_HAVE_RTC_SUBSECONDS if !STM32_LOWDENSITY
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1
 
 config STM32_ENERGYLITE
 	bool
@@ -1401,6 +1403,8 @@ config STM32_STM32F10XX
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_RTC_COUNTER
 	select STM32_HAVE_TIM3
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1_BASIC
 
 config STM32_VALUELINE
 	bool
@@ -1511,6 +1515,8 @@ config STM32_STM32F20XX
 	bool
 	default n
 	select STM32_HAVE_IOCOMPENSATION
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1
 
 config STM32_STM32F205
 	bool
@@ -1593,6 +1599,7 @@ config STM32_STM32F30XX
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
 	select STM32_HAVE_IP_TIMERS_V2
+	select STM32_HAVE_IP_ADC_V2
 
 config STM32_STM32F302
 	bool
@@ -1632,6 +1639,7 @@ config STM32_STM32F33XX
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_IP_TIMERS_V2
+	select STM32_HAVE_IP_ADC_V2
 
 config STM32_STM32F37XX
 	bool
@@ -1655,6 +1663,8 @@ config STM32_STM32F37XX
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_USART3
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1_BASIC
 
 config STM32_STM32F4XXX
 	bool
@@ -1662,6 +1672,8 @@ config STM32_STM32F4XXX
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_IOCOMPENSATION
+	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_ADC_V1
 
 config STM32_STM32F401xBC
 	bool
@@ -2027,6 +2039,10 @@ config STM32_HAVE_UART8
 	bool
 	default n
 
+config STM32_HAVE_IP_TIMERS_V1
+	bool
+	default n
+
 config STM32_HAVE_IP_TIMERS_V2
 	bool
 	default n
@@ -2098,6 +2114,24 @@ config STM32_HAVE_TIM16
 config STM32_HAVE_TIM17
 	bool
 	default n
+
+config STM32_HAVE_IP_ADC_V1
+	bool
+	default n
+
+config STM32_HAVE_IP_ADC_V1_BASIC
+	bool
+	default n
+	select STM32_HAVE_IP_ADC_V1
+
+config STM32_HAVE_IP_ADC_V2
+	bool
+	default n
+
+config STM32_HAVE_IP_ADC_V2_BASIC
+	bool
+	default n
+	select STM32_HAVE_IP_ADC_V2
 
 config STM32_HAVE_ADC2
 	bool
@@ -7484,6 +7518,38 @@ endmenu # "HRTIM Configuration"
 menu "ADC Configuration"
 	depends on STM32_ADC
 
+config STM32_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on STM32_ADC1 && !STM32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on STM32_ADC2 && !STM32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC2 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC3_RESOLUTION
+	int "ADC3 resolution"
+	depends on STM32_ADC3 && !STM32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC3 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC4_RESOLUTION
+	int "ADC4 resolution"
+	depends on STM32_ADC4 && !STM32_HAVE_IP_ADC_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC4 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
 config STM32_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
 	default n
@@ -7497,6 +7563,12 @@ config STM32_ADC_NOIRQ
 	---help---
 		Do not use default ADC interrupts handlers.
 		Only for STM32_STM32F33XX at this moment.
+
+config STM32_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	default n
+	---help---
+		Enable ADC sample time configuration (SMPRx registers).
 
 config STM32_ADC1_DMA
 	bool "ADC1 DMA"

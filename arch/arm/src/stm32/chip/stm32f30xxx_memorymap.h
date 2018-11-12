@@ -145,12 +145,8 @@
 
 /* AHB3 Base Addresses **************************************************************/
 
-#define STM32_ADC1_BASE      0x50000000     /* 0x5000004c-0x5000004c: Master ADC1 */
-#define STM32_ADC2_BASE      0x50000100     /* 0x5000014c-0x500001ff: Slave ADC2 */
-#define STM32_ADC12_BASE     0x50000300     /* 0x50000300-0x50000308: ADC12 Common */
-#define STM32_ADC3_BASE      0x50000400     /* 0x5000044c-0x5000044c: Master ADC3 */
-#define STM32_ADC4_BASE      0x50000500     /* 0x5000054c-0x500005ff: Slave ADC4 */
-#define STM32_ADC34_BASE     0x50000700     /* 0x50000700-0x50000708: ADC34 Common */
+#define STM32_ADC12_BASE     0x50000000     /* 0x50000000-0x500003ff: ADC12 Base */
+#define STM32_ADC34_BASE     0x50000400     /* 0x50000400-0x500007ff: ADC34 Base */
 
 /* Cortex-M4 Base Addresses *********************************************************/
 /* Other registers -- see armv7-m/nvic.h for standard Cortex-M4 registers in this

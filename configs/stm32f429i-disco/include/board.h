@@ -443,4 +443,9 @@
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(BOARD_LTDC_PLLSAIQ)
 
 #endif /* CONFIG_STM32_LTDC */
+
+/* DMA *************************************************************************/
+
+#define ADC1_DMA_CHAN DMAMAP_ADC1_1
+
 #endif  /* __CONFIG_STM32F429I_DISCO_INCLUDE_BOARD_H */

@@ -60,6 +60,26 @@
 #  error "Unknown STM32 DMA"
 #endif
 
+/* Support for STM32 DMA IP version 1 - F0, F1, F3, L0, L1
+ * REVISIT: move this to Kconfig
+ */
+
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
+#  define HAVE_IP_DMA_V1
+#endif
+
+/* Support for STM32 DMA IP version 2 - F2, F4, F7, H7 */
+
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  define HAVE_IP_DMA_V2
+#endif
+
+#if !defined(HAVE_IP_DMA_V1) && !defined(HAVE_IP_DMA_V2)
+#  error Unknown STM32 DMA IP version
+#endif
+
 /* These definitions provide the bit encoding of the 'status' parameter passed to the
  * DMA callback function (see dma_callback_t).
  */

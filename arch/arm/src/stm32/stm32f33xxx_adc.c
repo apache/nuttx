@@ -119,10 +119,6 @@
 #  define ADC2_HAVE_JEXTSEL
 #endif
 
-#if defined(CONFIG_STM32_ADC_NOIRQ) && defined(ADC_HAVE_DMA)
-#  error "ADC DMA support requires common ADC interrupts"
-#endif
-
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR    STM32_RCC_AHBRSTR
@@ -132,12 +128,12 @@
 
 /* ADC interrupts ***********************************************************/
 
-#define STM32_ADC_DMAREG_OFFSET    STM32_ADC_CFGR_OFFSET
-#define ADC_DMAREG_DMA             ADC_CFGR_DMAEN
-#define STM32_ADC_EXTREG_OFFSET    STM32_ADC_CFGR_OFFSET
-#define ADC_EXTREG_EXTSEL_MASK     ADC_CFGR_EXTSEL_MASK
-#define ADC_EXTREG_EXTEN_MASK      ADC_CFGR_EXTEN_MASK
-#define ADC_EXTREG_EXTEN_DEFAULT   ADC_CFGR_EXTEN_RISING
+#define STM32_ADC_DMAREG_OFFSET    STM32_ADC_CFGR1_OFFSET
+#define ADC_DMAREG_DMA             ADC_CFGR1_DMAEN
+#define STM32_ADC_EXTREG_OFFSET    STM32_ADC_CFGR1_OFFSET
+#define ADC_EXTREG_EXTSEL_MASK     ADC_CFGR1_EXTSEL_MASK
+#define ADC_EXTREG_EXTEN_MASK      ADC_CFGR1_EXTEN_MASK
+#define ADC_EXTREG_EXTEN_DEFAULT   ADC_CFGR1_EXTEN_RISING
 #define STM32_ADC_JEXTREG_OFFSET   STM32_ADC_JSQR_OFFSET
 #define ADC_JEXTREG_JEXTSEL_MASK   ADC_JSQR_JEXTSEL_MASK
 #define ADC_JEXTREG_JEXTEN_MASK    ADC_JSQR_JEXTEN_MASK
@@ -374,10 +370,10 @@
 /* Default ADC DMA configuration */
 
 #ifndef ADC1_DMA_CFG
-#  define ADC1_DMA_CFG ADC_CFGR_DMACFG
+#  define ADC1_DMA_CFG ADC_CFGR1_DMACFG
 #endif
 #ifndef ADC2_DMA_CFG
-#  define ADC2_DMA_CFG ADC_CFGR_DMACFG
+#  define ADC2_DMA_CFG ADC_CFGR1_DMACFG
 #endif
 
 /****************************************************************************
@@ -1591,42 +1587,42 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* Enable the analog watchdog */
 
-  clrbits = ADC_CFGR_AWD1CH_MASK;
-  setbits = ADC_CFGR_AWD1EN | ADC_CFGR_AWD1SGL |
-            (priv->r_chanlist[0] << ADC_CFGR_AWD1CH_SHIFT);
+  clrbits = ADC_CFGR1_AWD1CH_MASK;
+  setbits = ADC_CFGR1_AWD1EN | ADC_CFGR1_AWD1SGL |
+            (priv->r_chanlist[0] << ADC_CFGR1_AWD1CH_SHIFT);
 
   /* Set the resolution of the conversion */
 
-  clrbits |= ADC_CFGR_RES_MASK;
-  setbits |= priv->resolution << ADC_CFGR_RES_SHIFT;
+  clrbits |= ADC_CFGR1_RES_MASK;
+  setbits |= priv->resolution << ADC_CFGR1_RES_SHIFT;
 
 #ifdef ADC_HAVE_DMA
   if (priv->hasdma)
     {
       /* Set DMA mode */
 
-      clrbits |= ADC_CFGR_DMACFG;
+      clrbits |= ADC_CFGR1_DMACFG;
 
       setbits |= priv->dmacfg;
 
       /* Enable DMA */
 
-      setbits |= ADC_CFGR_DMAEN;
+      setbits |= ADC_CFGR1_DMAEN;
     }
 #endif
 
   /* Disable continuous mode and set align to right */
 
-  clrbits |= ADC_CFGR_CONT | ADC_CFGR_ALIGN;
+  clrbits |= ADC_CFGR1_CONT | ADC_CFGR1_ALIGN;
 
   /* Disable external trigger for regular channels */
 
-  clrbits |= ADC_CFGR_EXTEN_MASK;
-  setbits |= ADC_CFGR_EXTEN_NONE;
+  clrbits |= ADC_CFGR1_EXTEN_MASK;
+  setbits |= ADC_CFGR1_EXTEN_NONE;
 
   /* Set CFGR configuration */
 
-  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, clrbits, setbits);
+  adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
 
 #ifndef CONFIG_STM32_ADC_NOIRQ
   /* Enable interrupt flags, but disable overrun interrupt */
@@ -1752,7 +1748,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   ainfo("ISR:  0x%08x CR:   0x%08x CFGR: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
-        adc_getreg(priv, STM32_ADC_CFGR_OFFSET));
+        adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 
   ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),

@@ -258,6 +258,7 @@
 #define RCC_APB2RSTR_TIM11RST       (1 << 4)  /* Bit 4:  TIM11 timer reset */
                                               /* Bits 5-8: Reserved */
 #define RCC_APB2RSTR_ADC1RST        (1 << 9)  /* Bit 9:  ADC1 interface reset */
+#define RCC_APB2RSTR_ADCRST         (1 << 9)  /* for compatibility with ADC driver */
                                               /* Bit 10: Reserved */
 #define RCC_APB2RSTR_SDIORST        (1 << 11) /* Bit 11: SDIO reset */
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI 1 reset */

@@ -59,8 +59,12 @@
      - 4-bit SMS in SMCR register
 */
 
-#ifdef CONFIG_STM32_HAVE_IP_TIMERS_V2
+#if defined(CONFIG_STM32_HAVE_IP_TIMERS_V2)
 #  define HAVE_IP_TIMERS_V2
+#elif defined(CONFIG_STM32_HAVE_IP_TIMERS_V1)
+#  define HAVE_IP_TIMERS_V1
+#else
+#  error "STM32 TIMER IP version not specified"
 #endif
 
 /* TIM16 has OR register (F3/L4) */

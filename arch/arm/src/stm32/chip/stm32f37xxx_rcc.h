@@ -206,6 +206,7 @@
 
 #define RCC_APB2RSTR_SYSCFGRST      (1 << 0)  /* Bit 0: SYSCFG, Comparators and operational amplifiers reset */
 #define RCC_APB2RSTR_ADCRST         (1 << 9)  /* Bit 9: ADC reset */
+#define RCC_APB2RSTR_ADC1RST        (1 << 9)  /* for compatibility with ADC driver */
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI 1 reset */
 #define RCC_APB2RSTR_USART1RST      (1 << 14) /* Bit 14: USART1 reset */
 #define RCC_APB2RSTR_TIM15RST       (1 << 16) /* Bit 16: TIM15 reset */
