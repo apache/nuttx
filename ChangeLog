@@ -20626,4 +20626,1176 @@
 	  -CONFIG_NETUTILS_PING or change them to CONFIG_SYSTEM_PING with
 	  CONFIG_NET_ICMP_SOCKET=y  From Gregory Nutt (2018-09-05).
 
-7.27 2018-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.27 2018-11-15 Gregory Nutt <gnutt@nuttx.org>
+
+	* mm/iob:  Add an IOB notifier that will send a signal to any registered
+	  threads that want to be notified when an IOB has been freed.  This is an
+	  untested work-in-progress and is intended to be a part of a larger solution
+	  to correctly handling network poll operations.  From Gregory Nutt
+	  (2018-09-08).
+	* sched/signal:  Add a generic signal notification facility.  Modify the
+	  custom IOB available notifier so that it is now just a wrapper around this
+	  generic signal notification.   This generic signal notification facility
+	  will, eventually, be used to support network polling.  From Gregory Nutt
+	  (2018-09-09).
+	* net/tcp and udp:  Add logic to signal events when TCP or UDP read-ahead
+	  data is buffered.  From Gregory Nutt (2018-09-09).
+	* net/netdev:  Add signal notification for the case where the network goes
+	  down.  From Gregory Nutt (2018-09-09).
+	* sched/signal:  In signal notification facility, use sigqueue() to notify
+	  vs. kill().  With sigqueue(), we can pass more info (but still not enough).
+	  From Gregory Nutt (2018-09-09).
+	* Signals were not a good choice of IPC to implement the poll function for
+	  several reasons:  In order to handle the asynchronous poll-related event, a
+	  substantial amount of state information is needed.  Signals are only capable
+	  of passing minimal amounts of data.  There are also complexities with
+	  performing kernel space signal handlers in kernel space code that is better
+	  to avoid.  So, instead of signals, the equivalent logic was converted to run
+	  via a callback that executes on the high-priority work queue.  From Gregory
+	  Nutt (2018-09-09).
+	* net/TCP:  Extend the TCP notification logic logic so that it will also
+	  report loss of connection events.  From Gregory Nutt (2018-09-09).
+	* arch/arm/src/lpc43xx: Fix Ethernet TX_EN pin definitions.  TX_EN on
+	  LPC43xx can be routed via P0.1 and PC.4 in both MII and RMII mode.  Before,
+	  P0.1 was hard-coded for MII and PC.4 was hard-coded for RMII.  Also, the
+	  definitions used inconsistent naming (TXEN vs. TX_EN).  From Jakob Haufe
+	  (2018-09-10).
+	* sched/wqueue:  Notifier design cleanup.  The original concept used
+	  pre-allocated notification data structures.  However, the notification data
+	  must persist for an indeterminate amount of time.  So the design was
+	  modified to use dynamically allocated data structures.  This commit
+	  simplifies the design by removed some residual 'machinery' that is no longer
+	  needed.  From Gregory Nutt (2018-09-10).
+	* sched/sched/sched_waitpid.c: Remove a bad error check.  From Gregory Nutt
+	  (2018-09-10).
+	* mm/iob and sched/semaphore:  Work around some issues with the IOB throttle
+	  semaphore.  It has some odd behaviors that can cause assertions in
+	  sem_post().  Also, it seems to get outside of its range occasionally.  Need
+	  to REVISIT this.  From Gregory Nutt (2018-09-10).
+	* sched/wqueue:  Add an option to work queue notifier so that the
+	  notification can occur on different work queues.  From Gregory Nutt
+	  (2018-09-11).
+	* This patch prevent heap corruption as in below case.
+
+	  TASK A                        TASK B
+	  malloc()
+	  mm_takesemaphore()
+	  heap holder is set to TASK B
+	  <--- preempt
+	  ...
+	  task_exit()
+	  Set to current task to
+	  TASK B
+	  Try to release tcb, and
+	  stack memory
+	  free()
+	  mm_takesemaphore()
+	  - Successfully obtain
+	  semaphore because current
+	  task and heap holder is
+	  same.
+	  Free memory....
+	  Heap corrupt.
+
+	  This change forces all de-allocations via sched_kfree() and sched_ufree()
+	  to be delayed.  Eliminating the immediate de-allocation prevents the
+	  above problem with the the re-entrant semaphore because the deallocation
+	  always occurs on the worker thread, never on TASK B.
+
+	  There could be consequences in the timing of memory availability.  We
+	  will see.  From EunBong Song (2018-09-11).
+	* mm/iob:  IOB free notifier should accept the work queue ID as a
+	  parameter.  The notification may need to run on either the high- or low-
+	  priority work queue.  sched/work:  Change the default priority of the
+	  low-priority work queue to 100.  From Gregory Nutt (2018-09-11).
+	* net/tcp and net/udp:  In the POLLOUT poll logic, request an immediate Tx
+	  poll from the network device bound to the socket.  This obviously cannot
+	  work if there is not single device bound to the network device.  From
+	  Gregory Nutt (2018-09-11).
+	* kinetis:  i2c On failed reset re-init i2c and clocking.  If a reset fails,
+	  we still must reinitializes the i2c block so that subsequent transfers will
+	  not cause a hard-fault due to the clock being off.  If that transfer fails
+	  it can try to reset again.  From David Sidrane (2018-09-11).
+	* net/tcp/tcp_netpoll.c:  Add logic to receive notifications when IOBs are
+	  freed (Needs CONFIG_NET_TCP_WRITE_BUFFERS and CONFIG_IOB_NOTIFIER).  At
+	  present, does nothing because the logic in in psock_tcp_cansend() does not
+	  check for the availability of IOBs.  That will change.  From Gregory Nutt
+	  (2018-09-11).
+	* mm/iob:  iob_navail() was returning the number of free IOB chain queue
+	  entries, not the number of free IOBs.  Completely misnamed.  From Gregory
+	  Nutt (2018-09-12).
+	* net/tcp/tcp_netpoll.c:  Add logic to receive notifications when IOBs are
+	  freed (Needs CONFIG_NET_TCP_WRITE_BUFFERS and CONFIG_IOB_NOTIFIER).  At
+	  present, does nothing because the logic in in psock_tcp_cansend() does not
+	  check for the availability of IOBs.  That will change.
+
+	  mm/iob:  iob_navail() was returning the number of free IOB chain queue
+	  entries, not the number of free IOBs.  Completely misnamed.
+
+	  net/tcp/tcp_send_buffered.c:  Extend psock_tcp_cansend() so that it also
+	  requires that at least on IOB is also available.
+
+	  net/tcp/tcp_netpoll.c:  tcp_iob_work() needs to free the allocated
+	  argument when it is finished.
+
+	  sched/wqueue/kwork_notifier.c:  Redesign some data structures.  struct
+	  works_s must appear at the beginning of the notifier entry structure.
+	  That is because it contains the work queue indexes.  This solves a
+	  hard-fault issue.  From Gregory Nutt (2018-09-12).
+	* net/udp/udp_netpoll.c:  Port TCP poll changes to UDP.  From Gregory Nutt
+	  (2018-09-12).
+	* tools/Config.mk:  Fix an error in RWILDCARD implementation  From Anthony
+	  Merlino (2018-09-12).
+	* mm/iob:  Add a divider that can be used to reduce the rate of IOB
+	  notifications.  From Gregory Nutt (2018-09-13).
+	* tools/Directories.mk:  Correct the path to the installed libcxx
+	  directory.  From Gregory Nutt (2018-09-13).
+	* fs/smartfs/smartfs_smart.c:  Current sector should have a space for next
+	  entry size.  If not, we should move to next sector.  From EunBong Song
+	  (2018-09-14).
+	* task/task_restart.c:  Restarted with sigprocmask set.  Should have been
+	  cleared.  Noted by Jeongchan Kim  From Gregory Nutt (2018-09-14).
+	* net/usrsock:  Revert commit 'net/usrsock:  Optimize option dependence'.
+	  Re-allow combination of usrsock and NuttX TCP/IP stack.  For example, in
+	  case device has Ethernet and mobile connectivity and NuttX TCP/IP stack is
+	  used when configured to use Ethernet connection and usrsock when
+	  configured to use modem (modem TCP/IP stack through usrsock).  From Jussi
+	  Kivilinna (2018-09-14).
+	* libs/libc/wqueue/work_usrthread.c:  Eliminate a race condition noted by
+	  Xiang Xiao.  Use sigprocmask() so that we do not lose a signal.  From
+	  Gregory Nutt (2018-09-14).
+	* fs/vfs/fs_open.c:  Add nx_open() which is the same as open() except that
+	  it does not create a cancellation point nor does it modify the errno
+	  variable.
+
+	  many locations:  Change occurrences of open() followed by file_detach() to
+	  file_open().  Change most non-controversial calls to open() to nx_open().
+
+	  fs/inode/fs_fileopen.c:  Add file_open() implementation with some interim,
+	  placeholder logic.  From Gregory Nutt (2018-09-15).
+	* include/nuttx/fs/fs.h:  Fix some backward parameters in a new macro
+	  definition.  From Gregory Nutt (2018-09-15).
+	* Replace calls to ioctl() in the OS to file_ioctl()  From Gregory Nutt
+	  (2018-09-15).
+	* configs/stm32l4r9ai-disco/src/stm32_adc.c:  Replace calls to ioctl() in
+	  the OS to file_ioctl()  From Gregory Nutt (2018-09-15).
+	* Rename file_close_detached() to just file_close() for better consistency
+	  in naming.  From Gregory Nutt (2018-09-15).
+	* fs/inode/fs_fileclose.c:   Move file_close() a separate file.  It no
+	  longer makes sense for it to cohabitate with file_detach().  From Gregory
+	  Nutt (2018-09-15).
+	* configs/b-l475e-iot01a/include/b-l475e-iot01a_clock.h:  Correct timer
+	  source clock frequencies.  From Freemans Goden (2018-09-16).
+	* tools/tesbuild.sh:  No longer installs and builds the NxWidgets
+	  libraries.  They are now a port of apps/.  From Gregory Nutt (2018-09-16).
+	* I2C support for STM32H7
+
+	  - stm32h7/chip.h:  Update peripherals
+	  - stm32h7x3xx_rcc.h:  Update definitions
+	  - stm32h7x3xx_rcc.c:  Remove some unused code and configure I2C clocks
+	  - stm32h7: add lower half I2C driver (based on F7 I2C driver)
+	  - configs/nucleo-h743zi: Add LSM303AGR and LSM6DSL configuration
+	  - sensors/lsm303agr.c, sensors/lsm6dsl.c: add missing include, remove
+	    whitespace  From raiden00pl (2018-09-16).
+	* libs/libc/math:  Add variable convergence in log() and logf() to avoid
+	  hangs caused by failure to converge for very specific input values.
+
+	  libs/libc/math:  Small change to log() and logf() that improves accuracy
+	  and convergence time  From Rajan Gill (2018-09-16).
+	* drivers/timers:  RTC_PERIODIC is no longer EXPERIMENTAL, remove
+	  unimplemented EXPERIMENTAL RTC configuration variables.  From Juha
+	  Niskanen (2018-09-17).
+	* C library:  Add some new functions defined in POSIX.1-2017:  stpncpy(),
+	  strsignal(), psignal(), psiginfo().  From Gregory Nutt (2018-09-17).
+	* libs/libc/string/lib_stpncpy.c:  Correct the return pointer value for the
+	  case where the NUL terminator is transferred.  From Gregory Nutt
+	  (2018-09-18).
+	* drivers/usbdev: Fix buffer overrun check in rndis.c.  The rndis driver has
+	  been working since 13 Nov 2017.  However, I finally found that it depends
+	  on network and buffer configurations.  If a receiving TCP packet is
+	  divided into smaller ones based on USB max packet size, this condition
+	  check works correctly.  From Masayuki Ishikawa (2018-09-20).
+	* - mtd/progmem: change up_progmem_npages to up_progmem_neraseblocks
+
+	  page is a unit for read/write operation.
+	  eraseblock is a unit for erase operation.
+	  up_progmem_npages is a little bit confusing because it returns number of
+	  erase blocks in flash memory. This patch changes up_progmem_npages to
+	  up_progmem_neraseblocks. There is no logical change.
+
+	  - mtd/progmem: up_progmem_erasesize.
+
+	  Change argument name to be more readable.
+
+	  - mtd/progmem: up_progmem_eraseblock
+
+	  Change up_progmem_erasepage to up_progmem_eraseblock.
+	  eraseblock is more readable name than erasepage.
+
+	  - mtd/progmem: change up_progmem_eraseblock's return value.
+
+	  up_progmem_eraseblock erase a block. so it's better to return the erase block
+	  size than page size.
+
+	  - arm/cortex-r : fix wrong cp15_flash_dcache.
+
+	  change mcrne to mcr for unconditional dcache.  From EunBong Song (2018-09-21).
+	* arch/arm/src/armv7-a:  Replicate the same fix was previously committed for
+	  the armv7-r.  From Gregory Nutt (2018-09-20).
+	* arch/arm/src/lc823450: Fix up_allocate_heap() in
+	  lc823450_allocateheap2.c.  For lc823450, heap area in flat build mode must
+	  start just after  _eronly.  Because bss/data area is allocated in lower
+	  address than text area in SRAM. See ld.scripts for details. Also, this
+	  change removes unused up_allocateheap.c  From Masayuki Ishikawa
+	  (2018-09-21).
+	* arch/arm/src/stm32f7:  Remove adhoc PM interfaces and add CONFIG_PM serial
+	  suspend.  From Gregory Nutt (2018-09-21).
+	* arch/arm/src/kinetis:  Remove all attempts to reprioritize interrupts.
+	  From Gregory Nutt (2018-09-21).
+	* arch/arm/src:  Correct all ARMv7-M architectures.  Interrupts were not be
+	  disabled correctly on power up.  Writing zero to the NVIC SET-ENABLE
+	  registers has no effect.  In order to disable interrupts, it is necessary
+	  to write all ones to the NVIC CLEAR-ENABLE register.  Noted by David
+	  Sidrane.  From Gregory Nutt (2018-09-21).
+	* net/tcp/tcp_recvwindow.c:  In order to receive data we must not only have
+	  IOBs available, but we must also have at least one IOB chain qentry
+	  available.  Otherwise, we will advertise that we an buffer a lot of data
+	  when, in fact, we cannot.  This is an experimental fix to a performance
+	  problem noted by Masayuki Ishikawa.  From Gregory Nutt (2018-09-22).
+	* fs/driver:  Add support for named MTD drivers in the pseudo file system.
+	  This will, eventually, allow us to mount file systems that need MTD
+	  drivers without having to fake an intervening block driver.
+	  fs/driver and fs/mount:  Add mount() support for file systems that require
+	  MTD drivers (vs. block drivers).  From Gregory Nutt (2018-09-22).
+	* include/sys/socket.h:  Renumber the socket types.  They must begin at 1,
+	  not zero. Socket type zero has a special meaning for some interfaces.  For
+	  example, getaddrinfo() uses a socket type of zero to many any type of
+	  socket.  The is no standard name for the any-type-socket, but macOS uses
+	  SOCK_UNSPEC.  NuttX will do the same.  Issue noted by Anthony Merlino.
+	  From Gregory Nutt (2018-09-24).
+	* Brings in an initial port of version 0.3.7 of Peter Anderson's SPIFFS
+	  flash file system into NuttX.  From Gregory Nutt (2018-09-24).
+	* arch/arm/src/imxrt/imxrt_enet.c:  The board would not come up if I ran
+	  Nuttx from cold. I dumped the PHY registers to see what the differences
+	  were and the PHY was coming up in NANDTree mode. This is a mode for
+	  testing connectivity between the PHY and the MAC.  Switching this mode off
+	  in the PHY registers has fixed the problem.  From Dave Marples (2018-09-25).
+	* net/tcp/tcp_wrbuffer.c:  Fix buffer release handling on failed buffer
+	  alloc.  Attempt to release write buffer on failed TCP write I/O buffer
+	  alloc and tryalloc failed to wrb->wb_iob assertion.  From Harri Luhtala
+	  (2018-09-25).
+	* drivers/net/enc28j60.c:  Adjust debug trace levels.  Correct typos in some
+	  comments.  From Harri Luhtala (2018-09-25).
+	* A few improvements to getaddrinfo:  (1)  Use the protocol and socktype
+	  hints in returned address, (2) Ignore AI_PASSIVE argument if hostname is
+	  not NULL  From Anthony Merlino (2018-09-25).
+	* Fixes issue with libcxx build.  This was changed multiple times, but
+	  should be fixed now.  From Anthony Merlino (2018-09-25).
+	* include/nuttx:  Fix definitions used to access OS functions within the
+	  libraries.  In the FLAT build, we must always set the errno and/or create
+	  cancellation points because the same library functions are used within the
+	  OS as are used by applications.  This could cause issues for the OS but
+	  corrects some problems at the user interface.  Noted by Federico
+	  Braghiroli in Bitbucket issue 121.  From Gregory Nutt (2018-09-26).
+	* arch/arm/src/imxrt:  Add LPI2C driver.  From Ivan Ucherdzhiev (2018-09-26).
+	* arch/arm/src/imxrt/imxrt_lpsrtc.c:  SVNC LPCR register bits 0 & 1 are NOT
+	  reserved and are, in fact, needed to enabled the SRTC.  Now the SRTC is
+	  working.  From Ivan Ucherdzhiev (2018-09-26).
+	* arch/arm/src/imxrt/imxrt_enet.c:  Fix a race condition in setting up the
+	  Ethernet Tx transfer.  From Dave Marples (2018-09-26).
+	* arch/arm/src/lc823450: MPU support for FLAT build  From Masayuki Ishikawa
+	  (2018-09-27).
+	* Corrections for the i.MXRT Ethernet:
+
+	  (1) Now the Ethernet is completely re-initialized when an error occurs by
+	      means of taking the interface down and back up but the PHY is _not_
+	      renegotiated for that case because that is very time consuming and an
+	      error in the Ethernet is no reflection on the state of the PHY anyway.
+	  (2) Explicitly sets the expected PHY address to zero (this could be moved
+	      into the config) rather than searching for it which takes ages, and
+	      it's zero anyway for this board (that's the broadcast address, and
+	      anything that cannot respond on that has multiple PHYs, so that would
+	      be a new board).
+	  (3) Allows for the renegotiation of the PHY to be optional when a reset is
+	      needed. If a non-renegotiated reset doesn't result in good comms to
+	      the PHY then it'll automatically be escalated to a renegotiated one.
+	  (4) Only performs a reset for errors that need it (the CRITICAL_ERROR
+	      define).  The list of errors that need reset are somewhat arbitrarily
+	      chosen based on my prejudices and might need to be revisited, but
+	      certainly the jabber errors don't need reset, the partial packet is
+	      thrown away by the layer above anyway.
+	  (5) Re-loads the multicast table on reset.
+	  (6) Adds a bit more logging into the imxrt Ethernet module.  From Dave
+	      Marples (2018-09-28).
+	* fs/spiffs:  SPIFFS is basically functional although still immature.  From
+	  Gregory Nutt (2018-09-28).
+	* drivers/leds/max7219.c:  Support all digits presented in the MAX7219
+	  datasheet.  From Alan Carvalho de Assis (2018-09-29).
+	* fs/procfs/fs_procfsproc.c:  Change output of the env file so that it looks
+	  more like output from the 'env' command.  Documentation/NuttShell.html:
+	  Document the new NSH 'env' command.  From Gregory Nutt (2018-09-30).
+	* sched/environ/env_unsetenv.c:  Fix and error in unsetenv() when unsetting
+	  the last of the environment variables.  From Gregory Nutt (2018-09-30).
+	* Documentation/NuttShell.html:  Update document to describe the 'export'
+	  command, the CONFIG_NSH_VARS setting, and the effect of this setting on
+	  the behavior of the 'set' and 'unset' commands. Add description of the
+	  PATH environment variable.  From Gregory Nutt (2018-10-01).
+	* EFM32, STM32 (FS/HS), STM32F7, and STM32L4 OTGFS/HS:  Th epin_configure()
+	  function used the same eptype as the TxFIFO number for all endpoints.
+	  This should probably be the physical EP number, not the EP type.
+	  Suggested by Key Two.  From Gregory Nutt (2018-10-02).
+	* libs/libc/stdio/lib_sscanf.c: Fix conversion for format specifiers that
+	  appear right after a floating point format specifier.   When performing a
+	  floating point conversion the parsing code could consume more than
+	  required characters from the input buffer. This made impossible to convert
+	  input of form "1.1K" using format "%f%c".  Fix the issue by advancing the
+	  input buffer with the actual characters converted as a float point
+	  number.  From Mihai Serban (2018-10-03).
+	* stm32h7/rcc: update rcc defs, add SPI clock configuration and some fixes
+	  in rcc
+	  stm32h7: initial defs for SPI
+	  stm32h7: initial defs for MDMA, DMA, BDMA and DMAMUX
+	  From raiden00pl (2018-10-04).
+	* stm32_tim.c: don't use hard-coded UIF interrupt in some functions  From
+	  raiden00pl (2018-10-04).
+	* configs: add support for nucleo-f302r8 board  From raiden00pl (2018-10-05).
+	* libs/libc/stdio:  Remove CONFIG_NOPRINTF_FIELDWIDTH.  That option does,
+	  indeed, make the printf family of functions much smaller.  But it also
+	  adds a lot of complexity and makes the functions non-standard.  Removing
+	  this might break some of the tinier platforms but it is the best thing to
+	  do for long term maintenance for for OpenGroup.org compliance.
+
+	  libs/libc/stdio/lib_libvsprintf.c:  Resolves the integer field width
+	  problem if Issue 35 for the cases of integer, long and long long integer
+	  types.  The output now matches the output form glibc.  From Gregory Nutt
+	  (2018-10-05).
+	* configs/olimex-stm32-p407:  Added a HID keyboard configuration.  From
+	  Gregory Nutt (2018-10-06).
+	* configs/olimex-lpc1766stk:  Add support to initialize a USB HID keyboard.
+	  Still don't have a working configuration.  Seems to require a lot of
+	  transfer descriptors.  Also reorganized some logic.  It has been a long
+	  time since the Olimex LPC1766-STK has had any TLC.
+
+	  configs/olimex-lpc1766stk/hidkbd:  Add a configuration for testing the HID
+	  keyboard.  From Gregory Nutt (2018-10-06).
+	* drivers/wireless/ieee802.11:  Add capability for Broadcom chips to get
+	  firmware and CLM data from a mounted file system vs. in-memory data
+	  structures.  From Ramtin Amin (2018-10-07).
+	* drivers/wireless/ieee802.11:  Extend Add capability to get firmware from a
+	  mounted file system to BCM43362.  From Gregory Nutt (2018-10-07).
+	* arch/arm/src/stm32f7/stm32_serial.c:  Force invalidation of data cache
+	  after DMA re-enable when returning from low-power mode  From Juha Niskanen
+	  (2018-10-09).
+	* stm32f0, stm32f7, stm32h7, stm32l4 serial:  Fix use of
+	  CONFIG_SERIAL_IFLOWCONTROL where CONFIG_SERIAL_OFLOWCONTROL was intended.
+	  From Juha Niskanen (2018-10-10).
+	* EFM32, Kinetis, BCM2708:  Juha Niskanen's fix related to
+	  CONFIG_SERIAL_OFLOWCONTROL also applies to cloned logic in BCM2708, EFM32,
+	  and Kinetis.  From Gregory Nutt (2018-10-10).
+	* arch/mips/include/mips32/cp0.h:  Fix some copy-paste errors that cause
+	  malformed comments and syntax errors when certain CP0 CONFIG1 bits are
+	  referenced.  Note in Issue 123 by Anonymous.  From Gregory Nutt
+	  (2018-10-12).
+	* arch/arm/src/lpc43xx/lpc43_serial.c:  Fix copy-paste error:
+	  g_usart1port->g_uart1port.  From Dave Marples (2018-10-12).
+	* arch/arm/src/imxrt/imxrt_lpi2c.c:  Fixes 2 bugs in the for IMXRT1050: (1)
+	  I2C time out and did not send STOP condition when sending single byte, (2)
+	  I2C could not receive bytes after repeated start.  From Ivan Ucherdzhiev
+	  (2018-10-13).
+	* Improvements in STM32 PWM low level driver
+
+	  stm32_pwm: remove some impossible PWM configurations
+	  stm32_pwm: support for complementary outputs
+	  stm32_pwm: deadtime configuration
+	  stm32_pwm: output polarity and IDLE state configuration
+
+	  nucleo-f302r8: pwm support
+	  stm32f429i-disco: pwm support  From Mateusz Szafoni (2018-10-14).
+	* stm32_pwm: break and lock configuration and some cosmetics  From Mateusz
+	  Szafoni (2018-10-15).
+	* arch/mips/src/pic32mz/pic32mz-serial.c:  Fix a typo in assignment of TTYS0
+	  to UART6  From Ouss4 (2018-10-15).
+	* arch/mips/src/pic32mz/pic32mz-head.S:  Initialize the global pointer in
+	  all shadow sets.  From Ouss4 (2018-10-16).
+	* arch/mips/src/mips32/Toolchain.defs:  Add toolchain flags for the pinguino
+	  toolchain under Linux.  From Ouss4 (2018-10-16).
+	* configs/pcblogic-pic32mx:  Remove support for the PCB Logic PIC32MX
+	  board.  I do not find any references to PCB Logic on the web and I do not
+	  believe that this breakout board is available any longer.  From Gregory
+	  Nutt (2018-10-17).
+	* drivers/mtd:  Add support to Macronix MX25LF25635F serial NOR flash  From
+	  David Sidrane (2018-10-17).
+	* drivers/mtd/s25fl1.c:  During a MTDIOC_GEOMETRY ioctl call, the driver was
+	  incorrectly reporting the blocksize to be the same as the erasesize.  The
+	  blocksize should be 256 (the page size).  This patch fixes that, and now
+	  the SmartFS configration is working.  From Ken Pettit (2018-10-18).
+	* configs/bambino-200e/include/board.h:  Correct calculation of SDMMC clock
+	  configuration.  The LPC43 has no SDMMC source clock divider.  Error noted
+	  by Dave Marples.  From Gregory Nutt (2018-10-18).
+	* stm32 enable separate DMA per SPI configuration  From Daniel Agar
+	  (2018-10-18).
+	* drivers/sensors/ina226.c:  Add INA226 device driver.  From Daniel P.
+	  Carvalho (2018-10-19).
+	* configs/lpcxpresso-lpc54628/include/board.h:  Update logic used to
+	  calculate SDMMC input clock divider.  From Gregory Nutt (2018-10-21).
+	* Fix the LPC4330 family SDMMC card access. Some of these fixes (e.g. DELAY
+	  register) may also be applicable elsewhere. These are _NOT_ extensively
+	  tested, but they are certainly better than the current state of the
+	  driver.  The fixes, specifically, are;
+
+	  - Clocks were wrongly configured - way too fast because there is no
+	    primary divider on LPC4330
+
+	    This is fixed by means of changing the definitions in the board.h file.
+	    I've edited the one for the lpc4330-xplorer board because I'm actually
+	    working with Versiboard and don't want to contribute that config just
+	    yet while I've still got the drains up on it.
+
+	  - The LPC43_SDMMC_DELAY register was not being set
+
+	    I suspect, in the 'real world', it's possible to get away without
+	    setting this, but I've added a register definition, default value and
+	    register access macros into arch/arm/src/lpc43xx/chip/lpc43_scu.h and
+	    then used them in arch/arm/src/lpc43xx/lpc43_sdmmc.c.
+
+	  - The LPC43_SDMMC_BLKSIZ and LPC43_SDMMC_BYTECNT registers had the wrong
+	    values.
+
+	    The management have already implemented a rather nice block level
+	    interface for the stm32 so I've just re-used that to write to these
+	    registers as required. I'm slightly nervous that accessing the
+	    configuration registers (SCR being the prime example) which has a much
+	    smaller block size may not be being done in the right way but it does
+	    seem to work correctly, so let's assume it's all OK until someone tells
+	    me otherwise.
+
+	  These fixes have been tested with DMA-based read/write on a LPC4330. Speed
+	  via nsh is pretty low but I'm assuming that's just a
+	  buffering/implementation issue for now.  From Dave Marples (2018-10-21).
+	* arch/arm/src/lpc54/lpc54_sdmmc:  Port Dave Marple's LPC43 USB DCD fix to
+	  the LPC54 with appropriate naming changes.  From Gregory Nutt (2018-10-21).
+	* arch/arm/src/stm32f7/stm32_flash.c:  Allow programming OTP blocks through
+	  progmem interface  From Jussi Kivilinna (2018-10-22).
+	* arch/arm/src/lpc54xx/lpc54_sdmmc.c:  Tested Dave Marple's LPC43 fix with
+	  the LPC54.  The driver still does not work on the LPC54.  This commit adds
+	  support for and SDMMC errata and setting of the delay register which was
+	  missing in the previous commit.  It appears that now I can read the SD
+	  card successfully, but I get CRC errors when writing to the card.  From
+	  Gregory Nutt (2018-10-22).
+	* arch/arm/src/lpc43xx/lpc43_sdmmc.c:  This commit corrects a problem in
+	  lpc43_dmasendsetup().  There was no linked DMA descriptor code on the send
+	  side.  The end result was stalls while sending multiple sectors.  This
+	  commit adds that in and the send code is working much better.  From Dave
+	  Marples (2018-10-23).
+	* arch/arm/src/lpc54xx/lpc54_sdmmc.c:  This commit ports Dave Marple's DMA
+	  fix for the LPC43 SD/MMC to the LPC54.  From Gregory Nutt (2018-10-23).
+	* - imxrt:  Fix typos bit# and names
+	  - imxrt:  wdog Registers are 16 Bits
+	  - imxrt:  wdog Update has to be within 255 clocks of unlock
+	  - imxrt:  clockconfig Fix comments
+	  - imxrt1050-evk:  board.h Fix comments
+	  - imxrt:  imxrt_ccm.h Define Mux Selects for board.h use
+	  - imxrt:  clockconfig Allow better control from board.h
+
+	    1) Allows a board config clock setting to be defined
+	       in terms of the /n values shown in Figure 18-2.
+	       Clock Tree of the i.MX RT1050 Processor Reference
+	       Manual, Rev. 1, 03/2018
+	    2) Allows the clock multiplex selection to be made in
+	       The board config.
+
+	  - imxrt1050-evk:  Define board clocking based on divisor and muxes
+	  From David Sidrane (2018-10-23).
+	* nuttx/drivers/usbdev/rndis.c:  Account for CONFIG_NET_GUARDSIZE in
+	  allocation of packet buffer
+	  nuttx/drivers/usbdev/rndis.c:  Make USB device parameters configurable
+	  From Sakari Kapanen (2018-10-24).
+	* nuttx/net/tcp/tcp_input.c: Fix recovery when ackseq > unackseq.  The
+	  comment near this line says "reset the number of outstanding,
+	  unacknowledged bytes".  However, the code actually resets the whole TCP
+	  connection.  It was changed to the current form in commit f034d84ea1f with
+	  no explanation of the intent. Recover the line to what it was before that
+	  commit.  From Sakari Kapanen (2018-10-24).
+	* libs/libc:  Correct some errors in psignal() and stpncpy().  From Lokesh B
+	  V (2018-10-24).
+	* configs/nucleo-l432kc/include/board.h:  Fix SPI pin definitions.  From
+	  Daniel P. Carvalho (2018-10-24).
+	* With these changes the SDMMC card for LPC4330 is now working properly BUT
+	  it needs more testing, especially with different cards etc.  This code
+	  should be applicable to all members of the lpc43xx family.
+
+	  In addition to the problems that were previously identified there were a
+	  few other bits and pieces outstanding;
+
+	  - Timing was dependent on CPU speed rather than absolute time
+	  - End of transfer handling was a bit mixed up
+	  - It's possible for data to still be in the FIFO (i.e. not have reached
+	    the card) when a next write is requested, so we need to wait for that to
+	    complete
+	  - Interrupt Status could be carried over from one transfer episode to the
+	    next, corrupting progress
+	  - Multi-descriptor DMA writing simply wasn't implemented, but there were no
+	    indications ... it just failed silently  From Dave Marples (2018-10-24).
+	* arch/arm/src/lpc54xx/lpc54_sdmmc.c:  Ported the last of Dave Marples fixes
+	  to the LPC54.  Not yet verified.  From Gregory Nutt (2018-10-24).
+	* drivers/wireless/ieee80211/bcmf_core.c:  There were two functions that
+	  have a address issue.  In bcmf_read_sbreg and bcmf_write_sbreg,
+	  SBSDIO_SB_OFT_ADDR_MASK should be used before map address space.  Noted by
+	  Shao Li in Bitbucket issue #126.  From Gregory Nutt (2018-10-25).
+	* configs/nucleo-l432kc:  Added support for AT45DB Serial Flash  From Daniel
+	  P. Carvalho (2018-10-25).
+	* drivers/wireless/ieee80211/bcmf_sdpcm.c:  Remove incorrect OR condition.
+	  Always true, would always cause allocation failure.  Noted by Shao Li in
+	  Issue 127.  From Gregory Nutt (2018-10-26).
+	* arch/x86/src/qemu/qemu_head.S:  Correct .bss, IDLE stack, heap
+	  organization.  From Gregory Nutt (2018-10-26).
+	* net/sixlowpan: Fixes bug in uncompress_addr handling of odd postfix.  This
+	  affected multicast compress/uncompress since it's the only logic that used
+	  an odd postfix. The odd byte needs to be handled first, not last.  From
+	  Anthony Merlino (2018-10-27).
+	* Fixes logic in ipv6_input to handle more than ff02::/16 multicast
+	  addresses. Don't forward mcast packets if scope is not appropriate  From
+	  Anthony Merlino (2018-10-27).
+	* Adds extern "C" guard in include/net/if.h  From Anthony Merlino
+	  (2018-10-27).
+	* Adds definitions for IPPROTO_IPV6 socket options to netinet/in.h Adds
+	  missing fields to sockaddr_in6.  Adds struct ipv6-mreq.  These changes all
+	  follow the opengroup standard for netinet/in.h  From Anthony Merlino
+	  (2018-10-27).
+	* include/sys/socket.h:  With increased size of struct sockaddr_in6 of
+	  commit 55f31f03f9cca55b8b94ebf31cef3f501d8d76cf, the size of struct
+	  sockaddr_storage in include/sys/socket.h must also be increase so that it
+	  can contain the new, larger sockaddr_in6.  From Gregory Nutt (2018-10-27).
+	* libs/libc/misc/lib_crc8ccitt.c:  Adds implementation of CRC8-CCITT.  From
+	  Alan Carvalho de Assis (2018-10-27).
+	* Add basic SPI support for H7
+
+	  - stm32h7: basic SPI support (nodma, noirq)
+	  - nucleo-h743zi: nrf24l01 support
+	  - nrf24l01.c: fix compilation errors
+	  - stm32h7x3xx_rcc.c: enable SYSCFG clock  From Mateusz Szafoni (2018-10-28).
+	* arch/arm/stm32: add support for STM32F303xD/E; configs: add basic support
+	  for nucleo-f303ze  From Mateusz Szafoni (2018-10-28).
+	* include/netinet/in.h:  Per OpenGroup.org, type of sin_port in struct
+	  sockaddr_in must be in_port_t vs uint16_t.  NOTE: in_port_t is typdef'ed
+	  as uint16_t anyway.  Plus additional cosmetic changes for things like long
+	  lines.  From Gregory Nutt (2018-10-28).
+	* include/netinet/in.h:  Add IPv4 SOL_IP socket options for symmetry with
+	  IPv6 definitions added in a previous commit.  None of the socket options
+	  have been implemented!  From Gregory Nutt (2018-10-28).
+	* include/netinet/in.h:  Add other definitions required by OpenGroup.org.
+	  From Gregory Nutt (2018-10-28).
+	* drivers/sensors/mlx90614.c:  Add support for the Infrared Thermometer
+	  MLX90614  From Alan Carvalho de Assis (2018-10-28).
+	* configs/stm32f4discovery/src/stm32_mlx90614.c:  Add MLX90614 support for
+	  the STM32F4Discovery board  From Alan Carvalho de Assis (2018-10-28).
+	* include/sys/sockio.h, net/netdev/netdev_ioctl.c:  Fix a recently compile
+	  error introduced with commit that added the semi-standard ip_msfilter
+	  structure to netinet/in.h.  However, there was a non-standard version of
+	  that structure in sys/sockio.h.  This commit removes the non-standard
+	  version of struct ip_msfilter and adapts the IOCTL and device lookup logic
+	  in net/netdev to work with the new, semi-standard version in
+	  netinet/in.h.  From Gregory Nutt (2018-10-29).
+	* This commit brings in support for the GAP8 architecture.  The GAP8 is a
+	  1+8-core DSP-like RISC-V MCU.  Also included is support for the Gapuino
+	  GAP8 evaluation board.  From hhuysqt (2018-10-30).
+	* Fixes Kconfig options to include all STM32F20XX processors, not just
+	  STM32F207
+
+	  - arch/arm/src/stm32: Fixes Kconfig options to include all STM32F20XX
+	    processors, not just STM32F207
+	  - arch/arm/src/stm32: Removes redundant STM32_STM32F429 depends from
+	    Kconfig. STM32F4XXX already does this
+
+	  From Anthony Merlino (2018-10-31).
+	* include/nuttx/net/mld.h:  Add MLD header file based on RFC2710 and
+	  RFC3810.  From Gregory Nutt (2018-10-31).
+	* arch/arm/src/imxrt:  Add full support for the LPSPI in poll mode; includes
+	  a minor fix for LPI2C.  From Gregory Nutt (2018-10-31).
+	* net/mld:  Add basic build structure for Multicast Listener Discovery
+	  (MLD).  No yet functional.  From Gregory Nutt (2018-10-31).
+	* Add new configuration CONFIG_NET_MCASTGROUP.  This option is selected
+	  automatically if either CONFIG_NET_IGMP or CONFIG_NET_MLD are selected.
+	  Most conditional logic based on CONFIG_NET_IGMP replaced with conditioning
+	  on CONFIG_NET_MCASTGROUP.  From Gregory Nutt (2018-10-31).
+	* net/inet:  Add framework to support IPv4 and IPv6 protocol socket options
+	  (i.e., SOL_IP and SOL_IP6).  Handling of these socket options is a
+	  necessary step on the way to future ICMPv6 MLD support.  From Gregory Nutt
+	  (2018-10-31).
+	* net/inet/ipv4_setsockopt.c:  Add implementation for all IPv4 socket
+	  options that have implemented IOCTL command counterparts.  From Gregory
+	  Nutt (2018-10-31).
+	* configs/imxrt1050-evk/src:  Previous committed implemented atypical
+	  SPI-based MMC/SD card support conditioned on CONFIG_MMCSD.  This is, of
+	  course, incorrect and interferes with the implementation of correct MMC/SD
+	  card support using the correct SDIO-based peripheral.  This commit renames
+	  that atypical support to *mmcsd_spi* and conditions using that atypical
+	  support on CONFIG_MMCSD_SPI with should then not interfere with the
+	  correct MMC/SD support that can be conditioned on CONFIG_MMCSD_SDIO.  From
+	  Gregory Nutt (2018-10-31).
+	* arch/arm/src/imxrt/imxrt_usdhc.c:  Initial commit of the i.MXRT SDHC
+	  driver.  This driver is partially functional, working in PIO mode.  DMA
+	  support and additional testing are needed.  From Dave Marples (2018-10-31).
+	* This change is needed specifically for the case where a boot loader sets
+	  the SPE bit before starting NuttX.  In that case, the test in the SPI
+	  driver is bogus.  This change fixes that by assuring that NuttX has booted
+	  and initialized at least once (whether or not SPE is set) before the
+	  driver starts refusing to initialize.
+
+	  arch/arm/stm32*: Don't rely on SPI_CR1_SPE to determine if peripheral has
+	  been initialized yet.  From Anthony Merlino (2018-11-01).
+	* Xbee getset txpwr
+
+	  - drivers/wireless/ieee802154/xbee: Minor improvements to debug facilities.
+	  - drivers/wireless/ieee802154/xbee: Add support for setting/getting tx
+	    power.
+
+	  From Anthony Merlino (2018-11-01).
+	* net/mld:  Initialize implementation of MLD.  From Gregory Nutt (2018-11-01).
+	* include/nuttx/net/ipv6ext.h:  Create header file with all of the
+	  definitions of IPv6 extension headers that I could find.
+	  net/mld/mld_send.c:  Correct the size and format of the Hop-to-hop, Router
+	  alert extension header.  From Gregory Nutt (2018-11-01).
+	* drivers/sensors/mlx90614.c:  Fix MLX90614 to re-flash new device address
+	  From Alan Carvalho de Assis (2018-11-02).
+	* net/inet/ipv6_setsockopt.c:  Implement the IPV6_JOIN_GROUP and
+	  IPV6_LEAVE_GROUP socket options.
+
+	  net/devif/ipv6_input.c and net/icmpv6/icmpv6_input.c:  Add logic to skip
+	  over the variable number of IPv6 extension headers that may be present
+	  between the IPv6 header and the transport layer header.  The extension
+	  headers are simply ignored.  This is necessary because with MLD, certain
+	  incoming messages may have, at a minimum, a Router Alert Hop-by-hop
+	  extension header.
+
+	  net/devif, net/tcp, and net/udp:  Extend so that all support Transport
+	  protocols supported by IPv6 can handle the presence of IPv6 header
+	  extension options.  From Gregory Nutt (2018-11-02).
+	* net/mld:  Updates from comparison with roughly leveraged code and the MDL
+	  RFCs 2710 and 3810.
+
+	  net/mld:  Defer all timeout-related operations to the work queue vs.
+	  handling within the timer interrupt.  Need to notify the device driver for
+	  an immediate poll when there are MLD packets waiting to be sent.  From
+	  Gregory Nutt (2018-11-03).
+	* net/igmp:  Backport some MLD design improvements/fixes.  From Gregory Nutt
+	  (2018-11-04).
+	* net/mld:  Implement MLDv1 compatibility mode.  This completes coding of
+	  MLD.  MLD is, however, still completely untested.  From Gregory Nutt
+	  (2018-11-04).
+	* net/mld:  Fix some compile errors fill debug info is enabled.  Fix some
+	  errors in formatting the Listener report.  Still has a checksum error.
+	  From Gregory Nutt (2018-11-04).
+	* tools/configure.c: Add missing '\n' in printf statement
+
+	  tools/configure.c: Add missed -g option to getopt() string
+
+	  tools/configure.c and tools/configure.sh:  Fix Windows native pre-build
+	  kconfig-conf incompatibility.  Looks like pre-built Windows native
+	  kconfig-conf interprets "..\apps" as "..apps" (possibly '\a' as
+	  escape-sequence) so expand winnative path to double-backslashed variant
+	  "..\\apps".
+
+	  tools/mkdeps.c:  Fix '\0' missing in MinGW.  Implicit bug. There are 2
+	  cases.
+
+	  1. Under Linux.  The code works as planned: '\n' is always replaced with
+	     '\0' due to sprintf fills n-1 bytes and reaches buffer length limit.
+
+	  2. Under Windows/MinGW. There is memory corruption.  Seems like it`s a bug
+	     inside MinGW/snprintf.  Snprintf fills consecutively "oldbase",'
+	     ',"str",'\n', but does not inserts trailing '\0' instead of '\n'.  And
+	     when next append() occurs, strlen() returns garbage-appended "oldbase".
+
+	  So the fix just removes '\n' and reserves space for '\0'.
+
+	  tools/link.bat: Fix .fakelink creation
+
+	  configs/Makefile and tools/Config.mk:  Move single file copy to the new
+	  function COPYFILE.  This fixes the Windows native build case when there is
+	  no cp or cp does not recognize Windows paths.  From Anatol Ivanov
+	  (2018-11-05).
+	* configs/nucleo-l432kc:  Add support for the INA226.  From Daniel P.
+	  Carvalho (2018-11-05).
+	* tools/Config.mk and tools/Makefile.win:  Force use 'cmd' for shell with
+	  windows native build  From Anatol Ivanov (2018-11-06).
+	* tools/Makefile.win/unix:  Staging directory (and its libraries) should be
+	  removed on 'make clean' (issue noted by Dave Marples).  From Gregory Nutt
+	  (2018-11-06).
+	* net/procfs:  Add support to provide MLD stats at /proc/net/mld.  net/mld:
+	  Fix a couple more bugs found in further MLD testing.  From Gregory Nutt
+	  (2018-11-06).
+	* Adding imxrt 106x
+
+	  - imxrt:  Fix comment in imxrt105x_memorymap
+	  - imxrt:  Add imxrt1060 memory map
+	  - imxrt:  Add imcrt106x to imxrt_memorymap
+	  - imxrt:  Add i.MX RT 106x to Kconfig
+	  - imxrt:  Moved IMXRT_GPIO_NPORTS to chip.h & fixed comments
+	  - imxrt:  105x IRQ fix comment
+	  - imxrt:  gpioirq GPIO4,5 using wrong boundary
+	  - imxrt:  Add RT106x irq headers & Kconfig
+	  - imxrt:  Add rt106x GPIO chip headers
+	  - imxrt:  Extend Number of GPIO ports
+	  - imxrt:  Add 106x DMAMUX header
+	  - imxrt:  iomuxc add 106x
+	  - imxrt:  106x iomuxc extend Indexes
+	  - imxrt:  pinmux Add 106x
+	  - imxrt:  clockconfig use imxrt_memorymap.h
+	  - imxrt:  allocateheap use OCRAM2 as BASE when available
+
+	  From David Sidrane (2018-11-06).
+	* net/mld:  Implement 'Other Querier Present Timer'.  This timer is used to
+	  revert to Querier mode if there is no other querier on the network.  Also,
+	  fix some naming:  The Done message is not just Version 1 but is used with
+	  Version 2 as well.  From Gregory Nutt (2018-11-07).
+	* Reported by Anonymous in Bitbucket Issue #129:   When MIPS port is built
+	  for microMIPS and then loaded as an application, the __start entry point
+	  is entered in microMIPS mode, but the CPU core initialization code there
+	  misses to set the config3ISAOnExc bit to 1. Subsequently, exceptions are
+	  entered in MIPS32 mode, but the code base was built for microMIPS.  From
+	  Gregory Nutt (2018-11-07).
+	* sched/group/group_foreachchild.c:  group_foreachchild iterate by reverse
+	  order since the callback(e.g. group_killchildren) may remove the tcb from
+	  list
+
+	  sched Kconfig and sched/task/exit.c:  Add SCHED_EXIT_KILL_CHILDREN option
+	  to kill all child threads when the main thread of a task exits.  From
+	  zhangyuan7 (2018-11-08).
+	* binfmt/ and libs/libc:  Make exepath_*() more common:
+
+	  1. Move exepath_*() related code to libc/misc
+	  2. Rename exepath_ to envpath_
+	  3. Rename BINFMT_EXEPATH to LIB_ENVPATH
+
+	  libs/libc/modlib:  Add pre module library symbol table support.
+	  From nchao (2018-11-08).
+	* tools/csvparser.h:  Extend MAX_PARMSIZE to 256.  Fixes this issue:  70:
+	  Parameter too long: ...  From Xiang Xiao (2018-11-08).
+	* sched/signal/sig_suspend.c:  sigsuspend() shouldn't eat the pending signal
+	  but dispatch all instead  From Xiang Xiao (2018-11-08).
+	* sched/signal and syscall/:  Add support for pselect() and ppoll()
+	  functions  From dongjianli (2018-11-08).
+	* fs/aio, libs/libc/aio, sched/mqueue, sched/timer, and sched/signal:
+	  Remove the code duplication for SIGEV_THREAD.  From Xiang Xiao (2018-11-08).
+	* drivers/ioexpander:  Support multiple registrations of GPIO signal
+	  events.  From Xiang Xiao (2018-11-08).
+	* libs/libc/netdb/lib_dnsbind.c:  Make DNS receive timeout configurable.
+	  From ligd (2018-11-08).
+	* libs/libc/string/lib_memrchr.c:  Add memrchr() function  From Xiang Xiao
+	  (2018-11-08).
+	* libs/libc/stdio/lib_libvsprintf.c:  Eliminate recursive in conversion
+	  functions of lib_vsprintf().  From Xiang Xiao (2018-11-08).
+	* fs/partition:  Try MTDIOC_GEOMETRY IOCTL before bops's geometry
+	  fs/driver/fs_blockpartition.c:  Support MTD IOCTL  From Xiang Xiao
+	  (2018-11-08).
+	* drivers/mtd and other MTD drivers:  Remove mtd_procfsoperations since we
+	  can now get the same information from inode  From Xiang Xiao (2018-11-08).
+	* fs/mount/fs_mount.c mount:  Add support for mounting a file system with
+	  either a block or an MTD driver.  From Xiang Xiao (2018-11-08).
+	* fd/dirent, fs/driver/, and fs/vfs:  Make MTD device accessible via a
+	  character driver proxy like block devices  From Xiang Xiao (2018-11-08).
+	* fs/driver: Add register_mtdpartition() for MTD partition  From Xiang Xiao
+	  (2018-11-08).
+	* fs/procfs:  Add /proc/version support to get version info  From iuhaitao
+	  (2018-11-08).
+	* drivers/serial/uart_16550.c:  Fox UART flow control issue.  UART_MCR_RTS
+	  need be high even UART_MCR_AFCE is enabled  From zhangyuan7 (2018-11-08).
+	* drivers/serial/uart_16550.c:  Remove disabling of interrupts in
+	  up_earlyserialinit.  up_irqinitialize() already disable all interrupts
+	  From ligd (2018-11-08).
+	* drivers/timers/arch_alarm.c: Fix alarm ISR error when no
+	  CONFIG_SCHED_TICKLESS
+	  drivers/timers/arch_alarm.c: Use uint64_t to avoid alarm 32-bit overflow
+	  From ligd (2018-11-08).
+	* drivers/timers:  Simplify the error handling in arch rtc/alarm/timer
+	  wrapper  From Xiang Xiao (2018-11-08).
+	* imxrt:Clock config fixes and board.h sets sources and divisors
+
+	  - imxrt:clockconfig bug fix & Board config set clocks
+
+	    Fixed logic that was not clearing bits as ~ was
+	    missing in &= mask operations.
+
+	    Use values from the board.h file so set the Mux that
+	    selects the clock sources.
+
+	    Use board defined PODF values to select clock.
+
+	    Only configure USDHC2 clocks when board defines clocks.
+
+	  - imxrt1050-evk:  Board setting used to set  LSPI and USDHC Clocks
+	  From David Sidrane (2018-11-09).
+	* NuttX: Add DFU Runtime driver for activating boot-loader through USB
+	  command.  From Petteri Aimonen (2018-10-31).
+	* NuttX: USB Composite and DFU drivers: Add support for Microsoft OS
+	  descriptors.
+
+	  These Microsoft-only descriptors help in loading the correct driver on
+	  Windows.  They are especially helpful to give libusb access to a custom
+	  device without having to manually configure/install WinUSB driver.
+
+	  With this change DFU interface works automatically on Windows 10 with
+	  dfu-util 0.9 and libusb 1.0.22. On Windows 7 it still appears to need
+	  driver installation.  From Petteri Aimonen (2018-11-02).
+	* NuttX: STM32F407VG has only one DAC.  NDAC=2 causes compilation error when
+	  trying to use e.g. STM32_DAC1_CR macro.  From Petteri Aimonen (2018-11-09).
+	* RNDIS composite support
+
+	  - NuttX usb/composite.h: Forward-declare composite_devdesc_s.
+
+	    This avoids "error: conflicting types for 'composite_initialize'"
+	    on some versions of GCC. Because of the cross-inclusion between
+	    usbdev.h and composite.h, the full declaration is not always
+	    available.
+
+	  - NuttX: USB Composite driver: Fix strid comparison
+
+	    The last string ID used by composite driver is 4, and
+	    the number of IDs used is 5 (0..4). The comparison
+	    strid <= COMPOSITE_NSTRIDS caused composite driver to
+	    reply with -EINVAL for id 5, even though it should be
+	    available for sub-devices to use.
+
+	  - NuttX: RNDIS USB driver: Add support for composite configuration.
+	  From Petteri Aimonen (2018-11-09).
+	* FAT improvements
+
+	  - NuttX: Add CONFIG_FAT_LFN_ALIAS_HASH to speed up creating long filenames.
+
+	    Long filenames on FAT file systems have associated 8.3 character alias
+	    short filenames. The traditional form of these is FILENA~1.EXT with
+	    a running count of the number of similar names. However creating this
+	    unique count can take several seconds if there are many similarly named
+	    files in the directory. Enabling FAT_LFN_ALIAS_HASH uses an alternative
+	    format of FI0123~1.TXT where the four digits are a hash of the original
+	    filename. This method is similar to what is used by Windows 2000 and
+	    later.
+
+	  - NuttX: Add CONFIG_FAT_LFN_ALIAS_TRAILCHARS alternative format for 8.3
+	    filenames.
+
+	    Traditional format for long filename 8.3 aliases takes first 6
+	    characters of long filename. If this option is set to N > 0,
+	    NuttX will instead take first 6-N and last N characters to form
+	    the short name. This is useful for filenames like "datafile12.txt"
+	    where the first characters would always remain the same.
+
+	  - NuttX: FAT32: Fix file date corruption in fat_truncate().
+
+	  - NuttX: if SD card wait seems to be a long one, give time for other
+	    threads to run.  From Petteri Aimonen (2018-11-09).
+	* max11802: Fix compilation errors and allow setting PULL and SAMPLE
+	  registers.  From Petteri Aimonen (2018-11-09).
+	* imxrt Add imxrt1060-evk
+
+	  - imxrt1050-evk:  Fix typo
+	  - imxrt1050-evk:  Use naming for flash types that match documentation
+	  - imxrt1050-evk:  Fix typo
+	  - imxrt:Add imxrt1060-evk board support
+
+	  From David Sidrane (2018-11-09).
+	* drivers/rwbuffer.c:  Fix a lock issue  From Xiang Xiao (2018-11-09).
+	* rivers/rwbuffer.c:  Don't queue work to flush write buffer if
+	  CONFIG_DRVR_WRDELAY == 0  From Xiang Xiao (2018-11-09).
+	* drivers/rwbuffer.c: Improve the rwb_read/write overlap performance  From
+	  zhuyanlin (2018-11-09).
+	* drivers/mtd/ftl.c:  Support BIOC_FLUSH ioctl  From Xiang Xiao (2018-11-09).
+	* drivers/mtd/ftl.c:  Make READAHEAD and WRITEBUFFER work independently of
+	  each other.  There have cases we use writebuffer but not readbuffer, so
+	  the write buffer must be flushed before read.  Let rwb driver do it.  From
+	  zhuyanlin (2018-11-09).
+	* drivers/mtd/ftl.c:  Allocate eblock only when it's really needed  From
+	  Xiang Xiao (2018-11-09).
+	* drivers/mtd/ftl.c:  Add support support unlink operation to avoid the
+	  memory leak  From Xiang Xiao (2018-11-09).
+	* drivers/mtd/mtd_partition.c:  Remove the hard code partition name length
+	  From Xiang Xiao (2018-11-09).
+	* drivers/syslog/vsyslog.c:  nx_syslog's return value should include the
+	  timestamp length  From Xiang Xiao (2018-11-09).
+	* drivers/syslog/syslog_flush.c:  Uncomment the g_syslog_channel->sc_flush
+	  call  From Xiang Xiao (2018-11-09).
+	* drivers/syslog/syslog_putc.c:  Call sc_force in idle task even interrupt
+	  buffer enabled.  The following cases may hang randomly in the bring up
+	  phase: (1) boot up process and (2) suspend/resume process.  Either case
+	  runs in the idle task context, so it's difficult to debug the hang issue
+	  if these output go through the interrupt buffer.  From Xiang Xiao
+	  (2018-11-09).
+	* drivers/syslog:  Ensure interrupt log doesn't interlace in normal log.
+	  Don't call syslog_putc in syslog_default_write because syslog_putc will
+	  try to empty the interrupt buffer every time.  From Xiang Xiao (2018-11-09).
+	* drivers/syslog:  syslog_initialize initialize dev/syslog too and call
+	  syslog to add the prefix and timestamp  From Xiang Xiao (2018-11-09).
+	* include/netdb.h  Add NO_ADDRESS definition  From zhangyuan7 (2018-11-09).
+	* Fix typographical error in endian.h and resource.h  From anchao
+	  (2018-11-09).
+	* Fixes warnings from header files:
+
+	  - include/nuttx/clock.h:  Fix uptime wrong if DEBUG_FEATURES and
+	    SCHED_TICKLESS enabled
+	  - iinclude/nuttx/arch.h: fix CONFIG_ARCH_INTERRUPTSTACK not defined  warning
+	  - iinclude/nuttx/audio/audio_i2s.h:  Fix warning: struct i2s_dev_s declared
+	    inside parameter list
+
+	  From Xiang Xiao (2018-11-09).
+	* arch/sim/src/up_hostfs.c:  Support S_IFSOCK, DT_LNK, O_DIRECT and O_SYNC
+	  From Xiang Xiao (2018-11-09).
+	* sched/wdog: improve accuracy of wd_gettime() in tickless mode  From ligd
+	  (2018-11-09).
+	* sched/wdog:  Improve accuracy of wd_gettime() in tickless mode  From ligd
+	  (2018-11-09).
+	* include/nuttx/fs/fs.h:  Register_mtddriver should depend on CONFIG_MTD not
+	  CONFIG_MTD_PARTITION  From Xiang Xiao (2018-11-09).
+	* drivers/net/lan91c111.c:  Reuse lan91c111_reply for ARP case  From Xiang
+	  Xiao (2018-11-09).
+	* drivers/net/slip.c:  Add IPv6 support and fix minor issue  From Xiang Xiao
+	  (2018-11-09).
+	* drivers/net/tun.c:  Call ipv[4|6]_input dynamically by checking packet
+	  header and remove the code duplication  From Xiang Xiao (2018-11-09).
+	* arch/arm/src/stm32l4:  Add initial support for STM32L412 and STM32L422
+	  chips  From Juha Niskanen (2018-11-09).
+	* Remove deletion of Eclipse project files from make distclean target per
+	  request of David Sidrane.  From Gregory Nutt (2018-11-09).
+	* net/udp/udp_finddev.c:  Fallback to netdev_default device if the device is
+	  not found, rather than arbitrary using the device at the head of the list
+	  of devices.  From Xiang Xiao (2018-11-09).
+	* Fix compiler error and warning when CONFIG_NET_SENDFILE=y  From Xiang Xiao
+	  (2018-11-09).
+	* net/tcp/tcp_backlog.c:  Add SOMAXCONN definition and implementation per
+	  OpenGroup.org.  From zhangyuan7 (2018-11-09).
+	* net/arp and net/icmpv6: don't call d_txavail directly since it may point
+	  to NULL  From Xiang Xiao (2018-11-09).
+	* net/:  Add NET_ICMP[v6]_NO_STACK for usrsock case  From Xiang Xiao
+	  (2018-11-09).
+	* net/usrsock/usrsock_accept.c: Mark newconn ready before issue accept
+	  request to avoid the event get discarded due to the socket in the invalid
+	  state  From Xiang Xiao (2018-11-09).
+	* libs/libc/net:  Add basic implementation for recvmsg() and sendmsg() per
+	  OpenGroup.org specification.  From ligd (2018-11-09).
+	* include/netinet/in.h:  Add Linux IP_PKTINFO and IPV6_PKTINFO definitions,
+	  but not yet realized.  From Gregory Nutt (2018-11-09).
+	* include/net and include/sys:  Align the constant values with values in the
+	  Linux kernel which makes targeting the usrsock server to Linux kernel
+	  easier.  From Xiang Xiao (2018-11-09).
+	* include/arpa/inet.h:  Remove the dup INET[6]_ADDRSTRLEN from arpa.inet.h
+	  already define in netinet/in.h  From Xiang Xiao (2018-11-09).
+	* net/arp: Redesign ARP table aging to simplify the net initialization  From
+	  Xiang Xiao (2018-11-09).
+	* net/arp/arp_send.c:  Check ifname match before sending packet.  From Xiang
+	  Xiao (2018-11-09).
+	* Remove duplicate definition in nuttx/net/arp.h and
+	  include/nuttx/net/ioctl.h  From Xiang Xiao (2018-11-09).
+	* net/: Remove the unnecessary arp.h inclusion  From Xiang Xiao (2018-11-09).
+	* net/neighbor: Simplify the neighbor table aging process  From Xiang Xiao
+	  (2018-11-09).
+	* net/neighbor/neighbor_dumpentry.c:  Simplify neighbor_dumpentry()
+	  implementation  From Xiang Xiao (2018-11-09).
+	* net/neighbor:  neighbor_lookup() checks if the target IP belongs to one of
+	  the local network devices.  From Xiang Xiao (2018-11-09).
+	* net/neighbor: Support neighbor_out() for multiple link layer at the same
+	  time  From Xiang Xiao (2018-11-09).
+	* net/:  Fix some compile errors introduce with recent networking patches.
+	  Found in build testing.  From Gregory Nutt (2018-11-09).
+	* net/icmpv6/icmpv6_neighbor.c:  icmpv6_neighbor() shouldn't use the out of
+	  scope variable(dripaddr)  From Xiang Xiao (2018-11-09).
+	* net/icmpv6/icmpv6_conn.c:  icmpv6_free() remove reference count operation
+	  since it's already done in icmpv6_close().  From Xiang Xiao (2018-11-09).
+	* net/icmpv6/icmpv6_linkipaddr.c:  Encapsulate the link scope address
+	  generation into icmpv6_linkipaddr()  From Xiang Xiao (2018-11-09).
+	* net/icmpv6:  Remove the coupling between ICMPv6 and Ethernet by moving all
+	  Ethernet stuff to neighbor_ethernet_out.c and make the mac address as
+	  first field.  From Xiang Xiao (2018-11-09).
+	* net/arp and icmpv6:  Double the delay time on each iteration for ARP/ICMP
+	  to fight work jitter better.  From Xiang Xiao (2018-11-09).
+	* net/icmpv6, neighbor, and netdev:  Rename netdev_dev_lladdrsize() to
+	  netdev_lladdrsize() and move the prototype to include/nuttx/nex/netdev.h,
+	  giving is global scope within the OS.  Reviewer:  This degrades the
+	  integrity of the modular architecture by introducing a new coupling via C
+	  function call.  Not a good thing at all.  From Xiang Xiao (2018-11-09).
+	* net/devif/ipv6_input.c:  Fix a logic error when the received IPv6 srcaddr
+	  is a multicast address.  Exiting logic only supported UDP multicast.  But
+	  MLD and certain other ICMPv6 packets also require acceptance of multicast
+	  packets.  From Gregory Nutt (2018-11-09).
+	* drivers/timers/arch_rtc.c:  up_rtc_set_lowerhalf call clock_synchronize()
+	  for external RTC.  From Xiang Xiao (2018-11-09).
+	* net/icmpv6/icmpv6_autoconfig.c and icmpv6_rnotify.c:  Don't take the
+	  network device down when reconfiguring only the IP address from within
+	  ICMPv6 logic.  Recommended by Xiang Xiao in order to avoid the long
+	  delays of bringing some networks back up.
+
+	  Normally it is required that the network be in the "down" state when
+	  re-configuring the network interface.  This is thought not to be a
+	  necessary here because.
+
+	  1. The ICMPv6 logic here runs with the network locked so there can be no
+	     outgoing packets with bad source IP addresses from any asynchronous
+	     network activity using the device being reconfigured.
+	  2. Incoming packets depend only upon the MAC filtering.  Network drivers
+	     do not use the IP address; they filter incoming packets using only the
+	     MAC address which is not being changed here.
+
+	     From Gregory Nutt (2018-11-10).
+	* drivers/power/pm_initialize.c:  Fix pm_domain_s.stime unintialize caused
+	  time error.  Bug detail:
+
+	  1. open CONFIG_DEBUG_FEATURES CONFIG_SYSTEM_TIME64 CONFIG_CLOCK_MONOTONIC
+	     ==> INITIAL_SYSTEM_TIMER_TICKS very big data, not zero
+	  2. close CONFIG_SCHED_TICKLESS
+	     ==> use g_system_timer as system clock
+	  3. pm_domain_s.stime init to zero
+	  4. clock_systimer() - pm_domain_s.stime get big data, error
+
+	  From ligd (2018-11-10).
+	* drivers/power/pm:  Use the start time of state btime to calculate thrcnt;
+	  remove the loop whose count may be very big after the long idle  From
+	  ligd (2018-11-10).
+	* net/udp/Kconfig: Auto-select CONFIG_WQUEUE_NOTIFIER when
+	  CONFIG_UDP_READAHEAD_NOTIFIER is selected.  From Gregory Nutt (2018-11-10).
+	* /net/devif/ipv6_input.c:  Correct handling of IPv6 extension headers.
+	  The main confusion was that the payload length in the IPv6 header does
+	  not include its extension headers.
+	  net/icmpv6/icmpv6_input.c:  Correct calculation of the ICMPv6 header
+	  address
+	  net/mld/mld_query.c:  Correct back test for group found.
+	  net/mld/mld_report.c: Fix host vs. network order problem.
+	  net/mld/mld_send.c: Correct the address used in sending the General
+	  Query.  It should be the unspecified address in that case.
+	  net/MLD:  The MAS query should be sent on the group multicast address.
+	  net/mld:  There is an issue with the general query timer design.  There
+	  should be a single instance, not a per-group instance of the timer (ditto
+	  for the v1 compatibility timer).  Fall back for now and use the per-group
+	  MAX query.
+	  From Gregory Nutt (2018-11-10).
+	* arch/sim/src/up_netdriver.c: Fix error 'invalid operands to binary &'
+	  From Xiang Xiao (2018-11-10).
+	* arch/arm/src/common/up_exit.c:  Fix typo.  Caused compiler error when
+	  system debug enabled.  From Xiang Xiao (2018-11-10).
+	* arch/:  Add 'BOARD_ASSERT_RESET_VALUE' in config/Kconfig and replace
+	  reboot status '0' to 'CONFIG_BOARD_ASSERT_RESET_VALUE'.  From Gregory
+	  Nutt (2018-11-10).
+	* net/mld:  Resolve and issue with sending reports from multiple groups in
+	  the same polling cycle.  From Gregory Nutt (2018-11-11).
+	* The MLD implementation did not follow the RFC correctly when it is the
+	  Querier.  The Querier should use a general query and get query messages
+	  from all members of all groups.  This would be driven by a single timer
+	  per sub-net since all groups are queried at once. Instead, the design
+	  used a Multicast Address Specific Query with one timer per group and
+	  ignores groups that we are not members of.
+
+	  Similarly, the MLDv1 compatibility timer should be a single, separate
+	  timer, not a per-group timer.
+
+	  net/mld: Group may be NULL when sending a general query
+
+	  From Gregory Nutt (2018-11-11).
+	* net/mld:  Fix logic error when testing for the case where all members
+	  have left the group.  From Gregory Nutt (2018-11-11).
+	* arch/arm/src:  Remove general register dump from fault handler since the
+	  same info already dump in PANIC  From Xiang Xiao (2018-11-11).
+	* arch/ assertions files:  up_registerdump capture the general register if
+	  not yet saved and up_saveusercontext is implemented, the register dump is
+	  very useful to find the cause of failure.  From Xiang Xiao (2018-11-11).
+	* arch/ all assertion functions:  up_stackdump() dump the full stack if
+	  stack overflow the stack info is very useful to find the backtrace  From
+	  Xiang Xiao (2018-11-11).
+	* arch/ all assertion functions:  up_assert() move the register dump to
+	  first make the more important info first  From Xiang Xiao (2018-11-11).
+	* net/procfs/netdev_statistics.c:   Eliminate warning:  array subscript is
+	  above array bounds.  From Gregory Nutt (2018-11-11).
+	* Move NETDEV_LATEINIT from drivers/net/Kconfig to net/Kconfig so that we
+	  can select NETDEV_LATEINIT without enabling NETDEVICES since the net
+	  driver in arch folder may need to initialize later too.  From Xiang Xiao
+	  (2018-11-12).
+	* sched/clock/clock_getres.c:  Support CLOCK_MONOTONIC  From Xiang Xiao
+	  (2018-11-12).
+	* sched/clock/:  Remove g_monotonic_basetime and g_clock_monotonic_time
+	  since we don't need ensure monotonic time start from zero as state here:
+	  http://pubs.opengroup.org/onlinepubs/009696899/functions/clock_getres.html
+	  From Xiang Xiao (2018-11-12).
+	* sched/clock/:  Don't call up_timer_gettime in clock_gettime() and
+	  clock_systimer() to ensure the return value from them consistent with
+	  clock_systimespec  From Xiang Xiao (2018-11-12).
+	* sched/clock/clock_initialize.c:  clock_inittime() needs to be done with
+	  CONFIG_SCHED_TICKLESS and clock_initialize should skip clock_inittime()
+	  for external RTC case since the RTC isn't ready yet.  From Xiang Xiao
+	  (2018-11-12).
+	* sched/clock/ timekeeping:  Use clock_basetime() to initialize
+	  g_clock_wall_time to get the best initial RTC value and initialize
+	  g_clock_last_counter too since the hardware may not start counting from
+	  zero.  From Xiang Xiao (2018-11-12).
+	* libc libnx updates
+
+	  - NuttX: make strerror() return 'Success' for 0
+
+	  - NuttX: fix strrchr() so that it considers null terminator as part of
+	    string
+
+	    From strrchr(3) man page:  "The terminating null byte is considered
+	    part of the string, so that if c is specified as '\0', these functions
+	    return a pointer to the terminator."
+
+	  - NuttX: mm_free(): Add DEBUGASSERT()'s to catch memory corruption early.
+
+	    It's easier to find the source when asserts fail already when freeing
+	    an overflowed buffer, than if the corruption is only detected on next
+	    malloc().
+
+	  - MM_FILL_ALLOCATIONS: Add debug option to fill all mallocs()
+
+	    This is helpful for detecting uninitialized variables,
+	    especially in C++ code. I seem to be forgetting to initialize
+	    member variables and then they just get random values..
+
+	  - NuttX: nxtk_bitmapwindow: Fix warning message when bitmap is fully
+	    off-screen.
+
+	  - nxfonts_getfont: Avoid unnecessary warnings for other whitespace chars
+	    also.
+
+	  - NuttX: Fix kerning of 'I' in Sans17x22 font
+
+	    The I character was running together with some other
+	    characters, e.g. in sequence "IMI".
+
+	  - NXMU: Re-validate window pointer for mouse events.
+
+	    NXMU caches the previous window pointer so that further mouse
+	    events can be sent to the same window. However, if the window
+	    is destroyed while mouse button is held down, the pointer may
+	    become invalid and cause a crash. This patch revalidates the
+	    pointer before using it.
+
+	    From Petteri Aimonen (2018-11-12).
+	* stm32/stm32_adc: major refactor
+
+	  - stm32/stm32_adc: use STM32 ADC IP core version and ADC available
+	    functions instead of chip family names in conditional compilation
+
+	  - stm32/chip: replace family specific ADC headers with STM32 ADC IP core
+	    version headers
+
+	  - stm32/stm32_adc: configurable sample time supported for all chips, not
+	    only L1
+
+	  - stm32/stm32_adc: enable/disable interrupts supported for all chips, not
+	    only L1
+
+	  - stm32/stm32_adc: resolution configuration
+
+	  - stm32/stm32f33xxx_adc: remove wrong assertion
+
+	  - configs/nucleo-f303ze: support for ADC and ADC example
+
+	  - configs/stm32f429i-disco: support for ADC and ADC example
+
+	  From Mateusz Szafoni (2018-11-12).
+	* arch/arm/src/imxrt:  This commit completes the interrupt driven USDHC1
+	  functionality for the IMXRT EVKB. There is more work to be done to
+	  complete DMA mode and further changes will follow.  From Dave Marples
+	  (2018-11-12).
+	* arch/arm/src/imxrt/imxrt_usdhc.c:  Improve SD card handling in the DMA
+	  case.  For now I think we can consider this complete for both Interrupt
+	  and DMA transfers. There is other stuff to add (high speed, low voltage,
+	  DDR etc.) later,  From Dave Marples (2018-11-13).
+
+7.28 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
