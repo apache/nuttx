@@ -58,7 +58,7 @@
  * configuration for better standards compatibility.
  *
  * CONFIG_C99_BOOL8 - Means (1) your C++ compiler has sizeof(_Bool) == 8,
- * (2) your C compiler supports the C99 _Bool intrinsic type, and (2) that
+ * (2) your C compiler supports the C99 _Bool intrinsic type, and (3) that
  * the C99 _Bool type also has size 1.
  */
 

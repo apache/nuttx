@@ -4,6 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Dave Marples <dave@marples.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -170,13 +171,14 @@
 /* SDIO *****************************************************************************/
 
 /* Pin drive characteristics - drive strength in particular may need tuning for
- * specific boards.
+ * specific boards, but has been checked by scope on the EVKB to make sure shapes
+ * are square with minimal ringing.
  */
 
-#define PINSET_USDHC1_DATAX (IOMUX_SLEW_FAST | IOMUX_DRIVE_60OHM | \
+#define PINSET_USDHC1_DATAX (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
                              IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
 #define PINSET_USDHC1_CMD   (PINSET_USDHC1_DATAX)
-#define PINSET_USDHC1_CLK   (IOMUX_SLEW_FAST | IOMUX_DRIVE_60OHM | IOMUX_SPEED_MAX)
+#define PINSET_USDHC1_CLK   (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | IOMUX_SPEED_MAX)
 #define PINSET_USDHC1_CD    (0)
 
 #define PIN_USDHC1_D0       GPIO_USDHC1_DATA0
@@ -195,13 +197,13 @@
 /* 24.8MHz for other modes */
 
 #define BOARD_USDHC_MMCMODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4)  // FIXME 1
+#define BOARD_USDHC_MMCMODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
 #define BOARD_USDHC_SD1MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4) // FIXME 1
+#define BOARD_USDHC_SD1MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
 #define BOARD_USDHC_SD4MODE_PRESCALER   USDHC_SYSCTL_SDCLKFS_DIV8
-#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(4) // FIXME 1
+#define BOARD_USDHC_SD4MODE_DIVISOR     USDHC_SYSCTL_DVS_DIV(1)
 
 /* PIO Disambiguation ***************************************************************/
 
