@@ -19678,7 +19678,7 @@ detailed bugfix information):
 NuttX-7.27 Release Notes
 ------------------------
 
-The 127th release of NuttX, Version 7.27, was made on November 15, 2018,
+The 127th release of NuttX, Version 7.27, was made on November 14, 2018,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-7.27.tar.gz and
 apps-7.27.tar.gz.  These are available from:
@@ -19888,7 +19888,7 @@ Additional new features and extended functionality:
       - XBee IEEE 802.15.4: Add support for setting/getting tx power.  From
         Anthony Merlino.
 
-      * Other Common Device Drivers:
+    * Other Common Device Drivers:
 
       - GPIO:  Support multiple registrations of GPIO signal events.  From
         Xiang Xiao.
@@ -20279,7 +20279,7 @@ detailed bugfix information):
         Noted by Shao Li in Issue 127.  From Gregory Nutt.
       - NRF24L01:  Fix compilation errors.  From Mateusz Szafoni.
 
-    * Common Drivers:
+    * Other Common Drivers:
 
       - ALARM Upper Half: Fix alarm ISR error when no CONFIG_SCHED_TICKLESS
         drivers/timers/arch_alarm.c: Use uint64_t to avoid alarm 32-bit

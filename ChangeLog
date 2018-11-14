@@ -20626,7 +20626,7 @@
 	  -CONFIG_NETUTILS_PING or change them to CONFIG_SYSTEM_PING with
 	  CONFIG_NET_ICMP_SOCKET=y  From Gregory Nutt (2018-09-05).
 
-7.27 2018-11-15 Gregory Nutt <gnutt@nuttx.org>
+7.27 2018-11-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* mm/iob:  Add an IOB notifier that will send a signal to any registered
 	  threads that want to be notified when an IOB has been freed.  This is an
