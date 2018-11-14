@@ -352,6 +352,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_DNSCLIENT
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
 static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
                            FAR char *buf, size_t buflen)
 {
@@ -443,6 +444,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
   host->h_name = ptr;
   return OK;
 }
+#endif
 #endif /* CONFIG_NETDB_DNSCLIENT */
 
 /****************************************************************************

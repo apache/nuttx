@@ -198,7 +198,7 @@ static inline int btn_takesem(sem_t *sem)
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
 static void btn_enable(FAR struct btn_upperhalf_s *priv)
 {
-  FAR const struct btn_lowerhalf_s *lower = priv->bu_lower;
+  FAR const struct btn_lowerhalf_s *lower;
   FAR struct btn_open_s *opriv;
   btn_buttonset_t press;
   btn_buttonset_t release;
@@ -280,7 +280,7 @@ static void btn_interrupt(FAR const struct btn_lowerhalf_s *lower,
 
 static void btn_sample(FAR struct btn_upperhalf_s *priv)
 {
-  FAR const struct btn_lowerhalf_s *lower = priv->bu_lower;
+  FAR const struct btn_lowerhalf_s *lower;
   FAR struct btn_open_s *opriv;
   btn_buttonset_t sample;
 #if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)

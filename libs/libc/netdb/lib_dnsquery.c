@@ -63,10 +63,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The maximum number of retries when asking for a name */
-
-#define MAX_RETRIES      8
-
 /* Buffer sizes
  *
  * The SEND_BUFFER_SIZE depends the configured DNS name size,
@@ -172,7 +168,7 @@ static FAR uint8_t *dns_parse_name(FAR uint8_t *query, FAR uint8_t *queryend)
 static int dns_send_query(int sd, FAR const char *name,
                           FAR union dns_server_u *uaddr, uint16_t rectype)
 {
-  register FAR struct dns_header_s *hdr;
+  FAR struct dns_header_s *hdr;
   FAR uint8_t *dest;
   FAR uint8_t *nptr;
   FAR const char *src;
@@ -192,11 +188,11 @@ static int dns_send_query(int sd, FAR const char *name,
   /* Initialize the request header */
 
   hdr               = (FAR struct dns_header_s *)buffer;
-  memset(hdr, 0, sizeof(struct dns_header_s));
+  memset(hdr, 0, sizeof(*hdr));
   hdr->id           = htons(seqno);
   hdr->flags1       = DNS_FLAG1_RD;
   hdr->numquestions = HTONS(1);
-  dest              = buffer + 12;
+  dest              = buffer + sizeof(*hdr);
 
   /* Convert hostname into suitable query format. */
 
@@ -294,7 +290,7 @@ static int dns_recv_response(int sd, FAR struct sockaddr *addr,
       return errcode;
     }
 
-  if (ret < 12)
+  if (ret < sizeof(*hdr))
     {
       /* DNS header can't fit in received data */
 
@@ -491,7 +487,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
   /* Loop while receive timeout errors occur and there are remaining retries */
 
-  for (retries = 0; retries < 3; retries++)
+  for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
 #ifdef CONFIG_NET_IPv4
       /* Is this an IPv4 address? */
@@ -503,7 +499,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           if (addrlen < sizeof(struct sockaddr_in))
             {
               /* Return zero to skip this address and try the next
-               * namserver address in resolv.conf.
+               * nameserver address in resolv.conf.
                */
 
               nerr("ERROR: Invalid IPv4 address size: %d\n", addrlen);
@@ -519,7 +515,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           if (ret < 0)
             {
               /* Return zero to skip this address and try the next
-               * namserver address in resolv.conf.
+               * nameserver address in resolv.conf.
                */
 
               nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
@@ -563,7 +559,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           else if (ret != -EAGAIN)
             {
               /* Some failure other than receive timeout occurred.  Return
-               * zero to skip this address and try the next namserver
+               * zero to skip this address and try the next nameserver
                * address in resolv.conf.
                */
 
@@ -575,7 +571,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-      /* Is this an IPv4 address? */
+      /* Is this an IPv6 address? */
 
       if (query->addr->sa_family == AF_INET6)
         {
@@ -584,7 +580,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           if (addrlen < sizeof(struct sockaddr_in6))
             {
               /* Return zero to skip this address and try the next
-               * namserver address in resolv.conf.
+               * nameserver address in resolv.conf.
                */
 
               nerr("ERROR: Invalid IPv6 address size: %d\n", addrlen);
@@ -600,7 +596,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           if (ret < 0)
             {
               /* Return zero to skip this address and try the next
-               * namserver address in resolv.conf.
+               * nameserver address in resolv.conf.
                */
 
               nerr("ERROR: IPv6 dns_send_query failed: %d\n", ret);
@@ -644,7 +640,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
           else if (ret != -EAGAIN)
             {
               /* Some failure other than receive timeout occurred.  Return
-               * zero to skip this address and try the next namserver
+               * zero to skip this address and try the next nameserver
                * address in resolv.conf.
                */
 
@@ -663,9 +659,9 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         }
     }
 
-  /* We tried three times and could not communicate with this nameserver.
-   * Perhaps it is down?  Return zero to continue with the next address
-   * in the resolv.conf file.
+  /* We tried and could not communicate with this nameserver. Perhaps it
+   * is down?  Return zero to continue with the next address in the
+   * resolv.conf file.
    */
 
   query->result = -ETIMEDOUT;
