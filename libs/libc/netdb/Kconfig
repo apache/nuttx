@@ -54,13 +54,6 @@ menuconfig NETDB_DNSCLIENT
 
 if NETDB_DNSCLIENT
 
-config NETDB_DNSCLIENT_RECV_TIMEOUT
-	int "DNS receive tiemout"
-	default 30
-	---help---
-		This the timeout value when DNS receive response after
-		dns_send_query, unit: seconds
-
 config NETDB_DNSCLIENT_ENTRIES
 	int "Number of DNS resolver entries"
 	default 0 if DEFAULT_SMALL
@@ -109,6 +102,19 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 		can be received by the DNS resolver.  The default is 96 but may
 		need to be larger on enterprise networks (perhaps 176).
 
+config NETDB_DNSCLIENT_RECV_TIMEOUT
+	int "DNS receive timeout"
+	default 30
+	---help---
+		This is the timeout value when DNS receives response after
+		dns_send_query, unit: seconds
+
+config NETDB_DNSCLIENT_RETRIES
+	int "Number of retries for DNS request"
+	default 3
+	---help---
+		This setting determines how many times resolver retries request
+		until failing.
 
 config NETDB_RESOLVCONF
 	bool "DNS resolver file support"
