@@ -1006,27 +1006,29 @@
  * Since all these register definitions are identical the defines herein drops the
  * number 0-3 from the prefix.
  *
- *   For example the 'Status Register' appears 4 times per moulde
+ *   For example the 'Status Register' appears 4 times per module
  * (IMXRT_FLEXPWMn_BASE) as IMXRT_FLEXPWM_SM0STS_OFFSET, IMXRT_FLEXPWM_SM1STS_OFFSET,
  * IMXRT_FLEXPWM_SM2STS_OFFSET and IMXRT_FLEXPWM_SM3STS_OFFSET. But the bit
  * definitions for the  'Status Register' are defined as SMSTS_xxxxx (with the number
  * dropped.
  *
- *   The base address of submodule 0 is the same as the base address for the PWM module as a
- * whole. The base address of submodule 1 is offset 0x60 from the base address for the PWM
- * module as a whole. This 0x60 offset is based on the number of registers in a submodule.
- * The base address of submodule 2 is equal to the base address of submodule 1 plus this
- * same 0x60 offset. The pattern repeats for the base address of submodule 3
+ *   The base address of submodule 0 is the same as the base address for the PWM
+ * module as a whole. The base address of submodule 1 is offset 0x60 from the base
+ * address for the PWM module as a whole. This 0x60 offset is based on the number
+ * of registers in a submodule.  The base address of submodule 2 is equal to the
+ * base address of submodule 1 plus this same 0x60 offset. The pattern repeats for
+ * the base address of submodule 3
  * .
- *   The base address of the module configuration registers is equal to the base address
- * of the PWM module as a whole plus an offset of 0x180.
+ *   The base address of the module configuration registers is equal to the base
+ * address of the PWM module as a whole plus an offset of 0x180.
  *
- *   Fault channel registers are repeated for each fault channel. To designate which fault
- * channel they are in, register names are prefixed with F0 and F1. The base address of fault
- * channel 0 is equal to the base address of the PWM module as a whole plus an offset of
- * 0x18C. The base address of fault channel 1 is the base address of fault channel 0 + 4.
- * This 4 offset is based on the number of registers in a fault channel. Each of the four
- * fields in the fault channel registers corresponds to fault inputs 3-0.
+ *   Fault channel registers are repeated for each fault channel. To designate
+ * which fault channel they are in, register names are prefixed with F0 and F1. The
+ * base address of fault channel 0 is equal to the base address of the PWM module
+ * as a whole plus an offset of 0x18C. The base address of fault channel 1 is the
+ * base address of fault channel 0 + 4.  This 4 offset is based on the number of
+ * registers in a fault channel. Each of the four fields in the fault channel
+ * registers corresponds to fault inputs 3-0.
  */
 
 /* Control 2 Register */
