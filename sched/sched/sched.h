@@ -89,6 +89,13 @@
 #  define this_task()            (current_task(this_cpu()))
 #endif
 
+/* This macro returns the running task which may different from this_task()
+ * during interrupt level context switches.
+ */
+
+#define running_task() \
+  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
+
 /* List attribute flags */
 
 #define TLIST_ATTR_PRIORITIZED   (1 << 0) /* Bit 0: List is prioritized */
@@ -201,6 +208,17 @@ extern volatile dq_queue_t g_readytorun;
  */
 
 extern volatile dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+
+/* g_running_tasks[] holds a references to the running task for each cpu.
+ * It is valid only when up_interrupt_context() returns true.
+ */
+
+extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+
+#else
+
+extern FAR struct tcb_s *g_running_tasks[1];
+
 #endif
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed

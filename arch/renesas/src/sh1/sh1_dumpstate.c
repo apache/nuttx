@@ -141,7 +141,7 @@ static inline void sh1_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = running_task();
   uint32_t sp = sh1_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;

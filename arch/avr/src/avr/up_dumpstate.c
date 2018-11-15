@@ -160,7 +160,7 @@ static inline void up_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = running_task();
   uint16_t sp = up_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;

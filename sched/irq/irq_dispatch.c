@@ -46,6 +46,7 @@
 
 #include "irq/irq.h"
 #include "clock/clock.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -159,4 +160,10 @@ void irq_dispatch(int irq, FAR void *context)
 
   CALL_VECTOR(ndx, vector, irq, context, arg);
   UNUSED(ndx);
+
+  /* Record the new "running" task.  g_running_tasks[] is only used by
+   * assertion logic for reporting crashes.
+   */
+
+  g_running_tasks[this_cpu()] = this_task();
 }

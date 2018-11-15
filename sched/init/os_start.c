@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/init/os_start.c
  *
- *   Copyright (C) 2007-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,17 @@ volatile dq_queue_t g_readytorun;
  */
 
 volatile dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+
+/* g_running_tasks[] holds a references to the running task for each cpu.
+ * It is valid only when up_interrupt_context() returns true.
+ */
+
+FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+
+#else
+
+FAR struct tcb_s *g_running_tasks[1];
+
 #endif
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
@@ -545,6 +556,10 @@ void os_start(void)
       tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
 #endif
       dq_addfirst((FAR dq_entry_t *)&g_idletcb[cpu], tasklist);
+
+      /* Mark the idle task as the running task */
+
+      g_running_tasks[cpu] = &g_idletcb[cpu].cmn;
 
       /* Initialize the processor-specific portion of the TCB */
 

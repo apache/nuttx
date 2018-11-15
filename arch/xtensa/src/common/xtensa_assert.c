@@ -117,7 +117,7 @@ static void xtensa_assert(int errorcode)
 #ifdef CONFIG_BOARD_CRASHDUMP
   /* Perform board-specific crash dump */
 
-  board_crashdump(up_getsp(), this_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
@@ -126,7 +126,7 @@ static void xtensa_assert(int errorcode)
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (CURRENT_REGS || this_task()->pid == 0)
+  if (CURRENT_REGS || running_task()->pid == 0)
     {
        /* Blink the LEDs forever */
 
@@ -166,7 +166,7 @@ static void xtensa_assert(int errorcode)
 void up_assert(const uint8_t *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = running_task();
 #endif
 
   board_autoled_on(LED_ASSERTION);
@@ -211,7 +211,7 @@ void up_assert(const uint8_t *filename, int lineno)
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = running_task();
 #endif
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
@@ -315,7 +315,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 void xtensa_user(int exccause, uint32_t *regs)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = running_task();
 #endif
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
