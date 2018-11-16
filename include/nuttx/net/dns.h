@@ -2,7 +2,8 @@
  * include/nuttx/net/dns.h
  * DNS resolver code header file.
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014-2015, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Inspired by/based on uIP logic by Adam Dunkels:
@@ -53,13 +54,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* DNS classes */
 
-#define DNS_CLASS_IN                1 /* RFC 1035 Internet */
-#define DNS_CLASS_CH                3 /* N/A      Chaos */
-#define DNS_CLASS_HS                4 /* N/A      Hesiod */
-#define DNS_CLASS_QNONE           254 /* RFC 2136 QCLASS NONE */
-#define DNS_CLASS_QANY            255 /* RFC 1035 QCLASS ANY */
+#define DNS_CLASS_IN                 1 /* RFC 1035 Internet */
+#define DNS_CLASS_CH                 3 /* N/A      Chaos */
+#define DNS_CLASS_HS                 4 /* N/A      Hesiod */
+#define DNS_CLASS_QNONE            254 /* RFC 2136 QCLASS NONE */
+#define DNS_CLASS_QANY             255 /* RFC 1035 QCLASS ANY */
 
 /* DNS resource record types */
 
@@ -144,6 +146,14 @@ struct dns_header_s
   uint16_t numextrarr;
 };
 
+/* The DNS question message structure */
+
+struct dns_question_s
+{
+  uint16_t type;
+  uint16_t class;
+};
+
 /* The DNS answer message structure */
 
 struct dns_answer_s
@@ -220,3 +230,4 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg);
 #endif
 
 #endif /* __INCLUDE_NUTTX_NET_DNS_H */
+
