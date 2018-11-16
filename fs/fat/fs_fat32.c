@@ -1622,8 +1622,7 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         }
     }
 
-  fat_semgive(fs);
-  return OK;
+  ret = OK;
 
 errout_with_semaphore:
   fat_semgive(fs);

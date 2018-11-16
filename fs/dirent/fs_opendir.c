@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/dirent/fs_opendir.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014, 2017-2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +42,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <assert.h>
 #include <errno.h>
@@ -230,8 +232,52 @@ FAR DIR *opendir(FAR const char *path)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR const char *relpath = NULL;
 #endif
+  FAR char *alloc = NULL;
   bool isroot = false;
+  int len;
   int ret;
+
+  /* Strip off any trailing whitespace or '/' characters.  In this case we
+   * must make a copy of the user string so we can chop off bytes on the
+   * 'right' without modifying the user's const string.
+   */
+
+  if (path != NULL)
+    {
+      /* Length of the string excludes NUL terminator */
+
+      len = strlen(path);
+
+      /* Check for whitespace or a dangling '/' at the end of the string.
+       * But don't muck with the string any further if it has been reduced
+       * to "/"
+       */
+
+      while (len > 0 && strcmp(path, "/") != 0 &&
+             (isspace(path[len - 1]) || path[len - 1] == '/'))
+        {
+          /* Have we already allocated memory for the modified string? */
+
+          if (alloc == NULL)
+            {
+              alloc = strdup(path); /* Allocates one too many bytes */
+              if (alloc == NULL)
+                {
+                  ret = ENOMEM;
+                  goto errout;
+                }
+
+              /* Use the cloned, writable string instead of the user string */
+
+              path = alloc;
+            }
+
+          /* Chop off the final character */
+
+          len--;
+          alloc[len] = '\0';
+        }
+    }
 
   /* If we are given 'nothing' then we will interpret this as
    * request for the root inode.
@@ -247,7 +293,7 @@ FAR DIR *opendir(FAR const char *path)
     }
   else
     {
-      /* We don't know what to do with relative pathes */
+      /* We don't know what to do with relative paths */
 
       if (*path != '/')
         {
@@ -362,6 +408,14 @@ FAR DIR *opendir(FAR const char *path)
 
   RELEASE_SEARCH(&desc);
   inode_semgive();
+
+  /* Free any allocated string memory */
+
+  if (alloc != NULL)
+    {
+      kmm_free(alloc);
+    }
+
   return ((FAR DIR *)dir);
 
   /* Nasty goto's make error handling simpler */
@@ -372,6 +426,15 @@ errout_with_direntry:
 errout_with_semaphore:
   RELEASE_SEARCH(&desc);
   inode_semgive();
+
+  /* Free any allocated string memory */
+
+  if (alloc != NULL)
+    {
+      kmm_free(alloc);
+    }
+
+errout:
   set_errno(ret);
   return NULL;
 }
