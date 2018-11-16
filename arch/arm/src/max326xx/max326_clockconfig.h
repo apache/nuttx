@@ -1,15 +1,8 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpc54_clockconfig.h
+ * arch/arm/src/max326xx/max326_clockconfig.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Parts of this file were adapted from sample code provided for the LPC54xx
- * family from NXP which has a compatible BSD license.
- *
- *   Copyright (c) 2016, Freescale Semiconductor, Inc.
- *   Copyright (c) 2016 - 2017 , NXP
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -50,48 +43,13 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Frequencies of internal clocks */
-
-#define LPC54_SYSTEM_CLOCK     12000000  /* Default System clock value */
-#define LPC54_RTC_CLOCK           32768  /* RTC oscillator 32 kHz output (32k_clk )*/
-#define LPC54_FRO_12MHZ        12000000  /* FRO 12 MHz (fro_12m) */
-#define LPC54_FRO_48MHZ        48000000  /* FRO 48 MHz (fro_48m) */
-#define LPC54_FRO_96MHZ        96000000  /* FRO 96 MHz (fro_96m) */
-#define LPC54_CLKIN                   0  /* CLKIN pin clock */
-
-/* PLL setup structure flags for pllflags field.  These flags control how
- * the PLL setup function sets up the PLL
- */
-
-#define PLL_SETUPFLAG_POWERUP  (1 << 0)  /* Power on the PLL after setup */
-#define PLL_SETUPFLAG_WAITLOCK (1 << 1)  /* Wait for PLL lock and power on */
-#define PLL_SETUPFLAG_ADGVOLT  (1 << 2)  /* Optimize system voltage for PLL rate */
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* PLL setup structure.
- *
- * This structure can be used to define a PLL configuration.  If powering
- * up or waiting for PLL lock, the PLL input clock source should be
- * configured prior to PLL setup.
- */
+/* This structure can be used to define a clock configuration. */
 
-struct pll_setup_s
+struct clock_setup_s
 {
-  uint32_t pllclksel;       /* PLL clock source register SYSPLLCLKSEL */
-  uint32_t pllctrl;         /* PLL control register SYSPLLCTRL */
-  uint32_t pllndec;         /* PLL NDEC register SYSPLLNDEC */
-  uint32_t pllpdec;         /* PLL PDEC register SYSPLLPDEC */
-  uint32_t pllmdec;         /* PLL MDEC registers SYSPLLPDEC */
-  uint32_t pllfout;         /* Actual PLL output frequency */
-  uint32_t pllfrac;         /* Only aduio PLL has this function*/
-  uint32_t pllflags;        /* PLL setup flags */
-  uint32_t ahbdiv;          /* AHB divider */
 };
 
 /****************************************************************************
@@ -118,17 +76,27 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_clockconfig
+ * Name: max326_clockconfig
  *
  * Description:
- *   Called to initialize the LPC54xx.  This does whatever setup is needed
+ *   Called to initialize the MAX3266xx.  This does whatever setup is needed
  *   to put the MCU in a usable state.  This includes the initialization of
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
  *****************************************************************************/
 
-void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup);
+void max326_clockconfig(FAR const struct clock_setup_s *clocksetup);
+
+/****************************************************************************
+ * Name: max326_cpu_frequency
+ *
+ * Description:
+ *   Return the current CPU frequency.
+ *
+ *****************************************************************************/
+
+uint32_t max326_cpu_frequency(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -136,4 +104,4 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H */

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip.h
+ * arch/arm/src/max326xx/chip.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -42,21 +42,18 @@
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+/* Include the memory map and the chip features and IRQ definition file.  */
 
 #include <arch/irq.h>
-#include <arch/lpc54xx/chip.h>
-#include "chip/lpc54_memorymap.h"
+#include <arch/max326xx/chip.h>
 
 /* The common ARMv7-M vector handling logic expects the following definition in this
  * file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/lpc54xx/irq.h
+ * interrupts which, for this architecture, is provided in the arch/max326xx/irq.h
  * header file.
  */
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS LPC54_IRQ_NEXTINT
+#define ARMV7M_PERIPHERAL_INTERRUPTS MAX326_IRQ_NEXTINT
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -74,4 +71,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_H */

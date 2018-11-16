@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip.h
+ * arch/arm/src/max326xx/max326_mpuinit.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_MPUINIT_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX326_MPUINIT_H
 
 /************************************************************************************
  * Included Files
@@ -42,36 +42,37 @@
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
-
-#include <arch/irq.h>
-#include <arch/lpc54xx/chip.h>
-#include "chip/lpc54_memorymap.h"
-
-/* The common ARMv7-M vector handling logic expects the following definition in this
- * file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/lpc54xx/irq.h
- * header file.
- */
-
-#define ARMV7M_PERIPHERAL_INTERRUPTS LPC54_IRQ_NEXTINT
-
 /************************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/****************************************************************************
+ * Name: max326_mpuinitialize
+ *
+ * Description:
+ *   Configure the MPU to permit user-space access to only unrestricted MCU
+ *   resources.
+ *
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#ifdef CONFIG_BUILD_PROTECTED
+void max326_mpuinitialize(void);
+#else
+#  define max326_mpuinitialize()
+#endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Name: max326_mpu_uheap
+ *
+ * Description:
+ *  Map the user heap region.
+ *
+ ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_H */
+#ifdef CONFIG_BUILD_PROTECTED
+void max326_mpu_uheap(uintptr_t start, size_t size);
+#else
+#  define max326_mpu_uheap(start,size)
+#endif
+
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_MPUINIT_H */

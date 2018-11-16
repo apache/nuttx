@@ -97,7 +97,7 @@ config ARCH_FAMILY_MAX32660
 	select MAX326XX_HAVE_WDOG
 	select MAX326XX_HAVE_TIMER8
 
-# Peripheral support
+# Chip-Specific Peripheral support
 
 config MAX326XX_HAVE_WDOG
 	bool
@@ -191,6 +191,16 @@ config MAX326XX_HAVE_ADC10
 	bool
 	default n
 
+# Driver support
+
+config MAX326XX_HAVE_I2CM
+	bool
+	default n
+
+config MAX326XX_HAVE_SPIM
+	bool
+	default n
+
 # Peripheral Driver Selections
 
 config MAX326XX_WDOG
@@ -278,15 +288,18 @@ config MAX326XX_PTENGINE
 config MAX326XX_SPIM0
 	bool "SPI Master 0"
 	default n
+	select MAX326XX_HAVE_SPIM
 
 config MAX326XX_SPIM1
 	bool "SPI Master 1"
 	default n
+	select MAX326XX_HAVE_SPIM
 
 config MAX326XX_SPIM2
 	bool "SPI Master 2"
 	default n
 	depends on MAX326XX_HAVE_SPIM2
+	select MAX326XX_HAVE_SPIM
 
 config MAX326XX_SPIS0
 	bool "SPI Slave 0"
@@ -310,15 +323,18 @@ config MAX326XX_I2SS
 config MAX326XX_I2CM0
 	bool "I2C Master 0"
 	default n
+	select MAX326XX_HAVE_I2CM
 
 config MAX326XX_I2CM1
 	bool "I2C Master 1"
 	default n
+	select MAX326XX_HAVE_I2CM
 
 config MAX326XX_I2CM2
 	bool "I2C Master 2"
 	default n
 	depends on MAX326XX_HAVE_I2CM2
+	select MAX326XX_HAVE_I2CM
 
 config MAX326XX_I2CS0
 	bool "I2C Slave 0"

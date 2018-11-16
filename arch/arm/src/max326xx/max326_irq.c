@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpc54_irq.c
+ * arch/arm/src/max326xx/max326_irq.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "lpc54_gpio.h"
-#include "lpc54_irq.h"
+#include "max326_gpio.h"
+#include "max326_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,7 +95,7 @@ extern uint32_t _vectors[];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc54_dumpnvic
+ * Name: max326_dumpnvic
  *
  * Description:
  *   Dump some interesting NVIC registers
@@ -103,7 +103,7 @@ extern uint32_t _vectors[];
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_IRQ_INFO)
-static void lpc54_dumpnvic(const char *msg, int irq)
+static void max326_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
@@ -131,19 +131,19 @@ static void lpc54_dumpnvic(const char *msg, int irq)
   irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
           getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
-  irqinfo("              %08x %08x %08x\n",
+  irqinfo("              %08x %08x %08x %08x\n",
           getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-          getreg32(NVIC_IRQ56_59_PRIORITY));
+          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
 
   leave_critical_section(flags);
 }
 #else
-#  define lpc54_dumpnvic(msg, irq)
+#  define max326_dumpnvic(msg, irq)
 #endif
 
 /****************************************************************************
- * Name: lpc54_nmi, lpc54_busfault, lpc54_usagefault, lpc54_pendsv,
- *       lpc54_dbgmonitor, lpc54_pendsv, lpc54_reserved
+ * Name: max326_nmi, max326_busfault, max326_usagefault, max326_pendsv,
+ *       max326_dbgmonitor, max326_pendsv, max326_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -153,7 +153,7 @@ static void lpc54_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int lpc54_nmi(int irq, FAR void *context, FAR void *arg)
+static int max326_nmi(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -161,7 +161,7 @@ static int lpc54_nmi(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lpc54_busfault(int irq, FAR void *context, FAR void *arg)
+static int max326_busfault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Bus fault recived\n");
@@ -169,7 +169,7 @@ static int lpc54_busfault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lpc54_usagefault(int irq, FAR void *context, FAR void *arg)
+static int max326_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Usage fault received\n");
@@ -177,7 +177,7 @@ static int lpc54_usagefault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lpc54_pendsv(int irq, FAR void *context, FAR void *arg)
+static int max326_pendsv(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -185,7 +185,7 @@ static int lpc54_pendsv(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lpc54_dbgmonitor(int irq, FAR void *context, FAR void *arg)
+static int max326_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -193,7 +193,7 @@ static int lpc54_dbgmonitor(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lpc54_reserved(int irq, FAR void *context, FAR void *arg)
+static int max326_reserved(int irq, FAR void *context, FAR void *arg)
 {
   (void)up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -203,7 +203,7 @@ static int lpc54_reserved(int irq, FAR void *context, FAR void *arg)
 #endif
 
 /****************************************************************************
- * Name: lpc54_prioritize_syscall
+ * Name: max326_prioritize_syscall
  *
  * Description:
  *   Set the priority of an exception.  This function may be needed
@@ -212,7 +212,7 @@ static int lpc54_reserved(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-static inline void lpc54_prioritize_syscall(int priority)
+static inline void max326_prioritize_syscall(int priority)
 {
   uint32_t regval;
 
@@ -226,7 +226,7 @@ static inline void lpc54_prioritize_syscall(int priority)
 #endif
 
 /****************************************************************************
- * Name: lpc54_irqinfo
+ * Name: max326_irqinfo
  *
  * Description:
  *   Given an IRQ number, provide the register and bit setting to enable or
@@ -234,18 +234,18 @@ static inline void lpc54_prioritize_syscall(int priority)
  *
  ****************************************************************************/
 
-static int lpc54_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
-                         uintptr_t offset)
+static int max326_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
+                          uintptr_t offset)
 {
   int n;
 
-  DEBUGASSERT(irq >= LPC54_IRQ_NMI && irq < NR_IRQS);
+  DEBUGASSERT(irq >= MAX326_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
-  if (irq >= LPC54_IRQ_EXTINT)
+  if (irq >= MAX326_IRQ_EXTINT)
     {
-      n        = irq - LPC54_IRQ_EXTINT;
+      n        = irq - MAX326_IRQ_EXTINT;
       *regaddr = NVIC_IRQ_ENABLE(n) + offset;
       *bit     = (uint32_t)1 << (n & 0x1f);
     }
@@ -255,19 +255,19 @@ static int lpc54_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
   else
     {
       *regaddr = NVIC_SYSHCON;
-      if (irq == LPC54_IRQ_MEMFAULT)
+      if (irq == MAX326_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
-      else if (irq == LPC54_IRQ_BUSFAULT)
+      else if (irq == MAX326_IRQ_BUSFAULT)
         {
           *bit = NVIC_SYSHCON_BUSFAULTENA;
         }
-      else if (irq == LPC54_IRQ_USAGEFAULT)
+      else if (irq == MAX326_IRQ_USAGEFAULT)
         {
           *bit = NVIC_SYSHCON_USGFAULTENA;
         }
-      else if (irq == LPC54_IRQ_SYSTICK)
+      else if (irq == MAX326_IRQ_SYSTICK)
         {
           *regaddr = NVIC_SYSTICK_CTRL;
           *bit = NVIC_SYSTICK_CTRL_ENABLE;
@@ -305,7 +305,7 @@ void up_irqinitialize(void)
 
   /* Disable all interrupts */
 
-  for (i = 0; i < LPC54_IRQ_NEXTINT; i += 32)
+  for (i = 0; i < MAX326_IRQ_NEXTINT; i += 32)
     {
       putreg32(0xffffffff, NVIC_IRQ_CLEAR(i));
     }
@@ -363,17 +363,17 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LPC54_IRQ_SVCALL, up_svcall, NULL);
-  irq_attach(LPC54_IRQ_HARDFAULT, up_hardfault, NULL);
+  irq_attach(MAX326_IRQ_SVCALL, up_svcall, NULL);
+  irq_attach(MAX326_IRQ_HARDFAULT, up_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-  /* up_prioritize_irq(LPC54_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+  /* up_prioritize_irq(MAX326_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  lpc54_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+  max326_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
 #ifdef CONFIG_ARM_MPU
@@ -381,25 +381,25 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-  irq_attach(LPC54_IRQ_MEMFAULT, up_memfault, NULL);
-  up_enable_irq(LPC54_IRQ_MEMFAULT);
+  irq_attach(MAX326_IRQ_MEMFAULT, up_memfault, NULL);
+  up_enable_irq(MAX326_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(LPC54_IRQ_NMI, lpc54_nmi, NULL);
+  irq_attach(MAX326_IRQ_NMI, max326_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(LPC54_IRQ_MEMFAULT, up_memfault, NULL);
+  irq_attach(MAX326_IRQ_MEMFAULT, up_memfault, NULL);
 #endif
-  irq_attach(LPC54_IRQ_BUSFAULT, lpc54_busfault, NULL);
-  irq_attach(LPC54_IRQ_USAGEFAULT, lpc54_usagefault, NULL);
-  irq_attach(LPC54_IRQ_PENDSV, lpc54_pendsv, NULL);
-  irq_attach(LPC54_IRQ_DBGMONITOR, lpc54_dbgmonitor, NULL);
-  irq_attach(LPC54_IRQ_RESERVED, lpc54_reserved, NULL);
+  irq_attach(MAX326_IRQ_BUSFAULT, max326_busfault, NULL);
+  irq_attach(MAX326_IRQ_USAGEFAULT, max326_usagefault, NULL);
+  irq_attach(MAX326_IRQ_PENDSV, max326_pendsv, NULL);
+  irq_attach(MAX326_IRQ_DBGMONITOR, max326_dbgmonitor, NULL);
+  irq_attach(MAX326_IRQ_RESERVED, max326_reserved, NULL);
 #endif
 
-  lpc54_dumpnvic("initial", LPC54_IRQ_NIRQS);
+  max326_dumpnvic("initial", MAX326_IRQ_NIRQS);
 
 #if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
   /* If a debugger is connected, try to prevent it from catching hardfaults.
@@ -412,10 +412,10 @@ void up_irqinitialize(void)
   putreg32(regval, NVIC_DEMCR);
 #endif
 
-#ifdef CONFIG_LPC54_GPIOIRQ
+#ifdef CONFIG_MAX326_GPIOIRQ
   /* Initialize GPIO interrupts */
 
-  lpc54_gpio_irqinitialize();
+  max326_gpio_irqinitialize();
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -439,7 +439,7 @@ void up_disable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (lpc54_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
+  if (max326_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to disable the interrupt.
        * For normal interrupts, we need to set the bit in the associated
@@ -447,7 +447,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= LPC54_IRQ_EXTINT)
+      if (irq >= MAX326_IRQ_EXTINT)
         {
           putreg32(bit, regaddr);
         }
@@ -459,7 +459,7 @@ void up_disable_irq(int irq)
         }
     }
 
-  lpc54_dumpnvic("disable", irq);
+  max326_dumpnvic("disable", irq);
 }
 
 /****************************************************************************
@@ -476,7 +476,7 @@ void up_enable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (lpc54_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
+  if (max326_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to enable the interrupt.
        * For normal interrupts, we need to set the bit in the associated
@@ -484,7 +484,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= LPC54_IRQ_EXTINT)
+      if (irq >= MAX326_IRQ_EXTINT)
         {
           putreg32(bit, regaddr);
         }
@@ -496,7 +496,7 @@ void up_enable_irq(int irq)
         }
     }
 
-  lpc54_dumpnvic("enable", irq);
+  max326_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
@@ -509,7 +509,7 @@ void up_enable_irq(int irq)
 
 void up_ack_irq(int irq)
 {
-  lpc54_clrpend(irq);
+  max326_clrpend(irq);
 }
 
 /****************************************************************************
@@ -530,10 +530,10 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= LPC54_IRQ_MEMFAULT && irq < NR_IRQS &&
+  DEBUGASSERT(irq >= MAX326_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < LPC54_IRQ_EXTINT)
+  if (irq < MAX326_IRQ_EXTINT)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -546,7 +546,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= LPC54_IRQ_EXTINT;
+      irq    -= MAX326_IRQ_EXTINT;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 
@@ -556,7 +556,7 @@ int up_prioritize_irq(int irq, int priority)
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
 
-  lpc54_dumpnvic("prioritize", irq);
+  max326_dumpnvic("prioritize", irq);
   return OK;
 }
 #endif

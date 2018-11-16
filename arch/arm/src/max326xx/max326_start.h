@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip.h
+ * arch/arm/src/max326xx/max326_start.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,56 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_START_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX326_START_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#include <arch/irq.h>
-#include <arch/lpc54xx/chip.h>
-#include "chip/lpc54_memorymap.h"
-
-/* The common ARMv7-M vector handling logic expects the following definition in this
- * file.  ARMV7M_PERIPHERAL_INTERRUPTS provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/lpc54xx/irq.h
- * header file.
- */
-
-#define ARMV7M_PERIPHERAL_INTERRUPTS LPC54_IRQ_NEXTINT
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+#include "up_internal.h"
+#include "chip.h"
 
 /************************************************************************************
  * Public Data
  ************************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* g_idle_topstack: _sbss is the start of the BSS region as defined by the linker
+ * script. _ebss lies at the end of the BSS region. The idle task stack starts at
+ * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread is
+ * the thread that the system boots on and, eventually, becomes the IDLE, do
+ * nothing task that runs only when there is nothing else to run.  The heap
+ * continues from there until the end of memory.  g_idle_topstack is a read-only
+ * variable the provides this computed address.
+ */
+
+extern const uintptr_t g_idle_topstack;
+
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_H */
+/************************************************************************************
+ * Name: max326_board_initialize
+ *
+ * Description:
+ *   All MAX326xx architectures must provide the following entry point.  This entry
+ *   point is called early in the initialization -- after clocking and memory have
+ *   been configured but before caches have been enabled and before any devices have
+ *   been initialized.
+ *
+ ************************************************************************************/
+
+void max326_board_initialize(void);
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_START_H */
