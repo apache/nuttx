@@ -1,0 +1,358 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Maxim Integrate MAX326xx Configuration Options"
+
+# Chip Selection
+
+choice
+	prompt "MAX326xx Chip Selection"
+	default CONFIG_ARCH_CHIP_MAX32630
+	depends on ARCH_CHIP_MAX326XX
+
+config ARCH_CHIP_MAX32620
+	bool "MAX32620"
+	select ARCH_FAMILY_MAX32620
+
+config ARCH_CHIP_MAX32621
+	bool "MAX32621"
+	select ARCH_FAMILY_MAX32620
+
+config ARCH_CHIP_MAX32630
+	bool "MAX32630"
+	select ARCH_FAMILY_MAX32630
+
+config ARCH_CHIP_MAX32632
+	bool "MAX32632"
+	select ARCH_FAMILY_MAX32630
+
+config ARCH_CHIP_MAX32632
+	bool "MAX32660"
+	select ARCH_FAMILY_MAX32660
+
+endchoice # MAX326xx Chip Selection
+
+# Chip Families
+#
+# Chip Families are determined by sharing a common User Guide for the chip
+# specification:
+#
+# CONFIG_ARCH_FAMILY_MAX32620:  MAX32620 Rev C, User Guide, AN6242,
+#                               Rev 2, 2/17
+# CONFIG_ARCH_FAMILY_MAX32630:  MAX32630 Rev B, User Guide, AN6349,
+#                               Rev 0, 10/16
+# CONFIG_ARCH_FAMILY_MAX32660:  MAX32660 User Guide, AN6659, Rev0, 7/18
+
+config ARCH_FAMILY_MAX32620
+	bool
+	default n
+	select MAX326XX_HAVE_WWDOG
+	select MAX326XX_HAVE_RWDOG
+	select MAX326XX_HAVE_WAKEUP
+	select MAX326XX_HAVE_CRC
+	select MAX326XX_HAVE_AES
+	select MAX326XX_HAVE_USB20
+	select MAX326XX_HAVE_TIMER32_2
+	select MAX326XX_HAVE_TIMER32_3
+	select MAX326XX_HAVE_TIMER32_4
+	select MAX326XX_HAVE_TIMER32_5
+	select MAX326XX_HAVE_PTENGINE
+	select MAX326XX_HAVE_SPIM2
+	select MAX326XX_HAVE_SPIS1
+	select MAX326XX_HAVE_SPIXIP
+	select MAX326XX_HAVE_I2SS
+	select MAX326XX_HAVE_I2CM2
+	select MAX326XX_HAVE_I2CS1
+	select MAX326XX_HAVE_UART2
+	select MAX326XX_HAVE_UART3
+	select MAX326XX_HAVE_1WIREM
+	select MAX326XX_HAVE_ADC10
+
+config ARCH_FAMILY_MAX32630
+	bool
+	default n
+	select MAX326XX_HAVE_WWDOG
+	select MAX326XX_HAVE_WAKEUP
+	select MAX326XX_HAVE_CRC
+	select MAX326XX_HAVE_AES
+	select MAX326XX_HAVE_USB20
+	select MAX326XX_HAVE_TIMER32_2
+	select MAX326XX_HAVE_TIMER32_3
+	select MAX326XX_HAVE_TIMER32_4
+	select MAX326XX_HAVE_TIMER32_5
+	select MAX326XX_HAVE_PTENGINE
+	select MAX326XX_HAVE_SPIM2
+	select MAX326XX_HAVE_SPIXIP
+	select MAX326XX_HAVE_I2CM2
+	select MAX326XX_HAVE_UART2
+	select MAX326XX_HAVE_UART3
+	select MAX326XX_HAVE_1WIREM
+	select MAX326XX_HAVE_ADC10
+
+config ARCH_FAMILY_MAX32660
+	bool
+	default n
+	select MAX326XX_HAVE_WDOG
+	select MAX326XX_HAVE_TIMER8
+
+# Peripheral support
+
+config MAX326XX_HAVE_WDOG
+	bool
+	default n
+
+config MAX326XX_HAVE_WWDOG
+	bool
+	default n
+
+config MAX326XX_HAVE_RWDOG
+	bool
+	default n
+
+config MAX326XX_HAVE_WAKEUP
+	bool
+	default n
+
+config MAX326XX_HAVE_RTC
+	bool
+	default n
+
+config MAX326XX_HAVE_CRC
+	bool
+	default n
+
+config MAX326XX_HAVE_AES
+	bool
+	default n
+
+config MAX326XX_HAVE_USB20
+	bool
+	default n
+
+config MAX326XX_HAVE_TIMER32_2
+	bool
+	default n
+
+config MAX326XX_HAVE_TIMER32_3
+	bool
+	default n
+
+config MAX326XX_HAVE_TIMER32_4
+	bool
+	default n
+
+config MAX326XX_HAVE_TIMER32_5
+	bool
+	default n
+
+config MAX326XX_HAVE_TIMER8
+	bool
+	default n
+
+config MAX326XX_HAVE_SPIM2
+	bool
+	default n
+
+config MAX326XX_HAVE_SPIS1
+	bool
+	default n
+
+config MAX326XX_HAVE_SPIXIP
+	bool
+	default n
+
+config MAX326XX_HAVE_I2SS
+	bool
+	default n
+
+config MAX326XX_HAVE_I2CM2
+	bool
+	default n
+
+config MAX326XX_HAVE_I2CS1
+	bool
+	default n
+
+config MAX326XX_HAVE_UART2
+	bool
+	default n
+
+config MAX326XX_HAVE_UART3
+	bool
+	default n
+
+config MAX326XX_HAVE_1WIREM
+	bool
+	default n
+
+config MAX326XX_HAVE_ADC10
+	bool
+	default n
+
+# Peripheral Driver Selections
+
+config MAX326XX_WDOG
+	bool "Watchdog Timer"
+	default n
+	depends on MAX326XX_HAVE_WDOG
+
+config MAX326XX_WWDOG0
+	bool "Windowed Watchdog Timer 0"
+	default n
+	depends on MAX326XX_HAVE_WWDOG
+
+config MAX326XX_WWDOG1
+	bool "Windowed Watchdog Timer 1"
+	default n
+	depends on MAX326XX_HAVE_WWDOG
+
+config MAX326XX_RWDOG
+	bool "Recovery Watchdog"
+	default n
+	depends on MAX326XX_HAVE_RWDOG
+
+config MAX326XX_WAKEUP
+	bool "Wakeup Timer"
+	default n
+	depends on MAX326XX_HAVE_WAKEUP
+
+config MAX326XX_RTC
+	bool "RTC"
+	default n
+	depends on MAX326XX_HAVE_RTC
+
+config MAX326XX_CRC
+	bool "CRC 16/32"
+	default n
+	depends on MAX326XX_HAVE_CRC
+
+config MAX326XX_AES
+	bool "AES 128, 192, 256"
+	default n
+	depends on MAX326XX_HAVE_AES
+
+config MAX326XX_USB20
+	bool "USB 2.0 Device"
+	default n
+	depends on MAX326XX_HAVE_USB20
+
+config MAX326XX_TIMER32_0
+	bool "32-Bit Timer 0"
+	default n
+
+config MAX326XX_TIMER32_1
+	bool "32-Bit Timer 1"
+	default n
+
+config MAX326XX_TIMER32_2
+	bool "32-Bit Timer 2"
+	default n
+	depends on MAX326XX_HAVE_TIMER32_2
+
+config MAX326XX_TIMER32_3
+	bool "32-Bit Timer 3"
+	default n
+	depends on MAX326XX_HAVE_TIMER32_3
+
+config MAX326XX_TIMER32_4
+	bool "32-Bit Timer 4"
+	default n
+	depends on MAX326XX_HAVE_TIMER32_4
+
+config MAX326XX_TIMER32_5
+	bool "32-Bit Timer 5"
+	default n
+	depends on MAX326XX_HAVE_TIMER32_5
+
+config MAX326XX_TIMER8
+	bool "8-Bit Timer"
+	default n
+	depends on MAX326XX_HAVE_TIMER8
+
+config MAX326XX_PTENGINE
+	bool "Pulse Train Engine"
+	default n
+
+config MAX326XX_SPIM0
+	bool "SPI Master 0"
+	default n
+
+config MAX326XX_SPIM1
+	bool "SPI Master 1"
+	default n
+
+config MAX326XX_SPIM2
+	bool "SPI Master 2"
+	default n
+	depends on MAX326XX_HAVE_SPIM2
+
+config MAX326XX_SPIS0
+	bool "SPI Slave 0"
+	default n
+
+config MAX326XX_SPIS1
+	bool "SPI Slave 1"
+	default n
+	depends on MAX326XX_HAVE_SPIS1
+
+config MAX326XX_SPIXIP
+	bool "SPI XIP"
+	default n
+	depends on MAX326XX_HAVE_SPIXIP
+
+config MAX326XX_I2SS
+	bool "I2S Slave"
+	default n
+	depends on MAX326XX_HAVE_I2SS
+
+config MAX326XX_I2CM0
+	bool "I2C Master 0"
+	default n
+
+config MAX326XX_I2CM1
+	bool "I2C Master 1"
+	default n
+
+config MAX326XX_I2CM2
+	bool "I2C Master 2"
+	default n
+	depends on MAX326XX_HAVE_I2CM2
+
+config MAX326XX_I2CS0
+	bool "I2C Slave 0"
+	default n
+
+config MAX326XX_I2CS1
+	bool "I2C Slave 1"
+	default n
+	depends on MAX326XX_HAVE_I2CS1
+
+config MAX326XX_UART0
+	bool "UART 0"
+	default n
+
+config MAX326XX_UART1
+	bool "UART 1"
+	default n
+
+config MAX326XX_UART2
+	bool "UART 2"
+	default n
+	depends on MAX326XX_HAVE_UART2
+
+config MAX326XX_UART3
+	bool "UART 3"
+	default n
+	depends on MAX326XX_HAVE_UART3
+
+config MAX326XX_1WIREM
+	bool "1-Wire Master"
+	default n
+	depends on MAX326XX_HAVE_1WIREM
+
+config MAX326XX_ADC10
+	bool "10-Bit ADC"
+	default n
+	depends on MAX326XX_HAVE_ADC10

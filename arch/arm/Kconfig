@@ -48,7 +48,7 @@ config ARCH_CHIP_DM320
 		TI DMS320 DM320 (ARM926EJS)
 
 config ARCH_CHIP_EFM32
-	bool "Energy Micro"
+	bool "Energy Micro EFM32"
 	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_FETCHADD
 	---help---
@@ -183,6 +183,13 @@ config ARCH_CHIP_LPC54XX
 	select ARCH_HAVE_FETCHADD
 	---help---
 		NPX LPC54XX architectures (ARM Cortex-M4).
+
+config ARCH_CHIP_MAX326XX
+	bool "Maxim Integrated MAX326XX"
+	select ARCH_HAVE_FETCHADD
+	depends on EXPERIMENTAL
+	---help---
+		Maxim Integrated MAX326XX microcontrollers (ARM Cortex-M4F).
 
 config ARCH_CHIP_MOXART
 	bool "MoxART"
@@ -591,6 +598,7 @@ config ARCH_CHIP
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "lpc54xx"	if ARCH_CHIP_LPC54XX
+	default "max326xx"	if ARCH_CHIP_MAX326XX
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
@@ -823,6 +831,9 @@ source arch/arm/src/lpc43xx/Kconfig
 endif
 if ARCH_CHIP_LPC54XX
 source arch/arm/src/lpc54xx/Kconfig
+endif
+if ARCH_CHIP_MAX326XX
+source arch/arm/src/max326xx/Kconfig
 endif
 if ARCH_CHIP_MOXART
 source arch/arm/src/moxart/Kconfig
