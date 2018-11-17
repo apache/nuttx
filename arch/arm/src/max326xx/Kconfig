@@ -333,8 +333,8 @@ config MAX326XX_I2CM1
 config MAX326XX_I2CM2
 	bool "I2C Master 2"
 	default n
-	depends on MAX326XX_HAVE_I2CM2
 	select MAX326XX_HAVE_I2CM
+	depends on MAX326XX_HAVE_I2CM2
 
 config MAX326XX_I2CS0
 	bool "I2C Slave 0"
@@ -348,19 +348,23 @@ config MAX326XX_I2CS1
 config MAX326XX_UART0
 	bool "UART 0"
 	default n
+	select UART0_SERIALDRIVER
 
 config MAX326XX_UART1
 	bool "UART 1"
 	default n
+	select UART1_SERIALDRIVER
 
 config MAX326XX_UART2
 	bool "UART 2"
 	default n
+	select UART2_SERIALDRIVER
 	depends on MAX326XX_HAVE_UART2
 
 config MAX326XX_UART3
 	bool "UART 3"
 	default n
+	select UART3_SERIALDRIVER
 	depends on MAX326XX_HAVE_UART3
 
 config MAX326XX_1WIREM
