@@ -90,7 +90,7 @@ void board_autoled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  max326_configgpio(GPIO_LED);
+  max326_gpio_config(GPIO_LED);
 }
 
 /****************************************************************************
@@ -101,7 +101,7 @@ void board_autoled_on(int led)
 {
   if (led == 1 || led == 3)
     {
-      max326_gpiowrite(GPIO_LED, false); /* Low illuminates */
+      max326_gpio_write(GPIO_LED, false); /* Low illuminates */
     }
 }
 
@@ -113,7 +113,7 @@ void board_autoled_off(int led)
 {
   if (led == 3)
     {
-      max326_gpiowrite(GPIO_LED, true);  /* High extinguishes */
+      max326_gpio_write(GPIO_LED, true);  /* High extinguishes */
     }
 }
 

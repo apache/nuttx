@@ -60,7 +60,7 @@ void board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
-  max326_configgpio(GPIO_LED);
+  max326_gpio_config(GPIO_LED);
 }
 
 /****************************************************************************
@@ -71,7 +71,7 @@ void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LED)
     {
-      max326_gpiowrite(GPIO_LED, !ledon); /* Low illuminates */
+      max326_gpio_write(GPIO_LED, !ledon); /* Low illuminates */
     }
 }
 
@@ -83,5 +83,5 @@ void board_userled_all(uint8_t ledset)
 {
   /* Low illuminates */
 
-  max326_gpiowrite(GPIO_LED, (ledset & BOARD_LED_BIT) == 0));
+  max326_gpio_write(GPIO_LED, (ledset & BOARD_LED_BIT) == 0));
 }

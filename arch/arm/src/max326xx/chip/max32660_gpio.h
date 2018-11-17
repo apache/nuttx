@@ -58,7 +58,7 @@
 #define MAX326_GPIO_INTPOL_OFFSET      0x002c  /* Interrupt Polarity Select
                                                 * Register */
 #define MAX326_GPIO_INTEN_OFFSET       0x0034  /* Interrupt Enable Register */
-#define MAX326_GPIO_INTFL_OFFSET       0x0040  /*1C Interrupt Flag Register */
+#define MAX326_GPIO_INTFL_OFFSET       0x0040  /* Interrupt Flag Register */
 #define MAX326_GPIO_WAKEEN_OFFSET      0x004c  /* Wakeup Enable Register */
 #define MAX326_GPIO_INTDUALEDGE_OFFSET 0x005c  /* Dual Edge Select Interrupt
                                                 * Register */
@@ -126,7 +126,7 @@
 
 #define GPIO_INTEN(n)                  (1 << (n)) /* GPIO Pin n interrupt enabled */
 
-/*1C Interrupt Flag Register */
+/* Interrupt Flag Register */
 
 #define GPIO_INTFL(n)                  (1 << (n)) /* GPIO Pin n interrupt pending */
 
