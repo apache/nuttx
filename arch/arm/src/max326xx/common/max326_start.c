@@ -193,7 +193,7 @@ void __start(void)
 
   __asm__ __volatile__ ("\tcpsid  i\n");
 
-  /* Configure the clocking and the console uart so that we can get debug
+  /* Configure the clocking and the console UART so that we can get debug
    * output as soon as possible.  NOTE: That this logic must not assume that
    * .bss or .data have been initialized.
    */

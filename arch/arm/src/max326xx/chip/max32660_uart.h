@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_uart.h
+ * arch/arm/src/max326xx/chip/max32660_uart.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_UART_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_UART_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H
 
 /************************************************************************************
  * Included Files
@@ -193,4 +193,4 @@
 
 #define UART_TXFIFO_MASK            (0xff)    /* Bits 0-7: TX FIFO Data Output Peek Register */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_UART_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H */

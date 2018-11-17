@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_spi.h
+ * arch/arm/src/max326xx/chip/max32660_spi.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPI_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPI_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPI_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPI_H
 
 /************************************************************************************
  * Included Files
@@ -195,4 +195,4 @@
 
 #define SPI_STAT_BUSY               (1 << 0)  /* Bit 0:  SPI Active Status */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPI_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPI_H */

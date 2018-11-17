@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_tmr.h
+ * arch/arm/src/max326xx/chip/max32660_tmr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_TMR_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_TMR_H
 
 /************************************************************************************
  * Included Files
@@ -127,4 +127,4 @@
 #define TMR_CN_NOLLPOL              (1 << 11) /* Bit 11: PWM Output phase A' Polarity */
 #define TMR_CN_PWMCKBD              (1 << 12) /* Bit 12: PWM Output phase A' Disable */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_TMR_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_spimss.h
+ * arch/arm/src/max326xx/chip/max32660_spimss.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPIMSS_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPIMSS_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPIMSS_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPIMSS_H
 
 /************************************************************************************
  * Included Files
@@ -138,4 +138,4 @@
 #define SPIMSS_I2SCTRL_I2SMONO        (1 << 3)  /* Bit 3:  I2S Monophonic Audio Mode */
 #define SPIMSS_I2SCTRL_I2SLJ          (1 << 4)  /* Bit 4:  I2S Left Justify */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_SPIMSS_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_SPIMSS_H */

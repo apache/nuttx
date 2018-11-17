@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_flc.h
+ * arch/arm/src/max326xx/chip/max32660_flc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_FLC_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_FLC_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_FLC_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_FLC_H
 
 /************************************************************************************
  * Included Files
@@ -111,4 +111,4 @@
 /* Flash Controller Data Register 2 (32-bit FLASH data) */
 /* Flash Controller Data Register 3 (32-bit FLASH data) */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_FLC_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_FLC_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_i2c.h
+ * arch/arm/src/max326xx/chip/max32660_i2c.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_I2C_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_I2C_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_I2C_H
+#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_I2C_H
 
 /************************************************************************************
  * Included Files
@@ -298,4 +298,4 @@
 #define I2C_DMA_TXEN                (1 << 0)  /* Bit 0:  TX DMA Channel Enable */
 #define I2C_DMA_RXEN                (1 << 1)  /* Bit 1:  RX DMA Channel Enable */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_I2C_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_I2C_H */
