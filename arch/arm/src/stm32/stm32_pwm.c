@@ -293,8 +293,9 @@
 #endif
 
 /* Advanced Timer support
- * NOTE: TIM15-17 are not ADVTIM but they support most of the ADVTIM functionality.
- *       The main difference is the number of supported capture/compare.
+ * NOTE: TIM15-17 are not ADVTIM but they support most of the
+ *       ADVTIM functionality.  The main difference is the number of
+ *       supported capture/compare.
  */
 
 #if defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM) || \
@@ -544,7 +545,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
  * Private Data
  ****************************************************************************/
 
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver.
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {
@@ -1896,7 +1899,8 @@ static uint32_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint32_t value)
+static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset,
+                       uint32_t value)
 {
   if (pwm_reg_is_32bit(priv->timtype, offset) == true)
     {
@@ -1943,7 +1947,8 @@ static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
     {
       /* 16-bit register */
 
-      modifyreg16(priv->base + offset, (uint16_t)clearbits, (uint16_t)setbits);
+      modifyreg16(priv->base + offset, (uint16_t)clearbits,
+                  (uint16_t)setbits);
     }
 }
 
@@ -2005,7 +2010,8 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
           pwm_getreg(priv, STM32_GTIM_PSC_OFFSET),
           pwm_getreg(priv, STM32_GTIM_ARR_OFFSET));
 
-  if (priv->timid == 1 || priv->timid == 8 || (priv->timid >= 15 && priv->timid <= 17))
+  if (priv->timid == 1 || priv->timid == 8 ||i
+      (priv->timid >= 15 && priv->timid <= 17))
     {
       pwminfo("  RCR: %04x BDTR: %04x\n",
           pwm_getreg(priv, STM32_ATIM_RCR_OFFSET),
@@ -2453,8 +2459,8 @@ errout:
  *
  ****************************************************************************/
 
-static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel,
-                              uint32_t mode)
+static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv,
+                              uint8_t channel, uint32_t mode)
 {
   uint32_t chanmode = 0;
   uint32_t ocmode1  = 0;
@@ -2533,7 +2539,8 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
         {
           /* Reset current channel 1 mode configuration */
 
-          ccmr1 &= ~(ATIM_CCMR1_CC1S_MASK | ATIM_CCMR1_OC1M_MASK | ATIM_CCMR1_OC1PE);
+          ccmr1 &= ~(ATIM_CCMR1_CC1S_MASK | ATIM_CCMR1_OC1M_MASK |
+                     ATIM_CCMR1_OC1PE);
 
           /* Configure CC1 as output */
 
@@ -2566,7 +2573,8 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
         {
           /* Reset current channel 2 mode configuration */
 
-          ccmr1 &= ~(ATIM_CCMR1_CC2S_MASK | ATIM_CCMR1_OC2M_MASK | ATIM_CCMR1_OC2PE);
+          ccmr1 &= ~(ATIM_CCMR1_CC2S_MASK | ATIM_CCMR1_OC2M_MASK |
+                     ATIM_CCMR1_OC2PE);
 
           /* Configure CC2 as output */
 
@@ -2599,7 +2607,8 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
         {
           /* Reset current channel 3 mode configuration */
 
-          ccmr2 &= ~(ATIM_CCMR2_CC3S_MASK | ATIM_CCMR2_OC3M_MASK | ATIM_CCMR2_OC3PE);
+          ccmr2 &= ~(ATIM_CCMR2_CC3S_MASK | ATIM_CCMR2_OC3M_MASK |
+                     ATIM_CCMR2_OC3PE);
 
           /* Configure CC3 as output */
 
@@ -2632,7 +2641,8 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel
         {
           /* Reset current channel 4 mode configuration */
 
-          ccmr2 &= ~(ATIM_CCMR2_CC4S_MASK | ATIM_CCMR2_OC4M_MASK | ATIM_CCMR2_OC4PE);
+          ccmr2 &= ~(ATIM_CCMR2_CC4S_MASK | ATIM_CCMR2_OC4M_MASK |
+                     ATIM_CCMR2_OC4PE);
 
           /* Configure Compare 4 mode */
 
@@ -2691,7 +2701,8 @@ errout:
  *
  ****************************************************************************/
 
-static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t channel)
+static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
+                                uint8_t channel)
 {
   uint32_t cr2  = 0;
   uint32_t ccer = 0;
@@ -2717,7 +2728,8 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t chann
     }
 
 #ifdef HAVE_ADVTIM
-  if (priv->timtype == TIMTYPE_ADVANCED || priv->timtype == TIMTYPE_COUNTUP16_N)
+  if (priv->timtype == TIMTYPE_ADVANCED ||
+      priv->timtype == TIMTYPE_COUNTUP16_N)
     {
       /* Configure output IDLE State */
 
@@ -2804,8 +2816,8 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t chann
  *
 ****************************************************************************/
 
-static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
-                              bool state)
+static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
+                              uint16_t outputs, bool state)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   uint32_t ccer   = 0;
@@ -2824,7 +2836,9 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
   regval |= ((outputs & STM32_CHAN3)  ? ATIM_CCER_CC3E  : 0);
   regval |= ((outputs & STM32_CHAN3N) ? ATIM_CCER_CC3NE : 0);
   regval |= ((outputs & STM32_CHAN4)  ? ATIM_CCER_CC4E  : 0);
+
   /* NOTE: CC4N does not exist, but some docs show configuration bits for it */
+
 #ifdef HAVE_IP_TIMERS_V2
   regval |= ((outputs & STM32_CHAN5)  ? ATIM_CCER_CC5E  : 0);
   regval |= ((outputs & STM32_CHAN6)  ? ATIM_CCER_CC6E  : 0);
@@ -2944,6 +2958,12 @@ static int pwm_soft_update(FAR struct pwm_lowerhalf_s *dev)
  * Description:
  *   Generate an software break event
  *
+ *   Outputs are enabled if state is false.
+ *   Outputs are disabled if state is true.
+ *
+ *   NOTE: only timers with complementary outputs have BDTR register and
+ *         support software break.
+ *
  ****************************************************************************/
 
 static int pwm_soft_break(FAR struct pwm_lowerhalf_s *dev, bool state)
@@ -2952,15 +2972,15 @@ static int pwm_soft_break(FAR struct pwm_lowerhalf_s *dev, bool state)
 
   if (state == true)
     {
-      /* Set MOE bit */
-
-      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
-    }
-  else
-    {
       /* Reset MOE bit */
 
       pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
+    }
+  else
+    {
+      /* Set MOE bit */
+
+      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
     }
 
   return OK;
@@ -3148,7 +3168,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
       goto errout;
     }
 
-  /* Disable software break */
+  /* Disable software break (enable outputs) */
 
   ret = pwm_soft_break(dev, false);
   if (ret < 0)
@@ -3175,7 +3195,8 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
         {
           /* Update PWM mode */
 
-          pwm_mode_configure(priv, priv->channels[j].channel, priv->channels[j].mode);
+          pwm_mode_configure(priv, priv->channels[j].channel,
+                             priv->channels[j].mode);
 
           /* PWM outputs configuration */
 
@@ -3314,8 +3335,8 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
     }
 
   /* Setup update interrupt.  If info->count is > 0, then we can be
-   * assured that pwm_pulsecount_start() has already verified: (1) that this is an
-   * advanced timer, and that (2) the repetition count is within range.
+   * assured that pwm_pulsecount_start() has already verified: (1) that this
+   * is an advanced timer, and that (2) the repetition count is within range.
    */
 
   if (info->count > 0)
@@ -3386,7 +3407,8 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
   /* Some special setup for advanced timers */
 
 #ifdef HAVE_ADVTIM
-  if (priv->timtype == TIMTYPE_ADVANCED || priv->timtype == TIMTYPE_COUNTUP16_N)
+  if (priv->timtype == TIMTYPE_ADVANCED ||
+      priv->timtype == TIMTYPE_COUNTUP16_N)
     {
       /* Configure break and deadtime register */
 
@@ -3418,7 +3440,8 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 
           /* Update PWM mode */
 
-          ret = pwm_mode_configure(priv, priv->channels[j].channel, priv->channels[j].mode);
+          ret = pwm_mode_configure(priv, priv->channels[j].channel,
+                                   priv->channels[j].mode);
           if (ret < 0)
             {
               goto errout;
@@ -3434,12 +3457,21 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
         }
     }
 
-  /* Disable software break */
+  /* Disable software break at the end of the outputs configuration (enablei
+   * outputs).
+   *
+   * NOTE: Only timers with complementary outputs have BDTR register and
+   *       support software break.
+   */
 
-  ret = pwm_soft_break(dev, false);
-  if (ret < 0)
+  if (priv->timtype == TIMTYPE_ADVANCED ||
+      priv->timtype == TIMTYPE_COUNTUP16_N)
     {
-      goto errout;
+      ret = pwm_soft_break(dev, false);
+      if (ret < 0)
+        {
+          goto errout;
+        }
     }
 
 errout:
@@ -3546,7 +3578,8 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
           priv->timid, info->frequency);
 #else
   pwminfo("TIM%u channel: %u frequency: %u duty: %08x\n",
-          priv->timid, priv->channels[0].channel, info->frequency, info->duty);
+          priv->timid, priv->channels[0].channel,
+          info->frequency, info->duty);
 #endif
 
   DEBUGASSERT(info->frequency > 0);
@@ -3575,7 +3608,8 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
   /* Set the advanced timer's repetition counter */
 
 #ifdef HAVE_ADVTIM
-  if (priv->timtype == TIMTYPE_ADVANCED || priv->timtype == TIMTYPE_COUNTUP16_N)
+  if (priv->timtype == TIMTYPE_ADVANCED ||
+      priv->timtype == TIMTYPE_COUNTUP16_N)
     {
       /* If a non-zero repetition count has been selected, then set the
        * repitition counter to the count-1 (pwm_start() has already
@@ -3661,7 +3695,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
        * quickly as possible.
        */
 
-      pwm_soft_break(dev, false);
+      pwm_soft_break(dev, true);
 
       /* Disable first interrtups, stop and reset the timer */
 
@@ -3695,7 +3729,9 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
       pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
-  /* Now all of the time critical stuff is done so we can do some debug output */
+  /* Now all of the time critical stuff is done so we can do some debug
+   * output.
+  */
 
   pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
           regval, priv->prev, priv->curr, priv->count);
@@ -4434,7 +4470,8 @@ errout:
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+                     unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
@@ -4637,7 +4674,8 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_PWM_LL_OPS
-FAR const struct stm32_pwm_ops_s *stm32_pwm_llops_get(FAR struct pwm_lowerhalf_s *dev)
+FAR const struct stm32_pwm_ops_s *
+stm32_pwm_llops_get(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
 
@@ -4646,3 +4684,4 @@ FAR const struct stm32_pwm_ops_s *stm32_pwm_llops_get(FAR struct pwm_lowerhalf_s
 #endif
 
 #endif /* CONFIG_STM32_TIMn_PWM, n = 1,...,17 */
+
