@@ -33,6 +33,8 @@
 #
 ############################################################################
 
+# Common ARMv7-M Source Files
+
 HEAD_ASRC  =
 
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
@@ -75,9 +77,21 @@ CMN_ASRCS += up_fpu.S
 CMN_CSRCS += up_copyarmstate.c
 endif
 
+# Common MAX326XX Source Files
+
 CHIP_ASRCS  =
 CHIP_CSRCS  = max326_start.c max326_clockconfig.c max326_irq.c max326_clrpend.c
-CHIP_CSRCS += max326_allocateheap.c max326_lowputc.c max326_gpio.c
+CHIP_CSRCS += max326_allocateheap.c
+
+# Source Files for the MAX32620 and MAX32630
+
+# Source Files for the MAX32660
+
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_lowputc.c max32660_gpio.c
+endif
+
+# Configuration-Dependent Source Files
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += max326_timerisr.c
@@ -90,7 +104,9 @@ CHIP_CSRCS += max326_userspace.c max326_mpuinit.c
 endif
 
 ifeq ($(CONFIG_MAX326_DMA),y)
-CHIP_CSRCS += max326_dma.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_dma.c
+endif
 endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
@@ -98,32 +114,42 @@ CHIP_CSRCS += max326_idle.c
 endif
 
 ifeq ($(CONFIG_MAX326_GPIOIRQ),y)
-CHIP_CSRCS += max326_gpioirq.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_gpioirq.c
+endif
 endif
 
 ifeq ($(CONFIG_RTC),y)
-CHIP_CSRCS += max326_rtc.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_rtc.c
+endif
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += max326_rtc_lowerhalf.c
 endif
 endif
 
 ifeq ($(CONFIG_MAX326_WDT),y)
-CHIP_CSRCS += max326_wdt.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_wdt.c
+endif
 endif
 
 ifeq ($(CONFIG_MAX326_RNG),y)
 CHIP_CSRCS += max326_rng.c
 endif
 
-ifeq ($(CONFIG_MAX326_HAVE_USART),y)
-CHIP_CSRCS += max326_serial.c
+ifeq ($(CONFIG_MAX326XX_HAVE_UART),y)
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_serial.c
+endif
 endif
 
 ifeq ($(CONFIG_MAX326XX_HAVE_I2CM),y)
-CHIP_CSRCS += max326_i2c_master.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_i2cm.c
+endif
 endif
 
 ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
-CHIP_CSRCS += max326_spi_master.c
+CHIP_CSRCS += max326_spim.c
 endif

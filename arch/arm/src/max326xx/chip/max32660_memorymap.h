@@ -69,19 +69,13 @@
 #define MAX326_TMR2_BASE       0x40012000 /* TMR2 */
 #define MAX326_SPIMSS_BASE     0x40019000 /* SPIMSS (I2S) */
 #define MAX326_I2C0_BASE       0x4001d000 /* I2CM 0 Master/Slave */
-#  define MAX326_I2CM0_BASE    0x4001d000 /* I2CM 0 Master */
-#  define MAX326_I2CS0_BASE    0x4001d000 /* I2CS 0 Slave */
 #define MAX326_I2C1_BASE       0x4001e000 /* I2CM 1 Master/Slave */
-#  define MAX326_I2CM1_BASE    0x4001e000 /* I2CM 1 Master */
-#  define MAX326_I2CS1_BASE    0x4001e000 /* I2CS 1 Slave */
 #define MAX326_DMA_BASE        0x40028000 /* Standard DMA */
 #define MAX326_FLC_BASE        0x40029000 /* FLASH Controller */
 #define MAX326_ICC_BASE        0x4002a000 /* Internal Cache Controller */
 #define MAX326_UART0_BASE      0x40042000 /* UART 0 */
 #define MAX326_UART1_BASE      0x40043000 /* UART 1 */
 #define MAX326_SPI0_BASE       0x40046000 /* SPIM 0 Master/Slave */
-#  define MAX326_SPIM0_BASE    0x40046000 /* SPIM 0 Master */
-#  define MAX326_SPIS0_BASE    0x40046000 /* SPIS 0 Slave */
 
 /********************************************************************************************
  * Public Types

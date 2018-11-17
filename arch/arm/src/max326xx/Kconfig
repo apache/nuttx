@@ -201,6 +201,10 @@ config MAX326XX_HAVE_SPIM
 	bool
 	default n
 
+config MAX326XX_HAVE_UART
+	bool
+	default n
+
 # Peripheral Driver Selections
 
 config MAX326XX_WDOG
@@ -348,16 +352,19 @@ config MAX326XX_I2CS1
 config MAX326XX_UART0
 	bool "UART 0"
 	default n
+	select MAX326XX_HAVE_UART
 	select UART0_SERIALDRIVER
 
 config MAX326XX_UART1
 	bool "UART 1"
 	default n
+	select MAX326XX_HAVE_UART
 	select UART1_SERIALDRIVER
 
 config MAX326XX_UART2
 	bool "UART 2"
 	default n
+	select MAX326XX_HAVE_UART
 	select UART2_SERIALDRIVER
 	depends on MAX326XX_HAVE_UART2
 
