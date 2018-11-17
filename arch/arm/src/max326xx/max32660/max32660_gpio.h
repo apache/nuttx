@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/max32660_gpio.h
+ * arch/arm/src/max326xx/max32660/max32660_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_MAX32660_GPIO_H
-#define __ARCH_ARM_SRC_MAX326XX_MAX32660_GPIO_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_GPIO_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -186,4 +186,4 @@
 
 typedef uint16_t max326_pinset_t;
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_MAX32660_GPIO_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_GPIO_H */

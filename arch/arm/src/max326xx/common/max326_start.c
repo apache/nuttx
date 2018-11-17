@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/max326_start.c
+ * arch/arm/src/max326xx/common/max326_start.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,6 @@
 #include "up_internal.h"
 #include "nvic.h"
 
-#include "chip/max326_syscon.h"
 #include "max326_clockconfig.h"
 #include "max326_userspace.h"
 #include "max326_lowputc.h"
@@ -78,18 +77,9 @@
 
 /* This describes the initial PLL configuration */
 
-static const struct pll_setup_s g_initial_pll_setup =
+static const struct clock_setup_s g_initial_clock_setup =
 {
-  .pllclksel = BOARD_PLL_CLKSEL,
-  .pllctrl   = SYSCON_SYSPLLCTRL_SELR(BOARD_PLL_SELR) |
-               SYSCON_SYSPLLCTRL_SELI(BOARD_PLL_SELI) |
-               SYSCON_SYSPLLCTRL_SELP(BOARD_PLL_SELP),
-  .pllmdec   = (SYSCON_SYSPLLMDEC_MDEC(BOARD_PLL_MDEC)),
-  .pllndec   = (SYSCON_SYSPLLNDEC_NDEC(BOARD_PLL_NDEC)),
-  .pllpdec   = (SYSCON_SYSPLLPDEC_PDEC(BOARD_PLL_PDEC)),
-  .pllfout   = BOARD_PLL_FOUT,
-  .pllflags  = PLL_SETUPFLAG_WAITLOCK | PLL_SETUPFLAG_POWERUP,
-  .ahbdiv    = SYSCON_AHBCLKDIV_DIV(BOARD_AHBCLKDIV)
+#warning Missing logic
 };
 
 /****************************************************************************
@@ -198,7 +188,6 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
-  uint32_t regval;
 
   /* Make sure that interrupts are disabled */
 
@@ -209,7 +198,7 @@ void __start(void)
    * .bss or .data have been initialized.
    */
 
-  max326_clockconfig(&g_initial_pll_setup);
+  max326_clockconfig(&g_initial_clock_setup);
   max326_lowsetup();
   showprogress('A');
 

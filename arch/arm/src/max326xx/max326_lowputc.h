@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/max326_userspace.c
+ * arch/arm/src/max326xx/max326_lowputc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_LOWPUTC_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX326_LOWPUTC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -40,68 +43,76 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <assert.h>
+#include <stdbool.h>
 
-#include <nuttx/userspace.h>
+#include "max326_config.h"
 
-#include "max326_mpuinit.h"
-#include "max326_userspace.h"
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifdef HAVE_UART_DEVICE
+/* This structure describes the configuration of an UART */
+
+struct uart_config_s
+{
+  uint32_t baud;          /* Configured baud */
+  uint32_t fclk;          /* Input UART function clock frequency */
+  uint8_t  parity;        /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;          /* Number of bits (5-9) */
+  uint8_t  txlevel;       /* TX level for event generation */
+  uint8_t  rxlevel;       /* RX level for event generation */
+  bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool     iflow;         /* true: Input flow control supported */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool     oflow;         /* true: Output flow control supported. */
+#endif
+};
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: max326_userspace
+ * Name: max326_lowsetup
  *
  * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
+ *   Called at the very beginning of _start.  Performs low level
+ *   initialization including setup of the console UART.  This UART
+ *   initialization is done early so that the serial console is available
+ *   for debugging very early in the boot sequence.
  *
  ****************************************************************************/
 
-void max326_userspace(void)
-{
-  uint8_t *src;
-  uint8_t *dest;
-  uint8_t *end;
+void max326_lowsetup(void);
 
-  /* Clear all of user-space .bss */
+/****************************************************************************
+ * Name: max326_usart_configure
+ *
+ * Description:
+ *   Configure a UART for non-interrupt driven operation
+ *
+ ****************************************************************************/
 
-  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
-              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+#ifdef HAVE_UART_DEVICE
+void max326_usart_configure(uintptr_t base,
+                            FAR const struct uart_config_s *config);
+#endif
 
-  dest = (uint8_t *)USERSPACE->us_bssstart;
-  end  = (uint8_t *)USERSPACE->us_bssend;
+/****************************************************************************
+ * Name: max326_usart_disable
+ *
+ * Description:
+ *   Disable a UART.  it will be necessary to again call
+ *   max326_usart_configure() in order to use this UART channel again.
+ *
+ ****************************************************************************/
 
-  while (dest != end)
-    {
-      *dest++ = 0;
-    }
+#ifdef HAVE_UART_DEVICE
+void max326_usart_disable(uintptr_t base);
+#endif
 
-  /* Initialize all of user-space .data */
-
-  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
-              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
-              USERSPACE->us_datastart <= USERSPACE->us_dataend);
-
-  src  = (uint8_t *)USERSPACE->us_datasource;
-  dest = (uint8_t *)USERSPACE->us_datastart;
-  end  = (uint8_t *)USERSPACE->us_dataend;
-
-  while (dest != end)
-    {
-      *dest++ = *src++;
-    }
-
-  /* Configure the MPU to permit user-space access to its FLASH and RAM */
-
-  max326_mpuinitialize();
-}
-
-#endif /* CONFIG_BUILD_PROTECTED */
-
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_LOWPUTC_H */

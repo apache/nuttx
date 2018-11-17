@@ -153,3 +153,17 @@ endif
 ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
 CHIP_CSRCS += max326_spim.c
 endif
+
+# Paths to source files
+
+VPATH += chip/common
+
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32620),y)
+VPATH += chip/max32620_30
+else ifeq ($(CONFIG_ARCH_FAMILY_MAX32630),y)
+VPATH += chip/max32620_30
+endif
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+VPATH += chip/max32660
+endif
+
