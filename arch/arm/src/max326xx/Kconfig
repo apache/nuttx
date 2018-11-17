@@ -28,7 +28,7 @@ config ARCH_CHIP_MAX32632
 	bool "MAX32632"
 	select ARCH_FAMILY_MAX32630
 
-config ARCH_CHIP_MAX32632
+config ARCH_CHIP_MAX32660
 	bool "MAX32660"
 	select ARCH_FAMILY_MAX32660
 
@@ -48,6 +48,7 @@ endchoice # MAX326xx Chip Selection
 config ARCH_FAMILY_MAX32620
 	bool
 	default n
+	select ARCH_CORTEXM4
 	select MAX326XX_HAVE_WWDOG
 	select MAX326XX_HAVE_RWDOG
 	select MAX326XX_HAVE_WAKEUP
@@ -73,6 +74,7 @@ config ARCH_FAMILY_MAX32620
 config ARCH_FAMILY_MAX32630
 	bool
 	default n
+	select ARCH_CORTEXM4
 	select MAX326XX_HAVE_WWDOG
 	select MAX326XX_HAVE_WAKEUP
 	select MAX326XX_HAVE_CRC
@@ -94,6 +96,9 @@ config ARCH_FAMILY_MAX32630
 config ARCH_FAMILY_MAX32660
 	bool
 	default n
+	select ARCH_CORTEXM4
+	select MAX326XX_HAVE_I2CS1
+	select MAX326XX_HAVE_SPIS1
 	select MAX326XX_HAVE_WDOG
 	select MAX326XX_HAVE_TIMER8
 
@@ -207,6 +212,8 @@ config MAX326XX_HAVE_UART
 
 # Peripheral Driver Selections
 
+menu "MAX32xx Peripheral Selection"
+
 config MAX326XX_WDOG
 	bool "Watchdog Timer"
 	default n
@@ -288,6 +295,7 @@ config MAX326XX_TIMER8
 config MAX326XX_PTENGINE
 	bool "Pulse Train Engine"
 	default n
+	depends on MAX326XX_HAVE_PTENGINE
 
 config MAX326XX_SPIM0
 	bool "SPI Master 0"
@@ -308,11 +316,13 @@ config MAX326XX_SPIM2
 config MAX326XX_SPIS0
 	bool "SPI Slave 0"
 	default n
+	depends on !MAX326XX_SPIM0 || !ARCH_FAMILY_MAX32660
 
 config MAX326XX_SPIS1
 	bool "SPI Slave 1"
 	default n
 	depends on MAX326XX_HAVE_SPIS1
+	depends on !MAX326XX_SPIM1 || !ARCH_FAMILY_MAX32660
 
 config MAX326XX_SPIXIP
 	bool "SPI XIP"
@@ -343,11 +353,13 @@ config MAX326XX_I2CM2
 config MAX326XX_I2CS0
 	bool "I2C Slave 0"
 	default n
+	depends on !MAX326XX_I2CM0 || !ARCH_FAMILY_MAX32660
 
 config MAX326XX_I2CS1
 	bool "I2C Slave 1"
 	default n
 	depends on MAX326XX_HAVE_I2CS1
+	depends on !MAX326XX_I2CM1 || !ARCH_FAMILY_MAX32660
 
 config MAX326XX_UART0
 	bool "UART 0"
@@ -383,3 +395,13 @@ config MAX326XX_ADC10
 	bool "10-Bit ADC"
 	default n
 	depends on MAX326XX_HAVE_ADC10
+
+endmenu # MAX32xx Peripheral Selection
+
+config MAX326XX_DMA
+	bool "DMA"
+	default n
+
+config MAX326_GPIOIRQ
+	bool "GPIO Interrupt Support"
+	default n

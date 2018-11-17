@@ -446,14 +446,24 @@ config ARCH_BOARD_LPC4370_LINK2
 		NXP LPC4370 Link2 board.  This board is based on the
 		LPC4370FET100.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_MAX32660_EVSYS
+	bool "Maxim Integrated MAX32660-EVSYS"
+	depends on ARCH_CHIP_MAX32660
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This option enables support the Maxim Integrated MAX32660-EVSYS
+		board.
+
 config ARCH_BOARD_MBED
 	bool "mbed LCP1768"
 	depends on ARCH_CHIP_LPC1768
 	select ARCH_HAVE_LEDS
 	---help---
-		The configurations in this directory support the mbed board (http://mbed.org)
-		that features the NXP LPC1768 microcontroller. This OS is also built
-		with the arm-nuttx-elf toolchain*.  STATUS:  Contributed.
+		This option enables support the mbed board (http://mbed.org)
+		that features the NXP LPC1768 microcontroller. This OS is also
+		built with the arm-nuttx-elf toolchain*.  STATUS:  Contributed.
 
 config ARCH_BOARD_MCB1700
 	bool "Keil MCB1700"
@@ -1735,6 +1745,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "maple"                    if ARCH_BOARD_MAPLE
+	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
 	default "mbed"                     if ARCH_BOARD_MBED
 	default "mcb1700"                  if ARCH_BOARD_MCB1700
 	default "mcu123-lpc214x"           if ARCH_BOARD_MCU123_LPC214X
@@ -2020,6 +2031,9 @@ source "configs/lpcxpresso-lpc54628/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
 source "configs/maple/Kconfig"
+endif
+if ARCH_BOARD_MAX32660_EVSYS
+source "configs/max32660-evsys/Kconfig"
 endif
 if ARCH_BOARD_MBED
 source "configs/mbed/Kconfig"

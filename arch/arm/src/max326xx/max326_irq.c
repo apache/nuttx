@@ -412,7 +412,7 @@ void up_irqinitialize(void)
   putreg32(regval, NVIC_DEMCR);
 #endif
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
   /* Initialize GPIO interrupts */
 
   max326_gpio_irqinitialize();

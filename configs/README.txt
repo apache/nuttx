@@ -357,6 +357,10 @@ configs/maple
   are based on the STM32F103RBT6 chip for the standard version and on the
   STM32F103CBT6 for the mini version (See http://leaflabs.com/docs/hardware/maple.html)
 
+configs/max32660-evsys
+  The configurations in this directory support the Maxim Integrated
+  MAX32660-EVSYS board.
+
 configs/mbed
   The configurations in this directory support the mbed board (http://mbed.org)
   that features the NXP LPC1768 microcontroller. This OS is also built

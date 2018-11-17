@@ -103,7 +103,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += max326_userspace.c max326_mpuinit.c
 endif
 
-ifeq ($(CONFIG_MAX326_DMA),y)
+ifeq ($(CONFIG_MAX326XX_DMA),y)
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
 CHIP_CSRCS += max32660_dma.c
 endif
@@ -113,7 +113,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += max326_idle.c
 endif
 
-ifeq ($(CONFIG_MAX326_GPIOIRQ),y)
+ifeq ($(CONFIG_MAX326XX_GPIOIRQ),y)
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
 CHIP_CSRCS += max32660_gpioirq.c
 endif
@@ -128,13 +128,13 @@ CHIP_CSRCS += max326_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_MAX326_WDT),y)
+ifeq ($(CONFIG_MAX326XX_WDT),y)
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
 CHIP_CSRCS += max32660_wdt.c
 endif
 endif
 
-ifeq ($(CONFIG_MAX326_RNG),y)
+ifeq ($(CONFIG_MAX326XX_RNG),y)
 CHIP_CSRCS += max326_rng.c
 endif
 

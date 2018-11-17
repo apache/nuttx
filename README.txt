@@ -1825,6 +1825,8 @@ nuttx/
  |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
+ |   |- max32660-evsys/
+ |   |   `- README.txt
  |   |- mbed/
  |   |   `- README.txt
  |   |- mcb1700/
