@@ -498,7 +498,7 @@
 void stm32_flash_lock(void);
 void stm32_flash_unlock(void);
 
-#ifdef CONFIG_STM32_STM32F4XXX
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 int stm32_flash_writeprotect(size_t page, bool enabled);
 #endif
 
