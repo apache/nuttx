@@ -398,6 +398,11 @@ config MAX326XX_ADC10
 
 endmenu # MAX32xx Peripheral Selection
 
+config MAX326XX_ICC
+	bool "Instruction Cache Controller (ICC)"
+	default y
+	select ARMV7M_HAVE_ICACHE
+
 config MAX326XX_DMA
 	bool "DMA"
 	default n

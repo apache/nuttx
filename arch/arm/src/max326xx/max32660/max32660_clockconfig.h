@@ -41,6 +41,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Public Types
@@ -70,6 +72,10 @@ struct clock_setup_s
   uint8_t ovr;      /* Output voltage range for internal regulator */
   uint8_t clksrc;   /* See enum clock_source_e.  Determines Fsysosc */
   uint8_t psc;      /* System Oscillator Prescaler.  Derives Fsysclk */
+  bool hfio;        /* True: Enable the High frequency internal oscillator. */
+#ifdef BOARD_HAVE_X32K
+  bool x32k;        /* True: Enable the 32.768KHz ext crystal oscillator. */
+#endif
 };
 
 /****************************************************************************

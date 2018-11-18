@@ -64,7 +64,11 @@ const struct clock_setup_s g_initial_clock_setup =
 {
   .ovr    = 2,            /* Output voltage range for internal regulator */
   .clksrc = CLKSRC_HFIO,  /* See enum clock_source_e.  Determines Fsysosc */
-  .psc    = 0             /* System Oscillator Prescaler.  Derives Fsysclk */
+  .psc    = 0,            /* System Oscillator Prescaler.  Derives Fsysclk */
+  .hfio   = true,         /* True: Enable the High frequency internal oscillator. */
+#ifdef BOARD_HAVE_X32K
+  .x32k   = true,         /* True: Enable the 32.768KHz ext crystal oscillator. */
+#endif
 };
 
 /****************************************************************************
@@ -127,6 +131,39 @@ static uint32_t max326_sysclk_frequency(void)
 }
 
 /****************************************************************************
+ * Name: max326_enable_hfio
+ *
+ * Description:
+ *   Enable/disable High-Frequency Internal Oscillator (HFIO).
+ *
+ ****************************************************************************/
+
+static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
+{
+  uint32_t regval;
+
+  /* Enable/disable the HFIO. */
+
+  regval = getreg32(MAX326_GCR_CLKCTRL);
+  if (clksetup->hfio)
+    {
+      regval |= GCR_CLKCTRL_HIRCEN;
+      putreg32(regval, MAX326_GCR_CLKCTRL);
+
+      /* Wait for the oscillator to become ready */
+
+      while ((getreg32(GCR_CLKCTRL_HIRCRDY) & GCR_CLKCTRL_HIRCRDY) == 0)
+        {
+        }
+    }
+  else
+    {
+      regval &= ~GCR_CLKCTRL_HIRCEN;
+      putreg32(regval, MAX326_GCR_CLKCTRL);
+    }
+}
+
+/****************************************************************************
  * Name: max326_select_hfio
  *
  * Description:
@@ -138,18 +175,6 @@ static uint32_t max326_sysclk_frequency(void)
 static void max326_select_hfio(void)
 {
   uint32_t regval;
-
-  /* Enable the HFIO. */
-
-  regval  = getreg32(MAX326_GCR_CLKCTRL);
-  regval |= GCR_CLKCTRL_HIRCEN;
-  putreg32(regval, MAX326_GCR_CLKCTRL);
-
-  /* Wait for the oscillator to become ready */
-
-  while ((getreg32(GCR_CLKCTRL_HIRCRDY) & GCR_CLKCTRL_HIRCRDY) == 0)
-    {
-    }
 
   /* Select the HIFO as the SYSOSC clock source. */
 
@@ -192,6 +217,41 @@ static void max326_select_lirc8k(void)
 }
 
 /****************************************************************************
+ * Name: max326_enable_x32k
+ *
+ * Description:
+ *   Enable/disable the 32.768kHz External Crystal Oscillator.
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_HAVE_X32K
+static void max326_enable_x32k(FAR const struct clock_setup_s *clksetup)
+{
+  uint32_t regval;
+
+  /* Enable/disable the 32.768kHz external oscillator. */
+
+  regval = getreg32(MAX326_GCR_CLKCTRL);
+  if (clksetup->x32k)
+    {
+      regval |= GCR_CLKCTRL_X32KEN;
+      putreg32(regval, MAX326_GCR_CLKCTRL);
+
+      /* Wait for the oscillator to become ready */
+
+      while ((getreg32(MAX326_GCR_CLKCTRL) & GCR_CLKCTRL_X32KRDY) == 0)
+        {
+        }
+    }
+  else
+    {
+      regval &= ~GCR_CLKCTRL_X32KEN;
+      putreg32(regval, MAX326_GCR_CLKCTRL);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: max326_select_x32k
  *
  * Description:
@@ -204,18 +264,6 @@ static void max326_select_lirc8k(void)
 static void max326_select_x32k(void)
 {
   uint32_t regval;
-
-  /* Enable the 32.768kHz external oscillator. */
-
-  regval  = getreg32(MAX326_GCR_CLKCTRL);
-  regval |= GCR_CLKCTRL_X32KEN;
-  putreg32(regval, MAX326_GCR_CLKCTRL);
-
-  /* Wait for the oscillator to become ready */
-
-  while ((getreg32(MAX326_GCR_CLKCTRL) & GCR_CLKCTRL_X32KRDY) == 0)
-    {
-    }
 
   /* Select the 32.768kHz external oscillator as the SYSOSC clock
    * source.
@@ -239,20 +287,20 @@ static void max326_select_x32k(void)
  *
  ****************************************************************************/
 
-static void max326_set_ovr(FAR const struct clock_setup_s *clocksetup)
+static void max326_set_ovr(FAR const struct clock_setup_s *clksetup)
 {
   uint32_t ovr;
   uint32_t regval;
 
 #ifndef BOARD_HAVE_X32K
-  DEBUGASSERT(clocksetup->ovr != CLKSRC_32KHZ);
+  DEBUGASSERT(clksetup->ovr != CLKSRC_32KHZ);
 #endif
 
   /* First check of the OVR setting is being changed */
 
   regval = getreg32(MAX326_PWRSEQ_LPCTRL);
   ovr    = (regval & PWRSEQ_LPCTRL_OVR_MASK) >> PWRSEQ_LPCTRL_OVR_SHIFT;
-  if (ovr != clocksetup->ovr)
+  if (ovr != clksetup->ovr)
     {
       /* Switch to the internal LDO for VCORE
        *
@@ -273,17 +321,22 @@ static void max326_set_ovr(FAR const struct clock_setup_s *clocksetup)
 
 #ifdef BOARD_HAVE_X32K
       /* Select the 32.768kHz External Crystal Oscillator as the SYSOSC
-       * clock source.
+       * clock source (if it was enabled)
        */
 
-      max326_select_x32k();
-#else
-      /* Select the 8kHz Internal Ultra-Low Power Nano-Ring Oscillator as
-       * the SYSOSC clock source.
-       */
-
-      max326_select_lirc8k();
+      if (clksetup->x32k)
+        {
+          max326_select_x32k();
+        }
+      else
 #endif
+        {
+          /* Select the 8kHz Internal Ultra-Low Power Nano-Ring Oscillator
+           * as the SYSOSC clock source.
+           */
+
+          max326_select_lirc8k();
+        }
 
      /* Wait for SYSOSC to become ready */
 
@@ -295,14 +348,14 @@ static void max326_set_ovr(FAR const struct clock_setup_s *clocksetup)
 
       regval  = getreg32(MAX326_PWRSEQ_LPCTRL);
       regval &= ~PWRSEQ_LPCTRL_OVR_MASK;
-      regval |= PWRSEQ_LPCTRL_OVR(clocksetup->ovr);
+      regval |= PWRSEQ_LPCTRL_OVR(clksetup->ovr);
       putreg32(regval, MAX326_PWRSEQ_LPCTRL);
     }
 
   /* Set the Flash Low Voltage Enable according to the OVR setting */
 
   regval = getreg32(MAX326_FLC_CTRL);
-  if (clocksetup->ovr < 2)
+  if (clksetup->ovr < 2)
     {
       regval |= FLC_CTRL_LVE;
     }
@@ -322,7 +375,7 @@ static void max326_set_ovr(FAR const struct clock_setup_s *clocksetup)
  *
  ****************************************************************************/
 
-static void max326_set_clksrc(FAR const struct clock_setup_s *clocksetup)
+static void max326_set_clksrc(FAR const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
   uint32_t clksrc;
@@ -334,19 +387,20 @@ static void max326_set_clksrc(FAR const struct clock_setup_s *clocksetup)
   regval = getreg32(MAX326_GCR_CLKCTRL);
   clksrc = (regval & GCR_CLKCTRL_CLKSEL_MASK) >> GCR_CLKCTRL_CLKSEL_SHIFT;
 
-  if (clksrc != clocksetup->clksrc)
+  if (clksrc != clksetup->clksrc)
     {
       /* Set the selected clock source */
 
-      switch (clocksetup->clksrc)
+      switch (clksetup->clksrc)
         {
           case CLKSRC_HFIO:   /* High frequency internal oscillator */
             /* Select the High-Frequency Internal Oscillator (HFIO) as the
              * SYSOSC clock source.
              */
 
-             max326_select_hfio();
-             break;
+            DEBUGASSERT(clksetup->hfio);
+            max326_select_hfio();
+            break;
 
           case CLKSRC_8KHZ:   /* 8kHz Internal Ultra-Low Power Nano-Ring Oscillator */
             /* Select the 8kHz Internal Ultra-Low Power Nano-Ring Oscillator
@@ -362,6 +416,7 @@ static void max326_set_clksrc(FAR const struct clock_setup_s *clocksetup)
              * SYSOSC clock source.
              */
 
+            DEBUGASSERT(clksetup->x32k);
             max326_select_x32k();
             break;
 #endif
@@ -382,7 +437,7 @@ static void max326_set_clksrc(FAR const struct clock_setup_s *clocksetup)
 
   regval  = getreg32(MAX326_GCR_CLKCTRL);
   regval &= ~GCR_CLKCTRL_PSC_MASK;
-  regval |= GCR_CLKCTRL_PSC(clocksetup->psc);
+  regval |= GCR_CLKCTRL_PSC(clksetup->psc);
   putreg32(regval, MAX326_GCR_CLKCTRL);
 }
 
@@ -499,11 +554,21 @@ static void max326_periph_reset(void)
  *
  *****************************************************************************/
 
-void max326_clockconfig(FAR const struct clock_setup_s *clocksetup)
+void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
 {
   /* Set the the FLASH wait states to the default value (5) */
 
   max326_set_fwsdefault();
+
+#ifdef BOARD_HAVE_X32K
+  /* Enable/disble the 32.768 KHz crystal oscillator */
+
+  max326_enable_x32k(clksetup);
+#endif
+
+  /* Enable/disable the High frequency internal oscillator */
+
+  max326_enable_hfio(clksetup);
 
   /* Set the operating voltage range selection.  If the OVR setting is
    * different from the previous setting, then upon return, we will be
@@ -511,11 +576,11 @@ void max326_clockconfig(FAR const struct clock_setup_s *clocksetup)
    * ring oscillator with SYCLK prescaler == 0.
    */
 
-  max326_set_ovr(clocksetup);
+  max326_set_ovr(clksetup);
 
   /* Select the requested clock source. */
 
-  max326_set_clksrc(clocksetup);
+  max326_set_clksrc(clksetup);
 
   /* Set an optimal value for the FLASH wait states */
 
