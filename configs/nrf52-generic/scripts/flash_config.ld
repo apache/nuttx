@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nrf52-pca10040/scripts/flash_config.ld
+ * configs/nrf52-generic/scripts/flash_config.ld
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>

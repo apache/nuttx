@@ -174,6 +174,7 @@
 #  define GPIO_PIN29            (29 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN30            (30 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN31            (31 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN(n)           ((n) << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nrf52-pca10040/src/lpc4357-evb.h
+ * config/nrf52-generic/src/nrf53_bringup.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,62 +33,22 @@
  *
  ****************************************************************************/
 
-#ifndef _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H
-#define _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include "nrf52_gpio.h"
+#include <sys/types.h>
+#include <syslog.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_NRF52_WDT
+#  include "nrf52_wdt.h"
+#endif
 
-/* LED definitions **********************************************************/
-/* The PCA10040 has 4 user-controllable LEDs
- *
- *  ---- ------- -------------
- *  LED  SIGNAL  MCU
- *  ---- ------- -------------
- *  LED1         GPIO 17
- *  LED2         GPIO 18
- *  LED3         GPIO 19
- *  LED4         GPIO 20
- *  ---- ------- -------------
- *
- * A low output illuminates the LED.
- *
- */
-
-/* Definitions to configure LED GPIO as outputs */
-
-#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN17)
-#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN18)
-#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN19)
-#define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN20)
-
-/* Button definitions *******************************************************/
-/* Board supports four buttons. */
-
-#define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN13)
-#define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN14)
-#define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN15)
-#define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN16)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -108,7 +68,30 @@
  *
  ****************************************************************************/
 
-int nrf52_bringup(void);
+int nrf52_bringup(void)
+{
+  int ret;
 
-#endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_NRF52PCA10040_SRC_NRF52PCA10040_H */
+#ifdef CONFIG_NRF52_WDT
+  /* Start Watchdog timer */
+
+  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
+}

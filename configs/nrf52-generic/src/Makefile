@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nrf52-pca10040/src/Makefile
+# configs/nrf52-generic/src/Makefile
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
 #   Author:  Janne Rosberg <janne@offcode.fi>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nrf52-pca10040/src/lpc43_autoleds.c
+ * configs/nrf52-generic/src/nrf52-generic.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,130 +33,67 @@
  *
  ****************************************************************************/
 
-/* The PCA10040 has 4 user-controllable LEDs:
- *
- *   LED   MCU
- *   LED1  PIN-17
- *   LED2  PIN-18
- *   LED3  PIN-19
- *   LED4  PIN-20
- *
- * A low output illuminates the LED.
- */
+#ifndef _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H
+#define _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "nrf52-pca10040.h"
-
-#ifdef CONFIG_ARCH_LEDS
+#include "nrf52_gpio.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* LED definitions **********************************************************/
+/* Definitions to configure LED GPIO as outputs */
+
+#define GPIO_LED1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED1_PIN))
+#define GPIO_LED2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED2_PIN))
+#define GPIO_LED3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED3_PIN))
+#define GPIO_LED4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PIN(CONFIG_NRF52_GENERIC_LED4_PIN))
+
+/* Button definitions *******************************************************/
+/* Board supports four buttons. */
+
+#define GPIO_BUTTON1 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN13)
+#define GPIO_BUTTON2 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN14)
+#define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN15)
+#define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PIN16)
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: led_dumppins
+ * Public data
  ****************************************************************************/
 
-#ifdef LED_VERBOSE
-static void led_dumppins(FAR const char *msg)
-{
-  nrf52_pin_dump(PINCONFIG_LED, msg);
-  nrf52_gpio_dump(GPIO_LED, msg);
-}
-#else
-#  define led_dumppins(m)
-#endif
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: nrf52_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
  ****************************************************************************/
 
-void board_autoled_initialize(void)
-{
-  /* Configure LED pin as a GPIO outputs */
+int nrf52_bringup(void);
 
-  led_dumppins("board_autoled_initialize() Entry)");
-
-  nrf52_gpio_config(GPIO_LED1);
-  nrf52_gpio_config(GPIO_LED2);
-  nrf52_gpio_config(GPIO_LED3);
-  nrf52_gpio_config(GPIO_LED4);
-
-  led_dumppins("board_autoled_initialize() Exit");
-}
-
-/****************************************************************************
- * Name: board_autoled_on
- ****************************************************************************/
-
-void board_autoled_on(int led)
-{
-  switch (led)
-    {
-      default:
-      case 0:
-        nrf52_gpio_write(GPIO_LED1, 0);
-        break;
-
-      case 1:
-        nrf52_gpio_write(GPIO_LED2, 0);
-        break;
-
-      case 2:
-        nrf52_gpio_write(GPIO_LED3, 0);
-        break;
-
-      case 3:
-        nrf52_gpio_write(GPIO_LED4, 0);
-        break;
-    }
-}
-
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
-
-void board_autoled_off(int led)
-{
-  switch (led)
-    {
-      default:
-      case 0:
-        nrf52_gpio_write(GPIO_LED1, 1);
-        break;
-
-      case 1:
-        nrf52_gpio_write(GPIO_LED2, 1);
-        break;
-
-      case 2:
-        nrf52_gpio_write(GPIO_LED3, 1);
-        break;
-
-      case 3:
-        nrf52_gpio_write(GPIO_LED4, 1);
-        break;
-    }
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* __ASSEMBLY__ */
+#endif /* _CONFIGS_NRF52GENERIC_SRC_NRF52GENERIC_H */

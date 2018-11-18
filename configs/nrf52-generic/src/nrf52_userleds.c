@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nrf52-pca10040/src/nrf52_userleds.c
+ * configs/nrf52-generic/src/nrf52_userleds.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "nrf52-pca10040.h"
+#include "nrf52-generic.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -66,6 +66,32 @@
  *  void board_userled(int led, bool ledon);
  *  void board_userled_all(uint8_t ledset);
  */
+
+#ifdef CONFIG_NRF52_GENERIC_LED_ACTIVELOW
+#define LED_ON 0
+#define LED_OFF 1
+#else
+#define LED_ON 1
+#define LED_OFF 0
+#endif
+
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+#if 0 < BOARD_NLEDS
+  GPIO_LED1,
+#endif
+#if 1 < BOARD_NLEDS
+  GPIO_LED2,
+#endif
+#if 2 < BOARD_NLEDS
+  GPIO_LED3,
+#endif
+#if 3 < BOARD_NLEDS
+  GPIO_LED4,
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -95,16 +121,18 @@ static void led_dumppins(FAR const char *msg)
 
 void board_userled_initialize(void)
 {
+  int i;
+
   /* Configure LED pin as a GPIO outputs */
 
   led_dumppins("board_userled_initialize() Entry)");
 
   /* Configure GPIO as an outputs */
 
-  nrf52_gpio_config(GPIO_LED1);
-  nrf52_gpio_config(GPIO_LED2);
-  nrf52_gpio_config(GPIO_LED3);
-  nrf52_gpio_config(GPIO_LED4);
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      nrf52_gpio_config(g_ledcfg[i]);
+    }
 
   led_dumppins("board_userled_initialize() Exit");
 }
@@ -115,9 +143,9 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == BOARD_LED1)
+  if ((unsigned)led < BOARD_NLEDS)
     {
-      nrf52_gpio_write(GPIO_LED1, !ledon);
+      nrf52_gpio_write(g_ledcfg[led], ledon ? LED_ON : LED_OFF);
     }
 }
 
@@ -127,10 +155,14 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-  nrf52_gpio_write(GPIO_LED1, (ledset & BOARD_LED1_BIT) == 0);
-  nrf52_gpio_write(GPIO_LED2, (ledset & BOARD_LED2_BIT) == 0);
-  nrf52_gpio_write(GPIO_LED3, (ledset & BOARD_LED3_BIT) == 0);
-  nrf52_gpio_write(GPIO_LED4, (ledset & BOARD_LED4_BIT) == 0);
+  int i;
+
+  /* Configure LED1-8 GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      nrf52_gpio_write(g_ledcfg[i], (ledset & (1 << i)) ? LED_ON : LED_OFF);
+    }
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

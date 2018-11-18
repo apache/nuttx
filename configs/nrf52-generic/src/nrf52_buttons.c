@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nrf52-pca10400/src/nrf52_buttons.c
+ * configs/nrf52-generic/src/nrf52_buttons.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -48,7 +48,7 @@
 
 #include "nrf52_gpio.h"
 
-#include "nrf52-pca10040.h"
+#include "nrf52-generic.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -56,7 +56,7 @@
  * Private Data
  ****************************************************************************/
 
-/* Pin configuration for each PCA10400 button.  This array is indexed by
+/* Pin configuration for each PCA10040 button.  This array is indexed by
  * the BUTTON_* definitions in board.h
  */
 

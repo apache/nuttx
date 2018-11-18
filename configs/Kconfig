@@ -553,6 +553,17 @@ config ARCH_BOARD_NRF52_PCA10040
 	---help---
 		PCA10040 Evaluation board
 
+config ARCH_BOARD_NRF52_GENERIC
+	bool "Generic NRF52832 board"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		NuttX port to the a generic NRF52832 board.  Support is in place for
+		the NRF PCA10040 board from Nordic Semiconductor or for the Adafruit
+		NRF52 feather and can be simply extended to other board based on the
+		NRF52832 MCU.
+
 config ARCH_BOARD_LPC1766STK
 	bool "Olimex LPC1766-STK board"
 	depends on ARCH_CHIP_LPC1766
@@ -1755,7 +1766,7 @@ config ARCH_BOARD
 	default "misoc"                    if ARCH_BOARD_MISOC
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
-	default "nrf52-pca10040"           if ARCH_BOARD_NRF52_PCA10040
+	default "nrf52-generic"            if ARCH_BOARD_NRF52_GENERIC
 	default "ntosd-dm320"              if ARCH_BOARD_NTOSD_DM320
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
@@ -2068,8 +2079,8 @@ endif
 if ARCH_BOARD_NE64BADGE
 source "configs/ne64badge/Kconfig"
 endif
-if ARCH_BOARD_NRF52_PCA10040
-source "configs/nrf52-pca10040/Kconfig"
+if ARCH_BOARD_NRF52_GENERIC
+source "configs/nrf52-generic/Kconfig"
 endif
 if ARCH_BOARD_NTOSD_DM320
 source "configs/ntosd-dm320/Kconfig"

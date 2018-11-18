@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nrf52-pca10040/src/nrf52_appinit.c
+ * config/nrf52-generic/src/nrf52_appinit.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -46,7 +46,7 @@
 #include <nuttx/board.h>
 
 #include "chip.h"
-#include "nrf52-pca10040.h"
+#include "nrf52-generic.h"
 
 /****************************************************************************
  * Public Functions

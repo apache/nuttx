@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nrf52-pca10040/src/nrf53_bringup.c
+ * configs/nrf52-generic/src/lpc43_boot.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,43 +39,58 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <debug.h>
 
-#include "nrf52_wdt.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "up_internal.h"
+
+#include "nrf52-generic.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
+ * Name: nrf52_board_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
- *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   All NRF52xxx architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-int nrf52_bringup(void)
+void nrf52_board_initialize(void)
 {
-  int ret;
+  /* Configure on-board LEDs if LED support has been selected. */
 
-#ifdef CONFIG_NRF52_WDT
-  /* Start Watchdog timer */
-
-  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
-    }
+#ifdef CONFIG_ARCH_LEDS
+  board_autoled_initialize();
 #endif
-
-  UNUSED(ret);
-  return OK;
 }
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  (void)nrf52_bringup();
+}
+#endif

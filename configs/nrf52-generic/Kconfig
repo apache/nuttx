@@ -1,0 +1,56 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NRF52_GENERIC
+
+config NRF52_GENERIC_UART0_RX_PIN
+	int "Pin select for UART0 TXD"
+	default 23
+	---help---
+		Pin select for UART0 TXD
+
+config NRF52_GENERIC_UART0_TX_PIN
+	int "Pin select for UART0 TXD"
+	default 24
+	---help---
+		Pin select for UART0 TXD
+
+config NRF52_GENERIC_NUM_LEDS
+	int "Number of LEDs"
+	default 4
+	---help---
+		Number of LEDs
+
+config NRF52_GENERIC_LED_ACTIVELOW
+	bool "Board LEDs are 'active low'"
+	default y
+	---help---
+		Board LEDs are 'active low'
+
+config NRF52_GENERIC_LED1_PIN
+	int "Pin select for LED 1"
+	default 17
+	---help---
+		Pin select for LED 1
+
+config NRF52_GENERIC_LED2_PIN
+	int "Pin select for LED 2"
+	default 18
+	---help---
+		Pin select for LED 2
+
+config NRF52_GENERIC_LED3_PIN
+	int "Pin select for LED 3"
+	default 19
+	---help---
+		Pin select for LED 3
+
+config NRF52_GENERIC_LED4_PIN
+	int "Pin select for LED 4"
+	default 20
+	---help---
+		Pin select for LED 4
+
+endif

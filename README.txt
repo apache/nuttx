@@ -1847,7 +1847,7 @@ nuttx/
  |   |   `- README.txt
  |   |- ne63badge/
  |   |   `- README.txt
- |   |- nrf52-pca10040/
+ |   |- nrf52-generic/
  |   |   `- README.txt
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt

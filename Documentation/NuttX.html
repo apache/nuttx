@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: November 14, 2018</p>
+      <p>Last Updated: November 18, 2018</p>
     </td>
   </tr>
 </table>
@@ -1530,7 +1530,7 @@
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (2)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (49)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (50)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (13)</li>
     </ul>
   <li>Atmel AVR
@@ -3793,11 +3793,16 @@ nsh>
       <a name="nrf52"><b>Nordic Semiconductor/NRF52xxx</b>.</a>
       Initial architecture support of the NRF52 including UART, Timer, and GPIOs was contributed by Janne Rosberg in NuttX-7.25.
       Janne also contributed board support for the NRF52-PCA10040 development board at that time.
-      Additional drivers include:
+    </p>
+    <p>
+      The NRF52 was generalized by Hanya Zou in NuttX-7.28 for any similar board based on the NRF52832 MCU.  Support was specifically included for the Adafruit NRF52 Feather board.
+    </p>
+    <p>
+      Available drivers include:
     </p>
     <ul>
       <li>
-        <b>NuttX-7.25</b>.  A watchdog timer driver was added by Levin Li.
+        <b>NuttX-7.25</b>.  UART, Timer, and GPIOs from Janne Rosberg and a watchdog timer driver was added by Levin Li.
       </li>
       <li>
         <b>NuttX-7.25</b>.  Flash PROGMEM support was added by Alan Carvalho de Assis.
@@ -3806,25 +3811,11 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        Refer to the NRF52-PCA10040 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nrf52-pca10040/README.txt" target="_blank">README</a> file for further information.
+        Refer to the generic NRF52 board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/nrf52-generic/README.txt" target="_blank">README</a> file for further information.
       </p>
     </ul>
   </td>
 </tr>
-
-    * Nordic NRF52 Drivers:
-
-      - NRF52:  Added watchdog timer drivers.  Includes significant
-        updates from Levin Li.
-      - NRF52:  Added nRF52 Flash PROGMEM support  From Alan Carvalho de
-        Assis.
-
-    * Nordic NRF52 Boards:
-
-      - NRF52:  Added support for the NRF52 including initially UART, Timer
-        and GPIO support.  From Janne Rosberg.
-
-
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -4071,9 +4062,6 @@ nsh>
     </ul>
   </td>
 </tr>
-
-      <li><a href="#">STMicro STM32F334</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
-
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -4082,8 +4070,8 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f334x"><b>STMicro STM32 STM32F334 (STM32 F3 family, ARM Cortex-M4)</b>.</a>
-    <p>
+      <a name="stm32f334x"><b>STMicro STM32 F334 (STM32 F3 family, ARM Cortex-M4)</b>.</a>
+    </p>
     <p>
       Support for the STMicro <b>STM32F334-Disco</b> board was contributed by Mateusz Szafoni in NuttX-7.22 and for the <b>Nucleo-STM32F334R8</b> was contributed in an earlier release.
     </p>
@@ -5240,9 +5228,6 @@ Mem:         29232       5920      23312      23312
     </p>
   </td>
 </tr>
-
-      <li><a href="#">Atmel SAMD5x/E5x</a> <small>(ARM Cortex-M4)</small></li>
-
 <tr>
   <td><br></td>
   <td><hr></td>

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nrf52-pca10040/scripts/Make.defs
+# configs/nrf52-generic/scripts/Make.defs
 #
 #   Copyright (C) 2014, 2017, 2018 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
