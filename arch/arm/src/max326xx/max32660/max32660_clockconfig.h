@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/max326xx/max326_clockconfig.h
+ * arch/arm/src/max326xx/max32660/max32660_clockconfig.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -46,25 +46,34 @@
  * Public Types
  ****************************************************************************/
 
-/* Include the MCU-specific structure can be used to define a clock
- * configuration. */
+/* Clock sources.  Values match the CLKSEL field of the GCR_CLK_CTRL
+ * register
+ */
 
-#if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
-#  include "max32620_30/max32620_30_clockconfig.h"
-#if defined(CONFIG_ARCH_FAMILY_MAX32660)
-#  include "max32660/max32660_clockconfig.h"
-#else
-#  error "Unsupported MAX326XX family"
-#endif
+enum clock_source_e
+{
+  CLKSRC_HFIO  = 0, /* High frequency internal oscillator */
+  CLKSRC_8KHZ  = 3, /* 8kHz Internal Ultra-Low Power Nano-Ring Oscillator */
+  CLKSRC_32KHZ = 6  /* 32.768kHz External Crystal Oscillator */
+};
+
+/* This structure can be used to define a clock configuration.
+ *
+ * Fhfio     Determined by Output Voltage Range.
+ * Fsysoc    Determined by source clock selection.
+ * Fsysclk = Fsysclk / (2^psc)
+ * Fpclk   = Fsysclk / 2
+ */
+
+struct clock_setup_s
+{
+  uint8_t ovr;      /* Output voltage range for internal regulator */
+  uint8_t clksrc;   /* See enum clock_source_e.  Determines Fsysosc */
+  uint8_t psc;      /* System Oscillator Prescaler.  Derives Fsysclk */
+};
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -76,47 +85,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: max326_clockconfig
- *
- * Description:
- *   Called to initialize the MAX3266xx.  This does whatever setup is needed
- *   to put the MCU in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.  This function also performs
- *   other low-level chip as necessary.
- *
- *****************************************************************************/
-
-void max326_clockconfig(FAR const struct clock_setup_s *clocksetup);
-
-/****************************************************************************
- * Name: max326_hfio_frequency
- *
- * Description:
- *   Return the High-Frequency Internal Oscillator (HFIO) frequency.
- *
- *****************************************************************************/
-
-uint32_t max326_hfio_frequency(void);
-
-/****************************************************************************
- * Name: max326_cpu_frequency
- *
- * Description:
- *   Return the current CPU frequency.
- *
- *****************************************************************************/
-
-uint32_t max326_cpu_frequency(void);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H */
