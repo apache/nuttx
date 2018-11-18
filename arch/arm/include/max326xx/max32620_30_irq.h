@@ -104,7 +104,20 @@
 /* Number of external interrupts and total number of vectors */
 
 #define MAX326_IRQ_NEXTINT    50
-#define NR_IRQS               (MAX326_IRQ_EXTINT + MAX326_IRQ_NEXTINT)
+
+#define MAX326_IRQ_NVECTORS   (MAX326_IRQ_EXTINT + MAX326_IRQ_NEXTINT)
+
+/* If GPIO pin interrupts are used then there is a second level of interrupt decode */
+
+#ifdef CONFIG_MAX326_GPIOIRQ
+#warning Missing logic
+#else
+#  define MAX326_IRQ_NPININT   0
+#endif
+
+/* Total number of interrupts handled by the OS */
+
+#define NR_IRQS               (MAX326_IRQ_NVECTORS + MAX326_IRQ_NPININT)
 
 /************************************************************************************************
  * Public Types

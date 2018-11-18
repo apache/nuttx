@@ -86,10 +86,41 @@
                                                          /* 46-48  Reserved */
 #define MAX326_IRQ_SPIS       (MAX326_IRQ_EXTINT + 49)   /* 49  SPI Slave */
 
-/* Number of external interrupts and total number of vectors */
+/* Number of external interrupts and number of true interrupt vectors */
 
 #define MAX326_IRQ_NEXTINT    50
-#define NR_IRQS               (MAX326_IRQ_EXTINT + MAX326_IRQ_NEXTINT)
+#define MAX326_IRQ_NVECTORS   (MAX326_IRQ_EXTINT + MAX326_IRQ_NEXTINT)
+
+/* If GPIO pin interrupts are used then there is a second level of interrupt decode */
+
+#ifdef CONFIG_MAX326_GPIOIRQ
+/* Up to 14 pins are available as interrupt sources, depending on the MAX32660 package */
+
+#  define MAX326_IRQ_P0_0     (MAX326_IRQ_NEXTINT + 0)
+#  define MAX326_IRQ_P0_1     (MAX326_IRQ_NEXTINT + 1)
+#  define MAX326_IRQ_P0_2     (MAX326_IRQ_NEXTINT + 2)
+#  define MAX326_IRQ_P0_3     (MAX326_IRQ_NEXTINT + 3)
+#  define MAX326_IRQ_P0_4     (MAX326_IRQ_NEXTINT + 4)
+#  define MAX326_IRQ_P0_5     (MAX326_IRQ_NEXTINT + 5)
+#  define MAX326_IRQ_P0_6     (MAX326_IRQ_NEXTINT + 6)
+#  define MAX326_IRQ_P0_7     (MAX326_IRQ_NEXTINT + 7)
+#  define MAX326_IRQ_P0_8     (MAX326_IRQ_NEXTINT + 8)
+#  define MAX326_IRQ_P0_9     (MAX326_IRQ_NEXTINT + 9)
+#  define MAX326_IRQ_P0_10    (MAX326_IRQ_NEXTINT + 10)
+#  define MAX326_IRQ_P0_11    (MAX326_IRQ_NEXTINT + 11)
+#  define MAX326_IRQ_P0_12    (MAX326_IRQ_NEXTINT + 12)
+#  define MAX326_IRQ_P0_13    (MAX326_IRQ_NEXTINT + 13)
+
+#  define MAX326_IRQ_GPIO1ST   MAX326_IRQ_P0_0
+#  define MAX326_IRQ_GPIOLAST  MAX326_IRQ_P0_13
+#  define MAX326_IRQ_NPININT   14
+#else
+#  define MAX326_IRQ_NPININT   0
+#endif
+
+/* Total number of interrupts handled by the OS */
+
+#define NR_IRQS               (MAX326_IRQ_NVECTORS + MAX326_IRQ_NPININT)
 
 /************************************************************************************************
  * Public Types

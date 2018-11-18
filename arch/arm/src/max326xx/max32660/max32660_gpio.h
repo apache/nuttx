@@ -69,10 +69,9 @@
 #define GPIO_FUNC_MASK      (15 << GPIO_FUNC_SHIFT)
 #  define GPIO_INPUT        (0 << GPIO_FUNC_SHIFT)    /* 0000 GPIO input pin */
 #  define GPIO_OUTPUT       (1 << GPIO_FUNC_SHIFT)    /* 0001 GPIO output pin */
-#  define GPIO_ALT0         (4 << GPIO_FUNC_SHIFT)    /* 0100 GPIO Alternate function 0 */
-#  define GPIO_ALT1         (5 << GPIO_FUNC_SHIFT)    /* 0101 GPIO Alternate function 1 */
-#  define GPIO_ALT2         (6 << GPIO_FUNC_SHIFT)    /* 0110 GPIO Alternate function 2 */
-#  define GPIO_ALT3         (7 << GPIO_FUNC_SHIFT)    /* 0111 GPIO Alternate function 3 */
+#  define GPIO_ALT1         (5 << GPIO_FUNC_SHIFT)    /* 0100 GPIO Alternate function 1 */
+#  define GPIO_ALT2         (6 << GPIO_FUNC_SHIFT)    /* 0101 GPIO Alternate function 2 */
+#  define GPIO_ALT3         (7 << GPIO_FUNC_SHIFT)    /* 0110 GPIO Alternate function 3 */
 #  define GPIO_INTFE        (9 << GPIO_FUNC_SHIFT)    /* 1001 GPIO interrupt falling edge */
 #  define GPIO_INTRE        (10 << GPIO_FUNC_SHIFT)   /* 1010 GPIO interrupt rising edge */
 #  define GPIO_INTBOTH      (11 << GPIO_FUNC_SHIFT)   /* 1011 GPIO interrupt both edges */
@@ -94,7 +93,7 @@
 
 #define GPIO_IS_GPIO(ps)    (((uint16_t)(ps) & GPIO_GPIO_MASK) == GPIO_GPIO_CODE)
 #define GPIO_IS_ALT(ps)     (((uint16_t)(ps) & GPIO_ALT_MASK) == GPIO_ALT_CODE)
-#define GPIO_IS_INTR(ps)    (((uint16_t)(ps) & GPIO_ALT_MASK) == GPIO_ALT_CODE)
+#define GPIO_IS_INTR(ps)    (((uint16_t)(ps) & GPIO_ALT_MASK) == GPIO_INTR_CODE)
 #define GPIO_IS_INTEDGE(ps) (((uint16_t)(ps) & GPIO_INTEDGE_MASK) == GPIO_INTEDGE_CODE)
 #define GPIO_IS_INTLVL(ps)  (((uint16_t)(ps) & GPIO_INTLVL_MASK) == GPIO_INTLVL_CODE)
 
@@ -179,6 +178,9 @@
 #  define GPIO_PIN11        (11 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN12        (12 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN13        (13 << GPIO_PIN_SHIFT)
+
+#  define GPIO_PINMIN       0
+#  define GPIO_PINMAX       13
 
 /************************************************************************************
  * Public Types

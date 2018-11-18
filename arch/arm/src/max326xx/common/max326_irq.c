@@ -439,6 +439,15 @@ void up_disable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
+#ifdef CONFIG_MAX326_GPIOIRQ
+  /* Handle "fake" GPIO irq */
+
+  if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
+    {
+      max326_gpio_irqdisable(irq);
+    }
+  else
+#endif
   if (max326_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to disable the interrupt.
@@ -476,6 +485,15 @@ void up_enable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
+#ifdef CONFIG_MAX326_GPIOIRQ
+  /* Handle "fake" GPIO irq */
+
+  if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
+    {
+      max326_gpio_irqensable(irq);
+    }
+  else
+#endif
   if (max326_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to enable the interrupt.
@@ -542,12 +560,19 @@ int up_prioritize_irq(int irq, int priority)
       regaddr = NVIC_SYSH_PRIORITY(irq);
       irq    -= 4;
     }
-  else
+  else if (irq < MAX326_IRQ_NVECTORS)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
       irq    -= MAX326_IRQ_EXTINT;
       regaddr = NVIC_IRQ_PRIORITY(irq);
+    }
+  else
+    {
+#ifndef CONFIG_MAX326_GPIOIRQ
+      DEBUGPANIC();
+#endif
+      return;
     }
 
   regval      = getreg32(regaddr);

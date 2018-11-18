@@ -86,12 +86,13 @@ extern "C"
  *   Initialize logic to support interrupting GPIO pins.  This function is called by
  *   the OS initialization logic and is not a user interface.
  *
+ * Assumptions:
+ *   Called early in the boot-up sequence
+ *
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_GPIOIRQ
 void max326_gpio_irqinitialize(void);
-#else
-#  define max326_gpio_irqinitialize()
 #endif
 
 /************************************************************************************
@@ -100,9 +101,27 @@ void max326_gpio_irqinitialize(void);
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
+ * Assumptions:
+ *   - The pin interrupt has been disabled and all interrupt related bits
+ *     have been set to zero by max436_gpio_config().
+ *   - We are called in a critical section.
+ *
  ************************************************************************************/
 
 int max326_gpio_config(max326_pinset_t cfgset);
+
+/************************************************************************************
+ * Name: max326_gpio_irqconfig
+ *
+ * Description:
+ *   Configure a pin for interrupt operation.  This function should not be called
+ *   directory but, rather, indirectly through max326_gpio_config().
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_MAX326_GPIOIRQ
+void max326_gpio_irqconfig(max326_pinset_t cfgset);
+#endif
 
 /************************************************************************************
  * Name: max326_gpio_write
@@ -125,10 +144,43 @@ void max326_gpio_write(max326_pinset_t pinset, bool value);
 bool max326_gpio_read(max326_pinset_t pinset);
 
 /************************************************************************************
+ * Name: max326_gpio_irqdisable
+ *
+ * Description:
+ *   Disable a GPIO pin interrupt.  This function should not be called directly but,
+ *   rather through up_disable_irq();
+ *
+ * Assumptions:
+ *   We are in a critical section.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_MAX326_GPIOIRQ
+void max326_gpio_irqdisable(int irq);
+#endif
+
+/************************************************************************************
+ * Name: max326_gpio_irqenable
+ *
+ * Description:
+ *   Enable a GPIO pin interrupt.  This function should not be called directly but,
+ *   rather through up_enable_irq();
+ *
+ * Assumptions:
+ *   We are in a critical section.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_MAX326_GPIOIRQ
+void max326_gpio_irqenable(int irq);
+#endif
+
+/************************************************************************************
  * Function:  max326_gpio_dump
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Decode and dump all GPIO registers associated with the port and pin
+ *   numbers in the provided pinset.
  *
  ************************************************************************************/
 
