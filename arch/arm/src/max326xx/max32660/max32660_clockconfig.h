@@ -60,7 +60,7 @@ enum clock_source_e
 /* This structure can be used to define a clock configuration.
  *
  * Fhfio     Determined by Output Voltage Range.
- * Fsysoc    Determined by source clock selection.
+ * Fsysosc   Determined by source clock selection.
  * Fsysclk = Fsysclk / (2^psc)
  * Fpclk   = Fsysclk / 2
  */
@@ -90,5 +90,4 @@ extern "C"
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H */

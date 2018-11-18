@@ -55,7 +55,7 @@
 
 #if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
 #  include "max32620_30/max32620_30_gpio.h"
-#if defined(CONFIG_ARCH_FAMILY_MAX32660)
+#elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "max32660/max32660_gpio.h"
 #else
 #  error "Unsupported MAX326XX family"

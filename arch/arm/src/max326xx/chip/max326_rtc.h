@@ -44,7 +44,7 @@
 
 #if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
 #  include "chip/max32620_30_rtc.h"
-#if defined(CONFIG_ARCH_FAMILY_MAX32660)
+#elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "chip/max32660_rtc.h"
 #else
 #  error "Unsupported MAX326XX family"

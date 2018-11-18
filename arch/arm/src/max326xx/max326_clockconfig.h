@@ -51,7 +51,7 @@
 
 #if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
 #  include "max32620_30/max32620_30_clockconfig.h"
-#if defined(CONFIG_ARCH_FAMILY_MAX32660)
+#elif defined(CONFIG_ARCH_FAMILY_MAX32660)
 #  include "max32660/max32660_clockconfig.h"
 #else
 #  error "Unsupported MAX326XX family"
@@ -80,6 +80,16 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/* This describes the initial clock configuration.  g_initial_clock_setup
+ * must be provided by MCU-specific logic.
+ */
+
+EXTERN const struct clock_setup_s g_initial_clock_setup;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: max326_clockconfig
  *
@@ -89,7 +99,7 @@ extern "C"
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void max326_clockconfig(FAR const struct clock_setup_s *clocksetup);
 
@@ -99,7 +109,7 @@ void max326_clockconfig(FAR const struct clock_setup_s *clocksetup);
  * Description:
  *   Return the High-Frequency Internal Oscillator (HFIO) frequency.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t max326_hfio_frequency(void);
 
@@ -109,9 +119,19 @@ uint32_t max326_hfio_frequency(void);
  * Description:
  *   Return the current CPU frequency.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t max326_cpu_frequency(void);
+
+/****************************************************************************
+ * Name: max326_pclk_frequency
+ *
+ * Description:
+ *   Return the current peripheral clock frequency.
+ *
+ ****************************************************************************/
+
+uint32_t max326_pclk_frequency(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

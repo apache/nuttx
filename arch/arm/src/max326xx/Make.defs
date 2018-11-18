@@ -40,14 +40,14 @@ HEAD_ASRC  =
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_doirq.c up_exit.c up_hardfault.c up_initialize.c
-CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_mdelay.c
-CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
-CMN_CSRCS += up_svcall.c up_trigger_irq.c up_unblocktask.c up_udelay.c
-CMN_CSRCS += up_usestack.c up_vfork.c
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_hardfault.c
+CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
+CMN_CSRCS += up_mdelay.c up_memfault.c up_modifyreg8.c up_modifyreg16.c
+CMN_CSRCS += up_modifyreg32.c up_releasepending.c up_releasestack.c
+CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c up_sigdeliver.c
+CMN_CSRCS += up_stackframe.c up_svcall.c up_trigger_irq.c up_unblocktask.c
+CMN_CSRCS += up_udelay.c up_usestack.c up_vfork.c
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
@@ -80,15 +80,14 @@ endif
 # Common MAX326XX Source Files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = max326_start.c max326_clockconfig.c max326_irq.c max326_clrpend.c
-CHIP_CSRCS += max326_allocateheap.c
+CHIP_CSRCS  = max326_start.c max326_irq.c max326_clrpend.c
 
 # Source Files for the MAX32620 and MAX32630
 
 # Source Files for the MAX32660
 
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
-CHIP_CSRCS += max32660_lowputc.c max32660_gpio.c
+CHIP_CSRCS += max32660_clockconfig.c max32660_lowputc.c max32660_gpio.c
 endif
 
 # Configuration-Dependent Source Files

@@ -48,6 +48,8 @@
 
 /* Clocking *****************************************************************/
 
+#define BOARD_HAVE_X32K    1 /* Have external 32.786KHz crystal oscialltor */
+
 /* LED definitions **********************************************************/
 
 /* The MAX32660-EVSYS board has a single red LED is connected to GPIO P0.13

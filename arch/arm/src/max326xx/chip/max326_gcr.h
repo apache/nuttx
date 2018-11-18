@@ -126,6 +126,7 @@
 #define GCR_CLKCTRL_X32KEN          (1 << 17) /* Bit 17: 32.768kHz External Oscillator Enable */
 #define GCR_CLKCTRL_HIRCEN          (1 << 18) /* Bit 18: High-Frequency Internal Oscillator (HFIO) Enable */
 #define GCR_CLKCTRL_X32KRDY         (1 << 25) /* Bit 25: 32.768kHz External Oscillator Ready Status */
+#define GCR_CLKCTRL_HIRCRDY         (1 << 26) /* Bit 26: High-Frequency Internal Oscillator Ready */
 #define GCR_CLKCTRL_LIRC8KRDY       (1 << 29) /* Bit 29: 8kHz Internal Oscillator Ready Status */
 
 /* Power Management Register */
@@ -156,6 +157,8 @@
 /* Memory Clock Control */
 
 #define GCR_MEMCTRL_FWS_SHIFT       (0)       /* Bits 0-2: Flash Wait States */
+#define GCR_MEMCTRL_FWS_MASK        (7 << GCR_MEMCTRL_FWS_SHIFT)
+#  define GCR_MEMCTRL_FWS(n)        ((uint32_t)(n) << GCR_MEMCTRL_FWS_SHIFT)
 #define GCR_MEMCTRL_RAM0LS          (1 << 8)  /* Bit 8:  System RAM 0 Light Sleep Enable */
 #define GCR_MEMCTRL_RAM1LS          (1 << 9)  /* Bit 9:  System RAM 1 Light Sleep Enable */
 #define GCR_MEMCTRL_RAM2LS          (1 << 10) /* Bit 10: System RAM 2 Light Sleep Enable */

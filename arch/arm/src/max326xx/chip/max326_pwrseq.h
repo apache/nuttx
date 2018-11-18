@@ -75,6 +75,7 @@
                                                  *         Enable for BACKUP Mode */
 #define PWRSEQ_LPCTRL_OVR_SHIFT       (4)       /* Output Voltage Range */
 #define PWRSEQ_LPCTRL_OVR_MASK        (3 << PWRSEQ_LPCTRL_OVR_SHIFT)
+#  define PWRSEQ_LPCTRL_OVR(n)        ((uint32_t)(n) << PWRSEQ_LPCTRL_OVR_SHIFT)
 #  define PWRSEQ_LPCTRL_OVR_1p1V      (2 << PWRSEQ_LPCTRL_OVR_SHIFT) /* VCORE=1.1V fINTCLK=96MHz */
 #  define PWRSEQ_LPCTRL_OVR_1p0V      (1 << PWRSEQ_LPCTRL_OVR_SHIFT) /* VCORE=1.0V fINTCLK=48MHz */
 #  define PWRSEQ_LPCTRL_OVR_0p9V      (0 << PWRSEQ_LPCTRL_OVR_SHIFT) /* VCORE=0.9V fINTCLK=24MHz */

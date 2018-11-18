@@ -73,7 +73,7 @@ void max326_clrpend(int irq)
         {
           putreg32(1 << (irq - MAX326_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
         }
-      else if (irq < MAX326_IRQ_NIRQS)
+      else if (irq < MAX326_IRQ_NVECTORS)
         {
           putreg32(1 << (irq - MAX326_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
         }
