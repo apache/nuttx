@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_qencoder.c
+ * arch/arm/src/stm32f7/stm32_qencoder.c
  *
- *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -55,7 +55,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "stm32.h"
 #include "stm32_gpio.h"
 #include "stm32_tim.h"
 #include "stm32_qencoder.h"
@@ -71,74 +70,29 @@
 #undef HAVE_32BIT_TIMERS
 #undef HAVE_16BIT_TIMERS
 
-/* On the F1 series, all timers are 16-bit. */
+/* On the F7 series, TIM2 and TIM5 are 32-bit.  All of the rest are 16-bit */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+/* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
-#  define HAVE_16BIT_TIMERS     1
-
-   /* The width in bits of each timer */
-
-#  define TIM1_BITWIDTH         16
-#  define TIM2_BITWIDTH         16
-#  define TIM3_BITWIDTH         16
-#  define TIM4_BITWIDTH         16
-#  define TIM5_BITWIDTH         16
-#  define TIM8_BITWIDTH         16
-
-/* On the F3 series, TIM5 is 32-bit.  All of the rest are 16-bit */
-
-#elif defined(CONFIG_STM32_STM32F30XX)
-
-   /* If TIM5 is enabled, then we have 32-bit timers */
-
-#  if defined(CONFIG_STM32_TIM5_QE)
-#    define HAVE_32BIT_TIMERS   1
-#  endif
-
-   /* If TIM1,2,3,4, or 8 are enabled, then we have 16-bit timers */
-
-#  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM2_QE) || \
-      defined(CONFIG_STM32_TIM3_QE) || defined(CONFIG_STM32_TIM4_QE) || \
-      defined(CONFIG_STM32_TIM8_QE)
-#    define HAVE_16BIT_TIMERS   1
-#  endif
-
-   /* The width in bits of each timer */
-
-#  define TIM1_BITWIDTH         16
-#  define TIM2_BITWIDTH         16
-#  define TIM3_BITWIDTH         16
-#  define TIM4_BITWIDTH         16
-#  define TIM5_BITWIDTH         32
-#  define TIM8_BITWIDTH         16
-
-/* On the F4 series, TIM2 and TIM5 are 32-bit.  All of the rest are 16-bit */
-
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-
-   /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
-
-#  if defined(CONFIG_STM32_TIM2_QE) || defined(CONFIG_STM32_TIM5_QE)
-#    define HAVE_32BIT_TIMERS   1
-#  endif
-
-   /* If TIM1,3,4, or 8 are enabled, then we have 16-bit timers */
-
-#  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM3_QE) || \
-      defined(CONFIG_STM32_TIM4_QE) || defined(CONFIG_STM32_TIM8_QE)
-#    define HAVE_16BIT_TIMERS   1
-#  endif
-
-   /* The width in bits of each timer */
-
-#  define TIM1_BITWIDTH         16
-#  define TIM2_BITWIDTH         32
-#  define TIM3_BITWIDTH         16
-#  define TIM4_BITWIDTH         16
-#  define TIM5_BITWIDTH         32
-#  define TIM8_BITWIDTH         16
+#if defined(CONFIG_STM32F7_TIM2_QE) || defined(CONFIG_STM32F7_TIM5_QE)
+#  define HAVE_32BIT_TIMERS   1
 #endif
+
+/* If TIM1,3,4, or 8 are enabled, then we have 16-bit timers */
+
+#if defined(CONFIG_STM32F7_TIM1_QE) || defined(CONFIG_STM32F7_TIM3_QE) || \
+    defined(CONFIG_STM32F7_TIM4_QE) || defined(CONFIG_STM32F7_TIM8_QE)
+#  define HAVE_16BIT_TIMERS   1
+#endif
+
+/* The width in bits of each timer */
+
+#define TIM1_BITWIDTH         16
+#define TIM2_BITWIDTH         32
+#define TIM3_BITWIDTH         16
+#define TIM4_BITWIDTH         16
+#define TIM5_BITWIDTH         32
+#define TIM8_BITWIDTH         16
 
 /* Do we need to support mixed 16- and 32-bit timers */
 
@@ -149,51 +103,51 @@
 
 /* Input filter *********************************************************************/
 
-#ifdef CONFIG_STM32_QENCODER_FILTER
-#  if defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_1)
+#ifdef CONFIG_STM32F7_QENCODER_FILTER
+#  if defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_1)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_CKINT)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_2)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_CKINT)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_2)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT2
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_4)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_4)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT4
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT8
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_2)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS_2)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_6)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd26
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd28
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_4)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS_4)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_6)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd46
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd48
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_8)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS_8)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_6)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd86
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd88
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_16)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS_16)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_5)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd165
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_6)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd166
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd168
 #    endif
-#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_32)
-#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#  elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_FDTS_32)
+#    if defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_5)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd325
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_6)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd326
-#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#    elif defined(CONFIG_STM32F7_QENCODER_SAMPLE_EVENT_8)
 #      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd328
 #    endif
 #  endif
@@ -207,18 +161,10 @@
 #  define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
 #endif
 
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_CNF_INFLOAT | \
-                                  GPIO_MODE_INPUT)
-#elif defined(CONFIG_STM32_STM32F20XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F4XXX)
-#  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
-#else
-#  error "Unrecognized STM32 chip"
-#endif
+#define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
 
 /* Debug ****************************************************************************/
+
 /* Non-standard debug that may be enabled just for testing the quadrature encoder */
 
 #ifndef CONFIG_DEBUG_FEATURES
@@ -285,15 +231,19 @@ struct stm32_lowerhalf_s
 /************************************************************************************
  * Private Function Prototypes
  ************************************************************************************/
+
 /* Helper functions */
 
 static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv, int offset);
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value);
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+              uint16_t value);
 static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset);
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value);
+static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+              uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg);
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
+              FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
 #endif
@@ -312,11 +262,13 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower);
 static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower);
 static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
-static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd, unsigned long arg);
+static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+              unsigned long arg);
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
 /* The lower half callback structure */
 
 static const struct qe_ops_s g_qecallbacks =
@@ -330,7 +282,7 @@ static const struct qe_ops_s g_qecallbacks =
 
 /* Per-timer state structures */
 
-#ifdef CONFIG_STM32_TIM1_QE
+#ifdef CONFIG_STM32F7_TIM1_QE
 static const struct stm32_qeconfig_s g_tim1config =
 {
   .timid    = 1,
@@ -341,7 +293,7 @@ static const struct stm32_qeconfig_s g_tim1config =
   .regaddr  = STM32_RCC_APB2ENR,
   .enable   = RCC_APB2ENR_TIM1EN,
   .base     = STM32_TIM1_BASE,
-  .psc      = CONFIG_STM32_TIM1_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
   .ti2cfg   = GPIO_TIM1_CH2IN,
 };
@@ -355,7 +307,7 @@ static struct stm32_lowerhalf_s g_tim1lower =
 
 #endif
 
-#ifdef CONFIG_STM32_TIM2_QE
+#ifdef CONFIG_STM32F7_TIM2_QE
 static const struct stm32_qeconfig_s g_tim2config =
 {
   .timid    = 2,
@@ -366,7 +318,7 @@ static const struct stm32_qeconfig_s g_tim2config =
   .regaddr  = STM32_RCC_APB1ENR,
   .enable   = RCC_APB1ENR_TIM2EN,
   .base     = STM32_TIM2_BASE,
-  .psc      = CONFIG_STM32_TIM2_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
   .ti2cfg   = GPIO_TIM2_CH2IN,
 };
@@ -380,7 +332,7 @@ static struct stm32_lowerhalf_s g_tim2lower =
 
 #endif
 
-#ifdef CONFIG_STM32_TIM3_QE
+#ifdef CONFIG_STM32F7_TIM3_QE
 static const struct stm32_qeconfig_s g_tim3config =
 {
   .timid    = 3,
@@ -391,7 +343,7 @@ static const struct stm32_qeconfig_s g_tim3config =
   .regaddr  = STM32_RCC_APB1ENR,
   .enable   = RCC_APB1ENR_TIM3EN,
   .base     = STM32_TIM3_BASE,
-  .psc      = CONFIG_STM32_TIM3_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
   .ti2cfg   = GPIO_TIM3_CH2IN,
 };
@@ -405,7 +357,7 @@ static struct stm32_lowerhalf_s g_tim3lower =
 
 #endif
 
-#ifdef CONFIG_STM32_TIM4_QE
+#ifdef CONFIG_STM32F7_TIM4_QE
 static const struct stm32_qeconfig_s g_tim4config =
 {
   .timid    = 4,
@@ -416,7 +368,7 @@ static const struct stm32_qeconfig_s g_tim4config =
   .regaddr  = STM32_RCC_APB1ENR,
   .enable   = RCC_APB1ENR_TIM4EN,
   .base     = STM32_TIM4_BASE,
-  .psc      = CONFIG_STM32_TIM4_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
   .ti2cfg   = GPIO_TIM4_CH2IN,
 };
@@ -430,7 +382,7 @@ static struct stm32_lowerhalf_s g_tim4lower =
 
 #endif
 
-#ifdef CONFIG_STM32_TIM5_QE
+#ifdef CONFIG_STM32F7_TIM5_QE
 static const struct stm32_qeconfig_s g_tim5config =
 {
   .timid    = 5,
@@ -441,7 +393,7 @@ static const struct stm32_qeconfig_s g_tim5config =
   .regaddr  = STM32_RCC_APB1ENR,
   .enable   = RCC_APB1ENR_TIM5EN,
   .base     = STM32_TIM5_BASE,
-  .psc      = CONFIG_STM32_TIM5_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
 };
@@ -455,7 +407,7 @@ static struct stm32_lowerhalf_s g_tim5lower =
 
 #endif
 
-#ifdef CONFIG_STM32_TIM8_QE
+#ifdef CONFIG_STM32F7_TIM8_QE
 static const struct stm32_qeconfig_s g_tim8config =
 {
   .timid    = 8,
@@ -466,7 +418,7 @@ static const struct stm32_qeconfig_s g_tim8config =
   .regaddr  = STM32_RCC_APB2ENR,
   .enable   = RCC_APB2ENR_TIM8EN,
   .base     = STM32_TIM8_BASE,
-  .psc      = CONFIG_STM32_TIM8_QEPSC,
+  .psc      = CONFIG_STM32F7_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
   .ti2cfg   = GPIO_TIM8_CH2IN,
 };
@@ -519,7 +471,8 @@ static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset)
  *
  ************************************************************************************/
 
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint16_t value)
+static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint16_t value)
 {
   putreg16(value, priv->config->base + offset);
 }
@@ -528,9 +481,9 @@ static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset, uint1
  * Name: stm32_getreg32
  *
  * Description:
- *   Read the value of a 32-bit timer register.  This applies only for the STM32 F4
+ *   Read the value of a 32-bit timer register.  This applies for the STM32 F7
  *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5 (but works OK
- *   with the 16-bit TIM1,8 and F1 registers as well).
+ *   with the 16-bit TIM1,8 as well).
  *
  * Input Parameters:
  *   priv - A reference to the lower half status
@@ -550,9 +503,9 @@ static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset)
  * Name: stm32_putreg32
  *
  * Description:
- *   Write a value to a 32-bit timer register.  This applies only for the STM32 F4
+ *   Write a value to a 32-bit timer register.  This applies for the STM32 F7
  *   32-bit registers (CNT, ARR, CRR1-4) in the 32-bit timers TIM2-5 (but works OK
- *   with the 16-bit TIM1,8 and F1 registers).
+ *   with the 16-bit TIM1,8 as well).
  *
  * Input Parameters:
  *   priv - A reference to the lower half status
@@ -563,7 +516,8 @@ static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv, int offset)
  *
  ************************************************************************************/
 
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint32_t value)
+static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+                           uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
 }
@@ -583,7 +537,8 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset, uint3
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *msg)
+static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
+                           FAR const char *msg)
 {
   sninfo("%s:\n", msg);
   sninfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -606,7 +561,7 @@ static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv, FAR const char *m
          stm32_getreg16(priv, STM32_GTIM_CCR2_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR3_OFFSET),
          stm32_getreg16(priv, STM32_GTIM_CCR4_OFFSET));
-#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
+#if defined(CONFIG_STM32F7_TIM1_QE) || defined(CONFIG_STM32F7_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
     {
       sninfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
@@ -637,27 +592,27 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
 {
   switch (tim)
     {
-#ifdef CONFIG_STM32_TIM1_QE
+#ifdef CONFIG_STM32F7_TIM1_QE
     case 1:
       return &g_tim1lower;
 #endif
-#ifdef CONFIG_STM32_TIM2_QE
+#ifdef CONFIG_STM32F7_TIM2_QE
     case 2:
       return &g_tim2lower;
 #endif
-#ifdef CONFIG_STM32_TIM3_QE
+#ifdef CONFIG_STM32F7_TIM3_QE
     case 3:
       return &g_tim3lower;
 #endif
-#ifdef CONFIG_STM32_TIM4_QE
+#ifdef CONFIG_STM32F7_TIM4_QE
     case 4:
       return &g_tim4lower;
 #endif
-#ifdef CONFIG_STM32_TIM5_QE
+#ifdef CONFIG_STM32F7_TIM5_QE
     case 5:
       return &g_tim5lower;
 #endif
-#ifdef CONFIG_STM32_TIM8_QE
+#ifdef CONFIG_STM32F7_TIM8_QE
     case 8:
       return &g_tim8lower;
 #endif
@@ -777,7 +732,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   stm32_putreg16(priv, STM32_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
 
-#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
+#if defined(CONFIG_STM32F7_TIM1_QE) || defined(CONFIG_STM32F7_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
     {
       /* Clear the Repetition Counter value */
@@ -985,37 +940,37 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   switch (priv->config->timid)
     {
-#ifdef CONFIG_STM32_TIM1_QE
+#ifdef CONFIG_STM32F7_TIM1_QE
       case 1:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM1RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM2_QE
+#ifdef CONFIG_STM32F7_TIM2_QE
       case 2:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM2RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM3_QE
+#ifdef CONFIG_STM32F7_TIM3_QE
       case 3:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM3RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM4_QE
+#ifdef CONFIG_STM32F7_TIM4_QE
       case 4:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM4RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM5_QE
+#ifdef CONFIG_STM32F7_TIM5_QE
       case 5:
         regaddr  = STM32_RCC_APB1RSTR;
         resetbit = RCC_APB1RSTR_TIM5RST;
         break;
 #endif
-#ifdef CONFIG_STM32_TIM8_QE
+#ifdef CONFIG_STM32F7_TIM8_QE
       case 8:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM8RST;
