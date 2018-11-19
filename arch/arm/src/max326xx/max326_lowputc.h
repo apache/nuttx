@@ -57,7 +57,6 @@
 struct uart_config_s
 {
   uint32_t baud;          /* Configured baud */
-  uint32_t fclk;          /* Input UART function clock frequency */
   uint8_t  parity;        /* 0=none, 1=odd, 2=even */
   uint8_t  bits;          /* Number of bits (5-9) */
   uint8_t  txlevel;       /* TX level for event generation */
@@ -90,7 +89,7 @@ struct uart_config_s
 void max326_lowsetup(void);
 
 /****************************************************************************
- * Name: max326_usart_configure
+ * Name: max326_uart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
@@ -98,21 +97,21 @@ void max326_lowsetup(void);
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void max326_usart_configure(uintptr_t base,
-                            FAR const struct uart_config_s *config);
+void max326_uart_configure(uintptr_t base,
+                           FAR const struct uart_config_s *config);
 #endif
 
 /****************************************************************************
- * Name: max326_usart_disable
+ * Name: max326_uart_disable
  *
  * Description:
  *   Disable a UART.  it will be necessary to again call
- *   max326_usart_configure() in order to use this UART channel again.
+ *   max326_uart_configure() in order to use this UART channel again.
  *
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void max326_usart_disable(uintptr_t base);
+void max326_uart_disable(uintptr_t base);
 #endif
 
 #endif /* __ARCH_ARM_SRC_MAX326XX_MAX326_LOWPUTC_H */

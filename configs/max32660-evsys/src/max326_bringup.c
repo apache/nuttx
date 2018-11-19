@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sys/mount.h>
 #include <syslog.h>
 

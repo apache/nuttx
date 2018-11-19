@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/max326xx/common/max326_timerisr.c
+ * configs/sama5d2-xult/src/sam_buttons.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,107 +40,110 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <time.h>
-#include <debug.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/irq.h>
+
+#include <nuttx/irq.h>
+
+#include "max326_gpio.h"
+#include "max32660-evsys.h"
+
 #include <arch/board/board.h>
 
-#include "nvic.h"
-#include "clock/clock.h"
-#include "up_internal.h"
-#include "up_arch.h"
-#include "max326_clockconfig.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The SysTick clock will may be clocked internally the processor clock
- * (CLKSOURCE==1).  The SysTick Function clock is equal to:
- *
- *   Fsystick = Fcpu / SYSTICKCLKDIV
- *
- * The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- *    reload = (Fsystick / CLK_TICK) - 1
- *
- * The resulting reload value should be as large as possible, but must be
- * less than 2^24:
- *
- *   SYSTICKDIV > Fcpu / CLK_TCK / 2^24
- */
-
-#define SYSTICK_RELOAD ((max326_cpu_frequency() / CLK_TCK) - 1)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  max326_timerisr
- *
- * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
- *
- ****************************************************************************/
-
-static int max326_timerisr(int irq, uint32_t *regs, void *arg)
-{
-  /* Process timer interrupt */
-
-  sched_process_timer();
-  return 0;
-}
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  arm_timer_initialize
+ * Name: board_button_initialize
  *
  * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void board_button_initialize(void)
 {
-  uint32_t regval;
-
-  /* Make sure that the SYSTICK clock source is set to use the CPU clock
-   * (CLKSOURCE==1).
-   *
-   * REVISIT:  This is duplicate logic.  The same setting is make below.
-   */
-
-  regval  = getreg32(NVIC_SYSTICK_CTRL);
-  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
-  putreg32(regval, NVIC_SYSTICK_CTRL);
-
-  /* Configure SysTick to interrupt at the requested rate */
-
-  regval = SYSTICK_RELOAD;
-  DEBUGASSERT(regval < 0x01000000);
-
-  putreg32(regval, NVIC_SYSTICK_RELOAD);
-
-  /* Attach the timer interrupt vector */
-
-  (void)irq_attach(MAX326_IRQ_SYSTICK, (xcpt_t)max326_timerisr, NULL);
-
-  /* Enable SysTick interrupts */
-
-  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
-            NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(MAX326_IRQ_SYSTICK);
+  (void)max326_gpio_config(GPIO_BUTTON);
 }
+
+/****************************************************************************
+ * Name: board_buttons
+ *
+ * Description:
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   32-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
+ *
+ ****************************************************************************/
+
+uint32_t board_buttons(void)
+{
+  return !max326_gpio_read(GPIO_BUTTON) ? 0 : BUTTON_SW2_BIT;
+}
+
+/****************************************************************************
+ * Name: board_button_irq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is one
+ *   of the BUTTON* definitions provided above.
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
+ *   overall PIO IRQ feature and CONFIG_SAMA5_PIOB_IRQ must be enabled to
+ *   select PIOs to support interrupts on PIOE.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_PIOB_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret = -EINVAL;
+
+  if (id == BUTTON_SW2)
+    {
+      irqstate_t flags;
+
+      /* Disable interrupts until we are done.  This guarantees that the
+       * following operations are atomic.
+       */
+
+      flags = spin_lock_irqsave();
+
+      /* Are we attaching or detaching? */
+
+      if (irqhandler != NULL)
+        {
+          /* Configure the interrupt */
+
+          (void)irq_attach(BUTTON_IRQ, irqhandler, arg);
+          up_enable_irq(BUTTON_IRQ);
+        }
+      else
+        {
+          /* Disable and detach the interrupt */
+
+          up_disable_irq(BUTTON_IRQ);
+          (void)irq_detach(BUTTON_IRQ);
+        }
+
+      spin_unlock_irqrestore(flags);
+      ret = OK;
+    }
+
+  return ret;
+}
+#endif
+
+#endif /* CONFIG_ARCH_BUTTONS */

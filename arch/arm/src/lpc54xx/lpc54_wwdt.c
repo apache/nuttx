@@ -550,7 +550,7 @@ static xcpt_t lpc54_capture(FAR struct watchdog_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: lp54_ioctl
+ * Name: lpc54_ioctl
  *
  * Description:
  *   Any ioctl commands that are not recognized by the "upper-half" driver

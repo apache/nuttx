@@ -575,11 +575,8 @@ int up_prioritize_irq(int irq, int priority)
       return;
     }
 
-  regval      = getreg32(regaddr);
   shift       = ((irq & 3) << 3);
-  regval     &= ~(0xff << shift);
-  regval     |= (priority << shift);
-  putreg32(regval, regaddr);
+  modifyreg32(regaddr, 0xff << shift, priority << shift);
 
   max326_dumpnvic("prioritize", irq);
   return OK;

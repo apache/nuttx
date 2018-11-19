@@ -61,7 +61,7 @@
 #define MAX326_IRQ_INTERVAL   (MAX326_IRQ_EXTINT + 5)    /*  5  RTC Interval Alarm */
 #define MAX326_IRQ_RTCOVF     (MAX326_IRQ_EXTINT + 6)    /*  6  RTC Counter Overflow */
 #define MAX326_IRQ_PMU        (MAX326_IRQ_EXTINT + 7)    /*  7  PMU */
-#define MAX326_IRQ_USB        (MAX326_IRQ_EXTINT + 8)    /*  8-9  Reserved */
+                                                         /*  8-9  Reserved */
 #define MAX326_IRQ_MMA        (MAX326_IRQ_EXTINT + 10)   /* 10  MMA */
 #define MAX326_IRQ_WDT0       (MAX326_IRQ_EXTINT + 11)   /* 11  Watchdog 0 Timeout Interrupt */
                                                          /* 12-14  Watchdog 0 Pre-window Interrupt */
@@ -73,10 +73,10 @@
 #define MAX326_IRQ_TMR1_1     (MAX326_IRQ_EXTINT + 25)   /* 25  Timer 1 Interrupt 1 */
 #define MAX326_IRQ_TMR2_0     (MAX326_IRQ_EXTINT + 26)   /* 26  Timer 2 Interrupt 0 */
 #define MAX326_IRQ_TMR2_1     (MAX326_IRQ_EXTINT + 27)   /* 27  Timer 2 Interrupt 1 */
-#define MAX326_IRQ_TMR3_0     (MAX326_IRQ_EXTINT + 28)   /* 28-33 Reserved */
+                                                         /* 28-33 Reserved */
 #define MAX326_IRQ_UART0      (MAX326_IRQ_EXTINT + 34)   /* 34  UART 0 */
-#define MAX326_IRQ_UART1      (MAX326_IRQ_EXTINT + 35)   /* 34  UART 1 */
-#define MAX326_IRQ_UART2      (MAX326_IRQ_EXTINT + 36)   /* 36-38 Reserved */
+#define MAX326_IRQ_UART1      (MAX326_IRQ_EXTINT + 35)   /* 35  UART 1 */
+                                                         /* 36-38 Reserved */
 #define MAX326_IRQ_I2CM0      (MAX326_IRQ_EXTINT + 39)   /* 39  I2C0 Master */
 #define MAX326_IRQ_I2CM1      (MAX326_IRQ_EXTINT + 40)   /* 40  I2C1 Master */
                                                          /* 41-42 Reserved */

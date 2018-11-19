@@ -109,7 +109,20 @@
 
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
-/* Alternate function pin selections ****************************************/
+/* Pin Disambiguation *******************************************************/
+
+/* UART1
+ *
+ * UART1 Tx and Rx signals at port P0.10 and P0.11 are connected to the
+ * programming and debug header JH2 pins 2 and 3 through 1kΩ resistors.
+ * This provides a convenient way to communicate with a PC though the
+ * virtual serial port available in Maxim’s CMSIS-DAP debug adapter. The
+ * series resistors allow for these signals to be overdriven by other
+ * circuits without modifying the board.
+ */
+
+#define GPIO_UART1_RX     GPIO_UART1_RX_3  /* P0.11 */
+#define GPIO_UART1_TX     GPIO_UART1_TX_3  /* P0.10 */
 
 /* DMA **********************************************************************/
 

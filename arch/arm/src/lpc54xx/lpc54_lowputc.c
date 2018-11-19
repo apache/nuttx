@@ -311,7 +311,7 @@ static const struct uart_config_s g_console_config=
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lp54_setbaud
+ * Name: lpc54_setbaud
  *
  * Description:
  *   Configure the USART BAUD.
@@ -319,7 +319,7 @@ static const struct uart_config_s g_console_config=
  ************************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-static void lp54_setbaud(uintptr_t base, FAR const struct uart_config_s *config)
+static void lpc54_setbaud(uintptr_t base, FAR const struct uart_config_s *config)
 {
   uint32_t bestdiff = (uint32_t)-1;
   uint32_t bestosr  = 15;
@@ -693,7 +693,7 @@ void lpc54_usart_configure(uintptr_t base, FAR const struct uart_config_s *confi
 
   /* Configure baud */
 
-  lp54_setbaud(base, config);
+  lpc54_setbaud(base, config);
 
   /* Configure RX and TX FIFOs */
   /* Empty and enable FIFOs */

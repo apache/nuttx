@@ -108,7 +108,7 @@ void max326_gpio_irqinitialize(void);
  *
  ************************************************************************************/
 
-int max326_gpio_config(max326_pinset_t cfgset);
+int max326_gpio_config(max326_pinset_t pinset);
 
 /************************************************************************************
  * Name: max326_gpio_irqconfig
@@ -120,7 +120,7 @@ int max326_gpio_config(max326_pinset_t cfgset);
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_GPIOIRQ
-void max326_gpio_irqconfig(max326_pinset_t cfgset);
+void max326_gpio_irqconfig(max326_pinset_t pinset);
 #endif
 
 /************************************************************************************
@@ -150,9 +150,6 @@ bool max326_gpio_read(max326_pinset_t pinset);
  *   Disable a GPIO pin interrupt.  This function should not be called directly but,
  *   rather through up_disable_irq();
  *
- * Assumptions:
- *   We are in a critical section.
- *
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_GPIOIRQ
@@ -165,9 +162,6 @@ void max326_gpio_irqdisable(int irq);
  * Description:
  *   Enable a GPIO pin interrupt.  This function should not be called directly but,
  *   rather through up_enable_irq();
- *
- * Assumptions:
- *   We are in a critical section.
  *
  ************************************************************************************/
 

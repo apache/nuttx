@@ -47,6 +47,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define MAX326_UART_TXFIFO_DEPTH    32      /* 32 bytes */
+#define MAX326_UART_RXFIFO_DEPTH    32      /* 32 bytes */
+
 /* Register Offsets *****************************************************************/
 
 #define MAX326_UART_CTRL0_OFFSET    0x0000  /* UART Control 0 Register */

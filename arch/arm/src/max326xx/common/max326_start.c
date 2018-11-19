@@ -57,6 +57,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Memory Map:
+ *
+ * 0x0000:0000 - Beginning of FLASH. Address of exception vectors.
+ * 0x0003:ffff - End of flash (assuming 256KB of FLASH)
+ * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
+ *             - End of .data (_edata) abd start of .bss (_sbss)
+ *             - End of .bss (_ebss) and bottom of idle stack
+ *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
+ *               start of heap
+ * 0x2001:7fff - End of SRAM and end of heap (assuming 96KB of SRAM)
+ */
+
+#define IDLE_STACK ((uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE - 4)
+#define HEAP_BASE  ((uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+
 /****************************************************************************
  * Name: showprogress
  *
@@ -70,6 +85,12 @@
 #else
 #  define showprogress(c)
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const uint32_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Functions

@@ -174,21 +174,17 @@ void max326_gpio_irqconfig(max326_pinset_t cfgset)
 void max326_gpio_irqdisable(int irq)
 {
   unsigned int pin;
-  uint32_t pinmask;
-  uint32_t regval;
-  irqset_t flags;
 
-  pin     = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  DEBUGASSERT(pin <= GPIO_PINMAX);
-  pinmask = 1 << pin;
+  DEBUGASSERT(irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
 
-  /* Modification of registers must be atomic */
+  if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
+    {
+      pin = irq - MAX326_IRQ_GPIO1ST
 
-  flags   = spin_lock_irqsave();
-  regval  = getreg32(MAX326_GPIO0_INTEN);
-  regval &= ~pinmask;
-  putreg32(regval, MAX326_GPIO0_INTEN)
-  spin_unlock_restore(flags);
+      /* Modification of registers must be atomic */
+
+      modifyreg32(MAX326_GPIO0_INTEN, 1 << pin, 0);
+    }
 }
 
 /************************************************************************************
@@ -206,21 +202,17 @@ void max326_gpio_irqdisable(int irq)
 void max326_gpio_irqenable(int irq)
 {
   unsigned int pin;
-  uint32_t pinmask;
-  uint32_t regval;
-  irqset_t flags;
 
-  pin     = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  DEBUGASSERT(pin <= GPIO_PINMAX);
-  pinmask = 1 << pin;
+  DEBUGASSERT(irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
 
-  /* Modification of registers must be atomic */
+  if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
+    {
+      pin = irq - MAX326_IRQ_GPIO1ST
 
-  flags   = spin_lock_irqsave();
-  regval  = getreg32(MAX326_GPIO0_INTEN);
-  regval |= pinmask;
-  putreg32(regval, MAX326_GPIO0_INTEN)
-  spin_unlock_restore(flags);
+      /* Modification of registers must be atomic */
+
+      modifyreg32(MAX326_GPIO0_INTEN, 0, 1 << pin);
+    }
 }
 
 #endif /* CONFIG_MAX326_GPIOIRQ */

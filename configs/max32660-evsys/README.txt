@@ -32,8 +32,12 @@ Contents
 Serial Console
 ==============
 
-  A VCOM serial console is available.  This is provided by UART1 via pins
-  P0.10 and P0.11.
+  UART1 Tx and Rx signals at port P0.10 and P0.11 are connected to the
+  programming and debug header JH2 pins 2 and 3 through 1kΩ resistors.
+  This provides a convenient way to communicate with a PC though the
+  virtual serial port available in Maxim’s CMSIS-DAP debug adapter. The
+  series resistors allow for these signals to be overdriven by other
+  circuits without modifying the board.
 
 LEDs and Buttons
 ================
