@@ -854,8 +854,8 @@ static void up_set_format(struct uart_dev_s *dev)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  uint32_t lcrh = 0;
-  uint32_t ctl = 0;
+  uint32_t lcrh;
+  uint32_t ctl;
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   up_set_format(dev);
@@ -880,17 +880,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enable the FIFOs */
 
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
   lcrh = up_serialin(priv, TIVA_UART_LCRH_OFFSET);
-#endif
   lcrh |= UART_LCRH_FEN;
   up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
 
   /* Enable Rx, Tx, and the UART */
 
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
   ctl = up_serialin(priv, TIVA_UART_CTL_OFFSET);
-#endif
   ctl |= (UART_CTL_UARTEN | UART_CTL_TXE | UART_CTL_RXE);
   up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
 
