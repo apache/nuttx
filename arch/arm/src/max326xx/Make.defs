@@ -82,6 +82,10 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  = max326_start.c max326_irq.c max326_clrpend.c
 
+ifeq ($(CONFIG_MAX326XX_ICC),y)
+CHIP_CSRCS += max326_icc.c
+endif
+
 # Source Files for the MAX32620 and MAX32630
 
 # Source Files for the MAX32660

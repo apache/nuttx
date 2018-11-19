@@ -51,6 +51,7 @@
 #include "max326_userspace.h"
 #include "max326_lowputc.h"
 #include "max326_serial.h"
+#include "max326_icc.h"
 #include "max326_start.h"
 
 /****************************************************************************
@@ -212,6 +213,13 @@ void __start(void)
   max326_lowsetup();
   showprogress('A');
 
+#ifdef CONFIG_MAX326XX_ICC
+  /* Enable the instruction cache */
+
+  max326_icc_enable(true);
+  showprogress('B');
+#endif
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -221,7 +229,7 @@ void __start(void)
       *dest++ = 0;
     }
 
-  showprogress('B');
+  showprogress('C');
 
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
@@ -234,19 +242,19 @@ void __start(void)
       *dest++ = *src++;
     }
 
-  showprogress('C');
+  showprogress('D');
 
   /* Initialize the FPU (if configured) */
 
   max326_fpuconfig();
-  showprogress('D');
+  showprogress('E');
 
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
   max326_earlyserialinit();
 #endif
-  showprogress('E');
+  showprogress('F');
 
 #ifdef CONFIG_BUILD_PROTECTED
   /* For the case of the separate user-/kernel-space build, perform whatever
@@ -256,16 +264,13 @@ void __start(void)
    */
 
   max326_userspace();
-  showprogress('F');
+  showprogress('G');
 #endif
 
   /* Initialize on-board resources */
 
   max326_board_initialize();
-  showprogress('G');
-
-  /* Enable the instruction cache */
-#warning Missing logic
+  showprogress('H');
 
   /* Then start NuttX */
 

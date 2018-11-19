@@ -91,20 +91,20 @@
 /* First pick the console and ttys0.  This could be any of UART0-5 */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart0port /* UART0 is console */
-#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define CONSOLE_DEV        g_uart0port /* UART0 is console */
+#    define TTYS0_DEV          g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED     1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
-#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define CONSOLE_DEV        g_uart1port /* UART1 is console */
+#    define TTYS0_DEV          g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED     1
 #else
 #  undef CONSOLE_DEV                        /* No console */
 #  if defined(CONFIG_MAX326XX_UART0)
-#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define TTYS0_DEV          g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED     1
 #  elif defined(CONFIG_MAX326XX_UART1)
-#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define TTYS0_DEV          g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED     1
 #  endif
 #endif
@@ -112,12 +112,19 @@
 /* Pick ttys1.  This could be any of UART0-1 excluding the console UART. */
 
 #if defined(CONFIG_MAX326XX_UART0) && !defined(UART0_ASSIGNED)
-#  define TTYS1_DEV             g_uart0port /* UART0 is ttyS1 */
+#  define TTYS1_DEV            g_uart0port /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED       1
 #elif defined(CONFIG_MAX326XX_UART1) && !defined(UART1_ASSIGNED)
-#  define TTYS1_DEV             g_uart1port /* UART1 is ttyS1 */
+#  define TTYS1_DEV            g_uart1port /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED       1
 #endif
+
+/* UART events */
+
+#define UART_INT_TX            UART_INT_TXFIFOLVL
+#define UART_INT_RX            (UART_INT_RXFIFOLVL | UART_INT_RXTO)
+#define UART_INT_RXERRORS      (UART_INT_FRAME | UART_INT_PARITY | \
+                                UART_INT_RXOVR)
 
 /****************************************************************************
  * Private Types
@@ -284,7 +291,7 @@ static uart_dev_t g_uart1port =
  ****************************************************************************/
 
 static inline uint32_t max326_serialin(struct max326_dev_s *priv,
-                                     unsigned int offset)
+                                       unsigned int offset)
 {
   return getreg32(priv->uartbase + offset);
 }
@@ -294,7 +301,7 @@ static inline uint32_t max326_serialin(struct max326_dev_s *priv,
  ****************************************************************************/
 
 static inline void max326_serialout(struct max326_dev_s *priv,
-                                  unsigned int offset, uint32_t value)
+                                    unsigned int offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -321,39 +328,56 @@ static inline void max326_modifyreg(struct max326_dev_s *priv, unsigned int offs
 }
 
 /****************************************************************************
- * Name: max326_fifoint_enable
+ * Name: max326_int_enable
  ****************************************************************************/
 
-static inline void max326_fifoint_enable(struct max326_dev_s *priv, uint32_t intset)
+static inline void max326_int_enable(struct max326_dev_s *priv,
+                                     uint32_t intset)
 {
-#warning Missing logic
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags   = spin_lock_irqsave();
+  regval  = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
+  regval |= intset;
+  max326_serialout(priv, MAX326_UART_INTEN_OFFSET, regval);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: max326_fifoint_disable
+ * Name: max326_int_disable
  ****************************************************************************/
 
-static inline void max326_fifoint_disable(struct max326_dev_s *priv, uint32_t intset)
+static inline void max326_int_disable(struct max326_dev_s *priv,
+                                      uint32_t intset)
 {
-#warning Missing logic
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags   = spin_lock_irqsave();
+  regval  = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
+  regval &= ~intset;
+  max326_serialout(priv, MAX326_UART_INTEN_OFFSET, regval);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: max326_fifoint_disableall
+ * Name: max326_int_disableall
  ****************************************************************************/
 
-static void max326_fifoint_disableall(struct max326_dev_s *priv, uint32_t *intset)
+static void max326_int_disableall(struct max326_dev_s *priv,
+                                  uint32_t *intset)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave();
   if (intset)
     {
-#warning Missing logic
+      *intset = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
     }
 
-#warning Missing logic
-  leave_critical_section(flags);
+  max326_serialout(priv, MAX326_UART_INTEN_OFFSET, 0);
+  spin_unlock_irqrestore(flags);
 }
 
 /****************************************************************************
@@ -377,7 +401,7 @@ static int max326_setup(struct uart_dev_s *dev)
 
   /* Make sure that all interrupts are disabled */
 
-  max326_fifoint_disableall(priv, NULL);
+  max326_int_disableall(priv, NULL);
   return OK;
 }
 
@@ -396,7 +420,7 @@ static void max326_shutdown(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  max326_fifoint_disableall(priv, NULL);
+  max326_int_disableall(priv, NULL);
 
   /* Reset hardware and disable Rx and Tx */
 
@@ -452,7 +476,7 @@ static void max326_detach(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  max326_fifoint_disableall(priv, NULL);
+  max326_int_disableall(priv, NULL);
   up_disable_irq(priv->irq);
 
   /* Detach from the interrupt(s) */
@@ -476,9 +500,9 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct max326_dev_s *priv;
-  int passes;
   uint32_t regval;
   bool handled;
+  int passes;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct max326_dev_s *)dev->priv;
@@ -493,14 +517,15 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
       handled = false;
 
       /* Read and clear FIFO interrupt status */
-#warning Missing logic
 
+      regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
+      max326_serialout(priv, MAX326_UART_STAT_OFFSET, regval);
 
       /* Handle incoming, receive bytes.
        * Check if the received FIFO is not empty.
        */
 
-#warning Missing logic
+      if ((regval & UART_INT_RX) != 0)
         {
           /* Process incoming bytes */
 
@@ -512,7 +537,7 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
        * Check if the received FIFO is not full.
        */
 
-#warning Missing logic
+      if ((regval & UART_INT_TX) != 0)
         {
           /* Process outgoing bytes */
 
@@ -521,9 +546,9 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
         }
 
 #ifdef CONFIG_DEBUG_FEATURES
-      /* Check for error conditions */
+      /* Check for RX error conditions */
 
-#warning Missing logic
+      if ((regval & MAX326_INT_RXERRORS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
 #warning Misssing logic
@@ -586,24 +611,17 @@ static int max326_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int max326_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct max326_dev_s *priv = (struct max326_dev_s *)dev->priv;
-  uint32_t fiford;
-
-  /* Get input data along with receiver control information */
-#warning Missing logic
-
 
   /* Return receiver control information */
 
   if (status)
     {
-#warning Missing logic
-      //*status = fiford && ~UART_FIFORD_RXDATA_MASK;
+      *status = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
     }
 
   /* Then return the actual received data. */
 
-#warning Missing logic
-  return fiford /* & UART_FIFORD_RXDATA_MASK */;
+ return max326_serialin(priv, MAX326_UART_FIFO_OFFSET);
 }
 
 /****************************************************************************
@@ -625,14 +643,16 @@ static void max326_rxint(struct uart_dev_s *dev, bool enable)
        * timeout occurs).
        */
 
-#warning Missing logic
-      //max326_fifoint_enable(priv, CCR_RX_EVENTS);
+#ifdef CONFIG_DEBUG_FEATURES
+      max326_int_enable(priv, UART_INT_RX);
+#else
+      max326_int_enable(priv, UART_INT_RX + UART_INT_RXERRORS);
+#endif
 #endif
     }
   else
     {
-#warning Missing logic
-      //max326_fifoint_disable(priv, CCR_RX_EVENTS);
+      max326_int_disable(priv, UART_INT_RX);
     }
 }
 
@@ -649,9 +669,10 @@ static bool max326_rxavailable(struct uart_dev_s *dev)
   struct max326_dev_s *priv = (struct max326_dev_s *)dev->priv;
   uint32_t regval;
 
-  /* Return true if the receive buffer/fifo is not "empty." */
-#warning Missing logic
-  return false;
+  /* Return true if the receive RXFIFO is not "empty." */
+
+  regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
+  return (regval & UART_STAT_RXEMPTY) == 0;
 }
 
 /****************************************************************************
@@ -665,7 +686,7 @@ static bool max326_rxavailable(struct uart_dev_s *dev)
 static void max326_send(struct uart_dev_s *dev, int ch)
 {
   struct max326_dev_s *priv = (struct max326_dev_s *)dev->priv;
-#warning Missing logic
+  max326_serialout(priv, MAX326_UART_FIFO_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -687,8 +708,7 @@ static void max326_txint(struct uart_dev_s *dev, bool enable)
       /* Enable the TX interrupt */
 
       flags = enter_critical_section();
-#warning Missing logic
-      //max326_fifoint_enable(priv, CCR_TX_EVENTS);
+      max326_int_enable(priv, UART_INT_TX);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -702,8 +722,7 @@ static void max326_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-#warning Missing logic
-      //max326_fifoint_disable(priv, CCR_TX_EVENTS);
+      max326_int_disable(priv, UART_INT_TX);
     }
 }
 
@@ -721,8 +740,9 @@ static bool max326_txready(struct uart_dev_s *dev)
   uint32_t regval;
 
   /* Return true if the transmit FIFO is "not full." */
-#warning Missing logic
-  return false;
+
+  regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
+  return (regval & UART_STAT_TXFULL) == 0;
 }
 
 /****************************************************************************
@@ -739,8 +759,9 @@ static bool max326_txempty(struct uart_dev_s *dev)
   uint32_t regval;
 
   /* Return true if the transmit FIFO is "empty." */
-#warning Missing logic
-  return false;
+
+  regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
+  return (regval & UART_STAT_TXEMPTY) != 0;
 }
 
 /****************************************************************************
@@ -766,9 +787,9 @@ void max326_earlyserialinit(void)
    * pic32mx_consoleinit()
    */
 
-  max326_fifoint_disableall(TTYS0_DEV.priv, NULL);
+  max326_int_disableall(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV
-  max326_fifoint_disableall(TTYS1_DEV.priv, NULL);
+  max326_int_disableall(TTYS1_DEV.priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
@@ -825,7 +846,7 @@ int up_putc(int ch)
   struct max326_dev_s *priv = (struct max326_dev_s *)CONSOLE_DEV.priv;
   uint32_t intset;
 
-  max326_fifoint_disableall(priv, &intset);
+  max326_int_disableall(priv, &intset);
 
   /* Check for LF */
 
@@ -837,7 +858,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-  max326_fifoint_enable(priv, intset);
+  max326_int_enable(priv, intset);
 #endif
 
   return ch;

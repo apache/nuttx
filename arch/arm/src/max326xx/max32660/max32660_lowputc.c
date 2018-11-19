@@ -471,7 +471,7 @@ void up_lowputc(char ch)
         {
           /* Send the character */
 
-          putreg32((uint32_t)ch, CONSOLE_BASE + MAX326_UART_TXFIFO_OFFSET);
+          putreg32((uint32_t)ch, CONSOLE_BASE + MAX326_UART_FIFO_OFFSET);
           spin_unlock_irqrestore(flags);
           return;
         }
