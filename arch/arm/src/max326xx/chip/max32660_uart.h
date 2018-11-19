@@ -167,6 +167,7 @@
 #  define UART_BAUD0_IBAUD(n)       ((uint32_t)(n) << UART_BAUD0_IBAUD_SHIFT)
 #define UART_BAUD0_CLKDIV_SHIFT     (16)      /* Bits 16-18:  Bit Rate Clock Divisor */
 #define UART_BAUD0_CLKDIV_MASK      (7 << UART_BAUD0_CLKDIV_SHIFT)
+#  define UART_BAUD0_CLKDIV(n)      ((uint32_t)(n) << UART_BAUD0_CLKDIV_SHIFT)
 #  define UART_BAUD0_CLKDIV_128     (0 << UART_BAUD0_CLKDIV_SHIFT)
 #  define UART_BAUD0_CLKDIV_64      (1 << UART_BAUD0_CLKDIV_SHIFT)
 #  define UART_BAUD0_CLKDIV_32      (2 << UART_BAUD0_CLKDIV_SHIFT)

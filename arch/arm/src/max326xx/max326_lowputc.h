@@ -61,6 +61,9 @@ struct uart_config_s
   uint8_t  bits;          /* Number of bits (5-9) */
   uint8_t  txlevel;       /* TX level for event generation */
   uint8_t  rxlevel;       /* RX level for event generation */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool     rtslevel;      /* RX level for RTS generation */
+#endif
   bool     stopbits2;     /* true: Configure with 2 stop bits instead of 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool     iflow;         /* true: Input flow control supported */

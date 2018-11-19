@@ -201,6 +201,9 @@ static struct max326_dev_s g_uart0priv =
     .bits         = CONFIG_UART0_BITS,
     .txlevel      = MAX326_UART_TXFIFO_DEPTH / 2,
     .rxlevel      = MAX326_UART_RXFIFO_DEPTH / 4,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+    .rtslevel     = 3 * MAX326_UART_RXFIFO_DEPTH / 4,
+#endif
     .stopbits2    = CONFIG_UART0_2STOP,
 #ifdef CONFIG_UART0_IFLOWCONTROL
     .iflow        = true,
@@ -242,6 +245,9 @@ static struct max326_dev_s g_uart1priv =
     .bits         = CONFIG_UART1_BITS,
     .txlevel      = MAX326_UART_TXFIFO_DEPTH / 2,
     .rxlevel      = MAX326_UART_RXFIFO_DEPTH / 4,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+    .rtslevel     = 3 * MAX326_UART_RXFIFO_DEPTH / 4,
+#endif
     .stopbits2    = CONFIG_UART1_2STOP,
 #ifdef CONFIG_UART1_IFLOWCONTROL
     .iflow        = true,
