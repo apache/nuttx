@@ -57,6 +57,7 @@
 static void show_usage(char *progname, int exitcode)
 {
   fprintf(stderr, "Usage:  %s [-m <maxline>] <filename>\n", progname);
+  fprintf(stderr, "        %s -h\n", progname);
   exit(exitcode);
 }
 
@@ -96,7 +97,9 @@ int main(int argc, char **argv, char **envp)
   maxline  = 78;
   filename = argv[1];
 
-  /* Usage:  nxstyle [-m <maxline>] <filename> */
+  /* Usage:  nxstyle [-m <maxline>] <filename>
+   *         nxstyle -h
+   */
 
   if (argc == 4)
     {
@@ -115,7 +118,14 @@ int main(int argc, char **argv, char **envp)
 
       filename = argv[3];
     }
-  else if (argc != 2)
+  else if (argc == 2)
+    {
+      if (strcmp(argv[1], "-h") == 0)
+        {
+          show_usage(argv[0], 0);
+        }
+    }
+  else
     {
       fprintf(stderr, "Invalid number of arguments\n");
       show_usage(argv[0], 1);
@@ -230,7 +240,9 @@ int main(int argc, char **argv, char **envp)
 
             default:
               {
-                fprintf(stderr, "Unexpected white space character %02x found at line %d:%d\n", line[n], lineno, n);
+                fprintf(stderr,
+                        "Unexpected white space character %02x found at line %d:%d\n",
+                        line[n], lineno, n);
               }
               break;
             }
@@ -783,7 +795,7 @@ int main(int argc, char **argv, char **envp)
                       break;
                     }
 
-                  /* &<variable> OR &(<expression>)*/
+                  /* &<variable> OR &(<expression>) */
 
                   else if (isalpha((int)line[n + 1]) || line[n + 1] == '_' || line[n + 1] == '(')
                     {
