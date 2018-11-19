@@ -37,9 +37,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 
 /****************************************************************************
@@ -49,6 +51,16 @@
 #define LINE_SIZE    512
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void show_usage(char *progname, int exitcode)
+{
+  fprintf(stderr, "Usage:  %s [-m <maxline>] <filename>\n", progname);
+  exit(exitcode);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -56,6 +68,7 @@ int main(int argc, char **argv, char **envp)
 {
   FILE *instream;
   char line[LINE_SIZE];
+  char *filename;
   char *lptr;
   bool btabs;
   bool bfunctions;
@@ -78,8 +91,37 @@ int main(int argc, char **argv, char **envp)
   int blank_lineno;
   int noblank_lineno;
   int linelen;
+  int maxline;
 
-  instream = fopen(argv[1], "r");
+  maxline  = 78;
+  filename = argv[1];
+
+  /* Usage:  nxstyle [-m <maxline>] <filename> */
+
+  if (argc == 4)
+    {
+      if (strcmp(argv[1], "-m") != 0)
+        {
+          fprintf(stderr, "Unrecognized argument\n");
+          show_usage(argv[0], 1);
+        }
+
+      maxline = atoi(argv[2]);
+      if (maxline < 1)
+        {
+          fprintf(stderr, "Bad value for <maxline>\n");
+          show_usage(argv[0], 1);
+        }
+
+      filename = argv[3];
+    }
+  else if (argc != 2)
+    {
+      fprintf(stderr, "Invalid number of arguments\n");
+      show_usage(argv[0], 1);
+    }
+
+  instream = fopen(filename, "r");
   if (!instream)
     {
       fprintf(stderr, "Failed to open %s\n", argv[1]);
@@ -902,12 +944,26 @@ int main(int argc, char **argv, char **envp)
         }
 
       /* Loop terminates when NUL or newline character found */
-      /* Check for space at the end of the line */
 
-      if (n > 1 && line[n] == '\n' && isspace((int)line[n - 1]))
+      if (line[n] == '\n')
         {
-          fprintf(stderr, "Dangling whitespace at the end of line %d:%d\n",
-                  lineno, n);
+          /* Check for space at the end of the line */
+
+          if (n > 1 && isspace((int)line[n - 1]))
+            {
+              fprintf(stderr,
+                      "Dangling whitespace at the end of line %d:%d\n",
+                      lineno, n);
+            }
+
+          /* Check for long lines */
+
+          if (n > maxline)
+            {
+              fprintf(stderr,
+                      "Long line found at %d:%d\n",
+                      lineno, n);
+            }
         }
 
       /* STEP 4: Check alignment */
