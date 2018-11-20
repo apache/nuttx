@@ -54,6 +54,41 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: max326_gpio_irqinitialize
+ *
+ * Description:
+ *   Initialize logic to support interrupting GPIO pins.  This function is
+ *   called by the OS initialization logic and is not a user interface.
+ *
+ * Assumptions:
+ *   Called early in the boot-up sequence
+ *
+ ****************************************************************************/
+
+static int max326_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  uint32_t pending;
+  int 0;
+
+  /* Get the pending interrupt set */
+
+  pending = getreg32(MAX326_GPIO0_INTFL) & getreg32(MAX326_GPIO0_INTEN) &
+            MAX326_GPIO0_ALLPINS;
+
+  for (i = 0; pending != 0 && i < MAX326_GPIO0_NPINS; i++)
+    {
+      uint32_t pinmask = GPIO_INTEN(i);
+      if ((pending & pinmask) != 0)
+        {
+          /* Dispatch the GPIO interrupt */
+
+          pending &= ~pinmask;
+          irq_dispatch(MAX326_IRQ_GPIO1ST + i, context);
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -73,7 +108,7 @@ void max326_gpio_irqinitialize(void);
 {
   /* Attach the GPIO0 interrupt handler and enable interrupts */
 
-  DEBUGVERIFY(irq_attach, MAX326_IRQ_GPIO0, NULL);
+  DEBUGVERIFY(irq_attach(MAX326_IRQ_GPIO0, max326_gpio0_interrupt, NULL));
   up_enable_irq(MAX326_IRQ_GPIO0);
 }
 

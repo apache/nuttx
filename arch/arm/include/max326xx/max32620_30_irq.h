@@ -52,7 +52,7 @@
 
 #define MAX326_IRQ_CRYPTO     (MAX326_IRQ_EXTINT + 0)    /*  0  Crypto Oscillator Stable */
 #define MAX326_IRQ_SUPPLY     (MAX326_IRQ_EXTINT + 1)    /*  1  Power Supply Reset */
-#define MAX326_IRQ_FLASHC     (MAX326_IRQ_EXTINT + 2)    /*  2  SRAM/FLASH Controller */
+#define MAX326_IRQ_FLC        (MAX326_IRQ_EXTINT + 2)    /*  2  SRAM/FLASH Controller (FLC) */
 #define MAX326_IRQ_ALARM0     (MAX326_IRQ_EXTINT + 3)    /*  3  RTC Time-of-Day Alarm 0 */
 #define MAX326_IRQ_ALARM1     (MAX326_IRQ_EXTINT + 4)    /*  4  RTC Time-of-Day Alarm 1 */
 #define MAX326_IRQ_INTERVAL   (MAX326_IRQ_EXTINT + 5)    /*  5  RTC Interval Alarm */

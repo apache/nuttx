@@ -49,46 +49,37 @@
  ************************************************************************************************/
 
 /* External interrupts (vectors >= 16) */
-/* REVISIT: Interrupt Vectors are not documented in the User Manual.  Here I am just assuming
- * that the vectors are the same for the other family members, but with unsupported options
- * removed.
- */
-                                                         /*  0  Reserved */
-#define MAX326_IRQ_SUPPLY     (MAX326_IRQ_EXTINT + 1)    /*  1  Power Supply Reset */
-#define MAX326_IRQ_FLASHC     (MAX326_IRQ_EXTINT + 2)    /*  2  SRAM/FLASH Controller */
-#define MAX326_IRQ_ALARM0     (MAX326_IRQ_EXTINT + 3)    /*  3  RTC Time-of-Day Alarm 0 */
-#define MAX326_IRQ_ALARM1     (MAX326_IRQ_EXTINT + 4)    /*  4  RTC Time-of-Day Alarm 1 */
-#define MAX326_IRQ_INTERVAL   (MAX326_IRQ_EXTINT + 5)    /*  5  RTC Interval Alarm */
-#define MAX326_IRQ_RTCOVF     (MAX326_IRQ_EXTINT + 6)    /*  6  RTC Counter Overflow */
-#define MAX326_IRQ_PMU        (MAX326_IRQ_EXTINT + 7)    /*  7  PMU */
-                                                         /*  8-9  Reserved */
-#define MAX326_IRQ_MMA        (MAX326_IRQ_EXTINT + 10)   /* 10  MMA */
-#define MAX326_IRQ_WDT0       (MAX326_IRQ_EXTINT + 11)   /* 11  Watchdog 0 Timeout Interrupt */
-                                                         /* 12-14  Watchdog 0 Pre-window Interrupt */
-#define MAX326_IRQ_GPIO0      (MAX326_IRQ_EXTINT + 15)   /* 15  GPIO P0.1-7 External Interrupts */
-                                                         /* 16-21 Reserved */
-#define MAX326_IRQ_TMR0_0     (MAX326_IRQ_EXTINT + 22)   /* 22  Timer 0 Interrupt 0 */
-#define MAX326_IRQ_TMR0_1     (MAX326_IRQ_EXTINT + 23)   /* 23  Timer 0 Interrupt 1 */
-#define MAX326_IRQ_TMR1_0     (MAX326_IRQ_EXTINT + 24)   /* 24  Timer 1 Interrupt 0 */
-#define MAX326_IRQ_TMR1_1     (MAX326_IRQ_EXTINT + 25)   /* 25  Timer 1 Interrupt 1 */
-#define MAX326_IRQ_TMR2_0     (MAX326_IRQ_EXTINT + 26)   /* 26  Timer 2 Interrupt 0 */
-#define MAX326_IRQ_TMR2_1     (MAX326_IRQ_EXTINT + 27)   /* 27  Timer 2 Interrupt 1 */
-                                                         /* 28-33 Reserved */
-#define MAX326_IRQ_UART0      (MAX326_IRQ_EXTINT + 34)   /* 34  UART 0 */
-#define MAX326_IRQ_UART1      (MAX326_IRQ_EXTINT + 35)   /* 35  UART 1 */
-                                                         /* 36-38 Reserved */
-#define MAX326_IRQ_I2CM0      (MAX326_IRQ_EXTINT + 39)   /* 39  I2C0 Master */
-#define MAX326_IRQ_I2CM1      (MAX326_IRQ_EXTINT + 40)   /* 40  I2C1 Master */
-                                                         /* 41-42 Reserved */
-#define MAX326_IRQ_SPIM0      (MAX326_IRQ_EXTINT + 43)   /* 43-44  SPI Master 0 */
-#define MAX326_IRQ_SPIM1      (MAX326_IRQ_EXTINT + 44)   /* 44  SPI Master 1 */
-#define MAX326_IRQ_SPIM2      (MAX326_IRQ_EXTINT + 45)   /* 45  SPI Master 2 */
-                                                         /* 46-48  Reserved */
-#define MAX326_IRQ_SPIS       (MAX326_IRQ_EXTINT + 49)   /* 49  SPI Slave */
+
+#define MAX326_IRQ_PF         (MAX326_IRQ_EXTINT + 0)    /*  0  Power Fail */
+#define MAX326_IRQ_WDT0       (MAX326_IRQ_EXTINT + 1)    /*  1  Watchdog 0 Interrupt */
+                                                         /*  2  Reserved */
+#define MAX326_IRQ_RTC        (MAX326_IRQ_EXTINT + 3)    /*  3  RTC Interrupt */
+                                                         /*  4  Reserved */
+#define MAX326_IRQ_TMR0       (MAX326_IRQ_EXTINT + 5)    /*  5  Timer 0 Interrupt */
+#define MAX326_IRQ_TMR1       (MAX326_IRQ_EXTINT + 6)    /*  6  Timer 1 Interrupt */
+#define MAX326_IRQ_TMR2       (MAX326_IRQ_EXTINT + 7)    /*  7  Timer 2 Interrupt */
+                                                         /*  8-12  Reserved */
+#define MAX326_IRQ_I2C0       (MAX326_IRQ_EXTINT + 13)   /* 13  I2C0 */
+#define MAX326_IRQ_UART0      (MAX326_IRQ_EXTINT + 14)   /* 14  UART 0 */
+#define MAX326_IRQ_UART1      (MAX326_IRQ_EXTINT + 15)   /* 15  UART 1 */
+#define MAX326_IRQ_SPI        (MAX326_IRQ_EXTINT + 16)   /* 16  SPI17Y */
+#define MAX326_IRQ_SPIMSS     (MAX326_IRQ_EXTINT + 17)   /* 17  SPIMSS/I2S */
+                                                         /* 18-22  Reserved */
+#define MAX326_IRQ_FLC        (MAX326_IRQ_EXTINT + 23)   /* 23  Flash Controller (FLC) */
+#define MAX326_IRQ_GPIO0      (MAX326_IRQ_EXTINT + 24)   /* 24  GPIO P0.1-7 External Interrupts */
+                                                         /* 25-27  Reserved */
+#define MAX326_IRQ_DMA0       (MAX326_IRQ_EXTINT + 28)   /* 28  DMA0 */
+#define MAX326_IRQ_DMA1       (MAX326_IRQ_EXTINT + 29)   /* 29  DMA1 */
+#define MAX326_IRQ_DMA2       (MAX326_IRQ_EXTINT + 30)   /* 30  DMA2 */
+#define MAX326_IRQ_DMA3       (MAX326_IRQ_EXTINT + 31)   /* 31  DMA3 */
+                                                         /* 32-35  Reserved */
+#define MAX326_IRQ_I2C1       (MAX326_IRQ_EXTINT + 36)   /* 36  I2C1 */
+                                                         /* 37-53  Reserved */
+#define MAX326_IRQ_WAKEUP     (MAX326_IRQ_EXTINT + 54)   /* 54  GPIO Wakeup */
 
 /* Number of external interrupts and number of true interrupt vectors */
 
-#define MAX326_IRQ_NEXTINT    50
+#define MAX326_IRQ_NEXTINT    55
 #define MAX326_IRQ_NVECTORS   (MAX326_IRQ_EXTINT + MAX326_IRQ_NEXTINT)
 
 /* If GPIO pin interrupts are used then there is a second level of interrupt decode */

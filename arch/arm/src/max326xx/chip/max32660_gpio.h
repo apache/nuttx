@@ -47,6 +47,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define MAX326_GPIO0_NPINS             14      /* Pins 0-13 (max) */
+#define MAX326_GPIO0_ALLPINS           0x3fff  /* Set of all pins */
+
 /* Register Offsets *****************************************************************/
 
 #define MAX326_GPIO_AF0SEL_OFFSET      0x0000  /* I/O and Alternate Function 1
