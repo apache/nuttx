@@ -142,7 +142,9 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
 
   if (addr->nv_addrlen < 1 || addr->nv_addrlen > RADIO_MAX_ADDRLEN)
     {
-      nwarn("WARNING: Bad or undefined node address: %u\n", addr->nv_addrlen);
+      nwarn("WARNING: Bad or undefined node address: %u\n",
+            addr->nv_addrlen);
+
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "--");
     }
@@ -151,7 +153,7 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "%02x", addr->nv_addr[0]);
 
-      for (i = 1; i < nv_addrlen; i++)
+      for (i = 1; i < addr->nv_addrlen; i++)
         {
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           ":%02x", addr->nv_addr[i]);
