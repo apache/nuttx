@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arch_invalidate_dcache.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Some logic in this header file derives from the ARM CMSIS core_cm7.h
  * header file which has a compatible 3-clause BSD license:
@@ -49,10 +50,6 @@
 #ifdef CONFIG_ARMV7M_DCACHE
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -62,7 +59,9 @@
  * Description:
  *   Invalidate the data cache within the specified region; we will be
  *   performing a DMA operation in this region and we want to purge old data
- *   in the cache.
+ *   in the cache. Note that this function invalidates all cache ways
+ *   in sets that could be associated with the address range, regardless of
+ *   whether the address range is contained in the cache or not.
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -136,6 +135,74 @@ void arch_invalidate_dcache(uintptr_t start, uintptr_t end)
           putreg32(sw, NVIC_DCISW);
         }
       while (tmpways--);
+
+      /* Increment the address by the size of one cache line. */
+
+      start += ssize;
+    }
+  while (start < end);
+
+  ARM_DSB();
+  ARM_ISB();
+}
+
+/****************************************************************************
+ * Name: arch_invalidate_dcache_by_addr
+ *
+ * Description:
+ *   Invalidate the data cache within the specified region; we will be
+ *   performing a DMA operation in this region and we want to purge old data
+ *   in the cache. Note that this function only invalidates cache sets that
+ *   contain data from this address range.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This operation is not atomic.  This function assumes that the caller
+ *   has exclusive access to the address range so that no harm is done if
+ *   the operation is pre-empted.
+ *
+ ****************************************************************************/
+
+void arch_invalidate_dcache_by_addr(uintptr_t start, uintptr_t end)
+{
+  uint32_t ccsidr;
+  uint32_t sshift;
+  uint32_t ssize;
+
+  /* Get the characteristics of the D-Cache */
+
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+
+  /* Invalidate the D-Cache containing this range of addresses */
+
+  ssize  = (1 << sshift);
+
+  /* Round down the start address to the nearest cache line boundary.
+   *
+   *   sshift = 5      : Offset to the beginning of the set field
+   *   (ssize - 1)  = 0x007f : Mask of the set field
+   */
+
+  start &= ~(ssize - 1);
+  ARM_DSB();
+
+  do
+    {
+      /* The below store causes the cache to check its directory and
+       * determine if this address is contained in the cache. If so, it
+       * invalidate that cache line. Only the cache way containing the
+       * address is invalidated. If the address is not in the cache, then
+       * nothing is invalidated.
+       */
+
+      putreg32(start, NVIC_DCIMVAC);
 
       /* Increment the address by the size of one cache line. */
 

@@ -4,6 +4,7 @@
  *   Copyright (C) 2009, 2011-2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,6 +64,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
+#include "stm32_dtcm.h"
 #include "stm32_dma.h"
 #include "stm32_gpio.h"
 #include "stm32_sdmmc.h"
@@ -563,7 +565,11 @@ static int  stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
+#ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
+static int  stm32_dmadelydinvldt(FAR struct sdio_dev_s *dev,
+              FAR const uint8_t *buffer, size_t buflen);
 #endif
+#endif /* CONFIG_STM32F7_SDMMC_DMA */
 
 /* Initialization/uninitialization/reset ************************************/
 
@@ -612,14 +618,17 @@ struct stm32_dev_s g_sdmmcdev1 =
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
-#else
+#ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
+    .dmadelydinvldt   = stm32_dmadelydinvldt,
+#endif
+#lse
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
     .dmapreflight     = NULL,
 #endif
     .dmarecvsetup     = stm32_recvsetup,
     .dmasendsetup     = stm32_sendsetup,
-#endif
-#endif
+#endif /* CONFIG_STM32F7_SDMMC_DMA */
+#endif /* CONFIG_SDIO_DMA*/
   },
   .base              = STM32_SDMMC1_BASE,
   .nirq              = STM32_IRQ_SDMMC1,
@@ -687,6 +696,9 @@ struct stm32_dev_s g_sdmmcdev2 =
 #endif
     .dmarecvsetup     = stm32_dmarecvsetup,
     .dmasendsetup     = stm32_dmasendsetup,
+#ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
+    .dmadelydinvldt   = stm32_dmadelydinvldt,
+#endif
 #endif
   },
   .base              = STM32_SDMMC2_BASE,
@@ -2524,7 +2536,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   else if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
-	   (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE  &&
+           (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
       mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
@@ -3055,7 +3067,12 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Force RAM reread */
 
-  arch_invalidate_dcache((uintptr_t)buffer,(uintptr_t)buffer + buflen);
+  if ((uintptr_t)buffer < DTCM_START || (uintptr_t)buffer + buflen > DTCM_END)
+    {
+#if !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
+      arch_invalidate_dcache_by_addr((uintptr_t)buffer,(uintptr_t)buffer + buflen);
+#endif
+    }
 
   /* Start the DMA */
 
@@ -3121,9 +3138,16 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   stm32_sampleinit();
   stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Flush cache to physical memory */
+  /* Flush cache to physical memory when not in DTCM memory */
 
-  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  if ((uintptr_t)buffer < DTCM_START || (uintptr_t)buffer + buflen > DTCM_END)
+    {
+#ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+      arch_invalidate_dcache_by_addr((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+#else
+      arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+#endif
+    }
 
   /* Save the source buffer information for use by the interrupt handler */
 
@@ -3153,6 +3177,42 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Enable TX interrupts */
 
   stm32_configxfrints(priv, STM32_SDMMC_DMASEND_MASK);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_dmadelydinvldt
+ *
+ * Description:
+ *   Delayed D-cache invalidation.
+ *   This function should be called after receive DMA completion to perform
+ *   D-cache invalidation. This eliminates the need for cache aligned DMA
+ *   buffers when the D-cache is in store-through mode.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - The memory to DMA into
+ *   buflen - The size of the DMA transfer in bytes
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_SDMMC_DMA
+static int stm32_dmadelydinvldt(FAR struct sdio_dev_s *dev,
+                              FAR const uint8_t *buffer, size_t buflen)
+{
+  /* Invaliate cache to physical memory when not in DTCM memory. */
+
+  if ((uintptr_t)buffer < DTCM_START ||
+      (uintptr_t)buffer + buflen > DTCM_END)
+    {
+      arch_invalidate_dcache_by_addr((uintptr_t)buffer,
+                                     (uintptr_t)buffer + buflen);
+    }
 
   return OK;
 }

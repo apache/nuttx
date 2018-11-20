@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/cache.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Some logic in this header file derives from the ARM CMSIS core_cm7.h
@@ -300,7 +300,9 @@ void arch_disable_dcache(void);
  * Description:
  *   Invalidate the data cache within the specified region; we will be
  *   performing a DMA operation in this region and we want to purge old data
- *   in the cache.
+ *   in the cache. Note that this function invalidates all cache ways
+ *   in sets that could be associated with the address range, regardless of
+ *   whether the address range is contained in the cache or not.
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -320,6 +322,35 @@ void arch_disable_dcache(void);
 void arch_invalidate_dcache(uintptr_t start, uintptr_t end);
 #else
 #  define arch_invalidate_dcache(s,e)
+#endif
+
+/****************************************************************************
+ * Name: arch_invalidate_dcache_by_addr
+ *
+ * Description:
+ *   Invalidate the data cache within the specified region; we will be
+ *   performing a DMA operation in this region and we want to purge old data
+ *   in the cache. Note that this function only invalidates cache sets that
+ *   contain data from this address range.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This operation is not atomic.  This function assumes that the caller
+ *   has exclusive access to the address range so that no harm is done if
+ *   the operation is pre-empted.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARMV7M_DCACHE
+void arch_invalidate_dcache_by_addr(uintptr_t start, uintptr_t end);
+#else
+#  define arch_invalidate_dcache_by_addr(s,e)
 #endif
 
 /****************************************************************************
