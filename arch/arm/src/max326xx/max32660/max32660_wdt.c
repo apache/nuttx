@@ -81,7 +81,7 @@
  * this fixed timer period.
  */
 
-#define WDT_RESET_DELAY MSEC_PER_SEC  /* One second in units of milliseconds */
+#define WDT_RESET_DELAY (5 * MSEC_PER_SEC)  /* Five seconds in units of msec */
 
 /****************************************************************************
  * Private Types
@@ -109,7 +109,6 @@ static void max326_int_enable(FAR struct max326_wdt_lowerhalf_s *priv);
 static uint32_t max326_time_left(FAR struct max326_wdt_lowerhalf_s *priv);
 static uint64_t max326_exp2msec(uint32_t pclk, uint8_t exp);
 static uint8_t max326_msec2exp(uint32_t msec);
-static inline void max326_setexp(uint8_t intexp, uint8_t rstexp);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -231,8 +230,36 @@ static void max326_int_enable(FAR struct max326_wdt_lowerhalf_s *priv)
 
 static uint32_t max326_time_left(FAR struct max326_wdt_lowerhalf_s *priv)
 {
-  clock_t timeleft = clock_systimer() - priv->lastping;
-  return TICK2MSEC(timeleft);
+  uint64_t elapsed;
+  uint64_t timeout;
+  uint64_t timeleft;
+  uint32_t ctrl;
+  uint8_t exp;
+
+  /* Which timeout applies?  To the interrupt or to the reset>?  Doesn't
+   * matter, the interrupt time period is the right answer in either case.
+   */
+
+   ctrl = getreg32(MAX326_WDT0_CTRL);
+   exp  = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
+
+   timeout = max326_exp2msec(max326_pclk_frequency(), exp);
+   elapsed = TICK2MSEC(clock_systimer() - priv->lastping);
+
+   if (elapsed > timeout)
+     {
+       timeleft = 0;
+     }
+   else
+     {
+       timeleft = timeout - elapsed;
+       if (timeleft > UINT32_MAX)
+         {
+           timeleft = UINT32_MAX;
+         }
+     }
+
+  return (uint32_t)timeleft;
 }
 
 /****************************************************************************
@@ -307,31 +334,6 @@ static uint8_t max326_msec2exp(uint32_t msec)
     }
 
   return timeout;
-}
-
-/****************************************************************************
- * Name: max326_setexp
- *
- * Description:
- *   Set the time period exponents.
- *
- * Input Parameters:
- *   intexp - Interrupt time exponent.
- *   rstexp - Reset time exponent
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-static inline void max326_setexp(uint8_t intexp, uint8_t rstexp)
-{
-  uint32_t ctrl;
-
-  ctrl  = getreg32(MAX326_WDT0_CTRL);
-  ctrl &= ~(WDT0_CTRL_INTPERIOD_MASK | WDT0_CTRL_RSTPERIOD_MASK);
-  ctrl |= (WDT0_CTRL_INTPERIOD(intexp) | WDT0_CTRL_RSTPERIOD(rstexp));
-  putreg32(ctrl, MAX326_WDT0_CTRL);
 }
 
 /****************************************************************************
@@ -535,11 +537,18 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct max326_wdt_lowerhalf_s *priv =
     (FAR struct max326_wdt_lowerhalf_s *)lower;
+  irqstate_t flags;
+  uint32_t ctrl;
   uint8_t intexp;
   uint8_t rstexp;
 
   wdinfo("Entry: timeout=%lu\n", (unsigned long)timeout);
   DEBUGASSERT(priv != NULL);
+
+  /* Reset WDT timer */
+
+  flags = spin_lock_irqsave();
+  max326_wdog_reset(priv);
 
   /* Convert the timeout value in milliseconds to time exponent used by the
    * max32660.
@@ -555,7 +564,12 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       rstexp = max326_msec2exp(timeout + WDT_RESET_DELAY);
     }
 
-  max326_setexp(intexp, rstexp);
+  ctrl  = getreg32(MAX326_WDT0_CTRL);
+  ctrl &= ~(WDT0_CTRL_INTPERIOD_MASK | WDT0_CTRL_RSTPERIOD_MASK);
+  ctrl |= (WDT0_CTRL_INTPERIOD(intexp) | WDT0_CTRL_RSTPERIOD(rstexp));
+  putreg32(ctrl, MAX326_WDT0_CTRL);
+
+  spin_unlock_irqrestore(flags);
   return OK;
 }
 
