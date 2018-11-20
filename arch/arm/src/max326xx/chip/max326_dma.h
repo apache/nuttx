@@ -89,7 +89,7 @@
 
 /* DMA Channel Registers */
 
-#define MAX326_DMACH_OFFSET(n)      (0x0100 + )(n) << 5))
+#define MAX326_DMACH_OFFSET(n)      (0x0100 + ((unsigned int)(n) << 5))
 #define MAX326_DMACH0_OFFSET        0x0100
 #define MAX326_DMACH1_OFFSET        0x0120
 #define MAX326_DMACH2_OFFSET        0x0140
@@ -151,7 +151,8 @@
 #  define DMACH_CFG_PRI_MEDLO       (2 << DMACH_CFG_PRI_SHIFT)
 #  define DMACH_CFG_PRI_MEDHI       (1 << DMACH_CFG_PRI_SHIFT)
 #  define DMACH_CFG_PRI_HI          (0 << DMACH_CFG_PRI_SHIFT)
-#define DMACH_CFG_REQSEL_SHIFT      (4)       /* Bits 4-9: Request Select */
+#define DMACH_CFG_REQSEL_SHIFT      (4)       /* Bits 4-9: Request Select
+                                               *           See values below */
 #define DMACH_CFG_REQSEL_MASK       (0x3f << DMACH_CFG_REQSEL_SHIFT)
 #  define DMACH_CFG_REQSEL(n)       ((uint32_t)(n) << DMACH_CFG_REQSEL_SHIFT)
 #define DMACH_CFG_REQWAIT           (1 << 10) /* Bit 10: Request Wait Enable */
@@ -174,6 +175,7 @@
 #  define DMACH_CFG_PSSEL_DIV64K    (2 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 64K */
 #  define DMACH_CFG_PSSEL_DIV16M    (3 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 16M */
 #define DMACH_CFG_SRCWD_SHIFT       (16)      /* Bits 16-17: Source Width */
+#define DMACH_CFG_SRCWD_MASK        (3 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_1BYTE     (0 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_2BYTES    (1 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_4BYTES    (2 << DMACH_CFG_SRCWD_SHIFT)
@@ -192,6 +194,53 @@
 #define DMACH_CFG_CHDIEN            (1 << 30) /* Bit 30: Channel Disable
                                                *         Interrupt Enable */
 #define DMACH_CFG_CTZIEN            (1 << 31) /* Bit 31: CTZ Interrupt Enable */
+
+/* Values for the CFG register Request Select field */
+
+#define DMACH_REQSEL_MEMTOMEM        0x00
+#define DMACH_REQSEL_SPI0RX          0x01
+#define DMACH_REQSEL_SPI1RX          0x02
+#define DMACH_REQSEL_SPI2RX          0x03
+#define DMACH_REQSEL_UART0RX         0x04
+#define DMACH_REQSEL_UART1RX         0x05
+#define DMACH_REQSEL_I2C0RX          0x07
+#define DMACH_REQSEL_I2C1RX          0x08
+#define DMACH_REQSEL_ADC             0x09
+#define DMACH_REQSEL_UART2RX         0x0e
+#define DMACH_REQSEL_SPI3RX          0x0f
+#define DMACH_REQSEL_SPI_MSS0RX      0x10
+#define DMACH_REQSEL_USBRXEP1        0x11
+#define DMACH_REQSEL_USBRXEP2        0x12
+#define DMACH_REQSEL_USBRXEP3        0x13
+#define DMACH_REQSEL_USBRXEP4        0x14
+#define DMACH_REQSEL_USBRXEP5        0x15
+#define DMACH_REQSEL_USBRXEP6        0x16
+#define DMACH_REQSEL_USBRXEP7        0x17
+#define DMACH_REQSEL_USBRXEP8        0x18
+#define DMACH_REQSEL_USBRXEP9        0x19
+#define DMACH_REQSEL_USBRXEP10       0x1a
+#define DMACH_REQSEL_USBRXEP11       0x1b
+#define DMACH_REQSEL_SPI0TX          0x21
+#define DMACH_REQSEL_SPI1TX          0x22
+#define DMACH_REQSEL_SPI2TX          0x23
+#define DMACH_REQSEL_UART0TX         0x24
+#define DMACH_REQSEL_UART1TX         0x25
+#define DMACH_REQSEL_I2C0TX          0x27
+#define DMACH_REQSEL_I2C1TX          0x28
+#define DMACH_REQSEL_UART2TX         0x2e
+#define DMACH_REQSEL_SPI3TX          0x2f
+#define DMACH_REQSEL_SPI_MSS0TX      0x30
+#define DMACH_REQSEL_USBTXEP1        0x31
+#define DMACH_REQSEL_USBTXEP2        0x32
+#define DMACH_REQSEL_USBTXEP3        0x33
+#define DMACH_REQSEL_USBTXEP4        0x34
+#define DMACH_REQSEL_USBTXEP5        0x35
+#define DMACH_REQSEL_USBTXEP6        0x36
+#define DMACH_REQSEL_USBTXEP7        0x37
+#define DMACH_REQSEL_USBTXEP8        0x38
+#define DMACH_REQSEL_USBTXEP9        0x39
+#define DMACH_REQSEL_USBTXEP10       0x3a
+#define DMACH_REQSEL_USBTXEP11       0x3b
 
 /* DMA Channel Status Register */
 

@@ -439,7 +439,7 @@ void up_disable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
   /* Handle "fake" GPIO irq */
 
   if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
@@ -485,12 +485,12 @@ void up_enable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
   /* Handle "fake" GPIO irq */
 
   if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
     {
-      max326_gpio_irqensable(irq);
+      max326_gpio_irqenable(irq);
     }
   else
 #endif
@@ -569,7 +569,7 @@ int up_prioritize_irq(int irq, int priority)
     }
   else
     {
-#ifndef CONFIG_MAX326_GPIOIRQ
+#ifndef CONFIG_MAX326XX_GPIOIRQ
       DEBUGPANIC();
 #endif
       return;

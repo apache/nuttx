@@ -413,6 +413,6 @@ config MAX326XX_DMA
 	default n
 	depends on MAX326XX_HAVE_DMA
 
-config MAX326_GPIOIRQ
+config MAX326XX_GPIOIRQ
 	bool "GPIO Interrupt Support"
 	default n

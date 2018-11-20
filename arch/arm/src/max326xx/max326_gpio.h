@@ -91,7 +91,7 @@ extern "C"
  *
  ************************************************************************************/
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 void max326_gpio_irqinitialize(void);
 #endif
 
@@ -119,7 +119,7 @@ int max326_gpio_config(max326_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 void max326_gpio_irqconfig(max326_pinset_t pinset);
 #endif
 
@@ -152,7 +152,7 @@ bool max326_gpio_read(max326_pinset_t pinset);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 void max326_gpio_irqdisable(int irq);
 #endif
 
@@ -165,7 +165,7 @@ void max326_gpio_irqdisable(int irq);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 void max326_gpio_irqenable(int irq);
 #endif
 

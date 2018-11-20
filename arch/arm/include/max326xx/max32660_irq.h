@@ -84,7 +84,7 @@
 
 /* If GPIO pin interrupts are used then there is a second level of interrupt decode */
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 /* Up to 14 pins are available as interrupt sources, depending on the MAX32660 package */
 
 #  define MAX326_IRQ_P0_0     (MAX326_IRQ_NEXTINT + 0)

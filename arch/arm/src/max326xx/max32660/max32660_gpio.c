@@ -385,7 +385,7 @@ int max326_gpio_config(max326_pinset_t pinset)
         break;
     }
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
     /* Configure the interrupt */
 
   if (GPIO_IS_INTR(pinset))

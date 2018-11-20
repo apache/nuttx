@@ -44,8 +44,9 @@
 
 /* Standard DMA is only available for the MAX32660 */
 
-#ifdef (CONFIG_ARCH_FAMILY_MAX32660)
+#ifdef CONFIG_ARCH_FAMILY_MAX32660
+#  include "chip/max326_dma.h"
 #  include "max32660/max32660_dma.h"
-#ednif
+#endif
 
 #endif /* __ARCH_ARM_SRC_MAX436XX_MAX326_DMA_H */

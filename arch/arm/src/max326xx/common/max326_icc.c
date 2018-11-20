@@ -40,10 +40,10 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "up_arch.h"
-#include "chip/max326_icc.h"
 #include "max326_periphclks.h"
 #include "max326_icc.h"
 

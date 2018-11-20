@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -144,13 +145,24 @@ void max326_dma_free(DMA_HANDLE handle);
  *   following fields need be provided however.  The DMA logic will handle
  *   the rest.
  *
+ *     CFG          DMA priority
+ *     REQSEL       Request Select
+ *     REQWAIT      Request Wait Enable
+ *     TOSEL        Time-Out Select
+ *     PSSEL        Pre-Scale Select
+ *     SRCWD        Source Width
+ *     SRCINC       Source Increment Enable
+ *     DSTWD        Destination Width
+ *     DSTINC       Destination Increment Enable
+ *     BRST         Burst Size
+ *
  ****************************************************************************/
 
 int max326_dma_setup(DMA_HANDLE handle, uint32_t cfg, uint32_t saddr,
-                    uint32_t daddr, size_t nbytes);
+                     uint32_t daddr, size_t nbytes);
 
 /****************************************************************************
- * Name: max326_dma_setup
+ * Name: max326_dma_append
  *
  * Description:
  *   Append one buffer to the DMA chain.  max326_dma_setup() should have
@@ -163,8 +175,8 @@ int max326_dma_setup(DMA_HANDLE handle, uint32_t cfg, uint32_t saddr,
  *
  ****************************************************************************/
 
-int max326_dma_setup(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr,
-                     size_t nbytes);
+int max326_dma_append(DMA_HANDLE handle, uint32_t saddr, uint32_t daddr,
+                      size_t nbytes);
 
 /****************************************************************************
  * Name: max326_dmastart

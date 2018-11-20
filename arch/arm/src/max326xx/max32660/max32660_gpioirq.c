@@ -41,34 +41,31 @@
 
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
 #include "up_arch.h"
 
 #include "max326_gpio.h"
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: max326_gpio_irqinitialize
+ * Name: max326_gpio0_interrupt
  *
  * Description:
- *   Initialize logic to support interrupting GPIO pins.  This function is
- *   called by the OS initialization logic and is not a user interface.
- *
- * Assumptions:
- *   Called early in the boot-up sequence
+ *   GPIO0 pin interrupt handler.
  *
  ****************************************************************************/
 
 static int max326_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t pending;
-  int 0;
+  int i;
 
   /* Get the pending interrupt set */
 
@@ -86,6 +83,8 @@ static int max326_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
           irq_dispatch(MAX326_IRQ_GPIO1ST + i, context);
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -104,7 +103,7 @@ static int max326_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void max326_gpio_irqinitialize(void);
+void max326_gpio_irqinitialize(void)
 {
   /* Attach the GPIO0 interrupt handler and enable interrupts */
 
@@ -181,17 +180,17 @@ void max326_gpio_irqconfig(max326_pinset_t cfgset)
   regval  = getreg32(MAX326_GPIO0_INTMODE);
   regval &= ~pinmask;
   regval |= intmode;
-  putreg32(regval, MAX326_GPIO0_INTMODE)
+  putreg32(regval, MAX326_GPIO0_INTMODE);
 
   regval  = getreg32(MAX326_GPIO0_INTPOL);
   regval &= ~pinmask;
   regval |= intpol;
-  putreg32(regval, MAX326_GPIO0_INTPOL)
+  putreg32(regval, MAX326_GPIO0_INTPOL);
 
   regval  = getreg32(MAX326_GPIO0_INTDUALEDGE);
   regval &= ~pinmask;
   regval |= intdual;
-  putreg32(regval, MAX326_GPIO0_INTDUALEDGE)
+  putreg32(regval, MAX326_GPIO0_INTDUALEDGE);
 }
 
 /************************************************************************************
@@ -214,7 +213,7 @@ void max326_gpio_irqdisable(int irq)
 
   if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
     {
-      pin = irq - MAX326_IRQ_GPIO1ST
+      pin = irq - MAX326_IRQ_GPIO1ST;
 
       /* Modification of registers must be atomic */
 
@@ -242,7 +241,7 @@ void max326_gpio_irqenable(int irq)
 
   if (irq >= MAX326_IRQ_GPIO1ST && irq <= MAX326_IRQ_GPIOLAST)
     {
-      pin = irq - MAX326_IRQ_GPIO1ST
+      pin = irq - MAX326_IRQ_GPIO1ST;
 
       /* Modification of registers must be atomic */
 
@@ -250,4 +249,4 @@ void max326_gpio_irqenable(int irq)
     }
 }
 
-#endif /* CONFIG_MAX326_GPIOIRQ */
+#endif /* CONFIG_MAX326XX_GPIOIRQ */

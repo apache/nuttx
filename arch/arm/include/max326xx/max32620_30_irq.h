@@ -109,7 +109,7 @@
 
 /* If GPIO pin interrupts are used then there is a second level of interrupt decode */
 
-#ifdef CONFIG_MAX326_GPIOIRQ
+#ifdef CONFIG_MAX326XX_GPIOIRQ
 #warning Missing logic
 #else
 #  define MAX326_IRQ_NPININT   0
