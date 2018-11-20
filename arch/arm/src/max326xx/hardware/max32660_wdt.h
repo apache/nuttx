@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max32660_wdt.h
+ * arch/arm/src/max326xx/hardware/max32660_wdt.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_WDT_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_WDT_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_WDT_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_WDT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/max326_memorymap.h"
+#include "hardware/max326_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -110,4 +110,4 @@
 #  define WDT0_RST_SEQ1             (0xa5 << WDT0_RST_SHIFT)
 #  define WDT0_RST_SEQ2             (0x5a << WDT0_RST_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_WDT_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_WDT_H */

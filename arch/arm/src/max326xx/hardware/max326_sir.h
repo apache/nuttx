@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_wdt.h
+ * arch/arm/src/max326xx/hardware/max326_sir.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,37 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_WDT_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_WDT_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_SIR_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_SIR_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/max326_memorymap.h"
 
-#if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
-#  include "chip/max32620_30_wdt.h"
-#elif defined(CONFIG_ARCH_FAMILY_MAX32660)
-#  include "chip/max32660_wdt.h"
-#else
-#  error "Unsupported MAX326XX family"
-#endif
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_WDT_H */
+/* Register Offsets *****************************************************************/
+
+#define MAX326_SIR_STAT_OFFSET        0x0000 /* System Initialization Status Register */
+#define MAX326_SIR_ADDRER_OFFSET      0x0004 /* System Initialization Address Error Register */
+
+/* Register Addresses ***************************************************************/
+
+#define MAX326_SIR_STAT               (MAX326_SIR_BASE + MAX326_SIR_STAT_OFFSET)
+#define MAX326_SIR_ADDRER             (MAX326_SIR_BASE + MAX326_SIR_ADDRER_OFFSET)
+
+/* Register Bit-field Definitions ***************************************************/
+
+/* System Initialization Status Register */
+
+#define SIR_STAT_CFGVALID             (1 << 0)  /* Bit 0:  Configuration Valid Flag */
+#define SIR_STAT_CFGERR               (1 << 1)  /* Bit 1:  Configuration Error Flag */
+
+/* System Initialization Address Error Register (32-bit Configuration Error Address) */
+
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_SIR_H */

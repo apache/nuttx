@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/max326xx/chip/max32660_memorymap.h
+ * arch/arm/src/max326xx/hardware/max32660_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_MEMORYMAP_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_MEMORYMAP_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_MEMORYMAP_H
 
 /********************************************************************************************
  * Included Files
@@ -89,4 +89,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_MEMORYMAP_H */

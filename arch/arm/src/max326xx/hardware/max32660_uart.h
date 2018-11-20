@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max32660_uart.h
+ * arch/arm/src/max326xx/hardware/max32660_uart.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_UART_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_UART_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/max326_memorymap.h"
+#include "hardware/max326_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -197,4 +197,4 @@
 
 #define UART_TXFIFO_MASK            (0xff)    /* Bits 0-7: TX FIFO Data Output Peek Register */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_UART_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_UART_H */

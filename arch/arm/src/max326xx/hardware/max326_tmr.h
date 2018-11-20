@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_memorymap.h
+ * arch/arm/src/max326xx/hardware/max326_tmr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_MEMORYMAP_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_TMR_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_TMR_H
 
 /************************************************************************************
  * Included Files
@@ -43,11 +43,11 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
-#  include "chip/max32620_30_memorymap.h"
+#  include "hardware/max32620_30_tmr.h"
 #elif defined(CONFIG_ARCH_FAMILY_MAX32660)
-#  include "chip/max32660_memorymap.h"
+#  include "hardware/max32660_tmr.h"
 #else
 #  error "Unsupported MAX326XX family"
 #endif
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_TMR_H */

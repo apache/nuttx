@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_gcr.h
+ * arch/arm/src/max326xx/hardware/max326_gcr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_GCR_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_GCR_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
 
 /************************************************************************************
  * Included Files
@@ -48,7 +48,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/max326_memorymap.h"
+#include "hardware/max326_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -196,4 +196,4 @@
 
 #define GCR_SYSIE_ICEULIE           (1 << 0)  /* Bit 0:  Arm ICE Unlocked Interrupt Enable */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_GCR_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max32660_pinmux.h
+ * arch/arm/src/max326xx/hardware/max32660_pinmux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_PINMUX_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_PINMUX_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_PINMUX_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_PINMUX_H
 
 /************************************************************************************
  * Included Files
@@ -131,4 +131,4 @@
 #define GPIO_UART1_TX_2  (GPIO_ALT3 | GPIO_PORT0 | GPIO_PIN6)
 #define GPIO_UART1_TX_3  (GPIO_ALT2 | GPIO_PORT0 | GPIO_PIN10) /* 20-TQFN only */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_PINMUX_H */

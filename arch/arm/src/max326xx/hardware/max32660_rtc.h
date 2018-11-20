@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max32660_rtc.h
+ * arch/arm/src/max326xx/hardware/max32660_rtc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_RTC_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_RTC_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_RTC_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_RTC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/max326_memorymap.h"
+#include "hardware/max326_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -124,4 +124,4 @@
 #define RTC_OSCCTRL_BYPASS        (1 << 4)  /* Bit 4:  RTC Crystal Bypass */
 #define RTC_OSCCTRL_32KOUT        (1 << 5)  /* Bit 5:  RTC Square Wave Output */
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX32660_RTC_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_RTC_H */

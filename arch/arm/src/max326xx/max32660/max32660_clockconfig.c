@@ -45,9 +45,9 @@
 
 #include "up_arch.h"
 
-#include "chip/max326_gcr.h"
-#include "chip/max326_pwrseq.h"
-#include "chip/max326_flc.h"
+#include "hardware/max326_gcr.h"
+#include "hardware/max326_pwrseq.h"
+#include "hardware/max326_flc.h"
 #include "max326_clockconfig.h"
 
 #include <arch/board/board.h>

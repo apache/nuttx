@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/max326_gpio.h"
+#include "hardware/max326_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

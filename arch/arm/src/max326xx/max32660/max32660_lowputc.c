@@ -45,9 +45,9 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/max326_memorymap.h"
-#include "chip/max326_pinmux.h"
-#include "chip/max326_uart.h"
+#include "hardware/max326_memorymap.h"
+#include "hardware/max326_pinmux.h"
+#include "hardware/max326_uart.h"
 
 #include "max326_config.h"
 #include "max326_periphclks.h"

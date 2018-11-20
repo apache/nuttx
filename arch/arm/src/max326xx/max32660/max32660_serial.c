@@ -59,7 +59,7 @@
 
 #include "chip.h"
 #include "max326_config.h"
-#include "chip/max326_uart.h"
+#include "hardware/max326_uart.h"
 #include "max326_clockconfig.h"
 #include "max326_lowputc.h"
 #include "max326_serial.h"

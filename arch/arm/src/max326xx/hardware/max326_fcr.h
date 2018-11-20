@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/max326xx/chip/max326_tmr.h
+ * arch/arm/src/max326xx/hardware/max326_fcr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,21 +33,35 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H
-#define __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_FCR_H
+#define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_FCR_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/max326_memorymap.h"
 
-#if defined(CONFIG_ARCH_FAMILY_MAX32620) || defined(CONFIG_ARCH_FAMILY_MAX32630)
-#  include "chip/max32620_30_tmr.h"
-#elif defined(CONFIG_ARCH_FAMILY_MAX32660)
-#  include "chip/max32660_tmr.h"
-#else
-#  error "Unsupported MAX326XX family"
-#endif
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_CHIP_MAX326_TMR_H */
+/* Register Offsets *****************************************************************/
+
+#define MAX326_FCR_REG0_OFFSET      0x0000    /* Function Control Register 0 */
+
+/* Register Addresses ***************************************************************/
+
+#define MAX326_FCR_REG0             (MAX326_FCR_BASE + MAX326_FCR_REG0_OFFSET)
+
+/* Register Bit-field Definitions ***************************************************/
+
+/* Function Control Register 0 */
+
+#define FCR_REG0_I2C0_SDA_FILTER    (1 << 20) /* Bit 20: I2C0 SDA Filter Enable */
+#define FCR_REG0_I2C0_SCL_FILTER    (1 << 21) /* Bit 21: I2C0 SCL Filter Enable */
+#define FCR_REG0_I2C1_SDA_FILTER    (1 << 22) /* Bit 22: I2C1 SDA Filter Enable */
+#define FCR_REG0_I2C1_SCL_FILTER    (1 << 23) /* Bit 23: I2C1 SCL Filter Enable */
+
+#endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_FCR_H */

@@ -47,6 +47,7 @@
 
 #include "up_arch.h"
 
+#include "hardware/max326_dma.h"
 #include "max326_dma.h"
 
 #ifdef CONFIG_MAX326XX_DMA

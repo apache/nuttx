@@ -44,6 +44,7 @@
 #include <assert.h>
 
 #include "up_arch.h"
+#include "hardware/max326_icc.h"
 #include "max326_periphclks.h"
 #include "max326_icc.h"
 

@@ -46,7 +46,7 @@
 #include <stdbool.h>
 
 #include "up_arch.h"
-#include "chip/max326_gcr.h"
+#include "hardware/max326_gcr.h"
 
 /************************************************************************************
  * Pre-processor Definitions
