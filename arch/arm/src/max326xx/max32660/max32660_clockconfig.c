@@ -48,6 +48,7 @@
 #include "hardware/max326_gcr.h"
 #include "hardware/max326_pwrseq.h"
 #include "hardware/max326_flc.h"
+#include "max326_periphclks.h"
 #include "max326_clockconfig.h"
 
 #include <arch/board/board.h>
@@ -589,6 +590,39 @@ void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
   /* Perform a peripheral reset */
 
   max326_periph_reset();
+
+  /* Disable most clocks to peripherals by default to reduce power */
+
+#ifndef CONFIG_MAX326XX_DMA
+  max326_dma_disableclk();
+#endif
+#if !defined(CONFIG_MAX326XX_SPIM0) && !defined(CONFIG_MAX326XX_SPIS0)
+  max326_spi0_disableclk();
+#endif
+#if !defined(CONFIG_MAX326XX_SPIM1) && !defined(CONFIG_MAX326XX_SPIS1)
+  max326_spi1_disableclk();
+#endif
+#ifndef CONFIG_MAX326XX_UART0
+  max326_uart0_disableclk();
+#endif
+#ifndef CONFIG_MAX326XX_UART1
+  max326_uart1_disableclk();
+#endif
+#if !defined(CONFIG_MAX326XX_I2CM0) && !defined(CONFIG_MAX326XX_I2CS0)
+  max326_i2c0_disableclk();
+#endif
+#if !defined(CONFIG_MAX326XX_I2CM1) && !defined(CONFIG_MAX326XX_I2CS1)
+  max326_i2c1_disableclk();
+#endif
+#ifndef CONFIG_MAX326XX_TMR32_0
+  max326_tmr0_disableclk();
+#endif
+#ifndef CONFIG_MAX326XX_TMR32_1
+  max326_tmr2_disableclk();
+#endif
+#ifndef CONFIG_MAX326XX_TMR32_0
+  max326_tmr2_disableclk();
+#endif
 }
 
 /****************************************************************************

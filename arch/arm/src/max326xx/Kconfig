@@ -55,10 +55,10 @@ config ARCH_FAMILY_MAX32620
 	select MAX326XX_HAVE_CRC
 	select MAX326XX_HAVE_AES
 	select MAX326XX_HAVE_USB20
-	select MAX326XX_HAVE_TIMER32_2
-	select MAX326XX_HAVE_TIMER32_3
-	select MAX326XX_HAVE_TIMER32_4
-	select MAX326XX_HAVE_TIMER32_5
+	select MAX326XX_HAVE_TMR32_2
+	select MAX326XX_HAVE_TMR32_3
+	select MAX326XX_HAVE_TMR32_4
+	select MAX326XX_HAVE_TMR32_5
 	select MAX326XX_HAVE_PTENGINE
 	select MAX326XX_HAVE_SPIM2
 	select MAX326XX_HAVE_SPIS1
@@ -80,10 +80,10 @@ config ARCH_FAMILY_MAX32630
 	select MAX326XX_HAVE_CRC
 	select MAX326XX_HAVE_AES
 	select MAX326XX_HAVE_USB20
-	select MAX326XX_HAVE_TIMER32_2
-	select MAX326XX_HAVE_TIMER32_3
-	select MAX326XX_HAVE_TIMER32_4
-	select MAX326XX_HAVE_TIMER32_5
+	select MAX326XX_HAVE_TMR32_2
+	select MAX326XX_HAVE_TMR32_3
+	select MAX326XX_HAVE_TMR32_4
+	select MAX326XX_HAVE_TMR32_5
 	select MAX326XX_HAVE_PTENGINE
 	select MAX326XX_HAVE_SPIM2
 	select MAX326XX_HAVE_SPIXIP
@@ -101,7 +101,7 @@ config ARCH_FAMILY_MAX32660
 	select MAX326XX_HAVE_I2CS1
 	select MAX326XX_HAVE_SPIS1
 	select MAX326XX_HAVE_WDOG
-	select MAX326XX_HAVE_TIMER8
+	select MAX326XX_HAVE_TMR8
 
 # Chip-Specific Peripheral support
 
@@ -141,23 +141,23 @@ config MAX326XX_HAVE_USB20
 	bool
 	default n
 
-config MAX326XX_HAVE_TIMER32_2
+config MAX326XX_HAVE_TMR32_2
 	bool
 	default n
 
-config MAX326XX_HAVE_TIMER32_3
+config MAX326XX_HAVE_TMR32_3
 	bool
 	default n
 
-config MAX326XX_HAVE_TIMER32_4
+config MAX326XX_HAVE_TMR32_4
 	bool
 	default n
 
-config MAX326XX_HAVE_TIMER32_5
+config MAX326XX_HAVE_TMR32_5
 	bool
 	default n
 
-config MAX326XX_HAVE_TIMER8
+config MAX326XX_HAVE_TMR8
 	bool
 	default n
 
@@ -264,38 +264,38 @@ config MAX326XX_USB20
 	default n
 	depends on MAX326XX_HAVE_USB20
 
-config MAX326XX_TIMER32_0
+config MAX326XX_TMR32_0
 	bool "32-Bit Timer 0"
 	default n
 
-config MAX326XX_TIMER32_1
+config MAX326XX_TMR32_1
 	bool "32-Bit Timer 1"
 	default n
 
-config MAX326XX_TIMER32_2
+config MAX326XX_TMR32_2
 	bool "32-Bit Timer 2"
 	default n
-	depends on MAX326XX_HAVE_TIMER32_2
+	depends on MAX326XX_HAVE_TMR32_2
 
-config MAX326XX_TIMER32_3
+config MAX326XX_TMR32_3
 	bool "32-Bit Timer 3"
 	default n
-	depends on MAX326XX_HAVE_TIMER32_3
+	depends on MAX326XX_HAVE_TMR32_3
 
-config MAX326XX_TIMER32_4
+config MAX326XX_TMR32_4
 	bool "32-Bit Timer 4"
 	default n
-	depends on MAX326XX_HAVE_TIMER32_4
+	depends on MAX326XX_HAVE_TMR32_4
 
-config MAX326XX_TIMER32_5
+config MAX326XX_TMR32_5
 	bool "32-Bit Timer 5"
 	default n
-	depends on MAX326XX_HAVE_TIMER32_5
+	depends on MAX326XX_HAVE_TMR32_5
 
-config MAX326XX_TIMER8
+config MAX326XX_TMR8
 	bool "8-Bit Timer"
 	default n
-	depends on MAX326XX_HAVE_TIMER8
+	depends on MAX326XX_HAVE_TMR8
 
 config MAX326XX_PTENGINE
 	bool "Pulse Train Engine"

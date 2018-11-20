@@ -48,6 +48,7 @@
 #include "up_arch.h"
 
 #include "hardware/max326_dma.h"
+#include "max326_periphclks.h"
 #include "max326_dma.h"
 
 #ifdef CONFIG_MAX326XX_DMA
@@ -233,6 +234,10 @@ static int max326_dmach_interrupt(int irq, FAR void *context, FAR void *arg)
 void weak_function up_dma_initialize(void)
 {
   int i;
+
+  /* Enable peripheral clocking to the DMA */
+
+  max326_dma_enableclk();
 
   /* Initialize each DMA channel */
 

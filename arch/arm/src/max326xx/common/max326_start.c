@@ -222,6 +222,7 @@ void __start(void)
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
+   * REVISIT: Consider using MAX326xx SRAM Zeroize hardware.
    */
 
   for (dest = &_sbss; dest < &_ebss; )
