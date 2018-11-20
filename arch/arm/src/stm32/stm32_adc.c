@@ -3011,6 +3011,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
               return ret;
             }
 
+#ifdef CONFIG_ADC
           if (ch)
             {
               /* Clear fifo */
@@ -3018,6 +3019,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
               dev->ad_recv.af_head = 0;
               dev->ad_recv.af_tail = 0;
             }
+#endif
 
           adc_startconv(priv, true);
           break;
