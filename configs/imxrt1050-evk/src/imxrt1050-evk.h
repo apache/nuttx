@@ -59,6 +59,28 @@
 
 /* i.MX RT 1050 GPIO Pin Definitions ****************************************/
 
+/* Test points */
+
+#define BOARD_NGPIOIN   0 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT  4 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT  0 /* Amount of GPIO Input w/ Interruption pins */
+
+#define IOMUX_GOUT      (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
+                         IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
+                         IOMUX_SLEW_SLOW)
+
+#define GPIO_GOUT1      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | \
+                         GPIO_PIN19 | IOMUX_GOUT)
+
+#define GPIO_GOUT2      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | \
+                         GPIO_PIN18 | IOMUX_GOUT)
+
+#define GPIO_GOUT3      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | \
+                         GPIO_PIN10 | IOMUX_GOUT)
+
+#define GPIO_GOUT4      (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | GPIO_PORT1 | \
+                         GPIO_PIN9 | IOMUX_GOUT)
+
 /* LEDs
  *
  * There are four LED status indicators located on the EVK Board.  The
@@ -188,7 +210,7 @@ void imxrt_spidev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_SPI
-int imxrt_mmcsd_spi_initialize(int minor)
+int imxrt_mmcsd_spi_initialize(int minor);
 #endif
 
 /****************************************************************************
@@ -207,6 +229,19 @@ int imxrt_mmcsd_spi_initialize(int minor)
 
 #ifdef CONFIG_ARCH_LEDS
 void imxrt_autoled_initialize(void);
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+
+/****************************************************************************
+ * Name: imxrt_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ ****************************************************************************/
+
+int imxrt_gpio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

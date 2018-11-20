@@ -179,6 +179,15 @@ int imxrt_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  ret = imxrt_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

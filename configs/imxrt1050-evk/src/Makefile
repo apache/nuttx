@@ -70,4 +70,8 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += imxrt_mmcsd_spi.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += imxrt_gpio.c
+endif
+
 include $(TOPDIR)/configs/Board.mk
