@@ -291,7 +291,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void weak_function up_dmainitialize(void)
+void weak_function up_dma_initialize(void)
 {
   struct stm32_dma_s *dmach;
   int chndx;

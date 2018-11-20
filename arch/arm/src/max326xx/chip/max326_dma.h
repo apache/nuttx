@@ -47,13 +47,40 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* DMA Channels */
 
-#define MAX326_DMA_CHAN0            0 /* DMA Channel 0 */
-#define MAX326_DMA_CHAN1            1 /* DMA Channel 1 */
-#define MAX326_DMA_CHAN2            2 /* DMA Channel 2 */
-#define MAX326_DMA_CHAN3            3 /* DMA Channel 3 */
-#define MAX326_DMA_NCHAN            4 /* Four DMA Channels */
+#define MAX326_DMA_CHAN0            0  /* DMA Channel 0 */
+#define MAX326_DMA_CHAN1            1  /* DMA Channel 1 */
+#define MAX326_DMA_CHAN2            2  /* DMA Channel 2 */
+#define MAX326_DMA_CHAN3            3  /* DMA Channel 3 */
+#define MAX326_DMA_NCHAN            4  /* Four DMA Channels */
+
+/* DMA priorities */
+
+#define MAX326_DMAPRIO_LO           3  /* Lowest priority */
+#define MAX326_DMAPRIO_MEDLO        2
+#define MAX326_DMAPRIO_MEDHI        1
+#define MAX326_DMAPRIO_HI           0  /* Highest priority */
+
+/* DMA Prescaler */
+
+#define MAX326_DMA_PS_DISABLE       0  /* Disable timer */
+#define MAX326_DMA_PS_DIV256        1  /* fhclk / 256 */
+#define MAX326_DMA_PS_DIV64K        2  /* fhclk / 64K */
+#define MAX326_DMA_PS_DIV16M        3  /* fhclk / 16M */
+
+/* DMA Timeouts */
+
+#define MAX326_DMATO_3to4           0  /* 3-4 prescaler clocks */
+#define MAX326_DMATO_7to8           1  /* 7-8 prescaler clocks */
+#define MAX326_DMATO_15to16         2  /* 15-16 prescaler clocks */
+#define MAX326_DMATO_31to82         3  /* 31-32 prescaler clocks */
+#define MAX326_DMATO_63to64         4  /* 63-64 prescaler clocks */
+#define MAX326_DMATO_127to128       5  /* 127-128 prescaler clocks */
+#define MAX326_DMATO_255to256       6  /* 255-256 prescaler clocks */
+#define MAX326_DMATO_511to512       7  /* 511-512 prescaler clocks */
+
+/* Register Offsets *****************************************************************/
 
 /* DMA Control Registers */
 
@@ -118,26 +145,30 @@
 #define DMACH_CFG_CHEN              (1 << 0)  /* Bit nn:  Channel Enable */
 #define DMACH_CFG_RLDEN             (1 << 1)  /* Bit nn:  Reload Enable */
 #define DMACH_CFG_PRI_SHIFT         (2)       /* Bits 2-3: DMA priority */
-#define DMACH_CFG_PRI_MASK          (xx << DMACH_CFG_PRI_SHIFT)
+#define DMACH_CFG_PRI_MASK          (3 << DMACH_CFG_PRI_SHIFT)
+#  define DMACH_CFG_PRI(n)          ((uint32_t)(n) << DMACH_CFG_PRI_SHIFT)
+#  define DMACH_CFG_PRI_LO          (3 << DMACH_CFG_PRI_SHIFT)
+#  define DMACH_CFG_PRI_MEDLO       (2 << DMACH_CFG_PRI_SHIFT)
+#  define DMACH_CFG_PRI_MEDHI       (1 << DMACH_CFG_PRI_SHIFT)
+#  define DMACH_CFG_PRI_HI          (0 << DMACH_CFG_PRI_SHIFT)
 #define DMACH_CFG_REQSEL_SHIFT      (4)       /* Bits 4-9: Request Select */
 #define DMACH_CFG_REQSEL_MASK       (0x3f << DMACH_CFG_REQSEL_SHIFT)
-#  define DMACH_CFG_REQSEL_LO       (3 << DMACH_CFG_REQSEL_SHIFT)
-#  define DMACH_CFG_REQSEL_MEDLO    (2 << DMACH_CFG_REQSEL_SHIFT)
-#  define DMACH_CFG_REQSEL_MEDHI    (1 << DMACH_CFG_REQSEL_SHIFT)
-#  define DMACH_CFG_REQSEL_HI       (0 << DMACH_CFG_REQSEL_SHIFT)
+#  define DMACH_CFG_REQSEL(n)       ((uint32_t)(n) << DMACH_CFG_REQSEL_SHIFT)
 #define DMACH_CFG_REQWAIT           (1 << 10) /* Bit 10: Request Wait Enable */
 #define DMACH_CFG_TOSEL_SHIFT       (11)      /* Bits 11-13: Time-Out Select */
 #define DMACH_CFG_TOSEL_MASK        (7 << DMACH_CFG_TOSEL_SHIFT)
-#  define DMACH_CFG_TOSEL_ 3to4     (0 << DMACH_CFG_TOSEL_SHIFT) /* 3-4 */
-#  define DMACH_CFG_TOSEL_ 7to8     (1 << DMACH_CFG_TOSEL_SHIFT) /* 7-8 */
-#  define DMACH_CFG_TOSEL_ 15to16   (2 << DMACH_CFG_TOSEL_SHIFT) /* 15-16 */
-#  define DMACH_CFG_TOSEL_ 31to82   (3 << DMACH_CFG_TOSEL_SHIFT) /* 31-32 */
-#  define DMACH_CFG_TOSEL_ 63to64   (4 << DMACH_CFG_TOSEL_SHIFT) /* 63-64 */
-#  define DMACH_CFG_TOSEL_ 127to128 (5 << DMACH_CFG_TOSEL_SHIFT) /* 127-128 */
-#  define DMACH_CFG_TOSEL_ 255to256 (6 << DMACH_CFG_TOSEL_SHIFT) /* 255-256 */
-#  define DMACH_CFG_TOSEL_ 511to512 (7 << DMACH_CFG_TOSEL_SHIFT) /* 511-512 */
+#  define DMACH_CFG_TOSEL(n)        ((uint32_t)(n) << DMACH_CFG_TOSEL_SHIFT)
+#  define DMACH_CFG_TOSEL_3to4      (0 << DMACH_CFG_TOSEL_SHIFT) /* 3-4 */
+#  define DMACH_CFG_TOSEL_7to8      (1 << DMACH_CFG_TOSEL_SHIFT) /* 7-8 */
+#  define DMACH_CFG_TOSEL_15to16    (2 << DMACH_CFG_TOSEL_SHIFT) /* 15-16 */
+#  define DMACH_CFG_TOSEL_31to82    (3 << DMACH_CFG_TOSEL_SHIFT) /* 31-32 */
+#  define DMACH_CFG_TOSEL_63to64    (4 << DMACH_CFG_TOSEL_SHIFT) /* 63-64 */
+#  define DMACH_CFG_TOSEL_127to128  (5 << DMACH_CFG_TOSEL_SHIFT) /* 127-128 */
+#  define DMACH_CFG_TOSEL_255to256  (6 << DMACH_CFG_TOSEL_SHIFT) /* 255-256 */
+#  define DMACH_CFG_TOSEL_511to512  (7 << DMACH_CFG_TOSEL_SHIFT) /* 511-512 */
 #define DMACH_CFG_PSSEL_SHIFT       (14)      /* Bits 14-15: Pre-Scale Select */
 #define DMACH_CFG_PSSEL_MASK        (3 << DMACH_CFG_PSSEL_SHIFT)
+#  define DMACH_CFG_PSSEL(n)        ((uint32_t)(n) << DMACH_CFG_PSSEL_SHIFT)
 #  define DMACH_CFG_PSSEL_DISABLE   (0 << DMACH_CFG_PSSEL_SHIFT) /* Disable timer */
 #  define DMACH_CFG_PSSEL_DIV256    (1 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 256 */
 #  define DMACH_CFG_PSSEL_DIV64K    (2 << DMACH_CFG_PSSEL_SHIFT) /* fhclk / 64K */
@@ -146,14 +177,14 @@
 #  define DMACH_CFG_SRCWD_1BYTE     (0 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_2BYTES    (1 << DMACH_CFG_SRCWD_SHIFT)
 #  define DMACH_CFG_SRCWD_4BYTES    (2 << DMACH_CFG_SRCWD_SHIFT)
-#define DMACH_CFG_SRINC             (1 << 18) /* Bit 18: Source Increment
+#define DMACH_CFG_SRCINC            (1 << 18) /* Bit 18: Source Increment
                                                *         Enable */
 #define DMACH_CFG_DSTWD_SHIFT       (20)      /* Bits 20-21: Destination Width */
 #define DMACH_CFG_DSTWD_MASK        (3 << DMACH_CFG_DSTWD_SHIFT)
 #  define DMACH_CFG_DSTWD_1BYTE     (0 << DMACH_CFG_DSTWD_SHIFT)
 #  define DMACH_CFG_DSTWD_2BYTES    (1 << DMACH_CFG_DSTWD_SHIFT)
 #  define DMACH_CFG_DSTWD_4BYTES    (2 << DMACH_CFG_DSTWD_SHIFT)
-#define DMACH_CFG_DISTINC           (1 << 22) /* Bit 22: Destination Increment
+#define DMACH_CFG_DSTINC            (1 << 22) /* Bit 22: Destination Increment
                                                *         Enable */
 #define DMACH_CFG_BRST_SHIFT        (24)      /* Bits 24-28: Burst Size */
 #define DMACH_CFG_BRST_MASK         (31 << DMACH_CFG_BRST_SHIFT)

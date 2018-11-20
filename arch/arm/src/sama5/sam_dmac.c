@@ -1898,7 +1898,7 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dmainitialize
+ * Name: up_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -1908,7 +1908,7 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
  *
  ****************************************************************************/
 
-void weak_function up_dmainitialize(void)
+void weak_function up_dma_initialize(void)
 {
 #ifdef CONFIG_SAMA5_DMAC0
   dmainfo("Initialize DMAC0\n");

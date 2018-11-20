@@ -1611,7 +1611,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dmainitialize
+ * Name: up_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -1621,7 +1621,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
  *
  ****************************************************************************/
 
-void weak_function up_dmainitialize(void)
+void weak_function up_dma_initialize(void)
 {
   dmainfo("Initialize XDMAC\n");
 

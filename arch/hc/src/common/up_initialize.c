@@ -105,15 +105,15 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dmainitialize has been
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
    * brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (up_dmainitialize)
+  if (up_dma_initialize)
 #endif
     {
-      up_dmainitialize();
+      up_dma_initialize();
     }
 #endif
 

@@ -192,7 +192,7 @@ void up_addregion(void);
 /* Sub-system/driver initialization */
 
 #ifdef CONFIG_ARCH_DMA
-void weak_function up_dmainitialize(void);
+void weak_function up_dma_initialize(void);
 #endif
 
 void up_wdtinit(void);

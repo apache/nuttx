@@ -760,7 +760,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dmainitialize
+ * Name: up_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -770,7 +770,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
  *
  ****************************************************************************/
 
-void weak_function up_dmainitialize(void)
+void weak_function up_dma_initialize(void)
 {
   dmainfo("Initialize DMAC\n");
   int i;

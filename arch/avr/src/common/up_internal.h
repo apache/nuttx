@@ -125,7 +125,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
-void weak_function up_dmainitialize(void);
+void weak_function up_dma_initialize(void);
 #endif
 void up_sigdeliver(void);
 void up_lowputc(char ch);

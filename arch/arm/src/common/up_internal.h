@@ -476,7 +476,7 @@ void lowconsole_init(void);
 /* DMA **********************************************************************/
 
 #ifdef CONFIG_ARCH_DMA
-void weak_function up_dmainitialize(void);
+void weak_function up_dma_initialize(void);
 #endif
 
 /* Cache control ************************************************************/

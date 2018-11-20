@@ -97,12 +97,17 @@ config ARCH_FAMILY_MAX32660
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select MAX326XX_HAVE_DMA
 	select MAX326XX_HAVE_I2CS1
 	select MAX326XX_HAVE_SPIS1
 	select MAX326XX_HAVE_WDOG
 	select MAX326XX_HAVE_TIMER8
 
 # Chip-Specific Peripheral support
+
+config MAX326XX_HAVE_AES
+	bool
+	default n
 
 config MAX326XX_HAVE_WDOG
 	bool
@@ -128,7 +133,7 @@ config MAX326XX_HAVE_CRC
 	bool
 	default n
 
-config MAX326XX_HAVE_AES
+config MAX326XX_HAVE_DMA
 	bool
 	default n
 
@@ -404,8 +409,9 @@ config MAX326XX_ICC
 	select ARMV7M_HAVE_ICACHE
 
 config MAX326XX_DMA
-	bool "DMA"
+	bool "Standard DMA"
 	default n
+	depends on MAX326XX_HAVE_DMA
 
 config MAX326_GPIOIRQ
 	bool "GPIO Interrupt Support"
