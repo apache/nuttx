@@ -50,7 +50,7 @@ config ARCH_FAMILY_MAX32620
 	default n
 	select ARCH_CORTEXM4
 	select MAX326XX_HAVE_WWDOG
-	select MAX326XX_HAVE_RWDOG
+	select MAX326XX_HAVE_LLWDOG
 	select MAX326XX_HAVE_WAKEUP
 	select MAX326XX_HAVE_CRC
 	select MAX326XX_HAVE_AES
@@ -76,6 +76,7 @@ config ARCH_FAMILY_MAX32630
 	default n
 	select ARCH_CORTEXM4
 	select MAX326XX_HAVE_WWDOG
+	select MAX326XX_HAVE_LLWDOG
 	select MAX326XX_HAVE_WAKEUP
 	select MAX326XX_HAVE_CRC
 	select MAX326XX_HAVE_AES
@@ -117,7 +118,7 @@ config MAX326XX_HAVE_WWDOG
 	bool
 	default n
 
-config MAX326XX_HAVE_RWDOG
+config MAX326XX_HAVE_LLWDOG
 	bool
 	default n
 
@@ -225,19 +226,19 @@ config MAX326XX_WDOG
 	depends on MAX326XX_HAVE_WDOG
 
 config MAX326XX_WWDOG0
-	bool "Windowed Watchdog Timer 0"
+	bool "Windowed Watchdog Timer (WDT0) "
 	default n
 	depends on MAX326XX_HAVE_WWDOG
 
 config MAX326XX_WWDOG1
-	bool "Windowed Watchdog Timer 1"
+	bool "Low-Level Watchdog Timer (WDT1)"
 	default n
 	depends on MAX326XX_HAVE_WWDOG
 
 config MAX326XX_RWDOG
 	bool "Recovery Watchdog"
 	default n
-	depends on MAX326XX_HAVE_RWDOG
+	depends on MAX326XX_HAVE_LLWDOG
 
 config MAX326XX_WAKEUP
 	bool "Wakeup Timer"
