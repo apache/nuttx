@@ -560,7 +560,7 @@ Notes about Header Files
     When a GCC toolchain is built, it incorporates the C library header
     files into the compiler internal directories and, in this way, the C
     library really becomes a part of the toolchain.  If you use the NuttX
-    buildroot toolchain as described below under under "NuttX Buildroot
+    buildroot toolchain as described below under "NuttX Buildroot
     Toolchain", your GCC toolchain will build against the NuttX C library
     and will incorporate the NuttX C library header files as part of the
     toolchain.
@@ -761,7 +761,7 @@ Refreshing Configurations
   be?  Enter ? in response to the 'make oldconfig' prompt and it will show
   you the help text that goes with the option.
 
-  If you don't want to make any decisions are are willing to just accept the
+  If you don't want to make any decisions are willing to just accept the
   recommended default value for each new configuration item, an even easier
   way is:
 

@@ -106,7 +106,7 @@ mkconfig.c, cfgdefine.c, and cfgdefine.h
   into include/nuttx/config.h.  config.h is a another version of the
   NuttX configuration that can be included by C files.
 
-cmdconfig.c
+cmpconfig.c
 -----------
 
   This C file can be used to build a utility for comparing two NuttX
