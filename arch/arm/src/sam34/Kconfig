@@ -1376,26 +1376,6 @@ config SAM34_EMAC_ISETH0
 	bool
 	default y
 
-choice
-	prompt "Work queue"
-	default SAM34_EMAC_LPWORK if SCHED_LPWORK
-	default SAM34_EMAC_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
-	depends on SCHED_WORKQUEUE
-	---help---
-		Work queue support is required to use the Ethernet driver.  If the
-		low priority work queue is available, then it should be used by the
-		driver.
-
-config SAM34_EMAC_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config SAM34_EMAC_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
-
 config SAM34_EMAC_REGDEBUG
 	bool "Register-Level Debug"
 	default n

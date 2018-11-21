@@ -193,25 +193,6 @@ config NET_TUN_PKTSIZE
 		the MSS (Maximum Segment Size).  TUN has no link layer header so for
 		TUN the MTU is the same as the PKTSIZE.
 
-choice
-	prompt "Work queue"
-	default TUN_LPWORK if SCHED_LPWORK
-	default TUN_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
-	depends on SCHED_WORKQUEUE
-	---help---
-		Work queue support is required to use the TUN driver.  If the
-		low priority work queue is available, then it should be used by the
-		TUN driver.
-
-config TUN_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config TUN_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
 endif # NET_TUN
 
 config NET_USRSOCK

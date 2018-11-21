@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_ethernet.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the PIC32MZ Ethernet Driver
@@ -88,18 +88,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_PIC32MZ_ETHERNET_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_PIC32MZ_ETHERNET_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_PIC32MZ_ETHERNET_HPWORK nor CONFIG_PIC32MZ_ETHERNET_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
 
 /* CONFIG_PIC32MZ_NINTERFACES determines the number of physical interfaces
  * that will be supported -- unless it is more than actually supported by the

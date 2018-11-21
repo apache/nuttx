@@ -123,6 +123,11 @@
 
 /* The low priority work queue is preferred.  If it is not enabled, LPWORK
  * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
  */
 
 #define ETHWORK LPWORK

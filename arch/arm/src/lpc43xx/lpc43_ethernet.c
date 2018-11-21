@@ -85,18 +85,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
-#else
-
-  /* Select work queue */
-
-#  if defined(CONFIG_LPC43_ETHERNET_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_LPC43_ETHERNET_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_LPC43_ETHERNET_HPWORK nor CONFIG_LPC43_ETHERNET_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
 
 #ifndef CONFIG_LPC43_PHYADDR
 #  error "CONFIG_LPC43_PHYADDR must be defined in the NuttX configuration"

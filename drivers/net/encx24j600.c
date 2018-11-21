@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/encx24j600.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013-2014 UVC Ingenieure. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
  *
@@ -123,15 +123,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#else
-#  if defined(CONFIG_ENCX24J600_HPWORK)
-#    define ENCWORK HPWORK
-#  elif defined(CONFIG_ENCX24J600_LPWORK)
-#    define ENCWORK LPWORK
-#  else
-#    error "Neither CONFIG_ENCX24J600_HPWORK nor CONFIG_ENCX24J600_LPWORK defined"
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ENCWORK LPWORK
 
 /* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet to the console. */
 

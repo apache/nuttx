@@ -93,7 +93,7 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
+#endif
 
 /* The low priority work queue is preferred.  If it is not enabled, LPWORK
  * will be the same as HPWORK. NOTE: Use of the high priority work queue will
@@ -101,8 +101,7 @@
  * performance.  This should be avoided.
  */
 
-#  define ETHWORK LPWORK
-#endif
+#define ETHWORK LPWORK
 
 /* CONFIG_CDCECM_NINTERFACES determines the number of physical interfaces
  * that will be supported.

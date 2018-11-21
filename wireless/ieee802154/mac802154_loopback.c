@@ -1,7 +1,7 @@
 /****************************************************************************
  * wireless/iee802154/mac802154_loopback.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,15 +71,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
-#else
-#  if defined(CONFIG_IEEE802154_LOOPBACK_HPWORK)
-#    define LPBKWORK HPWORK
-#  elif defined(CONFIG_IEEE802154_LOOPBACK_LPWORK)
-#    define LPBKWORK LPWORK
-#  else
-#    error Neither CONFIG_IEEE802154_LOOPBACK_HPWORK nor CONFIG_IEEE802154_LOOPBACK_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define LPBKWORK LPWORK
 
 /* Preferred address size */
 

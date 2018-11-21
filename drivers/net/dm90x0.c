@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/net/dm90x0.c
  *
- *   Copyright (C) 2007-2010, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014-2016, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Davicom data sheets (DM9000-DS-F03-041906.pdf,
@@ -82,20 +83,20 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_DM9X_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_DM9X_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_DM9X_HPWORK nor CONFIG_DM9X_LPWORK defined
-#  endif
 #endif
 
-/* DM90000 and DM9010 register offets */
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
+
+/* DM90000 and DM9010 register offsets */
 
 #define DM9X_NETC          0x00 /* Network control register */
 #define DM9X_NETS          0x01 /* Network Status register */

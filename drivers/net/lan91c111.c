@@ -64,18 +64,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-/* Use the selected work queue */
-
-#  if defined(CONFIG_LAN91C111_HPWORK)
-#    define LAN91C111_WORK      HPWORK
-#  elif defined(CONFIG_LAN91C111_LPWORK)
-#    define LAN91C111_WORK      LPWORK
-#  else
-#    error Neither CONFIG_LAN91C111_HPWORK nor CONFIG_LAN91C111_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define LAN91C111_WORK LPWORK
 
 #ifdef CONFIG_NET_DUMPPACKET
 #  define lan91c111_dumppacket  lib_dumpbuffer

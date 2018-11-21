@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -117,15 +117,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
-#else
-#  if defined(CONFIG_ENC28J60_HPWORK)
-#    define ENCWORK HPWORK
-#  elif defined(CONFIG_ENC28J60_LPWORK)
-#    define ENCWORK LPWORK
-#  else
-#    error "Neither CONFIG_ENC28J60_HPWORK nor CONFIG_ENC28J60_LPWORK defined"
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ENCWORK LPWORK
 
 /* CONFIG_ENC28J60_DUMPPACKET will dump the contents of each packet to the console. */
 

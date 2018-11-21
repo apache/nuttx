@@ -1,7 +1,7 @@
 /****************************************************************************
  * wireless/ieee802154/mac802154_netdev.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,18 +77,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-   /* Use the selected work queue */
-
-#  if defined(CONFIG_IEEE802154_NETDEV_HPWORK)
-#     define WPANWORK HPWORK
-#  elif defined(CONFIG_IEEE802154_NETDEV_LPWORK)
-#     define WPANWORK LPWORK
-#  else
-#     error Neither CONFIG_IEEE802154_NETDEV_HPWORK nor CONFIG_IEEE802154_NETDEV_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define WPANWORK LPWORK
 
 /* CONFIG_IEEE802154_NETDEV_NINTERFACES determines the number of physical interfaces
  * that will be supported.

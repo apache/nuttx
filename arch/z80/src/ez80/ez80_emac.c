@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -82,18 +83,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_EZ80_EMAC_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_EZ80_EMAC_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_EZ80_EMAC_HPWORK nor CONFIG_EZ80_EMAC_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
 
 #ifndef CONFIG_EZ80_RAMADDR
 #  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM

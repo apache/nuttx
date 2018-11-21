@@ -164,36 +164,7 @@ config IEEE802154_NETDEV_RECVRPRIO
 		the MAC character driver (which should always be lowest priority since
 		it is a "catch-all" type receiver).
 
-choice
-	prompt "Work queue"
-	default IEEE802154_NETDEV_LPWORK if SCHED_LPWORK
-	default IEEE802154_NETDEV_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
-	depends on SCHED_WORKQUEUE
-	---help---
-		Work queue support is required to use the IEEE802.15.4 network
-		driver.  If the low priority work queue is available, then it should
-		be used by the loopback driver.
-
-		WARNING!! The IEEE802.15.4 network device must never run on the same
-		work queue as does the IEEE 802.15.4 MAC.  That configuration will
-		cause deadlocks:  The network logic may be blocked on the work queue
-		waiting on resources that can only be freed by the MAC logic but the
-		MAC is unable to run because the work queue is blocked.  The
-		recommended configuration is:  Network on the LP work queue; MAC on HP
-		work queue.  Blocking on the HP work queue is a very bad thing in
-		any case.
-
-config IEEE802154_NETDEV_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config IEEE802154_NETDEV_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
 endif # IEEE802154_NETDEV
-
 endif # IEEE802154_MACDEV
 
 config IEEE802154_LOOPBACK
@@ -205,26 +176,6 @@ config IEEE802154_LOOPBACK
 		Add support for the IEEE802.15.4 6LoWPAN Loopback test device.
 
 if IEEE802154_LOOPBACK
-
-choice
-	prompt "Work queue"
-	default IEEE802154_LOOPBACK_LPWORK if SCHED_LPWORK
-	default IEEE802154_LOOPBACK_HPWORK if !SCHED_LPWORK && SCHED_HPWORK
-	depends on SCHED_WORKQUEUE
-	---help---
-		Work queue support is required to use the loopback driver.  If the
-		low priority work queue is available, then it should be used by the
-		loopback driver.
-
-config IEEE802154_LOOPBACK_HPWORK
-	bool "High priority"
-	depends on SCHED_HPWORK
-
-config IEEE802154_LOOPBACK_LPWORK
-	bool "Low priority"
-	depends on SCHED_LPWORK
-
-endchoice # Work queue
 endif # IEEE802154_LOOPBACK
 
 endif # WIRELESS_IEEE802154

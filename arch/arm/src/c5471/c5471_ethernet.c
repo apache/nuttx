@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/c5471/c5471_ethernet.c
  *
- *   Copyright (C) 2007, 2009-2010, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2014-2015, 2017-2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
@@ -82,18 +83,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#else
-
-  /* Use the low priority work queue if possible */
-
-#  if defined(CONFIG_C5471_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_C5471_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_C5471_HPWORK nor CONFIG_C5471_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
 
 /* CONFIG_C5471_NET_NINTERFACES determines the number of physical interfaces
  * that will be supported.

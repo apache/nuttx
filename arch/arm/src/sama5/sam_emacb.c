@@ -8,7 +8,7 @@
  * separate (mostly because the 'B' driver needs to support two EMAC blocks.
  * But the 'B' driver should replace the 'A' driver someday.
  *
- *   Copyright (C) 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic derives from the SAM4E Ethernet driver which, in turn, derived
@@ -115,18 +115,18 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
-#else
-
-  /* Select work queue */
-
-#  if defined(CONFIG_SAMA5_EMACB_HPWORK)
-#    define ETHWORK HPWORK
-#  elif defined(CONFIG_SAMA5_EMACB_LPWORK)
-#    define ETHWORK LPWORK
-#  else
-#    error Neither CONFIG_SAMA5_EMACB_HPWORK nor CONFIG_SAMA5_EMACB_LPWORK defined
-#  endif
 #endif
+
+/* The low priority work queue is preferred.  If it is not enabled, LPWORK
+ * will be the same as HPWORK.
+ *
+ * NOTE:  However, the network should NEVER run on the high priority work
+ * queue!  That queue is intended only to service short back end interrupt
+ * processing that never suspends.  Suspending the high priority work queue
+ * may bring the system to its knees!
+ */
+
+#define ETHWORK LPWORK
 
 /* EMAC0 Configuration ******************************************************/
 
