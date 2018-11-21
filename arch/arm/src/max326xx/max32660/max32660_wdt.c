@@ -198,15 +198,23 @@ static void max326_int_enable(FAR struct max326_wdt_lowerhalf_s *priv)
 
   if (priv->handler != NULL)
     {
-      irq_attach(MAX326_IRQ_WDT0, priv->handler, priv);
+      /* Yes.. attach handler and enable the interrupt */
+
+      (void)irq_attach(MAX326_IRQ_WDT0, priv->handler, priv);
       up_enable_irq(MAX326_IRQ_WDT0);
+
+      /* Select the interrupt behavior (de-selecting the reset behavior) */
 
       ctrl |= WDT0_CTRL_INTEN;
     }
   else
     {
+      /* No.. disable and detach the interrupt */
+
       up_disable_irq(MAX326_IRQ_WDT0);
       irq_detach(MAX326_IRQ_WDT0);
+
+      /* Select the reset behavior (de-selecting the interrupt behavior) */
 
       ctrl |= WDT0_CTRL_RSTEN;
     }
@@ -492,10 +500,7 @@ static int max326_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->flags |= priv->handler != NULL ? WDFLAGS_CAPTURE : WDFLAGS_RESET;
 
-  /* Return the timeout value in millisconds.
-   *
-   * Tsec = (2 ^ (31 - timeout)) / Fpclk.
-   */
+  /* Get the timeout value in milliseconds. */
 
   msec = max326_exp2msec(max326_pclk_frequency(), priv->exp);
   if (msec > UINT32_MAX)
@@ -539,8 +544,7 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
     (FAR struct max326_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
   uint32_t ctrl;
-  uint8_t intexp;
-  uint8_t rstexp;
+  uint8_t exp;
 
   wdinfo("Entry: timeout=%lu\n", (unsigned long)timeout);
   DEBUGASSERT(priv != NULL);
@@ -554,19 +558,19 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    * max32660.
    */
 
-  intexp = max326_msec2exp(timeout);
-  rstexp = intexp;
+  exp = max326_msec2exp(timeout);
 
-  /* Interrupt? or reset? */
-
-  if (priv->handler)
-    {
-      rstexp = max326_msec2exp(timeout + WDT_RESET_DELAY);
-    }
+  /* Update the selected intervals in the CTRL register.  Note that the
+   * interrupt and the reset intervals are set to the same value.  The
+   * User Guide requires that the reset interval be longer than the
+   * interrupt interval.  This is thought to be no problem because in
+   * this implementation, either the interrupt or reset behavior is
+   * implemented, but not both.
+   */
 
   ctrl  = getreg32(MAX326_WDT0_CTRL);
   ctrl &= ~(WDT0_CTRL_INTPERIOD_MASK | WDT0_CTRL_RSTPERIOD_MASK);
-  ctrl |= (WDT0_CTRL_INTPERIOD(intexp) | WDT0_CTRL_RSTPERIOD(rstexp));
+  ctrl |= (WDT0_CTRL_INTPERIOD(exp) | WDT0_CTRL_RSTPERIOD(exp));
   putreg32(ctrl, MAX326_WDT0_CTRL);
 
   spin_unlock_irqrestore(flags);
@@ -596,9 +600,6 @@ static xcpt_t max326_capture(FAR struct watchdog_lowerhalf_s *lower,
     (FAR struct max326_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
-  uint64_t timeout;
-  uint32_t ctrl;
-  uint32_t exp;
 
   DEBUGASSERT(priv != NULL)
   wdinfo("Handler=%p\n", handler);
@@ -616,40 +617,12 @@ static xcpt_t max326_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   max326_wdog_reset(priv);
 
-  /* Are we adding, removing, or changing a handler? */
+  /* Are we adding, removing, or changing a handler?  */
 
-  if (handler != NULL && oldhandler == NULL)
+  if ((handler != NULL && oldhandler == NULL) || /* Adding a handler */
+      (handler == NULL && oldhandler != NULL))   /* Removing a handler */
     {
-      /* Adding a handler */
-      /* Set a new, longer reset period */
-
-      ctrl = getreg32(MAX326_WDT0_CTRL);
-      exp  = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
-
-      timeout = max326_exp2msec(max326_pclk_frequency(), exp);
-      exp     = max326_msec2exp(timeout + WDT_RESET_DELAY);
-
-      ctrl &= ~WDT0_CTRL_RSTPERIOD_MASK;
-      ctrl |= WDT0_CTRL_RSTPERIOD(exp);
-      putreg32(ctrl, MAX326_WDT0_CTRL);
-
-      /* Disable the reset event.  Enable the interrupt event */
-
-      max326_int_enable(priv);
-    }
-  else if (handler == NULL && oldhandler != NULL)
-    {
-      /* Removing a handler */
-      /* Reset the rst period to the intperiod */
-
-      ctrl  = getreg32(MAX326_WDT0_CTRL);
-      exp   = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
-
-      ctrl &= ~WDT0_CTRL_RSTPERIOD_MASK;
-      ctrl |= WDT0_CTRL_RSTPERIOD(exp);
-      putreg32(ctrl, MAX326_WDT0_CTRL);
-
-      /* Disable the interrupt event.  Enable the reset event */
+      /* Disable/disable the interrupt and reset events appropriately. */
 
       max326_int_enable(priv);
     }
