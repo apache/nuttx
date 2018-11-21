@@ -1021,7 +1021,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
    */
 
   DEBUGASSERT(priv->pd_dev.d_buf != NULL &&
-              priv->pd_dev.d_len < CONFIG_NET_ETH_PKTSIZE);
+              priv->pd_dev.d_len <= CONFIG_NET_ETH_PKTSIZE);
 
   /* Increment statistics and dump the packet (if so configured) */
 
