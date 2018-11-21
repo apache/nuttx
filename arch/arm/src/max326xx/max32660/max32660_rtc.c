@@ -518,31 +518,53 @@ int up_rtc_settime(FAR const struct timespec *tp)
 int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *arg)
 {
   irqstate_t flags;
-  b32_t ftime;
-  uint64_t rssa;
+  b32_t b32now;
+  b32_t b32alarm;
+  b32_t b32delay;
+  uint32_t sec;
+  uint32_t ssec;
+  uint32_t rssa;
+  uint32_t verify;
   uint32_t regval;
   int ret = -EBUSY;
 
   DEBUGASSERT(alminfo != NULL && alminfo->as_cb != NULL);
 
-  flags = spin_lock_irqsave();
-
   /* Is there already something waiting on the ALARM? */
 
+  flags = spin_lock_irqsave();
   if (g_alarmcb == NULL)
     {
-      /* No.. Save the callback function pointer */
-
-      g_alarmcb  = cb;
-      g_alarmarg = arg;
-
       /* Get the time as a fixed precision number.
        * Form:  ssssssss ssssssss ffffffff ffffff
        *        |                 `- 32-bits of fraction
        *        `- 32-bits of integer seconds
        */
 
-      ftime = max326_rtc_tm2b32(ts);
+      b32alarm = max326_rtc_tm2b32(ts);
+
+      /* Get the current time */
+
+      do
+        {
+          sec    = getreg32(MAX326_RTC_SEC);
+          ssec   = getreg32(MAX326_RTC_SSEC);
+          verify = getreg32(MAX326_RTC_SEC);
+        }
+      while (verify != sec);
+
+      /* Get the current time as a b32_t value */
+
+      b32now = itob32(sec) | (b32_t)ssec << (32 - 8);
+      if (b32now >= b32alarm)
+        {
+          ret = -EINVAL;
+          goto errout_with_lock;
+        }
+
+      /* Get the ALARM delay betwen now and the alarm time */
+
+      b32delay = b32alarm - b32now;
 
       /* Convert to RSSA value.
        *
@@ -559,25 +581,27 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
        * has to be subtracted from 1 << 32.
        */
 
-       if (b32toi(ftime) >16777216)
+       if ((uint32_t)b32toi(b32delay) >= 16777216)
          {
            rssa = 0;
          }
        else
          {
-           rssa = 0x0000000100000000 -
-                  ((ftime >> (32 - 8)) & 0x00000000ffffffff);
-           if (rssa > UINT32_MAX)
+           uint64_t tmp = ((b32delay >> (32 - 8)) & 0x00000000ffffffff);
+           if (tmp == 0)
              {
                rssa = UINT32_MAX;
+             }
+           else
+             {
+               tmp  = 0x0000000100000000 - tmp;
+               rssa = (uint32_t)tmp;
              }
          }
 
       /* We need to disable ALARMs in order to write to the RSSA registers. */
 
-      flags = spin_lock_irqsave();
-
-      regval = getreg32(MAX326_RTC_CTRL);
+      regval  = getreg32(MAX326_RTC_CTRL);
       regval &= ~(RTC_CTRL_ALARM_TODEN | RTC_CTRL_ALARM_SSEN);
       putreg32(regval, MAX326_RTC_CTRL);
       max326_rtc_waitbusy();
@@ -591,14 +615,19 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
       regval |= RTC_CTRL_ALARM_SSEN;
       putreg32(regval, MAX326_RTC_CTRL);
 
+      /* No.. Save the callback function pointer */
+
+      g_alarmcb  = cb;
+      g_alarmarg = arg;
+
       /* Enable the RTC interrupt at the NVIC */
 
       up_enable_irq(MAX326_IRQ_RTC);
-      spin_unlock_irqrestore(flags);
-
       ret = OK;
     }
 
+errout_with_lock:
+  spin_unlock_irqrestore(flags);
   return ret;
 }
 #endif
@@ -620,8 +649,8 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
 #ifdef CONFIG_RTC_ALARM
 int max326_rtc_rdalarm(FAR b32_t *ftime)
 {
-  b32_t b32sec;
-  b32_t b32rssa;
+  b32_t b32now;
+  b32_t b32delay;
   uint32_t sec;
   uint32_t ssec;
   uint32_t rssa;
@@ -636,7 +665,7 @@ int max326_rtc_rdalarm(FAR b32_t *ftime)
     {
       rssa   = getreg32(MAX326_RTC_RSSA);
       sec    = getreg32(MAX326_RTC_SEC);
-      ssec   = getreg32(MAX326_RTC_SEC);
+      ssec   = getreg32(MAX326_RTC_SSEC);
       verify = getreg32(MAX326_RTC_RSSA);
     }
   while (verify != rssa);
@@ -651,7 +680,7 @@ int max326_rtc_rdalarm(FAR b32_t *ftime)
 
   /* Get the current time as a b32_t value */
 
-  b32sec = itob32(sec) | ssec << (32 - 8);
+  b32now = itob32(sec) | ssec << (32 - 8);
 
   /* Use the RSSA value to determine the time when the alarm will fire:
    *
@@ -664,15 +693,15 @@ int max326_rtc_rdalarm(FAR b32_t *ftime)
 
    if (rssa > 0)
      {
-       b32rssa = 0x0000000100000000 - (uint64_t)rssa;
-       b32rssa = (b32rssa & 0x00000000ffffffff) << (32 - 8);
+       b32delay = 0x0000000100000000 - (uint64_t)rssa;
+       b32delay = (b32delay & 0x00000000ffffffff) << (32 - 8);
      }
    else
      {
-       b32rssa = 0;
+       b32delay = 0;
      }
 
-   *ftime  = b32sec + b32rssa;
+   *ftime  = b32now + b32delay;
    return OK;
 }
 #endif

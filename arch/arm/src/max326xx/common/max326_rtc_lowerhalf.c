@@ -529,7 +529,7 @@ static int max326_setrelative(FAR struct rtc_lowerhalf_s *lower,
  *   method of the RTC driver interface
  *
  * Input Parameters:
- *   lower - A reference to RTC lower half driver state structure
+ *   lower     - A reference to RTC lower half driver state structure
  *   alarminfo - Provided information needed to set the alarm
  *
  * Returned Value:

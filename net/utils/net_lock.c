@@ -222,7 +222,7 @@ int net_breaklock(FAR unsigned int *count)
 
   DEBUGASSERT(count != NULL);
 
-  flags = spin_lock_irqsave(); /* No interrupts */
+  flags = enter_critical_section(); /* No interrupts */
   if (g_holder == me)
     {
       /* Return the lock setting */
@@ -238,7 +238,7 @@ int net_breaklock(FAR unsigned int *count)
       ret      = OK;
     }
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
