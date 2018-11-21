@@ -620,9 +620,10 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
 #ifdef CONFIG_RTC_ALARM
 int max326_rtc_rdalarm(FAR b32_t *ftime)
 {
-  uint64_t b32val;
-  uint64_t b32rssa;
+  b32_t b32sec;
+  b32_t b32rssa;
   uint32_t sec;
+  uint32_t ssec;
   uint32_t rssa;
   uint32_t verify;
   uint32_t regval;
@@ -635,6 +636,7 @@ int max326_rtc_rdalarm(FAR b32_t *ftime)
     {
       rssa   = getreg32(MAX326_RTC_RSSA);
       sec    = getreg32(MAX326_RTC_SEC);
+      ssec   = getreg32(MAX326_RTC_SEC);
       verify = getreg32(MAX326_RTC_RSSA);
     }
   while (verify != rssa);
@@ -647,22 +649,30 @@ int max326_rtc_rdalarm(FAR b32_t *ftime)
       return -EINVAL;
     }
 
-  /* Convert the RSA value to b32_t time
+  /* Get the current time as a b32_t value */
+
+  b32sec = itob32(sec) | ssec << (32 - 8);
+
+  /* Use the RSSA value to determine the time when the alarm will fire:
    *
-   * Form: SSssssssff00000
+   * alarm_time = current_time + rssa_remaining
    *
-   * Where SS is the MS 8-bits of seconds from the SEC register
-   *       ssssss is the LS 24 bits of seconds from the RRSA register.
-   *       ff is the MS 8-bit of the fractional value.
-   *
-   * Where the sssssff value is (1 << 32) - RRSA, that is, the time
-   * remaining until the rollover.
+   * Where current_time is the time from SEC and SSEC registers.
+   *       rssa_remaining is the time remaining until RSSA roles
+   *       over to zero, that is (1 << 32) - RRSA.
    */
 
-   b32val  = (uint64_t)(sec & 0xff000000) << 32;
-   b32rssa = 0x0000000100000000 - (uint64_t)rssa;
-   b32rssa = (b32rssa & 0x00000000ffffffff) << (32 - 8);
-   *ftime  = (b32_t)(b32val | b32rssa);
+   if (rssa > 0)
+     {
+       b32rssa = 0x0000000100000000 - (uint64_t)rssa;
+       b32rssa = (b32rssa & 0x00000000ffffffff) << (32 - 8);
+     }
+   else
+     {
+       b32rssa = 0;
+     }
+
+   *ftime  = b32sec + b32rssa;
    return OK;
 }
 #endif
