@@ -42,8 +42,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 24K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 8K
 }
 
 OUTPUT_ARCH(arm)
