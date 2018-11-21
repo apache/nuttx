@@ -96,7 +96,7 @@ static FAR void *g_alarmarg;
  * Public Data
  ****************************************************************************/
 
-/* Indicates that the RTC has be initialized */
+/* Indicates that the RTC has been initialized */
 
 volatile bool g_rtc_enabled = false;
 
@@ -519,10 +519,8 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
 {
   irqstate_t flags;
   b32_t ftime;
+  uint64_t rssa;
   uint32_t regval;
-  uint32_t sec;
-  uint32_t ssec;
-  uint32_t verify;
   int ret = -EBUSY;
 
   DEBUGASSERT(alminfo != NULL && alminfo->as_cb != NULL);
@@ -538,15 +536,44 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
       g_alarmcb  = cb;
       g_alarmarg = arg;
 
-      /* Get the time as a fixed precision number. */
+      /* Get the time as a fixed precision number.
+       * Form:  ssssssss ssssssss ffffffff ffffff
+       *        |                 `- 32-bits of fraction
+       *        `- 32-bits of integer seconds
+       */
 
       ftime = max326_rtc_tm2b32(ts);
-      sec   = b32toi(ftime);
-      ssec  = (uint32_t)(b32frac(ftime) >> (32 - 8));
 
-      /* We need to disable ALARMs in order to write to the RAS and RSSA
-       * registers.
+      /* Convert to RSSA value.
+       *
+       * Writing RSSA sets the starting value for the sub-second alarm
+       * counter. Writing the SSEN enables the sub-second alarm. Once
+       * enabled, the sub-second alarm begins up-counting from the RSSA
+       * value. When the counter rolls over from 0xffffffff to 0x00000000.
+       * A 256Hz clock drives the sub-second alarm allowing a maximum
+       * interval of 16,777,216 seconds with a resolution of approximately
+       * 3.9 msec.
+       *
+       * The delay is ssss ssff Where ssssss is the ls 24 bits of seconds
+       * and ff is the 8bit fractional value.  To get the RSSA, that value
+       * has to be subtracted from 1 << 32.
        */
+
+       if (b32toi(ftime) >16777216)
+         {
+           rssa = 0;
+         }
+       else
+         {
+           rssa = 0x0000000100000000 -
+                  ((ftime >> (32 - 8)) & 0x00000000ffffffff);
+           if (rssa > UINT32_MAX)
+             {
+               rssa = UINT32_MAX;
+             }
+         }
+
+      /* We need to disable ALARMs in order to write to the RSSA registers. */
 
       flags = spin_lock_irqsave();
 
@@ -555,15 +582,9 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
       putreg32(regval, MAX326_RTC_CTRL);
       max326_rtc_waitbusy();
 
-      /* Then write the time values to the RAS and RSSA registers. */
+      /* Then write the RSSA values. */
 
-      do
-        {
-          putreg32(sec, MAX326_RTC_RAS);
-          putreg32(ssec, MAX326_RTC_RSSA);
-          verify = getreg32(MAX326_RTC_RAS);
-        }
-      while (verify != sec);
+      putreg32(rssa, MAX326_RTC_RSSA);
 
       /* Enable sub-second alarm */
 
@@ -579,6 +600,70 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
     }
 
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: max326_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  ftime - Location to return the current alarm setting.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int max326_rtc_rdalarm(FAR b32_t *ftime)
+{
+  uint64_t b32val;
+  uint64_t b32rssa;
+  uint32_t sec;
+  uint32_t rssa;
+  uint32_t verify;
+  uint32_t regval;
+
+  DEBUGASSERT(ftime != NULL);
+
+  /* Read the SEC and the RSSA registers */
+
+  do
+    {
+      rssa   = getreg32(MAX326_RTC_RSSA);
+      sec    = getreg32(MAX326_RTC_SEC);
+      verify = getreg32(MAX326_RTC_RSSA);
+    }
+  while (verify != rssa);
+
+  /* Check if the alarm is enabled */
+
+  regval = getreg32(MAX326_RTC_CTRL);
+  if ((regval & RTC_CTRL_ALARM_SSEN) == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Convert the RSA value to b32_t time
+   *
+   * Form: SSssssssff00000
+   *
+   * Where SS is the MS 8-bits of seconds from the SEC register
+   *       ssssss is the LS 24 bits of seconds from the RRSA register.
+   *       ff is the MS 8-bit of the fractional value.
+   *
+   * Where the sssssff value is (1 << 32) - RRSA, that is, the time
+   * remaining until the rollover.
+   */
+
+   b32val  = (uint64_t)(sec & 0xff000000) << 32;
+   b32rssa = 0x0000000100000000 - (uint64_t)rssa;
+   b32rssa = (b32rssa & 0x00000000ffffffff) << (32 - 8);
+   *ftime  = (b32_t)(b32val | b32rssa);
+   return OK;
 }
 #endif
 

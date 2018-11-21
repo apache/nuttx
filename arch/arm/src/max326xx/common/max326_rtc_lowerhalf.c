@@ -106,6 +106,7 @@ struct max326_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int max326_rdtime(FAR struct rtc_lowerhalf_s *lower,
@@ -374,7 +375,7 @@ static bool max326_havesettime(FAR struct rtc_lowerhalf_s *lower)
 
 #ifdef CONFIG_RTC_ALARM
 static int max326_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo)
+                           FAR const struct lower_setalarm_s *alarminfo)
 {
   FAR struct max326_lowerhalf_s *priv;
   FAR struct max326_cbinfo_s *cbinfo;
@@ -579,22 +580,35 @@ static int max326_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
 static int max326_rdalarm(FAR struct rtc_lowerhalf_s *lower,
                          FAR struct lower_rdalarm_s *alarminfo)
 {
-  struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
 
-  DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
-  DEBUGASSERT(alarminfo->id < RTC_NALARMS);
+  DEBUGASSERT(lower != NULL && alarminfo != NULL);
+  DEBUGASSERT(alarminfo->id == 0 && alarminfo->time != NULL);
 
-  if (alarminfo->id < RTC_NALARMS)
+  if (alarminfo->id == 0)
     {
+       b32_t ftime;
+
       /* Disable pre-emption while we do this so that we don't have to worry
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
-      lowerinfo.ar_time = alarminfo->time;
-      ret = max326_rtc_rdalarm(&lowerinfo);
-      sched_unlock();
+      ret = max326_rtc_rdalarm(&ftime);
+      if (ret >= 0)
+        {
+          /* Extract integer seconds from the b32_t value */
+
+           time_t sec = (time_t)(b32toi(ftime));
+
+           /* Convert to struct rtc_time (aka struct tm) */
+
+#ifdef CONFIG_LIBC_LOCALTIME
+          (void)localtime_r(&sec, (FAR struct tm *)alarminfo->time);
+#else
+          (void)gmtime_r(&sec, (FAR struct tm *)alarminfo->time);
+#endif
+          ret = OK;
+        }
     }
 
   return ret;

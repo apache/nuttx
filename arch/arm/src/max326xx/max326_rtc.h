@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <fixedmath.h>
 
 /****************************************************************************
  * Public Types
@@ -51,13 +52,6 @@
 /* Type of callback invoked when an ALARM interrupt occurs */
 
 typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
-
-/* Structure used to pass parameters to query an alarm */
-
-struct alm_rdalarm_s
-{
-  FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
-};
 
 /****************************************************************************
  * Public Data
@@ -84,6 +78,7 @@ extern "C"
  *
  * Input Parameters:
  *  ts  - Alarm time
+ *  id  - A
  *  cb  - Callback invoked when alarm expires
  *  arg - Argument passed with the alarm
  *
@@ -104,7 +99,7 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb,
  *   Query an alarm configured in hardware.
  *
  * Input Parameters:
- *  alminfo - Information about the alarm configuration.
+ *  ftime - Location to return the current alarm setting.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -112,7 +107,7 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int max326_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+int max326_rtc_rdalarm(FAR b32_t *ftime);
 #endif
 
 /****************************************************************************
