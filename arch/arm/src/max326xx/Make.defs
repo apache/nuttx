@@ -86,6 +86,10 @@ ifeq ($(CONFIG_MAX326XX_ICC),y)
 CHIP_CSRCS += max326_icc.c
 endif
 
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += max326_rtc_lowerhalf.c
+endif
+
 # Source Files for the MAX32620 and MAX32630
 
 # Source Files for the MAX32660
@@ -119,6 +123,12 @@ endif
 ifeq ($(CONFIG_MAX326XX_GPIOIRQ),y)
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
 CHIP_CSRCS += max32660_gpioirq.c
+endif
+endif
+
+ifeq ($(CONFIG_MAX326XX_RTC),y)
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_rtc.c
 endif
 endif
 

@@ -126,10 +126,6 @@ config MAX326XX_HAVE_WAKEUP
 	bool
 	default n
 
-config MAX326XX_HAVE_RTC
-	bool
-	default n
-
 config MAX326XX_HAVE_CRC
 	bool
 	default n
@@ -248,7 +244,6 @@ config MAX326XX_WAKEUP
 config MAX326XX_RTC
 	bool "RTC"
 	default n
-	depends on MAX326XX_HAVE_RTC
 
 config MAX326XX_CRC
 	bool "CRC 16/32"

@@ -69,7 +69,7 @@
 
 /* Register Bit-field Definitions ***************************************************/
 
-/* Seconds Counter Register (32-bit seconds count) */
+/* Seconds Counter Register (32-bit seconds counter) */
 /* Sub-Seconds Counter Register */
 
 #define RTC_SSEC_MASK             (0xff)    /* Bits 0-7: Sub-second counter */
