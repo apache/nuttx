@@ -135,7 +135,7 @@ static uint32_t max326_sysclk_frequency(void)
  * Name: max326_enable_hfio
  *
  * Description:
- *   Enable/disable High-Frequency Internal Oscillator (HFIO).
+ *   Enable High-Frequency Internal Oscillator (HFIO) if it is needed.
  *
  ****************************************************************************/
 
@@ -143,11 +143,13 @@ static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
-  /* Enable/disable the HFIO. */
+ /* Check if the HFIO is needed. */
 
-  regval = getreg32(MAX326_GCR_CLKCTRL);
   if (clksetup->hfio)
     {
+      /* Yes.. Enable the HFIO. */
+
+      regval  = getreg32(MAX326_GCR_CLKCTRL);
       regval |= GCR_CLKCTRL_HIRCEN;
       putreg32(regval, MAX326_GCR_CLKCTRL);
 
@@ -157,8 +159,27 @@ static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
         {
         }
     }
-  else
+}
+
+/****************************************************************************
+ * Name: max326_disable_hfio
+ *
+ * Description:
+ *   Disable the High-Frequency Internal Oscillator (HFIO) if it is not used.
+ *
+ ****************************************************************************/
+
+static void max326_disable_hfio(FAR const struct clock_setup_s *clksetup)
+{
+  uint32_t regval;
+
+  /* Check if the HFIO is used. */
+
+  if (!clksetup->hfio)
     {
+      /* No.. Disable the HFIO */
+
+      regval  = getreg32(MAX326_GCR_CLKCTRL);
       regval &= ~GCR_CLKCTRL_HIRCEN;
       putreg32(regval, MAX326_GCR_CLKCTRL);
     }
@@ -221,7 +242,7 @@ static void max326_select_lirc8k(void)
  * Name: max326_enable_x32k
  *
  * Description:
- *   Enable/disable the 32.768kHz External Crystal Oscillator.
+ *   Enable the 32.768kHz External Crystal Oscillator if is it needed.
  *
  ****************************************************************************/
 
@@ -230,11 +251,13 @@ static void max326_enable_x32k(FAR const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
-  /* Enable/disable the 32.768kHz external oscillator. */
+  /* Check if the 2.768kHz External Crystal Oscillator is needed. */
 
   regval = getreg32(MAX326_GCR_CLKCTRL);
   if (clksetup->x32k)
     {
+      /* Yes.. Enable the 32.768kHz external oscillator. */
+
       regval |= GCR_CLKCTRL_X32KEN;
       putreg32(regval, MAX326_GCR_CLKCTRL);
 
@@ -244,8 +267,29 @@ static void max326_enable_x32k(FAR const struct clock_setup_s *clksetup)
         {
         }
     }
-  else
+}
+#endif
+
+/****************************************************************************
+ * Name: max326_disable_x32k
+ *
+ * Description:
+ *   Disable the 32.768 KHz crystal oscillator if it is not used
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_HAVE_X32K
+static void max326_disable_x32k(FAR const struct clock_setup_s *clksetup)
+{
+  uint32_t regval;
+
+  /* Check if the 32.768 KHz crystal oscillator is used */
+
+  if (!clksetup->x32k)
     {
+      /* No.. Disable the 32.768kHz external oscillator. */
+
+      regval  = getreg32(MAX326_GCR_CLKCTRL);
       regval &= ~GCR_CLKCTRL_X32KEN;
       putreg32(regval, MAX326_GCR_CLKCTRL);
     }
@@ -562,12 +606,12 @@ void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
   max326_set_fwsdefault();
 
 #ifdef BOARD_HAVE_X32K
-  /* Enable/disble the 32.768 KHz crystal oscillator */
+  /* Enable the 32.768 KHz crystal oscillator if it is needed */
 
   max326_enable_x32k(clksetup);
 #endif
 
-  /* Enable/disable the High frequency internal oscillator */
+  /* Enable the High frequency internal oscillator if it is needed */
 
   max326_enable_hfio(clksetup);
 
@@ -582,6 +626,16 @@ void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
   /* Select the requested clock source. */
 
   max326_set_clksrc(clksetup);
+
+#ifdef BOARD_HAVE_X32K
+  /* Disable the 32.768 KHz crystal oscillator if it is not used */
+
+  max326_disable_x32k(clksetup);
+#endif
+
+  /* Disable the High frequency internal oscillator if it is not used. */
+
+  max326_disable_hfio(clksetup);
 
   /* Set an optimal value for the FLASH wait states */
 

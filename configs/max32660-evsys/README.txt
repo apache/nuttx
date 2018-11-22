@@ -26,8 +26,19 @@ README
 Contents
 ========
 
+  o Status
   o Serial Console
   o LEDs and Buttons
+
+Status
+======
+
+  2018-11-21:  The port is code complete but completely untested.  I am
+    still waiting to receive hardware to perform the bringup.  This initial
+    port will support an NSH console:  Clock configuration, timer, GPIO
+    pin configuration, ICC, and UART.  Additional untested drivers are
+    complete and ready for testing:  DMA, GPIO interrupts, RTC, WDT.  The
+    following drivers are not implemented: I2C, SPI, I2S.
 
 Serial Console
 ==============
