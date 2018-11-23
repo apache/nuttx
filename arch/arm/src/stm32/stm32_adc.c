@@ -76,12 +76,11 @@
  *     but also in the lower-half logic for special-case custom drivers
  *     (eg. power-control, custom sensors),
  *   - ADC can be used in time-critical operations (eg. control loop for
- *     converters or motor drivers) therfore it is necessary to support the high
- *     performence, zero latency ADC interrupts,
+ *     converters or motor drivers) therefore it is necessary to support the high
+ *     performance, zero latency ADC interrupts,
  *   - ADC triggering from different sources (EXTSEL and JEXTSEL),
  *   - regular sequence conversion (supported in upper-half ADC driver)
  *   - injected sequence conversion (not supported in upper-half ADC driver)
- *
  */
 
 /* ADC "upper half" support must be enabled */
@@ -551,10 +550,10 @@ static void stm32_modifyreg32(unsigned int addr, uint32_t clrbits,
                               uint32_t setbits);
 #endif
 static uint32_t adc_getreg(FAR struct stm32_dev_s *priv, int offset);
-static void     adc_putreg(FAR struct stm32_dev_s *priv, int offset,
-                           uint32_t value);
-static void     adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
-                              uint32_t clrbits, uint32_t setbits);
+static void adc_putreg(FAR struct stm32_dev_s *priv, int offset,
+                       uint32_t value);
+static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
+                          uint32_t clrbits, uint32_t setbits);
 #ifdef HAVE_ADC_CMN_REGS
 static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv);
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
@@ -565,16 +564,16 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset);
 #endif
 #ifdef ADC_HAVE_TIMER
 static uint16_t tim_getreg(FAR struct stm32_dev_s *priv, int offset);
-static void     tim_putreg(FAR struct stm32_dev_s *priv, int offset,
-                           uint16_t value);
-static void     tim_modifyreg(FAR struct stm32_dev_s *priv, int offset,
-                              uint16_t clrbits, uint16_t setbits);
-static void     tim_dumpregs(FAR struct stm32_dev_s *priv,
+static void tim_putreg(FAR struct stm32_dev_s *priv, int offset,
+                       uint16_t value);
+static void tim_modifyreg(FAR struct stm32_dev_s *priv, int offset,
+                          uint16_t clrbits, uint16_t setbits);
+static void tim_dumpregs(FAR struct stm32_dev_s *priv,
                              FAR const char *msg);
 #endif
 
 #ifdef HAVE_ADC_CMN_DATA
-static int adccmn_lock(FAR struct stm32_dev_s *priv, bool lock);
+static int  adccmn_lock(FAR struct stm32_dev_s *priv, bool lock);
 #endif
 
 static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
@@ -582,22 +581,22 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 /* ADC Interrupt Handler */
 
 #ifndef CONFIG_STM32_ADC_NOIRQ
-static int adc_interrupt(FAR struct adc_dev_s *dev);
+static int  adc_interrupt(FAR struct adc_dev_s *dev);
 #  if defined(STM32_IRQ_ADC1) && defined(CONFIG_STM32_ADC1)
-static int adc1_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  adc1_interrupt(int irq, FAR void *context, FAR void *arg);
 #  endif
 #  if defined(STM32_IRQ_ADC12) && (defined(CONFIG_STM32_ADC1) || \
                                  defined(CONFIG_STM32_ADC2))
-static int adc12_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  adc12_interrupt(int irq, FAR void *context, FAR void *arg);
 #  endif
 #  if (defined(STM32_IRQ_ADC3) && defined(CONFIG_STM32_ADC3))
-static int adc3_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  adc3_interrupt(int irq, FAR void *context, FAR void *arg);
 #  endif
 #  if defined(STM32_IRQ_ADC4) && defined(CONFIG_STM32_ADC4)
-static int adc4_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  adc4_interrupt(int irq, FAR void *context, FAR void *arg);
 #  endif
 #  if defined(STM32_IRQ_ADC)
-static int adc123_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  adc123_interrupt(int irq, FAR void *context, FAR void *arg);
 #  endif
 #endif  /* CONFIG_STM32_ADC_NOIRQ */
 
@@ -614,20 +613,20 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable);
 
 static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
                             int offset);
-static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
+static int  adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
 
-static int adc_ioc_change_ints(FAR struct adc_dev_s *dev, int cmd,
+static int  adc_ioc_change_ints(FAR struct adc_dev_s *dev, int cmd,
                                 bool arg);
 
 #ifdef HAVE_ADC_RESOLUTION
-static int adc_resolution_set(FAR struct adc_dev_s *dev, uint8_t res);
+static int  adc_resolution_set(FAR struct adc_dev_s *dev, uint8_t res);
 #endif
 #ifdef HAVE_ADC_VBAT
 static void adc_enable_vbat_channel(FAR struct adc_dev_s *dev, bool enable);
 #endif
 #ifdef HAVE_ADC_POWERDOWN
-static int adc_ioc_change_sleep_between_opers(FAR struct adc_dev_s *dev,
-                                              int cmd, bool arg);
+static int  adc_ioc_change_sleep_between_opers(FAR struct adc_dev_s *dev,
+                                               int cmd, bool arg);
 static void adc_power_down_idle(FAR struct stm32_dev_s *priv,
                                 bool pdi_high);
 static void adc_power_down_delay(FAR struct stm32_dev_s *priv,
