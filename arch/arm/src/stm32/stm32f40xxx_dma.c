@@ -1055,4 +1055,81 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+
+/****************************************************************************
+ * Name: stm32_dma_intack
+ *
+ * Description:
+ *   Public visible interface to acknowledge interrupts on DMA stream
+ *
+ ****************************************************************************/
+
+void stm32_dma_intack(unsigned int controller, uint8_t stream, uint32_t isr)
+{
+  struct stm32_dma_s *dmast = stm32_dmastream(stream, controller);
+  uint32_t regval = 0;
+  uint32_t offset = 0;
+
+  /* Select the interrupt flag clear register (either the LIFCR or HIFCR)
+   * based on the stream number
+   */
+
+  if (stream < 4)
+    {
+      offset = STM32_DMA_LIFCR_OFFSET;
+    }
+  else
+    {
+      offset = STM32_DMA_HIFCR_OFFSET;
+    }
+
+  /* Get value to write */
+
+  regval |= ((isr & DMA_STREAM_MASK) << dmast->shift);
+
+  /* Write register */
+
+  dmabase_putreg(dmast, offset, regval);
+}
+
+/****************************************************************************
+ * Name: stm32_dma_intget
+ *
+ * Description:
+ *   Public visible interface to get pending interrupts from DMA stream
+ *
+ ****************************************************************************/
+
+uint8_t stm32_dma_intget(unsigned int controller, uint8_t stream)
+{
+  struct stm32_dma_s *dmast = stm32_dmastream(stream, controller);
+  uint32_t regval = 0;
+  uint32_t offset = 0;
+
+  /* Select the interrupt status register (either the LISR or HISR)
+   * based on the stream number
+   */
+
+  if (stream < 4)
+    {
+      offset = STM32_DMA_LISR_OFFSET;
+    }
+  else
+    {
+      offset = STM32_DMA_HISR_OFFSET;
+    }
+
+  /* Get register value */
+
+  regval = dmabase_getreg(dmast, offset);
+
+  /* Get stream status */
+
+  regval = ((regval >> dmast->shift) & DMA_STREAM_MASK);
+
+  return (uint8_t)regval;
+}
+#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
+
 #endif /* CONFIG_STM32_STM32F4XXX */

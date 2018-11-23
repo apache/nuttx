@@ -347,12 +347,11 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 #  define stm32_dmadump(handle,regs,msg)
 #endif
 
-#ifdef CONFIG_STM32_STM32F33XX
-
-/* At this moment only for STM32F33XX family */
-
 /* High performance, zero latency DMA interrupts need some additional
  * interfaces.
+ *
+ * TODO: For now the interface is different for STM32 DMAv1 and STM32 DMAv2.
+ *       It should be unified somehow.
  */
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -365,7 +364,11 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
  *
  ****************************************************************************/
 
+#if defined(HAVE_IP_DMA_V1)
 void stm32_dma_intack(unsigned int chndx, uint32_t isr);
+#elif defined(HAVE_IP_DMA_V2)
+void stm32_dma_intack(unsigned int controller, uint8_t stream, uint32_t isr);
+#endif
 
 /****************************************************************************
  * Name: stm32_dma_intget
@@ -375,9 +378,13 @@ void stm32_dma_intack(unsigned int chndx, uint32_t isr);
  *
  ****************************************************************************/
 
+#if defined(HAVE_IP_DMA_V1)
 uint32_t stm32_dma_intget(unsigned int chndx);
+#elif defined(HAVE_IP_DMA_V2)
+uint8_t  stm32_dma_intget(unsigned int controller, uint8_t stream);
+#endif
+
 #endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
-#endif  /* CONFIG_STM32_STM32F33XX */
 
 #undef EXTERN
 #if defined(__cplusplus)

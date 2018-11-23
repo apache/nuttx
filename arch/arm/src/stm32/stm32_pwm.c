@@ -486,6 +486,7 @@ static int pwm_arr_update(FAR struct pwm_lowerhalf_s *dev, uint32_t arr);
 static uint32_t pwm_arr_get(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty);
+static int pwm_timer_enable(FAR struct pwm_lowerhalf_s *dev, bool state);
 
 #ifdef HAVE_ADVTIM
 static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv);
@@ -569,9 +570,14 @@ static const struct stm32_pwm_ops_s g_llpwmops =
   .arr_get         = pwm_arr_get,
   .outputs_enable  = pwm_outputs_enable,
   .soft_update     = pwm_soft_update,
-#ifdef HAVE_COMPLEMENTARY
+  .freq_update     = pwm_frequency_update,
+  .tim_enable      = pwm_timer_enable,
+#  ifdef CONFIG_DEBUG_PWM_INFO
+  .dump_regs       = pwm_dumpregs,
+#  endif
+#  ifdef HAVE_COMPLEMENTARY
   .dt_update       = pwm_deadtime_update,
-#endif
+#  endif
 };
 #endif
 
@@ -2010,7 +2016,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
           pwm_getreg(priv, STM32_GTIM_PSC_OFFSET),
           pwm_getreg(priv, STM32_GTIM_ARR_OFFSET));
 
-  if (priv->timid == 1 || priv->timid == 8 ||i
+  if (priv->timid == 1 || priv->timid == 8 ||
       (priv->timid >= 15 && priv->timid <= 17))
     {
       pwminfo("  RCR: %04x BDTR: %04x\n",
@@ -2066,6 +2072,8 @@ static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
       return -EINVAL;
     }
 #endif
+
+  /* REVISIT: start index from 0? */
 
   switch (index)
     {
@@ -2263,6 +2271,30 @@ static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
   /* Write coresponding CCR register */
 
   pwm_ccr_update(dev, channel, ccr);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pwm_timer_enable
+ ****************************************************************************/
+
+static int pwm_timer_enable(FAR struct pwm_lowerhalf_s *dev, bool state)
+{
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  if (state == true)
+    {
+      /* Enable timer counter */
+
+      pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+    }
+  else
+    {
+      /* Disable timer counter */
+
+      pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+    }
 
   return OK;
 }
@@ -3138,7 +3170,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable the timer until we get it configured */
 
-  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+  pwm_timer_enable(dev, false);
 
   /* Get configured outputs */
 
@@ -3348,7 +3380,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
       /* Enable the timer */
 
-      pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+      pwm_timer_enable(dev, true);
 
       /* And enable timer interrupts at the NVIC */
 
@@ -3394,7 +3426,7 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable the timer until we get it configured */
 
-  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+  pwm_timer_enable(dev, false);
 
   /* Initial timer configuration */
 
@@ -3646,7 +3678,7 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 
   /* Just enable the timer, leaving all interrupts disabled */
 
-  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+  pwm_timer_enable(dev, true);
 
   pwm_dumpregs(priv, "After starting");
 
@@ -4658,30 +4690,6 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 errout:
   return (FAR struct pwm_lowerhalf_s *)lower;
 }
-
-/****************************************************************************
- * Name: stm32_llops_get
- *
- * Description:
- *   Get low-level ops from the generic PWM lower-half data.
- *
- * Input Parameters:
- *   dev - A reference to the lower half PWM driver state structure
- *
- * Returned Value:
- *   Pointer to low-level PWM ops
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_PWM_LL_OPS
-FAR const struct stm32_pwm_ops_s *
-stm32_pwm_llops_get(FAR struct pwm_lowerhalf_s *dev)
-{
-  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
-
-  return priv->llops;
-}
-#endif
 
 #endif /* CONFIG_STM32_TIMn_PWM, n = 1,...,17 */
 

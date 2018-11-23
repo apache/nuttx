@@ -5,4 +5,8 @@
 
 if ARCH_BOARD_NUCLEO_F302R8
 
+config NUCLEOF302R8_HIGHPRI
+       bool "High priority interrupt test"
+       default n
+
 endif

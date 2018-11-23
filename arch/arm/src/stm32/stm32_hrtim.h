@@ -232,6 +232,8 @@
         (hrtim)->hd_ops->soft_reset(hrtim, timer)
 #define HRTIM_FREQ_SET(hrtim, timer,freq)                   \
         (hrtim)->hd_ops->freq_set(hrtim, timer, freq)
+#define HRTIM_TIM_ENABLE(hrtim, timers, state)              \
+        (hrtim)->hd_ops->tim_enable(hrtim, timers, state)
 #define HRTIM_OUTPUTS_ENABLE(hrtim, outputs, state)         \
         (hrtim)->hd_ops->outputs_enable(hrtim, outputs, state)
 #define HRTIM_OUTPUT_SET_SET(hrtim, output, set)            \
@@ -278,7 +280,9 @@ enum stm32_hrtim_tim_e
 #ifdef CONFIG_STM32_HRTIM_TIME
   HRTIM_TIMER_TIME   = (1<<5),
 #endif
-  HRTIM_TIMER_COMMON = (1<<6)
+  HRTIM_TIMER_COMMON = (1<<6),
+
+  HRTIM_TIMERS_MASK = 0x3f
 };
 
 /* Source which can force the Tx1/Tx2 output to its inactive state */
@@ -1028,8 +1032,10 @@ struct stm32_hrtim_ops_s
   uint64_t (*fclk_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   int      (*soft_update)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   int      (*soft_reset)(FAR struct hrtim_dev_s *dev, uint8_t timer);
-  int      (*freq_set)(FAR struct hrtim_dev_s  *hrtim, uint8_t timer,
+  int      (*freq_set)(FAR struct hrtim_dev_s  *dev, uint8_t timer,
                                  uint64_t freq);
+  int      (*tim_enable)(FAR struct hrtim_dev_s  *dev, uint8_t timers,
+                         bool state);
 
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
   int      (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);

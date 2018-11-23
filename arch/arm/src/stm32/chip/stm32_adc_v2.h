@@ -615,6 +615,7 @@
 #define ADC_JSQR_JSQ4_SHIFT          (26)       /* Bits 26-30: 4th conversion in injected sequence */
 #define ADC_JSQR_JSQ4_MASK           (0x1f << ADC_JSQR_JSQ4_SHIFT)
 #  define ADC_JSQR_JSQ4(ch)          ((ch) << ADC_JSQR_JSQ4_SHIFT) /* Channel number 1..18 */
+#define ADC_JSQR_JSQ_SHIFT           (6)        /* Shift between JSQx bits */
 
 /* ADC offset register 1 and 2 */
 

@@ -303,6 +303,15 @@
 #  undef  ADC4_HAVE_DMA
 #endif
 
+/* Injected channels support */
+
+#if (defined(CONFIG_STM32_ADC1) && (CONFIG_STM32_ADC1_INJECTED_CHAN > 0)) || \
+    (defined(CONFIG_STM32_ADC2) && (CONFIG_STM32_ADC2_INJECTED_CHAN > 0)) || \
+    (defined(CONFIG_STM32_ADC3) && (CONFIG_STM32_ADC3_INJECTED_CHAN > 0)) || \
+    (defined(CONFIG_STM32_ADC4) && (CONFIG_STM32_ADC4_INJECTED_CHAN > 0))
+#  define ADC_HAVE_INJECTED
+#endif
+
 /* Timer configuration:  If a timer trigger is specified, then get
  * information about the timer.
  *
@@ -1294,6 +1303,8 @@
 #  define ADC2_JEXTSEL_HRTTRG4 ADC12_JSQR_JEXTSEL_HRT1TRG4
 #endif
 
+/* EXTSEL configuration *****************************************************/
+
 #if defined(CONFIG_STM32_TIM1_ADC1)
 #  if CONFIG_STM32_ADC1_TIMTRIG == 0
 #    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
@@ -1454,14 +1465,6 @@
 #  define ADC1_EXTSEL_VALUE ADC1_EXTSEL_HRTTRG3
 #endif
 
-#if defined(CONFIG_STM32_HRTIM_ADC1_TRG2)
-#  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG2
-#elif defined(CONFIG_STM32_HRTIM_ADC1_TRG4)
-#  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG4
-#else
-#  define ADC1_JEXTSEL_VALUE 0
-#endif
-
 #if defined(CONFIG_STM32_TIM1_ADC2)
 #  if CONFIG_STM32_ADC2_TIMTRIG == 0
 #    define ADC2_EXTSEL_VALUE ADC2_EXTSEL_T1CC1
@@ -1578,14 +1581,6 @@
 #  define ADC2_EXTSEL_VALUE ADC1_EXTSEL_HRTTRG1
 #elif defined(CONFIG_STM32_HRTIM_ADC1_TRG3)
 #  define ADC2_EXTSEL_VALUE ADC1_EXTSEL_HRTTRG3
-#endif
-
-#if defined(CONFIG_STM32_HRTIM_ADC2_TRG2)
-#  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG2
-#elif defined(CONFIG_STM32_HRTIM_ADC2_TRG4)
-#  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG4
-#else
-#  define ADC2_JEXTSEL_VALUE 0
 #endif
 
 #if defined(CONFIG_STM32_TIM1_ADC3)
@@ -1844,6 +1839,99 @@
 #  endif
 #endif
 
+/* JEXTSEL configuration ****************************************************/
+
+/* TODO: ADC1 JEXTSEL trigger */
+
+#if defined(CONFIG_STM32_HRTIM_ADC1_TRG2)
+#  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG2
+#elif defined(CONFIG_STM32_HRTIM_ADC1_TRG4)
+#  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG4
+#else
+#  undef ADC1_JEXTSEL_VALUE
+#endif
+
+/* TODO: ADC2 JEXTSEL trigger */
+
+#if defined(CONFIG_STM32_HRTIM_ADC2_TRG2)
+#  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG2
+#elif defined(CONFIG_STM32_HRTIM_ADC2_TRG4)
+#  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG4
+#else
+#  undef ADC2_JEXTSEL_VALUE
+#endif
+
+/* TODO: ADC3 JEXTSEL trigger */
+
+#undef ADC3_JEXTSEL_VALUE
+
+/* TODO: ADC4 JEXTSEL trigger */
+
+#undef ADC4_JEXTSEL_VALUE
+
+/* ADC interrupts ***********************************************************/
+
+#if defined(HAVE_IP_ADC_V1)
+#  define ADC_ISR_EOC                  ADC_SR_EOC
+#  define ADC_IER_EOC                  ADC_CR1_EOCIE
+#  define ADC_ISR_AWD                  ADC_SR_AWD
+#  define ADC_IER_AWD                  ADC_CR1_AWDIE
+#  define ADC_ISR_JEOC                 ADC_SR_JEOC
+#  define ADC_IER_JEOC                 ADC_CR1_JEOCIE
+#  define ADC_ISR_JEOS                 0 /* No JEOS */
+#  define ADC_IER_JEOS                 0 /* No JEOS */
+#  ifdef HAVE_BASIC_ADC
+#    define ADC_ISR_OVR                0
+#    define ADC_IER_OVR                0
+#  else
+#    define ADC_ISR_OVR                ADC_SR_OVR
+#    define ADC_IER_OVR                ADC_CR1_OVRIE
+#  endif
+#elif defined(HAVE_IP_ADC_V2)
+#  define ADC_ISR_EOC                  ADC_INT_EOC
+#  define ADC_IER_EOC                  ADC_INT_EOC
+#  define ADC_ISR_AWD                  ADC_INT_AWD1
+#  define ADC_IER_AWD                  ADC_INT_AWD1
+#  define ADC_ISR_JEOC                 ADC_INT_JEOC
+#  define ADC_IER_JEOC                 ADC_INT_JEOC
+#  define ADC_ISR_OVR                  ADC_INT_OVR
+#  define ADC_IER_OVR                  ADC_INT_OVR
+#  define ADC_ISR_JEOS                 ADC_INT_JEOS
+#  define ADC_IER_JEOS                 ADC_INT_JEOS
+#endif
+
+#define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_AWD | ADC_ISR_JEOC | \
+                         ADC_ISR_JEOS | ADC_ISR_OVR)
+#define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_JEOC | \
+                         ADC_IER_JEOS | ADC_IER_OVR)
+
+/* Low-level ops helpers ****************************************************/
+
+#define ADC_INT_ACK(adc, source)                     \
+        (adc)->llops->int_ack(adc, source)
+#define ADC_INT_GET(adc)                             \
+        (adc)->llops->int_get(adc)
+#define ADC_INT_ENABLE(adc, source)                  \
+        (adc)->llops->int_en(adc, source)
+#define ADC_INT_DISABLE(adc, source)                 \
+        (adc)->llops->int_dis(adc, source)
+#define ADC_REGDATA_GET(adc)                         \
+        (adc)->llops->val_get(adc)
+#define ADC_REGBUF_REGISTER(adc, buffer, len)        \
+        (adc)->llops->regbuf_reg(adc, buffer, len)
+#define ADC_REG_STARTCONV(adc, state)                \
+        (adc)->llops->reg_startconv(adc, state)
+#define ADC_INJ_STARTCONV(adc, state)                \
+        (adc)->llops->inj_startconv(adc, state)
+#define ADC_INJDATA_GET(adc, chan)                   \
+        (adc)->llops->inj_get(adc, chan)
+#define ADC_SAMPLETIME_SET(adc, time_samples)        \
+        (adc)->llops->stime_set(adc, time_samples)
+#define ADC_SAMPLETIME_WRITE(adc)                    \
+        (adc)->llops->stime_write(adc)
+#define ADC_DUMP_REGS(adc)                           \
+        (adc)->llops->dump_regs(adc)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -1870,6 +1958,10 @@ enum adc_io_cmds_e
   IO_STOP_ADC,
   IO_START_ADC,
   IO_START_CONV,
+  IO_TRIGGER_REG,
+#ifdef ADC_HAVE_INJECTED
+  IO_TRIGGER_INJ,
+#endif
 #ifdef HAVE_ADC_POWERDOWN
   IO_ENABLE_DISABLE_PDI,
   IO_ENABLE_DISABLE_PDD,
@@ -1887,6 +1979,8 @@ enum stm32_adc_resoluton_e
   ADC_RESOLUTION_6BIT  = 3      /* 6 bit */
 };
 
+#ifdef CONFIG_STM32_ADC_LL_OPS
+
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
 
 /* Channel and sample time pair */
@@ -1895,16 +1989,7 @@ typedef struct adc_channel_s
 {
   uint8_t channel:5;
 
-  /* Sampling time individually for each channel
-   * 000: 4 cycles
-   * 001: 9 cycles
-   * 010: 16 cycles
-   * 011: 24 cycles
-   * 100: 48 cycles
-   * 101: 96 cycles
-   * 110: 192 cycles
-   * 111: 384 cycles    - selected for all channels
-   */
+  /* Sampling time individually for each channel. It differs between families */
 
   uint8_t sample_time:3;
 } adc_channel_t;
@@ -1915,19 +2000,13 @@ typedef struct adc_channel_s
 
 struct adc_sample_time_s
 {
-    adc_channel_t *channel;                /* Array of channels */
-    uint8_t        channels_nbr:5;         /* Number of channels in array */
-    bool           all_same:1;             /* All channels will get the
-                                            * same value of the sample time */
-    uint8_t        all_ch_sample_time:3;   /* Sample time for all channels */
+  adc_channel_t *channel;                /* Array of channels */
+  uint8_t        channels_nbr:5;         /* Number of channels in array */
+  bool           all_same:1;             /* All channels will get the
+                                          * same value of the sample time */
+  uint8_t        all_ch_sample_time:3;   /* Sample time for all channels */
 };
-#endif
-
-#ifdef CONFIG_STM32_STM32F33XX
-
-/* At this moment only for STM32F33XX family */
-
-#ifdef CONFIG_STM32_ADC_NOIRQ
+#endif  /* CONFIG_STM32_ADC_CHANGE_SAMPLETIME */
 
 /* This structure provides the publicly visable representation of the
  * "lower-half" ADC driver structure.
@@ -1937,14 +2016,15 @@ struct stm32_adc_dev_s
 {
   /* Publicly visible portion of the "lower-half" ADC driver structure */
 
-  FAR const struct stm32_adc_ops_s *ops;
+  FAR const struct stm32_adc_ops_s *llops;
 
   /* Require cast-compatibility with private "lower-half" ADC strucutre */
 };
 
+/* Low-level operations for ADC */
+
 struct stm32_adc_ops_s
 {
-
   /* Acknowledge interrupts */
 
   void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
@@ -1969,13 +2049,35 @@ struct stm32_adc_ops_s
 
   int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer, uint8_t len);
 
+  /* Start/stop regular conversion */
+
+  void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+
+#ifdef ADC_HAVE_INJECTED
   /* Get current ADC injected data register */
 
   uint32_t (*inj_get)(FAR struct stm32_adc_dev_s *dev, uint8_t chan);
+
+  /* Start/stop injected conversion */
+
+  void (*inj_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+#endif
+
+#ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
+  /* Set ADC sample time */
+
+  void (*stime_set)(FAR struct stm32_adc_dev_s *dev,
+                    FAR struct adc_sample_time_s *time_samples);
+
+  /* Write ADC sample time */
+
+  void (*stime_write)(FAR struct stm32_adc_dev_s *dev);
+#endif
+
+  void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
 };
 
-#endif  /* CONFIG_STM32_ADC_NOIRQ */
-#endif  /* CONFIG_STM32_STM32F33XX */
+#endif  /* CONFIG_STM32_ADC_LL_OPS */
 
 /************************************************************************************
  * Public Function Prototypes
@@ -1994,12 +2096,12 @@ extern "C"
  * Name: stm32_adcinitialize
  *
  * Description:
- *   Initialize the ADC.
+ *   Initialize the ADC. See stm32_adc.c for more details.
  *
  * Input Parameters:
- *   intf      - Could be {1,2,3} for ADC1, ADC2, or ADC3
- *   chanlist  - The list of channels
- *   nchannels - Number of channels
+ *   intf      - Could be {1,2,3,4} for ADC1, ADC2, ADC3 or ADC4
+ *   chanlist  - The list of channels (regular + injected)
+ *   nchannels - Number of channels (regular + injected)
  *
  * Returned Value:
  *   Valid can device structure reference on succcess; a NULL on failure
@@ -2008,11 +2110,14 @@ extern "C"
 
 struct adc_dev_s;
 struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
-                                      int nchannels);
+                                      int channels);
 
-#ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
-void stm32_adcchange_sample_time(FAR struct adc_dev_s *dev,
-                                 FAR struct adc_sample_time_s *time_samples);
+/************************************************************************************
+ * Name: stm32_adc_llops_get
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_ADC_LL_OPS
+FAR const struct stm32_adc_ops_s *stm32_adc_llops_get(FAR struct adc_dev_s *dev);
 #endif
 
 #undef EXTERN

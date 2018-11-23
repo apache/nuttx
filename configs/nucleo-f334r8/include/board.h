@@ -250,24 +250,38 @@
 #define OPAMP2_VPSEL OPAMP2_VPSEL_PB14
 
 /* Configuration specific to high priority interrupts example:
- *   - HRTIM Timer A trigger for ADC if DMA transfer
+ *   - HRTIM Timer A trigger for ADC if DMA transfer and HRTIM
+ *   - TIM1 CC1 trigger for ADC if DMA transfer and TIM1 PWM
  *   - ADC DMA transfer on DMA1_CH1
  */
 
 #ifdef CONFIG_NUCLEOF334R8_HIGHPRI
 
-/* HRTIM */
+#if defined(CONFIG_STM32_HRTIM1) && defined(CONFIG_STM32_ADC1_DMA)
+
+/* HRTIM - ADC trigger */
 
 #define HRTIM_TIMA_PRESCALER HRTIM_PRESCALER_128
 #define HRTIM_TIMA_MODE      HRTIM_MODE_CONT
+#define HRTIM_TIMA_UPDATE    0
+#define HRTIM_TIMA_RESET     0
 
 #define HRTIM_ADC_TRG1       HRTIM_ADCTRG13_APER
+
+#endif  /* CONFIG_STM32_HRTIM1 && CONFIG_STM32_ADC1_DMA*/
+
+#if defined(CONFIG_STM32_TIM1_PWM) && defined(CONFIG_STM32_ADC1_DMA)
+
+/* TIM1 - ADC trigger */
+
+#define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
+
+#endif  /* CONFIG_STM32_TIM1_PWM && CONFIG_STM32_ADC1_DMA */
+#endif  /* CONFIG_NUCLEOF334R8_HIGHPRI */
 
 /* DMA channels *************************************************************/
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
-
-#endif  /* CONFIG_NUCLEOF334R8_HIGHPRI */
 
 #endif /* __CONFIG_NUCLEO_F334R8_INCLUDE_BOARD_H */

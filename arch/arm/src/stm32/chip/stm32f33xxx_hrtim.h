@@ -183,6 +183,7 @@
 #  define HRTIM_MCR_SYNCSRC_MCMP1  (1 << HRTIM_MCR_SYNCSRC_SHIFT) /* 01: Master timer Compare 1 Event */
 #  define HRTIM_MCR_SYNCSRC_TASTRT (2 << HRTIM_MCR_SYNCSRC_SHIFT) /* 10: Timer A start/reset */
 #  define HRTIM_MCR_SYNCSRC_TACMP1 (3 << HRTIM_MCR_SYNCSRC_SHIFT) /* 11: Timer A Compare 1 Event */
+#define HRTIM_MCR_TCEN_SHIFT       (16)
 #define HRTIM_MCR_MCEN             (1 << 16) /* Bit 16: Master timer counter enable */
 #define HRTIM_MCR_TACEN            (1 << 17) /* Bit 17: Timer A counter enable */
 #define HRTIM_MCR_TBCEN            (1 << 18) /* Bit 18: Timer B counter enable */

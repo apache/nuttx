@@ -206,7 +206,7 @@ enum converter_mode_e
 struct smps_lower_dev_s
 {
   FAR struct hrtim_dev_s     *hrtim; /* PWM generation */
-  FAR struct adc_dev_s       *adc;   /* input and output voltage sense */
+  FAR struct stm32_adc_dev_s *adc;   /* input and output voltage sense */
   FAR struct comp_dev_s      *comp;  /* not used in this demo - only as reference */
   FAR struct dac_dev_s       *dac;   /* not used in this demo - only as reference */
   FAR struct opamp_dev_s     *opamp; /* not used in this demo - only as reference */
@@ -360,8 +360,12 @@ static int smps_setup(FAR struct smps_dev_s *dev)
   FAR struct smps_lower_dev_s *lower = dev->lower;
   FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
   FAR struct hrtim_dev_s      *hrtim = NULL;
-  FAR struct adc_dev_s        *adc   = NULL;
+  FAR struct stm32_adc_dev_s  *adc   = NULL;
   FAR struct smps_priv_s      *priv;
+  struct adc_channel_s         channels[ADC1_NCHANNELS];
+  struct adc_sample_time_s     stime;
+  int ret = OK;
+  int i   = 0;
 
   /* Initialize smps structure */
 
@@ -375,28 +379,49 @@ static int smps_setup(FAR struct smps_dev_s *dev)
   if (hrtim == NULL)
     {
       pwrerr("ERROR:  Failed to get hrtim ");
+      ret = ERROR;
+      goto errout;
     }
 
   adc = lower->adc;
   if (adc == NULL)
     {
       pwrerr("ERROR:  Failed to get ADC lower level interface");
+      ret = ERROR;
+      goto errout;
     }
+
+  /* Update ADC sample time */
+
+  for (i = 0; i < ADC1_NCHANNELS; i+= 1)
+    {
+      channels[i].sample_time = ADC_SMPR_61p5;
+      channels[i].channel     = g_adc1chan[i];
+    }
+
+  memset(&stime, 0, sizeof(struct adc_sample_time_s));
+
+  stime.channels_nbr = ADC1_NCHANNELS;
+  stime.channel      = channels;
+
+  ADC_SAMPLETIME_SET(adc, &stime);
+  ADC_SAMPLETIME_WRITE(adc);
 
   /* TODO: create current limit table */
 
   UNUSED(priv);
-  return OK;
+
+errout:
+  return ret;
 }
 
 static int smps_start(FAR struct smps_dev_s *dev)
 {
   FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct stm32_adc_dev_s  *stm32_adc =
-    (FAR struct stm32_adc_dev_s *) lower->adc->ad_priv;
-  FAR struct smps_s       *smps   = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s  *priv  = (struct smps_priv_s *)smps->priv;
-  FAR struct hrtim_dev_s  *hrtim  = lower->hrtim;
+  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
+  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
+  FAR struct hrtim_dev_s      *hrtim = lower->hrtim;
+  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
   volatile uint64_t per = 0;
   uint64_t fclk = 0;
   int ret = OK;
@@ -482,9 +507,17 @@ static int smps_start(FAR struct smps_dev_s *dev)
 
   HRTIM_ALL_OUTPUTS_ENABLE(hrtim, true);
 
-  /* Enable ADC interrupts */
+  /* Enable ADC JEOS interrupts */
 
-  stm32_adc->ops->int_en(stm32_adc, ADC_INT_JEOS);
+  ADC_INT_ENABLE(adc, ADC_INT_JEOS);
+
+  /* Enable ADC12 interrups */
+
+  up_enable_irq(STM32_IRQ_ADC12);
+
+  /* Start injected conversion */
+
+  ADC_INJ_STARTCONV(adc, true);
 
 errout:
   return ret;
@@ -493,19 +526,26 @@ errout:
 static int smps_stop(FAR struct smps_dev_s *dev)
 {
   FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct smps_s      *smps  = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s *priv  = (struct smps_priv_s *)smps->priv;
-  FAR struct hrtim_dev_s *hrtim = lower->hrtim;
-  FAR struct stm32_adc_dev_s  *stm32_adc  =
-    (FAR struct stm32_adc_dev_s *) lower->adc->ad_priv;
+  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
+  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
+  FAR struct hrtim_dev_s      *hrtim = lower->hrtim;
+  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
 
   /* Disable HRTIM outputs */
 
   HRTIM_ALL_OUTPUTS_ENABLE(hrtim, false);
 
-  /* Disable ADC interrupts */
+  /* Stop injected conversion */
 
-  stm32_adc->ops->int_dis(stm32_adc, ADC_INT_JEOS);
+  ADC_INJ_STARTCONV(adc, false);
+
+  /* Disable ADC JEOS interrupts */
+
+  ADC_INT_DISABLE(adc, ADC_INT_JEOS);
+
+  /* Disable ADC12 interrups */
+
+  up_disable_irq(STM32_IRQ_ADC12);
 
   /* Reset running flag */
 
@@ -885,7 +925,6 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
   /* Enable outputs */
 
   HRTIM_ALL_OUTPUTS_ENABLE(hrtim, true);
-
 }
 
 /****************************************************************************
@@ -894,12 +933,11 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
 
 static void adc12_handler(void)
 {
-  FAR struct smps_dev_s  *dev = &g_smps_dev;
-  FAR struct smps_s      *smps = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s *priv  = (struct smps_priv_s *)smps->priv;
+  FAR struct smps_dev_s       *dev   = &g_smps_dev;
+  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
+  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
   FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct stm32_adc_dev_s  *adc   =
-    (FAR struct stm32_adc_dev_s*)lower->adc->ad_priv;
+  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
   uint32_t pending;
   float ref = ADC_REF_VOLTAGE;
   float bit = ADC_VAL_MAX;
@@ -907,14 +945,14 @@ static void adc12_handler(void)
   float out;
   uint8_t mode;
 
-  pending = adc->ops->int_get(adc);
+  pending = ADC_INT_GET(adc);
 
   if (pending & ADC_INT_JEOC && priv->running == true)
     {
       /* Get raw ADC values */
 
-      priv->v_out_raw = adc->ops->inj_get(adc, V_OUT_ADC_INJ_CHANNEL);
-      priv->v_in_raw  = adc->ops->inj_get(adc, V_IN_ADC_INJ_CHANNEL);
+      priv->v_out_raw = ADC_INJDATA_GET(adc, V_OUT_ADC_INJ_CHANNEL);
+      priv->v_in_raw  = ADC_INJDATA_GET(adc, V_IN_ADC_INJ_CHANNEL);
 
       /* Convert raw values to real values */
 
@@ -969,7 +1007,7 @@ static void adc12_handler(void)
 
   /* Clear pending */
 
-  adc->ops->int_ack(adc, pending);
+  ADC_INT_ACK(adc, pending);
 }
 
 /****************************************************************************
@@ -1031,7 +1069,7 @@ int stm32_smps_setup(void)
       /* Initialize SMPS lower driver interfaces */
 
       lower->hrtim = hrtim;
-      lower->adc   = adc;
+      lower->adc   = adc->ad_priv;
       lower->comp  = NULL;
       lower->dac   = NULL;
       lower->opamp = NULL;
@@ -1055,8 +1093,6 @@ int stm32_smps_setup(void)
           ret = EXIT_FAILURE;
           goto errout;
         }
-
-      up_enable_irq(STM32_IRQ_ADC12);
 
       /* Setup ADC hardware */
 

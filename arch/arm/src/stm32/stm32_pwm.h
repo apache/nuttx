@@ -854,6 +854,40 @@
 #  define PWM_TIM17_CH1NCFG 0
 #endif
 
+/* Low-level ops helpers ************************************************************/
+
+/* NOTE: low-level ops accept pwm_lowerhalf_s as first argument, but llops access
+ *       can be found in stm32_pwm_dev_s
+ */
+
+#define PWM_SETUP(dev)                                                             \
+        (dev)->ops->setup((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_SHUTDOWN(dev)                                                          \
+        (dev)->ops->shutdown((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_CCR_UPDATE(dev, index, ccr)                                            \
+        (dev)->llops->ccr_update((FAR struct pwm_lowerhalf_s *)dev, index, ccr)
+#define PWM_CCR_GET(dev, index)                                                    \
+        (dev)->llops->ccr_get((FAR struct pwm_lowerhalf_s *)dev, index)
+#define PWM_ARR_UPDATE(dev, arr)                                                   \
+        (dev)->llops->arr_update((FAR struct pwm_lowerhalf_s *)dev, arr)
+#define PWM_ARR_GET(dev)                                                           \
+        (dev)->llops->arr_get((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_OUTPUTS_ENABLE(dev, out, state)                                        \
+        (dev)->llops->outputs_enable((FAR struct pwm_lowerhalf_s *)dev, out, state)
+#define PWM_SOFT_UPDATE(dev)                                                       \
+        (dev)->llops->soft_update((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_CONFIGURE(dev)                                                         \
+        (dev)->llops->configure((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_SOFT_BREAK(dev, state)                                                 \
+        (dev)->llops->soft_break((FAR struct pwm_lowerhalf_s *)dev, state)
+#define PWM_FREQ_UPDATE(dev, freq)                                                 \
+        (dev)->llops->freq_update((FAR struct pwm_lowerhalf_s *)dev, freq)
+#define PWM_TIM_ENABLE(dev, state)                                                 \
+        (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
+#define PWM_DUMP_REGS(dev)                                                         \
+        (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_DT_UPDATE(dev, dt)                                                     \
+        (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
 
 /************************************************************************************
  * Public Types
@@ -924,7 +958,27 @@ enum stm32_chan_e
 
 #ifdef CONFIG_STM32_PWM_LL_OPS
 
-/*  */
+/* This structure provides the publicly visable representation of the
+ * "lower-half" PWM driver structure.
+ */
+
+struct stm32_pwm_dev_s
+{
+  /* The first field of this state structure must be a pointer to the PWM
+   * callback structure to be consistent with upper-half PWM driver.
+   */
+
+  FAR const struct pwm_ops_s *ops;
+
+  /* Publicly visible portion of the "lower-half" PWM driver structure */
+
+  FAR const struct stm32_pwm_ops_s *llops;
+
+  /* Require cast-compatibility with private "lower-half" PWM strucutre */
+};
+
+/* Low-level operations for PWM */
+
 struct pwm_lowerhalf_s;
 struct stm32_pwm_ops_s
 {
@@ -960,6 +1014,20 @@ struct stm32_pwm_ops_s
 
   int (*soft_break)(FAR struct pwm_lowerhalf_s *dev, bool state);
 
+  /* Update frequency */
+
+  int (*freq_update)(FAR struct pwm_lowerhalf_s *dev, uint32_t frequency);
+
+  /* Enable timer counter */
+
+  int (*tim_enable)(FAR struct pwm_lowerhalf_s *dev, bool state);
+
+#ifdef CONFIG_DEBUG_PWM_INFO
+  /* Dump timer registers */
+
+  int (*dump_regs)(FAR struct pwm_lowerhalf_s *dev);
+#endif
+
 #ifdef HAVE_COMPLEMENTARY
   /* Deadtime update */
 
@@ -967,7 +1035,7 @@ struct stm32_pwm_ops_s
 #endif
 };
 
-#endif
+#endif  /* CONFIG_STM32_PWM_LL_OPS */
 
 /************************************************************************************
  * Public Data
@@ -1006,15 +1074,6 @@ extern "C"
  ************************************************************************************/
 
 FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
-
-/************************************************************************************
- * Name: stm32_pwm_llops_get
- *
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_PWM_LL_OPS
-  FAR const struct stm32_pwm_ops_s *stm32_pwm_llops_get(FAR struct pwm_lowerhalf_s *dev);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

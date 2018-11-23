@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f334r8/src/stm32_highpri.c
+ * configs/nucleo-f302r8/src/stm32_highpri.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -58,12 +58,11 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 
-#include "stm32_hrtim.h"
 #include "stm32_pwm.h"
 #include "stm32_adc.h"
 #include "stm32_dma.h"
 
-#ifdef CONFIG_NUCLEOF334R8_HIGHPRI
+#ifdef CONFIG_NUCLEOF302R8_HIGHPRI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,25 +86,14 @@
 #endif
 
 #ifdef CONFIG_STM32_ADC1_DMA
-#  if defined(CONFIG_STM32_HRTIM1) && defined(CONFIG_STM32_HRTIM_TIMA)
-#    define HIGHPRI_HAVE_HRTIM
-#  endif
 #  if defined(CONFIG_STM32_TIM1_PWM)
 #    define HIGHPRI_HAVE_TIM1
 #  endif
 #  if (CONFIG_STM32_ADC1_DMA_CFG != 1)
 #    error ADC1 DMA must be configured in Circular Mode
 #  endif
-#  if defined(HIGHPRI_HAVE_HRTIM) && defined(HIGHPRI_HAVE_TIM1)
-#    error HRTIM TIM A or TIM1 !
-#  elif !defined(HIGHPRI_HAVE_HRTIM) && !defined(HIGHPRI_HAVE_TIM1)
-#    error "Needs HRTIM TIMA or TIM1 to trigger ADC DMA"
-#  endif
-#endif
-
-#ifdef HIGHPRI_HAVE_HRTIM
-#  if !defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || !defined(CONFIG_STM32_HRTIM_ADC)
-#    error
+#  if !defined(HIGHPRI_HAVE_TIM1)
+#    error "Needs TIM1 to trigger ADC DMA"
 #  endif
 #endif
 
@@ -151,9 +139,6 @@
 struct highpri_s
 {
   FAR struct stm32_adc_dev_s *adc1;
-#ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s     *hrtim;
-#endif
 #ifdef HIGHPRI_HAVE_TIM1
   struct stm32_pwm_dev_s     *pwm;
 #endif
@@ -356,9 +341,6 @@ irq_out:
 
 int highpri_main(int argc, char *argv[])
 {
-#ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s *hrtim;
-#endif
 #ifdef HIGHPRI_HAVE_TIM1
   struct stm32_pwm_dev_s *pwm1;
 #endif
@@ -393,24 +375,6 @@ int highpri_main(int argc, char *argv[])
     }
 
   highpri->adc1 = (struct stm32_adc_dev_s *)adc1->ad_priv;
-
-#ifdef HIGHPRI_HAVE_HRTIM
-  /* Configure HRTIM */
-
-  hrtim = stm32_hrtiminitialize();
-  if (hrtim == NULL)
-    {
-      printf("ERROR: Failed to get HRTIM1 interface\n");
-      ret = EXIT_FAILURE;
-      goto errout;
-    }
-
-  highpri->hrtim = hrtim;
-
-  /* Set Timer A Period */
-
-  HRTIM_PER_SET(hrtim, HRTIM_TIMER_TIMA, 0xFFD0);
-#endif  /* HIGHPRI_HAVE_HRTIM */
 
 #ifdef HIGHPRI_HAVE_TIM1
   /* Initialize TIM1 */
@@ -521,12 +485,6 @@ int highpri_main(int argc, char *argv[])
   ADC_INT_ENABLE(highpri->adc1, ADC_IER_JEOS);
 #endif
 
-#ifdef HIGHPRI_HAVE_HRTIM
-  /* Enable HRTIM TIMA after ADC configuration */
-
-  HRTIM_TIM_ENABLE(highpri->hrtim, HRTIM_TIMER_TIMA, true);
-#endif
-
 #ifdef HIGHPRI_HAVE_TIM1
   /* Enable timer counter after ADC configuration */
 
@@ -591,4 +549,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_NUCLEOF334R8_HIGHPRI */
+#endif /* CONFIG_NUCLEOF302R8_HIGHPRI */

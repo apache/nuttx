@@ -1590,6 +1590,7 @@ config STM32_STM32F207
 config STM32_STM32F30XX
 	bool
 	default n
+	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_TIM1
@@ -1604,6 +1605,8 @@ config STM32_STM32F30XX
 config STM32_STM32F302
 	bool
 	default n
+	select STM32_HAVE_ADC2
+	select STM32_HAVE_ADC2_DMA
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -1614,6 +1617,7 @@ config STM32_STM32F303
 	bool
 	default n
 	select STM32_HAVE_ADC2
+	select STM32_HAVE_ADC2_DMA
 	select STM32_HAVE_CCM
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_TIM7
@@ -6949,6 +6953,12 @@ config STM32_HRTIM_DISABLE_CHARDRV
 		In most cases we do not need HRTIM Character Driver, so we can disable it
 		and save some memory.
 
+config STM32_HRTIM_NO_ENABLE_TIMERS
+	bool "Do not enable HRTIM timers at startup"
+	default n
+	---help---
+		Do not enable HRTIM timers at startup
+
 menuconfig STM32_HRTIM_ADC
 	bool "HRTIM ADC Triggering"
 	default n
@@ -7558,15 +7568,20 @@ config STM32_ADC_NO_STARTUP_CONV
 
 config STM32_ADC_NOIRQ
 	bool "Do not use default ADC interrupts"
-	depends on STM32_STM32F33XX
 	default n
 	---help---
 		Do not use default ADC interrupts handlers.
-		Only for STM32_STM32F33XX at this moment.
+
+config STM32_ADC_LL_OPS
+	bool "ADC low-level operations"
+	default n
+	---help---
+		Enable low-level ADC ops.
 
 config STM32_ADC_CHANGE_SAMPLETIME
 	bool "ADC sample time configuration"
 	default n
+	depends on STM32_ADC_LL_OPS
 	---help---
 		Enable ADC sample time configuration (SMPRx registers).
 
@@ -7579,6 +7594,14 @@ config STM32_ADC1_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on STM32_ADC1_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
 config STM32_ADC2_DMA
 	bool "ADC2 DMA"
 	depends on STM32_ADC2 && STM32_HAVE_ADC2_DMA
@@ -7587,6 +7610,14 @@ config STM32_ADC2_DMA
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
+
+config STM32_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on STM32_ADC2_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
 
 config STM32_ADC3_DMA
 	bool "ADC3 DMA"
@@ -7597,6 +7628,14 @@ config STM32_ADC3_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC3_DMA_CFG
+	int "ADC3 DMA configuration"
+	depends on STM32_ADC3_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
 config STM32_ADC4_DMA
 	bool "ADC4 DMA"
 	depends on STM32_ADC4 && STM32_HAVE_ADC4_DMA
@@ -7606,21 +7645,45 @@ config STM32_ADC4_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
-config STM32_ADC1_INJECTED
-	bool "ADC1 INJECTED"
-	depends on STM32_ADC1 && STM32_STM32F33XX
-	default n
+config STM32_ADC4_DMA_CFG
+	int "ADC4 DMA configuration"
+	depends on STM32_ADC4_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
+
+config STM32_ADC1_INJECTED_CHAN
+	int "ADC1 injected channels"
+	depends on STM32_ADC1
+	range 0 4
+	default 0
 	---help---
 		Support for ADC1 injected channels.
-		Only for STM32_STM32F33XX at this moment.
 
-config STM32_ADC2_INJECTED
-	bool "ADC2 INJECTED"
-	depends on STM32_ADC2 && STM32_STM32F33XX
-	default n
+config STM32_ADC2_INJECTED_CHAN
+	int "ADC2 injected channels"
+	depends on STM32_ADC2
+	range 0 4
+	default 0
 	---help---
 		Support for ADC2 injected channels.
-		Only for STM32_STM32F33XX at this moment.
+
+config STM32_ADC3_INJECTED_CHAN
+	int "ADC3 injected channels"
+	depends on STM32_ADC3
+	range 0 4
+	default 0
+	---help---
+		Support for ADC3 injected channels.
+
+config STM32_ADC4_INJECTED_CHAN
+	int "ADC4 injected channels"
+	depends on STM32_ADC4
+	range 0 4
+	default 0
+	---help---
+		Support for ADC4 injected channels.
 
 endmenu
 

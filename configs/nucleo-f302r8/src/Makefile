@@ -56,4 +56,8 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_NUCLEOF302R8_HIGHPRI),y)
+CSRCS += stm32_highpri.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

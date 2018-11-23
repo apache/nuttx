@@ -57,6 +57,8 @@
 
 /* This file supports only the STM32 F2 family (although it is identical to
  * the corresponding F4 file).
+ *
+ * TODO: merge this with stm32f40xxx_dma.c (STM32 DMA IP core version 2)
  */
 
 #if defined(CONFIG_STM32_STM32F20XX)

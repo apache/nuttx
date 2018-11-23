@@ -237,4 +237,9 @@ endchoice
 
 endif # STM32F429I_DISCO_ILI9341_FBIFACE
 endif # STM32F429I_DISCO_ILI9341
+
+config STM32F429I_DISCO_HIGHPRI
+       bool "High priority interrupt test"
+       default n
+
 endif # ARCH_BOARD_STM32F429I_DISCO

@@ -55,7 +55,6 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
     defined(CONFIG_STM32_STM32L15XX)
@@ -755,5 +754,38 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
   dmainfo("   CMAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CMAR_OFFSET, regs->cmar);
 }
 #endif
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+
+/****************************************************************************
+ * Name: stm32_dma_intack
+ *
+ * Description:
+ *   Public visible interface to acknowledge interrupts on DMA channel
+ *
+ ****************************************************************************/
+
+void stm32_dma_intack(unsigned int chndx, uint32_t isr)
+{
+  struct stm32_dma_s *dmach = &g_dma[chndx];
+
+  dmabase_putreg(dmach, STM32_DMA_IFCR_OFFSET, isr);
+}
+
+/****************************************************************************
+ * Name: stm32_dma_intget
+ *
+ * Description:
+ *   Public visible interface to get pending interrupts from DMA channel
+ *
+ ****************************************************************************/
+
+uint32_t stm32_dma_intget(unsigned int chndx)
+{
+  struct stm32_dma_s *dmach = &g_dma[chndx];
+
+  return dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET) & DMA_ISR_CHAN_MASK(dmach->chan);
+}
+#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
 
 #endif /* CONFIG_STM32_STM32F10XX */

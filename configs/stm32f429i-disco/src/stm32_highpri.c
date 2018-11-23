@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f334r8/src/stm32_highpri.c
+ * configs/stm32f429i-disco/src/stm32_highpri.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -58,12 +58,11 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 
-#include "stm32_hrtim.h"
 #include "stm32_pwm.h"
 #include "stm32_adc.h"
 #include "stm32_dma.h"
 
-#ifdef CONFIG_NUCLEOF334R8_HIGHPRI
+#ifdef CONFIG_STM32F429I_DISCO_HIGHPRI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,25 +86,14 @@
 #endif
 
 #ifdef CONFIG_STM32_ADC1_DMA
-#  if defined(CONFIG_STM32_HRTIM1) && defined(CONFIG_STM32_HRTIM_TIMA)
-#    define HIGHPRI_HAVE_HRTIM
-#  endif
 #  if defined(CONFIG_STM32_TIM1_PWM)
 #    define HIGHPRI_HAVE_TIM1
 #  endif
 #  if (CONFIG_STM32_ADC1_DMA_CFG != 1)
 #    error ADC1 DMA must be configured in Circular Mode
 #  endif
-#  if defined(HIGHPRI_HAVE_HRTIM) && defined(HIGHPRI_HAVE_TIM1)
-#    error HRTIM TIM A or TIM1 !
-#  elif !defined(HIGHPRI_HAVE_HRTIM) && !defined(HIGHPRI_HAVE_TIM1)
-#    error "Needs HRTIM TIMA or TIM1 to trigger ADC DMA"
-#  endif
-#endif
-
-#ifdef HIGHPRI_HAVE_HRTIM
-#  if !defined(CONFIG_STM32_HRTIM_ADC1_TRG1) || !defined(CONFIG_STM32_HRTIM_ADC)
-#    error
+#  if !defined(HIGHPRI_HAVE_TIM1)
+#    error "Needs TIM1 to trigger ADC DMA"
 #  endif
 #endif
 
@@ -116,8 +104,8 @@
 #endif
 
 #if (CONFIG_STM32_ADC1_INJECTED_CHAN > 0)
-#  if (CONFIG_STM32_ADC1_INJECTED_CHAN > 2)
-#    error Max 2 injected channels supported for now
+#  if (CONFIG_STM32_ADC1_INJECTED_CHAN > 1)
+#    error Max 1 injected channels supported for now
 #  else
 #    define HIGHPRI_HAVE_INJECTED
 #  endif
@@ -132,7 +120,7 @@
 #ifndef CONFIG_STM32_ADC1_DMA
 #  define REG_NCHANNELS (1)
 #else
-#  define REG_NCHANNELS (3)
+#  define REG_NCHANNELS (1)
 #endif
 
 #define ADC1_NCHANNELS  (REG_NCHANNELS + INJ_NCHANNELS)
@@ -151,9 +139,6 @@
 struct highpri_s
 {
   FAR struct stm32_adc_dev_s *adc1;
-#ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s     *hrtim;
-#endif
 #ifdef HIGHPRI_HAVE_TIM1
   struct stm32_pwm_dev_s     *pwm;
 #endif
@@ -177,16 +162,9 @@ struct highpri_s
 
 static const uint8_t g_chanlist1[DEV1_NCHANNELS] =
 {
-  1,
-#ifdef CONFIG_STM32_ADC1_DMA
-  2,
-  11,
-#endif
+  5,
 #if INJ_NCHANNELS > 0
-  7,
-#endif
-#if INJ_NCHANNELS > 1
-  6
+  13,
 #endif
 };
 
@@ -194,16 +172,9 @@ static const uint8_t g_chanlist1[DEV1_NCHANNELS] =
 
 static const uint32_t g_pinlist1[DEV1_NCHANNELS] =
 {
-  GPIO_ADC1_IN1,                /* PA0/A0 */
-#ifdef CONFIG_STM32_ADC1_DMA
-  GPIO_ADC1_IN2,                /* PA1/A1 */
-  GPIO_ADC1_IN11,               /* PB0/A3 */
-#endif
+  GPIO_ADC1_IN5,                 /* PA5 */
 #if INJ_NCHANNELS > 0
-  GPIO_ADC1_IN7,                /* PC1/A4 */
-#endif
-#if INJ_NCHANNELS > 1
-  GPIO_ADC1_IN6                 /* PC0/A5 */
+  GPIO_ADC1_IN13,                /* PC3 */
 #endif
 };
 
@@ -222,7 +193,7 @@ static struct highpri_s g_highpri;
  ****************************************************************************/
 
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
-void adc12_handler(void)
+void adc_handler(void)
 {
   FAR struct stm32_adc_dev_s *adc = g_highpri.adc1;
   float ref = ADC_REF_VOLTAGE;
@@ -232,7 +203,7 @@ void adc12_handler(void)
   int i = 0;
 #endif
 
-  /* Get pending ADC interrupts */
+  /* Get pending ADC1 interrupts */
 
   pending = ADC_INT_GET(adc);
 
@@ -272,7 +243,7 @@ void adc12_handler(void)
 #ifdef HIGHPRI_HAVE_INJECTED
   /* Injected channel end of sequence */
 
-  if (pending & ADC_ISR_JEOS)
+  if (pending & ADC_ISR_JEOC)
     {
       /* Increase injected sequence counter */
 
@@ -302,7 +273,7 @@ irq_out:
 #endif
 
 /****************************************************************************
- * Name: dmach1_handler
+ * Name: dma2s0_handler
  *
  * Description:
  *   This is the handler for the high speed ADC interrupt using DMA transfer.
@@ -310,14 +281,14 @@ irq_out:
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_ADC1_DMA
-void dma1ch1_handler(void)
+void dma2s0_handler(void)
 {
   float ref = ADC_REF_VOLTAGE;
   float bit = ADC_VAL_MAX;
-  uint32_t pending;
+  uint8_t pending;
   int i;
 
-  pending = stm32_dma_intget(STM32_DMA1_CHAN1);
+  pending = stm32_dma_intget(DMA2, DMA_STREAM0);
 
   if (g_highpri.lock == true)
     {
@@ -338,7 +309,7 @@ void dma1ch1_handler(void)
 irq_out:
   /* Clear DMA pending interrupts */
 
-  stm32_dma_intack(STM32_DMA1_CHAN1, pending);
+  stm32_dma_intack(DMA2, DMA_STREAM0, pending);
 }
 #endif
 
@@ -356,9 +327,6 @@ irq_out:
 
 int highpri_main(int argc, char *argv[])
 {
-#ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s *hrtim;
-#endif
 #ifdef HIGHPRI_HAVE_TIM1
   struct stm32_pwm_dev_s *pwm1;
 #endif
@@ -393,24 +361,6 @@ int highpri_main(int argc, char *argv[])
     }
 
   highpri->adc1 = (struct stm32_adc_dev_s *)adc1->ad_priv;
-
-#ifdef HIGHPRI_HAVE_HRTIM
-  /* Configure HRTIM */
-
-  hrtim = stm32_hrtiminitialize();
-  if (hrtim == NULL)
-    {
-      printf("ERROR: Failed to get HRTIM1 interface\n");
-      ret = EXIT_FAILURE;
-      goto errout;
-    }
-
-  highpri->hrtim = hrtim;
-
-  /* Set Timer A Period */
-
-  HRTIM_PER_SET(hrtim, HRTIM_TIMER_TIMA, 0xFFD0);
-#endif  /* HIGHPRI_HAVE_HRTIM */
 
 #ifdef HIGHPRI_HAVE_TIM1
   /* Initialize TIM1 */
@@ -454,9 +404,9 @@ int highpri_main(int argc, char *argv[])
 #endif  /* HIGHPRI_HAVE_TIM1 */
 
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
-  /* Attach ADC12 ram vector if no DMA or injected channels support */
+  /* Attach ADC ram vector if no DMA or injected channels support */
 
-  ret = up_ramvec_attach(STM32_IRQ_ADC12, adc12_handler);
+  ret = up_ramvec_attach(STM32_IRQ_ADC, adc_handler);
   if (ret < 0)
     {
       fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n", ret);
@@ -464,9 +414,9 @@ int highpri_main(int argc, char *argv[])
       goto errout;
     }
 
-  /* Set the priority of the ADC12 interrupt vector */
+  /* Set the priority of the ADC interrupt vector */
 
-  ret = up_prioritize_irq(STM32_IRQ_ADC12, NVIC_SYSH_HIGH_PRIORITY);
+  ret = up_prioritize_irq(STM32_IRQ_ADC, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
       fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n", ret);
@@ -474,13 +424,13 @@ int highpri_main(int argc, char *argv[])
       goto errout;
     }
 
-  up_enable_irq(STM32_IRQ_ADC12);
+  up_enable_irq(STM32_IRQ_ADC);
 #endif
 
 #ifdef CONFIG_STM32_ADC1_DMA
-  /* Attach DMA1 CH1 ram vector if DMA */
+  /* Attach DMA2 STREAM0 ram vector if DMA */
 
-  ret = up_ramvec_attach(STM32_IRQ_DMA1CH1, dma1ch1_handler);
+  ret = up_ramvec_attach(STM32_IRQ_DMA2S0, dma2s0_handler);
   if (ret < 0)
     {
       fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n", ret);
@@ -488,9 +438,9 @@ int highpri_main(int argc, char *argv[])
       goto errout;
     }
 
-  /* Set the priority of the DMA1CH1 interrupt vector */
+  /* Set the priority of the DMA2 STREAM0 interrupt vector */
 
-  ret = up_prioritize_irq(STM32_IRQ_DMA1CH1, NVIC_SYSH_HIGH_PRIORITY);
+  ret = up_prioritize_irq(STM32_IRQ_DMA2S0, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
       fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n", ret);
@@ -498,7 +448,7 @@ int highpri_main(int argc, char *argv[])
       goto errout;
     }
 
-  up_enable_irq(STM32_IRQ_DMA1CH1);
+  up_enable_irq(STM32_IRQ_DMA2S0);
 #endif
 
   /* Setup ADC hardware */
@@ -510,25 +460,25 @@ int highpri_main(int argc, char *argv[])
 
   ADC_INT_ENABLE(highpri->adc1, ADC_IER_EOC);
 #else
+  /* Note: ADC and DMA must be reset after overrun occurs.
+   *       For this example we assume that overrun will not occur.
+   *       This is true only if DMA and ADC trigger are properly configured.
+   *       DMA configuration must be done before ADC trigger starts!
+   */
+
   /* Register ADC buffer for DMA transfer */
 
   ADC_REGBUF_REGISTER(highpri->adc1, g_highpri.r_val, REG_NCHANNELS);
 #endif
 
 #ifdef HIGHPRI_HAVE_INJECTED
-  /* Enable ADC injected sequence end interrupts */
+  /* Enable ADC injected channels end of conversion interrupts */
 
-  ADC_INT_ENABLE(highpri->adc1, ADC_IER_JEOS);
-#endif
-
-#ifdef HIGHPRI_HAVE_HRTIM
-  /* Enable HRTIM TIMA after ADC configuration */
-
-  HRTIM_TIM_ENABLE(highpri->hrtim, HRTIM_TIMER_TIMA, true);
+  ADC_INT_ENABLE(highpri->adc1, ADC_IER_JEOC);
 #endif
 
 #ifdef HIGHPRI_HAVE_TIM1
-  /* Enable timer counter after ADC configuration */
+  /* Enable timer counter after ADC and DMA configuration */
 
   PWM_TIM_ENABLE(pwm1, true);
 #endif
@@ -591,4 +541,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_NUCLEOF334R8_HIGHPRI */
+#endif /* CONFIG_STM32F429I_DISCO_HIGHPRI */

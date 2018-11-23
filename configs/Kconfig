@@ -2094,6 +2094,9 @@ endif
 if ARCH_BOARD_NUCLEO_F091RC
 source "configs/nucleo-f091rc/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_F302R8
+source "configs/nucleo-f302r8/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F303RE
 source "configs/nucleo-f303re/Kconfig"
 endif

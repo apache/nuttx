@@ -268,13 +268,6 @@
 
 #if defined(CONFIG_EXAMPLES_SMPS)
 
-/* ADC configuration ******************************************************/
-
-#define ADC1_INJECTED_CHAN 2
-#define ADC1_EXTSEL_VALUE 0
-#define ADC1_SMP2 ADC_SMPR_61p5
-#define ADC1_SMP4 ADC_SMPR_61p5
-
 /* HRTIM configuration ******************************************************/
 
 /* Timer A configuration - Buck operations */

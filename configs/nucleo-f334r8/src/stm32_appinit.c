@@ -96,7 +96,6 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-#ifndef CONFIG_NUCLEOF334R8_HIGHPRI
 #ifdef HAVE_LEDS
   /* Register the LED driver */
 
@@ -146,7 +145,6 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32_opamp_setup failed: %d\n", ret);
     }
-#endif
 #endif
 
   UNUSED(ret);
