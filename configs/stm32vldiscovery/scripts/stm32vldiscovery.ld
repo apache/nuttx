@@ -34,7 +34,7 @@
  *
  ****************************************************************************/
 
-/* The STM32F100RC has 256kB of FLASH beginning at address 0x08000000 and 24kB
+/* The STM32F100RB has 128kB of FLASH beginning at address 0x08000000 and 8kB
  * of SRAM beginning at address 0x20000000.  When booting from FLASH, FLASH
  * memory is aliased to address 0x00000000 where the code expects to begin
  * execution by jumping to the entry point in the 0x08000000 address range.

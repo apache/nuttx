@@ -9,13 +9,13 @@ Contents
 
   - LEDs
   - UARTs
-  - "STMicro STM32F100RC generic" specific Configuration Options
+  - "STMicro STM32F100RB generic" specific Configuration Options
   - Configurations
 
 LEDs
 ====
 
-It is asumed that STMicro STM32F100RC generic board board has one LED on PA0.
+It is asumed that STMicro STM32F100RB generic board board has one LED on PA0.
 You should configure the port and pin number in
 configs/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
@@ -47,7 +47,7 @@ configured on pins PA10 and PA9, respectively. Then connect the RX pin of
 your USB/Serial adapter to TX pin (PA9) and the TX pin of your adapter to
 RX pin (PA10) of your board besides, of course, the GND pin.
 
-"STMicro STM32F100RC generic" specific Configuration Options
+"STMicro STM32F100RB generic" specific Configuration Options
 ============================================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -94,7 +94,7 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 
     CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_RAM_SIZE=24576 (24kB)
+       CONFIG_RAM_SIZE=8192 (8kB)
 
     CONFIG_RAM_START - The start address of installed DRAM
 
@@ -185,7 +185,7 @@ RX pin (PA10) of your board besides, of course, the GND pin.
       but without JNTRST.
     CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
 
-  STMicro STM32F100RC generic specific device driver settings
+  STMicro STM32F100RB generic specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -201,7 +201,7 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 Configurations
 ==============
 
-Each STMicro STM32F100RC generic configuration is maintained in a sub-directory
+Each STMicro STM32F100RB generic configuration is maintained in a sub-directory
 and can be selected as follow:
 
     tools/configure.sh stm32vldiscovery/<subdir>
