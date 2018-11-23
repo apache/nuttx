@@ -90,7 +90,7 @@ static FAR char *find_spaces(FAR char *ptr)
 
 int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 {
-  union dns_server_u u;
+  union dns_addr_u u;
   FAR FILE *stream;
   char line[DNS_MAX_LINE];
   FAR char *addrstr;

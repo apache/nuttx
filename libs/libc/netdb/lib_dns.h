@@ -62,10 +62,12 @@
 #  define CONFIG_NETDB_DNSCLIENT_ENTRIES 4
 #endif
 
-#define RESOLV_ENTRIES CONFIG_NETDB_DNSCLIENT_ENTRIES
-
 #ifndef CONFIG_NETDB_DNSCLIENT_MAXRESPONSE
 #  define CONFIG_NETDB_DNSCLIENT_MAXRESPONSE 96
+#endif
+
+#ifndef CONFIG_NETDB_DNSCLIENT_MAXIP
+#  define CONFIG_NETDB_DNSCLIENT_MAXIP 1
 #endif
 
 #ifndef CONFIG_NETDB_DNSCLIENT_NAMESIZE
@@ -91,7 +93,7 @@
  * alternative to sockaddr_storage.
  */
 
-union dns_server_u
+union dns_addr_u
 {
   struct sockaddr     addr;        /* Common address representation */
 #ifdef CONFIG_NET_IPv4
@@ -118,7 +120,7 @@ extern "C"
 #ifndef CONFIG_NETDB_RESOLVCONF
 /* The DNS server address */
 
-EXTERN union dns_server_u g_dns_server;
+EXTERN union dns_addr_u g_dns_server;
 EXTERN bool g_dns_address;     /* true: We have the address of the DNS server */
 #endif
 
@@ -184,19 +186,19 @@ int dns_bind(void);
  * Input Parameters:
  *   sd       - The socket descriptor previously initialized by dsn_bind().
  *   hostname - The hostname string to be resolved.
- *   addr     - The location to return the IP address associated with the
- *     hostname
- *   addrlen  - On entry, the size of the buffer backing up the 'addr'
- *     pointer.  On return, this location will hold the actual size of
- *     the returned address.
+ *   addr     - The location to return the IP addresses associated with the
+ *     hostname.
+ *   naddr    - On entry, the count of addresses backing up the 'addr'
+ *     pointer.  On return, this location will hold the actual count of
+ *     the returned addresses.
  *
  * Returned Value:
  *   Returns zero (OK) if the query was successful.
  *
  ****************************************************************************/
 
-int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
-              FAR socklen_t *addrlen);
+int dns_query(int sd, FAR const char *hostname, FAR union dns_addr_u *addr,
+              FAR int *naddr);
 
 /****************************************************************************
  * Name: dns_save_answer
@@ -206,8 +208,8 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
  *
  * Input Parameters:
  *   hostname - The hostname string to be cached.
- *   addr     - The IP address associated with the hostname
- *   addrlen  - The size of the of the IP address.
+ *   addr     - The IP addresses associated with the hostname.
+ *   naddr    - The count of the IP addresses.
  *
  * Returned Value:
  *   None
@@ -216,7 +218,7 @@ int dns_query(int sd, FAR const char *hostname, FAR struct sockaddr *addr,
 
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
 void dns_save_answer(FAR const char *hostname,
-                     FAR const struct sockaddr *addr, socklen_t addrlen);
+                     FAR const union dns_addr_u *addr, int naddr);
 #endif
 
 /****************************************************************************
@@ -227,11 +229,11 @@ void dns_save_answer(FAR const char *hostname,
  *
  * Input Parameters:
  *   hostname - The hostname string to be resolved.
- *   addr     - The location to return the IP address associated with the
- *     hostname
- *   addrlen  - On entry, the size of the buffer backing up the 'addr'
- *     pointer.  On return, this location will hold the actual size of
- *     the returned address.
+ *   addr     - The location to return the IP addresses associated with the
+ *     hostname.
+ *   naddr    - On entry, the count of addresses backing up the 'addr'
+ *     pointer.  On return, this location will hold the actual count of
+ *     the returned addresses.
  *
  * Returned Value:
  *   If the host name was successfully found in the DNS name resolution
@@ -242,8 +244,8 @@ void dns_save_answer(FAR const char *hostname,
  ****************************************************************************/
 
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
-                    FAR socklen_t *addrlen);
+int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
+                    FAR int *naddr);
 #endif
 
 #undef EXTERN

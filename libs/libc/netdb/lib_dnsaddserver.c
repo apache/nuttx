@@ -60,7 +60,7 @@
 #ifndef CONFIG_NETDB_RESOLVCONF
 /* The DNS server address */
 
-union dns_server_u g_dns_server;
+union dns_addr_u g_dns_server;
 bool g_dns_address;     /* true: We have the address of the DNS server */
 #endif
 

@@ -102,6 +102,13 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 		can be received by the DNS resolver.  The default is 96 but may
 		need to be larger on enterprise networks (perhaps 176).
 
+config NETDB_DNSCLIENT_MAXIP
+	int "Max number of IP addresses per host"
+	default 1
+	---help---
+		This setting determines the maximum number of IP addresses
+		stored to the name resolution cache for a given host.
+
 config NETDB_DNSCLIENT_RECV_TIMEOUT
 	int "DNS receive timeout"
 	default 30

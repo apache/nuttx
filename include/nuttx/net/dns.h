@@ -90,10 +90,12 @@
 #define DNS_RECTYPE_NSEC            47 /* RFC 4034 Next-Secure record */
 #define DNS_RECTYPE_NSEC3           50 /* RFC 5155 NSEC record version 3 */
 #define DNS_RECTYPE_NSEC3PARAM      51 /* RFC 5155 NSEC3 parameters */
+#define DNS_RECTYPE_OPENPGPKEY      61 /* RFC 7929 OpenPGP public key record */
 #define DNS_RECTYPE_PTR             12 /* RFC 1035 Pointer record */
 #define DNS_RECTYPE_RRSIG           46 /* RFC 4034 DNSSEC signature */
 #define DNS_RECTYPE_RP              17 /* RFC 1183 Responsible person */
 #define DNS_RECTYPE_SIG             24 /* RFC 2535 Signature */
+#define DNS_RECTYPE_SMIMEA          53 /* RFC 8162 S/MIME cert association */
 #define DNS_RECTYPE_SOA              6 /* RFC 1035 and RFC 2308 Start of [a zone of] authority record */
 #define DNS_RECTYPE_SRV             33 /* RFC 2782 Service locator */
 #define DNS_RECTYPE_SSHFP           44 /* RFC 4255 SSH Public Key Fingerprint */
@@ -101,7 +103,8 @@
 #define DNS_RECTYPE_TKEY           249 /* RFC 2930 Secret key record */
 #define DNS_RECTYPE_TLSA            52 /* RFC 6698 TLSA certificate association */
 #define DNS_RECTYPE_TSIG           250 /* RFC 2845 Transaction Signature */
-#define DNS_RECTYPE_TXT             16 /* RFC 1035[1] Text record */
+#define DNS_RECTYPE_TXT             16 /* RFC 1035 Text record */
+#define DNS_RECTYPE_URI            256 /* RFC 7553 Uniform Resource Identifier */
 
 #define DNS_RECTYPE_ALL            255 /* RFC 1035 All cached records */
 #define DNS_RECTYPE_AXFR           252 /* RFC 1035 Authoritative Zone Transfer */
@@ -156,7 +159,7 @@ struct dns_question_s
 
 /* The DNS answer message structure */
 
-struct dns_answer_s
+begin_packed_struct struct dns_answer_s
 {
   uint16_t type;
   uint16_t class;
@@ -172,7 +175,7 @@ struct dns_answer_s
     struct in6_addr ipv6;
 #endif
   } u;
-};
+} end_packed_struct;
 
 /* The type of the callback from dns_foreach_nameserver() */
 

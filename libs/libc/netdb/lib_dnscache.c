@@ -42,6 +42,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -65,15 +66,20 @@
  * Private Types
  ****************************************************************************/
 
-/* This described one entry in the cache of resolved hostnames */
+/* This described one entry in the cache of resolved hostnames.
+ *
+ * REVISIT: this consumes extra space, especially when multiple
+ * addresses per name are stored.
+ */
 
 struct dns_cache_s
 {
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-  time_t              ctime;      /* Creation time */
+  time_t            ctime;      /* Creation time */
 #endif
-  char                name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
-  union dns_server_u  addr;       /* Resolved address */
+  char              name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
+  uint8_t           naddr;      /* How many addresses per name */
+  union dns_addr_u  addr[CONFIG_NETDB_DNSCLIENT_MAXIP]; /* Resolved address */
 };
 
 /****************************************************************************
@@ -103,8 +109,8 @@ static struct dns_cache_s g_dns_cache[CONFIG_NETDB_DNSCLIENT_ENTRIES];
  *
  * Input Parameters:
  *   hostname - The hostname string to be cached.
- *   addr     - The IP address associated with the hostname
- *   addrlen  - The size of the of the IP address.
+ *   addr     - The IP addresses associated with the hostname.
+ *   naddr    - The count of the IP addresses.
  *
  * Returned Value:
  *   None
@@ -112,7 +118,7 @@ static struct dns_cache_s g_dns_cache[CONFIG_NETDB_DNSCLIENT_ENTRIES];
  ****************************************************************************/
 
 void dns_save_answer(FAR const char *hostname,
-                     FAR const struct sockaddr *addr, socklen_t addrlen)
+                     FAR const union dns_addr_u *addr, int naddr)
 {
   FAR struct dns_cache_s *entry;
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
@@ -120,6 +126,9 @@ void dns_save_answer(FAR const char *hostname,
 #endif
   int next;
   int ndx;
+
+  naddr = MIN(naddr, CONFIG_NETDB_DNSCLIENT_MAXIP);
+  DEBUGASSERT(naddr >= 1 && naddr <= UCHAR_MAX);
 
   /* Get exclusive access to the DNS cache */
 
@@ -161,7 +170,8 @@ void dns_save_answer(FAR const char *hostname,
 #endif
 
   strncpy(entry->name, hostname, CONFIG_NETDB_DNSCLIENT_NAMESIZE);
-  memcpy(&entry->addr.addr, addr, addrlen);
+  memcpy(&entry->addr, addr, naddr * sizeof(*addr));
+  entry->naddr = naddr;
 
   /* Save the updated head index */
 
@@ -177,11 +187,11 @@ void dns_save_answer(FAR const char *hostname,
  *
  * Input Parameters:
  *   hostname - The hostname string to be resolved.
- *   addr     - The location to return the IP address associated with the
- *     hostname
- *   addrlen  - On entry, the size of the buffer backing up the 'addr'
- *     pointer.  On return, this location will hold the actual size of
- *     the returned address.
+ *   addr     - The location to return the IP addresses associated with the
+ *     hostname.
+ *   naddr    - On entry, the count of addresses backing up the 'addr'
+ *     pointer.  On return, this location will hold the actual count of
+ *     the returned addresses.
  *
  * Returned Value:
  *   If the host name was successfully found in the DNS name resolution
@@ -191,8 +201,8 @@ void dns_save_answer(FAR const char *hostname,
  *
  ****************************************************************************/
 
-int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
-                    FAR socklen_t *addrlen)
+int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
+                    FAR int *naddr)
 {
   FAR struct dns_cache_s *entry;
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
@@ -220,8 +230,6 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 
   ret = clock_gettime(DNS_CLOCK, &now);
 #endif
-
-  /* REVISIT: This is not thread safe */
 
   for (ndx = g_dns_tail; ndx != g_dns_head; ndx = next)
     {
@@ -263,41 +271,17 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 
           if (strncmp(hostname, entry->name, CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
             {
-              socklen_t inlen;
-
               /* We have a match.  Return the resolved host address */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-              if (entry->addr.addr.sa_family == AF_INET)
-#endif
-                {
-                   inlen = sizeof(struct sockaddr_in);
-                }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-              else
-#endif
-                {
-                   inlen = sizeof(struct sockaddr_in6);
-                }
-#endif
               /* Make sure that the address will fit in the caller-provided
                * buffer.
                */
 
-              if (*addrlen < inlen)
-                {
-                  ret = -ERANGE;
-                  goto errout_with_sem;
-                }
+              *naddr = MIN(*naddr, entry->naddr);
 
               /* Return the address information */
 
-              memcpy(addr, &entry->addr.addr, inlen);
-              *addrlen = inlen;
+              memcpy(addr, &entry->addr, *naddr * sizeof(*addr));
 
               dns_semgive();
               return OK;
@@ -307,7 +291,6 @@ int dns_find_answer(FAR const char *hostname, FAR struct sockaddr *addr,
 
   ret = -ENOENT;
 
-errout_with_sem:
   dns_semgive();
   return ret;
 }

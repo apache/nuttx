@@ -66,7 +66,7 @@
 
 struct hostent_info_s
 {
-  FAR char *hi_addrlist[2];
+  FAR char *hi_addrlist[CONFIG_NETDB_DNSCLIENT_MAXIP + 1];
   char hi_data[1];
 };
 
@@ -360,9 +360,11 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
   FAR char *ptr;
   FAR void *addrdata;
   socklen_t addrlen;
+  int naddr;
   int addrtype;
   int namelen;
   int ret;
+  int i;
 
   /* Verify that we have a buffer big enough to get started (it still may not
    * be big enough).
@@ -379,13 +381,20 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
   ptr     = info->hi_data;
   buflen -= (sizeof(struct hostent_info_s) - 1);
 
+  /* Verify again that there is space for at least one address. */
+
+  if (buflen < sizeof(union dns_addr_u))
+    {
+      return -ERANGE;
+    }
+
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
   /* Try to get the host address using the DNS name server */
 
-  addrlen = buflen;
-  ret = dns_find_answer(name, (FAR struct sockaddr *)ptr, &addrlen);
+  naddr = buflen / sizeof(union dns_addr_u);
+  ret = dns_find_answer(name, (FAR union dns_addr_u *)ptr, &naddr);
   if (ret < 0)
     {
       /* No, nothing found in the cache */
@@ -393,41 +402,45 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       return ret;
     }
 
-  /* Get the address type; verify the address size. */
+  DEBUGASSERT(naddr <= CONFIG_NETDB_DNSCLIENT_MAXIP);
 
+  /* Get the address type. */
+
+  for (i = 0; i < naddr; i++)
+    {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-   if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
+      if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
 #endif
-    {
-      DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
-      addrlen  = sizeof(struct sockaddr_in);
-      addrtype = AF_INET;
-      addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
-    }
+        {
+          addrlen  = sizeof(struct sockaddr_in);
+          addrtype = AF_INET;
+          addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
+        }
 #endif
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else
+      else
 #endif
-    {
-      DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
-      addrlen  = sizeof(struct sockaddr_in6);
-      addrtype = AF_INET6;
-      addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
+        {
+          addrlen  = sizeof(struct sockaddr_in6);
+          addrtype = AF_INET6;
+          addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
+        }
+#endif
+
+      /* REVISIT: This assumes addresses are all either IPv4 or IPv6. */
+
+      info->hi_addrlist[i] = addrdata;
+      host->h_addrtype     = addrtype;
+      host->h_length       = addrlen;
+
+      ptr                 += sizeof(union dns_addr_u);
+      buflen              -= sizeof(union dns_addr_u);
     }
-#endif
 
-  /* Yes.. Return the address that we obtained from the DNS cache. */
-
-  info->hi_addrlist[0] = addrdata;
-  host->h_addr_list    = info->hi_addrlist;
-  host->h_addrtype     = addrtype;
-  host->h_length       = addrlen;
-
-  ptr                 += addrlen;
-  buflen              -= addrlen;
+  host->h_addr_list        = info->hi_addrlist;
 
   /* And copy name */
 
@@ -459,7 +472,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 static int lib_dns_query(FAR const char *hostname,
-                         FAR struct sockaddr *addr, socklen_t *addrlen)
+                         FAR union dns_addr_u *addr, int *naddr)
 {
   int sd;
   int ret;
@@ -474,7 +487,7 @@ static int lib_dns_query(FAR const char *hostname,
 
   /* Perform the query to get the IP address */
 
-  ret = dns_query(sd, hostname, addr, addrlen);
+  ret = dns_query(sd, hostname, addr, naddr);
 
   /* Release the socket */
 
@@ -509,9 +522,11 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
   FAR char *ptr;
   FAR void *addrdata;
   socklen_t addrlen;
+  int naddr;
   int addrtype;
   int namelen;
   int ret;
+  int i;
 
   /* Verify that we have a buffer big enough to get started (it still may not
    * be big enough).
@@ -528,26 +543,36 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
   ptr     = info->hi_data;
   buflen -= (sizeof(struct hostent_info_s) - 1);
 
+  /* Verify again that there is space for at least one address. */
+
+  if (buflen < sizeof(union dns_addr_u))
+    {
+      return -ERANGE;
+    }
+
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
   /* Try to get the host address using the DNS name server */
 
-  addrlen = buflen;
-  ret = lib_dns_query(name, (FAR struct sockaddr *)ptr, &addrlen);
-
-  /* Was the DNS lookup successful? */
-
-  if (ret >= 0)
+  naddr = buflen / sizeof(union dns_addr_u);
+  ret = lib_dns_query(name, (FAR union dns_addr_u *)ptr, &naddr);
+  if (ret < 0)
     {
-      /* Get the address type; verify the address size. */
+      return ret;
+    }
 
+  /* We can read more than maximum, limit here. */
+
+  naddr = MIN(naddr, CONFIG_NETDB_DNSCLIENT_MAXIP);
+
+  for (i = 0; i < naddr; i++)
+    {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
       if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
 #endif
         {
-          DEBUGASSERT(addrlen == sizeof(struct sockaddr_in));
           addrlen  = sizeof(struct sockaddr_in);
           addrtype = AF_INET;
           addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
@@ -559,40 +584,39 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
       else
 #endif
         {
-          DEBUGASSERT(addrlen == sizeof(struct sockaddr_in6));
           addrlen  = sizeof(struct sockaddr_in6);
           addrtype = AF_INET6;
           addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
         }
 #endif
 
-      /* Yes.. Return the address that we obtained from the DNS name server. */
+      /* REVISIT: This assumes addresses are all either IPv4 or IPv6. */
 
-      info->hi_addrlist[0] = addrdata;
-      host->h_addr_list    = info->hi_addrlist;
+      info->hi_addrlist[i] = addrdata;
       host->h_addrtype     = addrtype;
       host->h_length       = addrlen;
 
-      ptr                 += addrlen;
-      buflen              -= addrlen;
-
-      /* And copy name */
-
-      namelen = strlen(name);
-      if ((namelen + 1) > buflen)
-        {
-          return -ERANGE;
-        }
-
-      strncpy(ptr, name, buflen);
-
-      /* Set the address to h_name */
-
-      host->h_name = ptr;
-      return OK;
+      ptr                 += sizeof(union dns_addr_u);
+      buflen              -= sizeof(union dns_addr_u);
     }
 
-  return ret;
+  host->h_addr_list        = info->hi_addrlist;
+
+  /* And copy name */
+
+  namelen = strlen(name);
+  if ((namelen + 1) > buflen)
+    {
+      return -ERANGE;
+    }
+
+  strncpy(ptr, name, buflen);
+
+  /* Set the address to h_name */
+
+  host->h_name = ptr;
+
+  return OK;
 }
 #endif /* CONFIG_NETDB_DNSCLIENT */
 
