@@ -248,7 +248,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   int ret;
 
   DEBUGASSERT(set != NULL && rtcb->waitdog == NULL);
-  sched_lock();  /* Should not be necessary */
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
@@ -307,7 +306,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            */
 
           leave_critical_section(flags);
-          sched_unlock();
           return -ECANCELED;
        }
 #endif
@@ -448,7 +446,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       leave_critical_section(flags);
     }
 
-  sched_unlock();
   return ret;
 }
 
