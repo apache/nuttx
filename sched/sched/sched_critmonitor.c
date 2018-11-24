@@ -52,11 +52,11 @@
 #define CRITMON_PREEMPT       (1 << 0)  /* Bit 0:  Pre-emption is disabled */
 #define CRITMON_CSECTION      (1 << 1)  /* Bit 1:  In a critical section */
 
-#define DISABLE_PREEMPT(t)    do { (t)->flags |= CRITMON_PREEMPT; } while (0)
-#define ENTER_CSECTION(t)     do { (t)->flags |= CRITMON_PREEMPT; } while (0)
+#define DISABLE_PREEMPT(t)    do { (t)->crit_flags |= CRITMON_PREEMPT; } while (0)
+#define ENTER_CSECTION(t)     do { (t)->crit_flags |= CRITMON_CSECTION; } while (0)
 
-#define ENABLE_PREEMPT(t)     do { (t)->flags &= ~CRITMON_PREEMPT; } while (0)
-#define LEAVE_CSECTION(t)     do { (t)->flags &= ~CRITMON_PREEMPT; } while (0)
+#define ENABLE_PREEMPT(t)     do { (t)->crit_flags &= ~CRITMON_PREEMPT; } while (0)
+#define LEAVE_CSECTION(t)     do { (t)->crit_flags &= ~CRITMON_CSECTION; } while (0)
 
 #define PREEMPT_ISDISABLED(t) (((t)->crit_flags & CRITMON_PREEMPT) != 0)
 #define IN_CSECTION(t)        (((t)->crit_flags & CRITMON_CSECTION) != 0)

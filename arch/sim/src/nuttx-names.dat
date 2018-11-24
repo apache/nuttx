@@ -6,6 +6,7 @@ basename       NXbasename
 calloc         NXcalloc
 chdir          NXchdir
 clearenv       NXclearenv
+clock          NXclock
 clock_gettime  NXclock_gettime
 close          NXclose
 closedir       NXclosedir

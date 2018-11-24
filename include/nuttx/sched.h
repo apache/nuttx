@@ -637,7 +637,8 @@ struct tcb_s
 #endif
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_CRITMONITOR) || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
   int16_t  irqcount;                     /* 0=Not in critical section           */
 #endif
 #ifdef CONFIG_CANCELLATION_POINTS

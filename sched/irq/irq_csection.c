@@ -411,14 +411,22 @@ irqstate_t enter_critical_section(void)
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
 
-      /* Yes.. Note that we have entered the critical section */
+      /* Have we just entered the critical section?  Or is this a nested
+       * call to enter_critical_section.
+       */
+
+      DEBUGASSERT(rtcb->irqcount >= 0 && rtcb->irqcount < UINT16_MAX);
+      if (++rtcb->irqcount == 1)
+        {
+          /* Note that we have entered the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-      sched_critmon_csection(rtcb, true);
+          sched_critmon_csection(rtcb, true);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-      sched_note_csection(rtcb, true);
+          sched_note_csection(rtcb, true);
 #endif
+        }
     }
 
   /* Return interrupt status */
@@ -591,14 +599,20 @@ void leave_critical_section(irqstate_t flags)
       FAR struct tcb_s *rtcb = this_task();
       DEBUGASSERT(rtcb != NULL);
 
-      /* Yes.. Note that we have left the critical section */
+      /* Have we left entered the critical section?  Or are we still nested. */
+
+      DEBUGASSERT(rtcb->irqcount > 0);
+      if (--rtcb->irqcount <= 0)
+        {
+          /* Note that we have left the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-      sched_critmon_csection(rtcb, false);
+          sched_critmon_csection(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-      sched_note_csection(rtcb, false);
+          sched_note_csection(rtcb, false);
 #endif
+        }
     }
 
   /* Restore the previous interrupt state. */

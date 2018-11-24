@@ -1,7 +1,8 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2012, 2014, 2016, 2018 Gregory Nutt. All
+#     rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -89,6 +90,10 @@ endif
 
 ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
+endif
+
+ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
+  HOSTSRCS += up_critmon.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)

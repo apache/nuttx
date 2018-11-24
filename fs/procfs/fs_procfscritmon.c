@@ -304,19 +304,24 @@ static ssize_t critmon_read(FAR struct file *filep, FAR char *buffer,
   attr = (FAR struct critmon_file_s *)filep->f_priv;
   DEBUGASSERT(attr);
 
-  ret = 0;
+  ret    = 0;
+  offset = filep->f_pos;
 
 #ifdef CONFIG_SMP
   /* Get the status for each CPU  */
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
-      ret += critmon_read_cpu(attr, buffer + ret, buflen -ret,
-                                  &offset, cpu);
+      ssize_t nbytes = critmon_read_cpu(attr, buffer + ret, buflen - ret,
+                                        &offset, cpu);
+
+      ret += nbytes;
       if (ret > buflen)
         {
           break;
         }
+
+      offset += nbytes;
     }
 
 #else
