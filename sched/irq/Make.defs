@@ -44,6 +44,8 @@ endif
 endif
 else ifeq ($(CONFIG_SCHED_INSTRUMENTATION_CSECTION),y)
 CSRCS += irq_csection.c
+else ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
+CSRCS += irq_csection.c
 endif
 
 ifeq ($(CONFIG_SCHED_IRQMONITOR),y)

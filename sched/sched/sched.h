@@ -496,6 +496,15 @@ void sched_tasklist_unlock(irqstate_t lock);
 void weak_function sched_process_cpuload(void);
 #endif
 
+/* Critical section monitor */
+
+#ifdef CONFIG_SCHED_CRITMONITOR
+void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state);
+void sched_critmon_csection(FAR struct tcb_s *tcb, bool state);
+void sched_critmon_resume(FAR struct tcb_s *tcb);
+void sched_critmon_suspend(FAR struct tcb_s *tcb);
+#endif
+
 /* TCB operations */
 
 bool sched_verifytcb(FAR struct tcb_s *tcb);

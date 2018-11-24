@@ -103,11 +103,15 @@ int sched_unlock(void)
 
       if (rtcb->lockcount <= 0)
         {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           /* Note that we no longer have pre-emption disabled. */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+          sched_critmon_premption(rtcb, false);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
 #endif
+
           /* Set the lock count to zero */
 
           rtcb->lockcount = 0;
@@ -254,11 +258,15 @@ int sched_unlock(void)
 
       if (rtcb->lockcount <= 0)
         {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           /* Note that we no longer have pre-emption disabled. */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+          sched_critmon_premption(rtcb, false);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
 #endif
+
           /* Set the lock count to zero */
 
           rtcb->lockcount = 0;

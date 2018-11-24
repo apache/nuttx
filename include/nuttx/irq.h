@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/irq.h
  *
- *   Copyright (C) 2007-2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013, 2016-2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,7 +197,8 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
 irqstate_t enter_critical_section(void);
 #else
 #  define enter_critical_section(f) up_irq_save(f)
@@ -223,7 +225,8 @@ irqstate_t enter_critical_section(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
 void leave_critical_section(irqstate_t flags);
 #else
 #  define leave_critical_section(f) up_irq_restore(f)

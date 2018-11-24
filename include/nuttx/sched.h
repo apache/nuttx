@@ -696,6 +696,16 @@ struct tcb_s
   FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 
+  /* Pre-emption monitor support ************************************************/
+
+#ifdef CONFIG_SCHED_CRITMONITOR
+  uint32_t crit_flags;                   /* Flag values used by the monitor     */
+  uint32_t premp_start;                  /* Time when preemption disabled       */
+  uint32_t premp_max;                    /* Max time preemption disabled        */
+  uint32_t crit_start;                   /* Time critical section entered       */
+  uint32_t crit_max;                     /* Max time in critical section        */
+#endif
+
   /* Library related fields *****************************************************/
 
   int pterrno;                           /* Current per-thread errno            */
@@ -931,7 +941,8 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
  ********************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SMP)
+    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SCHED_CRITMONITOR) || \
+    defined(CONFIG_SMP)
 void sched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_resume_scheduler(tcb)
@@ -953,7 +964,8 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION)
+#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
 void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_suspend_scheduler(tcb)

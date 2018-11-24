@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_suspendscheduler.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,8 @@
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION)
+#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
 
 /****************************************************************************
  * Public Functions
@@ -83,11 +84,15 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb)
     }
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Inidicate the task has been suspended */
+  /* Indicate that the task has been suspended */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+  sched_critmon_suspend(tcb);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_suspend(tcb);
 #endif
 }
 
-#endif /* CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION */
+#endif /* CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION ||
+        * CONFIG_SCHED_CRITMONITOR */

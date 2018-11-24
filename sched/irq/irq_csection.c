@@ -49,7 +49,8 @@
 #include "sched/sched.h"
 #include "irq/irq.h"
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
 
 /****************************************************************************
  * Public Data
@@ -375,9 +376,12 @@ try_again:
                           &g_cpu_irqlock);
               rtcb->irqcount = 1;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               /* Note that we have entered the critical section */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+              sched_critmon_csection(rtcb, true);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, true);
 #endif
             }
@@ -388,7 +392,8 @@ try_again:
 
   return ret;
 }
-#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
+#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
+       * defined(CONFIG_SCHED_CRITMONITOR) */
 irqstate_t enter_critical_section(void)
 {
   irqstate_t ret;
@@ -408,7 +413,12 @@ irqstate_t enter_critical_section(void)
 
       /* Yes.. Note that we have entered the critical section */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+      sched_critmon_csection(rtcb, true);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
       sched_note_csection(rtcb, true);
+#endif
     }
 
   /* Return interrupt status */
@@ -507,9 +517,12 @@ void leave_critical_section(irqstate_t flags)
             }
           else
             {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               /* No.. Note that we have left the critical section */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+              sched_critmon_csection(rtcb, false);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, false);
 #endif
               /* Decrement our count on the lock.  If all CPUs have
@@ -563,7 +576,10 @@ void leave_critical_section(irqstate_t flags)
 
   up_irq_restore(flags);
 }
-#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) */
+
+#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) ||
+       * defined(CONFIG_SCHED_CRITMONITOR) */
+
 void leave_critical_section(irqstate_t flags)
 {
   /* Check if we were called from an interrupt handler and that the tasks
@@ -577,7 +593,12 @@ void leave_critical_section(irqstate_t flags)
 
       /* Yes.. Note that we have left the critical section */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+      sched_critmon_csection(rtcb, false);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
       sched_note_csection(rtcb, false);
+#endif
     }
 
   /* Restore the previous interrupt state. */
@@ -669,4 +690,5 @@ bool irq_cpu_locked(int cpu)
 }
 #endif
 
-#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION */
+#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION ||
+        * CONFIG_SCHED_CRITMONITOR */

@@ -53,6 +53,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+#  include <time.h>
+#endif
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
@@ -62,7 +66,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
 
-#ifdef CONFIG_SCHED_CPULOAD
+#if defined(CONFIG_SCHED_CPULOAD) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
 #endif
 
@@ -105,6 +109,9 @@ enum proc_node_e
   PROC_CMDLINE,                       /* Task command line */
 #ifdef CONFIG_SCHED_CPULOAD
   PROC_LOADAVG,                       /* Average CPU utilization */
+#endif
+#ifdef CONFIG_SCHED_CRITMONITOR
+  PROC_CRITMON,                       /* Critical section monitor */
 #endif
   PROC_STACK,                         /* Task stack info */
   PROC_GROUP,                         /* Group directory */
@@ -168,8 +175,23 @@ static FAR const char *g_policy[4] =
 };
 
 /****************************************************************************
+ * External Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CRITMONITOR
+/* If CONFIG_SCHED_CRITMONITOR is selected, then platform-specific logic
+ * must provide the following interface.  This interface simply converts an
+ * elapsed time into well known units for presentation by the ProcFS file
+ * system..
+ */
+
+void up_critmon_convert(uint32_t starttime, FAR struct timespec *ts);
+#endif
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Helpers */
 
 static FAR const struct proc_node_s *
@@ -182,6 +204,11 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
                  off_t offset);
 #ifdef CONFIG_SCHED_CPULOAD
 static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+#endif
+#ifdef CONFIG_SCHED_CRITMONITOR
+static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
 #endif
@@ -273,6 +300,13 @@ static const struct proc_node_s g_loadavg =
 };
 #endif
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+static const struct proc_node_s g_critmon =
+{
+  "critmon",       "critmon", (uint8_t)PROC_CRITMON,     DTYPE_FILE        /* Critical Section Monitor */
+};
+#endif
+
 static const struct proc_node_s g_stack =
 {
   "stack",        "stack",   (uint8_t)PROC_STACK,        DTYPE_FILE        /* Task stack info */
@@ -310,6 +344,9 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 #ifdef CONFIG_SCHED_CPULOAD
   &g_loadavg,      /* Average CPU utilization */
 #endif
+#ifdef CONFIG_SCHED_CRITMONITOR
+  &g_critmon,      /* Critical section Monitor */
+#endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
@@ -329,6 +366,9 @@ static const struct proc_node_s * const g_level0info[] =
   &g_cmdline,      /* Task command line */
 #ifdef CONFIG_SCHED_CPULOAD
   &g_loadavg,      /* Average CPU utilization */
+#endif
+#ifdef CONFIG_SCHED_CRITMONITOR
+  &g_critmon,      /* Critical section monitor */
 #endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
@@ -740,6 +780,84 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen, &offset);
 
   return copysize;
+}
+#endif
+
+/****************************************************************************
+ * Name: proc_critmon
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CRITMONITOR
+static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
+                            FAR struct tcb_s *tcb, FAR char *buffer,
+                            size_t buflen, off_t offset)
+{
+  struct timespec maxtime;
+  size_t remaining;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize;
+
+  remaining = buflen;
+  totalsize = 0;
+
+  /* Convert the for maximum time pre-emption disabled */
+
+  if (tcb->premp_max > 0)
+    {
+      up_critmon_convert(tcb->premp_max, &maxtime);
+    }
+  else
+    {
+      maxtime.tv_sec = 0;
+      maxtime.tv_nsec = 0;
+    }
+
+  /* Reset the maximum */
+
+  tcb->premp_max = 0;
+
+  /* Generate output for maximum time pre-emption disabled */
+
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+                     (unsigned long)maxtime.tv_sec,
+                     (unsigned long)maxtime.tv_nsec);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Convert and generate output for maximum time in a critical section */
+
+  if (tcb->crit_max > 0)
+    {
+      up_critmon_convert(tcb->crit_max, &maxtime);
+    }
+  else
+    {
+      maxtime.tv_sec = 0;
+      maxtime.tv_nsec = 0;
+    }
+
+  /* Reset the maximum */
+
+  tcb->crit_max = 0;
+
+  /* Generate output for maximum time in a critical section */
+
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
+                     (unsigned long)maxtime.tv_sec,
+                     (unsigned long)maxtime.tv_nsec);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen, &offset);
+
+  totalsize += copysize;
+  return totalsize;
 }
 #endif
 
@@ -1323,6 +1441,11 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_SCHED_CPULOAD
     case PROC_LOADAVG: /* Average CPU utilization */
       ret = proc_loadavg(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+#endif
+#ifdef CONFIG_SCHED_CRITMONITOR
+    case PROC_CRITMON: /* Critical section monitor */
+      ret = proc_critmon(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 #endif
     case PROC_STACK: /* Task stack info */

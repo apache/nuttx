@@ -250,14 +250,20 @@ int sched_lock(void)
       (void)up_fetchsub16(&g_global_lockcount, 1);
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+          sched_critmon_premption(rtcb, true);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
+#endif
         }
 #endif
 
@@ -299,14 +305,20 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
+    defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
+#ifdef CONFIG_SCHED_CRITMONITOR
+          sched_critmon_premption(rtcb, true);
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
+#endif
         }
 #endif
     }
