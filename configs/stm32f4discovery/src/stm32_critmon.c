@@ -51,7 +51,7 @@
 #ifdef CONFIG_SCHED_CRITMONITOR
 
 /************************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Cycle count register in the Data Watchpoint and Trace (DWT) Unit */

@@ -73,12 +73,13 @@
 #define PROCFS_NATTRS  2
 
 /****************************************************************************
- * External Definitons
+ * External Definitions
  ****************************************************************************/
 
 extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations irq_operations;
 extern const struct procfs_operations cpuload_operations;
+extern const struct procfs_operations critmon_operations;
 extern const struct procfs_operations meminfo_operations;
 extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
@@ -123,6 +124,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
   { "cpuload",       &cpuload_operations,         PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_SCHED_CRITMONITOR)
+  { "critmon",       &critmon_operations,         PROCFS_FILE_TYPE   },
 #endif
 
 #ifdef CONFIG_SCHED_IRQMONITOR
