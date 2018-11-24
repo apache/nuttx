@@ -136,20 +136,26 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
       /* Disabling.. Save the thread start time */
 
       tcb->premp_start = up_critmon_gettime();
-      DISABLE_PREEMPT(tcb);
 
-      /* Save the global start time */
+      /* Zero means that the timer is not ready */
 
-      g_premp_start[cpu] = tcb->premp_start;
+      if (tcb->premp_start != 0)
+        {
+          DISABLE_PREEMPT(tcb);
+
+          /* Save the global start time */
+
+          g_premp_start[cpu] = tcb->premp_start;
+        }
     }
   else if (tcb->premp_start != 0)
     {
-      DEBUGASSERT(PREEMPT_ISDISABLED(tcb));
-
       /* Re-enabling.. Check for the max elapsed time */
 
       uint32_t now     = up_critmon_gettime();
       uint32_t elapsed = now - tcb->premp_start;
+
+      DEBUGASSERT(now != 0 && PREEMPT_ISDISABLED(tcb));
 
       tcb->premp_start = 0;
       if (elapsed > tcb->premp_max)
@@ -195,9 +201,16 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       DEBUGASSERT(tcb->crit_start == 0);
       tcb->crit_start = up_critmon_gettime();
 
-      /* Set the global start time */
+      /* Zero means that the timer is not ready */
 
-      g_crit_start[cpu] = tcb->crit_start;
+      if (tcb->crit_start != 0)
+        {
+          ENTER_CSECTION(tcb);
+
+          /* Set the global start time */
+
+          g_crit_start[cpu] = tcb->crit_start;
+        }
     }
   else if (tcb->crit_start != 0)
     {
@@ -206,13 +219,15 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       uint32_t now     = up_critmon_gettime();
       uint32_t elapsed = now - tcb->crit_start;
 
+      DEBUGASSERT(now != 0 && IN_CSECTION(tcb));
+
       tcb->crit_start = 0;
       if (elapsed > tcb->crit_max)
         {
           tcb->crit_max = elapsed;
         }
 
-      ENTER_CSECTION(tcb);
+      LEAVE_CSECTION(tcb);
 
       /* Check for the global max elapsed time */
 
@@ -252,6 +267,8 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
       /* Yes.. Save the start time */
 
       tcb->premp_start = up_critmon_gettime();
+      DEBUGASSERT(tcb->premp_start != 0);
+
       if (g_premp_start[cpu] == 0)
         {
           g_premp_start[cpu] = tcb->premp_start;
@@ -277,6 +294,8 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
       /* Yes.. Save the start time */
 
       tcb->crit_start = up_critmon_gettime();
+      DEBUGASSERT(tcb->crit_start != 0);
+
       if (g_crit_start[cpu] == 0)
         {
           g_crit_start[cpu] = tcb->crit_start;

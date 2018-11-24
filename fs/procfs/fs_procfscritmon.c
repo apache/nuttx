@@ -242,7 +242,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = snprintf(attr->line, CRITMON_LINELEN, "%2d,%lu.%09lu,",
+  linesize = snprintf(attr->line, CRITMON_LINELEN, "%d,%lu.%09lu,",
                      cpu, (unsigned long)maxtime.tv_sec,
                      (unsigned long)maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
