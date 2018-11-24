@@ -717,7 +717,7 @@ config SCHED_CRITMONITOR
 		provided by platform-specific logic:
 
 			uint32_t up_critmon_gettime(void);
-			void up_critmon_convert(uint32_t starttime, FAR struct timespec *ts);
+			void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts);
 
 		The first interface simply provides the current time value in unknown
 		units.  NOTE:  This function may be called early before the timer has

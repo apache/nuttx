@@ -45,6 +45,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
+CSRCS += stm32_critmon.c
+endif
+
 ifeq ($(CONFIG_AUDIO_CS43L22),y)
 CSRCS += stm32_cs43l22.c
 endif
