@@ -185,7 +185,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  *     enter_critical_section() will still manage entrance into the
  *     protected logic using spinlocks.
  *
- *   If SMP is not enabled:
+ *   If thread-specific IRQ counter is not enabled:
  *     This function is equivalent to up_irq_save().
  *
  * Input Parameters:
@@ -197,8 +197,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_IRQCOUNT
 irqstate_t enter_critical_section(void);
 #else
 #  define enter_critical_section(f) up_irq_save(f)
@@ -213,7 +212,7 @@ irqstate_t enter_critical_section(void);
  *     the spinlock and restore the interrupt state as it was prior to the
  *     previous call to enter_critical_section().
  *
- *   If SMP is not enabled:
+ *   If thread-specific IRQ counter is not enabled:
  *     This function is equivalent to up_irq_restore().
  *
  * Input Parameters:
@@ -225,8 +224,7 @@ irqstate_t enter_critical_section(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_IRQCOUNT
 void leave_critical_section(irqstate_t flags);
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
