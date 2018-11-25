@@ -101,6 +101,10 @@ ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7032),y)
+  CSRCS += stm32_st7032.c
+endif
+
 ifeq ($(CONFIG_PCA9635PW),y)
 CSRCS += stm32_pca9635.c
 endif
