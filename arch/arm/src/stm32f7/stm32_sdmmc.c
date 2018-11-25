@@ -621,7 +621,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 #ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
     .dmadelydinvldt   = stm32_dmadelydinvldt,
 #endif
-#lse
+#else
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
     .dmapreflight     = NULL,
 #endif
