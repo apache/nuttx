@@ -44,6 +44,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#undef USE_CLOCK                                   /* Too slow */
+#define USE_CLOCK_GETTIME 1                        /* Better */
+
 /* From nuttx/clock.h */
  
 #define NSEC_PER_SEC  1000000000
@@ -64,6 +67,10 @@
 typedef int64_t b32_t;
 
 /************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -71,15 +78,25 @@ typedef int64_t b32_t;
  * Name: up_critmon_gettime
  ************************************************************************************/
 
+#if defined(USE_CLOCK)
 uint32_t up_critmon_gettime(void)
 {
   return (uint32_t)clock() + 1;  /* Avoid returning zero which means clock-not-ready */
 }
+#else /* USE_CLOCK_GETTIME */
+uint32_t up_critmon_gettime(void)
+{
+  struct timespec ts;
+  (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+  return (uint32_t)ts.tv_nsec;
+}
+#endif
 
 /************************************************************************************
  * Name: up_critmon_gettime
  ************************************************************************************/
 
+#if defined(USE_CLOCK)
 void up_critmon_convert(uint32_t elapsed, struct timespec *ts)
 {
   b32_t b32elapsed;
@@ -88,3 +105,10 @@ void up_critmon_convert(uint32_t elapsed, struct timespec *ts)
   ts->tv_sec  = b32toi(b32elapsed);
   ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
 }
+#else /* USE_CLOCK_GETTIME */
+void up_critmon_convert(uint32_t elapsed, struct timespec *ts)
+{
+  ts->tv_sec  = 0;
+  ts->tv_nsec = elapsed;
+}
+#endif

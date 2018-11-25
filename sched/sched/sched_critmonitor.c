@@ -121,7 +121,7 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 
       /* Zero means that the timer is not ready */
 
-      if (tcb->premp_start != 0)
+      if (tcb->premp_start != 0 && g_premp_start[cpu] == 0)
         {
           /* Save the global start time */
 
@@ -145,12 +145,15 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 
       /* Check for the global max elapsed time */
 
-      elapsed            = now - g_premp_start[cpu];
-      g_premp_start[cpu] = 0;
-
-      if (elapsed > g_premp_max[cpu])
+      if (g_premp_start[cpu] != 0)
         {
-          g_premp_max[cpu] = elapsed;
+          elapsed            = now - g_premp_start[cpu];
+          g_premp_start[cpu] = 0;
+
+          if (elapsed > g_premp_max[cpu])
+            {
+              g_premp_max[cpu] = elapsed;
+            }
         }
     }
 }
@@ -181,7 +184,7 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 
       /* Zero means that the timer is not ready */
 
-      if (tcb->crit_start != 0)
+      if (tcb->crit_start != 0 && g_crit_start[cpu] == 0)
         {
           /* Set the global start time */
 
@@ -205,12 +208,15 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 
       /* Check for the global max elapsed time */
 
-      elapsed           = now - g_crit_start[cpu];
-      g_crit_start[cpu] = 0;
-
-      if (elapsed > g_crit_max[cpu])
+      if (g_crit_start[cpu] != 0)
         {
-          g_crit_max[cpu] = elapsed;
+          elapsed           = now - g_crit_start[cpu];
+          g_crit_start[cpu] = 0;
+
+          if (elapsed > g_crit_max[cpu])
+            {
+              g_crit_max[cpu] = elapsed;
+            }
         }
     }
 }
@@ -242,6 +248,8 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
 
       tcb->premp_start = up_critmon_gettime();
       DEBUGASSERT(tcb->premp_start != 0);
+
+      /* Zero means that the timer is not ready */
 
       if (g_premp_start[cpu] == 0)
         {
@@ -294,7 +302,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
  *
  * Description:
  *   Called when a thread suspends execution, perhaps terminating a
- *   critical section or a non-pre-emptible state.
+ *   critical section or a non-preemptible state.
  *
  * Assumptions:
  *   Called within a critical section.
@@ -305,7 +313,7 @@ void sched_critmon_suspend(FAR struct tcb_s *tcb)
 {
   uint32_t elapsed;
 
-  /* Did this task disable pre-emption? */
+  /* Did this task disable preemption? */
 
   if (tcb->lockcount > 0)
     {
