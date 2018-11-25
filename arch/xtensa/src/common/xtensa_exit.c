@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_exit.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,7 @@ static void _xtensa_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 
 void _exit(int status)
 {
-  struct tcb_s *tcb;
+  struct tcb_s *tcb = this_task();
 
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.
@@ -154,17 +154,20 @@ void _exit(int status)
 
   (void)enter_critical_section();
 
-  sinfo("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", tcb);
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
   sched_foreach(_xtensa_dumponexit, NULL);
 #endif
 
+  /* Update scheduler parameters */
+
+  sched_suspend_scheduler(tcb);
+
 #if XCHAL_CP_NUM > 0
   /* Disable co-processor support for the task that is exit-ing. */
 
-  tcb = this_task();
   xtensa_coproc_disable(&tcb->xcp.cpstate, XTENSA_CP_ALLSET);
 #endif
 
@@ -193,6 +196,10 @@ void _exit(int status)
 
   (void)group_addrenv(tcb);
 #endif
+
+  /* Reset scheduler parameters */
+
+  sched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

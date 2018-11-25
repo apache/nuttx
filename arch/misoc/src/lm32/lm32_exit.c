@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_exit.c
  *
- *   Copyright (C) 2010, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -55,10 +56,6 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "lm32.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -143,7 +140,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 
 void _exit(int status)
 {
-  struct tcb_s *tcb;
+  struct tcb_s *tcb = this_task();
 
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.
@@ -151,12 +148,16 @@ void _exit(int status)
 
   (void)enter_critical_section();
 
-  sinfo("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", tcb);
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
   sched_foreach(_up_dumponexit, NULL);
 #endif
+
+  /* Update scheduler parameters */
+
+  sched_suspend_scheduler(tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
@@ -177,6 +178,10 @@ void _exit(int status)
 
   (void)group_addrenv(tcb);
 #endif
+
+  /* Reset scheduler parameters */
+
+  sched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_exit.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,9 +65,13 @@
 
 void _exit(int status)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = this_task();
 
   sinfo("TCB=%p exiting\n", tcb);
+
+  /* Update scheduler parameters */
+
+  sched_suspend_scheduler(tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
@@ -79,6 +83,10 @@ void _exit(int status)
 
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
+
+  /* Reset scheduler parameters */
+
+  sched_resume_scheduler(tcb);
 
   /* The way that we handle signals in the simulation is kind of
    * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
