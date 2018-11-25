@@ -44,24 +44,6 @@
 #ifdef CONFIG_SCHED_CRITMONITOR
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Flags used by the critical section monitor */
-
-#define CRITMON_PREEMPT       (1 << 0)  /* Bit 0:  Pre-emption is disabled */
-#define CRITMON_CSECTION      (1 << 1)  /* Bit 1:  In a critical section */
-
-#define DISABLE_PREEMPT(t)    do { (t)->crit_flags |= CRITMON_PREEMPT; } while (0)
-#define ENTER_CSECTION(t)     do { (t)->crit_flags |= CRITMON_CSECTION; } while (0)
-
-#define ENABLE_PREEMPT(t)     do { (t)->crit_flags &= ~CRITMON_PREEMPT; } while (0)
-#define LEAVE_CSECTION(t)     do { (t)->crit_flags &= ~CRITMON_CSECTION; } while (0)
-
-#define PREEMPT_ISDISABLED(t) (((t)->crit_flags & CRITMON_PREEMPT) != 0)
-#define IN_CSECTION(t)        (((t)->crit_flags & CRITMON_CSECTION) != 0)
-
-/****************************************************************************
  * External Function Prototypes
  ****************************************************************************/
 
@@ -131,7 +113,7 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 
   if (state)
     {
-      DEBUGASSERT(tcb->premp_start == 0 && !PREEMPT_ISDISABLED(tcb));
+      DEBUGASSERT(tcb->premp_start == 0);
 
       /* Disabling.. Save the thread start time */
 
@@ -141,8 +123,6 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 
       if (tcb->premp_start != 0)
         {
-          DISABLE_PREEMPT(tcb);
-
           /* Save the global start time */
 
           g_premp_start[cpu] = tcb->premp_start;
@@ -155,15 +135,13 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
       uint32_t now     = up_critmon_gettime();
       uint32_t elapsed = now - tcb->premp_start;
 
-      DEBUGASSERT(now != 0 && PREEMPT_ISDISABLED(tcb));
+      DEBUGASSERT(now != 0);
 
       tcb->premp_start = 0;
       if (elapsed > tcb->premp_max)
         {
           tcb->premp_max = elapsed;
         }
-
-      ENABLE_PREEMPT(tcb);
 
       /* Check for the global max elapsed time */
 
@@ -205,8 +183,6 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 
       if (tcb->crit_start != 0)
         {
-          ENTER_CSECTION(tcb);
-
           /* Set the global start time */
 
           g_crit_start[cpu] = tcb->crit_start;
@@ -219,15 +195,13 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       uint32_t now     = up_critmon_gettime();
       uint32_t elapsed = now - tcb->crit_start;
 
-      DEBUGASSERT(now != 0 && IN_CSECTION(tcb));
+      DEBUGASSERT(now != 0);
 
       tcb->crit_start = 0;
       if (elapsed > tcb->crit_max)
         {
           tcb->crit_max = elapsed;
         }
-
-      LEAVE_CSECTION(tcb);
 
       /* Check for the global max elapsed time */
 
@@ -262,7 +236,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
 
   /* Did this task disable pre-emption? */
 
-  if (PREEMPT_ISDISABLED(tcb))
+  if (tcb->lockcount > 0)
     {
       /* Yes.. Save the start time */
 
@@ -289,7 +263,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
 
   /* Was this task in a critical section? */
 
-  if (IN_CSECTION(tcb))
+  if (tcb->irqcount > 0)
     {
       /* Yes.. Save the start time */
 
@@ -333,7 +307,7 @@ void sched_critmon_suspend(FAR struct tcb_s *tcb)
 
   /* Did this task disable pre-emption? */
 
-  if (PREEMPT_ISDISABLED(tcb))
+  if (tcb->lockcount > 0)
     {
       /* Possibly re-enabling.. Check for the max elapsed time */
 
@@ -348,7 +322,7 @@ void sched_critmon_suspend(FAR struct tcb_s *tcb)
 
   /* Is this task in a critical section? */
 
-  if (IN_CSECTION(tcb))
+  if (tcb->irqcount > 0)
     {
       /* Possibly leaving .. Check for the max elapsed time */
 

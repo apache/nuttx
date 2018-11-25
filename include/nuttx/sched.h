@@ -700,7 +700,6 @@ struct tcb_s
   /* Pre-emption monitor support ************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  uint32_t crit_flags;                   /* Flag values used by the monitor     */
   uint32_t premp_start;                  /* Time when preemption disabled       */
   uint32_t premp_max;                    /* Max time preemption disabled        */
   uint32_t crit_start;                   /* Time critical section entered       */
