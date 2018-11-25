@@ -175,7 +175,9 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  * Name: enter_critical_section
  *
  * Description:
- *   If SMP is enabled:
+ *   If thread-specific IRQ counter is enabled (for SMP or other
+ *   instrumentation):
+ *
  *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
  *     specific counter is increment to indicate that the thread has IRQs
  *     disabled and to support nested calls to enter_critical_section().
@@ -186,6 +188,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  *     protected logic using spinlocks.
  *
  *   If thread-specific IRQ counter is not enabled:
+ *
  *     This function is equivalent to up_irq_save().
  *
  * Input Parameters:
@@ -207,12 +210,15 @@ irqstate_t enter_critical_section(void);
  * Name: leave_critical_section
  *
  * Description:
- *   If SMP is enabled:
+ *   If thread-specific IRQ counter is enabled (for SMP or other
+ *   instrumentation):
+ *
  *     Decrement the IRQ lock count and if it decrements to zero then release
  *     the spinlock and restore the interrupt state as it was prior to the
  *     previous call to enter_critical_section().
  *
  *   If thread-specific IRQ counter is not enabled:
+ *
  *     This function is equivalent to up_irq_restore().
  *
  * Input Parameters:
