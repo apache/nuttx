@@ -390,6 +390,9 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
   FAR uint8_t *ptr;
 
   DEBUGASSERT(conn != NULL && buf != NULL);
+
+  sq_init(&fraglist);
+
   wlinfo("conn handle %u buf len %u\n", conn->handle, buf->len);
 
   if (conn->state != BT_CONN_CONNECTED)
