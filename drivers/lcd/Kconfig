@@ -1198,5 +1198,18 @@ config LCD_BACKPACK
 
 		See pcf8574_lcd_backpack_readme.txt
 
+config LCD_ST7032
+	bool "ST7032 over I2C (i.e. JLX1602G-390)"
+	default n
+	depends on I2C
+	---help---
+		Enable support for ST7032i on I2C. This driver was tested with
+		JLX1602G-390 that has 10 pins: CAP1N, CAP1P, VOUT, VCC, SHLS,
+		SHLC, GND, SDA, SCL, XRESET. The XRESET pin is connected to a
+		pull-up resistor, then the module automatically executes power-on
+		reset when power is supplied to the module. The pin SHLS is also
+		connected to a pull-up resistor and the pin SHLC is connected to
+		the ground. So only I2C pins SDA and SCL are used by NuttX.
+
 endif # SLCD
 endmenu # LCD Driver Support
