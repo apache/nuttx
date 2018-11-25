@@ -1062,6 +1062,8 @@ int st7032_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->col = 0;
   priv->row = 0;
 
+  nxsem_init(&priv->sem_excl, 0, 1);
+
   /* Initialize the display */
 
   lcd_init(priv);
