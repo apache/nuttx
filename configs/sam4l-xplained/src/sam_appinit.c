@@ -103,7 +103,7 @@
 int board_app_initialize(uintptr_t arg)
 {
 #if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
-  /* Initialize the SLCD and register the SLCD device as /dev/slcd */
+  /* Initialize the SLCD and register the SLCD device as /dev/slcd0 */
 
   {
     int ret = sam_slcd_initialize();

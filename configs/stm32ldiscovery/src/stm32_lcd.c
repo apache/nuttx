@@ -1462,7 +1462,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
  *
  * Description:
  *   Initialize the STM32L-Discovery LCD hardware and register the character
- *   driver as /dev/slcd.
+ *   driver as /dev/slcd0.
  *
  ****************************************************************************/
 
@@ -1569,7 +1569,7 @@ int stm32_slcd_initialize(void)
 
       /* Register the LCD device driver */
 
-      ret = register_driver("/dev/slcd", &g_slcdops, 0644, &g_slcdstate);
+      ret = register_driver("/dev/slcd0", &g_slcdops, 0644, &g_slcdstate);
       g_slcdstate.initialized = true;
 
       /* Then clear the display */

@@ -189,7 +189,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_LCD_ST7032
-  ret = stm32_st7032init("/dev/disp0");
+  ret = stm32_st7032init("/dev/slcd0");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: st7032_register failed: %d\n", ret);

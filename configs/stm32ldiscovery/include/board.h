@@ -294,7 +294,7 @@ extern "C"
  *
  * Description:
  *   Initialize the STM32L-Discovery LCD hardware and register the character
- *   driver as /dev/slcd.
+ *   driver as /dev/slcd0.
  *
  ****************************************************************************/
 

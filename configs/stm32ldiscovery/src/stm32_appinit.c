@@ -81,7 +81,7 @@ int board_app_initialize(uintptr_t arg)
   int ret = OK;
 
 #ifdef CONFIG_STM32_LCD
-  /* Initialize the SLCD and register the SLCD device as /dev/slcd */
+  /* Initialize the SLCD and register the SLCD device as /dev/slcd0 */
 
   ret = stm32_slcd_initialize();
   if (ret != OK)

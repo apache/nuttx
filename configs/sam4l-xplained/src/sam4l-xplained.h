@@ -350,7 +350,7 @@ int sam_sdinitialize(int minor);
  *
  * Description:
  *   Initialize the SAM4L Xplained Pro LCD hardware and register the character
- *   driver as /dev/slcd.
+ *   driver as /dev/slcd0.
  *
  ****************************************************************************/
 

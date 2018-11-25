@@ -655,7 +655,7 @@ Configuration sub-directories
 
        Application Configuration -> Examples
          CONFIG_EXAMPLES_SLCD=y
-         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/slcd"
+         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/slcd0"
          CONFIG_EXAMPLES_SLCD_BUFSIZE=64
 
        Application Configuration -> NSH Library
