@@ -42,9 +42,9 @@ ifeq ($(CONFIG_ARCH_GLOBAL_IRQDISABLE),y)
 CSRCS += irq_spinlock.c
 endif
 endif
-else ifeq ($(CONFIG_SCHED_INSTRUMENTATION_CSECTION),y)
-CSRCS += irq_csection.c
-else ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
+endif
+
+ifeq ($(CONFIG_IRQCOUNT),y)
 CSRCS += irq_csection.c
 endif
 

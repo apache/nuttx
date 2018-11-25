@@ -637,8 +637,7 @@ struct tcb_s
 #endif
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_CRITMONITOR) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+#ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section           */
 #endif
 #ifdef CONFIG_CANCELLATION_POINTS
@@ -952,9 +951,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
  *
  ********************************************************************************/
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SCHED_CRITMONITOR) || \
-    defined(CONFIG_SMP)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_RESUMESCHEDULER)
 void sched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_resume_scheduler(tcb)
@@ -976,8 +973,7 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  *
  ********************************************************************************/
 
-#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_SCHED_SUSPENDSCHEDULER
 void sched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
 #  define sched_suspend_scheduler(tcb)

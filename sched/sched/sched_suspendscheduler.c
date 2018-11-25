@@ -50,8 +50,7 @@
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#if defined(CONFIG_SCHED_SPORADIC) || defined(CONFIG_SCHED_INSTRUMENTATION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_SCHED_SUSPENDSCHEDULER
 
 /****************************************************************************
  * Public Functions
@@ -94,5 +93,4 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 #endif
 }
 
-#endif /* CONFIG_SCHED_SPORADIC || CONFIG_SCHED_INSTRUMENTATION ||
-        * CONFIG_SCHED_CRITMONITOR */
+#endif /* CONFIG_SCHED_SUSPENDSCHEDULER */

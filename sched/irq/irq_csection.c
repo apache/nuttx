@@ -49,8 +49,7 @@
 #include "sched/sched.h"
 #include "irq/irq.h"
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_IRQCOUNT
 
 /****************************************************************************
  * Public Data
@@ -392,8 +391,9 @@ try_again:
 
   return ret;
 }
-#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) || \
-       * defined(CONFIG_SCHED_CRITMONITOR) */
+
+#else
+
 irqstate_t enter_critical_section(void)
 {
   irqstate_t ret;
@@ -585,8 +585,7 @@ void leave_critical_section(irqstate_t flags)
   up_irq_restore(flags);
 }
 
-#else /* defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION) ||
-       * defined(CONFIG_SCHED_CRITMONITOR) */
+#else
 
 void leave_critical_section(irqstate_t flags)
 {
@@ -704,5 +703,4 @@ bool irq_cpu_locked(int cpu)
 }
 #endif
 
-#endif /* CONFIG_SMP || CONFIG_SCHED_INSTRUMENTATION_CSECTION ||
-        * CONFIG_SCHED_CRITMONITOR */
+#endif /* CONFIG_IRQCOUNT */

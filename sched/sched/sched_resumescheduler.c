@@ -48,9 +48,7 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION) || defined(CONFIG_SCHED_CRITMONITOR) || \
-    defined(CONFIG_SMP)
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_RESUMESCHEDULER)
 
 /****************************************************************************
  * Public Functions
@@ -145,6 +143,4 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
 
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_SPORADIC || \
-        * CONFIG_SCHED_INSTRUMENTATION || CONFIG_SCHED_CRITMONITOR ||
-        * CONFIG_SMP */
+#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_RESUMESCHEDULER */
