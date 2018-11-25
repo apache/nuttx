@@ -891,7 +891,6 @@ config SCHED_INSTRUMENTATION
 	default n
 	select SCHED_SUSPENDSCHEDULER
 	select SCHED_RESUMESCHEDULER
-	select IRQCOUNT
 	---help---
 		Enables instrumentation in scheduler to monitor system performance.
 		If enabled, then the board-specific logic must provide the following
@@ -938,6 +937,7 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
 	default n
+	select IRQCOUNT
 	---help---
 		Enables additional hooks for entry and exit from critical sections.
 		Interrupts are disabled while within a critical section.  Board-
