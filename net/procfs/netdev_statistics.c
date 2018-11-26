@@ -153,11 +153,13 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "%02x", addr->nv_addr[0]);
 
+#if RADIO_MAX_ADDRLEN > 1  /* Avoids a warning */
       for (i = 1; i < addr->nv_addrlen; i++)
         {
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           ":%02x", addr->nv_addr[i]);
         }
+#endif
     }
 
   return len;
