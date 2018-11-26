@@ -29,6 +29,7 @@ Contents
   o Status
   o Serial Console
   o LEDs and Buttons
+  o OpenOCD
 
 Status
 ======
@@ -83,3 +84,30 @@ Buttons
 -------
 
   An single button is available on GPIO P0.12 for use by software.
+
+OpenOCD
+=======
+
+  An Eclipse based toolchain is available for download from Maxim Integrated.
+  If you (like me) are not an IDE user then the good news is the OpenOCD for
+  the MAX32660 is available within that toolchain.
+
+  As of this writing, the OpenOCD changes for the MAX32660 are not yet
+  incorporated into the mainline OpenOCD code so the Maxim Integrated version
+  within the Eclipse-based toolchain is the only show in town.  Patches for
+  the MAX32660 have been submitted and this will most likely no longer be true
+  as you read this.
+
+  The Eclipse-based toolchain installs by default at C:\Maxim under Windows.
+  The following script tracks tracks down OpenOCD in that installation
+  (assuming Cygwin, hence the /cygdrive/c for the C: drive:
+
+    #!/bin/sh
+
+    set -x
+
+    OPENOCD=/cygdrive/c/Maxim/Toolchain/bin/openocd.exe
+    IFCFG="C:\Maxim\Toolchain\share\openocd\scripts\interface\max32660_hdk.cfg"
+    MCUCFG="C:\Maxim\Toolchain\share\openocd\scripts\target\max32660.cfg"
+
+    ${OPENOCD} -f ${IFCFG} -f ${MCUCFG}
