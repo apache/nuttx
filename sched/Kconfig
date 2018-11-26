@@ -718,9 +718,8 @@ config SCHED_IRQMONITOR
 
 config SCHED_IRQMONITOR_GETTIME
 	bool "Custom Platform-specific Timer"
-	default y if SCHED_CRITMONITOR
-	default n if !SCHED_CRITMONITOR
-	depends on SCHED_IRQMONITOR && SCHED_TICKLESS
+	default n
+	depends on SCHED_IRQMONITOR && SCHED_TICKLESS && !SCHED_CRITMONITOR
 	---help---
 		If CONFIG_SCHED_TICKLESS is enabled, then the high resolution
 		Tickless timer will be used by default.  Otherwise, a platform-

@@ -81,25 +81,16 @@
  * request
  */
 
+#undef HAVE_PLATFORM_GETTIME
+#if defined(CONFIG_SCHED_IRQMONITOR) && \
+  (!defined(CONFIG_SCHED_TICKLESS) || \
+    defined(CONFIG_SCHED_CRITMONITOR) || \
+    defined(CONFIG_SCHED_IRQMONITOR_GETTIME))
+#  define HAVE_PLATFORM_GETTIME 1
+#endif
+
 #ifdef CONFIG_SCHED_IRQMONITOR
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_IRQMONITOR_GETTIME)
-#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
-     do \
-       { \
-         struct timespec start; \
-         struct timespec end; \
-         struct timespec delta; \
-         clock_systimespec(&start); \
-         vector(irq, context, arg); \
-         clock_systimespec(&end); \
-         clock_timespec_subtract(&end, &start, &delta); \
-         if (delta.tv_nsec > g_irqvector[ndx].time) \
-           { \
-             g_irqvector[ndx].time = delta.tv_nsec; \
-           } \
-       } \
-     while (0)
-#else
+#ifdef HAVE_PLATFORM_GETTIME
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
      do \
        { \
@@ -116,7 +107,24 @@
            } \
        } \
      while (0)
-#endif /* CONFIGSCHED_TICKLESS */
+#else
+#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
+     do \
+       { \
+         struct timespec start; \
+         struct timespec end; \
+         struct timespec delta; \
+         clock_systimespec(&start); \
+         vector(irq, context, arg); \
+         clock_systimespec(&end); \
+         clock_timespec_subtract(&end, &start, &delta); \
+         if (delta.tv_nsec > g_irqvector[ndx].time) \
+           { \
+             g_irqvector[ndx].time = delta.tv_nsec; \
+           } \
+       } \
+     while (0)
+#endif /* HAVE_PLATFORM_GETTIME */
 #else
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
      vector(irq, context, arg)
@@ -126,7 +134,7 @@
  * External Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
+#ifdef HAVE_PLATFORM_GETTIME
 /* If CONFIG_SCHED_TICKLESS is enabled, then the high resolution Tickless
  * timer will be used.  Otherwise, the platform specific logic must provide
  * the following in order to support high resolution timing:
@@ -149,7 +157,7 @@ void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts);
  * The second interface simple converts an elapsed time into well known
  * units.
  */
-#endif
+#endif /* HAVE_PLATFORM_GETTIME */
 
 /****************************************************************************
  * Public Functions
