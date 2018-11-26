@@ -82,9 +82,7 @@ struct irq_info_s
   uint32_t mscount;  /* Number of interrupts on this IRQ (MS) */
   uint32_t lscount;  /* Number of interrupts on this IRQ (LS) */
 #endif
-#ifdef CONFIG_SCHED_TICKLESS
   uint32_t time;     /* Maximum execution time on this IRQ */
-#endif
 #endif
 };
 

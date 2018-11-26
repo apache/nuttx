@@ -37,8 +37,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
+
 #include "sched/sched.h"
 
 #ifdef CONFIG_SCHED_CRITMONITOR
@@ -101,7 +104,8 @@ uint32_t g_crit_max[1];
  *   Called when there is any change in pre-emptible state of a thread.
  *
  * Assumptions:
- *   Called within a critical section.
+ *   - Called within a critical section.
+ *   - Never called from an interrupt handler
  *
  ****************************************************************************/
 
@@ -165,7 +169,8 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
  *   Called when a thread enters or leaves a critical section.
  *
  * Assumptions:
- *   Called within a critical section.
+ *   - Called within a critical section.
+ *   - Never called from an interrupt handler
  *
  ****************************************************************************/
 
@@ -229,7 +234,8 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
  *   critical section or a non-pre-emptible state.
  *
  * Assumptions:
- *   Called within a critical section.
+ *   - Called within a critical section.
+ *   - Might be called from an interrupt handler
  *
  ****************************************************************************/
 
@@ -305,7 +311,8 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
  *   critical section or a non-preemptible state.
  *
  * Assumptions:
- *   Called within a critical section.
+ *   - Called within a critical section.
+ *   - Might be called from an interrupt handler
  *
  ****************************************************************************/
 

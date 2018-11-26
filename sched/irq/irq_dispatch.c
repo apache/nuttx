@@ -81,7 +81,8 @@
  * request
  */
 
-#if defined(CONFIG_SCHED_IRQMONITOR) && defined(CONFIG_SCHED_TICKLESS)
+#ifdef CONFIG_SCHED_IRQMONITOR
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_IRQMONITOR_GETTIME)
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
      do \
        { \
@@ -100,7 +101,54 @@
      while (0)
 #else
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
+     do \
+       { \
+         struct timespec delta; \
+         uint32_t start; \
+         uint32_t elapsed; \
+         start = up_critmon_gettime(); \
+         vector(irq, context, arg); \
+         elapsed = up_critmon_gettime() - start; \
+         up_critmon_convert(elapsed, &delta); \
+         if (delta.tv_nsec > g_irqvector[ndx].time) \
+           { \
+             g_irqvector[ndx].time = delta.tv_nsec; \
+           } \
+       } \
+     while (0)
+#endif /* CONFIGSCHED_TICKLESS */
+#else
+#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
      vector(irq, context, arg)
+#endif /* CONFIG_SCHED_IRQMONITOR */
+
+/****************************************************************************
+ * External Function Prototypes
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_TICKLESS
+/* If CONFIG_SCHED_TICKLESS is enabled, then the high resolution Tickless
+ * timer will be used.  Otherwise, the platform specific logic must provide
+ * the following in order to support high resolution timing:
+ */
+
+uint32_t up_critmon_gettime(void);
+void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts);
+
+/* The first interface simply provides the current time value in unknown
+ * units.  NOTE:  This function may be called early before the timer has
+ * been initialized.  In that event, the function should just return a
+ * start time of zero.
+ *
+ * Nothing is assumed about the units of this time value.  The following
+ * are assumed, however: (1) The time is an unsigned integer value, (2)
+ * the time is monotonically increasing, and (3) the elapsed time (also
+ * in unknown units) can be obtained by subtracting a start time from
+ * the current time.
+ *
+ * The second interface simple converts an elapsed time into well known
+ * units.
+ */
 #endif
 
 /****************************************************************************
