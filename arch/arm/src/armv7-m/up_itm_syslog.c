@@ -110,7 +110,7 @@ static int itm_putc(int ch)
 {
   /* ITM enabled */
 
-  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) == 0)
+  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_MASK) == 0)
     {
       return EOF;
     }

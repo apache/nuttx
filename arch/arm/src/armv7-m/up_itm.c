@@ -99,8 +99,8 @@
 
 uint32_t itm_sendchar(uint32_t ch)
 {
-  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_Msk) && /* ITM enabled */
-      (getreg32(ITM_TER) & (1UL << 0)))           /* ITM Port #0 enabled */
+  if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_MASK) && /* ITM enabled */
+      (getreg32(ITM_TER) & (1UL << 0)))            /* ITM Port #0 enabled */
     {
       while (getreg32(ITM_PORT(0)) == 0);
       putreg8((uint8_t)ch, ITM_PORT(0));
