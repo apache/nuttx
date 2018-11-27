@@ -669,6 +669,7 @@ static uint8_t att_find_info_rsp(FAR struct bt_conn_s *conn,
       return BT_ATT_ERR_UNLIKELY;
     }
 
+  data.conn = conn;
   bt_gatt_foreach_attr(start_handle, end_handle, find_info_cb, &data);
 
   if (!data.rsp)
@@ -787,7 +788,8 @@ static uint8_t att_find_type_rsp(FAR struct bt_conn_s *conn,
       return BT_ATT_ERR_UNLIKELY;
     }
 
-  data.value = value;
+  data.conn      = conn;
+  data.value     = value;
   data.value_len = value_len;
 
   bt_gatt_foreach_attr(start_handle, end_handle, find_type_cb, &data);
@@ -943,6 +945,7 @@ static uint8_t att_read_type_rsp(FAR struct bt_conn_s *conn,
       return BT_ATT_ERR_UNLIKELY;
     }
 
+  data.conn     = conn;
   data.uuid     = uuid;
   data.rsp      = bt_buf_extend(data.buf, sizeof(*data.rsp));
   data.rsp->len = 0;
@@ -992,7 +995,7 @@ static uint8_t att_read_type_req(FAR struct bt_conn_s *conn,
     }
 
   wlinfo("start_handle 0x%04x end_handle 0x%04x type %u\n",
-         start_handle, end_handle, uuid.u16);
+         start_handle, end_handle, uuid.u.u16);
 
   if (!range_is_valid(start_handle, end_handle, &err_handle))
     {
@@ -1343,7 +1346,7 @@ static uint8_t att_read_group_req(FAR struct bt_conn_s *conn,
     }
 
   wlinfo("start_handle 0x%04x end_handle 0x%04x type %u\n",
-         start_handle, end_handle, uuid.u16);
+         start_handle, end_handle, uuid.u.u16);
 
   if (!range_is_valid(start_handle, end_handle, &err_handle))
     {
