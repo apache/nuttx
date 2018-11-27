@@ -75,11 +75,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM0_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART0_PARITY
 #  define CONSOLE_BITS        CONFIG_USART0_BITS
-#  ifdef CONFIG_USART0_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2 CONFIG_USART0_2STOP
 #  ifdef CONFIG_USART0_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -96,11 +92,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM1_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART1_PARITY
 #  define CONSOLE_BITS        CONFIG_USART1_BITS
-#  ifdef CONFIG_USART1_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART1_2STOP
 #  ifdef CONFIG_USART1_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -117,11 +109,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM2_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART2_PARITY
 #  define CONSOLE_BITS        CONFIG_USART2_BITS
-#  ifdef CONFIG_USART2_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART2_2STOP
 #  ifdef CONFIG_USART2_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -138,11 +126,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM3_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART3_PARITY
 #  define CONSOLE_BITS        CONFIG_USART3_BITS
-#  ifdef CONFIG_USART3_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART3_2STOP
 #  ifdef CONFIG_USART3_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -159,11 +143,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM4_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART4_PARITY
 #  define CONSOLE_BITS        CONFIG_USART4_BITS
-#  ifdef CONFIG_USART4_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART4_2STOP
 #  ifdef CONFIG_USART4_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -180,11 +160,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM5_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART5_PARITY
 #  define CONSOLE_BITS        CONFIG_USART5_BITS
-#  ifdef CONFIG_USART5_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART5_2STOP
 #  ifdef CONFIG_USART5_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -201,11 +177,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM6_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART6_PARITY
 #  define CONSOLE_BITS        CONFIG_USART6_BITS
-#  ifdef CONFIG_USART6_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART6_2STOP
 #  ifdef CONFIG_USART6_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -222,11 +194,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM7_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART7_PARITY
 #  define CONSOLE_BITS        CONFIG_USART7_BITS
-#  ifdef CONFIG_USART7_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART7_2STOP
 #  ifdef CONFIG_USART7_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -243,11 +211,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM8_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART8_PARITY
 #  define CONSOLE_BITS        CONFIG_USART8_BITS
-#  ifdef CONFIG_USART8_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART8_2STOP
 #  ifdef CONFIG_USART8_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -264,11 +228,7 @@
 #  define CONSOLE_FCLK        BOARD_FLEXCOMM9_FCLK
 #  define CONSOLE_PARITY      CONFIG_USART9_PARITY
 #  define CONSOLE_BITS        CONFIG_USART9_BITS
-#  ifdef CONFIG_USART9_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_USART9_2STOP
 #  ifdef CONFIG_USART9_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else

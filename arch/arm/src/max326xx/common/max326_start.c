@@ -197,7 +197,9 @@ static inline void max326_fpuconfig(void)
 
 void __start(void)
 {
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   const uint32_t *src;
+#endif
   uint32_t *dest;
 
   /* Make sure that interrupts are disabled */
@@ -232,6 +234,7 @@ void __start(void)
 
   showprogress('C');
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the
@@ -244,6 +247,7 @@ void __start(void)
     }
 
   showprogress('D');
+#endif
 
   /* Initialize the FPU (if configured) */
 

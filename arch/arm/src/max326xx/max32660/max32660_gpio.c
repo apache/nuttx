@@ -369,11 +369,11 @@ int max326_gpio_config(max326_pinset_t pinset)
         break;
 
       case GPIO_ALT2:
-        max326_altfunc(pinmask, AF_FUNC1);
+        max326_altfunc(pinmask, AF_FUNC2);
         break;
 
       case GPIO_ALT3:
-        max326_altfunc(pinmask, AF_FUNC1);
+        max326_altfunc(pinmask, AF_FUNC3);
         break;
 
       case GPIO_INPUT:   /* Already done */

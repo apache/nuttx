@@ -672,7 +672,7 @@ void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
   max326_tmr0_disableclk();
 #endif
 #ifndef CONFIG_MAX326XX_TMR32_1
-  max326_tmr2_disableclk();
+  max326_tmr1_disableclk();
 #endif
 #ifndef CONFIG_MAX326XX_TMR32_0
   max326_tmr2_disableclk();

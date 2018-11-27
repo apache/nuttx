@@ -40,6 +40,23 @@ Status
     pin configuration, ICC, and UART.  Additional untested drivers are
     complete and ready for testing:  DMA, GPIO interrupts, RTC, WDT.  The
     following drivers are not implemented: I2C, SPI, I2S.
+  2018-11-27:  I received the MAX32660-EVSYS today and made a little debug
+    progress.  Added a run-from-SRAM configuration to keep from locking
+    up the board on bad configurations.  The rest of the bring-up will
+    use this SRAM configuration.
+
+    Some successby the end of the day:
+
+      ACFH
+
+      NuttShell (NSH) NuttX-7.27
+      nsh>
+
+    Still lots to do though.  There is TX interrupt problem so it doesn't
+    look this good in real life.  Probably due to TX FIFO level interrupt
+    issues.  I comes up with 'NuttShell'  then stops.  I hit enter and
+    " (NSH) NuttX" comes out etc.  So it looks like Rx input is driving
+    the Tx output.
 
 Serial Console
 ==============
@@ -118,7 +135,7 @@ Starting OpenOCD
 Loading Code:
 
   Code can be loaded into FLASH using the convenient ARM MBED drag'n'drop
-  interface.  Or it can be loaded using GDB as follows:
+  interface.  Or it can be loaded into FLASH (or SRAM) using GDB as follows:
 
   $ arm-none-eabi-gdb
   (gdb) target remote localhost:3333
@@ -128,14 +145,31 @@ Loading Code:
 
   This does not work so reliably for me, however.
 
-Debugging:
+Debugging from FLASH:
 
   $ arm-none-eabi-gdb
   (gdb) target remote localhost:3333
   (gdb) mon reset
-  (gdb) mon reg pc 0x11c
+  (gdb) mon reg pc 0x11c  # Set PC to __start entry point
   (gdb) file nuttx
   (gdb) b os_start
   (gdb) c
 
   Also not very reliable.
+
+Debugging from SRAM:
+
+  Same except that the __start entry point is 0x2000011c, not 0x11c.
+
+Recovering from bad code in FLASH:
+
+  In my initial debug effort, I had a lethal bug that I thought had bricked
+  the board.  It appears that initialization logic put the MAX32660 in a bad
+  state so that every time that I reset the board, I would re-enter this
+  same bad state and I could not connect the CMSIS-DAP debugger.
+
+  I was able to recover.   I jumpered GND to RSTn the used the MBED MSC
+  interface to copy a known safe 'SysTick' demo program.  The copy hung and
+  timed out with an error message.  I yanked the jumper off RSTn and asked
+  to re-try copy.  It continued to burn the safe code demo!  I fixed it!
+  too much drama.

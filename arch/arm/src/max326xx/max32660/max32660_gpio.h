@@ -65,7 +65,7 @@
  * FFFF .... .... ....
  */
 
-#define GPIO_FUNC_SHIFT     (11)                      /* Bits 12-15: Pin Function */
+#define GPIO_FUNC_SHIFT     (12)                      /* Bits 12-15: Pin Function */
 #define GPIO_FUNC_MASK      (15 << GPIO_FUNC_SHIFT)
 #  define GPIO_INPUT        (0 << GPIO_FUNC_SHIFT)    /* 0000 GPIO input pin */
 #  define GPIO_OUTPUT       (1 << GPIO_FUNC_SHIFT)    /* 0001 GPIO output pin */

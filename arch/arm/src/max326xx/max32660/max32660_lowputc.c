@@ -66,11 +66,7 @@
 #  define CONSOLE_BAUD        CONFIG_UART0_BAUD
 #  define CONSOLE_PARITY      CONFIG_UART0_PARITY
 #  define CONSOLE_BITS        CONFIG_UART0_BITS
-#  ifdef CONFIG_UART0_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_UART0_2STOP
 #  ifdef CONFIG_UART0_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
@@ -86,11 +82,7 @@
 #  define CONSOLE_BAUD        CONFIG_UART1_BAUD
 #  define CONSOLE_PARITY      CONFIG_UART1_PARITY
 #  define CONSOLE_BITS        CONFIG_UART1_BITS
-#  ifdef CONFIG_UART1_2STOP
-#    define CONSOLE_STOPBITS2 true
-#  else
-#    define CONSOLE_STOPBITS2 false
-#  endif
+#  define CONSOLE_STOPBITS2   CONFIG_UART1_2STOP
 #  ifdef CONFIG_UART1_IFLOWCONTROL
 #    define CONSOLE_IFLOW     true
 #  else
