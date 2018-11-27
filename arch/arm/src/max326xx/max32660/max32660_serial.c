@@ -126,6 +126,12 @@
 #define UART_INT_RXERRORS      (UART_INT_FRAME | UART_INT_PARITY | \
                                 UART_INT_RXOVR)
 
+#ifdef CONFIG_DEBUG_FEATURES
+#  define UART_INT_ALL         (UART_INT_TX | UART_INT_RX | UART_INT_RXERRORS)
+#else
+#  define UART_INT_ALL         (UART_INT_TX | UART_INT_RX)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -519,7 +525,8 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
       /* Read and clear FIFO interrupt status */
 
       regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
-      max326_serialout(priv, MAX326_UART_STAT_OFFSET, regval);
+      max326_serialout(priv, MAX326_UART_STAT_OFFSET,
+                       regval & UART_INT_ALL);
 
       /* Handle incoming, receive bytes.
        * Check if the received FIFO is not empty.
@@ -548,10 +555,11 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for RX error conditions */
 
-      if ((regval & MAX326_INT_RXERRORS) != 0)
+      if ((regval & UART_INT_RXERRORS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
 #warning Misssing logic
+
         }
 #endif
     }

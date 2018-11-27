@@ -88,6 +88,9 @@ Buttons
 OpenOCD
 =======
 
+Starting OpenOCD
+----------------
+
   An Eclipse based toolchain is available for download from Maxim Integrated.
   If you (like me) are not an IDE user then the good news is the OpenOCD for
   the MAX32660 is available within that toolchain.
@@ -110,4 +113,29 @@ OpenOCD
     IFCFG="C:\Maxim\Toolchain\share\openocd\scripts\interface\max32660_hdk.cfg"
     MCUCFG="C:\Maxim\Toolchain\share\openocd\scripts\target\max32660.cfg"
 
-    ${OPENOCD} -f ${IFCFG} -f ${MCUCFG}
+    ${OPENOCD} ${1} -f ${IFCFG} # -f ${MCUCFG}
+
+Loading Code:
+
+  Code can be loaded into FLASH using the convenient ARM MBED drag'n'drop
+  interface.  Or it can be loaded using GDB as follows:
+
+  $ arm-none-eabi-gdb
+  (gdb) target remote localhost:3333
+  (gdb) mon reset
+  (gdb) mon halt
+  (gdb) load nuttx
+
+  This does not work so reliably for me, however.
+
+Debugging:
+
+  $ arm-none-eabi-gdb
+  (gdb) target remote localhost:3333
+  (gdb) mon reset
+  (gdb) mon reg pc 0x11c
+  (gdb) file nuttx
+  (gdb) b os_start
+  (gdb) c
+
+  Also not very reliable.

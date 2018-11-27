@@ -343,10 +343,6 @@ void max326_uart_configure(uintptr_t base,
   ctrl0 |= UART_CTRL0_TOCNT(4);
   putreg32(ctrl0, base + MAX326_UART_CTRL0_OFFSET);
 
-  /* Enable trigger events */
-
-  DEBUGASSERT(config->)
-
   /* Setup configuration and enable UART */
 
   ctrl0 &= ~UART_CTRL0_SIZE_MASK;

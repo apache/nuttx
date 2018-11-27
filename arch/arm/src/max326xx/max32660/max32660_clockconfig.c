@@ -155,7 +155,7 @@ static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
 
       /* Wait for the oscillator to become ready */
 
-      while ((getreg32(GCR_CLKCTRL_HIRCRDY) & GCR_CLKCTRL_HIRCRDY) == 0)
+      while ((getreg32(MAX326_GCR_CLKCTRL) & GCR_CLKCTRL_HIRCRDY) == 0)
         {
         }
     }
