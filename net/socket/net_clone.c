@@ -141,6 +141,12 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
            */
 
           (void)inet_close(psock2);
+
+          /* Then release our reference on the socket structure containing
+           * the connection.
+           */
+
+          sock_release(psock2);
         }
     }
 #endif
