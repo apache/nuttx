@@ -315,17 +315,17 @@ void max326_uart_configure(uintptr_t base,
 
   do
     {
-      ctrl0 = getreg32(base + MAX326_UART_CTRL0_OFFSET);
+      ctrl0  = getreg32(base + MAX326_UART_CTRL0_OFFSET);
       regval = ctrl0 & (UART_CTRL0_TXFLUSH | UART_CTRL0_RXFLUSH);
     }
   while (regval != 0);
 
   /* Setup trigger level */
 
-  regval = UART_CTRL1_RXFIFOLVL(config->rxlevel) |
-           UART_CTRL1_TXFIFOLVL(config->txlevel);
+  regval  = UART_CTRL1_RXFIFOLVL(config->rxlevel) |
+            UART_CTRL1_TXFIFOLVL(config->txlevel);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  regval = UART_CTRL1_RTSFIFOLVL(config->rtslevel) |
+  regval |= UART_CTRL1_RTSFIFOLVL(config->rtslevel);
 #endif
   putreg32(regval, base + MAX326_UART_CTRL1_OFFSET);
 
