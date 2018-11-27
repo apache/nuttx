@@ -42,6 +42,7 @@
 #include <time.h>
 #include <fixedmath.h>
 
+#include "dwt.h"
 #include "up_arch.h"
 
 #include <nuttx/clock.h>
@@ -49,14 +50,6 @@
 #include <arch/board/board.h>
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* Cycle count register in the Data Watchpoint and Trace (DWT) Unit */
-
-#define DWT_CYCCNT  0xe0001004
 
 /************************************************************************************
  * Public Functions
