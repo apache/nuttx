@@ -166,7 +166,7 @@ extern "C"
 int sockfd_allocate(int minsd);
 
 /****************************************************************************
- * Name: sock_release
+ * Name: psock_release
  *
  * Description:
  *   Free a socket.
@@ -179,7 +179,7 @@ int sockfd_allocate(int minsd);
  *
  ****************************************************************************/
 
-void sock_release(FAR struct socket *psock);
+void psock_release(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: sockfd_release

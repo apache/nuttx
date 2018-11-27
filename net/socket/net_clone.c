@@ -146,7 +146,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
            * the connection.
            */
 
-          sock_release(psock2);
+          psock_release(psock2);
         }
     }
 #endif
