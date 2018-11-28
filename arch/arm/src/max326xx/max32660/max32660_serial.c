@@ -506,7 +506,9 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct max326_dev_s *priv;
-  uint32_t regval;
+  uint32_t intfl;
+  uint32_t inten;
+  uint32_t stat;
   bool handled;
   int passes;
 
@@ -522,17 +524,29 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
     {
       handled = false;
 
-      /* Read and clear FIFO interrupt status */
-
-      regval = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
-      max326_serialout(priv, MAX326_UART_STAT_OFFSET,
-                       regval & UART_INT_ALL);
-
-      /* Handle incoming, receive bytes.
-       * Check if the received FIFO is not empty.
+      /* Read pending interrupt flags, interrupt enables, and UART status
+       * registers.
        */
 
-      if ((regval & UART_INT_RX) != 0)
+      intfl = max326_serialin(priv, MAX326_UART_INTFL_OFFSET);
+      inten = max326_serialin(priv, MAX326_UART_INTEN_OFFSET);
+      stat  = max326_serialin(priv, MAX326_UART_STAT_OFFSET);
+
+      /* Clear pending interrupt flags */
+
+      max326_serialout(priv, MAX326_UART_STAT_OFFSET,
+                       intfl & UART_INT_ALL);
+
+      /* Handle incoming, receive bytes.
+       * Check if the Rx FIFO level interrupt is enabled and the Rx FIFO is
+       * not empty.
+       */
+
+#if 0
+      if ((intfl & UART_INT_RX) != 0) /* Should work too */
+#else
+      if ((inten & UART_INT_RX) != 0 && (stat & UART_STAT_RXEMPTY) == 0)
+#endif
         {
           /* Process incoming bytes */
 
@@ -541,10 +555,11 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
         }
 
       /* Handle outgoing, transmit bytes.
-       * Check if the received FIFO is not full.
+       * Check if the Tx FIFO level interrupt is enabled and the Tx FIFO is
+       * not full.
        */
 
-      if ((regval & UART_INT_TX) != 0)
+      if ((inten & UART_INT_TX) != 0 && (stat & UART_STAT_TXFULL) == 0)
         {
           /* Process outgoing bytes */
 
@@ -555,11 +570,12 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for RX error conditions */
 
-      if ((regval & UART_INT_RXERRORS) != 0)
+      if ((intfl & UART_INT_RXERRORS) != 0)
         {
           /* And now do... what?  Should we reset FIFOs on a FIFO error? */
 #warning Misssing logic
 
+          handled = true;
         }
 #endif
     }
