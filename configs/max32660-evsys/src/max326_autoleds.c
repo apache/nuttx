@@ -101,7 +101,7 @@ void board_autoled_on(int led)
 {
   if (led == 1 || led == 3)
     {
-      max326_gpio_write(GPIO_LED, false); /* Low illuminates */
+      max326_gpio_write(GPIO_LED, true); /* High illuminates */
     }
 }
 
@@ -113,7 +113,7 @@ void board_autoled_off(int led)
 {
   if (led == 3)
     {
-      max326_gpio_write(GPIO_LED, true);  /* High extinguishes */
+      max326_gpio_write(GPIO_LED, false);  /* Low extinguishes */
     }
 }
 

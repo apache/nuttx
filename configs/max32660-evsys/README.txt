@@ -45,7 +45,7 @@ Status
     up the board on bad configurations.  The rest of the bring-up will
     use this SRAM configuration.
 
-    Some successby the end of the day:
+    Some success the end of the day:
 
       ACFH
 
@@ -57,6 +57,10 @@ Status
     issues.  I comes up with 'NuttShell'  then stops.  I hit enter and
     " (NSH) NuttX" comes out etc.  So it looks like Rx input is driving
     the Tx output.
+  2018-11-28:  Found that the WFI instruction in the IDLE loop was causing
+    instability.  System ran OK until it was in IDLE then it became
+    unstable.  Commenting out the WIF restores stability.  Also fixed the
+    on-board LED which now currently reflects the state.
 
 Serial Console
 ==============
@@ -150,7 +154,7 @@ Debugging from FLASH:
   $ arm-none-eabi-gdb
   (gdb) target remote localhost:3333
   (gdb) mon reset
-  (gdb) mon reg pc 0x11c  # Set PC to __start entry point
+  (gdb) mon reg pc __start  # Set PC to __start entry point
   (gdb) file nuttx
   (gdb) b os_start
   (gdb) c
@@ -159,7 +163,17 @@ Debugging from FLASH:
 
 Debugging from SRAM:
 
-  Same except that the __start entry point is 0x2000011c, not 0x11c.
+  Same except (1) that the __start entry point is 0x2000011c, not 0x11c, and
+  the code needs to be reloaded into SRAM each time:
+
+  (gdb) target remote localhost:3333
+  (gdb) mon reset
+  (gdb) mon halt
+  (gdb) load nuttx          # Re-load code into SRAM
+  (gdb) mon reg pc __start  # Set PC to __start entry point
+  (gdb) file nuttx
+  (gdb) b os_start
+  (gdb) c
 
 Recovering from bad code in FLASH:
 

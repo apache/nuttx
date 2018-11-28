@@ -46,13 +46,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* A single red LED is available driven by GPIO P0.13. */
+/* A single red LED is available driven by GPIO P0.13.
+ * High illuminates, initial output is Low.
+ */
 
-#define GPIO_LED    (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN13)
+#define GPIO_LED    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN13)
 
-/* An single button is available on GPIO P0.12 for use by software. */
+/* An single button is available on GPIO P0.12 for use by software.
+ * Interrupts are available on both edges.
+ */
 
-#define GPIO_BUTTON (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN12)
+#define GPIO_BUTTON (GPIO_INTBOTH | GPIO_PORT0 | GPIO_PIN12)
 #define BUTTON_IRQ  MAX326_IRQ_P0_12
 
 /****************************************************************************

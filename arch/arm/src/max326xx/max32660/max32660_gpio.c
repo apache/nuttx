@@ -244,6 +244,7 @@ void max326_default(uint32_t pinmask)
 int max326_gpio_config(max326_pinset_t pinset)
 {
   irqstate_t flags;
+  max326_pinset_t subset;
   unsigned int pin;
   uint32_t pinmask;
   uint32_t regval;
@@ -284,20 +285,33 @@ int max326_gpio_config(max326_pinset_t pinset)
 
   /* Enable pull up and pull down */
 
-  if ((pinset & GPIO_MODE_MASK) != GPIO_FLOAT)
+  subset = pinset & GPIO_MODE_MASK;
+  if (subset != GPIO_FLOAT)
     {
-      /* Enable pull-down resistor */
+      bool upcap;               /* True: GPIO_PULLUP supported */
 
-      if ((PULLUP_SET & pinmask) != 0 ||
-          (pinset & GPIO_MODE_MASK) == GPIO_PULLDOWN)
+      /* Enable pull-down resistor.  All pins support pull down resisters,
+       * but it works differently:
+       *
+       * - For pins that support only pull-down, the PULLEN register
+       *   selects the pull down resister.
+       * - For pins that support both pull-up and pull down, the PULLEN
+       *   enables the feature but the PULLSEL registers selects the pull
+       *   up or down direction.
+       */
+
+      upcap = ((PULLUP_SET & pinmask) != 0);
+
+      if (upcap || subset == GPIO_PULLDOWN)
         {
           regval  = getreg32(MAX326_GPIO0_PULLEN);
           regval |= pinmask;
           putreg32(regval, MAX326_GPIO0_PULLEN);
         }
 
-      if ((PULLUP_SET & pinmask) != 0 &&
-          (pinset & GPIO_MODE_MASK) == GPIO_PULLUP)
+      /* Enable pull-ups (only certain pins support pull up resistors) */
+
+      if (upcap && subset == GPIO_PULLUP)
         {
           /* Enable pull-up resistor */
 
@@ -309,12 +323,12 @@ int max326_gpio_config(max326_pinset_t pinset)
 
   /* Set drive strength */
 
+  subset = pinset & GPIO_DRIVE_MASK;
   if ((DS1_SET & pinmask) == 0)
     {
       /* Only two levels of drive strength */
 
-      if ((pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_MEDHI ||
-          (pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_HI)
+      if (subset == GPIO_DRIVE_MEDHI || subset == GPIO_DRIVE_HI)
         {
           regval  = getreg32(MAX326_GPIO0_DS0SEL);
           regval |= pinmask;
@@ -331,16 +345,14 @@ int max326_gpio_config(max326_pinset_t pinset)
         * HI    DS0=1 DS1=1
         */
 
-      if ((pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_MEDLO ||
-          (pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_HI)
+      if (subset == GPIO_DRIVE_MEDLO || subset == GPIO_DRIVE_HI)
         {
           regval  = getreg32(MAX326_GPIO0_DS0SEL);
           regval |= pinmask;
           putreg32(regval, MAX326_GPIO0_DS0SEL);
         }
 
-      if ((pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_MEDHI ||
-          (pinset & GPIO_DRIVE_MASK) != GPIO_DRIVE_HI)
+      if (subset == GPIO_DRIVE_MEDHI || subset == GPIO_DRIVE_HI)
         {
           regval  = getreg32(MAX326_GPIO0_DS1SEL);
           regval |= pinmask;
@@ -363,6 +375,7 @@ int max326_gpio_config(max326_pinset_t pinset)
         regval  = getreg32(MAX326_GPIO0_OUTEN);  /* Enable output drivers */
         regval |= pinmask;
         putreg32(regval, MAX326_GPIO0_OUTEN);
+        break;
 
       case GPIO_ALT1:
         max326_altfunc(pinmask, AF_FUNC1);
@@ -427,14 +440,14 @@ void max326_gpio_write(max326_pinset_t pinset, bool value)
   /* Modification of registers must be atomic */
 
   flags  = spin_lock_irqsave();
-  regval = getreg32(MAX326_GPIO0_OUT);  /* Set output high */
+  regval = getreg32(MAX326_GPIO0_OUT);
   if (value)
     {
-      regval |= (1 << pin);
+      regval |= (1 << pin);   /* Set output high */
     }
   else
     {
-      regval &= ~(1 << pin);
+      regval &= ~(1 << pin);  /* Set output low */
     }
 
   putreg32(regval, MAX326_GPIO0_OUT);
@@ -494,33 +507,33 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
  *   Alternate Function 3   1   1
  */
 
-  regval  = getre32(MAX326_GPIO0_AF0SEL);
+  regval  = getreg32(MAX326_GPIO0_AF0SEL);
   afmode  = (regval & pinmask) != 0 ? 1 : 0;
-  regval  = getre32(MAX326_GPIO0_AF1SEL);
+  regval  = getreg32(MAX326_GPIO0_AF1SEL);
   afmode |= (regval & pinmask) != 0 ? 2 : 0;
   gpioinfo("           Mode:  %d\n", g_afmode[afmode]);
 
 
-  regval = getre32(MAX326_GPIO0_OUTEN);
+  regval = getreg32(MAX326_GPIO0_OUTEN);
   gpioinfo("  Output Enable:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
-  regval = getre32(MAX326_GPIO0_OUT);
+  regval = getreg32(MAX326_GPIO0_OUT);
   gpioinfo("   Output Value:  %s\n",
            (regval & pinmask) != 0 ? "High" : "Low");
 
-  regval = getre32(MAX326_GPIO0_IN);
+  regval = getreg32(MAX326_GPIO0_IN);
   gpioinfo("    Input Value:  %s\n",
            (regval & pinmask) != 0 ? "High" : "Low");
 
-  regval = getre32(MAX326_GPIO0_INTMODE);
+  regval = getreg32(MAX326_GPIO0_INTMODE);
   edge   = (regval & pinmask) != 0
   gpioinfo("      Intr Mode:  %s\n", edge ? "Yes" : "No");
 
-  regval = getre32(MAX326_GPIO0_INTPOL);
+  regval = getreg32(MAX326_GPIO0_INTPOL);
   if (edge)
     {
-      uint32_t dualedge = getre32(MAX326_GPIO0_INTDUALEDGE);
+      uint32_t dualedge = getreg32(MAX326_GPIO0_INTDUALEDGE);
       if ((dualedge & pinmask) != 0)
         {
           gpioinfo("      Intr Edge:  Both edges\n");
@@ -537,20 +550,20 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
                (regval & pinmask) != 0 ? "High" : "Low");
     }
 
-  regval = getre32(MAX326_GPIO0_INTEN);
+  regval = getreg32(MAX326_GPIO0_INTEN);
   gpioinfo("   Intr Enabled:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
-  regval = getre32(MAX326_GPIO0_INTFL);
+  regval = getreg32(MAX326_GPIO0_INTFL);
   gpioinfo("   Intr Pending:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
-  regval = getre32(MAX326_GPIO0_WAKEEN);
+  regval = getreg32(MAX326_GPIO0_WAKEEN);
   gpioinfo(" Wakeup Enabled:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
   pullmode = 0
-  regval   = getre32(MAX326_GPIO0_PULLEN);
+  regval   = getreg32(MAX326_GPIO0_PULLEN);
   if ((regval & pinmask) != 0)
     {
       if ((PULLUP_SET & pinmask) == 0)
@@ -559,7 +572,7 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
         }
       else
         {
-          regval = getre32(MAX326_GPIO0_PULLSEL);
+          regval = getreg32(MAX326_GPIO0_PULLSEL);
           pullmode = (regval & pinmask) != 0 ? 2 : 1;
         }
     }
@@ -567,7 +580,7 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
   gpioinfo("  Resister Mode:  %s\n", g_pullmode[pullmode]);
 
   dsmode = (PULLUP_SET & pinmask) == 0 ? 1 : 0;
-  regval = getre32(MAX326_GPIO0_DS0SEL);
+  regval = getreg32(MAX326_GPIO0_DS0SEL);
   if ((regval & pinmask) != 0)
     {
       if (PULLUP_SET & pinmask) == 0)
@@ -576,13 +589,13 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
         }
       else
         {
-          regval = getre32(MAX326_GPIO0_DS1SEL);
+          regval = getreg32(MAX326_GPIO0_DS1SEL);
           dsmode = (regval & pinmask) != 0 ? 3 : 1;
         }
     }
   else if (PULLUP_SET & pinmask) != 0)
     {
-      regval = getre32(MAX326_GPIO0_DS1SEL);
+      regval = getreg32(MAX326_GPIO0_DS1SEL);
       if (regval & pinmask) != 0)
         {
           dsmode = 2;
@@ -591,11 +604,11 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
 
   gpioinfo(" Drive Strength:  %s\n", g_dsmode[dsmode]);
 
-  regval = getre32(MAX326_GPIO0_INHYSEN);
+  regval = getreg32(MAX326_GPIO0_INHYSEN);
   gpioinfo("     Hysteresis:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
-  regval = getre32(MAX326_GPIO0_SRSEL);
+  regval = getreg32(MAX326_GPIO0_SRSEL);
   gpioinfo("   Slew Enabled:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 }

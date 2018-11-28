@@ -312,9 +312,8 @@ void up_irqinitialize(void)
 
   /* Make sure that we are using the correct vector table.  The default
    * vector address is 0x0000:0000 but if we are executing code that is
-   * positioned in SRAM or in external FLASH, then we may need to reset
-   * the interrupt vector so that it refers to the table in SRAM or in
-   * external FLASH.
+   * positioned in SRAM, then we need to reset the interrupt vector so
+   * that it refers to the table in SRAM.
    */
 
   putreg32((uint32_t)_vectors, NVIC_VECTAB);
@@ -385,7 +384,7 @@ void up_irqinitialize(void)
   up_enable_irq(MAX326_IRQ_MEMFAULT);
 #endif
 
-  /* Attach all other processor exceptions (except reset and sys tick) */
+  /* Attach all other processor exceptions (except reset and SysTick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
   irq_attach(MAX326_IRQ_NMI, max326_nmi, NULL);

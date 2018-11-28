@@ -176,10 +176,12 @@ void up_idle(void)
 
   up_idlepm();
 
+#if 0 /* REVISIT: "wfi" causes instability */
   /* Sleep until an interrupt occurs to save power */
 
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();
+#endif
 #endif
 }
