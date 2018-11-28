@@ -59,8 +59,9 @@ Status
     the Tx output.
   2018-11-28:  Found that the WFI instruction in the IDLE loop was causing
     instability.  System ran OK until it was in IDLE then it became
-    unstable.  Commenting out the WIF restores stability.  Also fixed the
-    on-board LED which now currently reflects the state.
+    unstable.  Commenting out the WIF restores stability.  The port does
+    now run safely from FLASH although with some missing UART interrupts.
+    Also fixed the on-board LED which now currently reflects the state.
 
 Serial Console
 ==============
