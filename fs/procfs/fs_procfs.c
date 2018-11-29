@@ -553,7 +553,6 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct procfs_level0_s *level0;
   FAR struct procfs_dir_priv_s *dirpriv;
   FAR void *priv = NULL;
-  irqstate_t flags;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(mountpt && relpath && dir && !dir->u.procfs);
@@ -587,9 +586,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        */
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-      flags = enter_critical_section();
       sched_foreach(procfs_enum, level0);
-      leave_critical_section(flags);
 #else
       level0->base.index = 0;
       level0->base.nentries = 0;
@@ -715,7 +712,6 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   FAR struct tcb_s *tcb;
   FAR const char *name = NULL;
   unsigned int index;
-  irqstate_t flags;
   pid_t pid;
   int ret = -ENOENT;
 
@@ -839,10 +835,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           pid = level0->pid[index];
 
-          flags = enter_critical_section();
           tcb = sched_gettcb(pid);
-          leave_critical_section(flags);
-
           if (!tcb)
             {
               ferr("ERROR: PID %d is no longer valid\n", (int)pid);
