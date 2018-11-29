@@ -164,7 +164,9 @@ endif
 endif
 
 ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
-CHIP_CSRCS += max326_spim.c
+ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+CHIP_CSRCS += max32660_spim.c
+endif
 endif
 
 # Paths to source files

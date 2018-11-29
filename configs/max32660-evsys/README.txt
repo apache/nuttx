@@ -53,6 +53,8 @@ Status
     Also fixed the on-board LED which now currently reflects the state.
   2018-11-29:  Resolved the UART interrupt issue.  The NSH configuration
     now appears fully functional.  Removed EXPERIMENTAL from configuration.
+    Brought in the STM32 SPI driver as a starting point.  It still does
+    not build correctly.  Due to conflicts, only SPI0 will be available.
 
 Serial Console
 ==============

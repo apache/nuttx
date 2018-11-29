@@ -111,7 +111,17 @@
 
 /* Pin Disambiguation *******************************************************/
 
-/* UART1
+/* UART0: No alternative pin configurations:
+ *
+ *   PORT0  PIN  SPI FUNCTION ALT FUNCTION COMMENT
+ *   ------ ---- ------------ ------------ ----------------------------
+ *   P0.4   5    TX           ALT2
+ *   P0.5   6    RX           ALT2
+ *   P0.7   10   CTS          ALT2
+ *   P0.8   12   RTS          ALT2         Conflicts with I2C0 SDA
+ */
+
+/* UART1:
  *
  * UART1 Tx and Rx signals at port P0.10 and P0.11 are connected to the
  * programming and debug header JH2 pins 2 and 3 through 1kΩ resistors.
@@ -123,6 +133,55 @@
 
 #define GPIO_UART1_RX     GPIO_UART1_RX_3  /* P0.11 */
 #define GPIO_UART1_TX     GPIO_UART1_TX_3  /* P0.10 */
+
+/* SPI0: No alternative pin configurations:
+ *
+ *   PORT0  PIN  SPI FUNCTION ALT FUNCTION COMMENT
+ *   ------ ---- ------------ ------------ ----------------------------
+ *   P0.4   5    MISO         ALT1
+ *   P0.5   6    MOSI         ALT1
+ *   P0.6   8    SCK          ALT1
+ *   P0.7   10   SS0          ALT1
+ */
+
+/* SPI1:  Not recommended.  Not usable in current state due to pin
+ * conflicts:
+ *
+ *   PORT0  PIN  SPI FUNCTION ALT FUNCTION COMMENT
+ *   ------ ---- ------------ ------------ ----------------------------
+ *   P0.0   13   MISO         ALT2         Conflicts with JTAG SWD
+ *   P0.1   11   MOSI         ALT2         Conflicts with JTAG SWD
+ *   P0.2   9    SCK          ALT2         Conflicts with I2C1 SCL
+ *   P0.3   7    SS0          ALT2         Conflicts with I2C1 SDA
+ *   P0.10  2    MISO         ALT1         Conflicts with serial console
+ *   P0.11  4    MOSI         ALT1         Conflicts with serial console
+ *   P0.12  1    SCK          ALT1
+ *   P0.13  3    SS0          ALT1
+ */
+
+#define GPIO_SPI1_MISO    GPIO_SPI1_MISO_1
+#define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_1
+#define GPIO_SPI1_SCK     GPIO_SPI1_SCK_1
+#define GPIO_SPI1_SS0     GPIO_SPI1_SS0_1
+
+/* I2C0:  No alternative pin configurations
+ *
+ *   PORT0  PIN  SPI FUNCTION ALT FUNCTION COMMENT
+ *   ------ ---- ------------ ------------ ----------------------------
+ *   P0.8   12   SCL          ALT1         Conflicts with UART0 RTS
+ *   P0.9   14   SDA          ALT1
+ */
+
+#define GPIO_I2C1_SCL    (GPIO_ALT1 | GPIO_PORT0 | GPIO_PIN2)
+#define GPIO_I2C1_SDA    (GPIO_ALT1 | GPIO_PORT0 | GPIO_PIN3)
+
+/* I2C1:  No alternative pin configurations
+ *
+ *   PORT0  PIN  SPI FUNCTION ALT FUNCTION COMMENT
+ *   ------ ---- ------------ ------------ ----------------------------
+ *   P0.2   9    SCL          ALT1         Conflicts with SPI1 SCK
+ *   P0.3   7    SDA          ALT1         Conflicts with SPI1 SS0
+ */
 
 /* DMA **********************************************************************/
 
