@@ -79,6 +79,7 @@
 #include "chip.h"
 #include "hardware/max326_pinmux.h"
 #include "max326_clockconfig.h"
+#include "max326_periphclks.h"
 #include "max326_gpio.h"
 #include "max326_dma.h"
 #include "max326_spim.h"
@@ -451,7 +452,7 @@ static inline void spi_writeword(FAR struct max326_spidev_s *priv, uint16_t word
 
 static inline bool spi_16bitmode(FAR struct max326_spidev_s *priv)
 {
-  return ((spi_getreg(priv, MAX326_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0);
+#warning Missing logic
 }
 
 /************************************************************************************
@@ -720,10 +721,10 @@ static inline void spi_dmatxstart(FAR struct max326_spidev_s *priv)
 #endif
 
 /************************************************************************************
- * Name: spi_modigy_ctrl0
+ * Name: spi_modify_ctrl0
  *
  * Description:
- *   Clear and set bits in the CR1 register
+ *   Clear and set bits in the CTRL0 register
  *
  * Input Parameters:
  *   priv    - Device-specific state data
@@ -735,7 +736,7 @@ static inline void spi_dmatxstart(FAR struct max326_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modigy_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
+static void spi_modify_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
                              uint32_t clrbits)
 {
   uint32_t ctrl0;
@@ -747,10 +748,10 @@ static void spi_modigy_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
 }
 
 /************************************************************************************
- * Name: spi_modigy_ctrl1
+ * Name: spi_modify_ctrl2
  *
  * Description:
- *   Clear and set bits in the CR2 register
+ *   Clear and set bits in the CTRL2 register
  *
  * Input Parameters:
  *   priv    - Device-specific state data
@@ -762,18 +763,16 @@ static void spi_modigy_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
  *
  ************************************************************************************/
 
-#ifdef CONFIG_MAX326_SPI_DMA
-static void spi_modigy_ctrl1(FAR struct max326_spidev_s *priv, uint32_t setbits,
+static void spi_modify_ctrl2(FAR struct max326_spidev_s *priv, uint32_t setbits,
                              uint32_t clrbits)
 {
-  uint32_t ctrl1;
+  uint32_t ctrl2;
 
-  ctrl1  = spi_getreg(priv, MAX326_SPI_CTRL1_OFFSET);
-  ctrl1 &= ~clrbits;
-  ctrl1 |= setbits;
-  spi_putreg(priv, MAX326_SPI_CTRL1_OFFSET, ctrl1);
+  ctrl2  = spi_getreg(priv, MAX326_SPI_CTRL2_OFFSET);
+  ctrl2 &= ~clrbits;
+  ctrl2 |= setbits;
+  spi_putreg(priv, MAX326_SPI_CTRL2_OFFSET, ctrl2);
 }
-#endif
 
 /************************************************************************************
  * Name: spi_lock
@@ -851,7 +850,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
     {
       uint32_t pclk;
       uint32_t tmpbaud;
-      uint32_t setbits;
       uint32_t actual;
       uint32_t error;
       uint32_t regval;
@@ -908,6 +906,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
        */
 
       pclk  = max326_pclk_frequency();
+      DEBUGASSERT(frequency > 0 && frequency <= pclk);
       error = UINT32_MAX;
 
       for (tmpscale = 0; tmpscale < 9; tmpscale++)
@@ -936,7 +935,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
               if (tmperr < error)
                 {
                   error  = tmperr;
-                  actual = tmpbaud
+                  actual = tmpbaud;
                   scale  = tmpscale;
                   high   = tmphigh;
                 }
@@ -1016,7 +1015,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-        spi_modigy_ctrl2(priv, setbits, clrbits);
+        spi_modify_ctrl2(priv, setbits, clrbits);
 
         /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1042,36 +1041,22 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
-  uint16_t setbits;
-  uint16_t clrbits;
 
   spiinfo("nbits=%d\n", nbits);
+  DEBUGASSERT(nbits > 0 && nbits <= 16);
 
   /* Has the number of bits changed? */
 
   if (nbits != priv->nbits)
     {
-      /* Yes... Set CR1 appropriately */
+      /* Yes... Set CTRL2 appropriately */
 
-      switch (nbits)
-        {
-        case 8:
-          setbits = 0;
-          clrbits = SPI_CR1_DFF;
-          break;
+      spi_modify_ctrl2(priv, SPI_CTRL2_NUMBITS(nbits),
+                       SPI_CTRL2_NUMBITS_MASK);
 
-        case 16:
-          setbits = SPI_CR1_DFF;
-          clrbits = 0;
-          break;
-
-        default:
-          return;
-        }
-
-      spi_modigy_ctrl0(priv, setbits, clrbits);
-
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
 
       priv->nbits = nbits;
     }
@@ -1096,34 +1081,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 #ifdef CONFIG_SPI_HWFEATURES
 static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
-#ifdef CONFIG_SPI_BITORDER
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
-  uint16_t setbits;
-  uint16_t clrbits;
-
-  spiinfo("features=%08x\n", features);
-
-  /* Transfer data LSB first? */
-
-  if ((features & HWFEAT_LSBFIRST) != 0)
-    {
-      setbits = SPI_CR1_LSBFIRST;
-      clrbits = 0;
-    }
-  else
-    {
-      setbits = 0;
-      clrbits = SPI_CR1_LSBFIRST;
-    }
-
-  spi_modigy_ctrl0(priv, setbits, clrbits);
-
-  /* Other H/W features are not supported */
-
-  return ((features & ~HWFEAT_LSBFIRST) == 0) ? OK : -ENOSYS;
-#else
   return -ENOSYS;
-#endif
 }
 #endif
 
@@ -1395,22 +1353,28 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 
 static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
 {
-  uint16_t setbits;
-  uint16_t clrbits;
+  uint32_t setbits;
+  uint32_t clrbits;
+  uint32_t regval;
+
+  /* Enable SPI */
+
+  spi_modify_ctrl0(priv, 0, SPI_CTRL0_SPIEN);
+
+  /* Setup slaved select timing (even in Master mode?) */
+
+  regval = (SPI_SSTIME_SSACT1(1) | SPI_SSTIME_SSACT2(1) | SPI_SSTIME_SSINACT(1));
+  spi_putreg(priv, MAX326_SPI_SSTIME_OFFSET, regval);
 
   /* Configure CR1. Default configuration:
-   *   Mode 0:                        CPHA=0 and CPOL=0
-   *   Master:                        MSTR=1
-   *   8-bit:                         DFF=0
-   *   MSB transmitted first:         LSBFIRST=0
-   *   Replace NSS with SSI & SSI=1:  SSI=1 SSM=1 (prevents MODF error)
-   *   Two lines full duplex:         BIDIMODE=0 BIDIOIE=(Don't care) and RXONLY=0
+   *   Mode 0:                        CTRL2: CLKPHA=0 and CLKPOL=0
+   *   Master:                        CTRL0: MMEN=1
+   *   8-bit:                         CTRL2: NUMBITS=8
    */
 
-  clrbits = SPI_CTRL2_CLKPHA | SPI_CTRL2_CLKPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
-            SPI_CR1_RXONLY | SPI_CR1_DFF | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
-  setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
-  spi_modigy_ctrl0(priv, setbits, clrbits);
+  clrbits = SPI_CTRL2_CLKPHA | SPI_CTRL2_CLKPOL | SPI_CTRL2_NUMBITS_MASK;
+  setbits = SPI_CTRL2_NUMBITS(8);
+  spi_modify_ctrl2(priv, setbits, clrbits);
 
   priv->frequency = 0;
   priv->nbits     = 8;
@@ -1419,10 +1383,6 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
-
-  /* CRCPOLY configuration */
-
-  spi_putreg(priv, MAX326_SPI_CRCPR_OFFSET, 7);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
@@ -1450,11 +1410,9 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
        * this function!  Don't let your design do that!
        */
 
-      priv->rxdma = max326_dmachannel(priv->rxch);
-      priv->txdma = max326_dmachannel(priv->txch);
-      DEBUGASSERT(priv->rxdma && priv->txdma);
-
-      spi_modigy_ctrl1(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
+      priv->rxdma = max326_dma_channel();
+      priv->txdma = max326_dma_channel();
+      DEBUGASSERT(priv->rxdma != NULL && priv->txdma != NULL);
     }
   else
     {
@@ -1463,9 +1421,10 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
     }
 #endif
 
-  /* Enable SPI */
+  /* Clear pending interrupts */
 
-  spi_modigy_ctrl0(priv, SPI_CR1_SPE, 0);
+  regval = spi_getreg(priv, MAX326_SPI_INTFL_OFFSET);
+  spi_putreg(priv, MAX326_SPI_INTFL_OFFSET, regval);
 }
 
 /************************************************************************************
@@ -1503,6 +1462,10 @@ FAR struct spi_dev_s *max326_spibus_initialize(int bus)
 
       if (!priv->initialized)
         {
+          /* Enable peripheral clocking */
+
+          max326_spi0_enableclk();
+
           /* Configure SPI0 pins: SCK, MISO, and MOSI */
 
           max326_gpio_config(GPIO_SPI0_SCK);
@@ -1528,6 +1491,10 @@ FAR struct spi_dev_s *max326_spibus_initialize(int bus)
 
       if (!priv->initialized)
         {
+          /* Enable peripheral clocking */
+
+          max326_spi1_enableclk();
+
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
           max326_gpio_config(GPIO_SPI1_SCK);

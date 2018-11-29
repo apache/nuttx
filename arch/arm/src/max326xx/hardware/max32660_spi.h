@@ -106,7 +106,7 @@
 #define SPI_CTRL2_CLKPOL            (1 << 1)  /* Bit 1:  Clock Polarity */
 #define SPI_CTRL2_NUMBITS_SHIFT     (8)       /* Bits 8-11: Number of Bits per Character */
 #define SPI_CTRL2_NUMBITS_MASK      (15 << SPI_CTRL2_NUMBITS_SHIFT)
-#  define SPI_CTRL2_NUMBITS_(n)     ((uint32_t)(n) << SPI_CTRL2_NUMBITS_SHIFT)
+#  define SPI_CTRL2_NUMBITS(n)      ((uint32_t)((n) & 15) << SPI_CTRL2_NUMBITS_SHIFT)
 #define SPI_CTRL2_DATWIDTH_SHIFT    (12)      /* Bits 12-13: SPI Data Width */
 #define SPI_CTRL2_DATWIDTH_MASK     (3 << SPI_CTRL2_DATWIDTH_SHIFT)
 #  define SPI_CTRL2_DATWIDTH_SINGLE (0 << SPI_CTRL2_DATWIDTH_SHIFT) /* MOSI */
