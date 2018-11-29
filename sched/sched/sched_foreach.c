@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_foreach.c
  *
- *   Copyright (C) 2007, 2009, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,9 +51,15 @@
  * Name: sched_foreach
  *
  * Description:
- *   Enumerate over each task and provide the TCB of each
- *   task to a user callback functions.  Interrupts will be
- *   disabled throughout this enumeration!
+ *   Enumerate over each task and provide the TCB of each task to a user
+ *   callback functions.
+ *
+ *   NOTE:  This function examines the TCB and calls each handler within a
+ *   critical section.  However, that critical section is released and
+ *   reacquired for each TCB.  When it is released, there may be changes in
+ *   tasking.  If the caller requires absolute stability through the
+ *   traversal, then the caller should establish the critical section BEFORE
+ *   calling this function.
  *
  * Input Parameters:
  *   handler - The function to be called with the TCB of
@@ -62,26 +68,27 @@
  * Returned Value:
  *   None
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags;
   int ndx;
 
-  /* Vist each active task */
+  /* Visit each active task */
 
   for (ndx = 0; ndx < CONFIG_MAX_TASKS; ndx++)
     {
+      /* This test and the function call must be atomic */
+
+      flags = enter_critical_section();
       if (g_pidhash[ndx].tcb)
         {
           handler(g_pidhash[ndx].tcb, arg);
         }
-    }
 
-  leave_critical_section(flags);
+      leave_critical_section(flags);
+    }
 }
 
 

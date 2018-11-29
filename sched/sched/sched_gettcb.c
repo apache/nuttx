@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_gettcb.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
 
 #include <sched.h>
 
+#include "nuttx/irq.h"
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -51,15 +53,22 @@
  * Name: sched_gettcb
  *
  * Description:
- *   Given a task ID, this function will return
- *   the a pointer to the corresponding TCB (or NULL if there
- *   is no such task ID).
+ *   Given a task ID, this function will return the a pointer to the
+ *   corresponding TCB (or NULL if there is no such task ID).
+ *
+ *   NOTE:  This function holds a critical section while examining TCB data
+ *   data structures but releases that critical section before returning.
+ *   When it is released, the TCB may become unstable.  If the caller
+ *   requires absolute stability while using the TCB, then the caller
+ *   should establish the critical section BEFORE calling this function and
+ *   hold that critical section as long as necessary.
  *
  ****************************************************************************/
 
 FAR struct tcb_s *sched_gettcb(pid_t pid)
 {
   FAR struct tcb_s *ret = NULL;
+  irqstate_t flags;
   int hash_ndx;
 
   /* Verify that the PID is within range */
@@ -70,6 +79,14 @@ FAR struct tcb_s *sched_gettcb(pid_t pid)
 
       hash_ndx = PIDHASH(pid);
 
+      /* The test and the return setup should be atomic.  This still does
+       * not provide proper protection if the recipient of the TCB does not
+       * also protect against the task associated with the TCB from
+       * terminating asynchronously.
+       */
+
+      flags = spin_lock_irqsave();
+
       /* Verify that the correct TCB was found. */
 
       if (pid == g_pidhash[hash_ndx].pid)
@@ -78,6 +95,8 @@ FAR struct tcb_s *sched_gettcb(pid_t pid)
 
           ret = g_pidhash[hash_ndx].tcb;
         }
+
+      spin_unlock_irqsave();
     }
 
   /* Return the TCB. */
