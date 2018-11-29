@@ -187,7 +187,6 @@ config ARCH_CHIP_LPC54XX
 config ARCH_CHIP_MAX326XX
 	bool "Maxim Integrated MAX326XX"
 	select ARCH_HAVE_FETCHADD
-	depends on EXPERIMENTAL
 	---help---
 		Maxim Integrated MAX326XX microcontrollers (ARM Cortex-M4F).
 

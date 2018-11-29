@@ -44,24 +44,15 @@ Status
     progress.  Added a run-from-SRAM configuration to keep from locking
     up the board on bad configurations.  The rest of the bring-up will
     use this SRAM configuration.
-
-    Some success the end of the day:
-
-      ACFH
-
-      NuttShell (NSH) NuttX-7.27
-      nsh>
-
-    Still lots to do though.  There is TX interrupt problem so it doesn't
-    look this good in real life.  Probably due to TX FIFO level interrupt
-    issues.  I comes up with 'NuttShell'  then stops.  I hit enter and
-    " (NSH) NuttX" comes out etc.  So it looks like Rx input is driving
-    the Tx output.
+    The NSH prompt comes up, but there is some interrupt-related problem
+    that makes the console unusable.
   2018-11-28:  Found that the WFI instruction in the IDLE loop was causing
     instability.  System ran OK until it was in IDLE then it became
-    unstable.  Commenting out the WIF restores stability.  The port does
-    now run safely from FLASH although with some missing UART interrupts.
+    unstable.  Commenting out the WIF restores stability.  The port now
+    runs safely from FLASH although still with missing UART interrupts.
     Also fixed the on-board LED which now currently reflects the state.
+  2018-11-29:  Resolved the UART interrupt issue.  The NSH configuration
+    now appears fully functional.  Removed EXPERIMENTAL from configuration.
 
 Serial Console
 ==============

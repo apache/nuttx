@@ -121,7 +121,7 @@
 
 /* UART events */
 
-#define UART_INT_TX            UART_INT_TXFIFOLVL
+#define UART_INT_TX            (UART_INT_TXFIFOLVL | UART_INT_TXFIFOAE)
 #define UART_INT_RX            (UART_INT_RXFIFOLVL | UART_INT_RXTO)
 #define UART_INT_RXERRORS      (UART_INT_FRAME | UART_INT_PARITY | \
                                 UART_INT_RXOVR)
@@ -534,7 +534,7 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
 
       /* Clear pending interrupt flags */
 
-      max326_serialout(priv, MAX326_UART_STAT_OFFSET,
+      max326_serialout(priv, MAX326_UART_INTFL_OFFSET,
                        intfl & UART_INT_ALL);
 
       /* Handle incoming, receive bytes.
