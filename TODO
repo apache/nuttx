@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 10, 2018)
+NuttX TODO List (Last updated November 29, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (15)  Task/Scheduler (sched/)
-  (3)  SMP
+  (4)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -498,6 +498,23 @@ o SMP
                SGI implementation.  This change would, however, lead to
                simplification in the design and permit commonality with
                other, non-GIC implementations.
+
+  Title:       ISSUES WITH ACCESSING CPU INDEX
+  Description: The CPU number is accessed usually with the macro this_cpu().
+               The returned CPU number is then used for various things,
+               typically as an array index.  However, if pre-emption is
+               not disabled,then it is possible that a context switch
+               could occur and that logic could run on anothe CPU with
+               possible fatal consequences.
+
+               We need to evaluate all use of this_cpu() and assure that
+               it is used in a way that guarantees the the code continues
+               to execute on the same CPU.
+
+  Status:      Open
+  Prioity:     Medium.  This is a logical problem but I have nevers seen
+               an bugs caused by this.  But I believe that failures are
+               possible.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
