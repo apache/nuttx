@@ -331,7 +331,7 @@
   .perm      = BT_GATT_PERM_READ | BT_GATT_PERM_WRITE, \
   .read      = bt_gatt_attr_read_ccc, \
   .write     = bt_gatt_attr_write_ccc, \
-  .user_data = (&(struct _bt_gatt_ccc) \
+  .user_data = (&(struct _bt_gatt_ccc_s) \
                { \
                  .cfg          = _cfg, \
                  .cfg_len      = ARRAY_SIZE(_cfg), \
@@ -769,7 +769,7 @@ int bt_gatt_attr_read_chrc(FAR struct bt_conn_s *conn,
  * Description:
  *   Read CCC attribute value storing the result into buffer after
  *   encoding it.
- *   NOTE: Only use this with attributes which user_data is a _bt_gatt_ccc.
+ *   NOTE: Only use this with attributes which user_data is a _bt_gatt_ccc_s.
  *
  * Input Parameters:
  *   conn   - Connection object.
@@ -793,7 +793,7 @@ int bt_gatt_attr_read_ccc(FAR struct bt_conn_s *conn,
  *
  * Description:
  *   Write value in the buffer into CCC attribute.
- *   NOTE: Only use this with attributes which user_data is a _bt_gatt_ccc.
+ *   NOTE: Only use this with attributes which user_data is a _bt_gatt_ccc_s.
  *
  * Input Parameters:
  *   conn   - Connection object.
