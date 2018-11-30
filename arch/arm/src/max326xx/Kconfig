@@ -416,3 +416,19 @@ config MAX326XX_DMA
 config MAX326XX_GPIOIRQ
 	bool "GPIO Interrupt Support"
 	default n
+
+menu "SPI Master Configuration"
+	depends on MAX326XX_HAVE_SPIM
+
+if MAX326XX_SPIM0
+
+config MAX326XX_3WIRE
+	bool "SP0 3-pin mode"
+	default n
+	---help---
+		By default, 4-pin mode is supported(MISO, MOSI, SCK, SS).  Selecting
+		this option enables 3-pin mode (MOSI, SCK, SS).
+
+endif # MAX326XX_SPIM0
+
+endmenu # SPI Master Configuration

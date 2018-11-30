@@ -47,6 +47,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define MAX326_SPI_FIFO_DEPTH       32
+
 /* Register Offsets *****************************************************************/
 
 #define MAX326_SPI_DATA_OFFSET      0x0000  /* SPI FIFO Data Register */
@@ -147,7 +149,7 @@
 
 #define SPI_DMA_TXFIFOLVL_SHIFT     (0)       /* Bits 0-4: TX FIFO Threshold Level */
 #define SPI_DMA_TXFIFOLVL_MASK      (0x1f << SPI_DMA_TXFIFOLVL_SHIFT)
-#  define SPI_DMA_TXFIFOLVL(n)      ((uint32_t)(n) << SPI_DMA_TXFIFOLVL_SHIFT)
+#  define SPI_DMA_TXFIFOLVL(n)      ((uint32_t)((n) & 0x1f) << SPI_DMA_TXFIFOLVL_SHIFT)
 #define SPI_DMA_TXFIFOEN            (1 << 6)  /* Bit 6:  TX FIFO Enabled */
 #define SPI_DMA_TXFIFOCLR           (1 << 7)  /* Bit 7:  Clear the TX FIFO */
 #define SPI_DMA_TXFIFOCNT_SHIFT     (8)       /* Bits 8-13: Number of Bytes in the TX
@@ -156,7 +158,7 @@
 #define SPI_DMA_TXDMAEN             (1 << 15) /* Bit 15: TX DMA Enable */
 #define SPI_DMA_RXFIFOLVL_SHIFT     (16)      /* Bits 16-20: RX FIFO Threshold Level */
 #define SPI_DMA_RXFIFOLVL_MASK      (0x1f << SPI_DMA_RXFIFOLVL_SHIFT)
-#  define SPI_DMA_RXFIFOLVL(n)      ((uint32_t)(n) << SPI_DMA_RXFIFOLVL_SHIFT)
+#  define SPI_DMA_RXFIFOLVL(n)      ((uint32_t)((n) & 0x1f) << SPI_DMA_RXFIFOLVL_SHIFT)
 #define SPI_DMA_RXFIFOEN            (1 << 22) /* Bit 22: RX FIFO Enabled */
 #define SPI_DMA_RXFIFOCLR           (1 << 23) /* Bit 23: Clear the RX FIFO */
 #define SPI_DMA_RXFIFOCNT_SHIFT     (24)      /* Bits 24-29: Number of Bytes in the RX

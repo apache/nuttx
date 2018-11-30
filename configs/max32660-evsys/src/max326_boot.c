@@ -69,6 +69,12 @@
 
 void max326_board_initialize(void)
 {
+#ifdef CONFIG_MAX326XX_HAVE_SPIM
+  /* Configure SPI chip select pins */
+
+  max326_spidev_initialize();
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 

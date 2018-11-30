@@ -54,7 +54,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += max326_button.c
 endif
 
-ifeq ($(CONFIG_MAX326XX_HAVE_I2CM),y)
+ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
 CSRCS += max326_spi.c
 endif
 
