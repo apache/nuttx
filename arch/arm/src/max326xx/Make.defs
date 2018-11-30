@@ -165,7 +165,12 @@ endif
 
 ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
+ifeq ($(CONFIG_MAX326XX_SPIM0),y)
 CHIP_CSRCS += max32660_spim.c
+endif
+ifeq ($(CONFIG_MAX326XX_SPIM1),y)
+CHIP_CSRCS += max32660_spimssm.c
+endif
 endif
 endif
 

@@ -92,60 +92,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Configuration ********************************************************************/
-/* SPI interrupts */
-
-#ifdef CONFIG_MAX326_SPI_INTERRUPTS
-#  error "Interrupt driven SPI not yet supported"
-#endif
-
-/* Can't have both interrupt driven SPI and SPI DMA */
-
-#if defined(CONFIG_MAX326_SPI_INTERRUPTS) && defined(CONFIG_MAX326_SPI_DMA)
-#  error "Cannot enable both interrupt mode and DMA mode for SPI"
-#endif
-
-/* SPI DMA priority */
-
-#ifdef CONFIG_MAX326_SPI_DMA
-
-#  if defined(CONFIG_SPI_DMAPRIO)
-#    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_MAX326_MAX326F10XX) || defined(CONFIG_MAX326_MAX326L15XX) || \
-        defined(CONFIG_MAX326_MAX326F30XX)
-#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
-#  elif defined(CONFIG_MAX326_MAX326F20XX) || defined(CONFIG_MAX326_MAX326F4XXX)
-#    define SPI_DMA_PRIO  DMA_SCR_PRIMED
-#  else
-#    error "Unknown MAX326 DMA"
-#  endif
-
-#  if defined(CONFIG_MAX326_MAX326F10XX) || defined(CONFIG_MAX326_MAX326L15XX) || \
-      defined(CONFIG_MAX326_MAX326F30XX)
-#    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
-#  elif defined(CONFIG_MAX326_MAX326F20XX) || defined(CONFIG_MAX326_MAX326F4XXX)
-#    if (SPI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
-#      error "Illegal value for CONFIG_SPI_DMAPRIO"
-#    endif
-#  else
-#    error "Unknown MAX326 DMA"
-#  endif
-
-#endif
-
-/* DMA channel configuration */
-
-#define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
-#define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
-#define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_P2M)
-#define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_P2M)
-#define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
-#define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_M2P)
-#define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_M2P)
-#define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
-
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -159,7 +105,7 @@ struct max326_spidev_s
 #endif
 #ifdef CONFIG_MAX326_SPI_DMA
   volatile uint8_t rxresult;     /* Result of the RX DMA */
-  volatile uint8_t txresult;     /* Result of the RX DMA */
+  volatile uint8_t txresult;     /* Result of the TX DMA */
   uint8_t          rxch;         /* The RX DMA channel number */
   uint8_t          txch;         /* The TX DMA channel number */
   DMA_HANDLE       rxdma;        /* DMA channel handle for RX transfers */
@@ -183,60 +129,71 @@ struct max326_spidev_s
 
 /* Helpers */
 
-static inline uint32_t spi_getreg(FAR struct max326_spidev_s *priv,
+static inline uint32_t spi_getreg(struct max326_spidev_s *priv,
                                   unsigned int offset);
-static inline void spi_putreg(FAR struct max326_spidev_s *priv,
+static inline void spi_putreg(struct max326_spidev_s *priv,
                               unsigned int offset, uint32_t value);
-static inline uint16_t spi_readword(FAR struct max326_spidev_s *priv);
-static inline void spi_writeword(FAR struct max326_spidev_s *priv, uint16_t byte);
-static inline bool spi_16bitmode(FAR struct max326_spidev_s *priv);
+static inline uint16_t spi_readword(struct max326_spidev_s *priv);
+static inline void spi_writeword(struct max326_spidev_s *priv, uint16_t byte);
+static inline bool spi_16bitmode(struct max326_spidev_s *priv);
+
+/* Interrupt support */
+
+static void        spi_poll(struct max326_spidev_s *priv);
+#ifdef CONFIG_MAX326_SPI_INTERRUPTS
+static int         spi_interrupt(int irq, void *context, void *arg);
+#endif
 
 /* DMA support */
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void        spi_dmarxwait(FAR struct max326_spidev_s *priv);
-static void        spi_dmatxwait(FAR struct max326_spidev_s *priv);
-static inline void spi_dmarxwakeup(FAR struct max326_spidev_s *priv);
-static inline void spi_dmatxwakeup(FAR struct max326_spidev_s *priv);
+static void        spi_dmarxwait(struct max326_spidev_s *priv);
+static void        spi_dmatxwait(struct max326_spidev_s *priv);
+static inline void spi_dmarxwakeup(struct max326_spidev_s *priv);
+static inline void spi_dmatxwakeup(struct max326_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg);
 static void        spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg);
-static void        spi_dmarxsetup(FAR struct max326_spidev_s *priv,
-                                  FAR void *rxbuffer, FAR void *rxdummy,
+static void        spi_dmarxsetup(struct max326_spidev_s *priv, void *rxbuffer,
+                                  void *rxdummy, size_t nwords);
+static void        spi_dmatxsetup(struct max326_spidev_s *priv,
+                                  const void *txbuffer, const void *txdummy,
                                   size_t nwords);
-static void        spi_dmatxsetup(FAR struct max326_spidev_s *priv,
-                                  FAR const void *txbuffer, FAR const void *txdummy,
-                                  size_t nwords);
-static inline void spi_dmarxstart(FAR struct max326_spidev_s *priv);
-static inline void spi_dmatxstart(FAR struct max326_spidev_s *priv);
+static inline void spi_dmarxstart(struct max326_spidev_s *priv);
+static inline void spi_dmatxstart(struct max326_spidev_s *priv);
 #endif
 
 /* SPI methods */
 
-static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+static int         spi_lock(struct spi_dev_s *dev, bool lock);
+static uint32_t    spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
+static void        spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
+static void        spi_setbits(struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES
-static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
+static int         spi_hwfeatures(struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                FAR void *rxbuffer, size_t nwords);
+static uint16_t    spi_send(struct spi_dev_s *dev, uint16_t wd);
+static void        spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                                void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static void        spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
                                 size_t nwords);
-static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+static void        spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
                                  size_t nwords);
 #endif
 
 /* Initialization */
 
-static void        spi_bus_initialize(FAR struct max326_spidev_s *priv);
+static void        spi_bus_initialize(struct max326_spidev_s *priv);
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+
+/* NOTE:  This is somewhat over-designed since there is only a single SPI peripheral.
+ * However, it supports simple group to additional SPI peripherals by extending this
+ * logic.
+ */
 
 #ifdef CONFIG_MAX326XX_SPIM0
 static const struct spi_ops_s g_sp0iops =
@@ -286,54 +243,6 @@ static struct max326_spidev_s g_spi0dev =
 };
 #endif
 
-#ifdef CONFIG_MAX326XX_SPIM1
-static const struct spi_ops_s g_sp1iops =
-{
-  .lock              = spi_lock,
-  .select            = max326_spi1select,
-  .setfrequency      = spi_setfrequency,
-  .setmode           = spi_setmode,
-  .setbits           = spi_setbits,
-#ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = spi_hwfeatures,
-#endif
-  .status            = max326_spi1status,
-#ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = max326_spi1cmddata,
-#endif
-  .send              = spi_send,
-#ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spi_exchange,
-#else
-  .sndblock          = spi_sndblock,
-  .recvblock         = spi_recvblock,
-#endif
-#ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = max326_spi1register,  /* Provided externally */
-#else
-  .registercallback  = 0,                   /* Not implemented */
-#endif
-};
-
-static struct max326_spidev_s g_spi1dev =
-{
-  .spidev   = { &g_sp1iops },
-  .spibase  = MAX326_SPIMSS_BASE,
-#ifdef CONFIG_MAX326_SPI_INTERRUPTS
-  .spiirq   = MAX326_IRQ_SPIMSS,
-#endif
-#ifdef CONFIG_MAX326_SPI_DMA
-#  ifdef CONFIG_MAX326XX_SPIM1_DMA
-  .rxch     = DMACHAN_SPI1_RX,
-  .txch     = DMACHAN_SPI1_TX,
-#  else
-  .rxch     = 0,
-  .txch     = 0,
-#  endif
-#endif
-};
-#endif
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
@@ -353,8 +262,7 @@ static struct max326_spidev_s g_spi1dev =
  *
  ************************************************************************************/
 
-static inline uint32_t spi_getreg(FAR struct max326_spidev_s *priv,
-                                  unsigned int offset)
+static inline uint32_t spi_getreg(struct max326_spidev_s *priv, unsigned int offset)
 {
   return getreg32(priv->spibase + offset);
 }
@@ -375,7 +283,7 @@ static inline uint32_t spi_getreg(FAR struct max326_spidev_s *priv,
  *
  ************************************************************************************/
 
-static inline void spi_putreg(FAR struct max326_spidev_s *priv, unsigned int offset,
+static inline void spi_putreg(struct max326_spidev_s *priv, unsigned int offset,
                               uint32_t value)
 {
   putreg32(value, priv->spibase + offset);
@@ -395,7 +303,7 @@ static inline void spi_putreg(FAR struct max326_spidev_s *priv, unsigned int off
  *
  ************************************************************************************/
 
-static inline uint16_t spi_readword(FAR struct max326_spidev_s *priv)
+static inline uint16_t spi_readword(struct max326_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
@@ -423,7 +331,7 @@ static inline uint16_t spi_readword(FAR struct max326_spidev_s *priv)
  *
  ************************************************************************************/
 
-static inline void spi_writeword(FAR struct max326_spidev_s *priv, uint16_t word)
+static inline void spi_writeword(struct max326_spidev_s *priv, uint16_t word)
 {
   /* Wait until the transmit buffer is empty */
 
@@ -450,10 +358,77 @@ static inline void spi_writeword(FAR struct max326_spidev_s *priv, uint16_t word
  *
  ************************************************************************************/
 
-static inline bool spi_16bitmode(FAR struct max326_spidev_s *priv)
+static inline bool spi_16bitmode(struct max326_spidev_s *priv)
 {
 #warning Missing logic
 }
+
+/****************************************************************************
+ * Name: spi_poll
+ *
+ * Description:
+ *   Handle SPI events.  This may be called repeatedly in polled mode or may
+ *   be called from spi_interrupt() in interrupt mode.
+ *
+ ****************************************************************************/
+
+static void spi_poll(struct max326_spidev_s *priv)
+{
+#warning Missing logic
+}
+
+/****************************************************************************
+ * Name: spi_interrupt
+ *
+ * Description:
+ *   This is the SPI interrupt handler.  It will be invoked when an
+ *   interrupt received on the 'irq'.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MAX326_SPI_INTERRUPTS
+static int spi_interrupt(int irq, void *context, void *arg)
+{
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)arg;
+  uint32_t intfl;
+  uint32_t regval;
+  unsigned int rxavail;
+  unsigned int rxlevel;
+
+  /* Read pending interrupt flags, interrupt enables, and UART status
+   * registers.
+   */
+
+  intfl = max326_serialin(priv, MAX326_UART_INTFL_OFFSET);
+
+  /* Disable all interrupts */
+
+  spi_putreg(priv, MAX326_UART_INTEN_OFFSET, 0);
+
+  /* Clear pending interrupt flags */
+
+  max326_serialout(priv, MAX326_UART_INTFL_OFFSET, intfl & UART_INT_ALL);
+
+  /* Handle any active request */
+
+  if (intfl != 0)
+    {
+      do
+        {
+          spi_poll(priv);
+
+          /* Check if there is more Rx data to be read */
+
+          regval  = spi_getreg(priv, MAX326_SPI_DMA_OFFSET);
+          rxavail = (regval & SPI_DMA_TXFIFOCNT_MASK) >> SPI_DMA_TXFIFOCNT_SHIFT;
+          rxlevel = (regval & SPI_DMA_RXFIFOLVL_MASK) >> SPI_DMA_RXFIFOLVL_SHIFT;
+        }
+      while (/* RX buffer != NULL && */ rxavail > rxlevel);
+    }
+
+  return OK;
+}
+#endif
 
 /************************************************************************************
  * Name: spi_dmarxwait
@@ -464,7 +439,7 @@ static inline bool spi_16bitmode(FAR struct max326_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void spi_dmarxwait(FAR struct max326_spidev_s *priv)
+static void spi_dmarxwait(struct max326_spidev_s *priv)
 {
   int ret;
 
@@ -495,7 +470,7 @@ static void spi_dmarxwait(FAR struct max326_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void spi_dmatxwait(FAR struct max326_spidev_s *priv)
+static void spi_dmatxwait(struct max326_spidev_s *priv)
 {
   int ret;
 
@@ -526,7 +501,7 @@ static void spi_dmatxwait(FAR struct max326_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static inline void spi_dmarxwakeup(FAR struct max326_spidev_s *priv)
+static inline void spi_dmarxwakeup(struct max326_spidev_s *priv)
 {
   (void)nxsem_post(&priv->rxsem);
 }
@@ -541,7 +516,7 @@ static inline void spi_dmarxwakeup(FAR struct max326_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static inline void spi_dmatxwakeup(FAR struct max326_spidev_s *priv)
+static inline void spi_dmatxwakeup(struct max326_spidev_s *priv)
 {
   (void)nxsem_post(&priv->txsem);
 }
@@ -558,7 +533,7 @@ static inline void spi_dmatxwakeup(FAR struct max326_spidev_s *priv)
 #ifdef CONFIG_MAX326_SPI_DMA
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)arg;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)arg;
 
   /* Wake-up the SPI driver */
 
@@ -578,7 +553,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 #ifdef CONFIG_MAX326_SPI_DMA
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)arg;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)arg;
 
   /* Wake-up the SPI driver */
 
@@ -596,8 +571,8 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void spi_dmarxsetup(FAR struct max326_spidev_s *priv, FAR void *rxbuffer,
-                           FAR void *rxdummy, size_t nwords)
+static void spi_dmarxsetup(struct max326_spidev_s *priv, void *rxbuffer,
+                           void *rxdummy, size_t nwords)
 {
   /* 8- or 16-bit mode? */
 
@@ -646,9 +621,8 @@ static void spi_dmarxsetup(FAR struct max326_spidev_s *priv, FAR void *rxbuffer,
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void spi_dmatxsetup(FAR struct max326_spidev_s *priv,
-                           FAR const void *txbuffer, FAR const void *txdummy,
-                           size_t nwords)
+static void spi_dmatxsetup(struct max326_spidev_s *priv,const void *txbuffer,
+                           const void *txdummy, size_t nwords)
 {
   /* 8- or 16-bit mode? */
 
@@ -697,7 +671,7 @@ static void spi_dmatxsetup(FAR struct max326_spidev_s *priv,
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static inline void spi_dmarxstart(FAR struct max326_spidev_s *priv)
+static inline void spi_dmarxstart(struct max326_spidev_s *priv)
 {
   priv->rxresult = 0;
   max326_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
@@ -713,7 +687,7 @@ static inline void spi_dmarxstart(FAR struct max326_spidev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static inline void spi_dmatxstart(FAR struct max326_spidev_s *priv)
+static inline void spi_dmatxstart(struct max326_spidev_s *priv)
 {
   priv->txresult = 0;
   max326_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
@@ -736,7 +710,7 @@ static inline void spi_dmatxstart(FAR struct max326_spidev_s *priv)
  *
  ************************************************************************************/
 
-static void spi_modify_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
+static void spi_modify_ctrl0(struct max326_spidev_s *priv, uint32_t setbits,
                              uint32_t clrbits)
 {
   uint32_t ctrl0;
@@ -763,7 +737,7 @@ static void spi_modify_ctrl0(FAR struct max326_spidev_s *priv, uint32_t setbits,
  *
  ************************************************************************************/
 
-static void spi_modify_ctrl2(FAR struct max326_spidev_s *priv, uint32_t setbits,
+static void spi_modify_ctrl2(struct max326_spidev_s *priv, uint32_t setbits,
                              uint32_t clrbits)
 {
   uint32_t ctrl2;
@@ -795,9 +769,9 @@ static void spi_modify_ctrl2(FAR struct max326_spidev_s *priv, uint32_t setbits,
  *
  ************************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
   int ret;
 
   if (lock)
@@ -840,9 +814,9 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ************************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
 
   /* Has the frequency changed? */
 
@@ -975,9 +949,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  *
  ************************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
@@ -1038,9 +1012,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ************************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
 
   spiinfo("nbits=%d\n", nbits);
   DEBUGASSERT(nbits > 0 && nbits <= 16);
@@ -1079,7 +1053,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
-static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
+static int spi_hwfeatures(struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
   return -ENOSYS;
 }
@@ -1101,9 +1075,9 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
  *
  ************************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
   uint32_t regval;
   uint16_t ret;
 
@@ -1147,14 +1121,14 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  ************************************************************************************/
 
 #if !defined(CONFIG_MAX326_SPI_DMA)
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbuffer,
+                         size_t nwords)
 #else
-static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                               FAR void *rxbuffer, size_t nwords)
+static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
+                               void *rxbuffer, size_t nwords)
 #endif
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1251,10 +1225,10 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
  ************************************************************************************/
 
 #ifdef CONFIG_MAX326_SPI_DMA
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbuffer,
+                         size_t nwords)
 {
-  FAR struct max326_spidev_s *priv = (FAR struct max326_spidev_s *)dev;
+  struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
   static uint16_t rxdummy = 0xffff;
   static const uint16_t txdummy = 0xffff;
 
@@ -1299,8 +1273,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         size_t nwords)
+static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer, size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spi_exchange(dev, txbuffer, NULL, nwords);
@@ -1328,8 +1301,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                          size_t nwords)
+static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer, size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
@@ -1351,7 +1323,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  *
  ************************************************************************************/
 
-static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
+static void spi_bus_initialize(struct max326_spidev_s *priv)
 {
   uint32_t setbits;
   uint32_t clrbits;
@@ -1382,7 +1354,7 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
 
   /* Select a default frequency of approx. 400KHz */
 
-  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
@@ -1421,10 +1393,26 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
     }
 #endif
 
+  /* Disable all interrupts at the peripheral */
+
+  spi_putreg(0, MAX326_SPI_INTEN_OFFSET, regval);
+
   /* Clear pending interrupts */
 
   regval = spi_getreg(priv, MAX326_SPI_INTFL_OFFSET);
   spi_putreg(priv, MAX326_SPI_INTFL_OFFSET, regval);
+
+#ifdef CONFIG_MAX326_SPI_INTERRUPTS
+  /* Attach the interrupt handler and enable the IRQ at the NVIC.
+   * Interrupts are (probably) still disabled at the SPI peripheral.
+   */
+
+  ret = irq_attach(priv->irq, spi_interrupt, priv);
+  if (ret == OK)
+    {
+      up_enable_irq(priv->irq);
+    }
+#endif
 }
 
 /************************************************************************************
@@ -1438,16 +1426,16 @@ static void spi_bus_initialize(FAR struct max326_spidev_s *priv)
  *   Initialize the selected SPI bus
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *max326_spibus_initialize(int bus)
+struct spi_dev_s *max326_spibus_initialize(int bus)
 {
-  FAR struct max326_spidev_s *priv = NULL;
+  struct max326_spidev_s *priv = NULL;
 
   irqstate_t flags = enter_critical_section();
 
@@ -1480,42 +1468,13 @@ FAR struct spi_dev_s *max326_spibus_initialize(int bus)
     }
   else
 #endif
-#ifdef CONFIG_MAX326XX_SPIM1
-  if (bus == 1)
-    {
-      /* Select SPI1 */
-
-      priv = &g_spi1dev;
-
-      /* Only configure if the bus is not already configured */
-
-      if (!priv->initialized)
-        {
-          /* Enable peripheral clocking */
-
-          max326_spi1_enableclk();
-
-          /* Configure SPI1 pins: SCK, MISO, and MOSI */
-
-          max326_gpio_config(GPIO_SPI1_SCK);
-          max326_gpio_config(GPIO_SPI1_MISO);
-          max326_gpio_config(GPIO_SPI1_MOSI);
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          spi_bus_initialize(priv);
-          priv->initialized = true;
-        }
-    }
-  else
-#endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
       return NULL;
     }
 
   leave_critical_section(flags);
-  return (FAR struct spi_dev_s *)priv;
+  return (struct spi_dev_s *)priv;
 }
 
 #endif /* CONFIG_MAX326XX_HAVE_SPIM */

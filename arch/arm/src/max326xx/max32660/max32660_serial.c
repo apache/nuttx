@@ -156,7 +156,7 @@ static int  max326_setup(struct uart_dev_s *dev);
 static void max326_shutdown(struct uart_dev_s *dev);
 static int  max326_attach(struct uart_dev_s *dev);
 static void max326_detach(struct uart_dev_s *dev);
-static int  max326_interrupt(int irq, void *context, FAR void *arg);
+static int  max326_interrupt(int irq, void *context, void *arg);
 static int  max326_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  max326_receive(struct uart_dev_s *dev, uint32_t *status);
 static void max326_rxint(struct uart_dev_s *dev, bool enable);
@@ -496,13 +496,11 @@ static void max326_detach(struct uart_dev_s *dev)
  * Description:
  *   This is the UART status interrupt handler.  It will be invoked when an
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   uart_receivechar to perform the appropriate data transfers.
  *
  ****************************************************************************/
 
-static int max326_interrupt(int irq, void *context, FAR void *arg)
+static int max326_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct max326_dev_s *priv;
@@ -541,7 +539,6 @@ static int max326_interrupt(int irq, void *context, FAR void *arg)
        * Check if the Rx FIFO level interrupt is enabled and the Rx FIFO is
        * not empty.
        */
-
 #if 0
       if ((intfl & UART_INT_RX) != 0) /* Should work too */
 #else
