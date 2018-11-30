@@ -85,7 +85,7 @@ FAR struct tcb_s *sched_gettcb(pid_t pid)
        * terminating asynchronously.
        */
 
-      flags = spin_lock_irqsave();
+      flags = enter_critical_section();
 
       /* Verify that the correct TCB was found. */
 
@@ -96,7 +96,7 @@ FAR struct tcb_s *sched_gettcb(pid_t pid)
           ret = g_pidhash[hash_ndx].tcb;
         }
 
-      spin_unlock_irqsave();
+      leave_critical_section(flags);
     }
 
   /* Return the TCB. */
