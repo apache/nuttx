@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f334re/scripts/ld.script
+ * configs/nucleo-f334r8/scripts/ld.script
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* The STM32F334R8 has 64Kb of FLASH beginning at address 0x0800:0000 and
- * 12Kb of SRAM.
+/* The STM32F334R8 has 64Kb of FLASH beginning at address 0x0800:0000,
+ * 12Kb of SRAM and 4Kb of CCM SRAM.
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nucleo-f303re/src/Makefile
+# configs/nucleo-f334r8/src/Makefile
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>

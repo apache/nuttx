@@ -1,7 +1,7 @@
 Nucleo-64 Boards
 ================
 
-The Nucleo-F303RE is a member of the Nucleo-64 board family.  The Nucleo-64
+The Nucleo-F334R8 is a member of the Nucleo-64 board family.  The Nucleo-64
 is a standard board for use with several STM32 parts in the LQFP64 package.
 Variants include
 

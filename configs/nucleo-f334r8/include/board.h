@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIG_STM32F3DISCOVERY_INCLUDE_BOARD_H
-#define __CONFIG_STM32F3DISCOVERY_INCLUDE_BOARD_H
+#ifndef __CONFIG_NUCLEO_F334R8_INCLUDE_BOARD_H
+#define __CONFIG_NUCLEO_F334R8_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
