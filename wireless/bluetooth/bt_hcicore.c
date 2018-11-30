@@ -933,18 +933,6 @@ static void hci_event(FAR struct bt_buf_s *buf)
         hci_encrypt_change(buf);
         break;
 
-      case BT_HCI_EVT_CMD_COMPLETE:
-        hci_cmd_complete(buf);
-        break;
-
-      case BT_HCI_EVT_CMD_STATUS:
-        hci_cmd_status(buf);
-       break;
-
-      case BT_HCI_EVT_NUM_COMPLETED_PACKETS:
-        hci_num_completed_packets(buf);
-        break;
-
       case BT_HCI_EVT_ENCRYPT_KEY_REFRESH_COMPLETE:
         hci_encrypt_key_refresh_complete(buf);
         break;
@@ -1029,10 +1017,8 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
  * Name: hci_rx_work
  *
  * Description:
- *   This work function may operate on either the the high priority work
- *   thread (using the high priority buffer queue), or on the low priority
- *   work queue (using the low priority buffer queue), depending upon the
- *   type of the incoming message
+ *   This work function operates on the low priority work queue using the
+ *   low priority buffer queue.
  *
  * Input Parameters:
  *   arg - Indicates which buffer queue should be used
@@ -1069,6 +1055,67 @@ static void hci_rx_work(FAR void *arg)
             bt_buf_release(buf);
             break;
         }
+    }
+}
+
+/****************************************************************************
+ * Name: priority_rx_work
+ *
+ * Description:
+ *   This work function operates on the high priority work thread using the
+ *   high priority buffer queue.
+ *
+ * Input Parameters:
+ *   arg - Indicates which buffer queue should be used
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void priority_rx_work(FAR void *arg)
+{
+  FAR struct bt_bufferlist_s *list = (FAR struct bt_bufferlist_s *)arg;
+  FAR struct bt_buf_s *buf;
+
+  wlinfo("list %p\n", list);
+  DEBUGASSERT(list != NULL);
+
+  while ((buf = bt_dequeue_bufwork(list)) != NULL)
+    {
+      FAR struct bt_hci_evt_hdr_s *hdr = (FAR void *)buf->data;
+
+      wlinfo("buf %p type %u len %u\n", buf, buf->type, buf->len);
+
+      if (buf->type != BT_EVT)
+        {
+          wlerr("Unknown buf type %u\n", buf->type);
+          bt_buf_release(buf);
+          continue;
+        }
+
+      bt_buf_consume(buf, sizeof(struct bt_hci_evt_hdr_s));
+
+      switch (hdr->evt)
+        {
+          case BT_HCI_EVT_CMD_COMPLETE:
+            hci_cmd_complete(buf);
+            break;
+
+          case BT_HCI_EVT_CMD_STATUS:
+            hci_cmd_status(buf);
+            break;
+
+          case BT_HCI_EVT_NUM_COMPLETED_PACKETS:
+            hci_num_completed_packets(buf);
+            break;
+
+          default:
+            wlerr("Unknown event 0x%02x\n", hdr->evt);
+            break;
+        }
+
+      bt_buf_release(buf);
     }
 }
 
@@ -1514,7 +1561,7 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
 
           if (work_available(&g_hp_work))
             {
-              ret = work_queue(HPWORK, &g_hp_work, hci_rx_work,
+              ret = work_queue(HPWORK, &g_hp_work, priority_rx_work,
                                &g_hp_rxlist, 0);
               if (ret < 0)
                 {
