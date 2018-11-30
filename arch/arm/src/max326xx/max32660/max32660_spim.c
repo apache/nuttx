@@ -441,8 +441,8 @@ static int spi_poll(struct max326_spidev_s *priv)
   uint32_t length;
   uint32_t regval;
   uint32_t tmp;
-  unsigned int txavail;
-  unsigned int rxavail;
+  int txavail;
+  int rxavail;
   int remaining;
 
   /* Get the transfer size in units of bytes */
@@ -477,7 +477,7 @@ static int spi_poll(struct max326_spidev_s *priv)
       /* Write Tx buffer data to the FIFO */
 
       src = &((const uint8_t *)priv->txbuffer)[priv->txbytes];
-      while (txavail)
+      while (txavail > 0)
         {
           dest = (uint8_t *)(priv->base + MAX326_SPI_DATA_OFFSET);
 
@@ -558,7 +558,7 @@ static int spi_poll(struct max326_spidev_s *priv)
           /* Read data from the Rx FIFO */
 
           src = (const uint8_t *)(priv->base + MAX326_SPI_DATA_OFFSET);
-          while (rxavail)
+          while (rxavail > 0)
             {
               if (rxavail > 3)
                 {
@@ -1123,7 +1123,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbu
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
   DEBUGASSERT(priv != NULL && nwords > 0 && nwords <= UINT16_MAX);
-  DEBUGASSERT(txbuffer != NULL || txbuffer != NULL);
+  DEBUGASSERT(txbuffer != NULL || rxbuffer != NULL);
 
   /* Setup for the transfer */
 

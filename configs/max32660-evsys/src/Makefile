@@ -58,4 +58,8 @@ ifeq ($(CONFIG_MAX326XX_HAVE_SPIM),y)
 CSRCS += max326_spi.c
 endif
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+CSRCS += max326_mmcsd.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

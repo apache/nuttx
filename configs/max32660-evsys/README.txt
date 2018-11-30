@@ -55,6 +55,11 @@ Status
     now appears fully functional.  Removed EXPERIMENTAL from configuration.
     Brought in the STM32 SPI driver as a starting point.  It still does
     not build correctly.  Due to conflicts, only SPI0 will be available.
+  2018-11-30:  Completed coding of the SPI driver.  Added board support
+    for SPI and for and SPI-based micro-SD card.  Initial testing with no
+    device attached shows that the first single byte SPI transfer hangs
+    with 1 byte in the Tx FIFO and nothing in the Rx FIFO.  Data is not
+    moving.
 
 Serial Console
 ==============

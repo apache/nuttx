@@ -46,6 +46,18 @@
 #include "max32660-evsys.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Checking needed by MMC/SDCard */
+
+#ifdef CONFIG_NSH_MMCSDMINOR
+#  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
+#else
+#  define MMCSD_MINOR 0
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -78,6 +90,14 @@ int max326_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  ret = max326_mmcsd_initialize(MMCSD_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
     }
 #endif
 
