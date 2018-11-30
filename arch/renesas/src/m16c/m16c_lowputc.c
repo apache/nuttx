@@ -90,9 +90,9 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
-#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD_CONSOLE)
+#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_SLCD_CONSOLE)
 #  error "Both serial and LCD consoles are defined"
-#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_LCD_CONSOLE)
+#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SLCD_CONSOLE)
 #  warning "No console is defined"
 #endif
 
@@ -298,7 +298,7 @@ static inline void up_lowserialsetup(void)
  *
  ****************************************************************************/
 
-#if defined(HAVE_SERIAL) && !defined(CONFIG_LCD_CONSOLE)
+#if defined(HAVE_SERIAL) && !defined(CONFIG_SLCD_CONSOLE)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIALCONSOLE
@@ -335,7 +335,7 @@ void up_lowsetup(void)
 
   /* The LCD is initialized here if the LCD is used for console output.  */
 
-#ifdef CONFIG_LCD_CONSOLE
+#ifdef CONFIG_SLCD_CONSOLE
   up_lcdinit();
 #endif
 }

@@ -191,7 +191,7 @@ void renesas_timer_initialize(void);
 
 /* Defined in board/xyz_lcd.c */
 
-#ifdef CONFIG_LCD_CONSOLE
+#ifdef CONFIG_SLCD_CONSOLE
 void up_lcdinit(void);
 void up_lcdputc(char ch);
 #else

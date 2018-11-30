@@ -56,7 +56,8 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
-#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD) && defined(CONFIG_LCD_CONSOLE)
+#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_SLCD) && \
+     defined(CONFIG_SLCD_CONSOLE)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -138,4 +139,4 @@ int up_putc(int ch)
   return ch;
 }
 
-#endif /* !HAVE_SERIALCONSOLE && CONFIG_LCD && CONFIG_LCD_CONSOLE */
+#endif /* !HAVE_SERIALCONSOLE && CONFIG_SLCD && CONFIG_SLCD_CONSOLE */

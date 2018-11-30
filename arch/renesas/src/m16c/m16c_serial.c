@@ -130,9 +130,9 @@
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #endif
 
-#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD_CONSOLE)
+#if defined(HAVE_SERIALCONSOLE) && defined(CONFIG_SLCD_CONSOLE)
 #  error "Both serial and LCD consoles are defined"
-#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_LCD_CONSOLE)
+#elif !defined(HAVE_SERIALCONSOLE) && !defined(CONFIG_SLCD_CONSOLE)
 #  warning "No console is defined"
 #endif
 
