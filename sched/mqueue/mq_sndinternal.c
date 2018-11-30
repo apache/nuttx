@@ -291,6 +291,11 @@ int nxmq_wait_send(mqd_t mqdes)
               saved_errno   = rtcb->pterrno;
               rtcb->pterrno = OK;
 
+              /* Make sure this is not the idle task, descheduling that
+               * isn't going to end well.
+               */
+
+              DEBUGASSERT(NULL != rtcb->flink);
               up_block_task(rtcb, TSTATE_WAIT_MQNOTFULL);
 
               /* When we resume at this point, either (1) the message queue

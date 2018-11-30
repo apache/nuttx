@@ -142,8 +142,12 @@ void pg_miss(void)
    *   to the next highest priority task.
    * - The blocked task will be marked with state TSTATE_WAIT_PAGEFILL
    *   and will be retained in the g_waitingforfill prioritized task list.
+   *
+   * Need to firstly check that this is not the idle task,descheduling
+   * that isn't going to end well.
    */
 
+  DEBUGASSERT(NULL != ftcb->flink);
   up_block_task(ftcb, TSTATE_WAIT_PAGEFILL);
 
   /* Boost the page fill worker thread priority.

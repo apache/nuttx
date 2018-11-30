@@ -132,8 +132,12 @@ int sigsuspend(FAR const sigset_t *set)
     }
   else
     {
-      /* Its time to wait until one of the unblocked signals is posted */
+      /* Its time to wait until one of the unblocked signals is posted,
+       * but first, ensure this is not the idle task, descheduling that
+       * isn't going to end well.
+       */
 
+      DEBUGASSERT(NULL != rtcb->flink);
       up_block_task(rtcb, TSTATE_WAIT_SIG);
 
       /* We are running again, restore the original sigprocmask */

@@ -163,8 +163,12 @@ int nxsem_wait(FAR sem_t *sem)
           saved_errno   = rtcb->pterrno;
           rtcb->pterrno = OK;
 
-          /* Add the TCB to the prioritized semaphore wait queue */
+          /* Add the TCB to the prioritized semaphore wait queue, after
+           * checking this is not the idle task - descheduling that
+           * isn't going to end well.
+           */
 
+          DEBUGASSERT(NULL != rtcb->flink);
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been

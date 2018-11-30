@@ -95,8 +95,11 @@ void sched_suspend(FAR struct tcb_s *tcb)
       /* The task was running or runnable before being stopped.  Simply
        * block it in the stopped state.  If tcb refers to this task, then
        * this action will block this task.
+       * Before doing that make sure this is not the idle task,
+       * descheduling that isn't going to end well.
        */
 
+      DEBUGASSERT(NULL != tcb->flink);
       up_block_task(tcb, TSTATE_TASK_STOPPED);
     }
 
