@@ -429,6 +429,18 @@ config MAX326XX_3WIRE
 		By default, 4-pin mode is supported(MISO, MOSI, SCK, SS).  Selecting
 		this option enables 3-pin mode (MOSI, SCK, SS).
 
+		REVISIT:  Perhaps this should be an on-the-fly configuration as an
+		SPI "Hardware Feature" so that we can support 3-wire and 4-wire
+		devices on the same SPI bus?
+
 endif # MAX326XX_SPIM0
+
+config MAX326_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG_MEMCARD_INFO
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Very invasive! Requires also DEBUG_MEMCARD_INFO.
 
 endmenu # SPI Master Configuration

@@ -98,6 +98,10 @@
 #  error DMA not yet supported
 #endif
 
+#ifndef CONFIG_DEBUG_MEMCARD_INFO
+#  undef CONFIG_MAX326_SPI_REGDEBUG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -123,6 +127,15 @@ struct max326_spidev_s
 #endif
   uint8_t          nbits;        /* Width of word in bits (4 through 16) */
   uint8_t          mode;         /* Mode 0,1,2,3 */
+
+#ifdef CONFIG_MAX326_SPI_REGDEBUG
+  /* Debug stuff */
+
+  bool             wrlast;       /* Last was a write */
+  uint32_t         addrlast;     /* Last address */
+  uint32_t         vallast;      /* Last value */
+  int              ntimes;       /* Number of times */
+#endif
 };
 
 /****************************************************************************
@@ -131,10 +144,21 @@ struct max326_spidev_s
 
 /* Helpers */
 
+#ifdef CONFIG_MAX326_SPI_REGDEBUG
+static bool spi_checkreg(struct max326_spidev_s *priv, bool wr,
+              uint32_t regval, uintptr_t regaddr);
+static uint32_t spi_getreg(struct max326_spidev_s *priv,
+              unsigned int offset);
+static void spi_putreg(struct max326_spidev_s *priv,
+              unsigned int offset, uint32_t value);
+#else
+#  define spi_checkreg(priv,wr,regval,regaddr) (false)
 static inline uint32_t spi_getreg(struct max326_spidev_s *priv,
               unsigned int offset);
 static inline void spi_putreg(struct max326_spidev_s *priv,
               unsigned int offset, uint32_t value);
+#endif
+
 static void spi_modify_ctrl0(struct max326_spidev_s *priv, uint32_t setbits,
               uint32_t clrbits);
 static void spi_modify_ctrl1(struct max326_spidev_s *priv, uint32_t setbits,
@@ -239,6 +263,44 @@ static struct max326_spidev_s g_spi0dev =
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_MAX326_SPI_REGDEBUG
+static bool spi_checkreg(struct max326_spidev_s *priv, bool wr,
+                         uint32_t regval, uintptr_t regaddr)
+{
+  if (wr      == priv->wrlast &&     /* Same kind of access? */
+      regval  == priv->vallast &&    /* Same value? */
+      regaddr == priv->addrlast)     /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      priv->ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (priv->ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          mcinfo("...[Repeats %d times]...\n", priv->ntimes);
+        }
+
+      /* Save information about the new access */
+
+      priv->wrlast   = wr;
+      priv->vallast  = regval;
+      priv->addrlast = regaddr;
+      priv->ntimes   = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
 /****************************************************************************
  * Name: spi_getreg
  *
@@ -250,15 +312,30 @@ static struct max326_spidev_s g_spi0dev =
  *   offset - offset to the register of interest
  *
  * Returned Value:
- *   The contents of the 16-bit register
+ *   The contents of the 32-bit register
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MAX326_SPI_REGDEBUG
+static uint32_t spi_getreg(struct max326_spidev_s *priv, unsigned int offset)
+{
+  uintptr_t regaddr = priv->base + offset;
+  uint32_t regval   = getreg32(regaddr);
+
+  if (spi_checkreg(priv, false, regval, regaddr))
+    {
+      mcinfo("%08x->%08x\n", regaddr, regval);
+    }
+
+  return regval;
+}
+#else
 static inline uint32_t spi_getreg(struct max326_spidev_s *priv,
                                   unsigned int offset)
 {
   return getreg32(priv->base + offset);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_putreg
@@ -267,20 +344,35 @@ static inline uint32_t spi_getreg(struct max326_spidev_s *priv,
  *   Write a 16-bit value to the SPI register at offset
  *
  * Input Parameters:
- *   priv   - private SPI device structure
+ *   priv   - Private SPI device structure
  *   offset - offset to the register of interest
- *   value  - the 16-bit value to be written
+ *   regval - the 32-bit value to be written
  *
  * Returned Value:
  *   The contents of the 16-bit register
  *
  ****************************************************************************/
 
-static inline void spi_putreg(struct max326_spidev_s *priv,
-                              unsigned int offset, uint32_t value)
+#ifdef CONFIG_MAX326_SPI_REGDEBUG
+static void spi_putreg(struct max326_spidev_s *priv, unsigned int offset,
+                       uint32_t regval)
 {
-  putreg32(value, priv->base + offset);
+  uintptr_t regaddr = priv->base + offset;
+
+  if (spi_checkreg(priv, true, regval, regaddr))
+    {
+      mcinfo("%08x<-%08x\n", regaddr, regval);
+    }
+
+  putreg32(regval, regaddr);
 }
+#else
+static inline void spi_putreg(struct max326_spidev_s *priv,
+                              unsigned int offset, uint32_t regval)
+{
+  putreg32(regval, priv->base + offset);
+}
+#endif
 
 /****************************************************************************
  * Name: spi_modify_ctrl0
@@ -474,7 +566,7 @@ static int spi_poll(struct max326_spidev_s *priv)
           txavail &= ~1;
         }
 
-      /* Write Tx buffer data to the FIFO */
+      /* Write Tx buffer data to the Tx FIFO */
 
       src = &((const uint8_t *)priv->txbuffer)[priv->txbytes];
       while (txavail > 0)
@@ -538,7 +630,7 @@ static int spi_poll(struct max326_spidev_s *priv)
       goto done;
     }
 
-  /* Read the RX FIFO */
+  /* Read from the RX FIFO */
 
   if (priv->rxbuffer != NULL)
     {
@@ -797,7 +889,7 @@ static void spi0_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
   if (!selected)
     {
       priv = (struct max326_spidev_s *)dev;
-      spi_modify_ctrl0(priv, SPI_CTRL0_SPIEN, 0);
+      spi_modify_ctrl0(priv, 0, SPI_CTRL0_SPIEN);
     }
 }
 #endif
@@ -1197,7 +1289,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbu
     }
   else
     {
-      /* No Tx data sourc */
+      /* No Tx data source */
 
       spi_modify_dma(priv, 0, SPI_DMA_TXFIFOEN);
     }
@@ -1213,7 +1305,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbu
 
   /* Re-enable SPI to start the next transfer */
 
-  spi_modify_ctrl0(priv, 0, SPI_CTRL0_SPIEN);
+  spi_modify_ctrl0(priv, SPI_CTRL0_SPIEN, 0);
 
   /* Poll one time to setup the transfer */
 
@@ -1222,7 +1314,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer, void *rxbu
 
   /* Initiate data transmission */
 
-  spi_modify_ctrl0(priv, 0, SPI_CTRL0_START);
+  spi_modify_ctrl0(priv, SPI_CTRL0_START, 0);
   priv->busy = true;
 
 #ifndef CONFIG_MAX326_SPI_INTERRUPTS
@@ -1323,16 +1415,15 @@ static void spi_bus_initialize(struct max326_spidev_s *priv)
 
   /* Enable SPI */
 
-  spi_modify_ctrl0(priv, 0, SPI_CTRL0_SPIEN);
+  spi_modify_ctrl0(priv, SPI_CTRL0_SPIEN, 0);
 
   /* Setup slaved select timing (even in Master mode?) */
 
   regval = (SPI_SSTIME_SSACT1(1) | SPI_SSTIME_SSACT2(1) | SPI_SSTIME_SSINACT(1));
   spi_putreg(priv, MAX326_SPI_SSTIME_OFFSET, regval);
 
-  /* Configure CR1. Default configuration:
+  /* Configure CTRL0. Default configuration:
    *   Mode 0:                        CTRL2: CLKPHA=0 and CLKPOL=0
-   *   Master:                        CTRL0: MMEN=1
    *   8-bit:                         CTRL2: NUMBITS=8
    */
 
@@ -1343,6 +1434,10 @@ static void spi_bus_initialize(struct max326_spidev_s *priv)
   priv->frequency = 0;
   priv->nbits     = 8;
   priv->mode      = SPIDEV_MODE0;
+
+  /* Enable Master mode */
+
+  spi_modify_ctrl0(priv, SPI_CTRL0_MMEN, 0);
 
   /* Select a default frequency of approx. 400KHz */
 
@@ -1359,7 +1454,7 @@ static void spi_bus_initialize(struct max326_spidev_s *priv)
 
   /* Disable all interrupts at the peripheral */
 
-  spi_putreg(0, MAX326_SPI_INTEN_OFFSET, 0);
+  spi_putreg(priv, MAX326_SPI_INTEN_OFFSET, 0);
 
   /* Clear pending interrupts */
 
