@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretm4c_memorymap.h
+ * arch/arm/src/tiva/hardware/tm4c/tm4c_memorymap.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -574,4 +574,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_MEMORYMAP_H */

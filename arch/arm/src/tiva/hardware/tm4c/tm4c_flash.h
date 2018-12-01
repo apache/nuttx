@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretm4c_flash.h
+ * arch/arm/src/tiva/hardware/tm4c/tm4c_flash.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_FLASH_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_FLASH_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H
 
 /************************************************************************************
  * Included Files
@@ -401,4 +401,4 @@
 /* Flash Memory Protection Read Enable 0-15 (32-bit, bit-encoded) */
 /* Flash Memory Protection Program Enable 0-15 (32-bit, bit-encoded) */
 
-#endif // __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_FLASH_H
+#endif // __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_FLASH_H

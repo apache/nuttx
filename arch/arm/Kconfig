@@ -275,6 +275,16 @@ config ARCH_CHIP_SAMV7
 	---help---
 		Atmel SAMV7 (ARM Cortex-M7) architectures
 
+config ARCH_CHIP_SIMPLELINK
+	bool "TI SimpleLink"
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
+	depends on EXPERIMENTAL
+	---help---
+		TI SimpleLink CCxxx architectures (ARM Cortex-M3 or M4)
+
 config ARCH_CHIP_STM32
 	bool "STMicro STM32 F1/F2/F3/F4/L1"
 	select ARCH_HAVE_MPU
@@ -363,7 +373,6 @@ config ARCH_CHIP_TIVA
 	bool "TI Tiva"
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
-	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	---help---
 		TI Tiva TM4C architectures (ARM Cortex-M4)
@@ -589,7 +598,7 @@ config ARCH_CHIP
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
 	default "lc823450"	if ARCH_CHIP_LC823450
-	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA
+	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA ||ARCH_CHIP_SIMPLELINK
 	default "lpc11xx"	if ARCH_CHIP_LPC11XX
 	default "lpc17xx"	if ARCH_CHIP_LPC17XX
 	default "lpc214x"	if ARCH_CHIP_LPC214X
@@ -807,7 +816,7 @@ endif
 if ARCH_CHIP_LC823450
 source arch/arm/src/lc823450/Kconfig
 endif
-if ARCH_CHIP_LM || ARCH_CHIP_TIVA
+if ARCH_CHIP_LM || ARCH_CHIP_TIVA || ARCH_CHIP_SIMPLELINK
 source arch/arm/src/tiva/Kconfig
 endif
 if ARCH_CHIP_LPC11XX

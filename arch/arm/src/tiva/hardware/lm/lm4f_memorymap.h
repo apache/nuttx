@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwarelm4f_memorymap.h
+ * arch/arm/src/tiva/hardmware/lm/4f_memorymap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM4F_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM4F_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -160,4 +160,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM4F_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_MEMORYMAP_H */

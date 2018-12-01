@@ -45,11 +45,11 @@
 /* Include the pin mapping file for the specific Tiva/Stellaris chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "hardware/lm3s_pinmap.h"
+#  include "hardware/lm/lm3s_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
-#  include "hardware/lm4f_pinmap.h"
+#  include "hardware/lm/lm4f_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
-#  include "hardware/tm4c_pinmap.h"
+#  include "hardware/tm4c/tm4c_pinmap.h"
 #else
 #  error "Unsupported Tiva/Stellaris PIN mapping"
 #endif

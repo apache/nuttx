@@ -59,7 +59,7 @@
 
 #include "hardware/tiva_pwm.h"
 #include "hardware/tiva_pinmap.h"
-#include "hardware/tm4c_memorymap.h"
+#include "hardware/tiva_memorymap.h"
 
 /************************************************************************************
  * Private Types

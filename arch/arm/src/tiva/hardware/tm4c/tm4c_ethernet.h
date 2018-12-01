@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretm4c_ethernet.h
+ * arch/arm/src/tiva/hardware/tm4c/tm4c_ethernet.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_ETHERNET_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H
 
 /************************************************************************************
  * Included Files
@@ -1387,4 +1387,4 @@ struct emac_rxdesc_s
  ************************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_ETHERNET_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C_ETHERNET_H */

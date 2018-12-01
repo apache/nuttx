@@ -45,12 +45,12 @@
 /* The TM4C129 family has a different FLASH register layout */
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
-#  include "hardware/tm4c_flash.h"
+#  include "hardware/tm4c/tm4c_flash.h"
 
 /* Others (including LM4F and TM4C123) are similar to the LM3S family */
 
 #else
-#  include "hardware/lm3s_flash.h"
+#  include "hardware/lm/lm3s_flash.h"
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H */

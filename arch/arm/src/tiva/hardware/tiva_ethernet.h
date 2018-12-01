@@ -43,9 +43,9 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_TM4C)
-#  include "hardware/tm4c_ethernet.h"
+#  include "hardware/tm4c/tm4c_ethernet.h"
 #elif defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "hardware/lm3s_ethernet.h"
+#  include "hardware/lm/lm3s_ethernet.h"
 #endif
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ETHERNET_H */

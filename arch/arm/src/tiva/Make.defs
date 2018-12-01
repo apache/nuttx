@@ -153,4 +153,8 @@ ifeq ($(CONFIG_ARCH_CHIP_LM),y)
 VPATH += chip/lm
 else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
 VPATH += chip/tm4c
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
+VPATH += chip/cc13x0
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
+VPATH += chip/cc13x2
 endif

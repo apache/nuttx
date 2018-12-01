@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwarelm3s_syscontrol.h
+ * arch/arm/src/tiva/hardmware/lm/3s_syscontrol.h
  *
  *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM3S_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM3S_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
 
 /************************************************************************************
  * Included Files
@@ -492,4 +492,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM3S_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H */

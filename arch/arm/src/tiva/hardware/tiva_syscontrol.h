@@ -46,13 +46,13 @@
 /* Include the system control header file for the specific Tiva/Stellaris chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "hardware/lm3s_syscontrol.h"
+#  include "hardware/lm/lm3s_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
-#  include "hardware/lm4f_syscontrol.h"
+#  include "hardware/lm/lm4f_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C123)
-#  include "hardware/tm4c123_syscontrol.h"
+#  include "hardware/tm4c/tm4c123_syscontrol.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C129)
-#  include "hardware/tm4c129_syscontrol.h"
+#  include "hardware/tm4c/tm4c129_syscontrol.h"
 #else
 #  error "Unsupported Tiva/Stellaris system control module"
 #endif

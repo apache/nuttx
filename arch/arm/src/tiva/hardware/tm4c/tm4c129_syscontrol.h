@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/tiva/hardwaretm4c129_syscontrol.h
+ * arch/arm/src/tiva/hardware/tm4c/tm4c129_syscontrol.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C129_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C129_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_SYSCONTROL_H
 
 /********************************************************************************************
  * Included Files
@@ -2166,4 +2166,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C129_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_SYSCONTROL_H */

@@ -8,7 +8,7 @@ comment "Tiva/Stellaris Configuration Options"
 choice
 	prompt "Tiva/Stellaris Chip Selection"
 	default ARCH_CHIP_LM3S6965
-	depends on ARCH_CHIP_LM || ARCH_CHIP_TIVA
+	depends on ARCH_CHIP_LM || ARCH_CHIP_TIVA || ARCH_CHIP_SIMPLELINK
 
 config ARCH_CHIP_LM3S6918
 	bool "LM3S6918"
@@ -108,6 +108,22 @@ config ARCH_CHIP_TM4C129XNC
 	select ARCH_CHIP_TM4C
 	select ARCH_CHIP_TM4C129
 	select TIVA_HAVE_ETHERNET
+
+config ARCH_CHIP_CC1310
+	bool "CC1310 SimpleLink"
+	depends on ARCH_CHIP_SIMPLELINK || EXPERIMENTAL
+	select ARCH_CHIP_CC13X0
+
+config ARCH_CHIP_CC1312R1
+	bool "CC1312R1 SimpleLink"
+	depends on ARCH_CHIP_SIMPLELINK || EXPERIMENTAL
+	select ARCH_CHIP_CC13X2
+
+config ARCH_CHIP_CC1312R1
+	bool "CC1312R1 SimpleLink"
+	depends on ARCH_CHIP_SIMPLELINK || EXPERIMENTAL
+	select ARCH_CHIP_CC13X2
+
 endchoice
 
 # Chip families
@@ -122,6 +138,9 @@ config ARCH_CHIP_LM3S
 	select TIVA_HAVE_GPIOF_IRQS
 	select TIVA_HAVE_GPIOG_IRQS
 	select TIVA_HAVE_SSI0
+	select TIVA_HAVE_UART1
+	select TIVA_HAVE_UART2
+	select TIVA_HAVE_UART3
 
 config ARCH_CHIP_LM4F
 	bool
@@ -136,6 +155,8 @@ config ARCH_CHIP_LM4F
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_I2C2
 	select TIVA_HAVE_I2C3
+	select TIVA_HAVE_UART1
+	select TIVA_HAVE_UART2
 	select TIVA_HAVE_UART3
 	select TIVA_HAVE_UART4
 	select TIVA_HAVE_UART5
@@ -164,6 +185,9 @@ config ARCH_CHIP_TM4C129
 	select TIVA_HAVE_I2C9
 	select TIVA_HAVE_TIMER6
 	select TIVA_HAVE_TIMER7
+	select TIVA_HAVE_UART1
+	select TIVA_HAVE_UART2
+	select TIVA_HAVE_UART3
 
 config ARCH_CHIP_TM4C
 	bool
@@ -175,11 +199,6 @@ config ARCH_CHIP_TM4C
 	select TIVA_HAVE_I2C1
 	select TIVA_HAVE_I2C2
 	select TIVA_HAVE_I2C3
-	select TIVA_HAVE_UART3
-	select TIVA_HAVE_UART4
-	select TIVA_HAVE_UART5
-	select TIVA_HAVE_UART6
-	select TIVA_HAVE_UART7
 	select TIVA_HAVE_SSI0
 	select TIVA_HAVE_SSI1
 	select TIVA_HAVE_SSI2
@@ -190,6 +209,38 @@ config ARCH_CHIP_TM4C
 	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_TIMER4
 	select TIVA_HAVE_TIMER5
+	select TIVA_HAVE_UART1
+	select TIVA_HAVE_UART2
+	select TIVA_HAVE_UART3
+	select TIVA_HAVE_UART4
+	select TIVA_HAVE_UART5
+	select TIVA_HAVE_UART6
+	select TIVA_HAVE_UART7
+
+config ARCH_CHIP_CC13X0
+	bool
+	select ARCH_CORTEXM3
+	select TIVA_HAVE_ADC0
+	select TIVA_HAVE_SSI0
+	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_TIMER0
+	select TIVA_HAVE_TIMER1
+	select TIVA_HAVE_TIMER2
+	select TIVA_HAVE_TIMER3
+
+config ARCH_CHIP_CC13X2
+	bool
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	select TIVA_HAVE_ADC0
+	select TIVA_HAVE_I2C1
+	select TIVA_HAVE_SSI0
+	select TIVA_HAVE_SSI1
+	select TIVA_HAVE_TIMER0
+	select TIVA_HAVE_TIMER1
+	select TIVA_HAVE_TIMER2
+	select TIVA_HAVE_TIMER3
+	select TIVA_HAVE_UART1
 
 config LM_REVA2
 	bool "Rev A2"
@@ -254,6 +305,14 @@ config TIVA_HAVE_I2C8
 	default n
 
 config TIVA_HAVE_I2C9
+	bool
+	default n
+
+config TIVA_HAVE_UART1
+	bool
+	default n
+
+config TIVA_HAVE_UART2
 	bool
 	default n
 
@@ -412,18 +471,20 @@ config TIVA_I2C9
 
 config TIVA_UART0
 	bool "UART0"
-	select UART0_SERIALDRIVER
 	default n
+	select UART0_SERIALDRIVER
 
 config TIVA_UART1
 	bool "UART1"
-	select UART1_SERIALDRIVER
 	default n
+	depends on TIVA_HAVE_UART1
+	select UART1_SERIALDRIVER
 
 config TIVA_UART2
 	bool "UART2"
-	select UART2_SERIALDRIVER
 	default n
+	depends on TIVA_HAVE_UART2
+	select UART2_SERIALDRIVER
 
 config TIVA_UART3
 	bool "UART3"
