@@ -61,6 +61,22 @@ Status
     with 1 byte in the Tx FIFO and nothing in the Rx FIFO.  Data is not
     moving.
 
+  I need to stop and work on some other things for a while.  Here are the
+  things remaining to be done:
+
+  - Test the DMA, WDT and RTC drivers.  These drivers are complete but
+    untested.
+  - Finish verification of the SPI0 master driver.  It currently hangs as
+    described above.
+  - Add support for missing drivers.
+
+  Missing drivers include:
+
+  - SPI17Y:  SPI0 master DMA support, SPI0 Slave
+  - SPIMSS: SPI1 master/slave, I2C
+  - I2C0/1 master/slave
+  - Timer/PWM
+
 Serial Console
 ==============
 
