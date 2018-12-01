@@ -895,6 +895,24 @@ config ARCH_BOARD_NUCLEO_F091RC
 	---help---
 		STMicro Nucleo F091RC board based on the STMicro STM32F091RCT6 MCU.
 
+config ARCH_BOARD_NUCLEO_F103RB
+	bool "STM32F103 Nucleo F103RB"
+	depends on ARCH_CHIP_STM32F103RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F103RB board based on the STMicro STM32F103RBT6 MCU.
+
+config ARCH_BOARD_NUCLEO_F207ZG
+	bool "STM32F207 Nucleo F207ZG"
+	depends on ARCH_CHIP_STM32F207ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F207ZG board based on the STMicro STM32F207ZGT6 MCU.
+
 config ARCH_BOARD_NUCLEO_F302R8
 	bool "STM32F303 Nucleo F302R8"
 	depends on ARCH_CHIP_STM32F302R8
@@ -969,6 +987,15 @@ config ARCH_BOARD_NUCLEO_H743ZI
 # TODO:	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo H743ZI board based on the STMicro STM32H743ZI MCU.
+
+config ARCH_BOARD_NUCLEO_L152RE
+	bool "STM32L152 Nucleo L152RE"
+	depends on ARCH_CHIP_STM32L152RE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo L152RE board based on the STMicro STM32L152REU6 MCU.
 
 config ARCH_BOARD_NUCLEO_L432KC
 	bool "STM32L432 Nucleo-32 L432KC"
@@ -1771,6 +1798,8 @@ config ARCH_BOARD
 	default "nucleo-144"               if ARCH_BOARD_NUCLEO_144
 	default "nucleo-f072rb"            if ARCH_BOARD_NUCLEO_F072RB
 	default "nucleo-f091rc"            if ARCH_BOARD_NUCLEO_F091RC
+	default "nucleo-f103rb"            if ARCH_BOARD_NUCLEO_F103RB
+	default "nucleo-f207zg"            if ARCH_BOARD_NUCLEO_F207ZG
 	default "nucleo-f302r8"            if ARCH_BOARD_NUCLEO_F302R8
 	default "nucleo-f303re"            if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f303ze"            if ARCH_BOARD_NUCLEO_F303ZE
@@ -1778,6 +1807,7 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
+	default "nucleo-l152re"            if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"            if ARCH_BOARD_NUCLEO_L432KC
 	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
@@ -2094,6 +2124,12 @@ endif
 if ARCH_BOARD_NUCLEO_F091RC
 source "configs/nucleo-f091rc/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_F103RB
+source "configs/nucleo-f103rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F207ZG
+source "configs/nucleo-f207zg/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_F302R8
 source "configs/nucleo-f302r8/Kconfig"
 endif
@@ -2114,6 +2150,9 @@ source "configs/nucleo-f410rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "configs/nucleo-h743zi/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_L152RE
+source "configs/nucleo-l152re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L432KC
 source "configs/nucleo-l432kc/Kconfig"
