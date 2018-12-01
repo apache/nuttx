@@ -83,6 +83,7 @@ struct st7032_dev_s
   uint8_t    row;               /* Current row position to write on display  */
   uint8_t    col;               /* Current col position to write on display  */
   uint8_t    buffer[ST7032_MAX_ROW * ST7032_MAX_COL];  /* SLCD ASCII content */
+  bool       pendscroll;
   sem_t sem_excl;
 };
 
@@ -337,7 +338,8 @@ static inline void lcd_putdata(FAR struct st7032_dev_s *priv, uint8_t data)
 
   if (priv->row >= ST7032_MAX_ROW)
     {
-      priv->row = ST7032_MAX_ROW - 1;
+      priv->pendscroll = true;
+      priv->row        = ST7032_MAX_ROW - 1;
     }
 
   /* Update cursor position */
@@ -779,8 +781,17 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
   /* Now decode and process every byte in the input buffer */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
+         SLCDRET_EOF)
     {
+      /* Is there some pending scroll? */
+
+      if (priv->pendscroll)
+        {
+          lcd_scroll_up(priv);
+          priv->pendscroll = false;
+        }
+
       if (result == SLCDRET_CHAR)          /* A normal character was returned */
         {
           /* Check for ASCII control characters */
@@ -789,8 +800,9 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
             {
               /* Blink Cursor? Shouln't it be just 4 spaces to indicate TAB? */
 
-              st7032_write_inst(priv, ST7032_DISPLAY_ON_OFF | DISPLAY_ON_OFF_D |
-                                      DISPLAY_ON_OFF_C | DISPLAY_ON_OFF_B);
+              st7032_write_inst(priv, ST7032_DISPLAY_ON_OFF |
+                                      DISPLAY_ON_OFF_D | DISPLAY_ON_OFF_C |
+                                      DISPLAY_ON_OFF_B);
             }
           else if (ch == ASCII_VT)
             {
@@ -1058,9 +1070,10 @@ int st7032_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Setup priv with initial values */
 
-  priv->i2c = i2c;
-  priv->col = 0;
-  priv->row = 0;
+  priv->i2c        = i2c;
+  priv->col        = 0;
+  priv->row        = 0;
+  priv->pendscroll = false;
 
   nxsem_init(&priv->sem_excl, 0, 1);
 
