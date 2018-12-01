@@ -124,7 +124,9 @@ static int netprocfs_radio_linklayer(FAR struct netprocfs_file_s *netfile,
 {
   FAR struct netdev_varaddr_s *addr;
   FAR struct net_driver_s *dev;
+#if RADIO_MAX_ADDRLEN > 1 
   int i;
+#endif
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev  = netfile->dev;
