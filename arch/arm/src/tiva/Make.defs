@@ -144,3 +144,13 @@ endif
 ifeq ($(CONFIG_TIVA_EEPROM),y)
 CHIP_CSRCS += tiva_eeprom.c
 endif
+
+# Paths to source files
+
+VPATH += chip/common
+
+ifeq ($(CONFIG_ARCH_CHIP_LM),y)
+VPATH += chip/lm
+else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+VPATH += chip/tm4c
+endif

@@ -427,7 +427,8 @@ config MAX326XX_3WIRE
 	default n
 	---help---
 		By default, 4-pin mode is supported(MISO, MOSI, SCK, SS).  Selecting
-		this option enables 3-pin mode (MOSI, SCK, SS).
+		this option enables 3-pin mode (SOSI, SCK, SS).  The SISO pin is bi-
+		directional, half duplex in the 3-pin mode.
 
 		REVISIT:  Perhaps this should be an on-the-fly configuration as an
 		SPI "Hardware Feature" so that we can support 3-wire and 4-wire

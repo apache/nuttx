@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_eeprom.h
+ * arch/arm/src/tiva/common/tiva_mpuinit.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Shirshak Sengupta <sgshirshak@gmail.com>
- *            Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,61 +33,92 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H
-#define __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/tiva_eeprom.h"
+#include <nuttx/config.h>
+
+#include <assert.h>
+
+#include <nuttx/userspace.h>
+
+#include "mpu.h"
+#include "tiva_mpuinit.h"
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
+#endif
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_eeprom_initialize
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tiva_mpuinitialize
  *
  * Description:
- *  Performs any necessary recovery in case of power failures during write.
- *
- *  This function must be called after tiva_eeprom_enable() and before
- *  the EEPROM is accessed.  It is used to check for errors in the EEPROM state
- *  such as from power failure during a previous write operation.  The function
- *  detects these errors and performs as much recovery as possible.
- *
- *  If -ENODEV is returned, the EEPROM was unable to recover its
- *  state.  If power is stable when this occurs, this indicates a fatal
- *  error and is likely an indication that the EEPROM memory has exceeded its
- *  specified lifetime write/erase specification.  If the supply voltage is
- *  unstable when this return code is observed, retrying the operation once the
- *  voltage is stabilized may clear the error.
- *
- *  Failure to call this function after a reset may lead to incorrect operation
- *  or permanent data loss if the EEPROM is later written.
- *
- * Returned Value:
- *   Returns OK if no errors were detected or -ENODEV if the EEPROM
- *   peripheral cannot currently recover from an interrupted write or erase
- *   operation.
+ *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   resources.
  *
  ****************************************************************************/
 
-int tiva_eeprom_initialize(void);
+void tiva_mpuinitialize(void)
+{
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
+
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
+
+  /* Show MPU information */
+
+  mpu_showtype();
+
+  /* Configure user flash and SRAM space */
+
+  mpu_user_flash(USERSPACE->us_textstart,
+                 USERSPACE->us_textend - USERSPACE->us_textstart);
+
+  mpu_user_intsram(datastart, dataend - datastart);
+
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
+}
 
 /****************************************************************************
- * Name: tiva_eeprom_instance
+ * Name: tiva_mpu_uheap
  *
  * Description:
- *   Create and initialize an MTD device instance.  MTD devices are not
- *   registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
  *
  ****************************************************************************/
 
-struct mtd_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *tiva_eeprom_instance(void);
+void tiva_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_user_intsram(start, size);
+}
 
-#endif /* __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H */
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
+

@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/tiva_syscontrol.h"
+#include "hardware/tiva_syscontrol.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_eeprom.h
+ * arch/arm/src/tiva/common/tiva_userspace.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Shirshak Sengupta <sgshirshak@gmail.com>
- *            Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,61 +33,86 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H
-#define __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/tiva_eeprom.h"
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <assert.h>
+
+#include <nuttx/userspace.h>
+
+#include "tiva_mpuinit.h"
+#include "tiva_userspace.h"
+
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_eeprom_initialize
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tiva_userspace
  *
  * Description:
- *  Performs any necessary recovery in case of power failures during write.
- *
- *  This function must be called after tiva_eeprom_enable() and before
- *  the EEPROM is accessed.  It is used to check for errors in the EEPROM state
- *  such as from power failure during a previous write operation.  The function
- *  detects these errors and performs as much recovery as possible.
- *
- *  If -ENODEV is returned, the EEPROM was unable to recover its
- *  state.  If power is stable when this occurs, this indicates a fatal
- *  error and is likely an indication that the EEPROM memory has exceeded its
- *  specified lifetime write/erase specification.  If the supply voltage is
- *  unstable when this return code is observed, retrying the operation once the
- *  voltage is stabilized may clear the error.
- *
- *  Failure to call this function after a reset may lead to incorrect operation
- *  or permanent data loss if the EEPROM is later written.
- *
- * Returned Value:
- *   Returns OK if no errors were detected or -ENODEV if the EEPROM
- *   peripheral cannot currently recover from an interrupted write or erase
- *   operation.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-int tiva_eeprom_initialize(void);
+void tiva_userspace(void)
+{
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-/****************************************************************************
- * Name: tiva_eeprom_instance
- *
- * Description:
- *   Create and initialize an MTD device instance.  MTD devices are not
- *   registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
- *
- ****************************************************************************/
+  /* Clear all of user-space .bss */
 
-struct mtd_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *tiva_eeprom_instance(void);
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
 
-#endif /* __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H */
+  dest = (uint8_t *)USERSPACE->us_bssstart;
+  end  = (uint8_t *)USERSPACE->us_bssend;
+
+  while (dest != end)
+    {
+      *dest++ = 0;
+    }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t *)USERSPACE->us_datasource;
+  dest = (uint8_t *)USERSPACE->us_datastart;
+  end  = (uint8_t *)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM */
+
+  tiva_mpuinitialize();
+}
+
+#endif /* CONFIG_BUILD_PROTECTED */

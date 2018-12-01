@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/hardwaretiva_syscontrol.h
  *
- *   Copyright (C) 2009-2010, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_SYSCONTROL_H
 
 /************************************************************************************
  * Included Files
@@ -42,31 +42,35 @@
 
 #include <nuttx/config.h>
 #include <arch/tiva/chip.h>
-#include <arch/tiva/irq.h>
 
-/* Then get all of the register definitions */
+/* Include the system control header file for the specific Tiva/Stellaris chip */
 
-#include "hardware/tiva_memorymap.h"  /* Memory map */
-#include "hardware/tiva_syscontrol.h" /* System control module */
-#include "hardware/tiva_gpio.h"       /* GPIO modules */
-#include "hardware/tiva_uart.h"       /* UART modules */
-#include "hardware/tiva_i2c.h"        /* I2C modules */
-#include "hardware/tiva_ssi.h"        /* SSI modules */
-#include "hardware/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "hardware/tiva_flash.h"      /* FLASH */
-#include "hardware/tiva_eeprom.h"     /* EEPROM */
-#include "hardware/tiva_timer.h"      /* Timer */
-#include "hardware/tiva_adc.h"        /* ADC */
+#if defined(CONFIG_ARCH_CHIP_LM3S)
+#  include "hardware/lm3s_syscontrol.h"
+#elif defined(CONFIG_ARCH_CHIP_LM4F)
+#  include "hardware/lm4f_syscontrol.h"
+#elif defined(CONFIG_ARCH_CHIP_TM4C123)
+#  include "hardware/tm4c123_syscontrol.h"
+#elif defined(CONFIG_ARCH_CHIP_TM4C129)
+#  include "hardware/tm4c129_syscontrol.h"
+#else
+#  error "Unsupported Tiva/Stellaris system control module"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition TIVA_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/tiva/irq.h.
- */
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS  TIVA_IRQ_NEXTINT
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_SYSCONTROL_H */

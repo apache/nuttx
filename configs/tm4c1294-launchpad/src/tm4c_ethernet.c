@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/tiva_flash.h"
+#include "hardware/tiva_flash.h"
 #include "tiva_ethernet.h"
 
 /************************************************************************************

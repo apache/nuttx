@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/tiva_timer.h"
+#include "hardware/tiva_timer.h"
 
 /****************************************************************************
  * Pre-processor Definitions

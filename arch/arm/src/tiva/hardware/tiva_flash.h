@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/hardwaretiva_flash.h
  *
- *   Copyright (C) 2009-2010, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,40 +33,24 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
-#include <arch/tiva/irq.h>
 
-/* Then get all of the register definitions */
+/* The TM4C129 family has a different FLASH register layout */
 
-#include "hardware/tiva_memorymap.h"  /* Memory map */
-#include "hardware/tiva_syscontrol.h" /* System control module */
-#include "hardware/tiva_gpio.h"       /* GPIO modules */
-#include "hardware/tiva_uart.h"       /* UART modules */
-#include "hardware/tiva_i2c.h"        /* I2C modules */
-#include "hardware/tiva_ssi.h"        /* SSI modules */
-#include "hardware/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "hardware/tiva_flash.h"      /* FLASH */
-#include "hardware/tiva_eeprom.h"     /* EEPROM */
-#include "hardware/tiva_timer.h"      /* Timer */
-#include "hardware/tiva_adc.h"        /* ADC */
+#if defined(CONFIG_ARCH_CHIP_TM4C129)
+#  include "hardware/tm4c_flash.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/* Others (including LM4F and TM4C123) are similar to the LM3S family */
 
-/* Provide the required number of peripheral interrupt vector definitions as well.
- * The definition TIVA_IRQ_NEXTINT simply comes from the chip-specific IRQ header
- * file included by arch/tiva/irq.h.
- */
+#else
+#  include "hardware/lm3s_flash.h"
+#endif
 
-#define ARMV7M_PERIPHERAL_INTERRUPTS  TIVA_IRQ_NEXTINT
-
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H */

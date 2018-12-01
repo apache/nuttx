@@ -44,7 +44,7 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "chip.h"
-#include "chip/tiva_i2c.h"
+#include "hardware/tiva_i2c.h"
 
 /****************************************************************************
  * Public Function Prototypes

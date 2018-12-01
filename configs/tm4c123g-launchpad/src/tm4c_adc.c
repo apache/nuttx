@@ -48,7 +48,7 @@
 #include "tiva_adc.h"
 #include "tiva_timer.h"
 #include "tm4c123g-launchpad.h"
-#include "chip/tiva_pinmap.h"
+#include "hardware/tiva_pinmap.h"
 
 #ifdef CONFIG_TIVA_ADC
 
