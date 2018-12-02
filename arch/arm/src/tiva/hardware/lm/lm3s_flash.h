@@ -58,9 +58,6 @@
 
 #  define TIVA_FLASH_NPAGES        256
 #  define TIVA_FLASH_PAGESIZE      1024
-
-#else
-#  warning "No flash dimensions defined for selected chip."
 #endif
 
 #define TIVA_FLASH_SIZE            (TIVA_FLASH_NPAGES * TIVA_FLASH_PAGESIZE)
