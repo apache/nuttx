@@ -132,6 +132,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
 {
   FAR struct bt_conn_s *conn;
   FAR struct bt_buf_s *buf;
+  struct mq_attr attr;
   int ret;
 
   /* Get the connection instance */
@@ -189,6 +190,23 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
   do
     {
       buf = NULL;
+
+      /* Make sure the thread is not blocked forever on an empty queue.
+       * SIOCBTCONNECT will fail if preceding SIOCBTDISCONNECT does not
+       * result in a successful termination of this thread.
+       */
+
+      ret = mq_getattr(conn->tx_queue, &attr);
+      if (ret != OK)
+        {
+          break;
+        }
+
+      if (attr.mq_curmsgs == 0)
+        {
+          break;
+        }
+
       ret = bt_queue_receive(conn->tx_queue, &buf);
       if (ret >= 0)
         {
@@ -201,6 +219,9 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
   bt_conn_reset_rx_state(conn);
 
   wlinfo("handle %u exiting\n", conn->handle);
+
+  /* Release reference taken when thread was created */
+
   bt_conn_release(conn);
   return EXIT_SUCCESS;
 }

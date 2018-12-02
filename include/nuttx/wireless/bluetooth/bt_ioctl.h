@@ -69,7 +69,7 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 24
+#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 26
 #  error Incorrect setting for number of Bluetooth IOCTL commands
 #endif
 
@@ -202,6 +202,11 @@
 #define SIOCBTGATTWR           _WLIOC(WL_BLUETOOTHFIRST + 22)
 #define SIOCBTGATTWRGET        _WLIOC(WL_BLUETOOTHFIRST + 23)
 
+/* Connect/diconnect from a peer */
+
+#define SIOCBTCONNECT          _WLIOC(WL_BLUETOOTHFIRST + 24)
+#define SIOCBTDISCONNECT       _WLIOC(WL_BLUETOOTHFIRST + 25)
+
 /* Definitions associated with struct btreg_s *******************************/
 /* struct btreq_s union field accessors */
 
@@ -266,6 +271,8 @@
 
 #define btr_wrpending          btru.btgwrr.br_pending
 #define btr_wrresult           btru.btgwrr.br_result
+
+#define btr_rmtpeer            btru.btcon.btcon_peer
 
 /* btr_flags */
 
@@ -496,6 +503,16 @@ struct btreq_s
       /* Write result that accompanies SIOCBTGATTWRGET command */
 
       struct bt_result_s btgwrr;     /* OUT: Result of the write */
+
+      /* Read-only data that accompanies the SIOCBTCONNECT and
+       * SIOCBTDISCONNECT commands.
+       */
+
+      struct
+      {
+        bt_addr_le_t btcon_peer;     /* IN:  Peer address */
+      } btcon;
+
    } btru;
 };
 

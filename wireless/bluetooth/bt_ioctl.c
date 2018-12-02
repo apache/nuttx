@@ -659,6 +659,56 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+      case SIOCBTCONNECT:
+        {
+          FAR struct bt_conn_s *conn;
+          conn = bt_conn_create_le(&btreq->btr_rmtpeer);
+
+          if (!conn)
+            {
+              wlerr("Connection failed\n");
+              ret = -ENOTCONN;
+            }
+          else
+            {
+              wlinfo("Connection pending\n");
+              ret = OK;
+            }
+        }
+        break;
+
+      case SIOCBTDISCONNECT:
+        {
+          FAR struct bt_conn_s *conn;
+
+          conn = bt_conn_lookup_addr_le(&btreq->btr_rmtpeer);
+          if (!conn)
+            {
+              wlerr("Peer not connected\n");
+              ret = -ENOTCONN;
+            }
+          else
+            {
+              ret = bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+              if (ret == -ENOTCONN)
+                {
+                  wlerr("Already disconnected\n");
+                }
+              else
+                {
+                  /* Release reference taken in bt_conn_create_le */
+
+                  bt_conn_release(conn);
+                  ret = OK;
+                }
+
+              /* Release reference taken in bt_conn_lookup_addr_le */
+
+              bt_conn_release(conn);
+            }
+        }
+        break;
+
        /* SIOCGBTINFO:  Get Bluetooth device Info.  Given the device name,
         * fill in the btreq_s structure.
         *
