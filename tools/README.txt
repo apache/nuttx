@@ -69,6 +69,13 @@ configure.c, cfgparser.c, and cfgparser.h
   2) That path to bin bin/ directory containing mingw-gcc.exe must be
      included in the PATH variable.
 
+convert-comments.c
+------------------
+
+  Convert C++-style comments to C89 C-style comments.  Usage:
+
+  convert-comments <source-file> <out-file>
+
 discover.py
 -----------
 
