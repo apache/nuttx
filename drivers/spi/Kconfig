@@ -114,6 +114,17 @@ config SPI_CS_DELAY_CONTROL
 
 		This option enables the setdelay() interface method.
 
+config SPI_TRIGGER
+	bool "SPI DMA trigger"
+	default n
+	select SPI_HWFEATURES
+	depends on SPI_EXCHANGE
+	---help---
+		Some architectures benefit from delaying the start of DMA from the
+		DMA setup.  If this option is selected, then an SPI_TRIGGER() method
+		is supported:  The DMA is setup with in in SPI_EXCHANGE() but does
+		not actually begin until SPI_TRIGGER() is called.
+
 config SPI_DRIVER
 	bool "SPI character driver"
 	default n
