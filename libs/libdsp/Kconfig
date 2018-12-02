@@ -9,9 +9,10 @@ config LIBDSP
 	---help---
 		Enable build for various DSP functions
 
+if LIBDSP
+
 config LIBDSP_DEBUG
 	bool "Libdsp debugging"
-	depends on LIBDSP
 	default n
 	---help---
 		Enable debugging for libdsp. This option enables additional parameters
@@ -28,3 +29,5 @@ config LIBDSP_PRECISION
 		0 - the fastest calculation but the lowest precision
 		1 - a little better precision than above, but slowest
 		2 - the most accuracte but the slowest one, use standard math functions.
+
+endif # LIBDSP

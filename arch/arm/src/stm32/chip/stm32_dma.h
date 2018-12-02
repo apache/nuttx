@@ -1,8 +1,8 @@
-/****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32_adc.h
+/************************************************************************************
+ * arch/arm/src/stm32/chip/stm32_dma.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,45 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H
 
-/****************************************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/* There are 2 main types of ADC IP cores among STM32 chips:
- *   1. STM32 ADC IPv1:
- *     a) basic version for F1 and F37x
- *     b) extended version for F2, F4, F7, L1:
- *   2. STM32 ADC IPv2:
- *     a) basic version for F0 and L0
- *     b) extended version for F3 (without F37x), H7, L4, L4+
- *
- *   We also distinguish the modified STM32 ADC IPv1 core for the L1 family,
- *   which differs too much to keep it in the same file as ADC IPv1.
+/* Include the correct DMA register definitions for selected STM32 DMA IP core:
+ *   - STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4
+ *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && defined(CONFIG_STM32_HAVE_IP_ADC_V2)
-#  error Only one STM32 ADC IP version must be selected
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) && defined(CONFIG_STM32_HAVE_IP_DMA_V2)
+#  error Only one STM32 DMA IP version must be selected
 #endif
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1)
-#  if defined(CONFIG_STM32_STM32L15XX)
-#    include "stm32_adc_v1l1.h"   /* Special case for L1 */
-#  else
-#    include "stm32_adc_v1.h"
-#  endif
-#elif defined(CONFIG_STM32_HAVE_IP_ADC_V2)
-#  include "stm32_adc_v2.h"
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
+#  include "stm32_dma_v1.h"
+#elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
+#  include "stm32_dma_v2.h"
 #else
-#  error "STM32 ADC IP version not specified"
+#  error "STM32 DMA IP version not specified"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_ADC_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H */

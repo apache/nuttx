@@ -46,25 +46,17 @@
  ****************************************************************************/
 
 /* This file is only a thin shell that includes the correct DMA implementation
- * for the selected STM32 family.  The correct file cannot be selected by
- * the make system because it needs the intelligence that only exists in
- * chip.h that can associate an STM32 part number with an STM32 family.
+ * for the selected STM32 IP core:
+ *   - STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4
+ *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  *
- * The STM32 F4 DMA differs from the F1 DMA primarily in that it adds the
- * concept of "streams" that are used to associate DMA sources with DMA
- * channels.
- *
- * TODO: use STM32 DMA IP version instead of chip faimily:
- *       - STM32 DMA IP core version 1 - F0, F1, F3, L1
- *       - STM32 DMA IP core version 2 - F2, F4, F7, H7
+ * The STM32 DMA IPv2 differs from the STM32 DMA IPv1 primarily in that it
+ * adds the concept of "streams" that are used to associate DMA sources with
+ * DMA channels.
  */
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
-#  include "stm32f10xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "stm32f20xxx_dma.c"
-#elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "stm32f40xxx_dma.c"
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
+#  include "stm32_dma_v1.c"
+#elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
+#  include "stm32_dma_v2.c"
 #endif

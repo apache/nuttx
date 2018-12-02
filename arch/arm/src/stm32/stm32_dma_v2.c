@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32f20xxx_dma.c
+ * arch/arm/src/stm32/stm32_dma_v2.c
  *
- *   Copyright (C) 2012-2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,13 +55,10 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-/* This file supports only the STM32 F2 family (although it is identical to
- * the corresponding F4 file).
- *
- * TODO: merge this with stm32f40xxx_dma.c (STM32 DMA IP core version 2)
+/* This file supports the STM32 DMA IP core version 2 - F2, F4, F7, H7
+ * NOTE: F7 and H7 need support for DCACHE which is not implemented here
+ *       but otherwise DMA IP cores look the same.
  */
-
-#if defined(CONFIG_STM32_STM32F20XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,7 +92,6 @@ struct stm32_dma_s
   uint8_t        irq;      /* DMA stream IRQ number */
   uint8_t        shift;    /* ISR/IFCR bit shift value */
   uint8_t        channel;  /* DMA channel number (0-7) */
-  bool           nonstop;  /* Stream is configured in a non-stopping mode. */
   sem_t          sem;      /* Used to wait for DMA channel to become available */
   uint32_t       base;     /* DMA register channel base address */
   dma_callback_t callback; /* Callback invoked when the DMA completes */
@@ -377,7 +373,7 @@ static void stm32_dmastreamdisable(struct stm32_dma_s *dmast)
  *
  ************************************************************************************/
 
-static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
+static int stm32_dmainterrupt(int irq, void *context, void *arg)
 {
   struct stm32_dma_s *dmast;
   uint32_t status;
@@ -528,9 +524,9 @@ void weak_function up_dma_initialize(void)
  *   version.  Feel free to do that if that is what you need.
  *
  * Input Parameters:
- *   dmamap - Identifies the stream/channel resource. For the STM32 F2, this
- *     is a bit-encoded value as provided by the DMAMAP_* definitions
- *     in chip/stm32f20xxx_dma.h
+ *   dmamap - Identifies the stream/channel resource. For the STM32 F4, this
+ *     is a bit-encoded  value as provided by the DMAMAP_* definitions
+ *     in chip/stm32f40xxx_dma.h
  *
  * Returned Value:
  *   Provided that 'dmamap' is valid, this function ALWAYS returns a non-NULL,
@@ -615,6 +611,10 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   dmainfo("paddr: %08x maddr: %08x ntransfers: %d scr: %08x\n",
           paddr, maddr, ntransfers, scr);
+
+#ifdef CONFIG_STM32_DMACAPABLE
+  DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));
+#endif
 
   /* "If the stream is enabled, disable it by resetting the EN bit in the
    * DMA_SxCR register, then read this bit in order to confirm that there is no
@@ -736,7 +736,6 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
               DMA_SCR_DBM | DMA_SCR_CIRC |
               DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK);
   regval |= scr;
-  dmast->nonstop = (scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) != 0;
   dmast_putreg(dmast, STM32_DMA_SCR_OFFSET, regval);
 }
 
@@ -772,7 +771,12 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
   scr  = dmast_getreg(dmast, STM32_DMA_SCR_OFFSET);
   scr |= DMA_SCR_EN;
 
-  if (!dmast->nonstop)
+  /* In normal mode, interrupt at either half or full completion. In circular
+   * and double-buffered modes, always interrupt on buffer wrap, and optionally
+   * interrupt at the halfway point.
+   */
+
+  if ((scr & (DMA_SCR_DBM | DMA_SCR_CIRC)) == 0)
     {
       /* Once half of the bytes are transferred, the half-transfer flag (HTIF) is
        * set and an interrupt is generated if the Half-Transfer Interrupt Enable
@@ -785,7 +789,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
     }
   else
     {
-      /* In nonstop mode, when the transfer completes it immediately resets
+      /* In non-stop modes, when the transfer completes it immediately resets
        * and starts again.  The transfer-complete interrupt is thus always
        * enabled, and the half-complete interrupt can be used in circular
        * mode to determine when the buffer is half-full, or in double-buffered
@@ -869,6 +873,8 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
   uint32_t transfer_size, burst_length;
   uint32_t mend;
 
+  dmainfo("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
+
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
    * required to be aligned to their size.
@@ -897,11 +903,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
         break;
 
       default:
+        dmainfo("stm32_dmacapable: bad transfer size in CCR\n");
         return false;
     }
 
   if ((maddr & (transfer_size - 1)) != 0)
     {
+      dmainfo("stm32_dmacapable: transfer unaligned\n");
       return false;
     }
 
@@ -933,11 +941,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
             break;
 
           default:
+          dmainfo("stm32_dmacapable: bad burst size in CCR\n");
             return false;
         }
 
       if ((maddr & (burst_length - 1)) != 0)
         {
+          dmainfo("stm32_dmacapable: burst crosses 1KiB\n");
           return false;
         }
     }
@@ -946,6 +956,7 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   if ((maddr & STM32_REGION_MASK) != (mend & STM32_REGION_MASK))
     {
+      dmainfo("stm32_dmacapable: transfer crosses memory region\n");
       return false;
     }
 
@@ -956,16 +967,30 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
       case STM32_FSMC_BANK3:
       case STM32_FSMC_BANK4:
       case STM32_SRAM_BASE:
-      case STM32_CODE_BASE:
-        /* All RAM and flash is supported */
+        /* All RAM is supported */
 
-        return true;
+        break;
+
+      case STM32_CODE_BASE:
+        /* Everything except the CCM ram is supported */
+
+        if (maddr >= STM32_CCMRAM_BASE &&
+            (maddr - STM32_CCMRAM_BASE) < 65536)
+          {
+            dmainfo("stm32_dmacapable: transfer targets CCMRAM\n");
+            return false;
+          }
+        break;
 
       default:
         /* Everything else is unsupported by DMA */
 
+        dmainfo("stm32_dmacapable: transfer targets unknown/unsupported region\n");
         return false;
     }
+
+    dmainfo("stm32_dmacapable: transfer OK\n");
+  return true;
 }
 #endif
 
@@ -1029,4 +1054,79 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
-#endif /* CONFIG_STM32_STM32F20XX */
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+
+/****************************************************************************
+ * Name: stm32_dma_intack
+ *
+ * Description:
+ *   Public visible interface to acknowledge interrupts on DMA stream
+ *
+ ****************************************************************************/
+
+void stm32_dma_intack(unsigned int controller, uint8_t stream, uint32_t isr)
+{
+  struct stm32_dma_s *dmast = stm32_dmastream(stream, controller);
+  uint32_t regval = 0;
+  uint32_t offset = 0;
+
+  /* Select the interrupt flag clear register (either the LIFCR or HIFCR)
+   * based on the stream number
+   */
+
+  if (stream < 4)
+    {
+      offset = STM32_DMA_LIFCR_OFFSET;
+    }
+  else
+    {
+      offset = STM32_DMA_HIFCR_OFFSET;
+    }
+
+  /* Get value to write */
+
+  regval |= ((isr & DMA_STREAM_MASK) << dmast->shift);
+
+  /* Write register */
+
+  dmabase_putreg(dmast, offset, regval);
+}
+
+/****************************************************************************
+ * Name: stm32_dma_intget
+ *
+ * Description:
+ *   Public visible interface to get pending interrupts from DMA stream
+ *
+ ****************************************************************************/
+
+uint8_t stm32_dma_intget(unsigned int controller, uint8_t stream)
+{
+  struct stm32_dma_s *dmast = stm32_dmastream(stream, controller);
+  uint32_t regval = 0;
+  uint32_t offset = 0;
+
+  /* Select the interrupt status register (either the LISR or HISR)
+   * based on the stream number
+   */
+
+  if (stream < 4)
+    {
+      offset = STM32_DMA_LISR_OFFSET;
+    }
+  else
+    {
+      offset = STM32_DMA_HISR_OFFSET;
+    }
+
+  /* Get register value */
+
+  regval = dmabase_getreg(dmast, offset);
+
+  /* Get stream status */
+
+  regval = ((regval >> dmast->shift) & DMA_STREAM_MASK);
+
+  return (uint8_t)regval;
+}
+#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */

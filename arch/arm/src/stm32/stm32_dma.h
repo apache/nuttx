@@ -45,54 +45,19 @@
 
 #include "chip.h"
 
-/* Include the correct DMA register definitions for this STM32 family */
-
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-#  include "chip/stm32f10xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F33XX)
-#  include "chip/stm32f33xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_dma.h"
-#elif defined(CONFIG_STM32_STM32F4XXX)
-#  include "chip/stm32f40xxx_dma.h"
-#else
-#  error "Unknown STM32 DMA"
-#endif
-
-/* Support for STM32 DMA IP version 1 - F0, F1, F3, L0, L1
- * REVISIT: move this to Kconfig
- */
-
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
-#  define HAVE_IP_DMA_V1
-#endif
-
-/* Support for STM32 DMA IP version 2 - F2, F4, F7, H7 */
-
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  define HAVE_IP_DMA_V2
-#endif
-
-#if !defined(HAVE_IP_DMA_V1) && !defined(HAVE_IP_DMA_V2)
-#  error Unknown STM32 DMA IP version
-#endif
+#include "chip/stm32_dma.h"
 
 /* These definitions provide the bit encoding of the 'status' parameter passed to the
  * DMA callback function (see dma_callback_t).
  */
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
+#if defined(HAVE_IP_DMA_V1)
 #  define DMA_STATUS_FEIF         0                     /* (Not available in F1) */
 #  define DMA_STATUS_DMEIF        0                     /* (Not available in F1) */
 #  define DMA_STATUS_TEIF         DMA_CHAN_TEIF_BIT     /* Channel Transfer Error */
 #  define DMA_STATUS_HTIF         DMA_CHAN_HTIF_BIT     /* Channel Half Transfer */
 #  define DMA_STATUS_TCIF         DMA_CHAN_TCIF_BIT     /* Channel Transfer Complete */
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#elif defined(HAVE_IP_DMA_V2)
 #  define DMA_STATUS_FEIF         0                    /* Stream FIFO error (ignored) */
 #  define DMA_STATUS_DMEIF        DMA_STREAM_DMEIF_BIT /* Stream direct mode error */
 #  define DMA_STATUS_TEIF         DMA_STREAM_TEIF_BIT  /* Stream Transfer Error */
@@ -128,9 +93,8 @@ typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
+
+#if defined(HAVE_IP_DMA_V1)
 struct stm32_dmaregs_s
 {
   uint32_t isr;
@@ -139,7 +103,7 @@ struct stm32_dmaregs_s
   uint32_t cpar;
   uint32_t cmar;
 };
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#elif defined(HAVE_IP_DMA_V2)
 struct stm32_dmaregs_s
 {
   uint32_t lisr;

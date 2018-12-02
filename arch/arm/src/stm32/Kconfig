@@ -1491,6 +1491,7 @@ config STM32_STM32L15XX
 	select STM32_HAVE_RTC_SUBSECONDS if !STM32_LOWDENSITY
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1
+	select STM32_HAVE_IP_DMA_V1
 
 config STM32_ENERGYLITE
 	bool
@@ -1513,6 +1514,7 @@ config STM32_STM32F10XX
 	select STM32_HAVE_TIM3
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1_BASIC
+	select STM32_HAVE_IP_DMA_V1
 
 config STM32_VALUELINE
 	bool
@@ -1625,6 +1627,7 @@ config STM32_STM32F20XX
 	select STM32_HAVE_IOCOMPENSATION
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1
+	select STM32_HAVE_IP_DMA_V2
 
 config STM32_STM32F205
 	bool
@@ -1709,6 +1712,7 @@ config STM32_STM32F30XX
 	select STM32_HAVE_TIM17
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
+	select STM32_HAVE_IP_DMA_V1
 
 config STM32_STM32F302
 	bool
@@ -1752,6 +1756,7 @@ config STM32_STM32F33XX
 	select STM32_HAVE_USART3
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
+	select STM32_HAVE_IP_DMA_V1
 
 config STM32_STM32F37XX
 	bool
@@ -1777,6 +1782,7 @@ config STM32_STM32F37XX
 	select STM32_HAVE_USART3
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1_BASIC
+	select STM32_HAVE_IP_DMA_V1
 
 config STM32_STM32F4XXX
 	bool
@@ -1786,6 +1792,7 @@ config STM32_STM32F4XXX
 	select STM32_HAVE_IOCOMPENSATION
 	select STM32_HAVE_IP_TIMERS_V1
 	select STM32_HAVE_IP_ADC_V1
+	select STM32_HAVE_IP_DMA_V2
 
 config STM32_STM32F401xBC
 	bool
@@ -2151,14 +2158,6 @@ config STM32_HAVE_UART8
 	bool
 	default n
 
-config STM32_HAVE_IP_TIMERS_V1
-	bool
-	default n
-
-config STM32_HAVE_IP_TIMERS_V2
-	bool
-	default n
-
 config STM32_HAVE_TIM1
 	bool
 	default n
@@ -2226,24 +2225,6 @@ config STM32_HAVE_TIM16
 config STM32_HAVE_TIM17
 	bool
 	default n
-
-config STM32_HAVE_IP_ADC_V1
-	bool
-	default n
-
-config STM32_HAVE_IP_ADC_V1_BASIC
-	bool
-	default n
-	select STM32_HAVE_IP_ADC_V1
-
-config STM32_HAVE_IP_ADC_V2
-	bool
-	default n
-
-config STM32_HAVE_IP_ADC_V2_BASIC
-	bool
-	default n
-	select STM32_HAVE_IP_ADC_V2
 
 config STM32_HAVE_ADC2
 	bool
@@ -2404,6 +2385,42 @@ config STM32_HAVE_OPAMP3
 config STM32_HAVE_OPAMP4
 	bool
 	default n
+
+# These are STM32 peripherals IP blocks
+
+config STM32_HAVE_IP_DMA_V1
+	bool
+	default n
+
+config STM32_HAVE_IP_DMA_V2
+	bool
+	default n
+
+config STM32_HAVE_IP_TIMERS_V1
+	bool
+	default n
+
+config STM32_HAVE_IP_TIMERS_V2
+	bool
+	default n
+
+config STM32_HAVE_IP_ADC_V1
+	bool
+	default n
+
+config STM32_HAVE_IP_ADC_V1_BASIC
+	bool
+	default n
+	select STM32_HAVE_IP_ADC_V1
+
+config STM32_HAVE_IP_ADC_V2
+	bool
+	default n
+
+config STM32_HAVE_IP_ADC_V2_BASIC
+	bool
+	default n
+	select STM32_HAVE_IP_ADC_V2
 
 # These are the peripheral selections proper
 
@@ -2824,85 +2841,102 @@ config STM32_TIM1
 	bool "TIM1"
 	default n
 	depends on STM32_HAVE_TIM1
+	select STM32_TIM
 
 config STM32_TIM2
 	bool "TIM2"
 	default n
+	select STM32_TIM
 
 config STM32_TIM3
 	bool "TIM3"
 	default n
 	depends on STM32_HAVE_TIM3
+	select STM32_TIM
 
 config STM32_TIM4
 	bool "TIM4"
 	default n
 	depends on STM32_HAVE_TIM4
+	select STM32_TIM
 
 config STM32_TIM5
 	bool "TIM5"
 	default n
 	depends on STM32_HAVE_TIM5
+	select STM32_TIM
 
 config STM32_TIM6
 	bool "TIM6"
 	default n
 	depends on STM32_HAVE_TIM6
+	select STM32_TIM
 
 config STM32_TIM7
 	bool "TIM7"
 	default n
 	depends on STM32_HAVE_TIM7
+	select STM32_TIM
 
 config STM32_TIM8
 	bool "TIM8"
 	default n
 	depends on STM32_HAVE_TIM8
+	select STM32_TIM
 
 config STM32_TIM9
 	bool "TIM9"
 	default n
 	depends on STM32_HAVE_TIM9
+	select STM32_TIM
 
 config STM32_TIM10
 	bool "TIM10"
 	default n
 	depends on STM32_HAVE_TIM10
+	select STM32_TIM
 
 config STM32_TIM11
 	bool "TIM11"
 	default n
 	depends on STM32_HAVE_TIM11
+	select STM32_TIM
 
 config STM32_TIM12
 	bool "TIM12"
 	default n
 	depends on STM32_HAVE_TIM12
+	select STM32_TIM
 
 config STM32_TIM13
 	bool "TIM13"
 	default n
 	depends on STM32_HAVE_TIM13
+	select STM32_TIM
 
 config STM32_TIM14
 	bool "TIM14"
 	default n
 	depends on STM32_HAVE_TIM14
+	select STM32_TIM
 
 config STM32_TIM15
 	bool "TIM15"
 	default n
 	depends on STM32_HAVE_TIM15
+	select STM32_TIM
 
 config STM32_TIM16
 	bool "TIM16"
 	default n
 	depends on STM32_HAVE_TIM16
+	select STM32_TIM
 
 config STM32_TIM17
 	bool "TIM17"
 	default n
 	depends on STM32_HAVE_TIM17
+	select STM32_TIM
 
 config STM32_TSC
 	bool "TSC"
@@ -2995,6 +3029,10 @@ config STM32_I2C
 
 config STM32_CAN
 	bool
+
+config STM32_TIM
+	bool
+	default n
 
 config STM32_NOEXT_VECTORS
 	bool "Disable the ARMv7-M EXT vectors"
@@ -3316,6 +3354,7 @@ config STM32_FSMC_SRAM
 		In addition to internal SRAM, SRAM may also be available through the FSMC.
 
 menu "Timer Configuration"
+	depends on STM32_TIM
 
 if SCHED_TICKLESS
 
@@ -7051,8 +7090,7 @@ endmenu #STM32 TIMx Outputs Configuration
 endmenu # Timer Configuration
 
 menu "HRTIM Configuration"
-
-if STM32_HRTIM1
+	depends on STM32_HRTIM
 
 config STM32_HRTIM_DISABLE_CHARDRV
 	bool "HRTIM Disable Character Driver"
@@ -7628,8 +7666,6 @@ config STM32_HRTIM_TIME_PSHPLL
 	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIME_PWM)
 
 endmenu # "HRTIM Timer E Configuration"
-
-endif # STM32_HRTIM1
 
 endmenu # "HRTIM Configuration"
 
@@ -9356,6 +9392,7 @@ config STM32_OTGHS_SOFINTR
 endmenu
 
 menu "USB Host Debug Configuration"
+	depends on STM32_USBHOST
 
 config STM32_USBHOST_REGDEBUG
 	bool "Register-Level Debug"

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f40xxx_dma.h
+ * arch/arm/src/stm32/chip/stm32_dma_v2.h
  *
  *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
@@ -36,12 +36,17 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_V2_DMA_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_V2_DMA_H
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+/* This is implementation for STM32 DMA IP version 2 - F2, F4, F7, H7 */
+
+#define HAVE_IP_DMA_V2 1
+#undef  HAVE_IP_DMA_V1
 
 /* 2 DMA controllers */
 
@@ -558,4 +563,4 @@
 #define DMAMAP_TIM8_TRIG           STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 #define DMAMAP_TIM8_COM            STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_V2_DMA_H */

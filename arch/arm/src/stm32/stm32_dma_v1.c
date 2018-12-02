@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32f10xxx_dma.c
+ * arch/arm/src/stm32/stm32_dma_v1.c
  *
  *   Copyright (C) 2009, 2011-2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,9 +55,7 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L1, L4 */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -787,5 +785,3 @@ uint32_t stm32_dma_intget(unsigned int chndx)
   return dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET) & DMA_ISR_CHAN_MASK(dmach->chan);
 }
 #endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
-
-#endif /* CONFIG_STM32_STM32F10XX */
