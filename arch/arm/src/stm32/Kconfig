@@ -7704,7 +7704,7 @@ config STM32_ADC1_DMA
 
 config STM32_ADC1_DMA_CFG
 	int "ADC1 DMA configuration"
-	depends on STM32_ADC1_DMA
+	depends on STM32_ADC1_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
 	range 0 1
 	default 0
 	---help---
@@ -7721,7 +7721,7 @@ config STM32_ADC2_DMA
 
 config STM32_ADC2_DMA_CFG
 	int "ADC2 DMA configuration"
-	depends on STM32_ADC2_DMA
+	depends on STM32_ADC2_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
 	range 0 1
 	default 0
 	---help---
@@ -7738,7 +7738,7 @@ config STM32_ADC3_DMA
 
 config STM32_ADC3_DMA_CFG
 	int "ADC3 DMA configuration"
-	depends on STM32_ADC3_DMA
+	depends on STM32_ADC3_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
 	range 0 1
 	default 0
 	---help---
@@ -7755,7 +7755,7 @@ config STM32_ADC4_DMA
 
 config STM32_ADC4_DMA_CFG
 	int "ADC4 DMA configuration"
-	depends on STM32_ADC4_DMA
+	depends on STM32_ADC4_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
 	range 0 1
 	default 0
 	---help---

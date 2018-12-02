@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/nucleo-f334r8/src/stm32_adc.c
+ * configs/nucleo-f303ze/src/stm32_adc.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_ADC) && (defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2))
+#if defined(CONFIG_ADC) && (defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC3))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,17 +56,19 @@
 
 /* Configuration ************************************************************/
 
-/* 1 or 2 ADC devices (DEV1, DEV2) */
+/* 1 or 2 ADC devices (DEV1, DEV2).
+ * ADC1 and ADC3 supported for now.
+ */
 
 #if defined(CONFIG_STM32_ADC1)
 #  define DEV1_PORT 1
 #endif
 
-#if defined(CONFIG_STM32_ADC2)
+#if defined(CONFIG_STM32_ADC3)
 #  if defined(DEV1_PORT)
-#    define DEV2_PORT 2
+#    define DEV2_PORT 3
 #  else
-#    define DEV1_PORT 2
+#    define DEV1_PORT 3
 #  endif
 #endif
 
@@ -74,7 +76,7 @@
 /* TODO DMA */
 
 #define ADC1_NCHANNELS 3
-#define ADC2_NCHANNELS 3
+#define ADC3_NCHANNELS 3
 
 /****************************************************************************
  * Private Function Prototypes
@@ -94,40 +96,40 @@
 
 static const uint8_t g_chanlist1[3] =
 {
-  1,
-  2,
-  11
+  3,
+  10,
+  13
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist1[3]  =
 {
-  GPIO_ADC1_IN1,                /* PA0/A0 */
-  GPIO_ADC1_IN2,                /* PA1/A1 */
-  GPIO_ADC1_IN11,               /* PB0/A3 */
+  GPIO_ADC1_IN3,                /* PA3/A0 */
+  GPIO_ADC1_IN10,               /* PC0/A1 */
+  GPIO_ADC1_IN13,               /* PC3/A2 */
 };
 
-#elif DEV1_PORT == 2
+#elif DEV1_PORT == 3
 
-#define DEV1_NCHANNELS ADC2_NCHANNELS
+#define DEV1_NCHANNELS ADC3_NCHANNELS
 
 /* Identifying number of each ADC channel */
 
 static const uint8_t g_chanlist1[3] =
 {
-  1,
-  6,
-  7
+  9,
+  15,
+  8
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist1[3] =
 {
-  GPIO_ADC2_IN1,                /* PA4/A2 */
-  GPIO_ADC2_IN7,                /* PC1/A4 */
-  GPIO_ADC2_IN6,                /* PC0/A5 */
+  GPIO_ADC3_IN9,                /* PF3/A3 */
+  GPIO_ADC3_IN15,               /* PF5/A4 */
+  GPIO_ADC3_IN8,                /* PF10/A5 */
 };
 
 #endif  /* DEV1_PORT == 1 */
@@ -136,29 +138,29 @@ static const uint32_t g_pinlist1[3] =
 
 /* DEV 2 */
 
-#if DEV2_PORT == 2
+#if DEV2_PORT == 3
 
-#define DEV2_NCHANNELS ADC2_NCHANNELS
+#define DEV2_NCHANNELS ADC3_NCHANNELS
 
 /* Identifying number of each ADC channel */
 
 static const uint8_t g_chanlist2[3] =
 {
-  1,
-  6,
-  7
+  9,
+  15,
+  8
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist2[3] =
 {
-  GPIO_ADC2_IN1,                /* PA4/A2 */
-  GPIO_ADC2_IN7,                /* PC1/A4 */
-  GPIO_ADC2_IN6,                /* PC0/A5 */
+  GPIO_ADC3_IN9,                /* PF3/A3 */
+  GPIO_ADC3_IN15,               /* PF5/A4 */
+  GPIO_ADC3_IN8,                /* PF10/A5 */
 };
 
-#endif  /* DEV2_PORT == 2 */
+#endif  /* DEV2_PORT == 3 */
 #endif  /* DEV2_PORT */
 
 /****************************************************************************
@@ -169,13 +171,13 @@ static const uint32_t g_pinlist2[3] =
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_adc_setup(void)
 {
@@ -215,7 +217,6 @@ int stm32_adc_setup(void)
         }
 
 #ifdef DEV2_PORT
-
       /* DEV2 */
       /* Configure the pins as analog inputs for the selected channels */
 
@@ -244,10 +245,9 @@ int stm32_adc_setup(void)
 #endif
 
       initialized = true;
-
     }
 
   return OK;
 }
 
-#endif /* CONFIG_ADC && (CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2) */
+#endif /* CONFIG_ADC && (CONFIG_STM32_ADC1 || CONFIG_STM32_ADC3) */

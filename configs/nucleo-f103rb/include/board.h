@@ -101,7 +101,15 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-/* TODO: timers */
+/* APB2 TIM 1 will receive PCLK2 (72MHz) */
+
+#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+
+/* APB1 TIM 2-4 will be twice PCLK1 (72MHz) */
+
+#define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 
 /* LED definitions **********************************************************/
 /* The Nucleo F103RB board has three LEDs.  Two of these are controlled by
@@ -171,5 +179,10 @@
 #define BUTTON_USER_BIT  (1 << BUTTON_USER)
 
 /* Alternate function pin selections ****************************************/
+
+/* DMA channels *************************************************************/
+/* ADC */
+
+#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
 
 #endif /* __CONFIG_NUCLEO_F103RB_INCLUDE_BOARD_H */

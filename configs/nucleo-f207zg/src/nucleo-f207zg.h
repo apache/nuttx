@@ -84,6 +84,10 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
+/* PWM */
+
+#define NUCLEOF207ZG_PWMTIMER 1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -93,5 +97,29 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
 
 #endif /* __CONFIGS_NUCLEO_F207ZG_SRC_NUCLEO_F207ZG_H */

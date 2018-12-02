@@ -216,9 +216,6 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_2 /* PA2 */
 
-/* DMA channels *************************************************************/
-
-
 /* PWM configuration ********************************************************/
 
 /* TIM1 PWM */

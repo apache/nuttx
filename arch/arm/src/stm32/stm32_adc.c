@@ -449,6 +449,14 @@
 
 #define ADC_INJ_MAX_SAMPLES   4
 
+/* ADC DMA configuration bit support */
+
+#ifndef CONFIG_STM32_HAVE_IP_ADC_V1_BASIC
+#  define ADC_HAVE_DMACFG 1
+#else
+#  undef ADC_HAVE_DMACFG
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -491,7 +499,9 @@ struct stm32_dev_s
 #endif
 #ifdef ADC_HAVE_DMA
   uint8_t dmachan;           /* DMA channel needed by this ADC */
+#  ifdef ADC_HAVE_DMACFG
   uint8_t dmacfg;            /* DMA channel configuration, only for ADC IPv2 */
+#  endif
   bool    hasdma;            /* True: This channel supports DMA */
 #endif
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
@@ -828,7 +838,9 @@ static struct stm32_dev_s g_adcpriv1 =
 #endif
 #ifdef ADC1_HAVE_DMA
   .dmachan     = ADC1_DMA_CHAN,
+#  ifdef ADC_HAVE_DMACFG
   .dmacfg      = CONFIG_STM32_ADC1_DMA_CFG,
+#  endif
   .hasdma      = true,
 #endif
 };
@@ -881,7 +893,9 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
 #ifdef ADC2_HAVE_DMA
   .dmachan     = ADC2_DMA_CHAN,
+#  ifdef ADC_HAVE_DMACFG
   .dmacfg      = CONFIG_STM32_ADC2_DMA_CFG,
+#  endif
   .hasdma      = true,
 #endif
 };
@@ -934,7 +948,9 @@ static struct stm32_dev_s g_adcpriv3 =
 #endif
 #ifdef ADC3_HAVE_DMA
   .dmachan     = ADC3_DMA_CHAN,
+#  ifdef ADC_HAVE_DMACFG
   .dmacfg      = CONFIG_STM32_ADC3_DMA_CFG,
+#  endif
   .hasdma      = true,
 #endif
 };
@@ -980,7 +996,9 @@ static struct stm32_dev_s g_adcpriv4 =
 #endif
 #ifdef ADC4_HAVE_DMA
   .dmachan     = ADC4_DMA_CHAN,
+#  ifdef ADC_HAVE_DMACFG
   .dmacfg      = CONFIG_STM32_ADC4_DMA_CFG,
+#  endif
   .hasdma      = true,
 #endif
 };
@@ -2551,6 +2569,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #  ifdef ADC_HAVE_DMA
   if (priv->hasdma)
     {
+#    ifdef ADC_HAVE_DMACFG
       /* Set DMA mode */
 
       if (priv->dmacfg == 0)
@@ -2565,6 +2584,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
           setbits |= ADC_CR2_DDS;
         }
+#    endif
 
       /* Enable DMA */
 

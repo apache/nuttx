@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/nucleo-f334r8/src/stm32_adc.c
+ * configs/nucleo-f103rb/src/stm32_adc.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,22 +90,22 @@
 
 #define DEV1_NCHANNELS ADC1_NCHANNELS
 
-/* Identifying number of each ADC channel (even if NCHANNELS is less ) */
+/* Identifying number of each ADC channel (even if NCHANNELS is less) */
 
 static const uint8_t g_chanlist1[3] =
 {
+  0,
   1,
-  2,
-  11
+  4
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist1[3]  =
 {
-  GPIO_ADC1_IN1,                /* PA0/A0 */
-  GPIO_ADC1_IN2,                /* PA1/A1 */
-  GPIO_ADC1_IN11,               /* PB0/A3 */
+  GPIO_ADC123_IN0,                /* PA0/A0 */
+  GPIO_ADC123_IN1,                /* PA1/A1 */
+  GPIO_ADC12_IN4,                 /* PA4/A2 */
 };
 
 #elif DEV1_PORT == 2
@@ -116,18 +116,18 @@ static const uint32_t g_pinlist1[3]  =
 
 static const uint8_t g_chanlist1[3] =
 {
-  1,
-  6,
-  7
+  8,
+  11,
+  10
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist1[3] =
 {
-  GPIO_ADC2_IN1,                /* PA4/A2 */
-  GPIO_ADC2_IN7,                /* PC1/A4 */
-  GPIO_ADC2_IN6,                /* PC0/A5 */
+  GPIO_ADC12_IN8,                /* PB0/A3 */
+  GPIO_ADC123_IN11,              /* PC1/A4 */
+  GPIO_ADC123_IN10,              /* PC0/A5 */
 };
 
 #endif  /* DEV1_PORT == 1 */
@@ -144,18 +144,18 @@ static const uint32_t g_pinlist1[3] =
 
 static const uint8_t g_chanlist2[3] =
 {
-  1,
-  6,
-  7
+  8,
+  11,
+  10
 };
 
 /* Configurations of pins used by each ADC channel */
 
 static const uint32_t g_pinlist2[3] =
 {
-  GPIO_ADC2_IN1,                /* PA4/A2 */
-  GPIO_ADC2_IN7,                /* PC1/A4 */
-  GPIO_ADC2_IN6,                /* PC0/A5 */
+  GPIO_ADC12_IN8,                /* PB0/A3 */
+  GPIO_ADC123_IN11,              /* PC1/A4 */
+  GPIO_ADC123_IN10,              /* PC0/A5 */
 };
 
 #endif  /* DEV2_PORT == 2 */

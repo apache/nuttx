@@ -107,23 +107,35 @@
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
 
-/* APB1 clock (PCLK1) is HCLK/2 (50MHz) */
+/* APB1 clock (PCLK1) is HCLK/2 (25MHz) */
 
-#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2     /* PCLK1 = HCLK / 2 */
-#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
+#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-/* Timers driven from APB1 will be twice PCLK1 */
-/* REVISIT */
+/* APB2 clock (PCLK2) is HCLK/2 (50MHz) */
 
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 2 */
+#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+
+/* Timers driven from APB2 will be twice PCLK2 (100Mhz) */
+
+#define STM32_APB2_TIM1_CLKIN   (2*STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM8_CLKIN   (2*STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM9_CLKIN   (2*STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
+
+/* Timers driven from APB1 will be twice PCLK1 (50MHz) */
+
+#define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM5_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
-
-/* APB2 clock (PCLK2) is HCLK (100MHz) */
-
-#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK */
-#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY)
-
-/* TODO: Timers */
+#define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM12_CLKIN  (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM13_CLKIN  (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
 /* LED definitions **********************************************************/
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
@@ -185,5 +197,21 @@
 
 #define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
 #define GPIO_USART3_TX     GPIO_USART3_TX_3  /* PD8 */
+
+/* PWM configuration ********************************************************/
+
+/* TIM1 PWM */
+
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PE9 */
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3    /* PE8 */
+#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PE11 */
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_3    /* PE10 */
+#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PE13 */
+#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3    /* PE12 */
+
+/* DMA channels *************************************************************/
+/* ADC */
+
+#define ADC1_DMA_CHAN DMAMAP_ADC1_1
 
 #endif /* __CONFIG_NUCLEO_F207ZG_INCLUDE_BOARD_H */
