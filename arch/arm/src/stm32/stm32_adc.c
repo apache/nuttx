@@ -2324,11 +2324,383 @@ static int adc_bind(FAR struct adc_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: adc_watchdog_cfg
+ ****************************************************************************/
+
+#if defined(HAVE_IP_ADC_V2)
+static void adc_watchdog_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* Initialize the watchdog 1 threshold register */
+
+  adc_putreg(priv, STM32_ADC_TR1_OFFSET, 0x0fff0000);
+
+  /* Enable the analog watchdog */
+
+  clrbits = ADC_CFGR1_AWD1CH_MASK;
+  setbits = ADC_CFGR1_AWD1EN | ADC_CFGR1_AWD1SGL |
+            (priv->r_chanlist[0] << ADC_CFGR1_AWD1CH_SHIFT);
+
+  /* Modify CFGR configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
+}
+#else
+static void adc_watchdog_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* Initialize the watchdog high threshold register */
+
+  adc_putreg(priv, STM32_ADC_HTR_OFFSET, 0x00000fff);
+
+  /* Initialize the watchdog low threshold register */
+
+  adc_putreg(priv, STM32_ADC_LTR_OFFSET, 0x00000000);
+
+  clrbits = ADC_CR1_AWDCH_MASK;
+  setbits = ADC_CR1_AWDEN | (priv->r_chanlist[0] << ADC_CR1_AWDCH_SHIFT);
+
+  /* Modify CR1 configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CR1_OFFSET, clrbits, setbits);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_calibrate
+ ****************************************************************************/
+
+#if defined(HAVE_IP_ADC_V2)
+static void adc_calibrate(FAR struct stm32_dev_s *priv)
+{
+#if 0 /* Doesn't work */
+  /* Calibrate the ADC */
+
+  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADCALDIF, AD_CR_ADCAL);
+
+  /* Wait for the calibration to complete */
+
+  while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
+
+#else
+  UNUSED(priv);
+#endif
+}
+#else
+static void adc_calibrate(FAR struct stm32_dev_s *priv)
+{
+  /* TODO: adc_calibrate for ADC IPv1*/
+
+  UNUSED(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_mode_cfg
+ ****************************************************************************/
+
+#ifdef HAVE_IP_ADC_V2
+static void adc_mode_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* Disable continuous mode and set align to right */
+
+  clrbits = ADC_CFGR1_CONT | ADC_CFGR1_ALIGN;
+
+  /* Disable external trigger for regular channels */
+
+  clrbits |= ADC_CFGR1_EXTEN_MASK;
+  setbits |= ADC_CFGR1_EXTEN_NONE;
+
+  /* Set CFGR configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
+}
+#else
+static void adc_mode_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+#ifdef HAVE_BASIC_ADC
+  /* Set independent mode */
+
+  clrbits |= ADC_CR1_DUALMOD_MASK;
+  setbits |= ADC_CR1_IND;
+#endif
+
+#ifdef ADC_HAVE_DMA
+  if (priv->hasdma)
+    {
+      setbits |= ADC_CR1_SCAN;
+    }
+#endif
+
+  /* Set CR1 configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CR1_OFFSET, clrbits, setbits);
+
+  /* REVISIT: */
+
+#ifdef CONFIG_STM32_STM32L15XX
+
+  /* Select the bank of channels A */
+
+  adc_select_ch_bank(priv, false);
+
+#  ifdef HAVE_ADC_POWERDOWN
+  /* Disables power down during the delay phase */
+
+  adc_power_down_idle(priv, false);
+  adc_power_down_delay(priv, false);
+#  endif
+
+  /* Delay until the converted data has been read */
+
+  adc_dels_after_conversion(priv, ADC_CR2_DELS_TILLRD);
+#endif
+
+  /* Disable continuous mode and set align to right */
+
+  clrbits = ADC_CR2_CONT | ADC_CR2_ALIGN;
+  setbits = 0;
+
+  /* Disable external trigger for regular channels */
+
+  clrbits |= ADC_EXTREG_EXTEN_MASK;
+  setbits |= ADC_EXTREG_EXTEN_NONE;
+
+  /* Enable software trigger for regular channels
+   * REVISIT: SWSTART must be set if no EXT trigger and basic ADC IPv1
+   */
+
+#ifdef CONFIG_STM32_STM32F37XX
+  clrbits |= ADC_CR2_EXTSEL_MASK;
+  setbits |= ADC_CR2_EXTSEL_SWSTART | ADC_CR2_EXTTRIG; /* SW is considered as external trigger */
+#endif
+
+  /* Set CR2 configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, clrbits, setbits);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_voltreg_cfg
+ ****************************************************************************/
+
+#if defined(HAVE_IP_ADC_V2)
+static void adc_voltreg_cfg(FAR struct stm32_dev_s *priv)
+{
+  /* Set ADC voltage regulator to intermediate state */
+
+  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADVREGEN_MASK,
+                ADC_CR_ADVREGEN_INTER);
+
+  /* Enable the ADC voltage regulator */
+
+  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADVREGEN_MASK,
+                ADC_CR_ADVREGEN_ENABLED);
+
+  /* Wait for the ADC voltage regulator to startup */
+
+  up_udelay(10);
+}
+#else
+static void adc_voltreg_cfg(FAR struct stm32_dev_s *priv)
+{
+  /* Nothing to do here */
+
+  UNUSED(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_voltreg_cfg
+ ****************************************************************************/
+
+static void adc_sampletime_cfg(FAR struct adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  /* Initialize the same sample time for each ADC.
+   * During sample cycles channel selection bits must remain unchanged.
+   */
+
+#ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
+  adc_sampletime_write((FAR struct stm32_adc_dev_s *)dev);
+#else
+  adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
+  adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
+#  ifdef STM32_ADC_SMPR3_OFFSET
+  adc_putreg(priv, STM32_ADC_SMPR3_OFFSET, ADC_SMPR3_DEFAULT);
+#  endif
+#  ifdef STM32_ADC_SMPR0_OFFSET
+  adc_putreg(priv, STM32_ADC_SMPR0_OFFSET, ADC_SMPR0_DEFAULT);
+#  endif
+#endif
+}
+
+/****************************************************************************
+ * Name: adc_common_cfg
+ ****************************************************************************/
+
+#if defined(HAVE_IP_ADC_V2)
+static void adc_common_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* REVISIT: */
+
+  clrbits = ADC_CCR_DUAL_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DMACFG |
+            ADC_CCR_MDMA_MASK | ADC_CCR_CKMODE_MASK | ADC_CCR_VREFEN |
+            ADC_CCR_TSEN | ADC_CCR_VBATEN;
+  setbits = ADC_CCR_DUAL_IND | ADC_CCR_DELAY(0) | ADC_CCR_MDMA_DISABLED |
+            ADC_CCR_CKMODE_ASYNCH;
+
+  adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+}
+#elif defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
+static void adc_common_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
+  setbits  = ADC_CCR_ADCPRE_DIV2;
+
+  /* REVISIT: */
+
+#if !defined(CONFIG_STM32_STM32L15XX)
+  clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
+             ADC_CCR_DMA_MASK | ADC_CCR_VBATEN;
+  setbits |= ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED;
+#endif  /* !defined(CONFIG_STM32_STM32L15XX) */
+
+  adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
+}
+#else
+static void adc_common_cfg(FAR struct stm32_dev_s *priv)
+{
+  /* Do nothing here */
+
+  UNUSED(priv);
+}
+#endif
+
+#ifdef ADC_HAVE_DMA
+/****************************************************************************
+ * Name: adc_dma_cfg
+ ****************************************************************************/
+
+#ifdef HAVE_IP_ADC_V2
+static void adc_dma_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* Set DMA mode */
+
+  if (priv->dmacfg == 0)
+    {
+      /* One Shot Mode */
+
+      clrbits |= ADC_CFGR1_DMACFG;
+    }
+  else
+    {
+      /* Circular Mode */
+
+      setbits |= ADC_CFGR1_DMACFG;
+    }
+
+  /* Enable DMA */
+
+  setbits |= ADC_CFGR1_DMAEN;
+
+  /* Modify CFGR configuration */
+
+  adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
+}
+#else
+static void adc_dma_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+#ifdef ADC_HAVE_DMACFG
+    /* Set DMA mode */
+
+    if (priv->dmacfg == 0)
+      {
+        /* One Shot Mode */
+
+        clrbits |= ADC_CR2_DDS;
+      }
+    else
+      {
+        /* Circular Mode */
+
+        setbits |= ADC_CR2_DDS;
+      }
+#endif
+
+    /* Enable DMA */
+
+    setbits |= ADC_CR2_DMA;
+
+    /* Modify CR2 configuration */
+
+    adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, clrbits, setbits);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_dma_start
+ ****************************************************************************/
+
+static void adc_dma_start(FAR struct adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  /* Stop and free DMA if it was started before */
+
+  if (priv->dma != NULL)
+    {
+      stm32_dmastop(priv->dma);
+      stm32_dmafree(priv->dma);
+    }
+
+  priv->dma = stm32_dmachannel(priv->dmachan);
+
+#ifndef CONFIG_STM32_ADC_NOIRQ
+  stm32_dmasetup(priv->dma,
+                 priv->base + STM32_ADC_DR_OFFSET,
+                 (uint32_t)priv->r_dmabuffer,
+                 priv->rnchannels,
+                 ADC_DMA_CONTROL_WORD);
+
+  stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+#endif
+}
+#endif  /* ADC_HAVE_DMA */
+
+/****************************************************************************
  * Name: adc_reset
  *
  * Description:
  *   Reset the ADC device.  Called early to initialize the hardware.
  *   This is called, before adc_setup() and on error conditions.
+ *
+ * TODO: Separate the configuration logic from the reset logic!
+ * REVISIT: The ADC device should be configured in adc_setup not in adc_reset.
  *
  * Input Parameters:
  *
@@ -2340,8 +2712,6 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   irqstate_t flags;
-  uint32_t clrbits;
-  uint32_t setbits;
 #ifdef ADC_HAVE_TIMER
   int ret;
 #endif
@@ -2355,15 +2725,12 @@ static void adc_reset(FAR struct adc_dev_s *dev)
    */
 
   adc_enable_hsi(true);
-
 #endif
 
 #if defined(HAVE_IP_ADC_V2)
-
   /* Turn off the ADC so we can write the RCC bits */
 
   adc_enable(priv, false);
-
 #endif
 
   /* Only if this is the first initialzied ADC instance in the ADC block */
@@ -2387,216 +2754,25 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   adccmn_lock(priv, false);
 #endif
 
-#if defined(HAVE_IP_ADC_V2)
+  /* Configure voltage regulator if present */
 
-  /* Set voltage regular enable to intermediate state */
+  adc_voltreg_cfg(priv);
 
-  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADVREGEN_MASK,
-                ADC_CR_ADVREGEN_INTER);
+  /* Calibrate ADC - doesnt work for now */
 
-  /* Enable the ADC voltage regulator */
+  adc_calibrate(priv);
 
-  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADVREGEN_MASK,
-                ADC_CR_ADVREGEN_ENABLED);
+  /* Initialize the ADC watchdog */
 
-  /* Wait for the ADC voltage regulator to startup */
+  adc_watchdog_cfg(priv);
 
-  up_udelay(10);
+  /* Initialize the ADC sample time */
 
-#if 0 /* Doesn't work */
+  adc_sampletime_cfg(dev);
 
-  /* Calibrate the ADC */
+  /* Set ADC working mode */
 
-  adc_modifyreg(priv, STM32_ADC_CR_OFFSET, ADC_CR_ADCALDIF, AD_CR_ADCAL);
-
-  /* Wait for the calibration to complete */
-
-  while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL) != 0);
-
-#endif
-
-  /* Initialize the watchdog 1 threshold register */
-
-  adc_putreg(priv, STM32_ADC_TR1_OFFSET, 0x0fff0000);
-
-#else  /* HAVE_IP_ADC_V1 */
-
-  /* Initialize the watchdog high threshold register */
-
-  adc_putreg(priv, STM32_ADC_HTR_OFFSET, 0x00000fff);
-
-  /* Initialize the watchdog low threshold register */
-
-  adc_putreg(priv, STM32_ADC_LTR_OFFSET, 0x00000000);
-
-#endif
-
-  /* Initialize the same sample time for each ADC.
-   * During sample cycles channel selection bits must remain unchanged.
-   */
-
-#ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
-  adc_sampletime_write((FAR struct stm32_adc_dev_s *)dev);
-#else
-  adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
-  adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
-#  ifdef STM32_ADC_SMPR3_OFFSET
-  adc_putreg(priv, STM32_ADC_SMPR3_OFFSET, ADC_SMPR3_DEFAULT);
-#  endif
-#  ifdef STM32_ADC_SMPR0_OFFSET
-  adc_putreg(priv, STM32_ADC_SMPR0_OFFSET, ADC_SMPR0_DEFAULT);
-#  endif
-#endif
-
-#ifdef HAVE_IP_ADC_V2
-
-  /* Enable the analog watchdog */
-
-  clrbits = ADC_CFGR1_AWD1CH_MASK;
-  setbits = ADC_CFGR1_AWD1EN | ADC_CFGR1_AWD1SGL |
-            (priv->r_chanlist[0] << ADC_CFGR1_AWD1CH_SHIFT);
-
-#  ifdef ADC_HAVE_DMA
-  if (priv->hasdma)
-    {
-      /* Set DMA mode */
-
-      if (priv->dmacfg == 0)
-        {
-          /* One Shot Mode */
-
-          clrbits |= ADC_CFGR1_DMACFG;
-        }
-      else
-        {
-          /* Circular Mode */
-
-          setbits |= ADC_CFGR1_DMACFG;
-        }
-
-      /* Enable DMA */
-
-      setbits |= ADC_CFGR1_DMAEN;
-    }
-#  endif
-
-  /* Disable continuous mode and set align to right */
-
-  clrbits |= ADC_CFGR1_CONT | ADC_CFGR1_ALIGN;
-
-  /* Disable external trigger for regular channels */
-
-  clrbits |= ADC_CFGR1_EXTEN_MASK;
-  setbits |= ADC_CFGR1_EXTEN_NONE;
-
-  /* Set CFGR configuration */
-
-  adc_modifyreg(priv, STM32_ADC_CFGR1_OFFSET, clrbits, setbits);
-
-#  ifndef CONFIG_STM32_ADC_NOIRQ
-  /* Enable interrupt flags, but disable overrun interrupt */
-
-  clrbits = ADC_IER_OVR;
-  setbits = ADC_IER_ALLINTS & ~ADC_IER_OVR;
-
-  /* Set IER configuration */
-
-  adc_modifyreg(priv, STM32_ADC_IER_OFFSET, clrbits, setbits);
-#  endif
-
-#else /* HAVE_IP_ADC_V1 */
-
-  /* Enable the analog watchdog */
-
-  clrbits = ADC_CR1_AWDCH_MASK;
-  setbits = ADC_CR1_AWDEN | (priv->r_chanlist[0] << ADC_CR1_AWDCH_SHIFT);
-
-#  ifdef HAVE_BASIC_ADC
-  /* Set independent mode */
-
-  clrbits |= ADC_CR1_DUALMOD_MASK;
-  setbits |= ADC_CR1_IND;
-#  endif
-
-#  ifdef ADC_HAVE_DMA
-  if (priv->hasdma)
-    {
-      setbits |= ADC_CR1_SCAN;
-    }
-#  endif
-
-  /* Set CR1 configuration */
-
-  adc_modifyreg(priv, STM32_ADC_CR1_OFFSET, clrbits, setbits);
-
-#  ifdef CONFIG_STM32_STM32L15XX  /* REVISIT: */
-
-  /* Select the bank of channels A */
-
-  adc_select_ch_bank(priv, false);
-
-#    ifdef HAVE_ADC_POWERDOWN
-  /* Disables power down during the delay phase */
-
-  adc_power_down_idle(priv, false);
-  adc_power_down_delay(priv, false);
-#    endif
-
-  /* Delay until the converted data has been read */
-
-  adc_dels_after_conversion(priv, ADC_CR2_DELS_TILLRD);
-#  endif
-
-  /* Disable continuous mode and set align to right */
-
-  clrbits = ADC_CR2_CONT | ADC_CR2_ALIGN;
-  setbits = 0;
-
-  /* Disable external trigger for regular channels */
-
-  clrbits |= ADC_EXTREG_EXTEN_MASK;
-  setbits |= ADC_EXTREG_EXTEN_NONE;
-
-  /* Enable software trigger for regular channels
-   * REVISIT: SWSTART must be set if no EXT trigger and basic ADC IPv1
-   */
-
-#  ifdef CONFIG_STM32_STM32F37XX
-  clrbits |= ADC_CR2_EXTSEL_MASK;
-  setbits |= ADC_CR2_EXTSEL_SWSTART | ADC_CR2_EXTTRIG; /* SW is considered as external trigger */
-#  endif
-
-#  ifdef ADC_HAVE_DMA
-  if (priv->hasdma)
-    {
-#    ifdef ADC_HAVE_DMACFG
-      /* Set DMA mode */
-
-      if (priv->dmacfg == 0)
-        {
-          /* One Shot Mode */
-
-          clrbits |= ADC_CR2_DDS;
-        }
-      else
-        {
-          /* Circular Mode */
-
-          setbits |= ADC_CR2_DDS;
-        }
-#    endif
-
-      /* Enable DMA */
-
-      setbits |= ADC_CR2_DMA;
-    }
-#  endif
-
-  /* Set CR2 configuration */
-
-  adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, clrbits, setbits);
-
-#endif
+  adc_mode_cfg(priv);
 
   /* Configuration of the channel conversions */
 
@@ -2614,59 +2790,23 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
 #endif
 
-  /* ADC CCR configuration
-   * REVISIT: simplify this
-   */
+  /* ADC common register configuration */
 
-#if defined(HAVE_IP_ADC_V2)
-  clrbits = ADC_CCR_DUAL_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DMACFG |
-            ADC_CCR_MDMA_MASK | ADC_CCR_CKMODE_MASK | ADC_CCR_VREFEN |
-            ADC_CCR_TSEN | ADC_CCR_VBATEN;
-  setbits = ADC_CCR_DUAL_IND | ADC_CCR_DELAY(0) | ADC_CCR_MDMA_DISABLED |
-            ADC_CCR_CKMODE_ASYNCH;
-
-  adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
-
-#elif defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
-  clrbits  = ADC_CCR_ADCPRE_MASK | ADC_CCR_TSVREFE;
-  setbits  = ADC_CCR_ADCPRE_DIV2;
-
-#  if !defined(CONFIG_STM32_STM32L15XX)
-  clrbits |= ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS |
-             ADC_CCR_DMA_MASK | ADC_CCR_VBATEN;
-  setbits |= ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED;
-#  endif  /* !defined(CONFIG_STM32_STM32L15XX) */
-
-  adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, clrbits, setbits);
-#endif
+  adc_common_cfg(priv);
 
 #ifdef ADC_HAVE_DMA
-
-  /* Enable DMA */
+  /* Configure ADC DMA if enabled */
 
   if (priv->hasdma)
     {
-      /* Stop and free DMA if it was started before */
+      /* Configure ADC DMA */
 
-      if (priv->dma != NULL)
-        {
-          stm32_dmastop(priv->dma);
-          stm32_dmafree(priv->dma);
-        }
+      adc_dma_cfg(priv);
 
-      priv->dma = stm32_dmachannel(priv->dmachan);
+      /* Start ADC DMA */
 
-#  ifndef CONFIG_STM32_ADC_NOIRQ
-      stm32_dmasetup(priv->dma,
-                     priv->base + STM32_ADC_DR_OFFSET,
-                     (uint32_t)priv->r_dmabuffer,
-                     priv->rnchannels,
-                     ADC_DMA_CONTROL_WORD);
-
-      stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
-#  endif
+      adc_dma_start(dev);
     }
-
 #endif
 
 #ifdef HAVE_ADC_RESOLUTION
@@ -2674,12 +2814,6 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   (void)adc_resolution_set(dev, priv->resolution);
 #endif
-
-  /* Enable ADC */
-
-  adc_enable(priv, true);
-
-  /* REVISIT: events configuration should be before adc_enable ?? */
 
 #ifdef ADC_HAVE_EXTCFG
   /* Configure external event for regular group */
@@ -2692,6 +2826,10 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   adc_jextcfg_set(dev, priv->jextcfg);
 #endif
+
+  /* Enable ADC */
+
+  adc_enable(priv, true);
 
 #ifdef ADC_HAVE_TIMER
   if (priv->tbase != 0)
