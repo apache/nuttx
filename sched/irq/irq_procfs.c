@@ -252,7 +252,8 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
                       (unsigned int)irq,
                       (unsigned long)((uintptr_t)copy.handler),
                       (unsigned long)((uintptr_t)copy.arg),
-                      count, intpart, fracpart, copy.time / 1000);
+                      count, intpart, fracpart,
+                      (unsigned long)copy.time / 1000);
 
   copysize  = procfs_memcpy(irqfile->line, linesize, irqfile->buffer,
                             irqfile->remaining, &irqfile->offset);

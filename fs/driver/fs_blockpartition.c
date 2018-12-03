@@ -253,7 +253,7 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
               ret = parent->u.i_bops->geometry(parent, &geo);
               if (ret >= 0)
                 {
-                  *base += dev->firstsector * geo.geo_sectorsize;
+                  *(FAR uint8_t *)base += dev->firstsector * geo.geo_sectorsize;
                 }
             }
           else if (cmd == MTDIOC_GEOMETRY)
