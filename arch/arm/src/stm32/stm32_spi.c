@@ -244,6 +244,9 @@ static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
+#ifdef CONFIG_SPI_TRIGGER
+static int         spi_trigger(FAR struct spi_dev_s *dev);
+#endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void        spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 size_t nwords);
@@ -1426,8 +1429,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 #ifdef CONFIG_SPI_HWFEATURES
 static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
 {
-#ifdef CONFIG_SPI_BITORDER
+#if defined(CONFIG_SPI_BITORDER) || defined(CONFIG_SPI_TRIGGER)
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+#endif
+
+#ifdef CONFIG_SPI_BITORDER
   uint16_t setbits;
   uint16_t clrbits;
 
