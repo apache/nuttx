@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 29, 2018)
+NuttX TODO List (Last updated December 3, 2018)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1493,6 +1493,15 @@ o Network (net/, drivers/net)
                immediately (unless the SO_LINGER option is selected).  As a
                result, the socket does not send the FIN and this looks like
                an unexpected, abnormal loss of connection to the remote peer.
+
+               Actually, it is worse than this:  The is NO logic to send
+               FIN in when the file is close.  This is pretty easy to do,
+               however:
+
+                 - Wait for a TCP poll, then
+                 - Call tcp_append with TCP_CLOSE in the flags.  There is
+                   already logic in tcp_appsend to send the FIN in this case,
+                   it is just not being use.
   Status:      Open
   Priority:    Medium-Low.
 

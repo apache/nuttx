@@ -2527,8 +2527,6 @@ static void adc_voltreg_cfg(FAR struct stm32_dev_s *priv)
 
 static void adc_sampletime_cfg(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-
   /* Initialize the same sample time for each ADC.
    * During sample cycles channel selection bits must remain unchanged.
    */
@@ -2536,6 +2534,8 @@ static void adc_sampletime_cfg(FAR struct adc_dev_s *dev)
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
   adc_sampletime_write((FAR struct stm32_adc_dev_s *)dev);
 #else
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
   adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
   adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
 #  ifdef STM32_ADC_SMPR3_OFFSET
