@@ -46,22 +46,21 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
-
-#include <arch/irq.h>
-#include <arch/chip/chip.h>
-#include <arch/board/board.h>
-
-#include "up_internal.h"
-#include "ram_vectors.h"
-
 #include <nuttx/drivers/pwm.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
+
+#include <arch/irq.h>
+#include <arch/armv7-m/nvicpri.h>
+
+#include "up_internal.h"
+#include "ram_vectors.h"
 
 #include "stm32_pwm.h"
 #include "stm32_adc.h"
 #include "stm32_dma.h"
 
+#include <arch/board/board.h>
 #ifdef CONFIG_STM32F429I_DISCO_HIGHPRI
 
 /****************************************************************************

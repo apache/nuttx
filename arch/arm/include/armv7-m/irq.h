@@ -49,7 +49,7 @@
 #include <nuttx/irq.h>
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
-#  include <arch/chip/chip.h>
+#  include <arch/armv7-m/nvicpri.h>
 #  include <stdint.h>
 #endif
 
@@ -59,10 +59,6 @@
 #  include <arch/armv7-m/irq_cmnvector.h>
 #else
 #  include <arch/armv7-m/irq_lazyfpu.h>
-#endif
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-#  include <arch/chip/chip.h>
 #endif
 
 /****************************************************************************

@@ -39,6 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/boardctl.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -49,23 +53,22 @@
 #include <debug.h>
 #include <dsp.h>
 
-#include <sys/boardctl.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
-
-#include "up_internal.h"
-#include "ram_vectors.h"
-
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/power/smps.h>
 
+#include <arch/armv7-m/nvicpri.h>
+
+#include "up_internal.h"
+#include "ram_vectors.h"
+
 #include "stm32_hrtim.h"
 #include "stm32_adc.h"
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_EXAMPLES_SMPS) && defined(CONFIG_DRIVERS_SMPS)
 

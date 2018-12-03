@@ -40,9 +40,10 @@
 #include <nuttx/config.h>
 
 #include <arch/irq.h>
-#include "exc_return.h"
+#include <arch/armv7-m/nvicpri.h>
 
 #include "chip.h"
+#include "exc_return.h"
 
 /************************************************************************************************
  * Pre-processor Definitions

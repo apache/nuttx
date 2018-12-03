@@ -48,7 +48,8 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
+
+#include <arch/armv7-m/nvicpri.h>
 
 #include "nvic.h"
 #include "ram_vectors.h"
@@ -60,6 +61,8 @@
 #ifdef CONFIG_DVFS
 #  include "lc823450_dvfs2.h"
 #endif
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions

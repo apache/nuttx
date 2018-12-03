@@ -47,14 +47,15 @@
 #include <nuttx/signal.h>
 
 #include <arch/irq.h>
-#include <arch/chip/chip.h>
-#include <arch/board/board.h>
+#include <arch/armv7-m/nvicpri.h>
 
 #include "up_internal.h"
 #include "ram_vectors.h"
 #include "stm32_tim.h"
 
 #include "viewtool_stm32f107.h"
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_VIEWTOOL_HIGHPRI
 

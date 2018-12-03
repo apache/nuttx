@@ -44,6 +44,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <arch/armv7-m/nvicpri.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
