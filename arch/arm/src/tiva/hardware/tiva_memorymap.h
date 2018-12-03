@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-/* Include the memory map file for the specific Tiva/Stellaris chip */
+/* Include the memory map file for the specific Tiva/Stellaris/SimpleLink chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include "hardware/lm/lm3s_memorymap.h"
@@ -50,6 +50,12 @@
 #  include "hardware/lm/lm4f_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include "hardware/tm4c/tm4c_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X0)
+#  include "hardware/cc13x0/cc13x0_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X2_V1)
+#  include "hardware/cc13x2_cc26x2_v1/cc13x2_cc26x2_v1_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X2_V2)
+#  include "hardware/cc13x2_cc26x2_v2/cc13x2_cc26x2_v2_memorymap.h"
 #else
 #  error "Unsupported Tiva/Stellaris memory map"
 #endif
