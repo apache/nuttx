@@ -116,7 +116,7 @@ int main(int argc, char **argv, char **envp)
 
   while (fgets(g_line, LINE_SIZE, instream) != NULL)
     {
-      for (pos = 0, i = 0; g_line[i] && pos < LINE_SIZE && g_line[i]; i++)
+      for (pos = 0, i = 0; i < LINE_SIZE && g_line[i] != '\0'; i++)
         {
           if (g_line[i] == '\t')
             {
