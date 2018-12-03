@@ -92,16 +92,16 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 /* Buttons
  *
- * An single button, SW2,  is available on GPIO P0.12 for use by software.  A low
- * value will be sensed when the button is pressed.
+ * An single button, SW2,  is available on GPIO P0.12 for use by software.  A
+ * low value will be sensed when the button is pressed.
  *
  * NOTE: There are no pull-up resistors connected to the generic user buttons
- * so it is necessary to enable the internal pull-up in the SAM E70 to use the
- * button.
+ * so it is necessary to enable the internal pull-up in the SAM E70 to use
+ * the button.
  */
 
 #define BUTTON_SW2        0

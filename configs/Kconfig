@@ -335,6 +335,16 @@ config ARCH_BOARD_KWIKSTIK_K40
 		Kinetis K40 Cortex-M4 MCU.  This port uses the NXP/FreeScale KwikStik-K40
 		development board.
 
+config ARCH_BOARD_LAUNCHXL_CC1312R1
+	bool "TI LaunchXL-CC1312R1"
+	depends on ARCH_CHIP_CC1312R1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		TI SimpleLink CC1312R1 LaunchPad Evaluation Kit (LAUNCHXL-CC1312R1)
+		featuring the SimpleLinkCC1312R1 chip.
+
 config ARCH_BOARD_LAUNCHXL_TMS57004
 	bool "TI LaunchXL-TMS57004"
 	depends on ARCH_CHIP_TMS570LS0432PZ
@@ -1768,6 +1778,7 @@ config ARCH_BOARD
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
+	default "launchxl-cc1312r1"        if ARCH_BOARD_LAUNCHXL_CC1312R1
 	default "launchxl-tms57004"        if ARCH_BOARD_LAUNCHXL_TMS57004
 	default "lc823450-xgevk"           if ARCH_BOARD_LC823450_XGEVK
 	default "lincoln60"                if ARCH_BOARD_LINCOLN60
@@ -2030,6 +2041,9 @@ source "configs/imxrt1060-evk/Kconfig"
 endif
 if ARCH_BOARD_KWIKSTIK_K40
 source "configs/kwikstik-k40/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_CC1312R1
+source "configs/launchxl-cc1312r1/Kconfig"
 endif
 if ARCH_BOARD_LAUNCHXL_TMS57004
 source "configs/launchxl-tms57004/Kconfig"

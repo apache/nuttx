@@ -119,8 +119,8 @@ config ARCH_CHIP_CC1312R1
 	depends on ARCH_CHIP_SIMPLELINK || EXPERIMENTAL
 	select ARCH_CHIP_CC13X2
 
-config ARCH_CHIP_CC1312R1
-	bool "CC1312R1 SimpleLink"
+config ARCH_CHIP_CC1352R1
+	bool "CC1352R1 SimpleLink"
 	depends on ARCH_CHIP_SIMPLELINK || EXPERIMENTAL
 	select ARCH_CHIP_CC13X2
 
@@ -271,6 +271,8 @@ config TIVA_BOARD_EARLYINIT
 
 menu "Tiva/Stellaris Peripheral Support"
 
+# MCU capabilities
+
 config TIVA_ADC
 	bool
 	default n
@@ -375,14 +377,6 @@ config TIVA_HAVE_ETHERNET
 	bool
 	default n
 
-config TIVA_SSI
-	bool
-	default n
-
-config TIVA_TIMER
-	bool
-	default n
-
 config TIVA_HAVE_TIMER0
 	bool
 	default n
@@ -414,6 +408,18 @@ config TIVA_HAVE_TIMER6
 config TIVA_HAVE_TIMER7
 	bool
 	default n
+
+# Driver selections
+
+config TIVA_SSI
+	bool
+	default n
+
+config TIVA_TIMER
+	bool
+	default n
+
+# Periperhal Selections
 
 config TIVA_ADC0
 	bool "ADC0"
