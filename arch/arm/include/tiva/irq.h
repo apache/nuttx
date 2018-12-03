@@ -175,12 +175,20 @@
 #define TIVA_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
 #define TIVA_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
+/* Chip-specific Interrupts (vectors 16 and above) */
+
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include <arch/tiva/lm3s_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
 #  include <arch/tiva/lm4f_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include <arch/tiva/tm4c_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_CC13X0)
+#  include <arch/tiva/cc13x0_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_CC13X2_V1)
+#  include <arch/tiva/cc13x2_cc26x2_v1_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_CC13X2_V2)
+#  include <arch/tiva/cc13x2_cc26x2_v2_irq.h>
 #else
 #  error "Unsupported Stellaris IRQ file"
 #endif

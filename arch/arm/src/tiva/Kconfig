@@ -126,6 +126,21 @@ config ARCH_CHIP_CC1312R1
 
 endchoice
 
+# Chip versions
+
+choice
+	prompt "CC13x2 Chip Version"
+	default ARCH_CHIP_CC13X2_V1
+	depends on ARCH_CHIP_CC13X2
+
+config ARCH_CHIP_CC13X2_V1
+	bool "Version 1"
+
+config ARCH_CHIP_CC13X2_V2
+	bool "Version 2"
+
+endchoice # CC13x2 Chip Version
+
 # Chip families
 
 config ARCH_CHIP_LM3S
