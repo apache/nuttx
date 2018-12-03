@@ -74,7 +74,16 @@ convert-comments.c
 
   Convert C++-style comments to C89 C-style comments.  Usage:
 
-  convert-comments <source-file> <out-file>
+    convert-comments <source-file> <out-file>
+
+detab.c
+-------
+
+  Convert tabs to spaces in a file.  Usage:
+
+    detab [-4] <source-file> <out-file>
+
+  Default <source-file> tab size is 8 spaces;  -4 selects 4 space tab size.
 
 discover.py
 -----------
@@ -97,6 +106,13 @@ gencromfs.c
     <out-file> the name of the generated, output C file.  This file must
       be compiled in order to generate the binary CROMFS file system
       image.
+
+lowhex.c
+
+  Convert hexadecimal representation in a file from upper- to lower-case.
+  Usage:
+
+    lowhex <source-file> <out-file>
 
 mkconfig.c, cfgdefine.c, and cfgdefine.h
 ----------------------------------------
