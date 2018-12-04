@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_epi.h
+ * arch/arm/src/tiva/hardware/tiva_epi.h
  *
  *   Copyright (C) 2009-2013 Max Neklyudov. All rights reserved.
  *   Author: Max Neklyudov <macscomp@gmail.com>

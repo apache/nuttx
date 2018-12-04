@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_pinmap.h
+ * arch/arm/src/tiva/hardware/tiva_pinmap.h
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_ethernet.h
+ * arch/arm/src/tiva/hardware/tiva_ethernet.h
  *
  *   Copyright (C) 2009-2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

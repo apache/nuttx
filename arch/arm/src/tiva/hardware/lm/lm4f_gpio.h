@@ -1,0 +1,390 @@
+/************************************************************************************
+ * arch/arm/src/tiva/hardware/lm/lm4f_gpio.h
+ *
+ *   Copyright (C) 2009-2010, 2013, 2018 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Jose Pablo Carballo <jcarballo@nx-engineering.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_GPIO_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_GPIO_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* REVISIT:  Why do we not use the AHB aperture for all GPIO accesses? */
+
+#define TIVA_GPIOK_BASE             TIVA_GPIOKAHB_BASE
+#define TIVA_GPIOL_BASE             TIVA_GPIOLAHB_BASE
+#define TIVA_GPIOM_BASE             TIVA_GPIOMAHB_BASE
+#define TIVA_GPION_BASE             TIVA_GPIONAHB_BASE
+#define TIVA_GPIOP_BASE             TIVA_GPIOPAHB_BASE
+#define TIVA_GPIOQ_BASE             TIVA_GPIOQAHB_BASE
+#define TIVA_GPIOR_BASE             TIVA_GPIORAHB_BASE
+#define TIVA_GPIOS_BASE             TIVA_GPIOSAHB_BASE
+#define TIVA_GPIOT_BASE             TIVA_GPIOTAHB_BASE
+
+/* GPIO Register Offsets ************************************************************/
+
+#define TIVA_GPIO_DATA_OFFSET       0x0000 /* GPIO Data */
+#define TIVA_GPIO_DIR_OFFSET        0x0400 /* GPIO Direction */
+#define TIVA_GPIO_IS_OFFSET         0x0404 /* GPIO Interrupt Sense */
+#define TIVA_GPIO_IBE_OFFSET        0x0408 /* GPIO Interrupt Both Edges */
+#define TIVA_GPIO_IEV_OFFSET        0x040c /* GPIO Interrupt Event */
+#define TIVA_GPIO_IM_OFFSET         0x0410 /* GPIO Interrupt Mask */
+#define TIVA_GPIO_RIS_OFFSET        0x0414 /* GPIO Raw Interrupt Status */
+#define TIVA_GPIO_MIS_OFFSET        0x0418 /* GPIO Masked Interrupt Status */
+#define TIVA_GPIO_ICR_OFFSET        0x041c /* GPIO Interrupt Clear */
+#define TIVA_GPIO_AFSEL_OFFSET      0x0420 /* GPIO Alternate Function */
+#define TIVA_GPIO_DR2R_OFFSET       0x0500 /* Select GPIO 2-mA Drive Select */
+#define TIVA_GPIO_DR4R_OFFSET       0x0504 /* GPIO 4-mA Drive Select */
+#define TIVA_GPIO_DR8R_OFFSET       0x0508 /* GPIO 8-mA Drive Select */
+#define TIVA_GPIO_ODR_OFFSET        0x050c /* GPIO Open Drain Select */
+#define TIVA_GPIO_PUR_OFFSET        0x0510 /* GPIO Pull-Up Select */
+#define TIVA_GPIO_PDR_OFFSET        0x0514 /* GPIO Pull-Down Select */
+#define TIVA_GPIO_SLR_OFFSET        0x0518 /* GPIO Slew Rate Control Select */
+#define TIVA_GPIO_DEN_OFFSET        0x051c /* GPIO Digital Enable */
+#define TIVA_GPIO_LOCK_OFFSET       0x0520 /* GPIO Lock */
+#define TIVA_GPIO_CR_OFFSET         0x0524 /* GPIO Commit */
+#define TIVA_GPIO_AMSEL_OFFSET      0x0528 /* GPIO Analog Mode Select */
+#define TIVA_GPIO_PCTL_OFFSET       0x052c /* GPIO Port Control */
+#define TIVA_GPIO_ADCCTL_OFFSET     0x0530 /* GPIO ADC Control */
+#define TIVA_GPIO_DMACTL_OFFSET     0x0534 /* GPIO DMA Control */
+
+#define TIVA_GPIO_PERIPHID4_OFFSET  0x0fd0 /* GPIO Peripheral Identification 4 */
+#define TIVA_GPIO_PERIPHID5_OFFSET  0x0fd4 /* GPIO Peripheral Identification 5 */
+#define TIVA_GPIO_PERIPHID6_OFFSET  0x0fd8 /* GPIO Peripheral Identification 6 */
+#define TIVA_GPIO_PERIPHID7_OFFSET  0x0fdc /* GPIO Peripheral Identification 7 */
+#define TIVA_GPIO_PERIPHID0_OFFSET  0x0fe0 /* GPIO Peripheral Identification 0 */
+#define TIVA_GPIO_PERIPHID1_OFFSET  0x0fe4 /* GPIO Peripheral Identification 1 */
+#define TIVA_GPIO_PERIPHID2_OFFSET  0x0fe8 /* GPIO Peripheral Identification 2 */
+#define TIVA_GPIO_PERIPHID3_OFFSET  0x0fec /* GPIO Peripheral Identification 3 */
+#define TIVA_GPIO_PCELLID0_OFFSET   0x0ff0 /* GPIO PrimeCell Identification 0 */
+#define TIVA_GPIO_PCELLID1_OFFSET   0x0ff4 /* GPIO PrimeCell Identification 1 */
+#define TIVA_GPIO_PCELLID2_OFFSET   0x0ff8 /* GPIO PrimeCell Identification 2 */
+#define TIVA_GPIO_PCELLID3_OFFSET   0x0ffc /* GPIO PrimeCell Identification 3*/
+
+/* GPIO Register Addresses **********************************************************/
+
+#if TIVA_NPORTS > 0
+
+#  define TIVA_GPIOA_DATA           (TIVA_GPIOA_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOA_DIR            (TIVA_GPIOA_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOA_IS             (TIVA_GPIOA_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOA_IBE            (TIVA_GPIOA_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOA_IEV            (TIVA_GPIOA_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOA_IM             (TIVA_GPIOA_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOA_RIS            (TIVA_GPIOA_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOA_MIS            (TIVA_GPIOA_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOA_ICR            (TIVA_GPIOA_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOA_AFSEL          (TIVA_GPIOA_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOA_DR2R           (TIVA_GPIOA_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOA_DR4R           (TIVA_GPIOA_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOA_DR8R           (TIVA_GPIOA_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOA_ODR            (TIVA_GPIOA_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOA_PUR            (TIVA_GPIOA_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOA_PDR            (TIVA_GPIOA_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOA_SLR            (TIVA_GPIOA_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOA_DEN            (TIVA_GPIOA_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOA_LOCK           (TIVA_GPIOA_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOA_CR             (TIVA_GPIOA_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOA_AMSEL          (TIVA_GPIOA_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOA_PCTL           (TIVA_GPIOA_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOA_ADCCTL         (TIVA_GPIOA_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOA_DMACTL         (TIVA_GPIOA_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOA_PERIPHID4      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOA_PERIPHID5      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOA_PERIPHID6      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOA_PERIPHID7      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOA_PERIPHID0      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOA_PERIPHID1      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOA_PERIPHID2      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOA_PERIPHID3      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOA_PCELLID0       (TIVA_GPIOA_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOA_PCELLID1       (TIVA_GPIOA_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOA_PCELLID2       (TIVA_GPIOA_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOA_PCELLID3       (TIVA_GPIOA_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+#if TIVA_NPORTS > 1
+
+#  define TIVA_GPIOB_DATA           (TIVA_GPIOB_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOB_DIR            (TIVA_GPIOB_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOB_IS             (TIVA_GPIOB_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOB_IBE            (TIVA_GPIOB_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOB_IEV            (TIVA_GPIOB_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOB_IM             (TIVA_GPIOB_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOB_RIS            (TIVA_GPIOB_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOB_MIS            (TIVA_GPIOB_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOB_ICR            (TIVA_GPIOB_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOB_AFSEL          (TIVA_GPIOB_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOB_DR2R           (TIVA_GPIOB_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOB_DR4R           (TIVA_GPIOB_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOB_DR8R           (TIVA_GPIOB_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOB_ODR            (TIVA_GPIOB_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOB_PUR            (TIVA_GPIOB_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOB_PDR            (TIVA_GPIOB_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOB_SLR            (TIVA_GPIOB_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOB_DEN            (TIVA_GPIOB_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOB_LOCK           (TIVA_GPIOB_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOB_CR             (TIVA_GPIOB_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOB_AMSEL          (TIVA_GPIOB_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOB_PCTL           (TIVA_GPIOB_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOB_ADCCTL         (TIVA_GPIOB_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOB_DMACTL         (TIVA_GPIOB_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOB_PERIPHID4      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOB_PERIPHID5      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOB_PERIPHID6      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOB_PERIPHID7      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOB_PERIPHID0      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOB_PERIPHID1      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOB_PERIPHID2      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOB_PERIPHID3      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOB_PCELLID0       (TIVA_GPIOB_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOB_PCELLID1       (TIVA_GPIOB_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOB_PCELLID2       (TIVA_GPIOB_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOB_PCELLID3       (TIVA_GPIOB_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+#if TIVA_NPORTS > 2
+
+#  define TIVA_GPIOC_DATA           (TIVA_GPIOC_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOC_DIR            (TIVA_GPIOC_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOC_IS             (TIVA_GPIOC_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOC_IBE            (TIVA_GPIOC_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOC_IEV            (TIVA_GPIOC_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOC_IM             (TIVA_GPIOC_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOC_RIS            (TIVA_GPIOC_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOC_MIS            (TIVA_GPIOC_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOC_ICR            (TIVA_GPIOC_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOC_AFSEL          (TIVA_GPIOC_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOC_DR2R           (TIVA_GPIOC_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOC_DR4R           (TIVA_GPIOC_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOC_DR8R           (TIVA_GPIOC_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOC_ODR            (TIVA_GPIOC_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOC_PUR            (TIVA_GPIOC_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOC_PDR            (TIVA_GPIOC_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOC_SLR            (TIVA_GPIOC_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOC_DEN            (TIVA_GPIOC_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOC_LOCK           (TIVA_GPIOC_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOC_CR             (TIVA_GPIOC_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOC_AMSEL          (TIVA_GPIOC_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOC_PCTL           (TIVA_GPIOC_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOC_ADCCTL         (TIVA_GPIOC_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOC_DMACTL         (TIVA_GPIOC_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOC_PERIPHID4      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOC_PERIPHID5      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOC_PERIPHID6      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOC_PERIPHID7      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOC_PERIPHID0      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOC_PERIPHID1      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOC_PERIPHID2      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOC_PERIPHID3      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOC_PCELLID0       (TIVA_GPIOC_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOC_PCELLID1       (TIVA_GPIOC_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOC_PCELLID2       (TIVA_GPIOC_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOC_PCELLID3       (TIVA_GPIOC_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+#if TIVA_NPORTS > 3
+
+#  define TIVA_GPIOD_DATA           (TIVA_GPIOD_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOD_DIR            (TIVA_GPIOD_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOD_IS             (TIVA_GPIOD_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOD_IBE            (TIVA_GPIOD_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOD_IEV            (TIVA_GPIOD_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOD_IM             (TIVA_GPIOD_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOD_RIS            (TIVA_GPIOD_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOD_MIS            (TIVA_GPIOD_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOD_ICR            (TIVA_GPIOD_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOD_AFSEL          (TIVA_GPIOD_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOD_DR2R           (TIVA_GPIOD_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOD_DR4R           (TIVA_GPIOD_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOD_DR8R           (TIVA_GPIOD_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOD_ODR            (TIVA_GPIOD_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOD_PUR            (TIVA_GPIOD_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOD_PDR            (TIVA_GPIOD_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOD_SLR            (TIVA_GPIOD_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOD_DEN            (TIVA_GPIOD_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOD_LOCK           (TIVA_GPIOD_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOD_CR             (TIVA_GPIOD_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOD_AMSEL          (TIVA_GPIOD_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOD_PCTL           (TIVA_GPIOD_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOD_ADCCTL         (TIVA_GPIOD_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOD_DMACTL         (TIVA_GPIOD_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOD_PERIPHID4      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOD_PERIPHID5      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOD_PERIPHID6      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOD_PERIPHID7      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOD_PERIPHID0      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOD_PERIPHID1      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOD_PERIPHID2      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOD_PERIPHID3      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOD_PCELLID0       (TIVA_GPIOD_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOD_PCELLID1       (TIVA_GPIOD_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOD_PCELLID2       (TIVA_GPIOD_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOD_PCELLID3       (TIVA_GPIOD_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+#if TIVA_NPORTS > 4
+
+#  define TIVA_GPIOE_DATA           (TIVA_GPIOE_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOE_DIR            (TIVA_GPIOE_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOE_IS             (TIVA_GPIOE_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOE_IBE            (TIVA_GPIOE_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOE_IEV            (TIVA_GPIOE_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOE_IM             (TIVA_GPIOE_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOE_RIS            (TIVA_GPIOE_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOE_MIS            (TIVA_GPIOE_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOE_ICR            (TIVA_GPIOE_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOE_AFSEL          (TIVA_GPIOE_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOE_DR2R           (TIVA_GPIOE_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOE_DR4R           (TIVA_GPIOE_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOE_DR8R           (TIVA_GPIOE_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOE_ODR            (TIVA_GPIOE_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOE_PUR            (TIVA_GPIOE_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOE_PDR            (TIVA_GPIOE_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOE_SLR            (TIVA_GPIOE_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOE_DEN            (TIVA_GPIOE_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOE_LOCK           (TIVA_GPIOE_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOE_CR             (TIVA_GPIOE_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOE_AMSEL          (TIVA_GPIOE_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOE_PCTL           (TIVA_GPIOE_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOE_ADCCTL         (TIVA_GPIOE_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOE_DMACTL         (TIVA_GPIOE_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOE_PERIPHID4      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOE_PERIPHID5      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOE_PERIPHID6      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOE_PERIPHID7      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOE_PERIPHID0      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOE_PERIPHID1      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOE_PERIPHID2      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOE_PERIPHID3      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOE_PCELLID0       (TIVA_GPIOE_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOE_PCELLID1       (TIVA_GPIOE_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOE_PCELLID2       (TIVA_GPIOE_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOE_PCELLID3       (TIVA_GPIOE_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+#if TIVA_NPORTS > 5
+
+#  define TIVA_GPIOF_DATA           (TIVA_GPIOF_BASE + TIVA_GPIO_DATA_OFFSET)
+#  define TIVA_GPIOF_DIR            (TIVA_GPIOF_BASE + TIVA_GPIO_DIR_OFFSET)
+#  define TIVA_GPIOF_IS             (TIVA_GPIOF_BASE + TIVA_GPIO_IS_OFFSET)
+#  define TIVA_GPIOF_IBE            (TIVA_GPIOF_BASE + TIVA_GPIO_IBE_OFFSET)
+#  define TIVA_GPIOF_IEV            (TIVA_GPIOF_BASE + TIVA_GPIO_IEV_OFFSET)
+#  define TIVA_GPIOF_IM             (TIVA_GPIOF_BASE + TIVA_GPIO_IM_OFFSET)
+#  define TIVA_GPIOF_RIS            (TIVA_GPIOF_BASE + TIVA_GPIO_RIS_OFFSET)
+#  define TIVA_GPIOF_MIS            (TIVA_GPIOF_BASE + TIVA_GPIO_MIS_OFFSET)
+#  define TIVA_GPIOF_ICR            (TIVA_GPIOF_BASE + TIVA_GPIO_ICR_OFFSET)
+#  define TIVA_GPIOF_AFSEL          (TIVA_GPIOF_BASE + TIVA_GPIO_AFSEL_OFFSET)
+#  define TIVA_GPIOF_DR2R           (TIVA_GPIOF_BASE + TIVA_GPIO_DR2R_OFFSET)
+#  define TIVA_GPIOF_DR4R           (TIVA_GPIOF_BASE + TIVA_GPIO_DR4R_OFFSET)
+#  define TIVA_GPIOF_DR8R           (TIVA_GPIOF_BASE + TIVA_GPIO_DR8R_OFFSET)
+#  define TIVA_GPIOF_ODR            (TIVA_GPIOF_BASE + TIVA_GPIO_ODR_OFFSET)
+#  define TIVA_GPIOF_PUR            (TIVA_GPIOF_BASE + TIVA_GPIO_PUR_OFFSET)
+#  define TIVA_GPIOF_PDR            (TIVA_GPIOF_BASE + TIVA_GPIO_PDR_OFFSET)
+#  define TIVA_GPIOF_SLR            (TIVA_GPIOF_BASE + TIVA_GPIO_SLR_OFFSET)
+#  define TIVA_GPIOF_DEN            (TIVA_GPIOF_BASE + TIVA_GPIO_DEN_OFFSET)
+#  define TIVA_GPIOF_LOCK           (TIVA_GPIOF_BASE + TIVA_GPIO_LOCK_OFFSET)
+#  define TIVA_GPIOF_CR             (TIVA_GPIOF_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOF_AMSEL          (TIVA_GPIOF_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOF_PCTL           (TIVA_GPIOF_BASE + TIVA_GPIO_PCTL_OFFSET)
+#  define TIVA_GPIOF_ADCCTL         (TIVA_GPIOF_BASE + TIVA_GPIO_ADCCTL_OFFSET)
+#  define TIVA_GPIOF_DMACTL         (TIVA_GPIOF_BASE + TIVA_GPIO_DMACTL_OFFSET)
+
+#  define TIVA_GPIOF_PERIPHID4      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
+#  define TIVA_GPIOF_PERIPHID5      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
+#  define TIVA_GPIOF_PERIPHID6      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID6_OFFSET)
+#  define TIVA_GPIOF_PERIPHID7      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID7_OFFSET)
+#  define TIVA_GPIOF_PERIPHID0      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID0_OFFSET)
+#  define TIVA_GPIOF_PERIPHID1      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID1_OFFSET)
+#  define TIVA_GPIOF_PERIPHID2      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID2_OFFSET)
+#  define TIVA_GPIOF_PERIPHID3      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID3_OFFSET)
+#  define TIVA_GPIOF_PCELLID0       (TIVA_GPIOF_BASE + TIVA_GPIO_PCELLID0_OFFSET)
+#  define TIVA_GPIOF_PCELLID1       (TIVA_GPIOF_BASE + TIVA_GPIO_PCELLID1_OFFSET)
+#  define TIVA_GPIOF_PCELLID2       (TIVA_GPIOF_BASE + TIVA_GPIO_PCELLID2_OFFSET)
+#  define TIVA_GPIOF_PCELLID3       (TIVA_GPIOF_BASE + TIVA_GPIO_PCELLID3_OFFSET)
+#endif
+
+/* GPIO Register Bitfield Definitions ***********************************************/
+
+/* GPIO Lock */
+
+#define GPIO_LOCK_UNLOCK            0x4c4f434b
+#define GPIO_LOCK_LOCKED            (1 << 0)  /* Bit 0: GPIOCR register is locked */
+
+/* GPIO Port Control */
+
+#define GPIO_PCTL_PMC_SHIFT(n)      ((n) << 2)
+#define GPIO_PCTL_PMC_MASK(n)       (15 << GPIO_PCTL_PMC_SHIFT(n))
+
+#define GPIO_PCTL_PMC0_SHIFT        (0)     /* Bits 0-3: Port Mux Control 0 */
+#define GPIO_PCTL_PMC0_MASK         (15 << GPIO_PCTL_PMC0_SHIFT)
+#define GPIO_PCTL_PMC1_SHIFT        (4)     /* Bits 4-7: Port Mux Control 1 */
+#define GPIO_PCTL_PMC1_MASK         (15 << GPIO_PCTL_PMC1_SHIFT)
+#define GPIO_PCTL_PMC2_SHIFT        (8)     /* Bits 8-11: Port Mux Control 2 */
+#define GPIO_PCTL_PMC2_MASK         (15 << GPIO_PCTL_PMC2_SHIFT)
+#define GPIO_PCTL_PMC3_SHIFT        (12)    /* Bits 12-15: Port Mux Control 3 */
+#define GPIO_PCTL_PMC3_MASK         (15 << GPIO_PCTL_PMC3_SHIFT)
+#define GPIO_PCTL_PMC4_SHIFT        (16)    /* Bits 16-19: Port Mux Control 4 */
+#define GPIO_PCTL_PMC4_MASK         (15 << GPIO_PCTL_PMC4_SHIFT)
+#define GPIO_PCTL_PMC5_SHIFT        (20)    /* Bits 20-23: Port Mux Control 5 */
+#define GPIO_PCTL_PMC5_MASK         (15 << GPIO_PCTL_PMC5_SHIFT)
+#define GPIO_PCTL_PMC6_SHIFT        (24)    /* Bits 24-27: Port Mux Control 6 */
+#define GPIO_PCTL_PMC6_MASK         (15 << GPIO_PCTL_PMC6_SHIFT)
+#define GPIO_PCTL_PMC7_SHIFT        (28)    /* Bits 28-31: Port Mux Control 7 */
+#define GPIO_PCTL_PMC7_MASK         (15 << GPIO_PCTL_PMC7_SHIFT)
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM4F_GPIO_H */

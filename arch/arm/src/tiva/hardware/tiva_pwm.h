@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_pwm.h
+ * arch/arm/src/tiva/hardware/tiva_pwm.h
  *
  *   Copyright (C) 2016 Young Mu. All rights reserved.
  *   Author: Young Mu <young.mu@aliyun.com>

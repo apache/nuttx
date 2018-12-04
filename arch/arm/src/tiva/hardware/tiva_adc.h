@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_adc.h
+ * arch/arm/src/tiva/hardware/tiva_adc.h
  *
  *   Copyright (C) 2015 Calvin Maguranis. All rights reserved.
  *   Author: Calvin Maguranis <c.maguranis@gmail.com>

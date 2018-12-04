@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_eeprom.h
+ * arch/arm/src/tiva/hardware/tiva_eeprom.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Shirshak Sengupta <sgshirshak@gmail.com>

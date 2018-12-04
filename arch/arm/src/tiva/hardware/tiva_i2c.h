@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_i2c.h
+ * arch/arm/src/tiva/hardware/tiva_i2c.h
  *
  *   Copyright (C) 2009, 2013-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

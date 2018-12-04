@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_timer.h
+ * arch/arm/src/tiva/hardware/tiva_timer.h
  *
  * Originally:
  *
