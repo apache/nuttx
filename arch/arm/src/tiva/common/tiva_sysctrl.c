@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_syscontrol.c
+ * arch/arm/src/tiva/common/tiva_sysctrl.c
  *
  *   Copyright (C) 2009-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "chip.h"
-#include "tiva_syscontrol.h"
+#include "tiva_sysctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions

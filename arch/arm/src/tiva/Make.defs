@@ -91,9 +91,9 @@ CHIP_CSRCS += tiva_dumpgpio.c
 endif
 
 ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
-CHIP_CSRCS += tm4c129_syscontrol.c
+CHIP_CSRCS += tm4c129_sysctrl.c
 else
-CHIP_CSRCS += tiva_syscontrol.c
+CHIP_CSRCS += tiva_sysctrl.c
 endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

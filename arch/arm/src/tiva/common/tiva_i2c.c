@@ -69,7 +69,7 @@
 #include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 #include "hardware/tiva_pinmap.h"
-#include "hardware/tiva_syscontrol.h"
+#include "hardware/tiva_sysctrl.h"
 #include "tiva_i2c.h"
 
 /* At least one I2C peripheral must be enabled */

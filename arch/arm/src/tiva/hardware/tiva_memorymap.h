@@ -53,9 +53,9 @@
 #elif defined(CONFIG_ARCH_CHIP_CC13X0)
 #  include "hardware/cc13x0/cc13x0_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X2_V1)
-#  include "hardware/cc13x2_cc26x2_v1/cc13x2_cc26x2_v1_memorymap.h"
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_v1_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X2_V2)
-#  include "hardware/cc13x2_cc26x2_v2/cc13x2_cc26x2_v2_memorymap.h"
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_v2_memorymap.h"
 #else
 #  error "Unsupported Tiva/Stellaris memory map"
 #endif

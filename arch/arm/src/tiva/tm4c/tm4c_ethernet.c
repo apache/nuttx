@@ -70,7 +70,7 @@
 
 #include "chip.h"
 #include "tiva_gpio.h"
-#include "tiva_syscontrol.h"
+#include "tiva_sysctrl.h"
 #include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
 #include "tiva_periphrdy.h"

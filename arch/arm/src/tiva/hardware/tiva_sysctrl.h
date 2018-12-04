@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardwaretiva_syscontrol.h
+ * arch/arm/src/tiva/hardwaretiva_sysctrl.h
  *
  *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,13 +46,13 @@
 /* Include the system control header file for the specific Tiva/Stellaris chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "hardware/lm/lm3s_syscontrol.h"
+#  include "hardware/lm/lm3s_sysctrl.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
-#  include "hardware/lm/lm4f_syscontrol.h"
+#  include "hardware/lm/lm4f_sysctrl.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C123)
-#  include "hardware/tm4c/tm4c123_syscontrol.h"
+#  include "hardware/tm4c/tm4c123_sysctrl.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C129)
-#  include "hardware/tm4c/tm4c129_syscontrol.h"
+#  include "hardware/tm4c/tm4c129_sysctrl.h"
 #else
 #  error "Unsupported Tiva/Stellaris system control module"
 #endif

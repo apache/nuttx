@@ -83,7 +83,7 @@
 #include "tiva_adc.h"
 #include "hardware/tiva_adc.h"
 #include "hardware/tiva_pinmap.h"
-#include "hardware/tiva_syscontrol.h"
+#include "hardware/tiva_sysctrl.h"
 
 #ifdef CONFIG_TIVA_ADC
 

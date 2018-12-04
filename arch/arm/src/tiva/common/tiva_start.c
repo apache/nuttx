@@ -54,7 +54,7 @@
 #include "up_internal.h"
 
 #include "tiva_lowputc.h"
-#include "tiva_syscontrol.h"
+#include "tiva_sysctrl.h"
 #include "tiva_userspace.h"
 #include "tiva_eeprom.h"
 #include "tiva_start.h"

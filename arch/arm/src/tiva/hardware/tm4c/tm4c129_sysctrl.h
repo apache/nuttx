@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/tiva/hardware/tm4c/tm4c129_syscontrol.h
+ * arch/arm/src/tiva/hardware/tm4c/tm4c129_sysctrl.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

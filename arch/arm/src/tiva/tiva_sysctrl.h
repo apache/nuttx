@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/tiva_syscontrol.h
+ * arch/arm/src/tiva/tiva_sysctrl.h
  *
  *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

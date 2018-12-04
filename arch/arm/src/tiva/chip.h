@@ -47,7 +47,7 @@
 /* Then get all of the register definitions */
 
 #include "hardware/tiva_memorymap.h"  /* Memory map */
-#include "hardware/tiva_syscontrol.h" /* System control module */
+#include "hardware/tiva_sysctrl.h"    /* System control module */
 #include "hardware/tiva_gpio.h"       /* GPIO modules */
 #include "hardware/tiva_uart.h"       /* UART modules */
 #include "hardware/tiva_i2c.h"        /* I2C modules */

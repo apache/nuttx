@@ -51,7 +51,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "hardware/tiva_syscontrol.h"
+#include "hardware/tiva_sysctrl.h"
 #include "hardware/tiva_timer.h"
 
 #include "tiva_enableclks.h"

@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "hardware/tiva_syscontrol.h"
+#include "hardware/tiva_sysctrl.h"
 #include "tiva_eeprom.h"
 
 /****************************************************************************

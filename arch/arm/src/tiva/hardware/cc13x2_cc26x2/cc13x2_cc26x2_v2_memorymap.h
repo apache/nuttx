@@ -1,5 +1,5 @@
 /******************************************************************************
- * arch/arm/src/tiva/hardware/cc13x2_cc26x2_v1/cc13x2_cc26x2_v1_memorymap.h
+ * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_v2_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -7,8 +7,8 @@
  * Derives for a TI header file that has a compatible BSD license:
  *
  *   Filename:       hw_memmap_h
- *   Revised:        2017-01-10 11:54:43 +0100 (Tue, 10 Jan 2017)
- *   Revision:       48190
+ *   Revised:        2018-05-14 12:24:52 +0200 (Mon, 14 May 2018)
+ *   Revision:       51990
  *
  *   Copyright (c) 2015 - 2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -41,8 +41,8 @@
  *
  ******************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_V1_CC13X2_CC26X2_V1_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_V1_CC13X2_CC26X2_V1_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_V2_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_V2_MEMORYMAP_H
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -183,4 +183,4 @@
 #define CPU_TIPROP_BASE          0xe00fe000 /* CPU_TIPROP */
 #define CPU_ROM_TABLE_BASE       0xe00ff000 /* CPU_ROM_TABLE */
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_V1_CC13X2_CC26X2_V1_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_V2_MEMORYMAP_H */
