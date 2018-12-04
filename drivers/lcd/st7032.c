@@ -368,6 +368,10 @@ static void lcd_scroll_up(FAR struct st7032_dev_s *priv)
       return;
     }
 
+  /* Clear display */
+
+  st7032_write_inst(priv, ST7032_CLEAR_DISPLAY);
+
   for (currow = 1; currow < ST7032_MAX_ROW; ++currow)
     {
       priv->row = currow;
@@ -843,7 +847,7 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
               priv->row += 1;
               if (priv->row >= ST7032_MAX_ROW)
                 {
-                  lcd_scroll_up(priv);
+                  priv->pendscroll = true;
                   priv->row = ST7032_MAX_ROW - 1;
                 }
 
@@ -864,20 +868,7 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
             }
           else
             {
-              /* All others are fair game.  See if we need to wrap line. */
-
-              if (priv->col >= ST7032_MAX_COL)
-              {
-                priv->row += 1;
-                if (priv->row >= ST7032_MAX_ROW)
-                  {
-                    lcd_scroll_up(priv);
-                    priv->row = ST7032_MAX_ROW - 1;
-                  }
-
-                priv->col = 0;
-                lcd_set_curpos(priv);
-              }
+              /* Just print it! */
 
               lcd_putdata(priv, ch);
             }
