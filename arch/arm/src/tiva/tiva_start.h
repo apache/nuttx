@@ -75,19 +75,4 @@ extern const uintptr_t g_idle_topstack;
 
 void tiva_boardinitialize(void);
 
-/****************************************************************************
- * Name: board_earlyinit
- *
- * Description:
- *   If CONFIG_TIVA_BOARD_EARLYINIT, then board-specific logic must provide
- *   the function board_earlyinit() to provide very customized lower-level
- *   board bringup.  board_earlyinit() will be called by the start-up logic
- *   instead of up_clockconfig() and up_lowsetup().
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIVA_BOARD_EARLYINIT
-void board_earlyinit(void);
-#endif
-
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_START_H */
