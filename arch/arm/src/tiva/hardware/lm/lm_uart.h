@@ -367,8 +367,12 @@
 #define UART_RSR_BE                (1 << 2)  /* Bit 2:  UART Break Error */
 #define UART_RSR_OE                (1 << 3)  /* Bit 3:  UART Overrun Error */
 
-/* UART Error Clear (ECR), offset 0x004 */
-/* Writing any value to this register clears pending error indications */
+/* UART Error Clear (ECR) */
+
+#define UART_ECR_FE                (1 << 0)  /* Bit 0:  UART Clear Framing Error */
+#define UART_ECR_PE                (1 << 1)  /* Bit 1:  UART Clear Parity Error */
+#define UART_ECR_BE                (1 << 2)  /* Bit 2:  UART Clear Break Error */
+#define UART_ECR_OE                (1 << 3)  /* Bit 3:  UART Clear Overrun Error */
 
 /* UART Flag (FR) */
 
