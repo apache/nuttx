@@ -83,8 +83,20 @@ CMN_CSRCS += up_allocateheap.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpio.c
-CHIP_CSRCS += tiva_gpioirq.c tiva_lowputc.c tiva_serial.c tiva_ssi.c
+CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_irq.c tiva_gpioirq.c
+CHIP_CSRCS += tiva_lowputc.c tiva_serial.c tiva_ssi.c
+
+ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
+CHIP_CSRCS += lm3s_gpio.c
+else ifeq ($(CONFIG_ARCH_CHIP_LM4F),y)
+CHIP_CSRCS += lm4f_gpio.c
+else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+CHIP_CSRCS += tm4c_gpio.c
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
+CHIP_CSRCS += cc13c0_gpio.c
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
+CHIP_CSRCS += cc13x2_cc26x2_gpio.c
+endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
 CHIP_CSRCS += tiva_dumpgpio.c

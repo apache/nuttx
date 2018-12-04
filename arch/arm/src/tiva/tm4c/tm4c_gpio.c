@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_gpio.c
+ * arch/arm/src/tiva/tm4c/tm4c_gpio.c
  *
- *   Copyright (C) 2009-2010, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014-2015, 2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -347,7 +348,6 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
       modifyreg32(base + TIVA_GPIO_DEN_OFFSET, clrbit, setbit);
     }
 
-#if defined(LM4F) || defined(TM4C)
   /* Set/clear/ignore the GPIO AMSEL bit. "The GPIOAMSEL register controls
    * isolation circuits to the analog side of a unified I/O pad. Because
    * the GPIOs may be driven by a 5-V source and affect analog operation,
@@ -363,7 +363,6 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
     {
       modifyreg32(base + TIVA_GPIO_AMSEL_OFFSET, clrbit, setbit);
     }
-#endif
 }
 
 /****************************************************************************
@@ -499,10 +498,8 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
   uint32_t pdrclr   = 0;
   uint32_t denset   = 0;
   uint32_t denclr   = 0;
-#if defined(LM4F) || defined(TM4C)
   uint32_t amselset = 0;
   uint32_t amselclr = 0;
-#endif
 
   /* Set the pin type. */
 
@@ -514,9 +511,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denset = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -526,9 +521,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purset = pin;
           pdrclr = pin;
           denset = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -538,9 +531,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrset = pin;
           denset = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -550,9 +541,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denset = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -562,9 +551,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purset = pin;
           pdrclr = pin;
           denclr = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -574,9 +561,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrset = pin;
           denclr = pin;
-#if defined(LM4F) || defined(TM4C)
           amselclr = pin;
-#endif
         }
         break;
 
@@ -586,9 +571,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
           purclr = pin;
           pdrclr = pin;
           denclr = pin;
-#if defined(LM4F) || defined(TM4C)
           amselset = pin;
-#endif
         }
         break;
 
@@ -600,10 +583,7 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
   modifyreg32(base + TIVA_GPIO_PUR_OFFSET,   purclr,   purset);
   modifyreg32(base + TIVA_GPIO_PDR_OFFSET,   pdrclr,   pdrset);
   modifyreg32(base + TIVA_GPIO_DEN_OFFSET,   denclr,   denset);
-
-#if defined(LM4F) || defined(TM4C)
   modifyreg32(base + TIVA_GPIO_AMSEL_OFFSET, amselclr, amselset);
-#endif
 
 #ifdef CONFIG_ARCH_CHIP_TM4C129
   /* Set the wake pin enable register and the wake level register.  These
@@ -757,7 +737,6 @@ static inline void tiva_interrupt(uint32_t pinset)
  *
  ****************************************************************************/
 
-#if defined(LM4F) || defined(TM4C)
 static inline void tiva_portcontrol(uint32_t base, uint32_t pinno,
                                     uint32_t pinset,
                                     const struct gpio_func_s *func)
@@ -785,9 +764,6 @@ static inline void tiva_portcontrol(uint32_t base, uint32_t pinno,
   regval |= (alt << GPIO_PCTL_PMC_SHIFT(pinno)) & mask;
   putreg32(regval, base + TIVA_GPIO_PCTL_OFFSET);
 }
-#else
-#  define tiva_portcontrol(b,p,c,f)
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -55,10 +55,8 @@
 #  include "hardware/tm4c/tm4c129_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X0)
 #  include "hardware/cc13x0/cc13x0_gpio.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X2_V1)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_v1_gpio.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X2_V2)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_v2_gpio.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X2)
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_gpio.h"
 #else
 #  error "Unsupported Tiva/Stellaris system control module"
 #endif

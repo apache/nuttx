@@ -539,7 +539,6 @@
 #  define TIVA_GPIOJ_PCELLID3       (TIVA_GPIOJ_BASE + TIVA_GPIO_PCELLID3_OFFSET)
 #endif
 
-
 /* GPIO Register Bitfield Definitions ***********************************************/
 
 /* GPIO Interrupt Mask */

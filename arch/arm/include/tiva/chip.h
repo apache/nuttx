@@ -317,7 +317,7 @@
                                   /* Programmable current source */
 #  define TIVA_NPWM            0  /* No PWM generator modules */
 #  define TIVA_NQEI            0  /* No quadrature encoder modules */
-#  define TIVA_NPORTS          1  /* One Ports */
+#  define TIVA_NPORTS          1  /* One Port */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #  define TIVA_NUSBOTGHS       0  /* No USB 2.0 OTG HS */
@@ -347,7 +347,7 @@
                                   /* Two comparators with reference DAC */
 #  define TIVA_NPWM            0  /* No PWM generator modules */
 #  define TIVA_NQEI            0  /* No quadrature encoder modules */
-#  define TIVA_NPORTS          1  /* One Ports */
+#  define TIVA_NPORTS          1  /* One Port */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #  define TIVA_NUSBOTGHS       0  /* No USB 2.0 OTG HS */
