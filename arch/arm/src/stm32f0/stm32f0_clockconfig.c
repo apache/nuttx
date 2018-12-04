@@ -141,7 +141,7 @@ void stm32f0_clockconfig(void)
   /* Enable all GPIO modules */
 
   regval  = getreg32(STM32F0_RCC_AHBENR);
-  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN |\
-            RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPAEN;
+  regval |= RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPBEN | RCC_AHBENR_IOPCEN |\
+            RCC_AHBENR_IOPDEN | RCC_AHBENR_IOPEEN | RCC_AHBENR_IOPFEN;
   putreg32(regval, STM32F0_RCC_AHBENR);
 }
