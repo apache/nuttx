@@ -53,73 +53,74 @@
 /* IOC register offsets ************************************************************/
 
 #define TIVA_IOC_IOCFG_OFFSET(n)   ((n) << 2)
-#define TIVA_IOC_IOCFG0_OFFSET     0x0000  /* Configuration of DIO0 */
-#define TIVA_IOC_IOCFG1_OFFSET     0x0004  /* Configuration of DIO1 */
-#define TIVA_IOC_IOCFG2_OFFSET     0x0008  /* Configuration of DIO2 */
-#define TIVA_IOC_IOCFG3_OFFSET     0x000c  /* Configuration of DIO3 */
-#define TIVA_IOC_IOCFG4_OFFSET     0x0010  /* Configuration of DIO4 */
-#define TIVA_IOC_IOCFG5_OFFSET     0x0014  /* Configuration of DIO5 */
-#define TIVA_IOC_IOCFG6_OFFSET     0x0018  /* Configuration of DIO6 */
-#define TIVA_IOC_IOCFG7_OFFSET     0x001c  /* Configuration of DIO7 */
-#define TIVA_IOC_IOCFG8_OFFSET     0x0020  /* Configuration of DIO8 */
-#define TIVA_IOC_IOCFG9_OFFSET     0x0024  /* Configuration of DIO9 */
-#define TIVA_IOC_IOCFG10_OFFSET    0x0028  /* Configuration of DIO10 */
-#define TIVA_IOC_IOCFG11_OFFSET    0x002c  /* Configuration of DIO11 */
-#define TIVA_IOC_IOCFG12_OFFSET    0x0030  /* Configuration of DIO12 */
-#define TIVA_IOC_IOCFG13_OFFSET    0x0034  /* Configuration of DIO13 */
-#define TIVA_IOC_IOCFG14_OFFSET    0x0038  /* Configuration of DIO14 */
-#define TIVA_IOC_IOCFG15_OFFSET    0x003c  /* Configuration of DIO15 */
-#define TIVA_IOC_IOCFG16_OFFSET    0x0040  /* Configuration of DIO16 */
-#define TIVA_IOC_IOCFG17_OFFSET    0x0044  /* Configuration of DIO17 */
-#define TIVA_IOC_IOCFG18_OFFSET    0x0048  /* Configuration of DIO18 */
-#define TIVA_IOC_IOCFG19_OFFSET    0x004c  /* Configuration of DIO19 */
-#define TIVA_IOC_IOCFG20_OFFSET    0x0050  /* Configuration of DIO20 */
-#define TIVA_IOC_IOCFG21_OFFSET    0x0054  /* Configuration of DIO21 */
-#define TIVA_IOC_IOCFG22_OFFSET    0x0058  /* Configuration of DIO22 */
-#define TIVA_IOC_IOCFG23_OFFSET    0x005c  /* Configuration of DIO23 */
-#define TIVA_IOC_IOCFG24_OFFSET    0x0060  /* Configuration of DIO24 */
-#define TIVA_IOC_IOCFG25_OFFSET    0x0064  /* Configuration of DIO25 */
-#define TIVA_IOC_IOCFG26_OFFSET    0x0068  /* Configuration of DIO26 */
-#define TIVA_IOC_IOCFG27_OFFSET    0x006c  /* Configuration of DIO27 */
-#define TIVA_IOC_IOCFG28_OFFSET    0x0070  /* Configuration of DIO28 */
-#define TIVA_IOC_IOCFG29_OFFSET    0x0074  /* Configuration of DIO29 */
-#define TIVA_IOC_IOCFG30_OFFSET    0x0078  /* Configuration of DIO30 */
-#define TIVA_IOC_IOCFG31_OFFSET    0x007c  /* Configuration of DIO31 */
+#  define TIVA_IOC_IOCFG0_OFFSET   0x0000  /* Configuration of DIO0 */
+#  define TIVA_IOC_IOCFG1_OFFSET   0x0004  /* Configuration of DIO1 */
+#  define TIVA_IOC_IOCFG2_OFFSET   0x0008  /* Configuration of DIO2 */
+#  define TIVA_IOC_IOCFG3_OFFSET   0x000c  /* Configuration of DIO3 */
+#  define TIVA_IOC_IOCFG4_OFFSET   0x0010  /* Configuration of DIO4 */
+#  define TIVA_IOC_IOCFG5_OFFSET   0x0014  /* Configuration of DIO5 */
+#  define TIVA_IOC_IOCFG6_OFFSET   0x0018  /* Configuration of DIO6 */
+#  define TIVA_IOC_IOCFG7_OFFSET   0x001c  /* Configuration of DIO7 */
+#  define TIVA_IOC_IOCFG8_OFFSET   0x0020  /* Configuration of DIO8 */
+#  define TIVA_IOC_IOCFG9_OFFSET   0x0024  /* Configuration of DIO9 */
+#  define TIVA_IOC_IOCFG10_OFFSET  0x0028  /* Configuration of DIO10 */
+#  define TIVA_IOC_IOCFG11_OFFSET  0x002c  /* Configuration of DIO11 */
+#  define TIVA_IOC_IOCFG12_OFFSET  0x0030  /* Configuration of DIO12 */
+#  define TIVA_IOC_IOCFG13_OFFSET  0x0034  /* Configuration of DIO13 */
+#  define TIVA_IOC_IOCFG14_OFFSET  0x0038  /* Configuration of DIO14 */
+#  define TIVA_IOC_IOCFG15_OFFSET  0x003c  /* Configuration of DIO15 */
+#  define TIVA_IOC_IOCFG16_OFFSET  0x0040  /* Configuration of DIO16 */
+#  define TIVA_IOC_IOCFG17_OFFSET  0x0044  /* Configuration of DIO17 */
+#  define TIVA_IOC_IOCFG18_OFFSET  0x0048  /* Configuration of DIO18 */
+#  define TIVA_IOC_IOCFG19_OFFSET  0x004c  /* Configuration of DIO19 */
+#  define TIVA_IOC_IOCFG20_OFFSET  0x0050  /* Configuration of DIO20 */
+#  define TIVA_IOC_IOCFG21_OFFSET  0x0054  /* Configuration of DIO21 */
+#  define TIVA_IOC_IOCFG22_OFFSET  0x0058  /* Configuration of DIO22 */
+#  define TIVA_IOC_IOCFG23_OFFSET  0x005c  /* Configuration of DIO23 */
+#  define TIVA_IOC_IOCFG24_OFFSET  0x0060  /* Configuration of DIO24 */
+#  define TIVA_IOC_IOCFG25_OFFSET  0x0064  /* Configuration of DIO25 */
+#  define TIVA_IOC_IOCFG26_OFFSET  0x0068  /* Configuration of DIO26 */
+#  define TIVA_IOC_IOCFG27_OFFSET  0x006c  /* Configuration of DIO27 */
+#  define TIVA_IOC_IOCFG28_OFFSET  0x0070  /* Configuration of DIO28 */
+#  define TIVA_IOC_IOCFG29_OFFSET  0x0074  /* Configuration of DIO29 */
+#  define TIVA_IOC_IOCFG30_OFFSET  0x0078  /* Configuration of DIO30 */
+#  define TIVA_IOC_IOCFG31_OFFSET  0x007c  /* Configuration of DIO31 */
 
 /* IOC register addresses **********************************************************/
 
-#define TIVA_IOC_IOCFG0            (TIVA_IOC_BASE + TIVA_IOC_IOCFG0_OFFSET)
-#define TIVA_IOC_IOCFG1            (TIVA_IOC_BASE + TIVA_IOC_IOCFG1_OFFSET)
-#define TIVA_IOC_IOCFG2            (TIVA_IOC_BASE + TIVA_IOC_IOCFG2_OFFSET)
-#define TIVA_IOC_IOCFG3            (TIVA_IOC_BASE + TIVA_IOC_IOCFG3_OFFSET)
-#define TIVA_IOC_IOCFG4            (TIVA_IOC_BASE + TIVA_IOC_IOCFG4_OFFSET)
-#define TIVA_IOC_IOCFG5            (TIVA_IOC_BASE + TIVA_IOC_IOCFG5_OFFSET)
-#define TIVA_IOC_IOCFG6            (TIVA_IOC_BASE + TIVA_IOC_IOCFG6_OFFSET)
-#define TIVA_IOC_IOCFG7            (TIVA_IOC_BASE + TIVA_IOC_IOCFG7_OFFSET)
-#define TIVA_IOC_IOCFG8            (TIVA_IOC_BASE + TIVA_IOC_IOCFG8_OFFSET)
-#define TIVA_IOC_IOCFG9            (TIVA_IOC_BASE + TIVA_IOC_IOCFG9_OFFSET)
-#define TIVA_IOC_IOCFG10           (TIVA_IOC_BASE + TIVA_IOC_IOCFG10_OFFSET)
-#define TIVA_IOC_IOCFG11           (TIVA_IOC_BASE + TIVA_IOC_IOCFG11_OFFSET)
-#define TIVA_IOC_IOCFG12           (TIVA_IOC_BASE + TIVA_IOC_IOCFG12_OFFSET)
-#define TIVA_IOC_IOCFG13           (TIVA_IOC_BASE + TIVA_IOC_IOCFG13_OFFSET)
-#define TIVA_IOC_IOCFG14           (TIVA_IOC_BASE + TIVA_IOC_IOCFG14_OFFSET)
-#define TIVA_IOC_IOCFG15           (TIVA_IOC_BASE + TIVA_IOC_IOCFG15_OFFSET)
-#define TIVA_IOC_IOCFG16           (TIVA_IOC_BASE + TIVA_IOC_IOCFG16_OFFSET)
-#define TIVA_IOC_IOCFG17           (TIVA_IOC_BASE + TIVA_IOC_IOCFG17_OFFSET)
-#define TIVA_IOC_IOCFG18           (TIVA_IOC_BASE + TIVA_IOC_IOCFG18_OFFSET)
-#define TIVA_IOC_IOCFG19           (TIVA_IOC_BASE + TIVA_IOC_IOCFG19_OFFSET)
-#define TIVA_IOC_IOCFG20           (TIVA_IOC_BASE + TIVA_IOC_IOCFG20_OFFSET)
-#define TIVA_IOC_IOCFG21           (TIVA_IOC_BASE + TIVA_IOC_IOCFG21_OFFSET)
-#define TIVA_IOC_IOCFG22           (TIVA_IOC_BASE + TIVA_IOC_IOCFG22_OFFSET)
-#define TIVA_IOC_IOCFG23           (TIVA_IOC_BASE + TIVA_IOC_IOCFG23_OFFSET)
-#define TIVA_IOC_IOCFG24           (TIVA_IOC_BASE + TIVA_IOC_IOCFG24_OFFSET)
-#define TIVA_IOC_IOCFG25           (TIVA_IOC_BASE + TIVA_IOC_IOCFG25_OFFSET)
-#define TIVA_IOC_IOCFG26           (TIVA_IOC_BASE + TIVA_IOC_IOCFG26_OFFSET)
-#define TIVA_IOC_IOCFG27           (TIVA_IOC_BASE + TIVA_IOC_IOCFG27_OFFSET)
-#define TIVA_IOC_IOCFG28           (TIVA_IOC_BASE + TIVA_IOC_IOCFG28_OFFSET)
-#define TIVA_IOC_IOCFG29           (TIVA_IOC_BASE + TIVA_IOC_IOCFG29_OFFSET)
-#define TIVA_IOC_IOCFG30           (TIVA_IOC_BASE + TIVA_IOC_IOCFG30_OFFSET)
-#define TIVA_IOC_IOCFG31           (TIVA_IOC_BASE + TIVA_IOC_IOCFG31_OFFSET)
+#define TIVA_IOC_IOCFG_(n)         (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
+#  define TIVA_IOC_IOCFG0          (TIVA_IOC_BASE + TIVA_IOC_IOCFG0_OFFSET)
+#  define TIVA_IOC_IOCFG1          (TIVA_IOC_BASE + TIVA_IOC_IOCFG1_OFFSET)
+#  define TIVA_IOC_IOCFG2          (TIVA_IOC_BASE + TIVA_IOC_IOCFG2_OFFSET)
+#  define TIVA_IOC_IOCFG3          (TIVA_IOC_BASE + TIVA_IOC_IOCFG3_OFFSET)
+#  define TIVA_IOC_IOCFG4          (TIVA_IOC_BASE + TIVA_IOC_IOCFG4_OFFSET)
+#  define TIVA_IOC_IOCFG5          (TIVA_IOC_BASE + TIVA_IOC_IOCFG5_OFFSET)
+#  define TIVA_IOC_IOCFG6          (TIVA_IOC_BASE + TIVA_IOC_IOCFG6_OFFSET)
+#  define TIVA_IOC_IOCFG7          (TIVA_IOC_BASE + TIVA_IOC_IOCFG7_OFFSET)
+#  define TIVA_IOC_IOCFG8          (TIVA_IOC_BASE + TIVA_IOC_IOCFG8_OFFSET)
+#  define TIVA_IOC_IOCFG9          (TIVA_IOC_BASE + TIVA_IOC_IOCFG9_OFFSET)
+#  define TIVA_IOC_IOCFG10         (TIVA_IOC_BASE + TIVA_IOC_IOCFG10_OFFSET)
+#  define TIVA_IOC_IOCFG11         (TIVA_IOC_BASE + TIVA_IOC_IOCFG11_OFFSET)
+#  define TIVA_IOC_IOCFG12         (TIVA_IOC_BASE + TIVA_IOC_IOCFG12_OFFSET)
+#  define TIVA_IOC_IOCFG13         (TIVA_IOC_BASE + TIVA_IOC_IOCFG13_OFFSET)
+#  define TIVA_IOC_IOCFG14         (TIVA_IOC_BASE + TIVA_IOC_IOCFG14_OFFSET)
+#  define TIVA_IOC_IOCFG15         (TIVA_IOC_BASE + TIVA_IOC_IOCFG15_OFFSET)
+#  define TIVA_IOC_IOCFG16         (TIVA_IOC_BASE + TIVA_IOC_IOCFG16_OFFSET)
+#  define TIVA_IOC_IOCFG17         (TIVA_IOC_BASE + TIVA_IOC_IOCFG17_OFFSET)
+#  define TIVA_IOC_IOCFG18         (TIVA_IOC_BASE + TIVA_IOC_IOCFG18_OFFSET)
+#  define TIVA_IOC_IOCFG19         (TIVA_IOC_BASE + TIVA_IOC_IOCFG19_OFFSET)
+#  define TIVA_IOC_IOCFG20         (TIVA_IOC_BASE + TIVA_IOC_IOCFG20_OFFSET)
+#  define TIVA_IOC_IOCFG21         (TIVA_IOC_BASE + TIVA_IOC_IOCFG21_OFFSET)
+#  define TIVA_IOC_IOCFG22         (TIVA_IOC_BASE + TIVA_IOC_IOCFG22_OFFSET)
+#  define TIVA_IOC_IOCFG23         (TIVA_IOC_BASE + TIVA_IOC_IOCFG23_OFFSET)
+#  define TIVA_IOC_IOCFG24         (TIVA_IOC_BASE + TIVA_IOC_IOCFG24_OFFSET)
+#  define TIVA_IOC_IOCFG25         (TIVA_IOC_BASE + TIVA_IOC_IOCFG25_OFFSET)
+#  define TIVA_IOC_IOCFG26         (TIVA_IOC_BASE + TIVA_IOC_IOCFG26_OFFSET)
+#  define TIVA_IOC_IOCFG27         (TIVA_IOC_BASE + TIVA_IOC_IOCFG27_OFFSET)
+#  define TIVA_IOC_IOCFG28         (TIVA_IOC_BASE + TIVA_IOC_IOCFG28_OFFSET)
+#  define TIVA_IOC_IOCFG29         (TIVA_IOC_BASE + TIVA_IOC_IOCFG29_OFFSET)
+#  define TIVA_IOC_IOCFG30         (TIVA_IOC_BASE + TIVA_IOC_IOCFG30_OFFSET)
+#  define TIVA_IOC_IOCFG31         (TIVA_IOC_BASE + TIVA_IOC_IOCFG31_OFFSET)
 
 /* IOC register bit settings *******************************************************/
 

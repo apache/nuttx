@@ -122,7 +122,7 @@
 #  undef CONFIG_TIVA_GPIOQ_IRQS
 #endif
 
-/* Bit-encoded input to tiva_configgpio() *******************************************/
+/* Bit-encoded input to tiva_configgpio() ***********************************/
 
 /* Encoding:
  *
@@ -237,5 +237,7 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+uintptr_t tiva_gpiobaseaddress(unsigned int port);
 
 #endif /* __ARCH_ARM_SRC_TIVA_LM_LM3S_H */
