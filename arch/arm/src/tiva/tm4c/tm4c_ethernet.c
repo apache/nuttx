@@ -3466,7 +3466,8 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
    *      for proper operation. The MOSC source can be a single-ended source or a
    *      crystal."
    *
-   *   These are currently set up in tiva_clockconfig() before this function runs.
+   *   These are currently set up in tiva_clock_reconfigure() before this function
+   *   runs.
    *
    * MII/RMII Clocking:
    *

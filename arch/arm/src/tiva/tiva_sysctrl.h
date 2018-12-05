@@ -47,7 +47,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_TM4C129
-/* Helpers for use with the TM4C129 version of tiva_clockconfig() */
+/* Helpers for use with the TM4C129 version of tiva_clock_reconfigure() */
 
 #  define M2PLLFREQ0(mint,mfrac) \
      ((uint32_t)((mint) << SYSCON_PLLFREQ0_MINT_SHIFT) | \
@@ -83,7 +83,7 @@ extern "C"
 
 #if defined(CONFIG_ARCH_CHIP_TM4C129)
 /****************************************************************************
- * Name: tiva_clockconfig
+ * Name: tiva_clock_reconfigure
  *
  * Description:
  *   Called to change to new clock based on desired pllfreq0, pllfreq1, and
@@ -116,11 +116,12 @@ extern "C"
  *
  ****************************************************************************/
 
-uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv);
+uint32_t tiva_clock_reconfigure(uint32_t pllfreq0, uint32_t pllfreq1,
+                                uint32_t sysdiv);
 
 #else
 /****************************************************************************
- * Name: tiva_clockconfig
+ * Name: tiva_clock_reconfigure
  *
  * Description:
  *   Called to change to new clock based on desired rcc and rcc2 settings.
@@ -129,25 +130,11 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
  *
  ****************************************************************************/
 
-void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2);
-#endif
-
-#if defined(CONFIG_TIVA_BOARD_CLOCKCONFIG)
-/****************************************************************************
- * Name: tiva_board_clockconfig
- *
- * Description:
- *   If CONFIG_TIVA_BOARD_CLOCKCONFIG is defined, then the board-specific
- *   logic must provide the function tiva_board_clockconfig().  That
- *   function will then be called to perform all clock initialization.
- *
- ****************************************************************************/
-
-void tiva_board_clockconfig(void);
+void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2);
 #endif
 
 /****************************************************************************
- * Name: up_clockconfig
+ * Name: tiva_clock_configure
  *
  * Description:
  *   Called early in the boot sequence (before .data and .bss are available)
@@ -155,7 +142,7 @@ void tiva_board_clockconfig(void);
  *
  ****************************************************************************/
 
-void up_clockconfig(void);
+void tiva_clock_configure(void);
 
 #if defined(__cplusplus)
 }

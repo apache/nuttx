@@ -208,7 +208,7 @@ static uint32_t tiva_vco_frequency(uint32_t pllfreq0, uint32_t pllfreq1)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_clockconfig
+ * Name: tiva_clock_reconfigure
  *
  * Description:
  *   Called to change to new clock based on desired pllfreq0, pllfreq1, and
@@ -241,7 +241,8 @@ static uint32_t tiva_vco_frequency(uint32_t pllfreq0, uint32_t pllfreq1)
  *
  ****************************************************************************/
 
-uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
+uint32_t tiva_clock_reconfigure(uint32_t pllfreq0, uint32_t pllfreq1,
+                                uint32_t sysdiv)
 {
   uint32_t sysclk;
   uint32_t regval;
@@ -377,7 +378,7 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
 }
 
 /****************************************************************************
- * Name: up_clockconfig
+ * Name: tiva_clock_configure
  *
  * Description:
  *   Called early in the boot sequence (before .data and .bss are available)
@@ -385,7 +386,7 @@ uint32_t tiva_clockconfig(uint32_t pllfreq0, uint32_t pllfreq1, uint32_t sysdiv)
  *
  ****************************************************************************/
 
-void up_clockconfig(void)
+void tiva_clock_configure(void)
 {
   uint32_t pllfreq0;
   uint32_t pllfreq1;
@@ -396,7 +397,7 @@ void up_clockconfig(void)
 
   pllfreq0 = M2PLLFREQ0(BOARD_PLL_MINT, BOARD_PLL_MFRAC);
   pllfreq1 = QN2PLLFREQ1(BOARD_PLL_Q, BOARD_PLL_N);
-  tiva_clockconfig(pllfreq0, pllfreq1, BOARD_PLL_SYSDIV);
+  tiva_clock_reconfigure(pllfreq0, pllfreq1, BOARD_PLL_SYSDIV);
 
   /* Set up the alternate clock source
    *

@@ -218,7 +218,7 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  up_clockconfig();
+  tiva_clock_configure();
   up_lowsetup();
   tiva_fpuconfig();
   showprogress('A');

@@ -637,14 +637,6 @@ config TIVA_RAMVBAR
 		beginning of RAM (vs the beginning of FLASH).  The beginning of RAM
 		is that address defined by CONFIG_RAM_START.
 
-config TIVA_BOARD_CLOCKCONFIG
-	bool "Board-specific clock configuration"
-	default n
-	---help---
-		If CONFIG_TIVA_BOARD_CLOCKCONFIG is defined, then the board-specific
-		logic must provide the function tiva_board_clockconfig().  That
-		function will then be called to perform all clock initialization.
-
 menu "Enable GPIO Interrupts"
 
 config TIVA_GPIO_IRQS

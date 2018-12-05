@@ -180,7 +180,7 @@ static inline void tiva_pll_lock(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tiva_clockconfig
+ * Name: tiva_clock_reconfigure
  *
  * Description:
  *   Called to change to new clock based on desired rcc and rcc2 settings.
@@ -189,7 +189,7 @@ static inline void tiva_pll_lock(void)
  *
  ****************************************************************************/
 
-void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
+void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
 {
   /* We are probably using the main oscillator.  The main oscillator is
    * disabled on reset and so probably must be enabled here.  The internal
@@ -395,7 +395,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 }
 
 /****************************************************************************
- * Name: up_clockconfig
+ * Name: tiva_clock_configure
  *
  * Description:
  *   Called early in the boot sequence (before .data and .bss are available)
@@ -403,14 +403,8 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
  *
  ****************************************************************************/
 
-void up_clockconfig(void)
+void tiva_clock_configure(void)
 {
-#if defined(CONFIG_TIVA_BOARD_CLOCKCONFIG)
-  /* Execute the board specific clock configuration logic */
-
-  tiva_board_clockconfig();
-
-#else
 #ifdef CONFIG_LM_REVA2
   /* Some early LM3 silicon returned an increase LDO voltage to 2.75V to work
    * around a PLL bug
@@ -423,6 +417,5 @@ void up_clockconfig(void)
    * header file
    */
 
-  tiva_clockconfig(TIVA_RCC_VALUE, TIVA_RCC2_VALUE);
-#endif
+  tiva_clock_reconfigure(TIVA_RCC_VALUE, TIVA_RCC2_VALUE);
 }
