@@ -249,7 +249,7 @@ void up_lowputc(char ch)
 }
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: tiva_lowsetup
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
@@ -258,7 +258,7 @@ void up_lowputc(char ch)
  *
  ****************************************************************************/
 
-void up_lowsetup(void)
+void tiva_lowsetup(void)
 {
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t ctl;

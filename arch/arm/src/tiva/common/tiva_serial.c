@@ -731,7 +731,7 @@ static void up_set_format(struct uart_dev_s *dev)
   bool     was_active;
 
   /* Note:  The logic here depends on the fact that that the UART module
-   * was enabled and the GPIOs were configured in up_lowsetup().
+   * was enabled and the GPIOs were configured in tiva_lowsetup().
    */
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
@@ -1327,7 +1327,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
-   * up_lowsetup
+   * tiva_lowsetup
    */
 
   /* Disable all UARTS */

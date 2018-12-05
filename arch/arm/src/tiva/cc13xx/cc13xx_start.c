@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_start.c
+ * arch/arm/src/tiva/cc13xx/cc13x_start.c
  *
- *   Copyright (C) 2009, 2012, 2014, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,6 @@
 #include "up_internal.h"
 
 #include "tiva_lowputc.h"
-#include "tiva_sysctrl.h"
 #include "tiva_userspace.h"
 #include "tiva_eeprom.h"
 #include "tiva_start.h"
@@ -158,7 +157,7 @@ static inline void tiva_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -188,7 +187,7 @@ static inline void tiva_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -217,9 +216,12 @@ void __start(void)
 #endif
   uint32_t *dest;
 
+  /* Perform the necessary trim of the device which is not done in boot code. */
+
+  cc13x2_cc26x2_trim_device();
+
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  tiva_clock_configure();
   tiva_lowsetup();
   tiva_fpuconfig();
   showprogress('A');

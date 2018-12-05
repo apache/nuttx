@@ -198,14 +198,14 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: tiva_lowsetup
  *
  * Description:
  *   Called at the very beginning of _start.  Performs low level initialization.
  *
  ****************************************************************************/
 
-void up_lowsetup(void);
+void tiva_lowsetup(void);
 
 #if defined(__cplusplus)
 }

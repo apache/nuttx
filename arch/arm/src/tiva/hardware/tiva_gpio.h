@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-/* Include the GPIO header file for the specific Tiva/Stellaris chip */
+/* Include the GPIO header file for the specific Tiva/Stellaris/SimpleLink chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include "hardware/lm/lm3s_gpio.h"

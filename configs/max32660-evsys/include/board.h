@@ -87,7 +87,7 @@
 #define LED_PANIC        3 /* The system has crashed  FLASH    */
 #undef  LED_IDLE           /* MCU is is sleep mode    Not used */
 
-/* Thus is LED is statically on, NuttX has successfully  booted and is,
+/* Thus if LED is statically on, NuttX has successfully  booted and is,
  * apparently, running normally.  If LED is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
  */

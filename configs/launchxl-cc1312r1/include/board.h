@@ -54,6 +54,50 @@
 
 /* LED definitions **********************************************************/
 
+/* The LaunchXL-cc1312R1 and two LEDs controlled by software: DIO7_GLED (CR1)
+ * and DIO6_RLED (CR2).  A high output value illuminates an LED.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_GLED        0
+#define BOARD_RLED        1
+#define BOARD_NLEDS       2
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_GLED_BIT    (1 << BOARD_GLED)
+#define BOARD_RLED_BIT    (1 << BOARD_RLED)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/cc1312_autoleds.c.  The LEDs are used to
+ * encode OS-related events as follows:
+ *
+ *   ------------------- ---------------------------- ---- ----
+ *   SYMBOL                  Meaning                  GLED RLED
+ *   ------------------- ---------------------------- ---- ----  */
+
+#define LED_STARTED      0 /* NuttX has been started  OFF  OFF   */
+#define LED_HEAPALLOCATE 1 /* Heap has been allocated OFF  ON    */
+#define LED_IRQSENABLED  1 /* Interrupts enabled      OFF  ON    */
+#define LED_STACKCREATED 2 /* Idle stack created      ON   OFF   */
+#define LED_INIRQ        3 /* In an interrupt         N/C  GLOW  */
+#define LED_SIGNAL       3 /* In a signal handler     N/C  GLOW  */
+#define LED_ASSERTION    3 /* An assertion failed     N/C  GLOW  */
+#define LED_PANIC        4 /* The system has crashed  OFF  BLINK */
+#undef  LED_IDLE           /* MCU is is sleep mode    -Not used- */
+
+/* Thus iF GLED is statically on, NuttX has successfully  booted and is,
+ * apparently, running normally.  A soft glow of the RLED means that the
+ * board is taking interrupts.   If GLED is off and GLED is flashing at
+ * approximately 2Hz, then a fatal error has been detected and the system
+ * has halted.
+ */
+
 /* Button definitions *******************************************************/
 
 /* Pin Disambiguation *******************************************************/
