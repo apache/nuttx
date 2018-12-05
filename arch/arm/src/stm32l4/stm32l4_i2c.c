@@ -1593,7 +1593,9 @@ static inline void stm32l4_i2c_sendstart(FAR struct stm32l4_i2c_priv_s *priv)
    * it otherwise.
    */
 
-  if (priv->msgc > 0)
+  /* Check if there are multiple messages and the next is a continuation */
+
+  if (priv->msgc > 1)
     {
       next_norestart = (((priv->msgv + 1)->flags & I2C_M_NOSTART) != 0);
     }
