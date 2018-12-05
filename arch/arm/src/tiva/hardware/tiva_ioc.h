@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardware/tiva_pinmap.h
+ * arch/arm/src/tiva/hardware/tiva_ioc.h
  *
- *   Copyright (C) 2013-2014, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PINMAP_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PINMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_IOC_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_IOC_H
 
 /************************************************************************************
  * Included Files
@@ -44,18 +44,14 @@
 
 /* Include the pin mapping file for the specific Tiva/Stellaris/SimpleLink chip */
 
-#if defined(CONFIG_ARCH_CHIP_LM3S)
-#  include "hardware/lm/lm3s_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_LM4F)
-#  include "hardware/lm/lm4f_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_TM4C)
-#  include "hardware/tm4c/tm4c_pinmap.h"
+#if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
+  /* These architectures do not support the IOC block */
 #elif defined(CONFIG_ARCH_CHIP_CC13X0)
-#  include "hardware/cc13x0/cc13x0_pinmap.h"
+#  include "hardware/cc13x0/cc13x0_ioc.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_pinmap.h"
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_ioc.h"
 #else
-#  error "Unsupported Tiva/Stellaris/SimpleLink PIN mapping"
+#  error "Unsupported Tiva/Stellaris/SimpleLink IOC"
 #endif
 
 /************************************************************************************
@@ -74,4 +70,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_IOC_H */
