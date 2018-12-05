@@ -126,13 +126,13 @@
 #define IOC_IOCFG_PORTID_MASK      (0)       /* Bits 0-5:  Selects DIO usage */
 #define IOC_IOCFG_PORTID_SHIFT     (0x3f << IOC_IOCFG_PORTID_MASK)
 #  define IOC_IOCFG_PORTID(n)        ((uint32_t)(n) << IOC_IOCFG_PORTID_MASK) /* See PORT ID definitions */
-#define IOC_IOCFG_IOEV_MCU_WUEN    (1 << 6)  /* Bit 6:  Input edte asserts MCU_WU event */
+#define IOC_IOCFG_IOEV_MCU_WUEN    (1 << 6)  /* Bit 6:  Input edge asserts MCU_WU event */
 #define IOC_IOCFG_IOEV_RTCEN       (1 << 7)  /* Bit 7:  Input edge asserts RTC event */
 #define IOC_IOCFG_IOSTR_SHIFT      (8)       /* Bits 8-9: I/O drive strength */
 #define IOC_IOCFG_IOSTR_MASK       (3 << IOC_IOCFG_IOSTR_SHIFT)
-#  define IOC_IOCFG_IOSTR_AUTO        (3 << IOC_IOCFG_IOSTR_SHIFT) /* Automatic drive strength */
-#  define IOC_IOCFG_IOSTR_MIN         (3 << IOC_IOCFG_IOSTR_SHIFT) /* Minimum drive strength */
-#  define IOC_IOCFG_IOSTR_MED         (3 << IOC_IOCFG_IOSTR_SHIFT) /* Medium drive strength */
+#  define IOC_IOCFG_IOSTR_AUTO        (0 << IOC_IOCFG_IOSTR_SHIFT) /* Automatic drive strength */
+#  define IOC_IOCFG_IOSTR_MIN         (1 << IOC_IOCFG_IOSTR_SHIFT) /* Minimum drive strength */
+#  define IOC_IOCFG_IOSTR_MED         (2 << IOC_IOCFG_IOSTR_SHIFT) /* Medium drive strength */
 #  define IOC_IOCFG_IOSTR_MAX         (3 << IOC_IOCFG_IOSTR_SHIFT) /* Maximum drive strength */
 #define IOC_IOCFG_IOCURR_SHIFT     (10)      /* Bits 10-11: I/O current mode */
 #define IOC_IOCFG_IOCURR_MASK      (3 << IOC_IOCFG_IOCURR_SHIFT)

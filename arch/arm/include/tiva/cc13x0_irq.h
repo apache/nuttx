@@ -53,9 +53,6 @@
 
 /* External interrupts (vectors >= 16) */
 
-#define TIVA_IRQ_INTERRUPTS          (16) /* Vector number of the first external
-                                           * interrupt */
-
 #define TIVA_IRQ_AON_GPIO_EDGE       (16) /* Edge detect event from IOC */
 #define TIVA_IRQ_I2C                 (17) /* Interrupt event from I2C */
 #define TIVA_IRQ_RFC_CPE_1           (18) /* Combined Interrupt for CPE
@@ -95,5 +92,48 @@
 #define TIVA_IRQ_TRNG                (49) /* TRNG Interrupt event */
 
 #define NR_IRQS                      (50) /* Number of interrupt vectors */
+#define TIVA_IRQ_NEXTINT             (NR_IRQS - 16)
+
+/* GPIO IRQs -- Up to 31 interrupts, one for each supported pin */
+
+#if defined(CONFIG_TIVA_GPIOIRQS)
+#  define TIVA_IRQ_DIO_0            (NR_IRQS + 0)
+#  define TIVA_IRQ_DIO_1            (NR_IRQS + 1)
+#  define TIVA_IRQ_DIO_2            (NR_IRQS + 2)
+#  define TIVA_IRQ_DIO_3            (NR_IRQS + 3)
+#  define TIVA_IRQ_DIO_4            (NR_IRQS + 4)
+#  define TIVA_IRQ_DIO_5            (NR_IRQS + 5)
+#  define TIVA_IRQ_DIO_6            (NR_IRQS + 6)
+#  define TIVA_IRQ_DIO_7            (NR_IRQS + 7)
+#  define TIVA_IRQ_DIO_8            (NR_IRQS + 8)
+#  define TIVA_IRQ_DIO_9            (NR_IRQS + 9)
+#  define TIVA_IRQ_DIO_10           (NR_IRQS + 10)
+#  define TIVA_IRQ_DIO_11           (NR_IRQS + 11)
+#  define TIVA_IRQ_DIO_12           (NR_IRQS + 12)
+#  define TIVA_IRQ_DIO_13           (NR_IRQS + 13)
+#  define TIVA_IRQ_DIO_14           (NR_IRQS + 14)
+#  define TIVA_IRQ_DIO_15           (NR_IRQS + 15)
+#  define TIVA_IRQ_DIO_16           (NR_IRQS + 16)
+#  define TIVA_IRQ_DIO_17           (NR_IRQS + 17)
+#  define TIVA_IRQ_DIO_18           (NR_IRQS + 18)
+#  define TIVA_IRQ_DIO_19           (NR_IRQS + 19)
+#  define TIVA_IRQ_DIO_20           (NR_IRQS + 20)
+#  define TIVA_IRQ_DIO_21           (NR_IRQS + 21)
+#  define TIVA_IRQ_DIO_22           (NR_IRQS + 22)
+#  define TIVA_IRQ_DIO_23           (NR_IRQS + 23)
+#  define TIVA_IRQ_DIO_24           (NR_IRQS + 24)
+#  define TIVA_IRQ_DIO_25           (NR_IRQS + 25)
+#  define TIVA_IRQ_DIO_26           (NR_IRQS + 26)
+#  define TIVA_IRQ_DIO_27           (NR_IRQS + 27)
+#  define TIVA_IRQ_DIO_28           (NR_IRQS + 28)
+#  define TIVA_IRQ_DIO_29           (NR_IRQS + 29)
+#  define TIVA_IRQ_DIO_30           (NR_IRQS + 30)
+#  define TIVA_IRQ_DIO_31           (NR_IRQS + 31)
+#  define _NGPIOIRQS                (NR_IRQS + 32)
+#else
+#  define _NGPIOIRQS                NR_IRQS
+#endif
+
+#define NR_GPIO_IRQS                (_NGPIOTIRQS - NR_IRQS)
 
 #endif /* __ARCH_ARM_INCLUDE_TIVA_CC13X0_IRQ_H */

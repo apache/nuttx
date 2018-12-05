@@ -50,10 +50,8 @@
 #  include "hardware/lm/lm4f_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include "hardware/tm4c/tm4c_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X0)
-#  include "hardware/cc13x0/cc13x0_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X2)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X0) || defined(CONFIG_ARCH_CHIP_CC13X2)
+  /* There are no pin multiplex header files for these architectures */
 #else
 #  error "Unsupported Tiva/Stellaris/SimpleLink PIN mapping"
 #endif

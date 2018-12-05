@@ -58,7 +58,7 @@
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
 #  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_gpio.h"
 #else
-#  error "Unsupported Tiva/Stellaris system control module"
+#  error "Unsupported Tiva/Stellaris system GPIO"
 #endif
 
 /************************************************************************************
