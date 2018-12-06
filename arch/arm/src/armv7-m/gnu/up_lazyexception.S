@@ -189,28 +189,6 @@ exception_common:
 	stmdb	sp!, {r2-r11}			/* Save the remaining registers plus the SP value */
 #endif
 
-#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
-	/* Disable interrupts, select the stack to use for interrupt handling
-	 * and call up_doirq to handle the interrupt
-	 */
-
-	cpsid	i						/* Disable further interrupts */
-
-#else
-	/* Set the BASEPRI register so that further normal interrupts will be
-	 * masked.  Nested, high priority may still occur, however.
-	 *
-	 * REVISIT:  I think this is un-necessary:  "When the processor is
-	 * executing an exception handler, an exception can preempt the exception
-	 * handler if its priority is higher than the priority of the exception
-	 * being handled. See Interrupt priority grouping for more information
-	 * about preemption by an interrupt."
-	 */
-
-	mov		r2, #NVIC_SYSH_DISABLE_PRIORITY
-	msr		basepri, r2				/* Set the BASEPRI */
-#endif
-
 	/* There are two arguments to up_doirq:
 	 *
 	 *   R0 = The IRQ number
@@ -354,10 +332,6 @@ exception_common:
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 	msr		basepri, r3				/* Restore interrupts priority masking */
-#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
-	cpsie	i						/* Re-enable interrupts */
-#endif
-
 #else
 	msr		primask, r3				/* Restore interrupts */
 #endif
