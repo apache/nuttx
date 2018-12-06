@@ -52,7 +52,7 @@
 
 /* Encoding:
  *
- *    PPPP PPIO WCCR SSHS PPAA GIII EEVD DDDD
+ *    PPPP PPIO WCCR SSHS  PPAA GIII EEVD DDDD
  *
  * PPPPPP - 6 bits.  Port ID (see definitions in hardware/c13x0/c13x0_ioc.h
  *                   and hardware.cc13x2_cc26x2/cc13x2_cc26x2_ioc)
@@ -74,14 +74,14 @@
  * 2      - 1 bit    Edge asserts AON_PROG2 (CC13x2/CC26x only) NOTE 1
  * V      - 1 bit    GPIO output initial value
  * DDDDD  - 5 bits   DIO 0-31
- *t
+ *
  * NOTE 1:  Not currently implemented because no bits are available in
  * the uint32_t.  We need more bits!
  */
 
 /* Port ID
  *
- *    PPPP PP.. .... .... .... .... .... ....
+ *    PPPP PP.. .... ....  .... .... .... ....
  *
  * See PORTID definitions in the IOC register definitions file.
  */
@@ -92,21 +92,23 @@
 
 /* Input Enable:
  *
- *    .... ..I. .... .... .... .... .... ....
+ *    .... ..I. .... ....  .... .... .... ....
  */
 
 #define GPIO_IE                     (1 << 25) /* Bit 25: Input Enable */
-[
+
 /* GPIO output:
  *
- *    .... ...O .... .... .... .... .... ....
+ *    .... ...O .... ....  .... .... .... ....
+ *
+ * Valid only if Port ID=IOC_IOCFG_PORTID_GPIO
  */
 
 #define GPIO_OUTPUT                 (1 << 24) /* Bit 24: Input Enable */
 
 /* Wakeup enable (CC13x2/CC26x only):
  *
- *    .... .... W... .... .... .... .... ....
+ *    .... .... W... ....  .... .... .... ....
  */
 
 #define GPIO_WUEN                   (1 << 23) /* Bit 23: Input edge asserts MCU_WU event */
@@ -169,7 +171,7 @@
 
 /* Current mode:
  *
- *    .... .... .... .... ..AA .... .... ....
+ *    .... .... .... ....  ..AA .... .... ....
  */
 
 #define GPIO_IOCURR_SHIFT           (12)      /* Bits 12-13: I/O current mode */
@@ -180,14 +182,14 @@
 
 /* Enable edge interrupt generation:
  *
- *    .... .... .... .... .... G... .... ....
+ *    .... .... .... ....  .... G... .... ....
  */
 
 #define GPIO_EDGE_IRQEN             (1 << 11) /* Bit 11: Enable edge interrupt generation */
 
 /* I/O mode:
  *
- *    .... .... .... .... .... .III .... ....
+ *    .... .... .... ....  .... .III .... ....
  */
 
 #define GPIO_IOMODE_SHIFT           (8)       /* Bits 8-10:  I/O Mode */
@@ -201,7 +203,7 @@
 
 /* Edge detect mode
  *
- *    .... .... .... .... .... .... EE.. ....
+ *    .... .... .... ....  .... .... EE.. ....
  */
 
 #define GPIO_EDGE_SHIFT             (6)       /* Bits 6-7: Enable edge events generation */
@@ -214,7 +216,7 @@
 #if 0 /* Need more bits! */
 /* Edge asserts AON_PROG0/1/2 (CC13x2/CC26x only):
  *
- *    .... .... .... .... .... .... .... ....
+ *    .... .... .... ....  .... .... .... ....
  */
 
 #define GPIO_AON_PROG0              (1 << xx) /* Bit xx: Input edge asserts AON_PROG0 */
@@ -225,7 +227,9 @@
 
 /* GPIO output initial value:
  *
- *    .... .... .... .... .... .... ..V. ....
+ *    .... .... .... ....  .... .... ..V. ....
+ *
+ * Valid only if Port ID=IOC_IOCFG_PORTID_GPIO and GPIO_OUTPUT selected.
  */
 
 #define GPIO_VALUE_SHIFT            8                          /* Bit 5: If output, inital value of output */
@@ -235,7 +239,7 @@
 
 /* DIO:
  *
- *    .... .... .... .... .... .... ...D DDDD
+ *    .... .... .... ....  .... .... ...D DDDD
  */
 
 #define GPIO_DIO_SHIFT              (0)      /* Bits 0-4:  DIO */

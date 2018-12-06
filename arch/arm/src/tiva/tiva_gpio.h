@@ -66,10 +66,8 @@
 #  include "lm/lm4f_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include "tm4c/tm4c_gpio.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X0)
-#  include "cc13x0/cc13x0_gpio.h"
-#elif defined(CONFIG_ARCH_CHIP_CC13X2)
-#  include "cc13x2_cc26x2/cc13x2_cc26x2_gpio.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X0) || defined(CONFIG_ARCH_CHIP_CC13X2)
+#  include "cc13xx/cc13xx_gpio.h"
 #else
 #  error "Unsupported Tiva/Stellaris system GPIO"
 #endif

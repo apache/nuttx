@@ -102,6 +102,16 @@
 
 /* Pin Disambiguation *******************************************************/
 
+/* UART0:
+ *
+ * The on-board XDS110 Debugger provide a USB virtual serial console using
+ * UART0 (PA0/U0RX and PA1/U0TX).
+ */
+
+#define GPIO_UART0_RX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_IOCFG_IE | \
+                       GPIO_DIO(0))
+#define GPIO_UART0_TX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_TX) | GPIO_DIO(1))
+
 /* DMA **********************************************************************/
 
 #endif /* __CONFIG_NUCLEO_F303ZE_INCLUDE_BOARD_H */
