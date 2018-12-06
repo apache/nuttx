@@ -80,7 +80,7 @@
 #else
 #  define __HAVE_F4  0
 #endif
-#ifdef CONFIG_STM32_STM32FL15XX
+#ifdef CONFIG_STM32_STM32L15XX
 #  define __HAVE_L1  1
 #else
 #  define __HAVE_L1  0
