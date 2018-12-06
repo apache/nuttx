@@ -107,10 +107,6 @@
 #  error "This driver requires CONFIG_SDIO_BLOCKSETUP"
 #endif
 
-/* Nested interrupts not supported */
-
-#define SAM34_HSMCI_PRIO NVIC_SYSH_PRIORITY_DEFAULT
-
 #ifndef CONFIG_DEBUG_MEMCARD_INFO
 #  undef CONFIG_SAM34_HSMCI_CMDDEBUG
 #  undef CONFIG_SAM34_HSMCI_XFRDEBUG
@@ -1659,12 +1655,6 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
        */
 
       up_enable_irq(SAM_IRQ_HSMCI);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(SAM_IRQ_HSMCI, SAM34_HSMCI_PRIO);
-#endif
     }
 
   return ret;

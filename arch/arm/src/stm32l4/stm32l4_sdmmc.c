@@ -94,8 +94,6 @@
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
- *   CONFIG_SDMMC_PRI - SDMMC interrupt priority.  This setting is not very
- *     important since interrupt nesting is not currently supported.
  *   CONFIG_SDMMMC_DMAPRIO - SDMMC DMA priority.  This can be selecte if
  *     CONFIG_STM32L4_SDMMC_DMA is enabled.
  *   CONFIG_CONFIG_STM32L4_SDMMC_XFRDEBUG - Enables some very low-level debug output
@@ -117,11 +115,6 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
-#ifdef CONFIG_STM32L4_SDMMC1
-#  if defined(CONFIG_ARCH_IRQPRIO) && !defined(CONFIG_SDMMC1_PRI)
-#    define CONFIG_SDMMC1_PRI        NVIC_SYSH_PRIORITY_DEFAULT
-#  endif
-
 #  ifdef CONFIG_STM32L4_SDMMC_DMA
 #    ifndef CONFIG_STM32L4_SDMMC1_DMAPRIO
 #        define CONFIG_STM32L4_SDMMC1_DMAPRIO DMA_SCR_PRIVERYHI
@@ -133,11 +126,6 @@
 #    undef CONFIG_STM32L4_SDMMC1_DMAPRIO
 #  endif
 #endif
-
-#ifdef CONFIG_STM32L4_SDMMC2
-#  if defined(CONFIG_ARCH_IRQPRIO) && !defined(CONFIG_SDMMC2_PRI)
-#    define CONFIG_SDMMC2_PRI        NVIC_SYSH_PRIORITY_DEFAULT
-#  endif
 
 #  ifdef CONFIG_STM32L4_SDMMC_DMA
 #    ifndef CONFIG_STM32L4_SDMMC2_DMAPRIO
@@ -342,9 +330,6 @@ struct stm32_dev_s
   /* STM32-specific extensions */
   uint32_t          base;
   int               nirq;
-#ifdef CONFIG_ARCH_IRQPRIO
-  int               irqprio;
-#endif
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   uint32_t          d0_gpio;
 #endif
@@ -594,9 +579,6 @@ struct stm32_dev_s g_sdmmcdev1 =
   },
   .base              = STM32L4_SDMMC1_BASE,
   .nirq              = STM32L4_IRQ_SDMMC1,
-#ifdef CONFIG_SDMMC1_PRI
-  .irqprio           = CONFIG_SDMMC1_PRI,
-#endif
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   .d0_gpio           = GPIO_SDMMC1_D0,
 #endif
@@ -650,9 +632,6 @@ struct stm32_dev_s g_sdmmcdev2 =
   },
   .base              = STM32_SDMMC2_BASE,
   .nirq              = STM32_IRQ_SDMMC2,
-#ifdef CONFIG_SDMMC2_PRI
-  .irqprio           = CONFIG_SDMMC2_PRI,
-#endif
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   .d0_gpio           = GPIO_SDMMC2_D0,
 #endif
@@ -1959,13 +1938,6 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
        */
 
       up_enable_irq(priv->nirq);
-
-#if defined(CONFIG_ARCH_IRQPRIO) && (defined(CONFIG_STM32L4_SDMMC1_DMAPRIO) || \
-                                     defined(CONFIG_STM32L4_SDMMC2_DMAPRIO))
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(priv->nirq, priv->irqprio);
-#endif
     }
 
   return ret;

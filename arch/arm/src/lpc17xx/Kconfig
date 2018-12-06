@@ -690,13 +690,6 @@ config LPC17_ETH_NRXDESC
 	---help---
 		Configured number of Rx descriptors. Default: 13
 
-config LPC17_ETH_PRIORITY
-	int "Ethernet interrupt priority"
-	default 128
-	depends on ARCH_IRQPRIO && EXPERIMENTAL
-	---help---
-		Ethernet interrupt priority.  The default is the default priority (128).
-
 config LPC17_NET_WOL
 	bool "Wake-up on LAN"
 	default n

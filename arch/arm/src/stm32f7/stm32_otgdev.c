@@ -5579,12 +5579,6 @@ void up_usbinitialize(void)
   /* Enable USB controller interrupts at the NVIC */
 
   up_enable_irq(STM32_IRQ_OTG);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set the interrupt priority */
-
-  up_prioritize_irq(STM32_IRQ_OTG, CONFIG_OTG_PRI);
-#endif
   return;
 
 errout:

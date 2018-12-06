@@ -2478,12 +2478,6 @@ int imxrt_netinitialize(int intf)
   putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_RXEN_OFFSET);
   putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_RXERR_OFFSET);
 
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set interrupt priority levels */
-
-  up_prioritize_irq(IMXRT_IRQ_ENET, CONFIG_IMXRT_ENET_PRIO);
-#endif
-
   /* Attach the Ethernet MAC IEEE 1588 timer interrupt handler */
 
 #if 0

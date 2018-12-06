@@ -540,12 +540,6 @@ static int up_attach(struct uart_dev_s *dev)
        * UART */
 
       up_enable_irq(priv->irq);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the UART interrupt priority */
-
-      up_prioritize_irq(priv->irq, PRIORITY_HIGHEST);
-#endif
     }
 
   return ret;

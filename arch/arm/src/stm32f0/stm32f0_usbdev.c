@@ -83,10 +83,6 @@
 #  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
 #endif
 
-#ifndef CONFIG_USB_PRI
-#  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */
@@ -3799,12 +3795,6 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       /* Enable USB controller interrupts at the NVIC */
 
       up_enable_irq(STM32F0_IRQ_USB);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(STM32F0_IRQ_USB, CONFIG_USB_PRI);
-#endif
 
       /* Enable pull-up to connect the device.  The host should enumerate us
        * some time after this

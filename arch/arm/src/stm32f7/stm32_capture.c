@@ -746,19 +746,6 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler, voi
     }
 #endif
 
-#ifdef CONFIG_ARCH_IRQPRIO
-  /* Set the interrupt priority */
-
-  up_prioritize_irq(irq, NVIC_SYSH_PRIORITY_DEFAULT);
-
-#  ifdef USE_ADVENCED_TIM
-  if (priv->irq_of)
-    {
-      up_prioritize_irq(irq_of, NVIC_SYSH_PRIORITY_DEFAULT);
-    }
-#  endif
-#endif
-
   return OK;
 }
 

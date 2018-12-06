@@ -81,10 +81,6 @@
 #  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
 #endif
 
-#ifndef CONFIG_USB_PRI
-#  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /* USB Interrupts.  Should be re-mapped if CAN is used. */
 
 #ifdef CONFIG_STM32_STM32F30XX
@@ -3865,13 +3861,6 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       up_enable_irq(STM32_IRQ_USBHP);
       up_enable_irq(STM32_IRQ_USBLP);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(STM32_IRQ_USBHP, CONFIG_USB_PRI);
-      up_prioritize_irq(STM32_IRQ_USBLP, CONFIG_USB_PRI);
-#endif
 
       /* Enable pull-up to connect the device.  The host should enumerate us
        * some time after this

@@ -76,10 +76,6 @@
 #  define DMA_NSTREAMS   DMA1_NSTREAMS
 #endif
 
-#ifndef CONFIG_DMA_PRI
-#  define CONFIG_DMA_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /* Convert the DMA stream base address to the DMA register block address */
 
 #define DMA_BASE(ch)     ((ch) & 0xfffffc00)
@@ -498,12 +494,6 @@ void weak_function up_dma_initialize(void)
       /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
       up_enable_irq(dmast->irq);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(dmast->irq, CONFIG_DMA_PRI);
-#endif
     }
 }
 

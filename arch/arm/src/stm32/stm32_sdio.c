@@ -91,8 +91,6 @@
  *   CONFIG_STM32_SDIO_WIDTH_D1_ONLY - This may be selected to force the
  *     driver operate with only a single data line (the default is to use
  *     all 4 SD data lines).
- *   CONFIG_STM32_SDIO_PRI - SDIO interrupt priority.  This setting is not very
- *     important since interrupt nesting is not currently supported.
  *   CONFIG_SDM_DMAPRIO - SDIO DMA priority.  This can be selecte if
  *     CONFIG_STM32_SDIO_DMA is enabled.
  *   CONFIG_SDIO_XFRDEBUG - Enables some very low-level debug output
@@ -116,10 +114,6 @@
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
-#endif
-
-#ifndef CONFIG_STM32_SDIO_PRI
-#  define CONFIG_STM32_SDIO_PRI        NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 #ifdef CONFIG_STM32_SDIO_DMA
@@ -1851,12 +1845,6 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
        */
 
       up_enable_irq(STM32_IRQ_SDIO);
-
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(STM32_IRQ_SDIO, CONFIG_STM32_SDIO_PRI);
-#endif
     }
 
   return ret;

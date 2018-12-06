@@ -54,10 +54,6 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#ifndef CONFIG_OTG_PRI
-#  define CONFIG_OTG_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 #if defined(CONFIG_STM32F7_OTGFS)
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGFS
 #  define STM32_OTG_BASE        STM32_USBOTGFS_BASE

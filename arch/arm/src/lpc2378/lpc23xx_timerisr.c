@@ -190,9 +190,6 @@ void arm_timer_initialize(void)
   up_attach_vector(IRQ_SYSTIMER, ???, (vic_vector_t) lpc23xx_timerisr);
 #else
   (void)irq_attach(IRQ_SYSTIMER, (xcpt_t)lpc23xx_timerisr, NULL);
-#ifdef CONFIG_ARCH_IRQPRIO
-  up_prioritize_irq(IRQ_SYSTIMER, PRIORITY_HIGHEST);
-#endif
 #endif
 
   /* And enable the system timer interrupt */

@@ -126,14 +126,6 @@
 #  define CONFIG_LPC17_MULTICAST 1
 #endif
 
-/* If the user did not specify a priority for Ethernet interrupts, set the
- * interrupt priority to the default.
- */
-
-#ifndef CONFIG_LPC17_ETH_PRIORITY
-#  define CONFIG_LPC17_ETH_PRIORITY NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 #define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
 /* Debug Configuration *****************************************************/
@@ -1647,21 +1639,6 @@ static int lpc17_ifup(struct net_driver_s *dev)
   /* Clear any pending interrupts (shouldn't be any) */
 
   lpc17_putreg(0xffffffff, LPC17_ETH_INTCLR);
-
-  /* Configure interrupts.  The Ethernet interrupt was attached during one-time
-   * initialization, so we only need to set the interrupt priority, configure
-   * interrupts, and enable them.
-   */
-
-  /* Set the interrupt to the highest priority */
-
-#ifdef CONFIG_ARCH_IRQPRIO
-#if CONFIG_LPC17_NINTERFACES > 1
-  (void)up_prioritize_irq(priv->irq, CONFIG_LPC17_ETH_PRIORITY);
-#else
-  (void)up_prioritize_irq(LPC17_IRQ_ETH, CONFIG_LPC17_ETH_PRIORITY);
-#endif
-#endif
 
   /* Enable Ethernet interrupts.  The way we do this depends on whether or
    * not Wakeup on Lan (WoL) has been configured.

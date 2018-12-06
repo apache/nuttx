@@ -4070,13 +4070,6 @@ config STM32L4_SDMMC_DMA
 menu "SDMMC1 Configuration"
 	depends on STM32L4_SDMMC1
 
-config STM32L4_SDMMC1_PRI
-	hex "SDMMC1 interrupt priority"
-	default 128
-	depends on ARCH_IRQPRIO && EXPERIMENTAL
-	---help---
-		Select SDMMC1 interrupt priority.  Default: 128.
-
 config STM32L4_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00001000

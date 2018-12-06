@@ -276,12 +276,6 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       vic_putreg((uint32_t)handler, VIC_VECTADDR0_OFFSET + offset);
 
-#ifdef CONFIG_ARCH_IRQPRIO
-      /* Set the interrupt priority */
-
-      up_prioritize_irq(irq, PRIORITY_HIGHEST);
-#endif
-
       /* Enable the vectored interrupt */
 
       uint32_t val = vic_getreg(VIC_INTENABLE_OFFSET);

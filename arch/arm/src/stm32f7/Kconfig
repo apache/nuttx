@@ -2033,13 +2033,6 @@ config STM32F7_SDMMC_DMA
 menu "SDMMC1 Configuration"
 	depends on STM32F7_SDMMC1
 
-config STM32F7_SDMMC1_PRI
-	hex "SDMMC1 interrupt priority"
-	default 128
-	depends on ARCH_IRQPRIO && EXPERIMENTAL
-	---help---
-		Select SDMMC1 interrupt priority.  Default: 128.
-
 config STM32F7_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00010000
@@ -2075,13 +2068,6 @@ endmenu # "SDMMC1 Configuration"
 
 menu "SDMMC2 Configuration"
 	depends on STM32F7_SDMMC2
-
-config STM32F7_SDMMC2_PRI
-	hex "SDMMC2 interrupt priority"
-	default 128
-	depends on ARCH_IRQPRIO && EXPERIMENTAL
-	---help---
-		Select SDMMC2 interrupt priority.  Default: 128.
 
 config STM32F7_SDMMC2_DMAPRIO
 	hex "SDMMC2 DMA priority"

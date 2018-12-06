@@ -9029,13 +9029,6 @@ config STM32_SDIO_DMA
 	---help---
 		Support DMA data transfers.  Requires STM32_SDIO and config STM32_DMA2.
 
-config STM32_SDIO_PRI
-	hex "SDIO interrupt priority"
-	default 128
-	depends on ARCH_IRQPRIO && EXPERIMENTAL
-	---help---
-		Select SDIO interrupt priority.  Default: 128.
-
 config STM32_SDIO_DMAPRIO
 	hex "SDIO DMA priority"
 	default 0x00001000 if STM32_STM32F10XX
