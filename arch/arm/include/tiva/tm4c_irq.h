@@ -761,7 +761,7 @@
 #  define TIVA_IRQ_GPIOF_7    (_NGPIOFIRQS + 7)
 #  define _NGPIONIRQS         (_NGPIOFIRQS + 8)
 #else
-#  define _NGPIONIRQS         _NGPIOMIRQS
+#  define _NGPIONIRQS         _NGPIOFIRQS
 #endif
 
 #if defined(CONFIG_TIVA_GPIOP_IRQS)
@@ -792,7 +792,7 @@
 #  define _NGPIOQIRQS         _NGPIOPIRQS
 #endif
 
-#define NR_GPIO_IRQS          (_NGPIOTIRQS - NR_IRQS)
+#define NR_GPIO_IRQS          (_NGPIOQIRQS - NR_IRQS)
 
 /************************************************************************************
  * Public Types
