@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_TIVA_GPIO_H
-#define __ARCH_ARM_SRC_TIVA_TIVA_GPIO_H
+#ifndef __ARCH_ARM_SRC_TIVA_TM4C_TM4C_GPIO_H
+#define __ARCH_ARM_SRC_TIVA_TM4C_TM4C_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -298,4 +298,4 @@
 
 uintptr_t tiva_gpiobaseaddress(unsigned int port);
 
-#endif /* __ARCH_ARM_SRC_TIVA_TIVA_GPIO_H */
+#endif /* __ARCH_ARM_SRC_TIVA_TM4C_TM4C_GPIO_H */
