@@ -207,7 +207,7 @@ static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
 {
   /* Zero offset is a specials case:  It corresponds to a NULL address */
 
-  if (offset == 0)
+  if (offset == 0 || offset >= fs->cv_fsize)
     {
       return NULL;
     }
@@ -222,7 +222,7 @@ static FAR void *cromfs_offset2addr(FAR const struct cromfs_volume_s *fs,
 }
 
 /****************************************************************************
- * Name: cromfs_offset2addr
+ * Name: cromfs_addr2offset
  ****************************************************************************/
 
 static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
@@ -1030,6 +1030,15 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
    */
 
   node = (FAR const struct cromfs_node_s *)cromfs_offset2addr(fs, offset);
+  if (node == NULL)
+    {
+      /* We signal the end of the directory by returning the
+       * special error -ENOENT
+       */
+
+      finfo("Entry %d: End of directory\n", offset);
+      return -ENOENT;
+    }
 
   /* Save the filename and file type */
 
