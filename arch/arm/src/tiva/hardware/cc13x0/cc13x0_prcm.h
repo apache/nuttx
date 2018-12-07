@@ -173,123 +173,342 @@
 /* PRCM Register Bitfield Definitions **************************************************************/
 
 /* Infrastructure Clock Division Factor For Run Mode */
-#define PRCM_INFRCLKDIVR_
+
+#define PRCM_INFRCLKDIVR_RATIO_SHIFT     (0)       /* Bits 0-1:  Divider for MCU_AON clocks run mode */
+#define PRCM_INFRCLKDIVR_RATIO_MASK      (3 << PRCM_INFRCLKDIVR_RATIO_SHIFT)
+#  define PRCM_INFRCLKDIVR_RATIO_DIV1    (0 << PRCM_INFRCLKDIVR_RATIO_SHIFT) /*  Divide by 1 */
+#  define PRCM_INFRCLKDIVR_RATIO_DIV2    (1 << PRCM_INFRCLKDIVR_RATIO_SHIFT) /*  Divide by 2 */
+#  define PRCM_INFRCLKDIVR_RATIO_DIV8    (2 << PRCM_INFRCLKDIVR_RATIO_SHIFT) /*  Divide by 8 */
+#  define PRCM_INFRCLKDIVR_RATIO_DIV32   (3 << PRCM_INFRCLKDIVR_RATIO_SHIFT) /*  Divide by 32 */
+
 /* Infrastructure Clock Division Factor For Sleep Mode */
-#define PRCM_INFRCLKDIVS_
+
+#define PRCM_INFRCLKDIVS_RATIO_SHIFT     (0)       /* Bits 0-1:  Divider for MCU_AON clocks sleep mode */
+#define PRCM_INFRCLKDIVS_RATIO_MASK      (3 << PRCM_INFRCLKDIVS_RATIO_SHIFT)
+#  define PRCM_INFRCLKDIVS_RATIO_DIV1    (0 << PRCM_INFRCLKDIVS_RATIO_SHIFT) /*  Divide by 1 */
+#  define PRCM_INFRCLKDIVS_RATIO_DIV2    (1 << PRCM_INFRCLKDIVS_RATIO_SHIFT) /*  Divide by 2 */
+#  define PRCM_INFRCLKDIVS_RATIO_DIV8    (2 << PRCM_INFRCLKDIVS_RATIO_SHIFT) /*  Divide by 8 */
+#  define PRCM_INFRCLKDIVS_RATIO_DIV32   (3 << PRCM_INFRCLKDIVS_RATIO_SHIFT) /*  Divide by 32 */
+
 /* Infrastructure Clock Division Factor For DeepSleep Mode */
-#define PRCM_INFRCLKDIVDS_
+
+#define PRCM_INFRCLKDIVDS_RATIO_SHIFT    (0)       /* Bits 0-1:  Divider for MCU_AON clocks sleep mode */
+#define PRCM_INFRCLKDIVDS_RATIO_MASK     (3 << PRCM_INFRCLKDIVDS_RATIO_SHIFT)
+#  define PRCM_INFRCLKDIVDS_RATIO_DIV1   (0 << PRCM_INFRCLKDIVDS_RATIO_SHIFT) /*  Divide by 1 */
+#  define PRCM_INFRCLKDIVDS_RATIO_DIV2   (1 << PRCM_INFRCLKDIVDS_RATIO_SHIFT) /*  Divide by 2 */
+#  define PRCM_INFRCLKDIVDS_RATIO_DIV8   (2 << PRCM_INFRCLKDIVDS_RATIO_SHIFT) /*  Divide by 8 */
+#  define PRCM_INFRCLKDIVDS_RATIO_DIV32  (3 << PRCM_INFRCLKDIVDS_RATIO_SHIFT) /*  Divide by 32 */
+
 /* MCU Voltage Domain Control */
-#define PRCM_VDCTL_
+
+#define PRCM_VDCTL_ULDO                  (1 << 0)  /* Bit 0:  Request WUC to switch to uLDO */
+
 /* Load PRCM Settings To CLKCTRL Power Domain */
-#define PRCM_CLKLOADCTL_
+
+#define PRCM_CLKLOADCTL_LOAD             (1 << 0)  /* Bit 0:  Load settings to CLKCTRL */
+#define PRCM_CLKLOADCTL_LOADDONE         (1 << 1)  /* Bit 1:  Set when LOAD is done */
+
 /* RFC Clock Gate */
-#define PRCM_RFCCLKG_
+
+#define PRCM_RFCCLKG_CLKEN               (1 << 0)  /* Bit 0:  Enable clock */
+
 /* VIMS Clock Gate */
-#define PRCM_VIMSCLKG_
+
+#define PRCM_VIMSCLKG_CLKEN_SHIFT        (0)       /* Bits 0-1:  Clock control */
+#define PRCM_VIMSCLKG_CLKEN_MASK         (3 << PRCM_VIMSCLKG_CLKEN_SHIFT)
+#  define PRCM_VIMSCLKG_CLKEN_DIS        (0 << PRCM_VIMSCLKG_CLKEN_SHIFT) /* Disable clock */
+#  define PRCM_VIMSCLKG_CLKEN_DISSYSCLK  (1 << PRCM_VIMSCLKG_CLKEN_SHIFT) /* Disable clock when SYCLK disabled */
+#  define PRCM_VIMSCLKG_CLKEN_ENA        (3 << PRCM_VIMSCLKG_CLKEN_SHIFT) /* Enable clock */
+
 /* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Run And All Modes */
-#define PRCM_SECDMACLKGR_
+
+#define PRCM_SECDMACLKGR_CRYPTO_CLKEN    (1 << 0)  /* Bit 0:  Enable cypto clock */
+#define PRCM_SECDMACLKGR_TRNG_CLKEN      (1 << 1)  /* Bit 1:  Enable TRNG clock */
+#define PRCM_SECDMACLKGR_DMA_CLKEN       (1 << 8)  /* Bit 8:  Enable DMA clock */
+
 /* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Sleep Mode */
-#define PRCM_SECDMACLKGS_
+
+#define PRCM_SECDMACLKGS_CRYPTO_CLKEN    (1 << 0)  /* Bit 0:  Enable cypto clock */
+#define PRCM_SECDMACLKGS_TRNG_CLKEN      (1 << 1)  /* Bit 1:  Enable TRNG clock */
+#define PRCM_SECDMACLKGS_DMA_CLKEN       (1 << 8)  /* Bit 8:  Enable DMA clock */
+
 /* SEC (PKA And TRNG and CRYPTO) And UDMA Clock Gate For Deep Sleep Mode */
-#define PRCM_SECDMACLKGDS_
+
+#define PRCM_SECDMACLKGDS_CRYPTO_CLKEN   (1 << 0)  /* Bit 0:  Enable cypto clock */
+#define PRCM_SECDMACLKGDS_TRNG_CLKEN     (1 << 1)  /* Bit 1:  Enable TRNG clock */
+#define PRCM_SECDMACLKGDS_DMA_CLKEN      (1 << 8)  /* Bit 8:  Enable DMA clock */
+
 /* GPIO Clock Gate For Run And All Modes */
-#define PRCM_GPIOCLKGR_
+
+#define PRCM_GPIOCLKGR_CLKEN             (1 << 0)  /* Bit 0: Enable clock */
+
 /* GPIO Clock Gate For Sleep Mode */
-#define PRCM_GPIOCLKGS_
+
+#define PRCM_GPIOCLKGS_CLKEN             (1 << 0)  /* Bit 0: Enable clock */
+
 /* GPIO Clock Gate For Deep Sleep Mode */
-#define PRCM_GPIOCLKGDS_
+
+#define PRCM_GPIOCLKGDS_CLKEN            (1 << 0)  /* Bit 0: Enable clock */
+
 /* GPT Clock Gate For Run And All Modes */
-#define PRCM_GPTCLKGR_
+
+#define PRCM_GPTCLKGR_CLKEN_GPT0         (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
+#define PRCM_GPTCLKGR_CLKEN_GPT1         (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
+#define PRCM_GPTCLKGR_CLKEN_GPT2         (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
+#define PRCM_GPTCLKGR_CLKEN_GPT3         (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
+
 /* GPT Clock Gate For Sleep Mode */
-#define PRCM_GPTCLKGS_
+
+#define PRCM_GPTCLKGS_CLKEN_GPT0         (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
+#define PRCM_GPTCLKGS_CLKEN_GPT1         (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
+#define PRCM_GPTCLKGS_CLKEN_GPT2         (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
+#define PRCM_GPTCLKGS_CLKEN_GPT3         (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
+
 /* GPT Clock Gate For Deep Sleep Mode */
-#define PRCM_GPTCLKGDS_
+
+#define PRCM_GPTCLKGDS_CLKEN_GPT0        (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
+#define PRCM_GPTCLKGDS_CLKEN_GPT1        (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
+#define PRCM_GPTCLKGDS_CLKEN_GPT2        (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
+#define PRCM_GPTCLKGDS_CLKEN_GPT3        (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
+
 /* I2C Clock Gate For Run And All Modes */
-#define PRCM_I2CCLKGR_
+
+#define PRCM_I2CCLKGR_CLKEN              (1 << 0)  /* Bit 0:  Enable clock */
+
 /* I2C Clock Gate For Sleep Mode */
-#define PRCM_I2CCLKGS_
+
+#define PRCM_I2CCLKGS_CLKEN              (1 << 0)  /* Bit 0:  Enable clock */
+
 /* I2C Clock Gate For Deep Sleep Mode */
-#define PRCM_I2CCLKGDS_
+
+#define PRCM_I2CCLKGDS_CLKEN             (1 << 0)  /* Bit 0:  Enable clock */
+
 /* UART Clock Gate For Run And All Modes */
-#define PRCM_UARTCLKGR_
+
+#define PRCM_UARTCLKGR_CLKEN_UART0       (1 << 0)  /* Bit 0:  UART0 Enable clock */
+
 /* UART Clock Gate For Sleep Mode */
-#define PRCM_UARTCLKGS_
+
+#define PRCM_UARTCLKGS_CLKEN_UART0       (1 << 0)  /* Bit 0:  UART0 Enable clock */
+
 /* UART Clock Gate For Deep Sleep Mode */
-#define PRCM_UARTCLKGDS_
+
+#define PRCM_UARTCLKGDS_CLKEN_UART0      (1 << 0)  /* Bit 0:  UART0 Enable clock */
+
 /* SSI Clock Gate For Run And All Modes */
-#define PRCM_SSICLKGR_
+
+#define PRCM_SSICLKGR_CLKEN_SSI0       (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+#define PRCM_SSICLKGR_CLKEN_SSI1       (1 << 1)  /* Bit 1:  SSI1 Enable clock */
+
 /* SSI Clock Gate For Sleep Mode */
-#define PRCM_SSICLKGS_
+
+#define PRCM_SSICLKGS_CLKEN_SSI0       (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+#define PRCM_SSICLKGS_CLKEN_SSI1       (1 << 1)  /* Bit 1:  SSI1 Enable clock */
+
 /* SSI Clock Gate For Deep Sleep Mode */
-#define PRCM_SSICLKGDS_
+
+#define PRCM_SSICLKGDS_CLKEN_SSI0      (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+#define PRCM_SSICLKGDS_CLKEN_SSI1      (1 << 1)  /* Bit 1:  SSI1 Enable clock */
+
 /* I2S Clock Gate For Run And All Modes */
-#define PRCM_I2SCLKGR_
+
+#define PRCM_I2SCLKGR_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+
 /* I2S Clock Gate For Sleep Mode */
-#define PRCM_I2SCLKGS_
+
+#define PRCM_I2SCLKGS_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+
 /* I2S Clock Gate For Deep Sleep Mode */
-#define PRCM_I2SCLKGDS_
+
+#define PRCM_I2SCLKGDS_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+
 /* Internal */
-#define PRCM_CPUCLKDIV_
+
+#define PRCM_CPUCLKDIV_DIV              (1 << 0)  /* Bit 0:  Ratio */
+#  define PRCM_CPUCLKDIV_DIV1           (0)
+#  define PRCM_CPUCLKDIV_DIV2           PRCM_CPUCLKDIV_DIV
+
 /* I2S Clock Control */
-#define PRCM_I2SBCLKSEL_
+
+#define PRCM_I2SBCLKSEL_SRC             (1 << 0)  /* Bit 0:  BCLK source selector */
+#  define PRCM_I2SBCLKSEL_EXTERNAL      (0)
+#  define PRCM_I2SBCLKSEL_INTERNAL      PRCM_I2SBCLKSEL_SRC
+
 /* GPT Scalar */
-#define PRCM_GPTCLKDIV_
+
+#define PRCM_GPTCLKDIV_SHIFT         (0)       /* Bit 0-3: Ratio */
+#define PRCM_GPTCLKDIV_MASK          (15 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV1        (0 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV2        (1 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV4        (2 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV8        (3 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV16       (4 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV32       (5 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV65       (6 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV128      (7 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV256      (8 << PRCM_GPTCLKDIV_SHIFT)
+
 /* I2S Clock Control */
-#define PRCM_I2SCLKCTL_
+
+#define PRCM_I2SCLKCTL_EN                 (1 << 0)  /* Emable MCLK, BCLK, and WCLK */
+#define PRCM_I2SCLKCTL_WCLKPHASE_SHIFT    1         /* Bits 1-2: Wclock division ration mode */
+#define PRCM_I2SCLKCTL_WCLKPHASE_MASK     (3 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT)
+#  define PRCM_I2SCLKCTL_WCLKPHASE_SINGLE (0 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Single phase */
+#  define PRCM_I2SCLKCTL_WCLKPHASE_DUAL   (1 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Dual phase */
+#  define PRCM_I2SCLKCTL_WCLKPHASE_USER   (2 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* User Defined */
+#define PRCM_I2SCLKCTL_POSEDGE            (1 << 3)  /* Bit 3: Sample/clock on positive edge */
+#  define PRCM_I2SCLKCTL_NEGEDGE          (0)       /*        Sample/clock on negative edge */
+
 /* MCLK Division Ratio */
-#define PRCM_I2SMCLKDIV_
+
+#define PRCM_I2SMCLKDIV_MDIV_SHIFT   (0)      /* Bits 0-9: MCLK divider */
+#define PRCM_I2SMCLKDIV_MDIV_MASK    (0x3ff << PRCM_I2SMCLKDIV_MDIV_SHIFT)
+#  define PRCM_I2SMCLKDIV_MDIV(n)    (((uint32_t)(n) & 0x3ff) << PRCM_I2SMCLKDIV_MDIV_SHIFT)
+
 /* BCLK Division Ratio */
-#define PRCM_I2SBCLKDIV_
+
+#define PRCM_I2SBCLKDIV_BDIV_SHIFT   (0)      /* Bits 0-9: MCLK divider */
+#define PRCM_I2SBCLKDIV_BDIV_MASK    (0x3ff << PRCM_I2SBCLKDIV_BDIV_SHIFT)
+#  define PRCM_I2SBCLKDIV_BDIV(n)    (((uint32_t)(n) & 0x3ff) << PRCM_I2SBCLKDIV_BDIV_SHIFT)
+
 /* WCLK Division Ratio */
-#define PRCM_I2SWCLKDIV_
+
+#define PRCM_I2SWCLKDIV_WDIV_SHIFT   (0)      /* Bits 0-9: MCLK divider */
+#define PRCM_I2SWCLKDIV_WDIV_MASK    (0x3ff << PRCM_I2SWCLKDIV_WDIV_SHIFT)
+#  define PRCM_I2SWCLKDIV_WDIV(n)    ((uint32_t)(n) << PRCM_I2SWCLKDIV_WDIV_SHIFT)
+#  define PRCM_I2SWCLKDIV_WDIV(n)    (((uint32_t)(n) & 0x3ff) << PRCM_I2SWCLKDIV_WDIV_SHIFT)
+
 /* SW Initiated Resets */
-#define PRCM_SWRESET_
+
+#define PRCM_SWRESET_MCU             (1 << 0)  /* Bit 0:  Reset MCU */
+
 /*  WARM Reset Control And Status */
-#define PRCM_WARMRESET_
+
+#define PRCM_WARMRESET_WDT_STAT      (1 << 0)  /* Bit 0:  WDT event occurred */
+#define PRCM_WARMRESET_LOCKUP_STAT   (1 << 1)  /* Bit 1:  System CPU LOCKUP event occurred */
+#define PRCM_WARMRESET_WRTO_PINRESET (1 << 2)  /* Bit 2:  Warm reset emulates pin reset */
+
 /* Power Domain Control */
-#define PRCM_PDCTL0_
+
+#define PRCM_PDCTL0_RFC_ON           (1 << 0)  /* Bit 0:  RFC domain powered on */
+#define PRCM_PDCTL0_SERIAL_ON        (1 << 1)  /* Bit 1:  SERIAL domain powered up */
+#define PRCM_PDCTL0_PERIPH_ON        (1 << 2)  /* Bit 2:  PERIPH domain powered up */
+
 /* RFC Power Domain Control */
-#define PRCM_PDCTL0RFC_
+
+#define PRCM_PDCTL0RFC_ON            (1 << 0)  /* Bit 0:  Alias for PDCTL0.RFC_ON */
+
 /* SERIAL Power Domain Control */
-#define PRCM_PDCTL0SERIAL_
+
+#define PRCM_PDCTL0SERIAL_ON         (1 << 0)  /* Bit 0:  Alias for PDCTL0.SERIAL_ON */
+
 /* PERIPH Power Domain Control */
-#define PRCM_PDCTL0PERIPH_
+
+#define PRCM_PDCTL0PERIPH_ON         (1 << 0)  /* Bit 0:  Alias for PDCTL0.PERIOPH_ON */
+
 /* Power Domain Status */
-#define PRCM_PDSTAT0_
+
+#define PRCM_PDSTAT0_RFC_ON           (1 << 0)  /* Bit 0:  RFC domain powered on */
+#define PRCM_PDSTAT0_SERIAL_ON        (1 << 1)  /* Bit 1:  SERIAL domain powered up */
+#define PRCM_PDSTAT0_PERIPH_ON        (1 << 2)  /* Bit 2:  PERIPH domain powered up */
+
 /* RFC Power Domain Status */
-#define PRCM_PDSTAT0RFC_
+
+#define PRCM_PDSTAT0RFC_ON            (1 << 0)  /* Bit 0:  Alias for PDSTAT0.RFC_ON */
+
 /* SERIAL Power Domain Status */
-#define PRCM_PDSTAT0SERIAL_
+
+#define PRCM_PDSTAT0SERIAL_ON         (1 << 0)  /* Bit 0:  Alias for PDSTAT0.SERIAL_ON */
+
 /* PERIPH Power Domain Status */
-#define PRCM_PDSTAT0PERIPH_
+
+#define PRCM_PDSTAT0PERIPH_ON         (1 << 0)  /* Bit 0:  Alias for PDSTAT0.PERIPH_ON */
+
 /* Power Domain Control */
-#define PRCM_PDCTL1_
+
+#define PRCM_PDCTL1_CPU_ON            (1 << 1)  /* Bit 1:  Initiate power-on CPU domain */
+#define PRCM_PDCTL1_RFC_ON            (1 << 2)  /* Bit 2:  RFC power off if PDCTL.RFC_ON */
+#define PRCM_PDCTL1_VIMS_MODE_SHIFT   (3)       /* Bits 3-4: VIMS mode */
+#define PRCM_PDCTL1_VIMS_MODE_MASK    (3 << PRCM_PDCTL1_VIMS_MODE_SHIFT)
+#  define PRCM_PDCTL1_VIMS_MODE_CPU   (0 << PRCM_PDCTL1_VIMS_MODE_SHIFT) /* When CPU domain powered */
+#  define PRCM_PDCTL1_VIMS_MODE_BUS   (1 << PRCM_PDCTL1_VIMS_MODE_SHIFT) /* When BUS domain powered */
+#  define PRCM_PDCTL1_VIMS_MODE_BLOCK (2 << PRCM_PDCTL1_VIMS_MODE_SHIFT) /* Block on next wakeup */
+
 /* CPU Power Domain Direct Control */
-#define PRCM_PDCTL1CPU_
+
+#define PRCM_PDCTL1CPU_ON             (1 << 0)  /* Bit 0:  Alias for PDCTL1.CPU_ON */
+
 /* RFC Power Domain Direct Control */
-#define PRCM_PDCTL1RFC_
+
+#define PRCM_PDCTL1RFC_ON             (1 << 0)  /* Bit 0:  Alias for PDCTL1.RFC_ON */
+
 /* VIMS Mode Direct Control */
-#define PRCM_PDCTL1VIMS_
+
+#define PRCM_PDCTL1VIMS_ON            (1 << 0)  /* Bit 0:  Alias for PDCTL1.VIMS_ON */
+
 /* Power Manager Status */
-#define PRCM_PDSTAT1_
+
+#define PRCM_PDSTAT1_CPU_ON           (1 << 1)  /* Bit 1:  CPU domain is accessible */
+#define PRCM_PDSTAT1_RFC_ON           (1 << 2)  /* Bit 2:  RFC domain is accessible */
+#define PRCM_PDSTAT1_VIMS_ON          (1 << 3)  /* Bit 3:  VIMS domain is accessible */
+#define PRCM_PDSTAT1_BUS_ON           (1 << 4)  /* Bit 4:  BUS domain is accessible */
+
 /* BUS Power Domain Direct Read Status */
-#define PRCM_PDSTAT1BUS_
+
+#define PRCM_PDSTAT1BUS_ON            (1 << 0)  /* Bit 0:  Alias for PSTAT1.BUS_ON */
+
 /* RFC Power Domain Direct Read Status */
-#define PRCM_PDSTAT1RFC_
+
+#define PRCM_PDSTAT1RFC_ON            (1 << 0)  /* Bit 0:  Alias for PSTAT1.RFC_ON */
+
 /* CPU Power Domain Direct Read Status */
-#define PRCM_PDSTAT1CPU_
+
+#define PRCM_PDSTAT1CPU_ON            (1 << 0)  /* Bit 0:  Alias for PSTAT1.CPU_ON */
+
 /* VIMS Mode Direct Read Status */
-#define PRCM_PDSTAT1VIMS_
-/* Control To RFC */
-#define PRCM_RFCBITS_
+
+#define PRCM_PDSTAT1VIMS_ON           (1 << 0)  /* Bit 0:  Alias for PSTAT1.VIMS_ON */
+
+/* Control To RFC (32-bits RFCBITS) */
+
 /* Selected RFC Mode */
-#define PRCM_RFCMODESEL_
+
+#define PRCM_RFCMODESEL_CURR_SHIFT    (0)       /* Bits 0-2:  Selects RFC command set */
+#define PRCM_RFCMODESEL_CURR_MASK     (7 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE0  (0 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE1  (1 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE2  (2 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE3  (3 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE4  (4 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE5  (5 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE6  (6 << PRCM_RFCMODESEL_CURR_SHIFT)
+#  define PRCM_RFCMODESEL_CURR_MODE7  (7 << PRCM_RFCMODESEL_CURR_SHIFT)
+
 /* Allowed RFC Modes */
-#define PRCM_RFCMODEHWOPT_
+
+#define PRCM_RFCMODEHWOPT_CURR_SHIFT    (0)     /* Bits 0-2:  Permitted RFC modes */
+#define PRCM_RFCMODEHWOPT_CURR_MASK     (7 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE0  (0 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE1  (1 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE2  (2 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE3  (3 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE4  (4 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE5  (5 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE6  (6 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+#  define PRCM_RFCMODEHWOPT_CURR_MODE7  (7 << PRCM_RFCMODEHWOPT_CURR_SHIFT)
+
 /* Power Profiler Register */
-#define PRCM_PWRPROFSTAT_
+
+#define PRCM_PWRPROFSTAT_VALUE_SHIFT    (0)     /* Bits 0-7: Timestamp value */
+#define PRCM_PWRPROFSTAT_VALUE_MASK     (0xff << PRCM_PWRPROFSTAT_VALUE_SHIFT)
+
 /* Memory Retention Control */
-#define PRCM_RAMRETEN_
+
+#define PRCM_RAMRETEN_VIMS_SHIFT        (0)       /* Bits 0-1: VIMS memory retention enabled */
+#define PRCM_RAMRETEN_VIMS_MASK         (3 << PRCM_RAMRETEN_VIMS_SHIFT)
+#  define PRCM_RAMRETEN_VIMS_TRAM       (1 << PRCM_RAMRETEN_VIMS_SHIFT)
+#  define PRCM_RAMRETEN_VIMS_CRAM       (2 << PRCM_RAMRETEN_VIMS_SHIFT)
+#define PRCM_RAMRETEN_RFC               (1 << 2)  /* Bit 2:  RFC SRAM retention enabled */
 
 /****************************************************************************************************
  * Public Types
