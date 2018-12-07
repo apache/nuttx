@@ -62,6 +62,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 {
   FAR unsigned char *dest  = (FAR unsigned char*)ptr;
   ssize_t bytes_read;
+  size_t remaining = count;
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
   int ret;
 #endif
@@ -82,7 +83,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 #if CONFIG_NUNGET_CHARS > 0
       /* First, re-read any previously ungotten characters */
 
-      while ((stream->fs_nungotten > 0) && (count > 0))
+      while (stream->fs_nungotten > 0 && remaining > 0)
         {
           /* Decrement the count of ungotten bytes to get an index */
 
@@ -94,7 +95,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
           /* That's one less byte that we have to read */
 
-          count--;
+          remaining--;
         }
 #endif
 
@@ -117,16 +118,16 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
           /* Now get any other needed chars from the buffer or the file. */
 
-          while (count > 0)
+          while (remaining > 0)
             {
               /* Is there readable data in the buffer? */
 
-              while ((count > 0) && (stream->fs_bufpos < stream->fs_bufread))
+              while (remaining > 0 && stream->fs_bufpos < stream->fs_bufread)
                 {
                   /* Yes, copy a byte into the user buffer */
 
                   *dest++ = *stream->fs_bufpos++;
-                  count--;
+                  remaining--;
                 }
 
               /* The buffer is empty OR we have already supplied the number of
@@ -134,7 +135,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                * more from the file.
                */
 
-              if (count > 0)
+              if (remaining > 0)
                 {
                   size_t buffer_available;
 
@@ -154,9 +155,9 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                    * directly into the user's buffer.
                    */
 
-                  if (count > buffer_available)
+                  if (remaining > buffer_available)
                     {
-                      bytes_read = _NX_READ(stream->fs_fd, dest, count);
+                      bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
                       if (bytes_read < 0)
                         {
                           /* An error occurred on the read. */
@@ -175,24 +176,13 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else
                         {
-                          /* Some bytes were read. Adjust the dest pointer */
+                          /* Some (perhaps all) bytes were read. Adjust the dest
+                           * pointer and remaining bytes to be read.
+                           */
 
-                          dest  += bytes_read;
-
-                          /* Were all of the requested bytes read? */
-
-                          if ((size_t)bytes_read < count)
-                            {
-                              /* No.  We must be at the end of file. */
-
-                              goto shortread;
-                            }
-                          else
-                            {
-                              /* Yes.  We are done. */
-
-                              count = 0;
-                            }
+                          DEBUGASSERT(bytes_read <= remaining);
+                          dest      += bytes_read;
+                          remaining -= bytes_read;
                         }
                     }
                   else
@@ -226,7 +216,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else
                         {
-                          /* Some bytes were read */
+                          /* Some (perhaps all) bytes were read */
 
                           stream->fs_bufread += bytes_read;
                         }
@@ -239,9 +229,9 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
         {
           /* Now get any other needed chars from the file. */
 
-          while (count > 0)
+          while (remaining > 0)
             {
-              bytes_read = _NX_READ(stream->fs_fd, dest, count);
+              bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
               if (bytes_read < 0)
                 {
                   /* An error occurred on the read.  The error code is
@@ -262,26 +252,27 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                 }
               else
                 {
-                  dest  += bytes_read;
-                  count -= bytes_read;
+                  DEBUGASSERT(bytes_read <= remaining);
+                  dest      += bytes_read;
+                  remaining -= bytes_read;
                 }
             }
         }
 
-      /* Here after a successful (but perhaps short) read */
-
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-    shortread:
+      /* Here after a successful (but perhaps short) read.  A short read can
+       * only occur is read() returns 0 (end-of-file).
+       */
+
+shortread:
 #endif
 
-      bytes_read = dest - (FAR unsigned char *)ptr;
-
       /* Set or clear the EOF indicator.  If we get here because of a
-       * short read and the total number of* bytes read is zero, then
+       * short read and the total number of bytes read is zero, then
        * we must be at the end-of-file.
        */
 
-      if (bytes_read > 0)
+      if (remaining == 0)
         {
           stream->fs_flags &= ~__FS_FLAG_EOF;
         }
@@ -293,7 +284,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
       lib_give_semaphore(stream);
     }
 
-  return bytes_read;
+  return count - remaining;
 
 /* Error exits */
 
