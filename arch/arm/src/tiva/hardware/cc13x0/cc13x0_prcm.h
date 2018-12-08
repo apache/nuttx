@@ -220,119 +220,79 @@
 #  define PRCM_VIMSCLKG_CLKEN_DISSYSCLK  (1 << PRCM_VIMSCLKG_CLKEN_SHIFT) /* Disable clock when SYCLK disabled */
 #  define PRCM_VIMSCLKG_CLKEN_ENA        (3 << PRCM_VIMSCLKG_CLKEN_SHIFT) /* Enable clock */
 
-/* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Run And All Modes */
+/* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Run And All Modes,
+ * SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Sleep Mode, and
+ * SEC (PKA And TRNG and CRYPTO) And UDMA Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_SECDMACLKGR_CRYPTO_CLKEN    (1 << 0)  /* Bit 0:  Enable cypto clock */
-#define PRCM_SECDMACLKGR_TRNG_CLKEN      (1 << 1)  /* Bit 1:  Enable TRNG clock */
-#define PRCM_SECDMACLKGR_DMA_CLKEN       (1 << 8)  /* Bit 8:  Enable DMA clock */
+#define PRCM_SECDMACLKG_CRYPTO_CLKEN_SHIFT (1 << 0)  /* Bit 0:  Enable cypto clock */
+#define PRCM_SECDMACLKG_CRYPTO_CLKEN       (1 << PRCM_SECDMACLKG_CRYPTO_CLKEN_SHIFT)
+#define PRCM_SECDMACLKG_TRNG_CLKEN_SHIFT   (1 << 1)  /* Bit 1:  Enable TRNG clock */
+#define PRCM_SECDMACLKG_TRNG_CLKEN         (1 << PRCM_SECDMACLKG_TRNG_CLKEN_SHIFT)
+#define PRCM_SECDMACLKG_DMA_CLKEN_SHIFT    (1 << 8)  /* Bit 8:  Enable DMA clock */
+#define PRCM_SECDMACLKG_DMA_CLKEN          (1 << PRCM_SECDMACLKG_DMA_CLKEN_SHIFT)
 
-/* SEC (PKA And TRNG And CRYPTO) And UDMA Clock Gate For Sleep Mode */
+/* GPIO Clock Gate For Run And All Modes, GPIO Clock Gate For Sleep Mode, and
+ * GPIO Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_SECDMACLKGS_CRYPTO_CLKEN    (1 << 0)  /* Bit 0:  Enable cypto clock */
-#define PRCM_SECDMACLKGS_TRNG_CLKEN      (1 << 1)  /* Bit 1:  Enable TRNG clock */
-#define PRCM_SECDMACLKGS_DMA_CLKEN       (1 << 8)  /* Bit 8:  Enable DMA clock */
+#define PRCM_GPIOCLKG_CLKEN_SHIFT        (0)       /* Bit 0: Enable clock */
+#define PRCM_GPIOCLKG_CLKEN              (1 << PRCM_GPIOCLKG_CLKEN_SHIFT)
 
-/* SEC (PKA And TRNG and CRYPTO) And UDMA Clock Gate For Deep Sleep Mode */
+/* GPT Clock Gate For Run And All Modes, GPT Clock Gate For Sleep Mode, and
+ * GPT Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_SECDMACLKGDS_CRYPTO_CLKEN   (1 << 0)  /* Bit 0:  Enable cypto clock */
-#define PRCM_SECDMACLKGDS_TRNG_CLKEN     (1 << 1)  /* Bit 1:  Enable TRNG clock */
-#define PRCM_SECDMACLKGDS_DMA_CLKEN      (1 << 8)  /* Bit 8:  Enable DMA clock */
+#define PRCM_GPTCLKG_CLKEN_GPT0_SHIFT    (0)       /* Bit 0:  Enable clock for GPT0 */
+#define PRCM_GPTCLKG_CLKEN_GPT0          (1 << PRCM_GPTCLKG_CLKEN_GPT0_SHIFT)
+#define PRCM_GPTCLKG_CLKEN_GPT1_SHIFT    (1)       /* Bit 1:  Enable clock for GPT1 */
+#define PRCM_GPTCLKG_CLKEN_GPT1          (1 << PRCM_GPTCLKG_CLKEN_GPT1_SHIFT)
+#define PRCM_GPTCLKG_CLKEN_GPT2_SHIFT    (2)       /* Bit 2:  Enable clock for GPT2 */
+#define PRCM_GPTCLKG_CLKEN_GPT2          (1 << PRCM_GPTCLKG_CLKEN_GPT2_SHIFT)
+#define PRCM_GPTCLKG_CLKEN_GPT3_SHIFT    (3)       /* Bit 3:  Enable clock for GPT3 */
+#define PRCM_GPTCLKG_CLKEN_GPT3          (1 << PRCM_GPTCLKG_CLKEN_GPT3_SHIFT)
 
-/* GPIO Clock Gate For Run And All Modes */
+/* I2C Clock Gate For Run And All Modes, 2C Clock Gate For Sleep Mode, and
+ * 2C Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_GPIOCLKGR_CLKEN             (1 << 0)  /* Bit 0: Enable clock */
+#define PRCM_I2CCLKGR_CLKEN_SHIFT        (0)       /* Bit 0:  Enable clock */
+#define PRCM_I2CCLKGR_CLKEN              (1 << PRCM_I2CCLKGR_CLKEN_SHIFT)
 
-/* GPIO Clock Gate For Sleep Mode */
+/* UART Clock Gate For Run And All Modes, UART Clock Gate For Sleep Mode, and
+ * UART Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_GPIOCLKGS_CLKEN             (1 << 0)  /* Bit 0: Enable clock */
+#define PRCM_UARTCLKG_CLKEN_UART0_SHIFT  (1 << 0)  /* Bit 0:  UART0 Enable clock */
+#define PRCM_UARTCLKG_CLKEN_UART0        (1 << PRCM_UARTCLKGDS_CLKEN_UART0_SHIFT)
 
-/* GPIO Clock Gate For Deep Sleep Mode */
+/* SSI Clock Gate For Run And All Modes, SSI Clock Gate For Sleep Mode, and
+ * SSI Clock Gate For Deep Sleep Mode.
+ */
 
-#define PRCM_GPIOCLKGDS_CLKEN            (1 << 0)  /* Bit 0: Enable clock */
+#define PRCM_SSICLKG_CLKEN_SSI0_SHIFT (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+#define PRCM_SSICLKG_CLKEN_SSI0       (1 << PRCM_SSICLKG_CLKEN_SSI0_SHIFT)
+#define PRCM_SSICLKG_CLKEN_SSI1_SHIFT (1 << 1)  /* Bit 1:  SSI1 Enable clock */
+#define PRCM_SSICLKG_CLKEN_SSI1       (1 << PRCM_SSICLKG_CLKEN_SSI1_SHIFT)
 
-/* GPT Clock Gate For Run And All Modes */
+/* I2S Clock Gate For Run And All Modes, I2S Clock Gate For Sleep Mode, and
+ * I2S Clock Gate For Deep Sleep Mode
+ */
 
-#define PRCM_GPTCLKGR_CLKEN_GPT0         (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
-#define PRCM_GPTCLKGR_CLKEN_GPT1         (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
-#define PRCM_GPTCLKGR_CLKEN_GPT2         (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
-#define PRCM_GPTCLKGR_CLKEN_GPT3         (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
-
-/* GPT Clock Gate For Sleep Mode */
-
-#define PRCM_GPTCLKGS_CLKEN_GPT0         (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
-#define PRCM_GPTCLKGS_CLKEN_GPT1         (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
-#define PRCM_GPTCLKGS_CLKEN_GPT2         (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
-#define PRCM_GPTCLKGS_CLKEN_GPT3         (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
-
-/* GPT Clock Gate For Deep Sleep Mode */
-
-#define PRCM_GPTCLKGDS_CLKEN_GPT0        (1 << 0)  /* Bit 0:  Enable clock for GPT0 */
-#define PRCM_GPTCLKGDS_CLKEN_GPT1        (1 << 1)  /* Bit 1:  Enable clock for GPT1 */
-#define PRCM_GPTCLKGDS_CLKEN_GPT2        (1 << 2)  /* Bit 2:  Enable clock for GPT2 */
-#define PRCM_GPTCLKGDS_CLKEN_GPT3        (1 << 3)  /* Bit 3:  Enable clock for GPT3 */
-
-/* I2C Clock Gate For Run And All Modes */
-
-#define PRCM_I2CCLKGR_CLKEN              (1 << 0)  /* Bit 0:  Enable clock */
-
-/* I2C Clock Gate For Sleep Mode */
-
-#define PRCM_I2CCLKGS_CLKEN              (1 << 0)  /* Bit 0:  Enable clock */
-
-/* I2C Clock Gate For Deep Sleep Mode */
-
-#define PRCM_I2CCLKGDS_CLKEN             (1 << 0)  /* Bit 0:  Enable clock */
-
-/* UART Clock Gate For Run And All Modes */
-
-#define PRCM_UARTCLKGR_CLKEN_UART0       (1 << 0)  /* Bit 0:  UART0 Enable clock */
-
-/* UART Clock Gate For Sleep Mode */
-
-#define PRCM_UARTCLKGS_CLKEN_UART0       (1 << 0)  /* Bit 0:  UART0 Enable clock */
-
-/* UART Clock Gate For Deep Sleep Mode */
-
-#define PRCM_UARTCLKGDS_CLKEN_UART0      (1 << 0)  /* Bit 0:  UART0 Enable clock */
-
-/* SSI Clock Gate For Run And All Modes */
-
-#define PRCM_SSICLKGR_CLKEN_SSI0       (1 << 0)  /* Bit 0:  SSI0 Enable clock */
-#define PRCM_SSICLKGR_CLKEN_SSI1       (1 << 1)  /* Bit 1:  SSI1 Enable clock */
-
-/* SSI Clock Gate For Sleep Mode */
-
-#define PRCM_SSICLKGS_CLKEN_SSI0       (1 << 0)  /* Bit 0:  SSI0 Enable clock */
-#define PRCM_SSICLKGS_CLKEN_SSI1       (1 << 1)  /* Bit 1:  SSI1 Enable clock */
-
-/* SSI Clock Gate For Deep Sleep Mode */
-
-#define PRCM_SSICLKGDS_CLKEN_SSI0      (1 << 0)  /* Bit 0:  SSI0 Enable clock */
-#define PRCM_SSICLKGDS_CLKEN_SSI1      (1 << 1)  /* Bit 1:  SSI1 Enable clock */
-
-/* I2S Clock Gate For Run And All Modes */
-
-#define PRCM_I2SCLKGR_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
-
-/* I2S Clock Gate For Sleep Mode */
-
-#define PRCM_I2SCLKGS_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
-
-/* I2S Clock Gate For Deep Sleep Mode */
-
-#define PRCM_I2SCLKGDS_CLKEN            (1 << 0)  /* Bit 0:  SSI0 Enable clock */
+#define PRCM_I2SCLKG_CLKEN_SHIFT     (0)       /* Bit 0:  I2S Enable clock */
+#define PRCM_I2SCLKG_CLKEN           (1 << PRCM_I2SCLKG_CLKEN_SHIFT)
 
 /* Internal */
 
-#define PRCM_CPUCLKDIV_DIV              (1 << 0)  /* Bit 0:  Ratio */
-#  define PRCM_CPUCLKDIV_DIV1           (0)
-#  define PRCM_CPUCLKDIV_DIV2           PRCM_CPUCLKDIV_DIV
+#define PRCM_CPUCLKDIV_DIV           (1 << 0)  /* Bit 0:  Ratio */
+#  define PRCM_CPUCLKDIV_DIV1        (0)
+#  define PRCM_CPUCLKDIV_DIV2        PRCM_CPUCLKDIV_DIV
 
 /* I2S Clock Control */
 
-#define PRCM_I2SBCLKSEL_SRC             (1 << 0)  /* Bit 0:  BCLK source selector */
-#  define PRCM_I2SBCLKSEL_EXTERNAL      (0)
-#  define PRCM_I2SBCLKSEL_INTERNAL      PRCM_I2SBCLKSEL_SRC
+#define PRCM_I2SBCLKSEL_SRC          (1 << 0)  /* Bit 0:  BCLK source selector */
+#  define PRCM_I2SBCLKSEL_EXTERNAL   (0)
+#  define PRCM_I2SBCLKSEL_INTERNAL   PRCM_I2SBCLKSEL_SRC
 
 /* GPT Scalar */
 
@@ -344,7 +304,7 @@
 #  define PRCM_GPTCLKDIV_DIV8        (3 << PRCM_GPTCLKDIV_SHIFT)
 #  define PRCM_GPTCLKDIV_DIV16       (4 << PRCM_GPTCLKDIV_SHIFT)
 #  define PRCM_GPTCLKDIV_DIV32       (5 << PRCM_GPTCLKDIV_SHIFT)
-#  define PRCM_GPTCLKDIV_DIV65       (6 << PRCM_GPTCLKDIV_SHIFT)
+#  define PRCM_GPTCLKDIV_DIV64       (6 << PRCM_GPTCLKDIV_SHIFT)
 #  define PRCM_GPTCLKDIV_DIV128      (7 << PRCM_GPTCLKDIV_SHIFT)
 #  define PRCM_GPTCLKDIV_DIV256      (8 << PRCM_GPTCLKDIV_SHIFT)
 

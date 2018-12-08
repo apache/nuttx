@@ -81,6 +81,9 @@ void tiva_boardinitialize(void)
 
   board_autoled_initialize();
 #endif
+
+  /* TODO: Initialize antenna switch */
+  /* TODO: Shutdown external FLASH */
 }
 
 /****************************************************************************

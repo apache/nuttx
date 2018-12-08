@@ -108,9 +108,10 @@
  * UART0 (PA0/U0RX and PA1/U0TX).
  */
 
-#define GPIO_UART0_RX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_IOCFG_IE | \
-                       GPIO_DIO(0))
-#define GPIO_UART0_TX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_TX) | GPIO_DIO(1))
+#define GPIO_UART0_RX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_RX) | \
+                       GPIO_STD_INPUT | GPIO_DIO(0))
+#define GPIO_UART0_TX (GPIO_PORTID(IOC_IOCFG_PORTID_UART0_TX) | \
+                       GPIO_STD_OUTPUT | GPIO_DIO(1))
 
 /* DMA **********************************************************************/
 

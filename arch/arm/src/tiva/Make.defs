@@ -93,9 +93,9 @@ CHIP_CSRCS += tiva_start.c lm4f_gpio.c tiva_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
 CHIP_CSRCS += tiva_start.c tm4c_gpio.c tiva_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
-CHIP_CSRCS += cc13xx_start.c cc13xx_gpio.c cc13xx_gpioirq.c
+CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
-CHIP_CSRCS += cc13xx_start.c cc13xx_gpio.c cc13xx_gpioirq.c
+CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)

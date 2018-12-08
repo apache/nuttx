@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/cc13x0/cc13x0_gpio.h
+ * arch/arm/src/tiva/cc13xx/cc13xx_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,8 +35,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CC13X0_CC13X0_GPIO_H
-#define __ARCH_ARM_SRC_TIVA_CC13X0_CC13X0_GPIO_H
+#ifndef __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_GPIO_H
+#define __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -246,8 +246,17 @@
 #define GPIO_DIO_MASK               (0x1f << GPIO_PORTID_SHIFT)
 #  define GPIO_DIO(n)               ((uint32_t)(n) << GPIO_PORTID_SHIFT)
 
+/* Helper Definitions *******************************************************/
+
+#define GPIO_STD_INPUT              (GPIO_IOCURR_2MA | GPIO_IOSTR_AUTO | \
+                                     GPIO_PULL_DISABLE | GPIO_EDGE_NONE | \
+                                     GPIO_IOMODE_NORMAL | GPIO_IE)
+#define GPIO_STD_OUTPUT             (GPIO_IOCURR_2MA | GPIO_IOSTR_AUTO | \
+                                     GPIO_PULL_DISABLE | GPIO_EDGE_NONE | \
+                                     GPIO_IOMODE_NORMAL)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CC13X0_CC13X0_GPIO_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CC13XX_CC13XX_GPIO_H */
