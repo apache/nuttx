@@ -955,7 +955,7 @@ static void imxrt_lpi2c_tracedump(FAR struct imxrt_lpi2c_priv_s *priv)
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
          (long)(clock_systimer() - priv->start_time));
 
-  for (i = 0; i <= priv->tndx; i++)
+  for (i = 0; i < priv->tndx; i++)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,

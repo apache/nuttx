@@ -1014,7 +1014,7 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
          (long)(clock_systimer() - priv->ttime));
 
-  for (i = 0; i <= priv->tndx; i++)
+  for (i = 0; i < priv->tndx; i++)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
