@@ -78,7 +78,7 @@
  * START/STOP Rules:
  *
  * 1. The lower half I2C driver will always issue the START condition at the
- *    beginning of a message unless I2C_M_NOSTART flat is set in the
+ *    beginning of a message unless I2C_M_NOSTART flag is set in the
  *    message.
  *
  * 2. The lower half I2C driver will always issue the STOP condition at the
@@ -213,7 +213,7 @@ struct i2c_config_s
   uint8_t addrlen;             /* I2C address length (7 or 10 bits) */
 };
 
-/* I2C transaction segment beginning with a START.  A number of these can
+/* I2C transaction segment beginning with a START. A number of these can
  * be transferred together to form an arbitrary sequence of write/read transfer
  * to an I2C slave device.
  */

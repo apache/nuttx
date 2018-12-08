@@ -61,6 +61,10 @@ config PIC32MZ_SPI
 	bool
 	default n
 
+config PIC32MZ_I2C
+	bool
+	default n
+
 config PIC32MZ_T1
 	bool
 	default y
@@ -146,22 +150,27 @@ config PIC32MZ_OC5
 config PIC32MZ_I2C1
 	bool "I2C1"
 	default n
+	select PIC32MZ_I2C
 
 config PIC32MZ_I2C2
 	bool "I2C2"
 	default n
+	select PIC32MZ_I2C
 
 config PIC32MZ_I2C3
 	bool "I2C3"
 	default n
+	select PIC32MZ_I2C
 
 config PIC32MZ_I2C4
 	bool "I2C4"
 	default n
+	select PIC32MZ_I2C
 
 config PIC32MZ_I2C5
 	bool "I2C5"
 	default n
+	select PIC32MZ_I2C
 
 config PIC32MZ_SPI1
 	bool "SPI1"
@@ -363,6 +372,41 @@ config PIC32MZ_SPI_REGDEBUG
 		Requires also CONFIG_DEBUG_FEATURES.
 
 endmenu # SPI Driver Configuration
+
+menu "I2C Driver Configuration"
+	depends on PIC32MZ_I2C
+
+config PIC32MZ_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on PIC32MZ_I2C
+
+config PIC32MZ_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on PIC32MZ_I2C_DYNTIMEO
+
+config PIC32MZ_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Idle state (Milliseconds)"
+	default 1000
+	depends on PIC32MZ_I2C_DYNTIMEO
+
+config PIC32MZ_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on PIC32MZ_I2C
+
+config PIC32MZ_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on PIC32MZ_I2C && !PIC32MZ_I2C_DYNTIMEO
+
+config PIC32MZ_I2CTIMEOTICKS
+	int "Timeout for Idle state (ticks)"
+	default 500
+	depends on PIC32MZ_I2C && !PIC32MZ_I2C_DYNTIMEO
+
+endmenu # I2C Configuration
 
 config PIC32MZ_T1_SOSC
 	bool

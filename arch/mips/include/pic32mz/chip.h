@@ -195,7 +195,7 @@
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
 #else
-#  error "Unrecognized PIC32MZ device
+#  error "Unrecognized PIC32MZ device"
 #endif
 
 /****************************************************************************
