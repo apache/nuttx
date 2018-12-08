@@ -83,23 +83,25 @@ struct btnet_discoverstate_s
 {
   struct bt_gatt_discover_params_s bd_params;
   struct bt_uuid_s bd_uuid;         /* Discovery UUID */
-  sem_t bd_exclsem;                 /* Manages exclusive access */
-  volatile bool bd_discovering;     /* True:  Discovery in progress */
-  volatile uint8_t bd_head;         /* Head of circular list (for removal) */
-  volatile uint8_t bd_tail;         /* Tail of circular list (for addition) */
-
-  struct bt_discresonse_s bd_rsp[CONFIG_BLUETOOTH_MAXDISCOVER];
+  sem_t bd_donesem;                 /* Manages exclusive access */
 };
 
 /* GATT read state variables. */
 
 struct btnet_rdstate_s
 {
-  bool rd_pending;                  /* True: result not yet received */
+  struct btreq_s *rd_btreq;
   uint8_t rd_result;                /* The result of the read */
-  uint8_t rd_head;                  /* Start of data to read */
-  uint8_t rd_tail;                  /* End data to read */
-  uint8_t rd_data[HCI_GATTRD_DATA]; /* Data read */
+  sem_t rd_donesem;                 /* Manages exclusive access */
+};
+
+/* GATT write state variables. */
+
+struct btnet_wrstate_s
+{
+  struct btreq_s *wr_btreq;
+  uint8_t wr_result;                /* The result of the read */
+  sem_t wr_donesem;                 /* Manages exclusive access */
 };
 
 /****************************************************************************
@@ -126,10 +128,6 @@ struct btnet_rdstate_s
  */
 
 static struct btnet_scanstate_s     g_scanstate;
-static struct btnet_discoverstate_s g_discoverstate;
-static struct bt_result_s           g_exchangeresult;
-static struct btnet_rdstate_s       g_rdstate;
-static struct bt_result_s           g_gattwrresult;
 
 /****************************************************************************
  * Private Functions
@@ -294,9 +292,9 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
   g_scanstate.bs_head = head;
 
   if (scanning)
-   {
+    {
       nxsem_post(&g_scanstate.bs_exclsem);
-   }
+    }
 
   return nrsp;
 }
@@ -318,9 +316,13 @@ static int btnet_scan_result(FAR struct bt_scanresponse_s *result,
 
 static void btnet_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
 {
-  wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
-  g_exchangeresult.br_pending = false;
-  g_exchangeresult.br_result  = result;
+  FAR struct btnet_wrstate_s *pstate = conn->p_iostate;
+  FAR struct btreq_s *btreq = pstate->wr_btreq;
+
+  wlinfo("%s\n", result == 0 ? "succeeded" : "failed");
+
+  btreq->btr_exresult = result;
+  nxsem_post(&pstate->wr_donesem);
 }
 
 /****************************************************************************
@@ -342,62 +344,21 @@ static void btnet_exchange_rsp(FAR struct bt_conn_s *conn, uint8_t result)
 static uint8_t btnet_discover_func(FAR const struct bt_gatt_attr_s *attr,
                                    FAR void *arg)
 {
-  uint8_t nexttail;
-  uint8_t head;
-  uint8_t tail;
-  int ret;
+  FAR struct bt_gatt_discover_params_s *params = arg;
+  FAR struct btreq_s *btreq = (FAR struct btreq_s *)(params->p_data);
 
-  wlinfo("Discovered handle %u\n", attr->handle);
+  wlinfo("Discovered handle %x\n", attr->handle);
 
-  if (!g_discoverstate.bd_discovering)
+  if (btreq->btr_indx >= btreq->btr_gnrsp)
     {
-      wlerr("ERROR:  Results received while not discovering\n");
+      wlerr("ERROR: No space for results\n");
       return BT_GATT_ITER_STOP;
     }
 
-  /* Get exclusive access to the discovered data */
+  btreq->btr_grsp[btreq->btr_indx].dr_handle = attr->handle;
+  btreq->btr_grsp[btreq->btr_indx].dr_perm   = attr->perm;
+  btreq->btr_indx++;
 
-  while ((ret = nxsem_wait(&g_discoverstate.bd_exclsem)) < 0)
-    {
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-      if (ret != -EINTR)
-        {
-          return BT_GATT_ITER_STOP;
-        }
-    }
-
-  /* Add the discovered data to the cache */
-
-  tail     = g_discoverstate.bd_tail;
-  nexttail = tail + 1;
-
-  if (nexttail >= CONFIG_BLUETOOTH_MAXSCANRESULT)
-    {
-      nexttail = 0;
-    }
-
-  /* Is the circular buffer full? */
-
-  head = g_discoverstate.bd_head;
-  if (nexttail == head)
-    {
-      wlerr("ERROR: Too many handles discovered.  Data lost.\n");
-
-      if (++head >= CONFIG_BLUETOOTH_MAXSCANRESULT)
-        {
-          head = 0;
-        }
-
-      g_discoverstate.bd_head = head;
-    }
-
-  /* Save the newly discovered handle */
-
-  g_discoverstate.bd_rsp[tail].dr_handle = attr->handle;
-  g_discoverstate.bd_rsp[tail].dr_perm   = attr->perm;
-  g_discoverstate.bd_tail                = nexttail;
-
-  nxsem_post(&g_discoverstate.bd_exclsem);
   return BT_GATT_ITER_CONTINUE;
 }
 
@@ -418,92 +379,11 @@ static uint8_t btnet_discover_func(FAR const struct bt_gatt_attr_s *attr,
 
 static void btnet_discover_destroy(FAR void *arg)
 {
-  FAR struct bt_gatt_discover_params *params = arg;
+  struct btnet_discoverstate_s *pstate = arg;
 
-  /* There is nothing that needs to be down here.  The parameters were
-   * allocated on the stack and are long gone.
-   */
+  wlinfo("Discover destroy\n");
 
-  wlinfo("Discover destroy.  params %p\n", params);
-  DEBUGASSERT(params != NULL && g_discoverstate.bd_discovering);
-  UNUSED(params);
-
-  memset(&g_discoverstate.bd_params, 0, sizeof(struct btnet_discoverstate_s));
-  nxsem_destroy(&g_discoverstate.bd_exclsem);
-  g_discoverstate.bd_discovering = false;
-}
-
-/****************************************************************************
- * Name: btnet_discover_result
- *
- * Description:
- *   This function implements the SIOCBTDISCGET IOCTL command.  It returns
- *   the current, buffered discovered handles.
- *
- * Input Parameters:
- *   result - Location to return the discovery result data
- *   maxrsp - The maximum number of responses that can be returned.
- *
- * Returned Value:
- *   On success, the actual number of discovery results obtain is returned.  A
- *   negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-static int btnet_discover_result(FAR struct bt_discresonse_s *result,
-                                 uint8_t maxrsp)
-{
-  uint8_t head;
-  uint8_t tail;
-  uint8_t nrsp;
-  bool discovering;
-  int ret;
-
-  discovering = g_discoverstate.bd_discovering;
-  wlinfo("Discovering? %s\n", discovering ? "YES" : "NO");
-
-  /* Get exclusive access to the discovery data while we are actively
-   * discovering. The semaphore is uninitialized in other cases.
-   */
-
-  if (discovering)
-   {
-      ret = nxsem_wait(&g_discoverstate.bd_exclsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-          return ret;
-        }
-    }
-
-  /* Copy all available results */
-
-  head = g_discoverstate.bd_head;
-  tail = g_discoverstate.bd_tail;
-
-  for (nrsp = 0; nrsp < maxrsp && head != tail; nrsp++)
-    {
-      /* Copy data from the head index into the user buffer */
-
-      result[nrsp].dr_handle = g_discoverstate.bd_rsp[head].dr_handle;
-      result[nrsp].dr_perm   = g_discoverstate.bd_rsp[head].dr_perm;
-
-      /* Increment the head index */
-
-      if (++head >= CONFIG_BLUETOOTH_MAXDISCOVER)
-        {
-          head = 0;
-        }
-    }
-
-  g_discoverstate.bd_head = head;
-
-  if (discovering)
-   {
-      nxsem_post(&g_discoverstate.bd_exclsem);
-   }
-
-  return nrsp;
+  nxsem_post(&pstate->bd_donesem);
 }
 
 /****************************************************************************
@@ -526,76 +406,26 @@ static int btnet_discover_result(FAR struct bt_discresonse_s *result,
 static void btnet_read_callback(FAR struct bt_conn_s *conn, int result,
                                 FAR const void *data, uint16_t length)
 {
-  wlinfo("Read complete: result %d length %u\n", result, length);
+  FAR struct btnet_rdstate_s *pstate = conn->p_iostate;
+  FAR struct btreq_s *btreq = pstate->rd_btreq;
 
-  DEBUGASSERT(conn != NULL && g_rdstate.rd_pending);
+  wlinfo("Read complete: result %d length %u\n", result, length);
 
   if (length > HCI_GATTRD_DATA)
     {
-      g_rdstate.rd_result = ENFILE;
+      wlerr("ERROR: Unexpected length %u, result = %d\n", length, result);
+      btreq->btr_rdresult = ENFILE;
     }
   else
     {
       DEBUGASSERT((unsigned int)result < UINT8_MAX);
 
-      g_rdstate.rd_result = result;
-      g_rdstate.rd_head   = 0;
-      g_rdstate.rd_tail   = length;
-      memcpy(g_rdstate.rd_data, data, length);
+      btreq->btr_rdresult = result;
+      btreq->btr_rdsize   = length;
+      memcpy(btreq->btr_rddata, data, length);
     }
 
-  g_rdstate.rd_pending    = false;
-}
-
-/****************************************************************************
- * Name: btnet_read_result
- *
- * Description:
- *   Handle network IOCTL commands directed to this device.
- *
- * Input Parameters:
- *   btreq - IOCTL command data
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- ****************************************************************************/
-
-static int btnet_read_result(FAR struct btreq_s *btreq)
-{
-  int head;
-  int rdlen;
-
-  DEBUGASSERT(btreq != NULL && btreq->btr_rddata != NULL);
-
-  /* Is the read complete? */
-
-  btreq->btr_rdpending = g_rdstate.rd_pending;
-  if (!g_rdstate.rd_pending)
-    {
-      return -EBUSY;
-    }
-
-  /* Yes... return the read data */
-
-  head  = g_rdstate.rd_head;
-  if (head >= g_rdstate.rd_tail)
-    {
-      return -ENODATA;
-    }
-
-  rdlen = btreq->btr_rdsize;
-  if (rdlen + head >= g_rdstate.rd_tail)
-    {
-      rdlen = g_rdstate.rd_tail - head;
-    }
-
-  btreq->btr_rdresult = g_rdstate.rd_result;
-  btreq->btr_rdsize   = rdlen;
-  memcpy(btreq->btr_rddata, &g_rdstate.rd_data[head], rdlen);
-
-  g_rdstate.rd_head = head + rdlen;
-  return OK;
+  nxsem_post(&pstate->rd_donesem);
 }
 
 /****************************************************************************
@@ -615,9 +445,13 @@ static int btnet_read_result(FAR struct btreq_s *btreq)
 
 static void bnet_write_callback(FAR struct bt_conn_s *conn, uint8_t result)
 {
-  wlinfo("Exchange %s\n", result == 0 ? "succeeded" : "failed");
-  g_gattwrresult.br_pending = false;
-  g_gattwrresult.br_result  = result;
+  FAR struct btnet_wrstate_s *pstate = conn->p_iostate;
+  FAR struct btreq_s *btreq = pstate->wr_btreq;
+
+  wlinfo("%s\n", result == 0 ? "succeeded" : "failed");
+
+  btreq->btr_wrresult = result;
+  nxsem_post(&pstate->wr_donesem);
 }
 
 /****************************************************************************
@@ -879,47 +713,43 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
       case SIOCBTEXCHANGE:
         {
-          /* Check if we are still waiting for the result of the last exchange */
+          FAR struct bt_conn_s *conn;
 
-          if (g_exchangeresult.br_pending)
+          /* Get the connection associated with the provided LE address */
+
+          conn = bt_conn_lookup_addr_le(&btreq->btr_expeer);
+          if (conn == NULL)
             {
-              wlwarn("WARNING:  Last exchange not yet complete\n");
-              ret = -EBUSY;
+              wlwarn("WARNING:  Peer not connected\n");
+              ret = -ENOTCONN;
             }
           else
             {
-              FAR struct bt_conn_s *conn;
+              struct btnet_wrstate_s wrstate;
 
-              /* Get the connection associated with the provided LE address */
+              memset(&wrstate, 0, sizeof(wrstate));
+              wrstate.wr_btreq = btreq;
+              conn->p_iostate = &wrstate;
+              nxsem_init(&wrstate.wr_donesem, 0, 0);
 
-              conn = bt_conn_lookup_addr_le(&btreq->btr_expeer);
-              if (conn == NULL)
+              btreq->btr_wrresult = EBUSY;
+
+              ret = bt_gatt_exchange_mtu(conn, btnet_exchange_rsp);
+              if (ret < 0)
                 {
-                  wlwarn("WARNING:  Peer not connected\n");
-                  ret = -ENOTCONN;
+                  wlerr("ERROR: Exchange operation failed: %d\n", ret);
                 }
               else
                 {
-                  ret = bt_gatt_exchange_mtu(conn, btnet_exchange_rsp);
-                  if (ret == OK)
-                    {
-                      g_exchangeresult.br_pending = true;
-                      g_exchangeresult.br_result  = EBUSY;
-                    }
+                  /* Wait for callback to complete the exchange */
 
-                  bt_conn_release(conn);
+                  ret = nxsem_wait(&wrstate.wr_donesem);
                 }
+
+              nxsem_destroy(&wrstate.wr_donesem);
+
+              bt_conn_release(conn);
             }
-        }
-        break;
-
-      /* SIOCBTEXRESULT: Get the result of the MTU exchange */
-
-      case SIOCBTEXRESULT:
-        {
-          btreq->btr_expending = g_exchangeresult.br_pending;
-          btreq->btr_exresult  = g_exchangeresult.br_result;
-          ret                  = OK;
         }
         break;
 
@@ -929,170 +759,152 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         {
           FAR struct bt_conn_s *conn;
 
-          /* Check if discovery is already in progress */
+          /* Get the connection associated with the provided LE address */
 
-          if (g_discoverstate.bd_discovering)
+          conn = bt_conn_lookup_addr_le(&btreq->btr_dpeer);
+          if (conn == NULL)
             {
-              wlwarn("WARNING:  Discovery is already in progress\n");
-              ret = -EBUSY;
+              wlwarn("WARNING:  Peer not connected\n");
+              ret = -ENOTCONN;
             }
           else
             {
-              /* Get the connection associated with the provided LE address */
+              struct btnet_discoverstate_s dstate;
+              FAR struct bt_gatt_discover_params_s *params;
+              memset(&dstate, 0, sizeof(dstate));
 
-              conn = bt_conn_lookup_addr_le(&btreq->btr_dpeer);
-              if (conn == NULL)
+              /* Set up the query */
+
+              dstate.bd_uuid.type   = BT_UUID_16;
+              dstate.bd_uuid.u.u16  = btreq->btr_duuid16;
+
+              params                         = &dstate.bd_params;
+              params->func                   = btnet_discover_func;
+              params->destroy                = btnet_discover_destroy;
+              params->start_handle           = btreq->btr_dstart;
+              params->end_handle             = btreq->btr_dend;
+              params->p_data                 = (void *)arg;
+              btreq->btr_indx                = 0;
+
+              if (btreq->btr_duuid16 == 0)
                 {
-                  wlwarn("WARNING:  Peer not connected\n");
-                  ret = -ENOTCONN;
+                  params->uuid = NULL;
                 }
               else
                 {
-                  FAR struct bt_gatt_discover_params_s *params;
-
-                  /* Set up the query */
-
-                  g_discoverstate.bd_uuid.type   = BT_UUID_16;
-                  g_discoverstate.bd_uuid.u.u16  = btreq->btr_duuid16;
-
-                  params                         = &g_discoverstate.bd_params;
-                  params->uuid                   = &g_discoverstate.bd_uuid;
-                  params->func                   = btnet_discover_func;
-                  params->destroy                = btnet_discover_destroy;
-                  params->start_handle           = btreq->btr_dstart;
-                  params->end_handle             = btreq->btr_dend;
-
-                  nxsem_init(&g_discoverstate.bd_exclsem, 0, 1);
-                  g_discoverstate.bd_discovering = true;
-                  g_discoverstate.bd_head        = 0;
-                  g_discoverstate.bd_tail        = 0;
-
-                  /* Start the query */
-
-                  switch (btreq->btr_dtype)
-                    {
-                      case GATT_DISCOVER:
-                        ret = bt_gatt_discover(conn, params);
-                        break;
-
-                      case GATT_DISCOVER_DESC:
-                        ret = bt_gatt_discover_descriptor(conn, params);
-                        break;
-
-                      case GATT_DISCOVER_CHAR:
-                        ret = bt_gatt_discover_characteristic(conn, params);
-                        break;
-
-                      default:
-                        wlerr("ERROR: Unrecognized GATT discover type: %u\n",
-                              btreq->btr_dtype);
-                        ret = -EINVAL;
-                    }
-
-                  if (ret < 0)
-                    {
-                      wlerr("ERROR: Failed to start discovery: %d\n", ret);
-                      btnet_discover_destroy(params);
-                    }
-
-                  bt_conn_release(conn);
+                  params->uuid = &dstate.bd_uuid;
                 }
+
+              nxsem_init(&dstate.bd_donesem, 0, 0);
+
+              /* Start the query */
+
+              switch (btreq->btr_dtype)
+                {
+                  case GATT_DISCOVER:
+                    ret = bt_gatt_discover(conn, params);
+                    break;
+
+                  case GATT_DISCOVER_DESC:
+                    ret = bt_gatt_discover_descriptor(conn, params);
+                    break;
+
+                  case GATT_DISCOVER_CHAR:
+                    ret = bt_gatt_discover_characteristic(conn, params);
+                    break;
+
+                  default:
+                    wlerr("ERROR: Unrecognized GATT discover type: %u\n",
+                          btreq->btr_dtype);
+                    ret = -EINVAL;
+                }
+
+              if (ret < 0)
+                {
+                  wlerr("ERROR: Failed to start discovery: %d\n", ret);
+                }
+              else
+                {
+                  ret = nxsem_wait(&dstate.bd_donesem);
+                  if (ret == 0)
+                    {
+                      btreq->btr_gnrsp = btreq->btr_indx;
+                    }
+                }
+
+              nxsem_destroy(&dstate.bd_donesem);
+
+              bt_conn_release(conn);
             }
         }
         break;
 
-      /* SIOCBTDISCGET:  Return discovered results buffered since the call time
-       * that the SIOCBTDISCGET command was invoked.
-       */
-
-      case SIOCBTDISCGET:
-        {
-          ret = btnet_discover_result(btreq->btr_grsp, btreq->btr_gnrsp);
-          wlinfo("Get discovery results: %d\n", ret);
-
-          if (ret >= 0)
-            {
-              btreq->btr_nrsp = ret;
-              ret = OK;
-            }
-        }
-        break;
-
-      /* SIOCBTGATTRD:  Initiate read of GATT data */
+      /* SIOCBTGATTRD:  Read GATT data */
 
       case SIOCBTGATTRD:
         {
-          /* Is there already a read in progress?  The current
-           * implementation can support only one read at a time.
-           * REVISIT.. see suggested design improvement above.
-           */
+          FAR struct bt_conn_s *conn;
 
-          if (g_rdstate.rd_pending)
+          /* Get the connection associated with the provided LE address */
+
+          conn = bt_conn_lookup_addr_le(&btreq->btr_rdpeer);
+          if (conn == NULL)
             {
-              wlwarn("WARNING:  Read pending\n");
-              ret = -EBUSY;
+              wlwarn("WARNING: Peer not connected\n");
+              ret = -ENOTCONN;
             }
           else
             {
-              FAR struct bt_conn_s *conn;
+              /* Set up for the read */
 
-              /* Get the connection associated with the provided LE address */
+              struct btnet_rdstate_s rdstate;
 
-              conn = bt_conn_lookup_addr_le(&btreq->btr_rdpeer);
-              if (conn == NULL)
+              memset(&rdstate, 0, sizeof(rdstate));
+              rdstate.rd_btreq = btreq;
+              conn->p_iostate = &rdstate;
+              nxsem_init(&rdstate.rd_donesem, 0, 0);
+
+              /* Initiate read.. single or multiple? */
+
+              if (btreq->btr_rdnhandles == 1)
                 {
-                  wlwarn("WARNING:  Peer not connected\n");
-                  ret = -ENOTCONN;
+                  /* Read single */
+
+                  DEBUGASSERT(conn->p_iostate != NULL);
+                  ret = bt_gatt_read(conn, btreq->btr_rdhandles[0],
+                                     btreq->btr_rdoffset,
+                                     btnet_read_callback);
+                }
+              else if (btreq->btr_rdnhandles < HCI_GATT_MAXHANDLES)
+                {
+                  /* Read multiple */
+
+                  DEBUGASSERT(conn->p_iostate != NULL);
+                  DEBUGASSERT(btreq->btr_rdnhandles > 0);
+                  ret = bt_gatt_read_multiple(conn, btreq->btr_rdhandles,
+                                              btreq->btr_rdnhandles,
+                                              btnet_read_callback);
                 }
               else
                 {
-                  /* Set up for the read */
-
-                  g_rdstate.rd_pending = true;
-                  g_rdstate.rd_head    = 0;
-                  g_rdstate.rd_tail    = 0;
-
-                  /* Initiate read.. single or multiple? */
-
-                  if (btreq->btr_rdnhandles == 1)
-                    {
-                      /* Read single */
-
-                      ret = bt_gatt_read(conn, btreq->btr_rdhandles[0],
-                                         btreq->btr_rdoffset,
-                                         btnet_read_callback);
-                    }
-                  else if (btreq->btr_rdnhandles < HCI_GATT_MAXHANDLES)
-                    {
-                      /* Read multiple */
-
-                      DEBUGASSERT(btreq->btr_rdnhandles > 0);
-                      ret = bt_gatt_read_multiple(conn, btreq->btr_rdhandles,
-                                                  btreq->btr_rdnhandles,
-                                                  btnet_read_callback);
-                    }
-                  else
-                    {
-                      ret = -ENFILE;
-                    }
-
-                  if (ret < 0)
-                    {
-                      wlerr("ERROR:  Read operation failed: %d\n", ret);
-                    }
-
-                  bt_conn_release(conn);
+                  ret = -ENFILE;
                 }
+
+              if (ret < 0)
+                {
+                  wlerr("ERROR:  Read operation failed: %d\n", ret);
+                }
+              else
+                {
+                  /* Wait for callback to complete the transfer */
+
+                  ret = nxsem_wait(&rdstate.rd_donesem);
+                }
+
+              nxsem_destroy(&rdstate.rd_donesem);
+
+              bt_conn_release(conn);
             }
-        }
-        break;
-
-      /* SIOCBTGATTRDGET:  Get the result of the GATT data read */
-
-      case SIOCBTGATTRDGET:
-        {
-          ret = btnet_read_result(btreq);
-          wlinfo("Get read results: %d\n", ret);
         }
         break;
 
@@ -1102,59 +914,50 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         {
           DEBUGASSERT(btreq->btr_wrdata != NULL);
 
-          /* Is there already a write in progress?  The current
-           * implementation can support only one write at a time.
-           * REVISIT.. see suggested design improvement above.
-           */
+          FAR struct bt_conn_s *conn;
 
-          if (g_gattwrresult.br_pending)
+          /* Get the connection associated with the provided LE address */
+
+          conn = bt_conn_lookup_addr_le(&btreq->btr_wrpeer);
+          if (conn == NULL)
             {
-              wlwarn("WARNING:  Read pending\n");
-              ret = -EBUSY;
+              wlwarn("WARNING:  Peer not connected\n");
+              ret = -ENOTCONN;
             }
           else
             {
-              FAR struct bt_conn_s *conn;
+              /* Set up for the write */
 
-              /* Get the connection associated with the provided LE address */
+              struct btnet_wrstate_s wrstate;
 
-              conn = bt_conn_lookup_addr_le(&btreq->btr_wrpeer);
-              if (conn == NULL)
+              memset(&wrstate, 0, sizeof(wrstate));
+              wrstate.wr_btreq = btreq;
+              conn->p_iostate = &wrstate;
+              nxsem_init(&wrstate.wr_donesem, 0, 0);
+
+              btreq->btr_wrresult = EBUSY;
+
+              /* Initiate write */
+
+              ret = bt_gatt_write(conn, btreq->btr_wrhandle,
+                                  btreq->btr_wrdata,
+                                  btreq->btr_wrnbytes,
+                                  bnet_write_callback);
+              if (ret < 0)
                 {
-                  wlwarn("WARNING:  Peer not connected\n");
-                  ret = -ENOTCONN;
+                  wlerr("ERROR:  Write operation failed: %d\n", ret);
                 }
               else
                 {
-                  /* Set up for the write */
+                  /* Wait for callback to complete the transfer */
 
-                  g_gattwrresult.br_pending = true;
-                  g_gattwrresult.br_result  = EBUSY;
-
-                  /* Initiate write */
-
-                  ret = bt_gatt_write(conn, btreq->btr_wrhandle,
-                                      btreq->btr_wrdata,
-                                      btreq->btr_wrnbytes,
-                                      bnet_write_callback);
-                  if (ret < 0)
-                    {
-                      wlerr("ERROR:  Write operation failed: %d\n", ret);
-                    }
-
-                  bt_conn_release(conn);
+                  ret = nxsem_wait(&wrstate.wr_donesem);
                 }
+
+              nxsem_destroy(&wrstate.wr_donesem);
+
+              bt_conn_release(conn);
             }
-        }
-        break;
-
-      /* SIOCBTGATTWRGET:  Get the result of the GATT data write */
-
-      case SIOCBTGATTWRGET:
-        {
-          btreq->btr_wrpending = g_gattwrresult.br_pending;
-          btreq->btr_wrresult  = g_gattwrresult.br_result;
-          ret                  = OK;
         }
         break;
 

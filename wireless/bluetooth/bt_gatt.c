@@ -855,6 +855,14 @@ static void att_read_type_rsp(FAR struct bt_conn_s *conn, uint8_t err,
       goto done;
     }
 
+  /* Next characteristic shall be after current value handle */
+
+  params->start_handle = handle;
+  if (params->start_handle < UINT16_MAX)
+    {
+      params->start_handle++;
+    }
+
   /* Stop if over the requested range */
 
   if (params->start_handle >= params->end_handle)

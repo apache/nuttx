@@ -108,6 +108,10 @@ struct bt_conn_s
   uint8_t le_conn_interval;
   bt_atomic_t ref;
   enum bt_conn_state_e state;
+
+  /* Temporary data used by ioctl */
+
+  void *p_iostate;
 };
 
 /****************************************************************************

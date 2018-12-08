@@ -621,6 +621,10 @@ struct bt_gatt_discover_params_s
   /* Discover end handle */
 
   uint16_t end_handle;
+
+  /* Private data */
+
+  FAR void *p_data;
 };
 
 /****************************************************************************
