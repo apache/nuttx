@@ -47,12 +47,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-
-#include "up_internal.h"
-#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,7 +63,7 @@
 #elif defined(CONFIG_ARCH_CHIP_CC13X0) || defined(CONFIG_ARCH_CHIP_CC13X2)
 #  include "cc13xx/cc13xx_gpio.h"
 #else
-#  error "Unsupported Tiva/Stellaris system GPIO"
+#  error "Unsupported Tiva/Stellaris/SimpleLink GPIO"
 #endif
 
 /****************************************************************************

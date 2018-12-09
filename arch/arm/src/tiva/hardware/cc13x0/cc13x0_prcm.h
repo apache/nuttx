@@ -336,7 +336,6 @@
 #define PRCM_I2SWCLKDIV_WDIV_SHIFT   (0)      /* Bits 0-9: MCLK divider */
 #define PRCM_I2SWCLKDIV_WDIV_MASK    (0x3ff << PRCM_I2SWCLKDIV_WDIV_SHIFT)
 #  define PRCM_I2SWCLKDIV_WDIV(n)    ((uint32_t)(n) << PRCM_I2SWCLKDIV_WDIV_SHIFT)
-#  define PRCM_I2SWCLKDIV_WDIV(n)    (((uint32_t)(n) & 0x3ff) << PRCM_I2SWCLKDIV_WDIV_SHIFT)
 
 /* SW Initiated Resets */
 

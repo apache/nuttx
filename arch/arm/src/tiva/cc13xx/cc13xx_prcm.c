@@ -42,26 +42,15 @@
  * Included Files
  ******************************************************************************/
 
-#include <nuttx/config.y>
+#include <nuttx/config.h>
+
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
+
+#include "up_arch.h"
+#include "hardware/tiva_prcm.h"
 #include "cc13xx/cc13xx_prcm.h"
-
-/******************************************************************************
- * Pre-processor Definitions
- ******************************************************************************/
-
-/* This macro extracts the array index out of the peripheral number */
-
-#define PRCM_PERIPH_INDEX(a)  (((a) >> 8) & 0xf)
-
-/* This macro extracts the peripheral instance number and generates bit mask */
-
-#define PRCM_PERIPH_MASKBIT(a) (0x00000001 << ((a) & 0x1f))
-
-/* The size of a register look-up table */
-
-#define TABLE_SIZE              7
 
 /******************************************************************************
  * Private Data
@@ -74,7 +63,7 @@
 
 /* Run mode registers */
 
-static const uintptr_t g_rcgcr_base[TABLE_SIZE] =
+static const uintptr_t g_rcgcr_base[PRCM_NPERIPH] =
 {
   TIVA_PRCM_GPTCLKGR,              /* Index 0 */
   TIVA_PRCM_SSICLKGR,              /* Index 1 */
@@ -87,7 +76,7 @@ static const uintptr_t g_rcgcr_base[TABLE_SIZE] =
 
 /* Sleep mode registers */
 
-static const uintptr_t g_scgcr_base[TABLE_SIZE] =
+static const uintptr_t g_scgcr_base[PRCM_NPERIPH] =
 {
   TIVA_PRCM_GPTCLKGS,              /* Index 0 */
   TIVA_PRCM_SSICLKGS,              /* Index 1 */
@@ -100,7 +89,7 @@ static const uintptr_t g_scgcr_base[TABLE_SIZE] =
 
 /* Deep sleep mode registers */
 
-static const uintptr_t g_dcgcr_base[TABLE_SIZE] =
+static const uintptr_t g_dcgcr_base[PRCM_NPERIPH] =
 {
   TIVA_PRCM_GPTCLKGDS,             /* Index 0 */
   TIVA_PRCM_SSICLKGDS,             /* Index 1 */
@@ -130,7 +119,7 @@ static const uintptr_t g_dcgcr_base[TABLE_SIZE] =
  *
  *   NOTE:  If source clock is 48 MHz, minimum clock divider is 2.
  *
- * Input Parameters
+ * Input Parameters:
  *    clockdiv  - Determines the division ratio for the infrastructure
  *                clock when the device is in the specified mode.  Allowed
  *                division factors for all three System CPU power modes are:
@@ -183,7 +172,7 @@ void prcm_infclock_configure(enum prcm_clkdivider_e clkdiv,
     }
   else if (powermode == PRCM_DEEP_SLEEP_MODE)
     {
-      putreg32(divisor, TIVA_PRCM_INFRCLKDIVDSS);
+      putreg32(divisor, TIVA_PRCM_INFRCLKDIVDS);
     }
   else
     {
@@ -248,6 +237,7 @@ void prcm_audioclock_manual(uint32_t clkconfig, uint32_t mstdiv,
   retval &= ~(PRCM_I2SCLKCTL_WCLKPHASE_MASK | PRCM_I2SCLKCTL_POSEDGE);
   putreg32(regval | clkconfig, TIVA_PRCM_I2SCLKCTL);
 }
+#endif
 
 /******************************************************************************
  * Name: prcm_audioclock_configure
@@ -367,7 +357,7 @@ void prcm_audioclock_configure(uint32_t clkconfig,
  *   Any write operation to a power domain which is still not operational can
  *   result in unexpected behavior.
  *
- * Input Parameters
+ * Input Parameters:
  *   domains - Determines which power domains to turn on.  The domains that
  *             can be turned on/off are:
  *             1) PRCM_DOMAIN_RFCORE : RF Core
@@ -438,7 +428,7 @@ void prcm_powerdomain_on(uint32_t domains)
  *   NOTE:  See prcm_powerdomain_on() for specifics regarding on/off
  *   configuration.
  *
- * Input Parameters
+ * Input Parameters:
  *   domains - Determines which power domains to turn off.  The domains that
  *             can be turned on/off are:
  *             1) PRCM_DOMAIN_RFCORE : RF Core
@@ -510,7 +500,64 @@ void prcm_powerdomain_off(uint32_t domains)
 }
 
 /******************************************************************************
- * Name: prcm_periph_rundisable
+ * Name: prcm_powerdomain_status
+ *
+ * Description:
+ *   Use this function to retrieve the current power status of one or more
+ *   power domains.
+ *
+ * Input Parameters:
+ *    domains - Determines which domain to get the power status for.  The
+ *              parameter must be an OR'ed combination of one or several of:
+ *              1) PRCM_DOMAIN_RFCORE : RF Core.
+ *              2) PRCM_DOMAIN_SERIAL : SSI0, UART0, I2C0
+ *              3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1, I2S,
+ *                 DMA, UART1
+ *
+ * Returned Value
+ *    - True:  The specified domains are all powered up.
+ *    - False: One or more of the domains is powered down.
+ *
+ ******************************************************************************/
+
+bool prcm_powerdomain_status(uint32_t domains)
+{
+  uint32_t pdstat0;
+  uint32_t pdstat1;
+  bool status;
+
+  DEBUGASSERT((domains & (PRCM_DOMAIN_RFCORE | PRCM_DOMAIN_SERIAL |
+                          PRCM_DOMAIN_PERIPH)) != 0);
+
+  status  = true;
+  pdstat0 = getreg32(TIVA_PRCM_PDSTAT0);
+  pdstat1 = getreg32(TIVA_PRCM_PDSTAT1);
+
+  /* Return the correct power status. */
+
+  if (domains & PRCM_DOMAIN_RFCORE)
+    {
+       status = status && ((pdstat0 & PRCM_PDSTAT0_RFC_ON) != 0 ||
+                           (pdstat1 & PRCM_PDSTAT1_RFC_ON) != 0);
+    }
+
+  if (domains & PRCM_DOMAIN_SERIAL)
+    {
+      status = status && (pdstat0 & PRCM_PDSTAT0_SERIAL_ON) != 0;
+    }
+
+  if (domains & PRCM_DOMAIN_PERIPH)
+    {
+        status = status && (pdstat0 & PRCM_DOMAIN_PERIPH) != 0;
+    }
+
+  /* Return the status. */
+
+  return status;
+}
+
+/******************************************************************************
+ * Name: prcm_periph_runenable
  *
  * Description:
  *   Enables a peripheral in Run mode
@@ -545,7 +592,7 @@ void prcm_periph_runenable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Enable module in Run Mode. */
 
@@ -584,7 +631,7 @@ void prcm_periph_rundisable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Disable module in Run Mode. */
 
@@ -622,7 +669,7 @@ void prcm_periph_sleepenable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Enable this peripheral in sleep mode. */
 
@@ -661,7 +708,7 @@ void prcm_periph_sleepdisable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Disable this peripheral in sleep mode */
 
@@ -699,7 +746,7 @@ void prcm_periph_deepsleepenable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Enable this peripheral in sleep mode. */
 
@@ -740,7 +787,7 @@ void prcm_periph_deepsleepdisable(uint32_t peripheral)
   /* Extract the index */
 
   index = PRCM_PERIPH_INDEX(peripheral);
-  DEBUGASSERT(index < TABLE_SIZE);
+  DEBUGASSERT(index < PRCM_NPERIPH);
 
   /* Enable this peripheral in sleep mode. */
 

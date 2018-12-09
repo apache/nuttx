@@ -58,14 +58,14 @@
 #define TIVA_IRQ_RFC_CPE_1           (18) /* Combined Interrupt for CPE
                                            * Generated events */
 #define TIVA_IRQ_PKA                 (19) /* PKA Interrupt event */
-#define TIVA_IRQ_AON_RTC_COMB        (20) /* Event from AON_RTC */
-#define TIVA_IRQ_UART0_COMB          (21) /* UART0 combined interrupt */
+#define TIVA_IRQ_AON_RTC             (20) /* Event from AON_RTC */
+#define TIVA_IRQ_UART0               (21) /* UART0 combined interrupt */
 #define TIVA_IRQ_AUX_SWEV0           (22) /* AUX software event 0 */
-#define TIVA_IRQ_SSI0_COMB           (23) /* SSI0 combined interrupt */
-#define TIVA_IRQ_SSI1_COMB           (24) /* SSI1 combined interrupt */
+#define TIVA_IRQ_SSI0                (23) /* SSI0 combined interrupt */
+#define TIVA_IRQ_SSI1                (24) /* SSI1 combined interrupt */
 #define TIVA_IRQ_RFC_CPE_0           (25) /* Combined Interrupt for CPE
                                            * Generated events */
-#define TIVA_IRQ_RFC_HW_COMB         (26) /* Combined RFC hardware interrupt */
+#define TIVA_IRQ_RFC_HW              (26) /* Combined RFC hardware interrupt */
 #define TIVA_IRQ_RFC_CMD_ACK         (27) /* RFC Doorbell Command
                                            * Acknowledgement Interrupt */
 #define TIVA_IRQ_I2S                 (28) /* Interrupt event from I2S */
@@ -81,21 +81,21 @@
 #define TIVA_IRQ_GPT3B               (38) /* GPT3B interrupt event */
 #define TIVA_IRQ_CRYPTO_RESULT_AVAIL (39) /* CRYPTO result available interrupt
                                            * event */
-#define TIVA_IRQ_DMA_DONE_COMB       (40) /* Combined DMA done */
+#define TIVA_IRQ_DMA_DONE            (40) /* Combined DMA done */
 #define TIVA_IRQ_DMA_ERR             (41) /* DMA bus error */
 #define TIVA_IRQ_FLASH               (42) /* FLASH controller error event */
 #define TIVA_IRQ_SWEV0               (43) /* Software event 0 */
-#define TIVA_IRQ_AUX_COMB            (44) /* AUX combined event */
+#define TIVA_IRQ_AUX                 (44) /* AUX combined event */
 #define TIVA_IRQ_AON_PROG0           (45) /* AON programmable event 0 */
 #define TIVA_IRQ_PROG0               (46) /* Programmable Interrupt 0 */
 #define TIVA_IRQ_AUX_COMPA           (47) /* AUX Compare A event */
 #define TIVA_IRQ_AUX_ADC             (48) /* AUX ADC interrupt event */
 #define TIVA_IRQ_TRNG                (49) /* TRNG Interrupt event */
-#define TIVA_IRQ_OSC_COMB            (50) /* Combined event from Oscillator
+#define TIVA_IRQ_OSC                 (50) /* Combined event from Oscillator
                                            * control */
 #define TIVA_IRQ_AUX_TIMER2_EV0      (51) /* AUX Timer2 event 0 */
-#define TIVA_IRQ_UART1_COMB          (52) /* UART1 combined interrupt */
-#define TIVA_IRQ_BATMON_COMB         (53) /* Combined event from battery
+#define TIVA_IRQ_UART1               (52) /* UART1 combined interrupt */
+#define TIVA_IRQ_BATMON              (53) /* Combined event from battery
                                            * monitor */
 
 #define NR_IRQS                      (54) /* Number of interrupt vectors */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_start.c
+ * arch/arm/src/tiva/common/lmxx_tm4c_start.c
  *
  *   Copyright (C) 2009, 2012, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <arch/irq.h>
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"

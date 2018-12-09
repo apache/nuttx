@@ -48,6 +48,13 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#include "up_arch.h"
+#include "hardware/tiva_prcm.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -83,29 +90,52 @@
 /* Encoded values used for enabling and disabling peripheral modules in the
  * MCU domain.  Encoding:
  *
- *   Bits 0-4:  Defines the bit position within the register.
- *   Bits 8-11: Defines the index into the register offset constant tables.
+ *   Bits 0-4:   Defines the bit position within the register.
+ *   Bits 5-7:   Defines the index into the register offset constant tables.
+ *   Bit  8:     Power domain.  0=SERIAL 1=PERIPH
+ *   Bits 12-15: Unique peripheral identifier
  */
 
-#define PRCM_PERIPH_TIMER0  ((0 << 8) | PRCM_GPTCLKG_CLKEN_GPT0_SHIFT)
-#define PRCM_PERIPH_TIMER1  ((0 << 8) | PRCM_GPTCLKG_CLKEN_GPT1_SHIFT)
-#define PRCM_PERIPH_TIMER2  ((0 << 8) | PRCM_GPTCLKG_CLKEN_GPT2_SHIFT)
-#define PRCM_PERIPH_TIMER3  ((0 << 8) | PRCM_GPTCLKG_CLKEN_GPT3_SHIFT)
-#define PRCM_PERIPH_SSI0    ((1 << 8) | PRCM_SSICLKG_CLKEN_SSI1_SHIFT)
-#define PRCM_PERIPH_SSI1    ((1 << 8) | PRCM_SSICLKG_CLKEN_SSI1_SHIFT)
-#define PRCM_PERIPH_UART0   ((2 << 8) | PRCM_UARTCLKG_CLKEN_UART0_SHIFT)
+#define _PRCM_PERIPH(p,d,i,b)   (((p) << 12) | ((d) << 8) | ((i) << 5) | (b))
+#define PRCM_PERIPH_TIMER0      _PRCM_PERIPH( 0, 1, 0, PRCM_GPTCLKG_CLKEN_GPT0_SHIFT)
+#define PRCM_PERIPH_TIMER1      _PRCM_PERIPH( 1, 1, 0, PRCM_GPTCLKG_CLKEN_GPT1_SHIFT)
+#define PRCM_PERIPH_TIMER2      _PRCM_PERIPH( 2, 1, 0, PRCM_GPTCLKG_CLKEN_GPT2_SHIFT)
+#define PRCM_PERIPH_TIMER3      _PRCM_PERIPH( 3, 1, 0, PRCM_GPTCLKG_CLKEN_GPT3_SHIFT)
+#define PRCM_PERIPH_SSI0        _PRCM_PERIPH( 4, 0, 1, PRCM_SSICLKG_CLKEN_SSI1_SHIFT)
+#define PRCM_PERIPH_SSI1        _PRCM_PERIPH( 5, 1, 1, PRCM_SSICLKG_CLKEN_SSI1_SHIFT)
+#define PRCM_PERIPH_UART0       _PRCM_PERIPH( 6, 0, 2, PRCM_UARTCLKG_CLKEN_UART0_SHIFT)
 #ifdef CONFIG_ARCH_CHIP_CC13X2
-#  define PRCM_PERIPH_UART1 ((2 << 8) | PRCM_UARTCLKG_CLKEN_UART1_SHIFT)
+#  define PRCM_PERIPH_UART1     _PRCM_PERIPH( 7, 1, 2, PRCM_UARTCLKG_CLKEN_UART1_SHIFT)
 #endif
-#define PRCM_PERIPH_I2C0    ((3 << 8) | PRCM_I2CCLKGR_CLKEN_SHIFT)
-#define PRCM_PERIPH_CRYPTO  ((4 << 8) | PRCM_SECDMACLKG_CRYPTO_CLKEN_SHIFT)
-#define PRCM_PERIPH_TRNG    ((4 << 8) | PRCM_SECDMACLKG_TRNG_CLKEN_SHIFT)
+#define PRCM_PERIPH_I2C0        _PRCM_PERIPH( 8, 0, 3, PRCM_I2CCLKGR_CLKEN_SHIFT)
+#define PRCM_PERIPH_CRYPTO      _PRCM_PERIPH( 9, 1, 4, PRCM_SECDMACLKG_CRYPTO_CLKEN_SHIFT)
+#define PRCM_PERIPH_TRNG        _PRCM_PERIPH(10, 1, 4, PRCM_SECDMACLKG_TRNG_CLKEN_SHIFT)
 #ifdef CONFIG_ARCH_CHIP_CC13X2
-#  define PRCM_PERIPH_PKA   ((4 << 8) | PRCM_SECDMACLKG_PKA_CLKEN_SHIFT)
+#  define PRCM_PERIPH_PKA       _PRCM_PERIPH(11, 1, 4, PRCM_SECDMACLKG_PKA_CLKEN_SHIFT)
 #endif
-#define PRCM_PERIPH_UDMA    ((4 << 8) | PRCM_SECDMACLKG_DMA_CLKEN_SHIFT)
-#define PRCM_PERIPH_GPIO    ((5 << 8) | PRCM_GPIOCLKG_CLKEN_SHIFT)
-#define PRCM_PERIPH_I2S     ((6 << 8) | PRCM_I2SCLKG_CLKEN_SHIFT)
+#define PRCM_PERIPH_UDMA        _PRCM_PERIPH(12, 1, 4, PRCM_SECDMACLKG_DMA_CLKEN_SHIFT)
+#define PRCM_PERIPH_GPIO        _PRCM_PERIPH(13, 1, 5, PRCM_GPIOCLKG_CLKEN_SHIFT)
+#define PRCM_PERIPH_I2S         _PRCM_PERIPH(14, 1, 6, PRCM_I2SCLKG_CLKEN_SHIFT)
+
+/* This macro extracts the power domain index out of the peripheral number */
+
+#define PRCM_PERIPH_ID(a)       (((a) >> 12) & 15)
+
+/* This macro extracts the power domain index out of the peripheral number */
+
+#define PRCM_DOMAIN_INDEX(a)    (((a) >> 8) & 1)
+
+/* This macro extracts the array index out of the peripheral number */
+
+#define PRCM_PERIPH_INDEX(a)    (((a) >> 5) & 7)
+
+/* This macro extracts the peripheral instance number and generates bit mask */
+
+#define PRCM_PERIPH_MASKBIT(a)  (1 << ((a) & 0x1f))
+
+/* The size of a register look-up table */
+
+#define PRCM_NPERIPH            7
 
 /****************************************************************************
  * Public Types
@@ -199,7 +229,7 @@ static inline void prcm_mcuuldo_configure(uint32_t enable)
 {
   /* Enable or disable the uLDO request signal. */
 
-  putreg32(enabled, TIVA_PRCM_VDCTL);
+  putreg32(enable, TIVA_PRCM_VDCTL);
 }
 
 /******************************************************************************
@@ -242,7 +272,7 @@ static inline void prcm_gptclock_set(uint32_t clkdiv)
  *
  ******************************************************************************/
 
-static inline uint32_t PRCMGPTimerClockDivisionGet(void)
+static inline uint32_t prcm_gptclock_get(void)
 {
   return getreg32(TIVA_PRCM_GPTCLKDIV);
 }
@@ -412,7 +442,7 @@ static inline void prcm_rfpowerdown_whenidle(void)
  *
  ******************************************************************************/
 
-static inline bool (void)
+static inline bool prcm_rfready(void)
 {
   /* Return the ready status of the RF Core. */
 
@@ -469,7 +499,7 @@ static inline void prcm_cacheretention_disable(void)
  *
  *   NOTE:  If source clock is 48 MHz, minimum clock divider is 2.
  *
- * Input Parameters
+ * Input Parameters:
  *    clockdiv  - Determines the division ratio for the infrastructure
  *                clock when the device is in the specified mode.  Allowed
  *                division factors for all three System CPU power modes are:
@@ -481,7 +511,8 @@ static inline void prcm_cacheretention_disable(void)
  *
  ******************************************************************************/
 
-void prcm_infclock_configure(uint32_t clkdiv, enum prcm_powermode_e powermode);
+void prcm_infclock_configure(enum prcm_clkdivider_e clkdiv,
+                             enum prcm_powermode_e powermode);
 
 /******************************************************************************
  * Name: prcm_audioclock_manual
@@ -584,7 +615,7 @@ void prcm_audioclock_configure(uint32_t clkconfig,
  *   Any write operation to a power domain which is still not operational can
  *   result in unexpected behavior.
  *
- * Input Parameters
+ * Input Parameters:
  *   domains - Determines which power domains to turn on.  The domains that
  *             can be turned on/off are:
  *             1) PRCM_DOMAIN_RFCORE : RF Core
@@ -609,7 +640,7 @@ void prcm_powerdomain_on(uint32_t domains);
  *   NOTE:  See prcm_powerdomain_on() for specifics regarding on/off
  *   configuration.
  *
- * Input Parameters
+ * Input Parameters:
  *   domains - Determines which power domains to turn off.  The domains that
  *             can be turned on/off are:
  *             1) PRCM_DOMAIN_RFCORE : RF Core
@@ -625,7 +656,30 @@ void prcm_powerdomain_on(uint32_t domains);
 void prcm_powerdomain_off(uint32_t domains);
 
 /******************************************************************************
- * Name: prcm_periph_rundisable
+ * Name: prcm_powerdomain_status
+ *
+ * Description:
+ *   Use this function to retrieve the current power status of one or more
+ *   power domains.
+ *
+ * Input Parameters:
+ *    domains - Determines which domain to get the power status for.  The
+ *              parameter must be an OR'ed combination of one or several of:
+ *              1) PRCM_DOMAIN_RFCORE : RF Core.
+ *              2) PRCM_DOMAIN_SERIAL : SSI0, UART0, I2C0
+ *              3) PRCM_DOMAIN_PERIPH : GPT0, GPT1, GPT2, GPT3, GPIO, SSI1, I2S,
+ *                 DMA, UART1
+ *
+ * Returned Value
+ *    - True:  The specified domains are all powered up.
+ *    - False: One or more of the domains is powered down.
+ *
+ ******************************************************************************/
+
+bool prcm_powerdomain_status(uint32_t domains);
+
+/******************************************************************************
+ * Name: prcm_periph_runenable
  *
  * Description:
  *   Enables a peripheral in Run mode

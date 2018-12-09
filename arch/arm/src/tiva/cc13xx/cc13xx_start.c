@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x_start.c
+ * arch/arm/src/tiva/cc13xx/cc13xx_start.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <arch/irq.h>
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"

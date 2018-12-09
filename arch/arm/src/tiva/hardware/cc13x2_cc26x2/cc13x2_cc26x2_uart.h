@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/chip/chip.h>
+#include "hardware/tiva_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

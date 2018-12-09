@@ -43,6 +43,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/tiva_gpio.h"
+#include "hardware/tiva_ioc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -193,13 +195,13 @@
  */
 
 #define GPIO_IOMODE_SHIFT           (8)       /* Bits 8-10:  I/O Mode */
-#define GPIO_IOMODE_MASK            (7 << IOC_IOCFG1_IOMODE_SHIFT)
-#  define GPIO_IOMODE_NORMAL        (0 << IOC_IOCFG1_IOMODE_SHIFT) /* Normal I/O */
-#  define GPIO_IOMODE_INV           (1 << IOC_IOCFG1_IOMODE_SHIFT) /* Inverted I/O */
-#  define GPIO_IOMODE_OPENDR        (4 << IOC_IOCFG1_IOMODE_SHIFT) /* Open drain */
-#  define GPIO_IOMODE_OPENDRINV     (5 << IOC_IOCFG1_IOMODE_SHIFT) /* Open drain, inverted I/O */
-#  define GPIO_IOMODE_OPENSRC       (6 << IOC_IOCFG1_IOMODE_SHIFT) /* Open source */
-#  define GPIO_IOMODE_OPENSRCINV    (7 << IOC_IOCFG1_IOMODE_SHIFT) /* Open source, inverted I/O */
+#define GPIO_IOMODE_MASK            (7 << GPIO_IOMODE_SHIFT)
+#  define GPIO_IOMODE_NORMAL        (0 << GPIO_IOMODE_SHIFT) /* Normal I/O */
+#  define GPIO_IOMODE_INV           (1 << GPIO_IOMODE_SHIFT) /* Inverted I/O */
+#  define GPIO_IOMODE_OPENDR        (4 << GPIO_IOMODE_SHIFT) /* Open drain */
+#  define GPIO_IOMODE_OPENDRINV     (5 << GPIO_IOMODE_SHIFT) /* Open drain, inverted I/O */
+#  define GPIO_IOMODE_OPENSRC       (6 << GPIO_IOMODE_SHIFT) /* Open source */
+#  define GPIO_IOMODE_OPENSRCINV    (7 << GPIO_IOMODE_SHIFT) /* Open source, inverted I/O */
 
 /* Edge detect mode
  *

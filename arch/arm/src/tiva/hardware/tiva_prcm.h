@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_timer.h
+ * arch/arm/src/tiva/hardware/tiva_prcm.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,25 +33,30 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PRCM_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PRCM_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/tiva_memorymap.h"
+
+/* Include the pin mapping file for the specific Tiva/Stellaris/SimpleLink chip */
+
+#if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
+  /* These architectures do not support the PRCM block */
+#elif defined(CONFIG_ARCH_CHIP_CC13X0)
+#  include "hardware/cc13x0/cc13x0_prcm.h"
+#elif defined(CONFIG_ARCH_CHIP_CC13X2)
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_prcm.h"
+#else
+#  error "Unsupported Tiva/Stellaris/SimpleLink PRCM"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* TIMER Register Offsets ***********************************************************/
-
-/* TIMER Register Addresses *********************************************************/
-
-/* TIMER Register Bitfield Definitions **********************************************/
 
 /************************************************************************************
  * Public Types
@@ -65,4 +70,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_PRCM_H */

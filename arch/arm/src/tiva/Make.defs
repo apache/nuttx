@@ -87,15 +87,17 @@ CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
 CHIP_CSRCS += tiva_ssi.c
 
 ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
-CHIP_CSRCS += tiva_start.c lm3s_gpio.c tiva_gpioirq.c
+CHIP_CSRCS += lmxx_tm4c_start.c lm3s_gpio.c tiva_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_LM4F),y)
-CHIP_CSRCS += tiva_start.c lm4f_gpio.c tiva_gpioirq.c
+CHIP_CSRCS += lmxx_tm4c_start.c lm4f_gpio.c tiva_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
-CHIP_CSRCS += tiva_start.c tm4c_gpio.c tiva_gpioirq.c
+CHIP_CSRCS += lmxx_tm4c_start.c tm4c_gpio.c tiva_gpioirq.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
 CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
+CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
 CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
+CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
@@ -166,7 +168,7 @@ VPATH += chip/lm
 else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
 VPATH += chip/tm4c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
-VPATH += chip/cc13x0
+VPATH += chip/cc13xx
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
-VPATH += chip/cc13x2
+VPATH += chip/cc13xx
 endif
