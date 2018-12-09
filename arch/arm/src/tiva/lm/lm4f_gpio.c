@@ -585,8 +585,8 @@ static inline void tiva_interrupt(pinconfig_t pinconfig)
 
   /* Mask and clear the GPIO interrupt */
 
-  tiva_gpioirqdisable(port, pin);
-  tiva_gpioirqclear(port, pin);
+  tiva_gpioirqdisable(pinconfig);
+  tiva_gpioirqclear(pinconfig);
 
   /* handle according to the selected interrupt type */
 

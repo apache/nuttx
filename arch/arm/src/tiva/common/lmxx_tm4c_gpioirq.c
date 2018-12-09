@@ -1,7 +1,8 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_gpioirq.c
+ * arch/arm/src/tiva/common/lmxx_tm4c_gpioirq.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012, 2014-2016, 2018 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,26 +243,6 @@ static int gpioport2irq(uint8_t port)
 }
 
 /****************************************************************************
- * Name: tiva_gpioirqclear
- *
- * Description:
- *   Clears the interrupt status of the input base
- *
- ****************************************************************************/
-
-void tiva_gpioirqclear(uint8_t port, uint32_t pinmask)
-{
-  uintptr_t base = tiva_gpiobaseaddress(port);
-
-  /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a bit
-   * in this register clears the corresponding interrupt edge detection logic
-   * register. Writing a 0 has no effect."
-   */
-
-  modifyreg32(base + TIVA_GPIO_ICR_OFFSET, 0, pinmask);
-}
-
-/****************************************************************************
  * Name: tiva_gpioporthandler
  *
  * Description:
@@ -280,9 +261,11 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
   irq  = gpioport2irq(port);
   mis  = getreg32(base + TIVA_GPIO_MIS_OFFSET);
 
-  tiva_gpioirqclear(port, 0xff);
-
   gpioinfo("irq=%d mis=0b%08b\n", irq, mis & 0xff);
+
+  /* Clear all pending interrupts */
+
+  putreg32(0xff, base + TIVA_GPIO_ICR_OFFSET);
 
   /* Now process each IRQ pending in the MIS */
 
@@ -551,9 +534,6 @@ int tiva_gpioirqinitialize(void)
       g_gpioportirqvector[i].arg = NULL;
     }
 
-  gpioinfo("tiva_gpioirqinitialize isr=%d/%d irq_unexpected_isr=%p\n",
-           i, TIVA_NIRQ_PINS, irq_unexpected_isr);
-
   /* Then attach each GPIO interrupt handlers and enable corresponding GPIO
    * interrupts
    */
@@ -661,12 +641,12 @@ int tiva_gpioirqinitialize(void)
  *
  ****************************************************************************/
 
-int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg)
+int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 {
   FAR struct gpio_handler_s *handler;
   irqstate_t flags;
-  uint8_t    port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint8_t    pinno = (pinset & GPIO_PIN_MASK);
+  uint8_t    port  = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint8_t    pinno = (pinconfig & GPIO_PIN_MASK);
   uint8_t    pin   = 1 << pinno;
 
   /* Assign per-pin interrupt handlers */
@@ -686,7 +666,7 @@ int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg)
       handler = &g_gpioportirqvector[TIVA_GPIO_IRQ_IDX(port, pinno)];
       if (isr == NULL)
         {
-          tiva_gpioirqdisable(port, pin);
+          tiva_gpioirqdisable(pinconfig);
           handler->isr = irq_unexpected_isr;
           handler->arg = NULL;
         }
@@ -694,55 +674,13 @@ int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg)
         {
           handler->isr = isr;
           handler->arg = arg;
-          tiva_gpioirqenable(port, pin);
+          tiva_gpioirqenable(pinconfig);
         }
 
       leave_critical_section(flags);
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: tiva_gpioportirqattach
- *
- * Description:
- *   Attach 'isr' to the GPIO port. Only use this if you want to handle
- *   the entire ports interrupts explicitly.
- *
- ****************************************************************************/
-
-void tiva_gpioportirqattach(uint8_t port, xcpt_t isr)
-{
-  irqstate_t flags;
-  int irq = gpioport2irq(port);
-
-  /* assign port interrupt handler */
-
-  if (port < TIVA_NPORTS)
-    {
-      flags = enter_critical_section();
-
-      /* If the new ISR is NULL, then the ISR is being detached.
-       * In this case, disable the ISR and direct any interrupts
-       * to the unexpected interrupt handler.
-       */
-
-      gpioinfo("assign function=%p to port=%d\n", isr, port);
-
-      if (isr == NULL)
-        {
-          tiva_gpioirqdisable(port, 0xff);
-          irq_attach(irq, irq_unexpected_isr, NULL);
-        }
-      else
-        {
-          irq_attach(irq, isr, NULL);
-          tiva_gpioirqenable(port, 0xff);
-        }
-
-      leave_critical_section(flags);
-    }
 }
 
 /****************************************************************************
@@ -753,8 +691,10 @@ void tiva_gpioportirqattach(uint8_t port, xcpt_t isr)
  *
  ****************************************************************************/
 
-void tiva_gpioirqenable(uint8_t port, uint8_t pin)
+void tiva_gpioirqenable(pinconfig_t pinconfig)
 {
+  uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
   uintptr_t base = tiva_gpiobaseaddress(port);
 
   /* Enable the GPIO interrupt. "The GPIO IM register is the interrupt
@@ -775,8 +715,10 @@ void tiva_gpioirqenable(uint8_t port, uint8_t pin)
  *
  ****************************************************************************/
 
-void tiva_gpioirqdisable(uint8_t port, uint8_t pin)
+void tiva_gpioirqdisable(pinconfig_t pinconfig)
 {
+  uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
   uintptr_t base = tiva_gpiobaseaddress(port);
 
   /* Disable the GPIO interrupt. "The GPIO IM register is the interrupt
@@ -787,6 +729,28 @@ void tiva_gpioirqdisable(uint8_t port, uint8_t pin)
    */
 
   modifyreg32(base + TIVA_GPIO_IM_OFFSET, pin, 0);
+}
+
+/****************************************************************************
+ * Name: tiva_gpioirqclear
+ *
+ * Description:
+ *   Clears the interrupt status of the input base
+ *
+ ****************************************************************************/
+
+void tiva_gpioirqclear(pinconfig)
+{
+  uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
+  uintptr_t base = tiva_gpiobaseaddress(port);
+
+  /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a bit
+   * in this register clears the corresponding interrupt edge detection logic
+   * register. Writing a 0 has no effect."
+   */
+
+  putreg32((1 << pin), base + TIVA_GPIO_ICR_OFFSET);
 }
 
 #endif /* CONFIG_TIVA_GPIO_IRQS */

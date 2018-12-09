@@ -45,7 +45,7 @@
 
 #include <nuttx/irq.h>
 
-#include "hardware/tiva_prcm"
+#include "hardware/tiva_prcm.h"
 #include "tiva_enableclks.h"
 
 /****************************************************************************

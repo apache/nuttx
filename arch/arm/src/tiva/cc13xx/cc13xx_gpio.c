@@ -53,30 +53,10 @@
 #include "tiva_gpio.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static bool g_gpio_powered;
-
- /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-
- /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
 
 /****************************************************************************
  * Public Functions
@@ -112,6 +92,13 @@ int tiva_configgpio(pinconfig_t pinconfig)
       tiva_gpio_enableclk();
       g_gpio_powered = true;
     }
+
+#ifdef CONFIG_TIVA_GPIO_IRQS
+  /* Mask and clear any pending GPIO interrupt */
+
+  tiva_gpioirqdisable(pinconfig);
+  tiva_gpioirqclear(pinconfig);
+#endif
 
   /* Configure the GPIO as an input.  We don't even know if the pin is a
    * a GPIO yet, but may prevent glitches when configure GPIO output pins.

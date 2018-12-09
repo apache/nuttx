@@ -56,25 +56,13 @@
 
 const struct cc134xx_pinconfig_s g_gpio_uart0_rx =
 {
-  .gpio =
-  {
-    GPIO_DIO(0)
-  },
-  .ioc =
-  {
-    GPIO_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
-  }
+  .gpio = GPIO_DIO(0),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
 };
 
 const struct cc134xx_pinconfig_s g_gpio_uart0_tx =
 {
-  .gpio =
-  {
-    GPIO_DIO(1)
-  },
-  .ioc =
-  {
-    GPIO_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
-  }
+  .gpio = GPIO_DIO(1),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
 };
 #endif

@@ -45,7 +45,7 @@
 
 #include <nuttx/irq.h>
 
-#include "hardware/tiva_prcm"
+#include "hardware/tiva_prcm.h"
 #include "tiva_enablepwr.h"
 
 /****************************************************************************
@@ -68,14 +68,14 @@ static uint16_t g_domain_usage[2];
 
 void cc13xx_periph_enablepwr(uint32_t peripheral)
 {
-  irgstate_t flags;
+  irqstate_t flags;
   uint32_t domain;
   int dndx;
   int pndx;
 
   dndx   = PRCM_DOMAIN_INDEX(peripheral);
   pndx   = PRCM_PERIPH_ID(peripheral);
-  domain = (pndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH)
+  domain = (pndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
 
   /* Remember that this peripheral needs power in this domain */
 
@@ -109,7 +109,7 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
 {
   int dndx = PRCM_DOMAIN_INDEX(peripheral);
   int pndx = PRCM_PERIPH_ID(peripheral);
-  irgstate_t flags;
+  irqstate_t flags;
 
   /* This peripheral no longer needs power in this domain */
 
@@ -122,7 +122,7 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
 
   if (g_domain_usage[dndx] == 0)
     {
-      prcm_powerdomain_off(pndx == ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
+      prcm_powerdomain_off(pndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
     }
 
   spin_unlock_irqrestore(flags);

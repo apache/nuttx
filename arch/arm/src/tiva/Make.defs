@@ -49,37 +49,38 @@ CMN_CSRCS += up_svcall.c up_trigger_irq.c up_unblocktask.c up_udelay.c
 CMN_CSRCS += up_usestack.c up_vfork.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += up_idle.c
+  CMN_CSRCS += up_idle.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += up_lazyexception.S
+  CMN_ASRCS += up_lazyexception.S
 else
-CMN_ASRCS += up_exception.S
+  CMN_ASRCS += up_exception.S
 endif
+
 CMN_CSRCS += up_vectors.c
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += up_fpu.S
-CMN_CSRCS += up_copyarmstate.c
+  CMN_ASRCS += up_fpu.S
+  CMN_CSRCS += up_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+  CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+  CMN_CSRCS += up_checkstack.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+  CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS += up_signal_dispatch.c
-CMN_UASRCS += up_signal_handler.S
+  CMN_CSRCS += up_signal_dispatch.c
+  CMN_UASRCS += up_signal_handler.S
 endif
 else
-CMN_CSRCS += up_allocateheap.c
+  CMN_CSRCS += up_allocateheap.c
 endif
 
 CHIP_ASRCS  =
@@ -87,76 +88,77 @@ CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
 CHIP_CSRCS += tiva_ssi.c
 
 ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
-CHIP_CSRCS += lmxx_tm4c_start.c lm3s_gpio.c tiva_gpioirq.c
+  CHIP_CSRCS += lmxx_tm4c_start.c lm3s_gpio.c lmxx_tm4c_gpioirq.c
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
 else ifeq ($(CONFIG_ARCH_CHIP_LM4F),y)
-CHIP_CSRCS += lmxx_tm4c_start.c lm4f_gpio.c tiva_gpioirq.c
+  CHIP_CSRCS += lmxx_tm4c_start.c lm4f_gpio.c lmxx_tm4c_gpioirq.c
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
 else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
-CHIP_CSRCS += lmxx_tm4c_start.c tm4c_gpio.c tiva_gpioirq.c
+  CHIP_CSRCS += lmxx_tm4c_start.c tm4c_gpio.c lmxx_tm4c_gpioirq.c
+ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
+  CHIP_CSRCS += tm4c129_sysctrl.c
+else
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
+endif
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
-CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
-CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
+  CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
-CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
-CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
+  CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
-CHIP_CSRCS += tiva_dumpgpio.c
-endif
-
-ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
-CHIP_CSRCS += tm4c129_sysctrl.c
-else
-CHIP_CSRCS += tiva_sysctrl.c
+  CHIP_CSRCS += tiva_dumpgpio.c
 endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += tiva_timerisr.c
+  CHIP_CSRCS += tiva_timerisr.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
+  CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
 endif
 
 ifeq ($(CONFIG_TIVA_I2C),y)
-CHIP_CSRCS += tiva_i2c.c
+  CHIP_CSRCS += tiva_i2c.c
 endif
 
 ifeq ($(CONFIG_TIVA_PWM),y)
-CHIP_CSRCS += tiva_pwm.c
+  CHIP_CSRCS += tiva_pwm.c
 endif
 
 ifeq ($(CONFIG_TIVA_QEI),y)
-CHIP_CSRCS += tiva_qencoder.c
+  CHIP_CSRCS += tiva_qencoder.c
 endif
 
 ifeq ($(CONFIG_TIVA_TIMER),y)
-CHIP_CSRCS += tiva_timerlib.c
+  CHIP_CSRCS += tiva_timerlib.c
 ifeq ($(CONFIG_TIVA_TIMER32_PERIODIC),y)
-CHIP_CSRCS += tiva_timerlow32.c
+  CHIP_CSRCS += tiva_timerlow32.c
 endif
 endif
 
 ifeq ($(CONFIG_TIVA_ADC),y)
-CHIP_CSRCS += tiva_adclow.c
-CHIP_CSRCS += tiva_adclib.c
+  CHIP_CSRCS += tiva_adclow.c
+  CHIP_CSRCS += tiva_adclib.c
 endif
 
 ifeq ($(CONFIG_TIVA_ETHERNET),y)
 ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
-CHIP_CSRCS += lm3s_ethernet.c
+  CHIP_CSRCS += lm3s_ethernet.c
 endif
 ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
-CHIP_CSRCS += tm4c_ethernet.c
+  CHIP_CSRCS += tm4c_ethernet.c
 endif
 endif
 
 ifeq ($(CONFIG_TIVA_FLASH),y)
-CHIP_CSRCS += tiva_flash.c
+  CHIP_CSRCS += tiva_flash.c
 endif
 
 ifeq ($(CONFIG_TIVA_EEPROM),y)
-CHIP_CSRCS += tiva_eeprom.c
+  CHIP_CSRCS += tiva_eeprom.c
 endif
 
 # Paths to source files

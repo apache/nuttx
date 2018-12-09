@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_sysctrl.c
+ * arch/arm/src/tiva/common/lmxx_tm4c_sysctrl.c
  *
  *   Copyright (C) 2009-2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

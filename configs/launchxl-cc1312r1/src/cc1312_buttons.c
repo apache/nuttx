@@ -89,6 +89,7 @@ void board_button_initialize(void)
 uint32_t board_buttons(void)
 {
 #warning Missing logic
+  return 0;
 }
 
 /****************************************************************************
