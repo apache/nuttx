@@ -739,7 +739,7 @@ void tiva_gpioirqdisable(pinconfig_t pinconfig)
  *
  ****************************************************************************/
 
-void tiva_gpioirqclear(pinconfig)
+void tiva_gpioirqclear(pinconfig_t pinconfig)
 {
   uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
