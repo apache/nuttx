@@ -4625,7 +4625,6 @@ static int hrtim_irq_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer, uint16_t
       hrtim_tim_putreg(priv, timer, STM32_HRTIM_TIM_DIER_OFFSET, irq);
     }
 
-errout:
   return ret;
 }
 

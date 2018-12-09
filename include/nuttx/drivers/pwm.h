@@ -61,8 +61,6 @@
 
 #include <nuttx/fs/ioctl.h>
 
-#ifdef CONFIG_PWM
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -326,5 +324,4 @@ void pwm_expired(FAR void *handle);
 }
 #endif
 
-#endif /* CONFIG_PWM */
 #endif /* __INCLUDE_NUTTX_DRIVERS_PWM_H */

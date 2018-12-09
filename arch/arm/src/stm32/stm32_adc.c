@@ -83,7 +83,7 @@
  *   - injected sequence conversion (not supported in upper-half ADC driver)
  */
 
-/* ADC "upper half" support must be enabled */
+/* STM32 ADC "lower-half" support must be enabled */
 
 #ifdef CONFIG_STM32_ADC
 

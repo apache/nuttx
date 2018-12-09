@@ -199,15 +199,15 @@ ifeq ($(CONFIG_STM32_SDADC),y)
 CHIP_CSRCS += stm32_sdadc.c
 endif
 
-ifeq ($(CONFIG_DAC),y)
+ifeq ($(CONFIG_STM32_DAC),y)
 CHIP_CSRCS += stm32_dac.c
 endif
 
-ifeq ($(CONFIG_COMP),y)
+ifeq ($(CONFIG_STM32_COMP),y)
 CHIP_CSRCS += stm32_comp.c
 endif
 
-ifeq ($(CONFIG_OPAMP),y)
+ifeq ($(CONFIG_STM32_OPAMP),y)
 CHIP_CSRCS += stm32_opamp.c
 endif
 
@@ -235,7 +235,7 @@ ifeq ($(CONFIG_STM32_DMA2D),y)
 CHIP_CSRCS += stm32_dma2d.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
+ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
@@ -243,7 +243,7 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_CAN),y)
+ifeq ($(CONFIG_STM32_CAN),y)
 CHIP_CSRCS += stm32_can.c
 endif
 

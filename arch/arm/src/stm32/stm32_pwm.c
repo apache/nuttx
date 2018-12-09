@@ -49,7 +49,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/drivers/pwm.h>
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -67,14 +66,7 @@
  *   2. STM32 TIMER IP version 2 - F3 (no F37x), F7, H7, L4, L4+
  */
 
-#if defined(CONFIG_STM32_TIM1_PWM)  || defined(CONFIG_STM32_TIM2_PWM)  || \
-    defined(CONFIG_STM32_TIM3_PWM)  || defined(CONFIG_STM32_TIM4_PWM)  || \
-    defined(CONFIG_STM32_TIM5_PWM)  || defined(CONFIG_STM32_TIM8_PWM)  || \
-    defined(CONFIG_STM32_TIM9_PWM)  || defined(CONFIG_STM32_TIM10_PWM) || \
-    defined(CONFIG_STM32_TIM11_PWM) || defined(CONFIG_STM32_TIM12_PWM) || \
-    defined(CONFIG_STM32_TIM13_PWM) || defined(CONFIG_STM32_TIM14_PWM) || \
-    defined(CONFIG_STM32_TIM15_PWM) || defined(CONFIG_STM32_TIM16_PWM) || \
-    defined(CONFIG_STM32_TIM17_PWM)
+#ifdef CONFIG_STM32_PWM
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -4691,5 +4683,4 @@ errout:
   return (FAR struct pwm_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_STM32_TIMn_PWM, n = 1,...,17 */
-
+#endif /* CONFIG_STM32_PWM */

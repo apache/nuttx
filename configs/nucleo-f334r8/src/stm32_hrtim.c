@@ -47,8 +47,7 @@
 
 #include "stm32_hrtim.h"
 
-#if defined(CONFIG_STM32_HRTIM) && defined(CONFIG_STM32_HRTIM1) && \
-    !defined(CONFIG_NUCLEOF334R8_HIGHPRI)
+#ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
 
 /****************************************************************************
  * Public Functions

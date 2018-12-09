@@ -51,6 +51,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/drivers/pwm.h>
+
 #include "chip.h"
 
 /************************************************************************************
@@ -116,23 +118,14 @@
 
 /* Check if PWM support for any channel is enabled. */
 
-#if defined(CONFIG_STM32_TIM1_PWM)  || defined(CONFIG_STM32_TIM2_PWM)  || \
-    defined(CONFIG_STM32_TIM3_PWM)  || defined(CONFIG_STM32_TIM4_PWM)  || \
-    defined(CONFIG_STM32_TIM5_PWM)  || defined(CONFIG_STM32_TIM8_PWM)  || \
-    defined(CONFIG_STM32_TIM9_PWM)  || defined(CONFIG_STM32_TIM10_PWM) || \
-    defined(CONFIG_STM32_TIM11_PWM) || defined(CONFIG_STM32_TIM12_PWM) || \
-    defined(CONFIG_STM32_TIM13_PWM) || defined(CONFIG_STM32_TIM14_PWM) || \
-    defined(CONFIG_STM32_TIM15_PWM) || defined(CONFIG_STM32_TIM16_PWM) || \
-    defined(CONFIG_STM32_TIM17_PWM)
+#ifdef CONFIG_STM32_PWM
 
 #include <arch/board/board.h>
 #include "chip/stm32_tim.h"
 
-#ifdef CONFIG_STM32_PWM_MULTICHAN
-#  ifndef CONFIG_PWM_MULTICHAN
-#    error CONFIG_STM32_PWM_MULTICHAN enabled but CONFIG_PWM_MULTICHAN not set!
-#  endif
-#endif
+/* Configuration needed by upper-half PWM driver */
+
+#ifdef CONFIG_PWM
 
 #ifdef CONFIG_PWM_MULTICHAN
 
@@ -612,6 +605,8 @@
 
 #endif /* CONFIG_PWM_MULTICHAN */
 
+#endif /* CONFIG_PWM */
+
 #ifdef CONFIG_STM32_TIM1_CH1OUT
 #  define PWM_TIM1_CH1CFG GPIO_TIM1_CH1OUT
 #else
@@ -884,8 +879,12 @@
         (dev)->llops->freq_update((FAR struct pwm_lowerhalf_s *)dev, freq)
 #define PWM_TIM_ENABLE(dev, state)                                                 \
         (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
-#define PWM_DUMP_REGS(dev)                                                         \
+#ifdef CONFIG_DEBUG_PWM_INFO
+#  define PWM_DUMP_REGS(dev)                                                       \
         (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev)
+#else
+#  define PWM_DUMP_REGS(dev)
+#endif
 #define PWM_DT_UPDATE(dev, dt)                                                     \
         (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
 
@@ -1081,5 +1080,5 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32_TIMx_PWM */
+#endif /* CONFIG_STM32_PWM */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_PWM_H */

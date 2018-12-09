@@ -92,4 +92,8 @@ ifeq ($(CONFIG_NUCLEOF334R8_HIGHPRI),y)
 CSRCS += stm32_highpri.c
 endif
 
+ifeq ($(CONFIG_NUCLEOF334R8_SPWM),y)
+CSRCS += stm32_spwm.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

@@ -732,8 +732,11 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
 #if STM32_NATIM > 0
   /* Advanced registers require Main Output Enable */
 
-    if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE ||
-        ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE)
+    if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE
+#ifdef STM32_TIM8_BASE
+        || ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE
+#endif
+      )
       {
         stm32_modifyreg16(dev, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
       }

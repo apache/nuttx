@@ -1776,6 +1776,8 @@ config STM32_STM32F33XX
 	select STM32_HAVE_OPAMP2
 	select STM32_HAVE_CCM
 	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
@@ -2506,44 +2508,46 @@ config STM32_SDADC3
 	depends on STM32_HAVE_SDADC3
 	select STM32_HAVE_SDADC3_DMA if STM32_DMA2
 
-config STM32_COMP
-	bool "COMP"
-	default n
-	depends on STM32_STM32L15XX || STM32_STM32F33XX
-
 config STM32_COMP1
 	bool "COMP1"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP1
 
 config STM32_COMP2
 	bool "COMP2"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP2
 
 config STM32_COMP3
 	bool "COMP3"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP3
 
 config STM32_COMP4
 	bool "COMP4"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP4
 
 config STM32_COMP5
 	bool "COMP5"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP5
 
 config STM32_COMP6
 	bool "COMP6"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP6
 
 config STM32_COMP7
 	bool "COMP7"
 	default n
+	select STM32_COMP
 	depends on STM32_HAVE_COMP7
 
 config STM32_BKP
@@ -2749,28 +2753,28 @@ config STM32_DMA2D
 		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
 		available on the STM32F429 and STM32F439 devices.
 
-config STM32_OPAMP
-	bool "OPAMP"
-	default n
-
 config STM32_OPAMP1
 	bool "OPAMP1"
 	default n
+	select STM32_OPAMP
 	depends on STM32_HAVE_OPAMP1
 
 config STM32_OPAMP2
 	bool "OPAMP2"
 	default n
+	select STM32_OPAMP
 	depends on STM32_HAVE_OPAMP2
 
 config STM32_OPAMP3
 	bool "OPAMP3"
 	default n
+	select STM32_OPAMP
 	depends on STM32_HAVE_OPAMP3
 
 config STM32_OPAMP4
 	bool "OPAMP4"
 	default n
+	select STM32_OPAMP
 	depends on STM32_HAVE_OPAMP4
 
 config STM32_RTC
@@ -3063,6 +3067,19 @@ config STM32_CAN
 	bool
 
 config STM32_TIM
+	bool
+	default n
+
+config STM32_PWM
+	bool
+	default n
+
+config STM32_COMP
+	bool
+	default n
+	depends on STM32_STM32L15XX || STM32_STM32F33XX
+
+config STM32_OPAMP
 	bool
 	default n
 
@@ -3445,6 +3462,7 @@ config STM32_TIM1_PWM
 	default n
 	depends on STM32_TIM1
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -3686,6 +3704,7 @@ config STM32_TIM2_PWM
 	default n
 	depends on STM32_TIM2
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -3870,6 +3889,7 @@ config STM32_TIM3_PWM
 	default n
 	depends on STM32_TIM3
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -4054,6 +4074,7 @@ config STM32_TIM4_PWM
 	default n
 	depends on STM32_TIM4
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 4 for use by PWM
 
@@ -4238,6 +4259,7 @@ config STM32_TIM5_PWM
 	default n
 	depends on STM32_TIM5
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 5 for use by PWM
 
@@ -4422,6 +4444,7 @@ config STM32_TIM8_PWM
 	default n
 	depends on STM32_TIM8
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 8 for use by PWM
 
@@ -4657,6 +4680,7 @@ config STM32_TIM9_PWM
 	default n
 	depends on STM32_TIM9
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 9 for use by PWM
 
@@ -4766,6 +4790,7 @@ config STM32_TIM10_PWM
 	default n
 	depends on STM32_TIM10
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 10 for use by PWM
 
@@ -4841,6 +4866,7 @@ config STM32_TIM11_PWM
 	default n
 	depends on STM32_TIM11
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 11 for use by PWM
 
@@ -4916,6 +4942,7 @@ config STM32_TIM12_PWM
 	default n
 	depends on STM32_TIM12
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 12 for use by PWM
 
@@ -5025,6 +5052,7 @@ config STM32_TIM13_PWM
 	default n
 	depends on STM32_TIM13
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 13 for use by PWM
 
@@ -5100,6 +5128,7 @@ config STM32_TIM14_PWM
 	default n
 	depends on STM32_TIM14
 	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32_PWM
 	---help---
 		Reserve timer 14 for use by PWM
 
@@ -5174,6 +5203,7 @@ config STM32_TIM15_PWM
 	bool "TIM15 PWM"
 	default n
 	depends on STM32_TIM15
+	select STM32_PWM
 	---help---
 		Reserve timer 15 for use by PWM
 
@@ -5321,6 +5351,7 @@ config STM32_TIM16_PWM
 	bool "TIM16 PWM"
 	default n
 	depends on STM32_TIM16
+	select STM32_PWM
 	---help---
 		Reserve timer 16 for use by PWM
 
@@ -5414,6 +5445,7 @@ config STM32_TIM17_PWM
 	bool "TIM17 PWM"
 	default n
 	depends on STM32_TIM17
+	select STM32_PWM
 	---help---
 		Reserve timer 17 for use by PWM
 
