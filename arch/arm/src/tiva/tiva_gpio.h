@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_gpio.h
  *
- *   Copyright (C) 2009-2010, 2013-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2015, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * With modifications from Calvin Maguranis <calvin.maguranis@trd2inc.com>
@@ -47,6 +48,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
