@@ -263,6 +263,16 @@
 #  define GPIO_PIN_7                  (7 << GPIO_PIN_SHIFT)
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This opaque type permits common function prototype for GPIO functions
+ * across all MCUs.
+ */
+
+typedef uint32_t pinconfig_t;
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

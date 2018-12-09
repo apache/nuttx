@@ -88,7 +88,7 @@
 
 /* IOC register addresses **********************************************************/
 
-#define TIVA_IOC_IOCFG_(n)         (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
+#define TIVA_IOC_IOCFG(n)          (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
 #  define TIVA_IOC_IOCFG0          (TIVA_IOC_BASE + TIVA_IOC_IOCFG0_OFFSET)
 #  define TIVA_IOC_IOCFG1          (TIVA_IOC_BASE + TIVA_IOC_IOCFG1_OFFSET)
 #  define TIVA_IOC_IOCFG2          (TIVA_IOC_BASE + TIVA_IOC_IOCFG2_OFFSET)
@@ -124,8 +124,8 @@
 
 /* IOC register bit settings *******************************************************/
 
-#define IOC_IOCFG_PORTID_MASK      (0)       /* Bits 0-5:  Selects DIO usage */
-#define IOC_IOCFG_PORTID_SHIFT     (0x3f << IOC_IOCFG_PORTID_MASK)
+#define IOC_IOCFG_PORTID_SHIFT     (0)       /* Bits 0-5:  Selects DIO usage */
+#define IOC_IOCFG_PORTID_MASK      (0x3f << IOC_IOCFG_PORTID_SHIFT)
 #  define IOC_IOCFG_PORTID(n)        ((uint32_t)(n) << IOC_IOCFG_PORTID_MASK) /* See PORT ID definitions */
 #define IOC_IOCFG_IOEV_MCU_WUEN    (1 << 6)  /* Bit 6:  Input edge asserts MCU_WU event */
 #define IOC_IOCFG_IOEV_RTCEN       (1 << 7)  /* Bit 7:  Input edge asserts RTC event */

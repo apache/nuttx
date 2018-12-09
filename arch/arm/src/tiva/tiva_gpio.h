@@ -85,7 +85,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int tiva_configgpio(uint32_t pinset);
+int tiva_configgpio(pinconfig_t pinconfig);
 
 /****************************************************************************
  * Name: tiva_gpiowrite
@@ -95,7 +95,7 @@ int tiva_configgpio(uint32_t pinset);
  *
  ****************************************************************************/
 
-void tiva_gpiowrite(uint32_t pinset, bool value);
+void tiva_gpiowrite(pinconfig_t pinconfig, bool value);
 
 /****************************************************************************
  * Name: tiva_gpioread
@@ -105,7 +105,7 @@ void tiva_gpiowrite(uint32_t pinset, bool value);
  *
  ****************************************************************************/
 
-bool tiva_gpioread(uint32_t pinset);
+bool tiva_gpioread(pinconfig_t pinconfig);
 
 /****************************************************************************
  * Function:  tiva_dumpgpio
@@ -115,7 +115,7 @@ bool tiva_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
-int tiva_dumpgpio(uint32_t pinset, const char *msg);
+int tiva_dumpgpio(pinconfig_t pinconfig, const char *msg);
 
 /****************************************************************************
  * Name: tiva_gpio_lockport
@@ -126,10 +126,12 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg);
  *
  ****************************************************************************/
 
-void tiva_gpio_lockport(uint32_t pinset, bool lock);
+#if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
+void tiva_gpio_lockport(pinconfig_t pinconfig, bool lock);
+#endif
 
 /****************************************************************************
- * Function:  tiva_dumpgpio
+ * Function:  tiva_gpio_dumpconfig
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
@@ -137,7 +139,7 @@ void tiva_gpio_lockport(uint32_t pinset, bool lock);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
-void tiva_gpio_dumpconfig(uint32_t pinset);
+void tiva_gpio_dumpconfig(pinconfig_t pinconfig);
 #else
 # define tiva_gpio_dumpconfig(p)
 #endif
@@ -168,7 +170,7 @@ int weak_function tiva_gpioirqinitialize(void);
  *
  ****************************************************************************/
 
-int tiva_gpioirqattach(uint32_t pinset, xcpt_t isr, void *arg);
+int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg);
 #  define tiva_gpioirqdetach(p) tiva_gpioirqattach((p),NULL,NULL)
 
 /****************************************************************************
@@ -202,16 +204,6 @@ void tiva_gpioirqenable(uint8_t port, uint8_t pin);
  ****************************************************************************/
 
 void tiva_gpioirqdisable(uint8_t port, uint8_t pin);
-
-/****************************************************************************
- * Name: tiva_gpioirqstatus
- *
- * Description:
- *   Returns raw or masked interrupt status.
- *
- ****************************************************************************/
-
-uint32_t tiva_gpioirqstatus(uint8_t port, bool masked);
 
 /****************************************************************************
  * Name: tiva_gpioirqclear

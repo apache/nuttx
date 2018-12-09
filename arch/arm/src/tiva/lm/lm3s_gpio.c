@@ -358,9 +358,9 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
  ****************************************************************************/
 
 static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
-                                        uint32_t pinset)
+                                        pinconfig_t pinconfig)
 {
-  int strength = (pinset & GPIO_STRENGTH_MASK);
+  int strength = (pinconfig & GPIO_STRENGTH_MASK);
   uint32_t slrset  = 0;
   uint32_t slrclr  = 0;
   uint32_t dr2rset = 0;
@@ -431,9 +431,9 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
  ****************************************************************************/
 
 static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
-                                    uint32_t pinset)
+                                    pinconfig_t pinconfig)
 {
-  int padtype       = (pinset & GPIO_PADTYPE_MASK);
+  int padtype       = (pinconfig & GPIO_PADTYPE_MASK);
   uint32_t odrset   = 0;
   uint32_t odrclr   = 0;
   uint32_t purset   = 0;
@@ -528,10 +528,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
  *
  ****************************************************************************/
 
-static inline void tiva_initoutput(uint32_t pinset)
+static inline void tiva_initoutput(pinconfig_t pinconfig)
 {
-  bool value = ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
-  tiva_gpiowrite(pinset, value);
+  bool value = ((pinconfig & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
+  tiva_gpiowrite(pinconfig, value);
 }
 
 /****************************************************************************
@@ -543,12 +543,12 @@ static inline void tiva_initoutput(uint32_t pinset)
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
-static inline void tiva_interrupt(uint32_t pinset)
+static inline void tiva_interrupt(pinconfig_t pinconfig)
 {
-  uint8_t   port    = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint8_t   pin     = 1 << (pinset & GPIO_PIN_MASK);
+  uint8_t   port    = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  uint8_t   pin     = 1 << (pinconfig & GPIO_PIN_MASK);
   uintptr_t base    = tiva_gpiobaseaddress(port);
-  uint32_t  inttype = pinset & GPIO_INT_MASK;
+  uint32_t  inttype = pinconfig & GPIO_INT_MASK;
 
   uint32_t  isset   = 0;
   uint32_t  ibeset  = 0;
@@ -668,7 +668,7 @@ static inline void tiva_interrupt(uint32_t pinset)
  *
  ****************************************************************************/
 
-int tiva_configgpio(uint32_t pinset)
+int tiva_configgpio(pinconfig_t pinconfig)
 {
   irqstate_t   flags;
   unsigned int func;
@@ -679,9 +679,9 @@ int tiva_configgpio(uint32_t pinset)
 
   /* Decode the basics */
 
-  func  = (pinset & GPIO_FUNC_MASK) >> GPIO_FUNC_SHIFT;
-  port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (pinset & GPIO_PIN_MASK);
+  func  = (pinconfig & GPIO_FUNC_MASK) >> GPIO_FUNC_SHIFT;
+  port  = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pinno = (pinconfig & GPIO_PIN_MASK);
   pin   = (1 << pinno);
 
   DEBUGASSERT(func <= GPIO_FUNC_MAX);
@@ -714,8 +714,8 @@ int tiva_configgpio(uint32_t pinset)
    * user options.
    */
 
-  tiva_gpiopadstrength(base, pin, pinset);
-  tiva_gpiopadtype(base, pin, pinset);
+  tiva_gpiopadstrength(base, pin, pinconfig);
+  tiva_gpiopadtype(base, pin, pinconfig);
 
   /* Then set up the real pin function */
 
@@ -725,7 +725,7 @@ int tiva_configgpio(uint32_t pinset)
 
   if (func == 1 || func == 3 || func == 5)
     {
-      tiva_initoutput(pinset);
+      tiva_initoutput(pinconfig);
     }
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
@@ -733,7 +733,7 @@ int tiva_configgpio(uint32_t pinset)
 
   else if (func == 7)
     {
-      tiva_interrupt(pinset);
+      tiva_interrupt(pinconfig);
     }
 #endif
 
@@ -749,7 +749,7 @@ int tiva_configgpio(uint32_t pinset)
  *
  ****************************************************************************/
 
-void tiva_gpiowrite(uint32_t pinset, bool value)
+void tiva_gpiowrite(pinconfig_t pinconfig, bool value)
 {
   unsigned int port;
   unsigned int pinno;
@@ -757,8 +757,8 @@ void tiva_gpiowrite(uint32_t pinset, bool value)
 
   /* Decode the basics */
 
-  port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (pinset & GPIO_PIN_MASK);
+  port  = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pinno = (pinconfig & GPIO_PIN_MASK);
 
   /* Get the base address associated with the GPIO port */
 
@@ -787,7 +787,7 @@ void tiva_gpiowrite(uint32_t pinset, bool value)
  *
  ****************************************************************************/
 
-bool tiva_gpioread(uint32_t pinset)
+bool tiva_gpioread(pinconfig_t pinconfig)
 {
   unsigned int port;
   unsigned int pinno;
@@ -795,8 +795,8 @@ bool tiva_gpioread(uint32_t pinset)
 
   /* Decode the basics */
 
-  port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (pinset & GPIO_PIN_MASK);
+  port  = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pinno = (pinconfig & GPIO_PIN_MASK);
 
   /* Get the base address associated with the GPIO port */
 
@@ -826,7 +826,7 @@ bool tiva_gpioread(uint32_t pinset)
  *
  ****************************************************************************/
 
-void tiva_gpio_lockport(uint32_t pinset, bool lock)
+void tiva_gpio_lockport(pinconfig_t pinconfig, bool lock)
 {
   unsigned int port;
   unsigned int pinno;
@@ -835,8 +835,8 @@ void tiva_gpio_lockport(uint32_t pinset, bool lock)
 
   /* Decode the basics */
 
-  port    = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno   = (pinset & GPIO_PIN_MASK);
+  port    = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pinno   = (pinconfig & GPIO_PIN_MASK);
   pinmask = 1 << pinno;
 
   /* Get the base address associated with the GPIO port */

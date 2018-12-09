@@ -242,28 +242,6 @@ static int gpioport2irq(uint8_t port)
 }
 
 /****************************************************************************
- * Name: tiva_gpioirqstatus
- *
- * Description:
- *   Returns raw or masked interrupt status.
- *
- ****************************************************************************/
-
-uint32_t tiva_gpioirqstatus(uint8_t port, bool masked)
-{
-  uintptr_t base = tiva_gpiobaseaddress(port);
-
-  if (masked)
-    {
-      return getreg32(base + TIVA_GPIO_MIS_OFFSET);
-    }
-  else
-    {
-      return getreg32(base + TIVA_GPIO_RIS_OFFSET);
-    }
-}
-
-/****************************************************************************
  * Name: tiva_gpioirqclear
  *
  * Description:
@@ -293,13 +271,18 @@ void tiva_gpioirqclear(uint8_t port, uint32_t pinmask)
 
 static int tiva_gpioporthandler(uint8_t port, void *context)
 {
+  uintptr_t base;   /* GPIO base address */
+  int       irq;    /* GPIO port interrupt vector */
+  uint32_t  mis;    /* Masked Interrupt Status */
+  uint8_t   pin;    /* Pin number */
 
-  int       irq  = gpioport2irq(port);    /* GPIO port interrupt vector */
-  uint32_t  mis  = tiva_gpioirqstatus(port, true); /* Masked Interrupt Status */
-  uint8_t   pin;                                   /* Pin number */
+  base = tiva_gpiobaseaddress(port);
+  irq  = gpioport2irq(port);
+  mis  = getreg32(base + TIVA_GPIO_MIS_OFFSET);
 
   tiva_gpioirqclear(port, 0xff);
-  gpioinfo("mis=0b%08b\n", mis & 0xff);
+
+  gpioinfo("irq=%d mis=0b%08b\n", irq, mis & 0xff);
 
   /* Now process each IRQ pending in the MIS */
 

@@ -88,7 +88,7 @@
 
 /* IOC register addresses **********************************************************/
 
-#define TIVA_IOC_IOCFG_(n)         (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
+#define TIVA_IOC_IOCFG(n)          (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
 #  define TIVA_IOC_IOCFG0          (TIVA_IOC_BASE + TIVA_IOC_IOCFG0_OFFSET)
 #  define TIVA_IOC_IOCFG1          (TIVA_IOC_BASE + TIVA_IOC_IOCFG1_OFFSET)
 #  define TIVA_IOC_IOCFG2          (TIVA_IOC_BASE + TIVA_IOC_IOCFG2_OFFSET)
