@@ -60,16 +60,6 @@
 
 /* Configuration ************************************************************/
 
-#if defined(ADC1_HAVE_DMA) && defined(CONFIG_STM32_ADC1)
-#  warning "ADC1 with DMA support is not fully implemented"
-#  undef CONFIG_STM32_ADC1
-#endif
-
-#if defined(ADC2_HAVE_DMA) && defined(CONFIG_STM32_ADC2)
-#  warning "ADC2 with DMA support is not fully implemented"
-#  undef CONFIG_STM32_ADC2
-#endif
-
 #if (defined(CONFIG_STM32_ADC1) && defined(CONFIG_STM32_ADC2)) || \
     (defined(CONFIG_STM32_ADC3) && defined(CONFIG_STM32_ADC4))
 # error "will not work with this combination of ADCs"

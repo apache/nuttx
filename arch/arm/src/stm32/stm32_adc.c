@@ -1280,7 +1280,11 @@ static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg)
         tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
         tim_getreg(priv, STM32_GTIM_CCR4_OFFSET));
 #if STM32_NATIM > 0
-  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE
+#  ifdef STM32_TIM8_BASE
+      || priv->tbase == STM32_TIM8_BASE
+#  endif
+    )
     {
       ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
             tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
@@ -1456,7 +1460,11 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   /* Clear the advanced timers repetition counter in TIM1 */
 
 #if STM32_NATIM > 0
-  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE
+#  ifdef STM32_TIM8_BASE
+      || priv->tbase == STM32_TIM8_BASE
+#  endif
+    )
     {
       tim_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
       tim_putreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE); /* Check me */
@@ -1610,7 +1618,11 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   /* TODO: revisit and simplify logic below */
 
 #if STM32_NATIM > 0
-  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE
+#  ifdef STM32_TIM8_BASE
+      || priv->tbase == STM32_TIM8_BASE
+#  endif
+    )
     {
       /* Reset output N polarity level, output N state, output compare state,
        * output compare N idle state.
@@ -2693,66 +2705,16 @@ static void adc_dma_start(FAR struct adc_dev_s *dev)
 #endif  /* ADC_HAVE_DMA */
 
 /****************************************************************************
- * Name: adc_reset
- *
- * Description:
- *   Reset the ADC device.  Called early to initialize the hardware.
- *   This is called, before adc_setup() and on error conditions.
- *
- * TODO: Separate the configuration logic from the reset logic!
- * REVISIT: The ADC device should be configured in adc_setup not in adc_reset.
- *
- * Input Parameters:
- *
- * Returned Value:
- *
+ * Name: adc_configure
  ****************************************************************************/
 
-static void adc_reset(FAR struct adc_dev_s *dev)
+static void adc_configure(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-  irqstate_t flags;
-#ifdef ADC_HAVE_TIMER
-  int ret;
-#endif
 
-  ainfo("intf: %d\n", priv->intf);
-  flags = enter_critical_section();
-
-#ifdef HAVE_HSI_CONTROL
-  /* The STM32L15XX family uses HSI as an independent clock-source
-   * for the ADC
-   */
-
-  adc_enable_hsi(true);
-#endif
-
-#if defined(HAVE_IP_ADC_V2)
-  /* Turn off the ADC so we can write the RCC bits */
+  /* Turn off the ADC before configuration */
 
   adc_enable(priv, false);
-#endif
-
-  /* Only if this is the first initialzied ADC instance in the ADC block */
-
-#ifdef HAVE_ADC_CMN_DATA
-  adccmn_lock(priv, true);
-
-  if (priv->cmn->initialized == 0)
-#endif
-    {
-      /* Enable ADC reset state */
-
-      adc_rccreset(priv, true);
-
-      /* Release ADC from reset state */
-
-      adc_rccreset(priv, false);
-    }
-
-#ifdef HAVE_ADC_CMN_DATA
-  adccmn_lock(priv, false);
-#endif
 
   /* Configure voltage regulator if present */
 
@@ -2831,40 +2793,68 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   adc_enable(priv, true);
 
-#ifdef ADC_HAVE_TIMER
-  if (priv->tbase != 0)
-    {
-      ret = adc_timinit(priv);
-      if (ret < 0)
-        {
-          aerr("ERROR: adc_timinit failed: %d\n", ret);
-        }
-
-      /* NOTE: for ADC IPv2 (J)ADSTART bit must be set to start ADC conversion
-       *       even if hardware trigger is selected.
-       *       This is not done here, and you probably have to call ioctl
-       *       with ANIOC_TRIGGER before reading from ADC!
-       */
-    }
-#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
-  else
-#endif
-#endif
-#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
-    {
-      adc_reg_startconv(priv, true);
-
-#  ifdef ADC_HAVE_INJECTED
-      adc_inj_startconv(priv, true);
-#  endif
-    }
-#endif
-
-  leave_critical_section(flags);
-
   /* Dump regs */
 
   adc_dumpregs(priv);
+}
+
+/****************************************************************************
+ * Name: adc_reset
+ *
+ * Description:
+ *   Reset the ADC device.  Called early to initialize the hardware.
+ *   This is called, before adc_setup() and on error conditions.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+static void adc_reset(FAR struct adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  irqstate_t flags;
+
+  ainfo("intf: %d\n", priv->intf);
+  flags = enter_critical_section();
+
+#ifdef HAVE_HSI_CONTROL
+  /* The STM32L15XX family uses HSI as an independent clock-source
+   * for the ADC
+   */
+
+  adc_enable_hsi(true);
+#endif
+
+#if defined(HAVE_IP_ADC_V2)
+  /* Turn off the ADC so we can write the RCC bits */
+
+  adc_enable(priv, false);
+#endif
+
+  /* Only if this is the first initialzied ADC instance in the ADC block */
+
+#ifdef HAVE_ADC_CMN_DATA
+  adccmn_lock(priv, true);
+
+  if (priv->cmn->initialized == 0)
+#endif
+    {
+      /* Enable ADC reset state */
+
+      adc_rccreset(priv, true);
+
+      /* Release ADC from reset state */
+
+      adc_rccreset(priv, false);
+    }
+
+#ifdef HAVE_ADC_CMN_DATA
+  adccmn_lock(priv, false);
+#endif
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2907,7 +2897,8 @@ static void adc_reset_hsi_disable(FAR struct adc_dev_s *dev)
 
 static int adc_setup(FAR struct adc_dev_s *dev)
 {
-#if !defined(CONFIG_STM32_ADC_NOIRQ) || defined(HAVE_ADC_CMN_DATA)
+#if !defined(CONFIG_STM32_ADC_NOIRQ) || defined(HAVE_ADC_CMN_DATA) ||   \
+     defined(ADC_HAVE_TIMER) || !defined(CONFIG_STM32_ADC_NO_STARTUP_CONV)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 #endif
   int ret = OK;
@@ -2926,6 +2917,43 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   /* Make sure that the ADC device is in the powered up, reset state */
 
   adc_reset(dev);
+
+  /* Configure ADC device */
+
+  adc_configure(dev);
+
+#ifdef ADC_HAVE_TIMER
+  /* Configure timer */
+
+  if (priv->tbase != 0)
+    {
+      ret = adc_timinit(priv);
+      if (ret < 0)
+        {
+          aerr("ERROR: adc_timinit failed: %d\n", ret);
+        }
+    }
+#endif
+
+  /* As default conversion is started here.
+   *
+   * NOTE: for ADC IPv2 (J)ADSTART bit must be set to start ADC conversion
+   *       even if hardware trigger is selected.
+   *       This can be done here during the opening of the ADC device
+   *       or later with ANIOC_TRIGGER ioctl call.
+   */
+
+#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
+  /* Start regular conversion */
+
+  adc_reg_startconv(priv, true);
+
+#  ifdef ADC_HAVE_INJECTED
+  /* Start injected conversion */
+
+  adc_inj_startconv(priv, true);
+#  endif
+#endif
 
   /* Enable the ADC interrupt */
 
@@ -2993,6 +3021,15 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 
       adc_rccreset(priv, true);
     }
+
+#ifdef ADC_HAVE_TIMER
+  /* Disable timer */
+
+  if (priv->tbase != 0)
+    {
+      adc_timstart(priv, false);
+    }
+#endif
 
 #ifdef HAVE_ADC_CMN_DATA
   /* Decrease instances counter */
