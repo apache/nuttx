@@ -52,6 +52,13 @@
 
 #define SYSCLK_FREQUENCY      48000000
 
+/* Peripheral Clock (PCLK)
+ *
+ * Same frequency as the SYSCLK
+ */
+
+#define PCLK_FREQUENCY       SYSCLK_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* The LaunchXL-cc1312R1 and two LEDs controlled by software: DIO7_GLED (CR1)

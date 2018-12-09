@@ -90,20 +90,40 @@ static struct gpio_handler_s g_gpio_inthandler[TIVA_NIRQ_PINS];
 
 static int cc13xx_gpio_interrupt)(int irq, FAR void *context, FAR void *arg)
 {
+  uint32_t evflags;
+  uint32_t regval;
   unsigned int dio;
+  int irq;
+
+  /* Get pending events */
+
+  evflags = getreg32(TIVA_GPIO_EVFLAGS);
+
+  /* Clear pending events that will be processing here */
 #warning Missing logic
 
-  /* Clear pending interrupts */
+  /* Now process each pending DIO edge event */
 
-  /* Now process each pending interrupt */
+  for (dio = 0, irq = TIVA_IRQ_DIO_0;
+       dio < TIVA_NDIO && evflags != 0;
+       dio++, irq++)
+    {
+      uint32_t diomask = (1 << dio);
 
-  /* Call any handler registered for each pending DIO interrupt */
+      /* Is an event pending on this DIO? */
 
-  FAR struct gpio_handler_s *handler = &g_gpio_inthandler[dio];
+      if ((evflags & diomask) != 0)
+        {
+          /* Call any handler registered for each pending DIO interrupt */
 
-  gpioinfo("dio=%d isr=%p arg=%p\n", dio, handler->isr, handler->arg);
+          FAR struct gpio_handler_s *handler = &g_gpio_inthandler[dio];
 
-  handler->isr(irq, context, handler->arg);
+          gpioinfo("dio=%d isr=%p arg=%p\n", dio, handler->isr, handler->arg);
+          handler->isr(irq, context, handler->arg);
+
+          evflags &= ~diomask;
+        }
+    }
 
   return OK;
 }
@@ -209,10 +229,16 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 
 void tiva_gpioirqenable(pinconfig_t pinconfig)
 {
+  uintptr_t regaddr;
   unsigned int dio;
+
+  /* Enable edge interrupt generation */
+
   dio = (pinconfig->gpio & GPIO_DIO_MASK) >> GPIO_DIO_SHIFT;
   DEBUGASSERT(dio < TIVA_NDIO);
-#warning Missing logic
+
+  regaddr = TIVA_IOC_IOCFG_OFFSET(dio);
+  modifyreg32(regaddr, 0, IOC_IOCFG_EDGE_IRQEN);
 }
 
 /****************************************************************************
@@ -225,10 +251,16 @@ void tiva_gpioirqenable(pinconfig_t pinconfig)
 
 void tiva_gpioirqdisable(pinconfig_t pinconfig)
 {
+  uintptr_t regaddr;
   unsigned int dio;
+
+  /* Disable edge interrupt generation */
+
   dio = (pinconfig->gpio & GPIO_DIO_MASK) >> GPIO_DIO_SHIFT;
   DEBUGASSERT(dio < TIVA_NDIO);
-#warning Missing logic
+
+  regaddr = TIVA_IOC_IOCFG_OFFSET(dio);
+  modifyreg32(regaddr, IOC_IOCFG_EDGE_IRQEN, 0);
 }
 
 /****************************************************************************
@@ -242,9 +274,13 @@ void tiva_gpioirqdisable(pinconfig_t pinconfig)
 void tiva_gpioirqclear(pinconfig_t pinconfig)
 {
   unsigned int dio;
+
+  /* Clear pending edge events */
+
   dio = (pinconfig->gpio & GPIO_DIO_MASK) >> GPIO_DIO_SHIFT;
   DEBUGASSERT(dio < TIVA_NDIO);
-#warning Missing logic
+
+  modifyreg32(TIVA_GPIO_EVFLAGS, (1 << dio), 0);
 }
 
 #endif /* CONFIG_TIVA_GPIO_IRQS */

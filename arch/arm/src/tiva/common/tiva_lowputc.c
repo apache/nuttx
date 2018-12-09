@@ -57,7 +57,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **********************************************************/
+
+/* Configuration ************************************************************/
 
 /* Select UART parameters for the selected console */
 
@@ -158,42 +159,56 @@
 
 /* Calculate BAUD rate from the SYS clock:
  *
- * "The baud-rate divisor is a 22-bit number consisting of a 16-bit integer and a 6-bit
- *  fractional part. The number formed by these two values is used by the baud-rate generator
- *  to determine the bit period. Having a fractional baud-rate divider allows the UART to
- *  generate all the standard baud rates.
+ * "The baud-rate divisor is a 22-bit number consisting of a 16-bit integer
+ *  and a 6-bit fractional part. The number formed by these two values is
+ *  used by the baud-rate generator to determine the bit period. Having a
+ *  fractional baud-rate divider allows the UART to generate all the
+ *  standard baud rates.
  *
- * "The 16-bit integer is loaded through the UART Integer Baud-Rate Divisor (UARTIBRD)
- *  register ... and the 6-bit fractional part is loaded with the UART Fractional Baud-Rate
- *  Divisor (UARTFBRD) register... The baud-rate divisor (BRD) has the following relationship
- *  to the system clock (where BRDI is the integer part of the BRD and BRDF is the fractional
- *  part, separated by a decimal place.):
+ * "The 16-bit integer is loaded through the UART Integer Baud-Rate Divisor
+ *  (UARTIBRD) register ... and the 6-bit fractional part is loaded with the
+ *  UART Fractional Baud-Rate Divisor (UARTFBRD) register... The baud-rate
+ *  divisor (BRD) has the following relationship to the system clock (where
+ *  BRDI is the integer part of the BRD and BRDF is the fractional part,
+ *  separated by a decimal place.):
  *
  *    "BRD = BRDI + BRDF = UARTSysClk / (16 * Baud Rate)
  *
- * "where UARTSysClk is the system clock connected to the UART. The 6-bit fractional number
- *  (that is to be loaded into the DIVFRAC bit field in the UARTFBRD register) can be calculated
- *  by taking the fractional part of the baud-rate divisor, multiplying it by 64, and adding 0.5
- *  to account for rounding errors:
+ * "where UARTSysClk is the system clock connected to the UART. The 6-bit
+ *  fractional number (that is to be loaded into the DIVFRAC bit field in
+ *  the UARTFBRD register) can be calculated taking the fractional part of
+ *  the baud-rate divisor, multiplying it by 64, and adding 0.5 to account
+ *  for rounding errors:
  *
  *    "UARTFBRD[DIVFRAC] = integer(BRDF * 64 + 0.5)
  *
- * "The UART generates an internal baud-rate reference clock at 16x the baud-rate (referred
- *  to as Baud16). This reference clock is divided by 16 to generate the transmit clock, and is
- *  used for error detection during receive operations.
+ * "The UART generates an internal baud-rate reference clock at 16x the
+ *  baud-rate (referred to as Baud16). This reference clock is divided by 16
+ *  to generate the transmit clock, and is used for error detection during
+ *  receive operations.
  *
- * "Along with the UART Line Control, High Byte (UARTLCRH) register ..., the UARTIBRD and
- *  UARTFBRD registers form an internal 30-bit register. This internal register is only
- *  updated when a write operation to UARTLCRH is performed, so any changes to the baud-rate
- *  divisor must be followed by a write to the UARTLCRH register for the changes to take effect. ..."
+ * "Along with the UART Line Control, High Byte (UARTLCRH) register ..., the
+ *  UARTIBRD and UARTFBRD registers form an internal 30-bit register.  This
+ *  internal register is only updated when a write operation to UARTLCRH is
+ *  performed, so any changes to the baud-rate divisor must be followed by a
+ *  write to the UARTLCRH register for the changes to take effect. ..."
+ *
+ * Some parts support dividing done SYSCLK to generate a lower peripheral
+ * clock frequency.  Here we use some called PCLK_FREQUENCY which must be
+ * defined in the board.h header file.  Normally, PCLK_FREQUENCY is simply
+ * defined to by SYSCLK_FREQUENCY.
+ *
+ * TM4C129 supports an ALTCLOCK that may also be the UART source clock.  The
+ * default source for the ALTCLK is the 160MHz Precision Internal Oscillator
+ * (PIOSC).
  */
 
 #define TIVA_BRDDEN     (16 * TIVA_CONSOLE_BAUD)
-#define TIVA_BRDI       (SYSCLK_FREQUENCY / TIVA_BRDDEN)
-#define TIVA_REMAINDER  (SYSCLK_FREQUENCY - TIVA_BRDDEN * TIVA_BRDI)
+#define TIVA_BRDI       (PCLK_FREQUENCY / TIVA_BRDDEN)
+#define TIVA_REMAINDER  (PCLK_FREQUENCY - TIVA_BRDDEN * TIVA_BRDI)
 #define TIVA_DIVFRAC    ((TIVA_REMAINDER * 64 + (TIVA_BRDDEN/2)) / TIVA_BRDDEN)
 
-/* For example: TIVA_CONSOLE_BAUD = 115,200, SYSCLK_FREQUENCY = 50,000,000:
+/* For example: TIVA_CONSOLE_BAUD = 115,200, PCLK_FREQUENCY = 50,000,000:
  *
  * TIVA_BRDDEN    = (16 * 115,200)                           = 1,843,200
  * TIVA_BRDI      = 50,000,000 / 1,843,200                   = 27

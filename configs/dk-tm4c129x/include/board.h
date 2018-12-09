@@ -100,6 +100,13 @@
 #define BOARD_PLL_SYSDIV     4         /* Sysclk = Fvco / 4 = 120MHz */
 #define SYSCLK_FREQUENCY     120000000 /* Resulting SysClk frequency */
 
+/* Peripheral Clock (PCLK)
+ *
+ * Same frequency as the SYSCLK
+ */
+
+#define PCLK_FREQUENCY       SYSCLK_FREQUENCY
+
 /* Alternate Clock (ALTCLK)
  *
  * The ALTCLK provides a clock source of numerous frequencies to the general-purpose

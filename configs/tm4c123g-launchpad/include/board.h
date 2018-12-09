@@ -68,6 +68,13 @@
 #define TIVA_SYSDIV          5
 #define SYSCLK_FREQUENCY     80000000  /* 80MHz */
 
+/* Peripheral Clock (PCLK)
+ *
+ * Same frequency as the SYSCLK
+ */
+
+#define PCLK_FREQUENCY       SYSCLK_FREQUENCY
+
 /* Other RCC settings:
  *
  * - Main and internal oscillators enabled.
