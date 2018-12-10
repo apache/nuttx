@@ -140,7 +140,7 @@ int fs_dupfd(int fd, int minfd)
       goto errout;
     }
 
-  return OK;
+  return ret;
 
 errout:
   set_errno(-ret);
