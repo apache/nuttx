@@ -647,7 +647,6 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
   irqstate_t flags;
   uint8_t    port  = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint8_t    pinno = (pinconfig & GPIO_PIN_MASK);
-  uint8_t    pin   = 1 << pinno;
 
   /* Assign per-pin interrupt handlers */
 
