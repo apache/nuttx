@@ -375,7 +375,7 @@ static int ds_i2c_write(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
   FAR struct onewire_master_s *master = inst->master;
   uint16_t crc;
   int ret;
-  uint8_t buf[5];
+  uint8_t buf[3];
 
   if (length <= 0)
     {
@@ -451,6 +451,105 @@ static int ds_i2c_write(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
   /* Return count of bytes written. */
 
   return length;
+}
+
+/****************************************************************************
+ * Name: ds_i2c_write_read
+ *
+ * Description:
+ *   Write data to I2C slave and read from same address.
+ *
+ ****************************************************************************/
+
+static int ds_i2c_write_read(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
+                             FAR const uint8_t *wbuffer, ssize_t wlength,
+                             FAR uint8_t *rbuffer, ssize_t rlength)
+{
+  FAR struct onewire_master_s *master = inst->master;
+  uint16_t crc;
+  int ret;
+  uint8_t buf[3];
+
+  if (wlength <= 0 || rlength <= 0)
+    {
+      return -EINVAL;
+    }
+
+  if (wlength > DS_DATA_LIMIT)
+    {
+      i2cerr("ERROR: writing too many bytes!\n");
+      return -EINVAL;
+    }
+
+  if (rlength > DS_DATA_LIMIT)
+    {
+      i2cerr("ERROR: reading too many bytes!\n");
+      return -EINVAL;
+    }
+
+  /* Write command header. */
+
+  buf[0] = DS_WRITE_READ_DATA_WITH_STOP;
+  buf[1] = i2c_addr << 1;
+  buf[2] = wlength;
+  crc    = onewire_crc16(buf, 3, 0);
+
+  ret = ONEWIRE_WRITE(master->dev, buf, 3);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Write payload I2C data to DS28E17. */
+
+  crc = onewire_crc16(wbuffer, wlength, crc);
+
+  ret = ONEWIRE_WRITE(master->dev, wbuffer, wlength);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Write read length and checksum. */
+
+  buf[0] = rlength;
+  crc    = onewire_crc16(buf, 1, crc);
+  buf[1] = ~(crc & 0xff);
+  buf[2] = ~((crc >> 8) & 0xff);
+
+  ret = ONEWIRE_WRITE(master->dev, buf, 3);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Wait busy indication to vanish. */
+
+  ret = ds_busywait(inst, wlength + 1 + rlength + 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Read status from DS28E17. */
+
+  ret = ONEWIRE_READ(master->dev, buf, 2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Check error conditions. */
+
+  ret = ds_error(buf);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Read received I2C data from DS28E17. */
+
+  return ONEWIRE_READ(master->dev, rbuffer, rlength);
 }
 
 static int ds_i2c_setfrequency(FAR struct ds_i2c_inst_s *inst, uint32_t frequency)
@@ -542,11 +641,30 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
 
   while (i < count)
     {
-      /* TODO: we could use DS_WRITE_READ_DATA_WITH_STOP to optimize the
-       * common case of write followed by read to a same address.
+      /* First we try to use DS_WRITE_READ_DATA_WITH_STOP to optimize
+       * the common case of write followed by read to a same address.
        */
 
-      if (msgs[i].flags & I2C_M_READ)
+      if (i < count - 1 && msgs[i].addr == msgs[i+1].addr &&
+          (msgs[i].flags & I2C_M_READ) == 0 &&
+          (msgs[i+1].flags & I2C_M_READ))
+        {
+          /* Write-read combined transfer. */
+
+          ret = ds_i2c_write_read(inst, msgs[i].addr,
+                                  msgs[i].buffer, msgs[i].length,
+                                  msgs[i+1].buffer, msgs[i+1].length);
+          if (ret < 0)
+            {
+              i = ret;
+              goto errout;
+            }
+
+          /* We processed two messages here. */
+
+          i += 2;
+        }
+      else if (msgs[i].flags & I2C_M_READ)
         {
           /* Read transfer. */
 
@@ -556,6 +674,8 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
               i = ret;
               goto errout;
             }
+
+          i++;
         }
       else
         {
@@ -568,11 +688,12 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
               i = ret;
               goto errout;
             }
+
+          i++;
         }
 
       /* Any more messages to process? */
 
-      i++;
       if (i < count)
         {
           /* Yes. Resume to same DS28E17. */
