@@ -58,6 +58,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 #ifndef CONFIG_AT25_SPIMODE
@@ -69,10 +70,22 @@
 #endif
 
 /* AT25 Registers *******************************************************************/
-/* Indentification register values */
 
-#define AT25_MANUFACTURER         0x1F
+/* Identification register values */
+
+#define AT25_MANUFACTURER         0x1f
+#define AT25_AT25DF081A_TYPE      0x45 /*  8 M-bit */
 #define AT25_AT25DF321_TYPE       0x47 /* 32 M-bit */
+
+/*  AT25DF081A capacity is 1,048,575 bytes:
+ *  (16 sectors) * (65,536 bytes per sector)
+ *  (4096 pages) * (256 bytes per page)
+ */
+
+#define AT25_AT25DF081A_SECTOR_SHIFT  12    /* Sector size 1 << 12 = 4096 */
+#define AT25_AT25DF081A_NSECTORS      256
+#define AT25_AT25DF081A_PAGE_SHIFT    9     /* Page size 1 << 8 = 256 */
+#define AT25_AT25DF081A_NPAGES        2048
 
 /*  AT25DF321 capacity is 4,194,304 bytes:
  *  (64 sectors) * (65,536 bytes per sector)
@@ -161,10 +174,6 @@ static ssize_t at25_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
  * Private Functions
  ************************************************************************************/
 
@@ -237,13 +246,21 @@ static inline int at25_readid(struct at25_dev_s *priv)
 
   /* Check for a valid manufacturer and memory type */
 
-  if (manufacturer == AT25_MANUFACTURER && memory == AT25_AT25DF321_TYPE)
+  if (manufacturer == AT25_MANUFACTURER && memory == AT25_AT25DF081A_TYPE)
     {
-        priv->sectorshift = AT25_AT25DF321_SECTOR_SHIFT;
-        priv->nsectors    = AT25_AT25DF321_NSECTORS;
-        priv->pageshift   = AT25_AT25DF321_PAGE_SHIFT;
-        priv->npages      = AT25_AT25DF321_NPAGES;
-        return OK;
+      priv->sectorshift = AT25_AT25DF081A_SECTOR_SHIFT;
+      priv->nsectors    = AT25_AT25DF081A_NSECTORS;
+      priv->pageshift   = AT25_AT25DF081A_PAGE_SHIFT;
+      priv->npages      = AT25_AT25DF081A_NPAGES;
+      return OK;
+    }
+  else if (manufacturer == AT25_MANUFACTURER && memory == AT25_AT25DF321_TYPE)
+    {
+      priv->sectorshift = AT25_AT25DF321_SECTOR_SHIFT;
+      priv->nsectors    = AT25_AT25DF321_NSECTORS;
+      priv->pageshift   = AT25_AT25DF321_PAGE_SHIFT;
+      priv->npages      = AT25_AT25DF321_NPAGES;
+      return OK;
     }
 
   return -ENODEV;
@@ -478,7 +495,8 @@ static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 
   /* On this device, we can handle the block read just like the byte-oriented read */
 
-  nbytes = at25_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
+  nbytes = at25_read(dev, startblock << priv->pageshift,
+                     nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
         return nbytes >> priv->pageshift;
@@ -491,8 +509,8 @@ static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
  * Name: at25_bwrite
  ************************************************************************************/
 
-static ssize_t at25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buffer)
+static ssize_t at25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -581,8 +599,10 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
-          if (geo)
+          FAR struct mtd_geometry_s *geo =
+            FAR struct mtd_geometry_s *)((uintptr_t)arg);
+
+          if (geo != NULL)
             {
               /* Populate the geometry structure with information need to know
                * the capacity and how to access the device.
