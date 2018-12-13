@@ -122,9 +122,9 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
   else
     {
-      /* No other commands supported */
+      /* Command not recognized, forward to the MTD driver */
 
-      ret = -ENOTTY;
+      ret = MTD_IOCTL(volume->mtd, cmd, arg);
     }
 
 errout_with_semaphore:
