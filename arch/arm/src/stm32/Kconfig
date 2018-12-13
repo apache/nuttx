@@ -2602,22 +2602,16 @@ config STM32_RTC
 	default n
 	select RTC
 
-config STM32_USBHOST
-	bool
-	default n
-
 config STM32_OTGFS
 	bool "OTG FS"
 	default n
 	depends on STM32_HAVE_OTGFS
-	select STM32_USBHOST
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config STM32_OTGHS
 	bool "OTG HS"
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F4XXX
-	select STM32_USBHOST
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
 config STM32_PWR
@@ -9190,8 +9184,13 @@ config STM32_ETHMAC_REGDEBUG
 
 endmenu # Ethernet MAC configuration
 
+config STM32_USBHOST
+	bool "Enable USB Host Support"
+	depends on STM32_OTGFS || STM32_OTGHS
+	default n
+
 menu "USB FS Host Configuration"
-	depends on STM32_OTGFS
+	depends on STM32_OTGFS && STM32_USBHOST
 
 config STM32_OTGFS_RXFIFO_SIZE
 	int "Rx Packet Size"
@@ -9234,7 +9233,7 @@ config STM32_OTGFS_VBUS_CONTROL
 endmenu
 
 menu "USB HS Host Configuration"
-	depends on STM32_OTGHS
+	depends on STM32_OTGHS && STM32_USBHOST
 
 config STM32_OTGHS_RXFIFO_SIZE
 	int "Rx Packet Size"
