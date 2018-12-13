@@ -600,7 +600,7 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
       case MTDIOC_GEOMETRY:
         {
           FAR struct mtd_geometry_s *geo =
-            FAR struct mtd_geometry_s *)((uintptr_t)arg);
+                  (FAR struct mtd_geometry_s *)((uintptr_t)arg);
 
           if (geo != NULL)
             {

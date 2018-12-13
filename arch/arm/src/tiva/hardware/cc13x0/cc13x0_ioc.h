@@ -4,8 +4,10 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference:
- *   TI C13x2/C26x2 SDK
+ * Technical content derives from a TI header file that has a compatible BSD license:
+ *
+ *   Copyright (c) 2015-2017, Texas Instruments Incorporated
+ *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -4,13 +4,9 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derives for a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible BSD license:
  *
- *   Filename:       hw_memmap_h
- *   Revised:        2017-01-10 11:54:43 +0100 (Tue, 10 Jan 2017)
- *   Revision:       48190
- *
- *   Copyright (c) 2015 - 2017, Texas Instruments Incorporated
+ *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
