@@ -72,6 +72,8 @@
 #  define HOST_TGTSWAP 1
 #endif
 
+#define UNUSED(a) ((void)(a))
+
 /* mkstemp() has been giving me errors on Cygwin */
 
 #undef USE_MKSTEMP
@@ -1139,7 +1141,8 @@ static int dir_notempty(const char *dirpath, const char *name,
   char *path;
   int ret;
 
-  asprintf(&path, "%s/%s", dirpath, name);
+  ret = asprintf(&path, "%s/%s", dirpath, name);
+  UNUSED(ret);
 
   /* stat() should not fail for any reason */
 
@@ -1168,7 +1171,8 @@ static int process_direntry(const char *dirpath, const char *name,
   char *path;
   int ret;
 
-  asprintf(&path, "%s/%s", dirpath, name);
+  ret = asprintf(&path, "%s/%s", dirpath, name);
+  UNUSED(ret);
 
   ret = stat(path, &buf);
   if (ret < 0)
