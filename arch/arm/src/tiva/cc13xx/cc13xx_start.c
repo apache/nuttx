@@ -271,12 +271,14 @@ void __start(void)
   showprogress('E');
 #endif
 
+#ifndef CONFIG_ARCH_CHIP_CC13X0 /* REVISIT */
   /* Initialize the Power Manager internal state.  It must be called prior
    * to any other Power API.
    */
 
   cc13xx_power_initialize();
   showprogress('F');
+#endif
 
   /* Initialize onboard resources */
 

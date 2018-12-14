@@ -2369,7 +2369,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       /* Handle the received packet */
 
-       sam_receive(priv, qid);
+      sam_receive(priv, qid);
     }
 
   /* Check for TX errors */

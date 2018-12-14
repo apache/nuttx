@@ -101,11 +101,11 @@ else
   CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
 endif
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
-  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
-  CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
+  CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
-  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_gpio.c cc13xx_gpioirq.c
-  CHIP_CSRCS += cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
+  CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)

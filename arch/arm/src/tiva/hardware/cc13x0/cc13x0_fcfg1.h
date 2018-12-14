@@ -139,7 +139,7 @@
 
 /* FCFG1 Register Register Addresses ********************************************************************************/
 
-#define TIVA_FCFG1_MISC_CONF_1                             (TIVA_TIVA_FCFG1_BASE + TIVA_FCFG1_MISC_CONF_1_OFFSET)
+#define TIVA_FCFG1_MISC_CONF_1                             (TIVA_FCFG1_BASE + TIVA_FCFG1_MISC_CONF_1_OFFSET)
 #define TIVA_FCFG1_MISC_CONF_2                             (TIVA_FCFG1_BASE + TIVA_FCFG1_MISC_CONF_2_OFFSET)
 #define TIVA_FCFG1_CONFIG_RF_FRONTEND_DIV5                 (TIVA_FCFG1_BASE + TIVA_FCFG1_CONFIG_RF_FRONTEND_DIV5_OFFSET)
 #define TIVA_FCFG1_CONFIG_RF_FRONTEND_DIV6                 (TIVA_FCFG1_BASE + TIVA_FCFG1_CONFIG_RF_FRONTEND_DIV6_OFFSET)
