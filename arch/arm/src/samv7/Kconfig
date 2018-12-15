@@ -1821,13 +1821,18 @@ config SAMV7_EMAC0_NRXBUFFERS
 		descriptors that will be allocated  The selected value must be an
 		even power of 2.
 
+		NOTE that the defaut of 16 correspond to a total of only 2Kb of
+		RX buffering.  That can easily exceeded on a busy network or with
+		large packet MTUs.  You will know if this happens because you will
+		see the "Buffer Not Available (BNA)" receive error.
+
 config SAMV7_EMAC0_NTXBUFFERS
 	int "Number of TX buffers"
 	default 8
 	---help---
 		EMAC buffer memory is segmented into full Ethernet packets (size
-		NET_BUFSIZE bytes).  This setting provides the number of such packets
-		that can be in flight.  This is also equal to the number of TX
+		CONFIG_NET_BUFSIZE bytes).  This setting provides the number of such
+		packets that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
 
 config SAMV7_EMAC0_PHYADDR

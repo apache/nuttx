@@ -280,7 +280,7 @@ void __start(void)
   showprogress('F');
 #endif
 
-  /* Initialize onboard resources */
+  /* Initialize on-board resources */
 
   tiva_boardinitialize();
   showprogress('G');
