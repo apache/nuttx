@@ -416,7 +416,7 @@ config TIVA_TIMER
 	bool
 	default n
 
-# Periperhal Selections
+# Peripheral Selections
 
 config TIVA_ADC0
 	bool "ADC0"
@@ -487,52 +487,386 @@ config TIVA_I2C9
 	depends on TIVA_HAVE_I2C9
 	select TIVA_I2C
 
-config TIVA_UART0
-	bool "UART0"
+config TIVA_HCIUART
+	bool
 	default n
+
+choice
+	prompt "UART0 Driver Configuration"
+	default TIVA_UART0_NONE
+
+config TIVA_UART0_NONE
+	bool "Not selected"
+
+config TIVA_UART0
+	bool "Standard serial driver"
 	select UART0_SERIALDRIVER
 
+config TIVA_UART0_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART0 Driver Configuration
+
+if TIVA_UART0_HCIUART
+config TIVA_HCIUART0_RXBUFSIZE
+	int "HCI UART0 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART0_TXBUFSIZE
+	int "HCI UART0 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART0_BAUD
+	int "HCI UART0 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART0_HCIUART
+
+choice
+	prompt "UART1 Driver Configuration"
+	default TIVA_UART1_NONE
+
+config TIVA_UART1_NONE
+	bool "Not selected"
+
 config TIVA_UART1
-	bool "UART1"
-	default n
-	depends on TIVA_HAVE_UART1
+	bool "Standard serial driver"
 	select UART1_SERIALDRIVER
 
+config TIVA_UART1_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART1 Driver Configuration
+
+if TIVA_UART1_HCIUART
+config TIVA_HCIUART1_RXBUFSIZE
+	int "HCI UART1 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART1_TXBUFSIZE
+	int "HCI UART1 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART1_BAUD
+	int "HCI UART1 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART1_HCIUART
+
+choice
+	prompt "UART2 Driver Configuration"
+	default TIVA_UART2_NONE
+
+config TIVA_UART2_NONE
+	bool "Not selected"
+
 config TIVA_UART2
-	bool "UART2"
-	default n
-	depends on TIVA_HAVE_UART2
+	bool "Standard serial driver"
 	select UART2_SERIALDRIVER
 
+config TIVA_UART2_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART2 Driver Configuration
+
+if TIVA_UART2_HCIUART
+config TIVA_HCIUART2_RXBUFSIZE
+	int "HCI UART2 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART2_TXBUFSIZE
+	int "HCI UART2 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART2_BAUD
+	int "HCI UART2 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART2_HCIUART
+
+choice
+	prompt "UART3 Driver Configuration"
+	default TIVA_UART3_NONE
+
+config TIVA_UART3_NONE
+	bool "Not selected"
+
 config TIVA_UART3
-	bool "UART3"
-	default n
-	depends on TIVA_HAVE_UART3
+	bool "Standard serial driver"
 	select UART3_SERIALDRIVER
 
+config TIVA_UART3_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART3 Driver Configuration
+
+if TIVA_UART3_HCIUART
+config TIVA_HCIUART3_RXBUFSIZE
+	int "HCI UART3 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART3_TXBUFSIZE
+	int "HCI UART3 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART3_BAUD
+	int "HCI UART3 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART3_HCIUART
+
+choice
+	prompt "UART4 Driver Configuration"
+	default TIVA_UART4_NONE
+
+config TIVA_UART4_NONE
+	bool "Not selected"
+
 config TIVA_UART4
-	bool "UART4"
-	default n
-	depends on TIVA_HAVE_UART4
+	bool "Standard serial driver"
 	select UART4_SERIALDRIVER
 
+config TIVA_UART4_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART4 Driver Configuration
+
+if TIVA_UART4_HCIUART
+config TIVA_HCIUART4_RXBUFSIZE
+	int "HCI UART4 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART4_TXBUFSIZE
+	int "HCI UART4 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART4_BAUD
+	int "HCI UART4 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART4_HCIUART
+
+choice
+	prompt "UART5 Driver Configuration"
+	default TIVA_UART5_NONE
+
+config TIVA_UART5_NONE
+	bool "Not selected"
+
 config TIVA_UART5
-	bool "UART5"
-	default n
-	depends on TIVA_HAVE_UART5
+	bool "Standard serial driver"
 	select UART5_SERIALDRIVER
 
+config TIVA_UART5_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART5 Driver Configuration
+
+if TIVA_UART5_HCIUART
+config TIVA_HCIUART5_RXBUFSIZE
+	int "HCI UART5 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART5_TXBUFSIZE
+	int "HCI UART5 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART5_BAUD
+	int "HCI UART5 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART5_HCIUART
+
+choice
+	prompt "UART6 Driver Configuration"
+	default TIVA_UART6_NONE
+
+config TIVA_UART6_NONE
+	bool "Not selected"
+
 config TIVA_UART6
-	bool "UART6"
-	default n
-	depends on TIVA_HAVE_UART6
+	bool "Standard serial driver"
 	select UART6_SERIALDRIVER
 
+config TIVA_UART6_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART6 Driver Configuration
+
+if TIVA_UART6_HCIUART
+config TIVA_HCIUART6_RXBUFSIZE
+	int "HCI UART6 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART6_TXBUFSIZE
+	int "HCI UART6 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART6_BAUD
+	int "HCI UART6 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART6_HCIUART
+
+choice
+	prompt "UART7 Driver Configuration"
+	default TIVA_UART7_NONE
+
+config TIVA_UART7_NONE
+	bool "Not selected"
+
 config TIVA_UART7
-	bool "UART7"
-	default n
-	depends on TIVA_HAVE_UART7
+	bool "Standard serial driver"
 	select UART7_SERIALDRIVER
+
+config TIVA_UART7_HCIUART
+	bool "Bluetooth HCI-UART"
+	select TIVA_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART7 Driver Configuration
+
+if TIVA_UART7_HCIUART
+config TIVA_HCIUART7_RXBUFSIZE
+	int "HCI UART7 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config TIVA_HCIUART7_TXBUFSIZE
+	int "HCI UART7 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config TIVA_HCIUART7_BAUD
+	int "HCI UART7 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCI UART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+endif # TIVA_UART7_HCIUART
+
+menu "HCI UART Driver Configuration"
+	depends on TIVA_HCIUART
+
+config TIVA_HCIUART_SW_RXFLOW
+	bool "Use Software UART RTS flow control"
+	default n
+	---help---
+		Enable UART RTS flow control using Software.
+
+config TIVA_HCIUART_SW_TXFLOW
+	bool "Use Software UART CTS flow control"
+	default n
+	---help---
+		Enable UART CTS flow control using Software.
+
+endmenu # HCI UART Driver Configuration
 
 config TIVA_SSI0
 	bool "SSI0"

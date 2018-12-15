@@ -50,6 +50,30 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+#define HAVE_HCIUART    1
+
+#if !defined(CONFIG_TIVA_HCIUART) || !defined(CONFIG_BLUETOOTH_UART)
+#  undef HAVE_HCIUART
+#elif defined(CONFIG_TIVA_UART0_HCIUART)
+#  define HCIUART_SERDEV HCIUART0
+#elif defined(CONFIG_TIVA_UART1_HCIUART)
+#  define HCIUART_SERDEV HCIUART1
+#elif defined(CONFIG_TIVA_UART2_HCIUART)
+#  define HCIUART_SERDEV HCIUART2
+#elif defined(CONFIG_TIVA_UART3_HCIUART)
+#  define HCIUART_SERDEV HCIUART3
+#elif defined(CONFIG_TIVA_UART4_HCIUART)
+#  define HCIUART_SERDEV HCIUART4
+#elif defined(CONFIG_TIVA_UART5_HCIUART)
+#  define HCIUART_SERDEV HCIUART5
+#elif defined(CONFIG_TIVA_UART6_HCIUART)
+#  define HCIUART_SERDEV HCIUART6
+#elif defined(CONFIG_TIVA_UART7_HCIUART)
+#  define HCIUART_SERDEV HCIUART7
+#else
+#  error No HCI UART specifified
+#endif
+
 
 /* How many SSI modules does this chip support? */
 
@@ -175,6 +199,26 @@ int tm4c_bringup(void);
 
 #ifdef CONFIG_TM4C1294_LAUNCHPAD_TIMER
 int tiva_timer_configure(void);
+#endif
+
+/****************************************************************************
+ * Name: hciuart_dev_initialize
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   Bluetooth HCI UART driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_HCIUART
+int hciuart_dev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -195,4 +195,19 @@
 #define GPIO_EN0_LED1     GPIO_EN0_LED1_1
 #define GPIO_EN0_LED2     GPIO_EN0_LED2_1
 
+/* Control pins for BOOST-CC2564MODA plugged into BoosterPack1
+ *
+ *   --- ------------
+ *   Pin Pin Function
+ *   --- ------------
+ *   PM3 NSHUTD
+ *   PG0 RTS
+ *   PL4 CTS
+ *   --- ------------
+ */
+
+#define UART7_GPIO_NSHUTD (GPIO_FUNC_OUTPUT | GPIO_PORTM | GPIO_PIN_3)
+#define UART7_GPIO_RTS    (GPIO_FUNC_OUTPUT | GPIO_PORTG | GPIO_PIN_0)
+#define UART7_GPIO_CTS    (GPIO_FUNC_INPUT | GPIO_PORTL | GPIO_PIN_4)
+
 #endif  /* __CONFIGS_TM4C1294_LAUNCHPAD_INCLUDE_BOARD_H */

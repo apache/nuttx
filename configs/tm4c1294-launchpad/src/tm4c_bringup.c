@@ -306,7 +306,7 @@ static void tm4c_qei(void)
 
 int tm4c_bringup(void)
 {
-#ifdef HAVE_TIMER
+#if defined(HAVE_TIMER) || defined(HAVE_HCIUART)
   int ret;
 #endif
 
@@ -333,6 +333,14 @@ int tm4c_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize timer driver: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_HCIUART
+  ret = hciuart_dev_initialize();
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize HCI UART driver: %d\n", ret);
     }
 #endif
 

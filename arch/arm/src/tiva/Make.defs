@@ -161,6 +161,10 @@ ifeq ($(CONFIG_TIVA_EEPROM),y)
   CHIP_CSRCS += tiva_eeprom.c
 endif
 
+ifeq ($(CONFIG_TIVA_HCIUART),y)
+CHIP_CSRCS += tiva_hciuart.c
+endif
+
 # Paths to source files
 
 VPATH += chip/common
