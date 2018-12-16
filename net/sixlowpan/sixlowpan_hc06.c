@@ -270,7 +270,7 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
     {
       /* Compress IID to 16 bits: xxxx:xxxx:xxxx:xxxx:0000:00ff:fe00:XXXX */
 
-#ifdef CONFIG_BIG_ENDIAN
+#ifdef CONFIG_ENDIAN_BIG
       *g_hc06ptr++ = ipaddr[7] >> 8;        /* Preserve big-endian, network order */
       *g_hc06ptr++ = ipaddr[7] & 0xff;
 #else
@@ -288,7 +288,7 @@ static uint8_t compress_ipaddr(FAR const net_ipv6addr_t ipaddr, uint8_t bitpos)
 
       for (i = 4; i < 8; i++)
         {
-#ifdef CONFIG_BIG_ENDIAN
+#ifdef CONFIG_ENDIAN_BIG
           *g_hc06ptr++ = ipaddr[i] >> 8;    /* Preserve big-endian, network order */
           *g_hc06ptr++ = ipaddr[i] & 0xff;
 #else
@@ -498,7 +498,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       if ((postcount & 1) != 0)
         {
-#ifdef CONFIG_BIG_ENDIAN
+#ifdef CONFIG_ENDIAN_BIG
           /* Preserve big-endian, network order */
 
           ipaddr[destndx - 1] = (uint16_t)(*srcptr) << 8;
@@ -513,7 +513,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       for (i = destndx; i < 8; i++)
         {
-#ifdef CONFIG_BIG_ENDIAN
+#ifdef CONFIG_ENDIAN_BIG
           /* Preserve big-endian, network order */
 
           ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
