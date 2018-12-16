@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/nucleo-f072rb/src/stm32f0_boot.c
+ * configs/nucleo-f072rb/src/stm32f072rb_boot.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,16 +53,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32f0_boardinitialize
+ * Name: stm32_boardinitialize
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void stm32f0_boardinitialize(void)
+void stm32_boardinitialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */

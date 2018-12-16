@@ -49,7 +49,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_STM32F0_SPI),y)
+ifeq ($(CONFIG_STM32F0L0_SPI),y)
 CSRCS += stm32_spi.c
 endif
 

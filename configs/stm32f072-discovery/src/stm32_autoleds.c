@@ -86,8 +86,8 @@ void board_autoled_initialize(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
-  stm32f0_configgpio(GPIO_LED1);
-  stm32f0_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
 }
 
 /****************************************************************************
@@ -117,8 +117,8 @@ void board_autoled_on(int led)
         break;
     }
 
-  stm32f0_gpiowrite(GPIO_LED1, led1on);
-  stm32f0_gpiowrite(GPIO_LED2, led2on);
+  stm32_gpiowrite(GPIO_LED1, led1on);
+  stm32_gpiowrite(GPIO_LED2, led2on);
 }
 
 /****************************************************************************
@@ -129,8 +129,8 @@ void board_autoled_off(int led)
 {
   if (led != 2)
     {
-      stm32f0_gpiowrite(GPIO_LED1, false);
-      stm32f0_gpiowrite(GPIO_LED2, false);
+      stm32_gpiowrite(GPIO_LED1, false);
+      stm32_gpiowrite(GPIO_LED2, false);
     }
 }
 

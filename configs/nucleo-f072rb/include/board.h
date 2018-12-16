@@ -72,14 +72,14 @@
  *   Driven by 32.768KHz crystal (X2) on the OSC32_IN and OSC32_OUT pins.
  */
 
-#define STM32F0_BOARD_XTAL         8000000ul        /* X3 on board (not fitted)*/
+#define STM32_BOARD_XTAL         8000000ul        /* X3 on board (not fitted)*/
 
-#define STM32F0_HSI_FREQUENCY      8000000ul        /* Approximately 8MHz */
-#define STM32F0_HSI14_FREQUENCY    14000000ul       /* HSI14 for ADC */
-#define STM32F0_HSI48_FREQUENCY    48000000ul       /* HSI48 for USB, only some STM32F0xx */
-#define STM32F0_HSE_FREQUENCY      STM32F0_BOARD_XTAL
-#define STM32F0_LSI_FREQUENCY      40000            /* Approximately 40KHz */
-#define STM32F0_LSE_FREQUENCY      32768            /* X2 on board */
+#define STM32_HSI_FREQUENCY      8000000ul        /* Approximately 8MHz */
+#define STM32_HSI14_FREQUENCY    14000000ul       /* HSI14 for ADC */
+#define STM32_HSI48_FREQUENCY    48000000ul       /* HSI48 for USB, only some STM32F0xx */
+#define STM32_HSE_FREQUENCY      STM32_BOARD_XTAL
+#define STM32_LSI_FREQUENCY      40000            /* Approximately 40KHz */
+#define STM32_LSE_FREQUENCY      32768            /* X2 on board */
 
 /* PLL Configuration
  *
@@ -93,7 +93,7 @@
  *   If the USB interface is used in the application, it requires a precise
  *   48MHz clock which can be generated from either the (1) the internal
  *   main PLL with the HSE clock source using an HSE crystal oscillator.  In
- *   this case,  the PLL VCO clock (defined by STM32F0_CFGR_PLLMUL) must be
+ *   this case,  the PLL VCO clock (defined by STM32_CFGR_PLLMUL) must be
  *   programmed to output a 96 MHz frequency. This is required to provide a
  *   48MHz clock to the (USBCLK = PLLVCO/2).  Or (2) by using the internal
  *   48MHz oscillator in automatic trimming mode. The synchronization for
@@ -111,63 +111,63 @@
  *     PLL source).
  */
 
-#define STM32F0_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2         /* Source is HSI/2 */
-#define STM32F0_PLLSRC_FREQUENCY   (STM32F0_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
-#ifdef CONFIG_STM32F0_USB
-#  undef  STM32F0_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
-#  define STM32F0_PLL_FREQUENCY    (12*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
+#define STM32_CFGR_PLLSRC        RCC_CFGR_PLLSRC_HSId2       /* Source is HSI/2 */
+#define STM32_PLLSRC_FREQUENCY   (STM32_HSI_FREQUENCY/2)     /* 8MHz / 2 = 4MHz */
+#ifdef CONFIG_STM32F0L0_USB
+#  undef  STM32_CFGR2_PREDIV                                 /* Not used with source HSI/2 */
+#  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12      /* PLLMUL = 12 */
+#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #else
-#  undef  STM32F0_CFGR2_PREDIV                                   /* Not used with source HSI/2 */
-#  define STM32F0_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12        /* PLLMUL = 12 */
-#  define STM32F0_PLL_FREQUENCY    (12*STM32F0_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
+#  undef  STM32_CFGR2_PREDIV                                 /* Not used with source HSI/2 */
+#  define STM32_CFGR_PLLMUL      RCC_CFGR_PLLMUL_CLKx12      /* PLLMUL = 12 */
+#  define STM32_PLL_FREQUENCY    (12*STM32_PLLSRC_FREQUENCY) /* PLL VCO Frequency is 48MHz */
 #endif
 
 /* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32F0_PLL_FREQUENCY divided by the PLLDIV value).
+ * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
-#define STM32F0_SYSCLK_SW          RCC_CFGR_SW_PLL       /* Use the PLL as the SYSCLK */
-#define STM32F0_SYSCLK_SWS         RCC_CFGR_SWS_PLL
-#ifdef CONFIG_STM32F0_USB
-#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
+#define STM32_SYSCLK_SW          RCC_CFGR_SW_PLL     /* Use the PLL as the SYSCLK */
+#define STM32_SYSCLK_SWS         RCC_CFGR_SWS_PLL
+#ifdef CONFIG_STM32F0L0_USB
+#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
 #else
-#  define STM32F0_SYSCLK_FREQUENCY STM32F0_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
+#  define STM32_SYSCLK_FREQUENCY STM32_PLL_FREQUENCY /* SYSCLK frequency is PLL VCO = 48MHz */
 #endif
 
-#define STM32F0_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
-#define STM32F0_HCLK_FREQUENCY     STM32F0_SYSCLK_FREQUENCY
-#define STM32F0_BOARD_HCLK         STM32F0_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
+#define STM32_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
+#define STM32_HCLK_FREQUENCY     STM32_SYSCLK_FREQUENCY
+#define STM32_BOARD_HCLK         STM32_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK (48MHz) */
 
-#define STM32F0_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLK
-#define STM32F0_PCLK1_FREQUENCY    (STM32F0_HCLK_FREQUENCY)
+#define STM32_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLK
+#define STM32_PCLK1_FREQUENCY    (STM32_HCLK_FREQUENCY)
 
 /* APB2 clock (PCLK2) is HCLK (48MHz) */
 
-#define STM32F0_RCC_CFGR_PPRE2     RCC_CFGR_PPRE2_HCLK
-#define STM32F0_PCLK2_FREQUENCY    STM32F0_HCLK_FREQUENCY
-#define STM32F0_APB2_CLKIN         (STM32F0_PCLK2_FREQUENCY)
+#define STM32_RCC_CFGR_PPRE2     RCC_CFGR_PPRE2_HCLK
+#define STM32_PCLK2_FREQUENCY    STM32_HCLK_FREQUENCY
+#define STM32_APB2_CLKIN         (STM32_PCLK2_FREQUENCY)
 
 /* APB1 timers 1-3, 6-7, and 14-17 will receive PCLK1 */
 
-#define STM32F0_APB1_TIM1_CLKIN    (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM2_CLKIN    (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM3_CLKIN    (STM32F0_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM1_CLKIN    (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM2_CLKIN    (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN    (STM32_PCLK1_FREQUENCY)
 
-#define STM32F0_APB1_TIM6_CLKIN    (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM7_CLKIN    (STM32F0_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN    (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN    (STM32_PCLK1_FREQUENCY)
 
-#define STM32F0_APB1_TIM14_CLKIN   (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM15_CLKIN   (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM16_CLKIN   (STM32F0_PCLK1_FREQUENCY)
-#define STM32F0_APB1_TIM17_CLKIN   (STM32F0_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM14_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM15_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM16_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM17_CLKIN   (STM32_PCLK1_FREQUENCY)
 
 /* LED definitions ******************************************************************/
 /* LEDs
  *
- * The Nucleo-64 board has one user controlable LED, User LD2.  This green
+ * The Nucleo-64 board has one user controllable LED, User LD2.  This green
  * LED is a user LED connected to Arduino signal D13 corresponding to STM32
  * I/O PA5 (PB13 on other some other Nucleo-64 boards).
  *

@@ -45,7 +45,7 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-#include "stm32f0_gpio.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,15 +54,15 @@
 /* Configuration ************************************************************/
 /* How many SPI modules does this chip support? */
 
-#if STM32F0_NSPI < 1
-#  undef CONFIG_STM32F0_SPI1
-#  undef CONFIG_STM32F0_SPI2
-#  undef CONFIG_STM32F0_SPI3
-#elif STM32F0_NSPI < 2
-#  undef CONFIG_STM32F0_SPI2
-#  undef CONFIG_STM32F0_SPI3
-#elif STM32F0_NSPI < 3
-#  undef CONFIG_STM32F0_SPI3
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32F0L0_SPI1
+#  undef CONFIG_STM32F0L0_SPI2
+#  undef CONFIG_STM32F0L0_SPI3
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32F0L0_SPI2
+#  undef CONFIG_STM32F0L0_SPI3
+#elif STM32_NSPI < 3
+#  undef CONFIG_STM32F0L0_SPI3
 #endif
 
 /* Nucleo-F091RC GPIOs ******************************************************/

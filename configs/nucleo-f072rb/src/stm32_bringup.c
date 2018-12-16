@@ -45,7 +45,7 @@
 
 #include <nuttx/i2c/i2c_master.h>
 
-#include "stm32f0_i2c.h"
+#include "stm32_i2c.h"
 #include "nucleo-f072rb.h"
 
 /****************************************************************************
@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if defined(CONFIG_STM32F0_I2C1) && defined(CONFIG_I2C_DRIVER)
+#if defined(CONFIG_STM32F0L0_I2C1) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
@@ -95,7 +95,7 @@ int stm32_bringup(void)
 #ifdef HAVE_I2C_DRIVER
   /* Get the I2C lower half instance */
 
-  i2c = stm32f0_i2cbus_initialize(1);
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
       i2cerr("ERROR: Inialize I2C1: %d\n", ret);
