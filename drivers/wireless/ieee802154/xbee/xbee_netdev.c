@@ -286,7 +286,6 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, eaddr);
       dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
 
-#ifdef CONFIG_NET_IPv6
       /* Set the IP address based on the eaddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -298,7 +297,6 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[6]  = (uint16_t)eaddr[4] << 8 |  (uint16_t)eaddr[5];
       dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[7];
       dev->d_ipv6addr[4] ^= 0x200;
-#endif
       return OK;
     }
 
@@ -326,7 +324,6 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, saddr);
       dev->d_mac.radio.nv_addrlen = IEEE802154_SADDRSIZE;
 
-#ifdef CONFIG_NET_IPv6
       /* Set the IP address based on the saddr */
 
       dev->d_ipv6addr[0]  = HTONS(0xfe80);
@@ -338,7 +335,6 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[6]  = HTONS(0xfe00);
       dev->d_ipv6addr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
       dev->d_ipv6addr[7] ^= 0x200;
-#endif
       return OK;
     }
 #endif
@@ -360,7 +356,6 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
 
 static inline void xbeenet_netmask(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_IPv6
   dev->d_ipv6netmask[0]  = 0xffff;
   dev->d_ipv6netmask[1]  = 0xffff;
   dev->d_ipv6netmask[2]  = 0xffff;
@@ -375,7 +370,6 @@ static inline void xbeenet_netmask(FAR struct net_driver_s *dev)
   dev->d_ipv6netmask[5]  = 0xffff;
   dev->d_ipv6netmask[6]  = 0xffff;
   dev->d_ipv6netmask[7]  = 0;
-#endif
 #endif
 }
 
@@ -761,7 +755,6 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
   ret = xbeenet_set_ipaddress(dev);
   if (ret >= 0)
     {
-#ifdef CONFIG_NET_IPv6
       wlinfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
              dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
              dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
@@ -777,28 +770,6 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
       wlinfo("             Node: %02x:%02x\n",
              dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
 #endif
-#else
-      if (dev->d_mac.radio.nv_addrlen == 8)
-        {
-          ninfo("Bringing up: Node: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x PANID=%02x:%02x\n",
-                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-                 dev->d_mac.radio.nv_addr[2], dev->d_mac.radio.nv_addr[3],
-                 dev->d_mac.radio.nv_addr[4], dev->d_mac.radio.nv_addr[5],
-                 dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7],
-                 priv->lo_panid[0], priv->lo_panid[1]);
-        }
-      else if (dev->d_mac.radio.nv_addrlen == 2)
-        {
-          ninfo("Bringing up: Node: %02x:%02x PANID=%02x:%02x\n",
-                 dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1],
-                 priv->lo_panid[0], priv->lo_panid[1]);
-        }
-      else
-        {
-          nerr("ERROR: No address assigned\n");
-        }
-#endif
-
       /* Set and activate a timer process */
 
       (void)wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry,
