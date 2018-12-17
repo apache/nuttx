@@ -876,10 +876,7 @@ endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
 endif
-if ARCH_CHIP_STM32F0
-source arch/arm/src/stm32f0l0/Kconfig
-endif
-if ARCH_CHIP_STM32L0
+if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
 source arch/arm/src/stm32f0l0/Kconfig
 endif
 if ARCH_CHIP_STM32F7
