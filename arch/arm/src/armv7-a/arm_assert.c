@@ -395,7 +395,7 @@ static void _up_assert(int errorcode)
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (CURRENT_REGS || running_task()->pid == 0)
+  if (CURRENT_REGS || running_task()->flink == NULL)
     {
       /* Disable interrupts on this CPU */
 

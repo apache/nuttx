@@ -87,7 +87,7 @@ static void _up_assert(int errorcode) /* noreturn_function */
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (up_interrupt_context() || running_task()->pid == 0)
+  if (up_interrupt_context() || running_task()->flink == NULL)
     {
        (void)up_irq_save();
         for (;;)
