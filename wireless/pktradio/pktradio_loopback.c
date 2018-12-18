@@ -221,7 +221,7 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
-  dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[0] << 8 ^ 0x0200;
+  dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[0] << 8;
 
 #elif CONFIG_PKTRADIO_ADDRLEN == 2
   /* Set the IP address based on the 2 byte address */
@@ -230,7 +230,6 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
   dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[0] << 8 | (uint16_t)g_mac_addr[1];
-  dev->d_ipv6addr[7] ^= 0x0200;
 
 #elif CONFIG_PKTRADIO_ADDRLEN == 8
   /* Set the IP address based on the 8-byte address */
@@ -239,7 +238,6 @@ static void lo_addr2ip(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[5]  = (uint16_t)g_mac_addr[2] << 8 | (uint16_t)g_mac_addr[3];
   dev->d_ipv6addr[6]  = (uint16_t)g_mac_addr[4] << 8 | (uint16_t)g_mac_addr[5];
   dev->d_ipv6addr[7]  = (uint16_t)g_mac_addr[6] << 8 | (uint16_t)g_mac_addr[7];
-  dev->d_ipv6addr[4] ^= 0x0200;
 #endif
 }
 

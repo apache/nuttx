@@ -127,7 +127,7 @@ static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *badd
 {
   /* Big-endian uint16_t to byte order */
 
-  baddr[0] = ipaddr[7] >> 8 ^ 0x02;
+  baddr[0] = ipaddr[7] >> 8;
 }
 #endif
 
@@ -138,7 +138,6 @@ static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *sadd
 
   saddr[0]  = ipaddr[7] >> 8;
   saddr[1]  = ipaddr[7] & 0xff;
-  saddr[0] ^= 0x02;
 }
 #endif
 
@@ -147,8 +146,6 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
 {
   FAR uint8_t *eptr = eaddr;
   int i;
-
-  DEBUGASSERT(ipaddr[0] == HTONS(0xfe80));
 
   for (i = 4; i < 8; i++)
     {
@@ -436,7 +433,7 @@ static inline void sixlowpan_ipfrombyte(FAR const uint8_t *byte,
   ipaddr[4]  = 0;
   ipaddr[5]  = HTONS(0x00ff);
   ipaddr[6]  = HTONS(0xfe00);
-  ipaddr[7]  = (uint16_t)byte[0] << 8 ^ 0x0200;
+  ipaddr[7]  = (uint16_t)byte[0] << 8;
 }
 #endif
 
@@ -452,7 +449,6 @@ static inline void sixlowpan_ipfromsaddr(FAR const uint8_t *saddr,
   ipaddr[5]  = HTONS(0x00ff);
   ipaddr[6]  = HTONS(0xfe00);
   ipaddr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
-  ipaddr[7] ^= 0x0200;
 }
 #endif
 
@@ -468,7 +464,10 @@ static inline void sixlowpan_ipfromeaddr(FAR const uint8_t *eaddr,
   ipaddr[5]  = (uint16_t)eaddr[2] << 8 | (uint16_t)eaddr[3];
   ipaddr[6]  = (uint16_t)eaddr[4] << 8 | (uint16_t)eaddr[5];
   ipaddr[7]  = (uint16_t)eaddr[6] << 8 | (uint16_t)eaddr[7];
-  ipaddr[4] ^= 0x0200;
+
+  /* Invert the U/L bit */
+
+  ipaddr[4] ^= HTONS(0x0200);
 }
 #endif
 
@@ -523,7 +522,7 @@ static inline bool sixlowpan_isbytebased(const net_ipv6addr_t ipaddr,
 {
   return (ipaddr[5] == HTONS(0x00ff) &&
           ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == (((uint16_t)byte << 8) ^ 0x0200));
+          ipaddr[7] == ((uint16_t)byte << 8));
 }
 #endif
 
@@ -532,13 +531,13 @@ static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
 {
   return (ipaddr[5] == HTONS(0x00ff) &&
           ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == (GETUINT16(saddr, 0) ^ 0x0200));
+          ipaddr[7] == (GETUINT16(saddr, 0)));
 }
 
 static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
                                           FAR const uint8_t *eaddr)
 {
-  return (ipaddr[4] == (GETUINT16(eaddr, 0) ^ 0x0200) &&
+  return (ipaddr[4] == (GETUINT16(eaddr, 0) ^ HTONS(0x0200)) &&
           ipaddr[5] ==  GETUINT16(eaddr, 2) &&
           ipaddr[6] ==  GETUINT16(eaddr, 4) &&
           ipaddr[7] ==  GETUINT16(eaddr, 6));

@@ -216,7 +216,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
       sixlowpan_saddrcopy(&meta->destaddr.saddr, pktmeta->dest.nm_addr);
     }
 
-  IEEE802154_SADDRCOPY(meta->destaddr.panid, pktmeta->dpanid);
+  IEEE802154_PANIDCOPY(meta->destaddr.panid, pktmeta->dpanid);
 
   /* Handle associated with MSDU.  Will increment once per packet, not
    * necesarily per frame:  The same MSDU handle will be used for each

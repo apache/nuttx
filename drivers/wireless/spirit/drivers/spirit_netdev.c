@@ -620,7 +620,7 @@ static void spirit_set_ipaddress(FAR struct net_driver_s *dev)
   dev->d_ipv6addr[4]  = 0;
   dev->d_ipv6addr[5]  = HTONS(0x00ff);
   dev->d_ipv6addr[6]  = HTONS(0xfe00);
-  dev->d_ipv6addr[7]  = (uint16_t)addr->nv_addr[0] << 8 ^ 0x0200;
+  dev->d_ipv6addr[7]  = (uint16_t)addr->nv_addr[0] << 8;
 }
 
 /****************************************************************************

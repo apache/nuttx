@@ -447,12 +447,6 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
         {
           postcount = addr->nv_addrlen;
         }
-
-      /* If we are converting the entire MAC address, then we need to some some
-       * special bit operations.
-       */
-
-      fullmac = (postcount == addr->nv_addrlen);
     }
 
   /* Copy any prefix */
@@ -532,11 +526,13 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
           srcptr += 2;
         }
 
-      /* If the was a standard MAC based address then toggle */
+      /* If the IP is dervied from a MAC address big enough to include the U/L bit,
+       * invert it.
+       */
 
-      if (fullmac)
+      if (usemac && postcount == 8)
         {
-          ipaddr[7] ^= 0x0200;
+          ipaddr[4] ^= HTONS(0x0200);
         }
 
       /* If we took the data from packet, then update the packet pointer */
