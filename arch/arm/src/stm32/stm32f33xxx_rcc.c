@@ -144,7 +144,7 @@ static inline void rcc_enableahb(void)
 #endif
 
 #ifdef CONFIG_STM32_TSC
-  /* CRC clock enable */
+  /* TSC clock enable */
 
   regval |= RCC_AHBENR_TSCEN;
 #endif

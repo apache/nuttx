@@ -165,7 +165,7 @@
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -191,7 +191,7 @@
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 20-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -217,7 +217,7 @@
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 24-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -243,7 +243,7 @@
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -269,7 +269,7 @@
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 20-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -295,7 +295,7 @@
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 24-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -320,7 +320,7 @@
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                16  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -345,7 +345,7 @@
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 21-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -370,7 +370,7 @@
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -395,7 +395,7 @@
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -420,7 +420,7 @@
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -445,7 +445,7 @@
 #  define STM32_NGPIO                    109  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                33  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -470,7 +470,7 @@
 #  define STM32_NGPIO                    115  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                34  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -496,7 +496,7 @@
 #  define STM32_NGPIO                    115 /* GPIOA-G,H */
 #  define STM32_NADC                     1   /* ADC1, 40-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                34  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
@@ -523,13 +523,12 @@
 
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
 #  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
-                                             /* (2) Comparators */
+#  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
-
 
 /* STM32 F100 Value Line ************************************************************/
 

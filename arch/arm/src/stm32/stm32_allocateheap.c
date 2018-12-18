@@ -53,10 +53,12 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "mpu.h"
+#ifdef CONFIG_ARM_MPU
+#  include "mpu.h"
+#  include "stm32_mpuinit.h"
+#endif
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32_mpuinit.h"
 
 /****************************************************************************
  * Pre-processor Definitions

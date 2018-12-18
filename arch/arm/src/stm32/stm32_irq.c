@@ -48,7 +48,9 @@
 #include <arch/armv7-m/nvicpri.h>
 
 #include "nvic.h"
-#include "ram_vectors.h"
+#ifdef CONFIG_ARCH_RAMVECTORS
+#  include "ram_vectors.h"
+#endif
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
