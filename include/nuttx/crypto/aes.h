@@ -51,6 +51,15 @@
 #define AES128_KEY_SIZE    16
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct aes_state_s
+{
+  uint8_t expanded_key[176];
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -61,7 +70,7 @@ extern "C"
 
 /****************************************************************************
  * Public Function Prototypes
-/****************************************************************************
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: aes_encrypt
@@ -100,6 +109,60 @@ void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key);
  ****************************************************************************/
 
 void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key);
+
+/****************************************************************************
+ * Name: aes_setupkey
+ *
+ * Description:
+ *   Configure the given AES context for operation with the selected key.
+ *
+ * Input Parameters:
+ *  state  an AES context that can be used for AES operations
+ *  key    a pointer to a 16-byte buffer holding the AES-128 key
+ *  len    length of the key, must be 16
+ *
+ * TODO: Support other key lengths of 24 (AES-192) and 32 (AES-256)
+ *
+ * Returned Value:
+ *   0 if OK
+ *   -EINVAL if len is not 16
+ *
+ ****************************************************************************/
+
+int aes_setupkey(FAR struct aes_state_s *state, FAR const uint8_t *key,
+                 int len);
+
+/****************************************************************************
+ * Name: aes_encipher
+ *
+ * Description:
+ *   Encipher some 16-byte blocks (without any operation mode) using the
+ *   previously defined key. The function can be called multiple times with
+ *   the same state parameter.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void aes_encipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
+                  int nblk);
+
+/****************************************************************************
+ * Name: aes_decipher
+ *
+ * Description:
+ *   Decipher some 16-byte blocks (without any operation mode) using the
+ *   previously defined key. The function can be called multiple times with
+ *   the same state parameter.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void aes_decipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
+                  int nblk);
 
 #ifdef  __cplusplus
 }
