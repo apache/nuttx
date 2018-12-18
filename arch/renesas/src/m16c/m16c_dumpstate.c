@@ -166,7 +166,7 @@ void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0)
+  if (rtcb->flink == NULL)
     {
       ustackbase = g_idle_topstack - 1;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;

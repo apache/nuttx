@@ -214,7 +214,7 @@ void xtensa_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0)
+  if (rtcb->flink == NULL)
     {
       ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS-1];
       ustacksize = IDLETHREAD_STACKSIZE;
