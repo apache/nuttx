@@ -507,22 +507,15 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 
       for (i = destndx; i < 8; i++)
         {
-          if (usemac)
-            {
-              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
-            }
-          else
-            {
 #ifdef CONFIG_ENDIAN_BIG
-              /* Preserve big-endian, network order */
+          /* Preserve big-endian, network order */
 
-              ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
+          ipaddr[i] = (uint16_t)srcptr[0] << 8 | (uint16_t)srcptr[1];
 #else
-              /* Preserve big-endian, network order */
+          /* Preserve big-endian, network order */
 
-              ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
+          ipaddr[i] = (uint16_t)srcptr[1] << 8 | (uint16_t)srcptr[0];
 #endif
-            }
           srcptr += 2;
         }
 

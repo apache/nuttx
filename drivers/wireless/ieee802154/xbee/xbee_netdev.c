@@ -283,7 +283,18 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       /* Set the MAC address as the eaddr */
 
       eaddr = arg.getreq.attrval.mac.eaddr;
-      IEEE802154_EADDRCOPY(dev->d_mac.radio.nv_addr, eaddr);
+
+      /* Network layers expect address in Network Order (Big Endian) */
+
+      dev->d_mac.radio.nv_addr[0] = eaddr[7];
+      dev->d_mac.radio.nv_addr[1] = eaddr[6];
+      dev->d_mac.radio.nv_addr[2] = eaddr[5];
+      dev->d_mac.radio.nv_addr[3] = eaddr[4];
+      dev->d_mac.radio.nv_addr[4] = eaddr[3];
+      dev->d_mac.radio.nv_addr[5] = eaddr[2];
+      dev->d_mac.radio.nv_addr[6] = eaddr[1];
+      dev->d_mac.radio.nv_addr[7] = eaddr[0];
+
       dev->d_mac.radio.nv_addrlen = IEEE802154_EADDRSIZE;
 
       /* Set the IP address based on the eaddr */
@@ -292,10 +303,10 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[1]  = 0;
       dev->d_ipv6addr[2]  = 0;
       dev->d_ipv6addr[3]  = 0;
-      dev->d_ipv6addr[4]  = (uint16_t)eaddr[0] << 8 |  (uint16_t)eaddr[1];
-      dev->d_ipv6addr[5]  = (uint16_t)eaddr[2] << 8 |  (uint16_t)eaddr[3];
-      dev->d_ipv6addr[6]  = (uint16_t)eaddr[4] << 8 |  (uint16_t)eaddr[5];
-      dev->d_ipv6addr[7]  = (uint16_t)eaddr[6] << 8 |  (uint16_t)eaddr[7];
+      dev->d_ipv6addr[4]  = HTONS((uint16_t)eaddr[7] << 8 | (uint16_t)eaddr[6]);
+      dev->d_ipv6addr[5]  = HTONS((uint16_t)eaddr[5] << 8 | (uint16_t)eaddr[4]);
+      dev->d_ipv6addr[6]  = HTONS((uint16_t)eaddr[3] << 8 | (uint16_t)eaddr[2]);
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)eaddr[1] << 8 | (uint16_t)eaddr[0]);
 
       /* Invert the U/L bit */
 
@@ -324,7 +335,12 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       /* Set the MAC address as the saddr */
 
       saddr = arg.getreq.attrval.mac.saddr;
-      IEEE802154_SADDRCOPY(dev->d_mac.radio.nv_addr, saddr);
+
+      /* Network layers expect address in Network Order (Big Endian) */
+
+      dev->d_mac.radio.nv_addr[0] = saddr[1];
+      dev->d_mac.radio.nv_addr[1] = saddr[0];
+
       dev->d_mac.radio.nv_addrlen = IEEE802154_SADDRSIZE;
 
       /* Set the IP address based on the saddr */
@@ -336,7 +352,7 @@ static int xbeenet_set_ipaddress(FAR struct net_driver_s *dev)
       dev->d_ipv6addr[4]  = 0;
       dev->d_ipv6addr[5]  = HTONS(0x00ff);
       dev->d_ipv6addr[6]  = HTONS(0xfe00);
-      dev->d_ipv6addr[7]  = (uint16_t)saddr[0] << 8 |  (uint16_t)saddr[1];
+      dev->d_ipv6addr[7]  = HTONS((uint16_t)saddr[1] << 8 |  (uint16_t)saddr[0]);
       return OK;
     }
 #endif
