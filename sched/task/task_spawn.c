@@ -69,9 +69,9 @@
  *   pidp - Upon successful completion, this will return the task ID of the
  *     child task in the variable pointed to by a non-NULL 'pid' argument.|
  *
- *   path - The 'path' argument identifies the file to execute.  If
- *     CONFIG_LIB_ENVPATH is defined, this may be either a relative or
- *     or an absolute path.  Otherwise, it must be an absolute path.
+ *   name - The name to assign to the child task.
+ *
+ *   entry - The child task's entry point (an address in memory)
  *
  *   attr - If the value of the 'attr' parameter is NULL, the all default
  *     values for the POSIX spawn attributes will be used.  Otherwise, the
@@ -83,7 +83,7 @@
  *     - POSIX_SPAWN_SETSCHEDULER: Set the new tasks scheduler priority to
  *       the sched_policy value.
  *
- *     NOTE: POSIX_SPAWN_SETSIGMASK is handled in ps_proxy().
+ *     NOTE: POSIX_SPAWN_SETSIGMASK is handled in task_spawn_proxy().
  *
  *   argv - argv[] is the argument list for the new task.  argv[] is an
  *     array of pointers to null-terminated strings. The list is terminated
