@@ -166,7 +166,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
   *heap_start = (uintptr_t *)&_eronly; /* please see ld.script */
-  *heap_size  = SRAM1_END - (int)heap_start;
+  *heap_size  = SRAM1_END - (int)*heap_start;
 
   /* Colorize the heap for debug */
 
@@ -230,6 +230,14 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-# error "TODO"
+  FAR void *region_start;
+  size_t region_size;
+
+  /* NOTE: add 1KB to avoid conflicts of initial stack */
+
+  region_start = (uintptr_t *)&_ebss + 1024;
+  region_size  = 0x02040000 - (int)region_start;
+
+  umm_addregion(region_start, region_size);
 }
 #endif
