@@ -78,9 +78,9 @@
 
 /* Include MCU-specific external interrupt definitions */
 
-#if defined(CONFIG_STM32F0L0_STM32F0)
+#if defined(CONFIG_ARCH_CHIP_STM32F0)
 #  include <arch/stm32f0l0/stm32f0_irq.h>
-#elif defined(CONFIG_STM32F0L0_STM32L0)
+#elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include <arch/stm32f0l0/stm32l0_irq.h>
 #else
 #  error Unrecognized STM32 Cortex M0 family

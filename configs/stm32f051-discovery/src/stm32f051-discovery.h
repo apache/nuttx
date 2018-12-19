@@ -81,9 +81,9 @@
  * The other side of the LED connects to ground so high value will illuminate the LED.
  */
 
-#define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
+#define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN9)
-#define GPIO_LED2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
+#define GPIO_LED2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_MEDIUM | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN8)
 
 /* Button definitions *******************************************************************************/

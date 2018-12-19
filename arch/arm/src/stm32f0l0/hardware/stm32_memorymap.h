@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32f0l0/hardware/stm32_memorymap.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -47,8 +47,10 @@
 #if defined(CONFIG_STM32F0L0_STM32F05X) || defined(CONFIG_STM32F0L0_STM32F07X) || \
     defined(CONFIG_STM32F0L0_STM32F09X)
 #  include "hardware/stm32f05xf07xf09x_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32L0)
+#  include "hardware/stm32l0_memorymap.h"
 #else
-#  error "Unsupported STM32 memory map"
+#  error "Unsupported STM32F0/L0 memory map"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_MEMORYMAP_H */

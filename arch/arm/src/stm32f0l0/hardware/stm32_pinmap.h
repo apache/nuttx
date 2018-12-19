@@ -1,8 +1,8 @@
 /************************************************************************************
  * arch/arm/src/stm32f0l0/hardware/stm32_pinmap.h
  *
- *   Copyright (C) 2015 Sebastien Lorquet. All rights reserved.
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,8 +49,10 @@
 #  include "hardware/stm32f07x_pinmap.h"
 #elif defined(CONFIG_STM32F0L0_STM32F09X)
 #  include "hardware/stm32f09x_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32L0)
+#  include "hardware/stm32l0_pinmap.h"
 #else
-#  error "Unsupported STM32F0 pin map"
+#  error "Unsupported STM32F0/L0 pin map"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_PINMAP_H */

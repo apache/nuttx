@@ -57,7 +57,7 @@
 
 /* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L0, L1, L4
  *
- * F0, L0 and L4 have the additional CSELR register which is used to reamap
+ * F0, L0 and L4 have the additional CSELR register which is used to remap
  * the DMA requests for each channel.
  */
 

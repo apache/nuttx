@@ -54,6 +54,7 @@
 #include <arch/stm32f0l0/chip.h>
 
 #include "chip.h"
+#include "hardware/stm32_gpio.h"
 #include "hardware/stm32_pinmap.h"
 
 /************************************************************************************
@@ -142,9 +143,17 @@
 
 #define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
-#  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
-#  define GPIO_SPEED_10MHz            (1 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */
-#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz High speed output  */
+
+#if defined(STM32_GPIO_VERY_LOW_SPEED)
+#  define GPIO_SPPED_VERYLOW          (0 << GPIO_SPEED_SHIFT)     /* 400 kHz Very low speed */
+#  define GPIO_SPEED_LOW              (1 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_SPEED_MEDIUM           (2 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */
+#  define GPIO_SPEED_HIGH             (3 << GPIO_SPEED_SHIFT)     /* 40 MHz High speed output  */
+#else
+#  define GPIO_SPEED_LOW              (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_SPEED_MEDIUM           (1 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */
+#  define GPIO_SPEED_HIGH             (3 << GPIO_SPEED_SHIFT)     /* 50 MHz High speed output  */
+#endif
 
 /* Output/Alt function type selection:
  *

@@ -183,6 +183,9 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/b-l072z-lrwan1
+  STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
+
 configs/bambino-200e
   Micromint Bambino board. This board is based on the LPC4330FBD144.
 
@@ -454,6 +457,9 @@ configs/nucleo-f410rb
 
 configs/nucleo-f303re
   STMicro ST Nucleo F303RE board.  Contributed by Paul Alexander Patience.
+
+configs/nucleo-l073rz
+  STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 
 configs/nutiny-nuc120
   This is the port of NuttX to the NuvoTon NuTiny-SDK-NUC120 board.  This

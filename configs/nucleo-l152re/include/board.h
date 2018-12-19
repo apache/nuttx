@@ -219,7 +219,7 @@
 
 /* By default the USART2 is connected to STLINK Virtual COM Port:
  * USART2_RX - PA3
- * USART2_TX - PA4
+ * USART2_TX - PA2
  */
 
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */

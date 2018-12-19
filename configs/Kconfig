@@ -861,6 +861,15 @@ config ARCH_BOARD_NUCLEO_144
 			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
 				2048KiB Flash memory and 512KiB SRAM.
 
+config ARCH_BOARD_NUCLEO_L073RZ
+	bool "STM32L073RZU6 Nucleo L073RZ"
+	depends on ARCH_CHIP_STM32L073RZ
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo L073RZ board based on the STMicro STM32L073RZU6 MCU.
+
 config ARCH_BOARD_NUCLEO_L496ZG
 	bool "STM32L496 Nucleo L496ZG"
 	depends on ARCH_CHIP_STM32L496ZG
@@ -1399,6 +1408,15 @@ config ARCH_BOARD_STM32F746_WS
 	---help---
 		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
+config ARCH_BOARD_B_L072Z_LRWAN1
+	bool "B-L072Z-LRWAN1"
+	depends on ARCH_CHIP_STM32L072CZ
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
+
 config ARCH_BOARD_B_L475E_IOT01A
 	bool "STMicro IoT Discovery kit"
 	depends on ARCH_CHIP_STM32L475VG
@@ -1818,6 +1836,7 @@ config ARCH_BOARD
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
+	default "nucleo-l073rz"            if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"            if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"            if ARCH_BOARD_NUCLEO_L432KC
 	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
@@ -1881,6 +1900,7 @@ config ARCH_BOARD
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32f769i-disco"         if ARCH_BOARD_STM32F769I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
+	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
@@ -2165,6 +2185,9 @@ endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "configs/nucleo-h743zi/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_L073RZ
+source "configs/nucleo-l073rz/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_L152RE
 source "configs/nucleo-l152re/Kconfig"
 endif
@@ -2341,6 +2364,9 @@ source "configs/stm32f746g-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F769I_DISCO
 source "configs/stm32f769i-disco/Kconfig"
+endif
+if ARCH_BOARD_B_L072Z_LRWAN1
+source "configs/b-l072z-lrwan1/Kconfig"
 endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "configs/b-l475e-iot01a/Kconfig"

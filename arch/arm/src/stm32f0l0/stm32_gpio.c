@@ -64,22 +64,24 @@
 const uint32_t g_gpiobase[STM32_NPORTS] =
 {
 #if STM32_NPORTS > 0
-  STM32_GPIOA_BASE,
+  STM32_GPIOA_BASE,   /* One GPIO ports, GPIOA */
 #endif
 #if STM32_NPORTS > 1
-  STM32_GPIOB_BASE,
+  STM32_GPIOB_BASE,   /* Two GPIO ports, GPIOA-B */
 #endif
 #if STM32_NPORTS > 2
-  STM32_GPIOC_BASE,
+  STM32_GPIOC_BASE,   /* Three GPIO ports, GPIOA-D*/
 #endif
 #if STM32_NPORTS > 3
-  STM32_GPIOD_BASE,
+  STM32_GPIOD_BASE,   /* Four GPIO ports, GPIOA-D */
 #endif
 #if STM32_NPORTS > 4
-  STM32_GPIOE_BASE,
+  STM32_GPIOE_BASE,   /* Five GPIO ports, GPIOA-E */
 #endif
-#if STM32_NPORTS > 5
-  STM32_GPIOF_BASE,
+#if STM32_NPORTS > 5 && defined(STM32_HAVE_PORTF)
+  STM32_GPIOF_BASE,   /* Six GPIO ports, GPIOA-F */
+#elif STM32_NPORTS > 5 && !defined(STM32_HAVE_PORTF)
+  STM32_GPIOH_BASE,   /* Six GPIO ports, GPIOA-E, H */
 #endif
 };
 
@@ -249,17 +251,35 @@ int stm32_configgpio(uint32_t cfgset)
       switch (cfgset & GPIO_SPEED_MASK)
         {
           default:
-          case GPIO_SPEED_2MHz:    /* 2 MHz Low speed output */
+#if defined(STM32_GPIO_VERY_LOW_SPEED)
+          case GPIO_SPPED_VERYLOW: /* 400KHz Very Low speed output */
             setting = GPIO_OSPEED_2MHz;
             break;
 
-          case GPIO_SPEED_10MHz:   /* 10 MHz Medium speed output */
+          case GPIO_SPEED_LOW:     /* 2 MHz Low speed output */
+            setting = GPIO_OSPEED_2MHz;
+            break;
+
+          case GPIO_SPEED_MEDIUM:  /* 10 MHz Medium speed output */
             setting = GPIO_OSPEED_10MHz;
             break;
 
-          case GPIO_SPEED_50MHz:   /* 50 MHz High speed output  */
+          case GPIO_SPEED_HIGH:    /* 40 MHz High speed output  */
+            setting = GPIO_OSPEED_40MHz;
+            break;
+#else
+          case GPIO_SPEED_LOW:     /* 2 MHz Low speed output */
+            setting = GPIO_OSPEED_2MHz;
+            break;
+
+          case GPIO_SPEED_MEDIUM:  /* 10 MHz Medium speed output */
+            setting = GPIO_OSPEED_10MHz;
+            break;
+
+          case GPIO_SPEED_HIGH:    /* 50 MHz High speed output  */
             setting = GPIO_OSPEED_50MHz;
             break;
+#endif
         }
     }
   else

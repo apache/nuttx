@@ -62,12 +62,13 @@
 
 /* HSI - Internal 8 MHz RC Oscillator
  * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
+ * HSE - 8 MHz from MCO output of ST-LINK
  * LSE - 32.768 kHz
  */
 
 #define STM32_BOARD_XTAL        8000000ul        /* X1 on board */
 
+#define STM32_HSEBYP_ENABLE
 #define STM32_HSI_FREQUENCY     8000000ul
 #define STM32_LSI_FREQUENCY     40000            /* Between 30kHz and 60kHz */
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
@@ -89,7 +90,7 @@
 /* AHB clock (HCLK) is SYSCLK (72MHz) */
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
-#define STM32_HCLK_FREQUENCY    STM32_PLL_FREQUENCY
+#define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (72MHz) */

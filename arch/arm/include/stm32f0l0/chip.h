@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/stm32f0l0/chip.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -50,9 +50,6 @@
 /* Get customizations for each supported chip */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F051R8)
-#  define STM32F051x            1  /* STM32F051x family */
-#  undef  STM32F072x               /* Not STM32F072x family */
-#  undef  STM32F091x               /* Not STM32F091x family */
 
 #  define STM32_FLASH_SIZE      (64*1024) /* 64Kb */
 #  define STM32_SRAM_SIZE       (8*1024)  /*  8Kb */
@@ -62,7 +59,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          2  /* Two USARTs modules */
 #  define STM32_NCAN            0  /* No CAN controllers */
-#  define STM32_NUSBDEV         1  /* One USB device controller */
+#  define STM32_NUSBDEV         1  /* One USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NDAC            1  /* One DAC module */
 #  define STM32_NDACCHAN        1  /* One DAC channels */
 #  define STM32_NCOMP           2  /* Two Analog Comparators */
@@ -70,9 +68,6 @@
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F072C8) || defined(CONFIG_ARCH_CHIP_STM32F072CB)
-#  undef  STM32F051x               /* Not STM32F051x family */
-#  define STM32F072x            1  /* STM32F072x family */
-#  undef  STM32F091x               /* Not STM32F091x family */
 
 #  ifdef CONFIG_ARCH_CHIP_STM32F072C8
 #    define STM32_FLASH_SIZE    (64*1024)  /*  64Kb */
@@ -90,7 +85,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          4  /* Four USARTs module */
 #  define STM32_NCAN            1  /* One CAN controller */
-#  define STM32_NUSBDEV         1  /* One USB device controller */
+#  define STM32_NUSBDEV         1  /* One USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32_NADC12          1  /* One 12-bit module */
 #  define STM32_NADCCHAN        10 /* Ten external channels */
@@ -102,9 +98,6 @@
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F072R8) || defined(CONFIG_ARCH_CHIP_STM32F072RB)
-#  undef  STM32F051x               /* Not STM32F051x family */
-#  define STM32F072x            1  /* STM32F072x family */
-#  undef  STM32F091x               /* Not STM32F091x family */
 
 #  ifdef CONFIG_ARCH_CHIP_STM32F072R8
 #    define STM32_FLASH_SIZE    (64*1024)  /*  64Kb */
@@ -122,7 +115,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          4  /* Four USARTs module */
 #  define STM32_NCAN            1  /* One CAN controller */
-#  define STM32_NUSBDEV         1  /* One USB device controller */
+#  define STM32_NUSBDEV         1  /* One USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32_NADC12          1  /* One 12-bit module */
 #  define STM32_NADCCHAN        16 /* 16 external channels */
@@ -134,9 +128,6 @@
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F072V8) || defined(CONFIG_ARCH_CHIP_STM32F072VB)
-#  undef  STM32F051x               /* Not STM32F051x family */
-#  define STM32F072x            1  /* STM32F072x family */
-#  undef  STM32F091x               /* Not STM32F091x family */
 
 #  ifdef CONFIG_ARCH_CHIP_STM32F072V8
 #    define STM32_FLASH_SIZE    (64*1024)  /*  64Kb */
@@ -154,7 +145,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          4  /* Four USARTs module */
 #  define STM32_NCAN            1  /* One CAN controller */
-#  define STM32_NUSBDEV         1  /* One USB device controller */
+#  define STM32_NUSBDEV         1  /* One USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32_NADC12          1  /* One 12-bit module */
 #  define STM32_NADCCHAN        16 /* 16 external channels */
@@ -166,9 +158,6 @@
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F091CB) || defined(CONFIG_ARCH_CHIP_STM32F091CC)
-#  undef  STM32F051x               /* Not STM32F051x family */
-#  undef  STM32F072x               /* Not STM32F072x family */
-#  define STM32F091x            1  /* STM32F091x family */
 
 #  ifdef CONFIG_ARCH_CHIP_STM32F091CB
 #    define STM32_FLASH_SIZE    (128*1024) /* 128Kb */
@@ -186,7 +175,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          6  /* Six USARTs modules */
 #  define STM32_NCAN            1  /* One CAN controller */
-#  define STM32_NUSBDEV         0  /* No USB device controller */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32_NADC12          1  /* One 12-bit module */
 #  define STM32_NADCCHAN        10 /* 10 external channels */
@@ -197,11 +187,8 @@
 #  define STM32_NCAP            17 /* Capacitive sensing channels */
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F091RB) || defined(CONFIG_ARCH_CHIP_STM32F091RC) \
-   || defined(CONFIG_ARCH_CHIP_STM32F091VB) || defined(CONFIG_ARCH_CHIP_STM32F091VC)
-#  undef  STM32F051x               /* Not STM32F051x family */
-#  undef  STM32F072x               /* Not STM32F072x family */
-#  define STM32F091x            1  /* STM32F091x family */
+#elif defined(CONFIG_ARCH_CHIP_STM32F091RB) || defined(CONFIG_ARCH_CHIP_STM32F091RC) || \
+      defined(CONFIG_ARCH_CHIP_STM32F091VB) || defined(CONFIG_ARCH_CHIP_STM32F091VC)
 
 #  if defined(CONFIG_ARCH_CHIP_STM32F091RB) || defined(CONFIG_ARCH_CHIP_STM32F091VB)
 #    define STM32_FLASH_SIZE    (128*1024) /* 128Kb */
@@ -219,7 +206,8 @@
 #  define STM32_NI2C            2  /* Two I2C modules */
 #  define STM32_NUSART          8  /* Eight USARTs modules */
 #  define STM32_NCAN            1  /* One CAN controller */
-#  define STM32_NUSBDEV         0  /* No USB device controller */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NCEC            1  /* One HDMI-CEC controller */
 #  define STM32_NADC12          1  /* One 12-bit module */
 #  define STM32_NADCCHAN        16 /* 16 external channels */
@@ -233,6 +221,222 @@
 #    define STM32_NCAP          18 /* Capacitive sensing channels */
 #  endif
 #  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-F */
+
+/* STM32L EnergyLite Line ***********************************************************/
+ 
+/* STM32L03XX  - With LCD
+ * STM32L02XX  - No LCD
+ *
+ * STM32L0XXX8 - 64KB FLASH, 20KB SRAM, 3KB EEPROM
+ * STM32L0XXXB - 128KB FLASH, 20KB SRAM, 6KB EEPROM
+ * STM32L0XXXZ - 192KB FLASH, 20KB SRAM, 3KB EEPROM
+ *
+ * STM32L0XXCX - 48-pins
+ * STM32L0XXRX - 64-pins
+ * STM32L0XXVX - 100-pins
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L072V8) || defined(CONFIG_ARCH_CHIP_STM32L072VB) || \
+      defined(CONFIG_ARCH_CHIP_STM32L072VZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1  /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            24 /* Twenty-four Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L072KB) || defined(CONFIG_ARCH_CHIP_STM32L072KZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC                     1   /* (1) ADC1, 14-channels */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1  /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            13 /* Thirteen Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L072CB) || defined(CONFIG_ARCH_CHIP_STM32L072CZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1  /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            18 /* Nineteen Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L072RB) || defined(CONFIG_ARCH_CHIP_STM32L072RZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            0  /* No LCD */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1   /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            24 /* Twenty-four Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L073V8) || defined(CONFIG_ARCH_CHIP_STM32L073VB) || \
+      defined(CONFIG_ARCH_CHIP_STM32L073VZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            1  /* One LCD controller */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1  /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            24 /* Twenty-four Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L073CB) || defined(CONFIG_ARCH_CHIP_STM32L073CZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            1  /* One LCD controller */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1   /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            17 /* Seventeen Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32L073RB) || defined(CONFIG_ARCH_CHIP_STM32L073RZ)
+#  define STM32_NATIM           0  /* No advanced timers */
+#  define STM32_NGTIM16         4  /* 16-bit general up/down timers TIM2-3
+                                    * (with DMA) and TIM21-22 without DMA */
+#  define STM32_NGTIM32         0  /* No 32-bit general up/down timers */
+#  define STM32_NBTIM           2  /* Two basic timers: TIM6, TIM7 with DMA */
+                                   /* One LPTIMER */
+#  define STM32_NSPI            2  /* Two SPI modules SPI1-2 */
+#  define STM32_NI2S            1  /* One I2S module */
+#  define STM32_NI2C            3  /* Three I2C (2 with SMBus/PMBus) */
+#  define STM32_NDMA            1  /* One DMA1, 7-channels */
+#  define STM32_NUSART          4  /* Four USART modules, USART1-4 */
+                                   /* One LPUART */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NLCD            1  /* One LCD controller */
+#  define STM32_NUSBDEV         0  /* No USB full-speed device controller */
+#  define STM32_NUSBOTG         1  /* One USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NCEC            0  /* No HDMI-CEC controller */
+#  define STM32_NADC12          1  /* One 12-bit ADC module */
+#  define STM32_NADCCHAN        14 /* 14 channels */
+#  define STM32_NADCINT         0  /* ? internal channels vs external? */
+#  define STM32_NDAC            2  /* Two DAC module */
+#  define STM32_NDACCHAN        2  /* Two DAC channels */
+#  define STM32_NCOMP           2  /* Two Analog Comparators */
+#  define STM32_NCRC            1  /* One CRC module */
+#  define STM32_NRNG            1  /* One Random number generator (RNG) */
+#  define STM32_NCAP            24 /* Twenty-four Capacitive sensing channels */
+#  define STM32_NPORTS          6  /* Six GPIO ports, GPIOA-E, H */
 
 #else
 #  error "Unsupported STM32F0xx chip"

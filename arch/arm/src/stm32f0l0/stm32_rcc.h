@@ -48,4 +48,24 @@
 
 #include "hardware/stm32_rcc.h"
 
+/************************************************************************************
+ * Public Function Protoypes
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_rcc_enablelse
+ *
+ * Description:
+ *   Enable the External Low-Speed (LSE) Oscillator.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_rcc_enablelse(void);
+
 #endif /* __ARCH_ARM_SRC_STM32F0L0_STM32_RCC_H */

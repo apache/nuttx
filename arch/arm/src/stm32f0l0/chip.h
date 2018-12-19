@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32f0l0/chip.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
