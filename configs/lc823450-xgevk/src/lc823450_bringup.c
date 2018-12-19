@@ -118,7 +118,7 @@ int lc823450_bringup(void)
 
 #if defined(CONFIG_RNDIS) && defined(CONFIG_NSH_MACADDR)
   uint8_t mac[6];
-  mac[0] = 0xaa; /* TODO */
+  mac[0] = 0xa0; /* TODO */
   mac[1] = (CONFIG_NSH_MACADDR >> (8 * 4)) & 0xff;
   mac[2] = (CONFIG_NSH_MACADDR >> (8 * 3)) & 0xff;
   mac[3] = (CONFIG_NSH_MACADDR >> (8 * 2)) & 0xff;
