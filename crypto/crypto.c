@@ -66,20 +66,12 @@
 
 int up_cryptoinitialize(void)
 {
-#if defined(CONFIG_CRYPTO_AES) || defined(CONFIG_CRYPTO_ALGTEST)
-  int res;
-
-#ifdef CONFIG_CRYPTO_AES
-  res = up_aesinitialize();
-  if (res)
-    {
-      return res;
-    }
-#endif
+#ifdef CONFIG_CRYPTO_ALGTEST
+  int ret;
 
 #ifdef CONFIG_CRYPTO_ALGTEST
-  res = crypto_test();
-  if (res)
+  ret = crypto_test();
+  if (ret)
     {
       crypterr("ERROR: crypto test failed\n");
     }
@@ -89,7 +81,7 @@ int up_cryptoinitialize(void)
     }
 #endif
 
-  return res;
+  return ret;
 #else
   return OK;
 #endif

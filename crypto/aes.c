@@ -34,11 +34,6 @@
  *
  ****************************************************************************/
 
-/* TODO: Adapt interfaces so that they are consistent with H/W AES
- * implemenations.  This needs to support up_aesinitialize() and
- * aes_cypher() per include/nuttx/crypto/crypto.h.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/

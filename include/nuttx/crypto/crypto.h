@@ -65,9 +65,9 @@
 #define CYPHER_ENCRYPT 1
 #define CYPHER_DECRYPT 0
 
-/************************************************************************************
+/*******************************************************************************
  * Public Data
- ************************************************************************************/
+ ******************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -80,19 +80,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/*******************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ******************************************************************************/
 
 int up_cryptoinitialize(void);
 
 #if defined(CONFIG_CRYPTO_AES)
-int up_aesinitialize(void);
-int aes_cypher(FAR void *out, FAR const void *in, uint32_t size, FAR const void *iv,
-               FAR const void *key, uint32_t keysize, int mode, int encrypt);
-int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize, int mode,
-               int encrypt);
-int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in, uint32_t inl);
+int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
+               FAR const void *iv, FAR const void *key, uint32_t keysize,
+               int mode, int encrypt);
 #endif
 
 #if defined(CONFIG_CRYPTO_ALGTEST)

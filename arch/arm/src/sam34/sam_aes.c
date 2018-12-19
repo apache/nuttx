@@ -76,7 +76,8 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t lock;
+static sem_t g_samaes_lock;
+static bool  g_samaes_initdone = false;
 
 /****************************************************************************
  * Public Data
@@ -86,29 +87,31 @@ static sem_t lock;
  * Private Functions
  ****************************************************************************/
 
-static void aes_lock(void)
+static void samaes_lock(void)
 {
-  nxsem_wait(&lock);
+  nxsem_wait(&g_samaes_lock);
 }
 
-static void aes_unlock(void)
+static void samaes_unlock(void)
 {
-  nxsem_post(&lock);
+  nxsem_post(&g_samaes_lock);
 }
 
-static void aes_memcpy(void *out, const void *in, size_t size)
+static void samaes_memcpy(FAR void *out, FAR const void *in, size_t size)
 {
   size_t i;
   size_t wcount = size / 4;
-  for (i = 0; i < wcount; i++, out = (uint8_t *)out + 4, in = (uint8_t *)in + 4)
+
+  for (i = 0; i < wcount;
+       i++, out = (FAR uint8_t *)out + 4, in = (FAR uint8_t *)in + 4)
     {
-      *(uint32_t *)out = *(uint32_t *)in;
+      *(FAR uint32_t *)out = *(FAR uint32_t *)in;
     }
 }
 
-static void aes_encryptblock(void *out, const void *in)
+static void samaes_encryptblock(FAR void *out, FAR const void *in)
 {
-  aes_memcpy((void *)SAM_AES_IDATAR, in, AES_BLOCK_SIZE);
+  samaes_memcpy((void *)SAM_AES_IDATAR, in, AES_BLOCK_SIZE);
 
   putreg32(AES_CR_START, SAM_AES_CR);
 
@@ -116,11 +119,11 @@ static void aes_encryptblock(void *out, const void *in)
 
   if (out)
     {
-      aes_memcpy(out, (void *)SAM_AES_ODATAR, AES_BLOCK_SIZE);
+      samaes_memcpy(out, (void *)SAM_AES_ODATAR, AES_BLOCK_SIZE);
     }
 }
 
-static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
+static int samaes_setup_mr(uint32_t keysize, int mode, int encrypt)
 {
   uint32_t regval = AES_MR_SMOD_MANUAL_START | AES_MR_CKEY;
 
@@ -138,12 +141,15 @@ static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
     case 16:
       regval |= AES_MR_KEYSIZE_AES128;
       break;
+
     case 24:
       regval |= AES_MR_KEYSIZE_AES192;
       break;
+
     case 32:
       regval |= AES_MR_KEYSIZE_AES256;
       break;
+
     default:
       return -EINVAL;
     }
@@ -153,15 +159,19 @@ static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
     case AES_MODE_ECB:
       regval |= AES_MR_OPMOD_ECB;
       break;
+
     case AES_MODE_CBC:
       regval |= AES_MR_OPMOD_CBC;
       break;
+
     case AES_MODE_CTR:
       regval |= AES_MR_OPMOD_CTR;
       break;
+
     case AES_MODE_CFB:
       regval |= AES_MR_OPMOD_CFB;
       break;
+
     default:
       return -EINVAL;
     }
@@ -174,59 +184,71 @@ static int aes_setup_mr(uint32_t keysize, int mode, int encrypt)
  * Public Functions
  ****************************************************************************/
 
-int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
-               const void *key, uint32_t keysize, int mode, int encrypt)
+static int samaes_initialize(void)
 {
-  int res = OK;
+  nxsem_init(&g_samaes_lock, 0, 1);
+  sam_aes_enableclk();
+  putreg32(AES_CR_SWRST, SAM_AES_CR);
+  return OK;
+}
+
+int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
+               FAR const void *iv, FAR const void *key, uint32_t keysize,
+               int mode, int encrypt)
+{
+  int ret = OK;
+
+  if (!g_samaes_initdone)
+    {
+      ret = samaes_initialize();
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      g_samaes_initdone = true;
+    }
 
   if (size % 16)
     {
       return -EINVAL;
     }
 
-  aes_lock();
+  samaes_lock();
 
-  res = aes_setup_mr(keysize, mode & AES_MODE_MASK, encrypt);
-  if (res)
+  ret = samaes_setup_mr(keysize, mode & AES_MODE_MASK, encrypt);
+  if (ret < 0)
     {
-      aes_unlock();
-      return res;
+      samaes_unlock();
+      return ret;
     }
 
-  aes_memcpy((void *)SAM_AES_KEYWR, key, keysize);
-  if (iv)
+  samaes_memcpy((FAR void *)SAM_AES_KEYWR, key, keysize);
+  if (iv != NULL)
     {
-      aes_memcpy((void *)SAM_AES_IVR, iv, AES_BLOCK_SIZE);
+      samaes_memcpy((FAR void *)SAM_AES_IVR, iv, AES_BLOCK_SIZE);
     }
 
   while (size)
     {
       if ((mode & AES_MODE_MAC) == 0)
         {
-          aes_encryptblock(out, in);
-          out = (char *)out + AES_BLOCK_SIZE;
+          samaes_encryptblock(out, in);
+          out = (FAR char *)out + AES_BLOCK_SIZE;
         }
       else if (size == AES_BLOCK_SIZE)
         {
-          aes_encryptblock(out, in);
+          samaes_encryptblock(out, in);
         }
       else
         {
-          aes_encryptblock(NULL, in);
+          samaes_encryptblock(NULL, in);
         }
 
-      in  = (char *)in  + AES_BLOCK_SIZE;
+      in    = (FAR char *)in + AES_BLOCK_SIZE;
       size -= AES_BLOCK_SIZE;
     }
 
-  aes_unlock();
-  return res;
-}
-
-int up_aesinitialize()
-{
-  nxsem_init(&lock, 0, 1);
-  sam_aes_enableclk();
-  putreg32(AES_CR_SWRST, SAM_AES_CR);
-  return OK;
+  samaes_unlock();
+  return ret;
 }

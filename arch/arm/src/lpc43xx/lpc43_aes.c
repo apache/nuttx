@@ -66,32 +66,11 @@
 static struct lpc43_aes_s *g_aes;
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
-               const void *key, uint32_t keysize, int mode, int encrypt)
-{
-  unsigned int ret = 0;
-  uint32_t outl = size;
-
-  ret = aes_init(iv, key, keysize, mode, encrypt);
-
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  return aes_update(out, &outl, in, size);
-}
-
-int up_aesreset(void)
-{
-  return OK;
-}
-
-int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
-             int mode, int encrypt)
+static int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
+                    int mode, int encrypt)
 {
   unsigned int cmd = 0;
   unsigned int ret = 0;
@@ -101,10 +80,10 @@ int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
       return -ENOSYS;
     }
 
-    /* The LPC43 aes engine can load two keys from otp and one random
-     * generated key. This behavior doesn't fit current api.  So if
-     * key == NULL, we will usr keysize as identifier of the special key.
-     */
+  /* The LPC43 aes engine can load two keys from otp and one random
+   * generated key. This behavior doesn't fit current api.  So if
+   * key == NULL, we will usr keysize as identifier of the special key.
+   */
 
   if (keysize != 16 && key)
     {
@@ -134,19 +113,19 @@ int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
   else
     {
       switch (keysize)
-      {
-        case 0:
-          g_aes->aes_LoadKey1();
-          break;
+        {
+          case 0:
+            g_aes->aes_LoadKey1();
+            break;
 
-        case 1:
-          g_aes->aes_LoadKey2();
-          break;
+          case 1:
+            g_aes->aes_LoadKey2();
+            break;
 
-        case 2:
-          g_aes->aes_LoadKeyRNG();
-          break;
-      }
+          case 2:
+            g_aes->aes_LoadKeyRNG();
+            break;
+        }
     }
 
   g_aes->aes_LoadIV_SW((const unsigned char*)iv);
@@ -170,15 +149,15 @@ int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
   return 0;
 }
 
-int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in,
-               uint32_t inl)
+static int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in,
+                      uint32_t inl)
 {
   if (g_aes == NULL)
     {
       return -ENOSYS;
     }
 
-  if ((inl & (AES_BLOCK_SIZE-1)) != 0)
+  if ((inl & (AES_BLOCK_SIZE - 1)) != 0)
     {
       return -EINVAL;
     }
@@ -192,18 +171,24 @@ int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in,
                             (unsigned char*)in, inl / 16);
 }
 
-int up_aesinitialize(void)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
+               const void *key, uint32_t keysize, int mode, int encrypt)
 {
+  unsigned int ret = 0;
+  uint32_t outl = size;
+
   g_aes = (struct lpc43_g_aes*)*((uint32_t*)LPC43_ROM_AES_DRIVER_TABLE);
-  if (g_aes != NULL)
+
+  ret = aes_init(iv, key, keysize, mode, encrypt);
+
+  if (ret != OK)
     {
-      return OK;
+      return ret;
     }
 
-  return -ENOSYS;
-}
-
-int up_aesuninitialize(void)
-{
-  return OK;
+  return aes_update(out, &outl, in, size);
 }
