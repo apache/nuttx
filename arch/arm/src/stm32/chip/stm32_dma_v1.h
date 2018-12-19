@@ -45,6 +45,10 @@
 #define HAVE_IP_DMA_V1 1
 #undef  HAVE_IP_DMA_V2
 
+/* F0, L0, L4 have additional CSELR register */
+
+#undef DMA_HAVE_CSELR 1
+
 /* These definitions apply to both the STM32 F1 and F3 families */
 /* 12 Channels Total: 7 DMA1 Channels(1-7) and 5 DMA2 channels (1-5) */
 
@@ -111,6 +115,10 @@
 #define STM32_DMA_CMAR5_OFFSET    0x0064 /* DMA channel 5 memory address register */
 #define STM32_DMA_CMAR6_OFFSET    0x0078 /* DMA channel 6 memory address register */
 #define STM32_DMA_CMAR7_OFFSET    0x008c /* DMA channel 7 memory address register */
+
+#ifdef DMA_HAVE_CSELR
+#  define STM32_DMA_CSELR_OFFSET  0x00a8 /* DMA channel selection register */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -300,6 +308,14 @@
 #define STM32_DMA2_CHAN3          (9)
 #define STM32_DMA2_CHAN4          (10)
 #define STM32_DMA2_CHAN5          (11)
+
+#ifdef DMA_HAVE_CSELR
+#  define DMACHAN_SETTING(chan, sel)     ((((sel) & 0xff) << 8) | ((chan) & 0xff))
+#  define DMACHAN_SETTING_CHANNEL_MASK   0x00ff
+#  define DMACHAN_SETTING_CHANNEL_SHIFT  (0)
+#  define DMACHAN_SETTING_FUNCTION_MASK  0xff00
+#  define DMACHAN_SETTING_FUNCTION_SHIFT (8)
+#endif
 
 #if defined(CONFIG_STM32_STM32L15XX)
 

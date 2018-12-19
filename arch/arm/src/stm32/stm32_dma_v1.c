@@ -55,7 +55,11 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L1, L4 */
+/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L0, L1, L4
+ *
+ * F0, L0 and L4 have the additional CSELR register which is used to reamap
+ * the DMA requests for each channel.
+ */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,6 +86,9 @@
 struct stm32_dma_s
 {
   uint8_t        chan;     /* DMA channel number (0-6) */
+#ifdef DMA_HAVE_CSELR
+  uint8_t        function; /* DMA peripheral connected to this channel (0-7) */
+#endif
   uint8_t        irq;      /* DMA channel IRQ number */
   sem_t          sem;      /* Used to wait for DMA channel to become available */
   uint32_t       base;     /* DMA register channel base address */
@@ -399,9 +406,19 @@ void weak_function up_dma_initialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32_dmachannel(unsigned int chndx)
+DMA_HANDLE stm32_dmachannel(unsigned int chndef)
 {
-  struct stm32_dma_s *dmach = &g_dma[chndx];
+  int chndx = 0;
+  struct stm32_dma_s *dmach = NULL;
+
+#ifdef DMA_HAVE_CSELR
+  chndx = (chndef & DMACHAN_SETTING_CHANNEL_MASK) >>
+          DMACHAN_SETTING_CHANNEL_SHIFT;
+#else
+  chndx = chndef;
+#endif
+
+  dmach = &g_dma[chndx];
 
   DEBUGASSERT(chndx < DMA_NCHANNELS);
 
@@ -412,6 +429,15 @@ DMA_HANDLE stm32_dmachannel(unsigned int chndx)
   stm32_dmatake(dmach);
 
   /* The caller now has exclusive use of the DMA channel */
+
+#ifdef DMA_HAVE_CSELR
+  /* Define the peripheral that will use the channel. This is stored until
+   * dmasetup is called.
+   */
+
+  dmach->function = (chndef & DMACHAN_SETTING_FUNCTION_MASK) >>
+                     DMACHAN_SETTING_FUNCTION_SHIFT;
+#endif
 
   return (DMA_HANDLE)dmach;
 }
@@ -502,6 +528,15 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
               DMA_CCR_DIR);
   regval |= ccr;
   dmachan_putreg(dmach, STM32_DMACHAN_CCR_OFFSET, regval);
+
+#ifdef DMA_HAVE_CSELR
+  /* Define peripheral indicated in dmach->function */
+
+  regval  = dmabase_getreg(dmach, STM32_DMA_CSELR_OFFSET);
+  regval &= ~(0x0f << (dmach->chan << 2));
+  regval |= (dmach->function << (dmach->chan << 2));
+  dmabase_putreg(dmach, STM32_DMA_CSELR_OFFSET, regval);
+#endif
 }
 
 /****************************************************************************
@@ -708,6 +743,9 @@ void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
 
   flags       = enter_critical_section();
   regs->isr   = dmabase_getreg(dmach, STM32_DMA_ISR_OFFSET);
+#ifdef DMA_HAVE_CSELR
+  regs->cselr = dmabase_getreg(dmach, STM32_DMA_CSELR_OFFSET);
+#endif
   regs->ccr   = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
   regs->cndtr = dmachan_getreg(dmach, STM32_DMACHAN_CNDTR_OFFSET);
   regs->cpar  = dmachan_getreg(dmach, STM32_DMACHAN_CPAR_OFFSET);
@@ -736,6 +774,9 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 
   dmainfo("DMA Registers: %s\n", msg);
   dmainfo("   ISRC[%08x]: %08x\n", dmabase + STM32_DMA_ISR_OFFSET, regs->isr);
+#ifdef DMA_HAVE_CSELR
+  dmainfo("  CSELR[%08x]: %08x\n", dmabase + STM32_DMA_CSELR_OFFSET, regs->cselr);
+#endif
   dmainfo("    CCR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CCR_OFFSET, regs->ccr);
   dmainfo("  CNDTR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CNDTR_OFFSET, regs->cndtr);
   dmainfo("   CPAR[%08x]: %08x\n", dmach->base + STM32_DMACHAN_CPAR_OFFSET, regs->cpar);
