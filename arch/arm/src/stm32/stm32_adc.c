@@ -121,7 +121,7 @@
 #endif
 
 /* At the moment there is no proper implementation for timers external
- * trigger in STM32L15XX May be added latter
+ * trigger in STM32L15XX may be added later
  */
 
 #if defined(ADC_HAVE_TIMER) && defined(CONFIG_STM32_STM32L15XX)
