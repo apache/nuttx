@@ -76,8 +76,7 @@
 #  define _SEM_GETERROR(r)  (r) = -errno
 #endif
 
-/* Define the following to enable semaphore state monitoring */
-//#define MONITOR_MM_SEMAPHORE 1
+/* Define MONITOR_MM_SEMAPHORE to enable semaphore state monitoring */
 
 #ifdef MONITOR_MM_SEMAPHORE
 #  include <debug.h>
@@ -151,16 +150,10 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    * corruption and must be avoided.
    */
 
-  if (rtcb->task_state != TSTATE_TASK_RUNNING)
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
-
   /* Do I already have the semaphore? */
 
   my_pid = rtcb->pid;
-  if (heap->mm_holder == my_pid)
+  if (heap->mm_holder == my_pid && rtcb->task_state == TSTATE_TASK_RUNNING)
     {
       /* Yes, just increment the number of references that I have */
 
