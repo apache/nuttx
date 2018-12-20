@@ -126,6 +126,10 @@ extern const int             CONFIG_INIT_NEXPORTS;
 #  undef CONFIG_LIB_USRWORK
 #endif
 
+#if !defined(CONFIG_USERMAIN_PRIORITY)
+#  define CONFIG_USERMAIN_PRIORITY SCHED_PRIORITY_DEFAULT
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -259,11 +263,11 @@ static inline void os_do_appstart(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  pid = nxtask_create("init", SCHED_PRIORITY_DEFAULT,
+  pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
                       (FAR char * const *)NULL);
 #else
-  pid = nxtask_create("init", SCHED_PRIORITY_DEFAULT,
+  pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
                       CONFIG_USERMAIN_STACKSIZE,
                       (main_t)CONFIG_USER_ENTRYPOINT,
                       (FAR char * const *)NULL);

@@ -346,6 +346,12 @@ config USER_ENTRYPOINT
 		applications this is of the form 'app_main' where 'app' is the application
 		name. If not defined, USER_ENTRYPOINT defaults to "main".
 
+config USERMAIN_PRIORITY
+	int "init thread priority"
+	default 100
+	---help---
+		The priority of the user initialization thread.
+
 endif # INIT_ENTRYPOINT
 
 if INIT_FILEPATH
