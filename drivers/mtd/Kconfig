@@ -161,6 +161,19 @@ config MTD_CONFIG_ERASEDVALUE
 		most FLASH parts, this is 0xff, but could also be zero depending
 		on the device.
 
+config MTD_CONFIG_NAMED
+	bool "Use item NAMES instead of ID/enumeration in Dev Config device"
+	default n
+	---help---
+		Changes config item identification from ID/INST to NAMED values.
+
+config MTD_CONFIG_NAME_LEN
+	int "Dev Config item max name length"
+	default 24
+	depends on MTD_CONFIG_NAMED
+	---help---
+		Sets the maximum length of config item names.
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
