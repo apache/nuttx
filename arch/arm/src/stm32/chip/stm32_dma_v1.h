@@ -47,7 +47,7 @@
 
 /* F0, L0, L4 have additional CSELR register */
 
-#undef DMA_HAVE_CSELR 1
+#undef DMA_HAVE_CSELR
 
 /* These definitions apply to both the STM32 F1 and F3 families */
 /* 12 Channels Total: 7 DMA1 Channels(1-7) and 5 DMA2 channels (1-5) */
