@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
@@ -135,11 +136,30 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
 #endif
-  pid_t my_pid = getpid();
+  FAR struct tcb_s *rtcb = sched_self();
+  pid_t my_pid;
   int ret;
+
+  /* sched_self() returns the TCB at the head of the ready-to-run list.
+   * mm_trysemaphore() is an intimate component of the memory garbage
+   * collection logic and, hence, may be called in many different contexts.
+   *
+   * It may be called during context switches for example.  There are certain
+   * conditions when the the OS data structures are in flux and where the
+   * task at the head of the ready-to-run task list is not actually running.
+   * Granting the semaphore access in this case is known to result in heap
+   * corruption and must be avoided.
+   */
+
+  if (rtcb->task_state != TSTATE_TASK_RUNNING)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
   /* Do I already have the semaphore? */
 
+  my_pid = rtcb->pid;
   if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references that I have */
@@ -149,7 +169,7 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
     }
   else
     {
-      /* Try to take the semaphore (perhaps waiting) */
+      /* Try to take the semaphore */
 
       ret = _SEM_TRYWAIT(&heap->mm_semaphore);
       if (ret < 0)
@@ -260,7 +280,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
 
   DEBUGASSERT(heap->mm_holder == my_pid);
 
-  /* Do I hold multiple references to the semphore */
+  /* Do I hold multiple references to the semaphore */
 
   if (heap->mm_counts_held > 1)
     {
