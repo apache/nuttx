@@ -55,20 +55,7 @@
  * Private Data
  ************************************************************************************/
 
-/* Wakeup Pin Definitions:  See chip/stm32_pwr.h */
-
-#undef HAVE_PWR_WKUP2
-#undef HAVE_PWR_WKUP3
-
-#if defined(CONFIG_STM32_STM32F30XX)
-#  define HAVE_PWR_WKUP2  1
-#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX)
-#  define HAVE_PWR_WKUP2  1
-#  define HAVE_PWR_WKUP3  1
-#endif
-
-/* Thr parts only support a single Wake-up pin do not include the numeric suffix
+/* Parts only support a single Wake-up pin do not include the numeric suffix
  * in the naming.
  */
 
@@ -323,7 +310,7 @@ bool stm32_pwr_getwuf(void)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_ENERGYLITE
+#ifdef CONFIG_STM32F0L0_ENERGYLITE
 void stm32_pwr_setvos(uint16_t vos)
 {
   uint16_t regval;
@@ -336,7 +323,7 @@ void stm32_pwr_setvos(uint16_t vos)
    * 4. Poll VOSF bit of in PWR_CSR register. Wait until it is reset to 0.
    */
 
-  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
+  while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0)
     {
     }
 
@@ -414,6 +401,6 @@ void stm32_pwr_disablepvd(void)
   stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, PWR_CR_PVDE, 0);
 }
 
-#endif /* CONFIG_STM32_ENERGYLITE */
+#endif /* CONFIG_STM32F0L0_ENERGYLITE */
 
 #endif /* CONFIG_STM32F0L0_PWR */

@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_PWR_H
-#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_PWR_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_STM32_PWR_H
+#define __ARCH_ARM_SRC_STM32F0L0_STM32_PWR_H
 
 /************************************************************************************
  * Included Files
@@ -181,7 +181,7 @@ bool stm32_pwr_getwuf(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_ENERGYLITE
+#ifdef CONFIG_STM32F0L0_ENERGYLITE
 void stm32_pwr_setvos(uint16_t vos);
 
 /************************************************************************************
@@ -223,7 +223,7 @@ void stm32_pwr_enablepvd(void);
 
 void stm32_pwr_disablepvd(void);
 
-#endif /* CONFIG_STM32_ENERGYLITE */
+#endif /* CONFIG_STM32F0L0_ENERGYLITE */
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -231,4 +231,4 @@ void stm32_pwr_disablepvd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_PWR_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_STM32_PWR_H */

@@ -245,7 +245,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_DMACAPABLE
+#ifdef CONFIG_STM32F0L0_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
 #  define stm32_dmacapable(maddr, count, ccr) (true)

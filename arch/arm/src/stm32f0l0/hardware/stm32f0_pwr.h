@@ -48,6 +48,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#undef HAVE_PWR_WKUP2        1
+#undef HAVE_PWR_WKUP3        1
+
 /* Register Offsets *****************************************************************/
 
 #define STM32_PWR_CR_OFFSET  0x0000  /* Power control register */
