@@ -166,6 +166,21 @@ static void xbee_attnworker(FAR void *arg)
   DEBUGASSERT(priv);
   DEBUGASSERT(priv->spi);
 
+  /* Allocate an IOB for the incoming data. */
+
+  iob             = iob_alloc(false);
+  iob->io_flink   = NULL;
+  iob->io_len     = 0;
+  iob->io_offset  = 0;
+  iob->io_pktlen  = 0;
+
+  /* Keep a reference to the first IOB.  If we need to allocate more than
+   * one to hold each API frame, then we will still have this reference to
+   * the head of the list
+   */
+
+  iobhead = iob;
+
   /* NOTE: There is a helpful side-effect to trying to get the SPI Lock here
   * even when there is a write going on. That is, if the SPI write are on a
   * thread with lower priority, trying to get the lock here should boost the
@@ -191,24 +206,9 @@ static void xbee_attnworker(FAR void *arg)
       priv->attn_latched = false;
     }
 
-  /* Allocate an IOB for the incoming data. */
-
-  iob             = iob_alloc(false);
-  iob->io_flink   = NULL;
-  iob->io_len     = 0;
-  iob->io_offset  = 0;
-  iob->io_pktlen  = 0;
-
-  /* Keep a reference to the first IOB.  If we need to allocate more than
-   * one to hold each API frame, then we will still have this reference to
-   * the head of the list
-   */
-
-  iobhead = iob;
-
   if (priv->attn_latched)
     {
-      while (priv->lower->poll(priv->lower))
+      while (priv->lower->poll(priv->lower) && iob != NULL)
         {
           DEBUGASSERT(iob->io_len <= CONFIG_IOB_BUFSIZE);
 
@@ -264,14 +264,18 @@ static void xbee_attnworker(FAR void *arg)
                            * processing.
                            */
 
-                          iob->io_flink = iob_alloc(false);
+                          iob->io_flink = iob_tryalloc(false);
                           iob = iob->io_flink;
 
-                          iob->io_flink  = NULL;
-                          iob->io_len    = 0;
-                          iob->io_offset = 0;
-                          iob->io_pktlen = 0;
-                        }
+                          if (iob != NULL)
+                            {
+
+                              iob->io_flink  = NULL;
+                              iob->io_len    = 0;
+                              iob->io_offset = 0;
+                              iob->io_pktlen = 0;
+                            }
+                       }
                       else
                         {
                           wlwarn("invalid checksum on incoming API frame. Dropping!\n");
@@ -287,7 +291,10 @@ static void xbee_attnworker(FAR void *arg)
             }
         }
 
-      priv->attn_latched = false;
+      if (!priv->lower->poll(priv->lower))
+        {
+          priv->attn_latched = false;
+        }
     }
 
   /* The last IOB in the list (or the only one) may be able to be freed since
@@ -298,28 +305,31 @@ static void xbee_attnworker(FAR void *arg)
    * we can only drop it.
    */
 
-  if (iob->io_len < XBEE_APIFRAME_OVERHEAD || iob->io_len != rxframelen)
+  if (iob != NULL)
     {
-      if (iobhead == iob)
+      if (iob->io_len < XBEE_APIFRAME_OVERHEAD || iob->io_len != rxframelen)
         {
-          iobhead = NULL;
-        }
-      else
-        {
-          previob = iobhead;
-          while (previob->io_flink != iob)
+          if (iobhead == iob)
             {
-              previob = previob->io_flink;
+              iobhead = NULL;
             }
-          previob->io_flink = NULL;
-        }
+          else
+            {
+              previob = iobhead;
+              while (previob->io_flink != iob)
+                {
+                  previob = previob->io_flink;
+                }
+              previob->io_flink = NULL;
+            }
 
-      if (iob->io_len > 0)
-        {
-          wlwarn("Partial API frame clocked in. Dropping!\n");
-        }
+          if (iob->io_len > 0)
+            {
+              wlwarn("Partial API frame clocked in. Dropping!\n");
+            }
 
-      iob_free(iob);
+          iob_free(iob);
+        }
     }
 
   if (iobhead != NULL)
@@ -665,11 +675,8 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
             break;
           case XBEE_APIFRAME_TXSTATUS:
             {
-              wd_cancel(priv->reqdata_wd);
               xbee_process_txstatus(priv, frame->io_data[frame->io_offset],
                                     frame->io_data[frame->io_offset + 1]);
-              priv->txdone = true;
-              nxsem_post(&priv->txdone_sem);
             }
             break;
           case XBEE_APIFRAME_RX_EADDR:
@@ -841,6 +848,17 @@ static void xbee_process_txstatus(FAR struct xbee_priv_s *priv, uint8_t frameid,
     }
 
   xbee_notify(priv, primitive);
+
+  /* If this is the frame we are currently waiting on, cancel the timeout, and
+   * notify the waiting thread that the transmit is done
+   */
+
+  if (priv->frameid == frameid)
+    {
+      wd_cancel(priv->reqdata_wd);
+      priv->txdone = true;
+      nxsem_post(&priv->txdone_sem);
+    }
 }
 
 /****************************************************************************
@@ -1116,9 +1134,11 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
   /* Allocate an IOB for the incoming data. The XBee supports full-duplex
    * SPI communication. This means that the MISO data can become valid at any
    * time. This requires us to process incoming MISO data to see if it is valid.
+   *
+   * If we can't allocate an IOB, then we have to just drop the incoming data.
    */
 
-  iob             = iob_alloc(false);
+  iob             = iob_tryalloc(false);
   iob->io_flink   = NULL;
   iob->io_len     = 0;
   iob->io_offset  = 0;
@@ -1132,11 +1152,18 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
   iobhead = iob;
 
   i = 0;
-  while (i < framelen || priv->lower->poll(priv->lower))
+  while (i < framelen || (priv->lower->poll(priv->lower) && iob != NULL))
     {
       if (i < framelen)
         {
-          iob->io_data[iob->io_len] = SPI_SEND(priv->spi, frame[i++]);
+          if (iob)
+            {
+              iob->io_data[iob->io_len] = SPI_SEND(priv->spi, frame[i++]);
+            }
+          else
+            {
+              SPI_SEND(priv->spi, frame[i++]);
+            }
         }
       else
         {
@@ -1147,7 +1174,7 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
        * data prior to that can be completely ignored.
        */
 
-      if (priv->attn_latched)
+      if (priv->attn_latched && iob != NULL)
         {
           DEBUGASSERT(iob->io_len <= CONFIG_IOB_BUFSIZE);
 
@@ -1201,14 +1228,17 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
                            * processing.
                            */
 
-                          iob->io_flink = iob_alloc(false);
+                          iob->io_flink = iob_tryalloc(false);
                           iob = iob->io_flink;
 
-                          iob->io_flink  = NULL;
-                          iob->io_len    = 0;
-                          iob->io_offset = 0;
-                          iob->io_pktlen = 0;
-                        }
+                          if (iob != NULL)
+                            {
+                              iob->io_flink  = NULL;
+                              iob->io_len    = 0;
+                              iob->io_offset = 0;
+                              iob->io_pktlen = 0;
+                            }
+                       }
                       else
                         {
                           wlwarn("invalid checksum on incoming API frame. Dropping!\n");
@@ -1233,28 +1263,31 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
    * we can only drop it.
    */
 
-  if (iob->io_len < XBEE_APIFRAME_OVERHEAD || iob->io_len != rxframelen)
+  if (iob != NULL)
     {
-      if (iobhead == iob)
+      if (iob->io_len < XBEE_APIFRAME_OVERHEAD || iob->io_len != rxframelen)
         {
-          iobhead = NULL;
-        }
-      else
-        {
-          previob = iobhead;
-          while (previob->io_flink != iob)
+          if (iobhead == iob)
             {
-              previob = previob->io_flink;
+              iobhead = NULL;
             }
-          previob->io_flink = NULL;
-        }
+          else
+            {
+              previob = iobhead;
+              while (previob->io_flink != iob)
+                {
+                  previob = previob->io_flink;
+                }
+              previob->io_flink = NULL;
+            }
 
-      if (iob->io_len > 0)
-        {
-          wlwarn("Partial API frame clocked in. Dropping!\n");
-        }
+          if (iob->io_len > 0)
+            {
+              wlwarn("Partial API frame clocked in. Dropping!\n");
+            }
 
-      iob_free(iob);
+          iob_free(iob);
+        }
     }
 
   if (iobhead != NULL)

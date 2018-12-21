@@ -380,6 +380,20 @@ int xbee_req_data(XBEEHANDLE xbee,
       /* Wait for a transmit status to be received. Does not necessarily mean success */
 
       while (nxsem_wait(&priv->txdone_sem) < 0);
+
+      /* If the transmit timeout has occured, and there are no IOBs available,
+       * we may be blocking the context needed to free the IOBs. We cannot receive
+       * the Tx status because it requires an IOB. Therefore, if we have hit the
+       * timeout, and there are no IOBs, let's move on assuming the transmit was
+       * a success
+       */
+
+      if (!priv->txdone && iob_navail(false) <= 0)
+        {
+          wlwarn("Couldn't confirm TX. No IOBs\n");
+          break;
+        }
+
     }
   while (!priv->txdone);
 
