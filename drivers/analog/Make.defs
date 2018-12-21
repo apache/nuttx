@@ -52,6 +52,7 @@ endif
 ifeq ($(CONFIG_DAC7571),y)
   CSRCS += dac7571.c
 endif
+
 endif
 
 # Check for COMP devices
@@ -101,6 +102,10 @@ endif
 ifeq ($(CONFIG_ADC_LTC1867L),y)
   CSRCS += ltc1867l.c
 endif
+endif
+
+ifeq ($(CONFIG_LMP92001),y)
+  CSRCS += lmp92001.c
 endif
 
 # Add analog driver build support (the nested if-then-else implements an OR)

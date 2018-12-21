@@ -126,6 +126,7 @@ config PGA11X_MULTIPLE
 		devid=SPIDEV_MUX(n).
 
 endif # if ADC_PGA11X
+
 endif # ADC
 
 config COMP
@@ -162,7 +163,19 @@ config DAC7571_I2C_FREQUENCY
 endif # DAC
 
 config OPAMP
-       bool "Operational Amplifier"
-       default n
-       ---help---
+	bool "Operational Amplifier"
+	default n
+	---help---
 		Select to enable support for Operational Amplifiers (OPAMPs).
+
+config LMP92001
+	bool "LMP92001 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments LMP92001.
+
+config LMP92001_I2C_FREQUENCY
+	int "LMP92001 I2C frequency"
+	default 400000
+	depends on LMP92001

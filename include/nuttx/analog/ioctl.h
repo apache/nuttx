@@ -65,8 +65,8 @@
                                            * IN: Threshold value
                                            * OUT: None */
 
-#define AN_FIRST           0x0001         /* First common command */
-#define AN_NCMDS           3              /* Number of common commands */
+#define AN_FIRST          0x0001          /* First common command */
+#define AN_NCMDS          3               /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
@@ -77,8 +77,13 @@
 
 /* See include/nuttx/analog/ads1242.h */
 
-#define AN_ADS2142_FIRST   (AN_FIRST + AN_NCMDS)
-#define AN_ADS2142_NCMDS   6
+#define AN_ADS2142_FIRST  (AN_FIRST + AN_NCMDS)
+#define AN_ADS2142_NCMDS  6
+
+/* See include/nuttx/analog/lm92001.h */
+
+#define AN_LMP92001_FIRST (AN_FIRST + AN_NCMDS + AN_ADS2142_NCMDS)
+#define AN_LMP92001_NCMDS 7
 
 /****************************************************************************
  * Public Function Prototypes

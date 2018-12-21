@@ -8,7 +8,7 @@
  *
  * Derived from include/nuttx/can/can.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ struct dac_fifo_s
   sem_t         af_sem;                  /* Counting semaphore */
   uint8_t       af_head;                 /* Index to the head [IN] index in the circular buffer */
   uint8_t       af_tail;                 /* Index to the tail [OUT] index in the circular buffer */
-                                         /* Circular buffer of CAN messages */
+                                         /* Circular buffer of DAC messages */
   struct dac_msg_s af_buffer[CONFIG_DAC_FIFOSIZE];
 };
 
@@ -211,6 +211,24 @@ int dac_txdone(FAR struct dac_dev_s *dev);
 FAR struct dac_dev_s *up_ad5410initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 FAR struct dac_dev_s *dac7571_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
+
+/****************************************************************************
+ * Name: lmp92001_dac_initialize
+ *
+ * Description:
+ *   Initialize DAC
+ *
+ * Input Parameters:
+ *   I2C Port number
+ *   Device address
+ *
+ * Returned Value:
+ *   Valid LM92001 device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct dac_dev_s *lmp92001_dac_initialize(FAR struct i2c_master_s *i2c,
+                                               uint8_t addr);
 
 #if defined(__cplusplus)
 }

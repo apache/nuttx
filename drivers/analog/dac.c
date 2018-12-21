@@ -283,7 +283,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
   int                    msglen;
   int                    ret   = 0;
 
-  /* Interrupts must disabled throughout the following */
+  /* Interrupts must be disabled throughout the following */
 
   flags = enter_critical_section();
 
@@ -381,7 +381,7 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
         }
 
       /* We get here if there is space at the end of the FIFO.  Add the new
-       * CAN message at the tail of the FIFO.
+       * DAC message at the tail of the FIFO.
        */
 
       if (msglen == 5)
