@@ -156,6 +156,7 @@ struct sam_i2c_dev_s
   struct i2c_msg_s *msg;      /* Current message being processed */
   uint32_t frequency;         /* I2C transfer clock frequency */
   uint16_t flags;             /* Transfer flags */
+  uint16_t nextflags;         /* Next message flags */
 
   sem_t exclsem;              /* Only one thread can access at a time */
   sem_t waitsem;              /* Wait for I2C transfer completion */
@@ -732,11 +733,13 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
           i2c_wait_synchronization(priv);
 
           /* STOP */
-
-          regval = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
-          regval |= I2C_CTRLB_CMD_ACKSTOP;
-          i2c_putreg32(priv, regval, SAM_I2C_CTRLB_OFFSET);
-          i2c_wait_synchronization(priv);
+          if ((priv->nextflags & I2C_M_NOSTART) == 0)
+            {
+              regval  = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
+              regval |= I2C_CTRLB_CMD_ACKSTOP;
+              i2c_putreg32(priv, regval, SAM_I2C_CTRLB_OFFSET);
+              i2c_wait_synchronization(priv);
+            }
 
           msg->buffer[priv->xfrd++] = i2c_getreg8(priv, SAM_I2C_DATA_OFFSET);
           i2c_wait_synchronization(priv);
@@ -779,6 +782,13 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
       if ((i2c_getreg16(priv, SAM_I2C_STATUS_OFFSET) & I2C_STATUS_RXNACK) ==
           I2C_STATUS_RXNACK)
         {
+          /* Send STOP condition */
+
+          regval = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
+          regval |= I2C_CTRLB_CMD_ACKSTOP;
+          i2c_putreg32(priv, regval, SAM_I2C_CTRLB_OFFSET);
+          i2c_wait_synchronization(priv);
+
           i2c_wakeup(priv, -ENODEV);
           return OK;
         }
@@ -787,10 +797,13 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* Send STOP condition */
 
-          regval = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
-          regval |= I2C_CTRLB_CMD_ACKSTOP;
-          i2c_putreg32(priv, regval, SAM_I2C_CTRLB_OFFSET);
-          i2c_wait_synchronization(priv);
+          if ((priv->nextflags & I2C_M_NOSTART) == 0)
+            {
+              regval  = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
+              regval |= I2C_CTRLB_CMD_ACKSTOP;
+              i2c_putreg32(priv, regval, SAM_I2C_CTRLB_OFFSET);
+              i2c_wait_synchronization(priv);
+            }
 
           i2c_wakeup(priv, OK);
         }
@@ -892,18 +905,26 @@ static void i2c_startwrite(struct sam_i2c_dev_s *priv, struct i2c_msg_s *msg)
 
   /* 7 or 10 bits ? */
 
-  if (priv->flags & I2C_M_TEN)
+  if ((msg->flags & I2C_M_TEN) != 0)
     {
       regval |= I2C_ADDR_TENBITEN;
     }
 
   /* Is it a read or write? */
 
-  regval |= (priv->flags & I2C_M_READ);
+  regval |= (msg->flags & I2C_M_READ);
 
   /* Set the ADDR register */
 
-  i2c_putreg32(priv, regval, SAM_I2C_ADDR_OFFSET);
+  if ((msg->flags & I2C_M_NOSTART) == 0)
+    {
+      i2c_putreg32(priv, regval, SAM_I2C_ADDR_OFFSET);
+    }
+  else
+    {
+      i2c_putreg8(priv, msg->buffer[priv->xfrd++], SAM_I2C_DATA_OFFSET);
+    }
+
   i2c_wait_synchronization(priv);
 }
 
@@ -991,6 +1012,7 @@ static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
   while (count--)
     {
       priv->msg = msgs;
+      priv->nextflags = count == 0 ? 0 : msgs[1].flags;
       flags = enter_critical_section();
       i2c_startmessage(priv, msgs);
 
