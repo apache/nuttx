@@ -117,7 +117,7 @@
 #define SMART_FIRST_DIR_SECTOR      3       /* First root directory sector */
 #define SMART_FIRST_ALLOC_SECTOR    12      /* First logical sector number we will
                                              * use for assignment of requested Alloc
-                                             * sectors.  All enries below this are
+                                             * sectors.  All entries below this are
                                              * reserved (some for root dir entries,
                                              * other for our use, such as format
                                              * sector, etc. */
@@ -128,7 +128,7 @@
 #endif
 
 #ifndef CONFIG_MTD_SMART_SECTOR_SIZE
-#  define  CONFIG_MTD_SMART_SECTOR_SIZE 1024
+#  define CONFIG_MTD_SMART_SECTOR_SIZE 1024
 #endif
 
 #ifndef offsetof
@@ -136,7 +136,6 @@
 #endif
 
 #define SMART_MAX_ALLOCS        10
-//#define CONFIG_MTD_SMART_PACK_COUNTS
 
 #ifndef CONFIG_MTD_SMART_ALLOC_DEBUG
 #define smart_malloc(d, b, n)   kmm_malloc(b)

@@ -160,8 +160,7 @@ static const struct file_operations rtc_fops =
 static void rtc_destroy(FAR struct rtc_upperhalf_s *upper)
 {
   /* If the lower half driver provided a destroy method, then call that
-   * method now in order order to clean up resources used by the lower-half
-   * driver.
+   * method now in order to clean up resources used by the lower-half driver.
    */
 
   DEBUGASSERT(upper->lower && upper->lower->ops);
