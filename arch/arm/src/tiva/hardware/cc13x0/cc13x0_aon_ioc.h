@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ********************************************************************************************************************/
 
-/* FCFG1 Register Offsets *******************************************************************************************/
+/* AON IOC Register Offsets *****************************************************************************************/
 
 #define TIVA_AON_IOC_IOSTRMIN_OFFSET      0x0000
 #define TIVA_AON_IOC_IOSTRMED_OFFSET      0x0004
@@ -61,7 +61,7 @@
 #define TIVA_AON_IOC_CLK32KCTL_OFFSET     0x0010  /* SCLK_LF External Output Control */
 #define TIVA_AON_IOC_TCKCTL_OFFSET        0x0014  /* TCK IO Pin Control */
 
-/* FCFG1 Register Addresses *****************************************************************************************/
+/* AON IOC Register Addresses ***************************************************************************************/
 
 #define TIVA_AON_IOC_IOSTRMIN             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMIN_OFFSET)
 #define TIVA_AON_IOC_IOSTRMED             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMED_OFFSET)
@@ -69,7 +69,7 @@
 #define TIVA_AON_IOC_IOCLATCH             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOCLATCH_OFFSET)
 #define TIVA_AON_IOC_CLK32KCTL            (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_CLK32KCTL_OFFSET)
 
-/* FCFG1 Register Offsets *******************************************************************************************/
+/* AON IOC Bitfield Definitions *************************************************************************************/
 
 /* TIVA_AON_IOC_IOSTRMIN */
 
