@@ -115,14 +115,6 @@ static void go_os_start(void *pv, unsigned int nbytes)
 const uintptr_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -227,7 +219,7 @@ static inline void kinetis_fpuconfig(void)
  * Name: go_os_start
  *
  * Description:
- *   Set the IDLE stack to the
+ *   Set the IDLE stack to the coloration value and jump into os_start()
  *
  ****************************************************************************/
 
@@ -245,6 +237,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
   __asm__ __volatile__
   (
     "\tmovs r1, r1, lsr #2\n"   /* R1 = nwords = nbytes >> 2 */
+    "\tcmp  r1, #0\n"           /* Check (nwords == 0) */
     "\tbeq  2f\n"               /* (should not happen) */
 
     "\tbic  r0, r0, #3\n"       /* R0 = Aligned stackptr */

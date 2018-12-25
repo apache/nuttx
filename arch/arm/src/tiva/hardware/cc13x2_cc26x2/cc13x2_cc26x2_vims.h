@@ -55,7 +55,7 @@
 /* VIMS Register Offsets ********************************************************************************************/
 
 #define TIVA_VIMS_STAT_OFFSET           0x0000  /* Status */
-#define TIVA_VIMS_CTL_OFFSET            0x0004  /* Status */
+#define TIVA_VIMS_CTL_OFFSET            0x0004  /* Control */
 
 /* VIMS Register Addresses ******************************************************************************************/
 
