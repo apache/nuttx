@@ -125,7 +125,7 @@ extern uint32_t _stext_sram, _etext_sram, _ftext, _svect;
  * Private Function prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_STACK
+#ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
   __attribute__ ((naked, no_instrument_function, noreturn));
 #endif
@@ -152,11 +152,11 @@ static void go_os_start(void *pv, unsigned int nbytes)
  * Name: go_os_start
  *
  * Description:
- *   Set the IDLE stack to the
+ *   Set the IDLE stack to the coloration value and jump into os_start()
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_STACK
+#ifdef CONFIG_STACK_COLORATION
 static void go_os_start(void *pv, unsigned int nbytes)
 {
   /* Set the IDLE stack to the stack coloration value then jump to
@@ -169,6 +169,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
   __asm__ __volatile__
   (
     "\tmov  r1, r1, lsr #2\n"   /* R1 = nwords = nbytes >> 2 */
+    "\tcmp  r1, #0\n"           /* Check (nwords == 0) */
     "\tbeq  2f\n"               /* (should not happen) */
 
     "\tbic  r0, r0, #3\n"       /* R0 = Aligned stackptr */
@@ -405,7 +406,7 @@ void __start(void)
 
   CURRENT_REGS = NULL;
 
-#ifdef CONFIG_DEBUG_STACK
+#ifdef CONFIG_STACK_COLORATION
   /* Set the IDLE stack to the coloration value and jump into os_start() */
 
   go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);

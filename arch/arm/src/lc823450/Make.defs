@@ -78,7 +78,7 @@ ifeq ($(CONFIG_ARCH_MEMMOVE),y)
 CMN_CSRCS += up_memmove.c
 endif
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
+ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
