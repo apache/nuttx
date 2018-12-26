@@ -54,6 +54,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <limits.h>
 #include <errno.h>
 
 /****************************************************************************
