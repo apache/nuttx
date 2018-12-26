@@ -716,8 +716,15 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                     FAR struct iob_s *framelist,  FAR const void *metadata)
 {
   int ret = -EINVAL;
+  uint8_t *d_buf_backup;
 
   DEBUGASSERT(radio != NULL && framelist != NULL);
+
+  /* Sixlowpan modifies the d_buf to process fragments using reassembly buffers.
+   * Save the value of d_buf on entry and set it back before returning
+   */
+
+  d_buf_backup = radio->r_dev.d_buf;
 
   /* Verify that an frame has been provided. */
 
@@ -855,6 +862,10 @@ drop:
             }
         }
     }
+
+  /* Restore the d_buf back to it's original state */
+
+  radio->r_dev.d_buf = d_buf_backup;
 
   return ret;
 }
