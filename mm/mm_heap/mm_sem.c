@@ -140,22 +140,39 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
   int ret;
 
   /* sched_self() returns the TCB at the head of the ready-to-run list.
-   * mm_trysemaphore() is an intimate component of the memory garbage
-   * collection logic and, hence, may be called in many different contexts.
+   * mm_trysemaphore() may be called during context switches.  There are
+   * certain situations during context switching when the the OS data
+   * structures are in flux and where the current task (i.e., the task at
+   * the head of the ready-to-run task list) is not actually running.
+   * Granting the semaphore access in that case is known to result in heap
+   * corruption as in the following failure scenario.
    *
-   * It may be called during context switches for example.  There are certain
-   * conditions when the the OS data structures are in flux and where the
-   * task at the head of the ready-to-run task list is not actually running.
-   * Granting the semaphore access in this case is known to result in heap
-   * corruption and must be avoided.
+   * ----------------------------    -------------------------------
+   * TASK A                          TASK B
+   * ----------------------------    -------------------------------
+   *                                 Begins memory allocation.
+   *                                 - Holder is set to TASK B
+   *                             <---- Task B preempted, Task A runs
+   * Task A exits
+   * - Current task set to Task B
+   * Free tcb and stack memory
+   * - Since holder is Task B,
+   *   memory manager is re-
+   *   entered, and
+   * - Heap is corrupted.
+   * ----------------------------    -------------------------------
    */
 
-  /* Do I already have the semaphore? */
+  /* Does the current task already hold the semaphore?  Is the current
+   * task actually running?
+   */
 
   my_pid = rtcb->pid;
   if (heap->mm_holder == my_pid && rtcb->task_state == TSTATE_TASK_RUNNING)
     {
-      /* Yes, just increment the number of references that I have */
+      /* Yes, just increment the number of references held by the current
+       * task.
+       */
 
       heap->mm_counts_held++;
       ret = OK;
@@ -171,7 +188,7 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
          goto errout;
        }
 
-      /* We have it.  Claim the heap and return */
+      /* We have it.  Claim the heap for the current task and return */
 
       heap->mm_holder      = my_pid;
       heap->mm_counts_held = 1;
@@ -201,11 +218,13 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 #endif
   pid_t my_pid = getpid();
 
-  /* Do I already have the semaphore? */
+  /* Does the current task already hold the semaphore? */
 
   if (heap->mm_holder == my_pid)
     {
-      /* Yes, just increment the number of references that I have */
+      /* Yes, just increment the number of references held by the current
+       * task.
+       */
 
       heap->mm_counts_held++;
     }
@@ -238,7 +257,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       while (ret == -EINTR);
 
       /* We have it (or some awful, unexpected error occurred).  Claim
-       * the semaphore and return.
+       * the semaphore for the current task and return.
        */
 
       heap->mm_holder      = my_pid;
@@ -269,11 +288,13 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
   pid_t my_pid = getpid();
 #endif
 
-  /* I better be holding at least one reference to the semaphore */
+  /* The current task should be holding at least one reference to the
+   * semaphore.
+   */
 
   DEBUGASSERT(heap->mm_holder == my_pid);
 
-  /* Do I hold multiple references to the semaphore */
+  /* Does the current task hold multiple references to the semaphore */
 
   if (heap->mm_counts_held > 1)
     {
@@ -285,7 +306,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
     }
   else
     {
-      /* Nope, this is the last reference I have */
+      /* Nope, this is the last reference held by the current task. */
 
       mseminfo("PID=%d giving\n", my_pid);
 
