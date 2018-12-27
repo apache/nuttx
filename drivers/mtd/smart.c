@@ -1378,7 +1378,7 @@ errout:
 /****************************************************************************
  * Name: smart_add_sector_to_cache
  *
- * Description: Adds a logical to physical sector maaping to the sector
+ * Description: Adds a logical to physical sector mapping to the sector
  *              map cache.  The cache is used to minimize RAM by eliminating
  *              a one-to-one mapping of all logical sectors and only keeping
  *              a fixed number of mappings per the
@@ -1740,8 +1740,8 @@ static void smart_find_wear_minmax(FAR struct smart_struct_s *dev)
  * Description: Sets the wear level of the specified block.  The wear level
  *              is a 4-bit field packed 2 entries per byte and is mapped to
  *              a bit field which minimizes the number of 0 to 1 transitions
- *              such that entries can be updated on a NOR flash withough the
- *              need to relocated the format sector (assuming CRC is not
+ *              such that entries can be updated on a NOR flash without the
+ *              need to relocate the format sector (assuming CRC is not
  *              enabled, in which case a relocated is needed for ANY change).
  *
  ****************************************************************************/
@@ -4381,7 +4381,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
 #endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   /* If we are not using CRC and on a device that supports re-writing
-   * bits from 1 to 0 without neededing a block erase, such as NOR
+   * bits from 1 to 0 without needing a block erase, such as NOR
    * FLASH, then we can simply update the data in place and don't need
    * to relocate the sector.  Test if we need to relocate or not.
    */
@@ -4550,7 +4550,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
           offsetof(struct smart_sect_header_s, status);
       ret = smart_bytewrite(dev, offset, 1, &byte);
 
-      /* Update releasecount for released sector and freecount for the
+      /* Update releasecount for the released sector and freecount for the
        * newly allocated physical sector.
        */
 
@@ -4988,7 +4988,7 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
       }
 
     /* Fill in the struct and add to the list.  We are protected by the
-     * smartfs layer's mutex, so no locking required.
+     * smartfs layer's mutex, so no locking is required.
      */
 
     allocsect->logical = logsector;

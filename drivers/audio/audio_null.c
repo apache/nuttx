@@ -666,8 +666,8 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   done = ((apb->flags & AUDIO_APB_FINAL) != 0);
 
-  /* The buffer belongs to to an upper level.  Just forward the event to
-   * the next level up.
+  /* The buffer belongs to an upper level.  Just forward the event to the
+   * next level up.
    */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
