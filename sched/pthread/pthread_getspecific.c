@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_getspecific.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,11 +88,11 @@ FAR void *pthread_getspecific(pthread_key_t key)
   FAR struct task_group_s *group = rtcb->group;
   FAR void *ret = NULL;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL && (unsigned)key < CONFIG_NPTHREAD_KEYS);
 
   /* Check if the key is valid. */
 
-  if (key < group->tg_nkeys)
+  if (key < CONFIG_NPTHREAD_KEYS && (group->tg_keyset & (1 << key)) != 0)
     {
       /* Return the stored value. */
 

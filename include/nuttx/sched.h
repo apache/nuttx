@@ -375,6 +375,21 @@ struct pthread_cleanup_s
 };
 #endif
 
+/* type pthread_keyset_t *********************************************************/
+/* Smallest addressable type that can hold the entire configured number of keys */
+
+#if defined(CONFIG_NPTHREAD_KEYS) && CONFIG_NPTHREAD_KEYS > 0
+#  if CONFIG_NPTHREAD_KEYS > 32
+#    error Too many pthread keys
+#  elif CONFIG_NPTHREAD_KEYS > 16
+     typedef uint32_t pthread_keyset_t;
+#  elif CONFIG_NPTHREAD_KEYS > 8
+     typedef uint16_t pthread_keyset_t;
+#  else
+     typedef uint8_t pthread_keyset_t;
+#  endif
+#endif
+
 /* struct dspace_s ***************************************************************/
 /* This structure describes a reference counted D-Space region.  This must be a
  * separately allocated "break-away" structure that can be owned by a task and
@@ -520,7 +535,7 @@ struct task_group_s
   FAR struct join_s *tg_jointail;   /*   Tail of a list of join data            */
 #endif
 #if CONFIG_NPTHREAD_KEYS > 0
-  uint8_t tg_nkeys;                 /* Number pthread keys allocated            */
+  pthread_keyset_t tg_keyset;       /* Set of pthread keys allocated            */
 #endif
 
 #ifndef CONFIG_DISABLE_SIGNALS

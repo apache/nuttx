@@ -616,8 +616,10 @@ config NPTHREAD_KEYS
 	int "Maximum number of pthread keys"
 	default 4 if !DISABLE_PTHREAD
 	default 0 if DISABLE_PTHREAD
+	range 0 32
 	---help---
-		The number of items of thread-specific data that can be retained
+		The number of items of thread-specific data that can be retained.
+		The value zero disables support for pthread-specific data.
 
 if !DISABLE_PTHREAD
 

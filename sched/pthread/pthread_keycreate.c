@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_keycreate.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+
 #include "sched/sched.h"
 #include "pthread/pthread.h"
 
@@ -66,22 +68,22 @@
  *   associated with all defined keys in the new thread.
  *
  * Input Parameters:
- *   key = A pointer to the key to create.
- *   destructor = An optional destructor() function that may be associated
- *      with each key that is invoked when a thread exits.  However, this
- *      argument is ignored in the current implementation.
+ *   key        - A pointer to the key to create.
+ *   destructor - An optional destructor() function that may be associated
+ *                with each key that is invoked when a thread exits.
+ *                However, this argument is ignored in the current
+ *                implementation.
  *
  * Returned Value:
  *   If successful, the pthread_key_create() function will store the newly
  *   created key value at *key and return zero (OK).  Otherwise, an error
- *   number will bereturned to indicate the error:
+ *   number will be returned to indicate the error:
  *
- *      EAGAIN - The system lacked sufficient resources to create another
- *         thread-specific data key, or the system-imposed limit on the total
- *         number of keys pers process {PTHREAD_KEYS_MAX} has been exceeded
+ *      EAGAIN  - The system lacked sufficient resources to create another
+ *                thread-specific data key, or the system-imposed limit on
+ *                the total number of keys pers process {PTHREAD_KEYS_MAX}
+ *                has been exceeded
  *      ENONMEM - Insufficient memory exists to create the key.
- *
- * Assumptions:
  *
  * POSIX Compatibility:
  *   - The present implementation ignores the destructor argument.
@@ -94,25 +96,41 @@ int pthread_key_create(FAR pthread_key_t *key,
 #if CONFIG_NPTHREAD_KEYS > 0
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
+  irqstate_t flags;
+  int candidate;
   int ret = EAGAIN;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(key != NULL && group != NULL);
 
-  /* Check if we have exceeded the system-defined number of keys. */
+  /* Search for an unused key.  This is done in a critical section here to
+   * avoid concurrent modification of the group keyset.
+   */
 
-  if (group->tg_nkeys < PTHREAD_KEYS_MAX)
+  flags = spin_lock_irqsave();
+  for (candidate = 0; candidate < PTHREAD_KEYS_MAX; candidate++)
     {
-      /* Return the key value */
+      /* Is this candidate key available? */
 
-      *key = group->tg_nkeys;
+      pthread_keyset_t mask = (1 << candidate);
+      if ((group->tg_keyset & mask) == 0)
+        {
+          /* Yes.. allocate the key and break out of the loop */
 
-      /* Increment the count of global keys. */
+          group->tg_keyset |= mask;
+          break;
+        }
+    }
 
-      group->tg_nkeys++;
+  spin_unlock_irqrestore(flags);
 
-      /* Return success. */
+  /* Check if found a valid key. */
 
-      ret = OK;
+  if (candidate < PTHREAD_KEYS_MAX)
+    {
+      /* Yes.. Return the key value and success */
+
+      *key = candidate;
+      ret  = OK;
     }
 
   return ret;

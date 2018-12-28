@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_setspecific.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,11 +99,11 @@ int pthread_setspecific(pthread_key_t key, FAR const void *value)
   FAR struct task_group_s *group = rtcb->group;
   int ret = EINVAL;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group != NULL && (unsigned)key < CONFIG_NPTHREAD_KEYS);
 
   /* Check if the key is valid. */
 
-  if (key < group->tg_nkeys)
+  if (key < CONFIG_NPTHREAD_KEYS && (group->tg_keyset & (1 << key)) != 0)
     {
       /* Store the data in the TCB. */
 
