@@ -186,6 +186,31 @@
 #  define GPIO_INT_LOWLEVEL           (3 << GPIO_INT_SHIFT)      /*   Interrupt on low level */
 #  define GPIO_INT_HIGHLEVEL          (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
 
+/* The LM3S supports up to 15 alternate functions per pin:
+ *
+ *    .... .... .... AAAA .... .... .... ....
+ */
+
+#define GPIO_ALT_SHIFT                16                         /* Bits 16-19: Alternate function */
+#define GPIO_ALT_MASK                 (15 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT(n)                 ((n) << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_NONE               (0  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_1                  (1  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_2                  (2  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_3                  (3  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_4                  (4  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_5                  (5  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_6                  (6  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_7                  (7  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_8                  (8  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_9                  (9  << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_10                 (10 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_11                 (11 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_12                 (12 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_13                 (13 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_14                 (14 << GPIO_ALT_SHIFT)
+#  define GPIO_ALT_15                 (15 << GPIO_ALT_SHIFT)
+
 /* If the pin is an GPIO digital output, then this identifies the initial output value:
  *    .... .... .... .... .... ...V .... ....
  */

@@ -657,6 +657,44 @@ static inline void tiva_interrupt(pinconfig_t pinconfig)
 #endif
 
 /****************************************************************************
+ * Name: tiva_portcontrol
+ *
+ * Description:
+ *   Set the pin alternate function in the port control register.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_LM3S9B92)
+static inline void tiva_portcontrol(uint32_t base, uint32_t pinno,
+                                    pinconfig_t pinconfig,
+                                    const struct gpio_func_s *func)
+{
+  uint32_t alt = 0;
+  uint32_t mask;
+  uint32_t regval;
+
+  /* Is this pin an alternate function pin? */
+
+  if ((func->setbits & AFSEL_1) != 0)
+    {
+      /* Yes, extract the alternate function number from the pin
+       * configuration.
+       */
+
+      alt = (pinconfig & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT;
+    }
+
+  /* Set the alternate function in the port control register */
+
+  regval  = getreg32(base + TIVA_GPIO_PCTL_OFFSET);
+  mask    = GPIO_PCTL_PMC_MASK(pinno);
+  regval &= ~mask;
+  regval |= (alt << GPIO_PCTL_PMC_SHIFT(pinno)) & mask;
+  putreg32(regval, base + TIVA_GPIO_PCTL_OFFSET);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -708,6 +746,9 @@ int tiva_configgpio(pinconfig_t pinconfig)
    */
 
   tiva_gpiofunc(base, pinno, &g_funcbits[0]);
+#if defined(CONFIG_ARCH_CHIP_LM3S9B92)
+  tiva_portcontrol(base, pinno, pinconfig, &g_funcbits[0]);
+#endif
 
   /* Then set up pad strengths and pull-ups.  These setups should be done before
    * setting up the function because some function settings will over-ride these
@@ -720,6 +761,9 @@ int tiva_configgpio(pinconfig_t pinconfig)
   /* Then set up the real pin function */
 
   tiva_gpiofunc(base, pinno, &g_funcbits[func]);
+#if defined(CONFIG_ARCH_CHIP_LM3S9B92)
+  tiva_portcontrol(base, pinno, pinconfig, &g_funcbits[func]);
+#endif
 
   /* Special case GPIO digital output pins */
 

@@ -80,6 +80,8 @@
 #define TIVA_GPIO_DEN_OFFSET        0x051c /* GPIO Digital Enable */
 #define TIVA_GPIO_LOCK_OFFSET       0x0520 /* GPIO Lock */
 #define TIVA_GPIO_CR_OFFSET         0x0524 /* GPIO Commit */
+#define TIVA_GPIO_AMSEL_OFFSET      0x0528 /* GPIO Analog Mode Select */
+#define TIVA_GPIO_PCTL_OFFSET       0x052c /* GPIO Port Control */
 
 #define TIVA_GPIO_PERIPHID4_OFFSET  0x0fd0 /* GPIO Peripheral Identification 4 */
 #define TIVA_GPIO_PERIPHID5_OFFSET  0x0fd4 /* GPIO Peripheral Identification 5 */
@@ -118,6 +120,8 @@
 #  define TIVA_GPIOA_DEN            (TIVA_GPIOA_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOA_LOCK           (TIVA_GPIOA_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOA_CR             (TIVA_GPIOA_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOA_AMSEL          (TIVA_GPIOA_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOA_PCTL           (TIVA_GPIOA_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOA_PERIPHID4      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOA_PERIPHID5      (TIVA_GPIOA_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -155,6 +159,8 @@
 #  define TIVA_GPIOB_DEN            (TIVA_GPIOB_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOB_LOCK           (TIVA_GPIOB_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOB_CR             (TIVA_GPIOB_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOB_AMSEL          (TIVA_GPIOB_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOB_PCTL           (TIVA_GPIOB_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOB_PERIPHID4      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOB_PERIPHID5      (TIVA_GPIOB_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -192,6 +198,8 @@
 #  define TIVA_GPIOC_DEN            (TIVA_GPIOC_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOC_LOCK           (TIVA_GPIOC_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOC_CR             (TIVA_GPIOC_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOC_AMSEL          (TIVA_GPIOC_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOC_PCTL           (TIVA_GPIOC_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOC_PERIPHID4      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOC_PERIPHID5      (TIVA_GPIOC_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -229,6 +237,8 @@
 #  define TIVA_GPIOD_DEN            (TIVA_GPIOD_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOD_LOCK           (TIVA_GPIOD_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOD_CR             (TIVA_GPIOD_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOD_AMSEL          (TIVA_GPIOD_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOD_PCTL           (TIVA_GPIOD_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOD_PERIPHID4      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOD_PERIPHID5      (TIVA_GPIOD_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -266,6 +276,8 @@
 #  define TIVA_GPIOE_DEN            (TIVA_GPIOE_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOE_LOCK           (TIVA_GPIOE_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOE_CR             (TIVA_GPIOE_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOE_AMSEL          (TIVA_GPIOE_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOE_PCTL           (TIVA_GPIOE_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOE_PERIPHID4      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOE_PERIPHID5      (TIVA_GPIOE_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -303,6 +315,8 @@
 #  define TIVA_GPIOF_DEN            (TIVA_GPIOF_BASE + TIVA_GPIO_DEN_OFFSET)
 #  define TIVA_GPIOF_LOCK           (TIVA_GPIOF_BASE + TIVA_GPIO_LOCK_OFFSET)
 #  define TIVA_GPIOF_CR             (TIVA_GPIOF_BASE + TIVA_GPIO_CR_OFFSET)
+#  define TIVA_GPIOF_AMSEL          (TIVA_GPIOF_BASE + TIVA_GPIO_AMSEL_OFFSET)
+#  define TIVA_GPIOF_PCTL           (TIVA_GPIOF_BASE + TIVA_GPIO_PCTL_OFFSET)
 
 #  define TIVA_GPIOF_PERIPHID4      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID4_OFFSET)
 #  define TIVA_GPIOF_PERIPHID5      (TIVA_GPIOF_BASE + TIVA_GPIO_PERIPHID5_OFFSET)
@@ -435,6 +449,28 @@
 
 #define GPIO_LOCK_UNLOCK            0x4c4f434b
 #define GPIO_LOCK_LOCKED            (1 << 0)  /* Bit 0: GPIOCR register is locked */
+
+/* GPIO Port Control */
+
+#define GPIO_PCTL_PMC_SHIFT(n)      ((n) << 2)
+#define GPIO_PCTL_PMC_MASK(n)       (15 << GPIO_PCTL_PMC_SHIFT(n))
+
+#define GPIO_PCTL_PMC0_SHIFT        (0)       /* Bits 0-3: Port Mux Control 0 */
+#define GPIO_PCTL_PMC0_MASK         (15 << GPIO_PCTL_PMC0_SHIFT)
+#define GPIO_PCTL_PMC1_SHIFT        (4)       /* Bits 4-7: Port Mux Control 1 */
+#define GPIO_PCTL_PMC1_MASK         (15 << GPIO_PCTL_PMC1_SHIFT)
+#define GPIO_PCTL_PMC2_SHIFT        (8)       /* Bits 8-11: Port Mux Control 2 */
+#define GPIO_PCTL_PMC2_MASK         (15 << GPIO_PCTL_PMC2_SHIFT)
+#define GPIO_PCTL_PMC3_SHIFT        (12)      /* Bits 12-15: Port Mux Control 3 */
+#define GPIO_PCTL_PMC3_MASK         (15 << GPIO_PCTL_PMC3_SHIFT)
+#define GPIO_PCTL_PMC4_SHIFT        (16)      /* Bits 16-19: Port Mux Control 4 */
+#define GPIO_PCTL_PMC4_MASK         (15 << GPIO_PCTL_PMC4_SHIFT)
+#define GPIO_PCTL_PMC5_SHIFT        (20)      /* Bits 20-23: Port Mux Control 5 */
+#define GPIO_PCTL_PMC5_MASK         (15 << GPIO_PCTL_PMC5_SHIFT)
+#define GPIO_PCTL_PMC6_SHIFT        (24)      /* Bits 24-27: Port Mux Control 6 */
+#define GPIO_PCTL_PMC6_MASK         (15 << GPIO_PCTL_PMC6_SHIFT)
+#define GPIO_PCTL_PMC7_SHIFT        (28)      /* Bits 28-31: Port Mux Control 7 */
+#define GPIO_PCTL_PMC7_MASK         (15 << GPIO_PCTL_PMC7_SHIFT)
 
 /************************************************************************************
  * Public Types

@@ -322,6 +322,15 @@
 #  define SYSCON_RCC_XTAL7373KHZ      (13 << SYSCON_RCC_XTAL_SHIFT)  /* 7.3728MHz */
 #  define SYSCON_RCC_XTAL8000KHZ      (14 << SYSCON_RCC_XTAL_SHIFT)  /* 8.0000MHz */
 #  define SYSCON_RCC_XTAL8192KHZ      (15 << SYSCON_RCC_XTAL_SHIFT)  /* 8.1920MHz */
+#ifdef CONFIG_ARCH_CHIP_LM3S9B92
+#  define SYSCON_RCC_XTAL10000KHZ     (16 << SYSCON_RCC_XTAL_SHIFT)  /* 10.0 MHz (USB) */
+#  define SYSCON_RCC_XTAL12000KHZ     (17 << SYSCON_RCC_XTAL_SHIFT)  /* 12.0 MHz (USB) */
+#  define SYSCON_RCC_XTAL12888KHZ     (18 << SYSCON_RCC_XTAL_SHIFT)  /* 12.288 MHz */
+#  define SYSCON_RCC_XTAL13560KHZ     (19 << SYSCON_RCC_XTAL_SHIFT)  /* 13.56 MHz */
+#  define SYSCON_RCC_XTAL14318KHZ     (20 << SYSCON_RCC_XTAL_SHIFT)  /* 14.31818 MHz */
+#  define SYSCON_RCC_XTAL16000KHZ     (21 << SYSCON_RCC_XTAL_SHIFT)  /* 16.0 MHz (USB) */
+#  define SYSCON_RCC_XTAL16384KHZ     (22 << SYSCON_RCC_XTAL_SHIFT)  /* 16.384 MHz */
+#endif
 #ifdef CONFIG_ARCH_CHIP_LM3S9B96
 #  define SYSCON_RCC_XTAL10000KHZ     (16 << SYSCON_RCC_XTAL_SHIFT)  /* 10.0 MHz (USB) */
 #  define SYSCON_RCC_XTAL12000KHZ     (17 << SYSCON_RCC_XTAL_SHIFT)  /* 12.0 MHz (USB) */
@@ -479,6 +488,10 @@
 #define SYSCON_DSLPCLKCFG_DSDIVORIDE_MASK  (0x3f << SYSCON_DSLPCLKCFG_DSDIVORIDE_SHIFT)
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT   4 /* Bits 6-4: Clock Source */
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_MASK    (0x07 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT)
+
+/* UART Run Mode Clock Gating Control*/
+
+#define SYSCON_RCGCUART(n)            (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
 
 /************************************************************************************
  * Public Types

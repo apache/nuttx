@@ -125,7 +125,7 @@
 #  define TIVA_NAES            0  /* No AES module */
 #  define TIVA_NDES            0  /* No DES module */
 #  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) || defined(CONFIG_ARCH_CHIP_LM3S9B92)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */

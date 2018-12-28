@@ -68,7 +68,7 @@
                                          /* -0xe003ffff: Reserved */
 #  define TIVA_TPIU_BASE      0xe0040000 /* -0xe0040fff: Trace Port Interface Unit */
                                          /* -0xffffffff: Reserved */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) || defined(CONFIG_ARCH_CHIP_LM3S9B92)
 #  define TIVA_FLASH_BASE     0x00000000 /* -0x0003ffff: On-chip FLASH */
                                          /* -0x1fffffff: Reserved */
 #  define TIVA_SRAM_BASE      0x20000000 /* -0x2000ffff: Bit-banded on-chip SRAM */
@@ -266,7 +266,7 @@
 #  define TIVA_FLASHCON_BASE  (TIVA_PERIPH_BASE + 0xfd000)  /* -0xfdfff: FLASH Control */
 #  define TIVA_SYSCON_BASE    (TIVA_PERIPH_BASE + 0xfe000)  /* -0xfefff: System Control */
                                                             /* -0x1ffffff: Reserved */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) || defined(CONFIG_ARCH_CHIP_LM3S9B92)
 /* FiRM Peripheral Base Addresses */
 
 #  define TIVA_WDOG_BASE      (TIVA_PERIPH_BASE + 0x00000) /* -0x00fff: Watchdog Timer */
