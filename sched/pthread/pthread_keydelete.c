@@ -56,17 +56,15 @@
  * Name: pthread_key_delete
  *
  * Description:
- *   This POSIX function should delete a thread-specific data key
- *   previously returned by pthread_key_create().  However, this function
- *   does nothing in the present implementation.
+ *   This POSIX function deletes a thread-specific data key
+ *   previously returned by pthread_key_create().
  *
  * Input Parameters:
  *   key - the key to delete
  *
  * Returned Value:
- *   Always returns ENOSYS.
- *
- * Assumptions:
+ *   Returns zero (OK) on success.  EINVAL may be returned if an invalid
+ *   key is received.
  *
  * POSIX Compatibility:
  *
