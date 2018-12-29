@@ -226,8 +226,10 @@
 #  define tiva_uart6_disableclk()  tiva_uart_disableclk(6)
 #  define tiva_uart7_disableclk()  tiva_uart_disableclk(7)
 #else
+#if defined(CONFIG_ARCH_CHIP_LM3S9B92)
 #  define tiva_uart_enableclk(p)   tiva_enableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGCUART(p))
 #  define tiva_uart_disableclk(p)  tiva_disableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGCUART(p))
+#endif
 
 #  define tiva_uart0_enableclk()   tiva_enableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_UART0)
 #  define tiva_uart1_enableclk()   tiva_enableclk(TIVA_SYSCON_RCGC1,SYSCON_RCGC1_UART1)

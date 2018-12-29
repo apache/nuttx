@@ -491,7 +491,9 @@
 
 /* UART Run Mode Clock Gating Control*/
 
-#define SYSCON_RCGCUART(n)            (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
+#ifdef CONFIG_ARCH_CHIP_LM3S9B92
+#  define SYSCON_RCGCUART(n)          (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
+#endif
 
 /************************************************************************************
  * Public Types
