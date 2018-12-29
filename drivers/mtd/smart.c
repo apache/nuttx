@@ -4141,7 +4141,16 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
 #else
   header->seq = 0;
 #endif
-  sectsize = dev->sectorsize >> 7;
+
+  /* Calculate the 3-bit logical sector size in bits 2-4:
+   * 000b - 256 bytes
+   * 001b - 512 bytes
+   * 010b - 1024 bytes
+   * 011b - 2048 bytes
+   * etc.
+   */
+
+  sectsize = (dev->sectorsize >> 9) << 2;
 
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xff
   header->status = ~(SMART_STATUS_COMMITTED | SMART_STATUS_SIZEBITS |
