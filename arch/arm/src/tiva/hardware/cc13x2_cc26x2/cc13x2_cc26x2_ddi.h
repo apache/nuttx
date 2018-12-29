@@ -62,9 +62,9 @@
  * access the Master not the Slave).
  *
  *   uint32_t regval;
- *   regval  = getreg32(TIVA_DDI_CFG);
+ *   regval  = getreg32(TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_CFG_OFFSET);
  *   regval |= DDI_CFG_WAITFORACK
- *   putreg32(regval, TIVA_DDI_CFG);
+ *   putreg32(regval, TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_CFG_OFFSET);
  *
  * The "instruction offset" macros are used to pass an instruction to
  * the DDI Master when accessing DDI slave registers. These macros are
@@ -85,48 +85,59 @@
  *
  * The generic format of using this marcos for a read follows:
  *
- *   - Read low 16-bits in DDI_SLAVE_OFF
+ *   - Read low 16-bits in DDI_SLAVE_OFFSET
  *
- *     myushortvar = getreg16(TIVA_DDI_DIR + DDI_SLAVE_OFF);
+ *     myushortvar = getreg16(DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                            DDI_SLAVE_OFFSET);
  *
- *   - Read high 16-bits in DDI_SLAVE_OFF add 2 for data[31:16]
+ *   - Read high 16-bits in DDI_SLAVE_OFFSET add 2 for data[31:16]
  *
- *     myushortvar = getreg16(TIVA_DDI_DIR + DDI_SLAVE_OFF + 2);
+ *     myushortvar = getreg16(DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                            DDI_SLAVE_OFFSET + 2);
  *
- *   - Read data[31:24] byte in DDI_SLAVE_OFF add 3 for data[31:24]
+ *   - Read data[31:24] byte in DDI_SLAVE_OFFSET add 3 for data[31:24]
  *
- *     myuchar = getreg9(TIVA_DDI_DIR + DDI_SLAVE_OFF + 3);
+ *     myuchar = getreg8(DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                       DDI_SLAVE_OFFSET + 3);
  *
  * Notes: In the above example:
  *
- *   - Where TIVA_DDI_DIR is address of the of the Direct Access
+ *   - DDI_MASTER_BASE is the base address of the master
+ *   - Where TIVA_DDI_DIR_OFFSET is offset of the of the Direct Access
  *     instruction.
- *   - DDI_SLAVE_OFF is the DDI Slave offset defined in the
+ *   - DDI_SLAVE_OFFSET is the DDI Slave offset defined in the
  *     cc13x2_cc25x2_<ddi_slave>.h header file (e.g.
  *     cc13x2_cc25x2_osc_top.h for the OSCSC oscillator modules.
  *
  * Writes can use any of the "instruction macros".
  * The following examples do a "direct write" to DDI Slave register
- * DDI_SLAVE_OFF using different size operands:
+ * DDI_SLAVE_OFFSET using different size operands:
  *
  * DIRECT WRITES
  *   - Write 32-bits aligned
  *
- *     putreg32(0x12345678, TIVA_DDI_DIR + DDI_SLAVE_OFF);
+ *     putreg32(0x12345678, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                          DDI_SLAVE_OFFSET);
  *
  *   - Write 16-bits aligned to high 16-bits then low 16-bits
  *     Add 2 to get to high 16-bits.
  *
- *     putreg16(0xabcd, TIVA_DDI_DIR + DDI_SLAVE_OFF + 2);
- *     putreg16(0xef01, TIVA_DDI_DIR + DDI_SLAVE_OFF);
+ *     putreg16(0xabcd, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                      DDI_SLAVE_OFFSET + 2);
+ *     putreg16(0xef01, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                      DDI_SLAVE_OFFSET);
  *
- *   - Write each byte at DDI_SLAVE_OFF, one at a time.
+ *   - Write each byte at DDI_SLAVE_OFFSET, one at a time.
  *     Add 1,2,or 3 to get to bytes 1,2, or 3.
  *
- *     putreg8(TIVA_DDI_DIR + DDI_SLAVE_OFF)     = 0x33;
- *     putreg8(TIVA_DDI_DIR + DDI_SLAVE_OFF + 1) = 0x44;
- *     putreg8(TIVA_DDI_DIR + DDI_SLAVE_OFF + 2) = 0x55;
- *     putreg8(TIVA_DDI_DIR + DDI_SLAVE_OFF + 3) = 0x66;
+ *     putreg8(0x33, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                   DDI_SLAVE_OFFSET);
+ *     putreg8(0x44, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                   DDI_SLAVE_OFFSET + 1);
+ *     putreg8(0x55, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                   DDI_SLAVE_OFFSET + 2);
+ *     putreg8(0x66, DDI_MASTER_BASE + TIVA_DDI_DIR_OFFSET +
+ *                   DDI_SLAVE_OFFSET + 3);
  *
  * SET/CLR
  *
@@ -136,15 +147,18 @@
  *
  *   - Set all odd bits in a 32-bit words
  *
- *     putreg32(0xaaaaaaaa, TIVA_DDI_SET + DDI_SLAVE_OFF);
+ *     putreg32(0xaaaaaaaa, DDI_MASTER_BASE + TIVA_DDI_SET_OFFSET +
+ *                          DDI_SLAVE_OFFSET);
  *
  *   - Clear all bits in byte 2 (data[23:16]) using 32-bit operand
  *
- *      putreg32(0x00ff0000, TIVA_DDI_CLR + DDI_SLAVE_OFF);
+ *      putreg32(0x00ff0000, DDI_MASTER_BASE + TIVA_DDI_CLR_OFFSET +
+ *               DDI_SLAVE_OFFSET);
  *
  *   - Set even bits in byte 2 (data[23:16]) using 8-bit operand
  *
- *     putreg8(0x55, TIVA_DDI_CLR + DDI_SLAVE_OFF  + 2);
+ *     putreg8(0x55, DDI_MASTER_BASE + TIVA_DDI_CLR_OFFSET +
+ *                   DDI_SLAVE_OFFSET  + 2);
  *
  * MASKED WRITES
  *
@@ -154,40 +168,48 @@
  *   e.g. the mask and data are combined as follows for a 16 bit masked
  *   write: (mask << 16) | data;  Examples follow:
  *
- *   - Write 5555 to low 16-bits of DDI_SLAVE_OFF register
+ *   - Write 5555 to low 16-bits of DDI_SLAVE_OFFSET register
  *     a long write is needed (32-bits).
  *
- *     putreg32(0xffff5555, TIVA_DDI_MASK16B + DDI_SLAVE_OFF);
+ *     putreg32(0xffff5555, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                          DDI_SLAVE_OFFSET);
  *
- *   - Write 1AA to data bits 24:16 in high 16-bits of DDI_SLAVE_OFF register
- *     Note add 4 for high 16-bits at DDI_SLAVE_OFF; mask is 1ff!
+ *   - Write 1AA to data bits 24:16 in high 16-bits of DDI_SLAVE_OFFSET
+ *     register.  Note add 4 for high 16-bits at DDI_SLAVE_OFFSET; mask is
+ *     1ff!
  *
- *     putreg32(0x01ff01aa, TIVA_DDI_MASK16B + DDI_SLAVE_OFF + 4);
+ *     putreg32(0x01ff01aa, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                          DDI_SLAVE_OFFSET + 4);
  *
  *   - Do an 8 bit masked write of 00 to low byte of register (data[7:0]).
  *     a short write is needed (16-bits).
  *
- *     putreg16(0xff00, TIVA_DDI_MASK16B + DDI_SLAVE_OFF);
+ *     putreg16(0xff00, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                      DDI_SLAVE_OFFSET);
  *
  *   - Do an 8 bit masked write of 11 to byte 1 of register (data[15:8]).
  *     add 2 to get to byte 1.
  *
- *     putreg16(0xff11, TIVA_DDI_MASK16B + DDI_SLAVE_OFF + 2);
+ *     putreg16(0xff11, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                      DDI_SLAVE_OFFSET + 2);
  *
  *   - Do an 8 bit masked write of 33 to high byte of register (data[31:24]).
  *     add 6 to get to byte 3.
  *
- *     putreg16(0xff33, TIVA_DDI_MASK16B + DDI_SLAVE_OFF + 6);
+ *     putreg16(0xff33, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                      DDI_SLAVE_OFFSET + 6);
  *
  *   - Do an 4 bit masked write (Nibble) of 7 to data[3:0]).
  *     Byte write is needed.
  *
- *     putreg8(0xf7, TIVA_DDI_MASK16B + DDI_SLAVE_OFF + DDI_MASK16B_OFFSET);
+ *     putreg8(0xf7, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                   DDI_SLAVE_OFFSETSET + DDI_MASK16B_OFFSET);
  *
  *   - Do an 4 bit masked write of 4 to data[7:4]).
  *     Add 1 for next nibble
  *
- *     putreg8(0xf4, TIVA_DDI_MASK16B + DDI_SLAVE_OFF + 1);
+ *     putreg8(0xf4, DDI_MASTER_BASE + TIVA_DDI_MASK16B_OFFSET +
+ *                   DDI_SLAVE_OFFSETSET + 1);
  *
  ****************************************************************************/
 
@@ -212,12 +234,8 @@
 #define TIVA_DDI_MASK16B_OFFSET   0x0400  /* Offset for 16-bit masked access */
 
 /* DDI Register Addresses ***************************************************/
-
-#define TIVA_DDI_DIR              (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_DIR_OFFSET)
-#define TIVA_DDI_SET              (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_SET_OFFSET)
-#define TIVA_DDI_CLR              (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_CLR_OFFSET)
-#define TIVA_DDI_MASK4B           (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK4B_OFFSET)
-#define TIVA_DDI_MASK8B           (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK8B_OFFSET)
-#define TIVA_DDI_MASK16B          (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK16B_OFFSET)
+/* Register base addresses depend on that base address of the master, e.g.
+ * TIVA_AUX_DDI0_OSC_BASE.
+ */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_DDI_H */
