@@ -171,12 +171,6 @@
  *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
  *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
  *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
- *
- * Open Loop mode only:
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
  *
  * Closed loop mode only:
  *   BOARD_DFLL_GCLKGEN             - GCLK index
@@ -188,14 +182,9 @@
  */
 
 #define BOARD_DFLL_ENABLE            1
-#undef  BOARD_DFLL_OPENLOOP
+#define BOARD_DFLL_OPENLOOP          1
 #undef  BOARD_DFLL_ONDEMAND
 #undef  BOARD_DFLL_RUNINSTANDBY
-
-/* DFLL open loop mode configuration */
-
-#define BOARD_DFLL_COARSEVALUE       (0x1f / 4)
-#define BOARD_DFLL_FINEVALUE         (0xff / 4)
 
 /* DFLL closed loop mode configuration */
 

@@ -665,8 +665,6 @@ static inline void sam_dpll_config(void)
  *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
  *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
  *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
- *   BOARD_DFLL_COARSEVALUE         - Value
- *   BOARD_DFLL_FINEVALUE           - Value
  *
  * Open Loop mode only:
  *   BOARD_DFLL_COARSEVALUE         - Value
@@ -689,8 +687,11 @@ static inline void sam_dpll_config(void)
 #ifdef BOARD_DFLL_ENABLE
 static inline void sam_dfll_config(void)
 {
-  uint16_t control;
-  uint32_t regval;
+  uint16_t  control;
+  uint32_t  regval;
+  uint32_t *nvm_cal = (uint32_t *)SAM_NVMCALIB_AREA;
+  uint32_t  coarse  = ((nvm_cal[1]) >> 26) & 0x3f;
+  uint32_t  fine    = ((nvm_cal[2]) >> 0) & 0x7ff;
 
   /* Set up the DFLL control register */
 
@@ -737,8 +738,8 @@ static inline void sam_dfll_config(void)
 
   /* Set up the DFLL value register */
 
-  regval = SYSCTRL_DFLLVAL_COARSE(BOARD_DFLL_COARSEVALUE) |
-           SYSCTRL_DFLLVAL_FINE(BOARD_DFLL_FINEVALUE);
+  regval = SYSCTRL_DFLLVAL_COARSE(coarse) |
+           SYSCTRL_DFLLVAL_FINE(fine);
   putreg32(regval, SAM_SYSCTRL_DFLLVAL);
 
   /* Finally, set the state of the ONDEMAND bit if necessary */

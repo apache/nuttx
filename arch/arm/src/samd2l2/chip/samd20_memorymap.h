@@ -70,6 +70,8 @@
 #  define SAM_AUX1_AREA3 0x00806010 /* Area 3 offset address (reserved, 128 bits) */
 #  define SAM_AUX1_AREA4 0x00806020 /* Area 4 Software calibration area (256 bits) */
 
+#define SAM_NVMCALIB_AREA  SAM_AUX1_AREA4 /* Use same name of SAML21 */
+
 /* AHB-APB Bridge A */
 
 #define SAM_PAC0_BASE    0x40000000 /* Peripheral Access Controller 0 */
