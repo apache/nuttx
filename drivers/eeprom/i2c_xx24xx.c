@@ -188,6 +188,7 @@ static const struct ee24xx_geom_s g_ee24xx_devices[] =
   { 9, 4, 2, 0, 0}, /* 24xx512    65536  128     2 */
   {10, 4, 2, 1, 1}, /* 24xx1025  131072  128     2 Shifted address, todo */
   {10, 4, 2, 1, 0}, /* 24xx1026  131072  128     2 */
+  {11, 5, 2, 2, 0}, /* AT24CM02  262144  256     2 */
 
   /* STM devices */
 

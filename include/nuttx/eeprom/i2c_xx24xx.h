@@ -59,6 +59,7 @@ enum eeprom_24xx_e
   EEPROM_24xx512,
   EEPROM_24xx1025,
   EEPROM_24xx1026,
+  EEPROM_24cm02,
 
   /* Atmel geometries - none... */
 
@@ -81,6 +82,7 @@ enum eeprom_24xx_e
   EEPROM_AT24C256  = EEPROM_24xx256,
   EEPROM_AT24C512  = EEPROM_24xx512,
   EEPROM_AT24C1024 = EEPROM_24xx1026,
+  EEPROM_AT24CM02  = EEPROM_24cm02,
 
   EEPROM_M24C04    = EEPROM_24xx04,
   EEPROM_M24C08    = EEPROM_24xx08,
