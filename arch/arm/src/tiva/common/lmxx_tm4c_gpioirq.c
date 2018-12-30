@@ -693,7 +693,7 @@ int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 void tiva_gpioirqenable(pinconfig_t pinconfig)
 {
   uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
+  uint8_t pin    = 1 << (pinconfig & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   uintptr_t base = tiva_gpiobaseaddress(port);
 
   /* Enable the GPIO interrupt. "The GPIO IM register is the interrupt
@@ -717,7 +717,7 @@ void tiva_gpioirqenable(pinconfig_t pinconfig)
 void tiva_gpioirqdisable(pinconfig_t pinconfig)
 {
   uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
+  uint8_t pin    = 1 << (pinconfig & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   uintptr_t base = tiva_gpiobaseaddress(port);
 
   /* Disable the GPIO interrupt. "The GPIO IM register is the interrupt
@@ -741,7 +741,7 @@ void tiva_gpioirqdisable(pinconfig_t pinconfig)
 void tiva_gpioirqclear(pinconfig_t pinconfig)
 {
   uint8_t port   = (pinconfig & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint8_t pin    = (pinconfig & GPIO_PIN_MASK);
+  uint8_t pin    = 1 << (pinconfig & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   uintptr_t base = tiva_gpiobaseaddress(port);
 
   /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a bit
