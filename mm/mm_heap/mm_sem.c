@@ -1,7 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_sem.c
  *
- *   Copyright (C) 2007-2009, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2017-2018 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +45,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
@@ -75,6 +75,14 @@
 #else
 #  define _SEM_GETERROR(r)  (r) = -errno
 #endif
+
+/* This is a special value that indicates that there is no holder of the
+ * semaphore.  The valid range of PIDs is 0-32767 and any value outside of
+ * that range could be used (except -ESRCH which is a special return value
+ * from getpid())
+ */
+
+#define NO_HOLDER ((pid_t)-1)
 
 /* Define MONITOR_MM_SEMAPHORE to enable semaphore state monitoring */
 
@@ -115,7 +123,7 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 
   (void)nxsem_init(&heap->mm_semaphore, 0, 1);
 
-  heap->mm_holder      = -1;
+  heap->mm_holder      = NO_HOLDER;
   heap->mm_counts_held = 0;
 }
 
@@ -135,17 +143,16 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
 #endif
-  FAR struct tcb_s *rtcb = sched_self();
-  pid_t my_pid;
+  pid_t my_pid = getpid();
   int ret;
 
-  /* sched_self() returns the TCB at the head of the ready-to-run list.
-   * mm_trysemaphore() may be called during context switches.  There are
-   * certain situations during context switching when the the OS data
-   * structures are in flux and where the current task (i.e., the task at
-   * the head of the ready-to-run task list) is not actually running.
-   * Granting the semaphore access in that case is known to result in heap
-   * corruption as in the following failure scenario.
+  /* getpid() returns the task ID of the task at the head of the ready-to-
+   * run task list.  mm_trysemaphore() may be called during context
+   * switches.  There are certain situations during context switching when
+   * the OS data structures are in flux and where the current task (i.e.,
+   * the task at the head of the ready-to-run task list) is not actually
+   * running. Granting the semaphore access in that case is known to result
+   * in heap corruption as in the following failure scenario.
    *
    * ----------------------------    -------------------------------
    * TASK A                          TASK B
@@ -161,14 +168,18 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    *   entered, and
    * - Heap is corrupted.
    * ----------------------------    -------------------------------
+   *
+   * This is handled by getpid():  If the case where Task B is not actually
+   * running, then getpid() will return the special value -ESRCH.  That will
+   * avoid taking the fatal 'if' logic and will fall through to use the
+   * 'else', albeit with a nonsensical PID value.
    */
 
   /* Does the current task already hold the semaphore?  Is the current
    * task actually running?
    */
 
-  my_pid = rtcb->pid;
-  if (heap->mm_holder == my_pid && rtcb->task_state == TSTATE_TASK_RUNNING)
+  if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references held by the current
        * task.
@@ -310,7 +321,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
 
       mseminfo("PID=%d giving\n", my_pid);
 
-      heap->mm_holder      = -1;
+      heap->mm_holder      = NO_HOLDER;
       heap->mm_counts_held = 0;
       DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
     }

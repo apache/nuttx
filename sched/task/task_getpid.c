@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_getpid.c
  *
- *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,21 @@
  * Description:
  *   Get the task ID of the currently executing task.
  *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Normally when called from user applications, getpid() will return the
+ *   task ID of the currently executing task, that is, the task at the head
+ *   of the ready-to-run list.  There is no specification for any errors
+ *   returned from getpid().
+ *
+ *   getpid(), however, may be called from within the OS in some cases.
+ *   There are certain situations during context switching when the OS data
+ *   structures are in flux and where the current task at the head of the
+ *   ready-to-run task list) is not actually running.  In that case,
+ *   getpid() will return the error: -ESRCH
+ *
  ****************************************************************************/
 
 pid_t getpid(void)
@@ -61,25 +76,39 @@ pid_t getpid(void)
   FAR struct tcb_s *rtcb;
 
   /* Get the TCB at the head of the ready-to-run task list.  That
-   * will be the currently executing task.  There is an exception to
-   * this:  Early in the start-up sequence, the ready-to-run list may be
-   * empty!  This case, of course, the start-up/IDLE thread with pid == 0
-   * must be running.
+   * will usually be the currently executing task.  There is are two
+   * exceptions to this:
+   *
+   * 1. Early in the start-up sequence, the ready-to-run list may be
+   *    empty!  This case, of course, the CPU0 start-up/IDLE thread with
+   *    pid == 0 must be running, and
+   * 2. As described above, during certain context-switching conditions the
+   *    task at the head of the ready-to-run list may not actually be
+   *    running.
    */
 
   rtcb = this_task();
-  if (rtcb)
+  if (rtcb != NULL)
     {
-      /* Return the task ID from the TCB at the head of the ready-to-run
-       * task list
-       */
+      /* Check if the task is actually running */
 
-      return rtcb->pid;
+      if (rtcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          /* Yes.. Return the task ID from the TCB at the head of the
+           * ready-to-run task list
+           */
+
+          return rtcb->pid;
+        }
+
+      /* No.. return -ESRCH to indicate this condition */
+
+      return (pid_t)-ESRCH;
     }
 
   /* We must have been called earlier in the start up sequence from the
    * start-up/IDLE thread before the ready-to-run list has been initialized.
    */
 
-  return 0;
+  return (pid_t)0;
 }
