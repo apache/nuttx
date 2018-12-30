@@ -81,6 +81,17 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/*******************************************************************************
+ * Name: sam_i2c_master_initialize
+ *
+ * Description:
+ *   Initialize a I2C device for I2C operation
+ *
+ *******************************************************************************/
+
+struct i2c_master_s;  /* Forward reference */
+struct i2c_master_s *sam_i2c_master_initialize(int bus);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
