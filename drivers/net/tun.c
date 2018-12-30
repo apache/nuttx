@@ -619,6 +619,33 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 
       arp_ipin(&priv->dev);
       ipv4_input(&priv->dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field d_len will set to a value > 0.
+       */
+
+      if (priv->dev.d_len > 0)
+        {
+          /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+          if (IFF_IS_IPv4(priv->dev.d_flags))
+#endif
+            {
+              arp_out(&priv->dev);
+            }
+#ifdef CONFIG_NET_IPv6
+          else
+            {
+              neighbor_out(&priv->dev);
+            }
+#endif
+
+          /* And send the packet */
+
+          priv->write_d_len = priv->dev.d_len;
+          tun_fd_transmit(priv);
+        }
     }
   else
 #endif
@@ -631,6 +658,31 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
       /* Give the IPv6 packet to the network layer. */
 
       ipv6_input(&priv->dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field d_len will set to a value > 0.
+       */
+
+      if (priv->dev.d_len > 0)
+        {
+          /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv4
+          if (IFF_IS_IPv4(priv->dev.d_flags))
+            {
+              arp_out(&priv->dev);
+            }
+          else
+#endif
+#ifdef CONFIG_NET_IPv6
+            {
+              neighbor_out(&priv->dev);
+            }
+#endif
+
+          priv->write_d_len = priv->dev.d_len;
+          tun_fd_transmit(priv);
+        }
     }
   else
 #endif
@@ -639,40 +691,23 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
     {
       arp_arpin(&priv->dev);
       NETDEV_RXARP(&priv->dev);
+
+      /* If the above function invocation resulted in data that should be
+       * sent out on the network, the field  d_len will set to a value > 0.
+       */
+
+      if (priv->dev.d_len > 0)
+        {
+          priv->write_d_len = priv->dev.d_len;
+          tun_fd_transmit(priv);
+        }
     }
   else
 #endif
     {
       NETDEV_RXDROPPED(&priv->dev);
-      priv->dev.d_len = 0;
     }
 
-  /* If the above function invocation resulted in data that should be
-   * sent out on the network, the field d_len will set to a value > 0.
-   */
-
-  if (priv->dev.d_len > 0)
-    {
-      /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(priv->dev.d_flags))
-        {
-          arp_out(&priv->dev);
-        }
-#endif
-#ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(priv->dev.d_flags))
-        {
-          neighbor_out(&priv->dev);
-        }
-#endif
-
-      /* And send the packet */
-
-      priv->write_d_len = priv->dev.d_len;
-      tun_fd_transmit(priv);
-    }
 }
 #endif
 
