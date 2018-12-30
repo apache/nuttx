@@ -423,7 +423,6 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
                             FAR net_ipv6addr_t ipaddr)
 {
   FAR const uint8_t *srcptr;
-  bool fullmac      = false;
   bool usemac       = (prefpost & UNCOMPRESS_MACBASED) != 0;
   uint8_t prefcount = UNCOMPRESS_PREFLEN(prefpost);
   uint8_t postcount = UNCOMPRESS_POSTLEN(prefpost);

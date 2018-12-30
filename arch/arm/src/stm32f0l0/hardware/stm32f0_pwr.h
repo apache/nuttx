@@ -48,8 +48,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#undef HAVE_PWR_WKUP2        1
-#undef HAVE_PWR_WKUP3        1
+#undef HAVE_PWR_WKUP2
+#undef HAVE_PWR_WKUP3
 
 /* Register Offsets *****************************************************************/
 

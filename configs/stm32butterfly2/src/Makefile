@@ -49,7 +49,7 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_STM32_USBHOST),y)
 CSRCS += stm32_usbhost.c
 endif
 
