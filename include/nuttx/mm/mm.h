@@ -241,11 +241,11 @@ struct mm_heap_s
 
   sem_t mm_semaphore;
   pid_t mm_holder;
-  int   mm_counts_held;
+  int mm_counts_held;
 
   /* This is the size of the heap provided to mm */
 
-  size_t  mm_heapsize;
+  size_t mm_heapsize;
 
   /* This is the first and last nodes of the heap */
 

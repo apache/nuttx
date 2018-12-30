@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sched.h>
+#include <errno.h>
 
 #include "sched/sched.h"
 #include "task/task.h"
@@ -66,7 +67,7 @@
  *   getpid(), however, may be called from within the OS in some cases.
  *   There are certain situations during context switching when the OS data
  *   structures are in flux and where the current task at the head of the
- *   ready-to-run task list) is not actually running.  In that case,
+ *   ready-to-run task list is not actually running.  In that case,
  *   getpid() will return the error: -ESRCH
  *
  ****************************************************************************/
@@ -80,7 +81,7 @@ pid_t getpid(void)
    * exceptions to this:
    *
    * 1. Early in the start-up sequence, the ready-to-run list may be
-   *    empty!  This case, of course, the CPU0 start-up/IDLE thread with
+   *    empty!  In this case, of course, the CPU0 start-up/IDLE thread with
    *    pid == 0 must be running, and
    * 2. As described above, during certain context-switching conditions the
    *    task at the head of the ready-to-run list may not actually be
