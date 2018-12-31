@@ -357,6 +357,13 @@ config BQ2429X
 	---help---
 		The BQ24296/BQ24297/BQ24296M are battery charger for lithium-ion batteries.
 
+config MCP73871
+	bool "Microchip MCP73871 Battery charger support"
+	default n
+	depends on BATTERY_CHARGER
+	---help---
+		A simple driver to report MCP73871 status.
+
 if BQ2429X
 
 config DEBUG_BQ2429X
