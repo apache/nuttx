@@ -693,7 +693,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
       NETDEV_RXARP(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, the field d_len will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
