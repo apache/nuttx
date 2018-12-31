@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/tm4c1294-launchpad/src/ek-tm4c1294xl.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,8 +122,17 @@
  *   PJ1 USR_SW2
  *   --- ------------
  */
-#define GPIO_SW1   (GPIO_FUNC_INPUT | GPIO_PORTJ | GPIO_PIN_0)
-#define GPIO_SW2   (GPIO_FUNC_INPUT | GPIO_PORTJ | GPIO_PIN_1)
+#ifdef CONFIG_ARCH_IRQBUTTONS
+#  define GPIO_SW1    (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
+                       GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
+                       GPIO_PORTJ | GPIO_PIN_0)
+#  define GPIO_SW2    (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
+                       GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \
+                       GPIO_PORTJ | GPIO_PIN_1)
+#else
+#  define GPIO_SW1    (GPIO_FUNC_INPUT | GPIO_PORTJ | GPIO_PIN_0)
+#  define GPIO_SW2    (GPIO_FUNC_INPUT | GPIO_PORTJ | GPIO_PIN_1)
+#endif
 
 /* SPI Chip selects ****************************************************************/
 /*   SSI0: PA3 is used for SSI0 chip select to the second booster pack (No pull-

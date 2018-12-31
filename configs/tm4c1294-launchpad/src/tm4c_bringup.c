@@ -49,6 +49,10 @@
 
 #include <nuttx/drivers/pwm.h>
 
+#ifdef CONFIG_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 #include "tiva_i2c.h"
 #include "tiva_pwm.h"
 #include "tiva_qencoder.h"
@@ -306,9 +310,7 @@ static void tm4c_qei(void)
 
 int tm4c_bringup(void)
 {
-#if defined(HAVE_TIMER) || defined(HAVE_HCIUART)
   int ret;
-#endif
 
   /* Register I2C drivers on behalf of the I2C tool */
 
@@ -337,6 +339,8 @@ int tm4c_bringup(void)
 #endif
 
 #ifdef HAVE_HCIUART
+  /* Register the Bluetooth HCI UART device */
+
   ret = hciuart_dev_initialize();
   if (ret < 0)
     {
@@ -344,5 +348,16 @@ int tm4c_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }

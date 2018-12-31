@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/tm4c1294-launchpad/src/tm4c_buttons.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,12 @@ void board_button_initialize(void)
     {
       tiva_configgpio(g_buttons[i]);
     }
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+  /* Configure GPIO interrupts */
+
+  (void)tiva_gpioirqinitialize();
+#endif
 }
 
 /****************************************************************************
@@ -125,4 +131,41 @@ uint32_t board_buttons(void)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: board_button_irq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+{
+  int ret;
+
+  if (id < 0 || id >= NUM_BUTTONS )
+    {
+      ret = -EINVAL;
+    }
+  else
+    {
+      /* Are we attaching or detaching? */
+
+      if (irqhandler != NULL)
+        {
+          ret = tiva_gpioirqattach(g_buttons[id], irqhandler, arg);
+        }
+      else
+        {
+          ret = tiva_gpioirqdetach(g_buttons[id]);
+        }
+    }
+
+  return ret;
+}
+#endif
+
 #endif /* CONFIG_ARCH_BUTTONS */
