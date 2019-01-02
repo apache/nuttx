@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
+#include <errno.h>
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
 #endif
@@ -105,10 +106,18 @@
 #define uart_receive(dev,s)      dev->ops->receive(dev,s)
 
 #ifdef CONFIG_SERIAL_DMA
-#  define uart_dmasend(dev)      dev->ops->dmasend(dev)
-#  define uart_dmareceive(dev)   dev->ops->dmareceive(dev)
-#  define uart_dmarxfree(dev)    dev->ops->dmarxfree(dev)
-#  define uart_dmatxavail(dev)   dev->ops->dmatxavail(dev)
+#define uart_dmasend(dev)      \
+  ((dev)->ops->dmasend ? (dev)->ops->dmasend(dev) : -ENOSYS)
+
+#define uart_dmareceive(dev)   \
+  ((dev)->ops->dmareceive ? (dev)->ops->dmareceive(dev) : -ENOSYS)
+
+#define uart_dmarxfree(dev)    \
+  ((dev)->ops->dmarxfree ? (dev)->ops->dmarxfree(dev) : -ENOSYS)
+
+#define uart_dmatxavail(dev)   \
+  ((dev)->ops->dmatxavail ? (dev)->ops->dmatxavail(dev) : -ENOSYS)
+
 #endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
