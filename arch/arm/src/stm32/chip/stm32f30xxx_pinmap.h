@@ -167,8 +167,8 @@
  * should first be configured to analog (AIN)".
  */
 
-#define GPIO_DAC1_OUT       (GPIO_ANALOG|GPIO_PORTA|GPIO_PIN4)
-#define GPIO_DAC2_OUT       (GPIO_ANALOG|GPIO_PORTA|GPIO_PIN5)
+#define GPIO_DAC1_OUT1       (GPIO_ANALOG|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_DAC1_OUT2       (GPIO_ANALOG|GPIO_PORTA|GPIO_PIN5)
 
 /* I2C */
 

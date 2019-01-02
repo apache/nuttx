@@ -339,7 +339,7 @@
 #define RCC_APB1RSTR_CAN1RST        (1 << 25) /* Bit 25: CAN1 reset */
 #define RCC_APB1RSTR_CAN2RST        (1 << 26) /* Bit 26: CAN2 reset */
 #define RCC_APB1RSTR_PWRRST         (1 << 28) /* Bit 28: Power interface reset */
-#define RCC_APB1RSTR_DACRST         (1 << 29) /* Bit 29: DAC reset */
+#define RCC_APB1RSTR_DAC1RST        (1 << 29) /* Bit 29: DAC1 reset */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
     defined(CONFIG_STM32_STM32F469)
 #  define RCC_APB1RSTR_UART7RST     (1 << 30) /* Bit 30: USART 7 reset */
@@ -485,7 +485,7 @@
 #  define RCC_APB1ENR_CECEN         (1 << 27) /* Bit 27: CEC clock enable */
 #endif
 #define RCC_APB1ENR_PWREN           (1 << 28) /* Bit 28: Power interface clock enable */
-#define RCC_APB1ENR_DACEN           (1 << 29) /* Bit 29: DAC interface clock enable */
+#define RCC_APB1ENR_DAC1EN          (1 << 29) /* Bit 29: DAC1 interface clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
     defined(CONFIG_STM32_STM32F469)
 #  define RCC_APB1ENR_UART7EN       (1 << 30) /* Bit 30: UART7 clock enable */

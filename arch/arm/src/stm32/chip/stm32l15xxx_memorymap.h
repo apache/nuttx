@@ -100,7 +100,7 @@
 #define STM32_USB_BASE       0x40005c00     /* 0x40005c00-0x40005fff USB device FS */
 #define STM32_USBRAM_BASE    0x40006000     /* 0x40006000-0x400063ff USB SRAM 512B */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
-#define STM32_DAC_BASE       0x40007400     /* 0x40007400-0x400077ff DAC (dual) */
+#define STM32_DAC1_BASE      0x40007400     /* 0x40007400-0x400077ff DAC1 */
 #define STM32_DAC_COMP       0x40007c00     /* 0x40007c00-0x40007c03 COMP */
 #define STM32_DAC_RI         0x40007c04     /* 0x40007c04-0x40007c5b RI */
 #define STM32_DAC_OPAMP      0x40007c5c     /* 0x40007c5c-0x40007fff OPAMP */

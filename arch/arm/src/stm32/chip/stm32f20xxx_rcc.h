@@ -281,7 +281,7 @@
 #define RCC_APB1RSTR_CAN1RST        (1 << 25) /* Bit 25: CAN1 reset */
 #define RCC_APB1RSTR_CAN2RST        (1 << 26) /* Bit 26: CAN2 reset */
 #define RCC_APB1RSTR_PWRRST         (1 << 28) /* Bit 28: Power interface reset */
-#define RCC_APB1RSTR_DACRST         (1 << 29) /* Bit 29: DAC reset */
+#define RCC_APB1RSTR_DAC1RST        (1 << 29) /* Bit 29: DAC1 reset */
 
 /* APB2 Peripheral reset register */
 
@@ -356,7 +356,7 @@
 #define RCC_APB1ENR_CAN1EN           (1 << 25) /* Bit 25: CAN 1 clock enable */
 #define RCC_APB1ENR_CAN2EN           (1 << 26) /* Bit 26: CAN 2 clock enable */
 #define RCC_APB1ENR_PWREN            (1 << 28) /* Bit 28: Power interface clock enable */
-#define RCC_APB1ENR_DACEN            (1 << 29) /* Bit 29: DAC interface clock enable */
+#define RCC_APB1ENR_DAC1EN           (1 << 29) /* Bit 29: DAC1 interface clock enable */
 #define RCC_APB1ENR_UART7EN          (1 << 30) /* Bit 30: UART7 clock enable */
 #define RCC_APB1ENR_UART8EN          (1 << 31) /* Bit 31: UART8 clock enable */
 

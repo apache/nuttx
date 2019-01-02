@@ -111,7 +111,10 @@
 #define STM32_USBRAM_BASE    0x40006000     /* 0x40006000-0x400063ff USB SRAM 512B */
 #define STM32_CAN1_BASE      0x40006400     /* 0x40006400-0x400067ff bxCAN */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
-#define STM32_DAC_BASE       0x40007400     /* 0x40007400-0x400077ff DAC (dual) */
+#define STM32_DAC1_BASE      0x40007400     /* 0x40007400-0x400077ff DAC1 */
+#ifdef CONFIG_STM32_HAVE_DAC2
+#  define STM32_DAC2_BASE    0x40009800     /* 0x40009800-0x40009bff DAC2 */
+#endif
 
 /* APB2 Base Addresses **************************************************************/
 

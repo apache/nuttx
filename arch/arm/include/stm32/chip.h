@@ -164,7 +164,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -190,7 +190,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 20-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC , 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -216,7 +216,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 24-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -242,7 +242,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -268,7 +268,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 20-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -294,7 +294,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 24-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
@@ -319,7 +319,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    37  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 14-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                16  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -344,7 +344,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 21-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -369,7 +369,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -394,7 +394,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    51  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -419,7 +419,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    83  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -444,7 +444,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    109  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                33  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -469,7 +469,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    115  /* GPIOA-E,H */
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                34  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -495,7 +495,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS (only USB 2.0 device) */
 #  define STM32_NGPIO                    115 /* GPIOA-G,H */
 #  define STM32_NADC                     1   /* ADC1, 40-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                34  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -522,7 +522,7 @@
 #  define STM32_NGPIO                    83  /* GPIOA-G,H */
 
 #  define STM32_NADC                     1   /* ADC1, 25-channels */
-#  define STM32_NDAC                     2   /* DAC 1-2, 2 channels */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCMP                     2   /* (2) Comparators */
 #  define STM32_NCAPSENSE                23  /* Capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
@@ -551,7 +551,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    64  /* GPIOA-D */
 #  define STM32_NADC                     1   /* ADC1 */
-#  define STM32_NDAC                     2   /* DAC 1-2 */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -576,7 +576,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    80  /* GPIOA-E */
 #  define STM32_NADC                     1   /* ADC1 */
-#  define STM32_NDAC                     2   /* DAC 1-2 */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -604,7 +604,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    64  /* GPIOA-D */
 #  define STM32_NADC                     1   /* ADC1 */
-#  define STM32_NDAC                     2   /* DAC 1-2 */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -630,7 +630,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    80  /* GPIOA-E */
 #  define STM32_NADC                     1   /* ADC1 */
-#  define STM32_NDAC                     2   /* DAC 1-2 */
+#  define STM32_NDAC                     2   /* DAC 1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -786,7 +786,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-D */
 #  define STM32_NADC                     2   /* ADC1-2 */
-#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NDAC                     2   /* DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -814,7 +814,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    80  /* GPIOA-E */
 #  define STM32_NADC                     3   /* ADC1-3 */
-#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NDAC                     2   /* DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet */
@@ -868,7 +868,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    80  /* GPIOA-E */
 #  define STM32_NADC                     2   /* ADC1-2 */
-#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NDAC                     2   /* DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -892,7 +892,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-E */
 #  define STM32_NADC                     2   /* ADC1-2 */
-#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NDAC                     2   /* DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -916,7 +916,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    80  /* GPIOA-E */
 #  define STM32_NADC                     2   /* ADC1-2*/
-#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NDAC                     2   /* DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -943,7 +943,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet MAC */
@@ -969,7 +969,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    82 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -995,7 +995,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    140 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1021,7 +1021,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    114 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1059,7 +1059,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    24  /* GPIOA-F */
 #  define STM32_NADC                     1   /* (1) 12-bit ADC1 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCMP                     2   /* (2) Ultra-fast analog comparators: COMP2 and COMP4 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                13  /* (13) Capacitive sensing channels */
@@ -1088,7 +1088,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
 #  define STM32_NADC                     1   /* (1) 12-bit ADC1 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6*/
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                17  /* (17) Capacitive sensing channels */
@@ -1117,7 +1117,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-F */
 #  define STM32_NADC                     1   /* (1) 12-bit ADC1 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6*/
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                18  /* (18) Capacitive sensing channels */
@@ -1146,7 +1146,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1173,7 +1173,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    52  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1200,7 +1200,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    87  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1, 1 channel */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1226,7 +1226,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    25  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1-3 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1252,7 +1252,7 @@
 #  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1-3 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1278,7 +1278,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
 #  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1304,7 +1304,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    52  /* GPIOA-F */
 #  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1330,7 +1330,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-F */
 #  define STM32_NADC                     4   /* (4) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1356,7 +1356,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    87  /* GPIOA-F */
 #  define STM32_NADC                     4   /* (3) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1381,7 +1381,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    51  /* GPIOA-F */
 #  define STM32_NADC                     4   /* (4) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                18  /* (18) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1406,7 +1406,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    84  /* GPIOA-F (depends on package) */
 #  define STM32_NADC                     4   /* (4) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                24  /* (24) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1431,7 +1431,7 @@
 #  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
 #  define STM32_NGPIO                    115 /* GPIOA-F */
 #  define STM32_NADC                     4   /* (4) 12-bit ADC1-4 */
-#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                24  /* (24) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1458,7 +1458,7 @@
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    25  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCMP                     2   /* (2) Ultra-fast analog comparators: COMP2 and COMP4 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                14  /* (14) Capacitive sensing channels */
@@ -1487,7 +1487,7 @@
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    37  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                17  /* (17) Capacitive sensing channels */
@@ -1516,7 +1516,7 @@
 #  define STM32_NUSBOTG                  0   /* (0) No USB */
 #  define STM32_NGPIO                    51  /* GPIOA-F */
 #  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
-#  define STM32_NDAC                     3   /* (3) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCMP                     3   /* (3) Ultra-fast analog comparators: COMP2, COMP4 and COMP6 */
 #  define STM32_NPGA                     1   /* (1) Operational amplifiers: OPAMP */
 #  define STM32_NCAPSENSE                18  /* (18) Capacitive sensing channels */
@@ -1545,7 +1545,7 @@
 #  define STM32_NGPIO                    87  /* GPIOA-F */
 #  define STM32_NADC                     1   /* (1) 12-bit ADC1 */
 #  define STM32_NSDADC                   3   /* (3) 16-bit SDADC1-3 */
-#  define STM32_NDAC                     3   /* (2) 12-bit DAC1 CH1/CH2 and DAC2 CH1 */
+#  define STM32_NDAC                     3   /* (3) 12-bit DAC1-2, 3 channels */
 #  define STM32_NCAPSENSE                0   /* (0) No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* (1) CRC calculation unit */
 #  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
@@ -1657,7 +1657,7 @@
 #  define STM32_NUSBOTG                  0   /* USB OTG FS (only) */
 #  define STM32_NGPIO                    50  /* GPIOA-H */
 #  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
-#  define STM32_NDAC                     1   /* 12-bit DAC1 */
+#  define STM32_NDAC                     1   /* 12-bit DAC1, 1 channel */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* No CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet MAC */
@@ -1732,7 +1732,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet MAC */
@@ -1757,7 +1757,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet MAC */
@@ -1782,7 +1782,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* No Ethernet MAC */
@@ -1807,7 +1807,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1832,7 +1832,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     1   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     1   /* 12-bit DAC1, 1 channel */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1857,7 +1857,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1882,7 +1882,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1907,7 +1907,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1932,7 +1932,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1957,7 +1957,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -1982,7 +1982,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2007,7 +2007,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2032,7 +2032,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2057,7 +2057,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2082,7 +2082,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    139 /* GPIOA-I */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2106,8 +2106,8 @@
 #  define STM32_NLCD                     0   /* No LCD */
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    114 /* GPIOA-I */
-#  define STM32_NADC                     2  /* 12-bit ADC1-3, 14 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NADC                     2   /* 12-bit ADC1-3, 14 channels */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -2132,7 +2132,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    114 /* GPIOA-I */
 #  define STM32_NADC                     2  /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -2157,7 +2157,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    114 /* GPIOA-I */
 #  define STM32_NADC                     2  /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -2182,7 +2182,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    114 /* GPIOA-I */
 #  define STM32_NADC                     2  /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
@@ -2207,7 +2207,7 @@
 #  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
 #  define STM32_NGPIO                    168 /* GPIOA-K */
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
@@ -2242,7 +2242,7 @@
 #    define STM32_NGPIO                  161 /* GPIOA-K */
 #  endif
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
-#  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
+#  define STM32_NDAC                     2   /* 12-bit DAC1, 2 channels */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
 #  if defined(CONFIG_ARCH_CHIP_STM32F469A)

@@ -95,7 +95,7 @@
 #define STM32_CAN2_BASE      0x40006800     /* 0x40006800 - 0x40006bff: bxCAN2 */
 #define STM32_BKP_BASE       0x40006c00     /* 0x40006c00 - 0x40006fff: Backup registers (BKP) */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000 - 0x400073ff: Power control PWR */
-#define STM32_DAC_BASE       0x40007400     /* 0x40007400 - 0x400077ff: DAC */
+#define STM32_DAC1_BASE      0x40007400     /* 0x40007400 - 0x400077ff: DAC1 */
 #define STM32_CEC_BASE       0x40007800     /* 0x40007800 - 0x40007bff: CEC */
                                             /* 0x40007c00 - 0x4000ffff: Reserved */
 /* APB2 bus */

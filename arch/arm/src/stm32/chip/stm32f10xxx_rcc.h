@@ -269,7 +269,7 @@
 #endif
 #define RCC_APB1RSTR_BKPRST         (1 << 27) /* Bit 27: Backup interface reset */
 #define RCC_APB1RSTR_PWRRST         (1 << 28) /* Bit 28: Power interface reset */
-#define RCC_APB1RSTR_DACRST         (1 << 29) /* Bit 29: DAC interface reset */
+#define RCC_APB1RSTR_DAC1RST        (1 << 29) /* Bit 29: DAC1 interface reset */
 #ifdef CONFIG_STM32_VALUELINE
 #  define RCC_APB1RSTR_CECRST       (1 << 30) /* Bit 30: CEC reset */
 #endif
@@ -357,7 +357,7 @@
 #endif
 #define RCC_APB1ENR_BKPEN           (1 << 27) /* Bit 27: Backup interface clock enable */
 #define RCC_APB1ENR_PWREN           (1 << 28) /* Bit 28: Power interface clock enable */
-#define RCC_APB1ENR_DACEN           (1 << 29) /* Bit 29: DAC interface clock enable */
+#define RCC_APB1ENR_DAC1EN          (1 << 29) /* Bit 29: DAC1 interface clock enable */
 #ifdef CONFIG_STM32_VALUELINE
 #  define RCC_APB1ENR_CECEN         (1 << 30) /* Bit 30: CEC clock enable */
 #endif
