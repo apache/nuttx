@@ -1043,24 +1043,6 @@ config ARCH_BOARD_NUCLEO_L476RG
 	---help---
 		STMicro Nucleo L476RG board based on the STMicro STM32L476RGT6 MCU.
 
-config ARCH_BOARD_RASPBERRY_PIZERO
-	bool "Raspberry Pi Zero"
-	depends on ARCH_CHIP_BCM2835
-	---help---
-		This is the port of NuttX to the Raspberry Pi Zero.  There are two
-		versions of the Raspberry Pi Zero:  (1) This standard version and
-		(2) the Raspberry Pi Zero W with wireless support (selected with
-		CONFIG_ARCH_BOARD_RASPBERRY_PIZEROW.
-
-config ARCH_BOARD_RASPBERRY_PIZEROW
-	bool "Raspberry Pi Zero W"
-	depends on ARCH_CHIP_BCM2835
-	---help---
-		This is the port of NuttX to the Raspberry Pi Zero W.  There are two
-		versions of the Raspberry Pi Zero:  (1) This standard version
-		(selected with CONFIG_ARCH_BOARD_RASPBERRY_PIZEROW) and  (2) this
-		Raspberry Pi Zero W version with wireless support.
-
 config ARCH_BOARD_QEMU_I486
 	bool "Qemu i486 Mode"
 	depends on ARCH_X86 || ARCH_I486
@@ -1864,7 +1846,6 @@ config ARCH_BOARD
 	default "pic32mx-starterkit"       if ARCH_BOARD_PIC32MX_STARTERKIT
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
-	default "pizero"                   if ARCH_BOARD_RASPBERRY_PIZERO || ARCH_BOARD_RASPBERRY_PIZEROW
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
@@ -2260,9 +2241,6 @@ source "configs/pic32mx7mmb/Kconfig"
 endif
 if ARCH_BOARD_PIC32MZ_STARTERKIT
 source "configs/pic32mz-starterkit/Kconfig"
-endif
-if ARCH_BOARD_RASPBERRY_PIZERO || ARCH_BOARD_RASPBERRY_PIZEROW
-source "configs/pizero/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "configs/qemu-i486/Kconfig"

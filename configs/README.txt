@@ -585,11 +585,6 @@ configs/pic32mz-starterkit
 
   See www.microchip.com for further information.
 
-configs/pizero
-  This directory holds the port of NuttX to the Raspberry Pi Zero and
-  the similar Raspberry Pi Zero W with wireless suppoprt.  These boards
-  are based on the BCM2835 A1176 CPU.
-
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
