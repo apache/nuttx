@@ -157,7 +157,6 @@ arch/arm - ARM-based micro-controllers
 
     MCU support
       arch/arm/include/a1x and arch/arm/src/a1x
-      arch/arm/include/c5471 and arch/arm/src/bcm2708
       arch/arm/include/c5471 and arch/arm/src/c5471
       arch/arm/include/dm320 and arch/arm/src/dm320
       arch/arm/include/efm32 and arch/arm/src/efm32
