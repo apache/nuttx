@@ -161,8 +161,10 @@ static int mtdconfig_readbytes(FAR struct mtdconfig_struct_s *dev, int offset,
                                FAR uint8_t *pdata, int readlen)
 {
   off_t  bytestoread = readlen;
-  off_t  bytesthisblock, firstbyte;
-  off_t  block, index;
+  off_t  bytesthisblock;
+  off_t  firstbyte;
+  off_t  block;
+  off_t  index;
   int    ret = OK;
   size_t bytes;
 
@@ -310,9 +312,9 @@ static int mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev,
 
           /* Update writelen, etc. */
 
-          writelen -= bytes_this_block;
-          pdata += bytes_this_block;
-          offset += bytes_this_block;
+          writelen      -= bytes_this_block;
+          pdata         += bytes_this_block;
+          offset        += bytes_this_block;
           bytes_written += bytes_this_block;
         }
 
@@ -381,7 +383,7 @@ static int  mtdconfig_findfirstentry(FAR struct mtdconfig_struct_s *dev,
       /* Read headers until we find one that hasn't been released.
        */
 
-      ret = mtdconfig_readbytes(dev, offset, (uint8_t *) phdr,
+      ret = mtdconfig_readbytes(dev, offset, (FAR uint8_t *)phdr,
               sizeof(struct mtdconfig_header_s));
       if (ret != OK)
         {
@@ -444,7 +446,8 @@ static int  mtdconfig_findnextentry(FAR struct mtdconfig_struct_s *dev,
 {
   bool      found = false;
   int       ret;
-  uint16_t  block, bytes_left_in_block;
+  uint16_t  block;
+  uint16_t  bytes_left_in_block;
   uint16_t  endblock;
 
 #ifdef CONFIG_MTD_CONFIG_RAM_CONSOLIDATE
@@ -493,7 +496,8 @@ static int  mtdconfig_findnextentry(FAR struct mtdconfig_struct_s *dev,
       /* Read next header */
 
 read_next:
-      ret = mtdconfig_readbytes(dev, offset, (uint8_t *) phdr, sizeof(*phdr));
+      ret = mtdconfig_readbytes(dev, offset, (FAR uint8_t *)phdr,
+                                sizeof(*phdr));
       if (ret != OK)
         {
           return 0;
@@ -572,10 +576,12 @@ read_next:
 
 static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 {
-  FAR uint8_t *pBuf;
+  FAR uint8_t *pbuf;
   FAR struct  mtdconfig_header_s *phdr;
   struct      mtdconfig_header_s  hdr;
-  uint16_t    src_block = 0, dst_block = 0, blkper;
+  uint16_t    src_block = 0;
+  uint16_t    dst_block = 0;
+  uint16_t    blkper;
   off_t       dst_offset = CONFIGDATA_BLOCK_HDR_SIZE;
   off_t       src_offset = CONFIGDATA_BLOCK_HDR_SIZE;
   off_t       bytes_left_in_block;
@@ -584,8 +590,8 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a consolidation buffer */
 
-  pBuf = (uint8_t *)kmm_malloc(dev->erasesize);
-  if (pBuf == NULL)
+  pbuf = (FAR uint8_t *)kmm_malloc(dev->erasesize);
+  if (pbuf == NULL)
     {
       /* Unable to allocate buffer, can't consolidate! */
 
@@ -597,9 +603,9 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
   blkper = dev->erasesize / dev->blocksize;
   while (src_block < dev->neraseblocks)
     {
-      /* Point to beginning of pBuf and read the next erase block */
+      /* Point to beginning of pbuf and read the next erase block */
 
-      ret = MTD_BREAD(dev->mtd, src_block * blkper, blkper, pBuf);
+      ret = MTD_BREAD(dev->mtd, src_block * blkper, blkper, pbuf);
       if (ret < 0)
         {
           /* Error doing block read */
@@ -639,7 +645,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
       while (src_offset < dev->erasesize)
         {
-          phdr = (FAR struct mtdconfig_header_s *) &pBuf[src_offset];
+          phdr = (FAR struct mtdconfig_header_s *) &pbuf[src_offset];
 #ifdef CONFIG_MTD_CONFIG_NAMED
           if (phdr->name[0] == CONFIG_MTD_CONFIG_ERASEDVALUE)
 #else
@@ -679,7 +685,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               /* Now write the item to the current dst_offset location. */
 
-              ret = mtdconfig_writebytes(dev, dst_offset, (uint8_t *) phdr,
+              ret = mtdconfig_writebytes(dev, dst_offset, (FAR uint8_t *)phdr,
                                          sizeof(hdr));
               if (ret != sizeof(hdr))
                 {
@@ -691,7 +697,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               dst_offset += sizeof(hdr);
               ret = mtdconfig_writebytes(dev, dst_offset,
-                                         &pBuf[src_offset + sizeof(hdr)],
+                                         &pbuf[src_offset + sizeof(hdr)],
                                          phdr->len);
               if (ret != phdr->len)
                 {
@@ -731,11 +737,11 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
       src_offset = CONFIGDATA_BLOCK_HDR_SIZE;
     }
 
-  kmm_free(pBuf);
+  kmm_free(pbuf);
   return dst_offset;
 
 errout:
-  kmm_free(pBuf);
+  kmm_free(pbuf);
   ferr("ERROR: fail ram consolidate: %d\n", ret);
   return 0;
 }
@@ -757,13 +763,18 @@ errout:
 #ifndef CONFIG_MTD_CONFIG_RAM_CONSOLIDATE
 static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
 {
-  off_t       src_block, dst_block;
-  off_t       src_offset, dst_offset;
-  uint16_t    blkper, x, bytes, bytes_left_in_block;
+  off_t       src_block;
+  off_t       dst_block;
+  off_t       src_offset;
+  off_t       dst_offset;
+  uint16_t    blkper;
+  uint16_t    x;
+  uint16_t    bytes;
+  uint16_t    bytes_left_in_block;
   struct mtdconfig_header_s hdr;
   int         ret;
   uint8_t     sig[CONFIGDATA_BLOCK_HDR_SIZE];
-  uint8_t     *pBuf;
+  FAR uint8_t *pbuf;
 
   /* Prepare to copy block 0 to the last block (erase blocks) */
 
@@ -778,8 +789,8 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a small buffer for moving data */
 
-  pBuf = (uint8_t *)kmm_malloc(dev->blocksize);
-  if (pBuf == NULL)
+  pbuf = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  if (pbuf == NULL)
     {
       return 0;
     }
@@ -833,7 +844,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
       /* Scan all headers and move them to the src_offset */
 
 retry_relocate:
-      bytes = MTD_READ(dev->mtd, src_offset, sizeof(hdr), (uint8_t *) &hdr);
+      bytes = MTD_READ(dev->mtd, src_offset, sizeof(hdr), (FAR uint8_t *)&hdr);
       if (bytes != sizeof(hdr))
         {
           /* I/O Error! */
@@ -886,7 +897,7 @@ retry_relocate:
 
               /* Copy this entry to the destination */
 
-              ret = mtdconfig_writebytes(dev, dst_offset, (uint8_t *) &hdr,
+              ret = mtdconfig_writebytes(dev, dst_offset, (FAR uint8_t *)&hdr,
                                          sizeof(hdr));
               if (ret != sizeof(hdr))
                 {
@@ -911,7 +922,7 @@ retry_relocate:
 
                   /* Move the data. */
 
-                  ret = mtdconfig_readbytes(dev, src_offset, pBuf, bytes);
+                  ret = mtdconfig_readbytes(dev, src_offset, pbuf, bytes);
                   if (ret != OK)
                     {
                       /* I/O Error! */
@@ -920,7 +931,7 @@ retry_relocate:
                       goto errout;
                     }
 
-                  ret = mtdconfig_writebytes(dev, dst_offset, pBuf, bytes);
+                  ret = mtdconfig_writebytes(dev, dst_offset, pbuf, bytes);
                   if (ret != bytes)
                     {
                       /* I/O Error! */
@@ -988,11 +999,11 @@ retry_relocate:
         }
     }
 
-  kmm_free(pBuf);
+  kmm_free(pbuf);
   return dst_offset;
 
 errout:
-  kmm_free(pBuf);
+  kmm_free(pbuf);
   ferr("ERROR: fail consolidate: %d\n", ret);
   return 0;
 }
@@ -1049,7 +1060,7 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mtdconfig_struct_s *dev = inode->i_private;
-  size_t    bytes;
+  size_t bytes;
 
   if (dev->readoff >= dev->neraseblocks * dev->erasesize)
     {
@@ -1058,7 +1069,7 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
 
   /* Read data from the file */
 
-  bytes = MTD_READ(dev->mtd, dev->readoff, len, (uint8_t *) buffer);
+  bytes = MTD_READ(dev->mtd, dev->readoff, len, (FAR uint8_t *)buffer);
   if (bytes != len)
     {
       return -EIO;
@@ -1120,7 +1131,7 @@ static int mtdconfig_findentry(FAR struct mtdconfig_struct_s *dev,
 
           /* Read the 1st header from the next block */
 
-          ret = mtdconfig_readbytes(dev, offset, (uint8_t *) phdr,
+          ret = mtdconfig_readbytes(dev, offset, (FAR uint8_t *)phdr,
                                     sizeof(*phdr));
           if (ret != OK)
             {
@@ -1154,7 +1165,9 @@ static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
   uint8_t   sig[CONFIGDATA_BLOCK_HDR_SIZE];       /* Format signature bytes ("CD") */
   char      retrycount = 0;
   int       ret = -ENOSYS;
-  off_t     offset, bytes_left_in_block, bytes;
+  off_t     offset;
+  off_t     bytes_left_in_block;
+  off_t     bytes;
   uint16_t  block;
   struct mtdconfig_header_s hdr;
   uint8_t   ram_consolidate;
@@ -1341,7 +1354,7 @@ retry_find:
       hdr.len = pdata->len;
       hdr.flags = MTD_ERASED_FLAGS;
 
-      ret = mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr, sizeof(hdr));
+      ret = mtdconfig_writebytes(dev, offset, (FAR uint8_t *)&hdr, sizeof(hdr));
       if (ret != sizeof(hdr))
         {
           /* Cannot write even header! */
@@ -1357,7 +1370,7 @@ retry_find:
           /* Error writing data! */
 
           hdr.flags = MTD_ERASED_FLAGS;
-          mtdconfig_writebytes(dev, offset, (uint8_t *)&hdr,
+          mtdconfig_writebytes(dev, offset, (FAR uint8_t *)&hdr,
                                sizeof(hdr.flags));
           ret = -EIO;
           goto errout;
@@ -1379,10 +1392,11 @@ errout:
  ****************************************************************************/
 
 static int mtdconfig_getconfig(FAR struct mtdconfig_struct_s *dev,
-              FAR struct config_data_s *pdata)
+                               FAR struct config_data_s *pdata)
 {
   int    ret = -ENOSYS;
-  off_t  offset, bytes_to_read;
+  off_t  offset;
+  off_t  bytes_to_read;
   struct mtdconfig_header_s hdr;
 
   /* Allocate a temp block buffer */
@@ -1553,6 +1567,10 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
 
             ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
                                       pdata->configdata, bytes_to_read);
+            if (ret < 0)
+              {
+                break;
+              }
 
             /* Set other return data items */
 
@@ -1566,7 +1584,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
           }
         else
           {
-            ret = - ENOENT;
+            ret = -ENOENT;
           }
 
         break;
@@ -1576,7 +1594,13 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
 
         pdata = (FAR struct config_data_s *)arg;
 
-        mtdconfig_readbytes(dev, dev->readoff, (uint8_t *) &hdr, sizeof(hdr));
+        ret = mtdconfig_readbytes(dev, dev->readoff, (FAR uint8_t *)&hdr,
+                                  sizeof(hdr));
+        if (ret < 0)
+          {
+            break;
+          }
+
         dev->readoff = mtdconfig_findnextentry(dev, dev->readoff, &hdr, 0);
 
         /* Test if the config item is valid */
@@ -1599,6 +1623,10 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
 
             ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
                                       pdata->configdata, bytes_to_read);
+            if (ret < 0)
+              {
+                break;
+              }
 
 #ifdef CONFIG_MTD_CONFIG_NAMED
             strcpy(pdata->name, hdr.name);
@@ -1610,7 +1638,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
           }
         else
           {
-            ret = - ENOENT;
+            ret = -ENOENT;
           }
 
         break;
