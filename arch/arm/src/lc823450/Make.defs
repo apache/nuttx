@@ -140,11 +140,7 @@ CHIP_CSRCS += lc823450_adc.c
 endif
 
 ifeq ($(CONFIG_LC823450_IPL2),y)
-ifeq ($(CONFIG_LC823450_SPIFLASH_BOOT),y)
-CHIP_CSRCS += lc823450_spif_ipl2.c
-else
 CHIP_CSRCS += lc823450_ipl2.c
-endif
 endif
 
 ifeq ($(CONFIG_DVFS),y)
@@ -155,10 +151,6 @@ endif
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += lc823450_pminitialize.c
 CHIP_CSRCS += lc823450_sleep.c
-endif
-
-ifeq ($(CONFIG_LC823450_SPIFI_RAMFAT), y)
-CHIP_CSRCS += lc823450_ramfat.c
 endif
 
 ifeq ($(CONFIG_SMP), y)

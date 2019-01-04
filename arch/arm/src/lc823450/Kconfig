@@ -42,6 +42,9 @@ if LC823450_SPIFI
 config LC823450_SPIFI_QUADIO
 	bool "SPIFI 4bit access"
 	default y
+config LC823450_SPIFI_BOOT
+	bool "Boot from an external SPI flash"
+	default n
 endif
 
 config LC823450_SDIF

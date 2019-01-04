@@ -165,7 +165,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Return the heap settings */
 
-  *heap_start = (uintptr_t *)&_eronly; /* please see ld.script */
+#ifdef CONFIG_LC823450_SPIFI_BOOT
+  *heap_start = (uintptr_t *)&_ebss + 4096; /* see ld-spif-boot.script */
+#else
+  *heap_start = (uintptr_t *)&_eronly; /* see ld.script */
+#endif
+
   *heap_size  = SRAM1_END - (int)*heap_start;
 
   /* Colorize the heap for debug */

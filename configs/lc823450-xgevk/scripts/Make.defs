@@ -40,7 +40,11 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 ifeq ($(CONFIG_LC823450_IPL2),y)
   LDSCRIPT = ld-ipl2.script
 else
+ifeq ($(CONFIG_LC823450_SPIFI_BOOT),y)
+  LDSCRIPT = ld-spif-boot.script
+else
   LDSCRIPT = ld.script
+endif
 endif
 
 ifeq ($(WINTOOL),y)
