@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated December 3, 2018)
+NuttX TODO List (Last updated January 4, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ issues related to each board port.
 
 nuttx/:
 
- (15)  Task/Scheduler (sched/)
+ (16)  Task/Scheduler (sched/)
   (4)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
@@ -416,6 +416,71 @@ o Task/Scheduler (sched/)
                This change is primarily for aesthetic reasons.  If would
                reduce memory usage by a very small but probably
                insignificant amount.
+
+  Title:       DAEMONIZE ELF PROGRAM
+  Description: It is a common practice to "daemonize" to detach a task from
+               its parent.  This is used with NSH, for example, so that NSH
+               will stall, waiting in waitpid() for the child task to exit.
+
+               Daemonization is done to creating a new task which continues
+               to run while the origin task exits (sending the SIGCHLD
+               signal to the parent and awakening waitpid()).  In a pure
+               POSIX system, this is down with fork(), perhaps like:
+
+                 if (fork() != 0)
+                   {
+                     exit();
+                   }
+
+               but is usually down with task_create() in NuttX.  But when
+               task_create() is called from within an ELF program, a very
+               perverse situation is created.
+
+               The basic problem is address environments and task groups:
+               "Task groups" are emulations of Linux processes.  For the
+               case of the FLAT, ELF module, the address environment is
+               allocated memory that contains the ELF module.
+
+               When you call task_create() from the ELF program, you now
+               have two task groups running in the same address environment.
+               That is a perverse situation for which there is no standard
+               solution.  There is nothing comparable to that.  Even in
+               Linux, fork() creates another address environment (although
+               it is an exact copy of the original).
+
+               When the ELF program was created, the function exec() in
+               binfmt/binfmt_exec.c runs.  It sets up a call back that will
+               be invoked when the ELF program exits.
+
+               When ELF program exits, the address environment is destroyed
+               and the other task running in the same address environment is
+               running in stale memory and will eventually crash.
+
+               Nothing special happens when the other created task running
+               in the allocated address environment exits since has no such
+               call backs.
+
+               In order to make this work you would need logic like:
+
+               1. When the ELF task calls task_create(), it would need to:
+
+                 a. Detect that task_create() was called from an ELF program,
+                 b. increment a reference count on the address environment, and
+                 c. Set up the same exit hook for the newly created task.
+
+               2. Then when either the ELF program task or the created task
+                  in the same address environment exits, it would decrement
+                  the reference count.  When the last task exits, the reference
+                  count would go to zero and the address environement could be
+                  destroyed.
+
+               This is complex work and would take some effort and probably
+               requires redesign of existing code and interfaces to get a
+               proper, clean, modular solution.
+
+  Status:      Open
+  Priority:    Medium-Low.  A simple work-arounds when using NSH is to use
+               the '&' postfix to put the started ELF program into background.
 
 o SMP
   ^^^
@@ -2201,7 +2266,7 @@ o Graphics Subsystem (graphics/)
                derives from nxglib_copyrectangle() and all of those issues have been
                resolved in that file.
 
-               Other frambuffer rendering functions probably have similar issues.
+               Other framebuffer rendering functions probably have similar issues.
   Status:      Open
   Priority:    Low.  It is not surprising that there would be bugs in this logic:
                I have never encountered a hardware framebuffer with sub-byte pixel
