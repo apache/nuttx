@@ -1159,7 +1159,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
            */
 
           ff->ff_currentcluster = cluster;
-          if (position <= clustersize)
+          if (position < clustersize)
             {
               break;
             }
