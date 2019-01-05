@@ -420,10 +420,11 @@ o Task/Scheduler (sched/)
   Title:       DAEMONIZE ELF PROGRAM
   Description: It is a common practice to "daemonize" to detach a task from
                its parent.  This is used with NSH, for example, so that NSH
-               will stall, waiting in waitpid() for the child task to exit.
+               will not stall, waiting in waitpid() for the child task to
+               exit.
 
                Daemonization is done to creating a new task which continues
-               to run while the origin task exits (sending the SIGCHLD
+               to run while the original task exits (sending the SIGCHLD
                signal to the parent and awakening waitpid()).  In a pure
                POSIX system, this is down with fork(), perhaps like:
 
@@ -432,11 +433,11 @@ o Task/Scheduler (sched/)
                      exit();
                    }
 
-               but is usually down with task_create() in NuttX.  But when
+               but is usually done with task_create() in NuttX.  But when
                task_create() is called from within an ELF program, a very
-               perverse situation is created.
+               perverse situation is created:
 
-               The basic problem is address environments and task groups:
+               The basic problem involves address environments and task groups:
                "Task groups" are emulations of Linux processes.  For the
                case of the FLAT, ELF module, the address environment is
                allocated memory that contains the ELF module.
@@ -454,7 +455,7 @@ o Task/Scheduler (sched/)
 
                When ELF program exits, the address environment is destroyed
                and the other task running in the same address environment is
-               running in stale memory and will eventually crash.
+               then running in stale memory and will eventually crash.
 
                Nothing special happens when the other created task running
                in the allocated address environment exits since has no such
