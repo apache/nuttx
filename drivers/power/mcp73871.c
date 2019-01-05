@@ -93,13 +93,14 @@
 
 struct mcp73871_dev_s
 {
+  /* The common part of the battery driver visible to the upper-half driver */
+
+  FAR struct battery_charger_dev_s *dev;
+
   /* MCP73871 configuration helpers */
 
   FAR struct mcp73871_config_s *config;
 
-  /* The common part of the battery driver visible to the upper-half driver */
-
-  FAR const struct battery_charger_operations_s *ops; /* Battery operations */
   sem_t batsem;                /* Enforce mutually exclusive access */
 };
 
@@ -399,23 +400,34 @@ FAR struct battery_charger_dev_s *
 {
   FAR struct mcp73871_dev_s *priv;
 
-  /* Initialize the BQ2425x device structure */
+  /* Allocate the MCP73871 device structure */
 
-  priv = (FAR struct mcp73871_dev_s *)
-    kmm_zalloc(sizeof(struct mcp73871_dev_s));
-
-  if (priv)
+  priv = (FAR struct mcp73871_dev_s *)kmm_zalloc(sizeof(struct mcp73871_dev_s));
+  if (priv == NULL)
     {
-      /* Initialize the BQ2425x device structure */
-
-      nxsem_init(&priv->batsem, 0, 1);
-      priv->ops    = &g_mcp73871ops;
-      priv->config = config;
-
-      /* Enable the battery charge */
-
-      priv->config->set_chg_ce(true);
+      baterr("Error: Failed to allocate memory for mcp73871_dev_s!\n");
+      return NULL;
     }
+
+  priv->dev = (FAR struct battery_charger_dev_s *)
+              kmm_zalloc(sizeof(struct battery_charger_dev_s));
+
+  if (priv->dev == NULL)
+    {
+      batterr("Error: Failed to allocate memory for battery_charger_dev_s!\n");
+      kmm_free(priv);
+      return NULL;
+    }
+
+  /* Initialize the MCP73871 device structure */
+
+  nxsem_init(&priv->batsem, 0, 1);
+  priv->config    = config;
+  priv->dev->ops  = &g_mcp73871ops;
+
+  /* Enable the battery charge */
+
+  priv->config->set_chg_ce(true);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }

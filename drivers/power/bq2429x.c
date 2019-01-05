@@ -122,7 +122,7 @@ struct bq2429x_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_charger_operations_s *ops; /* Battery operations */
+  FAR const struct battery_charger_dev_s *dev; /* Battery device */
   sem_t batsem;                 /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half BQ2429X driver follow */
@@ -1251,58 +1251,74 @@ FAR struct battery_charger_dev_s *
   FAR struct bq2429x_dev_s *priv;
   int ret;
 
-  /* Initialize the BQ2429x device structure */
+  /* Allocate the BQ2429x device structure */
 
   priv = (FAR struct bq2429x_dev_s *)kmm_zalloc(sizeof(struct bq2429x_dev_s));
-  if (priv)
+  if (priv == NULL)
     {
-      /* Initialize the BQ2429x device structure */
+      baterr("ERROR: Failed to allocate memory for bq2429x_dev_s!\n");
+      return NULL;
+    }
 
-      nxsem_init(&priv->batsem, 0, 1);
-      priv->ops       = &g_bq2429xops;
-      priv->i2c       = i2c;
-      priv->addr      = addr;
-      priv->frequency = frequency;
+  priv->dev = (FAR struct battery_charger_dev_s *)
+              kmm_zalloc(sizeof(struct battery_charger_dev_s));
+  if (priv->dev == NULL)
+    {
+      baterr("ERROR: Failed to allocate memory for battery_charger_dev_s!\n");
+      kmm_free(priv);
+      return NULL;
+    }
 
-      /* Reset the BQ2429x */
+  /* Initialize the BQ2429x device structure */
 
-      ret = bq2429x_reset(priv);
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to reset the BQ2429x: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
+  nxsem_init(&priv->batsem, 0, 1);
+  priv->dev->ops  = &g_bq2429xops;
+  priv->i2c       = i2c;
+  priv->addr      = addr;
+  priv->frequency = frequency;
 
-      /* Disable watchdog otherwise BQ2429x returns to StandAlone mode */
+  /* Reset the BQ2429x */
 
-      ret = bq2429x_watchdog(priv, false);
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to disable BQ2429x watchdog: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
+  ret = bq2429x_reset(priv);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to reset the BQ2429x: %d\n", ret);
+      kmm_free(priv->dev);
+      kmm_free(priv);
+      return NULL;
+    }
 
-      /* Define the current that our power supply can offer to the charger. */
+  /* Disable watchdog otherwise BQ2429x returns to StandAlone mode */
 
-      ret = bq2429x_powersupply(priv, current);
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to set BQ2429x power supply input limit: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
+  ret = bq2429x_watchdog(priv, false);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to disable BQ2429x watchdog: %d\n", ret);
+      kmm_free(priv->dev);
+      kmm_free(priv);
+      return NULL;
+    }
 
-      /* Disable all interrupts. */
+  /* Define the current that our power supply can offer to the charger. */
 
-      ret = bq2429x_en_stat(priv, false);
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to disable BQ2429x interrupts: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
+  ret = bq2429x_powersupply(priv, current);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set BQ2429x power supply input limit: %d\n", ret);
+      kmm_free(priv->dev);
+      kmm_free(priv);
+      return NULL;
+    }
+
+  /* Disable all interrupts. */
+
+  ret = bq2429x_en_stat(priv, false);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to disable BQ2429x interrupts: %d\n", ret);
+      kmm_free(priv->dev);
+      kmm_free(priv);
+      return NULL;
     }
 
   return (FAR struct battery_charger_dev_s *)priv;
