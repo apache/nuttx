@@ -352,7 +352,7 @@ void generate_definitions(FILE *stream)
                   printf("#define %s 1\n", varname);
                 }
 
-              /* Or to '2' if it has the special value "m" */
+              /* Or to '2' if it has the special value 'm' */
 
               else if (strcmp(varval, "m") == 0)
                 {
