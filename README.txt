@@ -2147,6 +2147,8 @@ apps/
  |   |  `- README.txt
  |   |- symtab/
  |   |   `- README.txt
+ |   |- termcurses/
+ |   |   `- README.txt
  |   |- usbmsc/
  |   |  `- README.txt
  |   `- zmodem/
