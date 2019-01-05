@@ -1409,7 +1409,9 @@ void up_earlyserialinit(void)
 
   /* Disable all USARTS */
 
+#ifdef TTYS0_DEV
   sam_disableallints(TTYS0_DEV.priv, NULL);
+#endif
 #ifdef TTYS1_DEV
   sam_disableallints(TTYS1_DEV.priv, NULL);
 #endif
@@ -1460,7 +1462,9 @@ void up_serialinit(void)
 
   /* Register all USARTs */
 
+#ifdef TTYS0_DEV
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+#endif
 #ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif

@@ -49,6 +49,10 @@ config TELNET_CHARACTER_MODE
 		will echo a character which telnet client sent. By default, it works
 		in line mode.
 
+config TELNET_SUPPORT_NAWS
+	bool "Support NAWS (Negotiate About Window Size)"
+	default n
+
 endif # NETDEV_TELNET
 
 config ARCH_HAVE_NETDEV_STATISTICS
