@@ -343,13 +343,20 @@ void generate_definitions(FILE *stream)
                   printf("#undef %s\n", varname);
                 }
 
-              /* Simply define the configuration variable if it has the special
-               * value "y"
+              /* Simply define the configuration variable to '1' if it has the
+               * special value "y"
                */
 
               else if (strcmp(varval, "y") == 0)
                 {
                   printf("#define %s 1\n", varname);
+                }
+
+              /* Or to '2' if it has the special value "m" */
+
+              else if (strcmp(varval, "m") == 0)
+                {
+                  printf("#define %s 2\n", varname);
                 }
 
               /* Otherwise, use the value as provided */
