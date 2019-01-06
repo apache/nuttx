@@ -941,7 +941,11 @@ struct section_mapping_s
 
 	.macro	cp15_invalidate_tlb_bymva, vaddr
 	dsb
+#if defined(CONFIG_ARCH_CORTEXA8)
+	mcr		p15, 0, \vaddr, c8, c7, 1	/* TLBIMVA */
+#else
 	mcr		p15, 0, \vaddr, c8, c3, 3	/* TLBIMVAAIS */
+#endif
 	dsb
 	isb
 	.endm
@@ -970,7 +974,7 @@ struct section_mapping_s
 	.endm
 
 /************************************************************************************
- * Name: cp14_wrttb
+ * Name: cp15_wrttb
  *
  * Description:
  *   The ARMv7-aA architecture supports two translation tables.  This
@@ -984,7 +988,7 @@ struct section_mapping_s
  *
  ************************************************************************************/
 
-	.macro	cp14_wrttb, ttb, scratch
+	.macro	cp15_wrttb, ttb, scratch
 	mcr		p15, 0, \ttb, c2, c0, 0
 	nop
 	nop
@@ -1220,7 +1224,11 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
   __asm__ __volatile__
     (
       "\tdsb\n"
+#if defined(CONFIG_ARCH_CORTEXA8)
+      "\tmcr p15, 0, %0, c8, c7, 1\n" /* TLBIMVA */
+#else
       "\tmcr p15, 0, %0, c8, c3, 3\n" /* TLBIMVAAIS */
+#endif
       "\tdsb\n"
       "\tisb\n"
       :
@@ -1260,7 +1268,7 @@ static inline void cp15_wrdacr(unsigned int dacr)
 }
 
 /************************************************************************************
- * Name: cp14_wrttb
+ * Name: cp15_wrttb
  *
  * Description:
  *   The ARMv7-aA architecture supports two translation tables.  This
@@ -1274,7 +1282,7 @@ static inline void cp15_wrdacr(unsigned int dacr)
  *
  ************************************************************************************/
 
-static inline void cp14_wrttb(unsigned int ttb)
+static inline void cp15_wrttb(unsigned int ttb)
 {
   __asm__ __volatile__
     (
