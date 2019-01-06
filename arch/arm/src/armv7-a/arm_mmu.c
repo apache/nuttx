@@ -82,7 +82,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 
   /* Invalidate the TLB cache associated with virtual address range */
 
-  mmu_invalidate_region(vaddr, 1024*1024);
+  mmu_invalidate_region(vaddr, SECTION_SIZE);
 }
 #endif
 
@@ -117,7 +117,7 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
 
   /* Invalidate the TLB cache associated with virtual address range */
 
-  mmu_invalidate_region(vaddr & PMD_PTE_PADDR_MASK, 1024*1024);
+  mmu_invalidate_region(vaddr & PMD_PTE_PADDR_MASK, SECTION_SIZE);
 }
 #endif
 
@@ -215,7 +215,7 @@ void mmu_l1_map_region(const struct section_mapping_s *mapping)
 void mmu_invalidate_region(uint32_t vstart, size_t size)
 {
   uint32_t vaddr = vstart & 0xfffff000;
-  uint32_t vend  = vaddr + size;
+  uint32_t vend  = vstart + size;
 
   /* Loop, invalidating regions */
 
