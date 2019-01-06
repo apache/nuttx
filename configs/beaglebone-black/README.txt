@@ -1,0 +1,191 @@
+README
+======
+
+  This directory contains the port of NuttX to the Beaglebone Black board
+  See http://beagleboard.org for information about Beaglebone Black. This
+  board is based around the TI AM335x Sitara Cortex-A8 CPU.
+  This port was developed on the rev. C of the board:
+
+  Beaglebone Black (See http://beagleboard.org/black)
+
+    ITEMS                DETAILS
+    -------------------- ---------------------------------------------------
+    CPU                  1GHz ARM Cortex-A8
+    GPU                  SG530 3D, 20M Polygons/S
+    DRAM                 512MB DDR3 800MHz
+    Onboard Storage      4GB, 8bit Embedded MMC, microSD card (TF) slot for up to 32GB
+    Video Output         HDMI
+    Extension Interface  2.54mm Headers, 92 pins
+    Network interface    10/100Mbps RJ45
+    Power                5V, 1000mA
+    Overall Size         3.4" X 2.15"
+
+  Main features of the TI AM335x Sitara
+  (See http://www.ti.com/product/am3358):
+
+  CPU
+    - ARM Cortex-A8
+    - 32KB I-Cache
+    - 32KB D-Cache
+    - 256KB L2 Cache with ECC
+
+  FPU
+    - NEON SIMD Coprocessor
+
+  Memory
+    - 176KB of On-Chip Boot ROM
+    - 64KB of Dedicated RAM
+    - 64KB of General-Purpose On-Chip Memory Controller (OCMC) RAM
+    - 16-bit DDR2/DDR3
+    - Memory capacity up to 8G bits
+    - 8-Bit and 16-Bit Asynchronous Memory Interface with up to Seven Chip Selects (NAND, NOR, Muxed-NOR, SRAM)
+
+  Boot Devices
+    - NAND Flash
+    - SPI NOR Flash
+    - SD Card
+    - UART
+
+
+TODO:
+
+Contents
+========
+
+  - Beaglebone black Rev.C Connectors
+  - Serial Console
+  - LEDs
+  - Buttons
+  - JTAG
+  - Booting NuttX from an SD card
+  - Configurations
+
+Beaglebone black Rev.C Connectors
+=====================
+
+Serial Console
+==============
+
+  By default, the serial console will be provided on UART0 in all of these
+  configurations.
+
+LEDs
+====
+
+  The Beaglebone black Rev. C has four blue LEDs; three can be controlled from software.
+  Two are tied to ground and, hence, illuminated by driving the output pins to a high
+  value:
+
+    1. LED0 GPMC_A5   GPMC_A5/GMII2_TXD0/RGMII2_TD0/RMII2_TXD0/GPMC_A21/PR1_MII1_RXD3/eQEP1B_IN/GPIO1_21
+    2. LED1 GPMC_A6   GPMC_A6/GMII2_TXCLK/RGMII2_TCLK/MMC2_DAT4/GPMC_A22/PR1_MII1_RXD2/eQEP1_INDEX/GPIO1_22
+    3. LED2 GPMC_A7   GPMC_A7/GMII2_RXCLK/RGMII2_RCLK/MMC2_DAT5/GPMC_A23/PR1_MII1_RXD1/eQEP1_STROBE/GPIO1_23
+    4. LED3 GPMC_A8   GPMC_A8/GMII2_RXD3/RGMII2_RD3/MMC2_DAT6/GPMC_A24/PR1_MII1_RXD0/MCASP0_ACLKX/GPIO1_24
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/am335x_leds.c. The LEDs are used to encode OS-related
+  events as follows:
+
+    SYMBOL            Meaning                      LED state
+                                               LED1 LED3 LED4
+    ----------------- -----------------------  ---- ---- ------------
+    LED_STARTED       NuttX has been started   ON   OFF  OFF
+    LED_HEAPALLOCATE  Heap has been allocated  OFF  ON   OFF
+    LED_IRQSENABLED   Interrupts enabled       ON   ON   OFF
+    LED_STACKCREATED  Idle stack created       ON   ON   OFF
+    LED_INIRQ         In an interrupt          N/C  N/C  Soft glow
+    LED_SIGNAL        In a signal handler      N/C  N/C  Soft glow
+    LED_ASSERTION     An assertion failed      N/C  N/C  Soft glow
+    LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
+    LED_IDLE          MCU is is sleep mode         Not used
+
+  After booting, LED1 and 3 are not longer used by the system and can be used for
+  other purposes by the application (Of course, all LEDs are available to the
+  application if CONFIG_ARCH_LEDS is not defined.
+
+Buttons
+=======
+
+JTAG
+====
+
+Booting NuttX from an SD card
+=============================
+
+  These are the steps to get U-Boot booting from SD Card:
+
+    1. Stop Beaglebone Black boot process in U-Boot.
+
+    2. Insert a FLASH stick into host pc and format FAT32 FS.
+
+    3. Copy nuttx.bin into FLASH stick root.
+
+    4. Remove the FLASH stick from the host pc.  Insert into the Beaglecone Black
+       microSD slot.  Load Nuttx into memory and run
+
+       U-Boot# load mmc 0 0x8a000000 nuttx.bin
+       U-Boot# go 0x8a000000
+
+Configurations
+==============
+
+  Information Common to All Configurations
+  ----------------------------------------
+  Each Beaglebone Black configuration is maintained in a sub-directory and
+  can be selected as follow:
+
+    tools/configure.sh [OPTIONS] beaglebone-black/<subdir>
+
+  Where [OPTIONS] include -l to configure for a Linux host platform and
+  -c means to configure for a Windows Cygwin host platform.  -h will give
+  you the list of all options.
+
+  Before building, make sure the PATH environment variable includes the
+  correct path to the directory than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       see additional README.txt files in the NuttX tools repository.
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output on UART0.
+
+  3. All of these configurations use the Code Sourcery for Windows toolchain
+     (unless stated otherwise in the description of the configuration).  That
+     toolchain selection can easily be reconfigured using 'make menuconfig'.
+     Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y                   : Microsoft Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin or other POSIX environment
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+  Configuration Sub-directories
+  -----------------------------
+
+  nsh:
+
+    This configuration directory provide the NuttShell (NSH).  There are
+
+    STATUS:
+      Work in progress. Till now it is possible to pass arm_boot(), but Prefetch abort
+      is met when devnull_register() call is done. Have no idea why. I was able to trace
+      down to _inode_search() call. If I put any debug statement like "up_lowputc('0');"
+      right after "desc->node    = node;" statement at line 425 the code does not crash.

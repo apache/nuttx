@@ -1,0 +1,251 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_AM335X
+
+comment "AM335x Configuration Options"
+
+choice
+	prompt "TI AM335X Chip Selection"
+	default ARCH_CHIP_AM3358
+
+config ARCH_CHIP_AM3358
+	bool "AM3358"
+
+endchoice
+
+menu "TI AM335X Peripheral Support"
+
+config AM335X_UART0
+	bool "UART 0"
+	default n
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_UART1
+	bool "UART 1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_UART2
+	bool "UART 2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_UART3
+	bool "UART 3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_UART4
+	bool "UART 4"
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_UART5
+	bool "UART 5"
+	default n
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config AM335X_DMTIMER0
+	bool "Timer 0"
+	default n
+
+config AM335X_DMTIMER2
+	bool "Timer 2"
+	default n
+
+config AM335X_DMTIMER3
+	bool "Timer 3"
+	default n
+
+config AM335X_DMTIMER4
+	bool "Timer 4"
+	default n
+
+config AM335X_DMTIMER5
+	bool "Timer 5"
+	default n
+
+config AM335X_DMTIMER6
+	bool "Timer 6"
+	default n
+
+config AM335X_DMTIMER7
+	bool "Timer 7"
+	default n
+
+config AM335X_IRQ_WD
+	bool "Watchdog"
+	default n
+
+config AM335X_EDMA
+	bool "Enhanced Direct Memory Access"
+	default n
+
+config AM335X_GPIO
+	bool "GPIO"
+	default n
+
+config AM335X_TSC
+	bool "Touchscreen Controller"
+	default n
+
+config AM335X_LCDC
+	bool "LCD Controller"
+	default n
+
+config AM335X_CPSW
+	bool "Ethernet subsustem"
+	default n
+
+config AM335X_PWMSS
+	bool "Pulse-Width Modulation Subsystem"
+	default n
+
+config AM335X_USB0
+	bool "USB 0"
+	default n
+
+config AM335X_USB1
+	bool "USB 1"
+	default n
+
+config AM335X_MMCHS0
+	bool "MMC/SD/SDIO0 High Speed Host Controller 0"
+	default n
+
+config AM335X_MMCHS1
+	bool "MMC/SD/SDIO0 High Speed Host Controller 1"
+	default n
+
+config AM335X_MMCHS2
+	bool "MMC/SD/SDIO0 High Speed Host Controller 2"
+	default n
+
+config AM335X_I2C0
+	bool "Multi-master I2C Controller 0"
+	default n
+
+config AM335X_I2C0
+	bool "Multi-master I2C Controller 1"
+	default n
+
+config AM335X_I2C0
+	bool "Multi-master I2C Controller 2"
+	default n
+
+config AM335X_MCASP0
+	bool "Multichannel Audio Serial Port 0"
+	default n
+
+config AM335X_MCASP1
+	bool "Multichannel Audio Serial Port 1"
+	default n
+
+config AM335X_DCAN0
+	bool "DCAN Bus 0 Controller"
+	default n
+
+config AM335X_DCAN1
+	bool "DCAN Bus 1 Controller"
+	default n
+
+config AM335X_MCSPI0
+	bool "MCSPI 0"
+	default n
+
+config AM335X_MCSPI1
+	bool "MCSPI 1"
+	default n
+
+config AM335X_IRQ_PERFMU
+	bool "Performance monitor"
+	default n
+
+config AM335X_SGX
+	bool "Graphics Accelerator"
+	default n
+
+endmenu
+
+config AM335X_GPIO_IRQ
+	bool "GPIO interrupts"
+	default n
+	---help---
+		Select to enable support for GPIO interrupts.  These will
+		be handled through a second level of interrupt decoding and will
+		otherwise appear as any other interrupt.
+
+choice
+	prompt "Boot device"
+	default AM335X_BOOT_SDCARD
+
+config AM335X_BOOT_NAND
+	bool "NAND FLASH"
+
+config AM335X_BOOT_SPINOR
+	bool "SPI NOR FLASH"
+
+config AM335X_BOOT_SDCARD
+	bool "SD card"
+
+config AM335X_BOOT_USB
+	bool "USB"
+
+endchoice # Boot device
+
+config AM335X_DDR_MAPOFFSET
+	int "Installed SDRAM offset"
+	default 0
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus AM335X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically AM335X_MAP_OFFSET is zero and AM335X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
+config AM335X_DDR_MAPSIZE
+	int "Installed SDRAM size"
+	default 536870912
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus AM335X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically AM335X_MAP_OFFSET is zero and AM335X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
+endif # ARCH_CHIP_AM335X
