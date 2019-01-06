@@ -275,9 +275,11 @@ void up_disable_irq(int irq)
 {
   if (irq < AM335X_IRQ_NINT)
     {
-      //__asm__ __volatile__ ("\tdsb");
+      __asm__ __volatile__ ("\tdsb");
+
       /* Disable interrupt on INTC */
-      //putreg32(INTC_MIR_SET(irq), AM335X_INTC_MIR_SET(irq));
+
+      putreg32(INTC_MIR_SET(irq), AM335X_INTC_MIR_SET(irq));
     }
 #ifdef CONFIG_AM335X_GPIO_IRQ
   else
@@ -301,9 +303,11 @@ void up_enable_irq(int irq)
 {
   if (irq < AM335X_IRQ_NINT)
     {
-      //__asm__ __volatile__ ("\tdsb");
+      __asm__ __volatile__ ("\tdsb");
+
       /* Enable interrupt on INTC */
-      //putreg32(INTC_MIR_CLEAR(irq), AM335X_INTC_MIR_CLEAR(irq));
+
+      putreg32(INTC_MIR_CLEAR(irq), AM335X_INTC_MIR_CLEAR(irq));
     }
 #ifdef CONFIG_AM335X_GPIO_IRQ
   else
