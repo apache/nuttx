@@ -2181,6 +2181,9 @@ o File system / Generic drivers (fs/, drivers/)
                space at the seek position.  Seeking beyond the end of the file
                has the side effect of extending the file.
 
+               [NOTE: This automatic extension of the file cluster allocation
+                is probably unnecessary and another issue of its own.]
+
                For example, suppose you have a cluster size that is 4096 bytes
                and a file that is 8192 bytes long.  Then the file will consist
                of 2 allocated clusters at offsets 0 through 8191.
