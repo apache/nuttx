@@ -1117,8 +1117,8 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
+  FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
 #endif
   int ret;
