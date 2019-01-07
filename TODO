@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 4, 2019)
+NuttX TODO List (Last updated January 7, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -23,7 +23,7 @@ nuttx/:
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
  (11)  Libraries (libs/libc/, libs/libm/)
- (11)  File system/Generic drivers (fs/, drivers/)
+ (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
@@ -2167,6 +2167,110 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.
+
+  Title:       FAT:  CAN'T SEE TO END OF FILE IF READ-ONLY
+  Description: If the size of the underlying file is an exact multiple of the
+               FAT cluster size, then you cannot seek to the end of the file
+               if the file was opened read-only.  In that case, the FAT lseek
+               logic will return ENOSPC.
+
+               This is because seeking to the end of the file involves seeking
+               to an offset that is the size of the file (number of bytes
+               allocated for file + 1).  In order to seek to a position, the
+               current FAT implementation insists that there be allocated file
+               space at the seek position.  Seeking beyond the end of the file
+               has the side effect of extending the file.
+
+               For example, suppose you have a cluster size that is 4096 bytes
+               and a file that is 8192 bytes long.  Then the file will consist
+               of 2 allocated clusters at offsets 0 through 8191.
+
+               If the file is opened O_RDWR or O_RDONLY, then the statement:
+
+                 offset = lseek(fd, 0, SET_SEEK);
+
+               will seek to offset 8192 which beyond the end of the file so a
+               new (empty) cluster will be added.  Now the file consists of
+               three clusters and the file position refers to the first byte of
+               the third cluster.
+
+               If the file is open O_RDONLY, however, then that same lseek
+               statement will fail.  It is not possible to seek to position
+               8192.  That is beyond the end of the allocated cluster chain
+               and since the file is read-only, it is not permitted to extend
+               the cluster chain.  Hence, the error ENOSPC is returned.
+
+               This code snippet will duplicate the problem. It assumes a
+               cluster size of 512 and that /tmp is a mounted FAT file system:
+
+                 #define BUFSIZE 1024 //8192, depends on cluster size
+                 static char buffer[BUFSIZE];
+
+                 #if defined(BUILD_MODULE)
+                 int main(int argc, FAR char *argv[])
+                 #else
+                 int hello_main(int argc, char *argv[])
+                 #endif
+                 {
+                   ssize_t nwritten;
+                   off_t pos;
+                   int fd;
+                   int ch;
+                   int i;
+
+                   for (i = 0, ch = ' '; i < BUFSIZE; i++)
+                     {
+                       buffer[i] = ch;
+
+                       if (++ch == 0x7f)
+                         {
+                           ch = ' ';
+                         }
+                     }
+
+                   fd = open("/tmp/testfile", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                   if (fd < 0)
+                     {
+                       printf("open failed: %d\n", errno);
+                       return 1;
+                     }
+
+                   nwritten = write(fd, buffer, BUFSIZE);
+                   if (nwritten < 0)
+                     {
+                       printf("write failed: %d\n", errno);
+                       return 1;
+                     }
+
+                   close(fd);
+
+                   fd = open("/tmp/testfile", O_RDONLY);
+                   if (fd < 0)
+                     {
+                       printf("open failed: %d\n", errno);
+                       return 1;
+                     }
+
+                   pos = lseek(fd, 0, SEEK_END);
+                   if (pos < 0)
+                     {
+                       printf("lseek failed: %d\n", errno);
+                       return 1;
+                     }
+                   else if (pos != BUFSIZE)
+                     {
+                       printf("lseek failed: %d\n", pos);
+                       return 1;
+                     }
+
+                   close(fd);
+                   return 0;
+                 }
+
+  Status:      Open
+  Priority:    Medium.  Although this is a significant design error, the problem
+               has existed for 11 years without being previously reported.  I
+               conclude, then that the exposure from this problem is not great.
 
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
