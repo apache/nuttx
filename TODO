@@ -2168,7 +2168,7 @@ o File system / Generic drivers (fs/, drivers/)
   Priority:    Medium.  It is certain a file system failure, but I think that
                the exposure in real world uses cases is very small.
 
-  Title:       FAT:  CAN'T SEE TO END OF FILE IF READ-ONLY
+  Title:       FAT:  CAN'T SEEK TO END OF FILE IF READ-ONLY
   Description: If the size of the underlying file is an exact multiple of the
                FAT cluster size, then you cannot seek to the end of the file
                if the file was opened read-only.  In that case, the FAT lseek
@@ -2185,7 +2185,7 @@ o File system / Generic drivers (fs/, drivers/)
                and a file that is 8192 bytes long.  Then the file will consist
                of 2 allocated clusters at offsets 0 through 8191.
 
-               If the file is opened O_RDWR or O_RDONLY, then the statement:
+               If the file is opened O_RDWR or O_WRONLY, then the statement:
 
                  offset = lseek(fd, 0, SET_SEEK);
 
