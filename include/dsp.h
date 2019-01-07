@@ -202,7 +202,7 @@ struct pid_controller_s
   float       KP;               /* Proportional coefficient */
   float       KI;               /* Integral coefficient */
   float       KD;               /* Derivative coefficient */
-  float       part[3]           /* 0 - proporitonal part
+  float       part[3];          /* 0 - proporitonal part
                                  * 1 - integral part
                                  * 2 - derivative part
                                  */
