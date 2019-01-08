@@ -88,4 +88,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_AM335X_IRQ_H */
-
