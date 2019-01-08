@@ -2275,6 +2275,11 @@ o File system / Generic drivers (fs/, drivers/)
                has existed for 11 years without being previously reported.  I
                conclude, then that the exposure from this problem is not great.
 
+               Why would you seek to the end of a file using a read=only file
+               descriptor anyway?  Only one reason I can think of:  To get the
+               size of the file.  The alternative (and much more efficient) way
+               to do that is via stat().
+
 o Graphics Subsystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
