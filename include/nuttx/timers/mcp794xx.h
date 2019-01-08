@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/timers/mcp7941x.h
+ * include/nuttx/timers/mcp794xx.h
  *
  *   Copyright (C) 2019 Abdelatif Guettouche. All rights reserved.
  *   Author: 2019 Abdelatif Guettouche <abdelatif.guettouche@gmail.com>
@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_TIMERS_MCP7941X_H
-#define __INCLUDE_NUTTX_TIMERS_MCP7941X_H
+#ifndef __INCLUDE_NUTTX_TIMERS_MCP794XX_H
+#define __INCLUDE_NUTTX_TIMERS_MCP794XX_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +46,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RTC_MCP7941X
+#ifdef CONFIG_RTC_MCP794XX
 
 /****************************************************************************
  * Public Function Prototypes
@@ -61,14 +61,14 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: mcp7941x_rtc_initialize
+ * Name: mcp794xx_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This
  *   function is called once during the OS initialization sequence by board-
  *   specific logic.
  *
- *   After mcp7941x_rtc_initialize() is called, the OS function
+ *   After mcp794xx_rtc_initialize() is called, the OS function
  *   clock_synchronize() should also be called to synchronize the system
  *   timer to a hardware RTC.  That operation is normally performed
  *   automatically by the system during clock initialization.  However, when
@@ -76,9 +76,9 @@ extern "C"
  *   synchronize the system timer to the RTC when the RTC becomes available.
  *
  * Input Parameters:
- *   i2c  - An instance of the I2C interface used to access the MCP7941x
+ *   i2c  - An instance of the I2C interface used to access the MCP794XX
  *          device
- *   addr - The (7-bit) I2C address of the MCP7941x device
+ *   addr - The (7-bit) I2C address of the MCP794XX device
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
@@ -86,12 +86,12 @@ extern "C"
  ****************************************************************************/
 
 struct i2c_master_s; /* Forward reference */
-int mcp7941x_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
+int mcp794xx_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_RTC_MCP7941X */
-#endif  /* __INCLUDE_NUTTX_TIMERS_MCP7941X_H */
+#endif /* CONFIG_RTC_MCP794XX */
+#endif  /* __INCLUDE_NUTTX_TIMERS_MCP794XX_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/timers/mcp7941x.c
+ * drivers/timers/mcp794xx.c
  *
  *   Copyright (C) 2019 Abdelatif Guettouche. All rights reserved.
  *   Author: 2019 Abdelatif Guettouche <abdelatif.guettouche@gmail.com>
@@ -50,11 +50,11 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/timers/mcp7941x.h>
+#include <nuttx/timers/mcp794xx.h>
 
-#include "mcp7941x.h"
+#include "mcp794xx.h"
 
-#ifdef CONFIG_RTC_MCP7941X
+#ifdef CONFIG_RTC_MCP794XX
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,24 +71,24 @@
 #  error CONFIG_RTC_HIRES must NOT be set with this driver
 #endif
 
-#ifndef CONFIG_MCP7941X_I2C_FREQUENCY
-#  error CONFIG_MCP7941X_I2C_FREQUENCY is not configured
-#  define CONFIG_MCP7941X_I2C_FREQUENCY 400000
+#ifndef CONFIG_MCP794XX_I2C_FREQUENCY
+#  error CONFIG_MCP794XX_I2C_FREQUENCY is not configured
+#  define CONFIG_MCP794XX_I2C_FREQUENCY 400000
 #endif
 
-#if CONFIG_MCP7941X_I2C_FREQUENCY > 400000
-#  error CONFIG_MCP7941X_I2C_FREQUENCY is out of range
+#if CONFIG_MCP794XX_I2C_FREQUENCY > 400000
+#  error CONFIG_MCP794XX_I2C_FREQUENCY is out of range
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the MCP7941x chip.
+/* This structure describes the state of the MCP794XX chip.
  * Only a single RTC is supported.
  */
 
-struct mcp7941x_dev_s
+struct mcp794xx_dev_s
 {
   FAR struct i2c_master_s *i2c;  /* Contained reference to the I2C bus driver. */
   uint8_t addr;                  /* The I2C device address. */
@@ -106,9 +106,9 @@ volatile bool g_rtc_enabled = false;
  * Private Data
  ****************************************************************************/
 
-/* The state of the MCP7941x chip.  Only a single RTC is supported */
+/* The state of the MCP794XX chip.  Only a single RTC is supported */
 
-static struct mcp7941x_dev_s g_mcp7941x;
+static struct mcp794xx_dev_s g_mcp794xx;
 
 /****************************************************************************
  * Private Functions
@@ -200,14 +200,14 @@ static int rtc_bcd2bin(uint8_t value)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mcp7941x_rtc_initialize
+ * Name: mcp794xx_rtc_initialize
  *
  * Description:
  *   Initialize the hardware RTC per the selected configuration.  This
  *   function is called once during the OS initialization sequence by board-
  *   specific logic.
  *
- *   After mcp7941x_rtc_initialize() is called, the OS function
+ *   After mcp794xx_rtc_initialize() is called, the OS function
  *   clock_synchronize() should also be called to synchronize the system
  *   timer to a hardware RTC.  That operation is normally performed
  *   automatically by the system during clock initialization.  However, when
@@ -215,21 +215,21 @@ static int rtc_bcd2bin(uint8_t value)
  *   synchronize the system timer to the RTC when the RTC becomes available.
  *
  * Input Parameters:
- *   i2c  - An instance of the I2C interface used to access the MCP7941x
+ *   i2c  - An instance of the I2C interface used to access the MCP794XX
  *          device
- *   addr - The (7-bit) I2C address of the MCP7941x device
+ *   addr - The (7-bit) I2C address of the MCP794XX device
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int mcp7941x_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr)
+int mcp794xx_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr)
 {
   /* Remember the i2c device and claim that the RTC is enabled */
 
-  g_mcp7941x.i2c  = i2c;
-  g_mcp7941x.addr = addr;
+  g_mcp794xx.i2c  = i2c;
+  g_mcp794xx.addr = addr;
   g_rtc_enabled   = true;
   return OK;
 }
@@ -292,10 +292,10 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * The chip increments the address to read from after each read.
    */
 
-  secaddr = MCP7941X_REG_TIME_SEC;
+  secaddr = MCP794XX_REG_RTCSEC;
 
-  msg[0].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[0].addr      = g_mcp7941x.addr;
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
   msg[0].flags     = I2C_M_NOSTOP;
   msg[0].buffer    = &secaddr;
   msg[0].length    = 1;
@@ -304,22 +304,22 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * (Seconds, minutes, hours, wday, date, month and year)
    */
 
-  msg[1].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[1].addr      = g_mcp7941x.addr;
+  msg[1].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[1].addr      = g_mcp794xx.addr;
   msg[1].flags     = I2C_M_READ;
   msg[1].buffer    = buffer;
   msg[1].length    = 7;
 
   /* Read the seconds register again */
 
-  msg[2].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[2].addr      = g_mcp7941x.addr;
+  msg[2].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[2].addr      = g_mcp794xx.addr;
   msg[2].flags     = I2C_M_NOSTOP;
   msg[2].buffer    = &secaddr;
   msg[2].length    = 1;
 
-  msg[3].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[3].addr      = g_mcp7941x.addr;
+  msg[3].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[3].addr      = g_mcp794xx.addr;
   msg[3].flags     = I2C_M_READ;
   msg[3].buffer    = &seconds;
   msg[3].length    = 1;
@@ -330,46 +330,46 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   do
     {
-      ret = I2C_TRANSFER(g_mcp7941x.i2c, msg, 4);
+      ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 4);
       if (ret < 0)
         {
           rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
-  while ((buffer[0] & MCP7941X_TIME_SEC_BCDMASK) >
-         (seconds & MCP7941X_TIME_SEC_BCDMASK));
+  while ((buffer[0] & MCP794XX_RTCSEC_BCDMASK) >
+         (seconds & MCP794XX_RTCSEC_BCDMASK));
 
   /* Format the return time */
   /* Return seconds (0-59) */
 
-  tp->tm_sec = rtc_bcd2bin(buffer[0] & MCP7941X_TIME_SEC_BCDMASK);
+  tp->tm_sec = rtc_bcd2bin(buffer[0] & MCP794XX_RTCSEC_BCDMASK);
 
   /* Return minutes (0-59) */
 
-  tp->tm_min = rtc_bcd2bin(buffer[1] & MCP7941X_TIME_MIN_BCDMASK);
+  tp->tm_min = rtc_bcd2bin(buffer[1] & MCP794XX_RTCMIN_BCDMASK);
 
   /* Return hour (0-23).  This assumes 24-hour time was set. */
 
-  tp->tm_hour = rtc_bcd2bin(buffer[2] & MCP7941X_TIME_HOUR_BCDMASK);
+  tp->tm_hour = rtc_bcd2bin(buffer[2] & MCP794XX_RTCHOUR_BCDMASK);
 
  #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
-  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & MCP7941X_TIME_DAY_BCDMASK) - 1;
+  tp->tm_wday = (rtc_bcd2bin(buffer[3]) & MCP794XX_RTCWKDAY_BCDMASK) - 1;
 #endif
 
   /* Return the day of the month (1-31) */
 
-  tp->tm_mday = rtc_bcd2bin(buffer[4] & MCP7941X_TIME_DATE_BCDMASK);
+  tp->tm_mday = rtc_bcd2bin(buffer[4] & MCP794XX_RTCDATE_BCDMASK);
 
   /* Return the month (0-11) */
 
-  tp->tm_mon = rtc_bcd2bin(buffer[5] & MCP7941X_TIME_MONTH_BCDMASK) - 1;
+  tp->tm_mon = rtc_bcd2bin(buffer[5] & MCP794XX_RTCMTH_BCDMASK) - 1;
 
   /* Return the years since 1900 */
 
-  tp->tm_year = rtc_bcd2bin(buffer[6] & MCP7941X_TIME_YEAR_BCDMASK);
+  tp->tm_year = rtc_bcd2bin(buffer[6] & MCP794XX_RTCYEAR_BCDMASK);
 
   rtc_dumptime(tp, "Returning");
   return OK;
@@ -440,11 +440,11 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Construct the message */
   /* Write starting with the seconds register */
 
-  buffer[0] = MCP7941X_REG_TIME_SEC;
+  buffer[0] = MCP794XX_REG_RTCSEC;
 
   /* Save seconds (0-59) converted to BCD. And set the ST. */
 
-  buffer[1] = rtc_bin2bcd(newtm.tm_sec) | MCP7941X_TIME_SEC_ST;
+  buffer[1] = rtc_bin2bcd(newtm.tm_sec) | MCP794XX_RTCSEC_ST;
 
   /* Save minutes (0-59) converted to BCD */
 
@@ -457,9 +457,9 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Save the day of the week (1-7) and enable VBAT. */
 
 #if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-  buffer[4] = rtc_bin2bcd(newtm.tm_wday + 1) | MCP7941X_TIME_DAY_VBATEN;
+  buffer[4] = rtc_bin2bcd(newtm.tm_wday + 1) | MCP794XX_RTCWKDAY_VBATEN;
 #else
-  buffer[4] = 1 | MCP7941X_TIME_DAY_VBATEN;
+  buffer[4] = 1 | MCP794XX_RTCWKDAY_VBATEN;
 #endif
 
   /* Save the day of the month (1-31) */
@@ -476,24 +476,24 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Setup the I2C message */
 
-  msg[0].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[0].addr      = g_mcp7941x.addr;
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
   msg[0].flags     = 0;
   msg[0].buffer    = buffer;
   msg[0].length    = 8;
 
   /* Read back the seconds register */
 
-  secaddr = MCP7941X_REG_TIME_SEC;
+  secaddr = MCP794XX_REG_RTCSEC;
 
-  msg[1].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[1].addr      = g_mcp7941x.addr;
+  msg[1].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[1].addr      = g_mcp794xx.addr;
   msg[1].flags     = I2C_M_NOSTOP;
   msg[1].buffer    = &secaddr;
   msg[1].length    = 1;
 
-  msg[2].frequency = CONFIG_MCP7941X_I2C_FREQUENCY;
-  msg[2].addr      = g_mcp7941x.addr;
+  msg[2].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[2].addr      = g_mcp794xx.addr;
   msg[2].flags     = I2C_M_READ;
   msg[2].buffer    = &seconds;
   msg[2].length    = 1;
@@ -504,17 +504,17 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   do
     {
-      ret = I2C_TRANSFER(g_mcp7941x.i2c, msg, 3);
+      ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 3);
       if (ret < 0)
         {
           rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
     }
-  while ((buffer[1] & MCP7941X_TIME_SEC_BCDMASK) >
-         (seconds & MCP7941X_TIME_SEC_BCDMASK));
+  while ((buffer[1] & MCP794XX_RTCSEC_BCDMASK) >
+         (seconds & MCP794XX_RTCSEC_BCDMASK));
 
   return OK;
 }
 
-#endif /* CONFIG_RTC_MCP7941X */
+#endif /* CONFIG_RTC_MCP794XX */
