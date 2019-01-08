@@ -1103,6 +1103,7 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Yes.. then signal the poll logic */
 
+      fds->revents |= (POLLRDNORM & fds->events);
       nxsem_post(fds->sem);
     }
 
