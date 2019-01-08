@@ -213,7 +213,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * is aligned to the MPU requirement.
    */
 
-  log2  = (int)mpu_log2regionfloor(ubase, usize);
+  log2  = (int)mpu_log2regionfloor(usize);
   DEBUGASSERT((SRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
@@ -231,7 +231,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-   stm32_mpu_uheap(ubase, usize);
+   stm32_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -275,7 +275,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * is aligned to the MPU requirement.
    */
 
-  log2  = (int)mpu_log2regionfloor(ubase, usize);
+  log2  = (int)mpu_log2regionfloor(usize);
   DEBUGASSERT((SRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
