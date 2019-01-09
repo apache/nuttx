@@ -65,7 +65,7 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_irq.c # stm32_dma_v1.c
+CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c # stm32_dma_v1.c
 CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c
 
 # Configuration-dependent STM32F0/L0 files
@@ -112,12 +112,8 @@ ifeq ($(CONFIG_STM32F0L0_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
 
-ifeq ($(CONFIG_STM32F0L0_SPI0),y)
+ifeq ($(CONFIG_STM32F0L0_SPI),y)
 CHIP_CSRCS += stm32_spi.c
-else
-ifeq ($(CONFIG_STM32F0L0_SPI1),y)
-CHIP_CSRCS += stm32_spi.c
-endif
 endif
 
 ifeq ($(CONFIG_PWM),y)

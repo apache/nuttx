@@ -313,7 +313,6 @@ int stm32_configgpio(uint32_t cfgset)
 
   if ((cfgset & GPIO_EXTI) != 0)
     {
-#if 0
       /* "In STM32 F1 the selection of the EXTI line source is performed through
        *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
        *  selection is done through the EXTIx bits in the SYSCFG_EXTICRx registers.
@@ -336,7 +335,6 @@ int stm32_configgpio(uint32_t cfgset)
       regval |= (((uint32_t)port) << shift);
 
       putreg32(regval, regaddr);
-#endif
     }
 
   leave_critical_section(flags);

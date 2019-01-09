@@ -87,6 +87,18 @@
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | \
                         GPIO_PIN13)
 
+/* NRF24L01
+ * CS  - PA8 (D7)
+ * CE  - PA9 (D8)
+ * IRQ - PC7 (D9)
+ */
+
+#define GPIO_NRF24L01_CS   (GPIO_OUTPUT | GPIO_SPEED_HIGH |           \
+                            GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN8)
+#define GPIO_NRF24L01_CE   (GPIO_OUTPUT | GPIO_SPEED_HIGH |             \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN9)
+#define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN7)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -94,5 +106,44 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ************************************************************************************/
+
+int stm32_bringup(void);
+
+/************************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32F0L0_SPI
+void stm32_spidev_initialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_wlinitialize
+ *
+ * Description:
+ *   Initialize NRF24L01 wireless interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_WL_NRF24L01
+int stm32_wlinitialize(void);
+#endif
 
 #endif /* __CONFIGS_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

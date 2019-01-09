@@ -172,14 +172,14 @@
 
 /* I2C */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_3
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_3
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* D15 - PB8 */
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* D14 - PB9 */
 
 /* SPI */
 
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
+#define GPIO_SPI1_MISO GPIO_SPI1_MISO_2 /* D12 - PA6 */
+#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_2 /* D11 - PA7 */
+#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1  /* D13 - PA5 */
 
 /* USART */
 
@@ -190,8 +190,6 @@
 
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
-
-/* COMP */
 
 /* DMA channels *************************************************************/
 /* ADC */

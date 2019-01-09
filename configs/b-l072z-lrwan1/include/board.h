@@ -158,7 +158,7 @@
 /* The Nucleo LO73RZ supports two buttons; only one button is controllable
  * by software:
  *
- *   B1 USER:  user button connected to the I/O PC13 of the STM32LO73RZ.
+ *   B1 USER:  user button connected to the I/O PB2/PA0 of the STM32LO73RZ.
  *   B2 RESET: push button connected to NRST is used to RESET the
  *             STM32LO73RZ.
  */
@@ -170,18 +170,49 @@
 
 /* Alternate function pin selections ****************************************/
 
-/* I2C */
-
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_3
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_3
-
-/* SPI */
-
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK GPIO_SPI1_SCK_1
+/* CMWX1ZZABZ-091 module pinout and internal connections
+ *
+ * STM32L072CZ | Function
+ * ------------+-----------
+ * PC0         | SX1276_CE (NRESET)
+ * PA7         | SX1276_MOSI
+ * PA6         | SX1276_MISO
+ * PB3         | SX1276_SCK
+ * PA15        | SX1276_NSS
+ * ?           | SX1276_DIO0
+ * ?           | SX1276_DIO2
+ * ?           | SX1276_DIO3
+ * PA5         | SX1276_DIO4 optional
+ * PA4         | SX1276_DIO5 optional
+ * ?           | CRF1
+ * ?           | CRF2
+ * ?           | CRF3
+ * PA3         | STLINK Virtual COM RX
+ * PA2         | STLINK Virtual COM TX
+ * PA10        | USART1_RX
+ * PA9         | USART1_TX
+ * PB15        | SPI2_MOSI
+ * PB14        | SPI2_MISO
+ * PB13        | SPI2_SCK
+ * PB12        | SPI2_NSS
+ * PB5         | LPTIM1_INI
+ * PB6         | LPTIM1_ETR
+ * PB7         | LPTIM1_IN2
+ * PB2         | LPTIM1_OUT / BUTTON
+ * PA0         | BUTTON (optional)
+ * PB9         | I2C1_SDA
+ * PB8         | I2C1_SCL
+ * PA12        | USB_DP optional / TCXO_VCC
+ * PA11        | USB_DM optional
+ *
+ */
 
 /* USART */
+
+/* USART1 */
+
+#define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
+#define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
 
 /* By default the USART2 is connected to STLINK Virtual COM Port:
  * USART2_RX - PA3
@@ -191,7 +222,28 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
 
-/* COMP */
+/* SPI */
+
+/* SPI1 is connected to SX1276 radio */
+
+#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_2 /* PA7 */
+#define GPIO_SPI1_MISO GPIO_SPI1_MOSI_2 /* PA6 */
+#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_2  /* PB3 */
+#define GPIO_SPI1_NSS  GPIO_SPI1_NSS_1  /* PA15 */
+
+/* SPI2  */
+
+#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1 /* PB15 */
+#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1 /* PB14 */
+#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_3  /* PB13 */
+#define GPIO_SPI2_NSS  GPIO_SPI2_NSS_1  /* PB12 */
+
+/* I2C */
+
+/* I2C1 */
+
+#define GPIO_I2C1_SDA  GPIO_I2C1_SDA_2 /* PB9 */
+#define GPIO_I2C1_SCLK GPIO_I2C1_SCL_2 /* PB8 */
 
 /* DMA channels *************************************************************/
 /* ADC */

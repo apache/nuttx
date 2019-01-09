@@ -83,14 +83,12 @@
 #define EXTI_COMP1               (1 << 21) /* EXTI line 21 is connected to the COMP1 (comparator) output */
 #define EXTI_COMP2               (1 << 22) /* EXTI line 22 is connected to the COMP2 (comparator) output */
 #define EXTI_I2C1                (1 << 23) /* EXTI line 23 is connected to the I2C1 wakeup */
-                                           /* EXTI line 24 is reserved (internally held low) */
+#define EXTI_I2C3                (1 << 24) /* EXTI line 24 is connected to the I2C3 wakeup */
 #define EXTI_USART1              (1 << 25) /* EXTI line 25 is connected to the USART1 wakeup */
 #define EXTI_USART2              (1 << 26) /* EXTI line 26 is connected to the USART2 wakeup */
-#define EXTI_CEC                 (1 << 27) /* EXTI line 27 is connected to the CEC wakeup */
-#define EXTI_USART3              (1 << 28) /* EXTI line 28 is connected to the USART3 wakeup */
-                                           /* EXTI line 29 is reserved (internally held low) */
-                                           /* EXTI line 30 is reserved (internally held low) */
-#define EXTI_VDDIO2              (1 << 31) /* EXTI line 31 is connected to the Vddio2 supply comparator */
+                                           /* EXTI line 27 is reserved */
+#define EXTI_LPUART1             (1 << 28) /* EXTI line 28 is connected to the LPUART wakeup */
+#define EXTI_LPTIM1              (1 << 29) /* EXTI line 29 is connected to the LPTIM1 wakeup */
 
 /* Interrupt mask register */
 
