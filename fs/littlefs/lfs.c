@@ -167,8 +167,9 @@ static int lfs_cache_cmp(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
                          lfs_size_t size)
 {
   FAR const uint8_t *data = buffer;
+  lfs_off_t i;
 
-  for (lfs_off_t i = 0; i < size; i++)
+  for (i = 0; i < size; i++)
     {
       uint8_t c;
       int err = lfs_cache_read(lfs, rcache, pcache, block, off + i, &c, 1);
@@ -190,7 +191,9 @@ static int lfs_cache_crc(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
                          FAR const lfs_cache_t *pcache, lfs_block_t block,
                          lfs_off_t off, lfs_size_t size, FAR uint32_t *crc)
 {
-  for (lfs_off_t i = 0; i < size; i++)
+  lfs_off_t i;
+
+  for (i = 0; i < size; i++)
     {
       uint8_t c;
       int err = lfs_cache_read(lfs, rcache, pcache, block, off + i, &c, 1);
@@ -547,9 +550,11 @@ static inline lfs_size_t lfs_entry_size(FAR const lfs_entry_t *entry)
 
 static int lfs_dir_alloc(FAR lfs_t *lfs, FAR lfs_dir_t *dir)
 {
+  int i;
+
   /* allocate pair of dir blocks */
 
-  for (int i = 0; i < 2; i++)
+  for (i = 0; i < 2; i++)
     {
       int err = lfs_alloc(lfs, &dir->pair[i]);
       if (err)
@@ -593,10 +598,11 @@ static int lfs_dir_fetch(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
   FAR const lfs_block_t tpair[2] = {pair[0], pair[1]};
   bool valid = false;
+  int i;
 
   /* check both blocks for the most recent revision */
 
-  for (int i = 0; i < 2; i++)
+  for (i = 0; i < 2; i++)
     {
       struct lfs_disk_dir test;
       uint32_t crc;
@@ -666,6 +672,9 @@ static int lfs_dir_fetch(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
                           FAR const struct lfs_region *regions, int count)
 {
+  FAR lfs_dir_t *d;
+  int i;
+
   /* increment revision count */
 
   dir->d.rev += 1;
@@ -673,7 +682,7 @@ static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
   /* keep pairs in order such that pair[0] is most recent */
 
   lfs_pairswap(dir->pair);
-  for (int i = 0; i < count; i++)
+  for (i = 0; i < count; i++)
     {
       dir->d.size += regions[i].newlen - regions[i].oldlen;
     }
@@ -710,7 +719,7 @@ static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
               return err;
             }
 
-          int i = 0;
+          i = 0;
           lfs_off_t oldoff = sizeof(dir->d);
           lfs_off_t newoff = sizeof(dir->d);
           while (newoff < (0x7fffffff & dir->d.size) - 4)
@@ -839,7 +848,7 @@ static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
   /* shift over any directories that are affected */
 
-  for (lfs_dir_t *d = lfs->dirs; d; d = d->next)
+  for (d = lfs->dirs; d; d = d->next)
     {
       if (lfs_paircmp(d->pair, dir->pair) == 0)
         {
@@ -934,6 +943,10 @@ static int lfs_dir_append(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
                           FAR lfs_entry_t *entry)
 {
+  FAR lfs_file_t *f;
+  FAR lfs_dir_t *d;
+  int err;
+
   /* check if we should just drop the directory block */
 
   if ((dir->d.size & 0x7fffffff) == sizeof(dir->d) + 4 + lfs_entry_size(entry))
@@ -956,12 +969,12 @@ static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
   /* shift out the entry */
 
-  int err = lfs_dir_commit(lfs, dir,
-                           (struct lfs_region[])
-                           {
-                             {entry->off, lfs_entry_size(entry), NULL, 0},
-                           },
-                           1);
+  err = lfs_dir_commit(lfs, dir,
+                       (struct lfs_region[])
+                       {
+                         {entry->off, lfs_entry_size(entry), NULL, 0},
+                       },
+                       1);
   if (err)
     {
       return err;
@@ -969,7 +982,7 @@ static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
   /* shift over any files/directories that are affected */
 
-  for (lfs_file_t *f = lfs->files; f; f = f->next)
+  for (f = lfs->files; f; f = f->next)
     {
       if (lfs_paircmp(f->pair, dir->pair) == 0)
         {
@@ -985,7 +998,7 @@ static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
         }
     }
 
-  for (lfs_dir_t *d = lfs->dirs; d; d = d->next)
+  for (d = lfs->dirs; d; d = d->next)
     {
       if (lfs_paircmp(d->pair, dir->pair) == 0)
         {
@@ -1254,6 +1267,7 @@ static int lfs_ctz_extend(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
         {
           lfs_off_t index;
           lfs_size_t skips;
+          lfs_off_t i;
 
           err = lfs_bd_erase(lfs, nblock);
           if (err)
@@ -1281,7 +1295,7 @@ static int lfs_ctz_extend(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
 
           if (size != lfs->cfg->block_size)
             {
-              for (lfs_off_t i = 0; i < size; i++)
+              for (i = 0; i < size; i++)
                 {
                   uint8_t data;
                   err = lfs_cache_read(lfs, rcache, NULL, head, i,
@@ -1313,7 +1327,7 @@ static int lfs_ctz_extend(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
           index += 1;
           skips = lfs_ctz(index) + 1;
 
-          for (lfs_off_t i = 0; i < skips; i++)
+          for (i = 0; i < skips; i++)
             {
               head = lfs_tole32(head);
               err = lfs_cache_prog(lfs, pcache, rcache, nblock, 4 * i,
@@ -1376,7 +1390,10 @@ static int lfs_ctz_traverse(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
     {
       lfs_block_t heads[2];
       int count;
-      int err = cb(data, head);
+      int err;
+      int i;
+
+      err = cb(data, head);
       if (err)
         {
           return err;
@@ -1396,7 +1413,7 @@ static int lfs_ctz_traverse(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
           return err;
         }
 
-      for (int i = 0; i < count - 1; i++)
+      for (i = 0; i < count - 1; i++)
         {
           err = cb(data, heads[i]);
           if (err)
@@ -1413,6 +1430,7 @@ static int lfs_ctz_traverse(FAR lfs_t *lfs, FAR lfs_cache_t *rcache,
 static int lfs_file_relocate(FAR lfs_t *lfs, FAR lfs_file_t *file)
 {
   lfs_block_t nblock;
+  lfs_off_t i;
   int err;
 
 relocate:
@@ -1438,7 +1456,7 @@ relocate:
 
   /* either read from dirty cache or disk */
 
-  for (lfs_off_t i = 0; i < file->off; i++)
+  for (i = 0; i < file->off; i++)
     {
       uint8_t data;
       err = lfs_cache_read(lfs, &lfs->rcache, &file->cache, file->block, i,
@@ -2948,6 +2966,7 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
     {
       lfs_dir_t superdir;
       lfs_dir_t root;
+      int i;
 
       err = lfs_init(lfs, cfg);
       if (err)
@@ -3010,7 +3029,7 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
 
       lfs_superblock_tole32(&superblock.d);
       valid = false;
-      for (int i = 0; i < 2; i++)
+      for (i = 0; i < 2; i++)
         {
           err = lfs_dir_commit(
               lfs, &superdir,
@@ -3144,8 +3163,9 @@ int lfs_traverse(FAR lfs_t *lfs, CODE int (*cb)(void *, lfs_block_t),
   while (true)
     {
       int err;
+      int i;
 
-      for (int i = 0; i < 2; i++)
+      for (i = 0; i < 2; i++)
         {
           err = cb(data, cwd[i]);
           if (err)

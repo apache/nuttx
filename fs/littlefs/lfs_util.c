@@ -61,7 +61,7 @@
 
 /* Software CRC implementation with small lookup table */
 
-void lfs_crc(FAR uint32_t *restrict crc, FAR const void *buffer, size_t size)
+void lfs_crc(FAR uint32_t *crc, FAR const void *buffer, size_t size)
 {
   static const uint32_t rtable[16] =
   {
