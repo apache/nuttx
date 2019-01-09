@@ -231,10 +231,12 @@ void am335x_lowsetup(void)
 
   putreg32(UART_SYSC_SRESET | getreg32(CONSOLE_BASE + AM335X_UART_SYSC_OFFSET),
           CONSOLE_BASE + AM335X_UART_SYSC_OFFSET);
-#endif
 
   /* Wait until the process of Module Reset is complete. */
-  //while(!(getreg32(CONSOLE_BASE + AM335X_UART_SYSS_OFFSET) & 1));
+  while (!(getreg32(CONSOLE_BASE + AM335X_UART_SYSS_OFFSET) & UART_SYSS_RESET_DONE))
+    {
+    }
+#endif
 
   /* Put UART to disabled mode */
 

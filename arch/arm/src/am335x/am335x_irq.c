@@ -173,11 +173,19 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 #if 1 /* Use PEND registers instead */
   uint32_t regval;
 
+  /* Get active interrupt line */
+
   regval = getreg32(AM335X_INTC_SIR_IRQ) & INTC_SIR_IRQ_ACTIVE_MASK;
 
   /* Dispatch the interrupt */
 
-  return arm_doirq((int)regval, regs);
+  regs = arm_doirq((int)regval, regs);
+
+  /* Enable new interrupt generation */
+
+  putreg32(INTC_CONTROL_NEWIRQAGR, AM335X_INTC_CONTROL);
+
+  return regs;
 #else
   uintptr_t regaddr;
   uint32_t pending;

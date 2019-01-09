@@ -391,6 +391,10 @@
 #define UART_SYSC_SRESET            (1 << 1)  /* Bit 1: Software Reset */
 #define UART_SYSC_WAKEUP            (1 << 2)  /* Bit 2: Wake-up Control */
 
+/* UART System Status Register */
+
+#define UART_SYSS_RESET_DONE        (1 << 0)  /* Bit 0: Reset Complete */
+
 /* UART Enhanced Feature Register */
 
 #define UART_EFR_ENHANCEDEN         (1 << 4)  /* Bit 4: Enable Enhanced Functions Write */

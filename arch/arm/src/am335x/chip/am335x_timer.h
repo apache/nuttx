@@ -63,9 +63,9 @@
 #define AM335X_TMR_TTGR_OFFSET          0x0044 /* Timer Trigger Register */
 #define AM335X_TMR_TWPS_OFFSET          0x0048 /* Timer Write Posting Bits Register */
 #define AM335X_TMR_TMAR_OFFSET          0x004C /* Timer Match Register */
-#define AM335X_TMR_TCAR1_OFFSET         0x0050 /* Timer Capture Register */
+#define AM335X_TMR_TCAR1_OFFSET         0x0050 /* Timer Capture 1 Register */
 #define AM335X_TMR_TSICR_OFFSET         0x0054 /* Timer Synchronous Interface Control Register */
-#define AM335X_TMR_TCAR2_OFFSET         0x0058 /* Timer Capture Register */
+#define AM335X_TMR_TCAR2_OFFSET         0x0058 /* Timer Capture 2 Register */
 
 #define AM335X_TMR1MS_TIDR_OFFSET       0x0000 /* Identification Register Section */
 #define AM335X_TMR1MS_TIOCP_CFG_OFFSET  0x0010 /* 1ms Timer OCP Configuration Register Section */
@@ -79,9 +79,9 @@
 #define AM335X_TMR1MS_TTGR_OFFSET       0x0030 /* 1ms Timer Trigger Register */
 #define AM335X_TMR1MS_TWPS_OFFSET       0x0034 /* 1ms Timer Write Posting Bits Register */
 #define AM335X_TMR1MS_TMAR_OFFSET       0x0038 /* 1ms Timer Match Register */
-#define AM335X_TMR1MS_TCAR1_OFFSET      0x003C /* 1ms Timer Capture Register */
+#define AM335X_TMR1MS_TCAR1_OFFSET      0x003C /* 1ms Timer Capture 1 Register */
 #define AM335X_TMR1MS_TSICR_OFFSET      0x0040 /* 1ms Timer Synchronous Interface Control Register */
-#define AM335X_TMR1MS_TCAR2_OFFSET      0x0044 /* 1ms Timer Capture Register */
+#define AM335X_TMR1MS_TCAR2_OFFSET      0x0044 /* 1ms Timer Capture 2 Register */
 #define AM335X_TMR1MS_TPIR_OFFSET       0x0048 /* 1ms Timer Positive Increment Register */
 #define AM335X_TMR1MS_TNIR_OFFSET       0x004C /* 1ms Timer Negative Increment Register */
 #define AM335X_TMR1MS_TCVR_OFFSET       0x0050 /* 1ms Timer Counter Value Register */
@@ -90,6 +90,8 @@
 
 /* Register virtual addresses *******************************************************/
 
+#define AM335X_TMR1MS_TIOCP_CFG         (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TIOCP_CFG_OFFSET)
+#define AM335X_TMR1MS_TISTAT            (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TISTAT_OFFSET)
 #define AM335X_TMR1MS_TISR              (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TISR_OFFSET)
 #define AM335X_TMR1MS_TIER              (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TIER_OFFSET)
 #define AM335X_TMR1MS_TCLR              (AM335X_DMTIMER1_1MS_VADDR + AM335X_TMR1MS_TCLR_OFFSET)

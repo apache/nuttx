@@ -118,6 +118,20 @@ void arm_timer_initialize(void)
 {
   uint32_t regval;
 
+  /* Make sure that interrupts from the Timer 1 are disabled */
+
+  up_disable_irq(AM335X_IRQ_TIMER1_1MS);
+
+#if 0
+  /* Soft reset the timer */
+
+  putreg32(TMR1MS_TIOCP_SOFT_RESET, AM335X_TMR1MS_TIOCP_CFG);
+
+  while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT))
+    {
+    }
+#endif
+
   /* Stop timer */
 
   putreg32(0, AM335X_TMR1MS_TCLR);
@@ -132,10 +146,6 @@ void arm_timer_initialize(void)
   regval = TMR1MS_TCLR_TRG_OFLOW | TMR1MS_TCLR_AR |
            TMR1MS_TCLR_ST;
   putreg32(regval, AM335X_TMR1MS_TCLR);
-
-  /* Make sure that interrupts from the Timer 0 are disabled */
-
-  up_disable_irq(AM335X_IRQ_TIMER1_1MS);
 
   /* Attach the timer interrupt vector */
 
