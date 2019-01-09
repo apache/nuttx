@@ -2370,7 +2370,8 @@ int lfs_file_sync(FAR lfs_t *lfs, FAR lfs_file_t *file)
           return err;
         }
 
-      err = lfs_bd_read(lfs, cwd.pair[0], entry.off, &entry.d, sizeof(entry.d));
+      err = lfs_bd_read(lfs, cwd.pair[0], entry.off, &entry.d,
+                        sizeof(entry.d));
       lfs_entry_fromle32(&entry.d);
       if (err)
         {
@@ -2763,8 +2764,8 @@ int lfs_stat(FAR lfs_t *lfs, FAR const char *path,
   else
     {
       err = lfs_bd_read(lfs, cwd.pair[0],
-                        entry.off + 4 + entry.d.elen + entry.d.alen, info->name,
-                        entry.d.nlen);
+                        entry.off + 4 + entry.d.elen + entry.d.alen,
+                        info->name, entry.d.nlen);
       if (err)
         {
           return err;
@@ -3044,21 +3045,23 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
 
       /* write superblocks */
 
-      superblock.off = sizeof(superdir.d);
-      superblock.d.type = LFS_TYPE_SUPERBLOCK;
-      superblock.d.elen = sizeof(superblock.d) - sizeof(superblock.d.magic) - 4;
-      superblock.d.nlen = sizeof(superblock.d.magic);
-      superblock.d.version = LFS_DISK_VERSION;
-      superblock.d.block_size = lfs->cfg->block_size;
+      superblock.off           = sizeof(superdir.d);
+      superblock.d.type        = LFS_TYPE_SUPERBLOCK;
+      superblock.d.elen        = sizeof(superblock.d) -
+                                 sizeof(superblock.d.magic) - 4;
+      superblock.d.nlen        = sizeof(superblock.d.magic);
+      superblock.d.version     = LFS_DISK_VERSION;
+      superblock.d.block_size  = lfs->cfg->block_size;
       superblock.d.block_count = lfs->cfg->block_count;
-      superblock.d.root[0] = lfs->root[0];
-      superblock.d.root[0] = lfs->root[1];
+      superblock.d.root[0]     = lfs->root[0];
+      superblock.d.root[0]     = lfs->root[1];
 
       memcpy(superblock.d.magic, "littlefs", 8);
 
-      superdir.d.tail[0] = root.pair[0];
-      superdir.d.tail[1] = root.pair[1];
-      superdir.d.size = sizeof(superdir.d) + sizeof(superblock.d) + 4;
+      superdir.d.tail[0]       = root.pair[0];
+      superdir.d.tail[1]       = root.pair[1];
+      superdir.d.size          = sizeof(superdir.d) +
+                                 sizeof(superblock.d) + 4;
 
       /* write both pairs to be safe */
 
