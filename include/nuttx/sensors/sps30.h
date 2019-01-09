@@ -58,6 +58,7 @@ struct sps30_conv_data_s
   /* Mass Concentrations for particle ranges PM1.0, PM2.5, PM4.0, PM10.
    * Unit is [µg/m³] (microgram per cubicmeter).
    */
+
   float mass_concenration_pm1_0;
   float mass_concenration_pm2_5;
   float mass_concenration_pm4_0;
@@ -74,6 +75,7 @@ struct sps30_conv_data_s
   float number_concenration_pm10;
 
   /* Typical particle size. Unit is [µm] (micrometer). */
+
   float typical_particle_size;
 };
 

@@ -287,6 +287,7 @@ static int scd30_write_cmd(FAR struct scd30_dev_s *priv, uint16_t cmd,
   return (ret >= 0) ? OK : ret;
 #else
   /* UART mode not implemented yet. */
+
   return -ENODEV;
 #endif
 }
@@ -315,6 +316,7 @@ static int scd30_read_words(FAR struct scd30_dev_s *priv,
   return (ret >= 0) ? OK : ret;
 #else
   /* UART mode not implemented yet. */
+
   return -ENODEV;
 #endif
 }
@@ -390,7 +392,9 @@ static int scd30_check_data_crc(FAR const struct scd30_word_s *words,
   while (num_words)
     {
       if (scd30_crc_word(scd30_data_word_to_uint16(words)) != words->crc)
-        return -1;
+        {
+          return -1;
+        }
 
       num_words--;
       words++;
@@ -413,7 +417,9 @@ static int scd30_softreset(FAR struct scd30_dev_s *priv)
 
   ret = scd30_write_cmd(priv, SCD30_CMD_SOFT_RESET, NULL, 0);
   if (ret < 0)
-    return ret;
+    {
+      return ret;
+    }
 
   return 0;
 }

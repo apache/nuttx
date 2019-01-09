@@ -158,17 +158,17 @@ static int sps30_read_dev_info(FAR struct sps30_dev_s *priv, uint16_t cmd,
 /* Character driver methods */
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     sps30_open(FAR struct file *filep);
-static int     sps30_close(FAR struct file *filep);
+static int sps30_open(FAR struct file *filep);
+static int sps30_close(FAR struct file *filep);
 #endif
 static ssize_t sps30_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t sps30_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
-static int     sps30_ioctl(FAR struct file *filep, int cmd,
-                           unsigned long arg);
+static int sps30_ioctl(FAR struct file *filep, int cmd,
+                       unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     sps30_unlink(FAR struct inode *inode);
+static int sps30_unlink(FAR struct inode *inode);
 #endif
 
 /****************************************************************************
@@ -281,6 +281,7 @@ static int sps30_write_cmd(FAR struct sps30_dev_s *priv, uint16_t cmd,
   return (ret >= 0) ? OK : ret;
 #else
   /* UART mode not implemented yet. */
+
   return -ENODEV;
 #endif
 }
@@ -308,9 +309,13 @@ static int sps30_read_cmd(FAR struct sps30_dev_s *priv, uint16_t cmd,
   msg[0].length = 2;
 
   ret = sps30_do_transfer(priv->i2c, msg, 1);
+
   sps30_dbg("cmd: 0x%04X ret: %d\n", cmd, ret);
+
   if (ret < 0)
-    return ret;
+    {
+      return ret;
+    }
 
   msg[0].frequency = CONFIG_SPS30_I2C_FREQUENCY;
   msg[0].addr = priv->addr;
@@ -325,6 +330,7 @@ static int sps30_read_cmd(FAR struct sps30_dev_s *priv, uint16_t cmd,
   return (ret >= 0) ? OK : ret;
 #else
   /* UART mode not implemented yet. */
+
   return -ENODEV;
 #endif
 }
@@ -400,7 +406,9 @@ static int sps30_check_data_crc(FAR const struct sps30_word_s *words,
   while (num_words)
     {
       if (sps30_crc_word(sps30_data_word_to_uint16(words)) != words->crc)
-        return -1;
+        {
+          return -1;
+        }
 
       num_words--;
       words++;
@@ -423,7 +431,9 @@ static int sps30_softreset(FAR struct sps30_dev_s *priv)
 
   ret = sps30_write_cmd(priv, SPS30_CMD_SOFT_RESET, NULL, 0);
   if (ret < 0)
-    return ret;
+    {
+      return ret;
+    }
 
   return 0;
 }
@@ -600,7 +610,9 @@ static int sps30_read_dev_info(FAR struct sps30_dev_s *priv, uint16_t cmd,
     }
 
   if (outlen)
-    *out = '\0';
+    {
+      *out = '\0';
+    }
 
   return ret;
 }
@@ -959,7 +971,9 @@ static int sps30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
 
           if (arg > 0 && arg < 15)
-            arg = 15;
+            {
+              arg = 15;
+            }
 
           sps30_set_command_param(&param, arg);
           ret = sps30_write_cmd(priv, SPS30_CMD_SET_AUTO_CLEANING_INTERVAL,

@@ -137,17 +137,17 @@ static int sgp30_measure_raw(FAR struct sgp30_dev_s *priv,
 /* Character driver methods */
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     sgp30_open(FAR struct file *filep);
-static int     sgp30_close(FAR struct file *filep);
+static int sgp30_open(FAR struct file *filep);
+static int sgp30_close(FAR struct file *filep);
 #endif
 static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t sgp30_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
-static int     sgp30_ioctl(FAR struct file *filep, int cmd,
-                           unsigned long arg);
+static int sgp30_ioctl(FAR struct file *filep, int cmd,
+                       unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     sgp30_unlink(FAR struct inode *inode);
+static int sgp30_unlink(FAR struct inode *inode);
 #endif
 
 /****************************************************************************
@@ -326,10 +326,14 @@ static int sgp30_read_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
   msg[0].length = 2;
 
   ret = sgp30_do_transfer(priv->i2c, msg, 1);
+
   sgp30_dbg("cmd: 0x%04X delay: %uus ret: %d\n", cmd.address,
             cmd.read_delay_usec, ret);
+
   if (ret < 0)
-    return ret;
+    {
+      return ret;
+    }
 
   up_udelay(cmd.read_delay_usec + 100);
 
@@ -400,7 +404,9 @@ static int sgp30_check_data_crc(FAR const struct sgp30_word_s *words,
   while (num_words)
     {
       if (sgp30_crc_word(sgp30_data_word_to_uint16(words)) != words->crc)
-        return -1;
+        {
+          return -1;
+        }
 
       num_words--;
       words++;
