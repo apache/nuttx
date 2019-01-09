@@ -108,7 +108,8 @@ static off_t   littlefs_seek(FAR struct file *filep, off_t offset,
 static int     littlefs_bind(FAR struct inode *mtdinode,
                              FAR const void *data, FAR void **handle);
 static int     littlefs_unbind(FAR void *handle,
-                               FAR struct inode **mtdinode, unsigned int flags);
+                               FAR struct inode **mtdinode,
+                               unsigned int flags);
 
 static int     littlefs_statfs(FAR struct inode *mountpt,
                                FAR struct statfs *buf);
@@ -466,7 +467,8 @@ static int littlefs_unbind(FAR void *handle, FAR struct inode **mtdinode,
   return lfs_result_to_vfs(ret);
 }
 
-static int littlefs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
+static int littlefs_opendir(FAR struct inode *mountpt,
+                            FAR const char *relpath,
                             FAR struct fs_dirent_s *dir)
 {
   FAR struct littefs_s *fs = mountpt->i_private;
