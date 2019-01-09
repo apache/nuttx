@@ -178,4 +178,36 @@
 
 #define SNIOC_CHANGE_SMBUSADDR     _SNIOC(0x0053) /* Arg: uint8_t value */
 
+/* IOCTL commands unique to the SCD30 */
+
+/* SNIOC_RESET */                                 /* Arg: None */
+/* SNIOC_START */                                 /* Arg: None */
+/* SNIOC_STOP */                                  /* Arg: None */
+/* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct scd30_conv_data_s* */
+#define SNIOC_SET_INTERVAL         _SNIOC(0x0054) /* Arg: uint16_t value (seconds) */
+#define SNIOC_SET_TEMP_OFFSET      _SNIOC(0x0055) /* Arg: uint16_t value (0.01 Kelvin) */
+#define SNIOC_SET_PRESSURE_COMP    _SNIOC(0x0056) /* Arg: uint16_t value (mbar) */
+#define SNIOC_SET_ALTITUDE_COMP    _SNIOC(0x0057) /* Arg: uint16_t value (meters) */
+#define SNIOC_SET_FRC              _SNIOC(0x0058) /* Arg: uint16_t value (CO₂ ppm) */
+#define SNIOC_ENABLE_ASC           _SNIOC(0x0059) /* Arg: bool value */
+
+/* IOCTL commands unique to the SGP30 */
+
+/* SNIOC_RESET */                                 /* Arg: None */
+/* SNIOC_START_SELFTEST */                        /* Arg: None */
+/* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct sgp30_conv_data_s* */
+/* SNIOC_READ_RAW_DATA */                         /* Arg: struct sgp30_raw_data_s* */
+#define SNIOC_GET_BASELINE         _SNIOC(0x005a) /* Arg: struct sgp30_baseline_s* */
+#define SNIOC_SET_BASELINE         _SNIOC(0x005b) /* Arg: const struct sgp30_baseline_s* */
+#define SNIOC_SET_HUMIDITY         _SNIOC(0x005c) /* Arg: uint32_t value (mg/m³) */
+
+/* IOCTL commands unique to the SPS30 */
+
+/* SNIOC_RESET */                                 /* Arg: None */
+/* SNIOC_START */                                 /* Arg: None */
+/* SNIOC_STOP */                                  /* Arg: None */
+/* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct sps30_conv_data_s* */
+#define SNIOC_SET_CLEAN_INTERVAL   _SNIOC(0x005d) /* Arg: uint32_t value (seconds) */
+#define SNIOC_START_FAN_CLEANING   _SNIOC(0x005e) /* Arg: None */
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

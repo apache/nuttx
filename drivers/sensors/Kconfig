@@ -513,6 +513,59 @@ config LM92_I2C_FREQUENCY
 	range 1 400000
 	depends on LM92
 
+config SENSORS_SCD30
+	bool "Sensirion SCD30 CO2, humidity and temperature sensor"
+	default n
+	---help---
+		Enable driver support for the Sensirion SCD30 CO₂, humidity and
+		temperature sensor.
+
+if SENSORS_SCD30
+
+config SCD30_I2C
+	bool "Sensirion SCD30 I2C mode"
+	default y
+	select I2C
+
+config SCD30_I2C_FREQUENCY
+	int "SCD30 I2C frequency"
+	default 100000
+	range 1 100000
+	depends on SCD30_I2C
+	---help---
+		I2C frequency for SCD30. Note, maximum supported frequency for
+		this sensor is 100kHz.
+
+config SCD30_DEBUG
+	bool "Debug support for the SCD30"
+	default n
+	---help---
+		Enables debug features for the SCD30
+
+endif # SENSORS_SCD30
+
+config SENSORS_SGP30
+	bool "Sensirion SGP30 Gas Platform sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SCD30 CO₂ and TVOC gas sensor.
+
+if SENSORS_SGP30
+
+config SGP30_I2C_FREQUENCY
+	int "SGP30 I2C frequency"
+	default 400000
+	range 1 400000
+
+config SGP30_DEBUG
+	bool "Debug support for the SGP30"
+	default n
+	---help---
+		Enables debug features for the SGP30
+
+endif # SENSORS_SGP30
+
 config SENSORS_SHT21
 	bool "Sensirion SHT21 temperature and humidity sensor"
 	default n
@@ -536,6 +589,37 @@ config SHT21_DEBUG
 		Enables debug features for the SHT21
 
 endif # SENSORS_SHT21
+
+config SENSORS_SPS30
+	bool "Sensirion SPS30 particulate matter sensor"
+	default n
+	---help---
+		Enable driver support for the Sensirion SPS30 particulate matter sensor
+		sensor.
+
+if SENSORS_SPS30
+
+config SPS30_I2C
+	bool "Sensirion SPS30 I2C mode"
+	default y
+	select I2C
+
+config SPS30_I2C_FREQUENCY
+	int "SPS30 I2C frequency"
+	default 100000
+	range 1 100000
+	depends on SPS30_I2C
+	---help---
+		I2C frequency for SPS30. Note, maximum supported frequency for
+		this sensor is 100kHz.
+
+config SPS30_DEBUG
+	bool "Debug support for the SPS30"
+	default n
+	---help---
+		Enables debug features for the SPS30
+
+endif # SENSORS_SPS30
 
 config SENSORS_T67XX
 	bool "Telair T6713 carbon dioxide sensor"
