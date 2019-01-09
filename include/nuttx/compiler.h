@@ -258,16 +258,22 @@
 #  undef  CONFIG_PTR_IS_NOT_INT
 #endif
 
-/* GCC supports inlined functions */
+/* GCC supports inlined functions for version C99 and above */
 
-#  define CONFIG_HAVE_INLINE 1
+#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#    define CONFIG_HAVE_INLINE 1
+#  else
+#    undef CONFIG_HAVE_INLINE
+#    define inline
+#  endif
 
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
- * GCC 4.6
+ * GCC 4.6 (but might be suppressed with -std= option)
  */
 
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
-#  if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#  undef CONFIG_HAVE_ANONYMOUS_UNION
+#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 #    define CONFIG_HAVE_ANONYMOUS_STRUCT 1
 #    define CONFIG_HAVE_ANONYMOUS_UNION 1
 #  endif
@@ -647,7 +653,7 @@
 #  undef  CONFIG_LONG_IS_NOT_INT
 #  undef  CONFIG_PTR_IS_NOT_INT
 #  undef  CONFIG_HAVE_INLINE
-#  define inline 1
+#  define inline
 #  undef  CONFIG_HAVE_LONG_LONG
 #  define CONFIG_HAVE_FLOAT 1
 #  undef  CONFIG_HAVE_DOUBLE
