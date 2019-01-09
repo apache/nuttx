@@ -78,7 +78,7 @@
 
 /* These file systems require MTD drivers */
 
-#ifdef CONFIG_FS_SPIFFS
+#if defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)
 #  define MDFS_SUPPORT 1
 #endif
 
@@ -140,10 +140,17 @@ static const struct fsmap_t g_bdfsmap[] =
 extern const struct mountpt_operations spiffs_operations;
 #endif
 
+#ifdef CONFIG_FS_LITTLEFS
+extern const struct mountpt_operations littlefs_operations;
+#endif
+
 static const struct fsmap_t g_mdfsmap[] =
 {
 #ifdef CONFIG_FS_SPIFFS
     { "spiffs", &spiffs_operations },
+#endif
+#ifdef CONFIG_FS_LITTLEFS
+    { "littlefs", &littlefs_operations },
 #endif
 };
 #endif /* MDFS_SUPPORT */
