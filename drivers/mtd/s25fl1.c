@@ -1265,11 +1265,11 @@ static ssize_t s25fl1_bread(FAR struct mtd_dev_s *dev, off_t startblock,
       nbytes >>= S25FL1_SECTOR512_SHIFT;
     }
 #else
-  nbytes = s25fl1_read(dev, startblock << priv->sectorshift,
-                       nblocks << priv->sectorshift, buffer);
+  nbytes = s25fl1_read(dev, startblock << priv->pageshift,
+                       nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
-      nbytes >>= priv->sectorshift;
+      nbytes >>= priv->pageshift;
     }
 #endif
 
@@ -1300,8 +1300,8 @@ static ssize_t s25fl1_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
     }
 
 #else
-  ret = s25fl1_write_page(priv, buffer, startblock << priv->sectorshift,
-                          nblocks << priv->sectorshift);
+  ret = s25fl1_write_page(priv, buffer, startblock << priv->pageshift,
+                          nblocks << priv->pageshift);
   if (ret < 0)
     {
       ferr("ERROR: s25fl1_write_page failed: %d\n", ret);
