@@ -106,7 +106,7 @@ typedef uint32_t lfs_block_t;
  * valid positive return values
  */
 
-enum lfs_error
+enum lfs_error_e
 {
   LFS_ERR_OK       = 0,    /* No error */
   LFS_ERR_IO       = -5,   /* Error during device operation */
@@ -125,7 +125,7 @@ enum lfs_error
 
 /* File types */
 
-enum lfs_type
+enum lfs_type_e
 {
   LFS_TYPE_REG        = 0x11,
   LFS_TYPE_DIR        = 0x22,
@@ -134,7 +134,7 @@ enum lfs_type
 
 /* File open flags */
 
-enum lfs_open_flags
+enum lfs_open_flags_e
 {
   /* open flags */
 
@@ -156,7 +156,7 @@ enum lfs_open_flags
 
 /* File seek flags */
 
-enum lfs_whence_flags
+enum lfs_whence_flags_e
 {
   LFS_SEEK_SET = 0,   /* Seek relative to an absolute position */
   LFS_SEEK_CUR = 1,   /* Seek relative to the current file position */
@@ -165,7 +165,7 @@ enum lfs_whence_flags
 
 /* Configuration provided during initialization of the littlefs */
 
-struct lfs_config
+struct lfs_config_s
 {
   /* Opaque user provided context that can be used to pass
    * information to the block device operations
@@ -177,7 +177,7 @@ struct lfs_config
    * to the user.
    */
 
-  CODE int (*read)(const struct lfs_config *c, lfs_block_t block,
+  CODE int (*read)(FAR const struct lfs_config_s *c, lfs_block_t block,
                    lfs_off_t off, FAR void *buffer, lfs_size_t size);
 
   /* Program a region in a block. The block must have previously
@@ -185,7 +185,7 @@ struct lfs_config
    * May return LFS_ERR_CORRUPT if the block should be considered bad.
    */
 
-  CODE int (*prog)(FAR const struct lfs_config *c, lfs_block_t block,
+  CODE int (*prog)(FAR const struct lfs_config_s *c, lfs_block_t block,
                    lfs_off_t off, const void *buffer, lfs_size_t size);
 
   /* Erase a block. A block must be erased before being programmed.
@@ -194,13 +194,13 @@ struct lfs_config
    * May return LFS_ERR_CORRUPT if the block should be considered bad.
    */
 
-  CODE int (*erase)(FAR const struct lfs_config *c, lfs_block_t block);
+  CODE int (*erase)(FAR const struct lfs_config_s *c, lfs_block_t block);
 
   /* Sync the state of the underlying block device. Negative error codes
    * are propagated to the user.
    */
 
-  CODE int (*sync)(FAR const struct lfs_config *c);
+  CODE int (*sync)(FAR const struct lfs_config_s *c);
 
   /* Minimum size of a block read. This determines the size of read buffers.
    * This may be larger than the physical read size to improve performance
@@ -260,7 +260,7 @@ struct lfs_config
 
 /* Optional configuration provided during lfs_file_opencfg */
 
-struct lfs_file_config
+struct lfs_file_config_s
 {
   /* Optional, statically allocated buffer for files. Must be program sized.
    * If NULL, malloc will be used by default.
@@ -271,7 +271,7 @@ struct lfs_file_config
 
 /* File info structure */
 
-struct lfs_info
+struct lfs_info_s
 {
   /* Type of the file, either LFS_TYPE_REG or LFS_TYPE_DIR */
 
@@ -289,11 +289,11 @@ struct lfs_info
 
 /* littlefs data structures */
 
-typedef struct lfs_entry
+typedef struct lfs_entry_s
 {
   lfs_off_t off;
 
-  struct lfs_disk_entry
+  struct lfs_disk_entry_s
   {
     uint8_t type;
     uint8_t elen;
@@ -311,23 +311,23 @@ typedef struct lfs_entry
  } d;
 } lfs_entry_t;
 
-typedef struct lfs_cache
+typedef struct lfs_cache_s
 {
   lfs_block_t block;
   lfs_off_t off;
   FAR uint8_t *buffer;
 } lfs_cache_t;
 
-typedef struct lfs_file
+typedef struct lfs_file_s
 {
-  struct lfs_file *next;
+  FAR struct lfs_file_s *next;
   lfs_block_t pair[2];
   lfs_off_t poff;
 
   lfs_block_t head;
   lfs_size_t size;
 
-  FAR const struct lfs_file_config *cfg;
+  FAR const struct lfs_file_config_s *cfg;
   uint32_t flags;
   lfs_off_t pos;
   lfs_block_t block;
@@ -335,16 +335,16 @@ typedef struct lfs_file
   lfs_cache_t cache;
 } lfs_file_t;
 
-typedef struct lfs_dir
+typedef struct lfs_dir_s
 {
-  struct lfs_dir *next;
+  FAR struct lfs_dir_s *next;
   lfs_block_t pair[2];
   lfs_off_t off;
 
   lfs_block_t head[2];
   lfs_off_t pos;
 
-  struct lfs_disk_dir
+  struct lfs_disk_dir_s
   {
     uint32_t rev;
     lfs_size_t size;
@@ -352,11 +352,11 @@ typedef struct lfs_dir
   } d;
 } lfs_dir_t;
 
-typedef struct lfs_superblock
+typedef struct lfs_superblock_s
 {
   lfs_off_t off;
 
-  struct lfs_disk_superblock
+  struct lfs_disk_superblock_s
   {
     uint8_t type;
     uint8_t elen;
@@ -370,7 +370,7 @@ typedef struct lfs_superblock
   } d;
 } lfs_superblock_t;
 
-typedef struct lfs_free
+typedef struct lfs_free_s
 {
   lfs_block_t off;
   lfs_block_t size;
@@ -381,9 +381,9 @@ typedef struct lfs_free
 
 /* The littlefs type */
 
-typedef struct lfs
+typedef struct lfs_s
 {
-  FAR const struct lfs_config *cfg;
+  FAR const struct lfs_config_s *cfg;
 
   lfs_block_t root[2];
   FAR lfs_file_t *files;
@@ -421,7 +421,7 @@ extern "C"
  * Returns a negative error code on failure.
  */
 
-int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *config);
+int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config_s *config);
 
 /* Mounts a littlefs
  *
@@ -433,7 +433,7 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *config);
  * Returns a negative error code on failure.
  */
 
-int lfs_mount(FAR lfs_t *lfs, FAR const struct lfs_config *config);
+int lfs_mount(FAR lfs_t *lfs, FAR const struct lfs_config_s *config);
 
 /* Unmounts a littlefs
  *
@@ -471,7 +471,7 @@ int lfs_rename(FAR lfs_t *lfs, FAR const char *oldpath, FAR
  */
 
 int lfs_stat(FAR lfs_t *lfs, FAR const char *path,
-             FAR struct lfs_info *info);
+             FAR struct lfs_info_s *info);
 
 /* File operations */
 
@@ -500,7 +500,7 @@ int lfs_file_open(FAR lfs_t *lfs, FAR lfs_file_t *file,
 
 int lfs_file_opencfg(FAR lfs_t *lfs, FAR lfs_file_t *file,
                      FAR const char *path, int flags,
-                     FAR const struct lfs_file_config *config);
+                     FAR const struct lfs_file_config_s *config);
 
 /* Close a file
  *
@@ -612,7 +612,7 @@ int lfs_dir_close(FAR lfs_t *lfs, FAR lfs_dir_t *dir);
  */
 
 int lfs_dir_read(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
-                 FAR struct lfs_info *info);
+                 FAR struct lfs_info_s *info);
 
 /* Change the position of the directory
  *

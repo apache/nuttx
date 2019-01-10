@@ -48,10 +48,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <inttypes.h>
+
 #include "lfs.h"
 #include "lfs_util.h"
-
-#include <inttypes.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,7 +61,7 @@
  * Private Types
  ****************************************************************************/
 
-struct lfs_region
+struct lfs_region_s
 {
   lfs_off_t oldoff;
   lfs_size_t oldlen;
@@ -473,7 +473,7 @@ static void lfs_alloc_ack(FAR lfs_t *lfs)
 
 /* Endian swapping functions */
 
-static void lfs_dir_fromle32(FAR struct lfs_disk_dir *d)
+static void lfs_dir_fromle32(FAR struct lfs_disk_dir_s *d)
 {
   d->rev = lfs_fromle32(d->rev);
   d->size = lfs_fromle32(d->size);
@@ -481,7 +481,7 @@ static void lfs_dir_fromle32(FAR struct lfs_disk_dir *d)
   d->tail[1] = lfs_fromle32(d->tail[1]);
 }
 
-static void lfs_dir_tole32(FAR struct lfs_disk_dir *d)
+static void lfs_dir_tole32(FAR struct lfs_disk_dir_s *d)
 {
   d->rev = lfs_tole32(d->rev);
   d->size = lfs_tole32(d->size);
@@ -489,19 +489,19 @@ static void lfs_dir_tole32(FAR struct lfs_disk_dir *d)
   d->tail[1] = lfs_tole32(d->tail[1]);
 }
 
-static void lfs_entry_fromle32(FAR struct lfs_disk_entry *d)
+static void lfs_entry_fromle32(FAR struct lfs_disk_entry_s *d)
 {
   d->u.dir[0] = lfs_fromle32(d->u.dir[0]);
   d->u.dir[1] = lfs_fromle32(d->u.dir[1]);
 }
 
-static void lfs_entry_tole32(FAR struct lfs_disk_entry *d)
+static void lfs_entry_tole32(FAR struct lfs_disk_entry_s *d)
 {
   d->u.dir[0] = lfs_tole32(d->u.dir[0]);
   d->u.dir[1] = lfs_tole32(d->u.dir[1]);
 }
 
-static void lfs_superblock_fromle32(FAR struct lfs_disk_superblock *d)
+static void lfs_superblock_fromle32(FAR struct lfs_disk_superblock_s *d)
 {
   d->root[0] = lfs_fromle32(d->root[0]);
   d->root[1] = lfs_fromle32(d->root[1]);
@@ -510,7 +510,7 @@ static void lfs_superblock_fromle32(FAR struct lfs_disk_superblock *d)
   d->version = lfs_fromle32(d->version);
 }
 
-static void lfs_superblock_tole32(FAR struct lfs_disk_superblock *d)
+static void lfs_superblock_tole32(FAR struct lfs_disk_superblock_s *d)
 {
   d->root[0] = lfs_tole32(d->root[0]);
   d->root[1] = lfs_tole32(d->root[1]);
@@ -611,7 +611,7 @@ static int lfs_dir_fetch(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
   for (i = 0; i < 2; i++)
     {
-      struct lfs_disk_dir test;
+      struct lfs_disk_dir_s test;
       uint32_t crc;
       int err = lfs_bd_read(lfs, tpair[i], 0, &test, sizeof(test));
       lfs_dir_fromle32(&test);
@@ -677,7 +677,7 @@ static int lfs_dir_fetch(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 }
 
 static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
-                          FAR const struct lfs_region *regions, int count)
+                          FAR const struct lfs_region_s *regions, int count)
 {
   FAR lfs_dir_t *d;
   lfs_block_t oldpair[2];
@@ -880,7 +880,7 @@ static int lfs_dir_update(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
   lfs_entry_tole32(&entry->d);
   err = lfs_dir_commit(
       lfs, dir,
-      (struct lfs_region[])
+      (FAR struct lfs_region_s[])
       {
         {
           entry->off, sizeof(entry->d), &entry->d, sizeof(entry->d)
@@ -908,7 +908,7 @@ static int lfs_dir_append(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
           lfs_entry_tole32(&entry->d);
           int err =
               lfs_dir_commit(lfs, dir,
-                             (struct lfs_region[])
+                             (FAR struct lfs_region_s[])
                              {
                                {
                                  entry->off, 0, &entry->d, sizeof(entry->d)
@@ -938,7 +938,7 @@ static int lfs_dir_append(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
           entry->off = dir->d.size - 4;
           lfs_entry_tole32(&entry->d);
           err = lfs_dir_commit(lfs, dir,
-                               (struct lfs_region[])
+                               (FAR struct lfs_region_s[])
                                {
                                  {
                                    entry->off, 0, &entry->d, sizeof(entry->d)
@@ -999,7 +999,7 @@ static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
   /* shift out the entry */
 
   err = lfs_dir_commit(lfs, dir,
-                       (struct lfs_region[])
+                       (FAR struct lfs_region_s[])
                        {
                          {
                            entry->off, lfs_entry_size(entry), NULL, 0
@@ -1633,7 +1633,7 @@ static void lfs_deinit(FAR lfs_t *lfs)
     }
 }
 
-static int lfs_init(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
+static int lfs_init(FAR lfs_t *lfs, FAR const struct lfs_config_s *cfg)
 {
   lfs->cfg = cfg;
 
@@ -2047,7 +2047,7 @@ int lfs_dir_close(FAR lfs_t *lfs, FAR lfs_dir_t *dir)
 }
 
 int lfs_dir_read(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
-                 FAR struct lfs_info *info)
+                 FAR struct lfs_info_s *info)
 {
   lfs_entry_t entry;
 
@@ -2183,7 +2183,7 @@ int lfs_dir_rewind(FAR lfs_t *lfs, FAR lfs_dir_t *dir)
 
 int lfs_file_opencfg(FAR lfs_t *lfs, FAR lfs_file_t *file,
                      FAR const char *path, int flags,
-                     FAR const struct lfs_file_config *cfg)
+                     FAR const struct lfs_file_config_s *cfg)
 {
   lfs_dir_t cwd;
   lfs_entry_t entry;
@@ -2740,7 +2740,7 @@ lfs_soff_t lfs_file_size(FAR lfs_t *lfs, FAR lfs_file_t *file)
 /* General fs operations */
 
 int lfs_stat(FAR lfs_t *lfs, FAR const char *path,
-             FAR struct lfs_info *info)
+             FAR struct lfs_info_s *info)
 {
   lfs_dir_t cwd;
   lfs_entry_t entry;
@@ -2992,7 +2992,7 @@ int lfs_rename(FAR lfs_t *lfs, FAR const char *oldpath,
   return 0;
 }
 
-int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
+int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config_s *cfg)
 {
   lfs_superblock_t superblock;
   bool valid;
@@ -3071,7 +3071,7 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
         {
           err = lfs_dir_commit(
               lfs, &superdir,
-              (struct lfs_region[])
+              (struct lfs_region_s[])
               {
                 {
                   sizeof(superdir.d), sizeof(superblock.d),
@@ -3110,7 +3110,7 @@ cleanup:
   return err;
 }
 
-int lfs_mount(FAR lfs_t *lfs, FAR const struct lfs_config *cfg)
+int lfs_mount(FAR lfs_t *lfs, FAR const struct lfs_config_s *cfg)
 {
   int err = 0;
   if (true)

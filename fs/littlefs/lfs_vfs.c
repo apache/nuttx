@@ -50,26 +50,26 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <sys/statfs.h>
 #include <assert.h>
 #include <debug.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <nuttx/kmalloc.h>
 #include <queue.h>
 #include <semaphore.h>
 #include <stdint.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/statfs.h>
 
-#include "lfs.h"
-#include "lfs_util.h"
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+
+#include "lfs.h"
+#include "lfs_util.h"
 
 /****************************************************************************
  * Private Types
@@ -77,8 +77,8 @@
 
 struct littefs_s
 {
-  struct lfs lfs;
-  struct lfs_config cfg;
+  struct lfs_s lfs;
+  struct lfs_config_s cfg;
   FAR struct mtd_dev_s *mtd;
   struct mtd_geometry_s geo;
   sem_t fs_sem;
@@ -92,7 +92,7 @@ static void    littlefs_semgive(FAR struct littefs_s *fs);
 static void    littlefs_semtake(FAR struct littefs_s *fs);
 
 static void    littlefs_tostat(FAR struct stat *st,
-                               FAR struct lfs_info *info);
+                               FAR struct lfs_info_s *info);
 
 static int     littlefs_open(FAR struct file *filep,
                              FAR const char *relpath, int oflags,
@@ -308,7 +308,7 @@ static int lfs_result_to_vfs(int result)
   return status;
 }
 
-static int _lfs_flash_read(FAR const struct lfs_config *cfg,
+static int _lfs_flash_read(FAR const struct lfs_config_s *cfg,
                            lfs_block_t block, lfs_off_t off,
                            FAR void *buffer, lfs_size_t size)
 {
@@ -326,7 +326,7 @@ static int _lfs_flash_read(FAR const struct lfs_config *cfg,
   return LFS_ERR_OK;
 }
 
-static int _lfs_flash_prog(FAR const struct lfs_config *cfg,
+static int _lfs_flash_prog(FAR const struct lfs_config_s *cfg,
                            lfs_block_t block, lfs_off_t off,
                            FAR const void *buffer, lfs_size_t size)
 {
@@ -344,7 +344,7 @@ static int _lfs_flash_prog(FAR const struct lfs_config *cfg,
   return LFS_ERR_OK;
 }
 
-static int _lfs_flash_erase(FAR const struct lfs_config *cfg,
+static int _lfs_flash_erase(FAR const struct lfs_config_s *cfg,
                             lfs_block_t block)
 {
   FAR struct mtd_dev_s *mtd;
@@ -361,7 +361,7 @@ static int _lfs_flash_erase(FAR const struct lfs_config *cfg,
   return LFS_ERR_OK;
 }
 
-static int _lfs_flash_sync(FAR const struct lfs_config *cfg)
+static int _lfs_flash_sync(FAR const struct lfs_config_s *cfg)
 {
     return LFS_ERR_OK;
 }
@@ -504,7 +504,7 @@ static int littlefs_readdir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
   FAR struct littefs_s *fs = mountpt->i_private;
-  struct lfs_info info;
+  struct lfs_info_s info;
   int ret = OK;
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
@@ -866,7 +866,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR struct stat *buf)
 {
   FAR struct littefs_s *fs = mountpt->i_private;
-  struct lfs_info info;
+  struct lfs_info_s info;
   int ret = OK;
 
   finfo("littlefs_stat\n");
@@ -890,7 +890,7 @@ breakout:
   return lfs_result_to_vfs(ret);
 }
 
-static void littlefs_tostat(struct stat *st, struct lfs_info *info)
+static void littlefs_tostat(struct stat *st, struct lfs_info_s *info)
 {
   memset(st, 0, sizeof(struct stat));
   st->st_size = info->size;
