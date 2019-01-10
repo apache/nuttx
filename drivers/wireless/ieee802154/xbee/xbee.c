@@ -1085,6 +1085,10 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   priv->querycmd[0] = 0;
   priv->querycmd[1] = 0;
 
+  /* Initialize the saddr */
+
+  IEEE802154_SADDRCOPY(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC);
+
   /* Reset the XBee radio */
 
   priv->lower->reset(priv->lower);
@@ -1093,12 +1097,13 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
 
   priv->lower->enable(priv->lower, true);
 
-  /* Trigger a dummy query without waiting to tell the XBee to operate in SPI
-   * mode. By default the XBee uses the UART interface. It switches automatically
-   * when a valid SPI frame is received.
+  /* Trigger a query to tell the XBee to operate in SPI mode. By default the XBee
+   * uses the UART interface. It switches automatically when a valid SPI frame is received.
+   *
+   * Use this opportunity to pull the extended address
    */
 
-  xbee_send_atquery(priv, "VR");
+  xbee_query_eaddr(priv);
 
   return (XBEEHANDLE)priv;
 }
