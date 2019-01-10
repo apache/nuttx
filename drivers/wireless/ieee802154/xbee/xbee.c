@@ -754,14 +754,6 @@ static void xbee_process_rxframe(FAR struct xbee_priv_s *priv,
 
   dataind->frame = frame;
 
-  /* The XBee does not give us information about how the device was addressed.
-   * It only indicates the source mode. Therefore, we use the src address mode
-   * as the destination address mode, unless the short address is set to
-   * IEEE802154_SADDR_BCAST or IEEE802154_SADDR_UNSPEC
-   */
-
-  memcpy(&dataind->dest, &priv->addr, sizeof(struct ieee802154_addr_s));
-
   if (addrmode == IEEE802154_ADDRMODE_EXTENDED)
     {
       dataind->dest.mode = IEEE802154_ADDRMODE_EXTENDED;
@@ -777,19 +769,27 @@ static void xbee_process_rxframe(FAR struct xbee_priv_s *priv,
     }
   else
     {
-      if (priv->addr.saddr == IEEE802154_SADDR_BCAST ||
-          priv->addr.saddr == IEEE802154_SADDR_UNSPEC)
-        {
-          dataind->dest.mode = IEEE802154_ADDRMODE_EXTENDED;
-        }
-      else
-        {
-          dataind->dest.mode = IEEE802154_ADDRMODE_SHORT;
-        }
-
       dataind->src.mode = IEEE802154_ADDRMODE_SHORT;
       dataind->src.saddr[1] = frame->io_data[frame->io_offset++];
       dataind->src.saddr[0] = frame->io_data[frame->io_offset++];
+    }
+
+  /* The XBee does not give us information about how the device was addressed.
+   * It only indicates the source mode. Therefore, we make the assumption that
+   * if the saddr is set, we we're addressed using the saddr, otherwise we must
+   * have been addressed using the eaddr.
+   */
+
+  memcpy(&dataind->dest, &priv->addr, sizeof(struct ieee802154_addr_s));
+
+  if (IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_BCAST) ||
+      IEEE802154_SADDRCMP(priv->addr.saddr, &IEEE802154_SADDR_UNSPEC))
+    {
+      dataind->dest.mode = IEEE802154_ADDRMODE_EXTENDED;
+    }
+  else
+    {
+      dataind->dest.mode = IEEE802154_ADDRMODE_SHORT;
     }
 
   dataind->rssi = frame->io_data[frame->io_offset++];
