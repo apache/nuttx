@@ -1854,6 +1854,11 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   char      devname[22];
   FAR struct smart_multiroot_device_s *rootdirdev;
 #endif
+  static const short sizetbl[8] =
+  {
+    CONFIG_MTD_SMART_SECTOR_SIZE,
+    512, 1024, 4096, 2048, 8192, 16384, 32768
+  };
 
   finfo("Entry\n");
 
@@ -1885,11 +1890,16 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
           if (header.status != CONFIG_SMARTFS_ERASEDSTATE)
             {
-              sectorsize = (header.status & SMART_STATUS_SIZEBITS) << 7;
+              sectorsize = sizetbl[(header.status & SMART_STATUS_SIZEBITS) >> 2];
               break;
             }
 
           readaddress += offset;
+        }
+
+      if (sectorsize == 0xffff)
+        {
+          sectorsize = CONFIG_MTD_SMART_SECTOR_SIZE;
         }
 
       offset >>= 1;
@@ -2953,7 +2963,9 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 
   /* Set the sector size of this sector */
 
-  sectsize = (sectorsize >> 9) << 2;
+  sectsize = dev->sectorsize < 4096  ? (dev->sectorsize >> 9) :
+             dev->sectorsize == 4096 ? 3 : 5 + (dev->sectorsize >> 14);
+  sectsize <<= 2;
 
   /* Set the sector logical sector to zero and setup the header status */
 
@@ -4146,11 +4158,16 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
    * 000b - 256 bytes
    * 001b - 512 bytes
    * 010b - 1024 bytes
-   * 011b - 2048 bytes
-   * etc.
+   * 100b - 2048 bytes
+   * 011b - 4096 bytes
+   * 101b - 8192 bytes
+   * 110b - 16384 bytes
+   * 110b - 32768 bytes
    */
 
-  sectsize = (dev->sectorsize >> 9) << 2;
+  sectsize = dev->sectorsize < 4096  ? (dev->sectorsize >> 9) :
+             dev->sectorsize == 4096 ? 3 : 5 + (dev->sectorsize >> 14);
+  sectsize <<= 2;
 
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xff
   header->status = ~(SMART_STATUS_COMMITTED | SMART_STATUS_SIZEBITS |
