@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: August 28, 2018</p>
+      <p>Last Updated: January 10, 2019</p>
     </td>
   </tr>
 </table>
@@ -994,8 +994,18 @@ int animals(int animal)
 <p>
   <b>Alignment of Braces</b>.
   Note that since braces must be on a separate line (see above), this indentation by two spaces has an interesting property:
-  All C statements (and case selectors) like on lines that are odd multiples of 2 spaces: 2, 6, 10, ... (2*n + 1).
-  A braces lie on a separate line indented by an even multple of 2 spaces: 4, 8, 12, ... 2*n.
+</p>
+<ul>
+  <li><p>
+    All C statements (and case selectors) lie on lines that are multiples of 4 spaces (beginning with an indentation of two): 2, 6, 10, ... (4*n + 2) (for indentation level n = 0, 1, ...)
+  </p></li>
+  <li><p>
+   braces lie on a separate line also indented by multiple of 4 spaces: 4, 8, 12, ... 4*n (for indentation level n = 1, 2, ...)
+  </p></li>
+</ul>
+<p>
+   Thus, all code at the indentation level should align on the same column.
+   Similarly, opening and closing braces at the same indentation level should also align on the same (but different) column.
 </p>
 
 <p>
