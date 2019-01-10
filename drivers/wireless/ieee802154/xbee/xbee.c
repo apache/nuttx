@@ -62,6 +62,11 @@
 
 #define XBEE_ATQUERY_TIMEOUT MSEC2TICK(100)
 
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+#define XBEE_LOCKUP_QUERYTIME MSEC2TICK(500)
+#define XBEE_LOCKUP_QUERYATTEMPTS 20
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -85,6 +90,13 @@ static void xbee_notify(FAR struct xbee_priv_s *priv,
                 FAR struct ieee802154_primitive_s *primitive);
 static void xbee_notify_worker(FAR void *arg);
 static void xbee_atquery_timeout(int argc, uint32_t arg, ...);
+
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+static void xbee_lockupcheck_timeout(int argc, uint32_t arg, ...);
+static void xbee_lockupcheck_worker(FAR void *arg);
+static void xbee_backup_worker(FAR void *arg);
+static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -524,6 +536,15 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
 
   while (frame)
     {
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+      /* Any time we receive an API frame from the XBee we reschedule our lockup
+       * timeout. Receiving an API frame is an indication that the XBee is not
+       * locked up.
+       */
+
+      xbee_lockupcheck_reschedule(priv);
+#endif
+
       /* Skip over start byte and length */
 
       frame->io_offset += XBEE_APIFRAMEINDEX_TYPE;
@@ -532,6 +553,23 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
         {
           case XBEE_APIFRAME_MODEMSTATUS:
             {
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+              /* If the Modem Status indicates that the coordinator has just formed
+               * a new network, we know that the channel and PAN ID are locked in.
+               * In case we need to reset the radio due to a lockup, we tell the
+               * XBee to write the parameters to non-volatile memory so that upon
+               * reset, we can resume operation
+               */
+
+              if (frame->io_data[frame->io_offset] == 0x06)
+                {
+                  if (work_available(&priv->backupwork))
+                    {
+                      work_queue(LPWORK, &priv->backupwork, xbee_backup_worker,
+                                 (FAR void *)priv, 0);
+                    }
+                }
+#endif
               wlinfo("Modem Status: %d\n", frame->io_data[frame->io_offset++]);
             }
             break;
@@ -606,6 +644,21 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                           if (frame->io_data[frame->io_offset] == 0)
                             {
                               primitive->u.assocconf.status = IEEE802154_STATUS_SUCCESS;
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+                              /* Upon successful association, we know that the
+                               * channel and PAN ID give us a valid connection.
+                               * In case we need to reset the radio due to a lockup,
+                               * we tell the XBee to write the parameters to
+                               * non-volatile memory so that upon reset, we can
+                               * resume operation
+                               */
+
+                              if (work_available(&priv->backupwork))
+                                {
+                                  work_queue(LPWORK, &priv->backupwork, xbee_backup_worker,
+                                             (FAR void *)priv, 0);
+                                }
+#endif
                             }
                           else
                             {
@@ -1021,6 +1074,99 @@ static void xbee_atquery_timeout(int argc, uint32_t arg, ...)
   nxsem_post(&priv->atresp_sem);
 }
 
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+/****************************************************************************
+ * Name: xbee_lockupcheck_timeout
+ *
+ * Description:
+ *   This function runs when a query to the XBee has not been issued for awhile.
+ *   We query periodically in an effort to detect if the XBee has locked up.
+ *
+ * Input Parameters:
+ *   argc - The number of available arguments
+ *   arg  - The first argument
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void xbee_lockupcheck_timeout(int argc, uint32_t arg, ...)
+{
+  FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (work_available(&priv->lockupwork))
+    {
+      work_queue(LPWORK, &priv->lockupwork, xbee_lockupcheck_worker,
+                 (FAR void *)priv, 0);
+    }
+}
+
+/****************************************************************************
+ * Name: xbee_lockupcheck_worker
+ *
+ * Description:
+ *    Perform an AT query to make sure the XBee is still responsive. If we've
+ *    gotten here, it means we haven't talked to the XBee in a while. This
+ *    is to workaround an issue where the XBee locks up. In this condition,
+ *    most of the time, querying it kicks it out of the state. In some conditions
+ *    though, the XBee locks up to the point where it needs to be reset. This
+ *    will be handled inside xbee_atquery; if we don't get a response we will
+ *    reset the XBee.
+ *
+ ****************************************************************************/
+
+static void xbee_lockupcheck_worker(FAR void *arg)
+{
+  FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
+  DEBUGASSERT(priv != NULL);
+  wlinfo("Issuing query to detect lockup\n");
+  xbee_query_chan(priv);
+}
+
+/****************************************************************************
+ * Name: xbee_backup_worker
+ *
+ * Description:
+ *    In the case that we need to reset the XBee to bring it out of a locked up
+ *    state, we need to be able to restore it's previous state seemlessly to resume
+ *    operation. In order to achieve this, we backup the parameters using the
+ *    "WR" AT command. We do this at strategic points as we don't know what type
+ *    of memory technology is being used and writing too often may reduce the lifetime
+ *    of the device. The two key points chosen are upon association for endpoint nodes,
+ *    and upon creating a new network for coordinator nodes.  These conditions
+ *    indicate that the node is actively communicating on the network and that
+ *    the channel and pan ID are now set for the network.
+ *
+ ****************************************************************************/
+
+static void xbee_backup_worker(FAR void *arg)
+{
+  FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
+  DEBUGASSERT(priv != NULL);
+  xbee_save_params(priv);
+}
+
+static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv)
+{
+  wd_cancel(priv->lockup_wd);
+
+  /* Kickoff the watchdog timer that will query the XBee periodically (if naturally
+   * occuring queries do not occur). We query periodically to make sure the XBee
+   * is still responsive. If during any query, the XBee does not respond after
+   * multiple attempts, we restart the XBee to get it back in a working state
+   */
+
+  (void)wd_start(priv->lockup_wd, XBEE_LOCKUP_QUERYTIME, xbee_lockupcheck_timeout,
+                 1, (wdparm_t)priv);
+}
+
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1083,6 +1229,9 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   priv->assocwd    = wd_create();
   priv->atquery_wd = wd_create();
   priv->reqdata_wd = wd_create();
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  priv->lockup_wd = wd_create();
+#endif
 
   priv->frameid = 0; /* Frame ID should never be 0, but it is incremented
                       * in xbee_next_frameid before being used so it will be 1 */
@@ -1108,6 +1257,10 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
    */
 
   xbee_query_eaddr(priv);
+
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  xbee_lockupcheck_reschedule(priv);
+#endif
 
   return (XBEEHANDLE)priv;
 }
@@ -1337,6 +1490,9 @@ void xbee_send_apiframe(FAR struct xbee_priv_s *priv,
 int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
 {
   int ret;
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  int retries = XBEE_LOCKUP_QUERYATTEMPTS;
+#endif
 
   /* Only allow one query at a time */
 
@@ -1392,6 +1548,15 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
           nxsem_post(&priv->atquery_sem);
           return ret;
         }
+
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+      if (--retries == 0 && !priv->querydone)
+        {
+          wlerr("XBee not responding. Resetting.\n");
+          priv->lower->reset(priv->lower);
+          retries = XBEE_LOCKUP_QUERYATTEMPTS;
+        }
+#endif
     }
   while (!priv->querydone);
 

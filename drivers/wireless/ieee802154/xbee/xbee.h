@@ -177,6 +177,11 @@ struct xbee_priv_s
   sem_t tx_sem;                   /* Support a single pending transmit */
   sem_t txdone_sem;               /* For signalling tx is completed */
   bool txdone;
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  WDOG_ID lockup_wd;              /* Watchdog to protect for XBee lockup */
+  struct work_s lockupwork;       /* For deferring lockup query check to LPWORK queue*/
+  struct work_s backupwork;       /* For deferring backing up parameters to LPWORK queue*/
+#endif
 
   /******************* Fields related to Xbee radio ***************************/
 
