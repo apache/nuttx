@@ -382,7 +382,18 @@ void xbee_send_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand);
  *
  ****************************************************************************/
 
-#define xbee_query_assoc(priv) xbee_atquery(priv "AI")
+#define xbee_query_assoc(priv) xbee_atquery(priv, "AI")
+
+/****************************************************************************
+ * Name: xbee_save_params
+ *
+ * Description:
+ *   Sends API frame with AT command request to write current parameters to
+ *   non-volatile memory so that they are used after next reset.
+ *
+ ****************************************************************************/
+
+#define xbee_save_params(priv) xbee_atquery(priv, "WR")
 
 /****************************************************************************
  * Name: xbee_set_panid

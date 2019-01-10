@@ -657,6 +657,10 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                              frame->io_data[frame->io_offset]);
                       priv->boostmode = frame->io_data[frame->io_offset++];
                     }
+                  else if (memcmp(command, "WR", 2) == 0)
+                    {
+                      wlinfo("Write Complete: %d\n", frame->io_data[frame->io_offset]);
+                    }
                   else
                     {
                       wlwarn("Unhandled AT Response: %.*s\n", 2, command);
@@ -1354,10 +1358,21 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
 
   do
     {
-      /* Setup a timeout */
+      /* There is a note in the XBee datasheet: Once you issue a WR command,
+       * do not send any additional characters to the device until after
+       * you receive the OK response.
+       *
+       * If we are issuing a WR command, don't set a timeout. We will have to rely
+       * on the XBee getting back to us reliably.
+       */
 
-      (void)wd_start(priv->atquery_wd, XBEE_ATQUERY_TIMEOUT, xbee_atquery_timeout,
-                     1, (wdparm_t)priv);
+      if (memcmp(atcommand, "WR", 2) != 0)
+        {
+          /* Setup a timeout */
+
+          (void)wd_start(priv->atquery_wd, XBEE_ATQUERY_TIMEOUT, xbee_atquery_timeout,
+                         1, (wdparm_t)priv);
+        }
 
       /* Send the query */
 
