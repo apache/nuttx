@@ -146,9 +146,12 @@ static void xbee_assocworker(FAR void *arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
-  xbee_send_atquery(priv, "AI");
+  if (priv->associating)
+    {
+      xbee_send_atquery(priv, "AI");
 
-  (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
+      (void)wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer, 1, (wdparm_t)arg);
+    }
 }
 
 /****************************************************************************
@@ -659,6 +662,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
   xbee_set_chan(priv, req->chan);
 
   xbee_set_epassocflags(priv, XBEE_EPASSOCFLAGS_AUTOASSOC);
+
+  priv->associating = true;
 
   /* In order to track the association status, we must poll the device for
    * an update.

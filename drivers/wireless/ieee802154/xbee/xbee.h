@@ -167,6 +167,7 @@ struct xbee_priv_s
                                    * callback to registered receivers */
   WDOG_ID assocwd;                /* Association watchdog */
   struct work_s assocwork;        /* For polling for association status */
+  bool associating;               /* Are we currently associating */
   sem_t atquery_sem;              /* Only allow one AT query at a time */
   sem_t atresp_sem;               /* For signaling pending AT response received */
   char querycmd[2];               /* Stores the pending AT Query command */

@@ -637,6 +637,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                           frame->io_data[frame->io_offset] != 0x13)
                         {
                           wd_cancel(priv->assocwd);
+                          priv->associating = false;
 
                           primitive = ieee802154_primitive_allocate();
                           primitive->type = IEEE802154_PRIMITIVE_CONF_ASSOC;
@@ -724,6 +725,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                   if ((priv->querycmd[0] == *command) &&
                       (priv->querycmd[1] == *(command + 1)))
                     {
+                      wd_cancel(priv->atquery_wd);
                       priv->querydone = true;
                       nxsem_post(&priv->atresp_sem);
                     }
