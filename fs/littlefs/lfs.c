@@ -65,7 +65,7 @@ struct lfs_region_s
 {
   lfs_off_t oldoff;
   lfs_size_t oldlen;
-  const void *newdata;
+  FAR const void *newdata;
   lfs_size_t newlen;
 };
 
@@ -880,7 +880,7 @@ static int lfs_dir_update(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
   lfs_entry_tole32(&entry->d);
   err = lfs_dir_commit(
       lfs, dir,
-      (FAR struct lfs_region_s[])
+      (struct lfs_region_s[])
       {
         {
           entry->off, sizeof(entry->d), &entry->d, sizeof(entry->d)
@@ -908,7 +908,7 @@ static int lfs_dir_append(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
           lfs_entry_tole32(&entry->d);
           int err =
               lfs_dir_commit(lfs, dir,
-                             (FAR struct lfs_region_s[])
+                             (struct lfs_region_s[])
                              {
                                {
                                  entry->off, 0, &entry->d, sizeof(entry->d)
@@ -938,7 +938,7 @@ static int lfs_dir_append(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
           entry->off = dir->d.size - 4;
           lfs_entry_tole32(&entry->d);
           err = lfs_dir_commit(lfs, dir,
-                               (FAR struct lfs_region_s[])
+                               (struct lfs_region_s[])
                                {
                                  {
                                    entry->off, 0, &entry->d, sizeof(entry->d)
@@ -999,7 +999,7 @@ static int lfs_dir_remove(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
   /* shift out the entry */
 
   err = lfs_dir_commit(lfs, dir,
-                       (FAR struct lfs_region_s[])
+                       (struct lfs_region_s[])
                        {
                          {
                            entry->off, lfs_entry_size(entry), NULL, 0
