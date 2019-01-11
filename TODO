@@ -2029,7 +2029,7 @@ o File system / Generic drivers (fs/, drivers/)
                socket descriptors: if a descriptor is in one range then it is
                recognized as a file descriptor; if it is in another range
                then it is recognized as a socket descriptor.  These separate
-               descriptor ranges can cause problems, for example, they makes
+               descriptor ranges can cause problems, for example, they make
                dup'ing descriptors with dup2() problematic.  The two groups
                of descriptors are really indices into two separate tables:
                On an array of file structures and the other an array of
