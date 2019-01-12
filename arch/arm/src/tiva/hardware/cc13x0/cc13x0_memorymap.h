@@ -103,7 +103,7 @@
 #define TIVA_FLASH_CFG_BASE           0x50000000 /* CC26_DUMMY_COMP */
 #define TIVA_FCFG1_BASE               0x50001000 /* FCFG1 */
 #define TIVA_FCFG2_BASE               0x50002000 /* FCFG2 */
-#ifndef CCFG_BASE
+#ifndef TIVA_CCFG_BASE
 #  define TIVA_CCFG_BASE              0x50003000 /* CCFG */
 #endif
 #define TIVA_CCFG_BASE_DEFAULT        0x50003000 /* CCFG */

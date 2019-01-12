@@ -256,7 +256,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-#if CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
                                             ccfg_modeconf);
 #else
@@ -448,7 +448,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
 #else
   NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
@@ -524,7 +524,7 @@ void cc13xx_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
 #else
   NOROM_SetupSetCacheModeAccordingToCcfgSetting();
