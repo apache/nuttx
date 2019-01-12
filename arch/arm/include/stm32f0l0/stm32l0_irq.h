@@ -63,13 +63,9 @@
 #define STM32_IRQ_RTC         (STM32_IRQ_EXTINT + 2)  /* 2:  RTC global interrupt */
 #define STM32_IRQ_FLASH       (STM32_IRQ_EXTINT + 3)  /* 3:  Flash global interrupt */
 #define STM32_IRQ_RCC_CRS     (STM32_IRQ_EXTINT + 4)  /* 4:  RCC and CRS global interrupt */
-#define STM32_IRQ_EXTI0       (STM32_IRQ_EXTINT + 5)  /* 5:  EXTI Line 0 interrupt */
-#define STM32_IRQ_EXTI1       (STM32_IRQ_EXTINT + 5)  /* 5:  EXTI Line 1 interrupt */
-#define STM32_IRQ_EXTI2       (STM32_IRQ_EXTINT + 6)  /* 6:  EXTI Line 2 interrupt */
-#define STM32_IRQ_EXTI3       (STM32_IRQ_EXTINT + 6)  /* 6:  EXTI Line 3 interrupt */
-#define STM32_IRQ_EXTI4       (STM32_IRQ_EXTINT + 7)  /* 7:  EXTI Line 4 interrupt */
-#define STM32_IRQ_EXTI95      (STM32_IRQ_EXTINT + 7)  /* 7:  EXTI Line 5-9 interrupt */
-#define STM32_IRQ_EXTI1510    (STM32_IRQ_EXTINT + 7)  /* 7:  EXTI Line 10-15 interrupt */
+#define STM32_IRQ_EXTI0_1     (STM32_IRQ_EXTINT + 5)  /* 5:  EXTI Line 0-1 interrupt */
+#define STM32_IRQ_EXTI2_3     (STM32_IRQ_EXTINT + 6)  /* 6:  EXTI Line 2-3 interrupt */
+#define STM32_IRQ_EXTI4_15    (STM32_IRQ_EXTINT + 7)  /* 7:  EXTI Line 4-15 interrupt */
 #define STM32_IRQ_TSC         (STM32_IRQ_EXTINT + 8)  /* 8:  TSC global interrupt */
 #define STM32_IRQ_DMA1CH1     (STM32_IRQ_EXTINT + 9)  /* 9:  DMA1 channel 1 global interrupt */
 #define STM32_IRQ_DMA1CH2     (STM32_IRQ_EXTINT + 10) /* 10: DMA1 channel 2 global interrupt */

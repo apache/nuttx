@@ -81,111 +81,6 @@ static struct gpio_callback_s g_gpio_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-static int stm32_exti0_isr(int irq, void *context, void *arg)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0001, STM32_EXTI_PR);
-
-  /* And dispatch the interrupt to the handler */
-
-  if (g_gpio_callbacks[0].callback != NULL)
-    {
-      xcpt_t callback = g_gpio_callbacks[0].callback;
-      void  *cbarg    = g_gpio_callbacks[0].arg;
-
-      ret = callback(irq, context, cbarg);
-    }
-
-  return ret;
-}
-
-static int stm32_exti1_isr(int irq, void *context, void *arg)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0002, STM32_EXTI_PR);
-
-  /* And dispatch the interrupt to the handler */
-
-  if (g_gpio_callbacks[1].callback != NULL)
-    {
-      xcpt_t callback = g_gpio_callbacks[1].callback;
-      void  *cbarg    = g_gpio_callbacks[1].arg;
-
-      ret = callback(irq, context, cbarg);
-    }
-
-  return ret;
-}
-
-static int stm32_exti2_isr(int irq, void *context, void *arg)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0004, STM32_EXTI_PR);
-
-  /* And dispatch the interrupt to the handler */
-
-  if (g_gpio_callbacks[2].callback != NULL)
-    {
-      xcpt_t callback = g_gpio_callbacks[2].callback;
-      void  *cbarg    = g_gpio_callbacks[2].arg;
-
-      ret = callback(irq, context, cbarg);
-    }
-
-  return ret;
-}
-
-static int stm32_exti3_isr(int irq, void *context, void  * arg)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0008, STM32_EXTI_PR);
-
-  /* And dispatch the interrupt to the handler */
-
-  if (g_gpio_callbacks[3].callback != NULL)
-    {
-      xcpt_t callback = g_gpio_callbacks[3].callback;
-      void  *cbarg    = g_gpio_callbacks[3].arg;
-
-      ret = callback(irq, context, cbarg);
-    }
-
-  return ret;
-}
-
-static int stm32_exti4_isr(int irq, void *context, void *arg)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0010, STM32_EXTI_PR);
-
-  /* And dispatch the interrupt to the handler */
-
-  if (g_gpio_callbacks[4].callback != NULL)
-    {
-      xcpt_t callback = g_gpio_callbacks[4].callback;
-      void  *cbarg    = g_gpio_callbacks[4].arg;
-
-      ret = callback(irq, context, cbarg);
-    }
-
-  return ret;
-}
-
 static int stm32_exti_multiisr(int irq, void *context, void *arg,
                                int first, int last)
 {
@@ -230,14 +125,18 @@ static int stm32_exti_multiisr(int irq, void *context, void *arg,
   return ret;
 }
 
-static int stm32_exti95_isr(int irq, void *context, void *arg)
+static int stm32_exti01_isr(int irq, void *context, void *arg)
 {
-  return stm32_exti_multiisr(irq, context, arg, 5, 9);
+  return stm32_exti_multiisr(irq, context, arg, 0, 1);
 }
 
-static int stm32_exti1510_isr(int irq, void *context, void *arg)
+static int stm32_exti23_isr(int irq, void *context, void *arg)
 {
-  return stm32_exti_multiisr(irq, context, arg, 10, 15);
+  return stm32_exti_multiisr(irq, context, arg, 2, 3);
+}
+static int stm32_exti415_isr(int irq, void *context, void *arg)
+{
+  return stm32_exti_multiisr(irq, context, arg, 4, 15);
 }
 
 /****************************************************************************
@@ -277,47 +176,26 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Select the interrupt handler for this EXTI pin */
 
-  if (pin < 5)
+  if (pin < 2)
     {
-      irq        = pin + STM32_IRQ_EXTI0;
-      nshared    = 1;
-      shared_cbs = &g_gpio_callbacks[pin];
-      switch (pin)
-        {
-          case 0:
-            handler = stm32_exti0_isr;
-            break;
-
-          case 1:
-            handler = stm32_exti1_isr;
-            break;
-
-          case 2:
-            handler = stm32_exti2_isr;
-            break;
-
-          case 3:
-            handler = stm32_exti3_isr;
-            break;
-
-          default:
-            handler = stm32_exti4_isr;
-            break;
-        }
+      irq        = STM32_IRQ_EXTI0_1;
+      handler    = stm32_exti01_isr;
+      shared_cbs = &g_gpio_callbacks[0];
+      nshared    = 2;
     }
-  else if (pin < 10)
+  else if (pin < 4)
     {
-      irq        = STM32_IRQ_EXTI95;
-      handler    = stm32_exti95_isr;
-      shared_cbs = &g_gpio_callbacks[5];
-      nshared    = 5;
+      irq        = STM32_IRQ_EXTI2_3;
+      handler    = stm32_exti23_isr;
+      shared_cbs = &g_gpio_callbacks[2];
+      nshared    = 2;
     }
   else
     {
-      irq        = STM32_IRQ_EXTI1510;
-      handler    = stm32_exti1510_isr;
-      shared_cbs = &g_gpio_callbacks[10];
-      nshared    = 6;
+      irq        = STM32_IRQ_EXTI4_15;
+      handler    = stm32_exti415_isr;
+      shared_cbs = &g_gpio_callbacks[4];
+      nshared    = 12;
     }
 
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
