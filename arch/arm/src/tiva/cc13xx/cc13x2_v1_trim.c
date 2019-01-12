@@ -45,10 +45,14 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
-#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_flash.h"
+#include "hardware/tiva_prcm.h"
+#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_aon_pmctl.h"
+#include "hardware/tiva_aon_rtc.h"
+#include "hardware/tiva_adi2_refsys.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -98,13 +102,15 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
   uint32_t current_rcoschfctrl;
   uint32_t current_trim;
 
-  current_rcoschfctrl = getreg16(TIVA_AUX_DDI0_OSCRCOSCHFCTL);
+  current_rcoschfctrl = getreg16(TIVA_DDI0_OSC_RCOSCMFCTL);
   current_trim =
     (((current_rcoschfctrl & DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) >>
       DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT) ^ 0xc0);
 
   while (toCode != current_trim)
     {
+      uint16_t regval16;
+
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
       (void)getreg32(TIVA_AON_RTC_SYNCLF);
@@ -122,7 +128,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
                   ~DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) |
                   ((current_trim ^ 0xc0) <<
                   DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT);
-      putreg16(regval16, TIVA_AUX_DDI0_OSCRCOSCHFCTL);
+      putreg16(regval16, TIVA_DDI0_OSC_RCOSCMFCTL);
     }
 }
 
@@ -141,8 +147,8 @@ static void Step_VBG(int32_t target_signed)
 {
   /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI_3_REFSYS:REFSYSCTL3.TRIM_VBG) */
 
-  uint32_t ref_sysctl;
   int32_t current_signed;
+  uint8_t ref_sysctl;
 
   do
     {
@@ -156,7 +162,7 @@ static void Step_VBG(int32_t target_signed)
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
-      HWREG(TIVA_AON_RTC_SYNCLF);
+      (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
       if (target_signed != current_signed)
         {
@@ -169,16 +175,15 @@ static void Step_VBG(int32_t target_signed)
               current_signed--;
             }
 
-          regval = (ref_sysctl &
-                    ~(ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN |
-                      ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK)) |
-                      ((((uint32_t)current_signed) <<
-                      ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT) &
-                      ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK);
-          putreg8((uint8_t)regval, TIVA_ADI3_REFSYS_REFSYSCTL3);
+          ref_sysctl &= ~(ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN |
+                          ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK)) |
+                          ((((uint32_t)current_signed) <<
+                           ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT) &
+                         ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK);
+          putreg8(ref_sysctl, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-          regval |= ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
-          putreg8((uint8_t)regval, TIVA_ADI3_REFSYS_REFSYSCTL3);
+          ref_sysctl |= ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+          putreg8(ref_sysctl, TIVA_ADI3_REFSYS_REFSYSCTL3);
         }
     }
   while (target_signed != current_signed);
@@ -229,9 +234,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * OSCHfSourceSwitch().
    */
 
-  HWREG(TIVA_AUX_DDI0_OSCMASK16B + (DDI0_OSC_CTL0_OFFSET << 1) + 4) =
-    DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
-    (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
+  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
+           (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
+  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
@@ -264,6 +269,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   {
     uint32_t fusedata;
     uint32_t org_resetctl;
+    uint32_t regval;
+    uint16_t regval16;
+    uint8_t regval8;
 
     /* Get VTRIM_COARSE and VTRIM_DIG from EFUSE shadow register
      * OSC_BIAS_LDO_TRIM
@@ -276,28 +284,28 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
                        FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_SHIFT);
 
     /* Write to register SOCLDO_0_1 (addr offset 3) bits[7:4] (VTRIM_COARSE)
-     * and bits[3:0] (VTRIM_DIG) in ADI_2_REFSYS. Direct write can be used
+     * and bits[3:0] (VTRIM_DIG) in ADI2_REFSYS. Direct write can be used
      * since all register bit fields are trimmed.
      */
 
     regval8 = ((((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_MASK) >>
                  FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_SHIFT) <<
-                ADI_2_REFSYS_SOCLDOCTL1_VTRIM_COARSE_SHIFT) |
+                ADI2_REFSYS_SOCLDOCTL1_VTRIM_COARSE_SHIFT) |
                (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_MASK) >>
                  FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_SHIFT) <<
-                ADI_2_REFSYS_SOCLDOCTL1_VTRIM_DIG_SHIFT));
-    putreg8(regval8, TIVA_ADI2_DIR + ADI_2_REFSYS_SOCLDOCTL1_OFFSET);
+                ADI2_REFSYS_SOCLDOCTL1_VTRIM_DIG_SHIFT));
+    putreg8(regval8, TIVA_ADI2_DIR + ADI2_REFSYS_SOCLDOCTL1_OFFSET);
 
     /* Write to register CTLSOCREFSYS0 (addr offset 0) bits[4:0] (TRIMIREF) in
-     * ADI_2_REFSYS. Avoid using masked write access since bit field spans
+     * ADI2_REFSYS. Avoid using masked write access since bit field spans
      * nibble boundary. Direct write can be used since this is the only defined
      * bit field in this register.
      */
 
     regval8 = (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_MASK) >>
                 FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_SHIFT) <<
-               ADI_2_REFSYS_REFSYSCTL0_TRIM_IREF_SHIFT);
-    putreg8(regval8, TIVA_ADI2_DIR + ADI_2_REFSYS_REFSYSCTL0_OFFSET);
+               ADI2_REFSYS_REFSYSCTL0_TRIM_IREF_SHIFT);
+    putreg8(regval8, TIVA_ADI2_DIR + ADI2_REFSYS_REFSYSCTL0_OFFSET);
 
     /* Write to register CTLSOCREFSYS2 (addr offset 4) bits[7:4] (TRIMMAG) in
      * ADI_3_REFSYS
@@ -318,14 +326,15 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     org_resetctl =
       (getreg32(TIVA_AON_PMCTL_RESETCTL) &
        ~AON_PMCTL_RESETCTL_MCU_WARM_RESET_MASK);
-    HWREG(TIVA_AON_PMCTL_RESETCTL) =
-      (org_resetctl &
-       ~(AON_PMCTL_RESETCTL_CLK_LOSS_EN | AON_PMCTL_RESETCTL_VDD_LOSS_EN |
-         AON_PMCTL_RESETCTL_VDDR_LOSS_EN | AON_PMCTL_RESETCTL_VDDS_LOSS_EN));
+
+    regval = (org_resetctl &
+              ~(AON_PMCTL_RESETCTL_CLK_LOSS_EN | AON_PMCTL_RESETCTL_VDD_LOSS_EN |
+                AON_PMCTL_RESETCTL_VDDR_LOSS_EN | AON_PMCTL_RESETCTL_VDDS_LOSS_EN));
+    putreg32(regval, TIVA_AON_PMCTL_RESETCTL);
 
     /* Wait for xxx_LOSS_EN setting to propagate */
 
-    HWREG(TIVA_AON_RTC_SYNC);
+    (void)getreg32(TIVA_AON_RTC_SYNC);
 
     /* The VDDS_BOD trim and the VDDR trim is already stepped up to max/HH if
      * "CC1352 boost mode" is requested. See function
@@ -389,22 +398,24 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
     /* Wait for next edge on SCLK_LF (positive or negative) */
 
-    HWREG(TIVA_AON_RTC_SYNCLF);
+    (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
     /* Wait for next edge on SCLK_LF (positive or negative) */
 
-    HWREG(TIVA_AON_RTC_SYNCLF);
+    (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
-    HWREG(TIVA_AON_PMCTL_RESETCTL) = org_resetctl;
+    (void)getreg32(TIVA_AON_PMCTL_RESETCTL) = org_resetctl;
 
     /* Wait for xxx_LOSS_EN setting to propagate */
 
-    HWREG(TIVA_AON_RTC_SYNC);
+    (void)getreg32(TIVA_AON_RTC_SYNC);
   }
 
   {
     uint32_t trimreg;
     uint32_t trimvalue;
+    uint16_t regval16;
+    uint8_t regval8;
 
     /*Propagate the LPM_BIAS trim */
 

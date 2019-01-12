@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardware/tiva_flash.h
+ * arch/arm/src/tiva/hardware/tiva_adi2_refsys.h
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H
 
 /************************************************************************************
  * Included Files
@@ -42,23 +42,32 @@
 
 #include <nuttx/config.h>
 
+/* Include the pin mapping file for the specific Tiva/Stellaris/SimpleLink chip */
+
 #if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
-
-/* The TM4C129 family has a different FLASH register layout.  Others (including LM4F
- * and TM4C123) are similar to the LM3S family
- */
-
-#  if defined(CONFIG_ARCH_CHIP_TM4C129)
-#    include "hardware/tm4c/tm4c_flash.h"
-#  else
-#    include "hardware/lm/lm3s_flash.h"
-#  endif
+  /* These architectures do not support the ADI2 REFSYS block */
 #elif defined(CONFIG_ARCH_CHIP_CC13X0)
-#  include "hardware/cc13x0/cc13x0_flash.h"
+#  include "hardware/cc13x0/cc13x0_adi2_refsys.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_flash.h"
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi2_refsys.h"
 #else
-#  error "Unsupported Tiva/Stellaris FLASH"
+#  error "Unsupported Tiva/Stellaris/SimpleLink ADI2 REFSYS"
 #endif
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_FLASH_H */
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H */

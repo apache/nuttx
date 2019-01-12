@@ -45,8 +45,9 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
-#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_flash.h"
+#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_aon_pmctl.h"
 
@@ -188,6 +189,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     /* Set LPM_BIAS_WIDTH_TRIM according to FCFG1 configuration */
 
     {
+      uint32_t trimwidth;
+      uint16_t regval16;
+
       uint32_t trimwidth =
         ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_MASK) >>
          FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_SHIFT);

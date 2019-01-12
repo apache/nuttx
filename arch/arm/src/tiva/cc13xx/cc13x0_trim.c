@@ -45,9 +45,12 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
-#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_flash.h"
+#include "hardware/tiva_prcm.h"
+#include "hardware/tiva_vims.h"
 #include "hardware/tiva_ddi0_osc.h"
+#include "hardware/tiva_adi2_refsys.h"
 
 /******************************************************************************
  * Private Functions
@@ -196,8 +199,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
             }
         }
 
-      regval8 = (vtrim_udig << ADI_2_REFSYS_SOCLDOCTL0_VTRIM_UDIG_SHIFT) |
-                (vtrim_bod << ADI_2_REFSYS_SOCLDOCTL0_VTRIM_BOD_SHIFT);
+      regval8 = (vtrim_udig << ADI2_REFSYS_SOCLDOCTL0_VTRIM_UDIG_SHIFT) |
+                (vtrim_bod << ADI2_REFSYS_SOCLDOCTL0_VTRIM_BOD_SHIFT);
       putreg8(regval, TIVA_ADI2_SOCLDOCTL0);
     }
 
