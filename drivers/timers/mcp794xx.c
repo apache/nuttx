@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/timers/mcp794xx.h>
@@ -59,6 +60,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define MCP794XX_OSCRUN_READ_RETRY  5  /* How many time to read OSCRUN status */
 
 /* Configuration ************************************************************/
 /* This RTC implementation supports only date/time RTC hardware */
@@ -371,6 +374,12 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   tp->tm_year = rtc_bcd2bin(buffer[6] & MCP794XX_RTCYEAR_BCDMASK);
 
+  /* The Year is stored in the RTC starting from 2001. We need to convert it
+   * to POSIX format that expects the year starting from 1900.
+   */
+
+  tp->tm_year += 101;
+
   rtc_dumptime(tp, "Returning");
   return OK;
 }
@@ -396,9 +405,10 @@ int up_rtc_settime(FAR const struct timespec *tp)
   struct tm newtm;
   time_t newtime;
   uint8_t buffer[8];
-  uint8_t secaddr;
-  uint8_t seconds;
+  uint8_t wkdayaddr;
+  uint8_t wkday;
   int ret;
+  int retries = MCP794XX_OSCRUN_READ_RETRY;
 
   /* If this function is called before the RTC has been initialized then
    * just return an error.
@@ -437,14 +447,67 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   rtc_dumptime(&newtm, "New time");
 
+  /* Stop the oscillator first. */
+
+  buffer[0]        = MCP794XX_REG_RTCSEC;
+  buffer[1]        = 0;
+
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
+  msg[0].flags     = 0;
+  msg[0].buffer    = buffer;
+  msg[0].length    = 2;
+
+  ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 1);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Verify that the oscillator is not running. */
+
+  wkdayaddr = MCP794XX_REG_RTCWKDAY;
+
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
+  msg[0].flags     = I2C_M_NOSTOP;
+  msg[0].buffer    = &wkdayaddr;
+  msg[0].length    = 1;
+
+  msg[1].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[1].addr      = g_mcp794xx.addr;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = &wkday;
+  msg[1].length    = 1;
+
+  retries = MCP794XX_OSCRUN_READ_RETRY;
+
+  do
+    {
+      /* Give time to oscillator to change its status */
+
+      nxsig_usleep(10000);
+
+      ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 2);
+      if (ret < 0)
+        {
+          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          return ret;
+        }
+
+      retries--;
+    }
+  while ((wkday & MCP794XX_RTCWKDAY_OSCRUN) != 0 && retries > 0);
+
   /* Construct the message */
   /* Write starting with the seconds register */
 
   buffer[0] = MCP794XX_REG_RTCSEC;
 
-  /* Save seconds (0-59) converted to BCD. And set the ST. */
+  /* Save seconds (0-59) converted to BCD. And keep ST cleared. */
 
-  buffer[1] = rtc_bin2bcd(newtm.tm_sec) | MCP794XX_RTCSEC_ST;
+  buffer[1] = rtc_bin2bcd(newtm.tm_sec);
 
   /* Save minutes (0-59) converted to BCD */
 
@@ -472,9 +535,12 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save the year (00-99) */
 
-  buffer[7] = rtc_bin2bcd(newtm.tm_year);
+  /* First we need to convert "tm_year" to value starting from 2001.
+   * The "tm_year" in POSIX is relative to 1900, so 2019 is 119,
+   * so you just need to subtract 101: year = (1900 + value) - 2001
+   */
 
-  /* Setup the I2C message */
+  buffer[7]        = rtc_bin2bcd(newtm.tm_year - 101);
 
   msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
   msg[0].addr      = g_mcp794xx.addr;
@@ -482,37 +548,64 @@ int up_rtc_settime(FAR const struct timespec *tp)
   msg[0].buffer    = buffer;
   msg[0].length    = 8;
 
-  /* Read back the seconds register */
+  ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 1);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      return ret;
+    }
 
-  secaddr = MCP794XX_REG_RTCSEC;
+  /* Start the oscillator. */
+
+  buffer[1]       |= MCP794XX_RTCSEC_ST;
+
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
+  msg[0].flags     = 0;
+  msg[0].buffer    = buffer;
+  msg[0].length    = 2;
+
+  ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 1);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Verify that the oscillator is running. */
+
+  wkdayaddr = MCP794XX_REG_RTCWKDAY;
+
+  msg[0].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
+  msg[0].addr      = g_mcp794xx.addr;
+  msg[0].flags     = I2C_M_NOSTOP;
+  msg[0].buffer    = &wkdayaddr;
+  msg[0].length    = 1;
 
   msg[1].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
   msg[1].addr      = g_mcp794xx.addr;
-  msg[1].flags     = I2C_M_NOSTOP;
-  msg[1].buffer    = &secaddr;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = &wkday;
   msg[1].length    = 1;
 
-  msg[2].frequency = CONFIG_MCP794XX_I2C_FREQUENCY;
-  msg[2].addr      = g_mcp794xx.addr;
-  msg[2].flags     = I2C_M_READ;
-  msg[2].buffer    = &seconds;
-  msg[2].length    = 1;
-
-  /* Perform the transfer.  This transfer will be repeated if the seconds
-   * count rolls over to a smaller value while writing.
-   */
+  retries = MCP794XX_OSCRUN_READ_RETRY;
 
   do
     {
-      ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 3);
+      /* Give time to oscillator to change its status */
+
+      nxsig_usleep(10000);
+
+      ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 2);
       if (ret < 0)
         {
           rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
           return ret;
         }
+
+      retries--;
     }
-  while ((buffer[1] & MCP794XX_RTCSEC_BCDMASK) >
-         (seconds & MCP794XX_RTCSEC_BCDMASK));
+  while ((wkday & MCP794XX_RTCWKDAY_OSCRUN) == 0 && retries > 0);
 
   return OK;
 }

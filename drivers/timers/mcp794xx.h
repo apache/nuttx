@@ -62,7 +62,7 @@
 #define MCP794XX_REG_RTCWKDAY        0x03  /* Day register. */
 #  define MCP794XX_RTCWKDAY_VBATEN   (1 << 3)
 #  define MCP794XX_RTCWKDAY_PWRFAIL  (1 << 4)
-#  define MCP794XX_RTCWKDAY_OSRUN    (1 << 5)
+#  define MCP794XX_RTCWKDAY_OSCRUN   (1 << 5)
 #  define MCP794XX_RTCWKDAY_BCDMASK  0x07
 
 #define MCP794XX_REG_RTCDATE         0x04  /* Date register. */
