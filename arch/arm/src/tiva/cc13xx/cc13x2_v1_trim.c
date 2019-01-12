@@ -44,7 +44,11 @@
 
 #include <nuttx/config.h>
 
-#include "chipinfo.h"
+#include "tiva_chipinfo.h"
+#include "hardware/tiva_vims.h"
+#include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_ddi0_osc.h"
+#include "hardware/tiva_aon_pmctl.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -96,8 +100,8 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
 
   current_rcoschfctrl = getreg16(TIVA_AUX_DDI0_OSCRCOSCHFCTL);
   current_trim =
-    (((current_rcoschfctrl & DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) >>
-      DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT) ^ 0xc0);
+    (((current_rcoschfctrl & DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) >>
+      DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT) ^ 0xc0);
 
   while (toCode != current_trim)
     {
@@ -115,9 +119,9 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
         }
 
       regval16 = (current_rcoschfctrl &
-                  ~DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) |
+                  ~DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) |
                   ((current_trim ^ 0xc0) <<
-                  DDI_0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT);
+                  DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT);
       putreg16(regval16, TIVA_AUX_DDI0_OSCRCOSCHFCTL);
     }
 }
@@ -225,9 +229,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * OSCHfSourceSwitch().
    */
 
-  HWREG(TIVA_AUX_DDI0_OSCMASK16B + (DDI_0_OSC_CTL0_OFFSET << 1) + 4) =
-    DDI_0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
-    (DDI_0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
+  HWREG(TIVA_AUX_DDI0_OSCMASK16B + (DDI0_OSC_CTL0_OFFSET << 1) + 4) =
+    DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
+    (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
 
   /* Dummy read to ensure that the write has propagated */
 
@@ -247,7 +251,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
                                             ccfg_modeconf);
 #else
@@ -433,7 +437,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
 #else
   NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
@@ -471,7 +475,7 @@ static void trim_coldreset(void)
  ******************************************************************************/
 
 /******************************************************************************
- * Name: cc13x2_cc26x2_trim_device
+ * Name: cc13xx_trim_device
  *
  * Descriptions:
  *   Perform the necessary trim of the device which is not done in boot code
@@ -482,7 +486,7 @@ static void trim_coldreset(void)
  *
  ******************************************************************************/
 
-void cc13x2_cc26x2_trim_device(void)
+void cc13xx_trim_device(void)
 {
   uint32_t fcfg1_revision;
   uint32_t aon_sysresetctrl;
@@ -509,7 +513,7 @@ void cc13x2_cc26x2_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
 #else
   NOROM_SetupSetCacheModeAccordingToCcfgSetting();

@@ -91,6 +91,14 @@
 const uintptr_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* REVISIT: Should be moved to a header file */
+
+void cc13xx_trim_device(void);
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -219,7 +227,7 @@ void __start(void)
 
   /* Perform the necessary trim of the device which is not done in boot code. */
 
-  cc13x2_cc26x2_trim_device();
+  cc13xx_trim_device();
 
   /* Configure the UART so that we can get debug output as soon as possible */
 

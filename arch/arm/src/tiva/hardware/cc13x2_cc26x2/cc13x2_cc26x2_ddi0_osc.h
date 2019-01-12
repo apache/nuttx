@@ -137,7 +137,7 @@
                                                                * input clock from AON for the xosc_lf */
 #  define DDI0_OSC_CTL0_XOSC_LF_DIG_32KHZ           (0)                                         /* Use 32kHz XOSC as xosc_lf
                                                                                                  * clock source */
-#  define DDI0_OSC_CTL0_XOSC_LF_DIG_BYPASS          DDI0_OSC_CTL0_XOSC_LF_DIG_BYPASS            /* Use digital input (from AON)
+#  define DDI0_OSC_CTL0_XOSC_LF_DIG_DIGINPUT        DDI0_OSC_CTL0_XOSC_LF_DIG_BYPASS            /* Use digital input (from AON)
                                                                                                  * as xosc_lf clock source */
 #define DDI0_OSC_CTL0_XOSC_HF_POWER_MODE            (1 << 11) /* Bit 11 */
 #define DDI0_OSC_CTL0_RCOSC_LF_TRIMMED              (1 << 12) /* Bit 12 */
@@ -329,9 +329,9 @@
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT       (0)       /* Bits 0-3: Adjusts bias current to RCOSC_MF */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_MASK        (15 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ(n)        ((uint32_t)(n) << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)
-#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_          (8 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* minimum current */
-#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_          (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* default current */
-#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_          (7 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* maximum current */
+#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_MIN       (8 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* minimum current */
+#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_DEFAULT   (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* default current */
+#  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_MAX       (7 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* maximum current */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT       (4)       /* Bits 4-5: Select fine resistor for frequency adjustment */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_MASK        (3 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_11K       (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)  /* 11kohms, minimum resistance,

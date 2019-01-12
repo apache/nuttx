@@ -44,7 +44,11 @@
 
 #include <nuttx/config.h>
 
-#include "chipinfo.h"
+#include "tiva_chipinfo.h"
+#include "hardware/tiva_vims.h"
+#include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_ddi0_osc.h"
+#include "hardware/tiva_aon_pmctl.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -124,9 +128,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * OSCHfSourceSwitch().
    */
 
-  regval = DDI_0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
-          (DDI_0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
-  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (DDI_0_OSC_CTL0_OFFSET << 1) + 4);
+  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
+          (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
+  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
@@ -146,7 +150,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
                                             ccfg_ModeConfReg);
 #else
@@ -203,7 +207,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_ModeConfReg);
 #else
   NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_ModeConfReg);
@@ -241,7 +245,7 @@ static void trim_coldreset(void)
  ****************************************************************************/
 
 /******************************************************************************
- * Name: 
+ * Name: cc13xx_trim_device
  *
  * Description:
  *   Perform the necessary trim of the device which is not done in boot code
@@ -252,7 +256,7 @@ static void trim_coldreset(void)
  *
  ******************************************************************************/
 
-void cc13x2_cc26x2_trim_device(void)
+void cc13xx_trim_device(void)
 {
   uint32_t fcfg1_revision;
   uint32_t aon_sysresetctrl;
@@ -281,7 +285,7 @@ void cc13x2_cc26x2_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if ( CCFG_BASE == CCFG_BASE_DEFAULT )
+#if CCFG_BASE == CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
 #else
   NOROM_SetupSetCacheModeAccordingToCcfgSetting();

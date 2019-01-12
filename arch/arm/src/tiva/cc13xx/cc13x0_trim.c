@@ -44,7 +44,10 @@
 
 #include <nuttx/config.h>
 
-#include "cc13xx/cc13xx_chipinfo.h"
+#include "tiva_chipinfo.h"
+#include "hardware/tiva_vims.h"
+#include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_ddi0_osc.h"
 
 /******************************************************************************
  * Private Functions
@@ -246,7 +249,7 @@ static void trim_coldreset(void)
  ******************************************************************************/
 
 /******************************************************************************
- * Name: cc13x0_trim_device
+ * Name: cc13xx_trim_device
  *
  * Description:
  *   Perform the necessary trim of the device which is not done in boot code
@@ -257,7 +260,7 @@ static void trim_coldreset(void)
  *
  ******************************************************************************/
 
-void cc13x0_trim_device(void)
+void cc13xx_trim_device(void)
 {
   uint32_t fcfg1_revision;
   uint32_t aon_sysresetctrl;
