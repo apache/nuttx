@@ -2,7 +2,7 @@
  * drivers/timers/mcp794xx.c
  *
  *   Copyright (C) 2019 Abdelatif Guettouche. All rights reserved.
- *   Author: 2019 Abdelatif Guettouche <abdelatif.guettouche@gmail.com>
+ *   Author: Abdelatif Guettouche <abdelatif.guettouche@gmail.com>
  *
  * This file is a part of NuttX:
  *

@@ -103,9 +103,15 @@ endif
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
   CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
   CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13x0_trim.c
 else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
   CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
   CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
+ifeq ($(CONFIG_ARCH_CHIP_CC13XX_V1),y)
+  CHIP_CSRCS += cc13x2_v1_trim.c
+else
+  CHIP_CSRCS += cc13x2_v2_trim.c
+endif
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
