@@ -219,23 +219,29 @@ static const struct file_operations g_telnet_fops =
   telnet_close,  /* close */
   telnet_read,   /* read */
   telnet_write,  /* write */
-  0,             /* seek */
+  NULL,          /* seek */
   common_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , telnet_poll  /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
 #endif
 };
 
 static const struct file_operations g_factory_fops =
 {
-  0,             /* open */
-  0,             /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   factory_read,  /* read */
   factory_write, /* write */
-  0,             /* seek */
-  common_ioctl  /* ioctl */
+  NULL,          /* seek */
+  common_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , telnet_poll  /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
 #endif
 };
 
@@ -1078,6 +1084,7 @@ static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_POLL
 static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -1111,6 +1118,7 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return psock_poll(psock, fds, setup);
 }
+#endif
 
 /****************************************************************************
  * Name: common_ioctl
