@@ -836,7 +836,6 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                         {
                           nwarn("WARNING: Unsupported protoype: %u\n",
                                 ipv6hdr->proto);
-                          ret = -EPROTO;
                           goto drop;
                         }
                     }
@@ -845,7 +844,6 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                     {
                       nwarn("WARNING: Packet too small: Have %u need >%u\n",
                             radio->r_dev.d_len, hdrlen);
-                      ret = -ENOBUFS;
                       goto drop;
                     }
 
@@ -858,6 +856,10 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                                                &destmac);
 drop:
                   radio->r_dev.d_len = 0;
+
+                  /* We consumed the frame, so we must return 0. */
+
+                  ret = 0;
                 }
             }
         }
