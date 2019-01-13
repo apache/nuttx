@@ -84,7 +84,7 @@
 
 /* AON PMCTL Bitfield Definitions ***********************************************************************************/
 
-/* AON_PMCTL_AUXSCECLK */
+/* TIVA_AON_PMCTL_AUXSCECLK */
 
 #define AON_PMCTL_AUXSCECLK_SRC             (1 << 0)  /* Bit 0:  Clock source for AUX dmaon in active mode */
 #  define AON_PMCTL_AUXSCECLK_SCLK_HFDIV2   (0)                        /* HF Clock divided by 2 (SCLK_HFDIV2) */
@@ -93,7 +93,7 @@
 #  define AON_PMCTL_AUXSCECLK_PD_NO_CLOCK   (0)                        /* No clock */
 #  define AON_PMCTL_AUXSCECLK_PD_SCLK_LF    AON_PMCTL_AUXSCECLK_PD_SRC /* LF clock (SCLK_LF) */
 
-/* AON_PMCTL_RAMCFG */
+/* TIVA_AON_PMCTL_RAMCFG */
 
 #define AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_SHIFT        (0)       /* Bits 0-3: Select banks for retention during MCU
                                                                  *           bus doman power off */
@@ -110,7 +110,7 @@
 #define AON_PMCTL_RAMCFG_AUX_SRAM_RET_EN    (1 << 16) /* Bit 16 */
 #define AON_PMCTL_RAMCFG_AUX_SRAM_PWR_OFF   (1 << 17) /* Bit 17 */
 
-/* AON_PMCTL_PWRCTL */
+/* TIVA_AON_PMCTL_PWRCTL */
 
 #define AON_PMCTL_PWRCTL_DCDC_EN            (1 << 0)  /* Bit 0:  Select to use DCDC or GLC0 during recharge of VDDR */
 #  define AON_PMCTL_PWRCTL_DCDC_EN_GLD0     (0)                      /* Use GLDO for recharge of VDDR */
@@ -122,17 +122,17 @@
 #  define AON_PMCTL_PWRCTL_DCDC_ACTIVE_GLD0 (0)                          /* Use GLDO for regulation of VDDR in active mode */
 #  define AON_PMCTL_PWRCTL_DCDC_ACTIVE_DCDC AON_PMCTL_PWRCTL_DCDC_ACTIVE /* Use DCDC for regulation of VDDR in active mode */
 
-/* AON_PMCTL_PWRSTAT */
+/* TIVA_AON_PMCTL_PWRSTAT */
 
 #define AON_PMCTL_PWRSTAT_AUX_RESET_DONE      (1 << 0)  /* Bit 0:  Indicates Reset Done from AUX */
 #define AON_PMCTL_PWRSTAT_AUX_BUS_RESET_DONE  (1 << 1)  /* Bit 1: Indicates Reset Done from AUX Bus */
 #define AON_PMCTL_PWRSTAT_JTAG_PD_ON          (1 << 2)  /* Bit 2:  JTAG power state (ON) */
 
-/* AON_PMCTL_SHUTDOWN */
+/* TIVA_AON_PMCTL_SHUTDOWN */
 
 #define AON_PMCTL_SHUTDOWN_EN               (1 << 0)  /* Bit 0:  Shutdown control */
 
-/* AON_PMCTL_RECHARGECFG */
+/* TIVA_AON_PMCTL_RECHARGECFG */
 
 #define AON_PMCTL_RECHARGECFG_PER_E_SHIFT       (0)       /* Bits 0-2 */
 #define AON_PMCTL_RECHARGECFG_PER_E_MASK        (7 << AON_PMCTL_RECHARGECFG_PER_E_SHIFT)
@@ -160,8 +160,7 @@
 #  define AON_PMCTL_RECHARGECFG_MODE_ADAPTIVE   (2 << AON_PMCTL_RECHARGECFG_MODE_SHIFT) /* Adaptive timer */
 #  define AON_PMCTL_RECHARGECFG_MODE_COMPARATOR (3 << AON_PMCTL_RECHARGECFG_MODE_SHIFT) /* External recharge comparator */
 
-
-/* AON_PMCTL_RECHARGESTAT */
+/* TIVA_AON_PMCTL_RECHARGESTAT */
 
 #define AON_PMCTL_RECHARGESTAT_MAX_USED_PER_SHIFT (0)  /* Bits 0-15:  Mzx 32KHz periods between recharge cycles and VDDR
                                                         *             is still above BDDR_OK threshold. */
@@ -173,7 +172,7 @@
 #  define AON_PMCTL_RECHARGESTAT_VDDR_SMPL2       (4 << AON_PMCTL_RECHARGESTAT_VDDR_SMPLS_SHIFT)
 #  define AON_PMCTL_RECHARGESTAT_VDDR_SMPL3       (8 << AON_PMCTL_RECHARGESTAT_VDDR_SMPLS_SHIFT)
 
-/* AON_PMCTL_OSCCFG */
+/* TIVA_AON_PMCTL_OSCCFG */
 
 #define AON_PMCTL_OSCCFG_PER_E_SHIFT        (0)       /* Bits 0-2 */
 #define AON_PMCTL_OSCCFG_PER_E_MASK         (7 << AON_PMCTL_OSCCFG_PER_E_SHIFT)
@@ -182,7 +181,7 @@
 #define AON_PMCTL_OSCCFG_PER_M_MASK         (31 << AON_PMCTL_OSCCFG_PER_M_SHIFT)
 #  define AON_PMCTL_OSCCFG_PER_M(n)         ((uint32_t)(n) << AON_PMCTL_OSCCFG_PER_M_SHIFT)
 
-/* AON_PMCTL_RESETCTL */
+/* TIVA_AON_PMCTL_RESETCTL */
 
 #define AON_PMCTL_RESETCTL_RESET_SRC_SHIFT       (1)       /* Bits 1-3: Shows the root cause of the last system reset */
 #define AON_PMCTL_RESETCTL_RESET_SRC_MASK        (7 << AON_PMCTL_RESETCTL_RESET_SRC_SHIFT)
@@ -211,14 +210,14 @@
 #define AON_PMCTL_RESETCTL_BOOT_DET_1_CLR   (1 << 25) /* Bit 25 */
 #define AON_PMCTL_RESETCTL_SYSRESET         (1 << 31) /* Bit 31: Cold reset */
 
-/* AON_PMCTL_SLEEPCTL */
+/* TIVA_AON_PMCTL_SLEEPCTL */
 
 #define AON_PMCTL_SLEEPCTL_IO_PAD_SLEEP_DIS (1 << 0)  /* Bit 0:  Controls the I/O pad sleep mode */
 
-/* AON_PMCTL_JTAGCFG */
+/* TIVA_AON_PMCTL_JTAGCFG */
 
 #define AON_PMCTL_JTAGCFG_JTAG_PD_FORCE_ON  (1 << 8)  /* Bit 8:  Controls JTAG Power domain power state */
 
-/* AON_PMCTL_JTAGUSERCODE (32-bit value) */
+/* TIVA_AON_PMCTL_JTAGUSERCODE (32-bit value) */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_AON_PMCTL_H */

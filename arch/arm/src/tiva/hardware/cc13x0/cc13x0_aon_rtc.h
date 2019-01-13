@@ -84,7 +84,7 @@
 
 /* AON RTC Bitfield Definitions *************************************************************************************/
 
-/* AON_RTC_CTL */
+/* TIVA_AON_RTC_CTL */
 
 #define AON_RTC_CTL_EN                  (1 << 0)  /* Bit 0:  Enable RTC counter */
 #define AON_RTC_CTL_RTC_UPD_EN          (1 << 1)  /* Bit 1:  Enable 16-KHz RTC_UPD output */
@@ -113,17 +113,17 @@
 #  define AON_RTC_CTL_COMB_EV_MASK_CH1  (2 << AON_RTC_CTL_COMB_EV_MASK_SHIFT) /* Use Chan 1 delayed event to combine */
 #  define AON_RTC_CTL_COMB_EV_MASK_CH2  (4 << AON_RTC_CTL_COMB_EV_MASK_SHIFT) /* Use Chan 2 delayed event to combine */
 
-/* AON_RTC_EVFLAGS */
+/* TIVA_AON_RTC_EVFLAGS */
 
 #define AON_RTC_EVFLAGS_CH0             (1 << 0)  /* Bit 0:  Channel 0 event flag */
 #define AON_RTC_EVFLAGS_CH1             (1 << 8)  /* Bit 8:  Channel 1 event flag */
 #define AON_RTC_EVFLAGS_CH2             (1 << 16) /* Bit 16: Channel 2 event flag */
 
-/* AON_RTC_SEC (32-bit value, units of seconds) */
-/* AON_RTC_SUBSEC (32-bit value, b32 fractional seconds) */
-/* AON_RTC_SUBSECINC (32-bit value) */
+/* TIVA_AON_RTC_SEC (32-bit value, units of seconds) */
+/* TIVA_AON_RTC_SUBSEC (32-bit value, b32 fractional seconds) */
+/* TIVA_AON_RTC_SUBSECINC (32-bit value) */
 
-/* AON_RTC_CHCTL */
+/* TIVA_AON_RTC_CHCTL */
 
 #define AON_RTC_CHCTL_CH0_EN            (1 << 0)  /* Bit 0:  RTC Channel 0 enable */
 #define AON_RTC_CHCTL_CH1_EN            (1 << 8)  /* Bit 8:  RTC Channel 1 enable */
@@ -133,19 +133,19 @@
 #define AON_RTC_CHCTL_CH2_EN            (1 << 16) /* Bit 16: RTC Channel 2 Enable */
 #define AON_RTC_CHCTL_CH2_CONT_EN       (1 << 18) /* Bit 18: Enable Channel 2 Continuous Operation */
 
-/* AON_RTC_CH0CMP (32-bit value) */
-/* AON_RTC_CH1CMP (32-bit value) */
-/* AON_RTC_CH2CMP (32-bit value) */
-/* AON_RTC_CH2CMPINC (32-bit value) */
+/* TIVA_AON_RTC_CH0CMP (32-bit value) */
+/* TIVA_AON_RTC_CH1CMP (32-bit value) */
+/* TIVA_AON_RTC_CH2CMP (32-bit value) */
+/* TIVA_AON_RTC_CH2CMPINC (32-bit value) */
 
-/* AON_RTC_CH1CAPT */
+/* TIVA_AON_RTC_CH1CAPT */
 
 #define AON_RTC_CH1CAPT_SUBSEC_SHIFT    (0)       /* Value of SUBSEC.VALUE bits 31:16 at capture time */
 #define AON_RTC_CH1CAPT_SUBSEC_MASK     (0xffff << AON_RTC_CH1CAPT_SUBSEC_SHIFT)
 #define AON_RTC_CH1CAPT_SEC_SHIFT       (16)      /* Bits 16-31: Value of SEC.VALUE bits 15:0 at capture time */
 #define AON_RTC_CH1CAPT_SEC_MASK        (0xffff << AON_RTC_CH1CAPT_SEC_SHIFT)
 
-/* AON_RTC_SYNC */
+/* TIVA_AON_RTC_SYNC */
 
 #define AON_RTC_SYNC_WBUSY              (1 << 0)  /* Bit 0:
                                                    * Read: Outstanding MCU/AON write request
