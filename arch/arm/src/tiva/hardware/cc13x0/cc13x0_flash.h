@@ -993,7 +993,7 @@
 /* TIVA_FLASH_FSM_SECTOR1 (32-bit value) */
 /* TIVA_FLASH_FSM_SECTOR2 (32-bit value) */
 /* TIVA_FLASH_FSM_BSLE0 (32-bit value) */
-/* TIVA_FLASH_FSM_BSLE1 *(32-bit value) /
+/* TIVA_FLASH_FSM_BSLE1 (32-bit value) */
 /* TIVA_FLASH_FSM_BSLP0 (32-bit value) */
 /* TIVA_FLASH_FSM_BSLP1 (32-bit value) */
 

@@ -53,6 +53,7 @@
 #include "hardware/tiva_aon_pmctl.h"
 #include "hardware/tiva_aon_rtc.h"
 #include "hardware/tiva_adi2_refsys.h"
+#include "hardware/tiva_adi3_refsys.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -145,7 +146,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
 
 static void Step_VBG(int32_t target_signed)
 {
-  /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI_3_REFSYS:REFSYSCTL3.TRIM_VBG) */
+  /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
 
   int32_t current_signed;
   uint8_t ref_sysctl;
@@ -156,9 +157,9 @@ static void Step_VBG(int32_t target_signed)
       current_signed =
         (((int32_t)
           (ref_sysctl <<
-           (32 - ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_W -
-            ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT))) >>
-            (32 - ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_W));
+           (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_W -
+            ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT))) >>
+            (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_W));
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
@@ -175,14 +176,14 @@ static void Step_VBG(int32_t target_signed)
               current_signed--;
             }
 
-          ref_sysctl &= ~(ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN |
-                          ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK)) |
+          ref_sysctl &= ~(ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN |
+                          ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK)) |
                           ((((uint32_t)current_signed) <<
-                           ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT) &
-                         ADI_3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK);
+                           ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT) &
+                         ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK);
           putreg8(ref_sysctl, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-          ref_sysctl |= ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+          ref_sysctl |= ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
           putreg8(ref_sysctl, TIVA_ADI3_REFSYS_REFSYSCTL3);
         }
     }
@@ -213,8 +214,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   if ((getreg32(TIVA_CCFG_SIZE_AND_DIS_FLAGS) &
        CCFG_SIZE_AND_DIS_FLAGS_DIS_ALT_DCDC_SETTING) == 0)
     {
-      /* ADI_3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
-       * (=ALT_DCDC_DITHER_EN) ADI_3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
+      /* ADI3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
+       * (=ALT_DCDC_DITHER_EN) ADI3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
        * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit masked
        * write since layout is equal for both source and destination
        */
@@ -222,7 +223,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
       putreg8((uint8_t)regval,
-              TIVA_ADI3_MASK4B + (ADI_3_REFSYS_DCDCCTL5_OFFSET * 2));
+              TIVA_ADI3_MASK4B + (ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* TBD - Temporarily removed for CC13x2 / CC26x2 */
@@ -308,14 +309,14 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     putreg8(regval8, TIVA_ADI2_DIR + ADI2_REFSYS_REFSYSCTL0_OFFSET);
 
     /* Write to register CTLSOCREFSYS2 (addr offset 4) bits[7:4] (TRIMMAG) in
-     * ADI_3_REFSYS
+     * ADI3_REFSYS
      */
 
-    regval16 = (ADI_3_REFSYS_REFSYSCTL2_TRIM_VREF_MASK << 8) |
+    regval16 = (ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_MASK << 8) |
                (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_MASK) >>
                  FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_SHIFT) <<
-                ADI_3_REFSYS_REFSYSCTL2_TRIM_VREF_SHIFT);
-    putreg16(regval16, TIVA_ADI3_MASK8B + (ADI_3_REFSYS_REFSYSCTL2_OFFSET << 1));
+                ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_SHIFT);
+    putreg16(regval16, TIVA_ADI3_MASK8B + (ADI3_REFSYS_REFSYSCTL2_OFFSET << 1));
 
     /* Get TRIMBOD_EXTMODE or TRIMBOD_INTMODE from EFUSE shadow register in
      * FCFG1
@@ -348,37 +349,37 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
             AON_PMCTL_PWRCTL_EXT_REG_MODE)
           {
             /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
-             * offset 3) bit[7:3] (TRIMBOD) in ADI_3_REFSYS
+             * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
              */
 
-            regval16 = (ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
+            regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
                         (((fusedata & FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_MASK) >>
                           FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_SHIFT) <<
-                         ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
+                         ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
             putreg16(regval16,
-                     TIVA_ADI3_MASK8B + (ADI_3_REFSYS_REFSYSCTL1_OFFSET << 1));
+                     TIVA_ADI3_MASK8B + (ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
           }
         else
           {
             /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
-             * offset 3) bit[7:3] (TRIMBOD) in ADI_3_REFSYS
+             * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
              */
 
-            regval16 = (ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
+            regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
                         (((fusedata & FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_MASK) >>
                           FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_SHIFT) <<
-                         ADI_3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
+                         ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
             putreg16(regval16,
-                     TIVA_ADI3_MASK8B + (ADI_3_REFSYS_REFSYSCTL1_OFFSET << 1));
+                     TIVA_ADI3_MASK8B + (ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
           }
 
         /* Load the new VDDS_BOD setting */
 
         regval8  = getreg8(TIVA_ADI3_REFSYS_REFSYSCTL3);
-        regval8 &= ~ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+        regval8 &= ~ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
         putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-        regval8 |= ADI_3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+        regval8 |= ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
         putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
         SetupStepVddrTrimTo((fusedata &
@@ -386,7 +387,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
                             FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_SHIFT);
       }
 
-    /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI_3_REFSYS:REFSYSCTL3.TRIM_VBG) */
+    /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
 
     Step_VBG(((int32_t)
               (fusedata <<
@@ -431,8 +432,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
      * LPM_BIAS_WIDTH_TRIM = 3
      */
 
-    putreg8(ADI_3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-           TIVA_ADI3_SET + ADI_3_REFSYS_AUX_DEBUG_OFFSET);
+    putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
+           TIVA_ADI3_SET + ADI3_REFSYS_AUX_DEBUG_OFFSET);
 
     /* Set LPM_BIAS_WIDTH_TRIM = 3
      * Set mask (bits to be written) in [15:8]

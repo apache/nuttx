@@ -50,6 +50,7 @@
 #include "hardware/tiva_vims.h"
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_aon_pmctl.h"
+#include "hardware/tiva_adi3_refsys.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -108,8 +109,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   if ((getreg32(TIVA_CCFG_SIZE_AND_DIS_FLAGS) &
        CCFG_SIZE_AND_DIS_FLAGS_DIS_ALT_DCDC_SETTING) == 0)
     {
-      /* ADI_3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
-       * (=ALT_DCDC_DITHER_EN) ADI_3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
+      /* ADI3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
+       * (=ALT_DCDC_DITHER_EN) ADI3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
        * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit masked
        * write since layout is equal for both source and destination
        */
@@ -117,7 +118,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT);
       putreg8((uint8_t)regval,
-              TIVA_ADI3_MASK4B + (ADI_3_REFSYS_DCDCCTL5_OFFSET * 2));
+              TIVA_ADI3_MASK4B + (ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* TBD - Temporarily removed for CC13x2 / CC26x2 */
@@ -177,13 +178,13 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
     if (trimreg & FCFG1_DAC_BIAS_CNF_LPM_BIAS_BACKUP_EN)
       {
-        putreg8(ADI_3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-                TIVA_ADI3_SET + ADI_3_REFSYS_AUX_DEBUG_OFFSET);
+        putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
+                TIVA_ADI3_SET + ADI3_REFSYS_AUX_DEBUG_OFFSET);
       }
     else
       {
-        putreg8(ADI_3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-                TIVA_ADI3_CLR + ADI_3_REFSYS_AUX_DEBUG_OFFSET);
+        putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
+                TIVA_ADI3_CLR + ADI3_REFSYS_AUX_DEBUG_OFFSET);
       }
 
     /* Set LPM_BIAS_WIDTH_TRIM according to FCFG1 configuration */

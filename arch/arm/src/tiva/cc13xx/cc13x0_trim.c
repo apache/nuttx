@@ -51,6 +51,7 @@
 #include "hardware/tiva_vims.h"
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_adi2_refsys.h"
+#include "hardware/tiva_adi3_refsys.h"
 
 /******************************************************************************
  * Private Functions
@@ -116,15 +117,15 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   if ((getreg32(TIVA_CCFG_SIZE_AND_DIS_FLAGS) &
        CCFG_SIZE_AND_DIS_FLAGS_DIS_ALT_DCDC_SETTING) == 0)
     {
-      /* ADI_3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
-       * (=ALT_DCDC_DITHER_EN) ADI_3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
+      /* ADI3_REFSYS:DCDCCTL5[3] (=DITHER_EN) = CCFG_MODE_CONF_1[19]
+       * (=ALT_DCDC_DITHER_EN) ADI3_REFSYS:DCDCCTL5[2:0](=IPEAK ) =
        * CCFG_MODE_CONF_1[18:16](=ALT_DCDC_IPEAK ) Using a single 4-bit masked
        * write since layout is equal for both source and destination
        */
 
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
-      putreg8((uint8_t)regval, TIVA_ADI3_MASK4B + (ADI_3_REFSYS_DCDCCTL5_OFFSET * 2));
+      putreg8((uint8_t)regval, TIVA_ADI3_MASK4B + (ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* Enable for JTAG to be powered down(will still be powered on if debugger
