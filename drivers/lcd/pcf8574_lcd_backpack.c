@@ -1371,36 +1371,68 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct pcf8574_lcd_dev_s *priv = (FAR struct pcf8574_lcd_dev_s *)inode->i_private;
+  off_t pos;
   int maxpos;
 
   nxsem_wait(&priv->sem_excl);
 
   maxpos = priv->cfg.rows * priv->cfg.cols + (priv->cfg.rows - 1);
+  pos    = filep->f_pos;
+
   switch (whence)
     {
-    case SEEK_CUR:
-      filep->f_pos += offset;
-      if (filep->f_pos > maxpos)
-        filep->f_pos = maxpos;
-      break;
+      case SEEK_CUR:
+        pos += offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
 
-    case SEEK_SET:
-      filep->f_pos = offset;
-      if (filep->f_pos > maxpos)
-        filep->f_pos = maxpos;
-      break;
+        filep->f_pos = pos;
+        break;
 
-    case SEEK_END:
-      filep->f_pos = maxpos;
-      break;
+      case SEEK_SET:
+        pos = offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
 
-    default:
-      /* Return EINVAL if the whence argument is invalid */
-      filep->f_pos = -EINVAL;
+        filep->f_pos = pos;
+        break;
+
+      case SEEK_END:
+        pos = maxpos + offset;
+        if (pos > maxpos)
+          {
+            pos = maxpos;
+          }
+        else if (pos < 0)
+          {
+            pos = 0;
+          }
+
+        filep->f_pos = pos;
+        break;
+
+      default:
+        /* Return EINVAL if the whence argument is invalid */
+
+        pos = (off_t)-EINVAL;
+        break;
     }
 
+
   nxsem_post(&priv->sem_excl);
-  return filep->f_pos;
+  return pos;
 }
 
 /****************************************************************************
