@@ -46,6 +46,6 @@ MEMORY
     /* 256Kb SRAM (tentative) */
 
     ksram (rwx)      : ORIGIN = 0x020c0000, LENGTH = 32K
-    usram (rwx)      : ORIGIN = 0x020c4000, LENGTH = 32K
-    xsram (rwx)      : ORIGIN = 0x020c8000, LENGTH = 192K
+    usram (rwx)      : ORIGIN = 0x020c8000, LENGTH = 32K
+    xsram (rwx)      : ORIGIN = 0x020d0000, LENGTH = 192K
 }
