@@ -903,43 +903,54 @@ static off_t st7032_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct st7032_dev_s *priv = (FAR struct st7032_dev_s *)inode->i_private;
-  int maxpos;
+  off_t maxpos;
+  off_t pos;
 
   nxsem_wait(&priv->sem_excl);
 
   maxpos = ST7032_MAX_ROW * ST7032_MAX_COL + (ST7032_MAX_ROW - 1);
+  pos    = filep->f_pos;
+
   switch (whence)
     {
     case SEEK_CUR:
-      filep->f_pos += offset;
-      if (filep->f_pos > maxpos)
+      pos += offset;
+      if (pos > maxpos)
         {
-          filep->f_pos = maxpos;
+          pos = maxpos;
         }
 
+      filep->f_pos = pos;
       break;
 
     case SEEK_SET:
-      filep->f_pos = offset;
-      if (filep->f_pos > maxpos)
+      pos = offset;
+      if (pos > maxpos)
         {
-          filep->f_pos = maxpos;
+          pos = maxpos;
         }
 
+      filep->f_pos = pos;
       break;
 
     case SEEK_END:
-      filep->f_pos = maxpos;
+      pos = maxpos + offset;
+      if (pos > maxpos)
+        {
+          pos = maxpos;
+        }
+
+      filep->f_pos = pos;
       break;
 
     default:
       /* Return EINVAL if the whence argument is invalid */
 
-      filep->f_pos = -EINVAL;
+      pos = (off_t)-EINVAL;
     }
 
   nxsem_post(&priv->sem_excl);
-  return filep->f_pos;
+  return pos;
 }
 
 /****************************************************************************
