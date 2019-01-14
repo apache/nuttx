@@ -2249,6 +2249,36 @@ Configuration Sub-directories
       /mnt:
        -rw-rw-rw-      23 test.txt
 
+    This configuration also supports:
+
+    1. An NFS file system client.  Relevant configuration options:
+
+       CONFIG_NFS=y
+       CONFIG_NFS_STATISTICS=y
+
+    2. Loadable ELF modules
+
+       CONFIG_BUILD_LOADABLE=y
+       CONFIG_SYMTAB_ORDEREDBYNAME=y
+       CONFIG_ELF=y
+       CONFIG_EXAMPLES_HELLO=m
+       CONFIG_LIBC_EXECFUNCS=y
+       CONFIG_NSH_FILE_APPS=y
+       CONFIG_SYSTEM_NSH_SYMTAB=y
+       CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME="g_symtab"
+       CONFIG_SYSTEM_NSH_SYMTAB_COUNTNAME="g_nsymbols"
+
+       Further, the configuration assumes that executable files reside on the
+       remotely mounted file system:
+
+       CONFIG_LIB_ENVPATH=y
+       CONFIG_PATH_INITIAL="/mnt/nfs/bin"
+
+    3 'ping' support
+
+       CONFIG_NET_ICMP_SOCKET=y
+       CONFIG_SYSTEM_PING=y
+
   usbnsh:
   -------
 
