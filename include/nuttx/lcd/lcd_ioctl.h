@@ -2,7 +2,7 @@
  * include/nuttx/input/slcd_ioctl.h
  * IOCTL commands for segment LCDs
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,12 @@
 
 /* IOCTL commands set aside for FT80x character driver */
 
-#define FT80X_NIOCTL_CMDS  16
-#define FT80X_NIOCTL_BASE  0x0001
+#define FT80X_NIOCTL_CMDS     16
+#define FT80X_NIOCTL_BASE     0x0001
+
+/* IOCTL commands set aside for TDA19988 HDMI encoder */
+
+#define TDA19988_NIOCTL_CMDS  1
+#define TDA19988_NIOCTL_BASE  (FT80X_NIOCTL_BASE + FT80X_NIOCTL_CMDS)
 
 #endif /* __INCLUDE_NUTTX_INPUT_LCD_IOCTL_H */

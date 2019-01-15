@@ -1147,6 +1147,8 @@ endif # LCD_FT80X
 endmenu # LCD Driver selection
 endif # LCD
 
+comment "Character/Segment LCD Devices"
+
 menuconfig SLCD
 	bool "Alphanumeric/Segment LCD Devices"
 	default n
@@ -1212,4 +1214,25 @@ config LCD_ST7032
 		the ground. So only I2C pins SDA and SCL are used by NuttX.
 
 endif # SLCD
+
+comment "Other LCD-related Devices"
+
+config LCD_OTHER
+	bool
+	default n
+
+config LCD_TDA19988
+	bool "TDA19988 HDMI Encoder"
+	default n
+	select LCD_OTHER
+	depends on I2C && EXPERIMENTAL
+	---help---
+		Enable support for the TI TDA19988 HDMI Encoder.  The TDA19988 is a
+		very low power and very small size High-Definition Multimedia
+		Interface (HDMI) 1.4a transmitter.  This device is primarily
+		intended for mobile applications like Digital Video Camera (DVC),
+		Digital Still Camera (DSC), Portable Multimedia Player (PMP), Mobile
+		Phone and Ultra-Mobile Personal Computer (UM PC), new PC tablet and
+		MID where size and power are key for battery autonomy.
+
 endmenu # LCD Driver Support

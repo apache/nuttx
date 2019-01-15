@@ -134,6 +134,12 @@ ifeq ($(CONFIG_LCD_ST7032),y)
 endif
 endif # CONFIG_SLCD
 
+# Other LCD-related devices
+
+ifeq ($(CONFIG_LCD_TDA19988),y)
+  CSRCS += tda19988.c
+endif
+
 # Include LCD driver build support (the nested if-then-else implements an OR)
 
 ifeq ($(CONFIG_LCD),y)
@@ -141,6 +147,10 @@ ifeq ($(CONFIG_LCD),y)
   VPATH += :lcd
   CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
 else ifeq ($(CONFIG_SLCD),y)
+  DEPPATH += --dep-path lcd
+  VPATH += :lcd
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
+else ifeq ($(CONFIG_LCD_OTHER),y)
   DEPPATH += --dep-path lcd
   VPATH += :lcd
   CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)lcd}
