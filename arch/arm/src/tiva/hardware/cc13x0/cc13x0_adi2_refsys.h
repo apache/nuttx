@@ -78,7 +78,7 @@
 #define TIVA_ADI2_REFSYS_HPOSCCTL1                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL1_OFFSET)
 #define TIVA_ADI2_REFSYS_HPOSCCTL2                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL2_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+/* Offsets may also be used in conjunction with access as described in cc13x0_ddi.h */
 
 #define TIVA_ADI2_REFSYS_DIR                                 (TIVA_ADI2_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI2_REFSYS_SET                                 (TIVA_ADI2_BASE + TIVA_DDI_SET_OFFSET)
