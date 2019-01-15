@@ -248,19 +248,19 @@
 
 /* UART Receive Buffer Register */
 
-#define UART_RBR_MASK                0x000000ff
+#define UART_RBR_MASK                (0x000000ff)
 
 /* UART Transmit Holding Register */
 
-#define UART_THR_MASK                0x000000ff
+#define UART_THR_MASK                (0x000000ff)
 
 /* UART Divisor Latch Low Register */
 
-#define UART_DLL_MASK                0x000000ff
+#define UART_DLL_MASK                (0x000000ff)
 
 /* UART Divisor Latch High Register */
 
-#define UART_DLH_MASK                0x0000003f
+#define UART_DLH_MASK                (0x0000003f)
 
 /* UART Interrupt Enable Register */
 
@@ -270,7 +270,7 @@
 #define UART_IER_MODEM_STS           (1 << 3)  /* Bit 3:  Enable Modem Status Interrupt */
 #define UART_IER_RTS                 (1 << 6)  /* Bit 6:  Enable RTS (active-low) interrupt */
 #define UART_IER_CTS                 (1 << 7)  /* Bit 7:  Enable CTS (active-low) interrupt */
-#define UART_IER_ALLIE               0x000000cf
+#define UART_IER_ALLIE               (0x000000cf)
 
 /* UART Interrupt Identification Register */
 
@@ -326,9 +326,9 @@
 #  define UART_LCR_PARITY_EVEN       (3 << UART_LCR_PARITY_SHIFT)  /* Even Parity Bit */
 #define UART_LCR_BC                  (1 << 6)  /* Bit 6:  Break Control Bit */
 #define UART_LCR_DLAB                (1 << 7)  /* Bit 7:  Divisor Latch Access Enable Bit */
-#define UART_LCR_CONFIG_MODE_A       0x00000080
-#define UART_LCR_CONFIG_MODE_B       0x000000bf
-#define UART_LCR_OPER_MODE           0x0000007f
+#define UART_LCR_CONFIG_MODE_A       (0x00000080)
+#define UART_LCR_CONFIG_MODE_B       (0x000000bf)
+#define UART_LCR_OPER_MODE           (0x0000007f)
 
 /* UART Modem Control Register */
 
@@ -360,45 +360,46 @@
 
 /* UART Scratchpad Register */
 
-#define UART_SPR_MASK                0x000000ff
+#define UART_SPR_MASK                (0x000000ff)
 
 /* UART Transmit FIFO Level */
 
-#define UART_TFL_SHIFT              (0)  /* Bits 0-7: Transmit FIFO Level */
-#define UART_TFL_MASK               (0xff << UART_TFL_SHIFT)
-#  define UART_TFL(n)               ((uint32_t)(n) << UART_TFL_SHIFT)
+#define UART_TFL_SHIFT               (0)  /* Bits 0-7: Transmit FIFO Level */
+#define UART_TFL_MASK                (0xff << UART_TFL_SHIFT)
+#  define UART_TFL(n)                ((uint32_t)(n) << UART_TFL_SHIFT)
 
 /* UART Receive FIFO Level */
 
-#define UART_RFL_SHIFT              (0)  /* Bits 0-7: Receive FIFO Level */
-#define UART_RFL_MASK               (0xff << UART_RFL_SHIFT)
-#  define UART_RFL(n)               ((uint32_t)(n) << UART_RFL_SHIFT)
+#define UART_RFL_SHIFT               (0)  /* Bits 0-7: Receive FIFO Level */
+#define UART_RFL_MASK                (0xff << UART_RFL_SHIFT)
+#  define UART_RFL(n)                ((uint32_t)(n) << UART_RFL_SHIFT)
 
 /* UART Mode Definition 1 Register */
 
-#define UART_MDR1_MODE_SHIFT        (0)  /* Bits 0-2: Operation Mode Selection */
-#  define UART_MDR1_MODE_16x        (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
-#  define UART_MDR1_MODE_SIR        (1 << UART_MDR1_MODE_SHIFT)  /* SIR mode */
-#  define UART_MDR1_MODE_16xAUTO    (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */
-#  define UART_MDR1_MODE_13x        (3 << UART_MDR1_MODE_SHIFT)  /* UART 13x mode */
-#  define UART_MDR1_MODE_MIR        (4 << UART_MDR1_MODE_SHIFT)  /* MIR Mode */
-#  define UART_MDR1_MODE_FIR        (5 << UART_MDR1_MODE_SHIFT)  /* FIR Mode */
-#  define UART_MDR1_MODE_CIR        (6 << UART_MDR1_MODE_SHIFT)  /* CIR Mode */
-#  define UART_MDR1_MODE_DISABLE    (7 << UART_MDR1_MODE_SHIFT)  /* Disabled Mode */
+#define UART_MDR1_MODE_SHIFT         (0)  /* Bits 0-2: Operation Mode Selection */
+#  define UART_MDR1_MODE_16x         (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
+#  define UART_MDR1_MODE_SIR         (1 << UART_MDR1_MODE_SHIFT)  /* SIR mode */
+#  define UART_MDR1_MODE_16xAUTO     (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */
+#  define UART_MDR1_MODE_13x         (3 << UART_MDR1_MODE_SHIFT)  /* UART 13x mode */
+#  define UART_MDR1_MODE_MIR         (4 << UART_MDR1_MODE_SHIFT)  /* MIR Mode */
+#  define UART_MDR1_MODE_FIR         (5 << UART_MDR1_MODE_SHIFT)  /* FIR Mode */
+#  define UART_MDR1_MODE_CIR         (6 << UART_MDR1_MODE_SHIFT)  /* CIR Mode */
+#  define UART_MDR1_MODE_DISABLE     (7 << UART_MDR1_MODE_SHIFT)  /* Disabled Mode */
 
 /* UART System Configuration Register */
 
-#define UART_SYSC_SRESET            (1 << 1)  /* Bit 1: Software Reset */
-#define UART_SYSC_WAKEUP            (1 << 2)  /* Bit 2: Wake-up Control */
+#define UART_SYSC_SRESET             (1 << 1)  /* Bit 1: Software Reset */
+#define UART_SYSC_WAKEUP             (1 << 2)  /* Bit 2: Wake-up Control */
 
 /* UART System Status Register */
 
-#define UART_SYSS_RESET_DONE        (1 << 0)  /* Bit 0: Reset Complete */
+#define UART_SYSS_RESET_DONE         (1 << 0)  /* Bit 0: Reset Complete */
 
 /* UART Enhanced Feature Register */
 
-#define UART_EFR_ENHANCEDEN         (1 << 4)  /* Bit 4: Enable Enhanced Functions Write */
-#define UART_EFR_AUTORTSEN          (1 << 6)  /* Bit 6: Enable Auto-RTS */
-#define UART_EFR_AUTOCTSEN          (1 << 7)  /* Bit 7: Enable Auto-CTS */
+#define UART_EFR_ENHANCEDEN          (1 << 4)  /* Bit 4: Enable Enhanced Functions Write */
+#define UART_EFR_AUTORTSEN           (1 << 6)  /* Bit 6: Enable Auto-RTS */
+#define UART_EFR_AUTOCTSEN           (1 << 7)  /* Bit 7: Enable Auto-CTS */
 
 #endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_UART_H */
+
