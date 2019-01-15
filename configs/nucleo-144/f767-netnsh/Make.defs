@@ -1,5 +1,5 @@
 ############################################################################
-# configs/nucleo-144/f767-nsh/Make.defs
+# configs/nucleo-144/f767-netnsh/Make.defs
 #
 #   Copyright (C) 2016 Gregory Nutt. All rights reserved.
 #   Authors: Gregory Nutt <gnutt@nuttx.org>
