@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13x_start.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This is a port of TI's setup.c file (revision 49363) which has a fully
@@ -125,7 +125,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
-      putreg8((uint8_t)regval, TIVA_ADI3_MASK4B + (ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
+      putreg8((uint8_t)regval, TIVA_ADI3_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* Enable for JTAG to be powered down(will still be powered on if debugger
@@ -149,7 +149,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
                                             ccfg_modeconf);
 #else
@@ -209,7 +209,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
 #else
   NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
@@ -229,7 +229,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   regval  = getreg32(TIVA_FLASH_CFG);
   regval |= FLASH_CFG_DIS_EFUSECLK;
-  putreg32(regval, TIVA_FLASH_CFG)
+  putreg32(regval, TIVA_FLASH_CFG);
 }
 
 /******************************************************************************
@@ -287,7 +287,7 @@ void cc13xx_trim_device(void)
 
   regval  = getreg32(TIVA_FLASH_CFG);
   regval &= ~FLASH_CFG_DIS_STANDBY;
-  putreg32(regval, TIVA_FLASH_CFG)
+  putreg32(regval, TIVA_FLASH_CFG);
 
   /* Clock must always be enabled for the semaphore module (due to ADI/DDI HW
    * workaround)
@@ -308,7 +308,7 @@ void cc13xx_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
 #else
   NOROM_SetupSetCacheModeAccordingToCcfgSetting();

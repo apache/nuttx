@@ -1,7 +1,7 @@
 /********************************************************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi2_refsys.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Technical content derives from a TI header file that has a compatible BSD license:
@@ -77,6 +77,15 @@
 #define TIVA_ADI2_REFSYS_HPOSCCTL0                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL0_OFFSET)
 #define TIVA_ADI2_REFSYS_HPOSCCTL1                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL1_OFFSET)
 #define TIVA_ADI2_REFSYS_HPOSCCTL2                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL2_OFFSET)
+
+/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+
+#define TIVA_ADI2_REFSYS_DIR                                 (TIVA_ADI2_BASE + TIVA_DDI_DIR_OFFSET)
+#define TIVA_ADI2_REFSYS_SET                                 (TIVA_ADI2_BASE + TIVA_DDI_SET_OFFSET)
+#define TIVA_ADI2_REFSYS_CLR                                 (TIVA_ADI2_BASE + TIVA_DDI_CLR_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK4B                              (TIVA_ADI2_BASE + TIVA_DDI_MASK4B_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK8B                              (TIVA_ADI2_BASE + TIVA_DDI_MASK8B_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK16B                             (TIVA_ADI2_BASE + TIVA_DDI_MASK16B_OFFSET)
 
 /* ADI2 REFSYS Bitfield Definitions *********************************************************************************/
 

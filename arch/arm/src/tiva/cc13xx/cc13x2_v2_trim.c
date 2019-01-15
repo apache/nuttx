@@ -1,7 +1,7 @@
 /******************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13x_start.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This is a port of TI's setup.c file (revision 49363) which has a fully
@@ -51,18 +51,7 @@
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_aon_pmctl.h"
 #include "hardware/tiva_adi3_refsys.h"
-
-/******************************************************************************
- * Pre-processor Definitions
- ******************************************************************************/
-
-/* Temporarily adding these defines as they are missing in hw_adi_4_aux.h */
-
-#define ADI_4_AUX_LPMBIAS_OFFSET                  0x0000000e
-#define ADI_4_AUX_LPMBIAS_LPM_TRIM_IOUT_MASK      0x0000003f
-#define ADI_4_AUX_LPMBIAS_LPM_TRIM_IOUT_SHIFT     0
-#define ADI_4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT  3
-#define ADI_4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK   0x00000038
+#include "hardware/tiva_adi4_aux.h"
 
 /******************************************************************************
  * Private Functions
@@ -102,7 +91,8 @@ static void trim_wakeup_frompowerdown(void)
 
 static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
-  uint32_t ccfg_ModeConfReg;
+  uint32_t ccfg_modeconf;
+  uint32_t regval;
 
   /* Check in CCFG for alternative DCDC setting */
 
@@ -118,7 +108,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT);
       putreg8((uint8_t)regval,
-              TIVA_ADI3_MASK4B + (ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
+              TIVA_ADI3_REFSYS_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* TBD - Temporarily removed for CC13x2 / CC26x2 */
@@ -132,7 +122,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
           (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
-  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (DDI0_OSC_CTL0_OFFSET << 1) + 4);
+  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
@@ -140,24 +130,24 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* read the MODE_CONF register in CCFG */
 
-  ccfg_ModeConfReg = getreg32(TIVA_CCFG_MODE_CONF);
+  ccfg_modeconf = getreg32(TIVA_CCFG_MODE_CONF);
 
   /* First part of trim done after cold reset and wakeup from shutdown: -Adjust
    * the VDDR_TRIM_SLEEP value. -Configure DCDC.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg1(ccfg_ModeConfReg);
+  SetupAfterColdResetWakeupFromShutDownCfg1(ccfg_modeconf);
 
   /* Second part of trim done after cold reset and wakeup from shutdown:
    * -Configure XOSC.
    */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
-                                            ccfg_ModeConfReg);
+                                            ccfg_modeconf);
 #else
   NOROM_SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
-                                                  ccfg_ModeConfReg);
+                                                  ccfg_modeconf);
 #endif
 
   {
@@ -170,21 +160,21 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     trimvalue = ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_MASK) >>
                      FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_SHIFT);
 
-    regval = ((trimvalue << ADI_4_AUX_LPMBIAS_LPM_TRIM_IOUT_SHIFT) &
-              ADI_4_AUX_LPMBIAS_LPM_TRIM_IOUT_MASK);
-    putreg8((uint8_t)regval, TIVA_AUX_ADI4_LPMBIAS);
+    regval = ((trimvalue << ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_SHIFT) &
+              ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_MASK);
+    putreg8((uint8_t)regval, TIVA_ADI4_AUX_LPMBIAS);
 
     /* Set LPM_BIAS_BACKUP_EN according to FCFG1 configuration */
 
     if (trimreg & FCFG1_DAC_BIAS_CNF_LPM_BIAS_BACKUP_EN)
       {
         putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-                TIVA_ADI3_SET + ADI3_REFSYS_AUX_DEBUG_OFFSET);
+                TIVA_ADI3_REFSYS_SET + TIVA_ADI3_REFSYS_AUX_DEBUG_OFFSET);
       }
     else
       {
         putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-                TIVA_ADI3_CLR + ADI3_REFSYS_AUX_DEBUG_OFFSET);
+                TIVA_ADI3_REFSYS_CLR + TIVA_ADI3_REFSYS_AUX_DEBUG_OFFSET);
       }
 
     /* Set LPM_BIAS_WIDTH_TRIM according to FCFG1 configuration */
@@ -202,9 +192,10 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
        * Set value (in correct bit pos) in [7:0]
        */
 
-      regval16 = ((ADI_4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK << 8) |
-                  (trimwidth << ADI_4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT));
-      putreg16(regval16, TIVA_AUX_ADI4_MASK8B + (ADI_4_AUX_COMP_OFFSET * 2));
+      regval16 = ((ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK << 8) |
+                  (trimwidth << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT));
+      putreg16(regval16,
+               TIVA_ADI4_AUX_MASK8B + (TIVA_ADI4_AUX_COMP_OFFSET * 2));
     }
   }
 
@@ -212,10 +203,10 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
-  SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_ModeConfReg);
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
+  SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
 #else
-  NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_ModeConfReg);
+  NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
 #endif
 
   /* Set AUX into power down active mode */
@@ -226,7 +217,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   regval  = getreg32(TIVA_FLASH_CFG);
   regval |= FLASH_CFG_DIS_EFUSECLK;
-  putreg32(regval, TIVA_FLASH_CFG)
+  putreg32(regval, TIVA_FLASH_CFG);
 }
 
 /******************************************************************************
@@ -265,6 +256,7 @@ void cc13xx_trim_device(void)
 {
   uint32_t fcfg1_revision;
   uint32_t aon_sysresetctrl;
+  uint32_t regval;
 
   /* Get layout revision of the factory configuration area (Handle undefined
    * revision as revision = 0)
@@ -286,11 +278,11 @@ void cc13xx_trim_device(void)
 
   regval  = getreg32(TIVA_FLASH_CFG);
   regval &= ~FLASH_CFG_DIS_STANDBY;
-  putreg32(regval, TIVA_FLASH_CFG)
+  putreg32(regval, TIVA_FLASH_CFG);
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if TIVA_CCFG_BASE == CCFG_BASE_DEFAULT
+#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
 #else
   NOROM_SetupSetCacheModeAccordingToCcfgSetting();
@@ -366,18 +358,18 @@ void cc13xx_trim_device(void)
    * must be manually cleared
    */
 
-  if (((getreg32(TIVA_AON_PMCTL_RESETCTL) &
-        (AON_PMCTL_RESETCTL_BOOT_DET_1_MASK | AON_PMCTL_RESETCTL_BOOT_DET_0_MASK)) >>
-       AON_PMCTL_RESETCTL_BOOT_DET_0_SHIFT) == 1)
+  if ((getreg32(TIVA_AON_PMCTL_RESETCTL) &
+       (AON_PMCTL_RESETCTL_BOOT_DET_0 | AON_PMCTL_RESETCTL_BOOT_DET_1)) ==
+       AON_PMCTL_RESETCTL_BOOT_DET_0)
     {
-      aon_sysresetctrl = (getreg32(TIVA_AON_PMCTL_RESETCTL) &
-                            ~(AON_PMCTL_RESETCTL_BOOT_DET_1_CLR_MASK |
-                              AON_PMCTL_RESETCTL_BOOT_DET_0_CLR_MASK |
-                              AON_PMCTL_RESETCTL_BOOT_DET_1_SET_MASK |
-                              AON_PMCTL_RESETCTL_BOOT_DET_0_SET_MASK |
-                              AON_PMCTL_RESETCTL_MCU_WARM_RESET_MASK));
+      aon_sysresetctrl  = getreg32(TIVA_AON_PMCTL_RESETCTL);
+      aon_sysresetctrl &= ~(AON_PMCTL_RESETCTL_BOOT_DET_1_CLR |
+                            AON_PMCTL_RESETCTL_BOOT_DET_0_CLR |
+                            AON_PMCTL_RESETCTL_BOOT_DET_1_SET |
+                            AON_PMCTL_RESETCTL_BOOT_DET_0_SET |
+                            AON_PMCTL_RESETCTL_MCU_WARM_RESET);
 
-      putreg32(aon_sysresetctrl | AON_PMCTL_RESETCTL_BOOT_DET_1_SET_MASK,
+      putreg32(aon_sysresetctrl | AON_PMCTL_RESETCTL_BOOT_DET_1_SET,
                TIVA_AON_PMCTL_RESETCTL);
       putreg32(aon_sysresetctrl, TIVA_AON_PMCTL_RESETCTL);
     }

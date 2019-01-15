@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/hardware/tiva_adi2_refsys.h
+ * arch/arm/src/tiva/hardware/tiva_adi4_aux.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI4_AUX_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI4_AUX_H
 
 /************************************************************************************
  * Included Files
@@ -45,13 +45,13 @@
 /* Include the pin mapping file for the specific Tiva/Stellaris/SimpleLink chip */
 
 #if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TM4C)
-  /* These architectures do not support the ADI2 REFSYS block */
+  /* These architectures do not support the ADI4 AUX block */
 #elif defined(CONFIG_ARCH_CHIP_CC13X0)
-#  include "hardware/cc13x0/cc13x0_adi2_refsys.h"
+#  include "hardware/cc13x0/cc13x0_adi4_aux.h"
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi2_refsys.h"
+#  include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi4_aux.h"
 #else
-#  error "Unsupported Tiva/Stellaris/SimpleLink ADI2 REFSYS"
+#  error "Unsupported Tiva/Stellaris/SimpleLink ADI4 AUX"
 #endif
 
 /************************************************************************************
@@ -70,4 +70,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI2_REFSYS_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_ADI4_AUX_H */

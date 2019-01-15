@@ -1,7 +1,7 @@
 /********************************************************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi3_refsys.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Technical content derives from a TI header file that has a compatible BSD license:
@@ -85,6 +85,15 @@
 #define TIVA_ADI3_REFSYS_AUX_DEBUG                            (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_AUX_DEBUG_OFFSET)
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0                    (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP0_OFFSET)
 #define TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1                    (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_CTL_RECHARGE_CMP1_OFFSET)
+
+/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+
+#define TIVA_ADI3_REFSYS_DIR                                  (TIVA_ADI3_BASE + TIVA_DDI_DIR_OFFSET)
+#define TIVA_ADI3_REFSYS_SET                                  (TIVA_ADI3_BASE + TIVA_DDI_SET_OFFSET)
+#define TIVA_ADI3_REFSYS_CLR                                  (TIVA_ADI3_BASE + TIVA_DDI_CLR_OFFSET)
+#define TIVA_ADI3_REFSYS_MASK4B                               (TIVA_ADI3_BASE + TIVA_DDI_MASK4B_OFFSET)
+#define TIVA_ADI3_REFSYS_MASK8B                               (TIVA_ADI3_BASE + TIVA_DDI_MASK8B_OFFSET)
+#define TIVA_ADI3_REFSYS_MASK16B                              (TIVA_ADI3_BASE + TIVA_DDI_MASK16B_OFFSET)
 
 /* ADI3 REFSYS Bitfield Definitions *********************************************************************************/
 
@@ -191,7 +200,7 @@
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Default, about 1.63V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_TYPICAL              (5 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Typical voltage after trim voltage 1.71V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MAX                  (21 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Max voltage 1.96V */
-#  define ADI3_REFS */YS_DCDCCTL0_VDDR_TRIM_MIN               (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V
+#  define ADI3_REFS */YS_DCDCCTL0_VDDR_TRIM_MIN               (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT                  (5)       /* Bits 5-7:  Set charge and re-charge current level */
                                                                         /*            2's complement encoding */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MASK                   (7 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)

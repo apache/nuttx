@@ -78,6 +78,15 @@
 #define TIVA_ADI2_REFSYS_HPOSCCTL1                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL1_OFFSET)
 #define TIVA_ADI2_REFSYS_HPOSCCTL2                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL2_OFFSET)
 
+/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+
+#define TIVA_ADI2_REFSYS_DIR                                 (TIVA_ADI2_BASE + TIVA_DDI_DIR_OFFSET)
+#define TIVA_ADI2_REFSYS_SET                                 (TIVA_ADI2_BASE + TIVA_DDI_SET_OFFSET)
+#define TIVA_ADI2_REFSYS_CLR                                 (TIVA_ADI2_BASE + TIVA_DDI_CLR_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK4B                              (TIVA_ADI2_BASE + TIVA_DDI_MASK4B_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK8B                              (TIVA_ADI2_BASE + TIVA_DDI_MASK8B_OFFSET)
+#define TIVA_ADI2_REFSYS_MASK16B                             (TIVA_ADI2_BASE + TIVA_DDI_MASK16B_OFFSET)
+
 /* ADI2 REFSYS Bitfield Definitions *********************************************************************************/
 
 /* TIVA_ADI2_REFSYS_REFSYSCTL0 */
