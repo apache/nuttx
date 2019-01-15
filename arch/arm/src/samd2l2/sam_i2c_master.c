@@ -627,9 +627,18 @@ static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size)
 {
   struct timespec ts;
   int ret;
+  long usec;
 
   clock_gettime(CLOCK_REALTIME, &ts);
-  ts.tv_nsec += 200e3;
+
+  usec = size * I2C_TIMEOUT_MSPB + ts.tv_nsec / 1000;
+  while (usec > USEC_PER_SEC)
+    {
+      ts.tv_sec += 1;
+      usec      -= USEC_PER_SEC;
+    }
+
+  ts.tv_nsec = usec * 1000;
 
   ret = nxsem_timedwait(&priv->waitsem, (const struct timespec *)&ts);
   if (ret < 0)
@@ -1005,6 +1014,10 @@ static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
           i2cinfo("INTFLAG: 0x%02x\n",
                   i2c_getreg8(priv, SAM_I2C_INTFLAG_OFFSET));
 #endif
+          /* Disable any further I2C interrupts */
+
+          i2c_putreg8(priv, I2C_INT_MB | I2C_INT_SB, SAM_I2C_INTENCLR_OFFSET);
+
           leave_critical_section(flags);
           i2c_givesem(&priv->exclsem);
           return ret;
