@@ -111,6 +111,8 @@
 #define EDID_STDTIMING_6              48
 #define EDID_STDTIMING_7              50
 #define EDID_STDTIMING_8              52
+
+#define EDID_STDTIMING_NUMBER         8
 #define EDID_STDTIMING_SIZE           2
 
 /* Bytes 54-125:  Descriptor Blocks */
@@ -119,6 +121,8 @@
 #define EDID_DESCRIPTOR_2             72
 #define EDID_DESCRIPTOR_3             90
 #define EDID_DESCRIPTOR_4             108
+
+#define EDID_DESCRIPTOR_NUMBER        4
 #define EDID_DESCRIPTOR_SIZE          18
 
 /* Bits 126-127:  Trailer */

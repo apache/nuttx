@@ -56,6 +56,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/lcd/edid.h>
 #include <nuttx/lcd/tda19988.h>
 
 #include "tda19988.h"
@@ -732,7 +733,7 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
       goto done;
     }
 
-  blocks = priv->edid[0x7e];
+  blocks = priv->edid[EDID_TRAILER_NEXTENSIONS];
   if (blocks > 0)
     {
       FAR uint8_t *edid;
