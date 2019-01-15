@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/lcd_ioctl.h
  * IOCTL commands for segment LCDs
  *
@@ -32,10 +32,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_INPUT_LCD_IOCTL_H
-#define __INCLUDE_NUTTX_INPUT_LCD_IOCTL_H
+#ifndef __INCLUDE_NUTTX_LCD_LCD_IOCTL_H
+#define __INCLUDE_NUTTX_LCD_LCD_IOCTL_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@
 #define TDA19988_NIOCTL_CMDS  1
 #define TDA19988_NIOCTL_BASE  (FT80X_NIOCTL_BASE + FT80X_NIOCTL_CMDS)
 
-#endif /* __INCLUDE_NUTTX_INPUT_LCD_IOCTL_H */
+#endif /* __INCLUDE_NUTTX_LCD_LCD_IOCTL_H */
