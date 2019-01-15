@@ -58,6 +58,10 @@
 
 #define XBEE_RESPONSE_TIMEOUT MSEC2TICK(200)
 
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+#define XBEE_LOCKUP_SENDATTEMPTS 20
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -306,6 +310,9 @@ int xbee_req_data(XBEEHANDLE xbee,
 #ifdef CONFIG_DEBUG_ASSERTIONS
   int prevoffs = frame->io_offset;
 #endif
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+  int retries = XBEE_LOCKUP_SENDATTEMPTS;
+#endif
 
   /* Support one pending transmit at a time */
 
@@ -397,6 +404,14 @@ int xbee_req_data(XBEEHANDLE xbee,
           break;
         }
 
+#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
+      if (--retries == 0 && !priv->txdone)
+        {
+          wlerr("XBee not responding. Resetting.\n");
+          priv->lower->reset(priv->lower);
+          retries = XBEE_LOCKUP_SENDATTEMPTS;
+        }
+#endif
     }
   while (!priv->txdone);
 
