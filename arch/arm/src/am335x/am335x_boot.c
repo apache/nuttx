@@ -58,6 +58,7 @@
 #include "up_arch.h"
 
 #include "am335x_clockconfig.h"
+#include "am335x_wdog.h"
 #include "am335x_lowputc.h"
 #include "am335x_boot.h"
 
@@ -405,6 +406,10 @@ void arm_boot(void)
 
   arm_fpuconfig();
 #endif
+
+  /* Disable CPU Watchdog */
+
+  am335x_wdog_disable_all();
 
   /* Perform board-specific memory initialization,  This must include
    * initialization of board-specific memory resources (e.g., SDRAM)
