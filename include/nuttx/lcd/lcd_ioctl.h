@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/input/slcd_ioctl.h
+ * include/nuttx/lcd/lcd_ioctl.h
  * IOCTL commands for segment LCDs
  *
  *   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.

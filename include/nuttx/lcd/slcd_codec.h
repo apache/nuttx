@@ -1,5 +1,5 @@
 /************************************************************************************
- * include/nuttx/input/slcd_codec.h
+ * include/nuttx/lcd/slcd_codec.h
  * Serialize and marshaling data and events for character-based, segment LCDs
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
