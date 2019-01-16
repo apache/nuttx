@@ -980,10 +980,6 @@ static void imxrt_endwait(struct imxrt_dev_s *priv,
 static void imxrt_endtransfer(struct imxrt_dev_s *priv,
                               sdio_eventset_t wkupevent)
 {
-#ifdef CONFIG_IMXRT_USDHC_DMA
-  uint32_t regval;
-  uint32_t proctl;
-#endif
 
   /* Disable all transfer related interrupts */
 
