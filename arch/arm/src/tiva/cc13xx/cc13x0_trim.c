@@ -48,6 +48,7 @@
 #include "hardware/tiva_adi2_refsys.h"
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_aon_ioc.h"
+#include "hardware/tiva_aon_sysctl.h"
 #include "hardware/tiva_ccfg.h"
 #include "hardware/tiva_fcfg1.h"
 #include "hardware/tiva_flash.h"
@@ -389,17 +390,17 @@ void cc13xx_trim_device(void)
    * must be manually cleared
    */
 
-  if (((getreg32(TIVA_AON_SYSCTL_RESETCTL) &
-        (AON_SYSCTL_RESETCTL_BOOT_DET_1_MASK | AON_SYSCTL_RESETCTL_BOOT_DET_0_MASK))
-       >> AON_SYSCTL_RESETCTL_BOOT_DET_0_SHIFT) == 1)
+  if ((getreg32(TIVA_AON_SYSCTL_RESETCTL) &
+       (AON_SYSCTL_RESETCTL_BOOT_DET_1 | AON_SYSCTL_RESETCTL_BOOT_DET_0))
+       == AON_SYSCTL_RESETCTL_BOOT_DET_0)
     {
-      aon_sysresetctrl = (getreg32(TIVA_AON_SYSCTL_RESETCTL) &
-                            ~(AON_SYSCTL_RESETCTL_BOOT_DET_1_CLR_MASK |
-                              AON_SYSCTL_RESETCTL_BOOT_DET_0_CLR_MASK |
-                              AON_SYSCTL_RESETCTL_BOOT_DET_1_SET_MASK |
-                              AON_SYSCTL_RESETCTL_BOOT_DET_0_SET_MASK));
+      aon_sysresetctrl  = getreg32(TIVA_AON_SYSCTL_RESETCTL);
+      aon_sysresetctrl &= ~(AON_SYSCTL_RESETCTL_BOOT_DET_1_CLR |
+                            AON_SYSCTL_RESETCTL_BOOT_DET_0_CLR |
+                            AON_SYSCTL_RESETCTL_BOOT_DET_1_SET |
+                            AON_SYSCTL_RESETCTL_BOOT_DET_0_SET);
 
-      putreg32(aon_sysresetctrl | AON_SYSCTL_RESETCTL_BOOT_DET_1_SET_MASK,
+      putreg32(aon_sysresetctrl | AON_SYSCTL_RESETCTL_BOOT_DET_1_SET,
                TIVA_AON_SYSCTL_RESETCTL);
       putreg32(aon_sysresetctrl, TIVA_AON_SYSCTL_RESETCTL);
     }
