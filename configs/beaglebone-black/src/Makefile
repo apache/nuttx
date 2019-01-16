@@ -2,7 +2,7 @@
 # configs/beaglebone-black/src/Makefile
 #
 #   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
-#   Author: Gregory Nutt <petro.karashchenko@gmail.com>
+#   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
