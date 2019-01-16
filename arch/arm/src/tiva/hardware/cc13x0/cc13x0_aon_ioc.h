@@ -63,11 +63,11 @@
 
 /* AON IOC Register Addresses ***************************************************************************************/
 
-#define TIVA_AON_IOC_IOSTRMIN             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMIN_OFFSET)
-#define TIVA_AON_IOC_IOSTRMED             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMED_OFFSET)
-#define TIVA_AON_IOC_IOSTRMAX             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMAX_OFFSET)
-#define TIVA_AON_IOC_IOCLATCH             (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOCLATCH_OFFSET)
-#define TIVA_AON_IOC_CLK32KCTL            (TIVA_TIVA_AON_IOC_BASE + TIVA_AON_IOC_CLK32KCTL_OFFSET)
+#define TIVA_AON_IOC_IOSTRMIN             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMIN_OFFSET)
+#define TIVA_AON_IOC_IOSTRMED             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMED_OFFSET)
+#define TIVA_AON_IOC_IOSTRMAX             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOSTRMAX_OFFSET)
+#define TIVA_AON_IOC_IOCLATCH             (TIVA_AON_IOC_BASE + TIVA_AON_IOC_IOCLATCH_OFFSET)
+#define TIVA_AON_IOC_CLK32KCTL            (TIVA_AON_IOC_BASE + TIVA_AON_IOC_CLK32KCTL_OFFSET)
 
 /* AON IOC Bitfield Definitions *************************************************************************************/
 

@@ -1186,6 +1186,7 @@ degrees C */
 /* TIVA_FCFG1_SHDW_ANA_TRIM */
 
 #define FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT                 (0)       /* Bits 0-5 */
+#define FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH                 (6)       /* (For sign extension) */
 #define FCFG1_SHDW_ANA_TRIM_TRIMTEMP_MASK                  (0x3f << FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT)
 #  define FCFG1_SHDW_ANA_TRIM_TRIMTEMP(n)                  ((uint32_t)(n) << FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT)
 #define FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_SHIFT          (6)       /* Bits 6-10 */

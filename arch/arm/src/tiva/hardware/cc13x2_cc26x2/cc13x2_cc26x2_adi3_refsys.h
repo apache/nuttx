@@ -186,6 +186,7 @@
 /* TIVA_ADI3_REFSYS_REFSYSCTL3 */
 
 #define ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT                 (0)       /* Bits 0-5 */
+#define ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_WIDTH                 (6)       /* (Needed to sign extend) */
 #define ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_MASK                  (0x3f << ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT)
 #  define ADI3_REFSYS_REFSYSCTL3_TRIM_VBG(n)                  ((uint32_t)(n) << ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT)
 #define ADI3_REFSYS_REFSYSCTL3_VTEMP_EN                       (1 << 6)  /* Bit 6 */

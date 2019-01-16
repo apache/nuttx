@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x_start.c
+ * arch/arm/src/tiva/cc13xx/cc13x0_trim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,13 +45,14 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
+#include "hardware/tiva_adi2_refsys.h"
+#include "hardware/tiva_adi3_refsys.h"
+#include "hardware/tiva_aon_ioc.h"
 #include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_fcfg1.h"
 #include "hardware/tiva_flash.h"
 #include "hardware/tiva_prcm.h"
 #include "hardware/tiva_vims.h"
-#include "hardware/tiva_ddi0_osc.h"
-#include "hardware/tiva_adi2_refsys.h"
-#include "hardware/tiva_adi3_refsys.h"
 
 /******************************************************************************
  * Private Functions
@@ -93,6 +94,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
   uint32_t ccfg_modeconf;
   uint32_t mp1rev;
+  uing32_t regval;
 
   /* Force AUX on and enable clocks No need to save the current status of the
    * power/clock registers. At this point both AUX and AON should have been
@@ -125,14 +127,15 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
-      putreg8((uint8_t)regval, TIVA_ADI3_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
+      putreg8((uint8_t)regval,
+              TIVA_ADI3_REFSYS_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* Enable for JTAG to be powered down(will still be powered on if debugger
    * is connected)
    */
 
- AONWUCJtagPowerOff();
+  AONWUCJtagPowerOff();
 
   /* read the MODE_CONF register in CCFG */
 
@@ -172,6 +175,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       uint32_t ldoTrimReg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
       uint32_t vtrim_bod;
       uint32_t vtrim_udig;
+      uint8_t regval8;
 
       /* bit[27:24] unsigned */
 
@@ -202,7 +206,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
       regval8 = (vtrim_udig << ADI2_REFSYS_SOCLDOCTL0_VTRIM_UDIG_SHIFT) |
                 (vtrim_bod << ADI2_REFSYS_SOCLDOCTL0_VTRIM_BOD_SHIFT);
-      putreg8(regval, TIVA_ADI2_SOCLDOCTL0);
+      putreg8(regval, TIVA_ADI2_REFSYS_SOCLDOCTL0);
     }
 
   /* Third part of trim done after cold reset and wakeup from shutdown:
@@ -268,6 +272,7 @@ void cc13xx_trim_device(void)
 {
   uint32_t fcfg1_revision;
   uint32_t aon_sysresetctrl;
+  uint32_t regval;
 
   /* Get layout revision of the factory configuration area (Handle undefined
    * revision as revision = 0)
@@ -303,7 +308,7 @@ void cc13xx_trim_device(void)
    */
 
   regval  = getreg32(TIVA_PRCM_WARMRESET);
-  regval |= PRCM_WARMRESET_WR_TO_PINRESET;
+  regval |= PRCM_WARMRESET_WRTO_PINRESET;
   putreg32(regval, TIVA_PRCM_WARMRESET)
 
   /* Select correct CACHE mode and set correct CACHE configuration */

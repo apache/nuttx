@@ -1,5 +1,5 @@
 /******************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x_start.c
+ * arch/arm/src/tiva/cc13xx/cc13x2_v1_trim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,16 +45,17 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
-#include "hardware/tiva_ccfg.h"
-#include "hardware/tiva_flash.h"
-#include "hardware/tiva_prcm.h"
-#include "hardware/tiva_vims.h"
-#include "hardware/tiva_ddi0_osc.h"
-#include "hardware/tiva_aon_pmctl.h"
-#include "hardware/tiva_aon_rtc.h"
 #include "hardware/tiva_adi2_refsys.h"
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_adi4_aux.h"
+#include "hardware/tiva_aon_ioc.h"
+#include "hardware/tiva_aon_pmctl.h"
+#include "hardware/tiva_aon_rtc.h"
+#include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_ddi0_osc.h"
+#include "hardware/tiva_flash.h"
+#include "hardware/tiva_prcm.h"
+#include "hardware/tiva_vims.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -135,7 +136,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
 }
 
 /******************************************************************************
- * Name: Step_VBG
+ * Name: step_vbg
  *
  * Description:
  *   Special shadow register trim propagation on first batch of devices.
@@ -145,22 +146,26 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
  *
  ******************************************************************************/
 
-static void Step_VBG(int32_t target_signed)
+static void step_vbg(int32_t target_signed)
 {
   /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
 
   int32_t current_signed;
-  uint8_t ref_sysctl;
 
   do
     {
+      uint8_t ref_sysctl;
+      int lshift;
+      int rshift;
+
       ref_sysctl = getreg8(TIVA_ADI3_REFSYS_REFSYSCTL3);
-      current_signed =
-        (((int32_t)
-          (ref_sysctl <<
-           (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_W -
-            ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT))) >>
-            (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_W));
+
+      /* Isolate and sign extend the TRIM VDBG field */
+
+      lshift         = (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_WIDTH -
+                        ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_SHIFT);
+      rshift         = (32 - ADI3_REFSYS_REFSYSCTL3_TRIM_VBG_WIDTH);
+      current_signed = (((int32_t)ref_sysctl << lshift) >> rshift);
 
       /* Wait for next edge on SCLK_LF (positive or negative) */
 
@@ -209,6 +214,7 @@ static void Step_VBG(int32_t target_signed)
 static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
   uint32_t ccfg_modeconf;
+  uint32_t regval;
 
   /* Check in CCFG for alternative DCDC setting */
 
@@ -236,13 +242,13 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * OSCHfSourceSwitch().
    */
 
-  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
-           (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
-  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
+  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL |
+           (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL >> 16);
+  putreg32(regval, TIVA_DDI0_OSC_MASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
-  (void)getreg16(TIVA_AUX_DDI0_OSCCTL0);
+  (void)getreg16(TIVA_DDI0_OSC_CTL0);
 
   /* read the MODE_CONF register in CCFG */
 
@@ -273,6 +279,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     uint32_t org_resetctl;
     uint16_t regval16;
     uint8_t regval8;
+    int lshift;
+    int rshift;
 
     /* Get VTRIM_COARSE and VTRIM_DIG from EFUSE shadow register
      * OSC_BIAS_LDO_TRIM
@@ -389,13 +397,14 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
                             FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_SHIFT);
       }
 
-    /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
+    /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG)
+     * Provide isolated and sign extended SHDW_ANA_TRIM_TRIMTEMP
+     */
 
-    Step_VBG(((int32_t)
-              (fusedata <<
-               (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_W -
-                FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT))) >>
-                (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_W));
+    lshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH -
+              FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT);
+    rshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH);
+    step_vbg(((int32_t)fusedata << lshift) >> rshift);
 
     /* Wait two more LF edges before restoring xxx_LOSS_EN settings */
 
@@ -420,7 +429,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
     uint16_t regval16;
     uint8_t regval8;
 
-    /*Propagate the LPM_BIAS trim */
+    /* Propagate the LPM_BIAS trim */
 
     trimreg = getreg32(TIVA_FCFG1_DAC_BIAS_CNF);
     trimvalue = ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_MASK) >>

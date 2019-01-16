@@ -65,10 +65,7 @@
 #define TIVA_ADI4_AUX_ADC1_OFFSET                          0x0009  /* ADC Control 1 */
 #define TIVA_ADI4_AUX_ADCREF0_OFFSET                       0x000a  /* ADC Reference 0 */
 #define TIVA_ADI4_AUX_ADCREF1_OFFSET                       0x000b  /* ADC Reference 1 */
-
-#ifdef CONFIG_ARCH_CHIP_CC13XX_V2
-#  define TIVA_ADI4_AUX_LPMBIAS_OFFSET                     0x000e
-#endif
+#define TIVA_ADI4_AUX_LPMBIAS_OFFSET                       0x000e
 
 /* ADI3 AUX Register Addresses **************************************************************************************/
 
@@ -83,10 +80,7 @@
 #define TIVA_ADI4_AUX_ADC1                                 (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADC1_OFFSET)
 #define TIVA_ADI4_AUX_ADCREF0                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADCREF0_OFFSET)
 #define TIVA_ADI4_AUX_ADCREF1                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADCREF1_OFFSET)
-
-#ifdef CONFIG_ARCH_CHIP_CC13XX_V2
-#  define TIVA_ADI4_AUX_LPMBIAS                            (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_LPMBIAS_OFFSET)
-#endif
+#define TIVA_ADI4_AUX_LPMBIAS                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_LPMBIAS_OFFSET)
 
 /* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
 
@@ -180,13 +174,9 @@
 
 #define ADI4_AUX_COMP_COMPA_EN                              (1 << 1)  /* Bit 1:  COMPA enable */
 #define ADI4_AUX_COMP_COMPB_EN                              (1 << 2)  /* Bit 2:  COMPB enable */
-
-#ifdef CONFIG_ARCH_CHIP_CC13XX_V2
-#  define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT           (3)       /* Bits 3-5 */
-#  define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK            (7 << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT)
-#    define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM(n)            ((uint32_t)(n) << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT)
-#endif
-
+#define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT             (3)       /* Bits 3-5 */
+#define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK              (7 << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT)
+#  define ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM(n)              ((uint32_t)(n) << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT)
 #define ADI4_AUX_COMP_COMPA_REF_CURR_EN                     (1 << 6)  /* Bit 6:  Enables 2uA IPTAT current from ISRC to COMPA reference */
 #define ADI4_AUX_COMP_COMPA_REF_RES_EN                      (1 << 7)  /* Bit 7:  Enables 400kohm resistance from COMPA reference */
 
@@ -244,7 +234,6 @@
 #define ADI4_AUX_ADCREF0_EXT                                (1 << 4)  /* Bit 4 */
 #define ADI4_AUX_ADCREF0_IOMUX                              (1 << 5)  /* Bit 5 */
 #define ADI4_AUX_ADCREF0_REF_ON_IDLE                        (1 << 6)  /* Bit 6:  Enable ADCREF in IDLE state */
-
 
 /* TIVA_ADI4_AUX_ADCREF1 */
 

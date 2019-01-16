@@ -1,5 +1,5 @@
 /******************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x_start.c
+ * arch/arm/src/tiva/cc13xx/cc13x2_v2_trim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,13 +45,15 @@
 #include <nuttx/config.h>
 
 #include "tiva_chipinfo.h"
-#include "hardware/tiva_ccfg.h"
-#include "hardware/tiva_flash.h"
-#include "hardware/tiva_vims.h"
-#include "hardware/tiva_ddi0_osc.h"
-#include "hardware/tiva_aon_pmctl.h"
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_adi4_aux.h"
+#include "hardware/tiva_aon_ioc.h"
+#include "hardware/tiva_aon_pmctl.h"
+#include "hardware/tiva_ccfg.h"
+#include "hardware/tiva_ddi0_osc.h"
+#include "hardware/tiva_flash.h"
+#include "hardware/tiva_prcm.h"
+#include "hardware/tiva_vims.h"
 
 /******************************************************************************
  * Private Functions
@@ -120,13 +122,13 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * OSCHfSourceSwitch().
    */
 
-  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK |
-          (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL_MASK >> 16);
-  putreg32(regval, TIVA_AUX_DDI0_OSCMASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
+  regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL |
+           (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL >> 16);
+  putreg32(regval, TIVA_DDI0_OSC_MASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
-  (void)getret16(TIVA_AUX_DDI0_OSCCTL0);
+  (void)getreg16(TIVA_DDI0_OSC_CTL0);
 
   /* read the MODE_CONF register in CCFG */
 
@@ -183,9 +185,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       uint32_t trimwidth;
       uint16_t regval16;
 
-      uint32_t trimwidth =
-        ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_MASK) >>
-         FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_SHIFT);
+      trimwidth = ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_MASK) >>
+                  FCFG1_DAC_BIAS_CNF_LPM_BIAS_WIDTH_TRIM_SHIFT);
 
       /* Set LPM_BIAS_WIDTH_TRIM = 3
        * Set mask (bits to be written) in [15:8]
@@ -221,7 +222,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 }
 
 /******************************************************************************
- * Name: 
+ * Name: trim_coldreset
  *
  * Description:
  *   Trims to be applied when coming from PIN_RESET.
@@ -379,7 +380,7 @@ void cc13xx_trim_device(void)
    * but need to be sure)
    */
 
-  while ((getreg32(TIVA_VIMS_STAT0 & VIMS_STAT_MODE_CHANGING) != 0)
+  while ((getreg32(TIVA_VIMS_STAT) & VIMS_STAT_MODE_CHANGING) != 0)
     {
       /* Do nothing - wait for an eventual ongoing mode change to complete. */
     }
