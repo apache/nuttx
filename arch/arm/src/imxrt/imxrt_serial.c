@@ -100,19 +100,19 @@
 #  define UART4_ASSIGNED      1
 #elif defined(CONFIG_LPUART5_SERIAL_CONSOLE)
 #  define CONSOLE_DEV         g_uart5port /* LPUART5 is console */
-#  define TTYS5_DEV           g_uart5port /* LPUART5 is ttyS0 */
+#  define TTYS0_DEV           g_uart5port /* LPUART5 is ttyS0 */
 #  define UART5_ASSIGNED      1
 #elif defined(CONFIG_LPUART6_SERIAL_CONSOLE)
 #  define CONSOLE_DEV         g_uart6port /* LPUART6 is console */
-#  define TTYS6_DEV           g_uart6port /* LPUART6 is ttyS0 */
+#  define TTYS0_DEV           g_uart6port /* LPUART6 is ttyS0 */
 #  define UART6_ASSIGNED      1
 #elif defined(CONFIG_LPUART7_SERIAL_CONSOLE)
 #  define CONSOLE_DEV         g_uart7port /* LPUART7 is console */
-#  define TTYS7_DEV           g_uart7port /* LPUART7 is ttyS0 */
+#  define TTYS0_DEV           g_uart7port /* LPUART7 is ttyS0 */
 #  define UART7_ASSIGNED      1
 #elif defined(CONFIG_LPUART8_SERIAL_CONSOLE)
 #  define CONSOLE_DEV         g_uart8port /* LPUART8 is console */
-#  define TTYS8_DEV           g_uart8port /* LPUART8 is ttyS0 */
+#  define TTYS0_DEV           g_uart8port /* LPUART8 is ttyS0 */
 #  define UART8_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                      /* No console */
