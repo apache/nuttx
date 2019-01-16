@@ -55,9 +55,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* Timer 1 clock selects the external 32.768 KHz oscillator/clock */
+#ifdef USE_TIMER1MS
+/* Timer 1 clock selects the external 32.768 KHz oscillator/clock */
 
-#define TMR_CLOCK               (32768)
+#  define TMR_CLOCK             (32768)
+
+#else
+/* Timer clock selects system clock CLK_M_OSC (24MHz) */
+
+#  define TMR_CLOCK             (24000000ll)
+#endif
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -70,10 +77,22 @@
 
 #define TMR_TLDR                (0xffffffff - (TMR_CLOCK / CLK_TCK) + 1)
 #define TMR_TCRR                (0xffffffff - (TMR_CLOCK / CLK_TCK) + 1)
-#define TMR_TPIR \
-  (((TMR_CLOCK / CLK_TCK + 1) * 1000000l) - (TMR_CLOCK * (1000000l / CLK_TCK)))
-#define TMR_TNIR \
-  (((TMR_CLOCK / CLK_TCK) * 1000000l) - (TMR_CLOCK * (1000000l / CLK_TCK)))
+
+#ifdef USE_TIMER1MS
+#  define TMR_TPIR \
+    (((TMR_CLOCK / CLK_TCK + 1) * 1000000l) - \
+     (TMR_CLOCK * (1000000l / CLK_TCK)))
+#  define TMR_TNIR \
+    (((TMR_CLOCK / CLK_TCK) * 1000000l) - \
+     (TMR_CLOCK * (1000000l / CLK_TCK)))
+#else
+#  define TMR_TPIR \
+    (((TMR_CLOCK / CLK_TCK + 1) * 1000000ll) - \
+     (TMR_CLOCK * (1000000ll / CLK_TCK)))
+#  define TMR_TNIR \
+    (((TMR_CLOCK / CLK_TCK) * 1000000ll) - \
+     (TMR_CLOCK * (1000000ll / CLK_TCK)))
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -92,7 +111,11 @@ static int am335x_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending interrupt by writing a '1' to the status register */
 
-  putreg32(getreg32(AM335X_TMR1MS_TISR), AM335X_TMR1MS_TISR);
+#ifdef USE_TIMER1MS
+  putreg32(TMR1MS_IRQ_FLAG_OVF, AM335X_TMR1MS_TISR);
+#else
+  putreg32(TMR_IRQ_FLAG_OVF, AM335X_TMR2_IRQ_STAT);
+#endif
 
   /* Process timer interrupt */
 
@@ -118,11 +141,11 @@ void arm_timer_initialize(void)
 {
   uint32_t regval;
 
+#ifdef USE_TIMER1MS
   /* Make sure that interrupts from the Timer 1 are disabled */
 
   up_disable_irq(AM335X_IRQ_TIMER1_1MS);
 
-#if 0
   /* Soft reset the timer */
 
   putreg32(TMR1MS_TIOCP_SOFT_RESET, AM335X_TMR1MS_TIOCP_CFG);
@@ -130,21 +153,15 @@ void arm_timer_initialize(void)
   while (!(getreg32(AM335X_TMR1MS_TISTAT) & TMR1MS_TISTAT))
     {
     }
-#endif
-
-  /* Stop timer */
-
-  putreg32(0, AM335X_TMR1MS_TCLR);
 
   putreg32(TMR_TPIR, AM335X_TMR1MS_TPIR);
   putreg32(TMR_TNIR, AM335X_TMR1MS_TNIR);
   putreg32(TMR_TLDR, AM335X_TMR1MS_TLDR);
   putreg32(TMR_TCRR, AM335X_TMR1MS_TCRR);
 
-  /* Setup auto-reload, trigger on overflow and start timer */
+  /* Setup auto-reload and start timer */
 
-  regval = TMR1MS_TCLR_TRG_OFLOW | TMR1MS_TCLR_AR |
-           TMR1MS_TCLR_ST;
+  regval = TMR1MS_TCLR_AR | TMR1MS_TCLR_ST;
   putreg32(regval, AM335X_TMR1MS_TCLR);
 
   /* Attach the timer interrupt vector */
@@ -164,4 +181,39 @@ void arm_timer_initialize(void)
   /* And enable the timer interrupt */
 
   up_enable_irq(AM335X_IRQ_TIMER1_1MS);
+
+#else
+  /* Make sure that interrupts from the Timer 2 are disabled */
+
+  up_disable_irq(AM335X_IRQ_TIMER2);
+
+  /* Soft reset the timer */
+
+  putreg32(TMR_TIOCP_SOFT_RESET, AM335X_TMR2_TIOCP_CFG);
+
+  while ((getreg32(AM335X_TMR2_TIOCP_CFG) & TMR_TIOCP_SOFT_RESET))
+    {
+    }
+
+  putreg32(TMR_TLDR, AM335X_TMR2_TLDR);
+  putreg32(TMR_TCRR, AM335X_TMR2_TCRR);
+
+  /* Setup auto-reload and start timer */
+
+  regval = TMR_TCLR_AR | TMR_TCLR_ST;
+  putreg32(regval, AM335X_TMR2_TCLR);
+
+  /* Attach the timer interrupt vector */
+
+  (void)irq_attach(AM335X_IRQ_TIMER2, (xcpt_t)am335x_timerisr, NULL);
+
+  /* Enable overflow interrupt */
+
+  putreg32(TMR_IRQ_FLAG_OVF, AM335X_TMR2_IRQ_EN_SET);
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(AM335X_IRQ_TIMER2);
+
+#endif
 }
