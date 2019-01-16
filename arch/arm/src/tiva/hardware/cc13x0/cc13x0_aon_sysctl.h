@@ -1,5 +1,5 @@
 /********************************************************************************************************************
- * arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi2_refsys.h
+ * arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_sysctl.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>

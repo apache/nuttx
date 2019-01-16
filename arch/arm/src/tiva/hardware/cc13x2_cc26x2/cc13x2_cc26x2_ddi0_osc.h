@@ -46,8 +46,8 @@
  ********************************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/cc13x2_cc26x2/cc13x2_cc26x2_ddi.h"
 #include "hardware/tiva_memorymap.h"
+#include "hardware/tiva_ddi.h"
 
 /********************************************************************************************************************
  * Pre-processor Definitions

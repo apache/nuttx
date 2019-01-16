@@ -880,7 +880,7 @@ degrees C */
 
 /* TIVA_FCFG1_TRIM_CAL_REVISION */
 
-#define FCFG1_TRIM_CAL_REVISION_MP1_SHIFT                  (24)      /* Bits 0-15 */
+#define FCFG1_TRIM_CAL_REVISION_MP1_SHIFT                  (0)       /* Bits 0-15 */
 #define FCFG1_TRIM_CAL_REVISION_MP1_MASK                   (0xffff << FCFG1_TRIM_CAL_REVISION_MP1_SHIFT)
 #  define FCFG1_TRIM_CAL_REVISION_MP1(n)                   ((uint32_t)(n) << FCFG1_TRIM_CAL_REVISION_MP1_SHIFT)
 #define FCFG1_TRIM_CAL_REVISION_FT1_SHIFT                  (16)      /* Bits 16-31 */

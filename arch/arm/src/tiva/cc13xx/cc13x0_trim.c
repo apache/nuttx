@@ -49,6 +49,7 @@
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_aon_ioc.h"
 #include "hardware/tiva_aon_sysctl.h"
+#include "hardware/tiva_aon_wuc.h"
 #include "hardware/tiva_ccfg.h"
 #include "hardware/tiva_fcfg1.h"
 #include "hardware/tiva_flash.h"
@@ -95,7 +96,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
   uint32_t ccfg_modeconf;
   uint32_t mp1rev;
-  uing32_t regval;
+  uint32_t regval;
 
   /* Force AUX on and enable clocks No need to save the current status of the
    * power/clock registers. At this point both AUX and AON should have been
@@ -113,7 +114,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   /* Enable the clocks for AUX_DDI0_OSC and AUX_ADI4 */
 
   putreg32(AUX_WUC_MODCLKEN0_AUX_DDI0_OSC | AUX_WUC_MODCLKEN0_AUX_ADI4,
-           TIVA_AON_WUC_MODCLKEN0);
+           TIVA_AUX_WUC_MODCLKEN0);
 
   /* Check in CCFG for alternative DCDC setting */
 
@@ -168,9 +169,9 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * cc26x0
    */
 
-  mp1rev =
-    ((getreg32(TIVA_FCFG1_TRIM_CAL_REVISION) &
-      FCFG1_TRIM_CAL_REVISION_MP1_M) >> FCFG1_TRIM_CAL_REVISION_MP1_SHIFT);
+  mp1rev = ((getreg32(TIVA_FCFG1_TRIM_CAL_REVISION) &
+             FCFG1_TRIM_CAL_REVISION_MP1_MASK) >>
+            FCFG1_TRIM_CAL_REVISION_MP1_SHIFT);
   if (mp1rev < 542)
     {
       uint32_t ldoTrimReg = getreg32(TIVA_FCFG1_BAT_RC_LDO_TRIM);
@@ -180,12 +181,12 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
       /* bit[27:24] unsigned */
 
-      vtrim_bod = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_M) >>
+      vtrim_bod = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_MASK) >>
                   FCFG1_BAT_RC_LDO_TRIM_VTRIM_BOD_SHIFT);
 
       /* bit[19:16] signed but treated as unsigned */
 
-      vtrim_udig = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_M) >>
+      vtrim_udig = ((ldoTrimReg & FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_MASK) >>
                    FCFG1_BAT_RC_LDO_TRIM_VTRIM_UDIG_SHIFT);
 
       if (vtrim_bod > 0)
@@ -207,7 +208,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
       regval8 = (vtrim_udig << ADI2_REFSYS_SOCLDOCTL0_VTRIM_UDIG_SHIFT) |
                 (vtrim_bod << ADI2_REFSYS_SOCLDOCTL0_VTRIM_BOD_SHIFT);
-      putreg8(regval, TIVA_ADI2_REFSYS_SOCLDOCTL0);
+      putreg8(regval8, TIVA_ADI2_REFSYS_SOCLDOCTL0);
     }
 
   /* Third part of trim done after cold reset and wakeup from shutdown:
@@ -228,7 +229,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * AUX_ADI4
    */
 
-  putreg32(AUX_WUC_MODCLKEN0_AUX_DDI0_OSC, TIVA_AON_WUC_MODCLKEN0);
+  putreg32(AUX_WUC_MODCLKEN0_AUX_DDI0_OSC, TIVA_AUX_WUC_MODCLKEN0);
 
   /* Disable EFUSE clock */
 
