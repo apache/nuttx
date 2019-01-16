@@ -1148,7 +1148,7 @@
 
                                                         /* Bit: 0 Reserved */
 #define SMFRCTRL_FRAC1_EN                    (1 << 1)   /* Bit: 1  Fractional Cycle PWM Period Enable */
-#define SMFRCTRL_FRAC45_EN                   (1 << 2)   /* Bit: 2  Fractional Cycle Placement Enable for PWM_A */
+#define SMFRCTRL_FRAC23_EN                   (1 << 2)   /* Bit: 2  Fractional Cycle Placement Enable for PWM_A */
                                                         /* Bit: 3 Reserved */
 #define SMFRCTRL_FRAC45_EN                   (1 << 4)   /* Bit: 4  Fractional Cycle Placement Enable for PWM_B */
                                                         /* Bits: 5-7 Reserved */
@@ -1541,7 +1541,7 @@
 #  define OUTEN_PWMX_EN_SM1                  (2 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 1 */
 #  define OUTEN_PWMX_EN_SM2                  (4 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 2 */
 #  define OUTEN_PWMX_EN_SM3                  (8 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 3 */
-#  define OUTEN_PWMX_EN_ALL_DIS              (0xf << OUTEN_PWMX_EN_SHIFT)  /* All enabled */
+#  define OUTEN_PWMX_EN_ALL                  (0xf << OUTEN_PWMX_EN_SHIFT)  /* All enabled */
 #define OUTEN_PWMB_EN_SHIFT                  (4)        /* Bits: 4-7  PWM_B Output Enables */
 #define OUTEN_PWMB_EN_MASK                   (0xf << OUTEN_PWMB_EN_SHIFT)
 #  define OUTEN_PWMB_EN(n)                   ((uint32_t)(n) << OUTEN_PWMB_EN_SHIFT)
@@ -1550,7 +1550,7 @@
 #  define OUTEN_PWMB_EN_SM1                  (2 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 1 */
 #  define OUTEN_PWMB_EN_SM2                  (4 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 2 */
 #  define OUTEN_PWMB_EN_SM3                  (8 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 3 */
-#  define OUTEN_PWMB_EN_ALL_DIS              (0xf << OUTEN_PWMB_EN_SHIFT)  /* All enabled */
+#  define OUTEN_PWMB_EN_ALL                  (0xf << OUTEN_PWMB_EN_SHIFT)  /* All enabled */
 #define OUTEN_PWMA_EN_SHIFT                  (8)        /* Bits: 8-11  PWM_A Output Enables */
 #define OUTEN_PWMA_EN_MASK                   (0xf << OUTEN_PWMA_EN_SHIFT)
 #  define OUTEN_PWMA_EN(n)                   ((uint32_t)(n) << OUTEN_PWMA_EN_SHIFT)
@@ -1559,7 +1559,7 @@
 #  define OUTEN_PWMA_EN_SM1                  (2 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 1 */
 #  define OUTEN_PWMA_EN_SM2                  (4 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 2 */
 #  define OUTEN_PWMA_EN_SM3                  (8 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 3 */
-#  define OUTEN_PWMA_EN_ALL_DIS              (0xf << OUTEN_PWMA_EN_SHIFT)  /* All enabled */
+#  define OUTEN_PWMA_EN_ALL                  (0xf << OUTEN_PWMA_EN_SHIFT)  /* All enabled */
                                                         /* Bits: 12-15 Reserved */
 
 /* Mask Register */
