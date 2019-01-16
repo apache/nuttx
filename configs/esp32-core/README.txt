@@ -202,7 +202,7 @@ Buttons and LEDs
   LEDs
   ----
   There are several on-board LEDs for that indicate the presence of power
-  and USB activity.  None of these are available for use by sofware.
+  and USB activity.  None of these are available for use by software.
 
 SMP
 ===
@@ -270,11 +270,11 @@ OpenOCD for the ESP32
   to reflect the physical JTAG adapter connected.
 
   NOTE: A copy of this OpenOCD configuration file available in the NuttX
-  source tree at nuttx/config/esp32-core/scripts/esp32.cfg..  It has these
+  source tree at nuttx/configs/esp32-core/scripts/esp32.cfg .  It has these
   modifications:
 
     - The referenced "set ESP32_RTOS none" line has been uncommented
-    - The "ind interface/ftdi/tumpa.cfg".  This means that you will
+    - The "find interface/ftdi/tumpa.cfg".  This means that you will
       need to specify the interface configuration file on the OpenOCD
       command line.
 
@@ -311,7 +311,7 @@ OpenOCD for the ESP32
   Then start OpenOCD by executing a command like the following.  Here
   I assume that:
 
-    - You did not install OpenOCD; binararies are avalable at
+    - You did not install OpenOCD; binaries are available at
       openocd-esp32/src and interface scripts are in
       openocd-eps32/tcl/interface
     - I select the configuration for the Olimex ARM-USB-OCD
@@ -451,19 +451,14 @@ OpenOCD for the ESP32
   The tool esp-idf uses for flashing is a command line Python tool called
   "esptool.py" which talks to a serial bootloader in ROM.  A version is
   supplied in the esp-idf codebase in components/esptool_py/esptool, the
-  "upstream" for that tool is here:
+  "upstream" for that tool is here and now supports ESP32.
 
-    https://github.com/espressif/esptool/pull/121
-
-  The master branch for esptool.py is currently ESP8266-only (as of 2016-11-14),
-  this PR has the ESP32 support which still needs some final tidying up before
-  it's
-  merged.
+    https://github.com/espressif/esptool/
 
   To FLASH an ELF via the command line is a two step process, something like
   this:
 
-    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o ./nuttx.bin nuttx
+    esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o nuttx.bin nuttx
     esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x4000 partition_table.bin 0x10000 nuttx.bin
 
   The first step converts an ELF image into an ESP32-compatible binary
@@ -480,7 +475,7 @@ OpenOCD for the ESP32
   Secondary Boot Loader / Partition Table
   ---------------------------------------
   See https://github.com/espressif/esp-idf/tree/master/components/bootloader
-  and https://github.com/espressif/esp-idf/tree/master/components/partition_table.
+  and https://github.com/espressif/esp-idf/tree/master/components/partition_table .
 
   Running from IRAM with OpenOCD
   ------------------------------
