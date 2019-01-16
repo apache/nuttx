@@ -133,7 +133,16 @@ struct tda19988_lower_s
   struct tda19988_i2c_s cec;
   struct tda19988_i2c_s hdmi;
 
-  /* Interrupt controls */
+  /* Interrupt controls
+   *
+   * The interrupt output (open-drain) is used as dual function pin
+   * selectable through I2C-bus.  In calibration mode this pin is used as
+   * input for 10 ms +/- 1% calibration pulse.  In operational mode this pin
+   * is used to warn the external microprocessor that a special event has
+   * occurred for HDMI or CEC
+   *
+   * REVISIT: The interrupt is not currently used by the upper half driver.
+   */
 
   CODE int (*attach)(FAR const struct tda19988_lower_s *lower,
                      xcpt_t handler, FAR void *arg);
