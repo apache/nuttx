@@ -509,11 +509,11 @@ Configuration Directories
     built-in applications is enabled, but in the base configuration no
     built-in applications are selected.
 
-  nsh-ethernet
-  ------------
+  netnsh
+  ------
     This configuration is similar to the nsh but a lot more hardware
     peripherals are enabled, in particular Ethernet, as well as networking
-    support.  It is similar to the stm32f769i-disco/nsh-ethernet
+    support.  It is similar to the stm32f769i-disco/netnsh
     configuration. This configuration uses USART1 for the serial console.
     USART1 is connected to the ST-link virtual com inside board.h to remove
     the need of a extra serial connection to use this board.
