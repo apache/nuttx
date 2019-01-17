@@ -50,6 +50,7 @@
 #include "up_arch.h"
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
+#include "chip/imxrt_daisy.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -534,25 +535,25 @@ static inline int imxrt_gpio_configperiph(gpio_pinset_t pinset)
   iomux_pinset_t ioset;
   uintptr_t regaddr;
   uint32_t regval;
-  uint32_t value;
+  uint32_t alt;
   unsigned int index;
 
-  /* Configure pin as a peripheral */
+  /* Configure pin as a peripheral via SW MUX Control Register */
 
   index   = ((pinset & GPIO_PADMUX_MASK) >> GPIO_PADMUX_SHIFT);
   regaddr = imxrt_padmux_address(index);
 
-  value   = ((pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT);
-#if GPIO_SION_SHIFT >= PADMUX_SION_SHIFT
-  value  |= ((pinset & GPIO_SION_MASK) >> (GPIO_SION_SHIFT - PADMUX_SION_SHIFT));
-#else
-  value  |= ((pinset & GPIO_SION_MASK) << (PADMUX_SION_SHIFT - GPIO_SION_SHIFT));
-#endif
-  regval  = (value << PADMUX_MUXMODE_SHIFT);
+  alt     = (pinset & GPIO_ALT_MASK) >> GPIO_ALT_SHIFT;
+  regval  = alt << PADMUX_MUXMODE_SHIFT;
+  regval |= (pinset & GPIO_SION_MASK) ? PADMUX_SION : 0;
 
   putreg32(regval, regaddr);
 
-  /* Configure pin pad settings */
+  /* Configure pin Daisy Select Input Daisy Register */
+
+  imxrt_daisy_select(index, alt);
+
+  /* Configure pin pad settings SW PAD Control Register*/
 
   index = imxrt_padmux_map(index);
   if (index >= IMXRT_PADCTL_NREGISTERS)

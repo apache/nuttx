@@ -623,6 +623,9 @@
 
 /* Select Input Daisy Register Offsets */
 
+#define IMXRT_INPUT_INDEX2OFFSET(n)                 (0x03f4 + ((unsigned int)(n) << 2))
+#define IMXRT_INPUT_OFFSET2INDEX(o)                 (((unsigned int)(o) - 0x03f4) >> 2)
+
 #define IMXRT_INPUT_ANATOP_USB_OTG1_ID_OFFSET       0x03f4
 #define IMXRT_INPUT_ANATOP_USB_OTG2_ID_OFFSET       0x03f8
 #define IMXRT_INPUT_CCM_PMIC_READY_OFFSET           0x03fc
