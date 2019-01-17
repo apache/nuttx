@@ -126,6 +126,16 @@
 #define LPI2C_MASTER    1
 #define LPI2C_SLAVE     2
 
+#define MKI2C_OUTPUT(p) (((p) & GPIO_PADMUX_MASK) | \
+                         IOMUX_OPENDRAIN | IOMUX_DRIVE_33OHM | \
+                         IOMUX_SLEW_SLOW | (5 << GPIO_ALT_SHIFT) | \
+                         IOMUX_PULL_NONE | GPIO_OUTPUT_ONE)
+
+#define MKI2C_INPUT(p) (((p) & GPIO_PADMUX_MASK) | \
+                        IOMUX_DRIVE_HIZ | IOMUX_SLEW_SLOW | \
+                        IOMUX_CMOS_INPUT | (5 << GPIO_ALT_SHIFT) | \
+                        IOMUX_PULL_NONE)
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -1785,8 +1795,11 @@ static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev)
 
   /* Revert the GPIO configuration. */
 
-  imxrt_unconfig_gpio(sda_gpio);
-  imxrt_unconfig_gpio(scl_gpio);
+  sda_gpio = MKI2C_INPUT(sda_gpio);
+  scl_gpio = MKI2C_INPUT(scl_gpio);
+
+  imxrt_config_gpio(sda_gpio);
+  imxrt_config_gpio(scl_gpio);
 
   /* Re-init the port */
 
