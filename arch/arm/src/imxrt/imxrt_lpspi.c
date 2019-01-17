@@ -125,7 +125,6 @@ struct imxrt_lpspidev_s
 {
   struct spi_dev_s spidev;    /* Externally visible part of the SPI interface */
   uint32_t spibase;           /* SPIn base address */
-  uint32_t spiclock;          /* Clocking for the SPI module */
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   uint8_t spiirq;             /* SPI IRQ number */
 #endif
@@ -232,7 +231,6 @@ static struct imxrt_lpspidev_s g_lpspi1dev =
     &g_spi1ops
   },
   .spibase      = IMXRT_LPSPI1_BASE,
-  .spiclock     = CCM_CCGR_LPSPI1,
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI1,
 #endif
@@ -279,7 +277,6 @@ static struct imxrt_lpspidev_s g_lpspi2dev =
     &g_spi2ops
   },
   .spibase      = IMXRT_LPSPI2_BASE,
-  .spiclock     = CCM_CCGR_LPSPI2,
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI2,
 #endif
@@ -326,7 +323,6 @@ static struct imxrt_lpspidev_s g_lpspi3dev =
     &g_spi3ops
   },
   .spibase      = IMXRT_LPSPI3_BASE,
-  .spiclock     = CCM_CCGR_LPSPI3,
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI3,
 #endif
@@ -369,7 +365,6 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
     &g_spi4ops
   },
   .spibase      = IMXRT_LPSPI4_BASE,
-  .spiclock     = CCM_CCGR_LPSPI4,
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI4,
 #endif
