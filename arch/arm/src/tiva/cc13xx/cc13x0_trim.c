@@ -155,13 +155,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
                                             ccfg_modeconf);
-#else
-  NOROM_SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
-                                                  ccfg_modeconf);
-#endif
 
   /* Increased margin between digital supply voltage and VDD BOD during
    * standby. VTRIM_UDIG: signed 4 bits value to be incremented by 2 (max = 7)
@@ -216,11 +211,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
-#else
-  NOROM_SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
-#endif
 
   /* Allow AUX to power down */
 
@@ -316,11 +307,7 @@ void cc13xx_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-#if TIVA_CCFG_BASE == TIVA_CCFG_BASE_DEFAULT
   SetupSetCacheModeAccordingToCcfgSetting();
-#else
-  NOROM_SetupSetCacheModeAccordingToCcfgSetting();
-#endif
 
   /* 1. Check for powerdown 2. Check for shutdown 3. Assume cold reset if none
    * of the above. It is always assumed that the application will freeze the

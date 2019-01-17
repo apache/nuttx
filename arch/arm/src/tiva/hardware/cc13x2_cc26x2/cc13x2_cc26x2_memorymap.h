@@ -113,10 +113,7 @@
 #define TIVA_FLASH_CFG_BASE           0x50000000 /* CC26_DUMMY_COMP */
 #define TIVA_FCFG1_BASE               0x50001000 /* FCFG1 */
 #define TIVA_FCFG2_BASE               0x50002000 /* FCFG2 */
-#ifndef TIVA_CCFG_BASE
-#  define TIVA_CCFG_BASE              0x50003000 /* CCFG */
-#endif
-#define TIVA_CCFG_BASE_DEFAULT        0x50003000 /* CCFG */
+#define TIVA_CCFG_BASE                0x50003000 /* CCFG */
 #define TIVA_SSI0_NONBUF_BASE         0x60000000 /* SSI CPU nonbuf base */
 #define TIVA_UART0_NONBUF_BASE        0x60001000 /* UART CPU nonbuf base */
 #define TIVA_I2C0_NONBUF_BASE         0x60002000 /* I2C CPU nonbuf base */
