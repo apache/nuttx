@@ -50,6 +50,7 @@
 #include "hardware/tiva_aon_ioc.h"
 #include "hardware/tiva_aon_sysctl.h"
 #include "hardware/tiva_aon_wuc.h"
+#include "hardware/tiva_aux_wuc.h"
 #include "hardware/tiva_ccfg.h"
 #include "hardware/tiva_fcfg1.h"
 #include "hardware/tiva_flash.h"
@@ -300,7 +301,7 @@ void cc13xx_trim_device(void)
    * workaround)
    */
 
-  putreg32(AUX_WUC_MODCLKEN1_SMPH, TIVA_AON_WUC_MODCLKEN1);
+  putreg32(AUX_WUC_MODCLKEN1_SMPH, TIVA_AUX_WUC_MODCLKEN1);
 
   /* Warm resets on CC13x0 and CC26x0 complicates software design because much
    * of our software expect that initialization is done from a full system
@@ -311,7 +312,7 @@ void cc13xx_trim_device(void)
 
   regval  = getreg32(TIVA_PRCM_WARMRESET);
   regval |= PRCM_WARMRESET_WRTO_PINRESET;
-  putreg32(regval, TIVA_PRCM_WARMRESET)
+  putreg32(regval, TIVA_PRCM_WARMRESET);
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
