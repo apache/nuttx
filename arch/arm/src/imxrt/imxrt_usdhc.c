@@ -59,6 +59,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
+#include "cache.h"
 #include "chip.h"
 #include "up_arch.h"
 
@@ -995,7 +996,8 @@ static void imxrt_endtransfer(struct imxrt_dev_s *priv,
 
   /* DMA modified the buffer, so we need to flush its cache lines. */
 
-  arch_invalidate_dcache(priv->buffer, priv->bufferend);
+  arch_invalidate_dcache((uintptr_t)priv->buffer,
+                         (uintptr_t)priv->bufferend);
 
   /* Debug instrumentation */
 
