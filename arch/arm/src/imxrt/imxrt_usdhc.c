@@ -2780,10 +2780,6 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
 
 #if defined(CONFIG_MMCSD_HAVE_CARDDETECT) && defined(PIN_USDHC1_CD)
   (void)imxrt_config_gpio(PIN_USDHC1_CD);
-
-  /* Daisy chain select the CD pin */
-
-  putreg32(2, 0x401f85d4);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
