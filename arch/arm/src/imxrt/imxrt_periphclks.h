@@ -375,6 +375,15 @@
 #define imxrt_clockall_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_ALL)
 #define imxrt_clockall_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_ALL)
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /********************************************************************************************
  * Public Functions
  *********************************************************************************************/
@@ -399,4 +408,8 @@
 void imxrt_periphclk_configure(uintptr_t regaddr, unsigned int index,
                                unsigned int value);
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_PERIPHCLKS_H */
