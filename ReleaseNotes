@@ -20946,9 +20946,8 @@ Additional new features and extended functionality:
 
       - Configuration:  Simplify ARM core selection logic  From Mateusz Szafoni
       - Configuration:  USB Host is an option.  From David Sidrane
-      - STM32 L0:  Brings in initial WIP support for the STM23 L0.  This
-        initial commit is unverified and, hence it it marked "EXPERIMENTAL."
-        From Mateusz Szafoni
+      - STM32 L0:  Brings in initial support for the STM23 L0.  From Mateusz
+        Szafoni
 
     * STMicro STM32 Drivers:
 

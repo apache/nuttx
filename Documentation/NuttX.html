@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 2, 2019</p>
+      <p>Last Updated: January 19, 2019</p>
     </td>
   </tr>
 </table>
@@ -530,6 +530,16 @@
     <p>
       <li>
         SPIFFS. FLASH file system, originally by Peter Anderson.
+      </li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>
+        LittleFS. FLASH file system from ARM mbed..
       </li>
     </p>
   </td>
@@ -1451,11 +1461,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.27.
-  NuttX 7.27 is the 127<sup>th</sup> release of NuttX.
-  It was released on November 15, 2018, and is available for download from the
+  The current release is NuttX 7.28.
+  NuttX 7.28 is the 128<sup>th</sup> release of NuttX.
+  It was released on January 19, 2019, and is available for download from the
   <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.27.tar.gz</code> and <code>apps-7.27.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.28.tar.gz</code> and <code>apps-7.28.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1464,7 +1474,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.27 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
+      Release notes for NuttX 7.28 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1472,7 +1482,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.27 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
+      Release notes for NuttX 7.28 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
       Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
       The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1525,12 +1535,12 @@
       <li><a href="#armv4">Other ARMv4</a> (1)</li>
       <li><a href="#arm1176jz">ARM1176JZ</a> (1)</li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (3)</li>
-      <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
+      <li><a href="#armcortexa8">ARM Cortex-A8</a> (2)</li>
       <li><a href="#armcortexa9">ARM Cortex-A9</a> (1)</li>
       <li><a href="#armcortexr4">ARM Cortex-R4</a> (2)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (10)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (37)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (50)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (39)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (54)</li>
       <li><a href="#armcortexm7">ARM Cortex-M7</a> (13)</li>
     </ul>
   <li>Atmel AVR
@@ -1642,6 +1652,11 @@
       <li><a href="#80x86">Intel 80x86</a></li>
     </ul>
   </li>
+  <li>Maxim Integrated
+    <ul>
+      <li><a href="#max3660">MAX32660</a> <small>(ARM Cortex-M3)</small></li>
+    </ul>
+  </li>
   <li>MicroChip
     <ul>
       <li><a href="#pic32mx2xx">PIC32MX2xx Family</a> <small>(MIPS32 24Kc)</small></li>
@@ -1692,17 +1707,15 @@
   <li>NXP/Freescale
     <ul>
       <li><a href="#m68hcs12">M68HCS12</a></li>
-    </ul>
+      <li><a href="#freescaleimx1">NXP/Freescale i.MX1</a> <small>(ARM920-T)</small></li>
+      <li><a href="#freescaleimx6">NXP/Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
+      <li><a href="#freescaleimxrt">NXP/Freescale i.MX RT</a> <small>(ARM Cortex-M7)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>NXP/Freescale (Continued)
     <ul>
-    <ul>
-      <li><a href="#freescaleimx1">NXP/Freescale i.MX1</a> <small>(ARM920-T)</small></li>
-      <li><a href="#freescaleimx6">NXP/Freescale i.MX6</a> <small>(ARM Cortex-A9)</small></li>
-      <li><a href="#freescaleimxrt">NXP/Freescale i.MX RT</a> <small>(ARM Cortex-M7)</small></li>
       <li><a href="#freescalekl25z">NXP/FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#freescalekl26z">NXP/FreeScale KL26Z</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#kinetisk20">NXP/FreeScale Kinetis K20</a> <small>(ARM Cortex-M4)</small></li>
@@ -1747,6 +1760,7 @@
       <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L1 &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
       <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L1 &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f0xx">STMicro STM32F0xx</a> <small>(STM32 F0, ARM Cortex-M0)</small></li>
+      <li><a href="#stm32L0xx">STMicro STM32L0xx</a> <small>(STM32 F0, ARM Cortex-M0)</small></li>
       <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f102x">STMicro STM32F102x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103cx">STMicro STM32F103C4/C8</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot; Family, ARM Cortex-M3)</small></li>
@@ -1759,13 +1773,13 @@
       <li><a href="#stm32f303x">STMicro STM32F303x</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f334x">STMicro STM32F334</a> <small>(STM32 F3 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f372x">STMicro STM32 F372/F373</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f4x1">STMicro STM32F4x1</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
   <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>STMicroelectronics (Continued)
     <ul>
-      <li><a href="#stm32f4x1">STMicro STM32F4x1</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f410">STMicro STM32F410</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/F437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
@@ -1782,7 +1796,8 @@
       <li><a href="#stm32f74x">STMicro STM32 F745/F746</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f75x">STMicro STM32 F756</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
       <li><a href="#stm32f76xx77xx">STMicro STM32 F76xx/F77xx</a> <small>(STM32 F7 family, ARM Cortex-M7)</small></li>
-      <li><a href="#stm32h7x3">STMicro STM32 H7x3</a> <small>(STM32 H7 family, ARM Cortex-M7)    </ul>
+      <li><a href="#stm32h7x3">STMicro STM32 H7x3</a> <small>(STM32 H7 family, ARM Cortex-M7)</small></li>
+  </ul>
   <li>Texas Instruments (some formerly Luminary)
     <ul>
       <li><a href="#tms320c5471">TI TMS320-C5471</a> <small>(ARM7TDMI)</small></li>
@@ -1792,13 +1807,17 @@
       <li><a href="#tilms6918">TI/Stellaris LM3S6918</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilms6965">TI/Stellaris LM3S6965</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilms8962">TI/Stellaris LM3S8962</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilms9b92">TI/Stellaris LM3S9B92</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilms9b96">TI/Stellaris LM3S9B96</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilcc13x0">TI/SimpleLink CC13x0</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#tilm4f120x">TI/Stellaris LM4F120x</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#titm4c123g">TI/Tiva TM4C123G</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#titm4c1294">TI/Tiva TM4C1294</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#titm4c129x">TI/Tiva TM4C129X</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#tilcc13x2">TI/SimpleLink CC13x2</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#tms570ls04x">TI/Hercules TMS570LS04xx</a> <small>(ARM Cortex-R4)</small></li>
       <li><a href="#tms570ls31x">TI/Hercules TMS570LS31xx</a> <small>(ARM Cortex-R4)</small></li>
+      <li><a href="#tiam355x">TI/Sitara AM335x</a> <small>(Cortex-A8)</small></li>
     </ul>
   </li>
   <li>ZiLOG
@@ -2433,6 +2452,39 @@
 </tr>
 
 <tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="tiam355x"><b>TI/Sitara AM335x</b>.</a>
+      These following boards are based on the TI/Sitara AM335x are supported by NuttX:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>Beaglebone Black</b>.
+          A port of NuttX to the Beaglebone Black board was first released in NuttX-7.28.
+          This port was contributed by Petro Karashchenko.
+          This board is based on the TI/Sitara AM3358 Cortex-A8 CPU running 1GHz.
+        </p>
+        <p>
+          <b>STATUS</b>.
+          This initial port in NuttX-7.28 is very sparse.
+          While not ready for prodcution use, the Beaglebone Black port is functional and will be the basis for a more extensive development.
+          Additional work in progress to extend this port and more capable is anticipated in NuttX-7.29.
+        </p>
+        <p>
+          Refer to the Beaglebone Black board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/beaglebone-black/README.txt" target="_blank">README</a> file for further, up-to-date information.
+        </p>
+      </li>
+    </ul>
+  </td>
+</tr>
+
+<tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
     <a name="armcortexa9"><b>ARM Cortex-A9</b>.</a>
@@ -2517,9 +2569,6 @@
     </ul>
   </td>
 </tr>
-
-
-
 
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
@@ -2861,11 +2910,38 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="tilms9b92"><b>TI/Stellaris LM3S9B92</b>.</a>
+      Architectural support for the LM3S9B92 was contributed by Lwazi Dube in NuttX 7.28.  No board support for boards using the LM3S9B92 are currently available.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="tilms9b96"><b>TI/Stellaris LM3S9B96</b>.</a>
       Header file support was contributed by Tiago Maluta for this part.
       Jose Pablo Rojas V. is used those header file changes to port NuttX to the TI/Stellaris EKK-LM3S9B96.
       That port was available in the NuttX-6.20 release.
       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ekk-lm3s9b96/README.txt" target="_blank">README</a> file for further information.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="tilcc13x0"><b>TI/SimpleLink CC13x0</b>.</a>
+      Basic, unverified architectural support for the CC13x0 was added in NuttX-7.28.
+      This is a work in progress and, with any luck, a fully verified port will be available in NuttX-7.29.
     </p>
   </td>
 </tr>
@@ -3004,50 +3080,67 @@ nsh>
   <td>
     <p>
       <a name="stm32l152"><b>STMicro STM32L152 (STM32L &quot;EnergyLite&quot; Line)</b>.</a>
-      This is a port of NuttX to the STMicro STM32L-Discovery development board.
-      The STM32L-Discovery board is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).
-    </p>
+      Two boards are supported:
+    <p>
     <ul>
-      <p>
-        The STM32L-Discovery and STM32L152C DISCOVERY kits are functionally equivalent.
-        The difference is the internal Flash memory size (STM32L152RBT6 with 128 Kbytes or STM32L152RCT6 with 256 Kbytes).
-        Both boards feature:
-      </p>
-      <ul>
-        <li>An ST-LINK/V2 embedded debug tool interface,</li>
-        <li>LCD (24 segments, 4 commons),</li>
-        <li>LEDs,</li>
-        <li>Pushbuttons,</li>
-        <li>A linear touch sensor, and</li>
-        <li>Four touchkeys.</li>
-      </ul>
-      <p>
-        <b>STATUS</b>.
-        Initial support for the STM32L-Discovery was released in NuttX-6.28.
-        Addition (architecture-only) support for the STM32L152xC family was added in NuttX-7.21.
-        This initial support includes a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
-        A driver for the on-board segment LCD is included as well as an option to drive the segment LCD from an NSH &quot;built-in&quot; command.
-        As of this writing, a few more things are needed to make this a more complete port:  1) Verfication of more device drivers (timers, quadrature encoders, PWM, etc.), and 2) logic that actually uses the low-power consumption modes of the EnergyLite part.
-        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32ldiscovery/README.txt" target="_blank">README</a> file for further information.
-      </p>
-      <p>
-        <b>Memory Usage</b>.
-        For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the STM32L152RBT6 demonstrates the scalability of NuttX.  The STM32L152RBT6 comes in a 64-pin package and has 128KB FLASH and 16KB of SRAM.
-      </p>
-      <p>
-        Static memory usage can be shown with <code>size</code> command:
-      </p>
-      <ul><pre>
+      <li>
+        <p>STM32L-Discovery</b>.
+          This is a port of NuttX to the STMicro STM32L-Discovery development board.
+          The STM32L-Discovery board is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).
+        </p>
+        <p>
+          The STM32L-Discovery and STM32L152C DISCOVERY kits are functionally equivalent.
+          The difference is the internal Flash memory size (STM32L152RBT6 with 128 Kbytes or STM32L152RCT6 with 256 Kbytes).
+          Both boards feature:
+        </p>
+        <ul>
+          <li>An ST-LINK/V2 embedded debug tool interface,</li>
+          <li>LCD (24 segments, 4 commons),</li>
+          <li>LEDs,</li>
+          <li>Pushbuttons,</li>
+          <li>A linear touch sensor, and</li>
+          <li>Four touchkeys.</li>
+        </ul>
+      </li>
+      <li>
+        <p>Nucleo-L152RE</b>.
+        Board support for the Nucleo-L152RE was contributed by Mateusz Szafoni in NuttX-7.28.
+        Available configurations include NSH, ADC, and PWM.
+        </p>
+      </li>
+    </ul>
+    <p>
+      <b>STATUS</b>.
+      Initial support for the STM32L-Discovery was released in NuttX-6.28.
+      Addition (architecture-only) support for the STM32L152xC family was added in NuttX-7.21.
+      Support for the Nucleo-L152RE was added in NuttX-7.28.
+    </p>
+    <p>
+      That initial STM32L-Discovery support included a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
+      A driver for the on-board segment LCD is included as well as an option to drive the segment LCD from an NSH &quot;built-in&quot; command.
+      Refer to the STM32L-Discovery board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/stm32ldiscovery/README.txt" target="_blank">README</a> file for further information.
+    </p>
+    <p>
+      <b>Memory Usage</b>.
+      <blockquote><small>
+      REVISIT:  These numbers are out of date.  Current NuttX sizing might be somewhat larger.
+      </small></blockquote>
+      For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the STM32L152RBT6 demonstrates the scalability of NuttX.  The STM32L152RBT6 comes in a 64-pin package and has 128KB FLASH and 16KB of SRAM.
+    </p>
+    <p>
+      Static memory usage can be shown with <code>size</code> command:
+    </p>
+    <ul><pre>
 $ size nuttx
    text    data     bss     dec     hex filename
   39664     132    1124   40920    9fd8 nuttx
 </pre></ul>
-      <p>
-        NuttX, the NSH application, and GCC libraries use 38.7KB of FLASH leaving 89.3B of FLASH (70%) free from additional application development.
-        Static SRAM usage is about 1.2KB (&lt;4%) and leaves 14.8KB (86%) available for heap at runtime.
-      </p>
-        SRAM usage at run-time can be shown with the NSH <code>free</code> command:
-      <ul><pre>
+    <p>
+      NuttX, the NSH application, and GCC libraries use 38.7KB of FLASH leaving 89.3B of FLASH (70%) free from additional application development.
+      Static SRAM usage is about 1.2KB (&lt;4%) and leaves 14.8KB (86%) available for heap at runtime.
+    </p>
+      SRAM usage at run-time can be shown with the NSH <code>free</code> command:
+    <ul><pre>
 NuttShell (NSH) NuttX-6.27
 nsh> free
              total       used       free    largest
@@ -3084,7 +3177,7 @@ nsh>
     <p>
       <a name="stm32f0xx"><b>STMicro STM32F0xx (STM32 F0, ARM Cortex-M0)</b>.</a>
       Support for the STM32 F0 family was contributed by Alan Carvalho de Assis in NuttX-7.21.
-      There are ports to three different boards in this respository:
+      There are ports to three different boards in this repository:
     </p>
     <ul>
       <li>
@@ -3103,11 +3196,47 @@ nsh>
         Contributed by Juha Niskanen in NuttX-7.21.
       </li>
     </ul>
-    <p><b>STATUS:</b>
-    In this initial release, the level of support for the STM32 F0 family is minimal.
-    Certainly enough is in place to support a robust NSH configuration.
-    There are also unverified I2C and USB device drivers available in NuttX-7.21.
+    <p>
+      <b>STATUS:</b>
     </p>
+    <ul>
+      <li>
+        <b>NuttX-7.21</b>.
+        In this initial release, the level of support for the STM32 F0 family is minimal.
+        Certainly enough is in place to support a robust NSH configuration.
+        There are also unverified I2C and USB device drivers available in
+        NuttX-7.21.
+      </li>
+      <li>
+        <b>NuttX-7.28</b>
+        Add support for GPIO EXTI.  From Mateusz Sfafoni.
+      </li>
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32L0xx"><b>STMicro STM32L0xx (STM32 F0, ARM Cortex-M0)</b>.</a>
+      Support for the STM32 FL family was contributed by Mateusz Sfafoni in NuttX-7.28.
+      There are ports to two different STM32 L0 boards in the repository:
+    </p>
+    <ul>
+      <li>
+        <b>B-L072Z-LRWAN1</b>
+        Contributed byMateusz Sfafoni in NuttX-7.28.
+      </li>
+      <li>
+        <b>Nucleo-L073RZ</b>
+        Contributed byMateusz Sfafoni in NuttX-7.28.
+      </li>
+    </ul>
   </td>
 </tr>
 
@@ -3248,6 +3377,13 @@ nsh>
             Contributed by David Sidrane.
          </p>
       </li>
+      <li>
+         <p>
+            <b>Nucleo-STM32F103RB</b>.
+            This port uses the STM32F103RBT6.
+            It was contributed by Mateusz Szafoni in NuttX-7.28,
+         </p>
+      </li>
     </ol>
     <p>
       These ports uses a GNU arm-nuttx-elf toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -3297,6 +3433,13 @@ nsh>
             <b>Olimexino-STM32</b>.
             Contributed by David Sidrane and introduced with NuttX 7.9.
             Configurations are included for the NuttShell (NSH), a tiny version of the NuttShell, USB composite CDC/ACM + MSC, CAN support, and two tiny, small-footprint NSH configurations.
+          </p>
+        </li>
+        <li>
+          <p>
+            <b>Nucleo-STM32F103RB</b>.
+            Contributed by Mateusz Szafoni and introduced with NuttX 7.28.
+            Configurations are included for the NuttShell (NSH), ADC, and PWM.
           </p>
         </li>
       </ul>
@@ -3441,6 +3584,10 @@ nsh>
         </li>
         <li>
           Martin Lederhilger contributed support for the Olimex STM32 P207 board using the STM32F207ZE MCU.
+        </li>
+        <li>
+          Board support for the Nucleo-L152RE was contributed by Mateusz Szafoni in NuttX-7.28.
+          Available configurations include NSH, ADC, and PWM.
         </li>
       </ul>
     </p>
@@ -3761,9 +3908,47 @@ nsh>
       This port is intended to test LC823450 features including SMP. Supported peripherals include UART, TIMER, RTC, GPIO, DMA, I2C, SPI, LCD, eMMC, and USB device.
       ADC, Watchdog, IPC2, and I2S support was added by Masayuki Ishakawa in NuttX-7.23.
       Bluetooth, SPI, and <i>PROTECTED</i> build support were added by Masayuki Ishakawa in NuttX-7.26.
+      Support for for SPI flash boot was added in NuttX-7.28.
     </p>
   </td>
 </tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="max3660"><b>Maxim Integrated MAX36600</b>.</a>
+      Architectural upport for the MAX32660 was added (along with partial support for other members of the MAX326xx family) in NuttX 7.28.
+    </p>
+    <p>
+      <b>MAX32660-EVSYS</b>.
+      Basic support for the Maxim Integrated MAC3X660
+      EVSYS was included in the NuttX-7.28 release.
+      A basic NSH configuration is available and is fully functional.
+      Includes unverified support for an SPI0-based SD card.
+    </p>
+    <p>
+      <b>STATUS:</b>
+    </p>
+    <ul>
+      <p>
+        <b>NuttX-7.29</b>.
+          The initial release included: Clock configuration, timer, GPIO pin configuration, ICC, and UART.
+          Additional untested drivers are complete and ready for testing:  DMA, GPIO interrupts, SPI0 Master, TC, WDT.
+          The following drivers are not yet implemented: I2C and I2S.
+      </p>
+      <p>
+        <b>README File</b>.
+        Refer to the MAX32660-EVSYS <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/ max32660-evsys/README.txt" target="_blank">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+
+      <li><a href="#"></a> <small>(ARM Cortex-M3)</small></li>
 
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
@@ -4928,6 +5113,35 @@ nsh>
     </ul>
   </td>
 </tr>
+
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="tilcc13x2"><b>TI/SimpleLink CC13x2</b>.</a>
+      Basic, unverified architectural support for the CC13x2 was added in NuttX-7.28.
+      Fragmentary support for very similar CC26x2 family is included.
+      This is a work in progress and, with any luck, a fully verified port will be available in NuttX-7.29.
+      It is currently code complete (minus some ROM <i>DriverLib</i> hooks) but untested.
+    </p>
+    <p>
+      <b>TI LaunchXL-CC1312R1</b>.</a>
+      Basic board support for the TI LaunchXL-CC1312R1 board is in place.
+      Board bring-up, however, cannot be done until the the basic CC13x2 architecture support is complete, hopefully in NuttX-7.29.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        As of this writing, the basic port is nearly code complete but unverified.
+        Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/configs/launchxl-cc1312r1/README.txt" target="_blank">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -5489,6 +5703,12 @@ Mem:         29232       5920      23312      23312
         <p><b>NuttX-7.27</b>.
         NuttX-7.27 added LPI2C (from Ivan Ucherdzhiev) and SD card support via USDHC (from Dave Marples).
         </p>
+      <li>
+        <p><b>NuttX-7.28</b>.
+        GPIO Support Input daisy selection was added in NuttX-7.28 by David Sidrane
+        </p>
+      </li>
+      </p>
       </li>
     </ul>
   </td>
@@ -6737,13 +6957,16 @@ if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
 <ul>
   <li>NuttX is a registered trademark of Gregory Nutt.</li>
   <li>ARM, ARM7 ARM7TDMI, ARM9, ARM920T, ARM926EJS, Cortex-M3 are trademarks of Advanced RISC Machines, Limited.</li>
+  <li>Beaglebone is a trademark of GHI.</li>
   <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
   <li>Linux is a registered trademark of Linus Torvalds.</li>
   <li>Eagle-100 is a trademark of <a href=" http://www.micromint.com/">Micromint USA, LLC</a>.
   <li>EnergyLite is a trademark of STMicroelectronics.</li>
   <li>EFM32 is a trademark of Silicon Laboratories, Inc.</li>
   <li>LPC2148 is a trademark of NXP Semiconductors.</li>
+  <li>Sitara is a trademark of Texas Instruments Incorporated.</li>
   <li>TI is a tradename of Texas Instruments Incorporated.</li>
+  <li>Tiva is a trademark of Texas Instruments Incorporated.</li>
   <li>UNIX is a registered trademark of The Open Group.</li>
   <li>VxWorks is a registered trademark of Wind River Systems, Incorporated.</li>
   <li>ZDS, ZNEO, Z16F, Z80, and Zilog are a registered trademark of Zilog, Inc.</li>

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  October 2, 2018</p>
+      <p>Last Updated:  January 19, 2019</p>
     </td>
   </tr>
 </table>
@@ -1241,6 +1241,7 @@ test &lt;expression&gt;
 <p><b>Command Syntax:</b></p>
 <ul><pre>
 addroute &lt;target&gt; [&lt;netmask&gt;] &lt;router&gt;
+addroute default &lt;ipaddr&gt; &lt;interface&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -1263,6 +1264,9 @@ nsh&gt; addroute addroute 11.0.0.0 255.255.255.0 10.0.0.2
 <ul><pre>
 nsh&gt; addroute 11.0.0.0/24 10.0.0.2
 </pre></ul>
+<p>
+  The second form of the addroute command can be used to set the default gateway.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">

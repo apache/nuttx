@@ -1,7 +1,7 @@
 README
 ======
 
-  This directory holds NuttX board support for the TI LAUNCHL-CC1312R1.
+  This directory holds NuttX board support for the TI LaunchXL-CC1312R1.
 
 Contents
 ========

@@ -22518,7 +22518,7 @@
 	  Mateusz Sfafoni (2019-01-09).
 	* include/nuttx/compiler.h:  Correct support of C-version-specific
 	  features.  Cannot depend on GCC version because -std=c89 may be used on
-	  comomand line.  Need instead to use __STDC_VERSION__ to determine if a
+	  command line.  Need instead to use __STDC_VERSION__ to determine if a
 	  feature is supported.  Also add conditional support inline, depending
 	  on C99.  From Gregory Nutt (2019-01-09).
 	* With these changes, I am able to access NSH on Beaglebone Black.  I
@@ -22606,5 +22606,7 @@
 	  And, of course, completely untested.  Support for the CC26x2, which is
 	  nearly identical to the CC13x2 is fragmentary.  From Gregory Nutt
 	  (2019-01-17).
+	* arch/arm/include/kinetis/kinetis_sim.h:  Remove extra characters following
+	  #undef.  From Daniel Agar (2018-01-19).
 
 7.29 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
