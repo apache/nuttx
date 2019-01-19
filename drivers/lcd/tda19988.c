@@ -1645,7 +1645,8 @@ static void tda19988_shutdown(FAR struct tda1988_dev_s *priv)
  *   Create and register the the TDA19988 driver at 'devpath'
  *
  * Input Parameters:
- *   devpath - The location to register the TDA19988 driver instance
+ *   devpath - The location to register the TDA19988 driver instance.  The
+ *             standard location would be a path like /dev/hdmi0.
  *   lower   - The interface to the the TDA19988 lower half driver.
  *
  * Returned Value:
