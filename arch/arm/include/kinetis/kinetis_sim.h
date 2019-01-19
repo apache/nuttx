@@ -402,7 +402,7 @@
 #  define KINETIS_SIM_HAS_SOPT2_TRACECLKSEL           1   /* SoC has SOPT2[TRACECLKSEL] */
 #  define KINETIS_SIM_HAS_SOPT2_PLLFLLSEL             1   /* SoC has SOPT2[PLLFLLSEL] */
 #  define KINETIS_SIM_HAS_SOPT2_USBSRC                1   /* SoC has SOPT2[USBSRC] */
-#  undef  KINETIS_SIM_HAS_SOPT2_RMIISRC               1   /* SoC does not have SOPT2[RMIISRC] */
+#  undef  KINETIS_SIM_HAS_SOPT2_RMIISRC                   /* SoC does not have SOPT2[RMIISRC] */
 #  undef  KINETIS_SIM_HAS_SOPT2_TIMESRC                   /* SoC does not have SOPT2[TIMESRC] */
 #  define KINETIS_SIM_HAS_SOPT2_FLEXIOSRC             1   /* SoC has SOPT2[FLEXIOSRC] */
 #  undef  KINETIS_SIM_HAS_SOPT2_USBFSRC                   /* SoC does not have SOPT2[USBFSRC] */
