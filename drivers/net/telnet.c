@@ -1028,7 +1028,9 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   psock_close(psock);
 
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
   telnet_sendopt(priv, TELNET_DO, TELNET_NAWS);
+#endif
 
   /* Return the path to the new telnet driver */
 
