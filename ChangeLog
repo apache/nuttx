@@ -21816,7 +21816,7 @@
 	  (2018-11-15).
 	* arch/arm/src/stm32: STM32F446 & STM32F469 correct PC1 SPI assignments
 	  From David Sidrane (2018-11-15).
-	* arch/arm/src/imxr:  Add FLEXPWM  From David Sidrane (2018-11-15).
+	* arch/arm/src/imxrt:  Add FLEXPWM  From David Sidrane (2018-11-15).
 	* libs/libc/netdb/lib_dnsquery.c:  Harden against DNS spoofing.  This
 	  commit implements most of the RFC 5452 guidelines for making DNS more
 	  resilient. We now verify response matches against what was queried and
@@ -22016,8 +22016,8 @@
 	* sched/:  Add debug assertions before each call to up_block_task() to
 	  assure that there is no attempt to block an IDLE task.  From Dave Marples
 	  (2018-11-30).
-	* arch/mips/src/mips32/Kconfig:  Allow Penguino for windows for the Windows
-	  Ubuntu platform as well.  From Gregory Nutt (2018-11-30).
+	* arch/mips/src/mips32/Kconfig:  Allow Penguino for windows for the
+	  Windows Ubuntu platform as well (2018-11-30).
 	* arch/arm/src/max326xx/max32660/max32660_spim.c:  SPI0 master mode support
 	  is complete (sans DMA and completely untested).  From Gregory
 	  Nutt (2018-11-30).
