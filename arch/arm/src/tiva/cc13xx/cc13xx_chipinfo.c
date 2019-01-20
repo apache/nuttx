@@ -4,7 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD
+ * Technical content derives from a TI file that has a compatible BSD
  * license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated

@@ -55,6 +55,9 @@
 #include "hardware/tiva_prcm.h"
 #include "hardware/tiva_vims.h"
 
+#include "cc13xx/cc13x2_cc26x2_v2_rom.h"
+#include "cc13xx/cc13x2_aux_sysif.h"
+
 /******************************************************************************
  * Private Functions
  ******************************************************************************/
@@ -203,7 +206,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* Set AUX into power down active mode */
 
-  AUXSYSIFOpModeChange(AUX_SYSIF_OPMODE_TARGET_PDA);
+  aux_sysif_opmode(AUX_SYSIF_OPMODE_TARGET_PDA);
 
   /* Disable EFUSE clock */
 
