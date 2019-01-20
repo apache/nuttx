@@ -334,4 +334,26 @@
 #define EDID_DESC_ZERO_3                  4         /* Byte 4: Zero */
 #define EDID_DESC_INFO                    5         /* Bytes 5-17: Determined by descriptor type */
 
+/* Extended EDID data offsets ****************************************************************/
+/* To be provided */
+
+/* EDID Extensions assigned by VESA (First byte of the Extended EDID block) */
+
+#define EDID_EXT_TIMING                   0x00      /* Timing Extension */
+#define EDID_EXT_CEA                      0x02      /* Additional Timing Data Block (CEA EDID Timing Extension) */
+#define EDID_EXT_VTBEXT                   0x10      /* Video Timing Block Extension (VTB-EXT) */
+#define EDID_EXT_V2p0                     0x20      /* EDID 2.0 Extension */
+#define EDID_EXT_DIEXT                    0x40      /* Display Information Extension (DI-EXT) */
+#define EDID_EXT_LSEXT                    0x50      /* Localized String Extension (LS-EXT) */
+#define EDID_EXT_MIEXT                    0x60      /* Microdisplay Interface Extension (MI-EXT) */
+#define EDID_EXT_DIDEXIT                  0x70      /* Display ID Extension */
+#define EDID_EXT_DTCDB_1                  0xa7      /* Display Transfer Characteristics Data Block (DTCDB) */
+#define EDID_EXT_DTCDB_2                  0xaf      /* Display Transfer Characteristics Data Block (DTCDB) */
+#define EDID_EXT_DTCDB_3                  0xbf      /* Display Transfer Characteristics Data Block (DTCDB) */
+#define EDID_EXT_BLOCKMAP                 0xf0      /* Block Map */
+#define EDID_EXT_DDDB                     0xff      /* Display Device Data Block (DDDB) */
+#define EDID_EXT_VENDOR                   0xff      /* Extension defined by monitor manufacturer.
+                                                     * According to LS-EXT, actual contents varies
+                                                     * from manufacturer.  However, the value is
+                                                     * later used by DDDB. */
 #endif /* __INCLUDE_NUTTX_LCD_EDID_H */
