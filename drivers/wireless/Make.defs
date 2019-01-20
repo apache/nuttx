@@ -53,6 +53,12 @@ ifeq ($(CONFIG_DRIVERS_BLUETOOTH),y)
 include wireless$(DELIM)bluetooth$(DELIM)Make.defs
 endif
 
+# Include LPWAN support
+
+ifeq ($(CONFIG_DRIVERS_LPWAN),y)
+include wireless$(DELIM)lpwan$(DELIM)Make.defs
+endif
+
 # Include wireless drivers
 
 ifeq ($(CONFIG_WL_CC1101),y)

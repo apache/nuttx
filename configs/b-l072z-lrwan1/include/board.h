@@ -179,14 +179,15 @@
  * PA6         | SX1276_MISO
  * PB3         | SX1276_SCK
  * PA15        | SX1276_NSS
- * ?           | SX1276_DIO0
- * ?           | SX1276_DIO2
- * ?           | SX1276_DIO3
- * PA5         | SX1276_DIO4 optional
+ * PB4         | SX1276_DIO0
+ * PB1         | SX1276_DIO1
+ * PB0         | SX1276_DIO2
+ * PC13        | SX1276_DIO3
+ * PA5         | SX1276_DIO4 optional / LED5
  * PA4         | SX1276_DIO5 optional
- * ?           | CRF1
- * ?           | CRF2
- * ?           | CRF3
+ * PA1         | CRF1
+ * PC1         | CRF2
+ * PC2         | CRF3
  * PA3         | STLINK Virtual COM RX
  * PA2         | STLINK Virtual COM TX
  * PA10        | USART1_RX
@@ -195,9 +196,9 @@
  * PB14        | SPI2_MISO
  * PB13        | SPI2_SCK
  * PB12        | SPI2_NSS
- * PB5         | LPTIM1_INI
- * PB6         | LPTIM1_ETR
- * PB7         | LPTIM1_IN2
+ * PB5         | LPTIM1_INI / LED2
+ * PB6         | LPTIM1_ETR / LED3
+ * PB7         | LPTIM1_IN2 / LED4
  * PB2         | LPTIM1_OUT / BUTTON
  * PA0         | BUTTON (optional)
  * PB9         | I2C1_SDA

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/b-l072z-lrwan1/src/stm32_appinitialize.c
+ * configs/b-l072z-lrwan1/src/stm32_boot.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,56 +39,127 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <errno.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/leds/userled.h>
+#include <arch/board/board.h>
+#include <nuttx/wireless/lpwan/sx127x.h>
+
+#include "stm32_gpio.h"
+#include "stm32_exti.h"
+#include "stm32_spi.h"
 
 #include "b-l072z-lrwan1.h"
+
+/* WARNING: SX1276 on my CMWX1ZZABZ-091 module suddenly stopped
+ * working (no SPI communication), so there might be a bug here,
+ * something is missing in the configuration or something else.
+ */
+
+#warning SX127X driver support for B-L072Z-LRWAN1 needs some additional verification!
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* SX127X on SPI1 bus */
+
+#define SX127X_SPI 1
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void sx127x_chip_reset(void);
+static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+struct sx127x_lower_s lower =
+{
+  .irq0attach = sx127x_irq0_attach,
+  .reset = sx127x_chip_reset
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
+{
+  wlinfo("Attach DIO0 IRQ\n");
+
+  /* IRQ on rising edge */
+
+  (void)stm32_gpiosetevent(GPIO_SX127X_DIO0, false, true, false, isr, arg);
+  return OK;
+}
+
+static void sx127x_chip_reset(void)
+{
+  wlinfo("SX127X RESET\n");
+
+  /* Configure reset as output */
+
+  stm32_configgpio(GPIO_SX127X_RESET|GPIO_OUTPUT|GPIO_SPEED_HIGH|GPIO_OUTPUT_SET);
+
+  /* Set pin to zero */
+
+  stm32_gpiowrite(GPIO_SX127X_RESET, false);
+
+  /* Wait 1 ms */
+
+  usleep(1000);
+
+  /* Configure reset as input */
+
+  stm32_configgpio(GPIO_SX127X_RESET|GPIO_INPUT|GPIO_FLOAT);
+
+  /* Wait 10 ms */
+
+  usleep(10000);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int board_app_initialize(uintptr_t arg)
+int stm32_lpwaninitialize(void)
 {
-#ifdef CONFIG_BOARD_INITIALIZE
-  /* Board initialization already performed by board_initialize() */
+  FAR struct spi_dev_s *spidev;
+  int ret = OK;
 
-  return OK;
-#else
-  /* Perform board-specific initialization */
+  wlinfo("Register the sx127x module\n");
 
-  return stm32_bringup();
-#endif
+  /* Setup DIO0 */
+
+  stm32_configgpio(GPIO_SX127X_DIO0);
+
+  /* Init SPI bus */
+
+  spidev = stm32_spibus_initialize(SX127X_SPI);
+  if (!spidev)
+    {
+      wlerr("ERROR: Failed to initialize SPI %d bus\n", SX127X_SPI);
+      ret = -ENODEV;
+      goto errout;
+    }
+
+  /* Initialize SX127X */
+
+  ret = sx127x_register(spidev, &lower);
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to register sx127x\n");
+      goto errout;
+    }
+
+errout:
+  return ret;
 }

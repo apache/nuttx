@@ -99,6 +99,18 @@
                             GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN9)
 #define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN7)
 
+/* Dragino LORA shield (v1.4) - RF98 module (based on SX127X)
+ * RESET - PC7 (PD9)
+ * CS    - PB6 (PD10)
+ * DIO0  - PA10 (D2)
+ */
+
+#define GPIO_SX127X_RESET (GPIO_PORTC | GPIO_PIN7)
+#define GPIO_SX127X_CS    (GPIO_OUTPUT | GPIO_SPEED_HIGH |            \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
+#define GPIO_SX127X_DIO0  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI |  \
+                           GPIO_PORTA | GPIO_PIN10)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -144,6 +156,17 @@ void stm32_spidev_initialize(void);
 
 #ifdef CONFIG_WL_NRF24L01
 int stm32_wlinitialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_lpwaninitialize
+ *
+ * Description:
+ *   Initialize SX127X LPWAN interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int stm32_lpwaninitialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

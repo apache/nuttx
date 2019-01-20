@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -48,8 +48,16 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_STM32F0L0_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+endif
+
+ifeq ($(CONFIG_LPWAN_SX127X),y)
+CSRCS += stm32_sx127x.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

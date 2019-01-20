@@ -1,7 +1,7 @@
 ############################################################################
-# configs/nucleo-l073rz/src/Makefile
+# drivers/lpwan/sx127x/Make.defs
 #
-#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Mateusz Szafoni <raiden00@railab.me>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,35 +33,17 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
-
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_STM32F0L0_SPI),y)
-CSRCS += stm32_spi.c
-endif
-
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
-ifeq ($(CONFIG_WL_NRF24L01),y)
-CSRCS += stm32_nrf24l01.c
-endif
+# Include SX127X drivers into the build
 
 ifeq ($(CONFIG_LPWAN_SX127X),y)
-CSRCS += stm32_sx127x.c
-endif
 
-include $(TOPDIR)/configs/Board.mk
+CSRCS += sx127x.c
+
+# Include SX127X build support
+
+DEPPATH += --dep-path wireless$(DELIM)lpwan$(DELIM)sx127x
+VPATH += :wireless$(DELIM)lpwan$(DELIM)sx127x
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)wireless$(DELIM)lpwan$(DELIM)sx127x}
+
+endif # CONFIG_LPWAN_SX127X
+

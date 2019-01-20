@@ -1,0 +1,65 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if DRIVERS_LPWAN
+
+config LPWAN_SX127X
+	bool "SX127X Low Power Long Range transceiver support"
+	default n
+	select SPI
+	depends on EXPERIMENTAL
+	---help---
+		This options adds driver support for the Samtech SX127X chip.
+
+if LPWAN_SX127X
+
+config LPWAN_SX127X_RXSUPPORT
+	bool "SX127X RX support"
+	default n
+
+if LPWAN_SX127X_RXSUPPORT
+
+config LPWAN_SX127X_RXFIFO_LEN
+	int "SX127X RX FIFO length"
+	default 5
+
+config LPWAN_SX127X_RXFIFO_DATA_LEN
+	int "SX127X RX FIFO data length"
+	default 64
+
+endif #LPWAN_SX127X_RXSUPPORT
+
+config LPWAN_SX127X_TXSUPPORT
+	bool "SX127X TX support"
+	default n
+
+config LPWAN_SX127X_LORA
+	bool "SX127X LORA support"
+	default y
+
+config LPWAN_SX127X_FSKOOK
+	bool "SX127X FSK/OOK support"
+	default y
+
+choice
+	prompt "SX127X modulation default"
+
+config LPWAN_SX127X_DEFAULT_LORA
+	bool "SX127X default LORA modualtion"
+	depends on LPWAN_SX127X_LORA
+
+config LPWAN_SX127X_DEFAULT_FSK
+	bool "SX127X default FSK modulation"
+	depends on LPWAN_SX127X_FSKOOK
+
+config LPWAN_SX127X_DEFAULT_OOK
+	bool "SX127X default OOK modulation"
+	depends on LPWAN_SX127X_FSKOOK
+
+endchoice
+
+endif # WL_SX127X
+
+endif # DRIVERS_LPWAN

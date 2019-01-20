@@ -50,6 +50,14 @@ menuconfig DRIVERS_BLUETOOTH
 
 source drivers/wireless/bluetooth/Kconfig
 
+menuconfig DRIVERS_LPWAN
+	bool "LPWAN Device Support"
+	default n
+	---help---
+		Select to enable building of LPWAN device drivers.
+
+source drivers/wireless/lpwan/Kconfig
+
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"
 	default n
@@ -96,4 +104,5 @@ config WL_NRF24L01_RXFIFO_LEN
 
 endif # WL_NRF24L01_RXSUPPORT
 endif # WL_NRF24L01
+
 endif # DRIVERS_WIRELESS

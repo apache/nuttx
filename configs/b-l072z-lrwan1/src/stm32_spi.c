@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l073rz/src/stm32_spi.c
+ * configs/b-l072z-lrwan1/src/stm32_spi.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
@@ -51,7 +51,7 @@
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 
-#include "nucleo-l073rz.h"
+#include "b-l072z-lrwan1.h"
 #include <arch/board/board.h>
 
 #ifdef CONFIG_STM32F0L0_SPI
@@ -86,23 +86,13 @@
 
 void stm32_spidev_initialize(void)
 {
-  /* NOTE: Clocking for SPI1 and/or SPI3 was already provided in stm32_rcc.c.
+  /* NOTE: Clocking for SPI1 and/or SPI2 was already provided in stm32_rcc.c.
    *       Configurations of SPI pins is performed in stm32_spi.c.
    *       Here, we only initialize chip select pins unique to the board
    *       architecture.
    */
 
 #ifdef CONFIG_STM32F0L0_SPI1
-
-#  ifdef CONFIG_WL_NRF24L01
-  /* Configure the SPI-based NRF24L01 chip select GPIO */
-
-  spiinfo("Configure GPIO for NRF24L01 SPI1/CS\n");
-
-  stm32_configgpio(GPIO_NRF24L01_CS);
-  stm32_gpiowrite(GPIO_NRF24L01_CS, true);
-#  endif
-
 #  ifdef CONFIG_LPWAN_SX127X
   /* Configure the SPI-based SX127X chip select GPIO */
 
@@ -111,8 +101,7 @@ void stm32_spidev_initialize(void)
   stm32_configgpio(GPIO_SX127X_CS);
   stm32_gpiowrite(GPIO_SX127X_CS, true);
 #  endif
-
-#endif  /*  CONFIG_STM32F0L0_SPI1 */
+#endif
 }
 
 /****************************************************************************
@@ -142,24 +131,13 @@ void stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F0L0_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+                      bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
   switch (devid)
     {
-#ifdef CONFIG_WL_NRF24L01
-      case SPIDEV_WIRELESS(0):
-        {
-          spiinfo("nRF24L01 device %s\n",
-                  selected ? "asserted" : "de-asserted");
-
-          /* Set the GPIO low to select and high to de-select */
-
-          stm32_gpiowrite(GPIO_NRF24L01_CS, !selected);
-          break;
-        }
-#endif
 #ifdef CONFIG_LPWAN_SX127X
       case SPIDEV_LPWAN(0):
         {
@@ -184,13 +162,6 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 
   switch (devid)
     {
-#ifdef CONFIG_WL_NRF24L01
-      case SPIDEV_WIRELESS(0):
-        {
-          status |= SPI_STATUS_PRESENT;
-          break;
-        }
-#endif
 #ifdef CONFIG_LPWAN_SX127X
       case SPIDEV_LPWAN(0):
         {
@@ -221,4 +192,4 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 #endif  /* CONFIG_STM32F0L0_SPI2 */
 
-#endif
+#endif  /* CONFIG_STM32F0L0_SPI */

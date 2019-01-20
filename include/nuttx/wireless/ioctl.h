@@ -92,6 +92,11 @@
 #define NRF24L01_FIRST      (WL_FIRST + WL_NCMDS)
 #define NRF24L01_NCMDS      14
 
+/* See include/nuttx/wireless/lpwan/sx127x.h */
+
+#define SX127X_FIRST        (NRF24L01_FIRST + NRF24L01_NCMDS)
+#define SX127X_NCMDS        11
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
