@@ -107,7 +107,8 @@ static void sx127x_chip_reset(void)
 
   /* Configure reset as output */
 
-  stm32_configgpio(GPIO_SX127X_RESET|GPIO_OUTPUT|GPIO_SPEED_HIGH|GPIO_OUTPUT_SET);
+  stm32_configgpio(GPIO_SX127X_RESET | GPIO_OUTPUT | GPIO_SPEED_HIGH |
+                   GPIO_OUTPUT_SET);
 
   /* Set pin to zero */
 
@@ -119,7 +120,7 @@ static void sx127x_chip_reset(void)
 
   /* Configure reset as input */
 
-  stm32_configgpio(GPIO_SX127X_RESET|GPIO_INPUT|GPIO_FLOAT);
+  stm32_configgpio(GPIO_SX127X_RESET | GPIO_INPUT | GPIO_FLOAT);
 
   /* Wait 10 ms */
 
@@ -163,3 +164,4 @@ int stm32_lpwaninitialize(void)
 errout:
   return ret;
 }
+

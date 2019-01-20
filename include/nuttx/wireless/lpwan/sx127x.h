@@ -99,7 +99,7 @@
 
 /* RX FIFO data *************************************************************/
 
-#define SX127X_READ_DATA_HEADER_LEN (sizeof(struct sx127x_read_hdr_s)-SX127X_READ_DATA_MAX)
+#define SX127X_READ_DATA_HEADER_LEN (sizeof(struct sx127x_read_hdr_s) - SX127X_READ_DATA_MAX)
 #define SX127X_READ_DATA_MAX        (CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN)
 #define SX127X_RXFIFO_ITEM_SIZE     (sizeof(struct sx127x_read_hdr_s))
 
@@ -241,23 +241,23 @@ enum sx127x_lora_cr_e
 
 struct sx127x_lower_s
 {
-  int (*irq0attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq0attach)(xcpt_t handler, FAR void *arg);
 #ifdef CONFIG_LPWAN_SX127X_DIO1
-  int (*irq1attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq1attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO2
-  int (*irq2attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq2attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO3
-  int (*irq3attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq3attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO4
-  int (*irq4attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq4attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO5
-  int (*irq5attach)(xcpt_t handler, FAR void *arg);
+  CODE int (*irq5attach)(xcpt_t handler, FAR void *arg);
 #endif
-  void (*reset)(void);
+  CODE void (*reset)(void);
 };
 
 /****************************************************************************
@@ -268,3 +268,4 @@ int sx127x_register(FAR struct spi_dev_s *spi,
                     FAR const struct sx127x_lower_s *lower);
 
 #endif /* __INCLUDE_NUTTX_SX127X_H */
+
