@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/samd2l2/sam_config.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,6 +135,14 @@
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART0_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART0_RS485_DIR
+#    if (CONFIG_USART0_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
@@ -142,6 +150,14 @@
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART1_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART1_RS485_DIR
+#    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -149,6 +165,14 @@
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART2_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART2_RS485_DIR
+#    if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -156,6 +180,14 @@
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART3_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART3_RS485_DIR
+#    if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #elif defined(CONFIG_USART4_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -163,6 +195,14 @@
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART4_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART4_RS485_DIR
+#    if (CONFIG_USART4_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #elif defined(CONFIG_USART5_SERIAL_CONSOLE)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -170,6 +210,14 @@
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
+#  ifdef CONFIG_USART5_RS485MODE
+#    define SAM_CONSOLE_RS485_DIR GPIO_USART5_RS485_DIR
+#    if (CONFIG_USART5_RS485_DIR_POLARITY == 0)
+#      define SAM_CONSOLE_RS485_DIR_POLARITY false
+#    else
+#      define SAM_CONSOLE_RS485_DIR_POLARITY true
+#    endif
+#  endif
 #else
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -178,6 +226,7 @@
 #  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef CONFIG_USART5_SERIAL_CONSOLE
 #  undef HAVE_SERIAL_CONSOLE
+#  undef SAM_CONSOLE_RS485_DIR
 #endif
 
 /* Are any SERCOM peripherals are configured as SPI peripherals? */

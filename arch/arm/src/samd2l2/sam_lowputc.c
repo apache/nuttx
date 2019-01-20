@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/sam_lowputc.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -467,7 +467,13 @@ void sam_lowputc(uint32_t ch)
 
   /* Wait for the USART to be ready for new TX data */
 
-  while ((getreg8(intflag) & USART_INT_DRE) == 0);
+  while ((getreg8(intflag) & USART_INT_DRE) == 0)
+    {
+    }
+
+#ifdef SAM_CONSOLE_RS485_DIR
+  sam_portwrite(SAM_CONSOLE_RS485_DIR, SAM_CONSOLE_RS485_DIR_POLARITY);
+#endif
 
   /* Wait until synchronization is complete */
 
@@ -479,6 +485,12 @@ void sam_lowputc(uint32_t ch)
 
   /* Wait until data is sent */
 
-  while ((getreg8(intflag) & USART_INT_TXC) == 0);
+  while ((getreg8(intflag) & USART_INT_TXC) == 0)
+    {
+    }
+
+#ifdef SAM_CONSOLE_RS485_DIR
+  sam_portwrite(SAM_CONSOLE_RS485_DIR, !SAM_CONSOLE_RS485_DIR_POLARITY);
+#endif
 }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/sam_serial.c
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -229,6 +229,11 @@ struct sam_dev_s
   const struct sam_usart_config_s * const config;
 
   /* Information unique to the serial driver */
+
+#ifdef HAVE_RS485
+  const uint32_t rs485_dir_gpio;     /* USART RS-485 DIR GPIO pin configuration */
+  const bool     rs485_dir_polarity; /* USART RS-485 DIR pin state for TX enabled */
+#endif
 };
 
 /****************************************************************************
@@ -319,7 +324,15 @@ static char g_usart5txbuffer[CONFIG_USART5_TXBUFSIZE];
 #ifdef SAMD2L2_HAVE_USART0
 static struct sam_dev_s g_usart0priv =
 {
-  .config   = &g_usart0config,
+  .config             = &g_usart0config,
+#ifdef CONFIG_USART0_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART0_RS485_DIR,
+#  if (CONFIG_USART0_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart0port =
@@ -344,7 +357,15 @@ static uart_dev_t g_usart0port =
 #ifdef SAMD2L2_HAVE_USART1
 static struct sam_dev_s g_usart1priv =
 {
-  .config   = &g_usart1config,
+  .config             = &g_usart1config,
+#ifdef CONFIG_USART1_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART1_RS485_DIR,
+#  if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart1port =
@@ -369,7 +390,15 @@ static uart_dev_t g_usart1port =
 #ifdef SAMD2L2_HAVE_USART2
 static struct sam_dev_s g_usart2priv =
 {
-  .config   = &g_usart2config,
+  .config             = &g_usart2config,
+#ifdef CONFIG_USART2_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART2_RS485_DIR,
+#  if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart2port =
@@ -394,7 +423,15 @@ static uart_dev_t g_usart2port =
 #ifdef SAMD2L2_HAVE_USART3
 static struct sam_dev_s g_usart3priv =
 {
-  .config   = &g_usart3config,
+  .config             = &g_usart3config,
+#ifdef CONFIG_USART3_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART3_RS485_DIR,
+#  if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart3port =
@@ -419,7 +456,15 @@ static uart_dev_t g_usart3port =
 #ifdef SAMD2L2_HAVE_USART4
 static struct sam_dev_s g_usart4priv =
 {
-  .config   = &g_usart4config,
+  .config             = &g_usart4config,
+#ifdef CONFIG_USART4_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART4_RS485_DIR,
+#  if (CONFIG_USART4_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart4port =
@@ -444,7 +489,15 @@ static uart_dev_t g_usart4port =
 #ifdef SAMD2L2_HAVE_USART5
 static struct sam_dev_s g_usart5priv =
 {
-  .config   = &g_usart5config,
+  .config             = &g_usart5config,
+#ifdef CONFIG_USART5_RS485MODE
+  .rs485_dir_gpio     = GPIO_USART5_RS485_DIR,
+#  if (CONFIG_USART5_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
 };
 
 static uart_dev_t g_usart5port =
@@ -546,7 +599,21 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
   intflag = sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET);
   inten   = sam_serialin8(priv, SAM_USART_INTENCLR_OFFSET);
-  pending  = intflag & inten;
+  pending = intflag & inten;
+
+#ifdef HAVE_RS485
+  /* Transmission of whole buffer is over - TXC is set.
+   * Note - this should be first, to have the most recent TC bit value from
+   * SR register - sending data affects TXC, but without refresh we will not
+   * know that...
+   */
+
+  if ((pending & USART_INT_TXC) != 0)
+    {
+      sam_portwrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      sam_serialout8(priv, SAM_USART_INTENCLR_OFFSET, USART_INT_TXC);
+    }
+#endif
 
   /* Handle an incoming, receive byte.  The RXC flag is set when there is
    * unread data in DATA register.  This flag is cleared by reading the DATA
@@ -599,6 +666,14 @@ static int sam_setup(struct uart_dev_s *dev)
   if (!dev->isconsole)
     {
       ret = sam_usart_initialize(priv->config);
+    }
+#endif
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      (void)sam_configport(priv->rs485_dir_gpio);
+      sam_portwrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 
@@ -831,7 +906,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      sam_serialout8(priv, SAM_USART_INTENSET_OFFSET, USART_INT_DRE);
+      sam_serialout8(priv, SAM_USART_INTENSET_OFFSET, USART_TX_INTS);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -843,7 +918,7 @@ static void sam_txint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      /* Disable the TX interrupt */
+      /* Disable the TX interrupt. Only disable DRE, TXC will disable itself! */
 
       sam_serialout8(priv, SAM_USART_INTENCLR_OFFSET, USART_INT_DRE);
     }

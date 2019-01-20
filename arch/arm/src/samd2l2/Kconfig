@@ -616,6 +616,27 @@ config SAMD2L2_SERCOM0_ISUSART
 
 endchoice
 
+if USART0_SERIALDRIVER
+
+config USART0_RS485MODE
+	bool "RS-485 on USART0"
+	default n
+	---help---
+		Enable RS-485 interface on USART0. Your board config will have to
+		provide GPIO_USART0_RS485_DIR pin definition. Currently it cannot be
+		used with USART0_RXDMA.
+
+config USART0_RS485_DIR_POLARITY
+	int "USART0 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART0_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART0. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART0_SERIALDRIVER
+
 choice
 	prompt "SERCOM1 mode"
 	default SAMD2L2_SERCOM1_ISUSART
@@ -635,6 +656,27 @@ config SAMD2L2_SERCOM1_ISUSART
 	select USART1_SERIALDRIVER
 
 endchoice
+
+if USART1_SERIALDRIVER
+
+config USART1_RS485MODE
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART1_SERIALDRIVER
 
 choice
 	prompt "SERCOM2 mode"
@@ -656,6 +698,27 @@ config SAMD2L2_SERCOM2_ISUSART
 
 endchoice
 
+if USART2_SERIALDRIVER
+
+config USART2_RS485MODE
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART2_SERIALDRIVER
+
 choice
 	prompt "SERCOM3 mode"
 	default SAMD2L2_SERCOM3_ISUSART
@@ -675,6 +738,27 @@ config SAMD2L2_SERCOM3_ISUSART
 	select USART3_SERIALDRIVER
 
 endchoice
+
+if USART3_SERIALDRIVER
+
+config USART3_RS485MODE
+	bool "RS-485 on USART3"
+	default n
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART3_SERIALDRIVER
 
 choice
 	prompt "SERCOM4 mode"
@@ -696,6 +780,27 @@ config SAMD2L2_SERCOM4_ISUSART
 
 endchoice
 
+if USART4_SERIALDRIVER
+
+config USART4_RS485MODE
+	bool "RS-485 on USART4"
+	default n
+	---help---
+		Enable RS-485 interface on USART4. Your board config will have to
+		provide GPIO_USART4_RS485_DIR pin definition. Currently it cannot be
+		used with USART4_RXDMA.
+
+config USART4_RS485_DIR_POLARITY
+	int "USART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART4_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART4_SERIALDRIVER
+
 choice
 	prompt "SERCOM5 mode"
 	default SAMD2L2_SERCOM5_ISUSART
@@ -715,6 +820,27 @@ config SAMD2L2_SERCOM5_ISUSART
 	select USART5_SERIALDRIVER
 
 endchoice
+
+if USART5_SERIALDRIVER
+
+config USART5_RS485MODE
+	bool "RS-485 on USART5"
+	default n
+	---help---
+		Enable RS-485 interface on USART5. Your board config will have to
+		provide GPIO_USART5_RS485_DIR pin definition. Currently it cannot be
+		used with USART5_RXDMA.
+
+config USART5_RS485_DIR_POLARITY
+	int "USART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART5_RS485MODE
+	---help---
+		Polarity of DIR pin for RS-485 on USART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART5_SERIALDRIVER
 
 config SAMD2L2_HAVE_SPI
 	bool
