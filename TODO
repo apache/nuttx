@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 7, 2019)
+NuttX TODO List (Last updated January 21, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (16)  Task/Scheduler (sched/)
-  (4)  SMP
+  (5)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (3)  Signals (sched/signal, arch/)
@@ -581,6 +581,38 @@ o SMP
   Prioity:     Medium.  This is a logical problem but I have nevers seen
                an bugs caused by this.  But I believe that failures are
                possible.
+
+  Title:       POSSIBLE FOR TWO CPUs TO HOLD A CRITICAL SECTION?
+  Description: The SMP design includes logic that will support multiple
+               CPUs holding a critical section.  Is this necessary?  How
+               can that occur?  I think it can occur in the following
+               situation:
+
+               CPU0 - Task A is running.
+                    - The CPU0 IDLE task is the only other task in the
+                      CPU0 ready-to-run list.
+               CPU1 - Task B is running.
+                    - Task C is blocked but remains in the ready-to-run
+                      list because of a CPU affinity selection.  Task C
+                      also holds the critical section which is temporarily
+                      relinquished because Task C is blocked by Task B.
+                    - The CPU1 IDLE task is at the end of the list.
+
+               Actions:
+               1. Task A/CPU 0 takes the critical section.
+               2. Task B/CPU 1 suspends waiting for an event
+               3. Task C is restarted.
+
+               Now both Task A and Task C hold the critical section.
+
+               This problem has never been observed, but seems to be a
+               possibility.  I believe it could only occur if CPU affinity
+               is used (otherwise, tasks will pend must as when pre-
+               emption is disabled).
+Status:        Open
+Priority:      Unknown.  Might be high, but first we would need to confirm
+               that this situation can occur and that is actually causes
+               a failure.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
