@@ -540,7 +540,7 @@ o SMP
                interrupts are disabled.  This adds a lot of complexity
                to the ARMV7-A critical section design.
 
-               Masayuki Ishakawa has suggested the use of the GICv2 ICCMPR
+               Masayuki Ishikawa has suggested the use of the GICv2 ICCMPR
                register to control SGI interrupts.  This register (much like
                the ARMv7-M BASEPRI register) can be used to mask interrupts
                by interrupt priority.  Since SGIs may be assigned priorities
@@ -592,7 +592,7 @@ o SMP
                     - The CPU0 IDLE task is the only other task in the
                       CPU0 ready-to-run list.
                CPU1 - Task B is running.
-                    - Task C is blocked but remains in the ready-to-run
+                    - Task C is blocked but remains in the g_assignedtasks[]
                       list because of a CPU affinity selection.  Task C
                       also holds the critical section which is temporarily
                       relinquished because Task C is blocked by Task B.
@@ -609,6 +609,12 @@ o SMP
                possibility.  I believe it could only occur if CPU affinity
                is used (otherwise, tasks will pend must as when pre-
                emption is disabled).
+
+               A proper solution would probably involve re-designing how
+               CPU affinity is implemented.  The CPU1 IDLE thread should
+               more appropriately run, but cannot because the Task C TCB
+               is in the g_assignedtasks[] list.
+
 Status:        Open
 Priority:      Unknown.  Might be high, but first we would need to confirm
                that this situation can occur and that is actually causes

@@ -4,7 +4,7 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is a port of TI's rom.h file which has a fully compatible BSD license:
+ * This is a port of TI's setup_rom.h file which has a fully compatible BSD license:
  *
  *    Copyright (c) 2015-2017, Texas Instruments Incorporated
  *    All rights reserved.
