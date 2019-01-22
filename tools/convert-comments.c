@@ -295,6 +295,8 @@ int main(int argc, char **argv)
                   fputc('\n', outstream);
                 }
 
+              /* Reset to indicate a blank line */
+
               indent    = 0;
               iscomment = false;
               isblank   = true;
