@@ -122,7 +122,7 @@ int main(int argc, char **argv)
       goto errout_with_outstream;
     }
 
-  /* Skip over leading spaces in line1 n + 1 */
+  /* Skip over leading spaces in line n + 1 */
 
   for (ptr = g_line1, nextindent = 0;
        *ptr != '\0' && *ptr != '\n' && isspace(*ptr);
@@ -148,6 +148,8 @@ int main(int argc, char **argv)
       willbeblank   = false;
       willbecomment = strncmp(ptr, "//", 2) == 0;
     }
+
+  /* Loop for each line in the file */
 
   do
     {
@@ -253,7 +255,7 @@ int main(int argc, char **argv)
 
       printf("*****************************************************************************\n");
       printf("* %5lu. %s\n", lineno, g_line0);
-      printf("*  indent:  last=%u curr=%u next=%u\n",
+      printf("*  indent: last=%u curr=%u next=%u\n",
               lastindent, indent, nextindent);
       printf("* comment: last=%u curr=%u next=%u\n",
               wascomment, iscomment, willbecomment);
@@ -266,15 +268,36 @@ int main(int argc, char **argv)
       ptr = g_line0 + indent;
       if (iscomment)
         {
+          char *endptr;
+
+          /* Get a pointer for the first non-blank character following the
+           * comment.
+           */
+
+          for (endptr = &ptr[2];
+               *endptr != '\0' && *endptr != '\n' && isspace(*endptr);
+               endptr++)
+            {
+            }
+
           /* Check for a comment only line that is was not preceded by a
            * comment.
            */
 
-          if (ptr[2] == '\n' && !wascomment)
+          if ((*endptr == '\n' || *endptr == '\0') && !wascomment)
             {
-              /* Output a blank line */
+              /* Avoid double spacing */
 
-              fputc('\n', outstream);
+              if (!wasblank)
+                {
+                  /* Output a blank line  */
+
+                  fputc('\n', outstream);
+                }
+
+              indent    = 0;
+              iscomment = false;
+              isblank   = true;
             }
 
           /* Did line n - 1 start with a comment? */
