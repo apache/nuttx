@@ -69,6 +69,19 @@ Serial Console
   By default, the serial console will be provided on UART0 in all of these
   configurations.
 
+  UART0 is available on the 6-pin Debug connector:
+
+    Pin 1: GND
+    Pin 2: N/C
+    Pin 3: N/C
+    Pin 4: B_UART0_RX / UART0_RX / PIN E15
+    Pin 5: B_UART0_TX / UART0_TX / PIN E16
+    Pin 6: N/C
+
+    PIN E16: UART0_TXD/SPI1_CS1/DCAN0_RX/I2C2_SCL/ECAP1_IN_PWM1_OUT/
+             PR1_PRU1_PRU_R30_15/PR1_PRU1_PRU_R31_15/GPIO1_11
+    PIN E15: UART0_RXD/SPI1_CS0/DCAN0_TX/I2C2_SDA/ECAP2_IN_PWM2_OUT/
+             PR1_PRU1_PRU_R30_14/PR1_PRU1_PRU_R31_14/GPIO1_10
 LEDs
 ====
 
@@ -76,10 +89,14 @@ LEDs
   Two are tied to ground and, hence, illuminated by driving the output pins to a high
   value:
 
-    1. LED0 GPMC_A5   GPMC_A5/GMII2_TXD0/RGMII2_TD0/RMII2_TXD0/GPMC_A21/PR1_MII1_RXD3/eQEP1B_IN/GPIO1_21
-    2. LED1 GPMC_A6   GPMC_A6/GMII2_TXCLK/RGMII2_TCLK/MMC2_DAT4/GPMC_A22/PR1_MII1_RXD2/eQEP1_INDEX/GPIO1_22
-    3. LED2 GPMC_A7   GPMC_A7/GMII2_RXCLK/RGMII2_RCLK/MMC2_DAT5/GPMC_A23/PR1_MII1_RXD1/eQEP1_STROBE/GPIO1_23
-    4. LED3 GPMC_A8   GPMC_A8/GMII2_RXD3/RGMII2_RD3/MMC2_DAT6/GPMC_A24/PR1_MII1_RXD0/MCASP0_ACLKX/GPIO1_24
+    1. LED0 GPMC_A5   GPMC_A5/GMII2_TXD0/RGMII2_TD0/RMII2_TXD0/GPMC_A21/
+                      PR1_MII1_RXD3/eQEP1B_IN/GPIO1_21
+    2. LED1 GPMC_A6   GPMC_A6/GMII2_TXCLK/RGMII2_TCLK/MMC2_DAT4/GPMC_A22/
+                      PR1_MII1_RXD2/eQEP1_INDEX/GPIO1_22
+    3. LED2 GPMC_A7   GPMC_A7/GMII2_RXCLK/RGMII2_RCLK/MMC2_DAT5/GPMC_A23/
+                      PR1_MII1_RXD1/eQEP1_STROBE/GPIO1_23
+    4. LED3 GPMC_A8   GPMC_A8/GMII2_RXD3/RGMII2_RD3/MMC2_DAT6/GPMC_A24/
+                      PR1_MII1_RXD0/MCASP0_ACLKX/GPIO1_24
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
@@ -185,7 +202,11 @@ Configurations
     This configuration directory provide the NuttShell (NSH).  There are
 
     STATUS:
-      Work in progress. Till now it is possible to pass arm_boot(), but Prefetch abort
-      is met when devnull_register() call is done. Have no idea why. I was able to trace
-      down to _inode_search() call. If I put any debug statement like "up_lowputc('0');"
-      right after "desc->node    = node;" statement at line 425 the code does not crash.
+      2019-01-06:  Work in progress. Till now it is possible to pass arm_boot(), but
+        Prefetch abort is met when devnull_register() call is done. Have no idea why.
+        I was able to trace down to _inode_search() call. If I put any debug statement
+        like "up_lowputc('0');" right after "desc->node = node;" statement at line 425
+        the code does not crash.
+      2019-01-09:  The NSH configuration is now functional.
+      2019-01-16:  Correct timer interrupts by switching to DMTimer2 (DMTimer1ms is
+        not initialized by U-Boot).
