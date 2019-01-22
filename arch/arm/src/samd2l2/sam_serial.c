@@ -882,6 +882,14 @@ static bool sam_rxavailable(struct uart_dev_s *dev)
 static void sam_send(struct uart_dev_s *dev, int ch)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+
+#ifdef HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      sam_portwrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+    }
+#endif
+
   sam_serialout16(priv, SAM_USART_DATA_OFFSET, (uint16_t)ch);
 }
 
