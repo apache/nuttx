@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/src/cc1312_userleds.c
+ * configs/launchxl-cc1310/src/cc1310_userleds.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,30 +39,42 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/tiva_ioc.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+
 #include "tiva_gpio.h"
-#include "launchxl-cc1312r1.h"
+#include "launchxl-cc1310.h"
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_UART0
-/* UART0:
- *
- * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
- */
+/****************************************************************************
+ * Name: board_userled_initialize
+ ****************************************************************************/
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_rx =
+void board_userled_initialize(void)
 {
-  .gpio = GPIO_DIO(0),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
-};
+#warning Missing logic
+}
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
 {
-  .gpio = GPIO_DIO(1),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
-};
-#endif
+#warning Missing logic
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint8_t ledset)
+{
+#warning Missing logic
+}

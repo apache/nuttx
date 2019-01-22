@@ -1799,6 +1799,8 @@ nuttx/
  |   |   `- README.txt
  |   |- kwikstik-k40/
  |   |   `- README.txt
+ |   |- launchxl-cc1310/
+ |   |   `- README.txt
  |   |- launchxl-cc1312r1/
  |   |   `- README.txt
  |   |- launchxl-tms57004/

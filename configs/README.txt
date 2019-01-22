@@ -196,7 +196,15 @@ configs/c5471evm
   NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
   This port is complete and verified.
 
-config/clicker2-stm32
+configs launchxl_cc1310
+  Port to the TI SimpleLink CC1310 LaunchPad Evaluation Kit (LAUNCHXL-CC1310)
+  featuring the SimpleLinkCC1310 chip.
+
+configs launchxl_cc1312r1
+  Port to the TI SimpleLink CC1312R1 LaunchPad Evaluation Kit (LAUNCHXL-CC1312R1)
+  featuring the SimpleLinkCC1312R1 chip.
+
+configs/clicker2-stm32
   Mikroe Clicker2 STM32 board based on the STMicro STM32F407VGT6 MCU.
 
 configs/cloudctrl

@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/src/cc1312_userleds.c
+ * configs/launchxl-cc1310/src/launchxl-cc1310.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,36 +33,53 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIG_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
+#define __CONFIG_LAUNCH_CC1310_SRC_LAUNCH_CC1310_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "hardware/tiva_ioc.h"
-#include "tiva_gpio.h"
-#include "launchxl-cc1312r1.h"
-
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_UART0
-/* UART0:
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cc1310_bringup
  *
- * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
- */
+ * Description:
+ *   Bring up board features.
+ *
+ *   If CONFIG_BOARD_INITIALIZE=y, then this function will be called from
+ *   board_initialize().
+ *
+ *   If CONFIG_BOARD_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   then this function will *probably* be called from application logic via
+ *   boardctl().
+ *
+ *   Otherwise, this function will not be called (which is usually a bad
+ *   thing)
+ *
+ ****************************************************************************/
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_rx =
-{
-  .gpio = GPIO_DIO(0),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
-};
+int cc1310_bringup(void);
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
-{
-  .gpio = GPIO_DIO(1),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
-};
+/************************************************************************************
+ * Name: cc1310_ssidev_initialize
+ *
+ * Description:
+ *   Called to configure SSI chip select GPIO pins for the LAUNCHXL-CC1310 board.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_TIVA_SSI
+void cc1310_ssidev_initialize(void);
 #endif
+
+#endif /* __CONFIG_NUCLEO_F303ZE_INCLUDE_BOARD_H */

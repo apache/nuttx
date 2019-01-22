@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/include/board.h
+ * configs/launchxl-cc1310/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIG_LAUNCHXL_CC1312R1_INCLUDE_BOARD_H
-#define __CONFIG_LAUNCHXL_CC1312R1_INCLUDE_BOARD_H
+#ifndef __CONFIG_LAUNCH_CC1310_INCLUDE_BOARD_H
+#define __CONFIG_LAUNCH_CC1310_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -61,7 +61,7 @@
 
 /* LED definitions **********************************************************/
 
-/* The LaunchXL-cc1312R1 and two LEDs controlled by software: DIO7_GLED (CR1)
+/* The LaunchXL-cc1310 and two LEDs controlled by software: DIO7_GLED (CR1)
  * and DIO6_RLED (CR2).  A high output value illuminates an LED.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
@@ -81,7 +81,7 @@
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/cc1312_autoleds.c.  The LEDs are used to
+ * include/board.h and src/cc1310_autoleds.c.  The LEDs are used to
  * encode OS-related events as follows:
  *
  *   ------------------- ---------------------------- ---- ----

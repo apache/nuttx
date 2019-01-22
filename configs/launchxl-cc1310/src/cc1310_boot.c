@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/src/cc1312_userleds.c
+ * configs/launchxl-cc1310/src/cc1310_boot.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,30 +39,71 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/tiva_ioc.h"
-#include "tiva_gpio.h"
-#include "launchxl-cc1312r1.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <nuttx/clock.h>
+
+#include "up_arch.h"
+#include "tiva_start.h"
+#include "launchxl-cc1310.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_UART0
-/* UART0:
+/****************************************************************************
+ * Name: tiva_boardinitialize
  *
- * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
- */
+ * Description:
+ *   All Tiva architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after clocking and
+ *   memory have been configured but before caches have been enabled and
+ *   before any devices have been initialized.
+ *
+ ****************************************************************************/
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_rx =
+void tiva_boardinitialize(void)
 {
-  .gpio = GPIO_DIO(0),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
-};
+#ifdef CONFIG_TIVA_SSI
+  /* Configure SSI chip select pins */
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
-{
-  .gpio = GPIO_DIO(1),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
-};
+  cc1310_ssidev_initialize();
 #endif
+
+#ifdef CONFIG_ARCH_LEDS
+  /* Configure on-board LEDs if LED support has been selected. */
+
+  board_autoled_initialize();
+#endif
+
+  /* TODO: Initialize antenna switch */
+  /* TODO: Shutdown external FLASH */
+}
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intitialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform board initialization */
+
+  (void)cc1310_bringup();
+}
+#endif /* CONFIG_BOARD_INITIALIZE */

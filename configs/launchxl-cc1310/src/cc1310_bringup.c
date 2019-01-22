@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/src/cc1312_userleds.c
+ * config/launchxl-cc1310/src/cc1310_bringup.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,30 +39,57 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/tiva_ioc.h"
-#include "tiva_gpio.h"
-#include "launchxl-cc1312r1.h"
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <syslog.h>
+
+#include "launchxl-cc1310.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_UART0
-/* UART0:
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cc1310_bringup
  *
- * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
- */
+ * Description:
+ *   Bring up board features.
+ *
+ *   If CONFIG_BOARD_INITIALIZE=y, then this function will be called from
+ *   board_initialize().
+ *
+ *   If CONFIG_BOARD_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   then this function will *probably* be called from application logic via
+ *   boardctl().
+ *
+ *   Otherwise, this function will not be called (which is usually a bad
+ *   thing)
+ *
+ ****************************************************************************/
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_rx =
+int cc1310_bringup(void)
 {
-  .gpio = GPIO_DIO(0),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
-};
+  int ret;
 
-const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
-{
-  .gpio = GPIO_DIO(1),
-  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
-};
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
 #endif
+
+  /* If we got here then perhaps not all initialization was successful, but
+   * at least enough succeeded to bring-up NSH with perhaps reduced
+   * capabilities.
+   */
+
+  UNUSED(ret);
+  return OK;
+}

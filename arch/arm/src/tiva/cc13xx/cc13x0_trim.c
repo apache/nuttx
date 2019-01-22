@@ -136,11 +136,18 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
               TIVA_ADI3_REFSYS_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
-  /* Enable for JTAG to be powered down(will still be powered on if debugger
-   * is connected)
+  /* Enable for JTAG to be powered down. The JTAG domain is automatically
+   * powered up on if a debugger is connected.  If a debugger is not
+   * connected this function can be used to power off the JTAG domain.
+   * Achieving the lowest power modes (shutdown/powerdown) requires the
+   * JTAG domain to be turned off. In general the JTAG domain should never
+   * be powered in production code.
+   *
+   * NOTE: This logic comes from the aon_wuc.h header file in the TI
+   * DriverLib.
    */
 
-  AONWUCJtagPowerOff();
+  putreg32(0, TIVA_AON_WUC_JTAGCFG);
 
   /* read the MODE_CONF register in CCFG */
 
@@ -151,14 +158,13 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure DCDC.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg1(ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg1(ccfg_modeconf);
 
   /* Second part of trim done after cold reset and wakeup from shutdown:
    * -Configure XOSC.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
-                                            ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg2(fcfg1_revision, ccfg_modeconf);
 
   /* Increased margin between digital supply voltage and VDD BOD during
    * standby. VTRIM_UDIG: signed 4 bits value to be incremented by 2 (max = 7)
@@ -213,11 +219,11 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg3(ccfg_modeconf);
 
   /* Allow AUX to power down */
 
-  AUXWUCPowerCtrl(AUX_WUC_POWER_DOWN);
+  rom_aonwuc_powerctrl(AUX_WUC_POWER_DOWN);
 
   /* Leaving on AUX and clock for AUX_DDI0_OSC on but turn off clock for
    * AUX_ADI4
@@ -309,7 +315,7 @@ void cc13xx_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-  SetupSetCacheModeAccordingToCcfgSetting();
+  rom_setup_cachemode();
 
   /* 1. Check for powerdown 2. Check for shutdown 3. Assume cold reset if none
    * of the above. It is always assumed that the application will freeze the

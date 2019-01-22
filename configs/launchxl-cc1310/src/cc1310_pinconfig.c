@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/launchxl-cc1312r1/src/cc1312_userleds.c
+ * configs/launchxl-cc1310/src/cc1310_userleds.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 #include "hardware/tiva_ioc.h"
 #include "tiva_gpio.h"
-#include "launchxl-cc1312r1.h"
+#include "launchxl-cc1310.h"
 
 /****************************************************************************
  * Public Data

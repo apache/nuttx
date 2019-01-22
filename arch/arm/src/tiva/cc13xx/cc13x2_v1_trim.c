@@ -261,13 +261,13 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * the VDDR_TRIM_SLEEP value. -Configure DCDC.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg1(ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg1(ccfg_modeconf);
 
   /* Second part of trim done after cold reset and wakeup from shutdown:
    * -Configure XOSC.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg2(fcfg1_revision,
+  rom_setup_coldreset_from_shutdown_cfg2(fcfg1_revision,
                                             ccfg_modeconf);
 
   /* Special shadow register trim propagation on first batch of devices */
@@ -345,7 +345,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
     /* The VDDS_BOD trim and the VDDR trim is already stepped up to max/HH if
      * "CC1352 boost mode" is requested. See function
-     * SetupAfterColdResetWakeupFromShutDownCfg1() in setup_rom.c for details.
+     * rom_setup_coldreset_from_shutdown_cfg1() in setup_rom.c for details.
      */
 
     if (((ccfg_modeconf & CCFG_MODE_CONF_VDDR_EXT_LOAD) != 0) ||
@@ -390,7 +390,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
         regval8 |= ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
         putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-        SetupStepVddrTrimTo((fusedata &
+        rom_setup_stepvaddrtrimto((fusedata &
                              FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_MASK) >>
                             FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_SHIFT);
       }
@@ -458,7 +458,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure HPOSC. -Setup the LF clock.
    */
 
-  SetupAfterColdResetWakeupFromShutDownCfg3(ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg3(ccfg_modeconf);
 
   /* Set AUX into power down active mode */
 
@@ -531,7 +531,7 @@ void cc13xx_trim_device(void)
 
   /* Select correct CACHE mode and set correct CACHE configuration */
 
-  SetupSetCacheModeAccordingToCcfgSetting();
+  rom_setup_cachemode();
 
   /* 1. Check for powerdown 2. Check for shutdown 3. Assume cold reset if none
    * of the above. It is always assumed that the application will freeze the

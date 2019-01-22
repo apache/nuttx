@@ -81,7 +81,7 @@
                                            * domain. */
 
 #define PRCM_DOMAIN_VIMS_OFF_NO_WAKEUP \
-                                0x00020010  /* For function PRCMPowerDomainOff()
+                                0x00020010  /* For function rom_prcm_powerdomain_off()
                                              * it is an option to select that
                                              * VIMS power domain shall not
                                              * power up during the next wake
