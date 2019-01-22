@@ -343,7 +343,8 @@ config ARCH_BOARD_LAUNCHXL_CC1310
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		TI SimpleLink CC1310 LaunchPad Evaluation Kit (LAUNCHXL-CC1310)
-		featuring the SimpleLinkCC1310 chip.
+		featuring the SimpleLinkCC1310 chip.  This board features the
+		CC1310F128 part with 128Kb of FLASH and 20Kb of SRAM.
 
 config ARCH_BOARD_LAUNCHXL_CC1312R1
 	bool "TI LaunchXL-CC1312R1"

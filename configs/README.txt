@@ -198,7 +198,8 @@ configs/c5471evm
 
 configs launchxl_cc1310
   Port to the TI SimpleLink CC1310 LaunchPad Evaluation Kit (LAUNCHXL-CC1310)
-  featuring the SimpleLinkCC1310 chip.
+  featuring the SimpleLinkCC1310 chip.  This board features the CC1310F128
+  part with 128Kb of FLASH and 20Kb of SRAM.
 
 configs launchxl_cc1312r1
   Port to the TI SimpleLink CC1312R1 LaunchPad Evaluation Kit (LAUNCHXL-CC1312R1)

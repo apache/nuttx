@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* The CC1310 has 128Kb of FLASH beginning at address 0x0000:0000 and
- * 20Kb of SRAM beginning at 0x2000:0000
+/* The CC1310F128 on the LauchXL-CC1310 has 128Kb of FLASH beginning ati
+ * address 0x0000:0000 and 20Kb of SRAM beginning at 0x2000:0000
  */
 
 MEMORY

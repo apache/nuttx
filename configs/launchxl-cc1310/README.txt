@@ -1,7 +1,8 @@
 README
 ======
 
-  This directory holds NuttX board support for the TI LaunchXL-CC1310.
+  This directory holds NuttX board support for the TI LaunchXL-CC1310.  This
+  board features the CC1310F128 part with 128Kb of FLASH and 20Kb of SRAM.
 
 Contents
 ========
