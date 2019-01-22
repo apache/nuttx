@@ -2210,6 +2210,31 @@ config STM32F7_RTC_LSICLOCK
 		Drive the RTC with the LSI clock
 
 endchoice #"RTC clock source"
+
+if STM32F7_RTC_LSECLOCK
+
+config STM32F7_RTC_LSECLOCK_START_DRV_CAPABILITY
+	int "LSE oscillator drive capability level at LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium high drive capability
+		2 = Medium low drive capability
+		3 = High drive capability
+
+config STM32F7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+	int "LSE oscillator drive capability level after LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium high drive capability
+		2 = Medium low drive capability
+		3 = High drive capability
+
+endif # STM32F7_RTC_LSECLOCK
+
 endmenu # RTC Configuration
 
 config STM32F7_CUSTOM_CLOCKCONFIG
