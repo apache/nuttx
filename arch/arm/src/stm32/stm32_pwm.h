@@ -849,6 +849,31 @@
 #  define PWM_TIM17_CH1NCFG 0
 #endif
 
+/* Complementary outputs support */
+
+#if defined(CONFIG_STM32_TIM1_CH1NOUT) || defined(CONFIG_STM32_TIM1_CH2NOUT) || \
+    defined(CONFIG_STM32_TIM1_CH3NOUT)
+#  define HAVE_TIM1_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32_TIM8_CH1NOUT) || defined(CONFIG_STM32_TIM8_CH2NOUT) || \
+    defined(CONFIG_STM32_TIM8_CH3NOUT)
+#  define HAVE_TIM8_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32_TIM15_CH1NOUT)
+#  define HAVE_TIM15_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32_TIM16_CH1NOUT)
+#  define HAVE_TIM16_COMPLEMENTARY
+#endif
+#if defined(CONFIG_STM32_TIM17_CH1NOUT)
+#  define HAVE_TIM17_COMPLEMENTARY
+#endif
+#if defined(HAVE_TIM1_COMPLEMENTARY) || defined(HAVE_TIM8_COMPLEMENTARY) ||   \
+    defined(HAVE_TIM15_COMPLEMENTARY) || defined(HAVE_TIM16_COMPLEMENTARY) || \
+    defined(HAVE_TIM17_COMPLEMENTARY)
+#  define HAVE_PWM_COMPLEMENTARY
+#endif
+
 /* Low-level ops helpers ************************************************************/
 
 /* NOTE: low-level ops accept pwm_lowerhalf_s as first argument, but llops access
@@ -1027,7 +1052,7 @@ struct stm32_pwm_ops_s
   int (*dump_regs)(FAR struct pwm_lowerhalf_s *dev);
 #endif
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   /* Deadtime update */
 
   int (*dt_update)(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);

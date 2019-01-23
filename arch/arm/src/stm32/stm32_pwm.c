@@ -315,31 +315,6 @@
 #  define HAVE_TRGO
 #endif
 
-/* Complementary outputs support */
-
-#if defined(CONFIG_STM32_TIM1_CH1NOUT) || defined(CONFIG_STM32_TIM1_CH2NOUT) || \
-    defined(CONFIG_STM32_TIM1_CH3NOUT)
-#  define HAVE_TIM1_COMPLEMENTARY
-#endif
-#if defined(CONFIG_STM32_TIM8_CH1NOUT) || defined(CONFIG_STM32_TIM8_CH2NOUT) || \
-    defined(CONFIG_STM32_TIM8_CH3NOUT)
-#  define HAVE_TIM8_COMPLEMENTARY
-#endif
-#if defined(CONFIG_STM32_TIM15_CH1NOUT)
-#  define HAVE_TIM15_COMPLEMENTARY
-#endif
-#if defined(CONFIG_STM32_TIM16_CH1NOUT)
-#  define HAVE_TIM16_COMPLEMENTARY
-#endif
-#if defined(CONFIG_STM32_TIM17_CH1NOUT)
-#  define HAVE_TIM17_COMPLEMENTARY
-#endif
-#if defined(HAVE_TIM1_COMPLEMENTARY) || defined(HAVE_TIM8_COMPLEMENTARY) || \
-    defined(HAVE_TIM15_COMPLEMENTARY) || defined(HAVE_TIM16_COMPLEMENTARY) || \
-    defined(HAVE_TIM17_COMPLEMENTARY)
-#  define HAVE_COMPLEMENTARY
-#endif
-
 /* Break support */
 
 #if defined(CONFIG_STM32_TIM1_BREAK1) || defined(CONFIG_STM32_TIM1_BREAK2) || \
@@ -397,7 +372,7 @@ struct stm32_pwmchan_s
 #ifdef HAVE_BREAK
   struct stm32_pwm_break_s brk;         /* PWM break configuration */
 #endif
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   struct stm32_pwm_out_s   out2;        /* PWM complementary output configuration */
 #endif
 };
@@ -418,7 +393,7 @@ struct stm32_pwmtimer_s
   uint8_t  lock:2;                      /* TODO: Lock configuration */
   uint8_t  t_dts:3;                     /* Clock division for t_DTS */
   uint8_t  _res:5;                      /* Reserved */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   uint8_t  deadtime;                    /* Dead-time value */
 #endif
 #ifdef HAVE_TRGO
@@ -486,7 +461,7 @@ static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv);
 #ifdef HAVE_TRGO
 static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t trgo);
 #endif
-#if defined(HAVE_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
+#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
 static int pwm_deadtime_update(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);
 #endif
 #ifdef CONFIG_STM32_PWM_LL_OPS
@@ -567,7 +542,7 @@ static const struct stm32_pwm_ops_s g_llpwmops =
 #  ifdef CONFIG_DEBUG_PWM_INFO
   .dump_regs       = pwm_dumpregs,
 #  endif
-#  ifdef HAVE_COMPLEMENTARY
+#  ifdef HAVE_PWM_COMPLEMENTARY
   .dt_update       = pwm_deadtime_update,
 #  endif
 };
@@ -695,7 +670,7 @@ static struct stm32_pwmtimer_s g_pwm1dev =
   .mode        = CONFIG_STM32_TIM1_MODE,
   .lock        = CONFIG_STM32_TIM1_LOCK,
   .t_dts       = CONFIG_STM32_TIM1_TDTS,
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32_TIM1_DEADTIME,
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM1_TRGO)
@@ -794,7 +769,7 @@ static struct stm32_pwmtimer_s g_pwm2dev =
   .mode        = CONFIG_STM32_TIM2_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM2_TRGO)
@@ -893,7 +868,7 @@ static struct stm32_pwmtimer_s g_pwm3dev =
   .mode        = CONFIG_STM32_TIM3_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM3_TRGO)
@@ -992,7 +967,7 @@ static struct stm32_pwmtimer_s g_pwm4dev =
   .mode        = CONFIG_STM32_TIM4_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM4_TRGO)
@@ -1089,7 +1064,7 @@ static struct stm32_pwmtimer_s g_pwm5dev =
   .mode        = CONFIG_STM32_TIM5_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM5_TRGO)
@@ -1225,7 +1200,7 @@ static struct stm32_pwmtimer_s g_pwm8dev =
   .mode        = CONFIG_STM32_TIM8_MODE,
   .lock        = CONFIG_STM32_TIM8_LOCK,
   .t_dts       = CONFIG_STM32_TIM8_TDTS,
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32_TIM8_DEADTIME,
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM8_TRGO)
@@ -1292,7 +1267,7 @@ static struct stm32_pwmtimer_s g_pwm9dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1343,7 +1318,7 @@ static struct stm32_pwmtimer_s g_pwm10dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1394,7 +1369,7 @@ static struct stm32_pwmtimer_s g_pwm11dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1461,7 +1436,7 @@ static struct stm32_pwmtimer_s g_pwm12dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1512,7 +1487,7 @@ static struct stm32_pwmtimer_s g_pwm13dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1563,7 +1538,7 @@ static struct stm32_pwmtimer_s g_pwm14dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
 #if defined(HAVE_TRGO)
@@ -1648,7 +1623,7 @@ static struct stm32_pwmtimer_s g_pwm15dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32_TIM15_LOCK,
   .t_dts       = CONFIG_STM32_TIM15_TDTS,
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32_TIM15_DEADTIME,
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM15_TRGO)
@@ -1717,7 +1692,7 @@ static struct stm32_pwmtimer_s g_pwm16dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32_TIM16_LOCK,
   .t_dts       = CONFIG_STM32_TIM16_TDTS,
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32_TIM16_DEADTIME,
 #endif
 #if defined(HAVE_TRGO)
@@ -1786,7 +1761,7 @@ static struct stm32_pwmtimer_s g_pwm17dev =
   .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32_TIM17_LOCK,
   .t_dts       = CONFIG_STM32_TIM17_TDTS,
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32_TIM17_DEADTIME,
 #endif
 #if defined(HAVE_TRGO)
@@ -2742,7 +2717,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
   /* Configure output polarity (all PWM timers) */
 
-  if (priv->channels[channel-1].out1.pol & STM32_POL_POS)
+  if (priv->channels[channel-1].out1.pol == STM32_POL_POS)
     {
       ccer |= (GTIM_CCER_CC1P << ((channel-1)*4));
     }
@@ -2757,7 +2732,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
     {
       /* Configure output IDLE State */
 
-      if (priv->channels[channel-1].out1.idle & STM32_IDLE_ACTIVE)
+      if (priv->channels[channel-1].out1.idle == STM32_IDLE_ACTIVE)
         {
           cr2 |= (ATIM_CR2_OIS1 << ((channel-1)*2));
         }
@@ -2766,10 +2741,10 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
           cr2 &= ~(ATIM_CR2_OIS1 << ((channel-1)*2));
         }
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
       /* Configure complementary output IDLE state */
 
-      if (priv->channels[channel-1].out2.idle & STM32_IDLE_ACTIVE)
+      if (priv->channels[channel-1].out2.idle == STM32_IDLE_ACTIVE)
         {
           cr2 |= (ATIM_CR2_OIS1N << ((channel-1)*2));
         }
@@ -2780,7 +2755,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
       /* Configure complementary output polarity */
 
-      if (priv->channels[channel-1].out2.pol & STM32_POL_POS)
+      if (priv->channels[channel-1].out2.pol == STM32_POL_POS)
         {
           ccer |= (ATIM_CCER_CC1NP << ((channel-1)*4));
         }
@@ -2788,7 +2763,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
         {
           ccer &= ~(ATIM_CCER_CC1NP << ((channel-1)*4));
         }
-#endif  /* HAVE_COMPLEMENTARY */
+#endif  /* HAVE_PWM_COMPLEMENTARY */
 
 #ifdef HAVE_IP_TIMERS_V2
       /* TODO: OIS5 and OIS6 */
@@ -2888,7 +2863,7 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
   return OK;
 }
 
-#if defined(HAVE_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
+#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
 
 /****************************************************************************
  * Name: pwm_deadtime_update
@@ -2896,6 +2871,7 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
 
 static int pwm_deadtime_update(FAR struct pwm_lowerhalf_s *dev, uint8_t dt)
 {
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   uint32_t bdtr = 0;
   int      ret  = OK;
 
@@ -3041,7 +3017,7 @@ static uint16_t pwm_outputs_from_channels(FAR struct stm32_pwmtimer_s *priv)
               outputs |= (STM32_CHAN1 << ((channel-1)*2));
             }
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
           /* Enable complementary output if configured */
 
           if (priv->channels[i].out2.in_use == 1)
@@ -3079,7 +3055,7 @@ static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv)
   pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CKD_MASK,
                 priv->t_dts<<GTIM_CR1_CKD_SHIFT);
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
   /* Initialize deadtime */
 
   bdtr |= (priv->deadtime << ATIM_BDTR_DTG_SHIFT);
@@ -4075,7 +4051,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
           pwm_dumpgpio(pincfg, "PWM setup");
         }
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
       if (priv->channels[i].out2.in_use == 1)
         {
           pincfg = priv->channels[i].out2.pincfg;
@@ -4161,7 +4137,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
           stm32_configgpio(pincfg);
         }
 
-#ifdef HAVE_COMPLEMENTARY
+#ifdef HAVE_PWM_COMPLEMENTARY
       pincfg = priv->channels[i].out2.pincfg;
       if (pincfg != 0)
         {

@@ -72,6 +72,10 @@
 #  define CONFIG_LIBDSP_PRECISION 0
 #endif
 
+#if !defined(CONFIG_LIBM) && !defined(CONFIG_ARCH_MATH_H)
+#  error math.h not defined!
+#endif
+
 /* Phase rotation direction */
 
 #define DIR_CW   (1.0f)
