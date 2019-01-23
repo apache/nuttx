@@ -285,7 +285,6 @@ config ARCH_CHIP_SIMPLELINK
 	bool "TI SimpleLink"
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
-	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	depends on EXPERIMENTAL
 	---help---

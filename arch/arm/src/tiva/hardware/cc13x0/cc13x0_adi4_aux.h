@@ -114,7 +114,7 @@
 #  define ADI4_AUX_MUX1_COMPA_IN_AUXIO5                    (4   << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
 #  define ADI4_AUX_MUX1_COMPA_IN_AUXIO4                    (8   << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
 #  define ADI4_AUX_MUX1_COMPA_IN_AUXIO3                    (16  << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
-#  define ADI4_AUX_MUX1_COMPA_IN_AUXIO1                    (32  << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
+#  define ADI4_AUX_MUX1_COMPA_IN_AUXIO2                    (32  << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
 #  define ADI4_AUX_MUX1_COMPA_IN_AUXIO1                    (64  << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
 #  define ADI4_AUX_MUX1_COMPA_IN_AUXIO0                    (128 << ADI4_AUX_MUX1_COMPA_IN_SHIFT)
 

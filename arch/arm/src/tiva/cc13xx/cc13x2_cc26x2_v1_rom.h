@@ -45,7 +45,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Start address of the ROM hard API access table (located after the ROM FW rev field) */
+/* Start address of the ROM hard API access table (located after the ROM FW rev
+ * field)
+ */
 
 #define ROM_HAPI_TABLE_ADDR 0x10000048
 

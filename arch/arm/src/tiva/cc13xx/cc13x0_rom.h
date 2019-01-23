@@ -42,10 +42,21 @@
 #define __ARCH_ARM_SRC_TIVA_CC13XX_CC13X0_ROM_H
 
 /************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <stdint.h>
+#include <nuttx/irq.h>
+
+#include "hardware/tiva_aux_smph.h"
+
+/************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Start address of the ROM hard API access table (located after the ROM FW rev field) */
+/* Start address of the ROM hard API access table (located after the ROM FW rev
+ * field)
+ */
 
 #define ROM_HAPI_TABLE_ADDR 0x10000048
 
@@ -65,11 +76,16 @@
 
 /* REVISIT:  In the TI Driverlib, the following go through a "Safe" layer */
 
-#define hapi_source_safeswitch()       P_HARD_API->hf_source_safeswitch()
-#define hapi_select_compa_input(a)     P_HARD_API->select_compa_input(a)
-#define hapi_select_compa_ref(a)       P_HARD_API->select_compa_ref(a)
-#define hapi_select_adc_compb_input(a) P_HARD_API->select_adc_compb_input(a)
-#define hapi_select_adc_compb_ref(a)   P_HARD_API->select_adc_compb_ref(a)
+#define hapi_source_safeswitch() \
+   rom_hapi_void(P_HARD_API->hf_source_safe_switch)
+#define hapi_select_compa_input(a) \
+   rom_hapi_auxadiselect(P_HARD_API->select_compa_input,(a))
+#define hapi_select_compa_ref(a) \
+   rom_hapi_auxadiselect(P_HARD_API->select_compa_ref,(a))
+#define hapi_select_adc_compb_input(a) \
+   rom_hapi_auxadiselect(P_HARD_API->select_adc_compb_input,(a))
+#define hapi_select_adc_compb_ref(a) \
+   rom_hapi_auxadiselect(P_HARD_API->select_adc_compb_iref,(a))
 
 /* Defines for input parameter to the hapi_select_compa_input function.
  * The define values can not be changed!
@@ -643,6 +659,11 @@ typedef void     (*fptr_adccompbin_t)         (uint8_t       /* signal */);
 
 typedef void     (*fptr_compbref_t)           (uint8_t       /* signal */);
 
+/* Types used in the "Safe" interfaces taken from the TI DriverLib hw_types.h */
+
+typedef void     (*fptr_void_void_t)          (void);
+typedef void     (*fptr_void_uint8_t)         (uint8_t);
+
 /* ROM Hard-API access table type */
 
 struct hard_api_s
@@ -712,7 +733,7 @@ void     rom_setup_aonrtc_subsecinc(uint32_t subsecinc);
  *   vddrtrim - VDDR_TRIM setting
  *
  * Returned Value:
- *  Returns sign extended VDDR_TRIM setting.
+ *   Returns sign extended VDDR_TRIM setting.
  *
  ************************************************************************************/
 
@@ -729,6 +750,45 @@ static inline int32_t rom_signextend_vddrtrim(uint32_t vddrtrim)
     }
 
   return signed_vaddrtrim;
+}
+
+/************************************************************************************
+ * Name: rom_hapi_void and rom_hapi_auxadiselect
+ *
+ * Description:
+ *   Work-arounds for bus arbitration issue.
+ *   REVISIT:  Originally for the adi.h header file in the TI DriverLib
+ *
+ * Input Parameters
+ *   fptr - Function pointer
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+inline static void rom_hapi_void(fptr_void_void_t fptr)
+{
+  irqstate_t flags = enter_critical_section();
+  while (getreg32(TIVA_AUX_SMPH_SMPH0) == 0)
+    {
+    }
+
+  fptr();
+  putreg32(1, TIVA_AUX_SMPH_SMPH0);
+  leave_critical_section(flags);
+}
+
+inline static void rom_hapi_auxadiselect(fptr_void_uint8_t fptr, uint8_t signal)
+{
+  irqstate_t flags = enter_critical_section();
+  while (getreg32(TIVA_AUX_SMPH_SMPH0) == 0)
+    {
+    }
+
+  fptr(signal);
+  putreg32(1, TIVA_AUX_SMPH_SMPH0);
+  leave_critical_section(flags);
 }
 
 #endif /* __ARCH_ARM_SRC_TIVA_CC13XX_CC13X0_ROM_H */
