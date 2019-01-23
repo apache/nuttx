@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <errno.h>
 
 #include <nuttx/crypto/aes.h>
 
@@ -100,7 +101,7 @@ static const uint8_t g_rcon[11] =
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
 };
 
-static aes_state_s g_aes_state;
+static struct aes_state_s g_aes_state;
 
 /****************************************************************************
  * Private Functions
@@ -641,8 +642,8 @@ void aes_encrypt(FAR uint8_t *state, FAR const uint8_t *key)
 {
   /* Expand the key into 176 bytes */
 
-  aes_setupkey(&g_aes_state->expanded_key, key, 16);
-  aes_encr(state, g_aes_state->expanded_key);
+  aes_setupkey(&g_aes_state, key, 16);
+  aes_encr(state, g_aes_state.expanded_key);
 }
 
 /****************************************************************************
@@ -666,6 +667,6 @@ void aes_decrypt(FAR uint8_t *state, FAR const uint8_t *key)
 {
   /* Expand the key into 176 bytes */
 
-  aes_setupkey(&g_aes_state->expanded_key, key, 16);
-  aes_decr(state, g_aes_state->expanded_key);
+  aes_setupkey(&g_aes_state, key, 16);
+  aes_decr(state, g_aes_state.expanded_key);
 }
