@@ -46,7 +46,6 @@ README
     - SD Card
     - UART
 
-
 TODO:
 
 Contents
@@ -131,17 +130,36 @@ Booting NuttX from an SD card
 
   These are the steps to get U-Boot booting from SD Card:
 
-    1. Stop Beaglebone Black boot process in U-Boot.
+    1. Configure and build the NuttX Beaglebone Black configuration.  You
+       should have a file alled nuttx.bin when the build completes.
 
-    2. Insert a FLASH stick into host pc and format FAT32 FS.
+    2. Insert a FLASH stick into the host PC and format it for FAT32 FS.
 
     3. Copy nuttx.bin into FLASH stick root.
 
-    4. Remove the FLASH stick from the host pc.  Insert into the Beaglecone Black
-       microSD slot.  Load Nuttx into memory and run
+    4. Remove the FLASH stick from the host PC.  Insert into the Beaglebone
+       Black microSD slot.
 
-       U-Boot# load mmc 0 0x8a000000 nuttx.bin
-       U-Boot# go 0x8a000000
+    5. Connect a RS-232 Converted or USB serial adapter onto the Beaglebone
+       Black board and open a serial terminal on the host PC to communicate
+       with the target.
+
+    6. Reset the Stop Beaglebone Black boot.  You should see output from
+       U-boot in the serial console.  Stop the normal boot-up sequence
+       after the U-Boot prompt before Linux is started.:
+
+         Hit any key to stop autoboot: 0
+         U-Boot#
+
+    7. Load Nuttx into memory from the U-Boot prompt and run
+
+         U-Boot# load mmc 0 0x8a000000 nuttx.bin
+         U-Boot# go 0x8a000000
+
+       If your are running the 'nsh' configuration you then should see:
+
+         NuttShell (NSH)
+         nsh>
 
 Configurations
 ==============

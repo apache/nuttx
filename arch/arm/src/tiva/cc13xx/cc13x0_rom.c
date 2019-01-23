@@ -42,14 +42,23 @@
  * Included Files
  ************************************************************************************/
 
+#include <stdint.h>
+
+#include "up_arch.h"
+
 #include "hardware/tiva_adi2_refsys.h"
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_adi4_aux.h"
 #include "hardware/tiva_aon_batmon.h"
+#include "hardware/tiva_aon_rtc.h"
 #include "hardware/tiva_aon_sysctl.h"
+#include "hardware/tiva_aux_wuc.h"
 #include "hardware/tiva_ccfg.h"
 #include "hardware/tiva_ddi0_osc.h"
 #include "hardware/tiva_fcfg1.h"
+#include "hardware/tiva_vims.h"
+
+#include "cc13xx/cc13x0_rom.h"
 
 /************************************************************************************
  * Private Functions
@@ -72,7 +81,7 @@ static void rom_set_vddr_level(uint32_t ccfg_modeconf)
 
   rawtrim     = ((getreg32(TIVA_FCFG1_VOLT_TRIM) &
                   FCFG1_VOLT_TRIM_VDDR_TRIM_HH_MASK) >>
-                 CFG1_VOLT_TRIM_VDDR_TRIM_HH_SHIFT);
+                 FCFG1_VOLT_TRIM_VDDR_TRIM_HH_SHIFT);
 
   targettrim  = rom_signextend_vddrtrim(rawtrim);
   currenttrim =
@@ -167,7 +176,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
        */
 
       putreg16((ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
-               (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_POS_31)
+               (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_POS_31),
                TIVA_ADI3_REFSYS_MASK8B + (TIVA_ADI3_REFSYS_REFSYSCTL1_OFFSET * 2));
       putreg8(ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN,
               TIVA_ADI3_REFSYS_SET + TIVA_ADI3_REFSYS_REFSYSCTL3_OFFSET);
@@ -228,8 +237,8 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
   if (getreg32(TIVA_AON_SYSCTL_PWRCTL) &
       AON_SYSCTL_PWRCTL_EXT_REG_MODE)
     {
-      ccfg_modeconf |=
-        (CCFG_MODE_CONF_DCDC_RECHARGE_MASK | CCFG_MODE_CONF_DCDC_ACTIVE_MASK);
+      ccfg_modeconf |= (CCFG_MODE_CONF_DCDC_RECHARGE |
+                        CCFG_MODE_CONF_DCDC_ACTIVE);
     }
   else
     {
@@ -244,7 +253,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
   setbits = 0;
   clrbits = 0;
 
-  if ((ccfg_modecong & CCFG_MODE_CONF_DCDC_RECHARGE) != 0)
+  if ((ccfg_modeconf & CCFG_MODE_CONF_DCDC_RECHARGE) != 0)
     {
       clrbits |= AON_SYSCTL_PWRCTL_DCDC_EN;
     }
@@ -257,7 +266,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
    * polarity
    */
 
-  if ((ccfg_modecong & CCFG_MODE_CONF_DCDC_ACTIVE) != 0)
+  if ((ccfg_modeconf & CCFG_MODE_CONF_DCDC_ACTIVE) != 0)
     {
       clrbits |= AON_SYSCTL_PWRCTL_DCDC_ACTIVE;
     }
@@ -326,7 +335,7 @@ void rom_setup_coldreset_from_shutdown_cfg2(uint32_t fcfg1_revision,
 
   trim = rom_setup_get_trim_adcshvbufen(fcfg1_revision);
   putreg8(0x10 | trim,
-          TIVA_AUX_DDI0_OSC_BASE + DTIVA_DI_MASK4B_OFFSET +
+          TIVA_AUX_DDI0_OSC_BASE + TIVA_DI_MASK4B_OFFSET +
           (TIVA_DDI0_OSC_ADCDOUBLERNANOAMPCTL_OFFSET * 2) + 1);
 
   /* Set trim for the PEAK_DET_ITRIM, HP_BUF_ITRIM and LP_BUF_ITRIM bit fields
@@ -356,9 +365,9 @@ void rom_setup_coldreset_from_shutdown_cfg2(uint32_t fcfg1_revision,
    */
 
   trim = rom_setup_get_trim_rcosc_lfibiastrim(fcfg1_revision);
-  putreg8(0x80 | (trim << 3,
+  putreg8(0x80 | (trim << 3),
           TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK4B_OFFSET +
-          (0x00000020 * 2) + 1));
+          (0x00000020 * 2) + 1);
 
   /* Update DDI0_OSC_LFOSCCTL_XOSCLF_REGULATOR_TRIM and
    * DDI0_OSC_LFOSCCTL_XOSCLF_CMIRRWR_RATIO in one write This can be
@@ -444,7 +453,7 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
            * FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS (1 bit) */
 
           regval = ((getreg32(TIVA_ADI2_REFSYS_HPOSCCTL2) &
-                     ~(ADI2_REFSYS_HPOSCCTL2_BIAS_HOLD_MODE_EN_MASK |
+                     ~(ADI2_REFSYS_HPOSCCTL2_BIAS_HOLD_MODE_EN |
                        ADI2_REFSYS_HPOSCCTL2_CURRMIRR_RATIO_MASK)) |
                     (((fcfg1_oscconf &
                        FCFG1_OSC_CONF_HPOSC_BIAS_HOLD_MODE_EN_MASK) >>
@@ -485,7 +494,7 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
                         FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_MASK) >>
                        FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_SHIFT) <<
                       ADI2_REFSYS_HPOSCCTL0_DIV3_BYPASS_SHIFT));
-          putreg32(regval, TIVA_ADI2_REFSYS_HPOSCCTL0)'
+          putreg32(regval, TIVA_ADI2_REFSYS_HPOSCCTL0);
           break;
         }
       /* Not a HPOSC chip - fall through to default */
@@ -698,13 +707,13 @@ uint32_t rom_setup_get_trim_rcosc_lfrtunectuntrim(void)
     ((getreg32(TIVA_FCFG1_CONFIG_OSC_TOP) &
       FCFG1_CONFIG_OSC_TOP_RCOSCLF_CTUNE_TRIM_MASK) >>
      FCFG1_CONFIG_OSC_TOP_RCOSCLF_CTUNE_TRIM_SHIFT) <<
-    DDI0_OSC_LFOSCCTL_RCOSCLF_CTUNE_TRIM_S;
+    DDI0_OSC_LFOSCCTL_RCOSCLF_CTUNE_TRIM_SHIFT;
 
   trimValue |=
     ((getreg32(TIVA_FCFG1_CONFIG_OSC_TOP) &
       FCFG1_CONFIG_OSC_TOP_RCOSCLF_RTUNE_TRIM_MASK) >>
      FCFG1_CONFIG_OSC_TOP_RCOSCLF_RTUNE_TRIM_SHIFT) <<
-    DDI0_OSC_LFOSCCTL_RCOSCLF_RTUNE_TRIM_S;
+    DDI0_OSC_LFOSCCTL_RCOSCLF_RTUNE_TRIM_SHIFT;
 
   return (trimValue);
 }
@@ -722,7 +731,7 @@ uint32_t rom_setup_get_trim_xosc_hfibiastherm(void)
   trimValue =
     (getreg32(TIVA_FCFG1_ANABYPASS_VALUE2) &
      FCFG1_ANABYPASS_VALUE2_XOSC_HF_IBIASTHERM_MASK) >>
-    FCFG1_ANABYPASS_VALUE2_XOSC_HF_IBIASTHERM_S;
+    FCFG1_ANABYPASS_VALUE2_XOSC_HF_IBIASTHERM_SHIFT;
 
   return (trimValue);
 }
@@ -744,7 +753,7 @@ uint32_t rom_setup_get_trim_ampcompth2(void)
   trimValue = ((ui32Fcfg1Value &
                     FCFG1_AMPCOMP_TH2_LPMUPDATE_LTH_MASK) >>
                    FCFG1_AMPCOMP_TH2_LPMUPDATE_LTH_SHIFT) <<
-    DDI0_OSC_AMPCOMPTH2_LPMUPDATE_LTH_S;
+    DDI0_OSC_AMPCOMPTH2_LPMUPDATE_LTH_SHIFT;
   trimValue |= (((ui32Fcfg1Value &
                       FCFG1_AMPCOMP_TH2_LPMUPDATE_HTM_MASK) >>
                      FCFG1_AMPCOMP_TH2_LPMUPDATE_HTM_SHIFT) <<
@@ -913,7 +922,7 @@ uint32_t rom_setup_get_trim_dblrloopfilter_resetvoltage(uint32_t fcfg1_revision)
       dblrLoopFilterResetVoltageValue =
         (getreg32(TIVA_FCFG1_MISC_OTP_DATA_1) &
          FCFG1_MISC_OTP_DATA_1_DBLR_LOOP_FILTER_RESET_VOLTAGE_MASK) >>
-        FCFG1_MISC_OTP_DATA_1_DBLR_LOOP_FILTER_RESET_VOLTAGE_S;
+        FCFG1_MISC_OTP_DATA_1_DBLR_LOOP_FILTER_RESET_VOLTAGE_SHIFT;
     }
 
   return (dblrLoopFilterResetVoltageValue);
@@ -931,7 +940,7 @@ uint32_t rom_setup_get_trim_adcshmodeen(uint32_t fcfg1_revision)
     {
       getTrimForAdcShModeEnValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
                                     FCFG1_OSC_CONF_ADC_SH_MODE_EN_MASK) >>
-        FCFG1_OSC_CONF_ADC_SH_MODE_EN_S;
+        FCFG1_OSC_CONF_ADC_SH_MODE_EN_SHIFT;
     }
 
   return (getTrimForAdcShModeEnValue);
@@ -949,7 +958,7 @@ uint32_t rom_setup_get_trim_adcshvbufen(uint32_t fcfg1_revision)
     {
       getTrimForAdcShVbufEnValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
                                     FCFG1_OSC_CONF_ADC_SH_VBUF_EN_MASK) >>
-        FCFG1_OSC_CONF_ADC_SH_VBUF_EN_S;
+        FCFG1_OSC_CONF_ADC_SH_VBUF_EN_SHIFT;
     }
 
   return (getTrimForAdcShVbufEnValue);
@@ -999,7 +1008,7 @@ uint32_t rom_setup_get_trim_xosc_hffaststart(void)
 
   ui32XoscHfFastStartValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
                               FCFG1_OSC_CONF_XOSC_HF_FAST_START_MASK) >>
-    FCFG1_OSC_CONF_XOSC_HF_FAST_START_S;
+    FCFG1_OSC_CONF_XOSC_HF_FAST_START_SHIFT;
 
   return (ui32XoscHfFastStartValue);
 }
@@ -1049,7 +1058,7 @@ uint32_t rom_setup_get_trim_rcosc_lfibiastrim(uint32_t fcfg1_revision)
     {
       trimForRcOscLfIBiasTrimValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
                                       FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM_MASK)
-        >> FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM_S;
+        >> FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM_SHIFT;
     }
 
   return (trimForRcOscLfIBiasTrimValue);
@@ -1071,7 +1080,7 @@ uint32_t rom_setup_get_trim_lfregulator_cmirrwr_ratio(uint32_t fcfg1_revision)
         (getreg32(TIVA_FCFG1_OSC_CONF) &
          (FCFG1_OSC_CONF_XOSCLF_REGULATOR_TRIM_MASK |
           FCFG1_OSC_CONF_XOSCLF_CMIRRWR_RATIO_MASK)) >>
-        FCFG1_OSC_CONF_XOSCLF_CMIRRWR_RATIO_S;
+        FCFG1_OSC_CONF_XOSCLF_CMIRRWR_RATIO_SHIFT;
     }
 
   return (trimForXoscLfRegulatorAndCmirrwrRatioValue);
@@ -1095,7 +1104,7 @@ void rom_setup_cachemode(void)
 
   uint32_t vims_ctlmode0;
 
-  while ((getreg32(TIVA_VIMS_STAT) & VIMS_STAT_MODE_CHANGING_BITN) != 0)
+  while ((getreg32(TIVA_VIMS_STAT) & VIMS_STAT_MODE_CHANGING) != 0)
     {
       /* Do nothing - wait for an eventual ongoing mode change to complete.
        * (There should typically be no wait time here, but need to be sure)
@@ -1105,8 +1114,8 @@ void rom_setup_cachemode(void)
   /* Note that Mode=0 is equal to MODE_GPRAM */
 
   vims_ctlmode0 =
-    ((getreg32(TIVA_VIMS_CTL) & ~VIMS_CTL_MODE_MASK) | VIMS_CTL_DYN_CG_EN_MASK |
-     VIMS_CTL_PREF_EN_MASK);
+    ((getreg32(TIVA_VIMS_CTL) & ~VIMS_CTL_MODE_MASK) | VIMS_CTL_DYN_CG_EN |
+     VIMS_CTL_PREF_EN);
 
   if (getreg32(TIVA_CCFG_SIZE_AND_DIS_FLAGS) &
       CCFG_SIZE_AND_DIS_FLAGS_DIS_GPRAM)
