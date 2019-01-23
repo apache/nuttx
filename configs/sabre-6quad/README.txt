@@ -725,7 +725,7 @@ Configuration sub-directories
   ---
     This is a configuration of testing the SMP configuration.  It is
     essentially equivalent to the nsh configuration except has SMP enabled
-    and supports apps/examples/smp.
+    and supports apps/testing/smp.
 
     Sample output of the SMP test is show below (Configuration all 4 CPUs
     but with data cache disabled):

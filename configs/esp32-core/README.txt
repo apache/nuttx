@@ -663,12 +663,12 @@ NOTES:
       CONFIG_SMP_NCPUS=2
       CONFIG_SPINLOCK=y
 
-    The apps/examples/smp test is included:
+    The apps/testing/smp test is included:
 
-      CONFIG_EXAMPLES_SMP=y
-      CONFIG_EXAMPLES_SMP_NBARRIER_THREADS=8
-      CONFIG_EXAMPLES_SMP_PRIORITY=100
-      CONFIG_EXAMPLES_SMP_STACKSIZE=2048
+      CONFIG_TESTING_SMP=y
+      CONFIG_TESTING_SMP_NBARRIER_THREADS=8
+      CONFIG_TESTING_SMP_PRIORITY=100
+      CONFIG_TESTING_SMP_STACKSIZE=2048
 
     NOTES:
     1. See NOTES for the nsh configuration.
