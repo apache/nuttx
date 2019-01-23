@@ -135,7 +135,7 @@
 
 /* This structure represents the pin configuration */
 
-struct cc134xx_pinconfig_s
+struct cc13xx_pinconfig_s
 {
   uint32_t gpio;                /* GPIO and DIO definitions */
   uint32_t ioc;                 /* IOC configuration register image */
@@ -145,7 +145,7 @@ struct cc134xx_pinconfig_s
  * across all MCUs.
  */
 
-typedef const struct cc134xx_pinconfig_s *pinconfig_t;
+typedef const struct cc13xx_pinconfig_s *pinconfig_t;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -267,8 +267,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
    * -Configure XOSC.
    */
 
-  rom_setup_coldreset_from_shutdown_cfg2(fcfg1_revision,
-                                            ccfg_modeconf);
+  rom_setup_coldreset_from_shutdown_cfg2(fcfg1_revision, ccfg_modeconf);
 
   /* Special shadow register trim propagation on first batch of devices */
 
@@ -533,12 +532,14 @@ void cc13xx_trim_device(void)
 
   rom_setup_cachemode();
 
-  /* 1. Check for powerdown 2. Check for shutdown 3. Assume cold reset if none
-   * of the above. It is always assumed that the application will freeze the
-   * latches in AON_IOC when going to powerdown in order to retain the values
-   * on the IOs. NB. If this bit is not cleared before proceeding to
-   * powerdown, the IOs will all default to the reset configuration when
-   * restarting.
+  /* 1. Check for powerdown
+   * 2. Check for shutdown
+   * 3. Assume cold reset if none of the above.
+   *
+   * It is always assumed that the application will freeze the latches in
+   * AON_IOC when going to powerdown in order to retain the values on the
+   * IOs. NB. If this bit is not cleared before proceeding to powerdown,
+   * the IOs will all default to the reset configuration when restarting.
    */
 
   if ((getreg32(TIVA_AON_IOC_IOCLATCH) & AON_IOC_IOCLATCH_EN) == 0)

@@ -288,6 +288,9 @@ config ARCH_CHIP_CC13X2
 	select TIVA_HAVE_TIMER3
 	select TIVA_HAVE_UART1
 
+config ARCH_CHIP_CC26X2
+	bool
+
 config LM_REVA2
 	bool "Rev A2"
 	default n
@@ -538,6 +541,11 @@ config TIVA_UART0_HCIUART
 	depends on WIRELESS_BLUETOOTH
 
 endchoice # UART0 Driver Configuration
+
+config TIVA_CC26X2_POWERLIB
+	bool "CC26x2 Power Library"
+	default n
+	depends on ARCH_CHIP_CC26X2
 
 if TIVA_UART0_HCIUART
 config TIVA_HCIUART0_RXBUFSIZE

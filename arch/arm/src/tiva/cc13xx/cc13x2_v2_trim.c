@@ -299,16 +299,16 @@ void cc13xx_trim_device(void)
 
   /* Check for shutdown When device is going to shutdown the hardware will
    * automatically clear the SLEEPDIS bit in the SLEEP register in the
-   * AON_PMCTL module. It is left for the application to assert this bit when
-   * waking back up, but not before the desired IO configuration has been
-   * re-established.
+   * AON_PMCTL module. It is left for the application to assert this bit
+   * when waking back up, but not before the desired IO configuration has
+   * been re-established.
    */
 
-  else if ((getreg32(TIVA_AON_PMCTL_SLEEPCTL) & AON_PMCTL_SLEEPCTL_IO_PAD_SLEEP_DIS)
-           == 0)
+  else if ((getreg32(TIVA_AON_PMCTL_SLEEPCTL) &
+            AON_PMCTL_SLEEPCTL_IO_PAD_SLEEP_DIS) == 0)
     {
-      /* NB. This should be calling a ROM implementation of required trim and
-       * compensation e.g. trim_wakeup_fromshutdown() -->
+      /* NB. This should be calling a ROM implementation of required trim
+       * and compensation e.g. trim_wakeup_fromshutdown() -->
        * trim_wakeup_frompowerdown();
        */
 
@@ -317,11 +317,10 @@ void cc13xx_trim_device(void)
     }
   else
     {
-      /* Consider adding a check for soft reset to allow debugging to skip this
-       * section!!! NB. This should be calling a ROM implementation of
+      /* Consider adding a check for soft reset to allow debugging to skip
+       * this section!!! NB. This should be calling a ROM implementation of
        * required trim and compensation e.g. trim_coldreset() -->
-       * trim_wakeup_fromshutdown() -->
-       * trim_wakeup_frompowerdown()
+       * trim_wakeup_fromshutdown() --> trim_wakeup_frompowerdown()
        */
 
       trim_coldreset();
@@ -335,8 +334,8 @@ void cc13xx_trim_device(void)
 
   putreg32(0, TIVA_PRCM_PDCTL1VIMS);
 
-  /* Configure optimal wait time for flash FSM in cases where flash pump wakes
-   * up from sleep
+  /* Configure optimal wait time for flash FSM in cases where flash pump
+   * wakes up from sleep
    */
 
   regval  = getreg32(TIVA_FLASH_FPAC1);
@@ -345,8 +344,8 @@ void cc13xx_trim_device(void)
   putreg32(regval, TIVA_FLASH_FPAC1);
 
   /* And finally at the end of the flash boot process: SET BOOT_DET bits in
-   * AON_PMCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET bits
-   * must be manually cleared
+   * AON_PMCTL to 3 if already found to be 1 Note: The BOOT_DET_x_CLR/SET
+   * bits must be manually cleared
    */
 
   if ((getreg32(TIVA_AON_PMCTL_RESETCTL) &

@@ -9,13 +9,15 @@ Contents
   o Status
   o Serial Console
   o LEDs and Buttons
+  o Version 1 or 2?
 
 Status
 ======
 
   2018-12-03:  Fragmentary board support in place.  The initial intent
     of this board support is simply to assist in the CC13xx architecture
-    development.  Serious board development will occur later.
+    development.  Serious board development will occur later.  Board
+    support is missing LED and button support.
 
 Serial Console
 ==============
@@ -32,4 +34,18 @@ LEDs
 
 Buttons
 -------
+
+Version 1 or 2?
+===============
+
+  Two versions of the CC1312R1 are supported selected by CONFIG_ARCH_CHIP_CC13XX_V1
+  or CONFIG_ARCH_CHIP_CC13XX_V2.  How can you tell which one you have?
+  Perhaps you can tell by the markings on the chip, but I do not have the
+  secret decoder ring necessary to do that.
+
+  What you can do is enable CONFIG_DEBUG_ASSERTIONS.  The firmware can
+  determine which version you have by looking at register contents.  The
+  firmware will assert if you select the wrong version.  If that occurs,
+  switch to the other version and the assertion should go away.
+
 

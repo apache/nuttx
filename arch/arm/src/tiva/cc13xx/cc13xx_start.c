@@ -279,8 +279,8 @@ void __start(void)
   showprogress('E');
 #endif
 
-#ifndef CONFIG_ARCH_CHIP_CC13X0 /* REVISIT */
-  /* Initialize the Power Manager internal state.  It must be called prior
+#ifdef CONFIG_TIVA_CC26X2_POWERLIB /* REVISIT */
+  /* Initialize the Power Manager internal state.  This must be called prior
    * to any other Power API.
    */
 

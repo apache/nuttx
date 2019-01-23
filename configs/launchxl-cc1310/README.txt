@@ -14,9 +14,10 @@ Contents
 Status
 ======
 
-  2019-12-03:  Fragmentary board support in place.  The initial intent
-    of this board support is simply to assist in the CC13xx architecture
-    development.  Serious board development will occur later.
+  2019-01-21:  Fragmentary board support in place.  The initial intent
+    of this board support is simply to assist in the CC13x0 architecture
+    development.  Serious board development will occur later. At present,
+    the CC13x0 does not even compile error-free.
 
 Serial Console
 ==============
