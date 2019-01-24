@@ -190,7 +190,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
  *   sigqueue() except that it does not modify the errno value.
  *
  * Input Parameters:
- *   pid - Process ID of task to receive signal
+ *   pid   - Process ID of task to receive signal
  *   signo - Signal number
  *   value - Value to pass to task with signal
  *

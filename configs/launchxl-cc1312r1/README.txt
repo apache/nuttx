@@ -10,6 +10,7 @@ Contents
   o Serial Console
   o LEDs and Buttons
   o Version 1 or 2?
+  o Running from SRAM
 
 Status
 ======
@@ -48,4 +49,16 @@ Version 1 or 2?
   firmware will assert if you select the wrong version.  If that occurs,
   switch to the other version and the assertion should go away.
 
+Running from SRAM
+=================
 
+  The LaunchXL-CC1312R1 port supports execution from RAM.  Execution from
+  SRAM as a "safe" way to bring up a new board port without concern about
+  borking the board because of a bad FLASH image.
+
+  if CONFIG_BOOT_RUNFROMFLASH=y is set in the configuration, then the code
+  will build to run from FLASH.  Otherwise (presumably CONFIG_BOOT_RUNFROMSRAM=y)
+  the code will build to run from SRAM.  This is determined by the Make.defs
+  file in the scripts/ sub-directory.  Based on those configuration
+  settings, either scripts/flash.ld or sram.ld will be selected as the
+  linker script file to be used.

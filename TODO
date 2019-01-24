@@ -2196,7 +2196,7 @@ o File system / Generic drivers (fs/, drivers/)
                available on the FLASH.  That would be rare with a cache
                size of a few hundred bytes and very large serial FLASH.
 
-               This issue does cause the test at apps/examples/fstest to
+               This issue does cause the test at apps/testing/fstest to
                fail.  That test fails with a "Partial Read" because the
                file being read is smaller than number bytes written to the
                file.  That test does write small files continuously until

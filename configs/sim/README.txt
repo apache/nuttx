@@ -785,7 +785,7 @@ nx11
 
 nxffs
 
-  This is a test of the NXFFS file system using the apps/examples/nxffs
+  This is a test of the NXFFS file system using the apps/testing/nxffs
   test with an MTD RAM driver to simulate the FLASH part.
 
 nxlines
@@ -894,7 +894,7 @@ sixlowpan
 
 spiffs
 
-  This is a test of the SPIFFS file system using the apps/examples/fstest
+  This is a test of the SPIFFS file system using the apps/testing/fstest
   test with an MTD RAM driver to simulate the FLASH part.
 
 touchscreen
