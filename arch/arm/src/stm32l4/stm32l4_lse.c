@@ -46,6 +46,24 @@
 #include "stm32l4_waste.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY
+# if CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+     CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#  error "Invalid LSE drive capability setting"
+#endif
+#endif
+
+#ifdef CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+# if CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+     CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#  error "Invalid LSE drive capability setting"
+#endif
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -55,9 +73,6 @@
  * Description:
  *   Enable the External Low-Speed (LSE) oscillator.
  *
- * Todo:
- *   Check for LSE good timeout and return with -1,
- *
  ****************************************************************************/
 
 void stm32l4_rcc_enablelse(void)
@@ -65,29 +80,61 @@ void stm32l4_rcc_enablelse(void)
   bool writable;
   uint32_t regval;
 
-  /* The LSE is in the RTC domain and write access is denied to this domain
-   * after reset, you have to enable write access using DBP bit in the PWR CR
-   * register before to configuring the LSE.
-   */
+  /* Check if the External Low-Speed (LSE) oscillator is already running. */
 
-  writable = stm32l4_pwr_enablebkp(true);
+  regval = getreg32(STM32L4_RCC_BDCR);
 
-  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
-   * the RCC BDCR register.
-   */
-
-  regval  = getreg32(STM32L4_RCC_BDCR);
-  regval |= RCC_BDCR_LSEON;
-  putreg32(regval,STM32L4_RCC_BDCR);
-
-  /* Wait for the LSE clock to be ready */
-
-  while (((regval = getreg32(STM32L4_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
+  if ((regval & (RCC_BDCR_LSEON | RCC_BDCR_LSERDY)) !=
+                (RCC_BDCR_LSEON | RCC_BDCR_LSERDY))
     {
-      up_waste();
-    }
+      /* The LSE is in the RTC domain and write access is denied to this domain
+       * after reset, you have to enable write access using DBP bit in the PWR CR
+       * register before to configuring the LSE.
+       */
 
-  /* Disable backup domain access if it was disabled on entry */
+      writable = stm32l4_pwr_enablebkp(true);
 
-  (void)stm32l4_pwr_enablebkp(writable);
+      /* Enable the External Low-Speed (LSE) oscillator by setting the
+       * LSEON bit the RCC BDCR register.
+       */
+
+      regval |= RCC_BDCR_LSEON;
+
+#ifdef CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY
+      /* Set start-up drive capability for LSE oscillator. */
+
+      regval &= ~RCC_BDCR_LSEDRV_MASK;
+      regval |= CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+                RCC_BDCR_LSEDRV_SHIFT;
+#endif
+
+      putreg32(regval, STM32L4_RCC_BDCR);
+
+      /* Wait for the LSE clock to be ready */
+
+      while (((regval = getreg32(STM32L4_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
+        {
+          up_waste();
+        }
+
+#if defined(CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
+    CONFIG_STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY != \
+    CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+
+#  if CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
+#    error "STM32L4 only allows lowering LSE drive capability to zero"
+#  endif
+
+      /* Set running drive capability for LSE oscillator. */
+
+      regval &= ~RCC_BDCR_LSEDRV_MASK;
+      regval |= CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
+                RCC_BDCR_LSEDRV_SHIFT;
+      putreg32(regval, STM32L4_RCC_BDCR);
+#endif
+
+    /* Disable backup domain access if it was disabled on entry */
+
+    (void)stm32l4_pwr_enablebkp(writable);
+  }
 }

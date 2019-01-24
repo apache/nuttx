@@ -733,10 +733,10 @@
 
 #define RCC_BDCR_LSEDRV_SHIFT       (3)       /* Bits 3-4: LSE oscillator drive capability */
 #define RCC_BDCR_LSEDRV_MASK        (3 << RCC_BDCR_LSEDRV_SHIFT)
-#  define RCC_BDCR_LSEDRV_LOWER     (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Lower driving capability */
-#  define RCC_BDCR_LSEDRV_MIDLOW    (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium Low driving capability */
-#  define RCC_BDCR_LSEDRV_MIDHI     (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium High driving capability*/
-#  define RCC_BDCR_LSEDRV_HIGER     (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: Higher driving capability */
+#  define RCC_BDCR_LSEDRV_LOW       (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Lower driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO     (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium Low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI     (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium High driving capability*/
+#  define RCC_BDCR_LSEDRV_HIGH      (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: Higher driving capability */
 
 #define RCC_BDCR_LSECSSON           (1 << 5) /* Bit 5: CSS on LSE enable */
 #define RCC_BDCR_LSECSSD            (1 << 6) /* Bit 6: CSS on LSE failure Detection */

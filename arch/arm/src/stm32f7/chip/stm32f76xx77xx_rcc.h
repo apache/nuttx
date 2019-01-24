@@ -557,10 +557,10 @@
 #define RCC_BDCR_LSEBYP              (1 << 2)  /* Bit 2: External Low Speed oscillator Bypass */
 #define RCC_BDCR_LSEDRV_SHIFT        (3)       /* Bits 4:3: LSE oscillator Drive selection */
 #define RCC_BDCR_LSEDRV_MASK         (3 << RCC_BDCR_LSEDRV_SHIFT)
-#  define RCC_BDCR_LSEDRV_LOW        (0 << RCC_BDCR_LSEDRV_SHIFT) /* Low driving capability */
-#  define RCC_BDCR_LSEDRV_MEDHI      (1 << RCC_BDCR_LSEDRV_SHIFT) /* Medium high driving capability */
-#  define RCC_BDCR_LSEDRV_MEDLO      (2 << RCC_BDCR_LSEDRV_SHIFT) /* Medium low driving capability */
-#  define RCC_BDCR_LSEDRV_HIGH       (3 << RCC_BDCR_LSEDRV_SHIFT) /* High driving capability */
+#  define RCC_BDCR_LSEDRV_LOW        (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI      (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO      (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability */
+#  define RCC_BDCR_LSEDRV_HIGH       (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: High driving capability */
 #define RCC_BDCR_RTCSEL_SHIFT        (8)       /* Bits 9:8: RTC clock source selection */
 #define RCC_BDCR_RTCSEL_MASK         (3 << RCC_BDCR_RTCSEL_SHIFT)
 #  define RCC_BDCR_RTCSEL_NOCLK      (0 << RCC_BDCR_RTCSEL_SHIFT) /* 00: No clock */

@@ -1580,6 +1580,23 @@ config STM32L4_WWDG
 
 endmenu
 
+config STM32L4_SAI1PLL
+	bool "SAI1PLL"
+	default n
+	---help---
+		The STM32L4 has a separate PLL for the SAI1 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32L4_SAI2PLL
+	bool "SAI2PLL"
+	default n
+	depends on STM32L4_HAVE_SAI2
+	---help---
+		The STM32L4 has a separate PLL for the SAI2 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
 config STM32L4_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y
@@ -1605,6 +1622,9 @@ config STM32L4_HAVE_RTC_SUBSECONDS
 	bool
 	select ARCH_HAVE_RTC_SUBSECONDS
 	default y
+
+menu "RTC Configuration"
+	depends on STM32L4_RTC
 
 config STM32L4_RTC_MAGIC_REG
 	int "BKP register"
@@ -1649,22 +1669,31 @@ config STM32L4_RTC_HSECLOCK
 
 endchoice
 
-config STM32L4_SAI1PLL
-	bool "SAI1PLL"
-	default n
-	---help---
-		The STM32L476 has a separate PLL for the SAI1 block.
-		Set this true and provide configuration parameters in
-		board.h to use this PLL.
+if STM32L4_RTC_LSECLOCK
 
-config STM32L4_SAI2PLL
-	bool "SAI2PLL"
-	default n
-	depends on STM32L4_HAVE_SAI2
+config STM32L4_RTC_LSECLOCK_START_DRV_CAPABILITY
+	int "LSE oscillator drive capability level at LSE start-up"
+	default 0
+	range 0 3
 	---help---
-		The STM32L476 has a separate PLL for the SAI2 block.
-		Set this true and provide configuration parameters in
-		board.h to use this PLL.
+		0 = Low drive capability (default)
+		1 = Medium low drive capability
+		2 = Medium high drive capability
+		3 = High drive capability
+
+config STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+	int "LSE oscillator drive capability level after LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium low drive capability
+		2 = Medium high drive capability
+		3 = High drive capability
+
+endif # STM32L4_RTC_LSECLOCK
+
+endmenu # RTC Configuration
 
 menu "Timer Configuration"
 
