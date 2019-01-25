@@ -279,7 +279,7 @@ void __start(void)
   showprogress('E');
 #endif
 
-#ifdef CONFIG_TIVA_CC26X2_POWERLIB /* REVISIT */
+#ifdef CONFIG_TIVA_CC26X2_POWERLIB /* REVISIT:  Used with CC13x2 as well. */
   /* Initialize the Power Manager internal state.  This must be called prior
    * to any other Power API.
    */

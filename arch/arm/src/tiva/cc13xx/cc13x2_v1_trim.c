@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13x2_v1_trim.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -10,37 +10,38 @@
  *    Copyright (c) 2015-2017, Texas Instruments Incorporated
  *    All rights reserved.
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *  1) Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
+ * 1) Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
  *
- *  2) Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ * 2) Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- *  3) Neither the name NuttX nor the names of its contributors may be used to
- *     endorse or promote products derived from this software without specific
- *     prior written permission.
+ * 3) Neither the name NuttX nor the names of its contributors may be used
+ *    to endorse or promote products derived from this software without
+ *    specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,22 +61,11 @@
 #include "cc13xx/cc13x2_cc26x2_v1_rom.h"
 #include "cc13xx/cc13x2_aux_sysif.h"
 
-/******************************************************************************
- * Pre-processor Definitions
- ******************************************************************************/
-
-/* Handle support for DriverLib in ROM:
- * This section will undo prototype renaming made in the header file
- */
-
-#undef  cc13x2_cc26x2_trim_device
-#define cc13x2_cc26x2_trim_device  NOROM_cc13x2_cc26x2_trim_device
-
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_wakeup_frompowerdown
  *
  * Description:
@@ -85,14 +75,14 @@
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_wakeup_frompowerdown(void)
 {
   /* Currently no specific trim for Powerdown */
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: Step_RCOSCHF_CTRIM
  *
  * Description:
@@ -101,19 +91,19 @@ static void trim_wakeup_frompowerdown(void)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-static void Step_RCOSCHF_CTRIM(uint32_t toCode)
+static void Step_RCOSCHF_CTRIM(uint32_t tocode)
 {
   uint32_t current_rcoschfctrl;
   uint32_t current_trim;
 
   current_rcoschfctrl = getreg16(TIVA_DDI0_OSC_RCOSCMFCTL);
-  current_trim =
-    (((current_rcoschfctrl & DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) >>
-      DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT) ^ 0xc0);
+  current_trim = (((current_rcoschfctrl &
+                    DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_MASK) >>
+                   DDI0_OSC_RCOSCHFCTL_RCOSCHF_CTRIM_SHIFT) ^ 0xc0);
 
-  while (toCode != current_trim)
+  while (tocode != current_trim)
     {
       uint16_t regval16;
 
@@ -121,7 +111,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
 
       (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
-      if (toCode > current_trim)
+      if (tocode > current_trim)
         {
           current_trim++;
         }
@@ -138,7 +128,7 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
     }
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: step_vbg
  *
  * Description:
@@ -147,13 +137,13 @@ static void Step_RCOSCHF_CTRIM(uint32_t toCode)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void step_vbg(int32_t target_signed)
 {
-  /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
-
   int32_t current_signed;
+
+  /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG) */
 
   do
     {
@@ -199,7 +189,7 @@ static void step_vbg(int32_t target_signed)
   while (target_signed != current_signed);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_wakeup_fromshutdown
  *
  * Description:
@@ -212,12 +202,20 @@ static void step_vbg(int32_t target_signed)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 {
   uint32_t ccfg_modeconf;
   uint32_t regval;
+  uint32_t fusedata;
+  uint32_t org_resetctl;
+  uint32_t trimreg;
+  uint32_t trimvalue;
+  uint16_t regval16;
+  uint8_t regval8;
+  int lshift;
+  int rshift;
 
   /* Check in CCFG for alternative DCDC setting */
 
@@ -233,7 +231,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
       regval = getreg32(TIVA_CCFG_MODE_CONF_1);
       regval = (0xf0 | (regval >> CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT));
       putreg8((uint8_t)regval,
-              TIVA_ADI3_REFSYS_MASK4B + (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
+              TIVA_ADI3_REFSYS_MASK4B +
+              (TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET * 2));
     }
 
   /* TBD - Temporarily removed for CC13x2 / CC26x2 */
@@ -247,7 +246,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   regval = DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL |
            (DDI0_OSC_CTL0_CLK_DCDC_SRC_SEL >> 16);
-  putreg32(regval, TIVA_DDI0_OSC_MASK16B + (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
+  putreg32(regval, TIVA_DDI0_OSC_MASK16B +
+                   (TIVA_DDI0_OSC_CTL0_OFFSET << 1) + 4);
 
   /* Dummy read to ensure that the write has propagated */
 
@@ -257,8 +257,8 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   ccfg_modeconf = getreg32(TIVA_CCFG_MODE_CONF);
 
-  /* First part of trim done after cold reset and wakeup from shutdown: -Adjust
-   * the VDDR_TRIM_SLEEP value. -Configure DCDC.
+  /* First part of trim done after cold reset and wakeup from shutdown:
+   * Adjust the VDDR_TRIM_SLEEP value. Configure DCDC.
    */
 
   rom_setup_coldreset_from_shutdown_cfg1(ccfg_modeconf);
@@ -271,187 +271,175 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
 
   /* Special shadow register trim propagation on first batch of devices */
 
-  {
-    uint32_t fusedata;
-    uint32_t org_resetctl;
-    uint16_t regval16;
-    uint8_t regval8;
-    int lshift;
-    int rshift;
+  /* Get VTRIM_COARSE and VTRIM_DIG from EFUSE shadow register
+   * OSC_BIAS_LDO_TRIM
+   */
 
-    /* Get VTRIM_COARSE and VTRIM_DIG from EFUSE shadow register
-     * OSC_BIAS_LDO_TRIM
-     */
+  fusedata = getreg32(TIVA_FCFG1_SHDW_OSC_BIAS_LDO_TRIM);
 
-    fusedata = getreg32(TIVA_FCFG1_SHDW_OSC_BIAS_LDO_TRIM);
+  Step_RCOSCHF_CTRIM((fusedata &
+                      FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_MASK) >>
+                     FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_SHIFT);
 
-    Step_RCOSCHF_CTRIM((fusedata &
-                        FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_MASK) >>
-                       FCFG1_SHDW_OSC_BIAS_LDO_TRIM_RCOSCHF_CTRIM_SHIFT);
+  /* Write to register SOCLDO_0_1 (addr offset 3) bits[7:4] (VTRIM_COARSE)
+   * and bits[3:0] (VTRIM_DIG) in ADI2_REFSYS. Direct write can be used
+   * since all register bit fields are trimmed.
+   */
 
-    /* Write to register SOCLDO_0_1 (addr offset 3) bits[7:4] (VTRIM_COARSE)
-     * and bits[3:0] (VTRIM_DIG) in ADI2_REFSYS. Direct write can be used
-     * since all register bit fields are trimmed.
-     */
+  regval8 = ((((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_MASK) >>
+               FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_SHIFT) <<
+              ADI2_REFSYS_SOCLDOCTL1_VTRIM_COARSE_SHIFT) |
+             (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_MASK) >>
+               FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_SHIFT) <<
+              ADI2_REFSYS_SOCLDOCTL1_VTRIM_DIG_SHIFT));
+  putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_SOCLDOCTL1_OFFSET);
 
-    regval8 = ((((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_MASK) >>
-                 FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_COARSE_SHIFT) <<
-                ADI2_REFSYS_SOCLDOCTL1_VTRIM_COARSE_SHIFT) |
-               (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_MASK) >>
-                 FCFG1_SHDW_OSC_BIAS_LDO_TRIM_VTRIM_DIG_SHIFT) <<
-                ADI2_REFSYS_SOCLDOCTL1_VTRIM_DIG_SHIFT));
-    putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_SOCLDOCTL1_OFFSET);
+  /* Write to register CTLSOCREFSYS0 (addr offset 0) bits[4:0] (TRIMIREF) in
+   * ADI2_REFSYS. Avoid using masked write access since bit field spans
+   * nibble boundary. Direct write can be used since this is the only defined
+   * bit field in this register.
+   */
 
-    /* Write to register CTLSOCREFSYS0 (addr offset 0) bits[4:0] (TRIMIREF) in
-     * ADI2_REFSYS. Avoid using masked write access since bit field spans
-     * nibble boundary. Direct write can be used since this is the only defined
-     * bit field in this register.
-     */
+  regval8 = (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_MASK) >>
+              FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_SHIFT) <<
+             ADI2_REFSYS_REFSYSCTL0_TRIM_IREF_SHIFT);
+  putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET);
 
-    regval8 = (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_MASK) >>
-                FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMIREF_SHIFT) <<
-               ADI2_REFSYS_REFSYSCTL0_TRIM_IREF_SHIFT);
-    putreg8(regval8, TIVA_ADI2_REFSYS_DIR + TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET);
+  /* Write to register CTLSOCREFSYS2 (addr offset 4) bits[7:4] (TRIMMAG) in
+   * ADI3_REFSYS
+   */
 
-    /* Write to register CTLSOCREFSYS2 (addr offset 4) bits[7:4] (TRIMMAG) in
-     * ADI3_REFSYS
-     */
+  regval16 = (ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_MASK << 8) |
+             (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_MASK) >>
+               FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_SHIFT) <<
+              ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_SHIFT);
+  putreg16(regval16, TIVA_ADI3_REFSYS_MASK8B +
+           (TIVA_ADI3_REFSYS_REFSYSCTL2_OFFSET << 1));
 
-    regval16 = (ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_MASK << 8) |
-               (((fusedata & FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_MASK) >>
-                 FCFG1_SHDW_OSC_BIAS_LDO_TRIM_TRIMMAG_SHIFT) <<
-                ADI3_REFSYS_REFSYSCTL2_TRIM_VREF_SHIFT);
-    putreg16(regval16, TIVA_ADI3_REFSYS_MASK8B +
-             (TIVA_ADI3_REFSYS_REFSYSCTL2_OFFSET << 1));
+  /* Get TRIMBOD_EXTMODE or TRIMBOD_INTMODE from EFUSE shadow register in
+   * FCFG1
+   */
 
-    /* Get TRIMBOD_EXTMODE or TRIMBOD_INTMODE from EFUSE shadow register in
-     * FCFG1
-     */
+  fusedata = getreg32(TIVA_FCFG1_SHDW_ANA_TRIM);
 
-    fusedata = getreg32(TIVA_FCFG1_SHDW_ANA_TRIM);
+  org_resetctl = (getreg32(TIVA_AON_PMCTL_RESETCTL) &
+                  ~AON_PMCTL_RESETCTL_MCU_WARM_RESET);
 
-    org_resetctl =
-      (getreg32(TIVA_AON_PMCTL_RESETCTL) & ~AON_PMCTL_RESETCTL_MCU_WARM_RESET);
+  regval = (org_resetctl & ~(AON_PMCTL_RESETCTL_CLK_LOSS_EN |
+                             AON_PMCTL_RESETCTL_VDD_LOSS_EN |
+                             AON_PMCTL_RESETCTL_VDDR_LOSS_EN |
+                             AON_PMCTL_RESETCTL_VDDS_LOSS_EN));
+  putreg32(regval, TIVA_AON_PMCTL_RESETCTL);
 
-    regval = (org_resetctl &
-              ~(AON_PMCTL_RESETCTL_CLK_LOSS_EN | AON_PMCTL_RESETCTL_VDD_LOSS_EN |
-                AON_PMCTL_RESETCTL_VDDR_LOSS_EN | AON_PMCTL_RESETCTL_VDDS_LOSS_EN));
-    putreg32(regval, TIVA_AON_PMCTL_RESETCTL);
+  /* Wait for xxx_LOSS_EN setting to propagate */
 
-    /* Wait for xxx_LOSS_EN setting to propagate */
+  (void)getreg32(TIVA_AON_RTC_SYNC);
 
-    (void)getreg32(TIVA_AON_RTC_SYNC);
+  /* The VDDS_BOD trim and the VDDR trim is already stepped up to max/HH if
+   * "CC1352 boost mode" is requested. See function
+   * rom_setup_coldreset_from_shutdown_cfg1() in setup_rom.c for details.
+   */
 
-    /* The VDDS_BOD trim and the VDDR trim is already stepped up to max/HH if
-     * "CC1352 boost mode" is requested. See function
-     * rom_setup_coldreset_from_shutdown_cfg1() in setup_rom.c for details.
-     */
+  if (((ccfg_modeconf & CCFG_MODE_CONF_VDDR_EXT_LOAD) != 0) ||
+      ((ccfg_modeconf & CCFG_MODE_CONF_VDDS_BOD_LEVEL) == 0))
+    {
+      if (getreg32(TIVA_AON_PMCTL_PWRCTL) &
+          AON_PMCTL_PWRCTL_EXT_REG_MODE)
+        {
+          /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
+           * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
+           */
 
-    if (((ccfg_modeconf & CCFG_MODE_CONF_VDDR_EXT_LOAD) != 0) ||
-        ((ccfg_modeconf & CCFG_MODE_CONF_VDDS_BOD_LEVEL) == 0))
-      {
-        if (getreg32(TIVA_AON_PMCTL_PWRCTL) &
-            AON_PMCTL_PWRCTL_EXT_REG_MODE)
-          {
-            /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
-             * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
-             */
+          regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
+                      (((fusedata &
+                         FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_MASK) >>
+                        FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_SHIFT) <<
+                       ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
+          putreg16(regval16,
+                   TIVA_ADI3_REFSYS_MASK8B +
+                   (TIVA_ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
+        }
+      else
+        {
+          /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
+           * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
+           */
 
-            regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
-                        (((fusedata & FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_MASK) >>
-                          FCFG1_SHDW_ANA_TRIM_TRIMBOD_EXTMODE_SHIFT) <<
-                         ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
-            putreg16(regval16,
-                     TIVA_ADI3_REFSYS_MASK8B +
-                     (TIVA_ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
-          }
-        else
-          {
-            /* Apply VDDS BOD trim value Write to register CTLSOCREFSYS1 (addr
-             * offset 3) bit[7:3] (TRIMBOD) in ADI3_REFSYS
-             */
+          regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
+                      (((fusedata &
+                         FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_MASK) >>
+                        FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_SHIFT) <<
+                       ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
+          putreg16(regval16,
+                   TIVA_ADI3_REFSYS_MASK8B +
+                   (TIVA_ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
+        }
 
-            regval16 = (ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_MASK << 8) |
-                        (((fusedata & FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_MASK) >>
-                          FCFG1_SHDW_ANA_TRIM_TRIMBOD_INTMODE_SHIFT) <<
-                         ADI3_REFSYS_REFSYSCTL1_TRIM_VDDS_BOD_SHIFT);
-            putreg16(regval16,
-                     TIVA_ADI3_REFSYS_MASK8B +
-                     (TIVA_ADI3_REFSYS_REFSYSCTL1_OFFSET << 1));
-          }
+      /* Load the new VDDS_BOD setting */
 
-        /* Load the new VDDS_BOD setting */
+      regval8  = getreg8(TIVA_ADI3_REFSYS_REFSYSCTL3);
+      regval8 &= ~ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+      putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-        regval8  = getreg8(TIVA_ADI3_REFSYS_REFSYSCTL3);
-        regval8 &= ~ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
-        putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
+      regval8 |= ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
+      putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
 
-        regval8 |= ADI3_REFSYS_REFSYSCTL3_BOD_BG_TRIM_EN;
-        putreg8(regval8, TIVA_ADI3_REFSYS_REFSYSCTL3);
+      rom_setup_stepvaddrtrimto((fusedata &
+                                 FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_MASK) >>
+                                FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_SHIFT);
+    }
 
-        rom_setup_stepvaddrtrimto((fusedata &
-                             FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_MASK) >>
-                            FCFG1_SHDW_ANA_TRIM_VDDR_TRIM_SHIFT);
-      }
+  /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG)
+   * Provide isolated and sign extended SHDW_ANA_TRIM_TRIMTEMP
+   */
 
-    /* VBG (ANA_TRIM[5:0]=TRIMTEMP --> ADI3_REFSYS:REFSYSCTL3.TRIM_VBG)
-     * Provide isolated and sign extended SHDW_ANA_TRIM_TRIMTEMP
-     */
+  lshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH -
+            FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT);
+  rshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH);
+  step_vbg(((int32_t)fusedata << lshift) >> rshift);
 
-    lshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH -
-              FCFG1_SHDW_ANA_TRIM_TRIMTEMP_SHIFT);
-    rshift = (32 - FCFG1_SHDW_ANA_TRIM_TRIMTEMP_WIDTH);
-    step_vbg(((int32_t)fusedata << lshift) >> rshift);
+  /* Wait two more LF edges before restoring xxx_LOSS_EN settings:
+   * Wait for first edge on SCLK_LF (positive or negative)
+   */
 
-    /* Wait two more LF edges before restoring xxx_LOSS_EN settings */
+  (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
-    /* Wait for next edge on SCLK_LF (positive or negative) */
+  /* Wait for second edge on SCLK_LF (positive or negative) */
 
-    (void)getreg32(TIVA_AON_RTC_SYNCLF);
+  (void)getreg32(TIVA_AON_RTC_SYNCLF);
 
-    /* Wait for next edge on SCLK_LF (positive or negative) */
+  putreg32(org_resetctl, TIVA_AON_PMCTL_RESETCTL) ;
 
-    (void)getreg32(TIVA_AON_RTC_SYNCLF);
+  /* Wait for xxx_LOSS_EN setting to propagate */
 
-    putreg32(org_resetctl, TIVA_AON_PMCTL_RESETCTL) ;
+  (void)getreg32(TIVA_AON_RTC_SYNC);
 
-    /* Wait for xxx_LOSS_EN setting to propagate */
+  /* Propagate the LPM_BIAS trim */
 
-    (void)getreg32(TIVA_AON_RTC_SYNC);
-  }
+  trimreg   = getreg32(TIVA_FCFG1_DAC_BIAS_CNF);
+  trimvalue = ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_MASK) >>
+               FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_SHIFT);
 
-  {
-    uint32_t trimreg;
-    uint32_t trimvalue;
-    uint16_t regval16;
-    uint8_t regval8;
+  regval8 = ((trimvalue << ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_SHIFT) &
+             ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_MASK);
+  putreg8(regval8, TIVA_ADI4_AUX_LPMBIAS);
 
-    /* Propagate the LPM_BIAS trim */
+  /* Set fixed LPM_BIAS values --- LPM_BIAS_BACKUP_EN = 1 and
+   * LPM_BIAS_WIDTH_TRIM = 3
+   */
 
-    trimreg = getreg32(TIVA_FCFG1_DAC_BIAS_CNF);
-    trimvalue = ((trimreg & FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_MASK) >>
-                     FCFG1_DAC_BIAS_CNF_LPM_TRIM_IOUT_SHIFT);
+  putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
+         TIVA_ADI3_REFSYS_SET + TIVA_ADI3_REFSYS_AUX_DEBUG_OFFSET);
 
-    regval8 = ((trimvalue << ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_SHIFT) &
-               ADI4_AUX_LPMBIAS_LPM_TRIM_IOUT_MASK);
-    putreg8(regval8, TIVA_ADI4_AUX_LPMBIAS);
+  /* Set LPM_BIAS_WIDTH_TRIM = 3
+   * Set mask (bits to be written) in [15:8]
+   * Set value (in correct bit pos) in [7:0]
+   */
 
-    /* Set fixed LPM_BIAS values --- LPM_BIAS_BACKUP_EN = 1 and
-     * LPM_BIAS_WIDTH_TRIM = 3
-     */
-
-    putreg8(ADI3_REFSYS_AUX_DEBUG_LPM_BIAS_BACKUP_EN,
-           TIVA_ADI3_REFSYS_SET + TIVA_ADI3_REFSYS_AUX_DEBUG_OFFSET);
-
-    /* Set LPM_BIAS_WIDTH_TRIM = 3
-     * Set mask (bits to be written) in [15:8]
-     * Set value (in correct bit pos) in [7:0]
-     */
-
-    regval16 = ((ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK << 8) |
-                (3 << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT));
-    putreg16(regval16, TIVA_ADI4_AUX_MASK8B + (TIVA_ADI4_AUX_COMP_OFFSET * 2));
-  }
+  regval16 = ((ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_MASK << 8) |
+              (3 << ADI4_AUX_COMP_LPM_BIAS_WIDTH_TRIM_SHIFT));
+  putreg16(regval16, TIVA_ADI4_AUX_MASK8B +
+                     (TIVA_ADI4_AUX_COMP_OFFSET * 2));
 
   /* Third part of trim done after cold reset and wakeup from shutdown:
    * -Configure HPOSC. -Setup the LF clock.
@@ -470,7 +458,7 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
   putreg32(regval, TIVA_FLASH_CFG);
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: trim_coldreset
  *
  * Description:
@@ -479,18 +467,18 @@ static void trim_wakeup_fromshutdown(uint32_t fcfg1_revision)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static void trim_coldreset(void)
 {
   /* Currently no specific trim for Cold Reset */
 }
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: cc13xx_trim_device
  *
  * Descriptions:
@@ -500,7 +488,7 @@ static void trim_coldreset(void)
  *   implementation does not take soft reset into account. However, it does no
  *   damage to execute it again. It only consumes time.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_trim_device(void)
 {
@@ -545,8 +533,7 @@ void cc13xx_trim_device(void)
   if ((getreg32(TIVA_AON_IOC_IOCLATCH) & AON_IOC_IOCLATCH_EN) == 0)
     {
       /* NB. This should be calling a ROM implementation of required trim and
-       * compensation e.g.
-       * trim_wakeup_frompowerdown()
+       * compensation e.g. trim_wakeup_frompowerdown()
        */
 
       trim_wakeup_frompowerdown();
@@ -559,8 +546,8 @@ void cc13xx_trim_device(void)
    * re-established.
    */
 
-  else if ((getreg32(TIVA_AON_PMCTL_SLEEPCTL) & AON_PMCTL_SLEEPCTL_IO_PAD_SLEEP_DIS)
-           == 0)
+  else if ((getreg32(TIVA_AON_PMCTL_SLEEPCTL) &
+            AON_PMCTL_SLEEPCTL_IO_PAD_SLEEP_DIS) == 0)
     {
       /* NB. This should be calling a ROM implementation of required trim and
        * compensation e.g. trim_wakeup_fromshutdown() -->
@@ -572,8 +559,8 @@ void cc13xx_trim_device(void)
     }
   else
     {
-      /* Consider adding a check for soft reset to allow debugging to skip this
-       * section!!! NB. This should be calling a ROM implementation of
+      /* Consider adding a check for soft reset to allow debugging to skip
+       * this section!!! NB. This should be calling a ROM implementation of
        * required trim and compensation e.g. trim_coldreset() -->
        * trim_wakeup_fromshutdown() -->
        * trim_wakeup_frompowerdown()
