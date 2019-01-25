@@ -94,7 +94,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if TIVA_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int tiva_ethinitialize(int intf);
 #endif
 

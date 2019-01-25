@@ -2182,7 +2182,7 @@ int kinetis_netinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_KINETIS_ENETNETHIFS == 1
+#if CONFIG_KINETIS_ENETNETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)kinetis_netinitialize(0);

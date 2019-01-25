@@ -4020,10 +4020,9 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if TIVA_NETHCONTROLLERS == 1
+#if TIVA_NETHCONTROLLERS == 1 || defined(CONFIG_NETDEV_LATEINIT)
 static inline
 #endif
-
 int tiva_ethinitialize(int intf)
 {
   struct tiva_ethmac_s *priv;
@@ -4161,7 +4160,7 @@ int tiva_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if TIVA_NETHCONTROLLERS == 1
+#if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)tiva_ethinitialize(0);

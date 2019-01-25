@@ -1656,7 +1656,7 @@ static int tiva_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *
  ****************************************************************************/
 
-#if TIVA_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int tiva_ethinitialize(int intf)
 #else
 static inline int tiva_ethinitialize(int intf)
@@ -1748,7 +1748,7 @@ static inline int tiva_ethinitialize(int intf)
  *
  ************************************************************************************/
 
-#if TIVA_NETHCONTROLLERS == 1
+#if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)tiva_ethinitialize(0);

@@ -3878,9 +3878,11 @@ static inline int lpc43_ethinitialize(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDEV_LATEINIT
 void up_netinitialize(void)
 {
   (void)lpc43_ethinitialize();
 }
+#endif
 
 #endif /* CONFIG_NET && CONFIG_LPC43_ETHERNET */

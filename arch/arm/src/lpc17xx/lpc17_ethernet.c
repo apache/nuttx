@@ -2983,7 +2983,7 @@ static void lpc17_ethreset(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-#if CONFIG_LPC17_NINTERFACES > 1
+#if CONFIG_LPC17_NINTERFACES > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int lpc17_ethinitialize(int intf)
 #else
 static inline int lpc17_ethinitialize(int intf)
@@ -3079,7 +3079,7 @@ static inline int lpc17_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_LPC17_NINTERFACES == 1
+#if CONFIG_LPC17_NINTERFACES == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)lpc17_ethinitialize(0);

@@ -2580,7 +2580,7 @@ int imxrt_netinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_IMXRT_ENET_NETHIFS == 1
+#if CONFIG_IMXRT_ENET_NETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)imxrt_netinitialize(0);

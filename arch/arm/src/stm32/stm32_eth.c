@@ -4022,10 +4022,9 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if STM32_NETHERNET == 1
+#if STM32_NETHERNET == 1 || defined(CONFIG_NETDEV_LATEINIT)
 static inline
 #endif
-
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
@@ -4106,7 +4105,7 @@ int stm32_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if STM32_NETHERNET == 1
+#if STM32_NETHERNET == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)stm32_ethinitialize(0);

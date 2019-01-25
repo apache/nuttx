@@ -47,6 +47,9 @@
  * Name: up_netinitialize
  ************************************************************************************/
 
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
 }
+#endif
+

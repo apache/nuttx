@@ -3320,7 +3320,7 @@ static void pic32mx_ethreset(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-#if CONFIG_PIC32MX_NINTERFACES > 1
+#if CONFIG_PIC32MX_NINTERFACES > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int pic32mx_ethinitialize(int intf)
 #else
 static inline int pic32mx_ethinitialize(int intf)
@@ -3394,7 +3394,7 @@ static inline int pic32mx_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if CONFIG_PIC32MX_NINTERFACES == 1
+#if CONFIG_PIC32MX_NINTERFACES == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void up_netinitialize(void)
 {
   (void)pic32mx_ethinitialize(0);
