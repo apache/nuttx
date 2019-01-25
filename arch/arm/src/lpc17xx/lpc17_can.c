@@ -203,16 +203,16 @@ static void can_putcommon(uint32_t addr, uint32_t value);
 
 /* CAN methods */
 
-static void can_reset(FAR struct can_dev_s *dev);
-static int  can_setup(FAR struct can_dev_s *dev);
-static void can_shutdown(FAR struct can_dev_s *dev);
-static void can_rxint(FAR struct can_dev_s *dev, bool enable);
-static void can_txint(FAR struct can_dev_s *dev, bool enable);
-static int  can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
-static int  can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
-static bool can_txready(FAR struct can_dev_s *dev);
-static bool can_txempty(FAR struct can_dev_s *dev);
+static void lpc17can_reset(FAR struct can_dev_s *dev);
+static int  lpc17can_setup(FAR struct can_dev_s *dev);
+static void lpc17can_shutdown(FAR struct can_dev_s *dev);
+static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable);
+static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable);
+static int  lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
+static int  lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
+static int  lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
+static bool lpc17can_txready(FAR struct can_dev_s *dev);
+static bool lpc17can_txempty(FAR struct can_dev_s *dev);
 
 /* CAN interrupts */
 
@@ -229,16 +229,16 @@ static int can_bittiming(struct up_dev_s *priv);
 
 static const struct can_ops_s g_canops =
 {
-  .co_reset         = can_reset,
-  .co_setup         = can_setup,
-  .co_shutdown      = can_shutdown,
-  .co_rxint         = can_rxint,
-  .co_txint         = can_txint,
-  .co_ioctl         = can_ioctl,
-  .co_remoterequest = can_remoterequest,
-  .co_send          = can_send,
-  .co_txready       = can_txready,
-  .co_txempty       = can_txempty,
+  .co_reset         = lpc17can_reset,
+  .co_setup         = lpc17can_setup,
+  .co_shutdown      = lpc17can_shutdown,
+  .co_rxint         = lpc17can_rxint,
+  .co_txint         = lpc17can_txint,
+  .co_ioctl         = lpc17can_ioctl,
+  .co_remoterequest = lpc17can_remoterequest,
+  .co_send          = lpc17can_send,
+  .co_txready       = lpc17can_txready,
+  .co_txempty       = lpc17can_txempty,
 };
 
 #ifdef CONFIG_LPC17_CAN1
@@ -467,11 +467,11 @@ static void can_putcommon(uint32_t addr, uint32_t value)
 #endif
 
 /****************************************************************************
- * Name: can_reset
+ * Name: lpc17can_reset
  *
  * Description:
  *   Reset the CAN device.  Called early to initialize the hardware. This
- *   function is called, before can_setup() and on error conditions.
+ *   function is called, before lpc17can_setup() and on error conditions.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -481,7 +481,7 @@ static void can_putcommon(uint32_t addr, uint32_t value)
  *
  ****************************************************************************/
 
-static void can_reset(FAR struct can_dev_s *dev)
+static void lpc17can_reset(FAR struct can_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   irqstate_t flags;
@@ -518,7 +518,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_setup
+ * Name: lpc17can_setup
  *
  * Description:
  *   Configure the CAN. This method is called the first time that the CAN
@@ -534,7 +534,7 @@ static void can_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can_setup(FAR struct can_dev_s *dev)
+static int lpc17can_setup(FAR struct can_dev_s *dev)
 {
 #ifdef CONFIG_DEBUG_CAN_INFO
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
@@ -553,7 +553,7 @@ static int can_setup(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_shutdown
+ * Name: lpc17can_shutdown
  *
  * Description:
  *   Disable the CAN.  This method is called when the CAN device is closed.
@@ -567,7 +567,7 @@ static int can_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_shutdown(FAR struct can_dev_s *dev)
+static void lpc17can_shutdown(FAR struct can_dev_s *dev)
 {
 #ifdef CONFIG_DEBUG_CAN_INFO
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
@@ -580,7 +580,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_rxint
+ * Name: lpc17can_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts.
@@ -593,7 +593,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_rxint(FAR struct can_dev_s *dev, bool enable)
+static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
@@ -621,7 +621,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: can_txint
+ * Name: lpc17can_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts.
@@ -634,7 +634,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void can_txint(FAR struct can_dev_s *dev, bool enable)
+static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
@@ -666,7 +666,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: can_ioctl
+ * Name: lpc17can_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
@@ -679,14 +679,14 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 {
   canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
 }
 
 /****************************************************************************
- * Name: can_remoterequest
+ * Name: lpc17can_remoterequest
  *
  * Description:
  *   Send a remote request
@@ -699,14 +699,14 @@ static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 {
   canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
 }
 
 /****************************************************************************
- * Name: can_send
+ * Name: lpc17can_send
  *
  * Description:
  *    Send one can message.
@@ -728,7 +728,7 @@ static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t tid = (uint32_t)msg->cm_hdr.ch_id;
@@ -871,7 +871,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 }
 
 /****************************************************************************
- * Name: can_txready
+ * Name: lpc17can_txready
  *
  * Description:
  *   Return true if the CAN hardware can accept another TX message.
@@ -884,7 +884,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
  *
  ****************************************************************************/
 
-static bool can_txready(FAR struct can_dev_s *dev)
+static bool lpc17can_txready(FAR struct can_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t regval = can_getreg(priv, LPC17_CAN_SR_OFFSET);
@@ -892,7 +892,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: can_txempty
+ * Name: lpc17can_txempty
  *
  * Description:
  *   Return true if all message have been sent.  If for example, the CAN
@@ -909,7 +909,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool can_txempty(FAR struct can_dev_s *dev)
+static bool lpc17can_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t regval = can_getreg(priv, LPC17_CAN_GSR_OFFSET);
@@ -1241,11 +1241,17 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
        * in low level clock configuration logic).
        */
 
+#ifdef LPC178x
+      regval  = can_getcommon(LPC17_SYSCON_PCLKSEL);
+      regval &= SYSCON_PCLKSEL_PCLKDIV_MASK
+      regval >>= SYSCON_PCLKSEL_PCLKDIV_SHIFT;
+      g_can1pri.divisor = regval;
+#else
       regval  = can_getcommon(LPC17_SYSCON_PCLKSEL0);
       regval &= ~SYSCON_PCLKSEL0_CAN1_MASK;
       regval |= (CAN1_CCLK_DIVISOR << SYSCON_PCLKSEL0_CAN1_SHIFT);
       can_putcommon(LPC17_SYSCON_PCLKSEL0, regval);
-
+#endif
       /* Configure CAN GPIO pins */
 
       lpc17_configgpio(GPIO_CAN1_RD);
@@ -1268,11 +1274,17 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
        * in low level clock configuration logic).
        */
 
+#ifdef LPC178x
+      regval  = can_getcommon(LPC17_SYSCON_PCLKSEL);
+      regval &= SYSCON_PCLKSEL_PCLKDIV_MASK;
+      regval >>= SYSCON_PCLKSEL_PCLKDIV_SHIFT;
+      g_can2priv.divisor = regval;
+#else
       regval  = can_getcommon(LPC17_SYSCON_PCLKSEL0);
       regval &= ~SYSCON_PCLKSEL0_CAN2_MASK;
       regval |= (CAN2_CCLK_DIVISOR << SYSCON_PCLKSEL0_CAN2_SHIFT);
       can_putcommon(LPC17_SYSCON_PCLKSEL0, regval);
-
+#endif
       /* Configure CAN GPIO pins */
 
       lpc17_configgpio(GPIO_CAN2_RD);
@@ -1290,7 +1302,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
 
   /* Then just perform a CAN reset operation */
 
-  can_reset(candev);
+  lpc17can_reset(candev);
   leave_critical_section(flags);
   return candev;
 }

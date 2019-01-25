@@ -201,12 +201,13 @@ config LPC17_UART4
 
 config LPC17_CAN1
 	bool "CAN1"
-	select UART4_SERIALDRIVER
 	default n
+	select CAN
 
 config LPC17_CAN2
 	bool "CAN2"
 	default n
+	select CAN
 
 config LPC17_SPI
 	bool "SPI"
