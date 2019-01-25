@@ -168,6 +168,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
        fd = block_proxy(path, oflags);
        if (fd < 0)
          {
+           ret = fd;
            goto errout_with_search;
          }
 
