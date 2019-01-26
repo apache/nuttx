@@ -173,11 +173,11 @@ static int shm_extend(int shmid, size_t size)
 
   /* This is the number of pages that are needed to satisfy the allocation */
 
-  pgneeded = MM_PGALIGNUP(size);
+  pgneeded = MM_NPAGES(size);
 
   /* This is the number of pages that have already been allocated */
 
-  pgalloc = MM_PGALIGNUP(region->sr_ds.shm_segsz);
+  pgalloc = MM_NPAGES(region->sr_ds.shm_segsz);
 
   /* Loop until all pages have been allocated (or something bad happens) */
 
@@ -192,7 +192,7 @@ static int shm_extend(int shmid, size_t size)
           break;
         }
 
-      /* Increment the number of pages successully allocated */
+      /* Increment the number of pages successfully allocated */
 
       pgalloc++;
     }

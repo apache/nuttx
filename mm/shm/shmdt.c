@@ -132,7 +132,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Convert the region size to pages */
 
-  npages = MM_PGALIGNUP(region->sr_ds.shm_segsz);
+  npages = MM_NPAGES(region->sr_ds.shm_segsz);
 
   /* Detach, i.e, unmap, on shared memory region from a user virtual
    * address.

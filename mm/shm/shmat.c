@@ -153,7 +153,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Convert the region size to pages */
 
-  npages = MM_PGALIGNUP(region->sr_ds.shm_segsz);
+  npages = MM_NPAGES(region->sr_ds.shm_segsz);
 
   /* Attach, i.e, map, on shared memory region to the user virtual address. */
 
