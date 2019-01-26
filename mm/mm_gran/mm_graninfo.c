@@ -78,7 +78,7 @@ static const struct nibble_info_s g_0bit_info[1] =
 
 static const struct nibble_info_s g_1bit_info[2] =
 {
-  { 1, 1, 0, 1},  /*  0 xxx0 */
+  { 1, 1, 0, 0},  /*  0 xxx0 */
   { 0, 0, 0, 0}   /*  1 xxx1 */
 };
 
@@ -139,7 +139,7 @@ static const struct nibble_info_s *g_info_table[5] =
  * Name: gran_nibble_info
  *
  * Description:
- *   Return information a 4-bit value from the GAT.
+ *   Return information for a 4-bit value from the GAT.
  *
  * Input Parameters:
  *   value - The 4-bit value
@@ -151,8 +151,8 @@ static const struct nibble_info_s *g_info_table[5] =
  *
  ****************************************************************************/
 
-void gran_nibble_info(uint8_t value, FAR struct valinfo_s *info,
-                      unsigned int nbits)
+static void gran_nibble_info(uint8_t value, FAR struct valinfo_s *info,
+                             unsigned int nbits)
 {
   FAR const struct nibble_info_s *table = g_info_table[nbits];
   FAR const struct nibble_info_s *nibinfo;
@@ -188,8 +188,10 @@ void gran_nibble_info(uint8_t value, FAR struct valinfo_s *info,
  *
  ****************************************************************************/
 
-void gran_info_combine(FAR const struct valinfo_s *msinfo, unsigned int msbits,
-                       FAR struct valinfo_s *lsinfo, unsigned int lsbits)
+static void gran_info_combine(FAR const struct valinfo_s *msinfo,
+                              unsigned int msbits,
+                              FAR struct valinfo_s *lsinfo,
+                              unsigned int lsbits)
 {
   unsigned int midfree;
 
@@ -293,10 +295,10 @@ void gran_info_combine(FAR const struct valinfo_s *msinfo, unsigned int msbits,
  *
  ****************************************************************************/
 
-void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
-                    unsigned int nbits)
+static void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
+                           unsigned int nbits)
 {
-  uint16_t mask;
+  uint8_t mask;
 
   if (nbits < 8)
     {
@@ -360,8 +362,8 @@ void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
  *
  ****************************************************************************/
 
-void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
-                     unsigned int nbits)
+static void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
+                            unsigned int nbits)
 {
   uint16_t mask;
 
@@ -453,7 +455,7 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
 
   gran_enter_critical(priv);
 
-  /* Travere the granule allocation  */
+  /* Traverse the granule allocation  */
 
   for (granidx = 0; granidx < priv->ngranules; granidx += 32)
     {
@@ -464,7 +466,7 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
 
       /* The final entry is a special case */
 
-      if ((granidx + 32) >= priv->ngranules)
+      if ((granidx + 32) > priv->ngranules)
         {
           nbits  = priv->ngranules - granidx;
           mask   = ((1ul << nbits) - 1);
