@@ -88,7 +88,7 @@
 #define INA3221_CONFIG_RST (1 << 15)
 
 #ifndef CONFIG_INA3221_I2C_FREQUENCY
-#  define CONFIG_INA3221_I2C_FREQUENCY 400000
+#  define CONFIG_INA3221_I2C_FREQUENCY  400000
 #endif
 
 #define I2C_NOSTARTSTOP_MSGS              2
@@ -164,15 +164,15 @@ static int ina3221_access(FAR struct ina3221_dev_s *priv,
 
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency = CONFIG_INA3221_I2C_FREQUENCY;
 
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr = priv->addr;
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags = 0;
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer = &start_register_address;
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length = 1;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr      = priv->addr;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags     = 0;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer    = &start_register_address;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length    = 1;
 
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags = reading ? I2C_M_READ : 0;
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer = register_value;
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length = data_length;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr         = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags        = reading ? I2C_M_READ : 0;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer       = register_value;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length       = data_length;
 
   ret = I2C_TRANSFER(priv->i2c, msg, I2C_NOSTARTSTOP_MSGS);
 
@@ -226,18 +226,21 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
                              FAR struct ina3221_s *buffer)
 {
   uint16_t reg;
-  int64_t  tmp;
+  int16_t sreg;
+  int64_t tmp;
   int i;
 
   int ret;
 
+  /* Loop for all 3 channels on the device */
+
   for (i = 0; i < 3; i++)
     {
-      if (priv->config & (INA3221_CONFIG_CH1_EN << i))
+      if (priv->config & (INA3221_CONFIG_CH1_EN >> i))
         {
           /* Read the raw bus voltage */
 
-          ret = ina3221_read16(priv, (INA3221_REG_CH1_BUS_VOLTAGE << i),
+          ret = ina3221_read16(priv, (INA3221_REG_CH1_BUS_VOLTAGE + i * 2),
                                &reg);
           if (ret < 0)
           {
@@ -247,12 +250,14 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
 
           /* Convert register value to bus voltage */
 
-          reg >>= 3; /* 3 LSB of reg contains mode */
-          buffer->ch[i].voltage = ((uint32_t)reg) * 8000LU;
+          sreg   = (int16_t)reg;
+          sreg >>= 3;                               /* 3 LSB of reg are not used,
+                                                     * but the value is signed */
+          buffer->ch[i].voltage = ((uint32_t)sreg) * 8000LU;
 
           /* Read the raw shunt voltage */
 
-          ret = ina3221_read16(priv, (INA3221_REG_CH1_SHUNT_VOLTAGE << i),
+          ret = ina3221_read16(priv, (INA3221_REG_CH1_SHUNT_VOLTAGE + i * 2),
                                &reg);
           if (ret < 0)
           {
@@ -262,8 +267,10 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
 
           /* Convert register value to shunt voltage */
 
-          reg >>= 3; /* 3 LSB of reg contains mode */
-          tmp = ((int64_t)(int16_t)reg) * 40LL; /* micro volts across shunt */
+          sreg   = (int16_t)reg;
+          sreg >>= 3;                               /* 3 LSB of reg are not used,
+                                                     * but the value is signed */
+          tmp    = ((int64_t)(int16_t)sreg) * 40LL; /* micro volts across shunt */
 
           /* Convert shunt voltage to current across the shunt resistor.
            * I(uA) = U(uV)/R(ohms)
@@ -296,7 +303,7 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
 static int ina3221_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ina3221_dev_s *priv   = inode->i_private;
+  FAR struct ina3221_dev_s *priv = inode->i_private;
 
   UNUSED(priv);
   return OK;
@@ -313,7 +320,7 @@ static int ina3221_open(FAR struct file *filep)
 static int ina3221_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ina3221_dev_s *priv   = inode->i_private;
+  FAR struct ina3221_dev_s *priv = inode->i_private;
 
   UNUSED(priv);
   return OK;
