@@ -164,11 +164,6 @@ int exec_module(FAR const struct binary_s *binp)
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
       goto errout_with_tcb;
     }
-
-  /* Initialize the user heap */
-
-  umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
-                 up_addrenv_heapsize(&binp->addrenv));
 #endif
 
   /* Allocate the stack for the new task.

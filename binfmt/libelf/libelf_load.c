@@ -277,7 +277,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 #elif defined(CONFIG_ARCH_STACK_DYNAMIC)
   heapsize = ARCH_HEAP_SIZE;
 #else
-  heapsize = MIN(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
+  heapsize = MAX(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
 #endif
 
   /* Allocate (and zero) memory for the ELF file. */
@@ -301,6 +301,11 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
       berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
       goto errout_with_buffers;
     }
+
+  /* Initialize the user heap */
+
+  umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
+                 up_addrenv_heapsize(&loadinfo->addrenv));
 #endif
 
   /* Load ELF section data into memory */
