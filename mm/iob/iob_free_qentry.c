@@ -76,13 +76,13 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
 
   flags = enter_critical_section();
 
-  /* Which list?  If there is a task waiting for an IOB, then put
-   * the IOB on either the free list or on the committed list where
+  /* Which list?  If there is a task waiting for an IOB chain, then put
+   * the IOB chain on either the free list or on the committed list where
    * it is reserved for that allocation (and not available to
-   * iob_tryalloc()).
+   * iob_tryalloc_qentry()).
    */
 
-  if (g_iob_sem.semcount < 0)
+  if (g_qentry_sem.semcount < 0)
     {
       iobq->qe_flink   = g_iob_qcommitted;
       g_iob_qcommitted = iobq;

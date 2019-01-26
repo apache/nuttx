@@ -200,7 +200,7 @@ FAR struct iob_qentry_s *iob_alloc_qentry(void)
 {
   /* Were we called from the interrupt level? */
 
-  if (up_interrupt_context())
+  if (up_interrupt_context() || sched_idletask())
     {
       /* Yes, then try to allocate an I/O buffer without waiting */
 

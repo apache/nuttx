@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/iob/iob_copy.c
+ * mm/iob/iob_clone.c
  *
  *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

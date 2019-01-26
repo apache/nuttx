@@ -77,12 +77,12 @@ int iob_navail(bool throttled)
       if (throttled)
         {
           ret -= CONFIG_IOB_THROTTLE;
-          if (ret < 0)
-            {
-              ret = 0;
-            }
         }
 #endif
+      if (ret < 0)
+        {
+          ret = 0;
+        }
     }
 
 #else
@@ -112,6 +112,10 @@ int iob_qentry_navail(void)
   if (ret >= 0)
     {
       ret = navail;
+      if (ret < 0)
+        {
+          ret = 0;
+        }
     }
 
 #else

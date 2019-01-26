@@ -113,7 +113,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
           /* Get the next I/O buffer in the chain */
 
           next = iob->io_flink;
-          DEBUGASSERT(next != NULL && next->io_len > 0);
+          DEBUGASSERT(next != NULL);
 
           /* Copy what we need or what we can from the next buffer */
 

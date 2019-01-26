@@ -115,12 +115,11 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
         }
       else
         {
-          /* This can only happen if the next entry is last entry in the
-           * chain... and if it is empty
+          /* This can only happen if the free entry isn't first entry in the
+           * chain...
            */
 
           next->io_pktlen = 0;
-          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
         }
 
       iobinfo("next=%p io_pktlen=%u io_len=%u\n",

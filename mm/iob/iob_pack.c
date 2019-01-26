@@ -46,14 +46,6 @@
 #include "iob.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,6 +71,10 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
   while (iob->io_len <= 0)
     {
       iob = iob_free(iob);
+      if (iob == NULL)
+        {
+          return NULL;
+        }
     }
 
   /* Now remember the head of the chain (for the return value) */
