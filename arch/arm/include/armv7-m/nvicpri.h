@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/rmv7-m/nvicpri.h
+ * arch/arm/include/armv7-m/nvicpri.h
  *
  *   Copyright (C) 2009, 2011-2014, 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

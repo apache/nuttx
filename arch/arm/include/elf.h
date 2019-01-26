@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/syscall.h
+ * arch/arm/include/elf.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
