@@ -80,25 +80,9 @@ struct shm_info_s g_shminfo;
 
 void shm_initialize(void)
 {
-#if 0
-  FAR struct shm_region_s *region;
-  int i;
-#endif
-
   /* Initialize the shared memory region list */
 
   nxsem_init(&g_shminfo.si_sem, 0, 1);
-
-#if 0
-  /* Initialize each shared memory region */
-
-  for (i = 0; i < CONFIG_ARCH_SHM_NPAGES; i++)
-    {
-      region = &g_shminfo.si_region[i];
-
-      /* Nothing to be done */
-    }
-#endif
 }
 
 /****************************************************************************
