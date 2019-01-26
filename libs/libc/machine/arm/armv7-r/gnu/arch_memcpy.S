@@ -1,5 +1,5 @@
 /************************************************************************************
- * libs/libc/marchine/arm/armv7-r/arm_memcpy.S
+ * libs/libc/marchine/arm/armv7-r/arch_memcpy.S
  * ARMv7-R optimized memcpy.
  *
  * Adapted for use with ARMv7-R and NuttX by:

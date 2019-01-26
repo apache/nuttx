@@ -1,5 +1,5 @@
 /************************************************************************************
- * libs/libc/machine/arm/armv7-m/gnu/up_memcpy.S
+ * libs/libc/machine/arm/armv7-m/gnu/arch_memcpy.S
  *
  * armv7m-optimized memcpy, contributed by Mike Smith.  Apparently in the public
  * domain and is re-released here under the modified BSD license:

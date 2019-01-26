@@ -172,7 +172,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%s' st_value=%08lx\n",
+        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
               ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
@@ -183,7 +183,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
           }
 
         offset += sym->st_value - addr;
-        if (offset & 3 || offset <= (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
+        if (offset & 3 || offset < (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
           {
             berr("ERROR:   ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
                   ELF32_R_TYPE(rel->r_info), offset);
@@ -242,7 +242,6 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         offset = *(uint32_t *)addr;
         offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
-        offset = (offset ^ 0x8000) - 0x8000;
 
         offset += sym->st_value;
         if (ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_ABS)
