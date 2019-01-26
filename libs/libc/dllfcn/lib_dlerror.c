@@ -39,7 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <dllfcn.h>
+#include <string.h>
 
 /****************************************************************************
  * Public Functions
@@ -68,6 +70,5 @@
 
 FAR char *dlerror(void)
 {
-#warning Missing logic
-  return NULL;
+  return (FAR char *)strerror(errno);
 }

@@ -101,12 +101,12 @@ static inline FAR const void *dlgetsym(FAR void *handle,
                              modp->modinfo.nexports);
   if (symbol == NULL)
     {
-      serr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
+      serr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
       err = ENOENT;
       goto errout_with_lock;
     }
 
-  /* Return the address within the module assoicated with the symbol */
+  /* Return the address within the module associated with the symbol */
 
   modlib_registry_unlock();
   DEBUGASSERT(symbol->sym_value != NULL);

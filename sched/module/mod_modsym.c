@@ -118,7 +118,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
       goto errout_with_lock;
     }
 
-  /* Return the address within the module assoicated with the symbol */
+  /* Return the address within the module associated with the symbol */
 
   modlib_registry_unlock();
   DEBUGASSERT(symbol->sym_value != NULL);
