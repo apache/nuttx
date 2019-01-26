@@ -56,6 +56,12 @@
 
 #define SYS_syscall 0x900001
 
+#if defined(__thumb__) || defined(__thumb2__)
+#  define SYS_smhcall 0xab
+#else
+#  define SYS_smhcall 0x123456
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -226,16 +232,12 @@ static inline long smh_call(unsigned int nbr, void *parm)
   register long reg1 __asm__("r1") = (long)(parm);
 
   __asm__ __volatile__
-    (
-#if defined(__thumb__) || defined(__thumb2__)
-    "svc #0xab"
-#else
-    "svc #0x123456"
-#endif
+  (
+  "svc %1"
     : "=r"(reg0)
-    : "r"(reg0), "r"(reg1)
-    : "memory"
-    );
+    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)
+    : "memory", "r14"
+  );
 
   return reg0;
 }

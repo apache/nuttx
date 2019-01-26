@@ -59,6 +59,7 @@
  */
 
 #define SYS_syscall 0x00
+#define SYS_smhcall 0xab
 
 /* The SYS_signal_handler_return is executed here... its value is not always
  * available in this context and so is assumed to be 7.
@@ -250,9 +251,9 @@ static inline long smh_call(unsigned int nbr, void *parm)
 
   __asm__ __volatile__
   (
-  "bkpt #0xab"
+  "bkpt %1"
     : "=r"(reg0)
-    : "r"(reg0), "r"(reg1)
+    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)
     : "memory"
   );
 
