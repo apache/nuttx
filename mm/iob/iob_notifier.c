@@ -84,19 +84,6 @@ int iob_notifier_setup(int qid, worker_t worker, FAR void *arg)
 
   DEBUGASSERT(worker != NULL);
 
-  /* If there are already free IOBs, then return zero without setting up the
-   * notification.
-   *
-   * REVISIT: The 'throttled' argument should not always be 'false'.
-   */
-
-  if (iob_navail(false) > 0)
-    {
-      return 0;
-    }
-
-  /* Otherwise, this is just a simple wrapper around work_notifer_setup(). */
-
   info.evtype    = WORK_IOB_AVAIL;
   info.qid       = qid;
   info.qualifier = NULL;

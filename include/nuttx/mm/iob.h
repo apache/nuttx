@@ -273,30 +273,6 @@ int iob_notifier_teardown(int key);
 #endif
 
 /****************************************************************************
- * Name: iob_notifier_signal
- *
- * Description:
- *   An IOB has become available.  Signal all threads waiting for an IOB
- *   that an IOB is available.
- *
- *   When an IOB becomes available, *all* of the workers waiting for an
- *   IOB will be executed.  If there are multiple workers for waiting an IOB
- *   then only the first to execute will get the IOB.  Others will
- *   need to call iob_notify_setup() once again.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_IOB_NOTIFIER
-void iob_notifier_signal(void);
-#endif
-
-/****************************************************************************
  * Name: iob_free_chain
  *
  * Description:
