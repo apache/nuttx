@@ -58,8 +58,6 @@
 #  include <termios.h>
 #endif
 
-#include <arch/serial.h>
-
 #include "up_arch.h"
 #include "up_internal.h"
 #include "chip.h"

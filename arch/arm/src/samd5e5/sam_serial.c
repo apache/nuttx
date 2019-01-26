@@ -52,7 +52,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 
-#include <arch/serial.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"

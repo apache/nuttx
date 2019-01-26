@@ -57,7 +57,6 @@
 #  include <termios.h>
 #endif
 
-#include <arch/serial.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
