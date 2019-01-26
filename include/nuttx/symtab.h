@@ -137,24 +137,6 @@ FAR const struct symtab_s *
 symtab_findbyvalue(FAR const struct symtab_s *symtab,
                    FAR void *value, int nsyms);
 
-/****************************************************************************
- * Name: symtab_findorderedbyvalue
- *
- * Description:
- *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is ordered
- *   with respect to symbol name.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
-                          FAR void *value, int nsyms);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX Binary Loader</i></font></big></h1>
-      <p>Last Updated: October 1, 2017</p>
+      <p>Last Updated: January 26, 2019</p>
     </td>
   </tr>
 </table>
@@ -494,7 +494,6 @@ struct symtab_s
   <a href="#symtab_findbyname">3.3.1 <code>symtab_findbyname()</code></a><br>
   <a href="#symtab_findorderedbyname">3.3.2 <code>symtab_findorderedbyname()</code></a><br>
   <a href="#symtab_findbyvalue">3.3.3 <code>symtab_findbyvalue()</code></a><br>
-  <a href="#symtab_findorderedbyvalue">3.3.4 <code>symtab_findorderedbyvalue()</code></a>
 </ul>
 
 <h3>3.3.1 <a name="symtab_findbyname"><code>symtab_findbyname()</code></a></h3>
@@ -547,25 +546,6 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
 <ul>
   Find the symbol in the symbol table whose value closest (but not greater than), the provided value.
   This version assumes that table is not ordered with respect to symbol name and, hence, access time will be linear with respect to <code>nsyms</code>.
-</ul>
-<p><b>Returned Value:</b></p>
-<ul>
-  A reference to the symbol table entry if an entry with the matching name is found;
-  <code>NULL</code> is returned if the entry is not found.
-</ul>
-
-<h3>3.3.4 <a name="symtab_findorderedbyvalue"><code>symtab_findorderedbyvalue()</code></a></h3>
-<p><b>Function Prototype:</b></p>
-<ul><pre>
-#include &lt:nuttx/binfmt/symtab.h&gt;
-FAR const struct symtab_s *
-symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
-                          FAR void *value, int nsyms);
-</pre></ul>
-<p><b>Description:</b></p>
-<ul>
-  Find the symbol in the symbol table whose value closest (but not greater than), the provided value.
-  This version assumes that table is ordered with respect to symbol name.
 </ul>
 <p><b>Returned Value:</b></p>
 <ul>
