@@ -141,7 +141,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
        */
 
       bytesize = pgincr << MM_PGSHIFT;
-      if (brkaddr != 0)
+      if (brkaddr == 0)
         {
           /* No... then initialize it now */
 
