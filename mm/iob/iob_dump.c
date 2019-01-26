@@ -56,6 +56,29 @@
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define IOB_NITEMS   32                    /* 32 bytes displayed per line */
+#define IOB_LINESIZE (3 * IOB_NITEMS + 4)  /* 2 hex chars, ASCII char, 3 spaces, NUL */
+
+/****************************************************************************
+ * Name: iob_nibble
+ *
+ * Description:
+ *  Convert a binary nibble to a hexadecimal character.
+ *
+ ****************************************************************************/
+
+static char iob_nibble(unsigned char nibble)
+{
+  if (nibble < 10)
+    {
+      return '0' + nibble;
+    }
+  else
+    {
+      return 'a' + nibble - 10;
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,7 +95,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
               unsigned int offset)
 {
   FAR struct iob_s *head;
-  uint8_t data[32];
+  uint8_t data[IOB_NITEMS];
+  char buf[IOB_LINESIZE];
   unsigned int maxlen;
   unsigned int nbytes;
   unsigned int lndx;
@@ -106,60 +130,63 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
   len = MIN(len, maxlen);
 
   /* Then beginning printing with the buffer containing the offset in groups
-   * of 32 bytes.
+   * of IOB_NITEMS bytes.
    */
 
-  for (lndx = 0; lndx < len; lndx += 32, offset += 32)
+  for (lndx = 0; lndx < len; lndx += IOB_NITEMS, offset += IOB_NITEMS)
     {
-      /* Copy 32-bytes into our local buffer from the current offset */
+      /* Copy IOB_NITEMS-bytes into our local buffer from the current offset */
 
-      nbytes = iob_copyout(data, head, 32, offset);
+      nbytes = iob_copyout(data, head, IOB_NITEMS, offset);
 
       /* Make sure that we have something to print */
 
       if (nbytes > 0)
         {
-          syslog(LOG_DEBUG, "  %04x: ", offset);
+          FAR char *ptr = buf;
 
-          for (cndx = 0; cndx < 32; cndx++)
+          for (cndx = 0; cndx < IOB_NITEMS; cndx++)
             {
-              if (cndx == 16)
+              if (cndx == IOB_NITEMS / 2)
                 {
-                  syslog(LOG_DEBUG, " ");
+                  *ptr++ = ' ';
                 }
 
               if ((lndx + cndx) < len)
                 {
-                  syslog(LOG_DEBUG, "%02x", data[cndx]);
+                  *ptr++ = iob_nibble((data[cndx] >> 4) & 0xf);
+                  *ptr++ = iob_nibble(data[cndx] & 0xf);
                 }
               else
                 {
-                  syslog(LOG_DEBUG, "  ");
+                  *ptr++ = ' ';
+                  *ptr++ = ' ';
                 }
             }
 
-          syslog(LOG_DEBUG, " ");
-          for (cndx = 0; cndx < 32; cndx++)
+          *ptr++ = ' ';
+          for (cndx = 0; cndx < IOB_NITEMS; cndx++)
             {
-              if (cndx == 16)
+              if (cndx == IOB_NITEMS / 2)
                 {
-                  syslog(LOG_DEBUG, " ");
+                  *ptr++ = ' ';
                 }
 
               if ((lndx + cndx) < len)
                 {
                   if (data[cndx] >= 0x20 && data[cndx] < 0x7f)
                     {
-                      syslog(LOG_DEBUG, "%c", data[cndx]);
+                      *ptr++ = data[cndx];
                     }
                   else
                     {
-                      syslog(LOG_DEBUG, ".");
+                      *ptr++ = '.';
                     }
                 }
             }
 
-          syslog(LOG_DEBUG, "\n");
+          *ptr = '\0';
+          syslog(LOG_DEBUG, "  %04x: %s\n", offset, buf);
         }
     }
 }
