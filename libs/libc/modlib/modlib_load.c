@@ -261,7 +261,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold the ELF image */
 
-  loadinfo->textalloc = (uintptr_t)lib_zalloc(loadinfo->textsize + loadinfo->datasize);
+  loadinfo->textalloc = (uintptr_t)lib_malloc(loadinfo->textsize + loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
       berr("ERROR: Failed to allocate memory for the module\n");

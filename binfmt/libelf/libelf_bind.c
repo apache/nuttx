@@ -63,10 +63,6 @@
 #  undef CONFIG_ELF_DUMPBUFFER
 #endif
 
-#ifndef CONFIG_ELF_BUFFERSIZE
-#  define CONFIG_ELF_BUFFERSIZE 128
-#endif
-
 #ifdef CONFIG_ELF_DUMPBUFFER
 # define elf_dumpbuffer(m,b,n) binfodumpbuffer(m,b,n)
 #else

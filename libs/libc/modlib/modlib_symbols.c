@@ -52,12 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Amount to reallocate buffer when buffer is full */
-
-#ifndef CONFIG_MODLIB_BUFFERINCR
-#  define CONFIG_MODLIB_BUFFERINCR 32
-#endif
-
 /* Return values search for exported modules */
 
 #define SYM_NOT_FOUND 0

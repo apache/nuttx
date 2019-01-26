@@ -33,12 +33,12 @@ config MODLIB_ALIGN_LOG2
 
 config MODLIB_BUFFERSIZE
 	int "Module I/O Buffer Size"
-	default 128
+	default 32
 	---help---
 		This is an I/O buffer that is used to access the module file.
 		Variable length items will need to be read (such as symbol names).
 		This is really just this initial size of the buffer; it will be
-		reallocated as necessary to hold large symbol names).  Default: 128
+		reallocated as necessary to hold large symbol names).  Default: 32
 
 config MODLIB_BUFFERINCR
 	int "Module I/O Buffer Realloc Increment"
