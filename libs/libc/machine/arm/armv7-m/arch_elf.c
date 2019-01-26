@@ -450,6 +450,41 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
       }
       break;
 
+    case R_ARM_THM_JUMP11:
+      {
+        offset = (uint32_t)(*(uint16_t *)addr & 0x7ff) << 1;
+        if (offset & 0x0800)
+          {
+            offset -= 0x1000;
+          }
+
+        offset += sym->st_value - addr;
+
+        if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
+          {
+            berr("ERROR: JUMP11 [%d] requires odd offset, offset=%08lx\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        /* Check the range of the offset */
+
+        if (offset < (int32_t)0xfffff800 || offset >= (int32_t)0x0800)
+          {
+            berr("ERROR: JUMP11 [%d] relocation out of range, branch taget=%08lx\n",
+                 ELF32_R_TYPE(rel->r_info), offset);
+
+            return -EINVAL;
+          }
+
+        offset >>= 1;
+
+        *(uint16_t *)addr &= 0xf800;
+        *(uint16_t *)addr |= offset & 0x7ff;
+      }
+      break;
+
     default:
       berr("ERROR: Unsupported relocation: %d\n", ELF32_R_TYPE(rel->r_info));
       return -EINVAL;
