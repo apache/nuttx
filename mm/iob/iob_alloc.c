@@ -162,21 +162,13 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
       else
         {
           /* When we wake up from wait successfully, an I/O buffer was
-           * freed and we hold a count for one IOB.  Unless somehting
-           * failed, we should have an IOB waiting for us in the
-           * committed list.
+           * freed and we hold a count for one IOB.
            */
 
           iob = iob_alloc_committed();
-          DEBUGASSERT(iob != NULL);
-
           if (iob == NULL)
             {
-              /* This should not fail, but we allow for that possibility to
-               * handle any potential, non-obvious race condition.  Perhaps
-               * the free IOB ended up in the g_iob_free list?
-               *
-               * We need release our count so that it is available to
+              /* We need release our count so that it is available to
                * iob_tryalloc(), perhaps allowing another thread to take our
                * count.  In that event, iob_tryalloc() will fail above and
                * we will have to wait again.
@@ -185,6 +177,19 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
               nxsem_post(sem);
               iob = iob_tryalloc(throttled);
             }
+#if CONFIG_IOB_THROTTLE > 0
+          else
+            {
+              if (throttled)
+                {
+                  g_iob_sem.semcount--;
+                }
+              else
+                {
+                  g_throttle_sem.semcount--;
+                }
+            }
+#endif
         }
     }
 
