@@ -90,7 +90,7 @@
 
 #ifdef SAMD2L2_HAVE_USART
 static void
-sam_wait_synchronization(const struct sam_usart_config_s * const config)
+sam_wait_synchronization(const struct sam_usart_config_s *const config)
 {
   while (usart_syncbusy(config));
 }
@@ -106,7 +106,7 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
 
 #ifdef SAMD2L2_HAVE_USART
 static inline int
-sam_usart_configure(const struct sam_usart_config_s * const config)
+sam_usart_configure(const struct sam_usart_config_s *const config)
 {
   uint32_t ctrla;
   uint32_t ctrlb;
@@ -257,7 +257,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 
 #ifdef SAMD2L2_HAVE_USART
 static inline void
-sam_pad_configure(const struct sam_usart_config_s * const config)
+sam_pad_configure(const struct sam_usart_config_s *const config)
 {
   /* Configure SERCOM pads */
 
@@ -294,7 +294,7 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
  ****************************************************************************/
 
 #ifdef SAMD2L2_HAVE_USART
-int sam_usart_internal(const struct sam_usart_config_s * const config)
+int sam_usart_internal(const struct sam_usart_config_s *const config)
 {
 #ifdef CONFIG_ARCH_FAMILY_SAML21
   int channel;
@@ -340,34 +340,6 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
 #endif
 
 /****************************************************************************
- * Name: sam_usart_enable
- *
- * Description:
- *   Enable the SERCOM USART (without enabling interrupts).
- *
- ****************************************************************************/
-
-#ifdef SAMD2L2_HAVE_USART
-static inline void
-sam_usart_enable(const struct sam_usart_config_s * const config)
-{
-  uintptr_t regaddr;
-  uint32_t regval;
-
-  /* Wait until synchronization is complete */
-
-  sam_wait_synchronization(config);
-
-  /* Enable USART module */
-
-  regaddr = config->base + SAM_USART_CTRLA_OFFSET;
-  regval = getreg32(regaddr);
-  regval |= USART_CTRLA_ENABLE;
-  putreg32(regval, regaddr);
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -401,7 +373,7 @@ void sam_lowsetup(void)
  ****************************************************************************/
 
 #ifdef SAMD2L2_HAVE_USART
-int sam_usart_initialize(const struct sam_usart_config_s * const config)
+int sam_usart_initialize(const struct sam_usart_config_s *const config)
 {
   irqstate_t flags;
   int ret;
@@ -431,7 +403,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
  ****************************************************************************/
 
 #ifdef SAMD2L2_HAVE_USART
-void sam_usart_reset(const struct sam_usart_config_s * const config)
+void sam_usart_reset(const struct sam_usart_config_s *const config)
 {
   uintptr_t regaddr = config->base + SAM_USART_CTRLA_OFFSET;
   uint32_t regval;
@@ -448,6 +420,33 @@ void sam_usart_reset(const struct sam_usart_config_s * const config)
   /* Wait for the reset to complete */
 
   while ((getreg32(regaddr) & USART_CTRLA_SWRST) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_usart_enable
+ *
+ * Description:
+ *   Enable the SERCOM USART (without enabling interrupts).
+ *
+ ****************************************************************************/
+
+#ifdef SAMD2L2_HAVE_USART
+void sam_usart_enable(const struct sam_usart_config_s *const config)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+
+  /* Wait until synchronization is complete */
+
+  sam_wait_synchronization(config);
+
+  /* Enable USART module */
+
+  regaddr = config->base + SAM_USART_CTRLA_OFFSET;
+  regval = getreg32(regaddr);
+  regval |= USART_CTRLA_ENABLE;
+  putreg32(regval, regaddr);
 }
 #endif
 

@@ -666,6 +666,10 @@ static int sam_setup(struct uart_dev_s *dev)
   if (!dev->isconsole)
     {
       ret = sam_usart_initialize(priv->config);
+      if (ret >= 0)
+        {
+          sam_usart_enable(priv->config);
+        }
     }
 #endif
 

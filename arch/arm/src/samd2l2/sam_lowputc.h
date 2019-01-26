@@ -93,7 +93,7 @@ void sam_lowsetup(void);
 
 #ifdef SAMD2L2_HAVE_USART
 struct sam_usart_config_s;
-int sam_usart_initialize(const struct sam_usart_config_s * const config);
+int sam_usart_initialize(const struct sam_usart_config_s *const config);
 #endif
 
 /****************************************************************************
@@ -107,7 +107,20 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config);
 
 #ifdef SAMD2L2_HAVE_USART
 struct sam_usart_config_s;
-void sam_usart_reset(const struct sam_usart_config_s * const config);
+void sam_usart_reset(const struct sam_usart_config_s *const config);
+#endif
+
+/****************************************************************************
+ * Name: sam_usart_enable
+ *
+ * Description:
+ *   Enable the SERCOM USART (without enabling interrupts).
+ *
+ ****************************************************************************/
+
+#ifdef SAMD2L2_HAVE_USART
+struct sam_usart_config_s;
+void sam_usart_enable(const struct sam_usart_config_s *const config);
 #endif
 
 /****************************************************************************

@@ -137,6 +137,19 @@ FAR const struct symtab_s *
 symtab_findbyvalue(FAR const struct symtab_s *symtab,
                    FAR void *value, int nsyms);
 
+/****************************************************************************
+ * Name: symtab_sortbyname
+ *
+ * Description:
+ *   Sort the symbol table by name.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void symtab_sortbyname(FAR struct symtab_s *symtab, int nsyms);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
