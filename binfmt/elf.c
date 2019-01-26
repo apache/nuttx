@@ -271,31 +271,27 @@ static int elf_loadbinary(FAR struct binary_s *binp)
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-#  warning "REVISIT"
-#else
-  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
-#endif
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  /* Save information about constructors.  NOTE:  destructors are not
-   * yet supported.
-   */
-
-  binp->alloc[1]  = loadinfo.ctoralloc;
-  binp->ctors     = loadinfo.ctors;
-  binp->nctors    = loadinfo.nctors;
-
-  binp->alloc[2]  = loadinfo.dtoralloc;
-  binp->dtors     = loadinfo.dtors;
-  binp->ndtors    = loadinfo.ndtors;
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
   /* Save the address environment in the binfmt structure.  This will be
    * needed when the module is executed.
    */
 
   up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
+#else
+  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
+  binp->alloc[1]  = loadinfo.ctoralloc;
+  binp->alloc[2]  = loadinfo.dtoralloc;
+#endif
+#endif
+
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
+  /* Save information about constructors and destructors. */
+
+  binp->ctors     = loadinfo.ctors;
+  binp->nctors    = loadinfo.nctors;
+
+  binp->dtors     = loadinfo.dtors;
+  binp->ndtors    = loadinfo.ndtors;
 #endif
 
   elf_dumpentrypt(binp, &loadinfo);
