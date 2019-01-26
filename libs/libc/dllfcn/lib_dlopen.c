@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/envpath.h>
 #include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
@@ -161,6 +162,14 @@ static void dldump_initializer(mod_initializer_t initializer,
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
+/* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
+ * must be two copies of the module logic:  One residing in kernel
+ * space and using the kernel symbol table and one residing in user space
+ * using the user space symbol table.
+ *
+ * dlinsert() is essentially a clone of insmod().
+ */
+
 static inline FAR void *dlinsert(FAR const char *filename)
 {
   struct mod_loadinfo_s loadinfo;
@@ -255,6 +264,50 @@ errout_with_loadinfo:
 errout_with_lock:
   modlib_registry_unlock();
   set_errno(-ret);
+  return NULL;
+}
+#elif defined(CONFIG_BUILD_FLAT)
+/* In the FLAT build, a shared library is essentially the same as a kernel
+ * module.
+ *
+ * REVIST:  Missing functionality:
+ * - No automatic binding of symbols
+ * - No dependencies
+ * - mode is ignored.
+ */
+
+static inline FAR void *dlinsert(FAR const char *filename)
+{
+  FAR void *handle;
+  FAR char *name;
+
+  DEBUGASSERT(filename != NULL);
+
+  name = strdup(filename);
+  if (name == NULL)
+    {
+      return NULL;
+    }
+
+  /* Then install the file using the basename of the file as the module name. */
+
+  handle = insmod(filename, basename(name));
+  free(name);
+  return handle;
+}
+#else /* if defined(CONFIG_BUILD_KERNEL) */
+/* The KERNEL build is considerably more complex:  In order to be shared,
+ * the .text portion of the module must be (1) build for PIC/PID operation
+ * and (2) must like in a shared memory region accessible from all
+ * processes.  The .data/.bss portion of the module must be allocated in
+ * the user space of each process, but must lie at the same virtual address
+ * so that it can be referenced from the one copy of the text in the shared
+ * memory region.
+ */
+
+static inline FAR void *dlinsert(FAR const char *filename)
+{
+#warning Missing logic
   return NULL;
 }
 #endif
@@ -365,61 +418,58 @@ errout_with_lock:
 
 FAR void *dlopen(FAR const char *file, int mode)
 {
-#if defined(CONFIG_BUILD_FLAT)
-  FAR void *handle;
-  FAR char *name;
+  FAR void *handle = NULL;
 
-  DEBUGASSERT(file != NULL);
-
-  /* In the FLAT build, a shared library is essentially the same as a kernel
-   * module.
-   *
-   * REVIST:  Missing functionality:
-   * - No automatic binding of symbols
-   * - No dependencies
-   * - mode is ignored.
-   */
-
-  /* Use the basename of the file as the module name.
-   * REVISIT: This places an non-standard restriction.  We cannot install
-   * two modules of the same name event though they lie in different
-   * directories.
-   */
-
-  name = strdup(file);
-  if (name == NULL)
+#ifdef CONFIG_LIB_ENVPATH
+  if (file[0] != '/')
     {
-      return NULL;
+      FAR const char *relpath;
+      FAR char *fullpath;
+      ENVPATH_HANDLE env;
+
+      /* Set aside the relative path */
+
+      relpath = file;
+
+      /* Initialize to traverse the LD_LIBRARY_PATH variable */
+
+      env = envpath_init("LD_LIBRARY_PATH");
+      if (env)
+        {
+          /* Get the next absolute file path */
+
+          while ((fullpath = envpath_next(env, relpath)) != NULL)
+            {
+              /* Try to load the file at this path */
+
+              handle = dlinsert(fullpath);
+
+              /* Free the allocated fullpath */
+
+              lib_free(fullpath);
+
+              /* Break out of the loop with handle != NULL on success */
+
+              if (handle != NULL)
+                {
+                  break;
+                }
+            }
+
+          /* Release the traversal handle */
+
+          envpath_release(env);
+        }
+    }
+  else
+#endif
+    {
+      /* We already have the one and only absolute path to the file to
+       * be loaded.
+       */
+
+       handle = dlinsert(file);
     }
 
-  /* Then install the file using the basename of the file as the module name. */
-
-  handle = insmod(file, basename(name));
-  free(name);
   return handle;
-
-#elif defined(CONFIG_BUILD_PROTECTED)
-  /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
-   * must be two copies of the module logic:  One residing in kernel
-   * space and using the kernel symbol table and one residing in user space
-   * using the user space symbol table.
-   *
-   * dlinsert() is essentially a clone of insmod().
-   */
-
-  return dlinsert(file);
-
-#else /* if defined(CONFIG_BUILD_KERNEL) */
-  /* The KERNEL build is considerably more complex:  In order to be shared,
-   * the .text portion of the module must be (1) build for PIC/PID operation
-   * and (2) must like in a shared memory region accessible from all
-   * processes.  The .data/.bss portion of the module must be allocated in
-   * the user space of each process, but must lie at the same virtual address
-   * so that it can be referenced from the one copy of the text in the shared
-   * memory region.
-   */
-
-#warning Missing logic
-  return NULL;
-#endif
 }

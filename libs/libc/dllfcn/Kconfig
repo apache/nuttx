@@ -17,4 +17,16 @@ config LIBC_DLLFCN
 
 		A work in progress, hence, marked EXPERIMENTAL
 
+if LIBC_DLLFCN
+
+config LDPATH_INITIAL
+	string "Initial LD_LIBRARY_PATH Value"
+	default ""
+	depends on LIB_ENVPATH
+	---help---
+		The initial value of the LD_LIBRARY_PATH variable.  This is the
+		colon-separated list of absolute paths.  E.g., "/lib:/usr/lib:/system/lib"
+
+endif
+
 # endmenu # Shared Library Support

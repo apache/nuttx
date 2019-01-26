@@ -436,6 +436,10 @@ int os_bringup(void)
   (void)setenv("PATH", CONFIG_PATH_INITIAL, 1);
 #endif
 
+#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_LDPATH_INITIAL)
+  (void)setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
+#endif
+
   /* Start the page fill worker kernel thread that will resolve page faults.
    * This should always be the first thread started because it may have to
    * resolve page faults in other threads
@@ -458,7 +462,7 @@ int os_bringup(void)
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
-#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_PATH_INITIAL)
+#if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || defined(CONFIG_LDPATH_INITIAL))
   (void)clearenv();
 #endif
 
