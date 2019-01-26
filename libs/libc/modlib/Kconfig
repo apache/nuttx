@@ -6,6 +6,7 @@
 config LIBC_MODLIB
 	bool
 	default n
+	select LIBC_ARCH_ELF
 
 menu "Module library configuration"
 	depends on LIBC_MODLIB
@@ -68,11 +69,13 @@ if MODLIB_HAVE_SYMTAB
 
 config MODLIB_SYMTAB_ARRAY
 	string "Symbol table name used by dlsym"
-	default "g_mod_symtab"
+	default "g_mod_symtab" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
 
 config MODLIB_NSYMBOLS_VAR
 	string "Name of variable holding the number of symbols"
-	default "g_mod_nsymbols"
+	default "g_mod_nsymbols" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
 
 endif # MODLIB_HAVE_SYMTAB
 
