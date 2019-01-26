@@ -104,6 +104,12 @@ void up_initialize(void)
 
   xtensa_irq_initialize();
 
+#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* Initialize the system timer interrupt */
+
+  xtensa_timer_initialize();
+#endif
+
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any
@@ -125,12 +131,6 @@ void up_initialize(void)
     {
       xtensa_dma_initialize();
     }
-#endif
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* Initialize the system timer interrupt */
-
-  xtensa_timer_initialize();
 #endif
 
 #ifdef CONFIG_MM_IOB
