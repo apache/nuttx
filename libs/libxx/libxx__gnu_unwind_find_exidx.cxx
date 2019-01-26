@@ -37,6 +37,7 @@
 // Included Files
 //***************************************************************************
 
+#include <nuttx/elf.h>
 #include "libxx__gnu_unwind_find_exidx.hxx"
 
 //***************************************************************************
@@ -84,10 +85,11 @@
 
 extern "C"
 {
-  void init_unwind_exidx(Elf32_Addr start, Elf32_Word size)
+  int up_init_exidx(Elf32_Addr start, Elf32_Word size)
   {
     __exidx_start_elf = (__EIT_entry *) start;
     __exidx_end_elf   = __exidx_start_elf + size;
+    return 0;
   }
 
   _Unwind_Ptr __gnu_Unwind_Find_exidx (_Unwind_Ptr return_address, int *nrecp)

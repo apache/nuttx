@@ -47,14 +47,6 @@
 #include <nuttx/elf.h>
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_UCLIBCXX_EXCEPTION
-extern void init_unwind_exidx(Elf32_Addr start, Elf32_Addr end);
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -472,13 +464,3 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   berr("ERROR: RELA relocation not supported\n");
   return -ENOSYS;
 }
-
-#ifdef CONFIG_UCLIBCXX_EXCEPTION
-int up_init_exidx(Elf32_Addr address, Elf32_Word size)
-{
-  init_unwind_exidx(address, size);
-
-  return OK;
-}
-#endif
-

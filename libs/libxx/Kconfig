@@ -30,6 +30,12 @@ config CXX_NEWLONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
+config CXX_EXCEPTION
+	bool
+
+config CXX_LIBSUPCXX
+	bool
+
 comment "LLVM C++ Library (libcxx)"
 
 config LIBCXX
@@ -45,14 +51,12 @@ if LIBCXX
 config LIBCXX_EXCEPTION
 	bool "Enable Exception Suppport"
 	default y
-
-config LIBCXX_IOSTREAM_BUFSIZE
-	int "IO Stream Buffer Size"
-	default 32
+	select CXX_EXCEPTION
 
 config LIBCXX_HAVE_LIBSUPCXX
 	bool "Have libsupc++ (required)"
 	default y
+	select CXX_LIBSUPCXX
 	---help---
 		Select if your toolchain provides libsupc++.  This option is required
 		at present because the built-in libsupc++ support is incomplete.
@@ -74,6 +78,7 @@ if UCLIBCXX
 config UCLIBCXX_EXCEPTION
 	bool "Enable Exception Suppport"
 	default y
+	select CXX_EXCEPTION
 
 config UCLIBCXX_IOSTREAM_BUFSIZE
 	int "IO Stream Buffer Size"
@@ -82,6 +87,7 @@ config UCLIBCXX_IOSTREAM_BUFSIZE
 config UCLIBCXX_HAVE_LIBSUPCXX
 	bool "Have libsupc++ (required)"
 	default y
+	select CXX_LIBSUPCXX
 	---help---
 		Select if your toolchain provides libsupc++.  This option is required
 		at present because the built-in libsupc++ support is incomplete.

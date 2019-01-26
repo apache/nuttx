@@ -47,7 +47,7 @@ ASRCS =
 CSRCS =
 
 CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx  libxx_cxa_atexit.cxx
-ifneq (,$(findstring y,$(CONFIG_UCLIBCXX_EXCEPTION) $(CONFIG_LIBCXX_EXCEPTION)))
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CXXSRCS += libxx__gnu_unwind_find_exidx.cxx
 endif
 
@@ -58,10 +58,6 @@ ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
 CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
-else
-ifeq (,$(findstring y,$(CONFIG_UCLIBCXX_EXCEPTION) $(CONFIG_LIBCXX_EXCEPTION)))
-CXXSRCS += libxx_stdthrow.cxx
-endif
 endif
 
 # uClibc++ doesn't need this file

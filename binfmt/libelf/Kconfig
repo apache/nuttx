@@ -42,7 +42,7 @@ config ELF_DUMPBUFFER
 config ELF_EXIDX_SECTNAME
 	string "ELF Section Name for Exception Index"
 	default ".ARM.exidx"
-	depends on UCLIBCXX_EXCEPTION
+	depends on CXX_EXCEPTION
 	---help---
 		Set the name string for the exception index section on the ELF modules to
 		be loaded by the ELF binary loader.
