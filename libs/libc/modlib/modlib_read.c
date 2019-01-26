@@ -43,11 +43,9 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
-#include <elf32.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/module.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/modlib.h>
 

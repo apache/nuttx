@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <elf32.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>

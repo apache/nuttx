@@ -41,11 +41,11 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <elf32.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/elf.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/binfmt/symtab.h>
 
@@ -279,7 +279,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
   if (ret < 0)
     {
       berr("elf_allocbuffer failed: %d\n", ret);
-      return -ENOMEM;
+      return ret;
     }
 
 #ifdef CONFIG_ARCH_ADDRENV

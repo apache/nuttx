@@ -43,10 +43,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <elf32.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/module.h>
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -85,7 +84,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
  * Name: modlib_readsym
  *
  * Description:
- *   Read the ELFT symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specified index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information

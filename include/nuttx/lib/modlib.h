@@ -46,7 +46,7 @@
 #include <elf32.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/module.h>
+#include <nuttx/symtab.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -136,7 +136,7 @@ struct mod_info_s
   mod_uninitializer_t uninitializer;   /* Module uninitializer */
   FAR void *arg;                       /* Uninitializer argument */
   FAR const struct symtab_s *exports;  /* Symbols exported by module */
-  unsigned int nexports;               /* Number of symobols in exports list */
+  unsigned int nexports;               /* Number of symbols in exports list */
 };
 
 /* A NuttX module is expected to export a function called module_initialize()
@@ -161,7 +161,6 @@ typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
 
 /* This describes the file to be loaded. */
 
-struct symtab_s;
 struct module_s
 {
   FAR struct module_s *flink;          /* Supports a singly linked list */
@@ -220,8 +219,6 @@ struct mod_loadinfo_s
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-struct symtab_s;
 
 /****************************************************************************
  * Public Function Prototypes

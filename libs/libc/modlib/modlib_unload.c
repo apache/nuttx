@@ -42,7 +42,6 @@
 #include <stdlib.h>
 #include <debug.h>
 
-#include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
 #include "libc.h"

@@ -41,13 +41,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <elf32.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
-#include <nuttx/binfmt/symtab.h>
 
 #include "modlib/modlib.h"
 
@@ -271,7 +268,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  * Name: modlib_readsym
  *
  * Description:
- *   Read the ELFT symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specified index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information
@@ -421,7 +418,7 @@ int modlib_symvalue(FAR struct module_s *modp,
 
         /* Yes... add the exported symbol value to the ELF symbol table entry */
 
-        binfo("SHN_ABS: name=%s %08x+%08x=%08x\n",
+        binfo("SHN_UNDEF: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 

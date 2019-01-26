@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/binfmt_loadmodule.c
+ * binfmt/binfmt_unloadmodule.c
  *
  *   Copyright (C) 2009, 2012-2013, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +60,7 @@
  * Name: exec_dtors
  *
  * Description:
- *   Execute C++ static constructors.
+ *   Execute C++ static destructors.
  *
  * Input Parameters:
  *   binp - Load state information

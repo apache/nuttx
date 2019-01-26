@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nxflat.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>

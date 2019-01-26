@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libelf/elf_iobuffer.c
+ * binfmt/libelf/libelf_iobuffer.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

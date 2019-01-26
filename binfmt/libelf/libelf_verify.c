@@ -43,6 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/elf.h>
 #include <nuttx/binfmt/elf.h>
 
 /****************************************************************************

@@ -45,7 +45,6 @@
 #include <errno.h>
 
 #include <nuttx/semaphore.h>
-#include <nuttx/module.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
@@ -72,7 +71,7 @@ struct mod_registrylock_s
 static struct mod_registrylock_s g_modlock =
 {
   SEM_INITIALIZER(1), /* lock */
-  0,                  /* pid */
+  NO_HOLDER,          /* pid */
   0                   /* count */
 };
 
@@ -118,7 +117,7 @@ void modlib_registry_lock(void)
     {
       while ((ret = _SEM_WAIT(&g_modlock.lock)) < 0)
         {
-          /* The only case that an error should occr here is if
+          /* The only case that an error should occur here is if
            * the wait was awakened by a signal.
            */
 

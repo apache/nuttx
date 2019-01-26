@@ -41,14 +41,12 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <elf32.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/module.h>
+#include <nuttx/elf.h>
 #include <nuttx/lib/modlib.h>
-#include <nuttx/binfmt/symtab.h>
 
 #include "modlib/modlib.h"
 

@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <elf32.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/elf.h>
@@ -137,7 +136,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_readsym
  *
  * Description:
- *   Read the ELFT symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specfied index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information
@@ -294,7 +293,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
  * Name: elf_addrenv_select
  *
  * Description:
- *   Temporarily select the task's address environemnt.
+ *   Temporarily select the task's address environment.
  *
  * Input Parameters:
  *   loadinfo - Load state information

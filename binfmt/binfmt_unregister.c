@@ -58,7 +58,7 @@
  * Name: unregister_binfmt
  *
  * Description:
- *   Register a loader for a binary format
+ *   Unregister a loader for a binary format
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

@@ -40,12 +40,10 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
-#include <elf32.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/binfmt/elf.h>
+#include <nuttx/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions

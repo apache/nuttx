@@ -41,7 +41,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <elf32.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -206,7 +205,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo)
  * Name: elf_readsym
  *
  * Description:
- *   Read the ELFT symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specified index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information
@@ -322,7 +321,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
 
         /* Yes... add the exported symbol value to the ELF symbol table entry */
 
-        binfo("SHN_ABS: name=%s %08x+%08x=%08x\n",
+        binfo("SHN_UNDEF: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
