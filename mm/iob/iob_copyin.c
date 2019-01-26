@@ -50,20 +50,6 @@
 #include "iob.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-typedef CODE struct iob_s *(*iob_alloc_t)(bool throttled);
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -198,23 +184,22 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
         {
           /* Yes.. allocate a new buffer.
            *
-           * Copy as many bytes as possible.  If we have successfully copied
-           * any already don't block, otherwise block if we're allowed.
+           * Copy as many bytes as possible. Block if we're allowed.
            */
 
-          if (!can_block || len < total)
+          if (can_block)
             {
-              next = iob_tryalloc(throttled);
+              next = iob_alloc(throttled);
             }
           else
             {
-              next = iob_alloc(throttled);
+              next = iob_tryalloc(throttled);
             }
 
           if (next == NULL)
             {
               ioberr("ERROR: Failed to allocate I/O buffer\n");
-              return len;
+              return -ENOMEM;
             }
 
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
@@ -227,7 +212,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       offset = 0;
     }
 
-  return 0;
+  return total;
 }
 
 /****************************************************************************
@@ -246,7 +231,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset, bool throttled)
 {
-  return len - iob_copyin_internal(iob, src, len, offset, throttled, true);
+  return iob_copyin_internal(iob, src, len, offset, throttled, true);
 }
 
 /****************************************************************************
@@ -262,12 +247,5 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                   unsigned int len, unsigned int offset, bool throttled)
 {
-  if (iob_copyin_internal(iob, src, len, offset, throttled, false) == 0)
-    {
-      return len;
-    }
-  else
-    {
-      return -ENOMEM;
-    }
+  return iob_copyin_internal(iob, src, len, offset, throttled, false);
 }
