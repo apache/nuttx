@@ -796,7 +796,6 @@ config ARCH_HIPRI_INTERRUPT
 	bool "High priority interrupts"
 	default n
 	depends on ARCH_HAVE_HIPRI_INTERRUPT && ARCH_HAVE_IRQPRIO
-	select ARMV7M_USEBASEPRI
 	select ARCH_IRQPRIO
 	---help---
 		NOTE: This description is currently unique to the Cortex-M family
