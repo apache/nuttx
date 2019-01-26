@@ -214,7 +214,7 @@ void xtensa_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->flink == NULL)
+  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
     {
       ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS-1];
       ustacksize = IDLETHREAD_STACKSIZE;
