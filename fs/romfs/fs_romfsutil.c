@@ -54,6 +54,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "fs_romfs.h"
 
@@ -367,7 +368,7 @@ void romfs_semgive(struct romfs_mountpt_s *rm)
 int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
                  unsigned int nsectors)
 {
-  int ret = -ENODEV;
+  int ret = OK;
 
   /* Check the access mode */
 
@@ -378,29 +379,33 @@ int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
       memcpy(buffer,
              rm->rm_xipbase + sector*rm->rm_hwsectorsize,
              nsectors*rm->rm_hwsectorsize);
-      ret = OK;
     }
   else
     {
       /* In non-XIP mode, we have to read the data from the device */
 
       struct inode *inode = rm->rm_blkdriver;
-      ssize_t nsectorsread;
+      ssize_t nsectorsread = -ENODEV;
 
       DEBUGASSERT(inode);
-      if (inode->u.i_bops && inode->u.i_bops->read)
+      if (INODE_IS_MTD(inode))
+        {
+          nsectorsread =
+            MTD_BREAD(inode->u.i_mtd, sector, nsectors, buffer);
+        }
+      else if (inode->u.i_bops->read)
         {
           nsectorsread =
             inode->u.i_bops->read(inode, buffer, sector, nsectors);
+        }
 
-          if (nsectorsread == (ssize_t)nsectors)
-            {
-              ret = OK;
-            }
-          else if (nsectorsread < 0)
-            {
-              ret = nsectorsread;
-            }
+      if (nsectorsread == (ssize_t)nsectors)
+        {
+          ret = OK;
+        }
+      else if (nsectorsread < 0)
+        {
+          ret = nsectorsread;
         }
     }
 
@@ -477,52 +482,83 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
 int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 {
   struct inode *inode = rm->rm_blkdriver;
-  struct geometry geo;
   int ret;
 
   /* Get the underlying device geometry */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!inode || !inode->u.i_bops || !inode->u.i_bops->geometry)
+  if (inode == NULL)
     {
       return -ENODEV;
     }
 #endif
 
-  ret = inode->u.i_bops->geometry(inode, &geo);
-  if (ret != OK)
+  if (INODE_IS_MTD(inode))
     {
-      return ret;
-    }
+      struct mtd_geometry_s mgeo;
 
-  if (!geo.geo_available)
+      ret = MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
+                      (unsigned long)&mgeo);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      /* Save that information in the mount structure */
+
+      rm->rm_hwsectorsize = mgeo.blocksize;
+      rm->rm_hwnsectors   = mgeo.neraseblocks *
+                            (mgeo.erasesize / mgeo.blocksize);
+    }
+  else
     {
-      return -EBUSY;
+      struct geometry geo;
+
+      ret = inode->u.i_bops->geometry(inode, &geo);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
+      if (!geo.geo_available)
+        {
+          return -EBUSY;
+        }
+
+      /* Save that information in the mount structure */
+
+      rm->rm_hwsectorsize = geo.geo_sectorsize;
+      rm->rm_hwnsectors   = geo.geo_nsectors;
     }
-
-  /* Save that information in the mount structure */
-
-  rm->rm_hwsectorsize = geo.geo_sectorsize;
-  rm->rm_hwnsectors   = geo.geo_nsectors;
 
   /* Determine if block driver supports the XIP mode of operation */
 
   rm->rm_cachesector  = (uint32_t)-1;
 
-  if (inode->u.i_bops->ioctl)
+  if (INODE_IS_MTD(inode))
+    {
+      ret = MTD_IOCTL(inode->u.i_mtd, MTDIOC_XIPBASE,
+                      (unsigned long)&rm->rm_xipbase);
+    }
+  else if (inode->u.i_bops->ioctl != NULL)
     {
       ret = inode->u.i_bops->ioctl(inode, BIOC_XIPBASE,
                                    (unsigned long)&rm->rm_xipbase);
-      if (ret == OK && rm->rm_xipbase)
-        {
-          /* Yes.. Then we will directly access the media (vs.
-           * copying into an allocated sector buffer.
-           */
+    }
+  else
+    {
+      ret = -ENOTSUP;
+    }
 
-          rm->rm_buffer      = rm->rm_xipbase;
-          rm->rm_cachesector = 0;
-          return OK;
-        }
+  if (ret == OK && rm->rm_xipbase)
+    {
+      /* Yes.. Then we will directly access the media (vs.
+       * copying into an allocated sector buffer.
+       */
+
+      rm->rm_buffer      = rm->rm_xipbase;
+      rm->rm_cachesector = 0;
+      return OK;
     }
 
   /* Allocate the device cache buffer for normal sector accesses */
@@ -652,7 +688,13 @@ int romfs_checkmount(struct romfs_mountpt_s *rm)
        */
 
       inode = rm->rm_blkdriver;
-      if (inode->u.i_bops && inode->u.i_bops->geometry)
+      if (INODE_IS_MTD(inode))
+        {
+          /* It is impossible to remove MTD device */
+
+          return OK;
+        }
+      else if (inode->u.i_bops->geometry)
         {
           ret = inode->u.i_bops->geometry(inode, &geo);
           if (ret == OK && geo.geo_available && !geo.geo_mediachanged)
