@@ -98,6 +98,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
   FAR struct aio_container_s *next;
+  pid_t pid;
   int status;
   int ret;
 
@@ -140,17 +141,28 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
               status = work_cancel(LPWORK, &aioc->aioc_work);
               if (status >= 0)
                 {
+                  /* Remove the container from the list of pending transfers */
+
+                  pid = aioc->aioc_pid;
+                  (void)aioc_decant(aioc);
+
                   aiocbp->aio_result = -ECANCELED;
                   ret = AIO_CANCELED;
+
+                  /* Signal the client */
+
+                  (void)aio_signal(pid, aiocbp);
                 }
               else
                 {
                   ret = AIO_NOTCANCELED;
                 }
+            }
+          else
+            {
+              /* Can't cancel, the operation is running */
 
-              /* Remove the container from the list of pending transfers */
-
-              (void)aioc_decant(aioc);
+              ret = AIO_NOTCANCELED;
             }
         }
     }
@@ -182,20 +194,24 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                */
 
               status = work_cancel(LPWORK, &aioc->aioc_work);
-
-              /* Remove the container from the list of pending transfers */
-
-              next   = (FAR struct aio_container_s *)aioc->aioc_link.flink;
-              aiocbp = aioc_decant(aioc);
-              DEBUGASSERT(aiocbp);
-
               if (status >= 0)
                 {
+                  /* Remove the container from the list of pending transfers */
+
+                  next   = (FAR struct aio_container_s *)aioc->aioc_link.flink;
+                  pid    = aioc->aioc_pid;
+                  aiocbp = aioc_decant(aioc);
+                  DEBUGASSERT(aiocbp);
+
                   aiocbp->aio_result = -ECANCELED;
                   if (ret != AIO_NOTCANCELED)
                     {
                       ret = AIO_CANCELED;
                     }
+
+                  /* Signal the client */
+
+                  (void)aio_signal(pid, aiocbp);
                 }
               else
                 {

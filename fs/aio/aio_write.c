@@ -57,23 +57,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_fcntl
- ****************************************************************************/
-
-#ifdef AIO_HAVE_FILEP
-static inline int file_fcntl(FAR struct file *filep, int cmd, ...)
-{
-  va_list ap;
-  int ret;
-
-  va_start(ap, cmd);
-  ret = file_vfcntl(filep, cmd, ap);
-  va_end(ap);
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Name: aio_write_worker
  *
  * Description:
@@ -333,6 +316,7 @@ int aio_write(FAR struct aiocb *aiocbp)
     {
       /* The result and the errno have already been set */
 
+      aioc_decant(aioc);
       return ERROR;
     }
 

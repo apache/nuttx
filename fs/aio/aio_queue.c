@@ -94,6 +94,9 @@ int aio_queue(FAR struct aio_container_s *aioc, worker_t worker)
       FAR struct aiocb *aiocbp = aioc->aioc_aiocbp;
       DEBUGASSERT(aiocbp);
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      lpwork_restorepriority(aioc->aioc_prio);
+#endif
       aiocbp->aio_result = ret;
       set_errno(-ret);
       ret = ERROR;

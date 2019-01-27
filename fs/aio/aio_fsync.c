@@ -234,6 +234,7 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
     {
       /* The result and the errno have already been set */
 
+      aioc_decant(aioc);
       return ERROR;
     }
 

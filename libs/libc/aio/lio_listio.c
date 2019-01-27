@@ -59,7 +59,7 @@
 struct lio_sighand_s
 {
   FAR struct aiocb * const *list;  /* List of I/O operations */
-  FAR struct sigevent *sig;        /* Describes how to signal the caller */
+  FAR struct sigevent sig;         /* Describes how to signal the caller */
   int nent;                        /* Number or elements in list[] */
   pid_t pid;                       /* ID of client */
   sigset_t oprocmask;              /* sigprocmask to restore */
@@ -245,7 +245,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
   /* Initialize the allocated structure */
 
   sighand->list = list;
-  sighand->sig  = sig;
+  sighand->sig  = *sig;
   sighand->nent = nent;
   sighand->pid  = getpid();
 
