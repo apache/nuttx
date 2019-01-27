@@ -92,7 +92,9 @@
 
 void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mqueue_inode_s *msgq;
+#endif
 
   DEBUGASSERT(mqdes != NULL && group != NULL);
 
@@ -102,6 +104,7 @@ void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
 
   sq_rem((FAR sq_entry_t *)mqdes, &group->tg_msgdesq);
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Find the message queue associated with the message descriptor */
 
   msgq = mqdes->msgq;
@@ -110,7 +113,6 @@ void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
    * queue via this mqdes.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   if (msgq->ntmqdes == mqdes)
     {
       memset(&msgq->ntevent, 0, sizeof(struct sigevent));
