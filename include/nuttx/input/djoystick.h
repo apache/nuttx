@@ -58,6 +58,8 @@
 #include <nuttx/config.h>
 #include <nuttx/input/ioctl.h>
 
+#include <signal.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -186,7 +188,7 @@ struct djoy_notify_s
 {
   djoy_buttonset_t dn_press;   /* Set of button depressions to be notified */
   djoy_buttonset_t dn_release; /* Set of button releases to be notified */
-  uint8_t          dn_signo;   /* Signal number to use in the notification */
+  struct sigevent  dn_event;   /* Describe the way a task is to be notified */
 };
 
 /* This is the type of the discrete joystick interrupt handler used with

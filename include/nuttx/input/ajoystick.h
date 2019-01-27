@@ -58,6 +58,8 @@
 #include <nuttx/config.h>
 #include <nuttx/input/ioctl.h>
 
+#include <signal.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -187,7 +189,7 @@ struct ajoy_notify_s
 {
   ajoy_buttonset_t an_press;   /* Set of button depressions to be notified */
   ajoy_buttonset_t an_release; /* Set of button releases to be notified */
-  uint8_t          an_signo;   /* Signal number to use in the notification */
+  struct sigevent  an_event;   /* Describe the way a task is to be notified */
 };
 
 /* This structure is returned by read() and provides the sample state of the

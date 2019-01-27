@@ -163,8 +163,8 @@ struct macnet_driver_s
   /* MAC Service notification information */
 
   bool    md_notify_registered;
-  uint8_t md_notify_signo;
   pid_t   md_notify_pid;
+  struct sigevent md_notify_event;
 #endif
 };
 
@@ -444,15 +444,9 @@ static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
 #ifndef CONFIG_DISABLE_SIGNALS
       if (priv->md_notify_registered)
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)primitive->type;
-          (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
-                            value);
-#else
-          (void)nxsig_queue(priv->md_notify_pid, priv->md_notify_signo,
-                            (FAR void *)primitive->type);
-#endif
+          priv->md_notify_event.sigev_value.sival_int = primitive->type;
+          nxsig_notification(priv->md_notify_pid, &priv->md_notify_event,
+                             SI_QUEUE);
         }
 #endif
 
@@ -1053,7 +1047,7 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
                 {
                   /* Save the notification events */
 
-                  priv->md_notify_signo       = netmac->u.signo;
+                  priv->md_notify_event       = netmac->u.event;
                   priv->md_notify_pid         = getpid();
                   priv->md_notify_registered  = true;
                   ret = OK;

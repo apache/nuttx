@@ -48,6 +48,7 @@
 
 #include <nuttx/config.h>
 
+#include <signal.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -1706,7 +1707,7 @@ union ieee802154_macarg_u
   /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
   /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
 
-  uint8_t                          signo;       /* MAC802154IOC_NOTIFY_REGISTER */
+  struct sigevent                  event;       /* MAC802154IOC_NOTIFY_REGISTER */
   struct ieee802154_primitive_s    primitive;   /* MAC802154IOC_GET_EVENT */
   bool                             enable;      /* MAC802154IOC_ENABLE_EVENTS */
 };

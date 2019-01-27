@@ -374,16 +374,9 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
         {
           /* Yes.. Signal the waiter */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)sample;
-
-          (void)nxsig_queue(opriv->ao_pid, opriv->ao_notify.an_signo,
-                            value);
-#else
-          (void)nxsig_queue(opriv->ao_pid, opriv->ao_notify.dn.signo,
-                            (FAR void *)sample);
-#endif
+          opriv->ao_notify.an_event.sigev_value.sival_int = sample;
+          nxsig_notification(opriv->ao_pid, &opriv->ao_notify.an_event,
+                             SI_QUEUE);
         }
 #endif
     }
@@ -639,10 +632,10 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
     /* Command:     AJOYIOC_SUPPORTED
      * Description: Report the set of button events supported by the hardware;
-     * Argument:    A pointer to writeable integer value in which to return the
-     *              set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Argument:    A pointer to writeable integer value in which to return
+     *              the set of supported buttons.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case AJOYIOC_SUPPORTED:
@@ -715,7 +708,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             opriv->ao_notify.an_press   = notify->an_press;
             opriv->ao_notify.an_release = notify->an_release;
-            opriv->ao_notify.an_signo   = notify->an_signo;
+            opriv->ao_notify.an_event   = notify->an_event;
             opriv->ao_pid               = getpid();
 
             /* Enable/disable interrupt handling */

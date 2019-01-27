@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
+#include <signal.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -118,7 +120,7 @@ struct btn_notify_s
 {
   btn_buttonset_t bn_press;   /* Set of button depressions to be notified */
   btn_buttonset_t bn_release; /* Set of button releases to be notified */
-  uint8_t         bn_signo;   /* Signal number to use in the notification */
+  struct sigevent bn_event;   /* Describe the way a task is to be notified */
 };
 
 /* This is the type of the button interrupt handler used with the struct

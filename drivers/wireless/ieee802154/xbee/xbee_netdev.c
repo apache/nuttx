@@ -163,8 +163,8 @@ struct xbeenet_driver_s
   /* MAC Service notification information */
 
   bool    xd_notify_registered;
-  uint8_t xd_notify_signo;
   pid_t   xd_notify_pid;
+  struct sigevent xd_notify_event;
 #endif
 };
 
@@ -444,15 +444,9 @@ static int xbeenet_notify(FAR struct xbee_maccb_s *maccb,
 #ifndef CONFIG_DISABLE_SIGNALS
       if (priv->xd_notify_registered)
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)primitive->type;
-          (void)nxsig_queue(priv->xd_notify_pid, priv->xd_notify_signo,
-                            value);
-#else
-          (void)nxsig_queue(priv->xd_notify_pid, priv->xd_notify_signo,
-                            (FAR void *)primitive->type);
-#endif
+          priv->xd_notify_event.sigev_value.sival_int = primitive->type;
+          nxsig_notification(priv->xd_notify_pid, &priv->xd_notify_event,
+                             SI_QUEUE);
         }
 #endif
 
@@ -1053,7 +1047,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                 {
                   /* Save the notification events */
 
-                  priv->xd_notify_signo       = netmac->u.signo;
+                  priv->xd_notify_event       = netmac->u.event;
                   priv->xd_notify_pid         = getpid();
                   priv->xd_notify_registered  = true;
                   ret = OK;

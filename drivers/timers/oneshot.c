@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <semaphore.h>
-#include <signal.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -76,9 +75,8 @@ struct oneshot_dev_s
 
   /* Oneshot timer expiration notification information */
 
-  uint8_t od_signo;                            /* Signal number for notification */
+  struct sigevent od_event;                    /* Signal info */
   pid_t od_pid;                                /* PID to be notified */
-  FAR void *od_arg;                            /* Signal value argument */
 };
 
 /****************************************************************************
@@ -129,29 +127,21 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
   FAR struct oneshot_dev_s *priv = (FAR struct oneshot_dev_s *)arg;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  union sigval value;
-#endif
 
   DEBUGASSERT(priv != NULL);
 
   /* Signal the waiter.. if there is one */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  value.sival_ptr = priv->od_arg;
-  (void)nxsig_queue(priv->od_pid, priv->od_signo, value);
-#else
-  (void)nxsig_queue(priv->od_pid, priv->od_signo, priv->od_arg);
-#endif
+  nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: oneshot_open
  *
  * Description:
  *   This function is called whenever the PWM device is opened.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int oneshot_open(FAR struct file *filep)
 {
@@ -160,13 +150,13 @@ static int oneshot_open(FAR struct file *filep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: oneshot_close
  *
  * Description:
  *   This function is called when the PWM device is closed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int oneshot_close(FAR struct file *filep)
 {
@@ -175,15 +165,16 @@ static int oneshot_close(FAR struct file *filep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: oneshot_read
  *
  * Description:
  *   A dummy read method.  This is provided only to satsify the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t oneshot_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t oneshot_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
 
@@ -192,13 +183,13 @@ static ssize_t oneshot_read(FAR struct file *filep, FAR char *buffer, size_t buf
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: oneshot_write
  *
  * Description:
  *   A dummy write method.  This is provided only to satsify the VFS layer.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t oneshot_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
@@ -210,13 +201,13 @@ static ssize_t oneshot_write(FAR struct file *filep, FAR const char *buffer,
   return -EPERM;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: oneshot_ioctl
  *
  * Description:
  *   The standard ioctl method.  This is where ALL of the PWM work is done.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -270,10 +261,9 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           start = (FAR struct oneshot_start_s *)((uintptr_t)arg);
           DEBUGASSERT(start != NULL);
 
-          /* Save signalling information */
+          /* Save signaling information */
 
-          priv->od_signo = start->signo;
-          priv->od_arg   = start->arg;
+          priv->od_event = start->event;
 
           pid = start->pid;
           if (pid == 0)

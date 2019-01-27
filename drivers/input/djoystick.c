@@ -374,15 +374,9 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
         {
           /* Yes.. Signal the waiter */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)sample;
-          (void)nxsig_queue(opriv->do_pid, opriv->do_notify.dn_signo,
-                            value);
-#else
-          (void)nxsig_queue(opriv->do_pid, opriv->do_notify.dn.signo,
-                            (FAR void *)sample);
-#endif
+          opriv->do_notify.dn_event.sigev_value.sival_int = sample;
+          nxsig_notification(opriv->do_pid, &opriv->do_notify.dn_event,
+                             SI_QUEUE);
         }
 #endif
     }
@@ -634,10 +628,10 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
     /* Command:     DJOYIOC_SUPPORTED
      * Description: Report the set of button events supported by the hardware;
-     * Argument:    A pointer to writeable integer value in which to return the
-     *              set of supported buttons.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Argument:    A pointer to writeable integer value in which to return
+     *              the set of supported buttons.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case DJOYIOC_SUPPORTED:
@@ -710,7 +704,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             opriv->do_notify.dn_press   = notify->dn_press;
             opriv->do_notify.dn_release = notify->dn_release;
-            opriv->do_notify.dn_signo  = notify->dn_signo;
+            opriv->do_notify.dn_event   = notify->dn_event;
             opriv->do_pid               = getpid();
 
             /* Enable/disable interrupt handling */

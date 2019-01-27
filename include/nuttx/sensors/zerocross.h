@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
+#include <signal.h>
+
 #ifdef CONFIG_SENSORS_ZEROCROSS
 
 /****************************************************************************
@@ -56,7 +58,7 @@
 /* Command:     ZCIOC_REGISTER
  * Description: Register to receive a signal whenever there is zero cross
  *              interrupt event.
- * Argument:    A read-only pointer to an instance of struct zc_notify_s
+ * Argument:    A read-only pointer to an instance of struct sigevent
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
  *              with the errno value set appropriately.
  */
@@ -90,16 +92,6 @@ typedef CODE void (*zc_interrupt_t)
  * casts, the initial fields of the custom state structure match the initial
  * fields of the following generic lower half state structure.
  */
-
-/* A reference to this structure is provided with the ZCIOC_REGISTER IOCTL
- * command and describes the conditions under which the client would like
- * to receive notification.
- */
-
-struct zc_notify_s
-{
-  uint8_t          zc_signo;   /* Signal number to use in the notification */
-};
 
 struct zc_lowerhalf_s
 {

@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <signal.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -223,10 +224,9 @@ struct oneshot_lowerhalf_s
 
 struct oneshot_start_s
 {
-  pid_t pid;          /* PID of task to be signalled (0 means calling task) */
-  int signo;          /* Signal number to use */
-  FAR void *arg;      /* Signal value argument */
-  struct timespec ts; /* Delay until time expiration */
+  pid_t pid;             /* PID of task to be signalled (0 means calling task) */
+  struct sigevent event; /* Describe the way a task is to be notified */
+  struct timespec ts;    /* Delay until time expiration */
 };
 #endif
 

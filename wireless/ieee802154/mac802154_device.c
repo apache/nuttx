@@ -120,8 +120,8 @@ struct mac802154_chardevice_s
   /* MAC Service notification information */
 
   bool    md_notify_registered;
-  uint8_t md_notify_signo;
   pid_t   md_notify_pid;
+  struct sigevent md_notify_event;
 
 #endif
 };
@@ -624,7 +624,7 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
         {
           /* Save the notification events */
 
-          dev->md_notify_signo      = macarg->signo;
+          dev->md_notify_event      = macarg->event;
           dev->md_notify_pid        = getpid();
           dev->md_notify_registered = true;
 
@@ -766,16 +766,9 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
 #ifndef CONFIG_DISABLE_SIGNALS
       if (dev->md_notify_registered)
         {
-
-#ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
-          value.sival_int = (int)primitive->type;
-          (void)nxsig_queue(dev->md_notify_pid, dev->md_notify_signo,
-                            value);
-#else
-          (void)nxsig_queue(dev->md_notify_pid, dev->md_notify_signo,
-                            (FAR void *)primitive->type);
-#endif
+          dev->md_notify_event.sigev_value.sival_int = primitive->type;
+          nxsig_notification(dev->md_notify_pid, &dev->md_notify_event,
+                             SI_QUEUE);
         }
 #endif
 

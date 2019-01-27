@@ -51,6 +51,8 @@
 #include <nuttx/config.h>
 #include <nuttx/wqueue.h>
 
+#include <signal.h>
+
 /*******************************************************************************************
  * Public Types
  *******************************************************************************************/
@@ -157,7 +159,7 @@ struct ft80x_i2cwrite_s
 
 struct ft80x_eventinfo_s
 {
-  uint8_t signo;                          /* Notify using this signal number */
+  struct sigevent event;                  /* Describe the way a task is to be notified */
   bool enable;                            /* True: enable notification; false: disable */
   int16_t pid;                            /* Send the notification to this task */
 };
