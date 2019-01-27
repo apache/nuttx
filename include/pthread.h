@@ -203,11 +203,15 @@ extern "C"
 
 /* pthread-specific types */
 
+#ifndef __PTHREAD_KEY_T_DEFINED
 typedef int pthread_key_t;
 #define __PTHREAD_KEY_T_DEFINED 1
+#endif
 
+#ifndef __PTHREAD_ADDR_T_DEFINED
 typedef FAR void *pthread_addr_t;
 #define __PTHREAD_ADDR_T_DEFINED 1
+#endif
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
@@ -236,22 +240,30 @@ struct pthread_attr_s
 #endif
 };
 
+#ifndef __PTHREAD_ATTR_T_DEFINED
 typedef struct pthread_attr_s pthread_attr_t;
 #define __PTHREAD_ATTR_T_DEFINED 1
+#endif
 
+#ifndef __PTHREAD_T_DEFINED
 typedef pid_t pthread_t;
 #define __PTHREAD_T_DEFINED 1
+#endif
 
+#ifndef __PTHREAD_CONDATTR_T_DEFINED
 typedef int pthread_condattr_t;
 #define __PTHREAD_CONDATTR_T_DEFINED 1
+#endif
 
 struct pthread_cond_s
 {
   sem_t sem;
 };
 
+#ifndef __PTHREAD_COND_T_DEFINED
 typedef struct pthread_cond_s pthread_cond_t;
 #define __PTHREAD_COND_T_DEFINED 1
+#endif
 
 #define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
 
@@ -269,8 +281,10 @@ struct pthread_mutexattr_s
 #endif
 };
 
+#ifndef __PTHREAD_MUTEXATTR_T_DEFINED
 typedef struct pthread_mutexattr_s pthread_mutexattr_t;
 #define __PTHREAD_MUTEXATTR_T_DEFINED 1
+#endif
 
 struct pthread_mutex_s
 {
@@ -293,8 +307,10 @@ struct pthread_mutex_s
 #endif
 };
 
+#ifndef __PTHREAD_MUTEX_T_DEFINED
 typedef struct pthread_mutex_s pthread_mutex_t;
 #define __PTHREAD_MUTEX_T_DEFINED 1
+#endif
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 #  ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
@@ -323,8 +339,10 @@ struct pthread_barrierattr_s
   int pshared;
 };
 
+#ifndef __PTHREAD_BARRIERATTR_T_DEFINED
 typedef struct pthread_barrierattr_s pthread_barrierattr_t;
 #define __PTHREAD_BARRIERATTR_T_DEFINED 1
+#endif
 
 struct pthread_barrier_s
 {
@@ -332,11 +350,15 @@ struct pthread_barrier_s
   unsigned int count;
 };
 
+#ifndef __PTHREAD_BARRIER_T_DEFINED
 typedef struct pthread_barrier_s pthread_barrier_t;
 #define __PTHREAD_BARRIER_T_DEFINED 1
+#endif
 
+#ifndef __PTHREAD_ONCE_T_DEFINED
 typedef bool pthread_once_t;
 #define __PTHREAD_ONCE_T_DEFINED 1
+#endif
 
 struct pthread_rwlock_s
 {
