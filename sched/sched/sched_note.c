@@ -216,6 +216,7 @@ void note_spincommon(FAR struct tcb_s *tcb, FAR volatile spinlock_t *spinlock,
  *
  ****************************************************************************/
 
+#if defined(CONFIG_SCHED_NOTE_GET) || defined(CONFIG_DEBUG_ASSERTIONS)
 static unsigned int note_length(void)
 {
   unsigned int head = g_note_info.ni_head;
@@ -228,6 +229,7 @@ static unsigned int note_length(void)
 
   return head - tail;
 }
+#endif
 
 /****************************************************************************
  * Name: note_remove

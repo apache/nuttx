@@ -3649,6 +3649,7 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
  * Name: adc_offset_set
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_ADC_LL_OPS
 #ifdef HAVE_IP_ADC_V2
 static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
                           uint8_t i, uint16_t offset)
@@ -3705,6 +3706,7 @@ errout:
   return ret;
 }
 #endif
+#endif /* CONFIG_STM32_ADC_LL_OPS */
 
 /****************************************************************************
  * Name: adc_set_ch
