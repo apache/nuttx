@@ -41,6 +41,8 @@ comment "LLVM C++ Library (libcxx)"
 config LIBCXX
 	bool "Build LLVM libcxx (must be installed)"
 	default n
+	select LIBC_WCHAR
+	select TIME_EXTENDED
 	---help---
 		If you have installed libcxx into the NuttX source tree, then it can
 		be built by selecting this option.  See the README.txt file in the
