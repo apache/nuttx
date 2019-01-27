@@ -109,6 +109,11 @@ ifeq ($(CONFIG_LIB_ENVPATH),y)
 CSRCS += lib_envpath.c
 endif
 
+# To ensure uname information is newest,
+# add lib_utsname.o to phony target for force rebuild
+
+.PHONY: lib_utsname$(OBJEXT)
+
 # Add the misc directory to the build
 
 DEPPATH += --dep-path misc

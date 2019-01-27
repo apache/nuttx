@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/utsname.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <nuttx/version.h>
@@ -115,7 +116,12 @@ int uname(FAR struct utsname *name)
   strncpy(name->release,  CONFIG_VERSION_STRING, SYS_NAMELEN);
   name->release[SYS_NAMELEN-1] = '\0';
 
+#if defined(__DATE__) && defined(__TIME__)
+  snprintf(name->version, VERSION_NAMELEN, "%s %s %s",
+           CONFIG_VERSION_BUILD, __DATE__, __TIME__);
+#else
   strncpy(name->version,  CONFIG_VERSION_BUILD, VERSION_NAMELEN);
+#endif
   name->version[VERSION_NAMELEN-1] = '\0';
 
   strncpy(name->machine,  CONFIG_ARCH, SYS_NAMELEN);
