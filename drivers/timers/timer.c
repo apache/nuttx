@@ -67,6 +67,7 @@
 
 struct timer_upperhalf_s
 {
+  sem_t     exclsem;       /* Supports mutual exclusion */
   uint8_t   crefs;         /* The number of times the device has been opened */
   uint8_t   signo;         /* The signal number to use in the notification */
   pid_t     pid;           /* The ID of the task/thread to receive the signal */
@@ -164,6 +165,14 @@ static int timer_open(FAR struct file *filep)
 
   tmrinfo("crefs: %d\n", upper->crefs);
 
+  /* Get exclusive access to the device structures */
+
+  ret = nxsem_wait(&upper->exclsem);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
    * the device.
@@ -175,13 +184,16 @@ static int timer_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout;
+      goto errout_with_sem;
     }
 
   /* Save the new open count */
 
   upper->crefs = tmp;
   ret = OK;
+
+errout_with_sem:
+  nxsem_post(&upper->exclsem);
 
 errout:
   return ret;
@@ -199,8 +211,17 @@ static int timer_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
+  int ret;
 
   tmrinfo("crefs: %d\n", upper->crefs);
+
+  /* Get exclusive access to the device structures */
+
+  ret = nxsem_wait(&upper->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -211,6 +232,7 @@ static int timer_close(FAR struct file *filep)
       upper->crefs--;
     }
 
+  nxsem_post(&upper->exclsem);
   return OK;
 }
 
@@ -264,6 +286,14 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(upper != NULL);
   lower = upper->lower;
   DEBUGASSERT(lower != NULL);
+
+  /* Get exclusive access to the device structures */
+
+  ret = nxsem_wait(&upper->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Handle built-in ioctl commands */
 
@@ -433,6 +463,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
+  nxsem_post(&upper->exclsem);
   return ret;
 }
 
@@ -490,6 +521,7 @@ FAR void *timer_register(FAR const char *path,
    */
 
   upper->lower = lower;
+  nxsem_init(&upper->exclsem, 0, 1);
 
   /* Copy the registration path */
 
@@ -515,6 +547,7 @@ errout_with_path:
   kmm_free(upper->path);
 
 errout_with_upper:
+  nxsem_destroy(&upper->exclsem);
   kmm_free(upper);
 
 errout:
@@ -560,6 +593,7 @@ void timer_unregister(FAR void *handle)
 
   /* Then free all of the driver resources */
 
+  nxsem_destroy(&upper->exclsem);
   kmm_free(upper->path);
   kmm_free(upper);
 }
