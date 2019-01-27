@@ -920,11 +920,9 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                        FAR void **handle)
 {
   FAR struct hostfs_mountpt_s  *fs;
-  struct stat buf;
   FAR char *options;
   char *ptr, *saveptr;
-  int len, timeout = 0;
-  int ret;
+  int len;
 
   /* Validate the block driver is NULL */
 
@@ -943,7 +941,6 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* The options we suppor are:
    *  "fs=whatever", remote dir
-   *  "timeout=xx", bind timeout, unit (ms)
    */
 
   options = strdup(data);
@@ -959,10 +956,6 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       if ((strncmp(ptr, "fs=", 3) == 0))
         {
           strncpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
-        }
-      else if ((strncmp(ptr, "timeout=", 8) == 0))
-        {
-          timeout = atoi(&ptr[8]);
         }
 
       ptr = strtok_r(NULL, ",", &saveptr);
@@ -1003,27 +996,6 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       /* Remove trailing '/' */
 
       fs->fs_root[len-1] = '\0';
-    }
-
-  /* Try to stat the file in the host FS */
-
-  while (1)
-    {
-      ret = host_stat(fs->fs_root, &buf);
-      if ((ret != 0 && timeout <= 0) ||
-              (ret == 0 && (buf.st_mode & S_IFDIR) == 0))
-        {
-          hostfs_semgive(fs);
-          kmm_free(fs);
-          return -ENOENT;
-        }
-      else if (ret == 0)
-        {
-          break;
-        }
-
-      usleep(HOSTFS_RETRY_DELAY_MS * 1000);
-      timeout -= HOSTFS_RETRY_DELAY_MS;
     }
 
   /* Append a '/' to the name now */
