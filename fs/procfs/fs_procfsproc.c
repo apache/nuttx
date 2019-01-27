@@ -175,20 +175,6 @@ static FAR const char *g_policy[4] =
 };
 
 /****************************************************************************
- * External Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_CRITMONITOR
-/* If CONFIG_SCHED_CRITMONITOR is selected, then platform-specific logic
- * must provide the following interface.  This interface simply converts an
- * elapsed time into well known units for presentation by the ProcFS file
- * system..
- */
-
-void up_critmon_convert(uint32_t starttime, FAR struct timespec *ts);
-#endif
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 

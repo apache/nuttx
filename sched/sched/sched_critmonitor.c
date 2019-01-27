@@ -46,25 +46,6 @@
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 
-/****************************************************************************
- * External Function Prototypes
- ****************************************************************************/
-
-/* If CONFIG_SCHED_CRITMONITOR is selected, then platform-specific logic
- * must provide the following interface.  This interface simply provides the
- * current time value in unknown units.  NOTE:  This function may be called
- * early before the timer has been initialized.  In that event, the function
- * should just return a start time of zero.
- *
- * Nothing is assumed about the units of this time value.  The following
- * are assumed, however: (1) The time is an unsigned is an unsigned integer
- * value, (2) is is monotonically increasing, and (3) the elapsed time
- * (also in unknown units) can be obtained by subtracting a start time
- * from the current time.
- */
-
-uint32_t up_critmon_gettime(void);
-
 /************************************************************************************
  * Private Data
  ************************************************************************************/

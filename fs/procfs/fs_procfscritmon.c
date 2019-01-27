@@ -86,17 +86,6 @@ struct critmon_file_s
 };
 
 /****************************************************************************
- * External Function Prototypes
- ****************************************************************************/
-
-/* If CONFIG_SCHED_CRITMONITOR is selected, then platform-specific logic
- * must provide the following interface.  This function converts platform-
- * specific elapsed time into a well-known time format.
- */
-
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts);
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
