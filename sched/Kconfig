@@ -999,8 +999,8 @@ config SCHED_NOTE_BUFSIZE
 		bytes).
 
 config SCHED_NOTE_GET
-	int "Callable interface to get instrumentatin data"
-	default 2048
+	bool "Callable interface to get instrumentatin data"
+	default n
 	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
 		Add support for interfaces to get the size of the next note and also
