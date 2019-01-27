@@ -392,6 +392,47 @@ int up_alarm_start(FAR const struct timespec *ts)
 }
 #endif
 
+/********************************************************************************
+ * Name: up_critmon_*
+ *
+ * Description:
+ *   The first interface simply provides the current time value in unknown
+ *   units.  NOTE:  This function may be called early before the timer has
+ *   been initialized.  In that event, the function should just return a
+ *   start time of zero.
+ *
+ *   Nothing is assumed about the units of this time value.  The following
+ *   are assumed, however: (1) The time is an unsigned integer value, (2)
+ *   the time is monotonically increasing, and (3) the elapsed time (also
+ *   in unknown units) can be obtained by subtracting a start time from
+ *   the current time.
+ *
+ *   The second interface simple converts an elapsed time into well known
+ *   units.
+ ********************************************************************************/
+
+#ifdef CONFIG_SCHED_CRITMONITOR
+uint32_t up_critmon_gettime(void)
+{
+  uint32_t ret = 0;
+
+  if (g_oneshot_lower != NULL)
+    {
+      struct timespec ts;
+
+      ONESHOT_CURRENT(g_oneshot_lower, &ts);
+      ret = timespec_to_usec(&ts);
+    }
+
+  return ret;
+}
+
+void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
+{
+  timespec_from_usec(ts, elapsed);
+}
+#endif
+
 /****************************************************************************
  * Name: up_mdelay
  *
