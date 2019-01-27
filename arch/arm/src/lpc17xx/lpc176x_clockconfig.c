@@ -215,6 +215,21 @@ void lpc17_clockconfig(void)
   /* Configure FLASH */
 
 #ifdef CONFIG_LPC17_FLASH
-  putreg32(BOARD_FLASHCFG_VALUE, LPC17_SYSCON_FLASHCFG);
+  {
+    uint32_t regval;
+
+    if (BOARD_FLASHCFG_VALUE & ~SYSCON_FLASHCFG_TIM_MASK)
+      {
+        regval = BOARD_FLASHCFG_VALUE;
+      }
+    else
+      {
+        regval = getreg32(LPC17_SYSCON_FLASHCFG);
+        regval &= ~SYSCON_FLASHCFG_TIM_MASK;
+        regval |= BOARD_FLASHCFG_VALUE;
+      }
+
+    putreg32(BOARD_FLASHCFG_VALUE, LPC17_SYSCON_FLASHCFG);
+  }
 #endif
 }
