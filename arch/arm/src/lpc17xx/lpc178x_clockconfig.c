@@ -92,6 +92,8 @@
 
 void lpc17_clockconfig(void)
 {
+  uint32_t regval;
+
   /* TODO:
    *
    * (1) "Make sure that the PLL output is not already being used.  The CCLKSEL,
@@ -214,11 +216,17 @@ void lpc17_clockconfig(void)
 
 #endif /* CONFIG_LPC17_PLL1 */
 
-  /* Disable power to all peripherals (execpt GPIO).  Peripherals must be re-powered
+  /* Disable power to all peripherals (except GPIO and left EMC intact).
+   * EMC is switched off after reset but if there is boot-loader,
+   * it can left it on and if SDRAM is used for NuttX execution then
+   * disabling blocks system. Other peripherals must be re-powered
    * one at a time by each device driver when the driver is initialized.
    */
 
-  putreg32(SYSCON_PCONP_PCGPIO, LPC17_SYSCON_PCONP);
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval &= SYSCON_PCONP_PCEMC;
+  regval |= SYSCON_PCONP_PCGPIO;
+  putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Disable CLKOUT */
 

@@ -46,6 +46,8 @@
 
 #include <nuttx/init.h>
 
+#include <arch/irq.h>
+
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -219,6 +221,10 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
+
+  /* Disable interrupts for the case that started by loader */
+
+  cpsid();
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */

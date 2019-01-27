@@ -349,8 +349,32 @@ void up_addregion(void)
 
 #endif
   /* Add external DRAM heap memory to the user heap */
+  {
+    uint32_t *dram_start = (FAR void *)LPC17_EXTDRAM_CS0;
+    uint32_t *dram_end   = dram_start + CONFIG_LPC17_EXTDRAMSIZE / 4;
 
-  kumm_addregion((FAR void *)LPC17_EXTDRAM_CS0, CONFIG_LPC17_EXTDRAMSIZE);
+    if (&_eronly >= dram_start && &_eronly <= dram_end)
+      {
+        dram_start = (uint32_t *)&_eronly + 0x100;
+      }
+
+    if (&_edata >= dram_start && &_edata <= dram_end)
+      {
+        dram_start = &_edata + 0x100;
+      }
+
+    if (&_ebss >= dram_start && &_ebss <= dram_end)
+      {
+        dram_start = &_ebss + 0x100;
+      }
+
+    if (((uintptr_t)dram_start & 0xff) != 0)
+      {
+        dram_start = (uint32_t *)((uintptr_t)dram_start & ~0xff);
+      }
+
+    kumm_addregion(dram_start, (char *)dram_end - (char *)dram_start);
+  }
 #endif
 
 #if !defined(CONFIG_LPC17_EXTDRAMHEAP) || (CONFIG_MM_REGIONS >= 4)

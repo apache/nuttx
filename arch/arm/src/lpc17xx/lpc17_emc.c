@@ -121,6 +121,34 @@ static const lpc17_pinset_t g_emcaddr[] =
  * Private Functions
  ****************************************************************************/
 
+/*****************************************************************************
+ * Name:
+ *   lpc17_running_from_sdram
+ *
+ * Descriptions:
+ *   Check whether currently execution from SDRAM.
+ *
+ * Returned value:
+ *   1 running from SDRAM, otherwise 0
+ *
+ ****************************************************************************/
+
+static int lpc17_running_from_sdram(void)
+{
+  uint32_t extdram_bank_size = LPC17_EXTDRAM_CS3 - LPC17_EXTDRAM_CS2;
+  uint32_t extdram_end       = LPC17_EXTDRAM_CS3 + extdram_bank_size;
+
+  if (((uint32_t)lpc17_running_from_sdram >= LPC17_EXTDRAM_CS0) &&
+      ((uint32_t)lpc17_running_from_sdram < extdram_end))
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -142,7 +170,7 @@ void lpc17_emcinitialize(void)
 
   /* Enable clocking for the EMC */
 
-  regval = getreg32(LPC17_SYSCON_PCONP);
+  regval  = getreg32(LPC17_SYSCON_PCONP);
   regval |= SYSCON_PCONP_PCEMC;
   putreg32(regval, LPC17_SYSCON_PCONP);
 
@@ -160,6 +188,11 @@ void lpc17_emcinitialize(void)
    *  typically be used in clock delayed mode.  The delay amount is roughly
    *  (CLKOUT1DLY+1) * 250 picoseconds.
    */
+
+  if (lpc17_running_from_sdram())
+    {
+      return;
+    }
 
   regval = SYSCON_EMCDLYCTL_CMDDLY(BOARD_CMDDLY) |
            SYSCON_EMCDLYCTL_FBCLKDLY(BOARD_FBCLKDLY) |
