@@ -980,7 +980,8 @@ static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        uint8_t justify, uint8_t flags, int fieldwidth,
                        int valwidth, int trunc)
 {
-  bool althex = (fmt == 'x' || fmt == 'X') && IS_ALTFORM(flags);
+  bool althex = (fmt == 'x' || fmt == 'X' || fmt == 'p' || fmt == 'P')
+                && IS_ALTFORM(flags);
   int i;
 
   /* If there is integer precision, then use FMT_RJUST vs FMT_RJUST0 */
