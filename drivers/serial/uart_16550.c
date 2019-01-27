@@ -391,7 +391,7 @@ static uart_dev_t g_uart3port =
 #  elif defined(CONFIG_16550_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart1port    /* UART1=console */
 #    define TTYS0_DEV       g_uart1port    /* UART1=ttyS0 */
-#    ifdef CONFIG_16550_UART
+#    ifdef CONFIG_16550_UART0
 #      define TTYS1_DEV     g_uart0port    /* UART1=ttyS0;UART0=ttyS1 */
 #      ifdef CONFIG_16550_UART2
 #        define TTYS2_DEV   g_uart2port    /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2 */
@@ -430,7 +430,7 @@ static uart_dev_t g_uart3port =
 #  elif defined(CONFIG_16550_UART2_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart2port    /* UART2=console */
 #    define TTYS0_DEV       g_uart2port    /* UART2=ttyS0 */
-#    ifdef CONFIG_16550_UART
+#    ifdef CONFIG_16550_UART0
 #      define TTYS1_DEV     g_uart0port    /* UART2=ttyS0;UART0=ttyS1 */
 #      ifdef CONFIG_16550_UART1
 #        define TTYS2_DEV   g_uart1port    /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2 */
@@ -469,7 +469,7 @@ static uart_dev_t g_uart3port =
 #  elif defined(CONFIG_16550_UART3_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart3port    /* UART3=console */
 #    define TTYS0_DEV       g_uart3port    /* UART3=ttyS0 */
-#    ifdef CONFIG_16550_UART
+#    ifdef CONFIG_16550_UART0
 #      define TTYS1_DEV     g_uart0port    /* UART3=ttyS0;UART0=ttyS1 */
 #      ifdef CONFIG_16550_UART1
 #        define TTYS2_DEV   g_uart1port    /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS2 */
