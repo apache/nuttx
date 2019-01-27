@@ -21,6 +21,7 @@ config SERIAL_CONSOLE
 
 menuconfig 16550_UART
 	bool "16550 UART Chip support"
+	select ARCH_HAVE_SERIAL_TERMIOS
 	default n
 
 if 16550_UART

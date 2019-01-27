@@ -378,12 +378,34 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
     {
       int ch = *buffer++;
 
+#ifdef CONFIG_SERIAL_TERMIOS
+      /* Do output post-processing */
+
+      if ((dev->tc_oflag & OPOST) != 0)
+        {
+          /* Mapping CR to NL? */
+
+          if ((ch == '\r') && (dev->tc_oflag & OCRNL) != 0)
+            {
+              ch = '\n';
+            }
+
+          /* Are we interested in newline processing? */
+
+          if ((ch == '\n') && (dev->tc_oflag & (ONLCR | ONLRET)) != 0)
+            {
+              uart_putc(dev, '\r');
+            }
+        }
+
+#else /* !CONFIG_SERIAL_TERMIOS */
       /* If this is the console, then we should replace LF with CR-LF */
 
       if (dev->isconsole && ch == '\n')
         {
           uart_putc(dev, '\r');
         }
+#endif
 
       /* Output the character, using the low-level direct UART interfaces */
 
@@ -600,22 +622,6 @@ static int uart_open(FAR struct file *filep)
            leave_critical_section(flags);
            goto errout_with_sem;
         }
-
-#ifdef CONFIG_SERIAL_TERMIOS
-      /* Initialize termios state */
-
-      dev->tc_iflag = 0;
-      if (dev->isconsole)
-        {
-          /* Enable \n -> \r\n translation for the console */
-
-          dev->tc_oflag = OPOST | ONLCR;
-        }
-      else
-        {
-          dev->tc_oflag = 0;
-        }
-#endif
 
 #ifdef CONFIG_SERIAL_DMA
       /* Notify DMA that there is free space in the RX buffer */
@@ -1611,16 +1617,24 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#ifdef CONFIG_SERIAL_TERMIOS
+#  if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
   dev->pid = (pid_t)-1;
+#  endif
 
-  /* If this UART is a serial console, then enable signals by default */
+  /* If this UART is a serial console */
 
   if (dev->isconsole)
     {
+      /* Enable signals by default */
+
       dev->tc_lflag |= ISIG;
+
+      /* Enable \n -> \r\n translation for the console */
+
+      dev->tc_oflag = OPOST | ONLCR;
     }
 #endif
 
