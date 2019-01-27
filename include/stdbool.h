@@ -67,8 +67,6 @@
  /* nuttx/compiler.h may also define or undefine CONFIG_C99_BOOL8 */
 
 #  include <nuttx/compiler.h>
-
-#if !defined(__cplusplus) || !defined(CONFIG_C99_BOOL8)
 #  include <stdint.h>
 
 /****************************************************************************
@@ -84,6 +82,7 @@
  * use _Bool8 as the underlying type (unless CONFIG_C99_BOOL8 is defined)
  */
 
+#ifndef __cplusplus
 #ifdef CONFIG_C99_BOOL8
 #  define bool _Bool
 #else
@@ -94,6 +93,7 @@
 #define false (bool)0
 
 #define __bool_true_false_are_defined 1
+#endif /* __cplusplus */
 
 /****************************************************************************
  * Public Types
@@ -115,6 +115,5 @@
 typedef uint8_t _Bool8;
 #endif
 
-#endif /* __cplusplus && CONFIG_C99_BOOL8 */
 #endif /* CONFIG_ARCH_STDBOOL_H */
 #endif /* __INCLUDE_STDBOOL_H */
