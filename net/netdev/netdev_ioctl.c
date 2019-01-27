@@ -1077,7 +1077,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev && dev->d_ioctl)
             {
-              struct mii_iotcl_notify_s *notify = &req->ifr_ifru.ifru_mii_notify;
+              struct mii_ioctl_notify_s *notify = &req->ifr_ifru.ifru_mii_notify;
               ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)notify));
             }
         }
@@ -1540,7 +1540,7 @@ ssize_t net_ioctl_arglen(int cmd)
         return sizeof(struct rtentry);
 
       case SIOCMIINOTIFY:
-        return sizeof(struct mii_iotcl_notify_s);
+        return sizeof(struct mii_ioctl_notify_s);
 
       case SIOCGMIIPHY:
       case SIOCGMIIREG:

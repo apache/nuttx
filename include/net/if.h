@@ -118,7 +118,7 @@
  * of PHY state changes.
  */
 
-struct mii_iotcl_notify_s
+struct mii_ioctl_notify_s
 {
   pid_t pid;             /* PID of the task to receive the signal.  Zero means "this task" */
   struct sigevent event; /* Describe the way a task is to be notified */
@@ -156,7 +156,7 @@ struct lifreq
     int                       lifru_count;              /* Number of devices */
     int                       lifru_mtu;                /* MTU size */
     uint8_t                   lifru_flags;              /* Interface flags */
-    struct mii_iotcl_notify_s llfru_mii_notify;         /* PHY event notification */
+    struct mii_ioctl_notify_s llfru_mii_notify;         /* PHY event notification */
     struct mii_ioctl_data_s   lifru_mii_data;           /* MII request data */
   } lifr_ifru;
 };
@@ -170,8 +170,7 @@ struct lifreq
 #define lifr_count            lifr_ifru.lifru_count     /* Number of devices */
 #define lifr_flags            lifr_ifru.lifru_flags     /* interface flags */
 #define lifr_mii_notify_pid   lifr_ifru.llfru_mii_notify.pid   /* PID to be notified */
-#define lifr_mii_notify_signo lifr_ifru.llfru_mii_notify.signo /* Signal to notify with */
-#define lifr_mii_notify_arg   lifr_ifru.llfru_mii_notify.arg   /* sigval argument */
+#define lifr_mii_notify_event lifr_ifru.llfru_mii_notify.event /* Describes notification */
 #define lifr_mii_phy_id       lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
 #define lifr_mii_reg_num      lifr_ifru.lifru_mii_data.reg_num /* PHY register address */
 #define lifr_mii_val_in       lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
@@ -207,7 +206,7 @@ struct ifreq
     int                       ifru_count;               /* Number of devices */
     int                       ifru_mtu;                 /* MTU size */
     uint8_t                   ifru_flags;               /* Interface flags */
-    struct mii_iotcl_notify_s ifru_mii_notify;          /* PHY event notification */
+    struct mii_ioctl_notify_s ifru_mii_notify;          /* PHY event notification */
     struct mii_ioctl_data_s   ifru_mii_data;            /* MII request data */
   } ifr_ifru;
 };
@@ -221,7 +220,7 @@ struct ifreq
 #define ifr_count             ifr_ifru.ifru_count       /* Number of devices */
 #define ifr_flags             ifr_ifru.ifru_flags       /* interface flags */
 #define ifr_mii_notify_pid    ifr_ifru.ifru_mii_notify.pid   /* PID to be notified */
-#define ifr_mii_notify_signo  ifr_ifru.ifru_mii_notify.signo /* Signal to notify with */
+#define ifr_mii_notify_event  ifr_ifru.ifru_mii_notify.event /* Describes notification */
 #define ifr_mii_notify_arg    ifr_ifru.ifru_mii_notify.arg   /* sigval argument */
 #define ifr_mii_phy_id        ifr_ifru.ifru_mii_data.phy_id  /* PHY device address */
 #define ifr_mii_reg_num       ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
