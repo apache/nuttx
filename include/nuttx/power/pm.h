@@ -492,6 +492,26 @@ void pm_stay(int domain, enum pm_state_e state);
 void pm_relax(int domain, enum pm_state_e state);
 
 /****************************************************************************
+ * Name: pm_staycount
+ *
+ * Description:
+ *   This function is called to get current stay count.
+ *
+ * Input Parameters:
+ *   domain - The domain of the PM activity
+ *   state - The state want to relax.
+ *
+ * Returned Value:
+ *   Current pm stay count
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+uint32_t pm_staycount(int domain, enum pm_state_e state);
+
+/****************************************************************************
  * Name: pm_checkstate
  *
  * Description:
