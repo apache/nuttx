@@ -378,6 +378,7 @@ union inode_ops_u
   FAR const struct file_operations     *i_ops;    /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR const struct block_operations    *i_bops;   /* Block driver operations */
+  FAR struct mtd_dev_s                 *i_mtd;    /* MTD device driver */
   FAR const struct mountpt_operations  *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
@@ -385,9 +386,6 @@ union inode_ops_u
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE
   FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
-#endif
-#ifdef CONFIG_MTD
-  FAR struct mtd_dev_s                 *i_mtd;    /* MTD device driver */
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   FAR char                             *i_link;   /* Full path to link target */
