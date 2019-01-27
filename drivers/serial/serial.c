@@ -691,13 +691,6 @@ static int uart_close(FAR struct file *filep)
       (void)uart_tcdrain(dev, 4 * TICK_PER_SEC);
     }
 
-  /* Mark the I/O buffers empty */
-
-  dev->xmit.head = 0;
-  dev->xmit.tail = 0;
-  dev->recv.head = 0;
-  dev->recv.tail = 0;
-
   /* Free the IRQ and disable the UART */
 
   flags = enter_critical_section();  /* Disable interrupts */
