@@ -39,7 +39,7 @@ config NETDEV_IFINDEX
 config NETDOWN_NOTIFIER
 	bool "Support network down notifications"
 	default n
-	depends on SCHED_LPWORK
+	depends on SCHED_WORKQUEUE
 	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of logic that will execute on the low priority work

@@ -1469,6 +1469,16 @@ config SCHED_WORKQUEUE
 		Create dedicated "worker" threads to handle delayed or asynchronous
 		processing.
 
+config WQUEUE_NOTIFIER
+	bool "Generic work notifier"
+	default n
+	depends on SCHED_WORKQUEUE
+	---help---
+		Enable building of work queue notifier logic that will execute a
+		worker function an event occurs.  This is is a general purpose
+		notifier, but was developed specifically to support poll() logic
+		where the poll must wait for an resources to become available.
+
 config SCHED_HPWORK
 	bool "High priority (kernel) worker thread"
 	default n
@@ -1533,15 +1543,6 @@ config SCHED_HPWORKSTACKSIZE
 	default 2048
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
-
-config WQUEUE_NOTIFIER
-	bool "Generic work notifier"
-	default n
-	---help---
-		Enable building of work queue notifier logic that will execute a
-		worker function an event occurs.  This is is a general purpose
-		notifier, but was developed specifically to support poll() logic
-		where the poll must wait for an resources to become available.
 
 endif # SCHED_HPWORK
 

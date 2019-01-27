@@ -211,7 +211,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
        */
 
       dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
-      ret = work_notifier_key();
+      ret = notifier->key;
     }
 
   (void)nxsem_post(&g_notifier_sem);
@@ -310,11 +310,12 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
   /* Get exclusive access to the notifier data structure */
 
-  ret = nxsem_wait(&g_notifier_sem);
-  while (ret < 0)
+  do
     {
+      ret = nxsem_wait(&g_notifier_sem);
       DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
     }
+  while (ret < 0);
 
   /* Don't let any newly started threads block this thread until all of
    * the notifications and been sent.
@@ -324,8 +325,6 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty  */
-
-  /* Find the entry matching this key in the g_notifier_pending list. */
 
   for (entry = dq_peek(&g_notifier_pending);
        entry != NULL;

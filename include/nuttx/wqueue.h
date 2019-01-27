@@ -245,7 +245,7 @@
 /* Kernel mode */
 
 #  define HPWORK   0          /* High priority, kernel-mode work queue */
-#  ifdef CONFIG_SCHED_LPWORK
+#  if defined(CONFIG_SCHED_LPWORK) && defined(CONFIG_SCHED_HPWORK)
 #    define LPWORK (HPWORK+1) /* Low priority, kernel-mode work queue */
 #  else
 #    define LPWORK HPWORK     /* Redirect low-priority references */

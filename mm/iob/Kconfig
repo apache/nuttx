@@ -62,7 +62,7 @@ config IOB_THROTTLE
 config IOB_NOTIFIER
 	bool "Support IOB notifications"
 	default n
-	depends on SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
 	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of IOB notifier logic that will execute a worker

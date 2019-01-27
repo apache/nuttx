@@ -60,7 +60,7 @@ config NET_UDP_READAHEAD
 config UDP_READAHEAD_NOTIFIER
 	bool "Support UDP read-ahead notifications"
 	default n
-	depends on NET_UDP_READAHEAD && SCHED_HPWORK
+	depends on NET_UDP_READAHEAD && SCHED_WORKQUEUE
 	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of UDP read-ahead notifier logic that will execute a

@@ -50,7 +50,7 @@ config NET_MAX_LISTENPORTS
 config TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n
-	depends on SCHED_LPWORK
+	depends on SCHED_WORKQUEUE
 	select WQUEUE_NOTIFIER
 	---help---
 		Enable building of TCP notifier logic that will execute a worker
