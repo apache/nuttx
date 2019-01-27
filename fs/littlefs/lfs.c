@@ -73,8 +73,6 @@ struct lfs_region_s
  * Private Function Prototypes
  ****************************************************************************/
 
-int lfs_traverse(FAR lfs_t *lfs, CODE int (*cb)(FAR void *, lfs_block_t),
-                 FAR void *data);
 static int lfs_pred(FAR lfs_t *lfs, FAR const lfs_block_t dir[2],
                     FAR lfs_dir_t *pdir);
 static int lfs_parent(FAR lfs_t *lfs, FAR const lfs_block_t dir[2],
@@ -82,7 +80,6 @@ static int lfs_parent(FAR lfs_t *lfs, FAR const lfs_block_t dir[2],
 static int lfs_moved(FAR lfs_t *lfs, FAR const void *e);
 static int lfs_relocate(FAR lfs_t *lfs, FAR const lfs_block_t oldpair[2],
                         FAR const lfs_block_t newpair[2]);
-int lfs_deorphan(FAR lfs_t *lfs);
 
 /****************************************************************************
  * Private Functions

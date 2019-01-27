@@ -81,7 +81,7 @@
 /* Max name size in bytes */
 
 #ifndef LFS_NAME_MAX
-#  define LFS_NAME_MAX 255
+#  define LFS_NAME_MAX NAME_MAX
 #endif
 
 /* Max file size in bytes */

@@ -1,5 +1,5 @@
 #############################################################################
-# fs/littlefs/lfs.c
+# fs/littlefs/Make.defs
 #
 # This file is a part of NuttX:
 #

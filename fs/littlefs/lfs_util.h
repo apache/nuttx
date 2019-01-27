@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/littlefs/lfs.c
+ * fs/littlefs/lfs_util.h
  *
  * This file is a part of NuttX:
  *
@@ -71,16 +71,14 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define LFS_NO_DEBUG
-
 #ifndef LFS_NO_MALLOC
-#  include <stdlib.h>
+#  include <nuttx/kmalloc.h>
 #endif
 #ifndef LFS_NO_ASSERT
 #  include <assert.h>
 #endif
 #if !defined(LFS_NO_DEBUG) || !defined(LFS_NO_WARN) || !defined(LFS_NO_ERROR)
-#  include <stdio.h>
+#  include <debug.h>
 #endif
 
 /****************************************************************************
@@ -96,21 +94,21 @@
 
 #ifndef LFS_NO_DEBUG
 #  define LFS_DEBUG(fmt, ...) \
-    printf("lfs debug:%d: " fmt "\n", __LINE__, __VA_ARGS__)
+    finfo("lfs debug:%d: " fmt "\n", __LINE__, __VA_ARGS__)
 #else
 #  define LFS_DEBUG(fmt, ...)
 #endif
 
 #ifndef LFS_NO_WARN
 #  define LFS_WARN(fmt, ...) \
-    printf("lfs warn:%d: " fmt "\n", __LINE__, __VA_ARGS__)
+    fwarn("lfs warn:%d: " fmt "\n", __LINE__, __VA_ARGS__)
 #else
 #  define LFS_WARN(fmt, ...)
 #endif
 
 #ifndef LFS_NO_ERROR
 #  define LFS_ERROR(fmt, ...) \
-    printf("lfs error:%d: " fmt "\n", __LINE__, __VA_ARGS__)
+    ferr("lfs error:%d: " fmt "\n", __LINE__, __VA_ARGS__)
 #else
 #  define LFS_ERROR(fmt, ...)
 #endif
@@ -118,7 +116,7 @@
 /* Runtime assertions */
 
 #ifndef LFS_NO_ASSERT
-#  define LFS_ASSERT(test) assert(test)
+#  define LFS_ASSERT(test) DEBUGASSERT(test)
 #else
 #  define LFS_ASSERT(test)
 #endif
@@ -222,15 +220,9 @@ static inline int lfs_scmp(uint32_t a, uint32_t b)
 
 static inline uint32_t lfs_fromle32(uint32_t a)
 {
-#if !defined(LFS_NO_INTRINSICS) && \
-    ((defined(BYTE_ORDER) && BYTE_ORDER == ORDER_LITTLE_ENDIAN) || \
-     (defined(__BYTE_ORDER) && __BYTE_ORDER == __ORDER_LITTLE_ENDIAN) || \
-     (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
+#if !defined(CONFIG_ENDIAN_BIG)
   return a;
-#elif !defined(LFS_NO_INTRINSICS) && \
-    ((defined(BYTE_ORDER) && BYTE_ORDER == ORDER_BIG_ENDIAN) || \
-     (defined(__BYTE_ORDER) && __BYTE_ORDER == __ORDER_BIG_ENDIAN) || \
-     (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__))
+#elif !defined(LFS_NO_INTRINSICS)
   return __builtin_bswap32(a);
 #else
   return (((uint8_t *)&a)[0] << 0) | (((uint8_t *)&a)[1] << 8) |
@@ -250,7 +242,7 @@ static inline uint32_t lfs_tole32(uint32_t a)
 static inline void *lfs_malloc(size_t size)
 {
 #ifndef LFS_NO_MALLOC
-  return malloc(size);
+  return kmm_malloc(size);
 #else
   return NULL;
 #endif
@@ -261,7 +253,7 @@ static inline void *lfs_malloc(size_t size)
 static inline void lfs_free(FAR void *p)
 {
 #ifndef LFS_NO_MALLOC
-  free(p);
+  kmm_free(p);
 #else
   (void)p;
 #endif
