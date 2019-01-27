@@ -3403,6 +3403,54 @@ config STM32_TIM1_CH4OUT
 
 endif # STM32_TIM1_CHANNEL4
 
+config STM32_TIM1_CHANNEL5
+	bool "TIM1 Channel 5 (internal)"
+	default n
+	depends on STM32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 5 (no available externaly)
+
+if STM32_TIM1_CHANNEL5
+
+config STM32_TIM1_CH5MODE
+	int "TIM1 Channel 5 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH5OUT
+	bool "TIM1 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # STM32_TIM1_CHANNEL5
+
+config STM32_TIM1_CHANNEL6
+	bool "TIM1 Channel 6 (internal)"
+	default n
+	depends on STM32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 6 (no available externaly)
+
+if STM32_TIM1_CHANNEL6
+
+config STM32_TIM1_CH6MODE
+	int "TIM1 Channel 6 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM1_CH6OUT
+	bool "TIM1 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # STM32_TIM1_CHANNEL6
+
 endif # STM32_PWM_MULTICHAN
 
 if !STM32_PWM_MULTICHAN
@@ -4379,6 +4427,54 @@ config STM32_TIM8_CH4OUT
 
 endif # STM32_TIM8_CHANNEL4
 
+config STM32_TIM8_CHANNEL5
+	bool "TIM8 Channel 5 (internal)"
+	default n
+	depends on STM32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 5 (no available externaly)
+
+if STM32_TIM8_CHANNEL5
+
+config STM32_TIM8_CH5MODE
+	int "TIM8 Channel 5 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH5OUT
+	bool "TIM8 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # STM32_TIM8_CHANNEL5
+
+config STM32_TIM8_CHANNEL6
+	bool "TIM8 Channel 6 (internal)"
+	default n
+	depends on STM32_HAVE_IP_TIMERS_V2
+	---help---
+		Enables channel 6 (no available externaly)
+
+if STM32_TIM8_CHANNEL6
+
+config STM32_TIM8_CH6MODE
+	int "TIM8 Channel 6 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32_TIM8_CH6OUT
+	bool "TIM8 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # STM32_TIM8_CHANNEL6
+
 endif # STM32_PWM_MULTICHAN
 
 if !STM32_PWM_MULTICHAN
@@ -5330,10 +5426,10 @@ config STM32_PWM_MULTICHAN
 		Specifies that the PWM driver supports multiple output
 		channels per timer.
 
-config STM32_TIM_PWM_TRGO
-	bool "TIM PWM TRGO"
+config STM32_PWM_TRGO
+	bool "TIM PWM TRGO support"
 	default n
-	depends on STM32_TIM1
+	depends on STM32_PWM
 	---help---
 		Enable TRGO support for PWM driver
 
@@ -6343,6 +6439,38 @@ config STM32_TIM1_CH4IDLE
 	---help---
 		TIM1 Channel 4 output IDLE
 
+config STM32_TIM1_CH5POL
+	int "TIM1 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output polarity
+
+config STM32_TIM1_CH5IDLE
+	int "TIM1 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output IDLE
+
+config STM32_TIM1_CH6POL
+	int "TIM1 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output polarity
+
+config STM32_TIM1_CH6IDLE
+	int "TIM1 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output IDLE
+
 config STM32_TIM2_CH1POL
 	int "TIM2 Channel 1 Output polarity"
 	default 0
@@ -6710,6 +6838,38 @@ config STM32_TIM8_CH4IDLE
 	depends on STM32_TIM8_CH4OUT
 	---help---
 		TIM8 Channel 4 output IDLE
+
+config STM32_TIM8_CH5POL
+	int "TIM8 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output polarity
+
+config STM32_TIM8_CH5IDLE
+	int "TIM8 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output IDLE
+
+config STM32_TIM8_CH6POL
+	int "TIM8 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output polarity
+
+config STM32_TIM8_CH6IDLE
+	int "TIM8 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output IDLE
 
 config STM32_TIM9_CH1POL
 	int "TIM9 Channel 1 Output polarity"

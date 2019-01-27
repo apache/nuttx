@@ -1921,6 +1921,8 @@
         (adc)->llops->regbuf_reg(adc, buffer, len)
 #define ADC_REG_STARTCONV(adc, state)                \
         (adc)->llops->reg_startconv(adc, state)
+#define ADC_OFFSET_SET(adc, ch, i, o)                \
+        (adc)->llops->offset_set(adc, ch, i, o)
 #define ADC_INJ_STARTCONV(adc, state)                \
         (adc)->llops->inj_startconv(adc, state)
 #define ADC_INJDATA_GET(adc, chan)                   \
@@ -2052,6 +2054,11 @@ struct stm32_adc_ops_s
   /* Start/stop regular conversion */
 
   void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+
+  /* Set offset for channel */
+
+  int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+                    uint16_t offset);
 
 #ifdef ADC_HAVE_INJECTED
   /* Get current ADC injected data register */

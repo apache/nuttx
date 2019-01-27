@@ -687,6 +687,8 @@ static void adc_intdis(FAR struct stm32_adc_dev_s *dev, uint32_t source);
 static uint32_t adc_intget(FAR struct stm32_adc_dev_s *dev);
 static uint32_t adc_regget(FAR struct stm32_adc_dev_s *dev);
 static void adc_llops_reg_startconv(FAR struct stm32_adc_dev_s *dev, bool enable);
+static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+                          uint16_t offset);
 #  ifdef ADC_HAVE_DMA
 static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
                               uint8_t len);
@@ -734,6 +736,7 @@ static const struct stm32_adc_ops_s g_adc_llops =
   .int_dis       = adc_intdis,
   .val_get       = adc_regget,
   .reg_startconv = adc_llops_reg_startconv,
+  .offset_set    = adc_offset_set,
 #  ifdef ADC_HAVE_DMA
   .regbuf_reg    = adc_regbufregister,
 #  endif
@@ -2783,15 +2786,25 @@ static void adc_configure(FAR struct adc_dev_s *dev)
   adc_extcfg_set(dev, priv->extcfg);
 #endif
 
-#ifdef ADC_HAVE_JEXTCFG
-  /* Configure external event for injected group */
-
-  adc_jextcfg_set(dev, priv->jextcfg);
-#endif
-
   /* Enable ADC */
 
   adc_enable(priv, true);
+
+#ifdef ADC_HAVE_JEXTCFG
+  /* Configure external event for injected group when ADC enabled */
+
+  adc_jextcfg_set(dev, priv->jextcfg);
+
+#if defined(HAVE_IP_ADC_V2)
+  /* For ADC IPv2 there is queue of context for injected conversion.
+   * JEXTCFG configuration is the second write to JSQR register which means
+   * configuration is stored on queue.
+   * We trigger single INJ conversion here to update context.
+   */
+
+  adc_inj_startconv(priv, true);
+#endif
+#endif
 
   /* Dump regs */
 
@@ -3267,8 +3280,9 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
   UNUSED(priv);
 
 #if defined(HAVE_IP_ADC_V2)
-  ainfo("ISR:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
+        adc_getreg(priv, STM32_ADC_IER_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 #else
@@ -3278,17 +3292,19 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x SQR4: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
+        adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
+
+  ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_SMPR1_OFFSET),
+        adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
 
 #if defined(STM32_ADC_SQR5_OFFSET)
-  ainfo("SQR4: 0x%08x SQR5: 0x%08x\n",
-        adc_getreg(priv, STM32_ADC_SQR4_OFFSET)
-        adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
-#elif defined(STM32_ADC_SQR4_OFFSET)
-  ainfo("SQR4: 0x%08x\n", adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
+  ainfo("SQR5: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 #endif
 
 #ifdef ADC_HAVE_INJECTED
@@ -3628,6 +3644,67 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
 
   return bits;
 }
+
+/****************************************************************************
+ * Name: adc_offset_set
+ ****************************************************************************/
+
+#ifdef HAVE_IP_ADC_V2
+static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
+                          uint8_t i, uint16_t offset)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+  uint32_t regval = 0;
+  uint32_t reg    = 0;
+  int      ret    = OK;
+
+  if (i >= 4)
+    {
+      /* There are only four offset registers. */
+
+      ret = -E2BIG;
+      goto errout;
+    }
+
+  reg = STM32_ADC_OFR1_OFFSET + i * 4;
+
+  regval = ADC_OFR_OFFSETY_EN;
+  adc_putreg(priv, reg, regval);
+
+  regval |= ADC_OFR_OFFSETY_CH(ch) | ADC_OFR_OFFSETY(offset);
+  adc_putreg(priv, reg, regval);
+
+errout:
+  return ret;
+}
+#else  /* HAVE_IP_ADC_V1 */
+static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
+                          uint8_t i, uint16_t offset)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+  uint32_t reg = 0;
+  int      ret = OK;
+
+  /* WARNING: Offset only for injected channels! */
+
+  UNUSED(ch);
+
+  if (i >= 4)
+    {
+      /* There are only four offset registers. */
+
+      ret = -E2BIG;
+      goto errout;
+    }
+
+  reg = STM32_ADC_JOFR1_OFFSET + i * 4;
+
+  adc_putreg(priv, reg, offset);
+
+errout:
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: adc_set_ch
@@ -4381,13 +4458,13 @@ void adc_sampletime_set(FAR struct stm32_adc_dev_s *dev,
     {
       for (i = 0; i < time_samples->channels_nbr; i++)
         {
-          ch_index = time_samples->channel->channel;
+          ch_index = time_samples->channel[i].channel;
           if (ch_index >= ADC_CHANNELS_NUMBER)
             {
               break;
             }
 
-          priv->sample_rate[ch_index] = time_samples->channel->sample_time;
+          priv->sample_rate[ch_index] = time_samples->channel[i].sample_time;
         }
     }
 }

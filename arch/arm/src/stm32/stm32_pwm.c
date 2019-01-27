@@ -653,6 +653,36 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
       .pincfg  = PWM_TIM1_CH4CFG,
     }
 #endif
+  },
+#endif
+#ifdef CONFIG_STM32_TIM1_CHANNEL5
+  {
+    .channel = 5,
+    .mode    = CONFIG_STM32_TIM1_CH5MODE
+#ifdef CONFIG_STM32_TIM1_CH5OUT
+    .out1 =
+    {
+      .in_use  = 1,
+      .pol     = CONFIG_STM32_TIM1_CH5POL,
+      .idle    = CONFIG_STM32_TIM1_CH5IDLE,
+      .pincfg  = 0,    /* No available externaly */
+    }
+#endif
+  }
+#endif
+#ifdef CONFIG_STM32_TIM1_CHANNEL6
+  {
+    .channel = 6,
+    .mode    = CONFIG_STM32_TIM1_CH6MODE
+#ifdef CONFIG_STM32_TIM1_CH6OUT
+    .out1 =
+    {
+      .in_use  = 1,
+      .pol     = CONFIG_STM32_TIM1_CH6POL,
+      .idle    = CONFIG_STM32_TIM1_CH6IDLE,
+      .pincfg  = 0,    /* No available externaly */
+    }
+#endif
   }
 #endif
 };
@@ -1184,6 +1214,36 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
     }
 #endif
   },
+#endif
+#ifdef CONFIG_STM32_TIM8_CHANNEL5
+  {
+    .channel = 5,
+    .mode    = CONFIG_STM32_TIM8_CH5MODE
+#ifdef CONFIG_STM32_TIM8_CH5OUT
+    .out1 =
+    {
+      .in_use  = 1,
+      .pol     = CONFIG_STM32_TIM8_CH5POL,
+      .idle    = CONFIG_STM32_TIM8_CH5IDLE,
+      .pincfg  = 0,    /* No available externaly */
+    }
+#endif
+  }
+#endif
+#ifdef CONFIG_STM32_TIM8_CHANNEL6
+  {
+    .channel = 6,
+    .mode    = CONFIG_STM32_TIM8_CH6MODE
+#ifdef CONFIG_STM32_TIM8_CH6OUT
+    .out1 =
+    {
+      .in_use  = 1,
+      .pol     = CONFIG_STM32_TIM8_CH6POL,
+      .idle    = CONFIG_STM32_TIM8_CH6IDLE,
+      .pincfg  = 0,    /* No available externaly */
+    }
+#endif
+  }
 #endif
 };
 
@@ -2016,6 +2076,16 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
   pwminfo("  DCR: %04x DMAR: %04x\n",
       pwm_getreg(priv, STM32_GTIM_DCR_OFFSET),
       pwm_getreg(priv, STM32_GTIM_DMAR_OFFSET));
+
+#ifdef HAVE_IP_TIMERS_V2
+  if (priv->timtype == TIMTYPE_ADVANCED)
+    {
+      pwminfo("  CCMR3: %04x CCR5: %04x CCR6: %04x\n",
+              pwm_getreg(priv, STM32_ATIM_CCMR3_OFFSET),
+              pwm_getreg(priv, STM32_ATIM_CCR5_OFFSET),
+              pwm_getreg(priv, STM32_ATIM_CCR6_OFFSET));
+    }
+#endif
 }
 #endif
 
@@ -2468,7 +2538,20 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv,
   uint32_t ccmr2    = 0;
   int      ret      = OK;
 #ifdef HAVE_IP_TIMERS_V2
+  uint32_t ccmr3    = 0;
+  uint32_t ocmode3  = 0;
   bool     ocmbit   = false;
+#endif
+
+#ifdef HAVE_IP_TIMERS_V2
+  /* Only advanced timers have channels 5-6 */
+
+  if (channel > 4 && priv->timtype != TIMTYPE_ADVANCED)
+    {
+      pwmerr("ERROR: No such channel: %u\n", channel);
+      ret = -EINVAL;
+      goto errout;
+    }
 #endif
 
   /* Get channel mode
@@ -2531,6 +2614,12 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv,
 
   ccmr1 = pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr2 = pwm_getreg(priv, STM32_GTIM_CCMR2_OFFSET);
+#ifdef HAVE_IP_TIMERS_V2
+  if (priv->timtype == TIMTYPE_ADVANCED)
+    {
+      ccmr3 = pwm_getreg(priv, STM32_ATIM_CCMR3_OFFSET);
+    }
+#endif
 
   switch (channel)
     {
@@ -2670,6 +2759,62 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv,
           break;
         }
 
+#ifdef HAVE_IP_TIMERS_V2
+      case 5: /* PWM Mode configuration: Channel 5 */
+        {
+          /* Reset current channel 5 mode configuration */
+
+          ccmr3 &= ~(ATIM_CCMR3_OC5M_MASK | ATIM_CCMR3_OC5PE);
+
+          /* Enable CCR5 preload */
+
+          ocmode3 |= (chanmode << ATIM_CCMR3_OC5M_SHIFT);
+
+          /* Enable CCR5 preload */
+
+          ocmode3 |= ATIM_CCMR3_OC5PE;
+
+          /* Reset current OC bit */
+
+          ccmr3 &= ~(ATIM_CCMR3_OC5M);
+
+          /* Set an additional OC5M bit */
+
+          if (ocmbit)
+            {
+              ocmode3 |= ATIM_CCMR3_OC5M;
+            }
+          break;
+        }
+
+      case 6: /* PWM Mode configuration: Channel 6 */
+        {
+          /* Reset current channel 6 mode configuration */
+
+          ccmr3 &= ~(ATIM_CCMR3_OC6M_MASK | ATIM_CCMR3_OC6PE);
+
+          /* Enable CCR6 preload */
+
+          ocmode3 |= (chanmode << ATIM_CCMR3_OC6M_SHIFT);
+
+          /* Enable CCR6 preload */
+
+          ocmode3 |= ATIM_CCMR3_OC6PE;
+
+          /* Reset current OC bit */
+
+          ccmr3 &= ~(ATIM_CCMR3_OC6M);
+
+          /* Set an additional OC6M bit */
+
+          if (ocmbit)
+            {
+              ocmode3 |= ATIM_CCMR3_OC6M;
+            }
+          break;
+        }
+#endif
+
       default:
         {
           pwmerr("ERROR: No such channel: %u\n", channel);
@@ -2683,10 +2828,17 @@ static int pwm_mode_configure(FAR struct stm32_pwmtimer_s *priv,
   ccmr1 |= ocmode1;
   ccmr2 |= ocmode2;
 
-  /* Write CCMR1 and CCMR2 registers */
+  /* Write CCMRx registers */
 
   pwm_putreg(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
   pwm_putreg(priv, STM32_GTIM_CCMR2_OFFSET, ccmr2);
+#ifdef HAVE_IP_TIMERS_V2
+  if (priv->timtype == TIMTYPE_ADVANCED)
+    {
+      ccmr3 |= ocmode3;
+      pwm_putreg(priv, STM32_ATIM_CCMR3_OFFSET, ccmr3);
+    }
+#endif
 
 errout:
   return ret;
@@ -2919,12 +3071,12 @@ static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t trgo)
 
   /* Configure TRGO (4 LSB in trgo) */
 
-  cr2 |= (trgo & ATIM_CR2_MMS_MASK) << ATIM_CR2_MMS_SHIFT;
+  cr2 |= (((trgo>>0) & 0x0F) << ATIM_CR2_MMS_SHIFT) & ATIM_CR2_MMS_MASK;
 
 #ifdef HAVE_IP_TIMERS_V2
   /* Configure TRGO2 (4 MSB in trgo)*/
 
-  cr2 |= ((trgo>>4) & ATIM_CR2_MMS2_MASK) << ATIM_CR2_MMS2_SHIFT;
+  cr2 |= (((trgo>>4) & 0x0F) << ATIM_CR2_MMS2_SHIFT) & ATIM_CR2_MMS2_MASK;
 #endif
 
   /* Write register */
@@ -3178,7 +3330,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 
   /* Configure TRGO/TRGO2 */
 #ifdef HAVE_TRGO
-  ret = pwm_sync_configure(priv, trgo);
+  ret = pwm_sync_configure(priv, priv->trgo);
   if (ret < 0)
     {
       goto errout;
@@ -3420,7 +3572,7 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 
       /* Configure TRGO/TRGO2 */
 #ifdef HAVE_TRGO
-      ret = pwm_sync_configure(priv, trgo);
+      ret = pwm_sync_configure(priv, priv->trgo);
       if (ret < 0)
         {
           goto errout;
@@ -3437,7 +3589,6 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 
       if (priv->channels[j].channel != 0)
         {
-
           /* Update PWM mode */
 
           ret = pwm_mode_configure(priv, priv->channels[j].channel,
