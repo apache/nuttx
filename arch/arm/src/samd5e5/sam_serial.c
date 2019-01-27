@@ -50,6 +50,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>
@@ -60,6 +61,7 @@
 #include "sam_config.h"
 #include "sam_usart.h"
 #include "sam_lowputc.h"
+#include <nuttx/fs/ioctl.h>
 #include "sam_serial.h"
 
 #ifdef SAMD5E5_HAVE_USART

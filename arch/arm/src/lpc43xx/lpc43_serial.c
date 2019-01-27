@@ -54,6 +54,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>
@@ -63,6 +64,7 @@
 #include "up_internal.h"
 
 #include "lpc43_config.h"
+#include <nuttx/fs/ioctl.h>
 #include "lpc43_serial.h"
 
 /****************************************************************************

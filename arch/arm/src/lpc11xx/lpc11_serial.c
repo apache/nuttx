@@ -53,6 +53,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>
@@ -63,6 +64,7 @@
 #include "chip.h"
 #include "chip/lpc11_uart.h"
 #include "lpc11_gpio.h"
+#include <nuttx/fs/ioctl.h>
 #include "lpc11_serial.h"
 
 /****************************************************************************
