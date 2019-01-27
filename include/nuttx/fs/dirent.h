@@ -222,29 +222,6 @@ struct fs_hostfsdir_s
 
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
-#ifdef CONFIG_FS_LITTLEFS
-typedef uint32_t _lfs_block_t;
-typedef uint32_t _lfs_size_t;
-typedef uint32_t _lfs_off_t;
-
-typedef struct _lfs_dir
-{
-  struct _lfs_dir *next;
-  _lfs_block_t pair[2];
-  _lfs_off_t off;
-
-  _lfs_block_t head[2];
-  _lfs_off_t pos;
-
-  struct _lfs_disk_dir
-  {
-    uint32_t rev;
-    _lfs_size_t size;
-    _lfs_block_t tail[2];
-  } d;
-} _lfs_dir_t;
-#endif
-
 struct fs_dirent_s
 {
   /* This is the node that was opened by opendir.  The type of the inode
@@ -313,7 +290,7 @@ struct fs_dirent_s
       struct fs_spiffsdir_s  spiffs;
 #endif
 #ifdef CONFIG_FS_LITTLEFS
-      _lfs_dir_t littlefs;
+      FAR void              *littlefs;
 #endif
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;

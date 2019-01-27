@@ -3,7 +3,7 @@ config FS_LITTLEFS
 	default n
 	select FS_READABLE
 	select FS_WRITABLE
-	depends on !DISABLE_MOUNTPOINT && MTD_BYTE_WRITE && EXPERIMENTAL
+	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the LITTLEFS file system. https://github.com/ARMmbed/littlefs.
 

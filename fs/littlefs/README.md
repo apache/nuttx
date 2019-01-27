@@ -1,6 +1,6 @@
 ## usage 
 
-depends on !DISABLE_MOUNTPOINT && MTD_BYTE_WRITE
+depends on !DISABLE_MOUNTPOINT
 
 1. register_mtddriver("/dev/w25", mtd, 0755, NULL);  
 2. mount("/dev/w25", "/w25", "littlefs", 0, NULL);
