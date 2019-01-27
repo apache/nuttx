@@ -255,6 +255,40 @@ config WATCHDOG_DEVPATH
 	string "Watchdog Device Path"
 	default "/dev/watchdog0"
 
+config WATCHDOG_AUTOMONITOR
+	bool "Auto-monitor"
+	---help---
+		The auto-monitor provides an OS-internal mechanism for automatically
+		start and repeatly reset the counting after the watchdog is register.
+
+if WATCHDOG_AUTOMONITOR
+
+config WATCHDOG_AUTOMONITOR_TIMEOUT
+	int "Auto-monitor reset timeout(second)"
+	default 60
+
+choice
+	prompt "Auto-monitor keepalive by"
+	default WATCHDOG_AUTOMONITOR_BY_TIMER
+
+config WATCHDOG_AUTOMONITOR_BY_CAPTURE
+	bool "Capture callback"
+
+config WATCHDOG_AUTOMONITOR_BY_TIMER
+	bool "Timer callback"
+
+config WATCHDOG_AUTOMONITOR_BY_WORKER
+	bool "Worker callback"
+	depends on SCHED_WORKQUEUE
+
+config WATCHDOG_AUTOMONITOR_BY_IDLE
+	bool "Idle callback"
+	depends on PM
+
+endchoice
+
+endif # WATCHDOG_AUTOMONITOR
+
 endif # WATCHDOG
 
 config TIMERS_CS2100CP
