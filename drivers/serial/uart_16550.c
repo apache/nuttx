@@ -215,7 +215,7 @@ static struct u16550_s g_uart1priv =
   .parity         = CONFIG_16550_UART1_PARITY,
   .bits           = CONFIG_16550_UART1_BITS,
   .stopbits2      = CONFIG_16550_UART1_2STOP,
-#if defined(CONFIG_16550_UART1_IFLOWCONTROL) || defined(CONFIG_16551_UART1_OFLOWCONTROL)
+#if defined(CONFIG_16550_UART1_IFLOWCONTROL) || defined(CONFIG_16550_UART1_OFLOWCONTROL)
   .flow           = true,
 #endif
 #endif
