@@ -40,6 +40,7 @@
  * Included Files
  *******************************************************************************************/
 
+#include <signal.h>
 #include <sys/socket.h>
 
 /*******************************************************************************************
@@ -119,9 +120,8 @@
 
 struct mii_iotcl_notify_s
 {
-  pid_t pid;     /* PID of the task to receive the signal.  Zero means "this task" */
-  uint8_t signo; /* Signal number to use when signalling */
-  FAR void *arg; /* An argument that will accompany the signal callback */
+  pid_t pid;             /* PID of the task to receive the signal.  Zero means "this task" */
+  struct sigevent event; /* Describe the way a task is to be notified */
 };
 
 /* Structure passed to read from or write to the MII/PHY management interface via the

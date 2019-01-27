@@ -2876,7 +2876,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
 
-          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
           if (ret == OK)
             {
               /* Enable PHY link up/down interrupts */

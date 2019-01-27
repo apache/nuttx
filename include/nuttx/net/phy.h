@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <signal.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -103,8 +104,7 @@ extern "C"
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
  *   pid   - Identifies the task to receive the signal.  The special value
  *           of zero means to use the pid of the current task.
- *   signo - This is the signal number to use when notifying the task.
- *   arg   - An argument that will accompany the notification signal.
+ *   event - Describe the way a task is to be notified
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -112,8 +112,8 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
-                         FAR void *arg);
+int phy_notify_subscribe(FAR const char *intf, pid_t pid,
+                         FAR struct sigevent *event);
 #endif
 
 /****************************************************************************

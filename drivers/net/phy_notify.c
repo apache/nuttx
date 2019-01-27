@@ -52,7 +52,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
-#include <signal.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -102,10 +101,9 @@
 struct phy_notify_s
 {
   bool assigned;
-  uint8_t signo;
   char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1];
   pid_t pid;
-  FAR void *arg;
+  struct sigevent event;
   phy_enable_t enable;
 };
 
@@ -177,10 +175,8 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           /* Assign and re-initialized the entry */
 
           client->assigned = true;
-          client->signo    = 0;
           client->intf[0]  = '\0';
           client->pid      = -1;
-          client->arg      = NULL;
           client->enable   = NULL;
 
           /* Return the client entry assigned to the caller */
@@ -236,13 +232,10 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
 static int phy_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct phy_notify_s *client = (FAR struct phy_notify_s *)arg;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  union sigval value;
-#endif
   int ret;
 
   DEBUGASSERT(client != NULL && client->assigned && client->enable);
-  phyinfo("Signalling PID=%d with signal %d\n", client->pid, client->signo);
+  phyinfo("Signaling PID=%d with event %p\n", client->pid, &client->event);
 
   /* Disable further interrupts */
 
@@ -250,16 +243,10 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Signal the client that the PHY has something interesting to say to us */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  value.sival_ptr = client->arg;
-  ret = nxsig_queue(client->pid, client->signo, value);
-#else
-  ret = nxsig_queue(client->pid, client->signo, client->arg);
-#endif
-
+  ret = nxsig_notification(client->pid, &client->event, SI_QUEUE);
   if (ret < 0)
     {
-      phyerr("ERROR: nxsig_queue failed: %d\n", ret);
+      phyerr("ERROR: nxsig_notification failed: %d\n", ret);
     }
 
   return OK;
@@ -287,23 +274,22 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
  *   pid   - Identifies the task to receive the signal.  The special value
  *           of zero means to use the pid of the current task.
- *   signo - This is the signal number to use when notifying the task.
- *   arg   - An argument that will accompany the notification signal.
+ *   event - Describes the way a task is to be notified
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
-                         FAR void *arg)
+int phy_notify_subscribe(FAR const char *intf, pid_t pid,
+                         FAR struct sigevent *event)
 {
   FAR struct phy_notify_s *client;
   int ret = OK;
 
   DEBUGASSERT(intf);
 
-  phyinfo("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
+  phyinfo("%s: PID=%d event=%p\n", intf, pid, event);
 
   /* The special value pid == 0 means to use the pid of the current task. */
 
@@ -320,8 +306,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
     {
       /* Yes.. update the signal number and argument */
 
-      client->signo = signo;
-      client->arg   = arg;
+      client->event = *event;
     }
   else
     {
@@ -336,9 +321,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 
       /* Initialize the new client entry */
 
-      client->signo = signo;
       client->pid   = pid;
-      client->arg   = arg;
+      client->event = *event;
       snprintf(client->intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1, intf);
       client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
 
@@ -399,10 +383,8 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   /* Un-initialize the client entry */
 
   client->assigned = false;
-  client->signo    = 0;
   client->intf[0]  = '\0';
   client->pid      = -1;
-  client->arg      = NULL;
 
   phy_semgive();
   return OK;
