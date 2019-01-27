@@ -351,6 +351,7 @@ uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset);
 void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value);
 #endif
 
+struct file;  /* Forward reference */
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 #endif /* CONFIG_16550_UART */
