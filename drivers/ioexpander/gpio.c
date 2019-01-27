@@ -46,7 +46,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/ioexpander/gpio.h>
 
@@ -113,7 +112,8 @@ static int gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin)
           break;
         }
 
-      nxsig_notification(signal->gp_pid, &signal->gp_event, SI_QUEUE);
+      nxsig_notification(signal->gp_pid, &signal->gp_event,
+                         SI_QUEUE, &signal->gp_work);
     }
 
   return OK;
@@ -329,6 +329,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                       }
 
                     dev->gp_signals[j].gp_pid = 0;
+                    nxsig_cancel_notification(&dev->gp_signals[j].gp_work);
                     ret = OK;
                     break;
                   }

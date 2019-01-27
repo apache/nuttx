@@ -52,7 +52,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/signal.h>
 #include <nuttx/cancelpt.h>
 
 #include "sched/sched.h"
@@ -414,7 +413,8 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       /* Notification the client */
 
-      DEBUGVERIFY(nxsig_notification(pid, &event, SI_MESGQ));
+      DEBUGVERIFY(nxsig_notification(pid, &event,
+                                     SI_MESGQ, &msgq->ntwork));
     }
 #endif
 

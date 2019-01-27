@@ -43,9 +43,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <signal.h>
 #include <time.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
@@ -137,6 +137,7 @@ struct aiocb
    * application code should never reference these elements.
    */
 
+  struct sigwork_s aio_sigwork;  /* Signal work */
   volatile ssize_t aio_result;   /* Support for aio_error() and aio_return() */
   FAR void *aio_priv;            /* Used by signal handlers */
 };

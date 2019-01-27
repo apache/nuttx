@@ -41,10 +41,34 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wqueue.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
 #include <signal.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_EVTHREAD
+  #define sigwork_init(work) memset(work, 0, sizeof(*work));
+#else
+  #define sigwork_init(work) (void)(work)
+#endif
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct sigwork_s
+{
+#ifdef CONFIG_SIG_EVTHREAD
+  struct work_s work;           /* Work queue structure */
+  union sigval value;           /* Data passed with notification */
+  sigev_notify_function_t func; /* Notification function */
+#endif
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -445,6 +469,7 @@ int nxsig_usleep(useconds_t usec);
  *   event - The instance of struct sigevent that describes how to signal
  *           the client.
  *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
+ *   work  - The work structure to queue
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -453,6 +478,27 @@ int nxsig_usleep(useconds_t usec);
  *
  ****************************************************************************/
 
-int nxsig_notification(pid_t pid, FAR struct sigevent *event, int code);
+int nxsig_notification(pid_t pid, FAR struct sigevent *event,
+                       int code, FAR struct sigwork_s *work);
+
+/****************************************************************************
+ * Name: nxsig_cancel_notification
+ *
+ * Description:
+ *   Cancel the notification if it doesn't send yet.
+ *
+ * Input Parameters:
+ *   work  - The work structure to cancel
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_EVTHREAD
+void nxsig_cancel_notification(FAR struct sigwork_s *work);
+#else
+  #define nxsig_cancel_notification(work) (void)(work)
+#endif
 
 #endif /* __INCLUDE_NUTTX_SIGNAL_H */

@@ -210,6 +210,7 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
 
   /* The result -EINPROGRESS means that the transfer has not yet completed */
 
+  sigwork_init(&aiocbp->aio_sigwork);
   aiocbp->aio_result = -EINPROGRESS;
   aiocbp->aio_priv   = NULL;
 

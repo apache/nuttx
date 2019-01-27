@@ -60,6 +60,7 @@ struct rtc_alarminfo_s
   bool active;            /* True: alarm is active */
   pid_t pid;              /* Identifies task to be notified */
   struct sigevent event;  /* Describe the way a task is to be notified */
+  struct sigwork_s work;  /* Signal work */
 };
 #endif
 
@@ -196,7 +197,8 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
     {
       /* Yes.. signal the alarm expiration */
 
-      nxsig_notification(alarminfo->pid, &alarminfo->event, SI_QUEUE);
+      nxsig_notification(alarminfo->pid, &alarminfo->event,
+                         SI_QUEUE, &alarminfo->work);
     }
 
   /* The alarm is no longer active */
@@ -227,7 +229,8 @@ static void rtc_periodic_callback(FAR void *priv, int alarmid)
     {
       /* Yes.. signal the alarm expiration */
 
-      nxsig_notification(alarminfo->pid, &alarminfo->event, SI_QUEUE);
+      nxsig_notification(alarminfo->pid, &alarminfo->event,
+                         SI_QUEUE, &alarminfo->work);
     }
 
   /* The alarm is no longer active */
@@ -566,6 +569,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             if (ret == OK)
               {
                 upperinfo->active = false;
+                nxsig_cancel_notification(&upperinfo->work);
               }
           }
       }
@@ -698,6 +702,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             if (ret == OK)
               {
                 upperinfo->active = false;
+                nxsig_cancel_notification(&upperinfo->work);
               }
           }
       }

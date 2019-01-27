@@ -165,6 +165,7 @@ struct macnet_driver_s
   bool    md_notify_registered;
   pid_t   md_notify_pid;
   struct sigevent md_notify_event;
+  struct sigwork_s md_notify_work;
 #endif
 };
 
@@ -446,7 +447,7 @@ static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
         {
           priv->md_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->md_notify_pid, &priv->md_notify_event,
-                             SI_QUEUE);
+                             SI_QUEUE, &priv->md_notify_work);
         }
 #endif
 

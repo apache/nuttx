@@ -101,6 +101,7 @@ struct btn_open_s
 
   pid_t bo_pid;
   struct btn_notify_s bo_notify;
+  struct sigwork_s bo_work;
 #endif
 
 #ifndef CONFIG_DISABLE_POLL
@@ -358,8 +359,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 
           opriv->bo_notify.bn_event.sigev_value.sival_int = sample;
           nxsig_notification(opriv->bo_pid, &opriv->bo_notify.bn_event,
-                             SI_QUEUE);
-       }
+                             SI_QUEUE, &opriv->bo_work);
+        }
 #endif
     }
 
@@ -517,6 +518,10 @@ static int btn_close(FAR struct file *filep)
     {
       priv->bu_open = opriv->bo_flink;
     }
+
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&opriv->bo_work);
 
   /* And free the open structure */
 

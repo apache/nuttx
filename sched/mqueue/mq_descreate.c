@@ -53,8 +53,6 @@
 #include <nuttx/sched.h>
 #include <nuttx/mqueue.h>
 
-#include "signal/signal.h"
-
 #include "mqueue/mqueue.h"
 
 /****************************************************************************

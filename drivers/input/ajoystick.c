@@ -105,6 +105,7 @@ struct ajoy_open_s
 
   pid_t ao_pid;
   struct ajoy_notify_s ao_notify;
+  struct sigwork_s ao_work;
 #endif
 
 #ifndef CONFIG_DISABLE_POLL
@@ -376,7 +377,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
           opriv->ao_notify.an_event.sigev_value.sival_int = sample;
           nxsig_notification(opriv->ao_pid, &opriv->ao_notify.an_event,
-                             SI_QUEUE);
+                             SI_QUEUE, &opriv->ao_work);
         }
 #endif
     }
@@ -531,6 +532,10 @@ static int ajoy_close(FAR struct file *filep)
     {
       priv->au_open = opriv->ao_flink;
     }
+
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&opriv->ao_work);
 
   /* And free the open structure */
 

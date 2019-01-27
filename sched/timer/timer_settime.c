@@ -46,7 +46,6 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/signal.h>
 
 #include "clock/clock.h"
 #include "timer/timer.h"
@@ -86,7 +85,8 @@ static void timer_timeout(int argc, wdparm_t itimer);
 
 static inline void timer_signotify(FAR struct posix_timer_s *timer)
 {
-  DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event, SI_TIMER));
+  DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event,
+                                 SI_TIMER, &timer->pt_work));
 }
 
 /****************************************************************************
@@ -287,6 +287,10 @@ int timer_settime(timer_t timerid, int flags,
    */
 
   (void)wd_cancel(timer->pt_wdog);
+
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&timer->pt_work);
 
   /* If the it_value member of value is zero, the timer will not be re-armed */
 

@@ -45,8 +45,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <signal.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -144,6 +144,7 @@ struct gpio_operations_s
 struct gpio_signal_s
 {
   struct sigevent gp_event;
+  struct sigwork_s gp_work;
   pid_t gp_pid;        /* The task to be signaled */
 };
 

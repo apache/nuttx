@@ -165,6 +165,7 @@ struct xbeenet_driver_s
   bool    xd_notify_registered;
   pid_t   xd_notify_pid;
   struct sigevent xd_notify_event;
+  struct sigwork_s xd_notify_work;
 #endif
 };
 
@@ -446,7 +447,7 @@ static int xbeenet_notify(FAR struct xbee_maccb_s *maccb,
         {
           priv->xd_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->xd_notify_pid, &priv->xd_notify_event,
-                             SI_QUEUE);
+                             SI_QUEUE, &priv->xd_notify_work);
         }
 #endif
 

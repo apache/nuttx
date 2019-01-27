@@ -51,6 +51,38 @@
 #include "signal/signal.h"
 
 /****************************************************************************
+ * Name: nxsig_notification_worker
+ *
+ * Description:
+ *   Perform the callback from the context of the worker thread.
+ *
+ * Input Parameters:
+ *   arg - Work argument.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_EVTHREAD
+static void nxsig_notification_worker(FAR void *arg)
+{
+  FAR struct sigwork_s *work = (FAR struct sigwork_s *)arg;
+
+  DEBUGASSERT(work != NULL);
+
+  /* Perform the callback */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  work->func(work->value);
+#else
+  work->func(work->value.sival_ptr);
+#endif
+}
+
+#endif /* CONFIG_SIG_EVTHREAD */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -66,6 +98,7 @@
  *   event - The instance of struct sigevent that describes how to signal
  *           the client.
  *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
+ *   work  - The work structure to queue
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -74,7 +107,8 @@
  *
  ****************************************************************************/
 
-int nxsig_notification(pid_t pid, FAR struct sigevent *event, int code)
+int nxsig_notification(pid_t pid, FAR struct sigevent *event,
+                       int code, FAR struct sigwork_s *work)
 {
   sinfo("pid=%p signo=%d code=%d sival_ptr=%p\n",
          pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
@@ -109,10 +143,42 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event, int code)
 
   else if (event->sigev_notify == SIGEV_THREAD)
     {
-      return nxsig_evthread(pid, event);
+      /* Initialize the work information */
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      work->value = event->sigev_value;
+#else
+      work->value.sival_ptr = event->sigev_value.sival_ptr;
+#endif
+      work->func = event->sigev_notify_function;
+
+      /* Then queue the work */
+
+      return work_queue(LPWORK, &work->work,
+                        nxsig_notification_worker, work, 0);
     }
 #endif
 
   return event->sigev_notify == SIGEV_NONE ? OK : -ENOSYS;
 }
 
+/****************************************************************************
+ * Name: nxsig_cancel_notification
+ *
+ * Description:
+ *   Cancel the notification if it doesn't send yet.
+ *
+ * Input Parameters:
+ *   work  - The work structure to cancel
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_EVTHREAD
+void nxsig_cancel_notification(FAR struct sigwork_s *work)
+{
+  work_cancel(LPWORK, &work->work);
+}
+#endif

@@ -43,13 +43,13 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/signal.h>
 
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <mqueue.h>
 #include <queue.h>
-#include <signal.h>
 
 #if CONFIG_MQ_MAXMSGSIZE > 0
 
@@ -117,6 +117,7 @@ struct mqueue_inode_s
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t ntpid;                /* Notification: Receiving Task's PID */
   struct sigevent ntevent;    /* Notification description */
+  struct sigwork_s ntwork;    /* Notification work */
 #endif
 };
 

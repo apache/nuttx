@@ -91,7 +91,8 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 
   /* Signal the client */
 
-  ret = nxsig_notification(pid, &aiocbp->aio_sigevent, SI_ASYNCIO);
+  ret = nxsig_notification(pid, &aiocbp->aio_sigevent,
+                           SI_ASYNCIO, &aiocbp->aio_sigwork);
   if (ret < 0)
     {
       ferr("ERROR: nxsig_notification failed: %d\n", ret);

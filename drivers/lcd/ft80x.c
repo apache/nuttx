@@ -58,7 +58,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
@@ -276,7 +275,7 @@ static void ft80x_notify(FAR struct ft80x_dev_s *priv,
       /* Yes.. Signal the client */
 
       info->event.sigev_value.sival_int = value;
-      nxsig_notification(info->pid, &info->event, SI_QUEUE);
+      nxsig_notification(info->pid, &info->event, SI_QUEUE, &info->work);
     }
 }
 
@@ -1055,6 +1054,10 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   regval  = ft80x_read_word(priv, FT80X_REG_INT_MASK);
                   regval &= ~(1 << notify->id);
                   ft80x_write_word(priv, FT80X_REG_INT_MASK, regval);
+
+                  /* Cancel any pending notification */
+
+                  nxsig_cancel_notification(&info->work);
                   ret = OK;
                 }
             }

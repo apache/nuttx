@@ -49,7 +49,6 @@
 #include <limits.h>
 #include <mqueue.h>
 #include <sched.h>
-#include <signal.h>
 
 #include <nuttx/mqueue.h>
 

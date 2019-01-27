@@ -44,9 +44,9 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <signal.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 
 /****************************************************************************
@@ -65,13 +65,14 @@ struct posix_timer_s
 {
   FAR struct posix_timer_s *flink;
 
-  uint8_t         pt_flags;        /* See PT_FLAGS_* definitions */
-  uint8_t         pt_crefs;        /* Reference count */
-  pid_t           pt_owner;        /* Creator of timer */
-  int             pt_delay;        /* If non-zero, used to reset repetitive timers */
-  int             pt_last;         /* Last value used to set watchdog */
-  WDOG_ID         pt_wdog;         /* The watchdog that provides the timing */
-  struct sigevent pt_event;        /* Notification information */
+  uint8_t          pt_flags;       /* See PT_FLAGS_* definitions */
+  uint8_t          pt_crefs;       /* Reference count */
+  pid_t            pt_owner;       /* Creator of timer */
+  int              pt_delay;       /* If non-zero, used to reset repetitive timers */
+  int              pt_last;        /* Last value used to set watchdog */
+  WDOG_ID          pt_wdog;        /* The watchdog that provides the timing */
+  struct sigevent  pt_event;       /* Notification information */
+  struct sigwork_s pt_work;
 };
 
 /****************************************************************************

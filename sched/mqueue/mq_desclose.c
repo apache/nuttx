@@ -116,6 +116,7 @@ void nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
       memset(&msgq->ntevent, 0, sizeof(struct sigevent));
       msgq->ntpid   = INVALID_PROCESS_ID;
       msgq->ntmqdes = NULL;
+      nxsig_cancel_notification(&msgq->ntwork);
     }
 #endif
 

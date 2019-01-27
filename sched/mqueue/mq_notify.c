@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <signal.h>
 #include <mqueue.h>
 #include <sched.h>
 #include <string.h>
@@ -182,6 +181,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
       memset(&msgq->ntevent, 0, sizeof(struct sigevent));
       msgq->ntpid   = INVALID_PROCESS_ID;
       msgq->ntmqdes = NULL;
+      nxsig_cancel_notification(&msgq->ntwork);
     }
 
   sched_unlock();

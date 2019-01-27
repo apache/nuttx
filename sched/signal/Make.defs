@@ -48,10 +48,6 @@ ifeq ($(CONFIG_SIG_DEFAULT),y)
 CSRCS += sig_default.c
 endif
 
-ifeq ($(CONFIG_SIG_EVTHREAD),y)
-CSRCS += sig_evthread.c
-endif
-
 ifneq ($(CONFIG_DISABLE_POLL),y)
 CSRCS += sig_ppoll.c sig_pselect.c
 endif

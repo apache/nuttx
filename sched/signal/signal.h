@@ -207,9 +207,6 @@ FAR sigq_t        *nxsig_alloc_pendingsigaction(void);
 void               nxsig_deliver(FAR struct tcb_s *stcb);
 FAR sigactq_t     *nxsig_find_action(FAR struct task_group_s *group, int signo);
 int                nxsig_lowest(FAR sigset_t *set);
-#if defined(CONFIG_SIG_EVTHREAD) && defined(CONFIG_BUILD_FLAT)
-int                nxsig_evthread(pid_t pid, FAR struct sigevent *event);
-#endif
 void               nxsig_release_pendingsigaction(FAR sigq_t *sigq);
 void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo);

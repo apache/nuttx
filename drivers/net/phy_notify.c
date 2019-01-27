@@ -104,6 +104,7 @@ struct phy_notify_s
   char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1];
   pid_t pid;
   struct sigevent event;
+  struct sigwork_s work;
   phy_enable_t enable;
 };
 
@@ -243,7 +244,8 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Signal the client that the PHY has something interesting to say to us */
 
-  ret = nxsig_notification(client->pid, &client->event, SI_QUEUE);
+  ret = nxsig_notification(client->pid, &client->event,
+                           SI_QUEUE, &client->work);
   if (ret < 0)
     {
       phyerr("ERROR: nxsig_notification failed: %d\n", ret);
@@ -379,6 +381,10 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 
   phy_semtake();
   (void)arch_phy_irq(intf, NULL, NULL, NULL);
+
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&client->work);
 
   /* Un-initialize the client entry */
 

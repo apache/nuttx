@@ -140,6 +140,10 @@ int timer_release(FAR struct posix_timer_s *timer)
 
   (void)wd_delete(timer->pt_wdog);
 
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&timer->pt_work);
+
   /* Release the timer structure */
 
   timer_free(timer);

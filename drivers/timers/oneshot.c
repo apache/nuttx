@@ -76,6 +76,7 @@ struct oneshot_dev_s
   /* Oneshot timer expiration notification information */
 
   struct sigevent od_event;                    /* Signal info */
+  struct sigwork_s od_work;                    /* Signal work */
   pid_t od_pid;                                /* PID to be notified */
 };
 
@@ -132,7 +133,8 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   /* Signal the waiter.. if there is one */
 
-  nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE);
+  nxsig_notification(priv->od_pid, &priv->od_event,
+                     SI_QUEUE, &priv->od_work);
 }
 
 /****************************************************************************
@@ -292,6 +294,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Cancel the oneshot timer */
 
           ret = ONESHOT_CANCEL(priv->od_lower, ts);
+          nxsig_cancel_notification(&priv->od_work);
         }
         break;
 

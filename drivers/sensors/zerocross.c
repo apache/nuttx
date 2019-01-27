@@ -104,6 +104,7 @@ struct zc_open_s
 
   pid_t do_pid;
   struct sigevent do_event;
+  struct sigwork_s do_work;
 };
 
 /****************************************************************************
@@ -205,7 +206,8 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
       /* Signal the waiter */
 
       opriv->do_event.sigev_value.sival_int = sample;
-      nxsig_notification(opriv->do_pid, &opriv->do_event, SI_QUEUE);
+      nxsig_notification(opriv->do_pid, &opriv->do_event,
+                         SI_QUEUE, &opriv->do_work);
     }
 
   leave_critical_section(flags);
@@ -345,6 +347,10 @@ static int zc_close(FAR struct file *filep)
     {
       priv->zu_open = opriv->do_flink;
     }
+
+  /* Cancel any pending notification */
+
+  nxsig_cancel_notification(&opriv->do_work);
 
   /* And free the open structure */
 
