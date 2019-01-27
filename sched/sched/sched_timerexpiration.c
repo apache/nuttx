@@ -492,7 +492,11 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
 
   clock_timespec_subtract(ts, &g_stop_time, &delta);
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  elapsed  = SEC2TICK((uint64_t)delta.tv_sec);
+#else
   elapsed  = SEC2TICK(delta.tv_sec);
+#endif
   elapsed += delta.tv_nsec / NSEC_PER_TICK;
 
   /* Save the time that the alarm occurred */
@@ -616,7 +620,11 @@ unsigned int sched_timer_cancel(void)
 
   /* Convert to ticks */
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  elapsed  = SEC2TICK((uint64_t)ts.tv_sec);
+#else
   elapsed  = SEC2TICK(ts.tv_sec);
+#endif
   elapsed += ts.tv_nsec / NSEC_PER_TICK;
 
   /* Correct g_stop_time cause of the elapsed have remainder */
@@ -652,7 +660,11 @@ unsigned int sched_timer_cancel(void)
 
   /* Convert to ticks */
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  ticks  = SEC2TICK((uint64_t)ts.tv_sec);
+#else
   ticks  = SEC2TICK(ts.tv_sec);
+#endif
   ticks += NSEC2TICK(ts.tv_nsec);
   DEBUGASSERT(ticks <= g_timer_interval);
 
