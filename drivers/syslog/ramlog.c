@@ -233,7 +233,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
  * Name: ramlog_addchar
  ****************************************************************************/
 
-static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
+static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
   irqstate_t flags;
   size_t nexthead;
