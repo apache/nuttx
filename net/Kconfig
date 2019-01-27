@@ -380,10 +380,4 @@ endmenu # Network Topologies
 
 source "net/route/Kconfig"
 
-config NET_HOSTNAME
-	string "Host name for this device"
-	default ""
-	---help---
-		A unique name to identify device on the network
-
 endif # NET

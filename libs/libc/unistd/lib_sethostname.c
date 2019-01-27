@@ -46,10 +46,6 @@
 
 #include <nuttx/irq.h>
 
-/* This file is only compiled if network support is enabled */
-
-#ifdef CONFIG_NET
-
 /* Further, in the protected and kernel build modes where kernel and
  * application code are separated, the hostname is a common system property
  * and must reside only in the kernel.  In that case, this accessor
@@ -128,5 +124,4 @@ int sethostname(FAR const char *name, size_t size)
   return 0;
 }
 
-#endif /* CONFIG_NET */
 #endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */

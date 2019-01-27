@@ -361,10 +361,8 @@ FAR char **getoptargp(void);  /* Optional argument following option */
 FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
 
-#ifdef CONFIG_NET
 int     gethostname(FAR char *name, size_t size);
 int     sethostname(FAR const char *name, size_t size);
-#endif
 
 /* Get configurable system variables */
 

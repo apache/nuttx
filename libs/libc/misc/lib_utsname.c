@@ -99,7 +99,6 @@ int uname(FAR struct utsname *name)
 
   strncpy(name->sysname, "NuttX", SYS_NAMELEN);
 
-#ifdef CONFIG_LIBC_NETDB
   /* Get the hostname */
 
   if (-1 == gethostname(name->nodename, HOST_NAME_MAX))
@@ -108,10 +107,6 @@ int uname(FAR struct utsname *name)
     }
 
   name->nodename[HOST_NAME_MAX-1] = '\0';
-
-#else
-  strncpy(name->nodename, "", HOST_NAME_MAX);
-#endif
 
   strncpy(name->release,  CONFIG_VERSION_STRING, SYS_NAMELEN);
   name->release[SYS_NAMELEN-1] = '\0';

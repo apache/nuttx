@@ -99,3 +99,9 @@ config TASK_SPAWN_DEFAULT_STACKSIZE
 		Default: 2048.
 
 endmenu # Program Execution Options
+
+config LIB_HOSTNAME
+	string "Host name for this device"
+	default ""
+	---help---
+		A unique name to identify device on the network
