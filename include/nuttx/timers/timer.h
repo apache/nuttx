@@ -45,6 +45,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/ioctl.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
@@ -130,9 +131,8 @@ struct timer_status_s
 
 struct timer_notify_s
 {
-  FAR void *arg;            /* An argument to pass with the signal */
-  pid_t     pid;            /* The ID of the task/thread to receive the signal */
-  uint8_t   signo;          /* The signal number to use in the notification */
+  struct sigevent event;    /* Describe the way a task is to be notified */
+  pid_t           pid;      /* The ID of the task/thread to receive the signal */
 };
 
 /* This structure provides the "lower-half" driver operations available to
