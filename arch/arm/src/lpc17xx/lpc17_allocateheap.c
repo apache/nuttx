@@ -263,12 +263,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
      * stack lie in SRAM?
      */
 
-    if (g_idlestack >= CONFIG_RAM_START &&
-        g_idlestack < CONFIG_RAM_END)
+    if (g_idle_topstack >= CONFIG_RAM_START &&
+        g_idle_topstack < CONFIG_RAM_END)
       {
         /* Yes, then the SRAM heap starts in SRAM after the IDLE stack */
 
-        sram_start = g_idlestack;
+        sram_start = g_idle_topstack;
       }
     else
       {
@@ -389,12 +389,12 @@ void up_addregion(void)
      * stack lie in SDRAM?
      */
 
-    if (g_idlestack >= LPC17_EXTDRAM_CS0 &&
-        g_idlestack < dram_end)
+    if (g_idle_topstack >= LPC17_EXTDRAM_CS0 &&
+        g_idle_topstack < dram_end)
       {
         /* Yes, then the SDRAM heap starts in SDRAM after the IDLE stack */
 
-        dram_start = g_idlestack;
+        dram_start = g_idle_topstack;
       }
     else
       {
@@ -413,7 +413,7 @@ void up_addregion(void)
 
     /* Add external DRAM heap memory to the user heap */
 
-    kumm_addregion(dram_start, heap_size);
+    kumm_addregion((FAR void *)dram_start, heap_size);
   }
 #endif
 
