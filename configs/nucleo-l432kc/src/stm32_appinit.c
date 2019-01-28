@@ -55,6 +55,7 @@
 
 #include <stm32l4.h>
 #include <stm32l4_uart.h>
+#include <stm32l4_i2c.h>
 
 #include <arch/board/board.h>
 
@@ -63,6 +64,15 @@
 #ifdef HAVE_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
 #  include "stm32l4_rtc.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef HAVE_I2C_DRIVER
+#if defined(CONFIG_STM32L4_I2C1) && defined(CONFIG_I2C_DRIVER)
+#  define HAVE_I2C_DRIVER 1
 #endif
 
 /****************************************************************************
@@ -95,7 +105,7 @@ void up_netinitialize(void)
  *   arg - The boardctl() argument is passed to the board_app_initialize()
  *         implementation without modification.  The argument has no
  *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initalization logic and the
+ *         between the board-specific initialization logic and the
  *         matching application logic.  The value cold be such things as a
  *         mode enumeration value, a set of DIP switch switch settings, a
  *         pointer to configuration data read from a file or serial FLASH,
@@ -112,6 +122,9 @@ int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_RTC_DRIVER
   FAR struct rtc_lowerhalf_s *rtclower;
+#endif
+#ifdef HAVE_I2C_DRIVER
+  FAR struct i2c_master_s *i2c;
 #endif
 #ifdef CONFIG_SENSORS_QENCODER
   int index;
@@ -166,6 +179,26 @@ int board_app_initialize(uintptr_t arg)
         {
           serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
+        }
+    }
+#endif
+
+#ifdef HAVE_I2C_DRIVER
+  /* Get the I2C lower half instance */
+
+  i2c = stm32l4_i2cbus_initialize(1);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c, 1);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
         }
     }
 #endif
