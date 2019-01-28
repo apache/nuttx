@@ -66,7 +66,6 @@
 #include "chip/sam_flexcom.h"
 #include "sam_config.h"
 #include "sam_dbgu.h"
-#include <nuttx/fs/ioctl.h>
 #include "sam_serial.h"
 
 /****************************************************************************

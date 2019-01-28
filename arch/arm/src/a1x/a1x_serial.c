@@ -64,7 +64,6 @@
 #include "chip.h"
 #include "chip/a1x_uart.h"
 #include "a1x_pio.h"
-#include <nuttx/fs/ioctl.h>
 #include "a1x_serial.h"
 
 /****************************************************************************

@@ -64,7 +64,6 @@
 #include "up_internal.h"
 
 #include "lpc43_config.h"
-#include <nuttx/fs/ioctl.h>
 #include "lpc43_serial.h"
 
 /****************************************************************************

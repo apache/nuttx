@@ -65,7 +65,6 @@
 #include "chip.h"
 #include "chip/nuc_uart.h"
 #include "nuc_lowputc.h"
-#include <nuttx/fs/ioctl.h>
 #include "nuc_serial.h"
 
 /****************************************************************************
