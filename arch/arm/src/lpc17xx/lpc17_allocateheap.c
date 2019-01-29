@@ -406,7 +406,12 @@ void up_addregion(void)
     heap_size = dram_end - dram_start;
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-    /* Allow user-mode access to the external DRAM heap memory */
+    /* Allow user-mode access to the external DRAM heap memory.
+     *
+     * REVISIT:  In PROTECTED mode, it would be necessary to align
+     * dram_start to an address that is easily spanned by an MPU
+     * region if dram_start is not at the beginning of CS0.
+     */
 
     lpc17_mpu_uheap(dram_start, heap_size);
 #endif
