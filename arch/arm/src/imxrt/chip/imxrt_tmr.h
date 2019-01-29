@@ -1,4 +1,4 @@
-/************************************************************************************
+/********************************************************************************************************************************************
  * arch/arm/src/imxrt/chip/imxrt_tmr.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,238 +32,270 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ********************************************************************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_TMR_H
 #define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_TMR_H
 
-/************************************************************************************
+/********************************************************************************************************************************************
  * Included Files
- ************************************************************************************/
+ ********************************************************************************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip/imxrt_memorymap.h"
 
-/************************************************************************************
+/********************************************************************************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ********************************************************************************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *************************************************************************************************************************/
 
-#define IMXRT_TMR1_COMP10_OFFSET             0xc000  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR1_COMP20_OFFSET             0xc002  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR1_CAPT0_OFFSET              0xc004  /* Timer Channel Capture Register */
-#define IMXRT_TMR1_LOAD0_OFFSET              0xc006  /* Timer Channel Load Register */
-#define IMXRT_TMR1_HOLD0_OFFSET              0xc008  /* Timer Channel Hold Register */
-#define IMXRT_TMR1_CNTR0_OFFSET              0xc00a  /* Timer Channel Counter Register */
-#define IMXRT_TMR1_CTRL0_OFFSET              0xc00c  /* Timer Channel Control Register */
-#define IMXRT_TMR1_SCTRL0_OFFSET             0xc00e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR1_CMPLD10_OFFSET            0xc010  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR1_CMPLD20_OFFSET            0xc012  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR1_CSCTRL0_OFFSET            0xc014  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR1_FILT0_OFFSET              0xc016  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR1_DMA0_OFFSET               0xc018  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR1_ENBL_OFFSET               0xc01e  /* Timer Channel Enable Register */
-#define IMXRT_TMR1_COMP11_OFFSET             0xc020  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR1_COMP21_OFFSET             0xc022  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR1_CAPT1_OFFSET              0xc024  /* Timer Channel Capture Register */
-#define IMXRT_TMR1_LOAD1_OFFSET              0xc026  /* Timer Channel Load Register */
-#define IMXRT_TMR1_HOLD1_OFFSET              0xc028  /* Timer Channel Hold Register */
-#define IMXRT_TMR1_CNTR1_OFFSET              0xc02a  /* Timer Channel Counter Register */
-#define IMXRT_TMR1_CTRL1_OFFSET              0xc02c  /* Timer Channel Control Register */
-#define IMXRT_TMR1_SCTRL1_OFFSET             0xc02e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR1_CMPLD11_OFFSET            0xc030  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR1_CMPLD21_OFFSET            0xc032  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR1_CSCTRL1_OFFSET            0xc034  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR1_FILT1_OFFSET              0xc036  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR1_DMA1_OFFSET               0xc038  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR1_COMP12_OFFSET             0xc040  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR1_COMP22_OFFSET             0xc042  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR1_CAPT2_OFFSET              0xc044  /* Timer Channel Capture Register */
-#define IMXRT_TMR1_LOAD2_OFFSET              0xc046  /* Timer Channel Load Register */
-#define IMXRT_TMR1_HOLD2_OFFSET              0xc048  /* Timer Channel Hold Register */
-#define IMXRT_TMR1_CNTR2_OFFSET              0xc04a  /* Timer Channel Counter Register */
-#define IMXRT_TMR1_CTRL2_OFFSET              0xc04c  /* Timer Channel Control Register */
-#define IMXRT_TMR1_SCTRL2_OFFSET             0xc04e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR1_CMPLD12_OFFSET            0xc050  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR1_CMPLD22_OFFSET            0xc052  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR1_CSCTRL2_OFFSET            0xc054  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR1_FILT2_OFFSET              0xc056  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR1_DMA2_OFFSET               0xc058  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR1_COMP13_OFFSET             0xc060  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR1_COMP23_OFFSET             0xc062  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR1_CAPT3_OFFSET              0xc064  /* Timer Channel Capture Register */
-#define IMXRT_TMR1_LOAD3_OFFSET              0xc066  /* Timer Channel Load Register */
-#define IMXRT_TMR1_HOLD3_OFFSET              0xc068  /* Timer Channel Hold Register */
-#define IMXRT_TMR1_CNTR3_OFFSET              0xc06a  /* Timer Channel Counter Register */
-#define IMXRT_TMR1_CTRL3_OFFSET              0xc06c  /* Timer Channel Control Register */
-#define IMXRT_TMR1_SCTRL3_OFFSET             0xc06e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR1_CMPLD13_OFFSET            0xc070  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR1_CMPLD23_OFFSET            0xc072  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR1_CSCTRL3_OFFSET            0xc074  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR1_FILT3_OFFSET              0xc076  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR1_DMA3_OFFSET               0xc078  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR2_COMP10_OFFSET             0x0000  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR2_COMP20_OFFSET             0x0002  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR2_CAPT0_OFFSET              0x0004  /* Timer Channel Capture Register */
-#define IMXRT_TMR2_LOAD0_OFFSET              0x0006  /* Timer Channel Load Register */
-#define IMXRT_TMR2_HOLD0_OFFSET              0x0008  /* Timer Channel Hold Register */
-#define IMXRT_TMR2_CNTR0_OFFSET              0x000a  /* Timer Channel Counter Register */
-#define IMXRT_TMR2_CTRL0_OFFSET              0x000c  /* Timer Channel Control Register */
-#define IMXRT_TMR2_SCTRL0_OFFSET             0x000e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR2_CMPLD10_OFFSET            0x0010  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR2_CMPLD20_OFFSET            0x0012  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR2_CSCTRL0_OFFSET            0x0014  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR2_FILT0_OFFSET              0x0016  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR2_DMA0_OFFSET               0x0018  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR2_ENBL_OFFSET               0x001e  /* Timer Channel Enable Register */
-#define IMXRT_TMR2_COMP11_OFFSET             0x0020  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR2_COMP21_OFFSET             0x0022  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR2_CAPT1_OFFSET              0x0024  /* Timer Channel Capture Register */
-#define IMXRT_TMR2_LOAD1_OFFSET              0x0026  /* Timer Channel Load Register */
-#define IMXRT_TMR2_HOLD1_OFFSET              0x0028  /* Timer Channel Hold Register */
-#define IMXRT_TMR2_CNTR1_OFFSET              0x002a  /* Timer Channel Counter Register */
-#define IMXRT_TMR2_CTRL1_OFFSET              0x002c  /* Timer Channel Control Register */
-#define IMXRT_TMR2_SCTRL1_OFFSET             0x002e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR2_CMPLD11_OFFSET            0x0030  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR2_CMPLD21_OFFSET            0x0032  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR2_CSCTRL1_OFFSET            0x0034  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR2_FILT1_OFFSET              0x0036  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR2_DMA1_OFFSET               0x0038  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR2_COMP12_OFFSET             0x0040  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR2_COMP22_OFFSET             0x0042  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR2_CAPT2_OFFSET              0x0044  /* Timer Channel Capture Register */
-#define IMXRT_TMR2_LOAD2_OFFSET              0x0046  /* Timer Channel Load Register */
-#define IMXRT_TMR2_HOLD2_OFFSET              0x0048  /* Timer Channel Hold Register */
-#define IMXRT_TMR2_CNTR2_OFFSET              0x004a  /* Timer Channel Counter Register */
-#define IMXRT_TMR2_CTRL2_OFFSET              0x004c  /* Timer Channel Control Register */
-#define IMXRT_TMR2_SCTRL2_OFFSET             0x004e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR2_CMPLD12_OFFSET            0x0050  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR2_CMPLD22_OFFSET            0x0052  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR2_CSCTRL2_OFFSET            0x0054  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR2_FILT2_OFFSET              0x0056  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR2_DMA2_OFFSET               0x0058  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR2_COMP13_OFFSET             0x0060  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR2_COMP23_OFFSET             0x0062  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR2_CAPT3_OFFSET              0x0064  /* Timer Channel Capture Register */
-#define IMXRT_TMR2_LOAD3_OFFSET              0x0066  /* Timer Channel Load Register */
-#define IMXRT_TMR2_HOLD3_OFFSET              0x0068  /* Timer Channel Hold Register */
-#define IMXRT_TMR2_CNTR3_OFFSET              0x006a  /* Timer Channel Counter Register */
-#define IMXRT_TMR2_CTRL3_OFFSET              0x006c  /* Timer Channel Control Register */
-#define IMXRT_TMR2_SCTRL3_OFFSET             0x006e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR2_CMPLD13_OFFSET            0x0070  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR2_CMPLD23_OFFSET            0x0072  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR2_CSCTRL3_OFFSET            0x0074  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR2_FILT3_OFFSET              0x0076  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR2_DMA3_OFFSET               0x0078  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR3_COMP10_OFFSET             0x4000  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR3_COMP20_OFFSET             0x4002  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR3_CAPT0_OFFSET              0x4004  /* Timer Channel Capture Register */
-#define IMXRT_TMR3_LOAD0_OFFSET              0x4006  /* Timer Channel Load Register */
-#define IMXRT_TMR3_HOLD0_OFFSET              0x4008  /* Timer Channel Hold Register */
-#define IMXRT_TMR3_CNTR0_OFFSET              0x400a  /* Timer Channel Counter Register */
-#define IMXRT_TMR3_CTRL0_OFFSET              0x400c  /* Timer Channel Control Register */
-#define IMXRT_TMR3_SCTRL0_OFFSET             0x400e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR3_CMPLD10_OFFSET            0x4010  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR3_CMPLD20_OFFSET            0x4012  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR3_CSCTRL0_OFFSET            0x4014  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR3_FILT0_OFFSET              0x4016  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR3_DMA0_OFFSET               0x4018  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR3_ENBL_OFFSET               0x401e  /* Timer Channel Enable Register */
-#define IMXRT_TMR3_COMP11_OFFSET             0x4020  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR3_COMP21_OFFSET             0x4022  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR3_CAPT1_OFFSET              0x4024  /* Timer Channel Capture Register */
-#define IMXRT_TMR3_LOAD1_OFFSET              0x4026  /* Timer Channel Load Register */
-#define IMXRT_TMR3_HOLD1_OFFSET              0x4028  /* Timer Channel Hold Register */
-#define IMXRT_TMR3_CNTR1_OFFSET              0x402a  /* Timer Channel Counter Register */
-#define IMXRT_TMR3_CTRL1_OFFSET              0x402c  /* Timer Channel Control Register */
-#define IMXRT_TMR3_SCTRL1_OFFSET             0x402e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR3_CMPLD11_OFFSET            0x4030  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR3_CMPLD21_OFFSET            0x4032  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR3_CSCTRL1_OFFSET            0x4034  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR3_FILT1_OFFSET              0x4036  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR3_DMA1_OFFSET               0x4038  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR3_COMP12_OFFSET             0x4040  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR3_COMP22_OFFSET             0x4042  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR3_CAPT2_OFFSET              0x4044  /* Timer Channel Capture Register */
-#define IMXRT_TMR3_LOAD2_OFFSET              0x4046  /* Timer Channel Load Register */
-#define IMXRT_TMR3_HOLD2_OFFSET              0x4048  /* Timer Channel Hold Register */
-#define IMXRT_TMR3_CNTR2_OFFSET              0x404a  /* Timer Channel Counter Register */
-#define IMXRT_TMR3_CTRL2_OFFSET              0x404c  /* Timer Channel Control Register */
-#define IMXRT_TMR3_SCTRL2_OFFSET             0x404e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR3_CMPLD12_OFFSET            0x4050  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR3_CMPLD22_OFFSET            0x4052  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR3_CSCTRL2_OFFSET            0x4054  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR3_FILT2_OFFSET              0x4056  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR3_DMA2_OFFSET               0x4058  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR3_COMP13_OFFSET             0x4060  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR3_COMP23_OFFSET             0x4062  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR3_CAPT3_OFFSET              0x4064  /* Timer Channel Capture Register */
-#define IMXRT_TMR3_LOAD3_OFFSET              0x4066  /* Timer Channel Load Register */
-#define IMXRT_TMR3_HOLD3_OFFSET              0x4068  /* Timer Channel Hold Register */
-#define IMXRT_TMR3_CNTR3_OFFSET              0x406a  /* Timer Channel Counter Register */
-#define IMXRT_TMR3_CTRL3_OFFSET              0x406c  /* Timer Channel Control Register */
-#define IMXRT_TMR3_SCTRL3_OFFSET             0x406e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR3_CMPLD13_OFFSET            0x4070  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR3_CMPLD23_OFFSET            0x4072  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR3_CSCTRL3_OFFSET            0x4074  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR3_FILT3_OFFSET              0x4076  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR3_DMA3_OFFSET               0x4078  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR4_COMP10_OFFSET             0x8000  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR4_COMP20_OFFSET             0x8002  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR4_CAPT0_OFFSET              0x8004  /* Timer Channel Capture Register */
-#define IMXRT_TMR4_LOAD0_OFFSET              0x8006  /* Timer Channel Load Register */
-#define IMXRT_TMR4_HOLD0_OFFSET              0x8008  /* Timer Channel Hold Register */
-#define IMXRT_TMR4_CNTR0_OFFSET              0x800a  /* Timer Channel Counter Register */
-#define IMXRT_TMR4_CTRL0_OFFSET              0x800c  /* Timer Channel Control Register */
-#define IMXRT_TMR4_SCTRL0_OFFSET             0x800e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR4_CMPLD10_OFFSET            0x8010  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR4_CMPLD20_OFFSET            0x8012  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR4_CSCTRL0_OFFSET            0x8014  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR4_FILT0_OFFSET              0x8016  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR4_DMA0_OFFSET               0x8018  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR4_ENBL_OFFSET               0x801e  /* Timer Channel Enable Register */
-#define IMXRT_TMR4_COMP11_OFFSET             0x8020  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR4_COMP21_OFFSET             0x8022  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR4_CAPT1_OFFSET              0x8024  /* Timer Channel Capture Register */
-#define IMXRT_TMR4_LOAD1_OFFSET              0x8026  /* Timer Channel Load Register */
-#define IMXRT_TMR4_HOLD1_OFFSET              0x8028  /* Timer Channel Hold Register */
-#define IMXRT_TMR4_CNTR1_OFFSET              0x802a  /* Timer Channel Counter Register */
-#define IMXRT_TMR4_CTRL1_OFFSET              0x802c  /* Timer Channel Control Register */
-#define IMXRT_TMR4_SCTRL1_OFFSET             0x802e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR4_CMPLD11_OFFSET            0x8030  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR4_CMPLD21_OFFSET            0x8032  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR4_CSCTRL1_OFFSET            0x8034  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR4_FILT1_OFFSET              0x8036  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR4_DMA1_OFFSET               0x8038  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR4_COMP12_OFFSET             0x8040  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR4_COMP22_OFFSET             0x8042  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR4_CAPT2_OFFSET              0x8044  /* Timer Channel Capture Register */
-#define IMXRT_TMR4_LOAD2_OFFSET              0x8046  /* Timer Channel Load Register */
-#define IMXRT_TMR4_HOLD2_OFFSET              0x8048  /* Timer Channel Hold Register */
-#define IMXRT_TMR4_CNTR2_OFFSET              0x804a  /* Timer Channel Counter Register */
-#define IMXRT_TMR4_CTRL2_OFFSET              0x804c  /* Timer Channel Control Register */
-#define IMXRT_TMR4_SCTRL2_OFFSET             0x804e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR4_CMPLD12_OFFSET            0x8050  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR4_CMPLD22_OFFSET            0x8052  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR4_CSCTRL2_OFFSET            0x8054  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR4_FILT2_OFFSET              0x8056  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR4_DMA2_OFFSET               0x8058  /* Timer Channel DMA Enable Register */
-#define IMXRT_TMR4_COMP13_OFFSET             0x8060  /* Timer Channel Compare Register 1 */
-#define IMXRT_TMR4_COMP23_OFFSET             0x8062  /* Timer Channel Compare Register 2 */
-#define IMXRT_TMR4_CAPT3_OFFSET              0x8064  /* Timer Channel Capture Register */
-#define IMXRT_TMR4_LOAD3_OFFSET              0x8066  /* Timer Channel Load Register */
-#define IMXRT_TMR4_HOLD3_OFFSET              0x8068  /* Timer Channel Hold Register */
-#define IMXRT_TMR4_CNTR3_OFFSET              0x806a  /* Timer Channel Counter Register */
-#define IMXRT_TMR4_CTRL3_OFFSET              0x806c  /* Timer Channel Control Register */
-#define IMXRT_TMR4_SCTRL3_OFFSET             0x806e  /* Timer Channel Status and Control Register */
-#define IMXRT_TMR4_CMPLD13_OFFSET            0x8070  /* Timer Channel Comparator Load Register 1 */
-#define IMXRT_TMR4_CMPLD23_OFFSET            0x8072  /* Timer Channel Comparator Load Register 2 */
-#define IMXRT_TMR4_CSCTRL3_OFFSET            0x8074  /* Timer Channel Comparator Status and Control Register */
-#define IMXRT_TMR4_FILT3_OFFSET              0x8076  /* Timer Channel Input Filter Register */
-#define IMXRT_TMR4_DMA3_OFFSET               0x8078  /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR_COMP1_OFFSET               0x0000  /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR_COMP2_OFFSET               0x0002  /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR_CAPT_OFFSET                0x0004  /* Timer Channel Capture Register */
+#define IMXRT_TMR_LOAD_OFFSET                0x0006  /* Timer Channel Load Register */
+#define IMXRT_TMR_HOLD_OFFSET                0x0008  /* Timer Channel Hold Register */
+#define IMXRT_TMR_CNTR_OFFSET                0x000a  /* Timer Channel Counter Register */
+#define IMXRT_TMR_CTRL_OFFSET                0x000c  /* Timer Channel Control Register */
+#define IMXRT_TMR_SCTRL_OFFSET               0x000e  /* Timer Channel Status and Control Register */
+#define IMXRT_TMR_CMPLD1_OFFSET              0x0010  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR_CMPLD2_OFFSET              0x0012  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR_CSCTRL_OFFSET              0x0014  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR_FILT_OFFSET                0x0016  /* Timer Channel Input Filter Register */
+#define IMXRT_TMR_DMA_OFFSET                 0x0018  /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR_ENBL_OFFSET                0x001e  /* Timer Channel Enable Register */
 
-/* Register addresses ***********************************************************************/
+#define IMXRT_TMR_CHANNEL_SPACING            0x20    /* Each timer has 4 Channels spaced 0x20 apart */
+#define IMXRT_TMR_CH0                        (0 * IMXRT_TMR_CHANNEL_SPACING)
+#define IMXRT_TMR_CH1                        (1 * IMXRT_TMR_CHANNEL_SPACING)
+#define IMXRT_TMR_CH2                        (2 * IMXRT_TMR_CHANNEL_SPACING)
+#define IMXRT_TMR_CH3                        (3 * IMXRT_TMR_CHANNEL_SPACING)
+
+#define IMXRT_TMR_OFFSET(ch,r)               ((r) + (ch))
+
+#define IMXRT_TMR1_COMP10_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR1_COMP20_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR1_CAPT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR1_LOAD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR1_HOLD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR1_CNTR0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR1_CTRL0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR1_SCTRL0_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR1_CMPLD10_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR1_CMPLD20_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR1_CSCTRL0_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR1_FILT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR1_DMA0_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR1_ENBL_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_ENBL_OFFSET)    /* Timer Channel Enable Register */
+#define IMXRT_TMR1_COMP11_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR1_COMP21_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR1_CAPT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR1_LOAD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR1_HOLD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR1_CNTR1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR1_CTRL1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR1_SCTRL1_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR1_CMPLD11_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR1_CMPLD21_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR1_CSCTRL1_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR1_FILT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR1_DMA1_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR1_COMP12_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR1_COMP22_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR1_CAPT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR1_LOAD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR1_HOLD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR1_CNTR2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR1_CTRL2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR1_SCTRL2_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR1_CMPLD12_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR1_CMPLD22_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR1_CSCTRL2_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR1_FILT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR1_DMA2_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR1_COMP13_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR1_COMP23_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR1_CAPT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR1_LOAD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR1_HOLD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR1_CNTR3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR1_CTRL3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR1_SCTRL3_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR1_CMPLD13_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR1_CMPLD23_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR1_CSCTRL3_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR1_FILT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR1_DMA3_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+
+/* Timer 2 offset */
+
+#define IMXRT_TMR2_COMP10_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR2_COMP20_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR2_CAPT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR2_LOAD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR2_HOLD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR2_CNTR0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR2_CTRL0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR2_SCTRL0_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR2_CMPLD10_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR2_CMPLD20_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR2_CSCTRL0_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR2_FILT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR2_DMA0_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR2_ENBL_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_ENBL_OFFSET)    /* Timer Channel Enable Register */
+#define IMXRT_TMR2_COMP11_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR2_COMP21_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR2_CAPT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR2_LOAD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR2_HOLD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR2_CNTR1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR2_CTRL1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR2_SCTRL1_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR2_CMPLD11_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR2_CMPLD21_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR2_CSCTRL1_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR2_FILT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR2_DMA1_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR2_COMP12_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR2_COMP22_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR2_CAPT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR2_LOAD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR2_HOLD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR2_CNTR2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR2_CTRL2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR2_SCTRL2_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR2_CMPLD12_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR2_CMPLD22_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR2_CSCTRL2_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR2_FILT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR2_DMA2_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR2_COMP13_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR2_COMP23_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR2_CAPT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR2_LOAD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR2_HOLD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR2_CNTR3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR2_CTRL3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR2_SCTRL3_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR2_CMPLD13_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR2_CMPLD23_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR2_CSCTRL3_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR2_FILT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR2_DMA3_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+
+/* Timer 3 offset */
+
+#define IMXRT_TMR3_COMP10_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR3_COMP20_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR3_CAPT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR3_LOAD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR3_HOLD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR3_CNTR0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR3_CTRL0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR3_SCTRL0_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR3_CMPLD10_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR3_CMPLD20_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR3_CSCTRL0_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR3_FILT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR3_DMA0_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR3_ENBL_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_ENBL_OFFSET)    /* Timer Channel Enable Register */
+#define IMXRT_TMR3_COMP11_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR3_COMP21_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR3_CAPT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR3_LOAD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR3_HOLD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR3_CNTR1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR3_CTRL1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR3_SCTRL1_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR3_CMPLD11_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR3_CMPLD21_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR3_CSCTRL1_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR3_FILT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR3_DMA1_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR3_COMP12_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR3_COMP22_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR3_CAPT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR3_LOAD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR3_HOLD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR3_CNTR2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR3_CTRL2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR3_SCTRL2_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR3_CMPLD12_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR3_CMPLD22_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR3_CSCTRL2_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR3_FILT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR3_DMA2_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR3_COMP13_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR3_COMP23_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR3_CAPT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR3_LOAD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR3_HOLD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR3_CNTR3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR3_CTRL3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR3_SCTRL3_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR3_CMPLD13_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR3_CMPLD23_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR3_CSCTRL3_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR3_FILT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR3_DMA3_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+
+/* Timer 4 offset */
+
+#define IMXRT_TMR4_COMP10_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR4_COMP20_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR4_CAPT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR4_LOAD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR4_HOLD0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR4_CNTR0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR4_CTRL0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR4_SCTRL0_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR4_CMPLD10_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR4_CMPLD20_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR4_CSCTRL0_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR4_FILT0_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR4_DMA0_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR4_ENBL_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH0, IMXRT_TMR_ENBL_OFFSET)    /* Timer Channel Enable Register */
+#define IMXRT_TMR4_COMP11_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR4_COMP21_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR4_CAPT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR4_LOAD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR4_HOLD1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR4_CNTR1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR4_CTRL1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR4_SCTRL1_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR4_CMPLD11_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR4_CMPLD21_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR4_CSCTRL1_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR4_FILT1_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR4_DMA1_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH1, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR4_COMP12_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR4_COMP22_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR4_CAPT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR4_LOAD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR4_HOLD2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR4_CNTR2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR4_CTRL2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR4_SCTRL2_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR4_CMPLD12_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR4_CMPLD22_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR4_CSCTRL2_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR4_FILT2_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR4_DMA2_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH2, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+#define IMXRT_TMR4_COMP13_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP1_OFFSET)   /* Timer Channel Compare Register 1 */
+#define IMXRT_TMR4_COMP23_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_COMP2_OFFSET)   /* Timer Channel Compare Register 2 */
+#define IMXRT_TMR4_CAPT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CAPT_OFFSET)    /* Timer Channel Capture Register */
+#define IMXRT_TMR4_LOAD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_LOAD_OFFSET)    /* Timer Channel Load Register */
+#define IMXRT_TMR4_HOLD3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_HOLD_OFFSET)    /* Timer Channel Hold Register */
+#define IMXRT_TMR4_CNTR3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CNTR_OFFSET)    /* Timer Channel Counter Register */
+#define IMXRT_TMR4_CTRL3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CTRL_OFFSET)    /* Timer Channel Control Register */
+#define IMXRT_TMR4_SCTRL3_OFFSET             IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_SCTRL_OFFSET)   /* Timer Channel Status and Control Register */
+#define IMXRT_TMR4_CMPLD13_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD1_OFFSET)  /* Timer Channel Comparator Load Register 1 */
+#define IMXRT_TMR4_CMPLD23_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CMPLD2_OFFSET)  /* Timer Channel Comparator Load Register 2 */
+#define IMXRT_TMR4_CSCTRL3_OFFSET            IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_CSCTRL_OFFSET)  /* Timer Channel Comparator Status and Control Register */
+#define IMXRT_TMR4_FILT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
+#define IMXRT_TMR4_DMA3_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
+
+/* Register addresses *******************************************************************************************************************************/
 
 #define IMXRT_TMR1_COMP10                   (IMXRT_QTIMER1_BASE + IMXRT_TMR1_COMP10_OFFSET)   /* Timer Channel Compare Register 1 */
 #define IMXRT_TMR1_COMP20                   (IMXRT_QTIMER1_BASE + IMXRT_TMR1_COMP20_OFFSET)   /* Timer Channel Compare Register 2 */
@@ -478,7 +510,7 @@
 #define IMXRT_TMR4_FILT3                    (IMXRT_QTIMER4_BASE + IMXRT_TMR4_FILT3_OFFSET)    /* Timer Channel Input Filter Register */
 #define IMXRT_TMR4_DMA3                     (IMXRT_QTIMER4_BASE + IMXRT_TMR4_DMA3_OFFSET)     /* Timer Channel DMA Enable Register */
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *****************************************************************************************************************/
 
 /* Timer Channel Control Register */
 
