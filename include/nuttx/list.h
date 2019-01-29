@@ -63,6 +63,7 @@
 
 #define LIST_INITIAL_VALUE(list) { &(list), &(list) }
 #define LIST_INITIAL_CLEARED_VALUE { NULL, NULL }
+
 #define list_add_after(entry, new_entry) list_add_head(entry, new_entry)
 #define list_add_before(entry, new_entry) list_add_tail(entry, new_entry)
 
@@ -270,8 +271,8 @@ static inline bool list_in_list(FAR struct list_node *item)
     }
 }
 
-static inline void list_add_headFAR (FAR struct list_node *list,
-                                     FAR struct list_node *item)
+static inline void list_add_head(FAR struct list_node *list,
+                                 FAR struct list_node *item)
 {
   item->next       = list->next;
   item->prev       = list;
@@ -347,7 +348,7 @@ static inline FAR struct list_node *list_peek_tail(FAR struct list_node *list)
     }
 }
 
-static inline sFAR truct list_node *list_prev(FAR struct list_node *list,
+static inline FAR struct list_node *list_prev(FAR struct list_node *list,
                                               FAR struct list_node *item)
 {
   if (item->prev != list)
