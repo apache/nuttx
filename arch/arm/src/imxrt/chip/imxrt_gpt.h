@@ -50,16 +50,16 @@
 
 /* Register Offsets *****************************************************************/
 
-#define IMXRT_GPT_CR_OFFSET                 0xc000  /* GPT Control Register */
-#define IMXRT_GPT_PR_OFFSET                 0xc004  /* GPT Prescaler Register */
-#define IMXRT_GPT_SR_OFFSET                 0xc008  /* GPT Status Register */
-#define IMXRT_GPT_IR_OFFSET                 0xc00c  /* GPT Interrupt Register */
-#define IMXRT_GPT_OCR1_OFFSET               0xc010  /* GPT Output Compare Register 1 */
-#define IMXRT_GPT_OCR2_OFFSET               0xc014  /* GPT Output Compare Register 2 */
-#define IMXRT_GPT_OCR3_OFFSET               0xc018  /* GPT Output Compare Register 3 */
-#define IMXRT_GPT_ICR1_OFFSET               0xc01c  /* GPT Input Capture Register 1 */
-#define IMXRT_GPT_ICR2_OFFSET               0xc020  /* GPT Input Capture Register 2 */
-#define IMXRT_GPT_CNT_OFFSET                0xc024  /* GPT Counter Register */
+#define IMXRT_GPT_CR_OFFSET                 0x0000  /* GPT Control Register */
+#define IMXRT_GPT_PR_OFFSET                 0x0004  /* GPT Prescaler Register */
+#define IMXRT_GPT_SR_OFFSET                 0x0008  /* GPT Status Register */
+#define IMXRT_GPT_IR_OFFSET                 0x000c  /* GPT Interrupt Register */
+#define IMXRT_GPT_OCR1_OFFSET               0x0010  /* GPT Output Compare Register 1 */
+#define IMXRT_GPT_OCR2_OFFSET               0x0014  /* GPT Output Compare Register 2 */
+#define IMXRT_GPT_OCR3_OFFSET               0x0018  /* GPT Output Compare Register 3 */
+#define IMXRT_GPT_ICR1_OFFSET               0x001c  /* GPT Input Capture Register 1 */
+#define IMXRT_GPT_ICR2_OFFSET               0x0020  /* GPT Input Capture Register 2 */
+#define IMXRT_GPT_CNT_OFFSET                0x0024  /* GPT Counter Register */
 
 /* Register addresses ***********************************************************************/
 
