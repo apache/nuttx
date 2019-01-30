@@ -41,7 +41,9 @@
 
 #include <sys/types.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "samv71-xult.h"
 
@@ -86,5 +88,31 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 #endif
 }
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  switch(cmd)
+    {
+      default:
+        return -ENOTTY;  /* Standard return for command not supported */
+        break;
+    }
+
+  return OK;
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == NULL)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+#endif
 
 #endif /* CONFIG_LIB_BOARDCTL */

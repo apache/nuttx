@@ -1189,7 +1189,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   regval &= ~QSPI_MR_DLYBCT_MASK;
 
 #if CONFIG_SAMV7_QSPI_DLYBCT > 0
-  dlybct  = ((CONFIG_SAMV7_QSPI_DLYBCT * (SAM_QSPI_CLOCK /1000000)) / 1000 / 32;
+  dlybct  = ((CONFIG_SAMV7_QSPI_DLYBCT * (SAM_QSPI_CLOCK /1000000)) / 1000 / 32);
   regval |= dlybct << QSPI_MR_DLYBCT_SHIFT;
 #endif
 
