@@ -46,6 +46,10 @@
 #  include <nuttx/arch.h>
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#  include <nuttx/board.h>
+#endif
+
 #include "sched/sched.h"
 #include "wdog/wdog.h"
 #include "clock/clock.h"
