@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/board.h
  *
- *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -255,6 +255,28 @@ int board_reset(int status);
 
 #ifdef CONFIG_BOARDCTL_UNIQUEID
 int board_uniqueid(FAR uint8_t *uniqueid);
+#endif
+
+/****************************************************************************
+ * Name:  board_timerhook
+ *
+ * Description:
+ *   If the system is not configured for Tickless operation, then a system
+ *   timer interrupt will be used.  If CONFIG_SYSTEMTICK_HOOK is selected
+ *   then the OS will call out to this user-provided function on every
+ *   timer interrupt.  This permits custom actions that may be performed on
+ *   each by boad-specific, OS internal logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+void board_timerhook(void);
 #endif
 
 /****************************************************************************
@@ -640,7 +662,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 #endif
 
 /****************************************************************************
- * Name: board_initrngseed
+ * Name: board_init_rngseed
  *
  * Description:
  *   If CONFIG_BOARD_INITRNGSEED is selected then board_init_rngseed is

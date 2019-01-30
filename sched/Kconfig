@@ -137,6 +137,18 @@ config SYSTEMTICK_EXTCLK
 		to move the scheduling off the processor clock to allow entering low
 		power states that would disable that clock.
 
+config SYSTEMTICK_HOOK
+	bool "System timer hook"
+	default n
+	---help---
+		Enable a call to a user-provided, board-level function on each timer
+		tick.  This permits custom actions that may be performed on each
+		timer tick.  The form of the user-provided function is:
+
+			void board_timerhook(void);
+
+		(prototyped in include/nuttx/board.h).
+
 endif # !SCHED_TICKLESS
 
 config SYSTEM_TIME64

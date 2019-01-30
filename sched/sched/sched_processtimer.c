@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009, 2014-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -222,4 +222,12 @@ void sched_process_timer(void)
   /* Process watchdogs */
 
   wd_timer();
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+  /* Call out to a user-provided function in order to perform board-specific,
+   * custom timer operations.
+   */
+
+  board_timerhook();
+#endif
 }
