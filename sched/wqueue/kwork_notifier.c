@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wqueue/kwork_notifier.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -313,7 +313,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
   do
     {
       ret = nxsem_wait(&g_notifier_sem);
-      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      DEBUGASSERT(ret >= 0 || ret == -EINTR || ret == -ECANCELED);
     }
   while (ret < 0);
 
