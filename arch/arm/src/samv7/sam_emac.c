@@ -342,6 +342,7 @@
 
 #define EMAC_NQUEUES_REVA   3
 #define EMAC_NQUEUES_REVB   6
+#define EMAC_NQUEUES_MAX    6
 
 /* Interrupt settings */
 
@@ -547,15 +548,15 @@ struct sam_emac_s
 
   /* Transfer queues */
 
-  struct sam_queue_s    xfrq[EMAC_MAX_NQUEUES];
+  struct sam_queue_s    xfrq[EMAC_NQUEUES_MAX];
 
     /* Debug stuff */
 
 #ifdef CONFIG_SAMV7_EMAC_REGDEBUG
-   bool               wrlast;     /* Last was a write */
-   uintptr_t          addrlast;   /* Last address */
-   uint32_t           vallast;    /* Last value */
-   int                ntimes;     /* Number of times */
+   bool                 wrlast;     /* Last was a write */
+   uintptr_t            addrlast;   /* Last address */
+   uint32_t             vallast;    /* Last value */
+   int                  ntimes;     /* Number of times */
 #endif
 };
 
