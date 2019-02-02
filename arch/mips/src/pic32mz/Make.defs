@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/pic32mz/Make.defs
 #
-#   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2015, 2018, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,24 @@ endif
 
 ifeq ($(CONFIG_PIC32MZ_I2C),y)
 CHIP_CSRCS += pic32mz-i2c.c
+endif
+
+ifeq ($(CONFIG_PIC32MZ_TIMER),y)
+CHIP_CSRCS += pic32mz-timer.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += pic32mz-timer-lowerhalf.c
+else ifeq ($(CONFIG_PIC32MZ_ONESHOT),y)
+CHIP_CSRCS += pic32mz-timer-lowerhalf.c
+endif
+
+ifeq ($(CONFIG_PIC32MZ_FREERUN),y)
+CHIP_CSRCS += pic32mz-freerun.c
+endif
+
+ifeq ($(CONFIG_PIC32MZ_ONESHOT),y)
+CHIP_CSRCS += pic32mz-oneshot.c
 endif
 
 ifeq ($(CONFIG_PIC32MZ_ETHERNET),y)

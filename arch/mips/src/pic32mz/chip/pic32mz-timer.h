@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_TIMER_H
-#define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_TIMER_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_TIMER_H
+#define __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_TIMER_H
 
 /************************************************************************************
  * Included Files
@@ -308,4 +308,4 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* CHIP_NTIMERS > 0 */
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_TIMER_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_CHIP_PIC32MZ_TIMER_H */

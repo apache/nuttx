@@ -65,6 +65,10 @@ config PIC32MZ_I2C
 	bool
 	default n
 
+config PIC32MZ_TIMER
+	bool
+	default n
+
 config PIC32MZ_T1
 	bool
 	default y
@@ -78,34 +82,42 @@ config PIC32MZ_WDT
 config PIC32MZ_T2
 	bool "Timer 2 (T2)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T3
 	bool "Timer 3 (T3)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T4
 	bool "Timer 4 (T4)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T5
 	bool "Timer 5 (T5)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T6
 	bool "Timer 6 (T6)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T7
 	bool "Timer 7 (T7)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T8
 	bool "Timer 8 (T8)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_T9
 	bool "Timer 9 (T9)"
 	default n
+	select PIC32MZ_TIMER
 
 config PIC32MZ_IC1
 	bool "Input Capture 1 (IC1)"
@@ -299,6 +311,579 @@ config PIC32MZ_CTMU
 	default n
 
 endmenu # PIC32MZ Peripheral Support
+
+menu "Timer Configuration"
+
+if PIC32MZ_TIMER
+
+config PIC32MZ_FREERUN
+	bool "Timer free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+config PIC32MZ_ONESHOT
+	bool "Timer one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config PIC32MZ_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on PIC32MZ_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+endif #PIC32MZ_TIMER
+
+if PIC32MZ_T2
+
+menu "Timer 2 configuration"
+
+config PIC32MZ_T2_STOPINIDLE
+	bool "Stop Timer 2 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T2_GATED
+	bool "Enable Timer 2 Gated Time Accumulation"
+	depends on !PIC32MZ_T2_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+choice
+	prompt "Timer 2 Input clock prescale value"
+	default PIC32MZ_T2_PRESCALE_1
+
+config PIC32MZ_T2_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T2_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T2_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T2_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T2_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T2_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T2_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T2_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T2_PRESCALE
+	int
+	default 7 if PIC32MZ_T2_PRESCALE_256
+	default 6 if PIC32MZ_T2_PRESCALE_64
+	default 5 if PIC32MZ_T2_PRESCALE_32
+	default 4 if PIC32MZ_T2_PRESCALE_16
+	default 3 if PIC32MZ_T2_PRESCALE_8
+	default 2 if PIC32MZ_T2_PRESCALE_4
+	default 1 if PIC32MZ_T2_PRESCALE_2
+	default 0 if PIC32MZ_T2_PRESCALE_1
+
+config PIC32MZ_T2_MODE32
+	bool "Timer 2 Enable 32bits mode"
+	select PIC32MZ_T3
+	---help---
+		Enable 32bits mode
+
+config PIC32MZ_T2_EXTERNALCLOCK
+	bool "Timer 2 external clock source"
+	default 0
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T2
+
+if PIC32MZ_T3
+
+menu "Timer 3 Configuration"
+	depends on !PIC32MZ_T2_MODE32
+
+config PIC32MZ_T3_STOPINIDLE
+	bool "Stop Timer 3 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T3_GATED
+	bool "Enable Timer 3 Gated Time Accumulation"
+	depends on !PIC32MZ_T3_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 3 Input clock prescale value"
+	default PIC32MZ_T3_PRESCALE_1
+
+config PIC32MZ_T3_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T3_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T3_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T3_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T3_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T3_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T3_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T3_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T3_PRESCALE
+	int
+	default 7 if PIC32MZ_T3_PRESCALE_256
+	default 6 if PIC32MZ_T3_PRESCALE_64
+	default 5 if PIC32MZ_T3_PRESCALE_32
+	default 4 if PIC32MZ_T3_PRESCALE_16
+	default 3 if PIC32MZ_T3_PRESCALE_8
+	default 2 if PIC32MZ_T3_PRESCALE_4
+	default 1 if PIC32MZ_T3_PRESCALE_2
+	default 0 if PIC32MZ_T3_PRESCALE_1
+
+config PIC32MZ_T3_EXTERNALCLOCK
+	bool "Timer 3 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T3
+
+if PIC32MZ_T4
+
+menu "Timer 4 Configuration"
+
+config PIC32MZ_T4_STOPINIDLE
+	bool "Stop Timer 4 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T4_GATED
+	bool "Enable Timer 4 Gated Time Accumulation"
+	depends on !PIC32MZ_T4_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 4 Input clock prescale value"
+	default PIC32MZ_T4_PRESCALE_1
+
+config PIC32MZ_T4_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T4_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T4_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T4_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T4_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T4_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T4_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T4_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T4_PRESCALE
+	int
+	default 7 if PIC32MZ_T4_PRESCALE_256
+	default 6 if PIC32MZ_T4_PRESCALE_64
+	default 5 if PIC32MZ_T4_PRESCALE_32
+	default 4 if PIC32MZ_T4_PRESCALE_16
+	default 3 if PIC32MZ_T4_PRESCALE_8
+	default 2 if PIC32MZ_T4_PRESCALE_4
+	default 1 if PIC32MZ_T4_PRESCALE_2
+	default 0 if PIC32MZ_T4_PRESCALE_1
+
+config PIC32MZ_T4_MODE32
+	bool "Timer 4 Enable 32bits mode"
+	select PIC32MZ_T5
+	---help---
+		Enable 32bits mode
+
+config PIC32MZ_T4_EXTERNALCLOCK
+	bool "Timer 4 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T4
+
+if PIC32MZ_T5
+
+menu "Timer 5 Configuration"
+	depends on !PIC32MZ_T4_MODE32
+
+config PIC32MZ_T5_STOPINIDLE
+	bool "Stop Timer 5 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T5_GATED
+	bool "Enable Timer 5 Gated Time Accumulation"
+	depends on !PIC32MZ_T5_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 5 Input clock prescale value"
+	default PIC32MZ_T5_PRESCALE_1
+
+config PIC32MZ_T5_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T5_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T5_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T5_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T5_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T5_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T5_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T5_PRESCALE_1
+	bool "1:1 prescale"
+endchoice
+
+config PIC32MZ_T5_PRESCALE
+	int
+	default 7 if PIC32MZ_T5_PRESCALE_256
+	default 6 if PIC32MZ_T5_PRESCALE_64
+	default 5 if PIC32MZ_T5_PRESCALE_32
+	default 4 if PIC32MZ_T5_PRESCALE_16
+	default 3 if PIC32MZ_T5_PRESCALE_8
+	default 2 if PIC32MZ_T5_PRESCALE_4
+	default 1 if PIC32MZ_T5_PRESCALE_2
+	default 0 if PIC32MZ_T5_PRESCALE_1
+
+config PIC32MZ_T5_EXTERNALCLOCK
+	bool "Timer 5 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T5
+
+if PIC32MZ_T6
+
+menu "Timer 6 Configuration"
+
+config PIC32MZ_T6_STOPINIDLE
+	bool "Stop Timer 6 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T6_GATED
+	bool "Enable Timer 6 Gated Time Accumulation"
+	depends on !PIC32MZ_T6_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 6 Input clock prescale value"
+	default PIC32MZ_T6_PRESCALE_1
+
+config PIC32MZ_T6_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T6_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T6_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T6_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T6_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T6_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T6_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T6_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T6_PRESCALE
+	int
+	default 7 if PIC32MZ_T6_PRESCALE_256
+	default 6 if PIC32MZ_T6_PRESCALE_64
+	default 5 if PIC32MZ_T6_PRESCALE_32
+	default 4 if PIC32MZ_T6_PRESCALE_16
+	default 3 if PIC32MZ_T6_PRESCALE_8
+	default 2 if PIC32MZ_T6_PRESCALE_4
+	default 1 if PIC32MZ_T6_PRESCALE_2
+	default 0 if PIC32MZ_T6_PRESCALE_1
+
+config PIC32MZ_T6_MODE32
+	bool "Timer 6 Enable 32bits mode"
+	select PIC32MZ_T7
+	---help---
+		Enable 32bits mode
+
+config PIC32MZ_T6_EXTERNALCLOCK
+	bool "Timer 6 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T6
+
+if PIC32MZ_T7
+
+menu "Timer 7 Configuration"
+	depends on !PIC32MZ_T6_MODE32
+
+config PIC32MZ_T7_STOPINIDLE
+	bool "Stop Timer 7 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T7_GATED
+	bool "Enable Timer 7 Gated Time Accumulation"
+	depends on !PIC32MZ_T7_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 7 Input clock prescale value"
+	default PIC32MZ_T7_PRESCALE_1
+
+config PIC32MZ_T7_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T7_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T7_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T7_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T7_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T7_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T7_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T7_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T7_PRESCALE
+	int
+	default 7 if PIC32MZ_T7_PRESCALE_256
+	default 6 if PIC32MZ_T7_PRESCALE_64
+	default 5 if PIC32MZ_T7_PRESCALE_32
+	default 4 if PIC32MZ_T7_PRESCALE_16
+	default 3 if PIC32MZ_T7_PRESCALE_8
+	default 2 if PIC32MZ_T7_PRESCALE_4
+	default 1 if PIC32MZ_T7_PRESCALE_2
+	default 0 if PIC32MZ_T7_PRESCALE_1
+
+config PIC32MZ_T7_EXTERNALCLOCK
+	bool "Timer 7 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T7
+
+if PIC32MZ_T8
+
+menu "Timer 8 Configuration"
+
+config PIC32MZ_T8_STOPINIDLE
+	bool "Stop Timer 8 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T8_GATED
+	bool "Enable Timer 8 Gated Time Accumulation"
+	depends on !PIC32MZ_T8_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 8 Input clock prescale value"
+	default PIC32MZ_T8_PRESCALE_1
+
+config PIC32MZ_T8_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T8_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T8_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T8_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T8_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T8_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T8_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T8_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T8_PRESCALE
+	int
+	default 7 if PIC32MZ_T8_PRESCALE_256
+	default 6 if PIC32MZ_T8_PRESCALE_64
+	default 5 if PIC32MZ_T8_PRESCALE_32
+	default 4 if PIC32MZ_T8_PRESCALE_16
+	default 3 if PIC32MZ_T8_PRESCALE_8
+	default 2 if PIC32MZ_T8_PRESCALE_4
+	default 1 if PIC32MZ_T8_PRESCALE_2
+	default 0 if PIC32MZ_T8_PRESCALE_1
+
+config PIC32MZ_T8_MODE32
+	bool "Timer 8 Enable 32bits mode"
+	select PIC32MZ_T9
+	---help---
+		Enable 32bits mode
+
+config PIC32MZ_T8_EXTERNALCLOCK
+	bool "Timer 8 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T8
+
+if PIC32MZ_T9
+
+menu "Timer 9 Configuration"
+	depends on !PIC32MZ_T8_MODE32
+
+config PIC32MZ_T9_STOPINIDLE
+	bool "Stop Timer 9 in idle"
+	---help---
+		Stop Timer in idle
+
+config PIC32MZ_T9_GATED
+	bool "Enable Timer 9 Gated Time Accumulation"
+	depends on !PIC32MZ_T9_EXTERNALCLOCK
+	---help---
+		Enable Gated Time Accumulation
+
+choice
+	prompt "Timer 9 Input clock prescale value"
+	default PIC32MZ_T9_PRESCALE_1
+
+config PIC32MZ_T9_PRESCALE_256
+	bool "1:256 prescale"
+
+config PIC32MZ_T9_PRESCALE_64
+	bool "1:64 prescale"
+
+config PIC32MZ_T9_PRESCALE_32
+	bool "1:32 prescale"
+
+config PIC32MZ_T9_PRESCALE_16
+	bool "1:16 prescale"
+
+config PIC32MZ_T9_PRESCALE_8
+	bool "1:8 prescale"
+
+config PIC32MZ_T9_PRESCALE_4
+	bool "1:4 prescale"
+
+config PIC32MZ_T9_PRESCALE_2
+	bool "1:2 prescale"
+
+config PIC32MZ_T9_PRESCALE_1
+	bool "1:1 prescale"
+
+endchoice
+
+config PIC32MZ_T9_PRESCALE
+	int
+	default 7 if PIC32MZ_T9_PRESCALE_256
+	default 6 if PIC32MZ_T9_PRESCALE_64
+	default 5 if PIC32MZ_T9_PRESCALE_32
+	default 4 if PIC32MZ_T9_PRESCALE_16
+	default 3 if PIC32MZ_T9_PRESCALE_8
+	default 2 if PIC32MZ_T9_PRESCALE_4
+	default 1 if PIC32MZ_T9_PRESCALE_2
+	default 0 if PIC32MZ_T9_PRESCALE_1
+
+config PIC32MZ_T9_EXTERNALCLOCK
+	bool "Timer 9 external clock source"
+	---help---
+		Enable Timer External clock
+
+endmenu
+endif # PIC32MZ_T9
+
+
+endmenu # Timer Configuration
 
 menuconfig PIC32MZ_GPIOIRQ
 	bool "GPIO Interrupt Support"
