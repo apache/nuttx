@@ -550,13 +550,13 @@ struct sam_emac_s
 
   struct sam_queue_s    xfrq[EMAC_NQUEUES_MAX];
 
-    /* Debug stuff */
+  /* Debug stuff */
 
 #ifdef CONFIG_SAMV7_EMAC_REGDEBUG
-   bool                 wrlast;     /* Last was a write */
-   uintptr_t            addrlast;   /* Last address */
-   uint32_t             vallast;    /* Last value */
-   int                  ntimes;     /* Number of times */
+  bool                  wrlast;     /* Last was a write */
+  uintptr_t             addrlast;   /* Last address */
+  uint32_t              vallast;    /* Last value */
+  int                   ntimes;     /* Number of times */
 #endif
 };
 
@@ -1873,16 +1873,16 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
                              (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
     }
 
-  /* isframe indicates that we have found a SOF. If we've received a SOF, but not
-   * an EOF in the sequential buffers we own, it must mean that we have a partial
-   * packet. This should only happen if there was a Buffer Not Available (BNA) error.
-   * When bursts of data come in, quickly filling the available buffers, before our
-   * interrupts can even service them. Eventually, the ring buffer loops back on
-   * itself and the peripheral sees it cannot write the next fragment of the packet.
+  /* isframe indicates that we have found a SOF. If we've received a SOF,
+   * but not an EOF in the sequential buffers we own, it must mean that we
+   * have a partial packet. This should only happen if there was a Buffer
+   * Not Available (BNA) error.  When bursts of data come in, quickly
+   * filling the available buffers, before our interrupts can even service
+   * them. Eventually, the ring buffer loops back on itself and the
+   * peripheral sees it cannot write the next fragment of the packet.
    *
-   * In this case, we keep the rxndx at the start of the last frame, since the peripheral
-   * will finish writing the packet there next.
-   *
+   * In this case, we keep the rxndx at the start of the last frame, since
+   * the peripheral will finish writing the packet there next.
    */
 
   if (!isframe)
