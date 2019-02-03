@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_deliver.c
  *
- *   Copyright (C) 2007, 2008, 2012-2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013, 2016, 2019 Gregory Nutt.  All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,49 +69,58 @@
 void nxsig_deliver(FAR struct tcb_s *stcb)
 {
   FAR sigq_t *sigq;
-  FAR sigq_t *next;
   sigset_t    savesigprocmask;
+  sigset_t    newsigprocmask;
+  sigset_t    altsigprocmask;
   irqstate_t  flags;
   int         saved_errno;
 
-  sched_lock();
+  /* Loop while there are signals to be delivered */
 
-  /* Save the thread errno.  When we finished dispatching the
-   * signal actions and resume the task, the errno value must
-   * be unchanged by the operation of the signal handling.  In
-   * particular, the EINTR indication that says that the task
-   * was reawakened by a signal must be retained.
-   */
-
-  saved_errno = stcb->pterrno;
-  for (sigq = (FAR sigq_t *)stcb->sigpendactionq.head; (sigq); sigq = next)
+  for (; ; )
     {
-      next = sigq->flink;
-      sinfo("Sending signal sigq=0x%x\n", sigq);
-
-      /* Remove the signal structure from the sigpendactionq and place it
-       * in the sigpostedq.  NOTE:  Since signals are processed one at a
-       * time, there should never be more than one signal in the sigpostedq
-       */
+      /* Remove the signal structure from the head of the sigpendactionq. */
 
       flags = enter_critical_section();
-      sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
-      sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
-      leave_critical_section(flags);
+      sigq  = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq);
 
-      /* Call the signal handler (unless the signal was cancelled)
-       *
-       * Save a copy of the old sigprocmask and install the new
+      if (sigq == NULL)
+        {
+          /* All queued signal actions have been dispatched */
+
+          leave_critical_section(flags);
+          break;
+        }
+
+      sinfo("Deliver signal %d to PID %d\n",
+            sigq->info.si_signo, stcb->pid);
+
+      /* Add the signal structure to the sigpostedq.  NOTE:  Since signals
+       * are processed one at a time, there should never be more than one
+       * signal in the sigpostedq
+       */
+
+      sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
+
+      /* Save the thread errno.  When we finished dispatching the
+       * signal actions and resume the task, the errno value must
+       * be unchanged by the operation of the signal handling.  In
+       * particular, the EINTR indication that says that the task
+       * was reawakened by a signal must be retained.
+       */
+
+      saved_errno       = stcb->pterrno;
+
+      /* Save a copy of the old sigprocmask and install the new
        * (temporary) sigprocmask.  The new sigprocmask is the union
        * of the current sigprocmask and the sa_mask for the signal being
        * delivered plus the signal being delivered.
        */
 
       savesigprocmask   = stcb->sigprocmask;
-      stcb->sigprocmask = savesigprocmask | sigq->mask |
+      newsigprocmask    = savesigprocmask | sigq->mask |
                           SIGNO2SET(sigq->info.si_signo);
-
-      /* Deliver the signal. */
+      stcb->sigprocmask = newsigprocmask;
 
 #if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
       /* In the kernel build this has to be handled differently if we are
@@ -125,13 +135,18 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       if (nxsig_isdefault(stcb, sigq->info.si_signo))
         {
-           (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info,
-                                      NULL);
+          /* Leave the critical section befor calling the handler */
+
+          leave_critical_section(flags);
+          (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info,
+                                     NULL);
         }
       else
 #endif
       if ((stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
         {
+          siginfo_t info;
+
           /* The sigq_t pointed to by sigq resides in kernel space.  So we
            * cannot pass a reference to sigq->info to the user application.
            * Instead, we will copy the siginfo_t structure onto the stack.
@@ -140,9 +155,11 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
            * siginfo_t structure will be accessible by the user thread.
            */
 
-          siginfo_t info;
           memcpy(&info, &sigq->info, sizeof(siginfo_t));
 
+          /* Leave the critical section befor calling the handler */
+
+          leave_critical_section(flags);
           up_signal_dispatch(sigq->action.sighandler, sigq->info.si_signo,
                              &info, NULL);
         }
@@ -151,13 +168,33 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
         {
           /* The kernel thread signal handler is much simpler. */
 
+          leave_critical_section(flags);
           (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info,
                                      NULL);
         }
 
-      /* Restore the original sigprocmask */
+      /* Restore the critical section, the original errno value, and
+       * the original sigprocmask.
+       */
 
-      stcb->sigprocmask = savesigprocmask;
+      flags             = enter_critical_section();
+      stcb->pterrno     = saved_errno;
+
+      /* What if the signal handler changed the sigprocmask?  Try to retain
+       * any such changes here.
+       *
+       * REVISIT: This logic is imperfect.  It will fail to detect bits set
+       * in the current sigprocmask that were already set by newsigprocmask.
+       */
+
+      altsigprocmask    = stcb->sigprocmask ^ newsigprocmask;
+      stcb->sigprocmask = (stcb->sigprocmask & altsigprocmask) |
+                          (savesigprocmask & ~altsigprocmask);
+
+      /* Remove the signal structure from the sigpostedq */
+
+      sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
+      leave_critical_section(flags);
 
       /* Now, handle the (rare?) case where (a) a blocked signal was
        * received while the signal handling executed but (b) restoring the
@@ -166,17 +203,8 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       nxsig_unmask_pendingsignal();
 
-      /* Remove the signal from the sigpostedq */
-
-      flags = enter_critical_section();
-      sq_rem((FAR sq_entry_t *)sigq, &(stcb->sigpostedq));
-      leave_critical_section(flags);
-
-      /* Then deallocate it */
+      /* Then deallocate the signal structure */
 
       nxsig_release_pendingsigaction(sigq);
     }
-
-  stcb->pterrno = saved_errno;
-  sched_unlock();
 }
