@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_cpuload_oneshot.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,9 +119,9 @@ struct sched_oneshot_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void sched_oneshot_start(void);
-static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                   FAR void *arg);
+static void nxsched_oneshot_start(void);
+static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
+                                     FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -134,7 +134,7 @@ static struct sched_oneshot_s g_sched_oneshot;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_oneshot_start
+ * Name:  nxsched_oneshot_start
  *
  * Description:
  *   [Re-]start the oneshot timer, applying entropy as configured
@@ -149,7 +149,7 @@ static struct sched_oneshot_s g_sched_oneshot;
  *
  ****************************************************************************/
 
-static void sched_oneshot_start(void)
+static void nxsched_oneshot_start(void)
 {
   struct timespec ts;
 #if CONFIG_CPULOAD_ENTROPY > 0
@@ -203,12 +203,12 @@ static void sched_oneshot_start(void)
   ts.tv_sec  = secs;
   ts.tv_nsec = 1000 * usecs;
 
-  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot, sched_oneshot_callback,
-                            NULL, &ts));
+  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot,
+                            nxsched_oneshot_callback, NULL, &ts));
 }
 
 /****************************************************************************
- * Name:  sched_oneshot_callback
+ * Name:  nxsched_oneshot_callback
  *
  * Description:
  *   This is the callback function that will be invoked when the oneshot
@@ -223,8 +223,8 @@ static void sched_oneshot_start(void)
  *
  ****************************************************************************/
 
-static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                   FAR void *arg)
+static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
+                                     FAR void *arg)
 {
   /* Perform CPU load measurements */
 
@@ -237,7 +237,7 @@ static void sched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   /* Then restart the oneshot */
 
-  sched_oneshot_start();
+  nxsched_oneshot_start();
 }
 
 /****************************************************************************
@@ -299,6 +299,6 @@ void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   /* Then start the oneshot */
 
   g_sched_oneshot.oneshot = lower;
-  sched_oneshot_start();
+  nxsched_oneshot_start();
 }
 #endif

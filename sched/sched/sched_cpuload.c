@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_cpuload.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ volatile uint32_t g_cpuload_total;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_cpu_process_cpuload
+ * Name: nxsched_cpu_process_cpuload
  *
  * Description:
  *   Collect data that can be used for CPU load measurements.
@@ -122,7 +122,7 @@ volatile uint32_t g_cpuload_total;
  *
  ****************************************************************************/
 
-static inline void sched_cpu_process_cpuload(int cpu)
+static inline void nxsched_cpu_process_cpuload(int cpu)
 {
   FAR struct tcb_s *rtcb  = current_task(cpu);
   int hash_index;
@@ -151,7 +151,7 @@ static inline void sched_cpu_process_cpuload(int cpu)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_process_cpuload
+ * Name: nxsched_process_cpuload
  *
  * Description:
  *   Collect data that can be used for CPU load measurements.
@@ -168,7 +168,7 @@ static inline void sched_cpu_process_cpuload(int cpu)
  *
  ****************************************************************************/
 
-void weak_function sched_process_cpuload(void)
+void weak_function nxsched_process_cpuload(void)
 {
   int i;
 
@@ -180,13 +180,13 @@ void weak_function sched_process_cpuload(void)
   flags = enter_critical_section();
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      sched_cpu_process_cpuload(i);
+      nxsched_cpu_process_cpuload(i);
     }
 
 #else
   /* Perform scheduler operations on the single CPU. */
 
-  sched_cpu_process_cpuload(0);
+  nxsched_cpu_process_cpuload(0);
 
 #endif
 

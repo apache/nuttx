@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setpriority.c
  *
- *   Copyright (C) 2009, 2013, 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013, 2016, 2018-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_nexttcb
+ * Name: nxsched_nexttcb
  *
  * Description:
  *   Get the next highest priority ready-to-run task.
@@ -68,7 +69,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static FAR struct tcb_s *sched_nexttcb(FAR struct tcb_s *tcb)
+static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)tcb->flink;
   FAR struct tcb_s *rtrtcb;
@@ -112,7 +113,7 @@ static FAR struct tcb_s *sched_nexttcb(FAR struct tcb_s *tcb)
 #endif
 
 /****************************************************************************
- * Name:  sched_running_setpriority
+ * Name:  nxsched_running_setpriority
  *
  * Description:
  *   This function sets the priority of a running task.  This does nothing
@@ -133,15 +134,15 @@ static FAR struct tcb_s *sched_nexttcb(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-static inline void sched_running_setpriority(FAR struct tcb_s *tcb,
-                                             int sched_priority)
+static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
+                                               int sched_priority)
 {
   FAR struct tcb_s *nxttcb;
 
   /* Get the TCB of the next highest priority, ready to run task */
 
 #ifdef CONFIG_SMP
-  nxttcb = sched_nexttcb(tcb);
+  nxttcb = nxsched_nexttcb(tcb);
 #else
   nxttcb = (FAR struct tcb_s *)tcb->flink;
 #endif
@@ -171,7 +172,7 @@ static inline void sched_running_setpriority(FAR struct tcb_s *tcb,
 }
 
 /****************************************************************************
- * Name:  sched_readytorun_setpriority
+ * Name:  nxsched_readytorun_setpriority
  *
  * Description:
  *   This function sets the priority of a ready-to-run task.  This may alter
@@ -187,8 +188,8 @@ static inline void sched_running_setpriority(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
-                                         int sched_priority)
+static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
+                                           int sched_priority)
 {
   FAR struct tcb_s *rtcb;
 
@@ -261,7 +262,7 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
 }
 
 /****************************************************************************
- * Name:  sched_blocked_setpriority
+ * Name:  nxsched_blocked_setpriority
  *
  * Description:
  *   Change the priority of a blocked tasks.  The only issue here is that
@@ -276,8 +277,8 @@ static void sched_readytorun_setpriority(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-static inline void sched_blocked_setpriority(FAR struct tcb_s *tcb,
-                                             int sched_priority)
+static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
+                                               int sched_priority)
 {
   FAR dq_queue_t *tasklist;
   tstate_t task_state = tcb->task_state;
@@ -366,7 +367,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
        */
 
       case TSTATE_TASK_RUNNING:
-        sched_running_setpriority(tcb, sched_priority);
+        nxsched_running_setpriority(tcb, sched_priority);
         break;
 
       /* CASE 2. The task is ready-to-run (but not running) and a context
@@ -377,7 +378,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 #ifdef CONFIG_SMP
       case TSTATE_TASK_ASSIGNED:
 #endif
-        sched_readytorun_setpriority(tcb, sched_priority);
+        nxsched_readytorun_setpriority(tcb, sched_priority);
         break;
 
       /* CASE 3. The task is not in the ready to run list.  Changing its
@@ -385,7 +386,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
        */
 
       default:
-        sched_blocked_setpriority(tcb, sched_priority);
+        nxsched_blocked_setpriority(tcb, sched_priority);
         break;
     }
 

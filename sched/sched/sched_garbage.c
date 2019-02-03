@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_kucleanup
+ * Name: nxsched_kucleanup
  *
  * Description:
  *   Clean-up deferred de-allocations of user memory
@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-static inline void sched_kucleanup(void)
+static inline void nxsched_kucleanup(void)
 {
 #ifdef CONFIG_BUILD_KERNEL
   /* REVISIT:  It is not safe to defer user allocation in the kernel mode
@@ -105,7 +105,7 @@ static inline void sched_kucleanup(void)
 }
 
 /****************************************************************************
- * Name: sched_have_kugarbage
+ * Name: nxsched_have_kugarbage
  *
  * Description:
  *   Return TRUE if there is user heap garbage to be collected.
@@ -119,16 +119,16 @@ static inline void sched_kucleanup(void)
  ****************************************************************************/
 
 #ifndef CONFIG_BUILD_KERNEL
-static inline bool sched_have_kugarbage(void)
+static inline bool nxsched_have_kugarbage(void)
 {
   return (g_delayed_kufree.head != NULL);
 }
 #else
-#  define sched_have_kugarbage() false
+#  define nxsched_have_kugarbage() false
 #endif
 
 /****************************************************************************
- * Name: sched_kcleanup
+ * Name: nxsched_kcleanup
  *
  * Description:
  *   Clean-up deferred de-allocations of kernel memory
@@ -143,7 +143,7 @@ static inline bool sched_have_kugarbage(void)
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
-static inline void sched_kcleanup(void)
+static inline void nxsched_kcleanup(void)
 {
   irqstate_t flags;
   FAR void *address;
@@ -175,11 +175,11 @@ static inline void sched_kcleanup(void)
     }
 }
 #else
-#  define sched_kcleanup()
+#  define nxsched_kcleanup()
 #endif
 
 /****************************************************************************
- * Name: sched_have_kgarbage
+ * Name: nxsched_have_kgarbage
  *
  * Description:
  *   Return TRUE if there is kernal heap garbage to be collected.
@@ -194,12 +194,12 @@ static inline void sched_kcleanup(void)
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
      defined(CONFIG_MM_KERNEL_HEAP)
-static inline bool sched_have_kgarbage(void)
+static inline bool nxsched_have_kgarbage(void)
 {
   return (g_delayed_kfree.head != NULL);
 }
 #else
-#  define sched_have_kgarbage() false
+#  define nxsched_have_kgarbage() false
 #endif
 
 /****************************************************************************
@@ -232,11 +232,11 @@ void sched_garbage_collection(void)
 {
   /* Handle deferred deallocations for the kernel heap */
 
-  sched_kcleanup();
+  nxsched_kcleanup();
 
   /* Handle deferred deallocations for the user heap */
 
-  sched_kucleanup();
+  nxsched_kucleanup();
 
   /* Handle the architecure-specific garbage collection */
 
@@ -268,6 +268,6 @@ void sched_garbage_collection(void)
 
 bool sched_have_garbage(void)
 {
-  return (sched_have_kgarbage() || sched_have_kugarbage() ||
+  return (nxsched_have_kgarbage() || nxsched_have_kugarbage() ||
           up_sched_have_garbage());
 }

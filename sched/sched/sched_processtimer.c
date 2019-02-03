@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_cpu_scheduler
+ * Name:  nxsched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
@@ -74,7 +74,7 @@
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline void sched_cpu_scheduler(int cpu)
+static inline void nxsched_cpu_scheduler(int cpu)
 {
   FAR struct tcb_s *rtcb = current_task(cpu);
 
@@ -107,7 +107,7 @@ static inline void sched_cpu_scheduler(int cpu)
 #endif
 
 /****************************************************************************
- * Name:  sched_process_scheduler
+ * Name:  nxsched_process_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
@@ -122,7 +122,7 @@ static inline void sched_cpu_scheduler(int cpu)
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static inline void sched_process_scheduler(void)
+static inline void nxsched_process_scheduler(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags;
@@ -142,7 +142,7 @@ static inline void sched_process_scheduler(void)
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      sched_cpu_scheduler(i);
+      nxsched_cpu_scheduler(i);
     }
 
   leave_critical_section(flags);
@@ -150,11 +150,11 @@ static inline void sched_process_scheduler(void)
 #else
   /* Perform scheduler operations on the single CPUs */
 
-  sched_cpu_scheduler(0);
+  nxsched_cpu_scheduler(0);
 #endif
 }
 #else
-#  define sched_process_scheduler()
+#  define nxsched_process_scheduler()
 #endif
 
 /****************************************************************************
@@ -221,7 +221,7 @@ void sched_process_timer(void)
    * timeslice.
    */
 
-  sched_process_scheduler();
+  nxsched_process_scheduler();
 
   /* Process watchdogs */
 

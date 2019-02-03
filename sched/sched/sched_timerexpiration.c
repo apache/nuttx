@@ -62,6 +62,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* In the original design, it was planned that sched_timer_reasses() be
  * called whenever there was a change at the head of the ready-to-run
  * list.  That call was intended to establish a new time-slice or to
@@ -117,13 +118,15 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches);
+static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
+                                      bool noswitches);
 #endif
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches);
+static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches);
 #endif
-static unsigned int sched_timer_process(unsigned int ticks, bool noswitches);
-static void sched_timer_start(unsigned int ticks);
+static unsigned int nxsched_timer_process(unsigned int ticks,
+                                          bool noswitches);
+static void nxsched_timer_start(unsigned int ticks);
 
 /****************************************************************************
  * Private Data
@@ -156,7 +159,7 @@ static struct timespec g_sched_time;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_cpu_scheduler
+ * Name:  nxsched_cpu_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
@@ -181,7 +184,8 @@ static struct timespec g_sched_time;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
+static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
+                                      bool noswitches)
 {
   FAR struct tcb_s *rtcb = current_task(cpu);
   FAR struct tcb_s *ntcb = current_task(cpu);
@@ -239,7 +243,7 @@ static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
     {
       /* Recurse just to get the correct return value */
 
-      return sched_process_scheduler(0, true);
+      return nxsched_process_scheduler(0, true);
     }
 
   /* Returning zero means that there is no interesting event to be timed */
@@ -258,7 +262,7 @@ static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
 #endif
 
 /****************************************************************************
- * Name: sched_process_scheduler
+ * Name: nxsched_process_scheduler
  *
  * Description:
  *   Check for operations specific to scheduling policy of the currently
@@ -282,7 +286,7 @@ static uint32_t sched_cpu_scheduler(int cpu, uint32_t ticks, bool noswitches)
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
+static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
 {
 #ifdef CONFIG_SMP
   uint32_t minslice = UINT32_MAX;
@@ -304,7 +308,7 @@ static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      timeslice = sched_cpu_scheduler(i, ticks, noswitches);
+      timeslice = nxsched_cpu_scheduler(i, ticks, noswitches);
       if (timeslice > 0 && timeslice < minslice)
         {
           minslice = timeslice;
@@ -317,15 +321,15 @@ static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
 #else
   /* Perform scheduler operations on the single CPUs */
 
-  return sched_cpu_scheduler(0, ticks, noswitches);
+  return nxsched_cpu_scheduler(0, ticks, noswitches);
 #endif
 }
 #else
-#  define sched_process_scheduler(t,n) (0)
+#  define nxsched_process_scheduler(t,n) (0)
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_process
+ * Name:  nxsched_timer_process
  *
  * Description:
  *   Process events on timer expiration.
@@ -340,7 +344,8 @@ static uint32_t sched_process_scheduler(uint32_t ticks, bool noswitches)
  *
  ****************************************************************************/
 
-static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
+static unsigned int nxsched_timer_process(unsigned int ticks,
+                                          bool noswitches)
 {
   unsigned int cmptime = UINT_MAX;
   unsigned int rettime = 0;
@@ -365,7 +370,7 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
    * active task.
    */
 
-  tmp = sched_process_scheduler(ticks, noswitches);
+  tmp = nxsched_process_scheduler(ticks, noswitches);
   if (tmp > 0 && tmp < cmptime)
     {
       rettime = tmp;
@@ -375,7 +380,7 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
 }
 
 /****************************************************************************
- * Name:  sched_timer_start
+ * Name:  nxsched_timer_start
  *
  * Description:
  *   Start the interval timer.
@@ -388,7 +393,7 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
  *
  ****************************************************************************/
 
-static void sched_timer_start(unsigned int ticks)
+static void nxsched_timer_start(unsigned int ticks)
 {
 #ifdef CONFIG_HAVE_LONG_LONG
   uint64_t usecs;
@@ -522,8 +527,8 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = sched_timer_process(elapsed, false);
-  sched_timer_start(nexttime);
+  nexttime = nxsched_timer_process(elapsed, false);
+  nxsched_timer_start(nexttime);
 }
 #endif
 
@@ -562,8 +567,8 @@ void sched_timer_expiration(void)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = sched_timer_process(elapsed, false);
-  sched_timer_start(nexttime);
+  nexttime = nxsched_timer_process(elapsed, false);
+  nxsched_timer_start(nexttime);
 }
 #endif
 
@@ -638,7 +643,7 @@ unsigned int sched_timer_cancel(void)
 
   /* Process the timer ticks and return the next interval */
 
-  return sched_timer_process(elapsed, true);
+  return nxsched_timer_process(elapsed, true);
 }
 #else
 unsigned int sched_timer_cancel(void)
@@ -679,7 +684,7 @@ unsigned int sched_timer_cancel(void)
 
   /* Process the timer ticks and return the next interval */
 
-  return sched_timer_process(elapsed, true);
+  return nxsched_timer_process(elapsed, true);
 }
 #endif
 
@@ -718,8 +723,8 @@ void sched_timer_resume(void)
    * and set up the next interval (or not).
    */
 
-  nexttime = sched_timer_process(0, true);
-  sched_timer_start(nexttime);
+  nexttime = nxsched_timer_process(0, true);
+  nxsched_timer_start(nexttime);
 }
 
 /****************************************************************************
@@ -763,7 +768,7 @@ void sched_timer_reassess(void)
   /* Cancel and restart the timer */
 
   nexttime = sched_timer_cancel();
-  sched_timer_start(nexttime);
+  nxsched_timer_start(nexttime);
 }
 
 #endif /* CONFIG_SCHED_TICKLESS */

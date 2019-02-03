@@ -115,8 +115,8 @@ struct sched_period_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static bool sched_period_callback(FAR uint32_t *next_interval_us,
-                                  FAR void *arg);
+static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
+                                    FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -131,7 +131,7 @@ static struct sched_period_s g_sched_period;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_period_callback
+ * Name:  nxsched_period_callback
  *
  * Description:
  *   This is the callback function that will be invoked when the period
@@ -146,8 +146,8 @@ static struct sched_period_s g_sched_period;
  *
  ****************************************************************************/
 
-static bool sched_period_callback(FAR uint32_t *next_interval_us,
-                                  FAR void *arg)
+static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
+                                    FAR void *arg)
 {
   /* Get the next delay */
 
@@ -243,7 +243,7 @@ void sched_period_extclk(FAR struct timer_lowerhalf_s *lower)
 
   /* Then start the period timer */
 
-  lower->ops->setcallback(lower, sched_period_callback, NULL);
+  lower->ops->setcallback(lower, nxsched_period_callback, NULL);
   lower->ops->settimeout(lower, CPULOAD_PERIOD_NOMINAL);
   lower->ops->start(lower);
 }
