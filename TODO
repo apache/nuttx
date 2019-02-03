@@ -1065,7 +1065,7 @@ o Kernel/Protected Build
                Linux, applications do not have separate user and supervisor
                stacks; everything is done on the user stack.
 
-               In the implementation of up_sigdeliver, a copy of the
+               In the implementation of up_sigdeliver(), a copy of the
                register contents that will be restored is present on the
                stack and could be modified by the user application.  Thus,
                if the user mucks with the return stack, problems could
@@ -1077,6 +1077,12 @@ o Kernel/Protected Build
                return address and switch to supervisor mode.  Other register
                are still modifiable and there is other possible mayhem that
                could be done.
+
+               A better solution, in lieu of a kernel stack, would be to
+               eliminate the stack-based register save area and, instead,
+               save the registers in another, dedicated state save area in
+               the TCB.  The only hesitation to this option is that it would
+               significantly increase the size of the TCB structure.
   Status:      Open
   Priority:    Medium-ish if are attempting to make a secure environment that
                may host malicious code.  Very low for the typical FLAT build,

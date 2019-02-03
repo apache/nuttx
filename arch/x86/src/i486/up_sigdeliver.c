@@ -72,7 +72,6 @@ void up_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
    * so that the user code final gets the correct errno value (probably
@@ -91,14 +90,6 @@ void up_sigdeliver(void)
 
   up_copystate(regs, rtcb->xcp.regs);
 
-  /* Get a local copy of the sigdeliver function pointer. we do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
    * run with interrupts enabled.
@@ -109,7 +100,7 @@ void up_sigdeliver(void)
 
   /* Deliver the signals */
 
-  sigdeliver(rtcb);
+  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -118,7 +109,7 @@ void up_sigdeliver(void)
 
   sinfo("Resuming\n");
   (void)up_irq_save();
-  rtcb->pterrno    = saved_errno;
+  rtcb->pterrno        = saved_errno;
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
@@ -130,8 +121,9 @@ void up_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_EIP]    = rtcb->xcp.saved_eip;
-  regs[REG_EFLAGS] = rtcb->xcp.saved_eflags;
+  regs[REG_EIP]        = rtcb->xcp.saved_eip;
+  regs[REG_EFLAGS]     = rtcb->xcp.saved_eflags;
+  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution. */
 

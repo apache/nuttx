@@ -69,9 +69,8 @@
 
 void xtensa_sig_deliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
    * so that the user code final gets the correct errno value (probably
@@ -98,14 +97,6 @@ void xtensa_sig_deliver(void)
   /* Save the return state on the stack. */
 
   xtensa_copystate(regs, rtcb->xcp.regs);
-
-  /* Get a local copy of the sigdeliver function pointer. we do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
 
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
@@ -137,7 +128,7 @@ void xtensa_sig_deliver(void)
 
   /* Deliver the signals */
 
-  sigdeliver(rtcb);
+  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -149,7 +140,7 @@ void xtensa_sig_deliver(void)
 
   /* Restore the saved errno value */
 
-  rtcb->pterrno = saved_errno;
+  rtcb->pterrno        = saved_errno;
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
@@ -161,8 +152,9 @@ void xtensa_sig_deliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]  = rtcb->xcp.saved_pc;
-  regs[REG_PS]  = rtcb->xcp.saved_ps;
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+  regs[REG_PS]         = rtcb->xcp.saved_ps;
+  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
