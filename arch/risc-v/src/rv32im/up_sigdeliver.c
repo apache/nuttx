@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/risc-v/src/rv32im/up_sigdeliver.c
  *
- *   Copyright (C) 2011, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2018-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modified for RISC-V:
@@ -93,11 +93,9 @@ void up_sigdeliver(void)
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Save the real return state on the stack. */
+  /* Save the return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_EPC]        = rtcb->xcp.saved_epc;
-  regs[REG_INT_CTX]    = rtcb->xcp.saved_int_ctx;
 
   /* Get a local copy of the sigdeliver function pointer. We do this so that
    * we can nullify the sigdeliver function pointer in the TCB and accept
@@ -127,7 +125,20 @@ void up_sigdeliver(void)
   sinfo("Resuming EPC: %08x INT_CTX: %08x\n", regs[REG_EPC], regs[REG_INT_CTX]);
 
   (void)up_irq_save();
-  rtcb->pterrno = saved_errno;
+  rtcb->pterrno     = saved_errno;
+
+  /* Modify the saved return state with the actual saved values in the
+   * TCB.  This depends on the fact that nested signal handling is
+   * not supported.  Therefore, these values will persist throughout the
+   * signal handling action.
+   *
+   * Keeping this data in the TCB resolves a security problem in protected
+   * and kernel mode:  The regs[] array is visible on the user stack and
+   * could be modified by a hostile program.
+   */
+
+  regs[REG_EPC]     = rtcb->xcp.saved_epc;
+  regs[REG_INT_CTX] = rtcb->xcp.saved_int_ctx;
 
   /* Then restore the correct state for this thread of
    * execution.

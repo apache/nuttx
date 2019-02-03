@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_sigdeliver.c
  *
- *   Copyright (C) 2008-2010, 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2015, 2018-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,18 +55,6 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -99,11 +88,9 @@ void up_sigdeliver(void)
          rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Save the real return state on the stack. */
+  /* Save the return state on the stack. */
 
   ez80_copystate(regs, rtcb->xcp.regs);
-  regs[XCPT_PC] = rtcb->xcp.saved_pc;
-  regs[XCPT_I]  = rtcb->xcp.saved_i;
 
   /* Get a local copy of the sigdeliver function pointer.  We do this so
    * that we can nullify the sigdeliver function pointer in the TCB and
@@ -134,6 +121,19 @@ void up_sigdeliver(void)
   sinfo("Resuming\n");
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
+
+  regs[XCPT_PC] = rtcb->xcp.saved_pc;
+  regs[XCPT_I]  = rtcb->xcp.saved_i;
+
+  /* Modify the saved return state with the actual saved values in the
+   * TCB.  This depends on the fact that nested signal handling is
+   * not supported.  Therefore, these values will persist throughout the
+   * signal handling action.
+   *
+   * Keeping this data in the TCB resolves a security problem in protected
+   * and kernel mode:  The regs[] array is visible on the user stack and
+   * could be modified by a hostile program.
+   */
 
   /* Then restore the correct state for this thread of
    * execution.

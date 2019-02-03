@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 21, 2019)
+NuttX TODO List (Last updated February 4, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/:
   (3)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
-  (9)  Kernel/Protected Build
+ (10)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (18)  Network (net/, drivers/net)
@@ -1059,6 +1059,28 @@ o Kernel/Protected Build
   Priority:    Low, this primarily an aesthetic issue but may also have some
                performance implications if the the errno variable is accessed
                via a system call at high rates.
+
+  Title:       SIGNAL DELIVERY VULNERABILITY
+  Description: When a signal is delivered, the user stack is used.  Unlike
+               Linux, applications do not have separate user and supervisor
+               stacks; everything is done on the user stack.
+
+               In the implementation of up_sigdeliver, a copy of the
+               register contents that will be restored is present on the
+               stack and could be modified by the user application.  Thus,
+               if the user mucks with the return stack, problems could
+               occur when the user task returns to supervisor mode from
+               the the signal handler.
+
+               A recent commit (4 Feb 2019) does protect the status register
+               and return address so that a malicious task cannot change the
+               return address and switch to supervisor mode.  Other register
+               are still modifiable and there is other possible mayhem that
+               could be done.
+  Status:      Open
+  Priority:    Medium-ish if are attempting to make a secure environment that
+               may host malicious code.  Very low for the typical FLAT build,
+               however.
 
 o C++ Support
   ^^^^^^^^^^^

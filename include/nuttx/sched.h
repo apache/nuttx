@@ -150,8 +150,9 @@
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT) /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT) /* Other scheding policy */
 #define TCB_FLAG_CPU_LOCKED        (1 << 7) /* Bit 7: Locked to this CPU */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 8) /* Bit 8: Exitting */
-                                            /* Bits 9-15: Available */
+#define TCB_FLAG_SIGNAL_ACTION     (1 << 8) /* Bit 8: In a signal handler */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 9) /* Bit 9: Exitting */
+                                            /* Bits 10-15: Available */
 
 /* Values for struct task_group tg_flags */
 

@@ -79,11 +79,20 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
   for (; ; )
     {
-      /* Remove the signal structure from the head of the sigpendactionq. */
+      /* Test if this task is already handling a signal */
 
       flags = enter_critical_section();
-      sigq  = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq);
+      if ((stcb->flags & TCB_FLAG_SIGNAL_ACTION) != 0)
+        {
+          /* Yes.. then we must wait for the signal handler to return */
 
+          leave_critical_section(flags);
+          break;
+        }
+
+      /* Remove the signal structure from the head of the sigpendactionq. */
+
+      sigq  = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq);
       if (sigq == NULL)
         {
           /* All queued signal actions have been dispatched */
@@ -91,6 +100,10 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
           leave_critical_section(flags);
           break;
         }
+
+      /* Indicate that a signal is being delivered */
+
+      stcb->flags |= TCB_FLAG_SIGNAL_ACTION;
 
       sinfo("Deliver signal %d to PID %d\n",
             sigq->info.si_signo, stcb->pid);
@@ -173,11 +186,13 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
                                      NULL);
         }
 
-      /* Restore the critical section, the original errno value, and
-       * the original sigprocmask.
-       */
+      /* Indicate that a signal has been delivered */
 
       flags             = enter_critical_section();
+      stcb->flags       &= ~TCB_FLAG_SIGNAL_ACTION;
+
+      /* Restore the original errno value and sigprocmask. */
+
       stcb->pterrno     = saved_errno;
 
       /* What if the signal handler changed the sigprocmask?  Try to retain

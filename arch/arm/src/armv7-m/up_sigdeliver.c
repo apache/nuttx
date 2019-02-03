@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_sigdeliver.c
  *
- *   Copyright (C) 2009-2010, 2013-2016, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2009-2010, 2013-2016, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -97,19 +97,9 @@ void up_sigdeliver(void)
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Save the real return state on the stack. */
+  /* Save the return state on the stack. */
 
   up_copyfullstate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-  regs[REG_BASEPRI]    = rtcb->xcp.saved_basepri;
-#else
-  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
-#endif
-  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
-#ifdef CONFIG_BUILD_PROTECTED
-  regs[REG_LR]         = rtcb->xcp.saved_lr;
-#endif
 
   /* Get a local copy of the sigdeliver function pointer. We do this so that
    * we can nullify the sigdeliver function pointer in the TCB and accept
@@ -174,7 +164,28 @@ void up_sigdeliver(void)
 
   /* Restore the saved errno value */
 
-  rtcb->pterrno = saved_errno;
+  rtcb->pterrno     = saved_errno;
+
+  /* Modify the saved return state with the actual saved values in the
+   * TCB.  This depends on the fact that nested signal handling is
+   * not supported.  Therefore, these values will persist throughout the
+   * signal handling action.
+   *
+   * Keeping this data in the TCB resolves a security problem in protected
+   * and kernel mode:  The regs[] array is visible on the user stack and
+   * could be modified by a hostile program.
+   */
+
+  regs[REG_PC]      = rtcb->xcp.saved_pc;
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+  regs[REG_BASEPRI] = rtcb->xcp.saved_basepri;
+#else
+  regs[REG_PRIMASK] = rtcb->xcp.saved_primask;
+#endif
+  regs[REG_XPSR]    = rtcb->xcp.saved_xpsr;
+#ifdef CONFIG_BUILD_PROTECTED
+  regs[REG_LR]      = rtcb->xcp.saved_lr;
+#endif
 
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
