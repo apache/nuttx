@@ -56,7 +56,8 @@
  * Name: nxsig_kill
  *
  * Description:
- *   The nxsig_kill() system call can be used to send any signal to any task.
+ *   The nxsig_kill() system call can be used to send any signal to any task
+ *   group.
  *
  *   This is an internal OS interface.  It is functionally equivalent to
  *   the POSIX standard kill() function but does not modify the application
@@ -135,7 +136,8 @@ int nxsig_kill(pid_t pid, int signo)
  * Name: kill
  *
  * Description:
- *   The kill() system call can be used to send any signal to any task.
+ *   The kill() system call can be used to send any signal to any task
+ *   group.
  *
  *   Limitation: Sending of signals to 'process groups' is not
  *   supported in NuttX

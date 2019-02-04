@@ -65,7 +65,7 @@
 
 FAR void *memalign(size_t alignment, size_t size)
 {
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR void *brkaddr;
   FAR void *mem;
 

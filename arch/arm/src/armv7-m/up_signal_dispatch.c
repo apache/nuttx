@@ -54,7 +54,7 @@
  * Name: up_signal_dispatch
  *
  * Description:
- *   In this kernel mode build, this function will be called to execute a
+ *   In the kernel mode build, this function will be called to execute a
  *   a signal handler in user-space.  When the signal is delivered, a
  *   kernel-mode stub will first run to perform some housekeeping functions.
  *   This kernel-mode stub will then be called transfer control to the user
