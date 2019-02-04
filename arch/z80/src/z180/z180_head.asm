@@ -48,7 +48,7 @@
 ; Global symbols used
 ;**************************************************************************
 
-	.globl	_os_start			; OS entry point
+	.globl	_nx_start			; OS entry point
 	.globl	_up_vectcommon		; Common interrupt handling logic
 	.globl	_z180_mmu_lowinit	; MMU initialization logic
 	.globl	s__HEAP				; Start of the heap
@@ -159,7 +159,7 @@ _up_reset:
 
 	; Then start NuttX
 
-	call	_os_start		; jump to the OS entry point
+	call	_nx_start		; jump to the OS entry point
 
 	; NuttX will never return, but just in case...
 

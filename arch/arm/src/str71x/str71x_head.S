@@ -70,7 +70,7 @@
 #ifdef CONFIG_DEBUG_FEATURES
 	.globl	up_lowputc					/* Low-level debug output */
 #endif
-	.globl	os_start					/* NuttX entry point */
+	.globl	nx_start					/* NuttX entry point */
 
 /*****************************************************************************
  * Macros
@@ -577,7 +577,7 @@ ctor_end:
 
 	/* Then jump to OS entry */
 
-	b		os_start
+	b		nx_start
 
 	/* Call destructors  -- never get here */
 

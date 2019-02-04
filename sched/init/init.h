@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_start
+ * Name: nx_start
  *
  * Description:
  *   This function is called to initialize the operating system and to spawn
@@ -62,10 +62,10 @@
  *
  ****************************************************************************/
 
-void os_start(void);
+void nx_start(void);
 
 /****************************************************************************
- * Name: os_smp_start
+ * Name: nx_smp_start
  *
  * Description:
  *   In an SMP configution, only one CPU is initially active (CPU 0). System
@@ -82,15 +82,15 @@ void os_start(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int os_smp_start(void);
+int nx_smp_start(void);
 #endif
 
 /****************************************************************************
- * Name: os_idle_trampoline
+ * Name: nx_idle_trampoline
  *
  * Description:
  *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *   It is equivalent to the CPU 0 IDLE logic in nx_start.c
  *
  * Input Parameters:
  *   Standard task arguments.
@@ -101,15 +101,15 @@ int os_smp_start(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-void os_idle_trampoline(void);
+void nx_idle_trampoline(void);
 #endif
 
 /****************************************************************************
- * Name: os_idle_task
+ * Name: nx_idle_task
  *
  * Description:
  *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *   It is equivalent to the CPU 0 IDLE logic in nx_start.c
  *
  * Input Parameters:
  *   Standard task arguments.
@@ -120,11 +120,11 @@ void os_idle_trampoline(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int os_idle_task(int argc, FAR char *argv[]);
+int nx_idle_task(int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************
- * Name: os_bringup
+ * Name: nx_bringup
  *
  * Description:
  *   Start all initial system tasks.  This does the "system bring-up" after
@@ -151,6 +151,6 @@ int os_idle_task(int argc, FAR char *argv[]);
  *
  ****************************************************************************/
 
-int os_bringup(void);
+int nx_bringup(void);
 
 #endif /* __SCHED_INIT_INIT_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/init/os_start.c
+ * sched/init/nx_start.c
  *
  *   Copyright (C) 2007-2014, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -331,7 +331,7 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
  * hardware resources may not yet be available to the kernel logic.
  */
 
-uint8_t g_os_initstate;  /* See enum os_initstate_e */
+uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Private Data
@@ -376,7 +376,7 @@ static FAR char *g_idleargv[1][2];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_start
+ * Name: nx_start
  *
  * Description:
  *   This function is called to initialize the operating system and to spawn
@@ -391,7 +391,7 @@ static FAR char *g_idleargv[1][2];
  *
  ****************************************************************************/
 
-void os_start(void)
+void nx_start(void)
 {
 #ifdef CONFIG_SMP
   int cpu;
@@ -404,7 +404,7 @@ void os_start(void)
 
   /* Boot up is complete */
 
-  g_os_initstate = OSINIT_BOOT;
+  g_nx_initstate = OSINIT_BOOT;
 
   /* Initialize RTOS Data ***************************************************/
   /* Initialize all task lists */
@@ -485,14 +485,14 @@ void os_start(void)
 #ifdef CONFIG_SMP
       if (cpu > 0)
         {
-          g_idletcb[cpu].cmn.start      = os_idle_trampoline;
-          g_idletcb[cpu].cmn.entry.main = os_idle_task;
+          g_idletcb[cpu].cmn.start      = nx_idle_trampoline;
+          g_idletcb[cpu].cmn.entry.main = nx_idle_task;
         }
       else
 #endif
         {
-          g_idletcb[cpu].cmn.start      = (start_t)os_start;
-          g_idletcb[cpu].cmn.entry.main = (main_t)os_start;
+          g_idletcb[cpu].cmn.start      = (start_t)nx_start;
+          g_idletcb[cpu].cmn.entry.main = (main_t)nx_start;
         }
 
       /* Set the task flags to indicate that this is a kernel thread and, if
@@ -568,7 +568,7 @@ void os_start(void)
 
   /* Task lists are initialized */
 
-  g_os_initstate = OSINIT_TASKLISTS;
+  g_nx_initstate = OSINIT_TASKLISTS;
 
   /* Initialize RTOS facilities *********************************************/
   /* Initialize the semaphore facility.  This has to be done very early
@@ -617,7 +617,7 @@ void os_start(void)
 
   /* The memory manager is available */
 
-  g_os_initstate = OSINIT_MEMORY;
+  g_nx_initstate = OSINIT_MEMORY;
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */
@@ -721,7 +721,7 @@ void os_start(void)
 
   /* Hardware resources are available */
 
-  g_os_initstate = OSINIT_HARDWARE;
+  g_nx_initstate = OSINIT_HARDWARE;
 
 #ifdef CONFIG_MM_SHM
   /* Initialize shared memory support */
@@ -811,18 +811,18 @@ void os_start(void)
 
   /* Then start the other CPUs */
 
-  DEBUGVERIFY(os_smp_start());
+  DEBUGVERIFY(nx_smp_start());
 
 #endif /* CONFIG_SMP */
 
   /* Bring Up the System ****************************************************/
   /* The OS is fully initialized and we are beginning multi-tasking */
 
-  g_os_initstate = OSINIT_OSREADY;
+  g_nx_initstate = OSINIT_OSREADY;
 
   /* Create initial tasks and bring-up the system */
 
-  DEBUGVERIFY(os_bringup());
+  DEBUGVERIFY(nx_bringup());
 
 #ifdef CONFIG_SMP
   /* Let other threads have access to the memory manager */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/init/os_bringup.c
+ * sched/init/nx_bringup.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * With extensions by:
@@ -135,7 +135,7 @@ extern const int             CONFIG_INIT_NEXPORTS;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_pgworker
+ * Name: nx_pgworker
  *
  * Description:
  *   Start the page fill worker kernel thread that will resolve page faults.
@@ -151,7 +151,7 @@ extern const int             CONFIG_INIT_NEXPORTS;
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-static inline void os_pgworker(void)
+static inline void nx_pgworker(void)
 {
   /* Start the page fill worker kernel thread that will resolve page faults.
    * This should always be the first thread started because it may have to
@@ -167,12 +167,12 @@ static inline void os_pgworker(void)
 }
 
 #else /* CONFIG_PAGING */
-#  define os_pgworker()
+#  define nx_pgworker()
 
 #endif /* CONFIG_PAGING */
 
 /****************************************************************************
- * Name: os_workqueues
+ * Name: nx_workqueues
  *
  * Description:
  *   Start the worker threads that service the work queues.
@@ -186,7 +186,7 @@ static inline void os_pgworker(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-static inline void os_workqueues(void)
+static inline void nx_workqueues(void)
 {
 #ifdef CONFIG_LIB_USRWORK
   pid_t pid;
@@ -221,12 +221,12 @@ static inline void os_workqueues(void)
 }
 
 #else /* CONFIG_SCHED_WORKQUEUE */
-#  define os_workqueues()
+#  define nx_workqueues()
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
 
 /****************************************************************************
- * Name: os_start_application
+ * Name: nx_start_application
  *
  * Description:
  *   Execute the board initialization function (if so configured) and start
@@ -241,7 +241,7 @@ static inline void os_workqueues(void)
  ****************************************************************************/
 
 #if defined(CONFIG_INIT_ENTRYPOINT)
-static inline void os_do_appstart(void)
+static inline void nx_start_application(void)
 {
   int pid;
 
@@ -277,7 +277,7 @@ static inline void os_do_appstart(void)
 }
 
 #elif defined(CONFIG_INIT_FILEPATH)
-static inline void os_do_appstart(void)
+static inline void nx_start_application(void)
 {
   int ret;
 
@@ -313,7 +313,7 @@ static inline void os_do_appstart(void)
 }
 
 #elif defined(CONFIG_INIT_NONE)
-#  define os_do_appstart()
+#  define nx_start_application()
 
 #else
 #  error "Cannot start initialization thread"
@@ -321,7 +321,7 @@ static inline void os_do_appstart(void)
 #endif
 
 /****************************************************************************
- * Name: os_start_task
+ * Name: nx_start_task
  *
  * Description:
  *   This is the framework for a short duration worker thread.  It off-loads
@@ -337,17 +337,17 @@ static inline void os_do_appstart(void)
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_INITTHREAD
-static int os_start_task(int argc, FAR char **argv)
+static int nx_start_task(int argc, FAR char **argv)
 {
   /* Do the board/application initialization and exit */
 
-  os_do_appstart();
+  nx_start_application();
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: os_start_application
+ * Name: nx_create_initthread
  *
  * Description:
  *   Execute the board initialization function (if so configured) and start
@@ -363,7 +363,7 @@ static int os_start_task(int argc, FAR char **argv)
  *
  ****************************************************************************/
 
-static inline void os_start_application(void)
+static inline void nx_create_initthread(void)
 {
 #ifdef CONFIG_BOARD_INITTHREAD
   int pid;
@@ -374,13 +374,13 @@ static inline void os_start_application(void)
 
   pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
-                      (main_t)os_start_task, (FAR char * const *)NULL);
+                      (main_t)nx_start_task, (FAR char * const *)NULL);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
 #else
   /* Do the board/application initialization on this thread of execution. */
 
-  os_do_appstart();
+  nx_start_application();
 
 #endif
 }
@@ -390,7 +390,7 @@ static inline void os_start_application(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_bringup
+ * Name: nx_bringup
  *
  * Description:
  *   Start all initial system tasks.  This does the "system bring-up" after
@@ -423,21 +423,23 @@ static inline void os_start_application(void)
  *
  ****************************************************************************/
 
-int os_bringup(void)
+int nx_bringup(void)
 {
+#ifndef CONFIG_DISABLE_ENVIRON
   /* Setup up the initial environment for the idle task.  At present, this
-   * may consist of only the initial PATH variable.  The PATH variable is
-   * (probably) not used by the IDLE task.  However, the environment
-   * containing the PATH variable will be inherited by all of the threads
-   * created by the IDLE task.
+   * may consist of only the initial PATH variable and/or and init library
+   * path variable.  These path variables are not used by the IDLE task.
+   * However, the environment containing the PATH variable will be inherited
+   * by all of the threads created by the IDLE task.
    */
 
-#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_PATH_INITIAL)
+#ifdef CONFIG_PATH_INITIAL
   (void)setenv("PATH", CONFIG_PATH_INITIAL, 1);
 #endif
 
-#if !defined(CONFIG_DISABLE_ENVIRON) && defined(CONFIG_LDPATH_INITIAL)
+#ifdef CONFIG_LDPATH_INITIAL
   (void)setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
+#endif
 #endif
 
   /* Start the page fill worker kernel thread that will resolve page faults.
@@ -445,24 +447,25 @@ int os_bringup(void)
    * resolve page faults in other threads
    */
 
-  os_pgworker();
+  nx_pgworker();
 
   /* Start the worker thread that will serve as the device driver "bottom-
    * half" and will perform misc garbage clean-up.
    */
 
-  os_workqueues();
+  nx_workqueues();
 
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user initialization thread of execution.  This
    * will be the first user-mode thread.
    */
 
-  os_start_application();
+  nx_create_initthread();
 
+#if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || \
+     defined(CONFIG_LDPATH_INITIAL))
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
-#if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || defined(CONFIG_LDPATH_INITIAL))
   (void)clearenv();
 #endif
 

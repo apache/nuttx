@@ -152,6 +152,6 @@ void IRAM_ATTR __start(void)
 
   /* Bring up NuttX */
 
-  os_start();
+  nx_start();
   for(; ; ); /* Should not return */
 }

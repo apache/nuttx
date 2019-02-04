@@ -70,7 +70,7 @@
 #ifdef CONFIG_ARCH_LEDS
 	xref	_board_autoled_initialize:ROM
 #endif
-	xref	_os_start:ROM
+	xref	_nx_start:ROM
 	xref	_up_doirq:ROM
 	xref	_low_nearbss
 	xref	_len_nearbss
@@ -225,7 +225,7 @@ _z8_reset10:
 	ldx     __intrp,#0
 	xor     r15, r15
 	xor     r14, r14
-	call	_os_start
+	call	_nx_start
 
 	/* We should never get here */
 

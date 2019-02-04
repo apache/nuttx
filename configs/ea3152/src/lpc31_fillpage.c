@@ -515,7 +515,7 @@ void weak_function lpc31_pginitialize(void)
    *   that it is called.
    *
    * In reality, however, this function is not very useful: This function is called
-   * from a low level (before os_start() is even called), it may not be possible to
+   * from a low level (before nx_start() is even called), it may not be possible to
    * perform file system operations or even to get debug output yet.  Therefore,
    * to keep life simple, initialization will be deferred in all cases until the first
    * time that up_fillpage() is called.

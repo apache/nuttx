@@ -177,7 +177,7 @@ void __start(void)
   showprogress('\r');
   showprogress('\n');
 
-  os_start();
+  nx_start();
 
   /* Shoulnd't get here */
 

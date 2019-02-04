@@ -61,7 +61,7 @@
 	xref	__len_code
 	xref	__low_code
 	xref	__low_romcode
-	xref	_os_start
+	xref	_nx_start
 	xdef	_ez80_startup
 	xdef	_ez80_halt
 
@@ -145,7 +145,7 @@ _ez80_codedone:
 
 	; Then start NuttX
 
-	call	_os_start		; jump to the OS entry point
+	call	_nx_start		; jump to the OS entry point
 
 	; NuttX will never return, but just in case...
 

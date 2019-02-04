@@ -384,10 +384,10 @@ __start:
 	 * within arm_boot() must configure SDRAM and call arm_data_initialize()
 	 * if CONFIG_ARMV7R_MEMINIT=y.
 	 *
-	 * This function does not return.  It must give control to os_start()
+	 * This function does not return.  It must give control to nx_start()
 	 * at the completion of its initialization.
 	 *
-	 * Why not just call arm_boot() and branch to os_start() when it returns?
+	 * Why not just call arm_boot() and branch to nx_start() when it returns?
 	 * If the stack pointer initialized above lies in SDRAM, then that may
 	 * not be possible.  Also, in the special case of the TMS570, it may
 	 * perform a destructive test, losing the pushed content of the stack.

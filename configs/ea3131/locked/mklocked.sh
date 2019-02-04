@@ -144,7 +144,7 @@ fi
 
 echo "EXTERN(arm_boot)" >>ld-locked.inc
 
-# All of the initialization functions that are called by os_start up to
+# All of the initialization functions that are called by nx_start up to
 # the point where the page fill worker thread is started must also be
 # included in the locked text section (at least for now)
 
@@ -203,7 +203,7 @@ echo "EXTERN(task_create)" >>ld-locked.inc
 #
 # The IDLE loop must be forced to lie in the locked .text region.
 
-echo "EXTERN(os_start)" >>ld-locked.inc
+echo "EXTERN(nx_start)" >>ld-locked.inc
 echo "EXTERN(up_idle)" >>ld-locked.inc
 
 ############################################################################

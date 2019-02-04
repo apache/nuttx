@@ -296,9 +296,9 @@ o Task/Scheduler (sched/)
 
                1. One problem is stack-related data in the IDLE threads TCB.
                   A solution might be to standardize the use of g_idle_topstack.
-                  That you could add initialization like this in os_start:
+                  That you could add initialization like this in nx_start:
 
-                  @@ -344,6 +347,11 @@ void os_start(void)
+                  @@ -344,6 +347,11 @@ void nx_start(void)
                      g_idleargv[1]  = NULL;
                      g_idletcb.argv = g_idleargv;
 
@@ -335,18 +335,18 @@ o Task/Scheduler (sched/)
 
                2. Another problem is colorizing that stack to use with
                  stack usage monitoring logic.  There is logic in some
-                 start functions to do this in a function called go_os_start.
+                 start functions to do this in a function called go_nx_start.
                  It is available in these architectures:
 
-                 ./arm/src/efm32/efm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/kinetis/kinetis_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/sam34/sam_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/samv7/sam_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/stm32/stm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/stm32f7/stm32_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/stm32l4/stm32l4_start.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/tms570/tms570_boot.c:static void go_os_start(void *pv, unsigned int nbytes)
-                 ./arm/src/xmc4/xmc4_start.c:static void go_os_start(void *pv, unsigned int nbytes)
+                 ./arm/src/efm32/efm32_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/kinetis/kinetis_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/sam34/sam_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/samv7/sam_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32/stm32_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32f7/stm32_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/stm32l4/stm32l4_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/tms570/tms570_boot.c:static void go_nx_start(void *pv, unsigned int nbytes)
+                 ./arm/src/xmc4/xmc4_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
 
                  But no others.
   Status:     Open

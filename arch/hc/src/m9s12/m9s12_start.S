@@ -68,7 +68,7 @@
 
 	.file		"m9s12_start.S"
 	.globl		__start
-	.globl		os_start
+	.globl		nx_start
 	.globl		up_lowsetup
 	.globl		hcs12_boardinitialize
 
@@ -224,7 +224,7 @@ __start:
 	/* Now, start the OS */
 
 	showprogress '\n'
-	CALL	os_start
+	CALL	nx_start
 	bra		__start
 
 	/* Variables:

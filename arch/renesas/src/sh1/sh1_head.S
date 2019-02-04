@@ -70,7 +70,7 @@
 #ifdef CONFIG_DEBUG_FEATURES
 	.globl	_up_lowputc					/* Low-level debug output */
 #endif
-	.globl	_os_start					/* NuttX entry point */
+	.globl	_nx_start					/* NuttX entry point */
 
 /* Variables set up by the linker script */
 
@@ -495,7 +495,7 @@ __start0:
 .Lledinit:
 	.long	_board_autoled_initialize
 .Losstart:
-	.long	_os_start
+	.long	_nx_start
 .Lsvect:
 	.long	_svect
 .Lvectend:

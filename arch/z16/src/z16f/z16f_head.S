@@ -61,7 +61,7 @@
 #elif defined(USE_EARLYSERIALINIT)
 	xref	_up_earlyserialinit:EROM
 #endif
-	xref	_os_start:EROM
+	xref	_nx_start:EROM
 	xref	_up_doirq:EROM
 	xref	_z16f_sysexec:EROM
 	xdef	_z16f_reset
@@ -222,8 +222,8 @@ _z16f_reset8:
 #endif
 	/* Start NuttX */
 
-	call	_os_start				/* Start the operating system */
-_halt1:								/* _os_start() should not return */
+	call	_nx_start				/* Start the operating system */
+_halt1:								/* _nx_start() should not return */
 	halt
 	jp	_halt1
 

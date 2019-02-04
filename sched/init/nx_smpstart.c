@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/init/os_smpstart.c
+ * sched/init/nx_smpstart.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  * Private Types
  ****************************************************************************/
 
-struct os_tcballoc_s
+struct nx_tcballoc_s
 {
   struct task_tcb_s tcb;  /* IDLE task TCB */
   FAR char *idleargv[2];  /* Argument list */
@@ -78,7 +78,7 @@ static const char g_idlename[] = "CPUn Idle"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: os_idle_trampoline
+ * Name: nx_idle_trampoline
  *
  * Description:
  *   This is the common start-up logic for the IDLE task for CPUs 1 through
@@ -95,7 +95,7 @@ static const char g_idlename[] = "CPUn Idle"
  *
  ****************************************************************************/
 
-void os_idle_trampoline(void)
+void nx_idle_trampoline(void)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   FAR struct tcb_s *tcb = this_task();
@@ -107,7 +107,7 @@ void os_idle_trampoline(void)
 
   /* Then transfer control to the IDLE task */
 
-  (void)os_idle_task(0, NULL);
+  (void)nx_idle_task(0, NULL);
 
   /* The IDLE task should never return */
 
@@ -115,11 +115,11 @@ void os_idle_trampoline(void)
 }
 
 /****************************************************************************
- * Name: os_idle_task
+ * Name: nx_idle_task
  *
  * Description:
  *   This is the common IDLE task for CPUs 1 through (CONFIG_SMP_NCPUS-1).
- *   It is equivalent to the CPU 0 IDLE logic in os_start.c
+ *   It is equivalent to the CPU 0 IDLE logic in nx_start.c
  *
  * Input Parameters:
  *   Standard task arguments.
@@ -129,7 +129,7 @@ void os_idle_trampoline(void)
  *
  ****************************************************************************/
 
-int os_idle_task(int argc, FAR char *argv[])
+int nx_idle_task(int argc, FAR char *argv[])
 {
   /* Enter the IDLE loop */
 
@@ -170,7 +170,7 @@ int os_idle_task(int argc, FAR char *argv[])
 }
 
 /****************************************************************************
- * Name: os_smp_start
+ * Name: nx_smp_start
  *
  * Description:
  *   In an SMP configuration, only one CPU is initially active (CPU 0).
@@ -191,7 +191,7 @@ int os_idle_task(int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-int os_smp_start(void)
+int nx_smp_start(void)
 {
   int ret;
   int cpu;

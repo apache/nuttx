@@ -186,7 +186,7 @@
   .extern _idle_stack_end
 
   .extern gap8_dispatch_irq
-  .extern os_start
+  .extern nx_start
   .extern gapuino_sysinit
 
 /*******************************************************************************
@@ -229,9 +229,9 @@ zero_loop_end:
 
   jal x1, gapuino_sysinit
 
-  /* Directly call Nuttx os_start() */
+  /* Directly call Nuttx nx_start() */
 
-  jal x1, os_start
+  jal x1, nx_start
 
   /* If it ever returns, spin here forever... */
 

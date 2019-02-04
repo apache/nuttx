@@ -52,10 +52,10 @@
  * initialization.
  */
 
-#define OSINIT_MM_READY()        (g_os_initstate >= OSINIT_MEMORY)
-#define OSINIT_HW_READY()        (g_os_initstate >= OSINIT_HARDWARE)
-#define OSINIT_OS_READY()        (g_os_initstate >= OSINIT_OSREADY)
-#define OSINIT_OS_INITIALIZING() (g_os_initstate  < OSINIT_OSREADY)
+#define OSINIT_MM_READY()        (g_nx_initstate >= OSINIT_MEMORY)
+#define OSINIT_HW_READY()        (g_nx_initstate >= OSINIT_HARDWARE)
+#define OSINIT_OS_READY()        (g_nx_initstate >= OSINIT_OSREADY)
+#define OSINIT_OS_INITIALIZING() (g_nx_initstate  < OSINIT_OSREADY)
 
 /****************************************************************************
  * Public Types
@@ -63,7 +63,7 @@
 
 /* Initialization state.  OS bring-up occurs in several phases: */
 
-enum os_initstate_e
+enum nx_initstate_e
 {
   OSINIT_POWERUP   = 0,  /* Power-up.  No initialization yet performed.
                           * Depends on .bss initialization logic for this
@@ -100,7 +100,7 @@ extern "C"
  * hardware resources may not yet be available to the OS-internal logic.
  */
 
-EXTERN uint8_t g_os_initstate;  /* See enum os_initstate_e */
+EXTERN uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -110,10 +110,10 @@ EXTERN uint8_t g_os_initstate;  /* See enum os_initstate_e */
 
 int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
 
-/* Functions contained in os_task.c *****************************************/
+/* Functions contained in nx_task.c *****************************************/
 /* OS entry point called by boot logic */
 
-void os_start(void) noreturn_function;
+void nx_start(void) noreturn_function;
 
 #undef EXTERN
 #ifdef __cplusplus

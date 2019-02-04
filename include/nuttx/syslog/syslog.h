@@ -101,7 +101,7 @@ enum syslog_init_e
 {
   SYSLOG_INIT_RESET = 0, /* Power on SYSLOG initializaton phase */
   SYSLOG_INIT_EARLY,     /* Early initialization in up_initialize() */
-  SYSLOG_INIT_LATE       /* Late initialization in os_start(). */
+  SYSLOG_INIT_LATE       /* Late initialization in nx_start(). */
 };
 
 /* This structure provides the interface to a SYSLOG device */

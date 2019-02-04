@@ -98,7 +98,7 @@ int main(int argc, char **argv, char **envp)
 #else
       /* Start the Nuttx emulation.  This should not return. */
 
-      os_start();
+      nx_start();
 #endif
     }
 

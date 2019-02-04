@@ -157,7 +157,7 @@ struct tasklist_s
  * Public Data
  ****************************************************************************/
 
-/* Declared in os_start.c ***************************************************/
+/* Declared in nx_start.c ***************************************************/
 
 /* The state of a task is indicated both by the task_state field of the TCB
  * and by a series of task lists.  All of these tasks lists are declared

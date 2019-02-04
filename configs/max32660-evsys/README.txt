@@ -171,7 +171,7 @@ Debugging from FLASH:
   (gdb) mon reset
   (gdb) mon reg pc __start  # Set PC to __start entry point
   (gdb) file nuttx
-  (gdb) b os_start
+  (gdb) b nx_start
   (gdb) c
 
   Also not very reliable.
@@ -187,7 +187,7 @@ Debugging from SRAM:
   (gdb) load nuttx          # Re-load code into SRAM
   (gdb) mon reg pc __start  # Set PC to __start entry point
   (gdb) file nuttx
-  (gdb) b os_start
+  (gdb) b nx_start
   (gdb) c
 
 Recovering from bad code in FLASH:

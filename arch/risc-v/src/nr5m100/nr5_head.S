@@ -83,7 +83,7 @@
 	.extern __reset_vec
 	.extern __trap_vec
 	.extern __stack_start
-	.global os_start
+	.global nx_start
 
 #ifndef CONFIG_LIB_NEWLIB
 

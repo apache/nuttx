@@ -178,7 +178,7 @@ _do_reset:
 	bi		.clearBSS
 
 .callMain:
-	bi		os_start
+	bi		nx_start
 
 .save_all:
 	addi	sp, sp, -136

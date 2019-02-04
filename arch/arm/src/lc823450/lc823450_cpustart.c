@@ -138,7 +138,7 @@ static void cpu1_boot(void)
 
   /* Then transfer control to the IDLE task */
 
-  (void)os_idle_task(0, NULL);
+  (void)nx_idle_task(0, NULL);
 
 }
 

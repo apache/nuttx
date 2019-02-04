@@ -75,7 +75,7 @@ void up_idle(void)
    */
 
   /* This is a kludge that I still don't understand.  The call to kmm_trysemaphore()
-   * in the os_start.c IDLE loop seems necessary for the good health of the IDLE
+   * in the nx_start.c IDLE loop seems necessary for the good health of the IDLE
    * loop.  When the work queue is enabled, this logic is removed from the IDLE
    * loop and it appears that we are somehow left idling with interrupts non-
    * functional. The following should be no-op, it just disables then re-enables

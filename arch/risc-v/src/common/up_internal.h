@@ -153,7 +153,7 @@ void up_lowputs(const char *str);
 
 /* The OS start routine    **************************************************/
 
-void os_start(void);
+void nx_start(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -60,7 +60,7 @@
 ; Global symbols used
 ;**************************************************************************
 
-	.globl	_os_start		; OS entry point
+	.globl	_nx_start		; OS entry point
 	.globl	_up_doirq		; Interrupt decoding logic
 
 ;**************************************************************************
@@ -174,7 +174,7 @@ _up_reset:
 
 	; Then start NuttX
 
-	call	_os_start		; jump to the OS entry point
+	call	_nx_start		; jump to the OS entry point
 
 	; NuttX will never return, but just in case...
 

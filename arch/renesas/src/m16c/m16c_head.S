@@ -267,8 +267,8 @@ __start:
 
 /* Pass control to NuttX */
 
-	.globl	_os_start
-	jsr.a	_os_start
+	.globl	_nx_start
+	jsr.a	_nx_start
 
 /* NuttX will not return, but just in case... */
 

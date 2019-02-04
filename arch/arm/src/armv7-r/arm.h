@@ -133,7 +133,7 @@ extern "C"
  *       among other things, must initialize memories.  After initializatino
  (       of the memories, this function will call arm_data_initialize() to
  *       initialize the memory resources
- *   4.  This function will then branch to os_start() to start the operating
+ *   4.  This function will then branch to nx_start() to start the operating
  *       system.
  *
  ****************************************************************************/

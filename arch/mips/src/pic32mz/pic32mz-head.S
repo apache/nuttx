@@ -127,7 +127,7 @@
 
 	/* Imported symbols */
 
-	.global os_start
+	.global nx_start
 	.global	pic32mz_exception
 	.global pic32mz_decodeirq
 #ifdef CONFIG_PIC32MZ_NMIHANDLER
@@ -676,9 +676,9 @@ __start_nuttx:
 	jalr    ra, t0
 	nop
 
-	/* Call os_start */
+	/* Call nx_start */
 
-	la		t0, os_start
+	la		t0, nx_start
 	jalr	ra, t0
 	nop
 

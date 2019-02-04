@@ -61,7 +61,7 @@
  *     kernel and application code.  There is only one heap that use is
  *     used by both the kernel and application logic.
  *
- *     In this configuration, this function is called early in os_start()
+ *     In this configuration, this function is called early in nx_start()
  *     to initialize the common heap.
  *
  *   CONFIG_BUILD_PROTECTED
@@ -72,7 +72,7 @@
  *     Or there may be separate protected/kernel and unprotected/user
  *     heaps.
  *
- *     In either case, this function is still called early in os_start()
+ *     In either case, this function is still called early in nx_start()
  *     to initialize the user heap.
  *
  *   CONFIG_BUILD_KERNEL

@@ -91,7 +91,7 @@ locked.r: ld-locked.inc $(PASS1_LIBBOARD)
 	@echo "LD:  locked.r"
 	$(Q) $(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC)
 	$(Q) $(NM) $@ > locked.map
-	$(Q) fgrep " U " locked.map | grep -v os_start
+	$(Q) fgrep " U " locked.map | grep -v nx_start
 	$(Q) $(CROSSDEV)size $@
 
 $(PASS1_SRCDIR)$(DELIM)locked.r: locked.r

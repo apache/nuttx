@@ -198,7 +198,7 @@ __start:
 
 	/* Then jump to OS entry */
 
-	b	os_start
+	b	nx_start
 
 	/* Variables:
 	 * _sbss is the start of the BSS region (see ld.script)

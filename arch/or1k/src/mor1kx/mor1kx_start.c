@@ -131,7 +131,7 @@ void __start(void)
 
   /* Start NuttX */
 
-  os_start();
+  nx_start();
 
   /* Shouldn't get here */
 

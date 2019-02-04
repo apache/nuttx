@@ -76,7 +76,7 @@
 	.global	_eronly				/* Start of .data section in FLASH */
 	.global	_enoinit			/* End of uninitilized data.  Defined by ld.script */
 	.global	up_lowinit			/* Perform low level initialization */
-	.global	os_start			/* NuttX entry point */
+	.global	nx_start			/* NuttX entry point */
 
 	.global	vectortab
 #if defined(CONFIG_ARCH_CHIP_ATMEGA128)
@@ -454,7 +454,7 @@ __do_clear_bss:
 
 	/* Now start NuttX */
 
-	call	os_start
+	call	nx_start
 	jmp		exit
 	.endfunc
 

@@ -147,7 +147,7 @@ __start:
 	/* Finally branch to the OS entry point */
 
 	mov		lr, #0				/* LR = return address (none) */
-	b		os_start			/* Branch to os_start */
+	b		nx_start			/* Branch to nx_start */
 
 	/* Variables:
 	 * _sbss is the start of the BSS region (see ld.script)

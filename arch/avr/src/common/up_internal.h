@@ -142,7 +142,7 @@ void up_addregion(void);
 #endif
 
 /* Defined in chip/xxx_lowinit.c.  This function is called from the
- * head.S file just before jumping to os_start().  This function
+ * head.S file just before jumping to nx_start().  This function
  * performs whatever very low level initialization that is needed
  * before the OS gets started (clocks, console, LEDs, etc.)
  */

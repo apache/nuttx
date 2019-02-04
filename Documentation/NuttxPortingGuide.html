@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 25, 2018</p>
+      <p>Last Updated: February 4, 2019</p>
     </td>
   </tr>
 </table>
@@ -150,7 +150,7 @@
     </ul>
     <a href="#exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#osstart">4.6.1 <code>os_start()</code></a><br>
+      <a href="#osstart">4.6.1 <code>nx_start()</code></a><br>
       <a href="#listmgmt">4.6.2 OS List Management APIs</a><br>
       <a href="#schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a><br>
       <a href="#schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a><br>
@@ -3881,7 +3881,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.6.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.6.1 <code>nx_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
@@ -6649,7 +6649,7 @@ int syslog_initialize(enum syslog_init_e phase);
   </li>
   <li>
     <p>
-      <code>syslog_initialize()</code> is called again from <code>os_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
+      <code>syslog_initialize()</code> is called again from <code>nx_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
   </li>
 </ul>
 <p>

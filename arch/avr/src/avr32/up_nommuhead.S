@@ -56,7 +56,7 @@
 	.global		_eronly			/* Start of .data section in FLASH */
 #endif
 	.global		up_lowinit		/* Perform low level initialization */
-	.global		os_start		/* NuttX entry point */
+	.global		nx_start		/* NuttX entry point */
 	.global		vectortab		/* Vector base address */
 
 /****************************************************************************
@@ -133,7 +133,7 @@ __start:
 
 	/* Then jump to OS entry (will not return) */
 
-	lda.w		pc, os_start
+	lda.w		pc, nx_start
 
 .Lstackbase:
 	.word	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4

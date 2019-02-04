@@ -64,9 +64,9 @@ void __nr5_init(void)
 
   nr5_boardinitialize();
 
-  /* Call os_start() */
+  /* Call nx_start() */
 
-  os_start();
+  nx_start();
 
   /* Shouldn't get here */
 

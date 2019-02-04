@@ -1,7 +1,7 @@
 ############################################################################
 # sched/init/Make.defs
 #
-#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-CSRCS += os_start.c os_bringup.c
+CSRCS += nx_start.c nx_bringup.c
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += os_smpstart.c
+CSRCS += nx_smpstart.c
 endif
 
 # Include init build support

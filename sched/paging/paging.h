@@ -78,7 +78,7 @@
 #ifndef __ASSEMBLY
 
 /* This is the task IDof the page fill worker thread.  This value was set in
- * os_start when the page fill worker thread was started.
+ * nx_start when the page fill worker thread was started.
  */
 
 extern pid_t g_pgworker;

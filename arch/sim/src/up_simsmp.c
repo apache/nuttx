@@ -100,7 +100,7 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void os_start(void) __attribute__ ((noreturn));
+void nx_start(void) __attribute__ ((noreturn));
 void up_cpu_paused(int cpu);
 void sim_smp_hook(void);
 
@@ -147,11 +147,11 @@ static void *sim_cpu0_trampoline(void *arg)
       return NULL;
     }
 
-  /* Give control to os_start() */
+  /* Give control to nx_start() */
 
-  os_start();
+  nx_start();
 
-  /* os_start() should not return */
+  /* nx_start() should not return */
 
   return NULL;
 }
