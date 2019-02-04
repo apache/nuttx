@@ -1,8 +1,8 @@
 /****************************************************************************
  * sched/task/task_create.c
  *
- *   Copyright (C) 2007-2010, 2013-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007-2010, 2013-2014, 2016, 2018-2019 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: thread_create
+ * Name: nxthread_create
  *
  * Description:
  *   This function creates and activates a new thread of the specified type
@@ -83,9 +83,9 @@
  *
  ****************************************************************************/
 
-static int thread_create(FAR const char *name, uint8_t ttype, int priority,
-                         int stack_size, main_t entry,
-                         FAR char * const argv[])
+static int nxthread_create(FAR const char *name, uint8_t ttype,
+                           int priority, int stack_size, main_t entry,
+                           FAR char * const argv[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -140,7 +140,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 
   /* Initialize the task control block */
 
-  ret = task_schedsetup(tcb, priority, task_start, entry, ttype);
+  ret = nxtask_schedsetup(tcb, priority, nxtask_start, entry, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
@@ -148,7 +148,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  (void)task_argsetup(tcb, name, argv);
+  (void)nxtask_argsetup(tcb, name, argv);
 
 #ifdef HAVE_TASK_GROUP
   /* Now we have enough in place that we can join the group */
@@ -172,7 +172,7 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
       ret = -get_errno();
       DEBUGASSERT(ret < 0);
 
-      /* The TCB was added to the active task list by task_schedsetup() */
+      /* The TCB was added to the active task list by nxtask_schedsetup() */
 
       dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
       goto errout_with_tcb;
@@ -230,8 +230,8 @@ errout_with_tcb:
 int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 {
-  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
-                       entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
+                         entry, argv);
 }
 
 /****************************************************************************
@@ -308,6 +308,6 @@ int task_create(FAR const char *name, int priority,
 int kthread_create(FAR const char *name, int priority,
                    int stack_size, main_t entry, FAR char *const argv[])
 {
-  return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
-                       entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
+                         entry, argv);
 }

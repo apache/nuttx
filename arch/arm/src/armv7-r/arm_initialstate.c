@@ -113,7 +113,7 @@ void up_initial_state(struct tcb_s *tcb)
   /* Set supervisor-mode and disable FIQs, regardless of how NuttX is
    * configured and of what kind of thread is being started.  That is
    * because all threads, even user-mode threads will start in kernel
-   * trampoline at task_start() or pthread_start().  The thread's
+   * trampoline at nxtask_start() or pthread_start().  The thread's
    * privileges will be dropped before transitioning to user code.
    */
 

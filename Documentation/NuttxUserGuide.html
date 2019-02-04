@@ -479,7 +479,7 @@ int task_delete(pid_t pid);
   Its  stack and TCB will be deallocated.
   This function is the companion to <code>task_create()</code>.
   This is the version of the function exposed to the user;
-  it is simply a wrapper around the internal, <code>task_terminate()</code> function.
+  it is simply a wrapper around the internal, <code>nxtask_terminate()</code> function.
 </p>
 <p>
   The logic in this function only deletes non-running tasks.

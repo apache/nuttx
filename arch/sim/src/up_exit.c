@@ -75,7 +75,7 @@ void _exit(int status)
 
   /* Destroy the task at the head of the ready to run list. */
 
-  (void)task_exit();
+  (void)nxtask_exit();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.

@@ -1212,8 +1212,8 @@ config SCHED_STARTHOOK
 	bool "Enable startup hook"
 	default n
 	---help---
-		Enable a non-standard, internal OS API call task_starthook().
-		task_starthook() registers a function that will be called on task
+		Enable a non-standard, internal OS API call nxtask_starthook().
+		nxtask_starthook() registers a function that will be called on task
 		startup before that actual task entry point is called.  The
 		starthook is useful, for example, for setting up automatic
 		configuration of C++ constructors.

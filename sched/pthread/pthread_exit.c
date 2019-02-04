@@ -137,7 +137,7 @@ void pthread_exit(FAR void *exit_value)
    * (2) so that we can flush buffered I/O (which may required suspending).
    */
 
-  task_exithook(tcb, EXIT_SUCCESS, false);
+  nxtask_exithook(tcb, EXIT_SUCCESS, false);
 
   /* Then just exit, retaining all file descriptors and without
    * calling atexit() functions.

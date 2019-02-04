@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_recover
+ * Name: nxtask_recover
  *
  * Description:
  *   This function is called when a task is deleted via task_delete() or
@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-void task_recover(FAR struct tcb_s *tcb)
+void nxtask_recover(FAR struct tcb_s *tcb)
 {
   /* The task is being deleted.  Cancel in pending timeout events. */
 

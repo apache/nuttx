@@ -92,7 +92,7 @@ void exit(int status)
    * so that we can flush buffered I/O (both of which may required suspending).
    */
 
-  task_exithook(tcb, status, false);
+  nxtask_exithook(tcb, status, false);
 
   /* Then "really" exit.  Only the lower 8 bits of the exit status are used. */
 

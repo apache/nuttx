@@ -72,7 +72,7 @@
 void nxmq_recover(FAR struct tcb_s *tcb)
 {
   /* If were were waiting for a timed message queue event, then the
-   * timer was canceled and deleted in task_recover() before this
+   * timer was canceled and deleted in nxtask_recover() before this
    * function was called.
    */
 

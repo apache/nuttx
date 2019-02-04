@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_exit
+ * Name: nxtask_exit
  *
  * Description:
  *   This is a part of the logic used to implement _exit().  The full
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int task_exit(void)
+int nxtask_exit(void)
 {
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
@@ -149,13 +149,13 @@ int task_exit(void)
   rtcb->task_state = TSTATE_TASK_READYTORUN;
 
   /* Move the TCB to the specified blocked task list and delete it.  Calling
-   * task_terminate with non-blocking true will suppress atexit() and on-exit()
+   * nxtask_terminate with non-blocking true will suppress atexit() and on-exit()
    * calls and will cause buffered I/O to fail to be flushed.  The former
    * is required _exit() behavior; the latter is optional _exit() behavior.
    */
 
   sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
-  ret = task_terminate(dtcb->pid, true);
+  ret = nxtask_terminate(dtcb->pid, true);
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
   /* Decrement the lockcount on rctb. */

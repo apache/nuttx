@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawnparms.c
  *
- *   Copyright (C) 2013, 2015, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ struct spawn_parms_s g_spawn_parms;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spawn_close, spawn_dup2, and spawn_open
+ * Name: nxspawn_close, nxspawn_dup2, and nxspawn_open
  *
  * Description:
  *   Implement individual file actions
@@ -81,7 +81,7 @@ struct spawn_parms_s g_spawn_parms;
  *
  ****************************************************************************/
 
-static inline int spawn_close(FAR struct spawn_close_file_action_s *action)
+static inline int nxspawn_close(FAR struct spawn_close_file_action_s *action)
 {
   /* The return value from close() is ignored */
 
@@ -91,7 +91,7 @@ static inline int spawn_close(FAR struct spawn_close_file_action_s *action)
   return OK;
 }
 
-static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
+static inline int nxspawn_dup2(FAR struct spawn_dup2_file_action_s *action)
 {
   int ret;
 
@@ -111,7 +111,7 @@ static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
   return OK;
 }
 
-static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
+static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
 {
   int fd;
   int ret = OK;
@@ -342,15 +342,15 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
           switch (entry->action)
             {
               case SPAWN_FILE_ACTION_CLOSE:
-                ret = spawn_close((FAR struct spawn_close_file_action_s *)entry);
+                ret = nxspawn_close((FAR struct spawn_close_file_action_s *)entry);
                 break;
 
               case SPAWN_FILE_ACTION_DUP2:
-                ret = spawn_dup2((FAR struct spawn_dup2_file_action_s *)entry);
+                ret = nxspawn_dup2((FAR struct spawn_dup2_file_action_s *)entry);
                 break;
 
               case SPAWN_FILE_ACTION_OPEN:
-                ret = spawn_open((FAR struct spawn_open_file_action_s *)entry);
+                ret = nxspawn_open((FAR struct spawn_open_file_action_s *)entry);
                 break;
 
               case SPAWN_FILE_ACTION_NONE:

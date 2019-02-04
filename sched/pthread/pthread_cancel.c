@@ -124,7 +124,7 @@ int pthread_cancel(pthread_t thread)
 
       if (tcb->cmn.cpcount > 0)
         {
-          notify_cancellation(&tcb->cmn);
+          nxnotify_cancellation(&tcb->cmn);
         }
 
       sched_unlock();
@@ -168,7 +168,7 @@ int pthread_cancel(pthread_t thread)
   pthread_mutex_inconsistent(tcb);
 #endif
 
-  /* Then let task_terminate do the real work */
+  /* Then let nxtask_terminate do the real work */
 
-  return task_terminate((pid_t)thread, false);
+  return nxtask_terminate((pid_t)thread, false);
 }

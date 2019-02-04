@@ -54,7 +54,7 @@
  * Name: task_activate
  *
  * Description:
- *   This function activates tasks initialized by task_schedsetup(). Without
+ *   This function activates tasks initialized by nxtask_schedsetup(). Without
  *   activation, a task is ineligible for execution by the scheduler.
  *
  * Input Parameters:

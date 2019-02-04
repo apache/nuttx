@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_starthook
+ * Name: nxtask_starthook
  *
  * Description:
  *   Configure a start hook... a function that will be called on the thread
@@ -68,8 +68,8 @@
  *
  ****************************************************************************/
 
-void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
-                    FAR void *arg)
+void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
+                      FAR void *arg)
 {
   /* Only tasks can have starthooks.  The starthook will be called when the
    * task is started (or restarted).

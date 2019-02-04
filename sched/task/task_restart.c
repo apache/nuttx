@@ -137,7 +137,7 @@ int task_restart(pid_t pid)
 
   /* Try to recover from any bad states */
 
-  task_recover((FAR struct tcb_s *)tcb);
+  nxtask_recover((FAR struct tcb_s *)tcb);
 
   /* Kill any children of this thread */
 
@@ -219,7 +219,7 @@ int task_restart(pid_t pid)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
     {
-      (void)task_terminate(pid, true);
+      (void)nxtask_terminate(pid, true);
       errcode = -ret;
       goto errout_with_lock;
     }

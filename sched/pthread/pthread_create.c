@@ -94,7 +94,7 @@ static const char g_pthreadname[] = "<pthread>";
  *   This functions sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   pthread_argsetup() is called from task_init() and task_start() to create
+ *   pthread_argsetup() is called from task_init() and nxtask_start() to create
  *   a new task (with arguments cloned via strdup) or pthread_create() which
  *   has one argument passed by value (distinguished by the pthread boolean
  *   argument).

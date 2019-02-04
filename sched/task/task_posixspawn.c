@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_posixspawn.c
  *
- *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawn_exec
+ * Name: nxposix_spawn_exec
  *
  * Description:
  *   Execute the task from the file system.
@@ -96,9 +96,9 @@
  *
  ****************************************************************************/
 
-static int posix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
-                            FAR const posix_spawnattr_t *attr,
-                            FAR char * const argv[])
+static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
+                              FAR const posix_spawnattr_t *attr,
+                              FAR char * const argv[])
 {
   FAR const struct symtab_s *symtab;
   int nsymbols;
@@ -153,18 +153,18 @@ errout:
 }
 
 /****************************************************************************
- * Name: posix_spawn_proxy
+ * Name: nxposix_spawn_proxy
  *
  * Description:
  *   Perform file_actions, then execute the task from the file system.
  *
  *   Do we really need this proxy task?  Isn't that wasteful?
  *
- *   Q: Why not use a starthook so that there is callout from task_start()
+ *   Q: Why not use a starthook so that there is callout from nxtask_start()
  *      to perform these operations after the file is loaded from
  *      the file system?
- *   A: That existing task_starthook() implementation cannot be used in
- *      this context; any of task_starthook() will also conflict with
+ *   A: That existing nxtask_starthook() implementation cannot be used in
+ *      this context; any of nxtask_starthook() will also conflict with
  *      binfmt's use of the start hook to call C++ static initializers.
  *      task_restart() would also be an issue.
  *
@@ -176,7 +176,7 @@ errout:
  *
  ****************************************************************************/
 
-static int posix_spawn_proxy(int argc, FAR char *argv[])
+static int nxposix_spawn_proxy(int argc, FAR char *argv[])
 {
   int ret;
 
@@ -200,8 +200,8 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
     {
       /* Start the task */
 
-      ret = posix_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.posix.path,
-                             g_spawn_parms.attr, g_spawn_parms.argv);
+      ret = nxposix_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.posix.path,
+                               g_spawn_parms.attr, g_spawn_parms.argv);
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
@@ -363,7 +363,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   if (file_actions ==  NULL || *file_actions == NULL)
 #endif
     {
-      return posix_spawn_exec(pid, path, attr, argv);
+      return nxposix_spawn_exec(pid, path, attr, argv);
     }
 
   /* Otherwise, we will have to go through an intermediary/proxy task in order
@@ -401,9 +401,9 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
     }
 
   /* Disable pre-emption so that the proxy does not run until waitpid
-   * is called.  This is probably unnecessary since the posix_spawn_proxy has
-   * the same priority as this thread; it should be schedule behind this
-   * task in the ready-to-run list.
+   * is called.  This is probably unnecessary since the nxposix_spawn_proxy
+   * has the same priority as this thread; it should be schedule behind
+   * this task in the ready-to-run list.
    */
 
 #ifdef CONFIG_SCHED_WAITPID
@@ -414,14 +414,14 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * task.
    */
 
-  proxy = kthread_create("posix_spawn_proxy", param.sched_priority,
+  proxy = kthread_create("nxposix_spawn_proxy", param.sched_priority,
                          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                         (main_t)posix_spawn_proxy,
+                         (main_t)nxposix_spawn_proxy,
                          (FAR char * const *)NULL);
   if (proxy < 0)
     {
       ret = -proxy;
-      serr("ERROR: Failed to start posix_spawn_proxy: %d\n", ret);
+      serr("ERROR: Failed to start nxposix_spawn_proxy: %d\n", ret);
       goto errout_with_lock;
     }
 

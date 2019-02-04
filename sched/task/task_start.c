@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_start
+ * Name: nxtask_start
  *
  * Description:
  *   This function is the low level entry point into the main thread of
@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-void task_start(void)
+void nxtask_start(void)
 {
   FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
   int exitcode;

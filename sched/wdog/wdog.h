@@ -170,7 +170,7 @@ void wd_timer(void);
  * Name: wd_recover
  *
  * Description:
- *   This function is called from task_recover() when a task is deleted via
+ *   This function is called from nxtask_recover() when a task is deleted via
  *   task_delete() or via pthread_cancel(). It checks if the deleted task
  *   is waiting for a timed event and if so cancels the timeout
  *

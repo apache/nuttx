@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_spawn.c
  *
- *   Copyright (C) 2013, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawn_exec
+ * Name: nxtask_spawn_exec
  *
  * Description:
  *   Execute the task from the file system.
@@ -83,7 +83,7 @@
  *     - POSIX_SPAWN_SETSCHEDULER: Set the new tasks scheduler priority to
  *       the sched_policy value.
  *
- *     NOTE: POSIX_SPAWN_SETSIGMASK is handled in task_spawn_proxy().
+ *     NOTE: POSIX_SPAWN_SETSIGMASK is handled in nxtask_spawn_proxy().
  *
  *   argv - argv[] is the argument list for the new task.  argv[] is an
  *     array of pointers to null-terminated strings. The list is terminated
@@ -97,9 +97,9 @@
  *
  ****************************************************************************/
 
-static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
-                           main_t entry, FAR const posix_spawnattr_t *attr,
-                           FAR char * const *argv)
+static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
+                             main_t entry, FAR const posix_spawnattr_t *attr,
+                             FAR char * const *argv)
 {
   size_t stacksize;
   int priority;
@@ -172,7 +172,7 @@ errout:
 }
 
 /****************************************************************************
- * Name: task_spawn_proxy
+ * Name: nxtask_spawn_proxy
  *
  * Description:
  *   Perform file_actions, then execute the task from the file system.
@@ -186,9 +186,9 @@ errout:
  *      that NuttX supports task_restart(), and you would never be able to
  *      restart a task from this point.
  *
- *   Q: Why not use a starthook so that there is callout from task_start()
+ *   Q: Why not use a starthook so that there is callout from nxtask_start()
  *      to perform these operations?
- *   A: Good idea, except that existing task_starthook() implementation
+ *   A: Good idea, except that existing nxtask_starthook() implementation
  *      cannot be used here unless we get rid of task_create and, instead,
  *      use task_init() and task_activate().  start_taskhook() could then
  *      be called between task_init() and task)activate().  task_restart()
@@ -202,7 +202,7 @@ errout:
  *
  ****************************************************************************/
 
-static int task_spawn_proxy(int argc, FAR char *argv[])
+static int nxtask_spawn_proxy(int argc, FAR char *argv[])
 {
   int ret;
 
@@ -226,9 +226,9 @@ static int task_spawn_proxy(int argc, FAR char *argv[])
     {
       /* Start the task */
 
-      ret = task_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.task.name,
-                            g_spawn_parms.u.task.entry, g_spawn_parms.attr,
-                            g_spawn_parms.argv);
+      ret = nxtask_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.task.name,
+                              g_spawn_parms.u.task.entry, g_spawn_parms.attr,
+                              g_spawn_parms.argv);
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
@@ -342,7 +342,8 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
         pid, name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
-   * the signal mask, then start the new child task directly from the parent task.
+   * the signal mask, then start the new child task directly from the parent
+   * task.
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -352,7 +353,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   if (file_actions ==  NULL || *file_actions == NULL)
 #endif
     {
-      return task_spawn_exec(pid, name, entry, attr, argv);
+      return nxtask_spawn_exec(pid, name, entry, attr, argv);
     }
 
   /* Otherwise, we will have to go through an intermediary/proxy task in order
@@ -392,9 +393,9 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 
 #ifdef CONFIG_SCHED_WAITPID
   /* Disable pre-emption so that the proxy does not run until waitpid
-   * is called.  This is probably unnecessary since the task_spawn_proxy has
-   * the same priority as this thread; it should be schedule behind this
-   * task in the ready-to-run list.
+   * is called.  This is probably unnecessary since the nxtask_spawn_proxy
+   * has the same priority as this thread; it should be schedule behind
+   * this task in the ready-to-run list.
    *
    * REVISIT:  This will may not have the desired effect in SMP mode.
    */
@@ -406,14 +407,14 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
    * task.
    */
 
-  proxy = nxtask_create("task_spawn_proxy", param.sched_priority,
+  proxy = nxtask_create("nxtask_spawn_proxy", param.sched_priority,
                         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                        (main_t)task_spawn_proxy,
+                        (main_t)nxtask_spawn_proxy,
                         (FAR char * const *)NULL);
   if (proxy < 0)
     {
       ret = -proxy;
-      serr("ERROR: Failed to start task_spawn_proxy: %d\n", ret);
+      serr("ERROR: Failed to start nxtask_spawn_proxy: %d\n", ret);
       goto errout_with_lock;
     }
 

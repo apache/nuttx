@@ -527,7 +527,7 @@ bool nxsig_iscatchable(int signo)
  * Name: nxsig_default_initialize
  *
  * Description:
- *   Set all signals to their default action.  This is called from task_start
+ *   Set all signals to their default action.  This is called from nxtask_start
  *   to configure the newly started task.
  *
  * Input Parameters:

@@ -53,7 +53,7 @@
  * Name: nxsem_recover
  *
  * Description:
- *   This function is called from task_recover() when a task is deleted via
+ *   This function is called from nxtask_recover() when a task is deleted via
  *   task_delete() or via pthread_cancel().  It current only checks on the
  *   case where a task is waiting for semaphore at the time that is was
  *   killed.

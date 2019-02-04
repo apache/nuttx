@@ -257,7 +257,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   if (binp->nctors > 0)
     {
-      task_starthook(tcb, exec_ctors, (FAR void *)binp);
+      nxtask_starthook(tcb, exec_ctors, (FAR void *)binp);
     }
 #endif
 

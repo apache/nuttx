@@ -59,7 +59,7 @@
  *   This function causes a specified task to cease to exist.  Its stack and
  *   TCB will be deallocated.  This function is the companion to
  *   task_create().  This is the version of the function exposed to the
- *   user; it is simply a wrapper around the internal, task_terminate
+ *   user; it is simply a wrapper around the internal, nxtask_terminate
  *   function.
  *
  *   The logic in this function only deletes non-running tasks.  If the
@@ -175,7 +175,7 @@ int task_delete(pid_t pid)
 
       if (dtcb->cpcount > 0)
         {
-          notify_cancellation(dtcb);
+          nxnotify_cancellation(dtcb);
         }
 
       sched_unlock();
@@ -196,10 +196,10 @@ int task_delete(pid_t pid)
     }
 
   /* Otherwise, perform the asynchronous cancellation, letting
-   * task_terminate() do all of the heavy lifting.
+   * nxtask_terminate() do all of the heavy lifting.
    */
 
-  ret = task_terminate(pid, false);
+  ret = nxtask_terminate(pid, false);
   if (ret < 0)
     {
       errcode = -ret;

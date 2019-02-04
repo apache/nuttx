@@ -315,7 +315,7 @@ bool check_cancellation_point(void)
 }
 
 /****************************************************************************
- * Name: notify_cancellation
+ * Name: nxnotify_cancellation
  *
  * Description:
  *   Called by task_delete() or pthread_cancel() if the cancellation occurs
@@ -327,7 +327,7 @@ bool check_cancellation_point(void)
  *
  ****************************************************************************/
 
-void notify_cancellation(FAR struct tcb_s *tcb)
+void nxnotify_cancellation(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
 

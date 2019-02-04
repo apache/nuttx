@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_terminate
+ * Name: nxtask_terminate
  *
  * Description:
  *   This function causes a specified task to cease to exist. Its  stack and
@@ -68,20 +68,20 @@
  *   to determine if blocking is permitted or not.
  *
  *   This function is the final function called all task termination
- *   sequences.  task_terminate() is called only from task_delete() (with
- *   nonblocking == false) and from task_exit() (with nonblocking == true).
+ *   sequences.  nxtask_terminate() is called only from task_delete() (with
+ *   nonblocking == false) and from nxtask_exit() (with nonblocking == true).
  *
- *   The path through task_exit() supports the final stops of the exit(),
+ *   The path through nxtask_exit() supports the final stops of the exit(),
  *   _exit(), and pthread_exit
  *
  *   - pthread_exit().  Calls _exit()
  *   - exit(). Calls _exit()
- *   - _exit().  Calls task_exit() making the currently running task
- *     non-running. task_exit then calls task_terminate() (with nonblocking
+ *   - _exit().  Calls nxtask_exit() making the currently running task
+ *     non-running. nxtask_exit then calls nxtask_terminate() (with nonblocking
  *     == true) to terminate the non-running task.
  *
  *   NOTE: that the state of non-blocking is irrelevant when called through
- *   exit() and pthread_exit().  In those cases task_exithook() has already
+ *   exit() and pthread_exit().  In those cases nxtask_exithook() has already
  *   been called with nonblocking == false;
  *
  * Input Parameters:
@@ -98,7 +98,7 @@
  *
  ****************************************************************************/
 
-int task_terminate(pid_t pid, bool nonblocking)
+int nxtask_terminate(pid_t pid, bool nonblocking)
 {
   FAR struct tcb_s *dtcb;
   FAR dq_queue_t *tasklist;
@@ -182,13 +182,13 @@ int task_terminate(pid_t pid, bool nonblocking)
    * this as early as possible so that higher level clean-up logic
    * can run in a healthy tasking environment.
    *
-   * In the case where the task exits via exit(), task_exithook()
+   * In the case where the task exits via exit(), nxtask_exithook()
    * may be called twice.
    *
    * I suppose EXIT_SUCCESS is an appropriate return value???
    */
 
-  task_exithook(dtcb, EXIT_SUCCESS, nonblocking);
+  nxtask_exithook(dtcb, EXIT_SUCCESS, nonblocking);
 
   /* Since all tasks pass through this function as the final step in their
    * exit sequence, this is an appropriate place to inform any instrumentation

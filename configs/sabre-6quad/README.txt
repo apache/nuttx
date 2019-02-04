@@ -128,7 +128,7 @@ Status
   until sched_resume_scheduler() runs.  These commits were made:
 
     commit 50ab5d638a37b539775d1e60085f182bf26be57f
-      sched/task:  It is not appropriate for logic in task_exit() to call
+      sched/task:  It is not appropriate for logic in nxtask_exit() to call
       the new version of this_task().  sched/irq:  Remove redundant fetch
       of CPU index; configs/sabre-6quad: update README.
 

@@ -122,7 +122,7 @@ int task_setcancelstate(int state, FAR int *oldstate)
 
               if (tcb->cpcount > 0)
                 {
-                  notify_cancellation(tcb);
+                  nxnotify_cancellation(tcb);
                 }
             }
           else
