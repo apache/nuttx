@@ -50,6 +50,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxmu.h>
 
 #include "nxfe.h"
 

@@ -474,6 +474,31 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxmu_start
+ *
+ * Description:
+ *   nxmu_start() provides a wrapper function to simplify and standardize
+ *   the starting of the NX server.
+ *
+ *   nxmu_start() can be called (indirectly) from applications via the
+ *   boardctl() interface with the BOARDIOC_NX_START command.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  This indicates that the NX server
+ *   has been successfully started, is running, and waiting to accept
+ *   connections from NX clients.
+ *
+ *   A negated errno value is returned on failure.  The errno value indicates
+ *   the nature of the failure.
+ *
+ ****************************************************************************/
+
+int nxmu_start(void);
+
+/****************************************************************************
  * Name: nxfe_constructwindow
  *
  * Description:
