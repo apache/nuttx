@@ -304,10 +304,12 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
+#ifdef CONFIG_BUILD_KERNEL
   /* Initialize the user heap */
 
   umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
                  up_addrenv_heapsize(&loadinfo->addrenv));
+#endif
 #endif
 
   /* Load ELF section data into memory */
