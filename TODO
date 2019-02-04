@@ -13,7 +13,7 @@ nuttx/:
   (5)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
-  (4)  Signals (sched/signal, arch/)
+  (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
  (10)  Kernel/Protected Build
@@ -779,6 +779,27 @@ o Signals (sched/signal, arch/)
                complained about it.  Apparently the visibility of the problem is
                very low.
 
+  Title:       QUEUED SIGNAL ACTIONS ARE INAPPROPRIATELY DEFERRED
+  Descirption: The implement of nxsig_deliver() does the followin in a loop:
+               - It takes the next next queued signal action from a list
+               - Calls the architecture-specific up_sigdeliver() to perform
+                 the signal action (through some sleight of hand in
+                 up_schedule_sigaction())
+               - up_sigdeliver() is a trampoline function that performs the
+                 actual signal action as well as some housekeeping functions
+                 then 
+               - up_sigdeliver() performs a context switch back to the normal,
+                 uninterrupted thread.
+
+               The loop in nxsig_deliver() then will have the opportunity to
+               run until when that normal, uniterrupted thread is suspended.
+               Then the loop will continue with the next queued signal
+               action.
+  Status:      Open
+  Priority:    Low.  This design flaw has been around for ages and no one has yet
+               complained about it.  Apparently the visibility of the problem is
+               very low.
+
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1076,10 +1097,10 @@ o Kernel/Protected Build
                performance implications if the the errno variable is accessed
                via a system call at high rates.
 
-  Title:       SIGNAL DELIVERY VULNERABILITY
-  Description: When a signal is delivered, the user stack is used.  Unlike
-               Linux, applications do not have separate user and supervisor
-               stacks; everything is done on the user stack.
+  Title:       SIGNAL ACTION VULNERABILITY
+  Description: When a signal action is peformed, the user stack is used.
+               Unlike Linux, applications do not have separate user and
+               supervisor stacks; everything is done on the user stack.
 
                In the implementation of up_sigdeliver(), a copy of the
                register contents that will be restored is present on the
@@ -1088,17 +1109,18 @@ o Kernel/Protected Build
                occur when the user task returns to supervisor mode from
                the the signal handler.
 
-               A recent commit (4 Feb 2019) does protect the status register
+               A recent commit (3 Feb 2019) does protect the status register
                and return address so that a malicious task cannot change the
-               return address and switch to supervisor mode.  Other register
-               are still modifiable and there is other possible mayhem that
+               return address or switch to supervisor mode.  Other register
+               are still modifiable so there is other possible mayhem that
                could be done.
 
                A better solution, in lieu of a kernel stack, would be to
-               eliminate the stack-based register save area and, instead,
-               save the registers in another, dedicated state save area in
-               the TCB.  The only hesitation to this option is that it would
-               significantly increase the size of the TCB structure.
+               eliminate the stack-based register save area altogether and,
+               instead, save the registers in another, dedicated state save
+               area in the TCB.  The only hesitation to this option is that
+               it would significantly increase the size of the TCB structure
+               and, hence, the per-thread memory overhead.
   Status:      Open
   Priority:    Medium-ish if are attempting to make a secure environment that
                may host malicious code.  Very low for the typical FLAT build,
