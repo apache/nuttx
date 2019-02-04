@@ -153,48 +153,46 @@
 #endif
 
 #if defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
-#  define OTGFS_GINT_RESETS (OTGFS_GINT_USBRST | OTGFS_GINT_RSTDET)
-#  define OTGFS_GINT_RESERVED (OTGFS_GINT_RES89 | \
-                              (OTGFS_GINT_RES16 | OTGFS_GINTMSK_EPMISM) \
-                              |OTGFS_GINT_RES22)
+#  define OTGFS_GINT_RESETS   (OTGFS_GINT_USBRST | OTGFS_GINT_RSTDET)
+#  define OTGFS_GINT_RESERVED (OTGFS_GINT_RES89 | OTGFS_GINT_RES16 | \
+                               OTGFS_GINTMSK_EPMISM | OTGFS_GINT_RES22)
 
-#  define OTGFS_GINT_RC_W1 (OTGFS_GINT_MMIS     | \
-                            OTGFS_GINT_SOF      | \
-                            OTGFS_GINT_ESUSP    | \
-                            OTGFS_GINT_USBSUSP  | \
-                            OTGFS_GINT_USBRST   | \
-                            OTGFS_GINT_ENUMDNE  | \
-                            OTGFS_GINT_ISOODRP  | \
-                            OTGFS_GINT_EOPF     | \
-                            OTGFS_GINT_IISOIXFR | \
-                            OTGFS_GINT_IISOOXFR | \
-                            OTGFS_GINT_RSTDET   | \
-                            OTGFS_GINT_LPMINT   | \
-                            OTGFS_GINT_CIDSCHG  | \
-                            OTGFS_GINT_DISC     | \
-                            OTGFS_GINT_SRQ      | \
-                            OTGFS_GINT_WKUP)
+#  define OTGFS_GINT_RC_W1    (OTGFS_GINT_MMIS     | \
+                               OTGFS_GINT_SOF      | \
+                               OTGFS_GINT_ESUSP    | \
+                               OTGFS_GINT_USBSUSP  | \
+                               OTGFS_GINT_USBRST   | \
+                               OTGFS_GINT_ENUMDNE  | \
+                               OTGFS_GINT_ISOODRP  | \
+                               OTGFS_GINT_EOPF     | \
+                               OTGFS_GINT_IISOIXFR | \
+                               OTGFS_GINT_IISOOXFR | \
+                               OTGFS_GINT_RSTDET   | \
+                               OTGFS_GINT_LPMINT   | \
+                               OTGFS_GINT_CIDSCHG  | \
+                               OTGFS_GINT_DISC     | \
+                               OTGFS_GINT_SRQ      | \
+                               OTGFS_GINT_WKUP)
 #else
-#  define OTGFS_GINT_RESETS OTGFS_GINT_USBRST
-#  define OTGFS_GINT_RESERVED (OTGFS_GINT_RES89 | \
-                              (OTGFS_GINT_RES16 | OTGFS_GINTMSK_EPMISM) \
-                              |OTGFS_GINT_RES2223 | \
+#  define OTGFS_GINT_RESETS   OTGFS_GINT_USBRST
+#  define OTGFS_GINT_RESERVED (OTGFS_GINT_RES89 | OTGFS_GINT_RES16 | \
+                               OTGFS_GINTMSK_EPMISM | OTGFS_GINT_RES2223 | \
                                OTGFS_GINT_RES27)
 
-#  define OTGFS_GINT_RC_W1 (OTGFS_GINT_MMIS     | \
-                            OTGFS_GINT_SOF      | \
-                            OTGFS_GINT_ESUSP    | \
-                            OTGFS_GINT_USBSUSP  | \
-                            OTGFS_GINT_USBRST   | \
-                            OTGFS_GINT_ENUMDNE  | \
-                            OTGFS_GINT_ISOODRP  | \
-                            OTGFS_GINT_EOPF     | \
-                            OTGFS_GINT_IISOIXFR | \
-                            OTGFS_GINT_IISOOXFR | \
-                            OTGFS_GINT_CIDSCHG  | \
-                            OTGFS_GINT_DISC     | \
-                            OTGFS_GINT_SRQ      | \
-                            OTGFS_GINT_WKUP)
+#  define OTGFS_GINT_RC_W1    (OTGFS_GINT_MMIS     | \
+                               OTGFS_GINT_SOF      | \
+                               OTGFS_GINT_ESUSP    | \
+                               OTGFS_GINT_USBSUSP  | \
+                               OTGFS_GINT_USBRST   | \
+                               OTGFS_GINT_ENUMDNE  | \
+                               OTGFS_GINT_ISOODRP  | \
+                               OTGFS_GINT_EOPF     | \
+                               OTGFS_GINT_IISOIXFR | \
+                               OTGFS_GINT_IISOOXFR | \
+                               OTGFS_GINT_CIDSCHG  | \
+                               OTGFS_GINT_DISC     | \
+                               OTGFS_GINT_SRQ      | \
+                               OTGFS_GINT_WKUP)
 #endif
 
 /* Debug ***********************************************************************/

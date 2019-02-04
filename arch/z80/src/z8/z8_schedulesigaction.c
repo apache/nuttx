@@ -53,14 +53,6 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -68,7 +60,8 @@
  * Name: z8_sigsetup
  ****************************************************************************/
 
-static void z8_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+static void z8_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
+                        FAR chipreg_t *regs)
 {
   /* Save the return address and interrupt state. These will be restored by
    * the signal trampoline after the signals have been delivered.
@@ -125,7 +118,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
 
-  _info("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
+  sinfo("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
 
   /* Make sure that interrupts are disabled */
 

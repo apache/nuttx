@@ -31,8 +31,14 @@ config NET_ARP_IPIN
 	bool "ARP address harvesting"
 	default n
 	---help---
-		Harvest IP/MAC address mappings from the ARP table
-		from incoming IP packets.
+		Harvest IP/MAC address mappings from the ARP table from incoming
+		IP packets.  If this option is selected, CONFIG_NET_ARTAB_SIZE
+		should be large enough to hold the hosts on the network.
+
+		This option is NOT recommended on busy networks with many remote
+		hosts.  On such networks the ARP table will be full most of the
+		time and the MAC addresses that you want will get flushed from
+		the table often.
 
 config NET_ARP_SEND
 	bool "ARP send"
