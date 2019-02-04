@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_start.c
+ * graphics/nxmu/nxmu_start.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,13 +153,13 @@ static int nx_server(int argc, char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_start
+ * Name: nxmu_start
  *
  * Description:
- *   nx_start() provides a wrapper function to simplify and standardize the
- *   starting of the NX server.
+ *   nxmu_start() provides a wrapper function to simplify and standardize
+ *   the starting of the NX server.
  *
- *   nx_start() can be called (indirectly) from applications via the
+ *   nxmu_start() can be called (indirectly) from applications via the
  *   boardctl() interface with the BOARDIOC_NX_START command.
  *
  * Input Parameters:
@@ -175,7 +175,7 @@ static int nx_server(int argc, char *argv[])
  *
  ****************************************************************************/
 
-int nx_start(void)
+int nxmu_start(void)
 {
   /* Do nothing is the server has already been started */
 

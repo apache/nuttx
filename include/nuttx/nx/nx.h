@@ -270,13 +270,13 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
 #define nx_run(dev) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
 
 /****************************************************************************
- * Name: nx_start
+ * Name: nxmu_start
  *
  * Description:
- *   nx_start() provides a wrapper function to simplify and standardize the
- *   starting of the NX server.
+ *   nxmu_start() provides a wrapper function to simplify and standardize
+ *   the starting of the NX server.
  *
- *   nx_start() can be called (indirectly) from applications via the
+ *   nxmu_start() can be called (indirectly) from applications via the
  *   boardctl() interface with the BOARDIOC_NX_START command.
  *
  * Input Parameters:
@@ -292,7 +292,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-int nx_start(void);
+int nxmu_start(void);
 
 /****************************************************************************
  * Name: nx_connectinstance (and nx_connect macro)

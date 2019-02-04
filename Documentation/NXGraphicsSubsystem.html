@@ -93,7 +93,7 @@
         <i>2.3.3 <a href="#startingnx">Starting the NX Server</a></i>
         <p>
           <ul>
-            <i>2.3.3.1 <a href="#nxstart"><code>nx_start()</code></a></i><br>
+            <i>2.3.3.1 <a href="#nxstart"><code>nxmu_start()</code></a></i><br>
             <i>2.3.3.2 <a href="#boardctl"><code>boardctl()</code></a></i><br>
           </ul>
         <p>
@@ -937,13 +937,13 @@ struct nx_callback_s
 <ol>
   <li>
     <p>
-      The NX server may be started in your board startup logic by simply calling the function <code> nx_start()</code>.
+      The NX server may be started in your board startup logic by simply calling the function <code> nxmu_start()</code>.
       The board startup logic usually resides the the <code>configs/<i>board</i>/src</code> directory.
       The boar board startup logic can run automatically during the early system if <code>CONFIG_BOARD_INITIALIZE</code> is defined in the configuration.
       Or, the board startup logic can execute under control of the application by calling the <code>boardctl(BOARDIOC_INIT, arg)</code> OS interface.
     </p>
     <p>
-      The board initialization logic will run in either case and the simple call to <code>nx_start()</code> will start the NX server.
+      The board initialization logic will run in either case and the simple call to <code>nxmu_start()</code> will start the NX server.
     </p>
   </li>
   <li>
@@ -951,16 +951,16 @@ struct nx_callback_s
   </li>
 </ol>
 
-<h4>2.3.3.1 <a name="nxstart"><code>nx_start()</code></a></h4>
+<h4>2.3.3.1 <a name="nxstart"><code>nxmu_start()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nx.h&gt;
 
-int nx_start(void);
+int nxmu_start(void);
 </pre></ul>
 <p>
   <b>Description:</b>
-  <code>nx_start()</code> provides a wrapper function to simplify and standardize the starting of the NX server.
+  <code>nxmu_start()</code> provides a wrapper function to simplify and standardize the starting of the NX server.
 </p>
 <p>
   <b>Input Parameters:</b>
@@ -996,7 +996,7 @@ int nx_start(void);
   In it is especially useful for setting up board operational and test configurations.
 </p>
 <p>
- When called with the <code>cmd</code> of <code>BOARDIOC_NX_START</code>, then the  <code>boardctl()</code> will call <code>nx_start</code> indirectly on behalf of the appication.
+ When called with the <code>cmd</code> of <code>BOARDIOC_NX_START</code>, then the  <code>boardctl()</code> will call <code>nxmu_start</code> indirectly on behalf of the appication.
  In this case the <code>arg</code> parameter is ignored.
 </p>
 <p>

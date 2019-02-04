@@ -113,7 +113,7 @@
  * DESCRIPTION:   Start the NX servier
  * ARG:           None
  * CONFIGURATION: CONFIG_NX
- * DEPENDENCIES:  Base graphics logic provides nx_start()
+ * DEPENDENCIES:  Base graphics logic provides nxmu_start()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)

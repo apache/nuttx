@@ -394,10 +394,10 @@ config NXSTART_EXTERNINIT
 	select LCD_EXTERNINIT if LCD && LCD_FRAMEBUFFER && NX_LCDDRIVER
 	---help---
 		Define to support external display initialization by platform-
-		specific code.  This this option is defined, then nx_start() will
-		call board_graphics_setup(CONFIG_NXSTART_DEVNO) to initialize the
-		graphics device.  This option is necessary if display is used that
-		cannot be initialized using the standard LCD or framebuffer
+		specific code.  This this option is defined, then nxmu_start()
+		will call board_graphics_setup(CONFIG_NXSTART_DEVNO) to initialize
+		the graphics device.  This option is necessary if display is used
+		that cannot be initialized using the standard LCD or framebuffer
 		interfaces.
 
 config NXSTART_SERVERPRIO

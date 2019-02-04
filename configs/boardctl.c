@@ -407,12 +407,12 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        * DESCRIPTION:   Start the NX servier
        * ARG:           None
        * CONFIGURATION: CONFIG_NX
-       * DEPENDENCIES:  Base graphics logic provides nx_start()
+       * DEPENDENCIES:  Base graphics logic provides nxmu_start()
        */
 
       case BOARDIOC_NX_START:
         {
-          ret = nx_start();
+          ret = nxmu_start();
         }
         break;
 #endif

@@ -337,7 +337,7 @@ FAR void *board_composite_connect(int port, int configid);
  *   initialization, then this board interface should be provided.
  *
  *   This is an internal OS interface. It is invoked by graphics sub-system
- *   initialization logic (nx_start()) or from the LCD framebuffer driver
+ *   initialization logic (nxmu_start()) or from the LCD framebuffer driver
  *   (when the NX server is not used).
  *
  ****************************************************************************/
