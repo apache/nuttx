@@ -128,6 +128,11 @@ struct xcptcontext
 
   /* These are saved copies of LR, PRIMASK, and xPSR used during
    * signal processing.
+   *
+   * REVISIT:  Because there is only one copy of these save areas,
+   * only a single signal handler can be active.  This precludes
+   * queuing of signal actions.  As a result, signals received while
+   * another signal handler is executing will be ignored!
    */
 
   uint32_t saved_pc;

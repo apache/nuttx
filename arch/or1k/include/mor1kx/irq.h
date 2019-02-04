@@ -171,15 +171,20 @@ struct xcptcontext
 
   uint32_t regs[XCPTCONTEXT_REGS];
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* These are saved copies of LR and CPSR used during
    * signal processing.
+   *
+   * REVISIT:  Because there is only one copy of these save areas,
+   * only a single signal handler can be active.  This precludes
+   * queuing of signal actions.  As a result, signals received while
+   * another signal handler is executing will be ignored!
    */
 
   uint32_t saved_pc;

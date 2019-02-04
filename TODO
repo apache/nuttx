@@ -13,7 +13,7 @@ nuttx/:
   (5)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
-  (3)  Signals (sched/signal, arch/)
+  (4)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread)
   (0)  Message Queues (sched/mqueue)
  (10)  Kernel/Protected Build
@@ -762,6 +762,22 @@ o Signals (sched/signal, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
+
+  Title:       NO QUEUING of SIGNAL ACTIONS
+  Description: In the architecture specific implemenation of struct xcptcontext,
+               there are fields used by signal handling logic to pass the state
+               information needed to dispatch signal actions to the appropriate
+               handler.
+
+               There is only one copy of this state information in the
+               implementations of struct xcptcontext and, as a consequence,
+               if there is a signal handler executing on a thread, then addition
+               signal actions will be lost until that signal handler completes
+               and releases those resources.
+  Status:      Open
+  Priority:    Low.  This design flaw has been around for ages and no one has yet
+               complained about it.  Apparently the visibility of the problem is
+               very low.
 
 o pthreads (sched/pthreads)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
