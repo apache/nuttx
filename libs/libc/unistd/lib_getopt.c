@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/unistd/lib_getopt.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,10 @@ int optopt = '?'; /* unrecognized option character */
  * Private Data
  ****************************************************************************/
 
-static FAR char *g_optptr       = NULL;
-static bool      g_binitialized = false;
+static FAR char        *g_optptr       = NULL;
+static FAR char *const *g_argv         = NULL;
+static int              g_argc         = 0;
+static bool             g_binitialized = false;
 
 /****************************************************************************
  * Public Functions
@@ -69,12 +71,13 @@ static bool      g_binitialized = false;
 /****************************************************************************
  * Name: getopt
  *
- * Description: getopt() parses command-line arguments.  Its arguments argc
- *   and argv are the argument count and array as passed to the main()
- *   function on program invocation.  An element of argv that starts with
- *   '-' is an option element. The characters of this element (aside from
- *   the initial '-') are option characters. If getopt() is called repeatedly,
- *   it returns successively each of the option characters from each of the
+ * Description:
+ *   getopt() parses command-line arguments.  Its arguments argc and argv
+ *   are the argument count and array as passed to the main() function on
+ *   program invocation.  An element of argv that starts with '-' is an
+ *   option element. The characters of this element (aside from the initial
+ *   '-') are option characters. If getopt() is called repeatedly, it
+ *   returns successively each of the option characters from each of the
  *   option elements.
  *
  *   If getopt() finds another option character, it returns that character,
@@ -114,10 +117,26 @@ static bool      g_binitialized = false;
 
 int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 {
-  if (argv && optstring && argc > 1)
+  /* Were new argc or argv passed in?  This detects misuse of getopt() by
+   * applictions that break out of the getopt() loop before getop() returns
+   * -1.
+   */
+
+  if (argc != g_argc || argv != g_argv)
     {
+      /* Yes, clear the internal state */
+
+      g_binitialized = false;
+      g_argc         = argc;
+      g_argv         = argv;
+    }
+
+  /* Verify input parameters. */
+
+  if (argv != NULL && optstring != NULL && argc > 1)
+    {
+      FAR char *optchar;
       int noarg_ret = '?';
-      char *optchar;
 
       /* The inital value of optind is 1.  If getopt() is called again in the
        * program, optind must be reset to some value <= 1.
@@ -125,7 +144,9 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
       if (optind < 1 || !g_binitialized)
         {
+          optarg         = NULL;
           optind         = 1;     /* Skip over the program name */
+          optopt         = '?';
           g_optptr       = NULL;  /* Start at the beginning of the first argument */
           g_binitialized = true;  /* Now we are initialized */
         }
@@ -260,8 +281,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
       /* No argument was supplied */
 
       g_optptr = NULL;
-      optarg = NULL;
-      optopt = *optchar;
+      optarg   = NULL;
+      optopt   = *optchar;
       optind++;
       return noarg_ret;
     }
@@ -269,7 +290,5 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
   /* Restore the initial, uninitialized state */
 
   g_binitialized = false;
-  optind = 1;
-  optopt = '?';
   return ERROR;
 }
