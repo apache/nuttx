@@ -117,6 +117,8 @@
 #define CCFG_MODE_CONF_1_XOSC_MAX_START_MASK    (0xff << CCFG_MODE_CONF_1_XOSC_MAX_START_SHIFT)
 #define CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_SHIFT  (8)    /* Bits 8-11: Signed delta value for IBIAS_OFFSET */
 #define CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_MASK   (15 << CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_SHIFT)
+#define CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_MASK   (15 << CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_SHIFT)
+#  define CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET(n)   ((uint32_t)(n) << CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_SHIFT)
 #define CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_SHIFT (12)      /* Bits 12-15: Signed delta value for IBIAS_INIT */
 #define CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_MASK  (15 << CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_SHIFT)
 #define CCFG_MODE_CONF_1_ALT_DCDC_IPEAK_SHIFT   (16)      /* Bits 16-18: Inductor peak current */
@@ -148,6 +150,7 @@
 #  define CCFG_MODE_CONF_VDDR_CAP(n)                 ((uint32_t)(n) << CCFG_MODE_CONF_VDDR_CAP_SHIFT)
 #define CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_SHIFT     (8)       /* Bits 8-15: Trimmed XOSC cap-array step value modifier */
 #define CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_MASK      (0xff << CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_SHIFT)
+#define CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_WIDTH     (8)       /* (For sign extension) */
 #  define CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA(n)      ((uint32_t)(n) << CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_SHIFT)
 #define CCFG_MODE_CONF_HF_COMP                       (1 << 16) /* Bit 16: Reserved for future use */
 #define CCFG_MODE_CONF_XOSC_CAP_MOD                  (1 << 17) /* Bit 17: Enable modification to XOSC cap-array */
@@ -174,6 +177,7 @@
 #define CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_SHIFT   (28)      /* Bits 28-31: Signed delta value to apply to the
                                                                 * VDDR_TRIM_SLEEP target, minus one */
 #define CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_MASK    (15 << CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_SHIFT)
+#define CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_WIDTH   4         /* (Supports sign extension) */
 #  define CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA(n)    (((uint8_t)((n) - 1) & 15) << CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA_SHIFT)
 
 /* TIVA_CCFG_VOLT_LOAD_0 */

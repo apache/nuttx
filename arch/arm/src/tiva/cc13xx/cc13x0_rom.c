@@ -160,8 +160,8 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
   /* Check for CC13xx boost mode The combination VDDR_EXT_LOAD=0 and
    * VDDS_BOD_LEVEL=1 is defined to select boost mode */
 
-  if (((ccfg_modeconf & CCFG_MODE_CONF_VDDR_EXT_LOAD) == 0) &&
-      ((ccfg_modeconf & CCFG_MODE_CONF_VDDS_BOD_LEVEL) != 0))
+  if (((ccfg_modeconf & CCFG_MODE_CONF_1_VDDR_EXT_LOAD) == 0) &&
+      ((ccfg_modeconf & CCFG_MODE_CONF_1_VDDS_BOD_LEVEL) != 0))
     {
       /* Set VDDS_BOD trim - using masked write {MASK8:DATA8} - TRIM_VDDS_BOD
        * is bits[7:3] of ADI3..REFSYSCTL1 - Needs a positive transition on
@@ -197,7 +197,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
     }
 
   /* Adjust the VDDR_TRIM_SLEEP value with value adjustable by customer
-   * (CCFG_MODE_CONF_VDDR_TRIM_SLEEP_DELTA) Read and sign extend VddrSleepDelta
+   * (CCFG_MODE_CONF_1_VDDR_TRIM_SLEEP_DELTA) Read and sign extend VddrSleepDelta
    * (in range -8 to +7) */
 
   vddr_sleepdelta =
@@ -237,8 +237,8 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
   if (getreg32(TIVA_AON_SYSCTL_PWRCTL) &
       AON_SYSCTL_PWRCTL_EXT_REG_MODE)
     {
-      ccfg_modeconf |= (CCFG_MODE_CONF_DCDC_RECHARGE |
-                        CCFG_MODE_CONF_DCDC_ACTIVE);
+      ccfg_modeconf |= (CCFG_MODE_CONF_1_DCDC_RECHARGE |
+                        CCFG_MODE_CONF_1_DCDC_ACTIVE);
     }
   else
     {
@@ -253,7 +253,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
   setbits = 0;
   clrbits = 0;
 
-  if ((ccfg_modeconf & CCFG_MODE_CONF_DCDC_RECHARGE) != 0)
+  if ((ccfg_modeconf & CCFG_MODE_CONF_1_DCDC_RECHARGE) != 0)
     {
       clrbits |= AON_SYSCTL_PWRCTL_DCDC_EN;
     }
@@ -266,7 +266,7 @@ void rom_setup_coldreset_from_shutdown_cfg1(uint32_t ccfg_modeconf)
    * polarity
    */
 
-  if ((ccfg_modeconf & CCFG_MODE_CONF_DCDC_ACTIVE) != 0)
+  if ((ccfg_modeconf & CCFG_MODE_CONF_1_DCDC_ACTIVE) != 0)
     {
       clrbits |= AON_SYSCTL_PWRCTL_DCDC_ACTIVE;
     }
@@ -386,7 +386,7 @@ void rom_setup_coldreset_from_shutdown_cfg2(uint32_t fcfg1_revision,
    * setting. Remaining register bit fields are set to their reset values of 0. */
 
   trim = rom_setup_get_trim_radc_extcfg(fcfg1_revision);
-  rom_ddi_write32(TIVA_AUX_DDI0_OSC_BASE, TIVA_DDI0OSC_RADCEXTCFG_OFFSET, trim);
+  rom_ddi_write32(TIVA_AUX_DDI0_OSC_BASE, TIVA_DDI0_OSC_RADCEXTCFG_OFFSET, trim);
 
   /* Setting FORCE_KICKSTART_EN (ref. CC26_V1_BUG00261). Should also be done
    * for PG2 (This is bit 22 in TIVA_DDI0_OSC_CTL0) */
@@ -412,8 +412,8 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
   /* Examine the XOSC_FREQ field to select 0x1=HPOSC, 0x2=48MHz XOSC, 0x3=24MHz
    * XOSC */
 
-  switch ((ccfg_modeconf & CCFG_MODE_CONF_XOSC_FREQ_MASK) >>
-          CCFG_MODE_CONF_XOSC_FREQ_SHIFT)
+  switch ((ccfg_modeconf & CCFG_MODE_CONF_1_XOSC_FREQ_MASK) >>
+          CCFG_MODE_CONF_1_XOSC_FREQ_SHIFT)
     {
     case 2:
       /* XOSC source is a 48 MHz crystal Do nothing (since this is the reset
@@ -473,27 +473,32 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
                      ADI2_REFSYS_HPOSCCTL1_BIAS_RES_SET_SHIFT));
           putreg32(regval, TIVA_ADI2_REFSYS_HPOSCCTL1);
 
-          regval = ((getreg32(TIVA_ADI2_REFSYS_HPOSCCTL0) &
-                     ~(ADI2_REFSYS_HPOSCCTL0_FILTER_EN_MASK |
-                       ADI2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_MASK |
-                       ADI2_REFSYS_HPOSCCTL0_SERIES_CAP_MASK |
-                       ADI2_REFSYS_HPOSCCTL0_DIV3_BYPASS_MASK)) |
-                     (((fcfg1_oscconf &
-                        FCFG1_OSC_CONF_HPOSC_FILTER_EN_MASK) >>
-                       FCFG1_OSC_CONF_HPOSC_FILTER_EN_SHIFT) <<
-                      ADI2_REFSYS_HPOSCCTL0_FILTER_EN_SHIFT) |
-                     (((fcfg1_oscconf &
-                        FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_MASK) >>
-                       FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_SHIFT) <<
-                      ADI2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_SHIFT) |
-                     (((fcfg1_oscconf &
-                        FCFG1_OSC_CONF_HPOSC_SERIES_CAP_MASK) >>
-                       FCFG1_OSC_CONF_HPOSC_SERIES_CAP_SHIFT) <<
-                      ADI2_REFSYS_HPOSCCTL0_SERIES_CAP_SHIFT) |
-                     (((fcfg1_oscconf &
-                        FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_MASK) >>
-                       FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS_SHIFT) <<
-                      ADI2_REFSYS_HPOSCCTL0_DIV3_BYPASS_SHIFT));
+          regval  = getreg32(TIVA_ADI2_REFSYS_HPOSCCTL0);
+          regval &= ~(ADI2_REFSYS_HPOSCCTL0_FILTER_EN_MASK |
+                      ADI2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_MASK |
+                      ADI2_REFSYS_HPOSCCTL0_SERIES_CAP_MASK |
+                      ADI2_REFSYS_HPOSCCTL0_DIV3_BYPASS_MASK);
+
+          if ((fcfg1_oscconf & FCFG1_OSC_CONF_HPOSC_FILTER_EN) != 0)
+            {
+              regval |= ADI2_REFSYS_HPOSCCTL0_FILTER_EN;
+            }
+
+          regval |= ((fcfg1_oscconf &
+                      FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_MASK) >>
+                     FCFG1_OSC_CONF_HPOSC_BIAS_RECHARGE_DELAY_SHIFT) <<
+                    ADI2_REFSYS_HPOSCCTL0_BIAS_RECHARGE_DLY_SHIFT;
+
+          regval |= ((fcfg1_oscconf &
+                      FCFG1_OSC_CONF_HPOSC_SERIES_CAP_MASK) >>
+                     FCFG1_OSC_CONF_HPOSC_SERIES_CAP_SHIFT) <<
+                    ADI2_REFSYS_HPOSCCTL0_SERIES_CAP_SHIFT;
+
+          if ((fcfg1_oscconf & FCFG1_OSC_CONF_HPOSC_DIV3_BYPASS) != 0)
+            {
+              regval |= ADI2_REFSYS_HPOSCCTL0_DIV3_BYPASS;
+            }
+
           putreg32(regval, TIVA_ADI2_REFSYS_HPOSCCTL0);
           break;
         }
@@ -524,7 +529,7 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
    * in TIVA_DDI0_OSC_CTL0. This is typically already 0 except on Lizard where it
    * is set in ROM-boot */
 
-  putreg32(DDI0_OSC_CTL0_CLK_LOSS_EN
+  putreg32(DDI0_OSC_CTL0_CLK_LOSS_EN,
            TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_CLR_OFFSET +
            TIVA_DDI0_OSC_CTL0_OFFSET);
 
@@ -537,10 +542,10 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
           TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK4B_OFFSET +
           (TIVA_DDI0_OSC_CTL1_OFFSET * 2));
 
-  /* setup the LF clock based upon CCFG:MODE_CONF:SCLK_LF_OPTION */
+  /* Setup the LF clock based upon CCFG:MODE_CONF:SCLK_LF_OPTION */
 
-  switch ((ccfg_modeconf & CCFG_MODE_CONF_SCLK_LF_OPTION_MASK) >>
-          CCFG_MODE_CONF_SCLK_LF_OPTION_SHIFT)
+  switch ((ccfg_modeconf & CCFG_MODE_CONF_1_SCLK_LF_OPTION_MASK) >>
+          CCFG_MODE_CONF_1_SCLK_LF_OPTION_SHIFT)
     {
     case 0:                    /* XOSC_HF_DLF (XOSCHF/1536) -> SCLK_LF (=31250
                                  * Hz) */
@@ -589,11 +594,11 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
       break;
     }
 
-  /* Update ADI_4_AUX_ADCREF1_VTRIM with value from FCFG1 */
+  /* Update ADI4_AUX_ADCREF1_VTRIM with value from FCFG1 */
 
   regval8 = (((getreg32(TIVA_FCFG1_SOC_ADC_REF_TRIM_AND_OFFSET_EXT) >>
                FCFG1_SOC_ADC_REF_TRIM_AND_OFFSET_EXT_SOC_ADC_REF_VOLTAGE_TRIM_TEMP1_SHIFT)
-             << ADI_4_AUX_ADCREF1_VTRIM_SHIFT) & ADI_4_AUX_ADCREF1_VTRIM_MASK);
+             << ADI4_AUX_ADCREF1_VTRIM_SHIFT) & ADI4_AUX_ADCREF1_VTRIM_MASK);
   putreg8(regval8, TIVA_ADI4_AUX_ADCREF1);
 
   /* Sync with AON */
@@ -607,24 +612,24 @@ void rom_setup_coldreset_from_shutdown_cfg3(uint32_t ccfg_modeconf)
 
 uint32_t rom_setup_get_trim_anabypass_value1(uint32_t ccfg_modeconf)
 {
-  uint32_t ui32Fcfg1Value;
-  uint32_t ui32XoscHfRow;
-  uint32_t ui32XoscHfCol;
-  uint32_t trimValue;
+  uint32_t fcfg1val;
+  uint32_t xosc_hf_row;
+  uint32_t xosc_hf_col;
+  uint32_t trimval;
 
   /* Use device specific trim values located in factory configuration area for
    * the XOSC_HF_COLUMN_Q12 and XOSC_HF_ROW_Q12 bit fields in the
    * ANABYPASS_VALUE1 register. Value for the other bit fields are set to 0. */
 
-  ui32Fcfg1Value = getreg32(TIVA_FCFG1_CONFIG_OSC_TOP);
-  ui32XoscHfRow = ((ui32Fcfg1Value &
+  fcfg1val = getreg32(TIVA_FCFG1_CONFIG_OSC_TOP);
+  xosc_hf_row = ((fcfg1val &
                     FCFG1_CONFIG_OSC_TOP_XOSC_HF_ROW_Q12_MASK) >>
                    FCFG1_CONFIG_OSC_TOP_XOSC_HF_ROW_Q12_SHIFT);
-  ui32XoscHfCol = ((ui32Fcfg1Value &
+  xosc_hf_col = ((fcfg1val &
                     FCFG1_CONFIG_OSC_TOP_XOSC_HF_COLUMN_Q12_MASK) >>
                    FCFG1_CONFIG_OSC_TOP_XOSC_HF_COLUMN_Q12_SHIFT);
 
-  if ((ccfg_modeconf & CCFG_MODE_CONF_XOSC_CAP_MOD) == 0)
+  if ((ccfg_modeconf & CCFG_MODE_CONF_1_XOSC_CAP_MOD) == 0)
     {
       /* XOSC_CAP_MOD = 0 means: CAP_ARRAY_DELTA is in use -> Apply
        * compensation XOSC_CAPARRAY_DELTA is located in bit[15:8] of
@@ -633,64 +638,66 @@ uint32_t rom_setup_get_trim_anabypass_value1(uint32_t ccfg_modeconf)
        * ( A small test program is created verifying the code lines below: Ref.:
        * ..\test\small_standalone_test_programs\CapArrayDeltaAdjust_test.c) */
 
-      int32_t i32CustomerDeltaAdjust =
+      int32_t customer_delta_adjust =
         (((int32_t)
           (ccfg_modeconf <<
-           (32 - CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_WIDTH -
-            CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_SHIFT))) >> (32 -
-                                                        CCFG_MODE_CONF_XOSC_CAPARRAY_DELTA_WIDTH));
+           (32 - CCFG_MODE_CONF_1_XOSC_CAPARRAY_DELTA_WIDTH -
+            CCFG_MODE_CONF_1_XOSC_CAPARRAY_DELTA_SHIFT))) >> (32 -
+                                                        CCFG_MODE_CONF_1_XOSC_CAPARRAY_DELTA_WIDTH));
 
-      while (i32CustomerDeltaAdjust < 0)
+      while (customer_delta_adjust < 0)
         {
-          ui32XoscHfCol >>= 1;  /* COL 1 step down */
+          xosc_hf_col >>= 1;  /* COL 1 step down */
 
-          if (ui32XoscHfCol == 0)
+          if (xosc_hf_col == 0)
             {                   /* if COL below minimum */
 
-              ui32XoscHfCol = 0xffff;   /* Set COL to maximum */
+              xosc_hf_col = 0xffff;   /* Set COL to maximum */
 
-              ui32XoscHfRow >>= 1;      /* ROW 1 step down */
+              xosc_hf_row >>= 1;      /* ROW 1 step down */
 
-              if (ui32XoscHfRow == 0)
+              if (xosc_hf_row == 0)
                 {               /* if ROW below minimum */
 
-                  ui32XoscHfRow = 1;    /* Set both ROW and COL */
+                  xosc_hf_row = 1;    /* Set both ROW and COL */
 
-                  ui32XoscHfCol = 1;    /* to minimum */
+                  xosc_hf_col = 1;    /* to minimum */
 
                 }
             }
-          i32CustomerDeltaAdjust++;
-        }
-      while (i32CustomerDeltaAdjust > 0)
-        {
-          ui32XoscHfCol = (ui32XoscHfCol << 1) | 1;     /* COL 1 step up */
 
-          if (ui32XoscHfCol > 0xffff)
+          customer_delta_adjust++;
+        }
+
+      while (customer_delta_adjust > 0)
+        {
+          xosc_hf_col = (xosc_hf_col << 1) | 1;     /* COL 1 step up */
+
+          if (xosc_hf_col > 0xffff)
             {                   /* if COL above maximum */
 
-              ui32XoscHfCol = 1;        /* Set COL to minimum */
+              xosc_hf_col = 1;        /* Set COL to minimum */
 
-              ui32XoscHfRow = (ui32XoscHfRow << 1) | 1; /* ROW 1 step up */
+              xosc_hf_row = (xosc_hf_row << 1) | 1; /* ROW 1 step up */
 
-              if (ui32XoscHfRow > 0xf)
+              if (xosc_hf_row > 0xf)
                 {               /* if ROW above maximum */
 
-                  ui32XoscHfRow = 0xf;  /* Set both ROW and COL */
+                  xosc_hf_row = 0xf;  /* Set both ROW and COL */
 
-                  ui32XoscHfCol = 0xffff;       /* to maximum */
+                  xosc_hf_col = 0xffff;       /* to maximum */
 
                 }
             }
-          i32CustomerDeltaAdjust--;
+          customer_delta_adjust--;
         }
     }
 
-  trimValue =
-    ((ui32XoscHfRow << DDI0_OSC_ANABYPASSVAL1_XOSC_HF_ROW_Q12_SHIFT) |
-     (ui32XoscHfCol << DDI0_OSC_ANABYPASSVAL1_XOSC_HF_COLUMN_Q12_SHIFT));
+  trimval =
+    ((xosc_hf_row << DDI0_OSC_ANABYPASSVAL1_XOSC_HF_ROW_Q12_SHIFT) |
+     (xosc_hf_col << DDI0_OSC_ANABYPASSVAL1_XOSC_HF_COLUMN_Q12_SHIFT));
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -699,23 +706,23 @@ uint32_t rom_setup_get_trim_anabypass_value1(uint32_t ccfg_modeconf)
 
 uint32_t rom_setup_get_trim_rcosc_lfrtunectuntrim(void)
 {
-  uint32_t trimValue;
+  uint32_t trimval;
 
   /* Use device specific trim values located in factory configuration area */
 
-  trimValue =
+  trimval =
     ((getreg32(TIVA_FCFG1_CONFIG_OSC_TOP) &
       FCFG1_CONFIG_OSC_TOP_RCOSCLF_CTUNE_TRIM_MASK) >>
      FCFG1_CONFIG_OSC_TOP_RCOSCLF_CTUNE_TRIM_SHIFT) <<
     DDI0_OSC_LFOSCCTL_RCOSCLF_CTUNE_TRIM_SHIFT;
 
-  trimValue |=
+  trimval |=
     ((getreg32(TIVA_FCFG1_CONFIG_OSC_TOP) &
       FCFG1_CONFIG_OSC_TOP_RCOSCLF_RTUNE_TRIM_MASK) >>
      FCFG1_CONFIG_OSC_TOP_RCOSCLF_RTUNE_TRIM_SHIFT) <<
     DDI0_OSC_LFOSCCTL_RCOSCLF_RTUNE_TRIM_SHIFT;
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -724,16 +731,16 @@ uint32_t rom_setup_get_trim_rcosc_lfrtunectuntrim(void)
 
 uint32_t rom_setup_get_trim_xosc_hfibiastherm(void)
 {
-  uint32_t trimValue;
+  uint32_t trimval;
 
   /* Use device specific trim value located in factory configuration area */
 
-  trimValue =
+  trimval =
     (getreg32(TIVA_FCFG1_ANABYPASS_VALUE2) &
      FCFG1_ANABYPASS_VALUE2_XOSC_HF_IBIASTHERM_MASK) >>
     FCFG1_ANABYPASS_VALUE2_XOSC_HF_IBIASTHERM_SHIFT;
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -742,32 +749,32 @@ uint32_t rom_setup_get_trim_xosc_hfibiastherm(void)
 
 uint32_t rom_setup_get_trim_ampcompth2(void)
 {
-  uint32_t trimValue;
-  uint32_t ui32Fcfg1Value;
+  uint32_t trimval;
+  uint32_t fcfg1val;
 
   /* Use device specific trim value located in factory configuration area. All
    * defined register bit fields have corresponding trim value in the factory
    * configuration area */
 
-  ui32Fcfg1Value = getreg32(TIVA_FCFG1_AMPCOMP_TH2);
-  trimValue = ((ui32Fcfg1Value &
+  fcfg1val = getreg32(TIVA_FCFG1_AMPCOMP_TH2);
+  trimval = ((fcfg1val &
                     FCFG1_AMPCOMP_TH2_LPMUPDATE_LTH_MASK) >>
                    FCFG1_AMPCOMP_TH2_LPMUPDATE_LTH_SHIFT) <<
     DDI0_OSC_AMPCOMPTH2_LPMUPDATE_LTH_SHIFT;
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH2_LPMUPDATE_HTM_MASK) >>
                      FCFG1_AMPCOMP_TH2_LPMUPDATE_HTM_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH2_LPMUPDATE_HTH_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH2_ADC_COMP_AMPTH_LPM_MASK) >>
                      FCFG1_AMPCOMP_TH2_ADC_COMP_AMPTH_LPM_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH2_ADC_COMP_AMPTH_LPM_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH2_ADC_COMP_AMPTH_HPM_MASK) >>
                      FCFG1_AMPCOMP_TH2_ADC_COMP_AMPTH_HPM_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH2_ADC_COMP_AMPTH_HPM_SHIFT);
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -776,32 +783,32 @@ uint32_t rom_setup_get_trim_ampcompth2(void)
 
 uint32_t rom_setup_get_trim_ampcompth1(void)
 {
-  uint32_t trimValue;
-  uint32_t ui32Fcfg1Value;
+  uint32_t trimval;
+  uint32_t fcfg1val;
 
   /* Use device specific trim values located in factory configuration area. All
    * defined register bit fields have a corresponding trim value in the factory
    * configuration area */
 
-  ui32Fcfg1Value = getreg32(TIVA_FCFG1_AMPCOMP_TH1);
-  trimValue = (((ui32Fcfg1Value &
+  fcfg1val = getreg32(TIVA_FCFG1_AMPCOMP_TH1);
+  trimval = (((fcfg1val &
                      FCFG1_AMPCOMP_TH1_HPMRAMP3_LTH_MASK) >>
                     FCFG1_AMPCOMP_TH1_HPMRAMP3_LTH_SHIFT) <<
                    DDI0_OSC_AMPCOMPTH1_HPMRAMP3_LTH_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH1_HPMRAMP3_HTH_MASK) >>
                      FCFG1_AMPCOMP_TH1_HPMRAMP3_HTH_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH1_HPMRAMP3_HTH_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH1_IBIASCAP_LPTOHP_OL_CNT_MASK) >>
                      FCFG1_AMPCOMP_TH1_IBIASCAP_LPTOHP_OL_CNT_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH1_IBIASCAP_LPTOHP_OL_CNT_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_TH1_HPMRAMP1_TH_MASK) >>
                      FCFG1_AMPCOMP_TH1_HPMRAMP1_TH_SHIFT) <<
                     DDI0_OSC_AMPCOMPTH1_HPMRAMP1_TH_SHIFT);
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -810,103 +817,108 @@ uint32_t rom_setup_get_trim_ampcompth1(void)
 
 uint32_t rom_setup_get_trim_ampcompctrl(uint32_t fcfg1_revision)
 {
-  uint32_t trimValue;
-  uint32_t ui32Fcfg1Value;
-  uint32_t ibiasOffset;
-  uint32_t ibiasInit;
-  uint32_t modeConf1;
-  int32_t deltaAdjust;
+  uint32_t trimval;
+  uint32_t fcfg1val;
+  uint32_t ibias_offset;
+  uint32_t ibias_init;
+  uint32_t mode_conf1;
+  int32_t delta_adjust;
 
   /* Use device specific trim values located in factory configuration area.
    * Register bit fields without trim values in the factory configuration area
    * will be set to the value of 0. */
 
-  ui32Fcfg1Value = getreg32(TIVA_FCFG1_AMPCOMP_CTRL1);
+  fcfg1val = getreg32(TIVA_FCFG1_AMPCOMP_CTRL1);
 
-  ibiasOffset = (ui32Fcfg1Value &
+  ibias_offset = (fcfg1val &
                  FCFG1_AMPCOMP_CTRL1_IBIAS_OFFSET_MASK) >>
     FCFG1_AMPCOMP_CTRL1_IBIAS_OFFSET_SHIFT;
-  ibiasInit = (ui32Fcfg1Value &
+  ibias_init = (fcfg1val &
                FCFG1_AMPCOMP_CTRL1_IBIAS_INIT_MASK) >>
     FCFG1_AMPCOMP_CTRL1_IBIAS_INIT_SHIFT;
 
   if ((getreg32(TIVA_CCFG_SIZE_AND_DIS_FLAGS) &
-       CCFG_SIZE_AND_DIS_FLAGS_DIS_XOSC_OVR_MASK) == 0)
+       CCFG_SIZE_AND_DIS_FLAGS_DIS_XOSC_OVR) == 0)
     {
       /* Adjust with TIVA_DELTA_IBIAS_OFFSET and DELTA_IBIAS_INIT from CCFG */
 
-      modeConf1 = getreg32(TIVA_CCFG_MODE_CONF_1);
+      mode_conf1 = getreg32(TIVA_CCFG_MODE_CONF_1);
 
       /* Both fields are signed 4-bit values. This is an assumption when doing
        * the sign extension. */
 
-      deltaAdjust =
+      delta_adjust =
         (((int32_t)
-          (modeConf1 <<
+          (mode_conf1 <<
            (32 - CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_WIDTH -
             CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_SHIFT))) >>
             (32 - CCFG_MODE_CONF_1_DELTA_IBIAS_OFFSET_WIDTH));
-      deltaAdjust += (int32_t) ibiasOffset;
-      if (deltaAdjust < 0)
+      delta_adjust += (int32_t) ibias_offset;
+      if (delta_adjust < 0)
         {
-          deltaAdjust = 0;
+          delta_adjust = 0;
         }
-      if (deltaAdjust >
+      if (delta_adjust >
           (DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_MASK >>
            DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_SHIFT))
         {
-          deltaAdjust =
+          delta_adjust =
             (DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_MASK >>
              DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_SHIFT);
         }
-      ibiasOffset = (uint32_t) deltaAdjust;
+      ibias_offset = (uint32_t) delta_adjust;
 
-      deltaAdjust =
+      delta_adjust =
         (((int32_t)
-          (modeConf1 <<
+          (mode_conf1 <<
            (32 - CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_WIDTH -
             CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_SHIFT))) >> (32 -
                                                        CCFG_MODE_CONF_1_DELTA_IBIAS_INIT_WIDTH));
-      deltaAdjust += (int32_t)ibiasInit;
-      if (deltaAdjust < 0)
+      delta_adjust += (int32_t)ibias_init;
+      if (delta_adjust < 0)
         {
-          deltaAdjust = 0;
+          delta_adjust = 0;
         }
-      if (deltaAdjust >
+      if (delta_adjust >
           (DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_MASK >>
            DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_SHIFT))
         {
-          deltaAdjust =
+          delta_adjust =
             (DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_MASK >>
              DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_SHIFT);
         }
-      ibiasInit = (uint32_t) deltaAdjust;
+      ibias_init = (uint32_t) delta_adjust;
     }
-  trimValue = (ibiasOffset << DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_SHIFT) |
-    (ibiasInit << DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_SHIFT);
 
-  trimValue |= (((ui32Fcfg1Value &
+  trimval = (ibias_offset << DDI0_OSC_AMPCOMPCTL_IBIAS_OFFSET_SHIFT) |
+    (ibias_init << DDI0_OSC_AMPCOMPCTL_IBIAS_INIT_SHIFT);
+
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_CTRL1_LPM_IBIAS_WAIT_CNT_FINAL_MASK) >>
                      FCFG1_AMPCOMP_CTRL1_LPM_IBIAS_WAIT_CNT_FINAL_SHIFT) <<
                     DDI0_OSC_AMPCOMPCTL_LPM_IBIAS_WAIT_CNT_FINAL_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_CTRL1_CAP_STEP_MASK) >>
                      FCFG1_AMPCOMP_CTRL1_CAP_STEP_SHIFT) <<
                     DDI0_OSC_AMPCOMPCTL_CAP_STEP_SHIFT);
-  trimValue |= (((ui32Fcfg1Value &
+  trimval |= (((fcfg1val &
                       FCFG1_AMPCOMP_CTRL1_IBIASCAP_HPTOLP_OL_CNT_MASK) >>
                      FCFG1_AMPCOMP_CTRL1_IBIASCAP_HPTOLP_OL_CNT_SHIFT) <<
                     DDI0_OSC_AMPCOMPCTL_IBIASCAP_HPTOLP_OL_CNT_SHIFT);
 
   if (fcfg1_revision >= 0x00000022)
     {
-      trimValue |= (((ui32Fcfg1Value &
-                          FCFG1_AMPCOMP_CTRL1_AMPCOMP_REQ_MODE_MASK) >>
-                         FCFG1_AMPCOMP_CTRL1_AMPCOMP_REQ_MODE_SHIFT) <<
-                        DDI0_OSC_AMPCOMPCTL_AMPCOMP_REQ_MODE_SHIFT);
+      uint32_t ampcomp_req_mode = 0;
+
+      if ((fcfg1val & FCFG1_AMPCOMP_CTRL1_AMPCOMP_REQ_MODE) != 0)
+        {
+          ampcomp_req_mode = DDI0_OSC_AMPCOMPCTL_AMPCOMP_REQ_MODE;
+        }
+
+      trimval |= ampcomp_req_mode;
     }
 
-  return (trimValue);
+  return trimval;
 }
 
 /************************************************************************************
@@ -934,16 +946,17 @@ uint32_t rom_setup_get_trim_dblrloopfilter_resetvoltage(uint32_t fcfg1_revision)
 
 uint32_t rom_setup_get_trim_adcshmodeen(uint32_t fcfg1_revision)
 {
-  uint32_t getTrimForAdcShModeEnValue = 1;      /* Recommended default setting */
+  uint32_t fcfg1_adcsh_modeen = 1;      /* Recommended default setting */
 
   if (fcfg1_revision >= 0x00000022)
     {
-      getTrimForAdcShModeEnValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
-                                    FCFG1_OSC_CONF_ADC_SH_MODE_EN_MASK) >>
-        FCFG1_OSC_CONF_ADC_SH_MODE_EN_SHIFT;
+      if ((getreg32(TIVA_FCFG1_OSC_CONF) & FCFG1_OSC_CONF_ADC_SH_MODE_EN) == 0)
+        {
+          fcfg1_adcsh_modeen = 0;
+        }
     }
 
-  return (getTrimForAdcShModeEnValue);
+  return fcfg1_adcsh_modeen;
 }
 
 /************************************************************************************
@@ -952,16 +965,17 @@ uint32_t rom_setup_get_trim_adcshmodeen(uint32_t fcfg1_revision)
 
 uint32_t rom_setup_get_trim_adcshvbufen(uint32_t fcfg1_revision)
 {
-  uint32_t getTrimForAdcShVbufEnValue = 1;      /* Recommended default setting */
+  uint32_t trim_adcshvbufen = 1;      /* Recommended default setting */
 
   if (fcfg1_revision >= 0x00000022)
     {
-      getTrimForAdcShVbufEnValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
-                                    FCFG1_OSC_CONF_ADC_SH_VBUF_EN_MASK) >>
-        FCFG1_OSC_CONF_ADC_SH_VBUF_EN_SHIFT;
+      if ((getreg32(TIVA_FCFG1_OSC_CONF) & FCFG1_OSC_CONF_ADC_SH_VBUF_EN) == 0)
+        {
+          trim_adcshvbufen = 0;
+        }
     }
 
-  return (getTrimForAdcShVbufEnValue);
+  return trim_adcshvbufen;
 }
 
 /************************************************************************************
@@ -1052,16 +1066,17 @@ uint32_t rom_setup_get_trim_radc_extcfg(uint32_t fcfg1_revision)
 
 uint32_t rom_setup_get_trim_rcosc_lfibiastrim(uint32_t fcfg1_revision)
 {
-  uint32_t trimForRcOscLfIBiasTrimValue = 0;    /* Default value */
+  uint32_t trim_rcosc_lfibaistrim = 0;    /* Default value */
 
   if (fcfg1_revision >= 0x00000022)
     {
-      trimForRcOscLfIBiasTrimValue = (getreg32(TIVA_FCFG1_OSC_CONF) &
-                                      FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM_MASK)
-        >> FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM_SHIFT;
+      if ((getreg32(TIVA_FCFG1_OSC_CONF) & FCFG1_OSC_CONF_ATESTLF_RCOSCLF_IBIAS_TRIM) != 0)
+        {
+          trim_rcosc_lfibaistrim = 1;
+        }
     }
 
-  return (trimForRcOscLfIBiasTrimValue);
+  return trim_rcosc_lfibaistrim;
 }
 
 /************************************************************************************
