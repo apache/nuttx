@@ -48,7 +48,10 @@
 #include <nuttx/board.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
-#include <nuttx/nx/nxmu.h>
+
+#ifdef CONFIG_NX
+#  include <nuttx/nx/nxmu.h>
+#endif
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 #  include <nuttx/usb/cdcacm.h>

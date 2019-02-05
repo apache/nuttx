@@ -56,10 +56,6 @@
 
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_DISABLE_MQUEUE
-#  error "Message queues are disabled(CONFIG_DISABLE_MQUEUE)"
-#endif
-
 #ifndef CONFIG_NX_MXSERVERMSGS
 #  define CONFIG_NX_MXSERVERMSGS 32 /* Number of pending messages in server MQ */
 #endif

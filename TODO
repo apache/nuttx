@@ -789,12 +789,16 @@ o Signals (sched/signal, arch/)
                  actual signal action as well as some housekeeping functions
                  then 
                - up_sigdeliver() performs a context switch back to the normal,
-                 uninterrupted thread.
+                 uninterrupted thread instead of returning to nxsig_deliver().
 
                The loop in nxsig_deliver() then will have the opportunity to
                run until when that normal, uniterrupted thread is suspended.
                Then the loop will continue with the next queued signal
                action.
+
+               Normally signals execute immediately.  The is the whole reason
+               why almost all blocking APIs return when a signal is received
+               (with errno equal to EINTR).
   Status:      Open
   Priority:    Low.  This design flaw has been around for ages and no one has yet
                complained about it.  Apparently the visibility of the problem is
