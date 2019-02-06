@@ -257,7 +257,7 @@ static uint8_t tca64_ngpios(FAR struct tca64_dev_s *priv)
 static uint8_t tca64_input_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 {
   FAR const struct tca64_part_s *part = tca64_getpart(priv);
-  uint8_t reg = part->tp_output;
+  uint8_t reg = part->tp_input;
 
   DEBUGASSERT(pin <= part->tp_ngpios);
   return reg + (pin >> 3);
@@ -996,7 +996,6 @@ static FAR void *tca64_attach(FAR struct ioexpander_dev_s *dev,
   tca64_unlock(priv);
   return handle;
 }
-#endif
 
 /****************************************************************************
  * Name: tca64_detach
@@ -1028,6 +1027,7 @@ static int tca64_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
   cb->cbarg  = NULL;
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: tca64_int_update
