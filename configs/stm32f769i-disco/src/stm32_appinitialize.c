@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/stm32f769i-disco/src/stm32_appinitialize.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 #include "stm32_ccm.h"
 #include "stm32f769i-disco.h"
