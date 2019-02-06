@@ -773,7 +773,7 @@ static void pic32mz_timer_extclocksource(FAR struct pic32mz_timer_dev_s *dev,
                                          bool enable)
 {
   FAR struct pic32mz_timer_priv_s *priv =
-    (FAR truct pic32mz_timer_priv_s *)dev;
+    (FAR struct pic32mz_timer_priv_s *)dev;
 
   if (enable)
     {
@@ -944,7 +944,7 @@ static uint32_t pic32mz_timer_getfreq(FAR struct pic32mz_timer_dev_s *dev)
   uint8_t prescale;
   uint32_t freq;
 
-  prescale = ((FAR structpic32mz_timer_priv_s *)dev)->config->prescale;
+  prescale = ((FAR struct pic32mz_timer_priv_s *)dev)->config->prescale;
 
   /* The prescale values are not a continuous power of 2.
    * There is a gap between 64 and 256 (the 128 is skipped).
@@ -1133,7 +1133,7 @@ static int  pic32mz_timer_setisr(FAR struct pic32mz_timer_dev_s *dev,
 
 static void pic32mz_timer_ackint(FAR struct pic32mz_timer_dev_s *dev)
 {
-  up_clrpend_irq(((FAR structpic32mz_timer_priv_s *)dev)->config->irq);
+  up_clrpend_irq(((FAR struct pic32mz_timer_priv_s *)dev)->config->irq);
 
   if (pic32mz_timer_mode32(dev))
     {
@@ -1161,7 +1161,10 @@ static bool  pic32mz_timer_checkint(FAR struct pic32mz_timer_dev_s *dev)
     }
   else
     {
-      return up_pending_irq(((FAR structpic32mz_timer_priv_s *)dev)->config->irq);
+      FAR struct pic32mz_timer_priv_s *priv =
+          (FAR struct pic32mz_timer_priv_s *)dev;
+
+      return up_pending_irq(priv->config->irq);
     }
 }
 
@@ -1181,49 +1184,49 @@ FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
     {
 #ifdef CONFIG_PIC32MZ_T2
       case 2:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t2_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t2_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T3
       case 3:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t3_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t3_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T4
       case 4:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t4_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t4_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T5
       case 5:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t5_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t5_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T6
       case 6:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t6_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t6_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T7
       case 7:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t7_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t7_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T8
       case 8:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t8_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t8_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T9
       case 9:
-        dev = (FAR structpic32mz_timer_dev_s *)&pic32mz_t9_priv;
+        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t9_priv;
         break;
 #endif
       default:
         return NULL;
     }
 
-  if (((FAR structpic32mz_timer_priv_s *)dev)->inuse)
+  if (((FAR struct pic32mz_timer_priv_s *)dev)->inuse)
     {
       return NULL;
     }
@@ -1233,7 +1236,7 @@ FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
 
       pic32mz_timer_inithardware(dev);
 
-      ((FAR structpic32mz_timer_priv_s *)dev)->inuse = true;
+      ((FAR struct pic32mz_timer_priv_s *)dev)->inuse = true;
 
       return dev;
     }
@@ -1246,7 +1249,7 @@ int pic32mz_timer_deinit(FAR struct pic32mz_timer_dev_s *dev)
    */
 
   pic32mz_timer_stop(dev);
-  ((FAR structpic32mz_timer_priv_s *)dev)->inuse = false;
+  ((FAR struct pic32mz_timer_priv_s *)dev)->inuse = false;
 
   return OK;
 }
