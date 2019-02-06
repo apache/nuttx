@@ -63,7 +63,7 @@
  * Public Functions
  ****************************************************************************/
 
-int __dtoa_engine(double x, FAR struct dtoa *dtoa, int max_digits,
+int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals)
 {
   int32_t exp = 0;
@@ -104,7 +104,7 @@ int __dtoa_engine(double x, FAR struct dtoa *dtoa, int max_digits,
         {
           for (i = DTOA_SCALE_UP_NUM - 1; i >= 0; i--)
             {
-              y = x * __dtoa_scale_up[i];
+              y = x * g_dtoa_scale_up[i];
               if (y < MAX_MANT)
                 {
                   x = y;
@@ -116,7 +116,7 @@ int __dtoa_engine(double x, FAR struct dtoa *dtoa, int max_digits,
         {
           for (i = DTOA_SCALE_DOWN_NUM - 1; i >= 0; i--)
             {
-              y = x * __dtoa_scale_down[i];
+              y = x * g_dtoa_scale_down[i];
               if (y >= MIN_MANT)
                 {
                   x = y;
@@ -139,7 +139,7 @@ int __dtoa_engine(double x, FAR struct dtoa *dtoa, int max_digits,
        * int. Check for overflow and adjust mantissa and exponent values
        */
 
-      x = x + __dtoa_round[max_digits];
+      x = x + g_dtoa_round[max_digits];
 
       if (x >= MAX_MANT)
         {

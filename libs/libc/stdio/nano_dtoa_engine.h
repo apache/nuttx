@@ -164,7 +164,7 @@
  * Public Types
  ****************************************************************************/
 
-struct dtoa
+struct dtoa_s
 {
   int32_t exp;
   uint8_t flags;
@@ -175,15 +175,15 @@ struct dtoa
  * Public Data
  ****************************************************************************/
 
-extern const double __dtoa_scale_up[];
-extern const double __dtoa_scale_down[];
-extern const double __dtoa_round[];
+extern const double g_dtoa_scale_up[];
+extern const double g_dtoa_scale_down[];
+extern const double g_dtoa_round[];
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int __dtoa_engine(double x, FAR struct dtoa *dtoa, int max_digits,
+int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals);
 
 #endif /* __LIBS_LIBC_STDIO_NANO_DTOA_ENGINE_H */

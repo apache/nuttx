@@ -329,7 +329,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
   {
     unsigned char __buf[11];  /* Size for -1 in octal, without '\0' */
 #  if PRINTF_LEVEL >= PRINTF_FLT
-    struct dtoa __dtoa;
+    struct dtoa_s __dtoa;
 #  endif
   } u;
   const char *pnt;

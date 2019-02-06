@@ -48,8 +48,8 @@
 
 /* Next flags are to use with `base'. Unused fields are reserved. */
 
-#define XTOA_PREFIX       0x0100  /* Put prefix for octal or hex  */
-#define XTOA_UPPER        0x0200  /* Use upper case letters   */
+#define XTOA_PREFIX  0x0100    /* Put prefix for octal or hex */
+#define XTOA_UPPER   0x0200    /* Use upper case letters */
 
 /****************************************************************************
  * Public Function Prototypes
