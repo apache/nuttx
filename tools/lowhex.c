@@ -112,7 +112,7 @@ int main(int argc, char **argv)
       /* Search for a '0x' that preceding some delimiting character */
 
       delimited = true;
-      inhex     = true;
+      inhex     = false;
 
       for (i = 0;
            i < LINESIZE && g_line[i] != '\n' && g_line[i] != '\0';
