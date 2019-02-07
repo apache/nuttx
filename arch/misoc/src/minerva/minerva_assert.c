@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_assert.c
+ * arch/misoc/src/minerva/minerva_assert.c
  *
- *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -54,7 +54,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -85,28 +85,28 @@ static void _up_assert(int errorcode)
 
   (void)syslog_flush();
 
-  /* Are we in an interrupt handler or the idle task?
-   * NOTE:  You cannot use the PID to determine if this is an IDLE task.  In
-   * the SMP case, there may be multiple IDLE tasks with different PIDs.  The
-   * only consistent way to test for the IDLE task is to check it is at the
-   * end of the list (flink == NULL)
+  /* Are we in an interrupt handler or the idle task? NOTE: You cannot use the
+   * PID to determine if this is an IDLE task.  In the SMP case, there may be
+   * multiple IDLE tasks with different PIDs.  The only consistent way to test
+   * for the IDLE task is to check it is at the end of the list (flink ==
+   * NULL)
    */
 
   if (g_current_regs || running_task()->flink == NULL)
     {
-       (void)up_irq_save();
-        for (; ; )
-          {
+      (void)up_irq_save();
+      for (; ; )
+        {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-            board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
 #ifdef CONFIG_ARCH_LEDS
-            board_autoled_on(LED_PANIC);
-            up_mdelay(250);
-            board_autoled_off(LED_PANIC);
-            up_mdelay(250);
+          board_autoled_on(LED_PANIC);
+          up_mdelay(250);
+          board_autoled_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {
@@ -150,7 +150,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const uint8_t * filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -164,13 +164,12 @@ void up_assert(const uint8_t *filename, int lineno)
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
-        filename, lineno, rtcb->name);
+         filename, lineno, rtcb->name);
 #else
-  _alert("Assertion failed at file:%s line: %d\n",
-        filename, lineno);
+  _alert("Assertion failed at file:%s line: %d\n", filename, lineno);
 #endif
 
-  lm32_dumpstate();
+  minerva_dumpstate();
 
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */

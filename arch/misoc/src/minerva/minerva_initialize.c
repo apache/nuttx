@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/minerva_initialize.c
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@
 #include <arch/board/board.h>
 
 #include "misoc.h"
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
  * Public Functionis
@@ -69,7 +69,7 @@ void up_initialize(void)
 {
   /* Initialize the System Timer */
 
-  lm32_irq_initialize();
+  minerva_irq_initialize();
 
   /* Initialize the serial driver */
 
@@ -85,9 +85,9 @@ void up_initialize(void)
   iob_initialize();
 #endif
 
-#if 0 /* REVISIT */
   /* Initialize the network cores */
 
+#ifdef CONFIG_MISOC_ETHERNET
   misoc_net_initialize(0);
 #endif
 }

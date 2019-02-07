@@ -1,9 +1,13 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/minerva_config.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *
+ * Modified for MINERVA:
+ *
+ *   Copyright (C) 2016 Ramin Amin. All rights reserved.
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,60 +38,45 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MISOC_SRC_MINERVA_MINERVA_CONFIG_H
+#define __ARCH_MISOC_SRC_MINERVA_MINERVA_CONFIG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
+#include <arch/chip/chip.h>
 #include <arch/board/board.h>
 
-#include "misoc.h"
-#include "lm32.h"
-
 /****************************************************************************
- * Public Functionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
-void up_initialize(void)
-{
-  /* Initialize the System Timer */
+/* UARTs ********************************************************************/
 
-  lm32_irq_initialize();
+/* Are any UARTs enabled? */
 
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
+#undef HAVE_UART_DEVICE
+#if defined(CONFIG_MISOC_UART1) || defined(CONFIG_MISOC_UART2)
+#  define HAVE_UART_DEVICE 1
 #endif
 
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
+/* Is there a serial console?  There should be no more than one defined.  It
+ * could be on any UARTn, n=1,.. CHIP_NUARTS
+ */
 
-  misoc_net_initialize(0);
+#if defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_MISOC_UART1)
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_MISOC_UART2)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
 #endif
-}
+
+#endif  /* __ARCH_MISOC_SRC_MINERVA_MINERVA_CONFIG_H */

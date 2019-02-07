@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_dumpstate.c
+ * arch/misoc/src/minerva/minerva_dumpstate.c
  *
- *  Copyright (C) 2011, 2019 Gregory Nutt. All rights reserved.
+ *  Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *  Author: Gregory Nutt <gnutt@nuttx.org>
  *          Ramtin Amin <keytwo@gmail.com>
  *
@@ -50,7 +50,7 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "lm32.h"
+#include "minerva.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
@@ -66,7 +66,7 @@ static inline uint32_t up_getsp(void)
 {
   register uint32_t sp;
 
-  __asm__ __volatile__("addi %0, sp, 0" : "=r" (sp));
+  __asm__ __volatile__("addi %0, sp, 0":"=r"(sp));
 
   return sp;
 }
@@ -77,11 +77,11 @@ static inline uint32_t up_getsp(void)
 
 static void up_stackdump(uint32_t sp, uint32_t stack_base)
 {
-  uint32_t stack ;
+  uint32_t stack;
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32_t *ptr = (uint32_t *)stack;
+      uint32_t *ptr = (uint32_t *) stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -98,30 +98,32 @@ static inline void up_registerdump(void)
 
   if (g_current_regs)
     {
-      _alert("EPC:%08x \n",
-            g_current_regs[REG_EPC]);
-      _alert(" X0:%08x  A0:%08x  A1:%08x  A2:%08x  A3:%08x  A4:%08x  A5:%08x  A6:%08x\n",
-            g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],
-            g_current_regs[REG_X2_NDX], g_current_regs[REG_X3_NDX],
-            g_current_regs[REG_X4_NDX], g_current_regs[REG_X5_NDX],
-            g_current_regs[REG_X6_NDX], g_current_regs[REG_X7_NDX]);
-      _alert(" A7:%08x  X9:%08x X10:%08x X11:%08x X12:%08x X13:%08x X14:%08x X15:%08x\n",
-            g_current_regs[REG_X8_NDX], g_current_regs[REG_X9_NDX],
-            g_current_regs[REG_X10_NDX], g_current_regs[REG_X11_NDX],
-            g_current_regs[REG_X12_NDX], g_current_regs[REG_X13_NDX],
-            g_current_regs[REG_X14_NDX], g_current_regs[REG_X15_NDX]);
-      _alert("X16:%08x X17:%08x X18:%08x X19:%08x X20:%08x X21:%08x X22:%08x X23:%08x\n",
-            g_current_regs[REG_X16_NDX], g_current_regs[REG_X17_NDX],
-            g_current_regs[REG_X18_NDX], g_current_regs[REG_X19_NDX],
-            g_current_regs[REG_X20_NDX], g_current_regs[REG_X21_NDX],
-            g_current_regs[REG_X22_NDX], g_current_regs[REG_X23_NDX]);
-      _alert("X24:%08x X25:%08x  GP:%08x  FP:%08x  SP:%08x  RA:%08x  EA:%08x  BA:%08x\n",
-            g_current_regs[REG_X24_NDX], g_current_regs[REG_X25_NDX],
-            g_current_regs[REG_X26_NDX], g_current_regs[REG_X27_NDX],
-            g_current_regs[REG_X28_NDX], g_current_regs[REG_X29_NDX],
-            g_current_regs[REG_X30_NDX], g_current_regs[REG_X31_NDX]);
-      _alert(" IE:%08x\n",
-            g_current_regs[REG_X32_NDX]);
+      _alert("EPC:%08x \n", g_current_regs[REG_CSR_MEPC]);
+      _alert
+        (" X0:%08x  A0:%08x  A1:%08x  A2:%08x  A3:%08x  A4:%08x  A5:%08x  A6:%08x\n",
+         g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],
+         g_current_regs[REG_X2_NDX], g_current_regs[REG_X3_NDX],
+         g_current_regs[REG_X4_NDX], g_current_regs[REG_X5_NDX],
+         g_current_regs[REG_X6_NDX], g_current_regs[REG_X7_NDX]);
+      _alert
+        (" A7:%08x  X9:%08x X10:%08x X11:%08x X12:%08x X13:%08x X14:%08x X15:%08x\n",
+         g_current_regs[REG_X8_NDX], g_current_regs[REG_X9_NDX],
+         g_current_regs[REG_X10_NDX], g_current_regs[REG_X11_NDX],
+         g_current_regs[REG_X12_NDX], g_current_regs[REG_X13_NDX],
+         g_current_regs[REG_X14_NDX], g_current_regs[REG_X15_NDX]);
+      _alert
+        ("X16:%08x X17:%08x X18:%08x X19:%08x X20:%08x X21:%08x X22:%08x X23:%08x\n",
+         g_current_regs[REG_X16_NDX], g_current_regs[REG_X17_NDX],
+         g_current_regs[REG_X18_NDX], g_current_regs[REG_X19_NDX],
+         g_current_regs[REG_X20_NDX], g_current_regs[REG_X21_NDX],
+         g_current_regs[REG_X22_NDX], g_current_regs[REG_X23_NDX]);
+      _alert
+        ("X24:%08x X25:%08x  GP:%08x  FP:%08x  SP:%08x  RA:%08x  EA:%08x  BA:%08x\n",
+         g_current_regs[REG_X24_NDX], g_current_regs[REG_X25_NDX],
+         g_current_regs[REG_X26_NDX], g_current_regs[REG_X27_NDX],
+         g_current_regs[REG_X28_NDX], g_current_regs[REG_X29_NDX],
+         g_current_regs[REG_X30_NDX], g_current_regs[REG_X31_NDX]);
+      _alert(" IE:%08x\n", g_current_regs[REG_CSR_MSTATUS]);
     }
 }
 
@@ -130,10 +132,10 @@ static inline void up_registerdump(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm32_dumpstate
+ * Name: minerva_dumpstate
  ****************************************************************************/
 
-void lm32_dumpstate(void)
+void minerva_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
@@ -148,23 +150,28 @@ void lm32_dumpstate(void)
 
   up_registerdump();
 
-  /* Get the limits on the user stack memory */
+  /* Get the limits on the user stack memory NOTE: You cannot use the PID to
+   * determine if this is an IDLE task.  In the SMP case, there may be
+   * multiple IDLE tasks with different PIDs.  The only consistent way to
+   * test for the IDLE task is to check it is at the end of the list (flink
+   * == NULL)
+   */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
+  if (rtcb->flink == NULL)
     {
       ustackbase = g_idle_topstack - 4;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
     }
   else
     {
-      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint32_t)rtcb->adj_stack_size;
+      ustackbase = (uint32_t) rtcb->adj_stack_ptr;
+      ustacksize = (uint32_t) rtcb->adj_stack_size;
     }
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t) & g_intstackbase;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */
@@ -174,9 +181,7 @@ void lm32_dumpstate(void)
   _alert("  base: %08x\n", istackbase);
   _alert("  size: %08x\n", istacksize);
 
-  /* Does the current stack pointer lie within the interrupt
-   * stack?
-   */
+  /* Does the current stack pointer lie within the interrupt stack? */
 
   if (sp <= istackbase && sp > istackbase - istacksize)
     {
@@ -184,8 +189,8 @@ void lm32_dumpstate(void)
 
       up_stackdump(sp, istackbase);
 
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
+      /* Extract the user stack pointer which should lie at the base of the
+       * interrupt stack.
        */
 
       sp = g_intstackbase;
@@ -223,4 +228,5 @@ void lm32_dumpstate(void)
     }
 }
 
-#endif /* CONFIG_ARCH_STACKDUMP */
+#endif  /* CONFIG_ARCH_STACKDUMP */
+

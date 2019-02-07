@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/minerva_copystate.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -40,54 +40,35 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <stdint.h>
+#include <arch/irq.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: minerva_copystate
+ ****************************************************************************/
+
+/* A little faster than most memcpy's */
+
+void minerva_copystate(uint32_t * dest, uint32_t * src)
 {
-  /* Initialize the System Timer */
+  int i;
 
-  lm32_irq_initialize();
+  /* In the MINERVA model, the state is copied from the stack to the TCB, but
+   * only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
 
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-#endif
+  if (src != dest)
+    {
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+    }
 }

@@ -50,4 +50,8 @@
 # include <arch/lm32/syscall.h>
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_MINERVA
+# include <arch/minerva/syscall.h>
+#endif
+
 #endif /* __ARCH_MISOC_INCLUDE_SYSCALL_H */

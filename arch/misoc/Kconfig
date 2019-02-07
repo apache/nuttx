@@ -15,17 +15,18 @@ config ARCH_CHIP_LM32
 	---help---
 		LM32 Chip Selected
 
-config ARCH_CHIP_MOR1K
-	bool "MOR1K"
+config ARCH_CHIP_MINERVA
+	bool "MINERVA"
+	select MISOC_HAVE_UART1
 	---help---
-		MOR1K Chip Selected
+		LambdaConcept MINERVAL Chip Selected
 
 endchoice # Misoc Chip Selection
 
 config ARCH_CHIP
 	string
 	default "lm32"		if ARCH_CHIP_LM32
-	default "mor1k"		if ARCH_CHIP_MOR1K
+	default "minerva"	if ARCH_CHIP_MINERVA
 
 menu "MISOC Peripheral Support"
 
@@ -72,8 +73,8 @@ config MISOC_UART_TX_BUF_SIZE
 if ARCH_CHIP_LM32
 source arch/misoc/src/lm32/Kconfig
 endif
-if ARCH_CHIP_MOR1K
-#source arch/misoc/src/mor1k/Kconfig
+if ARCH_CHIP_MINERVA
+source arch/misoc/src/minerva/Kconfig
 endif
 
 endif # ARCH_MISOC

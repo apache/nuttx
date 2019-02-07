@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_swint.c
+ * arch/misoc/src/minerva/minerva_swint.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -49,7 +49,7 @@
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
  * Private Functions
@@ -60,11 +60,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void up_registerdump(const uint32_t *regs)
+static void up_registerdump(const uint32_t * regs)
 {
 #if 0
-  svcinfo("EPC:%08x\n",
-          regs[REG_EPC]);
+  svcinfo("EPC:%08x\n", regs[REG_CSR_MEPC]);
   svcinfo("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x A6:%08x A7:%08x\n",
           regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
           regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
@@ -76,7 +75,7 @@ static void up_registerdump(const uint32_t *regs)
           regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
   svcinfo("S8:%08x S9:%08x S10:%08x S11:%08x\n",
           regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
-#ifdef LM3232_SAVE_GP
+#ifdef MINERVA32_SAVE_GP
   svcinfo("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
           regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #else
@@ -99,21 +98,27 @@ static void up_registerdump(const uint32_t *regs)
 
 #ifdef CONFIG_BUILD_KERNEL
 static void dispatch_syscall(void) naked_function;
-static void dispatch_syscall(void)
+     static void dispatch_syscall(void)
 {
-#  error "Missing logic"
+#error "Missing logic"
 
 /* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
-/*  __asm__ __volatile__ */
-/* ( */
-/*   Save registers */
-/*   Get the base of the stub lookup table */
-/*   Get the offset of the stub for this syscall */
-/*   Load the entry of the stub for this syscall */
-/*   Call the stub */
-/*   Restore regsisters */
-/*   Return from the syscall */
-/* ); */
+
+/* __asm__ __volatile__ */
+
+/* Save registers */
+
+/* Get the base of the stub lookup table */
+
+/* Get the offset of the stub for this syscall */
+
+/* Load the entry of the stub for this syscall */
+
+/* Call the stub */
+
+/* Restore regsisters */
+
+/* Return from the syscall */
 }
 #endif
 
@@ -122,7 +127,7 @@ static void dispatch_syscall(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm32_swint
+ * Name: minerva_swint
  *
  * Description:
  *   This is software interrupt exception handler that performs context
@@ -130,16 +135,15 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int lm32_swint(int irq, FAR void *context, FAR void *arg)
+int minerva_swint(int irq, FAR void *context, FAR void *arg)
 {
-  uint32_t *regs = (uint32_t *)context;
+  uint32_t *regs = (uint32_t *) context;
 
   DEBUGASSERT(regs != NULL && regs == g_current_regs);
-  g_current_regs = regs;
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_X10) = system call
-   * command and REG_A1-6 = variable number of
-   * arguments depending on the system call.
+   * command and REG_A1-6 = variable number of arguments depending on the
+   * system call.
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
@@ -151,83 +155,65 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
 
   switch (regs[REG_A0])
     {
-      /* A0=SYS_restore_context: This a restore context command:
-       *
-       *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_restore_context
-       *   A1 = restoreregs
-       *
-       * In this case, we simply need to set g_current_regs to restore register
-       * area referenced in the saved R1. context == g_current_regs is the normal
-       * exception return.  By setting g_current_regs = context[R1], we force
-       * the return to the saved context referenced in $a1.
+      /* A0=SYS_restore_context: This a restore context command: void
+       * up_fullcontextrestore(uint32_t *restoreregs) noreturn_function; At
+       * this point, the following values are saved in context: A0 =
+       * SYS_restore_context A1 = restoreregs In this case, we simply need to
+       * set g_current_regs to restore register area referenced in the saved
+       * R1. context == g_current_regs is the normal exception return.  By
+       * setting g_current_regs = context[R1], we force the return to the
+       * saved context referenced in $a1.
        */
 
-      case SYS_restore_context:
-        {
-          DEBUGASSERT(regs[REG_A1] != 0);
-          g_current_regs = (uint32_t *)regs[REG_A1];
-        }
-        break;
+    case SYS_restore_context:
+      {
+        DEBUGASSERT(regs[REG_A1] != 0);
+        g_current_regs = (uint32_t *) regs[REG_A1];
+      }
+      break;
 
-      /* A0=SYS_switch_context: This a switch context command:
-       *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_switch_context
-       *   A1 = saveregs
-       *   A2 = restoreregs
-       *
-       * In this case, we save the context registers to the save register
-       * area reference by the saved contents of R5 and then set
-       * g_current_regs to to the save register area referenced by the saved
-       * contents of R6.
+      /* A0=SYS_switch_context: This a switch context command: void
+       * up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs); At this
+       * point, the following values are saved in context: A0 =
+       * SYS_switch_context A1 = saveregs A2 = restoreregs In this case, we
+       * save the context registers to the save register area reference by the
+       * saved contents of R5 and then set g_current_regs to to the save
+       * register area referenced by the saved contents of R6.
        */
 
-      case SYS_switch_context:
-        {
-          DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          lm32_copystate((uint32_t *)regs[REG_A1], regs);
-          g_current_regs = (uint32_t *)regs[REG_A2];
-        }
-        break;
+    case SYS_switch_context:
+      {
+        DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
+        minerva_copystate((uint32_t *) regs[REG_A1], regs);
+        g_current_regs = (uint32_t *) regs[REG_A2];
+      }
+      break;
 
-      /* A0=SYS_syscall_return: This a switch context command:
-       *
-       *   void up_sycall_return(void);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_syscall_return
-       *
-       * We need to restore the saved return address and return in
-       * unprivileged thread mode.
+      /* A0=SYS_syscall_return: This a switch context command: void
+       * up_sycall_return(void); At this point, the following values are saved
+       * in context: A0 = SYS_syscall_return We need to restore the saved
+       * return address and return in unprivileged thread mode.
        */
 
 #ifdef CONFIG_BUILD_KERNEL
-      case SYS_syscall_return:
-        {
-          struct tcb_s *rtcb = sched_self();
-          int index = (int)rtcb->xcp.nsyscalls - 1;
+    case SYS_syscall_return:
+      {
+        struct tcb_s *rtcb = sched_self();
+        int index = (int)rtcb->xcp.nsyscalls - 1;
 
-          /* Make sure that there is a saved syscall return address. */
+        /* Make sure that there is a saved syscall return address. */
 
-          DEBUGASSERT(index >= 0);
+        DEBUGASSERT(index >= 0);
 
-          /* Setup to return to the saved syscall return address in
-           * the original mode.
-           */
+        /* Setup to return to the saved syscall return address in the original
+         * mode.
+         */
 
-          g_current_regs[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
+        g_current_regs[REG_CSR_MEPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
-          rtcb->xcp.nsyscalls   = index;
-        }
-        break;
+        rtcb->xcp.nsyscalls = index;
+      }
+      break;
 #endif
 
       /* This is not an architecture-specify system call.  If NuttX is built
@@ -235,42 +221,45 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
        * additional system calls must be handled as in the default case.
        */
 
-      default:
-        {
+    default:
+      {
 #ifdef CONFIG_BUILD_KERNEL
-          FAR struct tcb_s *rtcb = sched_self();
-          int index = rtcb->xcp.nsyscalls;
+        FAR struct tcb_s *rtcb = sched_self();
+        int index = rtcb->xcp.nsyscalls;
 
-          /* Verify that the SYS call number is within range */
+        /* Verify that the SYS call number is within range */
 
-          DEBUGASSERT(g_current_regs[REG_A0] < SYS_maxsyscall);
+        DEBUGASSERT(g_current_regs[REG_A0] < SYS_maxsyscall);
 
-          /* Make sure that we got here that there is a no saved syscall
-           * return address.  We cannot yet handle nested system calls.
-           */
+        /* Make sure that we got here that there is a no saved syscall return
+         * address.  We cannot yet handle nested system calls.
+         */
 
-          DEBUGASSERT(index < CONFIG_SYS_NNEST);
+        DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
-          /* Setup to return to dispatch_syscall in privileged mode. */
+        /* Setup to return to dispatch_syscall in privileged mode.
+        */
 
-          rtcb->xcpsyscall[index].sysreturn = regs[REG_EPC];
+        rtcb->xcpsyscall[index].sysreturn = regs[REG_CSR_MEPC];
 #error "Missing logic -- Need to save mode"
-          rtcb->xcp.nsyscalls  = index + 1;
+        rtcb->xcp.nsyscalls = index + 1;
 
-          regs[REG_EPC] = (uint32_t)dispatch_syscall;
+        regs[REG_CSR_MEPC] = (uint32_t) dispatch_syscall;
 #error "Missing logic -- Need to set privileged mode"
 
-          /* Offset R0 to account for the reserved values */
+        /* Offset R0 to account for the reserved values */
 
-          g_current_regs[REG_A0] -= CONFIG_SYS_RESERVED;
+        g_current_regs[REG_A0] -= CONFIG_SYS_RESERVED;
 #else
-          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
+        svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
-        }
-        break;
+      }
+      break;
     }
 
-  /* Report what happened.  That might difficult in the case of a context switch */
+  /* Report what happened.  That might difficult in the case of a context
+   * switch
+   */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   if (regs != g_current_regs)
@@ -283,7 +272,6 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
       svcinfo("SWInt Return: %d\n", regs[REG_A0]);
     }
 #endif
-
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
@@ -298,14 +286,14 @@ int lm32_swint(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)g_current_regs);
+      up_restorefpu((uint32_t *) g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
+      /* Make sure that the address environment for the previously running
+       * task is closed down gracefully (data caches dump, MMU flushed) and
+       * set up the address environment for the new thread at the head of
+       * the ready-to-run list.
        */
 
       (void)group_addrenv(NULL);

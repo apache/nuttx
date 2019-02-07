@@ -1,7 +1,7 @@
 ############################################################################
 # configs/misoc/scripts/Make.defs
 #
-#   Copyright (C) 2016m 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016, 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #           Ramtin Amin <keytwo@gmail.com>
 #
@@ -36,9 +36,15 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/arch/misoc/src/lm32/Toolchain.defs
 
-LDSCRIPT = ld.script
+ifeq ($(CONFIG_ARCH_CHIP_LM32),y)
+ include ${TOPDIR}/arch/misoc/src/lm32/Toolchain.defs
+ LDSCRIPT=lm32.ld
+endif
+ifeq ($(CONFIG_ARCH_CHIP_MINERVA),y)
+ include ${TOPDIR}/arch/misoc/src/minerva/Toolchain.defs
+ LDSCRIPT=minerva.ld
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
@@ -95,8 +101,8 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
+

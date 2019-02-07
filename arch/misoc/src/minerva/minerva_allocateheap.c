@@ -1,13 +1,9 @@
 /****************************************************************************
- * arch/risc-v/src/nr5m100/nr5_timerisr.c
+ * arch/misoc/src/minerva/minerva_allocateheap.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Modified for MISOC:
- *
- *   Copyright (C) 2016 Ramtin Amin. All rights reserved.
- *   Author: Ramtin Amin <keytwo@gmail.com>
+ *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,108 +40,53 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <time.h>
+#include <sys/types.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
-#include <arch/board/generated/csr.h>
 
-#include "chip.h"
-#include "misoc.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The desired timer interrupt frequency is provided by the definition
- * CLOCKS_PER_SEC (see include/time.h).  CLOCKS_PER_SEC defines the desired
- * number of system clock ticks per second.  That value is a user
- * configurable setting based on CONFIG_USEC_PER_TICK.  It defaults to 100
- * (100 ticks per second = 10 MS interval).
- *
- * Given the timer input frequency (Finput).  The timer correct reload
- * value is:
- *
- *   reload = Finput / CLOCKS_PER_SEC
- */
-
-#define SYSTICK_RELOAD ((SYSTEM_CLOCK_FREQUENCY / CLOCKS_PER_SEC) - 1)
-
-/* The size of the reload field is 30 bits.  Verify that the reload value
- * will fit in the reload register.
- */
-
-#if SYSTICK_RELOAD > 0x3fffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
-#endif
+#include "minerva.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  misoc_timer_isr
+ * Name: up_allocate_heap
  *
  * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
  *
  ****************************************************************************/
 
-int misoc_timer_isr(int irq, void *context, void *arg)
+void up_allocate_heap(FAR void **heap_start, size_t * heap_size)
 {
-  /* Clear event pending */
-
-  timer0_ev_pending_write(timer0_ev_pending_read());
-
-  /* Process timer interrupt */
-
-  sched_process_timer();
-  return 0;
+  board_autoled_on(LED_HEAPALLOCATE);
+  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_size = CONFIG_RAM_END - g_idle_topstack;
 }
 
 /****************************************************************************
- * Function:  misoc_timer_initialize
+ * Name: minerva_add_region
  *
  * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
  *
  ****************************************************************************/
 
-void misoc_timer_initialize(void)
+#if CONFIG_MM_REGIONS > 1
+void minerva_add_region(void)
 {
-  /* Clear event pending */
-
-  timer0_ev_pending_write(timer0_ev_pending_read());
-
-  /* Disable timer*/
-
-  timer0_en_write(0);
-
-  /* Setup the timer reload register to generate interrupts at the rate of
-   * CLOCKS_PER_SEC.
-   */
-
-  timer0_reload_write(SYSTICK_RELOAD * 20);
-  timer0_load_write(SYSTICK_RELOAD * 20);
-
-  /* Enable timer */
-
-  timer0_en_write(1);
-
-  /* Attach the timer interrupt vector */
-
-  (void)irq_attach(TIMER0_INTERRUPT, misoc_timer_isr, NULL);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(TIMER0_INTERRUPT);
-
-  /* Enable IRQ of the timer core */
-
-  timer0_ev_enable_write(1);
+#  warning Missing logic
 }
+#endif

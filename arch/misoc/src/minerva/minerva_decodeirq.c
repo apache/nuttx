@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/minerva_decodeirq.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,54 +39,69 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
+#include <arch/irq.h>
 
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
+#include "chip.h"
+#include "minerva.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: minerva_decodeirq
+ *
+ * Description:
+ *   This function is called from the IRQ vector handler in minerva_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the irq number of the interrupt and then to call minerva_doirq to
+ *   dispatch the interrupt.
+ *
+ *  Input parameters:
+ *   regs - A pointer to the register save area on the stack.
+ *
+ ****************************************************************************/
+
+uint32_t *minerva_decodeirq(uint32_t intstat, uint32_t * regs)
 {
-  /* Initialize the System Timer */
+  int irq;
 
-  lm32_irq_initialize();
+  irqinfo("intstat=%08lx\n", (unsigned long)intstat);
 
-  /* Initialize the serial driver */
+  /* Decode and dispatch interrupts */
 
-  misoc_serial_initialize();
+  for (irq = 0; irq < MINERVA_NINTERRUPTS && intstat != 0; irq++)
+    {
+      uint32_t bit = (1 << irq);
 
-  /* Initialize the system timer */
+      /* Is this interrupt pending? */
 
-  misoc_timer_initialize();
+      if ((intstat & bit) != 0)
+        {
+          /* Yes.. Dispatch the interrupt
+           * REVIST: Do I need to acknowledge the interrupt first?
+           */
 
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
+          irqinfo("irq=%d\n", irq);
+          regs = minerva_doirq(irq, regs);
 
-  iob_initialize();
-#endif
+          /* Clear the bit in the interrupt status copy so that maybe we can
+           * break out of the loop early.
+           */
 
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
+          intstat &= ~bit;
+        }
+    }
 
-  misoc_net_initialize(0);
-#endif
+  /* Return the final task register save area.  This will typically be the
+   * same as the value of regs on input.  In the event of a context switch,
+   * however, it will differ.  It will refere to the register save are in
+   * the TCB of the new thread.
+   */
+
+  return regs;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/up_initialstate.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -40,54 +40,73 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
+#include <arch/irq.h>
+#include <arch/minerva/csrdefs.h>
+#include <arch/minerva/irq.h>
 
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
+#include "minerva.h"
+#include "chip.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: up_initial_state
+ *
+ * Description:
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
+ *
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
+ *
+ ****************************************************************************/
+
+void up_initial_state(struct tcb_s *tcb)
 {
-  /* Initialize the System Timer */
+  uint32_t regval;
+  struct xcptcontext *xcp = &tcb->xcp;
 
-  lm32_irq_initialize();
+  /* Initialize the initial exception register context structure */
 
-  /* Initialize the serial driver */
+  memset(xcp, 0, sizeof(struct xcptcontext));
 
-  misoc_serial_initialize();
+  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
+   * beginning of the stack region.  Some functions may want to store data on
+   * the caller's stack and it might be good to reserve some space.  However,
+   * only the start function would do that and we have control over that one.
+   */
 
-  /* Initialize the system timer */
+  xcp->regs[REG_SP] = (uint32_t) tcb->adj_stack_ptr;
 
-  misoc_timer_initialize();
+  /* Save the task entry point */
 
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
+  xcp->regs[REG_CSR_MEPC] = (uint32_t) tcb->start;
 
-  iob_initialize();
+  xcp->regs[REG_CSR_MSTATUS] = CSR_MSTATUS_MPIE;
+
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
+   */
+
+#ifdef CONFIG_PIC
+#  warning "Missing logic"
 #endif
 
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
+  /* Set privileged- or unprivileged-mode, depending on how NuttX is
+   * configured and what kind of thread is being started. If the kernel
+   * build is not selected, then all threads run in privileged thread mode.
+   */
 
-  misoc_net_initialize(0);
+#ifdef CONFIG_BUILD_KERNEL
+#  warning "Missing logic"
 #endif
 }

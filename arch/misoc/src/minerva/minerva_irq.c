@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/_irq.c
+ *  arch/misoc/src/minerva/_irq.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include <arch/irq.h>
 
 #include "chip.h"
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
  * Public Data
@@ -60,10 +60,10 @@ volatile uint32_t *g_current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lm32_irq_initialize
+ * Name: minerva_irq_initialize
  ****************************************************************************/
 
-void lm32_irq_initialize(void)
+void minerva_irq_initialize(void)
 {
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -71,7 +71,7 @@ void lm32_irq_initialize(void)
 
   /* Attach the software interrupt */
 
-  (void)irq_attach(LM32_IRQ_SWINT, lm32_swint, NULL);
+  (void)irq_attach(MINERVA_IRQ_SWINT, minerva_swint, NULL);
 
   /* Enable interrupts */
 
@@ -153,11 +153,11 @@ void up_disable_irq(int irq)
 
   /* Ignore any attempt to disable software interrupts */
 
-  if (irq < LM32_NINTERRUPTS)
+  if (irq < MINERVA_NINTERRUPTS)
     {
       /* Disable interrupts by clearing the bit that corresponds to the irq */
 
-      flags  = irq_getmask();
+      flags = irq_getmask();
       flags &= ~(1 << irq);
       irq_setmask(flags);
     }
@@ -178,11 +178,11 @@ void up_enable_irq(int irq)
 
   /* Ignore any attempt to enable software interrupts */
 
-  if (irq < LM32_NINTERRUPTS)
+  if (irq < MINERVA_NINTERRUPTS)
     {
       /* Enable interrupts by setting the bit that corresponds to the irq */
 
-      flags  = irq_getmask();
+      flags = irq_getmask();
       flags |= (1 << irq);
       irq_setmask(flags);
     }

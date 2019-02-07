@@ -1,7 +1,7 @@
 ############################################################################
 # arch/misoc/src/Makefile
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,13 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-ARCH_SUBDIR = lm32
+ifeq ($(CONFIG_ARCH_CHIP_LM32),y)
+ ARCH_SUBDIR = lm32
+endif
+
+ifeq ($(CONFIG_ARCH_CHIP_MINERVA),y)
+ ARCH_SUBDIR = minerva
+endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src

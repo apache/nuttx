@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/minerva_doexception.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -40,54 +40,54 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
+#include <nuttx/board.h>
 
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "misoc.h"
-#include "lm32.h"
+#include "group/group.h"
+#include "minerva.h"
+#include "chip.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+uint32_t *minerva_doexception(uint32_t * regs)
 {
-  /* Initialize the System Timer */
+  uint32_t mcause;
+  uint32_t pending;
+  uint32_t *ret;
 
-  lm32_irq_initialize();
+  board_autoled_on(LED_INIRQ);
 
-  /* Initialize the serial driver */
+  mcause = regs[REG_CSR_MCAUSE_NDX];
 
-  misoc_serial_initialize();
+  if (mcause & 0x80000000)
+    {
+      pending = irq_pending();
+      ret = minerva_decodeirq(pending, regs);
+    }
+  else
+    {
+      mcause = mcause & 0x7fffffff;
+      if (mcause == 11)
+        {
+          regs[REG_CSR_MEPC_NDX] += 4;
+          ret = minerva_doirq(MINERVA_IRQ_SWINT, regs);
+        }
+      else
+        {
+          while (1);
+        }
+    }
 
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-#endif
+  board_autoled_off(LED_INIRQ);
+  return ret;
 }

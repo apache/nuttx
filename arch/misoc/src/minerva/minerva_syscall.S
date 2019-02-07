@@ -1,8 +1,13 @@
 /****************************************************************************
- * arch/misoc/include/irq.h
+ * arch/misoc/src/minerva/minerva_syscall.S
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Ramtin Amin <keytwo@gmail.com>
+ *
+ * Derives from RISC-V version:
+ *
+ *   Copyright (C) 2016 Ken Pettit. All rights reserved.
+ *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,54 +38,66 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_MISOC_INCLUDE_IRQ_H
-#define __ARCH_MISOC_INCLUDE_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/irq.h>
-#include <arch/chip/irq.h>
-
-#ifdef CONFIG_ARCH_CHIP_LM32
-# include <arch/lm32/irq.h>
-#endif
-#ifdef CONFIG_ARCH_CHIP_MINERVA
-# include <arch/minerva/irq.h>
-#endif
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Symbols
  ****************************************************************************/
 
-
+	.file	"up_syscall.S"
+	.global sys_call0
+	.global sys_call1
+	.global sys_call2
+	.global sys_call3
+	.global sys_call4
+	.global sys_call5
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Name: up_syscall0, up_syscall1, up_syscall2, up_syscall3
+ *
+ * Description:
+ *   up_syscall0 - System call SYS_ argument and no additional parameters.
+ *   up_syscall1 - System call SYS_ argument and one additional parameter.
+ *   up_syscall2 - System call SYS_ argument and two additional parameters.
+ *   up_syscall3 - System call SYS_ argument and three additional parameters.
+ *   up_syscall4 - System call SYS_ argument and four additional parameters.
+ *   up_syscall5 - System call SYS_ argument and five additional parameters.
+ *
+ * Assumption:
+ *   All interrupts are disabled except for the software interrupts.
+ *
+ ****************************************************************************/
 
-irqstate_t up_irq_save(void);
-irqstate_t up_irq_enable(void);
-void up_irq_restore(irqstate_t flags);
+	.text
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
+sys_call0:	/* a0 holds the syscall number */
+sys_call1:	/* a0 holds the syscall number, argument in a1 */
+sys_call2:	/* a0 holds the syscall number, arguments in a1 and a2 */
+sys_call3:	/* a0 holds the syscall number, arguments in a1, a2, and a3 */
+sys_call4:	/* a0 holds the syscall number, arguments in a1, a2, a3 and a4 */
+sys_call5:	/* a0 holds the syscall number, arguments in a1, a2, a3, a4 and a5 */
 
-#endif /* __ARCH_MISOC_INCLUDE_IRQ_H */
+	/* Issue the ECALL opcode to perform a SW interrupt to the OS */
+
+	ecall
+	
+	/* The actual interrupt may not a occur for a few more cycles.  Let's
+	 * put a few nop's here in hope that the SW interrupt occurs during
+	 * the sequence of nops.
+	 */
+
+	nop
+	nop
+
+	/* Then return with the result of the software interrupt in v0 */
+
+	ret
+	nop

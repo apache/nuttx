@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ *  arch/misoc/src/minerva/minerva_idle.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -39,55 +39,56 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
 
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
+#include "minerva.h"
 
 /****************************************************************************
- * Public Functionis
+ * Public Functions
  ****************************************************************************/
 
-void up_initialize(void)
+/****************************************************************************
+ * Name: up_idle
+ *
+ * Description:
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
+ *
+ ****************************************************************************/
+
+void up_idle(void)
 {
-  /* Initialize the System Timer */
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
+   */
 
-  lm32_irq_initialize();
+  sched_process_timer();
+#else
 
-  /* Initialize the serial driver */
+  /* This would be an appropriate place to put some MCU-specific logic to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   *
+   * This is a kludge that I still don't understand.  The call to
+   * kmm_trysemaphore() in the nx_start.c IDLE loop seems necessary for the
+   * good health of the IDLE loop.  When the work queue is enabled, this logic
+   * is removed from the IDLE loop and it appears that we are somehow left
+   * idling with interrupts non- functional. The following should be no-op, it
+   * just disables then re-enables interrupts.  But it fixes the problem and
+   * will stay here until I understand the problem/fix better. And no, the
+   * contents of the CP0 status register are not incorrect.  But for some
+   * reason the status register needs to be re-written again on this thread
+   * for it to take effect.
+   */
 
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
+#ifdef CONFIG_SCHED_WORKQUEUE
+  irqstate_t flags = enter_critical_section();
+  leave_critical_section(flags);
 #endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
 #endif
 }

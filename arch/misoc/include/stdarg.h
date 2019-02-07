@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/include/stdarg.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,60 +33,28 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MISOC_INCLUDE_STDARG_H
+#define __ARCH_MISOC_INCLUDE_STDARG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
-
 /****************************************************************************
- * Public Functionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
-void up_initialize(void)
-{
-  /* Initialize the System Timer */
+/* This should work with any modern gcc (newer than 3.4 or so) */
 
-  lm32_irq_initialize();
+#define va_start(v,l)   __builtin_va_start(v,l)
+#define va_end(v)       __builtin_va_end(v)
+#define va_arg(v,l)     __builtin_va_arg(v,l)
+#define va_copy(d,s)    __builtin_va_copy(d,s)
 
-  /* Initialize the serial driver */
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-  misoc_serial_initialize();
+typedef __builtin_va_list va_list;
 
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-#endif
-}
+#endif /* __ARCH_MISOC_INCLUDE_STDARG_H */

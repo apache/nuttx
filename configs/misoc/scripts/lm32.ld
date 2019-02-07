@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * configs/misoc/hello/script/ld.script
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,60 +33,65 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+OUTPUT_FORMAT("elf32-lm32")
+ENTRY(_stext)
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
-
-/****************************************************************************
- * Public Functionis
- ****************************************************************************/
-
-void up_initialize(void)
+MEMORY
 {
-  /* Initialize the System Timer */
-
-  lm32_irq_initialize();
-
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-#endif
+	rom : ORIGIN = 0x00000000, LENGTH = 0x00008000
+	sram : ORIGIN = 0x10000000, LENGTH = 0x00001000
+	main_ram : ORIGIN = 0x40000000, LENGTH = 0x02000000
 }
+
+SECTIONS
+{
+	.text : {
+		_stext = ABSOLUTE(.);
+		*(.vectors)
+		*(.text .text.*)
+		*(.fixup)
+		*(.gnu.warning)
+		*(.rodata .rodata.*)
+		*(.gnu.linkonce.t.*)
+		*(.glue_7)
+		*(.glue_7t)
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
+		_etext = ABSOLUTE(.);
+	} > main_ram
+
+	_eronly = ABSOLUTE(.);		/* See below                    */
+
+	.data : {
+		_sdata = ABSOLUTE(.);
+		*(.data .data.*)
+		*(.gnu.linkonce.d.*)
+		CONSTRUCTORS
+		_edata = ABSOLUTE(.);
+	} > main_ram
+
+	.bss : {			/* BSS				*/
+		_sbss = ABSOLUTE(.);
+		*(.bss .bss.*)
+		*(.gnu.linkonce.b.*)
+		*(COMMON)
+		_ebss = ABSOLUTE(.);
+	} > main_ram
+					/* Stabs debugging sections.	*/
+	.stab 0 : { *(.stab) }
+	.stabstr 0 : { *(.stabstr) }
+	.stab.excl 0 : { *(.stab.excl) }
+	.stab.exclstr 0 : { *(.stab.exclstr) }
+	.stab.index 0 : { *(.stab.index) }
+	.stab.indexstr 0 : { *(.stab.indexstr) }
+	.comment 0 : { *(.comment) }
+	.debug_abbrev 0 : { *(.debug_abbrev) }
+	.debug_info 0 : { *(.debug_info) }
+	.debug_line 0 : { *(.debug_line) }
+	.debug_pubnames 0 : { *(.debug_pubnames) }
+	.debug_aranges 0 : { *(.debug_aranges) }
+}
+
+PROVIDE(_fstack = ORIGIN(main_ram) + LENGTH(main_ram) - 4);
+

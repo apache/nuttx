@@ -1,9 +1,8 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/src/minerva/csrdefs.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Ramtin Amin <keytwo@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Ramtin Amin <keytwo@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,60 +33,48 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
+#ifndef __RISCV_CSR_DEFS__
+#define __RISCV_CSR_DEFS__
 
 /****************************************************************************
- * Public Functionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
-void up_initialize(void)
-{
-  /* Initialize the System Timer */
+#define CSR_MVENDORID_ADDR   0xf11
+#define CSR_MARCHID_ADDR     0xf12
+#define CSR_MIMPID_ADDR      0xf13
+#define CSR_MHARTID_ADDR     0xf14
+#define CSR_MSTATUS_ADDR     0x300
+#define CSR_MISA_ADDR        0x301
+#define CSR_MEDELEG_ADDR     0x302
+#define CSR_MIDELEG_ADDR     0x303
+#define CSR_MIE_ADDR         0x304
+#define CSR_MTVEC_ADDR       0x305
+#define CSR_MCOUTEREN_ADDR   0x306
+#define CSR_MSCRATCH_ADDR    0x340
+#define CSR_MEPC_ADDR        0x341
+#define CSR_MCAUSE_ADDR      0x342
+#define CSR_MTVAL_ADDR       0x343
+#define CSR_MIP_ADDR         0x344
+#define CSR_IRQ_MASK_ADDR    0x330
+#define CSR_IRQ_PENDING_ADDR 0x360
 
-  lm32_irq_initialize();
+#define CSR_MSTATUS_UIE      (1 << 0)
+#define CSR_MSTATUS_SIE      (1 << 1)
+#define CSR_MSTATUS_MIE      (1 << 3)
+#define CSR_MSTATUS_UPIE     (1 << 4)
+#define CSR_MSTATUS_SPIE     (1 << 5)
+#define CSR_MSTATUS_MPIE     (1 << 7)
+#define CSR_MSTATUS_SPP      (1 << 8)
+#define CSR_MSTATUS_MPP      (1 << 11)
+#define CSR_MSTATUS_FS       (1 << 13)
+#define CSR_MSTATUS_XS       (1 << 15)
+#define CSR_MSTATUS_MPRV     (1 << 17)
+#define CSR_MSTATUS_SUM      (1 << 18)
+#define CSR_MSTATUS_MXR      (1 << 19)
+#define CSR_MSTATUS_TVM      (1 << 20)
+#define CSR_MSTATUS_TW       (1 << 21)
+#define CSR_MSTATUS_TSR      (1 << 22)
+#define CSR_MSTATUS_SD       (1 << 31)
 
-  /* Initialize the serial driver */
-
-  misoc_serial_initialize();
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
 #endif
-
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
-
-  misoc_net_initialize(0);
-#endif
-}

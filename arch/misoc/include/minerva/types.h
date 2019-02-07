@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/misoc/src/lm32/lm32_initialize.c
+ * arch/misoc/include/minerva/types.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Ramtin Amin <keytwo@gmail.com>
  *
@@ -34,60 +34,61 @@
  *
  ****************************************************************************/
 
+/* This file should never be included directed but, rather, only indirectly
+ * through stdint.h
+ */
+
+#ifndef __ARCH_MISOC_INCLUDE_MINERVA_TYPES_H
+#define __ARCH_MISOC_INCLUDE_MINERVA_TYPES_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
-
-#include "misoc.h"
-#include "lm32.h"
-
 /****************************************************************************
- * Public Functionis
+ * Pre-processor Definitions
  ****************************************************************************/
 
-void up_initialize(void)
-{
-  /* Initialize the System Timer */
+/****************************************************************************
+ * Type Declarations
+ ****************************************************************************/
 
-  lm32_irq_initialize();
+#ifndef __ASSEMBLY__
 
-  /* Initialize the serial driver */
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ */
 
-  misoc_serial_initialize();
+typedef signed char _int8_t;
+typedef unsigned char _uint8_t;
 
-  /* Initialize the system timer */
+typedef signed short _int16_t;
+typedef unsigned short _uint16_t;
 
-  misoc_timer_initialize();
+typedef signed int _int32_t;
+typedef unsigned int _uint32_t;
 
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
+typedef signed long long _int64_t;
+typedef unsigned long long _uint64_t;
+#define __INT64_DEFINED
 
-  iob_initialize();
-#endif
+/* A pointer is 4 bytes */
 
-#if 0 /* REVISIT */
-  /* Initialize the network cores */
+typedef signed int _intptr_t;
+typedef unsigned int _uintptr_t;
 
-  misoc_net_initialize(0);
-#endif
-}
+/* This is the size of the interrupt state save returned by up_irq_save(). */
+
+typedef unsigned int irqstate_t;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#endif  /* __ASSEMBLY__ */
+#endif  /* __ARCH_MISOC_INCLUDE_MINERVA_TYPES_H */

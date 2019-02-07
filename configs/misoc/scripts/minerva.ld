@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/misoc/hello/script/ld.script
+ * configs/misoc/scripts/ld.script
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,15 @@
  *
  ****************************************************************************/
 
-OUTPUT_FORMAT("elf32-lm32")
+OUTPUT_FORMAT("elf32-littleriscv")
+
 ENTRY(_stext)
 
-/*INCLUDE configs/misoc/include/generated/regions.ld*/
 MEMORY
 {
 	rom : ORIGIN = 0x00000000, LENGTH = 0x00008000
-	sram : ORIGIN = 0x10000000, LENGTH = 0x00004000
-	main_ram : ORIGIN = 0x40000000, LENGTH = 0x00080000
+	sram : ORIGIN = 0x10000000, LENGTH = 0x00001000
+	main_ram : ORIGIN = 0x40000000, LENGTH = 0x02000000
 }
 
 SECTIONS
@@ -68,6 +68,8 @@ SECTIONS
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
+		*(.sdata .sdata.*)
+		*(.gnu.linkonce.s.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
 	} > main_ram
@@ -76,6 +78,8 @@ SECTIONS
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
+		*(.sbss .sbss.*)
+		*(.gnu.linkonce.sb.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > main_ram
@@ -95,3 +99,4 @@ SECTIONS
 }
 
 PROVIDE(_fstack = ORIGIN(main_ram) + LENGTH(main_ram) - 4);
+
