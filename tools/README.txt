@@ -7,21 +7,13 @@ The tools/ directory contains miscellaneous scripts and host C programs
 that are necessary parts of the NuttX build system.  These files
 include:
 
-README.txt
-----------
+cmpconfig.c
+-----------
 
-  This file!
+  This C file can be used to build a utility for comparing two NuttX
+  configuration files.
 
-Makefile.*
-----------
-
-  Makefile.unix is the Makefile used when building NuttX in Unix-like
-  systems.  It is selected from the top-level Makefile.
-
-  Makefile.win is the Makefile used when building natively under
-  Windows.  It is selected from the top-level Makefile.
-
-*.mk
+Config.mk
 ---------
 
   Config.mk contains common definitions used by many configuration files.
@@ -33,11 +25,6 @@ Makefile.*
 
   Subsequent logic within the configuration-specific Make.defs file may then
   override these default definitions as necessary.
-
-  Libraries.mk has the build rules for all NuttX libraries.
-
-  FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk:  These control the
-  selection of libraries to be built, depending on the selected build mode.
 
 configure.sh
 configure.bat
@@ -107,34 +94,6 @@ gencromfs.c
       be compiled in order to generate the binary CROMFS file system
       image.
 
-lowhex.c
-
-  Convert hexadecimal representation in a file from upper- to lower-case.
-  Usage:
-
-    lowhex <source-file> <out-file>
-
-mkconfig.c, cfgdefine.c, and cfgdefine.h
-----------------------------------------
-
-  These are Cs file that are used to build mkconfig program.  The mkconfig
-  program is used during the initial NuttX build.
-
-  When you configure NuttX, you will copy a configuration file called .config
-  in the top level NuttX directory (See configs/README.txt or
-  Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
-  the top-level makefile will build the mkconfig executable from mkconfig.c
-  (using Makefile.host).  The top-level Makefile will then execute the
-  mkconfig program to convert the .config file in the top level directory
-  into include/nuttx/config.h.  config.h is a another version of the
-  NuttX configuration that can be included by C files.
-
-cmpconfig.c
------------
-
-  This C file can be used to build a utility for comparing two NuttX
-  configuration files.
-
 initialconfig.c
 ---------------
 
@@ -175,6 +134,46 @@ kconfig2html.c
   or more quickly with:
 
     make dirlinks
+
+Libraries.mk, FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk
+-------------------------------------------------------------
+
+  Libraries.mk has the build rules for all NuttX libraries.
+
+  FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk:  These control the
+  selection of libraries to be built, depending on the selected build mode.
+
+lowhex.c
+--------
+
+  Convert hexadecimal representation in a file from upper- to lower-case.
+  Usage:
+
+    lowhex <source-file> <out-file>
+
+Makefile.[unix|win]
+-----------------
+
+  Makefile.unix is the Makefile used when building NuttX in Unix-like
+  systems.  It is selected from the top-level Makefile.
+
+  Makefile.win is the Makefile used when building natively under
+  Windows.  It is selected from the top-level Makefile.
+
+mkconfig.c, cfgdefine.c, and cfgdefine.h
+----------------------------------------
+
+  These are Cs file that are used to build mkconfig program.  The mkconfig
+  program is used during the initial NuttX build.
+
+  When you configure NuttX, you will copy a configuration file called .config
+  in the top level NuttX directory (See configs/README.txt or
+  Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
+  the top-level makefile will build the mkconfig executable from mkconfig.c
+  (using Makefile.host).  The top-level Makefile will then execute the
+  mkconfig program to convert the .config file in the top level directory
+  into include/nuttx/config.h.  config.h is a another version of the
+  NuttX configuration that can be included by C files.
 
 mkconfigvars.sh
 ---------------
@@ -476,11 +475,8 @@ mkromfsimg.sh
   TIP: Edit the resulting header file and mark the generated data values
   as 'const' so that they will be stored in FLASH.
 
-mkdeps.c
-cnvwindeps.c
-mkwindeps.sh
-mknulldeps.sh
--------------
+mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
+-------------------------------------------------------
 
   NuttX uses the GCC compilers capabilities to create Makefile dependencies.
   The program  mkdeps is used to run GCC in order to create the dependencies.
@@ -512,9 +508,8 @@ mknulldeps.sh
   eventually be solvable but for now continue to use mkwindeps.sh in
   that mixed environment.
 
-define.sh
-define.bat
----------
+define.sh and define.bat
+------------------------
 
   Different compilers have different conventions for specifying pre-
   processor definitions on the compiler command line.  This bash
@@ -622,9 +617,8 @@ ide_exporter.py
     Obsoleted/stm32f429i_disco/ltcd/template and at
     Obsoleted/stm3220g-eval/template.
 
-incdir.sh
-incdir.bat
----------
+incdir.sh and incdir.bat
+------------------------
 
   Different compilers have different conventions for specifying lists
   of include file paths on the compiler command line.  This incdir.sh
@@ -635,13 +629,38 @@ incdir.bat
   build.  However, there is currently only one compiler supported in
   that context:  MinGW-GCC.
 
-link.sh
-link.bat
-copydir.sh
-copydir.bat
-unlink.sh
-unlink.bat
-----------
+kconfig.bat
+-----------
+
+  Recent versions of NuttX support building NuttX from a native Windows
+  CMD.exe shell.  But kconfig-frontends is a Linux tool and is not yet
+  available in the pure CMD.exe environment.  At this point, there are
+  only a few options for the Windows user (see the top-level README.txt
+  file).
+
+  You can, with some effort, run the Cygwin kconfig-mconf tool directly
+  in the CMD.exe shell.  In this case, you do not have to modify the
+  .config file, but there are other complexities:  You need to
+  temporarily set the Cgywin directories in the PATH variable and
+  then run kconfig-mconf outside of the Make system.
+
+  kconfig.bat is a Windows batch file at tools/kconfig.bat that automates
+  these steps.  It is used from the top-level NuttX directory like:
+
+    tools/kconfig menuconfig
+
+  NOTE: There is an currently an issue with accessing DOS environment
+  variables from the Cygwin kconfig-mconf running in the CMD.exe shell.
+  The following change to the top-level Kconfig file seems to work around
+  these problems:
+
+     config APPSDIR
+          string
+     -   option env="APPSDIR"
+     +   default "../apps"
+
+link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
+---------------------------------------------------------------------
 
   Different file system have different capabilities for symbolic links.
   Some windows file systems have no native support for symbolic links.
@@ -679,36 +698,6 @@ unlink.bat
   this case.  link.bat will attempt to create a symbolic link using the
   NTFS mklink.exe command instead of copying files.  That logic, however,
   has not been verified as of this writing.
-
-kconfig.bat
------------
-
-  Recent versions of NuttX support building NuttX from a native Windows
-  CMD.exe shell.  But kconfig-frontends is a Linux tool and is not yet
-  available in the pure CMD.exe environment.  At this point, there are
-  only a few options for the Windows user (see the top-level README.txt
-  file).
-
-  You can, with some effort, run the Cygwin kconfig-mconf tool directly
-  in the CMD.exe shell.  In this case, you do not have to modify the
-  .config file, but there are other complexities:  You need to
-  temporarily set the Cgywin directories in the PATH variable and
-  then run kconfig-mconf outside of the Make system.
-
-  kconfig.bat is a Windows batch file at tools/kconfig.bat that automates
-  these steps.  It is used from the top-level NuttX directory like:
-
-    tools/kconfig menuconfig
-
-  NOTE: There is an currently an issue with accessing DOS environment
-  variables from the Cygwin kconfig-mconf running in the CMD.exe shell.
-  The following change to the top-level Kconfig file seems to work around
-  these problems:
-
-     config APPSDIR
-          string
-     -   option env="APPSDIR"
-     +   default "../apps"
 
 logparser.c
 -----------
@@ -773,47 +762,10 @@ indent.sh
 
    See also nxstyle.c and uncrustify.cfg
 
-sethost.sh
+README.txt
 ----------
 
-  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
-  platforms.  The platform characteristics can be changed use 'make
-  menuconfig'.  Sometimes this can be confusing due to the differences
-  between the platforms.  Enter sethost.sh
-
-  sethost.sh is a simple script that changes a configuration to your
-  host platform.  This can greatly simplify life if you use many different
-  configurations.  For example, if you are running on Linux and you
-  configure like this:
-
-    $ cd tools
-    $ ./configure.sh board/configuration
-    $ cd ..
-
-  The you can use the following command to both (1) make sure that the
-  configuration is up to date, AND (2) the configuration is set up
-  correctly for Linux:
-
-    $ tools/sethost.sh -l
-
-  Or, if you are on a Windows/Cygwin 64-bit platform:
-
-    $ tools/sethost.sh -w
-
-  Other options are available:
-
-    $ ./sethost.sh -h
-
-    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [-32|64] [<config>]
-           ./sethost.sh -h
-
-    Where:
-      -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux
-      -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under
-         Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin
-      -32|64 selects 32- or 64-bit host.  Default 64
-      -h will show this help test and terminate
-      <config> selects configuration file.  Default: .config
+  This file!
 
 refresh.sh
 ----------
@@ -887,6 +839,56 @@ refresh.sh
      option, this file copy will occur autiomatically.  Otherwise,
      refresh.sh will prompt you first to avoid overwriting the
      defconfig file with changes that you may not want.
+
+rmcr.c
+------
+
+  Removes all white space from the end of lines.  Whitespace here
+  includes space characters, TAB characters, horizontal and vertical
+  TABs, and carriage returns.  Lines will be terminated with the
+  newline character only.
+
+sethost.sh
+----------
+
+  Saved configurations may run on Linux, Cygwin (32- or 64-bit), or other
+  platforms.  The platform characteristics can be changed use 'make
+  menuconfig'.  Sometimes this can be confusing due to the differences
+  between the platforms.  Enter sethost.sh
+
+  sethost.sh is a simple script that changes a configuration to your
+  host platform.  This can greatly simplify life if you use many different
+  configurations.  For example, if you are running on Linux and you
+  configure like this:
+
+    $ cd tools
+    $ ./configure.sh board/configuration
+    $ cd ..
+
+  The you can use the following command to both (1) make sure that the
+  configuration is up to date, AND (2) the configuration is set up
+  correctly for Linux:
+
+    $ tools/sethost.sh -l
+
+  Or, if you are on a Windows/Cygwin 64-bit platform:
+
+    $ tools/sethost.sh -w
+
+  Other options are available:
+
+    $ ./sethost.sh -h
+
+    USAGE: ./sethost.sh [-w|l|m] [-c|u|g|n] [-32|64] [<config>]
+           ./sethost.sh -h
+
+    Where:
+      -w|l|m selects Windows (w), Linux (l), or macOS (m).  Default: Linux
+      -c|u|g|n selects Windows environment option:  Cygwin (c), Ubuntu under
+         Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Cygwin
+      -32|64 selects 32- or 64-bit host.  Default 64
+      -h will show this help test and terminate
+      <config> selects configuration file.  Default: .config
 
 showsize.sh
 -----------
