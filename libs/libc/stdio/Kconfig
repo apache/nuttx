@@ -110,7 +110,9 @@ config MEMCPY_VIK
 
 config NANO_PRINTF
 	bool "Use nano printf code"
-	default n
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
+	depends on !LIBC_LONG_LONG
 	---help---
 		Replace printf code with version from newlib-nano. This version
 		provides improved floating point output support, including 'g' mode
