@@ -253,7 +253,6 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             case 'u':
               flags &= ~FL_ALT;
               base   = 10;
-              sign   = 0;
               goto ultoa;
 
             case 'o':
