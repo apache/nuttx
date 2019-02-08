@@ -54,8 +54,14 @@ config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default n
 	---help---
-		By default, floating point
-		support in printf, sscanf, etc. is disabled.
+		By default, floating point support in printf, sscanf, etc. is
+		disabled.  This option will enable floating point support.
+
+		if CONFIG_NANO_PRINTF is enabled, tnen this option works a
+		little differently.  You still have to select
+		CONFIG_NANO_PRINTLEVEL=3 to get floating point support.  In
+		case, this option extends the range of acceptable
+		values that will permit selection of CONFIG_NANO_PRINTLEVEL=3.
 
 config LIBC_LONG_LONG
 	bool "Enable long long support in printf"
