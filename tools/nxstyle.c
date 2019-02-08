@@ -209,6 +209,14 @@ int main(int argc, char **argv, char **envp)
                           comment_lineno);
                 }
             }
+
+          /* Files must begin with a comment (the file header) */
+
+          if (lineno == 1 && (line[n] != '/' || line[n + 1] != '*'))
+            {
+              fprintf(stderr,
+                      "Missing file header comment block at line 1\n");
+            }
         }
 
       /* STEP 1: Find the indentation level and the start of real stuff on
