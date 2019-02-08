@@ -67,32 +67,33 @@ static void show_usage(char *progname, int exitcode)
 
 int main(int argc, char **argv, char **envp)
 {
-  FILE *instream;
-  char line[LINE_SIZE];
-  char *filename;
-  char *lptr;
-  bool btabs;
-  bool bfunctions;
-  bool bstatm;
-  bool bfor;
-  bool bswitch;
-  bool bstring;
-  bool bquote;
-  int lineno;
-  int indent;
-  int prevnest;
-  int ncomment;
-  int nnest;
-  int declnest;
-  int prevdeclnest;
-  int prevncomment;
+  FILE *instream;       /* File input stream */
+  char line[LINE_SIZE]; /* The current line being examined */
+  char *filename;       /* Name of the file to open */
+  char *lptr;           /* Temporary pointer into line[] */
+  bool btabs;           /* True: TAB characters found on the line */
+  bool bfunctions;      /* True: In private or public functions */
+  bool bstatm;          /* True: This line is beginning of a statement */
+  bool bfor;            /* True: This line is beginning of a 'for' statement */
+  bool bswitch;         /* True: Within a switch statement */
+  bool bstring;         /* True: Within a string */
+  bool bquote;          /* True: Backslash quoted character next */
+  bool bblank;          /* Used to verify block comment termintor */
+  int lineno;           /* Current line number */
+  int indent;           /* Indentation level */
+  int ncomment;         /* Comment nesting level on this line */
+  int prevncomment;     /* Comment nesting level on the previous line */
+  int nnest;            /* Brace nesting level on this line */
+  int prevnest;         /* Brace nesting level on the previous line */
+  int declnest;         /* Data declaration nesting level on this line */
+  int prevdeclnest;     /* Data declaration nesting level on the previous line */
+  int comment_lineno;   /* Line on which the last one line comment was closed */
+  int blank_lineno;     /* Line number of the last blank line */
+  int noblank_lineno;   /* A blank line is not needed after this line */
+  int linelen;          /* Length of the line */
+  int maxline;          /* Lines longer that this generate warnings */
   int n;
   int i;
-  int comment_lineno;
-  int blank_lineno;
-  int noblank_lineno;
-  int linelen;
-  int maxline;
 
   maxline  = 78;
   filename = argv[1];
@@ -138,29 +139,27 @@ int main(int argc, char **argv, char **envp)
       return 1;
     }
 
-  btabs          = false;
-  bfunctions     = false;
-  bswitch        = false;
-  bstring        = false;
-  lineno         = 0;
-  ncomment       = 0;
-  nnest          = 0;
-  declnest       = 0;
-  prevdeclnest   = 0;
-  prevncomment   = 0;
-  comment_lineno = -1;   /* Line on which the last one line comment was closed */
-  blank_lineno   = -1;   /* Line number of the last blank line */
-  noblank_lineno = -1;   /* A blank line is not needed after this line */
+  btabs          = false; /* True: TAB characters found on the line */
+  bfunctions     = false; /* True: In private or public functions */
+  bswitch        = false; /* True: Within a switch statement */
+  bstring        = false; /* True: Within a string */
+  lineno         = 0;     /* Current line number */
+  ncomment       = 0;     /* Comment nesting level on this line */
+  nnest          = 0;     /* Brace nesting level on this line */
+  declnest       = 0;     /* Data declaration nesting level on this line */
+  comment_lineno = -1;    /* Line on which the last one line comment was closed */
+  blank_lineno   = -1;    /* Line number of the last blank line */
+  noblank_lineno = -1;    /* A blank line is not needed after this line */
 
   while (fgets(line, LINE_SIZE, instream))
     {
       lineno++;
       indent       = 0;
-      prevnest     = nnest;
-      prevdeclnest = declnest;
-      prevncomment = ncomment;
-      bstatm       = false;
-      bfor         = false;  /* REVISIT: Implies for() is all on one line */
+      prevnest     = nnest;    /* Brace nesting level on the previous line */
+      prevdeclnest = declnest; /* Data declaration nesting level on the previous line */
+      prevncomment = ncomment; /* Comment nesting level on the previous line */
+      bstatm       = false;    /* True: This line is beginning of a statement */
+      bfor         = false;    /* REVISIT: Implies for() is all on one line */
 
       /* Check for a blank line */
 
@@ -403,7 +402,9 @@ int main(int argc, char **argv, char **envp)
 
       /* STEP 3: Parse each character on the line */
 
-      bquote = false;
+      bquote = false;   /* True: Backslash quoted character next */
+      bblank = true;    /* Used to verify block comment termintor */
+
       for (; line[n] != '\n' && line[n] != '\0'; n++)
         {
           if (line[n] == '/' && !bstring)
@@ -442,6 +443,19 @@ int main(int argc, char **argv, char **envp)
                     {
                       fprintf(stderr,
                               "Missing space before closing C comment at line %d:%d\n",
+                              lineno, n);
+                    }
+
+                  /* Check for block comments that are not on a separate line.
+                   * This would be the case if we are we are within a comment
+                   * that did not start on this line and the current line is
+                   * not blank up to the point where the comment was closed.
+                   */
+
+                  if (prevncomment > 0 && !bblank)
+                    {
+                      fprintf(stderr,
+                              "Block comment terminator must be on a separate line at line %d:%d\n",
                               lineno, n);
                     }
 
@@ -503,6 +517,16 @@ int main(int argc, char **argv, char **envp)
                 }
             }
 
+          /* Check if the line is blank so far.  This is only used to
+           * to verify the the closing of a block comment is on a separate
+           * line.  So we also need to treat '*' as a 'blank'.
+           */
+
+          if (!isblank(line[n]) && line[n] != '*')
+            {
+              bblank = false;
+            }
+
           /* Check for a string... ignore if we are in the middle of a
            * comment.
            */
@@ -527,7 +551,7 @@ int main(int argc, char **argv, char **envp)
               bquote = false;
             }
 
-          /* The reset of the line is only examined of we are in a comment
+          /* The reset of the line is only examined of we are not in a comment
            * or a string.
            *
            * REVISIT: Should still check for whitespace at the end of the
