@@ -127,7 +127,8 @@ config NANO_PRINTF
 
 config NANO_PRINTLEVEL
 	int "Nano printf support level"
-	default 2
+	default 2 if !LIBC_FLOATINGPOINT
+	default 3 if LIBC_FLOATINGPOINT
 	range 1 2 if !LIBC_FLOATINGPOINT
 	range 1 3 if LIBC_FLOATINGPOINT
 	depends on NANO_PRINTF
