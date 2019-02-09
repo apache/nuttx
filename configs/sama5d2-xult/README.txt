@@ -10,8 +10,7 @@ Contents
 
   - STATUS
   - Loading Code into SRAM with J-Link
-  - Creating and Using DRAMBOOT
-  - Creating and Using AT25BOOT
+  - DRAMBOOT, AT25BOOT, SRAMBOOT
   - Running NuttX from SDRAM
   - Buttons and LEDs
   - Serial Console
@@ -54,192 +53,18 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
     J-Link> setpc <address of __start>
     J-Link> ... start debugging ...
 
-Creating and Using DRAMBOOT
-===========================
-REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
+DRAMBOOT, AT25BOOT, SRAMBOOT
+----------------------------
 
-  In order to have more control of debugging code that runs out of DARM,
-  I created the sama5d2-xult/dramboot configuration.  That configuration is
-  described below under "Configurations."
+  See also configs/sama5d4-ek/README.txt for a description of the DRAMBOOT
+  program.  This is a tiny version of NuttX that can run out of internal
+  SRAM.  If you put this program on the HSMCI1 microSD card as boot.bin, then
+  it will boot on power up and you can download NuttX directly into DRAM by
+  sending the nuttx.hex file over the serial connection.
 
-  Here are some general instructions on how to build an use dramboot:
-
-  Building:
-  1. Remove any old configurations (if applicable).
-
-       cd <nuttx>
-       make distclean
-
-  2. Install and build the dramboot configuration.  This steps will establish
-     the dramboot configuration and setup the PATH variable in order to do
-     the build:
-
-       tools/configure.sh sama5d2-xult/dramboot
-
-     Before building, make sure the PATH environment variable includes the
-     correct path to the directory than holds your toolchain binaries.
-
-     NOTE:  Be aware that the default dramboot also disables the watchdog.
-     Since you will not be able to re-enable the watchdog later, you may
-     need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
-
-     Then make dramboot:
-
-       make
-
-     This will result in an ELF binary called 'nuttx' and also HEX and
-     binary versions called 'nuttx.hex' and 'nuttx.bin'.
-
-  3. Rename the binaries.  Since you will need two versions of NuttX:  this
-     dramboot version that runs in internal SRAM and another under test in
-     NOR FLASH, I rename the resulting binary files so that they can be
-     distinguished:
-
-       mv nuttx dramboot
-       mv nuttx.hex dramboot.hex
-       mv nuttx.bin dramboot.bin
-
-   4. Build the "real" DRAM configuration.  This will create the nuttx.hex
-      that you will load using dramboot.  Note that you must select
-      CONFIG_SAMA5D2XULT_DRAM_BOOT=y.  This controls the origin at which the
-      code is linked and positions it correctly for the DRAMBOOT program.
-
-   5. Restart the system holding DIS_BOOT.  You should see the RomBOOT
-      prompt on the 115200 8N1 serial console (and nothing) more.  Hit
-      the ENTER key with the focus on your terminal window a few time.
-      This will enable JTAG.
-
-   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
-
-       (gdb) mon heal                 # Halt the CPU
-       (gdb) load dramboot            # Load dramboot into internal SRAM
-       (gdb) mon go                   # Start dramboot
-
-      You should see this message:
-
-        Send Intel HEX file now
-
-      Load your program by sending the nuttx.hex via the terminal program.
-      Then:
-
-       (gdb) mon halt                 # Break in
-       (gdb) mon reg pc = 0x20000040  # Set the PC to DRAM entry point
-       (gdb) mon go                   # And jump into DRAM
-
-      The dramboot program can also be configured to jump directly into
-      DRAM without requiring the final halt and go by setting
-      CONFIG_SAMA5D2XULT_DRAM_START=y in the NuttX configuration.  However,
-      since I have been debugging the early boot sequence, the above
-      sequence has been most convenient for me since it allows me to
-      step into the program in SDRAM.
-
-   7. An option is to use the SAM-BA tool to write the DRAMBOOT image into
-      Serial FLASH.  Then, the system will boot from Serial FLASH by
-      copying the DRAMBOOT image in SRAM which will run, download the nuttx.hex
-      file, and then start the image loaded into DRAM automatically.  This is
-      a very convenient usage!
-
-      NOTES: (1) There is that must be closed to enable use of the AT25
-      Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
-      boot program into the boot area via the pull-down menu.  (3) If
-      you don't have SAM-BA, an alternative is to use the AT25BOOT program
-      described in the next section.
-
-   STATUS:  I don't have a working SAM-BA at the moment and there are issues
-   with my AT25BOOT (see below).  I currently work around these issues by
-   putting DRAMBOOT on a microSD card (as boot.bin).  The RomBOOT loader does
-   boot that image without issue.
-
-Creating and Using AT25BOOT
-===========================
-REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
-
-  To work around some SAM-BA availability issues that I had at one time,
-  I created the AT25BOOT program. AT25BOOT is a tiny program that runs in
-  ISRAM.  AT25BOOT will enable SDRAM and configure the AT25 Serial FLASH.
-  It will prompt and then load an Intel HEX program into SDRAM over the
-  serial console. If the program is successfully loaded in SDRAM, AT25BOOT
-  will copy the program at the beginning of the AT26 Serial FLASH.
-  If the jumpering is set correctly, the SAMA5D2 RomBOOT loader will
-  then boot the program from the serial FLASH the next time that it
-  reset.
-
-  The AT25BOOT configuration is described below under "Configurations."
-
-  Here are some general instructions on how to build an use AT25BOOT:
-
-  Building:
-  1. Remove any old configurations (if applicable).
-
-       cd <nuttx>
-       make distclean
-
-  2. Install and build the AT25BOOT configuration.  This steps will establish
-     the AT25BOOT configuration and setup the PATH variable in order to do
-     the build:
-
-       tools/configure.sh sama5d2-xult/at25boot
-
-     Before building, make sure the PATH environment variable includes the
-     correct path to the directory than holds your toolchain binaries.
-
-     Then make AT25BOOT:
-
-       make
-
-     This will result in an ELF binary called 'nuttx' and also HEX and
-     binary versions called 'nuttx.hex' and 'nuttx.bin'.
-
-  3. Rename the binaries.  If you want to save this version of AT25BOOT so
-     that it does not get clobbered later, you may want to rename the
-     binaries:
-
-       mv nuttx at25boot
-       mv nuttx.hex at25boot.hex
-       mv nuttx.bin at25boot.bin
-
-   4. Build the "real" DRAMBOOT configuration.  This will create the
-      dramboot.hex that you will write to the AT25 FLASH using AT25BOOT. See
-      the section above entitled "Creating and Using AT25BOOT" for more
-      information.
-
-   5. Restart the system holding DIS_BOOT.  You should see the RomBOOT
-      prompt on the 115200 8N1 serial console (and nothing) more.  Hit
-      the ENTER key with the focus on your terminal window a few time.
-      This will enable JTAG.
-
-   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
-
-       (gdb) mon heal                 # Halt the CPU
-       (gdb) load at25boot            # Load AT25BOOT into internal SRAM
-       (gdb) mon go                   # Start AT25BOOT
-
-      You should see this message:
-
-        Send Intel HEX file now
-
-      Load DRAMBOOT by sending the dramboot.hex via the terminal program.
-      At this point you will get messages indicated whether or not the write
-      to the AT25 FLASH was successful or not.  When you reset the board,
-      it should then boot from the AT25 Serial FLASH and you should again
-      get the prompt:
-
-        Send Intel HEX file now
-
-      But now you are being prompted to load the DRAM program under test
-      (See the section above entitled "Creating and Using AT25BOOT").
-
-   7. An better option, if available, is to use the SAM-BA tool to write the
-      DRAMBOOT image into Serial FLASH.
-
-   NOTES: (1) There is that must be closed to enable use of the AT25
-   Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
-   boot program into the boot area via the pull-down menu.
-
-   STATUS:  While this program works great and appears to correctly write
-   the binary image onto the AT25 Serial FLASH, the RomBOOT loader will
-   not boot it!  I believe that is because the secure boot loader has some
-   undocumented requirements that I am unaware of. (2014-6-28)
+  The configs/sama5d4-ek/README.txt also describes variants AT25BOOT and
+  SRAMBOOT.  This have not yet been ported to the SAMA5D2-XULT, but are
+  available if they are usefult too you.
 
 Running NuttX from SDRAM
 ========================
@@ -251,9 +76,6 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
   TFTP server).  In these cases, an intermediate bootloader such as U-Boot
   or Barebox must be used to configure the SAMA5D2 clocks and SDRAM and
   then to copy the NuttX binary into SDRAM.
-
-  The SRAMBOOT program is another option (see above). But this section
-  will focus on U-Boot.
 
     - NuttX Configuration
     - Boot sequence

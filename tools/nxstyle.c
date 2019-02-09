@@ -210,7 +210,10 @@ int main(int argc, char **argv, char **envp)
                 }
             }
 
-          /* Files must begin with a comment (the file header) */
+          /* Files must begin with a comment (the file header).
+           * REVISIT:  Logically, this belongs in the STEP 2 operations
+           * below.
+           */
 
           if (lineno == 1 && (line[n] != '/' || line[n + 1] != '*'))
             {
@@ -1034,8 +1037,16 @@ int main(int argc, char **argv, char **envp)
             }
           else if (indent > 0 && indent < 2)
             {
-              fprintf(stderr, "Insufficient indentation line %d:%d\n",
-                      lineno, indent);
+              if (nnest > 0)
+                {
+                  fprintf(stderr, "Insufficient indentation line %d:%d\n",
+                          lineno, indent);
+                }
+              else
+                {
+                  fprintf(stderr, "Expected indentation line %d:%d\n",
+                          lineno, indent);
+                }
             }
           else if (indent > 0 && !bswitch)
             {
