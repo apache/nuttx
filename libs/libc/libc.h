@@ -236,3 +236,4 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 #endif
 
 #endif /* __LIBC_LIBC_H */
+

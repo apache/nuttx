@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 4, 2019)
+NuttX TODO List (Last updated February 9, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -22,7 +22,7 @@ nuttx/:
  (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
- (11)  Libraries (libs/libc/, libs/libm/)
+ (12)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
@@ -2046,6 +2046,16 @@ o Libraries (libs/libc/, libs/libm/)
                the process address environment where they belong.  It is
                difficult to make this compatible with the FLAT build,
                however.
+  Status:      Open
+  Priority:    Low
+
+  Title:       MISSING fscanf()
+  Description: The standard C library function fscanf() has not been
+               implement.  This should be pretty straight forward feature
+               to implement using input streams as defined in
+               include/nuttx/streams.h analogous to the same way that output
+               streams were used in lib_vsprintf() to support both sprintf()
+               and fprintf().
   Status:      Open
   Priority:    Low
 
