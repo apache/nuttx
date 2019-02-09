@@ -29,7 +29,7 @@ in the include/ directory provides the prototype for library functions.  So
 we have:
 
   audio     - This part of the audio system: nuttx/audio/audio.h
-  dllfcn    - dllfcn.h
+  dlfcn     - dlfcn.h
   endian    - endian.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h

@@ -5,7 +5,7 @@
 
 # menu "Shared Library Support"
 
-config LIBC_DLLFCN
+config LIBC_DLFCN
 	bool "Shared library support"
 	default n
 	select LIBC_MODLIB if !BUILD_FLAT
@@ -16,7 +16,7 @@ config LIBC_DLLFCN
 
 		A work in progress, hence, marked EXPERIMENTAL
 
-if LIBC_DLLFCN
+if LIBC_DLFCN
 
 config LDPATH_INITIAL
 	string "Initial LD_LIBRARY_PATH Value"

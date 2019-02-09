@@ -66,7 +66,7 @@ static const char *dequote_list[] =
   "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
   "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */
   "CONFIG_EXECFUNCS_NSYMBOLS_VAR",        /* Variable holding number of symbols in the table */
-  "CONFIG_MODLIB_SYMTAB_ARRAY",           /* Symbol table array used by dllfcn[l|v] */
+  "CONFIG_MODLIB_SYMTAB_ARRAY",           /* Symbol table array used by modlib functions */
   "CONFIG_MODLIB_NSYMBOLS_VAR",           /* Variable holding number of symbols in the table */
   "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",                  /* Pass1 build target */

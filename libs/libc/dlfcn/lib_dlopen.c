@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dllfcn/lib_dlopen.c
+ * libs/libc/dlfcn/lib_dlopen.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
-#include <dllfcn.h>
+#include <dlfcn.h>
 #include <assert.h>
 #include <errno.h>
 

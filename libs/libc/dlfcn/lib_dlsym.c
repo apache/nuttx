@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dllfcn/lib_dlclose.c
+ * libs/libc/dlfcn/lib_dlsym.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,134 +39,83 @@
 
 #include <nuttx/config.h>
 
-#include <dllfcn.h>
+#include <dlfcn.h>
 #include <errno.h>
 
 #include <nuttx/module.h>
+#include <nuttx/symtab.h>
 #include <nuttx/lib/modlib.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dlremove
+ * Name: dlgetsym
  *
  * Description:
- *   Remove a previously installed shared library from memory.
+ *   dlgetsym() implements dlsym() for the PROTECTED build.
  *
  * Input Parameters:
- *   handle - The shared library handle previously returned by dlopen().
+ *   handle - The opaque, non-NULL value returned by a previous successful
+ *            call to insmod().
+ *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   See dlsym().
  *
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-static inline int dlremove(FAR void *handle)
+static inline FAR const void *dlgetsym(FAR void *handle,
+                                       FAR const char *name)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
+  FAR const struct symtab_s *symbol;
+  int err;
   int ret;
-
-  DEBUGASSERT(modp != NULL);
-
-  /* Get exclusive access to the module registry */
-
-  modlib_registry_lock();
 
   /* Verify that the module is in the registry */
 
+  modlib_registry_lock();
   ret = modlib_registry_verify(modp);
   if (ret < 0)
     {
       serr("ERROR: Failed to verify module: %d\n", ret);
+      err = -ret;
       goto errout_with_lock;
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-  /* Refuse to remove any module that other modules may depend upon. */
+  /* Does the module have a symbol table? */
 
-  if (modp->dependents > 0)
+  if (modp->modinfo.exports == NULL || modp->modinfo.nexports == 0)
     {
-      serr("ERROR: Module has dependents: %d\n", modp->dependents);
-      ret = -EBUSY;
-      goto errout_with_lock;
-    }
-#endif
-
-  /* Is there an uninitializer? */
-
-  if (modp->modinfo.uninitializer != NULL)
-    {
-      /* Try to uninitialize the module */
-
-      ret = modp->modinfo.uninitializer(modp->modinfo.arg);
-
-      /* Did the module successfully uninitialize? */
-
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to uninitialize the module: %d\n", ret);
-          goto errout_with_lock;
-        }
-
-      /* Nullify so that the uninitializer cannot be called again */
-
-      modp->modinfo.uninitializer = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer           = NULL;
-      modp->modinfo.arg           = NULL;
-      modp->modinfo.exports       = NULL;
-      modp->modinfo.nexports      = 0;
-#endif
-    }
-
-  /* Release resources held by the module */
-
-  if (modp->alloc != NULL)
-    {
-      /* Free the module memory */
-
-      lib_free((FAR void *)modp->alloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
-      modp->alloc = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->textsize  = 0;
-      modp->datasize  = 0;
-#endif
-    }
-
-  /* Remove the module from the registry */
-
-  ret = modlib_registry_del(modp);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      serr("ERROR: Module has no symbol table\n");
+      err = ENOENT;
       goto errout_with_lock;
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-  /* Eliminate any dependencies that this module has on other modules */
+  /* Search the symbol table for the matching symbol */
 
-  (void)modlib_undepend(modp);
-#endif
+  symbol = symtab_findbyname(modp->modinfo.exports, name,
+                             modp->modinfo.nexports);
+  if (symbol == NULL)
+    {
+      serr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
+      err = ENOENT;
+      goto errout_with_lock;
+    }
+
+  /* Return the address within the module associated with the symbol */
+
   modlib_registry_unlock();
-
-  /* And free the registry entry */
-
-  lib_free(modp);
-  return OK;
+  DEBUGASSERT(symbol->sym_value != NULL);
+  return symbol->sym_value;
 
 errout_with_lock:
   modlib_registry_unlock();
-  set_errno(-ret);
-  return ERROR;
+  set_errno(err);
+  return NULL;
 }
 #endif
 
@@ -175,54 +124,44 @@ errout_with_lock:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dlclose
+ * Name: dlsym
  *
  * Description:
- *   dlclose() is used to inform the system that the object referenced by a
- *   handle returned from a previous dlopen() invocation is no longer needed
- *   by the application.
+ *   dlsym() allows a process to obtain the address of a symbol defined
+ *   within an object made accessible through a dlopen() call. handle is the
+ *   value returned from a call to dlopen() (and which has not since been
+ *   released via a call to dlclose()), name is the symbol's name as a
+ *   character string.
  *
- *   The use of dlclose() reflects a statement of intent on the part of the
- *   process, but does not create any requirement upon the implementation,
- *   such as removal of the code or symbols referenced by handle. Once an
- *   object has been closed using dlclose() an application should assume
- *   that its symbols are no longer available to dlsym(). All objects loaded
- *   automatically as a result of invoking dlopen() on the referenced object
- *   are also closed.
- *
- *   Although a dlclose() operation is not required to remove structures
- *   from an address space, neither is an implementation prohibited from
- *   doing so. The only restriction on such a removal is that no object will
- *   be removed to which references have been relocated, until or unless all
- *   such references are removed. For instance, an object that had been
- *   loaded with a dlopen() operation specifying the RTLD_GLOBAL flag might
- *   provide a target for dynamic relocations performed in the processing of
- *   other objects - in such environments, an application may assume that no
- *   relocation, once made, will be undone or remade unless the object
- *   requiring the relocation has itself been removed.
+ *   dlsym() will search for the named symbol in all objects loaded
+ *   automatically as a result of loading the object referenced by handle
+ *   (see dlopen()). Load ordering is used in dlsym() operations upon the
+ *   global symbol object. The symbol resolution algorithm used will be
+ *   dependency order as described in dlopen().
  *
  * Input Parameters:
  *   handle - The opaque, non-NULL value returned by a previous successful
  *            call to dlopen().
+ *   name   - A pointer to the symbol name string.
  *
  * Returned Value:
- *   If the referenced object was successfully closed, dlclose() returns 0.
- *   If the object could not be closed, or if handle does not refer to an
- *   open object, dlclose() returns a non-zero value. More detailed
- *   diagnostic information will be available through dlerror().
+ *   If handle does not refer to a valid object opened by dlopen(), or if
+ *   the named symbol cannot be found within any of the objects associated
+ *   with handle, dlsym() will return NULL. More detailed diagnostic
+ *   information will be available through dlerror().
  *
  * Reference: OpenGroup.org
  *
  ****************************************************************************/
 
-int dlclose(FAR void *handle)
+FAR void *dlsym(FAR void *handle, FAR const char *name)
 {
 #if defined(CONFIG_BUILD_FLAT)
   /* In the FLAT build, a shared library is essentially the same as a kernel
    * module.
    */
 
-  return rmmod(handle);
+  return (FAR void *)modsym(handle, name);
 
 #elif defined(CONFIG_BUILD_PROTECTED)
   /* The PROTECTED build is equivalent to the FLAT build EXCEPT that there
@@ -230,10 +169,10 @@ int dlclose(FAR void *handle)
    * space and using the kernel symbol table and one residing in user space
    * using the user space symbol table.
    *
-   * dlremove() is essentially a clone of rmmod().
+   * dlgetsem() is essentially a clone of modsym().
    */
 
-  return dlremove(handle);
+  return (FAR void *)dlgetsym(handle, name);
 
 #else /* if defined(CONFIG_BUILD_KERNEL) */
   /* The KERNEL build is considerably more complex:  In order to be shared,
@@ -246,6 +185,6 @@ int dlclose(FAR void *handle)
    */
 
 #warning Missing logic
-  return -ENOSYS;
+  return NULL;
 #endif
 }

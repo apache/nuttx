@@ -482,7 +482,7 @@ must be is one of the following.
      FLAT build using apps/examples/sotest (assuming that you also have SD
      card support enabled and that the SD card is mount at /mnt/sdcard):
 
-      CONFIG_LIBC_DLLFCN=y
+      CONFIG_LIBC_DLFCN=y
       CONFIG_EXAMPLES_SOTEST=y
       CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
 
@@ -538,7 +538,7 @@ must be is one of the following.
        Add the following for testing shared libraries in the FLAT
        build:
 
-         CONFIG_LIBC_DLLFCN=y
+         CONFIG_LIBC_DLFCN=y
          CONFIG_EXAMPLES_SOTEST=y
          CONFIG_EXAMPLES_SOTEST_BUILTINFS=y
          CONFIG_EXAMPLES_SOTEST_DEVMINOR=1

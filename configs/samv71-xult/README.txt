@@ -1838,7 +1838,7 @@ Configuration sub-directories
        Add the following for testing shared libraries in the FLAT
        build:
 
-         CONFIG_LIBC_DLLFCN=y
+         CONFIG_LIBC_DLFCN=y
          CONFIG_EXAMPLES_SOTEST=y
          CONFIG_EXAMPLES_SOTEST_BINDIR="/mnt/sdcard"
 

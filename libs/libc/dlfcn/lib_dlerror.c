@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dllfcn/lib_symtab.c
+ * libs/libc/dlfcn/lib_dlerror.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,54 +39,36 @@
 
 #include <nuttx/config.h>
 
-#include <dllfcn.h>
 #include <errno.h>
-
-#include <nuttx/module.h>
-#include <nuttx/lib/modlib.h>
+#include <dlfcn.h>
+#include <string.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dlsymtab
+ * Name: dlerror
  *
  * Description:
- *   dlsymtab() is a non-standard shared library interface.  It selects the
- *   symbol table to use when binding a shared library to the base firmware
- *   which may be in FLASH memory.
+ *   dlerror() returns a null-terminated character string (with no trailing
+ *   newline) that describes the last error that occurred during dynamic
+ *   linking processing. If no dynamic linking errors have occurred since
+ *   the last invocation of dlerror(), dlerror() returns NULL. Thus,
+ *   invoking dlerror() a second time, immediately following a prior
+ *   invocation, will result in NULL being returned.
  *
  * Input Parameters:
- *   symtab   - The new symbol table.
- *   nsymbols - The number of symbols in the symbol table.
+ *   If successful, dlerror() returns a null-terminated character string.
+ *   Otherwise, NULL is returned.
  *
  * Returned Value:
- *   Always returns OK.
+ *
+ * Reference: OpenGroup.org
  *
  ****************************************************************************/
 
-int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
+FAR char *dlerror(void)
 {
-#if defined(CONFIG_BUILD_FLAT) || defined(CONFIG_BUILD_PROTECTED)
-  /* Set the symbol take information that will be used by this instance of
-   * the module library.
-   */
-
-  modlib_setsymtab(symtab, nsymbols);
-  return OK;
-
-#else /* if defined(CONFIG_BUILD_KERNEL) */
-  /* The KERNEL build is considerably more complex:  In order to be shared,
-   * the .text portion of the module must be (1) build for PIC/PID operation
-   * and (2) must like in a shared memory region accessible from all
-   * processes.  The .data/.bss portion of the module must be allocated in
-   * the user space of each process, but must lie at the same virtual address
-   * so that it can be referenced from the one copy of the text in the shared
-   * memory region.
-   */
-
-#warning Missing logic
-  return -ENOSYS;
-#endif
+  return (FAR char *)strerror(errno);
 }

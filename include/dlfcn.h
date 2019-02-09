@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/dllfcn.h
+ * include/dlfcn.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_DLLFCN_H
-#define __INCLUDE_DLLFCN_H
+#ifndef __INCLUDE_DLFCN_H
+#define __INCLUDE_DLFCN_H
 
 /****************************************************************************
  * Included Files
@@ -329,4 +329,4 @@ FAR char *dlerror(void);
 }
 #endif
 
-#endif /* __INCLUDE_DLLFCN_H */
+#endif /* __INCLUDE_DLFCN_H */
