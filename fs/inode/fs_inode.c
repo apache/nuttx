@@ -62,9 +62,9 @@
 /* Implements a re-entrant mutex for inode access.  This must be re-entrant
  * because there can be cycles.  For example, it may be necessary to destroy
  * a block driver inode on umount() after a removable block device has been
- * removed.  In that case umount() hold the inode semaphore, but the block
+ * removed.  In that case umount() holds the inode semaphore, but the block
  * driver may callback to unregister_blockdriver() after the un-mount,
- * requiring the seamphore again.
+ * requiring the semaphore again.
  */
 
 struct inode_sem_s

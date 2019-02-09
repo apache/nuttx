@@ -94,11 +94,11 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
 
   for (; ; )
     {
-      /* At end of node name? */
+      /* At the end of the node name? */
 
       if (!*nname)
         {
-          /* Yes.. also end of find name? */
+          /* Yes.. also at the end of find name? */
 
           if (!*fname || *fname == '/')
             {
@@ -114,7 +114,7 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
             }
         }
 
-      /* At end of find name? */
+      /* At end of the find name? */
 
       else if (!*fname || *fname == '/')
         {
@@ -285,7 +285,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
       /* Case 1:  The name is less than the name of the node.
        * Since the names are ordered, these means that there
        * is no peer node with this name and that there can be
-       * no match in the fileystem.
+       * no match in the filesystem.
        */
 
       if (result < 0)
@@ -314,16 +314,17 @@ static int _inode_search(FAR struct inode_search_s *desc)
           /* Now there are three remaining possibilities:
            *   (1) This is the node that we are looking for.
            *   (2) The node we are looking for is "below" this one.
-           *   (3) This node is a mountpoint and will absorb all request
+           *   (3) This node is a mountpoint and will absorb all requests
            *       below this one
            */
 
           name = inode_nextname(name);
           if (*name == '\0' || INODE_IS_MOUNTPT(node))
             {
-              /* Either (1) we are at the end of the path, so this must be the
-               * node we are looking for or else (2) this node is a mountpoint
-               * and will handle the remaining part of the pathname
+              /* Either (1) we are at the end of the path, so this must be
+               * the node we are looking for or else (2) this node is a
+               * mountpoint and will handle the remaining part of the
+               * pathname
                */
 
               relpath = name;

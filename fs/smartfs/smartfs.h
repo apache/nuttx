@@ -248,7 +248,7 @@ struct smartfs_entry_s
   uint32_t          datlen;       /* Length of inode data */
 };
 
-/* This is an on-device representation of the SMART inode it esists on
+/* This is an on-device representation of the SMART inode as it exists on
  * the FLASH.
  */
 

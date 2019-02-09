@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_registerreserve.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,8 +87,11 @@ static void inode_namecpy(char *dest, const char *src)
 
 static FAR struct inode *inode_alloc(FAR const char *name)
 {
-  int namelen = inode_namelen(name);
-  FAR struct inode *node = (FAR struct inode *)kmm_zalloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node;
+  int namelen;
+
+  namelen = inode_namelen(name);
+  node    = (FAR struct inode *)kmm_zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
       inode_namecpy(node->i_name, name);
