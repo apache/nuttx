@@ -66,3 +66,69 @@ const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
   .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
 };
 #endif
+/* The LaunchXL-cc1310 and two LEDs controlled by software: DIO7_GLED (CR1)
+ * and DIO6_RLED (CR2).  A high output value illuminates an LED.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ */
+
+const struct cc13xx_pinconfig_s g_gpio_gled =
+{
+  .gpio = GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_DIO(7),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_GPIO) | IOC_STD_INPUT
+};
+
+const struct cc13xx_pinconfig_s g_gpio_rled =
+{
+  .gpio = GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_DIO(6),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_GPIO) | IOC_STD_INPUT
+};
+
+#ifdef CONFIG_ARCH_BUTTONS
+/* The LaunchXL-CC1310 has two push-puttons:
+ *
+ *   DIO13_BTN1  SW1  Low input sensed when depressed
+ *   DIO14_BTN2  SW2  Low input sensed when depressed
+ */
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+/* Like IOC_STD_OUTPUT but with MCU wake-up enable and interrupt edge
+ * detection enabled on both edges.
+ */
+
+#define IOC_CC1310_BUTTON_OUTPUT  (IOC_IOCFG_IOEV_MCU_WUEN | \
+                                   IOC_IOCFG_IOSTR_AUTO | \
+                                   IOC_IOCFG_IOCURR_2MA | \
+                                   IOC_IOCFG_PULLCTL_DIS | \
+                                   IOC_IOCFG_EDGEDET_BOTH | \
+                                   IOC_IOCFG_EDGE_IRQEN | \
+                                   IOC_IOCFG_IOMODE_NORMAL | \
+                                   IOC_IOCFG_WUCFG_WAKEUPL | \
+                                   IOC_IOCFG_IE)
+
+#else
+/* Like IOC_STD_OUTPUT but with MCU wake-up enable. */
+
+#define  IOC_CC1310_BUTTON_OUTPUT (IOC_IOCFG_IOEV_MCU_WUEN | \
+                                   IOC_IOCFG_IOSTR_AUTO | \
+                                   IOC_IOCFG_IOCURR_2MA | \
+                                   IOC_IOCFG_PULLCTL_DIS | \
+                                   IOC_IOCFG_EDGEDET_NONE | \
+                                   IOC_IOCFG_IOMODE_NORMAL | \
+                                   IOC_IOCFG_WUCFG_WAKEUPL | \
+                                   IOC_IOCFG_IE)
+#endif /* CONFIG_ARCH_IRQBUTTONS */
+
+const struct cc13xx_pinconfig_s g_gpio_sw1 =
+{
+  .gpio = GPIO_DIO(14),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_GPIO) | IOC_CC1310_BUTTON_OUTPUT
+};
+
+const struct cc13xx_pinconfig_s g_gpio_sw2 =
+{
+  .gpio = GPIO_DIO(15),
+  .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_GPIO) | IOC_CC1310_BUTTON_OUTPUT
+};
+#endif  /* CONFIG_ARCH_BUTTONS */

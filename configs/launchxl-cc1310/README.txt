@@ -37,8 +37,47 @@ LEDs and Buttons
 LEDs
 ----
 
+  The LaunchXL-cc1310 and two LEDs controlled by software: DIO7_GLED (CR1)
+  and DIO6_RLED (CR2).  A high output value illuminates an LED.
+
+    DIO7_GLED  CR1  High output illuminuates
+    DIO6_RLED  CR2  High output illuminuates
+
+  If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+  any way.  The definitions provided in the board.h header file can be used
+  to access individual LEDs.
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/cc1312_autoleds.c. The LEDs are used to encode
+  OS-related events as follows:
+
+    SYMBOL              Meaning                  LED state
+                                                GLED   RLED
+    ------------------ ------------------------ ------ ------
+    LED_STARTED        NuttX has been started   OFF    OFF
+    LED_HEAPALLOCATE   Heap has been allocated  OFF    ON
+    LED_IRQSENABLED    Interrupts enabled       OFF    ON
+    LED_STACKCREATED   Idle stack created       ON     OFF
+    LED_INIRQ          In an interrupt          N/C    GLOW
+    LED_SIGNAL         In a signal handler      N/C    GLOW
+    LED_ASSERTION      An assertion failed      N/C    GLOW
+    LED_PANIC          The system has crashed   OFF    Blinking
+    LED_IDLE           MCU is is sleep mode      Not used
+
+  Thus iF GLED is statically on, NuttX has successfully booted and is,
+  apparently, running normally.  A soft glow of the RLED means that the
+  board is taking interrupts.   If GLED is off and GLED is flashing at
+  approximately 2Hz, then a fatal error has been detected and the system
+  has halted.
+
 Buttons
 -------
+
+  The LaunchXL-CC1310 has two push-puttons:
+
+  DIO13_BTN1  SW1  Low input sensed when depressed
+  DIO14_BTN2  SW2  Low input sensed when depressed
 
 Using J-Link
 ============

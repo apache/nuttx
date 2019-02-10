@@ -61,7 +61,7 @@
 
 struct cc13xx_pinconfig_s; /* Forward reference */
 
-/* The LaunchXL-cc1312R1 and two LEDs controlled by software: DIO7_GLED (CR1)
+/* The LaunchXL-cc1312R1 has two LEDs controlled by software: DIO7_GLED (CR1)
  * and DIO6_RLED (CR2).  A high output value illuminates an LED.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in

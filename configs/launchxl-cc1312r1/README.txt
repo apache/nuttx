@@ -46,7 +46,7 @@ LEDs and Buttons
 LEDs
 ----
 
-  The LaunchXL-cc1312R1 and two LEDs controlled by software: DIO7_GLED (CR1)
+  The LaunchXL-cc1312R1 has two LEDs controlled by software:  DIO7_GLED (CR1)
   and DIO6_RLED (CR2).  A high output value illuminates an LED.
 
     DIO7_GLED  CR1  High output illuminuates

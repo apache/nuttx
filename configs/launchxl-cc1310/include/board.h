@@ -107,6 +107,19 @@
 
 /* Button definitions *******************************************************/
 
+/* The LaunchXL-CC1310 has two push-puttons:
+ *
+ *   DIO13_BTN1  SW1  Low input sensed when depressed
+ *   DIO14_BTN2  SW2  Low input sensed when depressed
+ */
+
+#define BUTTON_SW1        0
+#define BUTTON_SW2        1
+#define NUM_BUTTONS       2
+
+#define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
+#define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
+
 /* Pin configuration ********************************************************/
 
 #ifdef CONFIG_TIVA_UART0

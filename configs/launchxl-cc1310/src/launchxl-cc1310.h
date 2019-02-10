@@ -46,6 +46,40 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Button GPIO IRQ numbers
+ *
+ *   DIO13_BTN1  SW1  Low input sensed when depressed
+ *   DIO14_BTN2  SW2  Low input sensed when depressed
+ */
+
+#define CC1310_SW1_IRQ  TIVA_IRQ_DIO_13
+#define CC1310_SW2_IRQ  TIVA_IRQ_DIO_14
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct cc13xx_pinconfig_s; /* Forward reference */
+
+/* The LaunchXL-cc1310 has two LEDs controlled by software: DIO7_GLED (CR1)
+ * and DIO6_RLED (CR2).  A high output value illuminates an LED.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ */
+
+extern const struct cc13xx_pinconfig_s g_gpio_gled;
+extern const struct cc13xx_pinconfig_s g_gpio_rled;
+
+/* The LaunchXL-CC1310 has two push-puttons:
+ *
+ *   DIO13_BTN1  SW1  Low input sensed when depressed
+ *   DIO14_BTN2  SW2  Low input sensed when depressed
+ */
+
+extern const struct cc13xx_pinconfig_s g_gpio_sw1;
+extern const struct cc13xx_pinconfig_s g_gpio_sw2;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
