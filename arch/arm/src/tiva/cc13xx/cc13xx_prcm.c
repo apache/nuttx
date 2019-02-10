@@ -71,9 +71,10 @@ static const uintptr_t g_rcgcr_base[PRCM_NPERIPH] =
   TIVA_PRCM_I2CCLKGR,              /* Index 3 */
   TIVA_PRCM_SECDMACLKGR,           /* Index 4 */
   TIVA_PRCM_GPIOCLKGR,             /* Index 5 */
-  TIVA_PRCM_I2CCLKGR               /* Index 6 */
+  TIVA_PRCM_I2SCLKGR               /* Index 6 */
 };
-
+#define PRCM_PERIPH_GPIO        _PRCM_PERIPH(13, 1, 5, PRCM_GPIOCLKG_CLKEN_SHIFT)
+#define PRCM_PERIPH_I2S         _PRCM_PERIPH(14, 1, 6, PRCM_I2SCLKG_CLKEN_SHIFT)
 /* Sleep mode registers */
 
 static const uintptr_t g_scgcr_base[PRCM_NPERIPH] =
@@ -84,7 +85,7 @@ static const uintptr_t g_scgcr_base[PRCM_NPERIPH] =
   TIVA_PRCM_I2CCLKGS,              /* Index 3 */
   TIVA_PRCM_SECDMACLKGS,           /* Index 4 */
   TIVA_PRCM_GPIOCLKGS,             /* Index 5 */
-  TIVA_PRCM_I2CCLKGS               /* Index 6 */
+  TIVA_PRCM_I2SCLKGS               /* Index 6 */
 };
 
 /* Deep sleep mode registers */
@@ -97,7 +98,7 @@ static const uintptr_t g_dcgcr_base[PRCM_NPERIPH] =
   TIVA_PRCM_I2CCLKGDS,             /* Index 3 */
   TIVA_PRCM_SECDMACLKGDS,          /* Index 4 */
   TIVA_PRCM_GPIOCLKGDS,            /* Index 5 */
-  TIVA_PRCM_I2CCLKGDS              /* Index 6 */
+  TIVA_PRCM_I2SCLKGDS              /* Index 6 */
 };
 
 /******************************************************************************

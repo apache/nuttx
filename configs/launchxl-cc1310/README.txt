@@ -48,7 +48,7 @@ Using J-Link
   to the XDS110 Out / CC1310 In connector [RXD, TXD, RST, TMS, TCK, TDO, TDI,
   WDO]. After isolating the on-board probe, the CC130F128 device can be
   debugged using J-Link. Please note, that the J-Link needs to be connected
-  to the board using the CC1310 using the micro JTAG connector marked "In". 
+  to the board using the CC1310 using the micro JTAG connector marked "In".
 
   The RXD/TXD can then be used for a Serial console using the appropriate
   TTL adapter (TTL to RS-232 or TTL to USB serial).
