@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_sscanf.c
  *
- *   Copyright (C) 2007, 2008, 2011-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2014, 2016 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -337,7 +338,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
   unsigned char   set[32]; /* Bit field (256 / 8) */
 #endif
 
-  linfo("vsscanf: buf=\"%s\" fmt=\"%s\"\n", buf, fmt);
+  linfo("buf=\"%s\" fmt=\"%s\"\n", buf, fmt);
 
   /* Remember the start of the input buffer.  We will need this for %n
    * calculations.
@@ -370,14 +371,14 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
       if (*fmt == '%')
         {
-          linfo("vsscanf: Specifier found\n");
+          linfo("Specifier found\n");
 
           /* Check for qualifiers on the conversion specifier */
 
           fmt++;
           for (; *fmt; fmt++)
             {
-              linfo("vsscanf: Processing %c\n", *fmt);
+              linfo("Processing %c\n", *fmt);
 
 #ifdef CONFIG_LIBC_SCANSET
               if (strchr("dibouxcsefgn[%", *fmt))
@@ -412,7 +413,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           if (*fmt == 's')
             {
-              linfo("vsscanf: Performing string conversion\n");
+              linfo("Performing string conversion\n");
 
               /* Get a pointer to the char * value.  We need to do this even
                * if we have reached the end of the input data in order to
@@ -475,7 +476,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           if (*fmt == '[')
             {
-              linfo("vsscanf: Performing scanset conversion\n");
+              linfo("Performing scanset conversion\n");
 
               fmt = findscanset(fmt, set); /* find scanset */
 
@@ -540,7 +541,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           else if (*fmt == 'c')
             {
-              linfo("vsscanf: Performing character conversion\n");
+              linfo("Performing character conversion\n");
 
               /* Get a pointer to the char * value.  We need to do this even
                * if we have reached the end of the input data in order to
@@ -593,7 +594,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
               FAR int  *pint  = NULL;
               bool sign;
 
-              linfo("vsscanf: Performing integer conversion\n");
+              linfo("Performing integer conversion\n");
 
               /* Get a pointer to the integer value.  We need to do this even
                * if we have reached the end of the input data in order to
@@ -681,7 +682,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                   strncpy(tmp, buf, width);
                   tmp[width] = '\0';
 
-                  linfo("vsscanf: tmp[]=\"%s\"\n", tmp);
+                  linfo("tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the integer conversion */
                   /* Preserve the errno value */
@@ -717,14 +718,12 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                       if (lflag)
                         {
-                          linfo("vsscanf: Return %ld to 0x%p\n",
-                                tmplong, plong);
+                          linfo("Return %ld to 0x%p\n", tmplong, plong);
                           *plong = tmplong;
                         }
                       else
                         {
-                          linfo("vsscanf: Return %ld to 0x%p\n",
-                                tmplong, pint);
+                          linfo("Return %ld to 0x%p\n", tmplong, pint);
                           *pint = (int)tmplong;
                         }
 
@@ -744,7 +743,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 #endif
               FAR float  *pf = NULL;
 
-              linfo("vsscanf: Performing floating point conversion\n");
+              linfo("Performing floating point conversion\n");
 
               /* Get a pointer to the double value.  We need to do this even
                * if we have reached the end of the input data in order to
@@ -807,7 +806,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                   strncpy(tmp, buf, width);
                   tmp[width] = '\0';
 
-                  linfo("vsscanf: tmp[]=\"%s\"\n", tmp);
+                  linfo("tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the floating point conversion */
                   /* Preserve the errno value */
@@ -852,7 +851,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                         {
                           /* Return the double value */
 
-                          linfo("vsscanf: Return %f to %p\n", dvalue, pd);
+                          linfo("Return %f to %p\n", dvalue, pd);
                           *pd = dvalue;
                         }
                       else
@@ -860,7 +859,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                         {
                           /* Return the float value */
 
-                          linfo("vsscanf: Return %f to %p\n", (double)fvalue, pf);
+                          linfo("Return %f to %p\n", (double)fvalue, pf);
                           *pf = fvalue;
                         }
 
@@ -874,7 +873,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           else if (*fmt == 'n')
             {
-              linfo("vsscanf: Performing character count\n");
+              linfo("Performing character count\n");
 
               if (!noassign)
                 {
