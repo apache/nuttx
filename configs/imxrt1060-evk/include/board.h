@@ -158,6 +158,7 @@
  */
 
 #define BUTTON_SW8        0
+#define NUM_BUTTONS       1
 
 #define BUTTON_SW8_BIT    (1 << BUTTON_SW8)
 

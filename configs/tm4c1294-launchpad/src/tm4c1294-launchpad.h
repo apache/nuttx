@@ -122,6 +122,7 @@
  *   PJ1 USR_SW2
  *   --- ------------
  */
+
 #ifdef CONFIG_ARCH_IRQBUTTONS
 #  define GPIO_SW1    (GPIO_FUNC_INTERRUPT | GPIO_INT_BOTHEDGES | \
                        GPIO_STRENGTH_2MA | GPIO_PADTYPE_STDWPU | \

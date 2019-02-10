@@ -72,7 +72,8 @@
 
 void board_button_initialize(void)
 {
-#warning Missing logic
+  (void)tiva_configgpio(&g_gpio_sw1);
+  (void)tiva_configgpio(&g_gpio_sw2);
 }
 
 /****************************************************************************
@@ -88,8 +89,21 @@ void board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-#warning Missing logic
-  return 0;
+  uint32_t ret = 0;
+
+  /* When the button is pressed, a low value will be sensed */
+
+  if (!tiva_gpioread(&g_gpio_sw1))
+    {
+      ret |= BUTTON_SW1_BIT;
+    }
+
+  if (!tiva_gpioread(&g_gpio_sw2))
+    {
+      ret |= BUTTON_SW2_BIT;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -107,45 +121,49 @@ uint32_t board_buttons(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOP_IRQS)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_TIVA_GPIOIRQS)
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-#if 0
   irqstate_t flags;
-  int ret = -EINVAL;
+  int irq;
+  int ret;
 
-  /* Interrupts are supported only on ports P and Q and, hence, only on button SW4 */
-
-  if (id == BUTTON_SW4)
+  if (id == BUTTON_SW1)
     {
-      /* The following should be atomic */
-
-      flags = enter_critical_section();
-
-      /* Detach and disable the button interrupt */
-
-      up_disable_irq(IRQ_SW4);
-      irq_detach(IRQ_SW4);
-
-      /* Attach the new handler if so requested */
-
-      if (irqhandler != NULL)
-        {
-          ret = irq_attach(IRQ_SW4, irqhandler, arg);
-          if (ret == OK)
-            {
-              up_enable_irq(IRQ_SW4);
-            }
-        }
-
-      leave_critical_section(flags);
+      irq = CC1312_SW1_IRQ;
+    }
+  else if (id == BUTTON_SW2)
+    {
+      irq = CC1312_SW2_IRQ;
+    }
+  else
+    {
+      return -EINVAL
     }
 
+  /* The following should be atomic */
+
+  flags = enter_critical_section();
+
+  /* Detach and disable the button interrupt */
+
+  up_disable_irq(irq);
+  irq_detach(irq);
+
+  /* Attach the new handler if so requested */
+
+  ret = OK;
+  if (irqhandler != NULL)
+    {
+      ret = irq_attach(irq, irqhandler, arg);
+      if (ret == OK)
+        {
+          up_enable_irq(irq);
+        }
+    }
+
+  leave_critical_section(flags);
   return ret;
-#else
-#warning Missing logic
-  return -ENOSYS;
-#endif
 }
 #endif
 

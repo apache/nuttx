@@ -58,7 +58,8 @@
 
 void board_userled_initialize(void)
 {
-#warning Missing logic
+  (void)tiva_configgpio(&g_gpio_gled);
+  (void)tiva_configgpio(&g_gpio_rled);
 }
 
 /****************************************************************************
@@ -67,7 +68,22 @@ void board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-#warning Missing logic
+  const struct cc13xx_pinconfig_s *pinconfig;
+
+  if (led == BOARD_GLED)
+    {
+      pinconfig = &g_gpio_gled;
+    }
+  else if (led = BOARD_RLED)
+    {
+      pinconfig = &g_gpio_rled;
+    }
+  else
+    {
+      return;
+    }
+
+  tiva_gpiowrite(pinconfig, ledon);  /* High output illuminates */
 }
 
 /****************************************************************************
@@ -76,5 +92,6 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint8_t ledset)
 {
-#warning Missing logic
+  board_userled(BOARD_GLED, (ledset & BOARD_GLED_BIT) != 0);
+  board_userled(BOARD_RLED, (ledset & BOARD_RLED_BIT) != 0);
 }

@@ -27,6 +27,10 @@ Serial Console
   The on-board XDS110 Debugger provide a USB virtual serial console using
   UART0 (PA0/U0RX and PA1/U0TX).
 
+  A J-Link debugger is used (see below), then the RXD/TXD jumper pins can
+  be used to support a serial console through appropriate TTL level adapater
+  (RS-232 or USB serial).
+
 LEDs and Buttons
 ================
 
@@ -39,17 +43,23 @@ Buttons
 Using J-Link
 ============
 
-  Reference https://wiki.segger.com/CC1310_LaunchPad (for CC1310)
+  Reference https://wiki.segger.com/CC1310_LaunchPad:
 
   When shipped, the TI CC1310 LaunchPad evaluation board is configured to be
   used with the on-board debug probe.  In order to use it with J-Link, the
   on-board debug probe needs to be isolated to make sure that it does not
   drive the debug signals.  This can be done by removing some jumpers next
   to the XDS110 Out / CC1310 In connector [RXD, TXD, RST, TMS, TCK, TDO, TDI,
-  WDO]. After isolating the on-board probe, the CC130F128 device can be
-  debugged using J-Link. Please note, that the J-Link needs to be connected
-  to the board using the CC1310 using the micro JTAG connector marked "In".
+  SWO].  After isolating the on-board probe, the CC130F128 device can be
+  debugged using J-Link.  The J-Link needs to be connected to the board
+  using the micro JTAG connector marked "In".
 
-  The RXD/TXD can then be used for a Serial console using the appropriate
-  TTL adapter (TTL to RS-232 or TTL to USB serial).
+  I use the Olimex ARM-JTAG-20-10 to interface with the board:
+  https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/
+
+  NOTE:  When connecting the J-Link GDB server, the interface must be set to
+  JTAG, not SWD as you might expect.
+
+  The RXD/TXD pins. PA0/U0RX and PA1/U0TX, can then support a Serial console
+  using the appropriate TTL adapter (TTL to RS-232 or TTL to USB serial).
 

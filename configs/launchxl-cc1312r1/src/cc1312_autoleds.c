@@ -62,7 +62,8 @@
 
 void board_autoled_initialize(void)
 {
-#warning Missing logic
+  (void)tiva_configgpio(&g_gpio_gled);
+  (void)tiva_configgpio(&g_gpio_rled);
 }
 
 /****************************************************************************
@@ -71,7 +72,55 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-#warning Missing logic
+  bool gled_change = true;   /* True: Change GLED */
+  bool gled_on     = false;  /* High output illuminates */
+  bool rled_on     = false;
+
+  /* SYMBOL           VAL MEANING                 GLED RLED
+   * ---------------- --- ----------------------- ---- -----
+   * LED_STARTED       0  NuttX has been started  OFF  OFF
+   * LED_HEAPALLOCATE  1  Heap has been allocated OFF  ON
+   * LED_IRQSENABLED   1  Interrupts enabled      OFF  ON
+   * LED_STACKCREATED  2  Idle stack created      ON   OFF
+   * LED_INIRQ         3  In an interrupt         N/C  GLOW
+   * LED_SIGNAL        3  In a signal handler     N/C  GLOW
+   * LED_ASSERTION     3  An assertion failed     N/C  GLOW
+   * LED_PANIC         4  The system has crashed  OFF  BLINK
+   */
+
+  switch (led)
+    {
+      case 0:  /* GLED=OFF RLED=OFF */
+        break;
+
+      case 3:  /* GLED=N/C RLED=ON */
+        gled_change = false;
+
+        /* Fall through */
+
+      case 1:  /* GLED=OFF RLED=ON */
+      case 4:  /* GLED=OFF RLED=ON */
+        rled_on = true;
+        break;
+
+      case 2:  /* GLED=ON  RLED=OFF */
+        gled_on = true;
+        break;
+
+      default:
+        return;
+    }
+
+  /* Set the new state of the GLED (unless is is N/C) */
+
+  if (gled_change)
+    {
+      tiva_gpiowrite(&g_gpio_gled, gled_on);
+    }
+
+  /* Set the new state of the RLED */
+
+  tiva_gpiowrite(&g_gpio_rled, rled_on);
 }
 
 /****************************************************************************
@@ -80,7 +129,35 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-#warning Missing logic
+  /* SYMBOL           VAL MEANING                 GLED RLED
+   * ---------------- --- ----------------------- ---- -----
+   * LED_STARTED       0  NuttX has been started  OFF  OFF
+   * LED_HEAPALLOCATE  1  Heap has been allocated OFF  ON
+   * LED_IRQSENABLED   1  Interrupts enabled      OFF  ON
+   * LED_STACKCREATED  2  Idle stack created      ON   OFF
+   * LED_INIRQ         3  In an interrupt         N/C  GLOW
+   * LED_SIGNAL        3  In a signal handler     N/C  GLOW
+   * LED_ASSERTION     3  An assertion failed     N/C  GLOW
+   * LED_PANIC         4  The system has crashed  OFF  BLINK
+   */
+
+  switch (led)
+    {
+      case 4:  /* GLED=OFF RLED=OFF */
+        tiva_gpiowrite(&g_gpio_gled, false);
+
+        /* Fall through */
+
+      case 3:  /* GLED=N/C RLED=OFF */
+        tiva_gpiowrite(&g_gpio_rled, false);
+        break;
+
+      case 0:  /* Should not happen */
+      case 1:  /* Should not happen */
+      case 2:  /* Should not happen */
+      default:
+        return;
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */
