@@ -67,6 +67,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "stm32_gpio.h"
 #include "stm32_usbhost.h"
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGFS)

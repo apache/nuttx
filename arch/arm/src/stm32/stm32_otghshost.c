@@ -67,6 +67,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "stm32_gpio.h"
 #include "stm32_usbhost.h"
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGHS)
@@ -5396,7 +5397,9 @@ FAR struct usbhost_connection_s *stm32_otghshost_initialize(int controller)
 
   stm32_configgpio(GPIO_OTGHSFS_DM);
   stm32_configgpio(GPIO_OTGHSFS_DP);
-//  stm32_configgpio(GPIO_OTGHSFS_ID);    /* Only needed for OTG */
+#if 0 /* Only needed for OTG */
+  stm32_configgpio(GPIO_OTGHSFS_ID);
+#endif
 
   /* SOF output pin configuration is configurable */
 
