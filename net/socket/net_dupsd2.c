@@ -112,3 +112,5 @@ errout:
   return ret;
 }
 
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRPTORS > 0 */
+
