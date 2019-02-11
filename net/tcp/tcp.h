@@ -63,7 +63,7 @@
 
 /* Conditions for support TCP poll/select operations */
 
-#if !defined(CONFIG_DISABLE_POLL) 0 && defined(CONFIG_NET_TCP_READAHEAD)
+#if !defined(CONFIG_DISABLE_POLL) && defined(CONFIG_NET_TCP_READAHEAD)
 #  define HAVE_TCP_POLL
 #endif
 
