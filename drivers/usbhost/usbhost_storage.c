@@ -64,7 +64,7 @@
 /* Don't compile if prerequisites are not met */
 
 #if defined(CONFIG_USBHOST) && !defined(CONFIG_USBHOST_BULK_DISABLE) && \
-   !defined(CONFIG_DISABLE_MOUNTPOINT) && CONFIG_NFILE_DESCRIPTORS > 0
+   !defined(CONFIG_DISABLE_MOUNTPOINT)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2317,4 +2317,5 @@ int usbhost_msc_initialize(void)
   return usbhost_registerclass(&g_storage);
 }
 
-#endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */
+

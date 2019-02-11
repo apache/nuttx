@@ -52,7 +52,6 @@
  * that some number of streams have been configured.
  */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 #if CONFIG_NFILE_STREAMS > 0
 
 /****************************************************************************
@@ -92,5 +91,4 @@ int group_setupstreams(FAR struct task_tcb_s *tcb)
 }
 
 #endif /* CONFIG_NFILE_STREAMS > 0 */
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 */
 

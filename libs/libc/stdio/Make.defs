@@ -63,8 +63,6 @@ endif
 
 # The remaining sources files depend upon file descriptors
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
 CSRCS += lib_rawsostream.c lib_remove.c
 
@@ -90,7 +88,6 @@ endif
 
 ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
 CSRCS += lib_setbuf.c lib_setvbuf.c
-endif
 endif
 
 # Other support that depends on specific, configured features.

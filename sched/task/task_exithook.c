@@ -694,13 +694,11 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
       nxtask_flushstreams(tcb);
     }
 
-#ifdef HAVE_TASK_GROUP
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
    */
 
   group_leave(tcb);
-#endif
 
 #ifndef CONFIG_DISABLE_SIGNALS
   /* Deallocate anything left in the TCB's queues */

@@ -75,7 +75,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 {
   int ret = -EINVAL;
@@ -212,7 +211,6 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
   return ret;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: file_fcntl
@@ -233,7 +231,6 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_fcntl(FAR struct file *filep, int cmd, ...)
 {
   va_list ap;
@@ -252,7 +249,6 @@ int file_fcntl(FAR struct file *filep, int cmd, ...)
   va_end(ap);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: fcntl
@@ -289,7 +285,6 @@ int fcntl(int fd, int cmd, ...)
 
   /* Did we get a valid file descriptor? */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
       /* Get the file structure corresponding to the file descriptor. */
@@ -307,12 +302,11 @@ int fcntl(int fd, int cmd, ...)
         }
     }
   else
-#endif
     {
       /* No... check for operations on a socket descriptor */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. defer socket descriptor operations to net_vfcntl(). The
            * errno is not set on failures.

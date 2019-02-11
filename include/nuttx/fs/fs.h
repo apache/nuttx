@@ -425,13 +425,11 @@ struct file
 
 /* This defines a list of files indexed by the file descriptor */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 struct filelist
 {
   sem_t   fl_sem;               /* Manage access to the file list */
   struct file fl_files[CONFIG_NFILE_DESCRIPTORS];
 };
-#endif
 
 /* The following structure defines the list of files used for standard C I/O.
  * Note that NuttX can support the standard C APIs with or without buffering
@@ -703,9 +701,7 @@ int inode_checkflags(FAR struct inode *inode, int oflags);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 void files_initlist(FAR struct filelist *list);
-#endif
 
 /****************************************************************************
  * Name: files_releaselist
@@ -715,9 +711,7 @@ void files_initlist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 void files_releaselist(FAR struct filelist *list);
-#endif
 
 /****************************************************************************
  * Name: file_dup2
@@ -736,9 +730,7 @@ void files_releaselist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
-#endif
 
 /****************************************************************************
  * Name: fs_dupfd OR dup
@@ -760,9 +752,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int fs_dupfd(int fd, int minfd);
-#endif
 
 /****************************************************************************
  * Name: file_dup
@@ -799,12 +789,10 @@ int file_dup(FAR struct file *filep, int minfd);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 int fs_dupfd2(int fd1, int fd2);
 #else
 #  define fs_dupfd2(fd1, fd2) dup2(fd1, fd2)
-#endif
 #endif
 
 /****************************************************************************
@@ -854,9 +842,7 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_detach(int fd, FAR struct file *filep);
-#endif
 
 /****************************************************************************
  * Name: file_close
@@ -900,10 +886,8 @@ int file_close(FAR struct file *filep);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int open_blockdriver(FAR const char *pathname, int mountflags,
                      FAR struct inode **ppinode);
-#endif
 
 /****************************************************************************
  * Name: close_blockdriver
@@ -922,9 +906,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int close_blockdriver(FAR struct inode *inode);
-#endif
 
 /****************************************************************************
  * Name: fs_ioctl
@@ -1016,9 +998,7 @@ ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int fs_getfilep(int fd, FAR struct file **filep);
-#endif
 
 /****************************************************************************
  * Name: nx_open and nx_vopen
@@ -1065,9 +1045,7 @@ int nx_open(FAR const char *path, int oflags, ...);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
-#endif
 
 /****************************************************************************
  * Name: nx_read
@@ -1102,9 +1080,7 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
-#endif
 
 /****************************************************************************
  * Name: nx_write
@@ -1143,10 +1119,8 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
                    off_t offset);
-#endif
 
 /****************************************************************************
  * Name: file_pwrite
@@ -1158,10 +1132,8 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
                     size_t nbytes, off_t offset);
-#endif
 
 /****************************************************************************
  * Name: file_seek
@@ -1173,9 +1145,7 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 off_t file_seek(FAR struct file *filep, off_t offset, int whence);
-#endif
 
 /****************************************************************************
  * Name: file_fsync
@@ -1187,7 +1157,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int file_fsync(FAR struct file *filep);
 #endif
 
@@ -1201,7 +1171,7 @@ int file_fsync(FAR struct file *filep);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int file_truncate(FAR struct file *filep, off_t length);
 #endif
 
@@ -1223,9 +1193,7 @@ int file_truncate(FAR struct file *filep, off_t length);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
-#endif
 
 /****************************************************************************
  * Name: file_vfcntl
@@ -1246,9 +1214,7 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
-#endif
 
 /****************************************************************************
  * Name: file_fcntl
@@ -1269,9 +1235,7 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_fcntl(FAR struct file *filep, int cmd, ...);
-#endif
 
 /****************************************************************************
  * Name: file_poll
@@ -1292,9 +1256,7 @@ int file_fcntl(FAR struct file *filep, int cmd, ...);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Name: file_fstat
@@ -1319,9 +1281,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_fstat(FAR struct file *filep, FAR struct stat *buf);
-#endif
 
 /****************************************************************************
  * Name: fdesc_poll
@@ -1341,9 +1301,7 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

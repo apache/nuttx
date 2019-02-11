@@ -109,7 +109,6 @@ static inline void _files_semtake(FAR struct filelist *list)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_detach(int fd, FAR struct file *filep)
 {
   FAR struct filelist *list;
@@ -165,5 +164,4 @@ int file_detach(int fd, FAR struct file *filep)
   _files_semgive(list);
   return OK;
 }
-#endif
 

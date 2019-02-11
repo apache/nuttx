@@ -71,9 +71,7 @@
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
-#ifdef HAVE_TASK_GROUP
-#  include "group/group.h"
-#endif
+#include "group/group.h"
 #include "init/init.h"
 
 /****************************************************************************
@@ -699,11 +697,9 @@ void nx_start(void)
     }
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Initialize the file system (needed to support device drivers) */
 
   fs_initialize();
-#endif
 
 #ifdef CONFIG_NET
   /* Initialize the networking system */
@@ -752,13 +748,10 @@ void nx_start(void)
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
 #endif
     {
-#ifdef HAVE_TASK_GROUP
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(group_allocate(&g_idletcb[cpu], g_idletcb[cpu].cmn.flags));
-#endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_SMP
       if (cpu > 0)
         {
@@ -776,16 +769,13 @@ void nx_start(void)
 
           DEBUGVERIFY(group_setupidlefiles(&g_idletcb[cpu]));
         }
-#endif
 
-#ifdef HAVE_TASK_GROUP
       /* Complete initialization of the IDLE group.  Suppress retention
        * of child status in the IDLE group.
        */
 
       DEBUGVERIFY(group_initialize(&g_idletcb[cpu]));
       g_idletcb[cpu].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
-#endif
     }
 
   /* Start SYSLOG ***********************************************************/

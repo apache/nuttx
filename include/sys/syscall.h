@@ -275,54 +275,56 @@
 #  define CONFIG_NSOCKET_DESCRIPTORS 0
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-#  define SYS_close                    (__SYS_descriptors + 0)
-#  ifdef CONFIG_LIBC_IOCTL_VARIADIC
-#    define SYS_fs_ioctl               (__SYS_descriptors + 1)
+#define SYS_close                    (__SYS_descriptors + 0)
+
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
+#  define SYS_fs_ioctl               (__SYS_descriptors + 1)
+#else
+#  define SYS_ioctl                  (__SYS_descriptors + 1)
+#endif
+
+#define SYS_read                     (__SYS_descriptors + 2)
+#define SYS_write                    (__SYS_descriptors + 3)
+#define SYS_pread                    (__SYS_descriptors + 4)
+#define SYS_pwrite                   (__SYS_descriptors + 5)
+
+#ifdef CONFIG_FS_AIO
+#  define SYS_aio_read               (__SYS_descriptors + 6)
+#  define SYS_aio_write              (__SYS_descriptors + 7)
+#  define SYS_aio_fsync              (__SYS_descriptors + 8)
+#  define SYS_aio_cancel             (__SYS_descriptors + 9)
+#  define __SYS_poll                 (__SYS_descriptors + 10)
+#else
+#  define __SYS_poll                 (__SYS_descriptors + 6)
+#endif
+
+#ifndef CONFIG_DISABLE_POLL
+#  define SYS_poll                   __SYS_poll
+#  define SYS_select                 (__SYS_poll + 1)
+#  ifndef CONFIG_DISABLE_SIGNALS
+#    define SYS_ppoll                (__SYS_poll + 2)
+#    define SYS_pselect              (__SYS_poll + 3)
+#    define __SYS_ifindex            (__SYS_poll + 4)
 #  else
-#    define SYS_ioctl                  (__SYS_descriptors + 1)
-#  endif
-#  define SYS_read                     (__SYS_descriptors + 2)
-#  define SYS_write                    (__SYS_descriptors + 3)
-#  define SYS_pread                    (__SYS_descriptors + 4)
-#  define SYS_pwrite                   (__SYS_descriptors + 5)
-#  ifdef CONFIG_FS_AIO
-#    define SYS_aio_read               (__SYS_descriptors + 6)
-#    define SYS_aio_write              (__SYS_descriptors + 7)
-#    define SYS_aio_fsync              (__SYS_descriptors + 8)
-#    define SYS_aio_cancel             (__SYS_descriptors + 9)
-#    define __SYS_poll                 (__SYS_descriptors + 10)
-#  else
-#    define __SYS_poll                 (__SYS_descriptors + 6)
-#  endif
-#  ifndef CONFIG_DISABLE_POLL
-#    define SYS_poll                   __SYS_poll
-#    define SYS_select                 (__SYS_poll + 1)
-#    ifndef CONFIG_DISABLE_SIGNALS
-#      define SYS_ppoll                (__SYS_poll + 2)
-#      define SYS_pselect              (__SYS_poll + 3)
-#      define __SYS_ifindex            (__SYS_poll + 4)
-#    else
-#      define __SYS_ifindex            (__SYS_poll + 2)
-#    endif
-#  else
-#    define __SYS_ifindex               __SYS_poll
-#  endif
-#  ifdef CONFIG_NETDEV_IFINDEX
-#    define SYS_if_indextoname         __SYS_ifindex
-#    define SYS_if_nametoindex         (__SYS_ifindex + 1)
-#    define __SYS_termios              (__SYS_ifindex + 2)
-#  else
-#    define __SYS_termios               __SYS_ifindex
-#  endif
-#  ifdef CONFIG_SERIAL_TERMIOS
-#    define SYS_tcdrain                __SYS_termios
-#    define __SYS_boardctl             (__SYS_termios + 1)
-#  else
-#    define __SYS_boardctl             __SYS_termios
+#    define __SYS_ifindex            (__SYS_poll + 2)
 #  endif
 #else
-#  define __SYS_boardctl               __SYS_descriptors
+#  define __SYS_ifindex               __SYS_poll
+#endif
+
+#ifdef CONFIG_NETDEV_IFINDEX
+#  define SYS_if_indextoname         __SYS_ifindex
+#  define SYS_if_nametoindex         (__SYS_ifindex + 1)
+#  define __SYS_termios              (__SYS_ifindex + 2)
+#else
+#  define __SYS_termios               __SYS_ifindex
+#endif
+
+#ifdef CONFIG_SERIAL_TERMIOS
+#  define SYS_tcdrain                __SYS_termios
+#  define __SYS_boardctl             (__SYS_termios + 1)
+#else
+#  define __SYS_boardctl             __SYS_termios
 #endif
 
 /* Board support */
@@ -336,79 +338,74 @@
 
 /* The following are defined if file descriptors are enabled */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-#  define SYS_closedir                 (__SYS_filedesc + 0)
-#  define SYS_dup                      (__SYS_filedesc + 1)
-#  define SYS_dup2                     (__SYS_filedesc + 2)
-#  define SYS_fcntl                    (__SYS_filedesc + 3)
-#  define SYS_lseek                    (__SYS_filedesc + 4)
-#  define SYS_mmap                     (__SYS_filedesc + 5)
-#  define SYS_open                     (__SYS_filedesc + 6)
-#  define SYS_opendir                  (__SYS_filedesc + 7)
-#  define SYS_readdir                  (__SYS_filedesc + 8)
-#  define SYS_rewinddir                (__SYS_filedesc + 9)
-#  define SYS_seekdir                  (__SYS_filedesc + 10)
-#  define SYS_stat                     (__SYS_filedesc + 11)
-#  define SYS_fstat                    (__SYS_filedesc + 12)
-#  define SYS_statfs                   (__SYS_filedesc + 13)
-#  define SYS_fstatfs                  (__SYS_filedesc + 14)
-#  define SYS_telldir                  (__SYS_filedesc + 15)
+#define SYS_closedir                   (__SYS_filedesc + 0)
+#define SYS_dup                        (__SYS_filedesc + 1)
+#define SYS_dup2                       (__SYS_filedesc + 2)
+#define SYS_fcntl                      (__SYS_filedesc + 3)
+#define SYS_lseek                      (__SYS_filedesc + 4)
+#define SYS_mmap                       (__SYS_filedesc + 5)
+#define SYS_open                       (__SYS_filedesc + 6)
+#define SYS_opendir                    (__SYS_filedesc + 7)
+#define SYS_readdir                    (__SYS_filedesc + 8)
+#define SYS_rewinddir                  (__SYS_filedesc + 9)
+#define SYS_seekdir                    (__SYS_filedesc + 10)
+#define SYS_stat                       (__SYS_filedesc + 11)
+#define SYS_fstat                      (__SYS_filedesc + 12)
+#define SYS_statfs                     (__SYS_filedesc + 13)
+#define SYS_fstatfs                    (__SYS_filedesc + 14)
+#define SYS_telldir                    (__SYS_filedesc + 15)
 
-#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-#    define SYS_link                   (__SYS_filedesc + 16)
-#    define SYS_readlink               (__SYS_filedesc + 17)
-#    define __SYS_pipes                (__SYS_filedesc + 18)
-#  else
-#    define __SYS_pipes                (__SYS_filedesc + 16)
-#  endif
-
-#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-#    define SYS_pipe2                  (__SYS_pipes + 0)
-#    define __SYS_mkfifo2              (__SYS_pipes + 1)
-#  else
-#    define __SYS_mkfifo2              (__SYS_pipes + 0)
-#  endif
-
-#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
-#    define SYS_mkfifo2                (__SYS_mkfifo2 + 0)
-#    define __SYS_fs_fdopen            (__SYS_mkfifo2 + 1)
-#  else
-#    define __SYS_fs_fdopen            (__SYS_mkfifo2 + 0)
-#  endif
-
-#  if CONFIG_NFILE_STREAMS > 0
-#    define SYS_fs_fdopen              (__SYS_fs_fdopen + 0)
-#    define SYS_sched_getstreams       (__SYS_fs_fdopen + 1)
-#    define __SYS_sendfile             (__SYS_fs_fdopen + 2)
-#  else
-#    define __SYS_sendfile             (__SYS_fs_fdopen + 0)
-#  endif
-
-#  if defined(CONFIG_NET_SENDFILE)
-#    define SYS_sendfile,              __SYS_sendfile
-#    define __SYS_mountpoint           (__SYS_sendfile + 1)
-#  else
-#    define __SYS_mountpoint           __SYS_sendfile
-#  endif
-
-#  if !defined(CONFIG_DISABLE_MOUNTPOINT)
-#  if defined(CONFIG_FS_READABLE)
-#    define SYS_mount                  (__SYS_mountpoint + 0)
-#  endif
-#    define SYS_fsync                  (__SYS_mountpoint + 1)
-#    define SYS_ftruncate              (__SYS_mountpoint + 2)
-#    define SYS_mkdir                  (__SYS_mountpoint + 3)
-#    define SYS_rename                 (__SYS_mountpoint + 4)
-#    define SYS_rmdir                  (__SYS_mountpoint + 5)
-#    define SYS_umount2                (__SYS_mountpoint + 6)
-#    define SYS_unlink                 (__SYS_mountpoint + 7)
-#    define __SYS_shm                  (__SYS_mountpoint + 8)
-#  else
-#    define __SYS_shm                  __SYS_mountpoint
-#  endif
-
+#if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#  define SYS_link                     (__SYS_filedesc + 16)
+#  define SYS_readlink                 (__SYS_filedesc + 17)
+#  define __SYS_pipes                  (__SYS_filedesc + 18)
 #else
-#  define __SYS_shm                    __SYS_filedesc
+#  define __SYS_pipes                  (__SYS_filedesc + 16)
+#endif
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+#  define SYS_pipe2                    (__SYS_pipes + 0)
+#  define __SYS_mkfifo2                (__SYS_pipes + 1)
+#else
+#  define __SYS_mkfifo2                (__SYS_pipes + 0)
+#endif
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+#  define SYS_mkfifo2                  (__SYS_mkfifo2 + 0)
+#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 1)
+#else
+#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 0)
+#endif
+
+#if CONFIG_NFILE_STREAMS > 0
+#  define SYS_fs_fdopen                (__SYS_fs_fdopen + 0)
+#  define SYS_sched_getstreams         (__SYS_fs_fdopen + 1)
+#  define __SYS_sendfile               (__SYS_fs_fdopen + 2)
+#else
+#  define __SYS_sendfile               (__SYS_fs_fdopen + 0)
+#endif
+
+#if defined(CONFIG_NET_SENDFILE)
+#  define SYS_sendfile,                __SYS_sendfile
+#  define __SYS_mountpoint             (__SYS_sendfile + 1)
+#else
+#  define __SYS_mountpoint             __SYS_sendfile
+#endif
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(CONFIG_FS_READABLE)
+#  define SYS_mount                    (__SYS_mountpoint + 0)
+#endif
+#  define SYS_fsync                    (__SYS_mountpoint + 1)
+#  define SYS_ftruncate                (__SYS_mountpoint + 2)
+#  define SYS_mkdir                    (__SYS_mountpoint + 3)
+#  define SYS_rename                   (__SYS_mountpoint + 4)
+#  define SYS_rmdir                    (__SYS_mountpoint + 5)
+#  define SYS_umount2                  (__SYS_mountpoint + 6)
+#  define SYS_unlink                   (__SYS_mountpoint + 7)
+#  define __SYS_shm                    (__SYS_mountpoint + 8)
+#else
+#  define __SYS_shm                    __SYS_mountpoint
 #endif
 
 /* Shared memory interfaces */

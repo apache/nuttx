@@ -33,14 +33,10 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-
 CSRCS += fs_closedir.c fs_opendir.c fs_readdir.c fs_rewinddir.c fs_seekdir.c
 
 # Include dirent build support
 
 DEPPATH += --dep-path dirent
 VPATH += :dirent
-endif
+

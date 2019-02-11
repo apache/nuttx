@@ -36,7 +36,6 @@
 # termios.h support requires file descriptors and that CONFIG_SERIAL_TERMIOS
 # is defined
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifeq ($(CONFIG_SERIAL_TERMIOS),y)
 
 # Add the termios C files to the build
@@ -49,6 +48,5 @@ CSRCS += lib_tcflow.c lib_tcgetattr.c lib_tcsetattr.c
 DEPPATH += --dep-path termios
 VPATH += termios
 
-endif
 endif
 

@@ -170,16 +170,7 @@ USERDEPDIRS = $(USERDIRS)
 
 # Add file system directories to KERNDEPDIRS (they are already in CLEANDIRS)
 
-ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifeq ($(CONFIG_NET),y)
-ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-KERNDEPDIRS += fs
-endif
-KERNDEPDIRS += drivers
-endif
-else
 KERNDEPDIRS += $(FSDIRS)
-endif
 
 # Add networking directories to KERNDEPDIRS and CLEANDIRS
 

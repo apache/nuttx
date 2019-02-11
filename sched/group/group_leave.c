@@ -59,8 +59,6 @@
 #include "mqueue/mqueue.h"
 #include "group/group.h"
 
-#ifdef HAVE_TASK_GROUP
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -162,7 +160,6 @@ static inline void group_release(FAR struct task_group_s *group)
   pthread_release(group);
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Free all file-related resources now.  We really need to close files as
    * soon as possible while we still have a functioning task.
    */
@@ -177,7 +174,6 @@ static inline void group_release(FAR struct task_group_s *group)
   lib_stream_release(group);
 
 #endif /* CONFIG_NFILE_STREAMS */
-#endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   /* Free resource held by the socket list */
@@ -449,4 +445,4 @@ void group_leave(FAR struct tcb_s *tcb)
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
-#endif /* HAVE_TASK_GROUP */
+

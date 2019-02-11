@@ -65,8 +65,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 FAR struct filelist *sched_getfiles(void)
 {
   FAR struct tcb_s *rtcb = this_task();
@@ -88,4 +86,3 @@ FAR struct filelist *sched_getfiles(void)
   return NULL;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS */

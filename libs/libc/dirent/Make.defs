@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-
 # Add the dirent C files to the build
 
 CSRCS += lib_readdirr.c lib_telldir.c
@@ -43,6 +41,4 @@ CSRCS += lib_readdirr.c lib_telldir.c
 
 DEPPATH += --dep-path dirent
 VPATH += :dirent
-
-endif
 

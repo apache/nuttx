@@ -12,7 +12,6 @@ the NuttX apps/ package and that you have named the directory apps/).
 
 Other required configuration settings:
 
-  CONFIG_NFILE_DESCRIPTORS > 3
   CONFIG_BINFMT_DISABLE=n
   CONFIG_BINFMT_PCODE=y
 

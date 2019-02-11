@@ -151,13 +151,8 @@ void up_lowinit(void);
 
 /* Defined in chip/xxx_serial.c */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 void up_earlyserialinit(void);
 void up_serialinit(void);
-#else
-# define up_earlyserialinit()
-# define up_serialinit()
-#endif
 
 /* Defined in drivers/lowconsole.c */
 

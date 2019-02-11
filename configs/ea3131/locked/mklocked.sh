@@ -183,10 +183,7 @@ if [ "$answer" = n ]; then
 	echo "EXTERN(pthread_initialize)" >>ld-locked.inc
 fi
 
-answer=$(checkzero CONFIG_NFILE_DESCRIPTORS)
-if [ "$answer" = n ]; then
-	echo "EXTERN(fs_initialize)" >>ld-locked.inc
-fi
+echo "EXTERN(fs_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_NET)
 if [ "$answer" = y ]; then

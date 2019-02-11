@@ -10,7 +10,7 @@ index ba7dbe7..45e4ab1 100644
  #include <assert.h>
  #include <errno.h>
  #include <debug.h>
-@@ -79,8 +80,13 @@ static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
+@@ -79,7 +80,12 @@ static FAR struct nsh_vtbl_s *nsh_consoleclone(FAR struct nsh_vtbl_s *vtbl);
  static void nsh_consolerelease(FAR struct nsh_vtbl_s *vtbl);
  static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl,
    FAR const void *buffer, size_t nbytes);
@@ -23,7 +23,6 @@ index ba7dbe7..45e4ab1 100644
 +#endif
  static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
  
- #if CONFIG_NFILE_DESCRIPTORS > 0
 @@ -213,6 +219,7 @@ static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buf
   *
   ****************************************************************************/
@@ -32,14 +31,13 @@ index ba7dbe7..45e4ab1 100644
  static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
                               FAR const char *fmt, ...)
  {
-@@ -263,6 +270,51 @@ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
+@@ -263,6 +270,29 @@ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
  #endif
  }
  
 +#else
 +static int nsh_consolevoutput(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, va_list ap)
 +{
-+#if CONFIG_NFILE_DESCRIPTORS > 0
 +  FAR struct console_stdio_s *pstate = (FAR struct console_stdio_s *)vtbl;
 +  int ret;
 +
@@ -56,27 +54,6 @@ index ba7dbe7..45e4ab1 100644
 +  ret = vfprintf(pstate->cn_outstream, fmt, ap);
 +
 +  return ret;
-+#else
-+  char *str;
-+
-+  /* Use vasprintf() to allocate a buffer and fill it with the formatted
-+   * data
-+   */
-+
-+  str = NULL;
-+  (void)vasprintf(&str, fmt, ap);
-+
-+  /* Was a string allocated? */
-+
-+  if (str)
-+    {
-+      /* Yes.. Print then free the allocated string */
-+
-+      printf("%s", str);
-+      free(str);
-+    }
-+
-+  return 0;
 +#endif
 +}
 +#endif
@@ -138,7 +115,7 @@ index c78362f..207f9b9 100644
  
  /* Size of info to be saved in call to nsh_redirect */
  
-@@ -107,7 +110,11 @@ struct nsh_vtbl_s
+@@ -107,6 +110,10 @@ struct nsh_vtbl_s
    void (*release)(FAR struct nsh_vtbl_s *vtbl);
  #endif
    ssize_t (*write)(FAR struct nsh_vtbl_s *vtbl, FAR const void *buffer, size_t nbytes);
@@ -148,7 +125,6 @@ index c78362f..207f9b9 100644
 +  int (*voutput)(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, va_list ap);
 +#endif
    FAR char *(*linebuffer)(FAR struct nsh_vtbl_s *vtbl);
- #if CONFIG_NFILE_DESCRIPTORS > 0
    void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
 @@ -159,5 +166,6 @@ struct console_stdio_s
  /* Defined in nsh_console.c *************************************************/

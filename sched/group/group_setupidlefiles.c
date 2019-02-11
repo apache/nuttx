@@ -52,8 +52,6 @@
 
 #include "group/group.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -76,22 +74,16 @@
 
 int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   FAR struct task_group_s *group = tcb->cmn.group;
-#endif
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+#ifdef CONFIG_DEV_CONSOLE
   int fd;
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  DEBUGASSERT(group);
-#endif
+  DEBUGASSERT(group != NULL);
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Initialize file descriptors for the TCB */
 
   files_initlist(&group->tg_filelist);
-#endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   /* Allocate socket descriptors for the TCB */
@@ -104,7 +96,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
    * descriptor 0.
    */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+#ifdef CONFIG_DEV_CONSOLE
   fd = nx_open("/dev/console", O_RDWR);
   if (fd == 0)
     {
@@ -142,4 +134,3 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 #endif
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */

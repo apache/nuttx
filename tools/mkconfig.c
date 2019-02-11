@@ -136,51 +136,11 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_RR_INTERVAL 0\n");
   printf("#endif\n\n");
 
-  printf("/* The correct way to disable filesystem support is to set the number of\n");
-  printf(" * file descriptors to zero.\n");
-  printf(" */\n\n");
-  printf("#ifndef CONFIG_NFILE_DESCRIPTORS\n");
-  printf("#  define CONFIG_NFILE_DESCRIPTORS 0\n");
-  printf("#endif\n\n");
-
-  printf("/* If no file descriptors are configured, then make certain no streams\n");
-  printf(" * are configured either.\n");
-  printf(" */\n\n");
-  printf("#if CONFIG_NFILE_DESCRIPTORS == 0\n");
-  printf("#  undef  CONFIG_NFILE_STREAMS\n");
-  printf("#  define CONFIG_NFILE_STREAMS 0\n");
-  printf("#endif\n\n");
-
   printf("/* The correct way to disable stream support is to set the number of\n");
   printf(" * streamd to zero.\n");
   printf(" */\n\n");
   printf("#ifndef CONFIG_NFILE_STREAMS\n");
   printf("#  define CONFIG_NFILE_STREAMS 0\n");
-  printf("#endif\n\n");
-
-  printf("/* If a console is selected, then make sure that there are resources for\n");
-  printf(" * three file descriptors and, if any streams are selected, also for three\n");
-  printf(" * file streams.\n");
-  printf(" *\n");
-  printf(" * CONFIG_DEV_CONSOLE means that a builtin console device exists at /dev/console\n");
-  printf(" * and can be opened during boot-up.  Other consoles, such as USB consoles, may\n");
-  printf(" * not exist at boot-upand have to be handled in a different way.  Three file\n");
-  printf(" * descriptors and three file streams are still needed.\n");
-  printf(" */\n\n");
-  printf("#if defined(CONFIG_DEV_CONSOLE) || defined(CONFIG_CDCACM_CONSOLE) || \\\n");
-  printf("    defined(CONFIG_PL2303_CONSOLE)\n");
-  printf("# if CONFIG_NFILE_DESCRIPTORS < 3\n");
-  printf("#   undef CONFIG_NFILE_DESCRIPTORS\n");
-  printf("#   define CONFIG_NFILE_DESCRIPTORS 3\n");
-  printf("# endif\n\n");
-  printf("# if CONFIG_NFILE_STREAMS > 0 && CONFIG_NFILE_STREAMS < 3\n");
-  printf("#  undef CONFIG_NFILE_STREAMS\n");
-  printf("#  define CONFIG_NFILE_STREAMS 3\n");
-  printf("# endif\n\n");
-  printf("/* If no console is selected, then disable all builtin console devices */\n\n");
-  printf("#else\n");
-  printf("#  undef CONFIG_DEV_LOWCONSOLE\n");
-  printf("#  undef CONFIG_RAMLOG_CONSOLE\n");
   printf("#endif\n\n");
 
   printf("/* If no file streams are configured, then make certain that buffered I/O\n");

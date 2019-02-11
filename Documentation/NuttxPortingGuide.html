@@ -4926,9 +4926,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 </p>
 
 <p><b>Pseudo Root File System</b>.
-  Or, a simple <i>in-memory</i>, <i>pseudo</i> file system can be enabled.
-  This simple file system can be enabled setting the CONFIG_NFILE_DESCRIPTORS
-  option to a non-zero value (see <a href="#apndxconfigs">Appendix A</a>).
+  A simple <i>in-memory</i>, <i>pseudo</i> file system can be enabled by default.
   This is an <i>in-memory</i> file system because it does not require any
   storage medium or block driver support.
   Rather, file system contents are generated on-the-fly as referenced via
@@ -4985,9 +4983,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     <li>Other <i>Specialized</i> Drivers.</li>
   </ul>
   These different device driver types are discussed in the following paragraphs.
-  Note: device driver support requires that the <i>in-memory</i>, <i>pseudo</i> file system
-  is enabled by setting the CONFIG_NFILE_DESCRIPTORS in the NuttX configuration file to a
-  non-zero value.
+  Note: device driver support depends on the <i>in-memory</i>, <i>pseudo</i> file system
+  that is enabled by default.
 </p>
 
 <h2><a name="chardrivers">6.1 Character Device Drivers</a></h2>

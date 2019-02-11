@@ -38,7 +38,6 @@
 CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_sysconf.c
 CSRCS += lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
 CSRCS += lib_chdir.c lib_getcwd.c
 endif
@@ -53,7 +52,6 @@ endif
 
 ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_pipe.c
-endif
 endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)

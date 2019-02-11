@@ -100,9 +100,7 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
-#endif
 
 /****************************************************************************
  * Name: syslog_dev_uninitialize
@@ -124,7 +122,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_SYSLOG_FILE)
+#ifdef CONFIG_SYSLOG_FILE
 int syslog_dev_uninitialize(void);
 #endif /* CONFIG_SYSLOG_FILE */
 
@@ -343,9 +341,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int syslog_dev_putc(int ch);
-#endif
 
 /****************************************************************************
  * Name: syslog_dev_flush
@@ -361,9 +357,7 @@ int syslog_dev_putc(int ch);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int syslog_dev_flush(void);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

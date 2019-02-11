@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NFILE_STREAMS > 0
+#if CONFIG_NFILE_STREAMS > 0
 
 FAR struct streamlist *sched_getstreams(void)
 {
@@ -78,4 +78,4 @@ FAR struct streamlist *sched_getstreams(void)
 #endif
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_NFILE_STREAMS */

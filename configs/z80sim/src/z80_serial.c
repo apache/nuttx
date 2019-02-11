@@ -55,7 +55,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#if defined(USE_SERIALDRIVER) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef USE_SERIALDRIVER
 
 /****************************************************************************
  * Private Function Prototypes
@@ -336,7 +336,7 @@ void up_serialinit(void)
   (void)uart_register("/dev/ttyS0", &g_uartport);
 }
 
-#endif /* USE_SERIALDRIVER && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
  * Name: up_putc

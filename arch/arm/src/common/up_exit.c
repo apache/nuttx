@@ -80,18 +80,15 @@
 #ifdef CONFIG_DUMP_ON_EXIT
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *filelist;
 #if CONFIG_NFILE_STREAMS > 0
   FAR struct streamlist *streamlist;
 #endif
   int i;
-#endif
 
   sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
   sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   filelist = tcb->group->tg_filelist;
   for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
     {
@@ -102,7 +99,6 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
                 i, inode->i_crefs);
         }
     }
-#endif
 
 #if CONFIG_NFILE_STREAMS > 0
   streamlist = tcb->group->tg_streamlist;

@@ -47,11 +47,7 @@
 
 #include "libc.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifndef CONFIG_DISABLE_ENVIRON
 
 /****************************************************************************
  * Private Functions
@@ -176,4 +172,4 @@ errout:
   set_errno(errcode);
   return ERROR;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */
+#endif /* !CONFIG_DISABLE_ENVIRON */

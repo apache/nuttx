@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_dupfd.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +47,6 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -146,6 +145,4 @@ errout:
   set_errno(-ret);
   return ERROR;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 

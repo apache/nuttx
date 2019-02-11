@@ -190,36 +190,34 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
  * enabled.
  */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   SYSCALL_LOOKUP(close,                    1, STUB_close)
-#  ifdef CONFIG_LIBC_IOCTL_VARIADIC
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
   SYSCALL_LOOKUP(fs_ioctl,                 3, STUB_fs_ioctl)
-#  else
+#else
   SYSCALL_LOOKUP(ioctl,                    3, STUB_ioctl)
-#  endif
+#endif
   SYSCALL_LOOKUP(read,                     3, STUB_read)
   SYSCALL_LOOKUP(write,                    3, STUB_write)
   SYSCALL_LOOKUP(pread,                    4, STUB_pread)
   SYSCALL_LOOKUP(pwrite,                   4, STUB_pwrite)
-#  ifdef CONFIG_FS_AIO
+#ifdef CONFIG_FS_AIO
   SYSCALL_LOOKUP(aio_read,                 1, STUB_aio_read)
   SYSCALL_LOOKUP(aio_write,                1, STUB_aio_write)
   SYSCALL_LOOKUP(aio_fsync,                2, STUB_aio_fsync)
   SYSCALL_LOOKUP(aio_cancel,               2, STUB_aio_cancel)
-#  endif
-#  ifndef CONFIG_DISABLE_POLL
+#endif
+#ifndef CONFIG_DISABLE_POLL
   SYSCALL_LOOKUP(poll,                     3, STUB_poll)
   SYSCALL_LOOKUP(select,                   5, STUB_select)
   SYSCALL_LOOKUP(ppoll,                    4, STUB_ppoll)
   SYSCALL_LOOKUP(pselect,                  6, STUB_pselect)
-#  endif
-#  ifdef CONFIG_NETDEV_IFINDEX
+#endif
+#ifdef CONFIG_NETDEV_IFINDEX
   SYSCALL_LOOKUP(if_indextoname,           2, STUB_if_indextoname)
   SYSCALL_LOOKUP(if_nametoindex,           1, STUB_if_nametoindex)
-#  endif
-#  ifdef CONFIG_SERIAL_TERMIOS
+#endif
+#ifdef CONFIG_SERIAL_TERMIOS
   SYSCALL_LOOKUP(tcdrain,                  1, STUB_tcdrain)
-#  endif
 #endif
 
 /* Board support */
@@ -230,7 +228,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 
 /* The following are defined if file descriptors are enabled */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   SYSCALL_LOOKUP(closedir,                 1, STUB_closedir)
   SYSCALL_LOOKUP(dup,                      1, STUB_dup)
   SYSCALL_LOOKUP(dup2,                     2, STUB_dup2)
@@ -248,32 +245,32 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(fstatfs,                  2, STUB_fstatfs)
   SYSCALL_LOOKUP(telldir,                  1, STUB_telldir)
 
-#  if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#if defined(CONFIG_PSEUDOFS_SOFTLINKS)
   SYSCALL_LOOKUP(link,                     2, STUB_link)
   SYSCALL_LOOKUP(readlink,                 3, STUB_readlink)
-#  endif
+#endif
 
-#  if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
+#if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
   SYSCALL_LOOKUP(pipe2,                    2, STUB_pipe2)
-#  endif
+#endif
 
-#  if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
   SYSCALL_LOOKUP(mkfifo2,                  3, STUB_mkfifo2)
-#  endif
+#endif
 
-#  if CONFIG_NFILE_STREAMS > 0
+#if CONFIG_NFILE_STREAMS > 0
   SYSCALL_LOOKUP(fdopen,                   3, STUB_fs_fdopen)
   SYSCALL_LOOKUP(sched_getstreams,         0, STUB_sched_getstreams)
-#  endif
+#endif
 
-#  if defined(CONFIG_NET_SENDFILE)
+#if defined(CONFIG_NET_SENDFILE)
   SYSCALL_LOOKUP(sendfile,                 4, STUB_fs_sendifile)
-#  endif
+#endif
 
-#  if !defined(CONFIG_DISABLE_MOUNTPOINT)
-#    if defined(CONFIG_FS_READABLE)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#  if defined(CONFIG_FS_READABLE)
   SYSCALL_LOOKUP(mount,                    5, STUB_mount)
-#    endif
+#  endif
   SYSCALL_LOOKUP(fsync,                    1, STUB_fsync)
   SYSCALL_LOOKUP(ftruncate,                2, STUB_ftruncate)
   SYSCALL_LOOKUP(mkdir,                    2, STUB_mkdir)
@@ -281,7 +278,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(rmdir,                    1, STUB_rmdir)
   SYSCALL_LOOKUP(umount2,                  2, STUB_umount2)
   SYSCALL_LOOKUP(unlink,                   1, STUB_unlink)
-#  endif
 #endif
 
 /* Shared memory interfaces */

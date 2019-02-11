@@ -48,7 +48,7 @@
 
 #include "libc.h"
 
-#if defined(CONFIG_LIBC_IOCTL_VARIADIC) && CONFIG_NFILE_DESCRIPTORS > 0
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
 
 /****************************************************************************
  * Public Functions
@@ -114,4 +114,4 @@ int ioctl(int fd, int req, ...)
   return fs_ioctl(fd, req, arg);
 }
 
-#endif /* CONFIG_LIBC_IOCTL_VARIADIC && CONFIG_NFILE_DESCRIPTORS > 0 */
+#endif /* CONFIG_LIBC_IOCTL_VARIADIC */

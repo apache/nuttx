@@ -57,7 +57,7 @@
  * assumed.
  */
 
-#if !defined(CONFIG_DEV_CONSOLE) || CONFIG_NFILE_DESCRIPTORS <= 0
+#ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
 #  undef  CONFIG_DEV_LOWCONSOLE
@@ -163,13 +163,8 @@ void hc_timer_initialize(void);
 
 /* Debug output */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 void up_earlyserialinit(void);
 void up_serialinit(void);
-#else
-# define up_earlyserialinit()
-# define up_serialinit()
-#endif
 
 #ifdef CONFIG_DEV_LOWCONSOLE
 void lowconsole_init(void);

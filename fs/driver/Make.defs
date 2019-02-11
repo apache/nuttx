@@ -33,10 +33,6 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-
 CSRCS += fs_registerdriver.c fs_unregisterdriver.c
 
 # Don't build-in block driver support if there are no mountpoints
@@ -63,4 +59,3 @@ endif # CONFIG_DISABLE_MOUNTPOINT
 
 DEPPATH += --dep-path driver
 VPATH += :driver
-endif

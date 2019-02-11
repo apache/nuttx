@@ -58,8 +58,6 @@
 
 #include "syslog.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -698,4 +696,3 @@ int syslog_dev_flush(void)
   return OK;
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

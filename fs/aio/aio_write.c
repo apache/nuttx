@@ -81,9 +81,7 @@ static void aio_write_worker(FAR void *arg)
   uint8_t prio;
 #endif
   ssize_t nwritten = 0;
-#ifdef AIO_HAVE_FILEP
   int oflags;
-#endif
 
   /* Get the information from the container, decant the AIO control block,
    * and free the container before starting any I/O.  That will minimize
@@ -97,10 +95,9 @@ static void aio_write_worker(FAR void *arg)
 #endif
   aiocbp = aioc_decant(aioc);
 
-#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+#ifdef AIO_HAVE_PSOCK
   if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
 #endif
-#ifdef AIO_HAVE_FILEP
     {
       /* Call fcntl(F_GETFL) to get the file open mode. */
 
@@ -138,11 +135,8 @@ static void aio_write_worker(FAR void *arg)
                                  aiocbp->aio_offset);
         }
     }
-#endif
-#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
-  else
-#endif
 #ifdef AIO_HAVE_PSOCK
+  else
     {
       /* Perform the send using:
        *
@@ -166,9 +160,7 @@ static void aio_write_worker(FAR void *arg)
 
   aiocbp->aio_result = nwritten;
 
-#ifdef AIO_HAVE_FILEP
 errout:
-#endif
 
   /* Signal the client */
 

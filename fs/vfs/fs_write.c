@@ -137,9 +137,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
 
 ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct file *filep;
-#endif
   ssize_t ret;
 
   if (buf == NULL)
@@ -149,9 +147,7 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
 
   /* Did we get a valid file descriptor? */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
 #if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
       /* Write to a socket descriptor is equivalent to send with flags == 0. */
@@ -161,8 +157,6 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
       ret = -EBADF;
 #endif
     }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
   else
     {
       /* The descriptor is in the right range to be a file descriptor..
@@ -180,7 +174,6 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
           ret = file_write(filep, buf, nbytes);
         }
     }
-#endif
 
   return ret;
 }

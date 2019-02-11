@@ -85,7 +85,7 @@
 
 /* Determine which (if any) console driver to use */
 
-#if !defined(CONFIG_DEV_CONSOLE) || CONFIG_NFILE_DESCRIPTORS == 0
+#ifndef CONFIG_DEV_CONSOLE
 #  undef USE_DEVCONSOLE
 #  undef CONFIG_RAMLOG_CONSOLE
 #else

@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-
 # Include serial drivers
 
 CSRCS += serial.c serial_io.c lowconsole.c
@@ -66,4 +64,4 @@ endif
 
 DEPPATH += --dep-path serial
 VPATH += :serial
-endif
+

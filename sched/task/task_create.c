@@ -100,7 +100,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
       return -ENOMEM;
     }
 
-#ifdef HAVE_TASK_GROUP
   /* Allocate a new task group with privileges appropriate for the parent
    * thread type.
    */
@@ -110,9 +109,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
     {
       goto errout_with_tcb;
     }
-#endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 #if 0 /* No... there are side effects */
   /* Associate file descriptors with the new task.  Exclude kernel threads;
    * kernel threads do not have file or socket descriptors.  They must use
@@ -128,7 +125,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
           goto errout_with_tcb;
         }
     }
-#endif
 
   /* Allocate the stack for the TCB */
 
@@ -150,7 +146,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   (void)nxtask_argsetup(tcb, name, argv);
 
-#ifdef HAVE_TASK_GROUP
   /* Now we have enough in place that we can join the group */
 
   ret = group_initialize(tcb);
@@ -158,7 +153,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
     {
       goto errout_with_tcb;
     }
-#endif
 
   /* Get the assigned pid before we start the task */
 

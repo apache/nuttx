@@ -65,7 +65,6 @@ int dup(int fd)
   /* Check the range of the descriptor to see if we got a file or a socket
    * descriptor. */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
       /* Its a valid file descriptor.. dup the file descriptor using any
@@ -76,12 +75,11 @@ int dup(int fd)
       ret = fs_dupfd(fd, 0);
     }
   else
-#endif
     {
       /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor.  The errno value is not set. */
 

@@ -48,8 +48,6 @@
 #include "sched/sched.h"
 #include "group/group.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -84,7 +82,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_FDCLONE_DISABLE)
+#ifndef CONFIG_FDCLONE_DISABLE
 static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
@@ -124,9 +122,9 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
         }
     }
 }
-#else /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_FDCLONE_DISABLE */
+#else /* !CONFIG_FDCLONE_DISABLE */
 #  define sched_dupfiles(tcb)
-#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_FDCLONE_DISABLE */
+#endif /* !CONFIG_FDCLONE_DISABLE */
 
 /****************************************************************************
  * Name: sched_dupsockets
@@ -208,20 +206,16 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
 
 int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   FAR struct task_group_s *group = tcb->cmn.group;
 
   DEBUGASSERT(group);
-#endif
 #ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Initialize file descriptors for the TCB */
 
   files_initlist(&group->tg_filelist);
-#endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   /* Allocate socket descriptors for the TCB */
@@ -245,6 +239,4 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   return OK;
 #endif
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 */
 

@@ -248,9 +248,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   int errcode;
   pid_t pid;
   int ret;
-#ifdef HAVE_TASK_GROUP
   bool group_joined = false;
-#endif
 
   /* If attributes were not supplied, use the default attributes */
 
@@ -268,7 +266,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       return ENOMEM;
     }
 
-#ifdef HAVE_TASK_GROUP
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */
@@ -279,7 +276,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       errcode = ENOMEM;
       goto errout_with_tcb;
     }
-#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Share the address environment of the parent task group. */
@@ -450,7 +446,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   pthread_argsetup(ptcb, arg);
 
-#ifdef HAVE_TASK_GROUP
   /* Join the parent's task group */
 
   ret = group_join(ptcb);
@@ -461,7 +456,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
     }
 
   group_joined = true;
-#endif
 
   /* Attach the join info to the TCB. */
 
@@ -621,14 +615,12 @@ errout_with_join:
   ptcb->joininfo = NULL;
 
 errout_with_tcb:
-#ifdef HAVE_TASK_GROUP
   /* Clear group binding */
 
   if (ptcb && !group_joined)
     {
       ptcb->cmn.group = NULL;
     }
-#endif
 
   sched_releasetcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return errcode;

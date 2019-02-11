@@ -46,8 +46,6 @@
 
 #include "inode/inode.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -132,6 +130,4 @@ errout:
   set_errno(-ret);
   return ERROR;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 

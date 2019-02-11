@@ -124,7 +124,6 @@ int daemon(int nochdir, int noclose)
     }
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if (noclose == 0)
     {
       int fd = open("/dev/null", O_RDWR);
@@ -169,7 +168,6 @@ int daemon(int nochdir, int noclose)
          (void)close(fd);
        }
     }
-#endif
 
   return OK;
 }

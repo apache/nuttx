@@ -36,10 +36,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = z80_irq.c z80_timerisr.c z80_lowputc.c
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-CSRCS += z80_serial.c
-endif
+CSRCS = z80_irq.c z80_timerisr.c z80_lowputc.c z80_serial.c
 
 include $(TOPDIR)/configs/Board.mk

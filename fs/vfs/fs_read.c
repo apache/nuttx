@@ -140,9 +140,7 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 {
   /* Did we get a valid file descriptor? */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
       /* No.. If networking is enabled, read() is the same as recv() with
@@ -156,8 +154,6 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
       return -EBADF;
 #endif
     }
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
   else
     {
       FAR struct file *filep;
@@ -178,11 +174,6 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 
       return file_read(filep, buf, nbytes);
     }
-#else
-  /* I don't think we can get here */
-
-  return -ENOSYS;
-#endif
 }
 
 /****************************************************************************

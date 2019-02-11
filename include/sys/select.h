@@ -46,8 +46,6 @@
 #include <signal.h>
 #include <time.h>
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -133,5 +131,4 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 }
 #endif
 
-#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */
 #endif /* __INCLUDE_SYS_SELECT_H */

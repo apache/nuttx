@@ -76,10 +76,8 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
   FAR struct aio_container_s *aioc;
   union
   {
-#ifdef AIO_HAVE_FILEP
     FAR struct file *filep;
-#endif
-#ifdef AIO_HAVE_FILEP
+#ifdef AIO_HAVE_PSOCK
     FAR struct socket *psock;
 #endif
     FAR void *ptr;
@@ -89,10 +87,9 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 #endif
   int ret;
 
-#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
+#ifdef AIO_HAVE_PSOCK
   if (aiocbp->aio_fildes < CONFIG_NFILE_DESCRIPTORS)
 #endif
-#ifdef AIO_HAVE_FILEP
     {
       /* Get the file structure corresponding to the file descriptor. */
 
@@ -104,11 +101,8 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
 
       DEBUGASSERT(u.filep != NULL);
     }
-#endif
-#if defined(AIO_HAVE_FILEP) && defined(AIO_HAVE_PSOCK)
-  else
-#endif
 #ifdef AIO_HAVE_PSOCK
+  else
     {
       /* Get the socket structure corresponding to the socket descriptor */
 

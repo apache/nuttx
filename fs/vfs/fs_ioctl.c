@@ -75,7 +75,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 {
   FAR struct inode *inode;
@@ -101,7 +100,6 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 
   return (int)inode->u.i_ops->ioctl(filep, req, arg);
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: ioctl/fs_ioctl
@@ -139,19 +137,17 @@ int ioctl(int fd, int req, unsigned long arg)
 #endif
 {
   int errcode;
-#if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct file *filep;
   int ret;
 
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
       /* Perform the socket ioctl */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = netdev_ioctl(fd, req, arg);
           if (ret < 0)
@@ -170,7 +166,6 @@ int ioctl(int fd, int req, unsigned long arg)
         }
     }
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Get the file structure corresponding to the file descriptor. */
 
   ret = fs_getfilep(fd, &filep);
@@ -194,9 +189,6 @@ int ioctl(int fd, int req, unsigned long arg)
     }
 
   return ret;
-#else
-  errcode = ENOTTY;
-#endif
 
 errout:
   set_errno(errcode);

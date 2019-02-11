@@ -131,7 +131,6 @@ void up_initialize(void)
   iob_initialize();
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
@@ -141,8 +140,6 @@ void up_initialize(void)
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();   /* Standard /dev/zero */
 #endif
-
-#endif /* CONFIG_NFILE_DESCRIPTORS */
 
   /* Initialize the serial device driver */
 
@@ -162,7 +159,7 @@ void up_initialize(void)
   ramlog_consoleinit();
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+#ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Register the master pseudo-terminal multiplexor device */
 
   (void)ptmx_register();

@@ -62,7 +62,6 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 static inline int fs_checkfd(FAR struct tcb_s *tcb, int fd, int oflags)
 {
   FAR struct file *filep;
@@ -110,7 +109,6 @@ static inline int fs_checkfd(FAR struct tcb_s *tcb, int fd, int oflags)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -159,9 +157,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
    * lie in a different range.
    */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
       /* No.. If networking is enabled then this might be a socket
        * descriptor.
@@ -177,14 +173,14 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 #endif
     }
 
-  /* The descriptor is in a valid range to file descriptor... perform some more checks */
+  /* The descriptor is in a valid range to file descriptor... perform some
+   * more checks.
+   */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   else
     {
       ret = fs_checkfd(tcb, fd, oflags);
     }
-#endif
 
   /* Do we have a good descriptor of some sort? */
 

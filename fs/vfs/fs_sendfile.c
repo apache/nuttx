@@ -50,7 +50,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/net/net.h>
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_SENDFILE
+#ifdef CONFIG_NET_SENDFILE
 
 /****************************************************************************
  * Public Functions
@@ -148,4 +148,5 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
   return lib_sendfile(outfd, infd, offset, count);
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_SENDFILE */
+#endif /* CONFIG_NET_SENDFILE */
+

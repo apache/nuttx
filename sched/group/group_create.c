@@ -51,8 +51,6 @@
 #include "environ/environ.h"
 #include "group/group.h"
 
-#ifdef HAVE_TASK_GROUP
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -343,6 +341,4 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->tg_nmembers = 1;
   return OK;
 }
-
-#endif /* HAVE_TASK_GROUP */
 

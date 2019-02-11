@@ -50,8 +50,6 @@
 #include "group/group.h"
 #include "environ/environ.h"
 
-#ifdef HAVE_TASK_GROUP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -149,4 +147,3 @@ FAR struct task_group_s *group_findbypid(pid_t pid)
 }
 #endif
 
-#endif /* HAVE_TASK_GROUP */

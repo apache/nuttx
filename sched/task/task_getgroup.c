@@ -45,8 +45,6 @@
 #include "group/group.h"
 #include "task/task.h"
 
-#ifdef HAVE_TASK_GROUP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -83,4 +81,3 @@ FAR struct task_group_s *task_getgroup(pid_t pid)
   return NULL;
 }
 
-#endif /* HAVE_TASK_GROUP */

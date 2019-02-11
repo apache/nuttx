@@ -94,7 +94,6 @@ void weak_function task_initialize(void);
 
 /* Task group data structure management */
 
-#ifdef HAVE_TASK_GROUP
 int  group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype);
 int  group_initialize(FAR struct task_tcb_s *tcb);
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -137,7 +136,6 @@ FAR struct task_group_s *task_getgroup(pid_t pid);
 #ifndef CONFIG_DISABLE_SIGNALS
 int  group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
 #endif
-#endif /* HAVE_TASK_GROUP */
 
 /* Parent/child data management */
 
@@ -161,12 +159,10 @@ void group_removechildren(FAR struct task_group_s *group);
 
 /* Group data resource configuration */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 int  group_setupidlefiles(FAR struct task_tcb_s *tcb);
 int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
 #if CONFIG_NFILE_STREAMS > 0
 int  group_setupstreams(FAR struct task_tcb_s *tcb);
-#endif
 #endif
 
 #endif /* __SCHED_GROUP_GROUP_H */

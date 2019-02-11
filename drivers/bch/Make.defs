@@ -33,7 +33,6 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
 # Include BCH driver
@@ -49,4 +48,4 @@ VPATH += :bch
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)bch}
 
 endif
-endif
+

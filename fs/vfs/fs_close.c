@@ -82,24 +82,20 @@
 int close(int fd)
 {
   int errcode;
-#if CONFIG_NFILE_DESCRIPTORS > 0
   int ret;
-#endif
 
   /* close() is a cancellation point */
 
   (void)enter_cancellation_point();
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-#endif
     {
       /* Close a socket descriptor */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = net_close(fd);
           if (ret < 0)
@@ -119,7 +115,6 @@ int close(int fd)
         }
     }
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Close the driver or mountpoint.  NOTES: (1) there is no
    * exclusion mechanism here, the driver or mountpoint must be
    * able to handle concurrent operations internally, (2) The driver
@@ -141,8 +136,6 @@ int close(int fd)
 
   leave_cancellation_point();
   return OK;
-
-#endif
 
 errout:
   set_errno(errcode);

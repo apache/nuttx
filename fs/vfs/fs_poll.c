@@ -98,7 +98,6 @@ static int poll_semtake(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
   /* Check for a valid file descriptor */
@@ -121,7 +120,6 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 
   return fdesc_poll(fd, fds, setup);
 }
-#endif
 
 /****************************************************************************
  * Name: poll_setup
@@ -131,7 +129,6 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 {
   unsigned int i;
@@ -227,7 +224,6 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: poll_teardown
@@ -238,9 +234,8 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
-                                int ret)
+static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
+                                FAR int *count, int ret)
 {
   unsigned int i;
   int status = OK;
@@ -299,7 +294,6 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -324,7 +318,6 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count,
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode;
@@ -370,7 +363,6 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: fdesc_poll
@@ -391,7 +383,6 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct file *filep;
@@ -411,7 +402,6 @@ int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
 
   return file_poll(filep, fds, setup);
 }
-#endif
 
 /****************************************************************************
  * Name: poll

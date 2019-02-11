@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_dup2.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +51,7 @@
  * performed.
  */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +78,7 @@ int dup2(int fd1, int fd2)
 
       /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
-      if ((unsigned int)fd1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd1 < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor. The errno value is not set. */
 
@@ -110,5 +111,5 @@ int dup2(int fd1, int fd2)
     }
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
 

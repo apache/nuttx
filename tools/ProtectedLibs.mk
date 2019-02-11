@@ -100,13 +100,7 @@ endif
 
 # Add libraries for file system support
 
-ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-NUTTXLIBS += staging$(DELIM)libfs$(LIBEXT)
-endif
-else
 NUTTXLIBS += staging$(DELIM)libfs$(LIBEXT) staging$(DELIM)libbinfmt$(LIBEXT)
-endif
 
 # Add libraries for the NX graphics sub-system
 

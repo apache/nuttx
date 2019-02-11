@@ -1081,6 +1081,7 @@ config SDCLONE_DISABLE
 config NFILE_DESCRIPTORS
 	int "Maximum number of file descriptors per task"
 	default 16
+	range 3 99999
 	---help---
 		The maximum number of file descriptors per task (one for each open)
 

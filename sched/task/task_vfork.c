@@ -317,23 +317,19 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
 
   /* Allocate a new task group with the same privileges as the parent */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_allocate(child, parent->flags);
   if (ret < 0)
     {
       goto errout_with_tcb;
     }
-#endif
 
   /* Associate file descriptors with the new task */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   ret = group_setuptaskfiles(child);
   if (ret < OK)
     {
       goto errout_with_tcb;
     }
-#endif
 
   /* Get the priority of the parent task */
 
@@ -430,14 +426,12 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 
   /* Now we have enough in place that we can join the group */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_initialize(child);
   if (ret < 0)
     {
       nxtask_vforkabort(child, -ret);
       return ERROR;
     }
-#endif
 
   /* Get the assigned pid before we start the task */
 

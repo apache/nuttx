@@ -1049,9 +1049,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                             size_t buflen, off_t offset)
 {
   FAR struct task_group_s *group = tcb->group;
-#if CONFIG_NFILE_DESCRIPTORS > 0 /* Guaranteed to be true */
   FAR struct file *file;
-#endif
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   FAR struct socket *socket;
 #endif
@@ -1066,7 +1064,6 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   remaining = buflen;
   totalsize = 0;
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 /* Guaranteed to be true */
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-8s %s\n",
                         "FD", "POS", "OFLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
@@ -1082,7 +1079,9 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   /* Examine each open file descriptor */
 
-  for (i = 0, file = group->tg_filelist.fl_files; i < CONFIG_NFILE_DESCRIPTORS; i++, file++)
+  for (i = 0, file = group->tg_filelist.fl_files;
+       i < CONFIG_NFILE_DESCRIPTORS;
+       i++, file++)
     {
       /* Is there an inode associated with the file descriptor? */
 
@@ -1102,7 +1101,6 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
             }
         }
     }
-#endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-2s %-3s %s\n",

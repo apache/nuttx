@@ -103,25 +103,21 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Create a new task group */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_allocate(ttcb, tcb->flags);
   if (ret < 0)
     {
       errcode = -ret;
       goto errout;
     }
-#endif
 
   /* Associate file descriptors with the new task */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   ret = group_setuptaskfiles(ttcb);
   if (ret < 0)
     {
       errcode = -ret;
       goto errout_with_group;
     }
-#endif
 
   /* Configure the user provided stack region */
 
@@ -143,22 +139,19 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Now we have enough in place that we can join the group */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_initialize(ttcb);
   if (ret < 0)
     {
       errcode = -ret;
       goto errout_with_group;
     }
-#endif
+
   return OK;
 
 errout_with_group:
-#ifdef HAVE_TASK_GROUP
   group_leave(tcb);
 
 errout:
-#endif
   set_errno(errcode);
   return ERROR;
 }

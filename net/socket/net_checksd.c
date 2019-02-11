@@ -63,7 +63,6 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET) && CONFIG_NFILE_DESCRIPTORS > 0
 int net_checksd(int sd, int oflags)
 {
   FAR struct socket *psock = sockfd_socket(sd);
@@ -84,5 +83,4 @@ int net_checksd(int sd, int oflags)
 
   return OK;
 }
-#endif /* CONIG_NET && CONFIG_NFILE_DESCRIPTORS > 0 */
 

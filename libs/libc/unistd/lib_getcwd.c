@@ -47,15 +47,7 @@
 
 #include "libc.h"
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifndef CONFIG_DISABLE_ENVIRON
 
 /****************************************************************************
  * Public Functions
@@ -129,4 +121,4 @@ FAR char *getcwd(FAR char *buf, size_t size)
   sched_unlock();
   return buf;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */
+#endif /* !CONFIG_DISABLE_ENVIRON */

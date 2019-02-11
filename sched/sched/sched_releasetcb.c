@@ -193,11 +193,9 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
       ret = up_addrenv_detach(tcb->group, tcb);
 #endif
 
-#ifdef HAVE_TASK_GROUP
       /* Leave the group (if we did not already leave in task_exithook.c) */
 
       group_leave(tcb);
-#endif
 
       /* And, finally, release the TCB itself */
 

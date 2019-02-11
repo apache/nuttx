@@ -49,8 +49,6 @@
 
 #include "libc.h"
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -294,4 +292,3 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
   return ntransferred;
 }
 
-#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0 */

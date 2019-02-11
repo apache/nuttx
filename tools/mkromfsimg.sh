@@ -115,26 +115,13 @@ if [ "X$disablescript" = "Xy" ]; then
     exit 1
 fi
 
-# We need at least 2 file descriptors 1 for the ROMFS mount and one for
-# FAT mount performed in rcS.  That still wouldn't be enough to to do much
-# with NSH
+# We need at least 5 file descriptors:  One for the ROMFS mount and one for
+# FAT mount performed in rcS, plus three for stdio.
 
-if [ -z "$ndescriptors" -o "$ndescriptors" -lt 2 ]; then
-    echo "No file descriptors have been allocated"
-    if [ "X$devconsole" = "Xy" ]; then
-        echo "Set CONFIG_NFILE_DESCRIPTORS to value greater than 4"
-    else
-        echo "Set CONFIG_NFILE_DESCRIPTORS to value greater than 1"
-    fi
-    exit 1
-fi
-
-# If a console is enabled, then three more file descriptors are required
-# for stdin, stdout, and stderr
-
-if [ "X$devconsole" = "Xy" -a "$ndescriptors" -lt 5 ]; then
+if [ -z "$ndescriptors" -o "$ndescriptors" -lt 5 ]; then
     echo "Insufficient file descriptors have been allocated"
     echo "Set CONFIG_NFILE_DESCRIPTORS to value greater than 4"
+    exit 1
 fi
 
 # ROMFS support is required, of course

@@ -157,13 +157,11 @@ int listen(int sockfd, int backlog)
        * descriptor used in the wrong context.
        */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
       if ((unsigned int)sockfd < CONFIG_NFILE_DESCRIPTORS)
         {
           errcode = ENOTSOCK;
         }
       else
-#endif
         {
           errcode = EBADF;
         }
