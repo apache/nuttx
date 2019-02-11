@@ -42,8 +42,6 @@
 #include <sched.h>
 #include "sched/sched.h"
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -64,6 +62,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET
 FAR struct socketlist *sched_getsockets(void)
 {
   FAR struct tcb_s *rtcb = this_task();
@@ -72,5 +71,6 @@ FAR struct socketlist *sched_getsockets(void)
   DEBUGASSERT(group);
   return &group->tg_socketlist;
 }
+#endif
 
-#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+

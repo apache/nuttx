@@ -52,10 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS < 1
-#  error CONFIG_NSOCKET_DESCRIPTORS must be greater than zero
-#endif
-
 #if CONFIG_NET_SOCKOPTS < 1
 #  error CONFIG_NET_SOCKOPTS required by this logic
 #endif

@@ -544,7 +544,7 @@ struct task_group_s
 #endif
 #endif
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   /* Sockets ********************************************************************/
 
   struct socketlist tg_socketlist;  /* Maps socket descriptor to socket         */
@@ -826,9 +826,9 @@ FAR struct filelist *sched_getfiles(void);
 FAR struct streamlist *sched_getstreams(void);
 #endif /* CONFIG_NFILE_STREAMS */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 FAR struct socketlist *sched_getsockets(void);
-#endif /* CONFIG_NSOCKET_DESCRIPTORS */
+#endif
 
 /********************************************************************************
  * Name: nxtask_starthook

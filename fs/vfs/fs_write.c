@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_TCP
 # include <sys/socket.h>
 #endif
 
@@ -149,7 +149,7 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_TCP
       /* Write to a socket descriptor is equivalent to send with flags == 0. */
 
       ret = nx_send(fd, buf, nbytes, 0);

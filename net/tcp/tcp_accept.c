@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_TCP)
+#ifdef CONFIG_NET_TCP
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -335,4 +335,4 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   return OK;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_TCP */
+#endif /* CONFIG_NET_TCP */

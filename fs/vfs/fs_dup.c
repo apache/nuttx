@@ -78,7 +78,7 @@ int dup(int fd)
     {
       /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor.  The errno value is not set. */

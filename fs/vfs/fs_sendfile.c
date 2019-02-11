@@ -103,7 +103,7 @@
 
 ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 {
-#if defined(CONFIG_NET_SENDFILE) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_SENDFILE
   /* Check the destination file descriptor:  Is it a (probable) file
    * descriptor?  Check the source file:  Is it a normal file?
    */

@@ -140,7 +140,7 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && !defined(CONFIG_SDCLONE_DISABLE)
+#if defined(CONFIG_NET) && !defined(CONFIG_SDCLONE_DISABLE)
 static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
@@ -178,9 +178,9 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
         }
     }
 }
-#else /* CONFIG_NSOCKET_DESCRIPTORS && !CONFIG_SDCLONE_DISABLE */
+#else /* CONFIG_NET && !CONFIG_SDCLONE_DISABLE */
 #  define sched_dupsockets(tcb)
-#endif /* CONFIG_NSOCKET_DESCRIPTORS && !CONFIG_SDCLONE_DISABLE */
+#endif /* CONFIG_NET && !CONFIG_SDCLONE_DISABLE */
 
 /****************************************************************************
  * Public Functions
@@ -217,7 +217,7 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 
   files_initlist(&group->tg_filelist);
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   /* Allocate socket descriptors for the TCB */
 
   net_initlist(&group->tg_socketlist);

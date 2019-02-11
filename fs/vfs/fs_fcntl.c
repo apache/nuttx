@@ -305,7 +305,7 @@ int fcntl(int fd, int cmd, ...)
     {
       /* No... check for operations on a socket descriptor */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. defer socket descriptor operations to net_vfcntl(). The

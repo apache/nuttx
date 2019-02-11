@@ -147,7 +147,7 @@ int fstat(int fd, FAR struct stat *buf)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       /* Let the networking logic handle the fstat() */
 
       ret = net_fstat(fd, buf);

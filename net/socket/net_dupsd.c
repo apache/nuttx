@@ -46,8 +46,6 @@
 
 #include "socket/socket.h"
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -156,4 +154,3 @@ int net_dupsd(int sockfd, int minsd)
   return psock_dupsd(sockfd_socket(sockfd), minsd);
 }
 
-#endif /* defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 */

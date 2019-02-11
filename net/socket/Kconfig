@@ -6,8 +6,9 @@
 menu "Socket Support"
 
 config NSOCKET_DESCRIPTORS
-	int "Number of socket descriptor"
+	int "Number of socket descriptors"
 	default 8
+	range 1 99999
 	---help---
 		Maximum number of socket descriptors per task/thread.
 

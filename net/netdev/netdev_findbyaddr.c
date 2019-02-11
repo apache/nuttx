@@ -39,7 +39,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <stdbool.h>
 #include <string.h>
@@ -345,4 +344,3 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
 }
 #endif /* CONFIG_NET_IPv6 */
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

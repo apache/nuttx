@@ -65,7 +65,7 @@
 
 #undef AIO_HAVE_PSOCK
 
-#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET_TCP
 #  define AIO_HAVE_PSOCK
 #endif
 

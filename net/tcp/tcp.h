@@ -63,8 +63,7 @@
 
 /* Conditions for support TCP poll/select operations */
 
-#if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
-    defined(CONFIG_NET_TCP_READAHEAD)
+#if !defined(CONFIG_DISABLE_POLL) 0 && defined(CONFIG_NET_TCP_READAHEAD)
 #  define HAVE_TCP_POLL
 #endif
 
@@ -312,7 +311,6 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 /* List of registered Ethernet device drivers.  You must have the network
  * locked in order to access this list.
  *
@@ -320,7 +318,6 @@ extern "C"
  */
 
 EXTERN struct net_driver_s *g_netdevices;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

@@ -193,26 +193,6 @@ int main(int argc, char **argv, char **envp)
   printf("#  define CONFIG_DISABLE_MQUEUE 1\n");
   printf("#endif\n\n");
 
-  printf("/* The correct way to disable socket support is to set the number of\n");
-  printf(" * socket descriptors to zero.\n");
-  printf(" */\n\n");
-  printf("#ifndef CONFIG_NSOCKET_DESCRIPTORS\n");
-  printf("#  define CONFIG_NSOCKET_DESCRIPTORS 0\n");
-  printf("#endif\n\n");
-
-  printf("/* There can be no network support with no socket descriptors */\n\n");
-  printf("#if CONFIG_NSOCKET_DESCRIPTORS <= 0\n");
-  printf("#  undef CONFIG_NET\n");
-  printf("#endif\n\n");
-
-  printf("/* Conversely, if there is no network support, there is no need for\n");
-  printf(" * socket descriptors\n");
-  printf(" */\n\n");
-  printf("#ifndef CONFIG_NET\n");
-  printf("#  undef  CONFIG_NSOCKET_DESCRIPTORS\n");
-  printf("#  define CONFIG_NSOCKET_DESCRIPTORS 0\n");
-  printf("#endif\n\n");
-
   printf("#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
   fclose(stream);
 

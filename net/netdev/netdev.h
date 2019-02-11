@@ -74,7 +74,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 /* List of registered Ethernet device drivers.  You must have the network
  * locked in order to access this list.
  *
@@ -82,7 +81,6 @@ extern "C"
  */
 
 EXTERN struct net_driver_s *g_netdevices;
-#endif
 
 #ifdef CONFIG_NETDEV_IFINDEX
 /* The set of network devices that have been registered.  This is used to
@@ -155,9 +153,7 @@ bool netdev_verify(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
-#endif
 
 /****************************************************************************
  * Name: netdev_foreach
@@ -177,8 +173,6 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
  ****************************************************************************/
 
 int netdev_foreach(netdev_callback_t callback, FAR void *arg);
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Name: netdev_findby_lipv4addr
@@ -265,7 +259,6 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
 FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
                                                  const net_ipv6addr_t ripaddr);
 #endif
-#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: netdev_findbyindex
@@ -368,9 +361,7 @@ unsigned int netdev_nametoindex(FAR const char *ifname);
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 FAR struct net_driver_s *netdev_default(void);
-#endif
 
 /****************************************************************************
  * Name: netdev_ipv4_txnotify
@@ -388,7 +379,6 @@ FAR struct net_driver_s *netdev_default(void);
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_NET_IPv4
 void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 #endif /* CONFIG_NET_IPv4 */
@@ -413,7 +403,6 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
                           FAR const net_ipv6addr_t ripaddr);
 #endif /* CONFIG_NET_IPv6 */
-#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Name: netdev_txnotify_dev
@@ -447,9 +436,7 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 int netdev_count(void);
-#endif
 
 /****************************************************************************
  * Name: netdev_ipv4_ifconf

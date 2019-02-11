@@ -142,7 +142,7 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       /* No.. If networking is enabled, read() is the same as recv() with
        * the flags parameter set to zero.
        */

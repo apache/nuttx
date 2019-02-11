@@ -45,7 +45,6 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 #ifdef CONFIG_NET
 /* Include network IOCTL definitions */
 
@@ -77,7 +76,6 @@
 #  include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 #endif /* CONFIG_WIRELESS_IEEE802154 */
-#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 /****************************************************************************
  * Pre-processor Definitions

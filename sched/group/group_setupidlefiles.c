@@ -85,7 +85,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 
   files_initlist(&group->tg_filelist);
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   /* Allocate socket descriptors for the TCB */
 
   net_initlist(&group->tg_socketlist);

@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <string.h>
 #include <errno.h>
@@ -89,4 +88,3 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
   return NULL;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

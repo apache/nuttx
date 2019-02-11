@@ -52,8 +52,6 @@
 #include "socket/socket.h"
 #include "usrsock/usrsock.h"
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -318,4 +316,3 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
   return psock_vfcntl(sockfd_socket(sockfd), cmd, ap);
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */

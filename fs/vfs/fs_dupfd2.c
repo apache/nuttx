@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 int fs_dupfd2(int fd1, int fd2)
 #else
 int dup2(int fd1, int fd2)

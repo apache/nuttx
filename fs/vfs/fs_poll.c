@@ -106,7 +106,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
     {
       /* Perform the socket ioctl */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           return net_poll(fd, fds, setup);

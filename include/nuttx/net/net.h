@@ -227,7 +227,7 @@ struct socket
 
 /* This defines a list of sockets indexed by the socket descriptor */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 struct socketlist
 {
   sem_t         sl_sem;      /* Manage access to the socket list */

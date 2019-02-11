@@ -46,7 +46,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 # include <nuttx/net/net.h>
 #endif
 
@@ -94,7 +94,7 @@ int close(int fd)
     {
       /* Close a socket descriptor */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = net_close(fd);

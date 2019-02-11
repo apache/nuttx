@@ -1050,7 +1050,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 {
   FAR struct task_group_s *group = tcb->group;
   FAR struct file *file;
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   FAR struct socket *socket;
 #endif
   size_t remaining;
@@ -1102,7 +1102,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         }
     }
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-2s %-3s %s\n",
                         "SD", "RF", "TYP", "FLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
@@ -1118,7 +1118,9 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
   /* Examine each open socket descriptor */
 
-  for (i = 0, socket = group->tg_socketlist.sl_sockets; i < CONFIG_NSOCKET_DESCRIPTORS; i++, socket++)
+  for (i = 0, socket = group->tg_socketlist.sl_sockets;
+       i < CONFIG_NSOCKET_DESCRIPTORS;
+       i++, socket++)
     {
       /* Is there an connection associated with the socket descriptor? */
 

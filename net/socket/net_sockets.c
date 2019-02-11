@@ -51,8 +51,6 @@
 
 #include "socket/socket.h"
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -295,4 +293,3 @@ FAR struct socket *sockfd_socket(int sockfd)
   return NULL;
 }
 
-#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */

@@ -48,8 +48,6 @@
 #include "utils/utils.h"
 #include "netdev/netdev.h"
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -177,4 +175,3 @@ int netdev_nextindex(int ifindex)
 }
 #endif
 
-#endif /* CONFIG_NSOCKET_DESCRIPTORS */

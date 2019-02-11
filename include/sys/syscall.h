@@ -270,11 +270,6 @@
  * enabled.
  */
 
-#ifndef CONFIG_NET
-#  undef CONFIG_NSOCKET_DESCRIPTORS
-#  define CONFIG_NSOCKET_DESCRIPTORS 0
-#endif
-
 #define SYS_close                    (__SYS_descriptors + 0)
 
 #ifdef CONFIG_LIBC_IOCTL_VARIADIC
@@ -524,7 +519,7 @@
 
 /* The following are defined only if networking AND sockets are supported */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 #  define SYS_accept                   (__SYS_network + 0)
 #  define SYS_bind                     (__SYS_network + 1)
 #  define SYS_connect                  (__SYS_network + 2)

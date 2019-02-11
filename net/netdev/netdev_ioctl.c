@@ -90,8 +90,6 @@
 #include "icmpv6/icmpv6.h"
 #include "route/route.h"
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1810,4 +1808,3 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
     }
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

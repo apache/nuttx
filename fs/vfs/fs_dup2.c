@@ -51,7 +51,7 @@
  * performed.
  */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
@@ -111,5 +111,5 @@ int dup2(int fd1, int fd2)
     }
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
+#endif /* CONFIG_NET */
 

@@ -47,7 +47,7 @@
 
 #include <net/if.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
 # include <nuttx/net/net.h>
 #endif
 
@@ -146,7 +146,7 @@ int ioctl(int fd, int req, unsigned long arg)
     {
       /* Perform the socket ioctl */
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#ifdef CONFIG_NET
       if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = netdev_ioctl(fd, req, arg);

@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <nuttx/net/netdev.h>
 
@@ -101,4 +100,3 @@ FAR struct net_driver_s *netdev_default(void)
   return ret;
 }
 
-#endif /* CONFIG_NET  */
