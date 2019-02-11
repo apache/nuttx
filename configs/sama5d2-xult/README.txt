@@ -803,15 +803,10 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the FLEXCOM4 for the serial console.
-       REVISIT:  This was intended to support an Arduino serial shield,
-       however, I think there are be problems with the FLEXCOM4 pins
-       at the at the Arduino connector.
-
-       It might be better to switch to USART1 (PD3 and PD4) which is
-       available at the "DBGU" RS-232 connector (J24).  This is easily
-       changed by reconfiguring to (1) enable a different serial
-       peripheral, and (2) selecting that serial peripheral as the
+    1. This configuration uses the UART1 (PD2 and PD3) for the serial
+       console.  USART1 is available at the "DBGU" RS-232 connector (J24).
+       This is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as the
        console device.
 
     2. By default, this configuration is set up to build on Windows

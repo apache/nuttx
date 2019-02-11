@@ -206,6 +206,9 @@
  *   ---- ------------------------ -------------
  */
 
+#define PIO_UART1_RXD     PIO_UART1_RXD_1
+#define PIO_UART1_TXD     PIO_UART1_TXD_1
+
 /* Standard UART on Arduino connector (J21) is FLEXCOM4.
  *
  *   ---- ------- -------------
@@ -236,7 +239,7 @@
 #define PIO_FLEXCOM3_IO0  PIO_FLEXCOM3_IO0_2
 #define PIO_FLEXCOM3_IO1  PIO_FLEXCOM3_IO1_2
 
-/* UARTs available of EXT1
+/* UARTs available on EXT1
  *
  *   ---- ------- -------------
  *   EXT1 BOARD      SAMA5D2
@@ -247,7 +250,7 @@
  *   ---- ------- ---- --------
  */
 
-/* UARTs available of EXT2
+/* UARTs available on EXT2
  *
  *   ---- ------- -------------
  *   EXT2 BOARD      SAMA5D2

@@ -2160,7 +2160,7 @@ o File system / Generic drivers (fs/, drivers/)
                (using pctl() instead sysctl()).  My objective was to be able
                to control the number of available file descriptors on a task-
                by-task basis.  The complexity due to the partitioning of
-               descriptor space in a range for file descriptors and a range
+               descriptor space into a range for file descriptors and a range
                for socket descriptors made this feature nearly impossible to
                implement.
   Status:      Open
