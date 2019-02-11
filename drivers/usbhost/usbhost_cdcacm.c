@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_cdcacm.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -181,6 +181,7 @@
 #endif
 
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/sd[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -302,7 +303,7 @@ struct usbhost_freestate_s
 
 /* Semaphores */
 
-static void usbhost_takesem(sem_t *sem);
+static void usbhost_takesem(FAR sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
 /* Memory allocation services */
@@ -343,11 +344,11 @@ static int  usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
 /* (Little Endian) Data helpers */
 
-static inline uint16_t usbhost_getle16(const uint8_t *val);
-static inline uint16_t usbhost_getbe16(const uint8_t *val);
-static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
+static inline uint16_t usbhost_getle16(FAR const uint8_t *val);
+static inline uint16_t usbhost_getbe16(FAR const uint8_t *val);
+static inline void usbhost_putle16(FAR uint8_t *dest, uint16_t val);
 #ifdef HAVE_CTRL_INTERFACE
-static void usbhost_putle32(uint8_t *dest, uint32_t val);
+static void usbhost_putle32(FAR uint8_t *dest, uint32_t val);
 #endif
 
 /* Transfer descriptor memory management */
@@ -471,7 +472,7 @@ static uint32_t g_devinuse;
  *
  ****************************************************************************/
 
-static void usbhost_takesem(sem_t *sem)
+static void usbhost_takesem(FAR sem_t *sem)
 {
   int ret;
 
@@ -540,7 +541,9 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
    */
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_cdcacm_s *)kmm_malloc(sizeof(struct usbhost_cdcacm_s));
+  priv = (FAR struct usbhost_cdcacm_s *)
+    kmm_malloc(sizeof(struct usbhost_cdcacm_s));
+
   uinfo("Allocated: %p\n", priv);
   return priv;
 }
@@ -563,7 +566,8 @@ static FAR struct usbhost_cdcacm_s *usbhost_allocclass(void)
 #if CONFIG_USBHOST_CDCACM_NPREALLOC > 0
 static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
 {
-  FAR struct usbhost_freestate_s *entry = (FAR struct usbhost_freestate_s *)usbclass;
+  FAR struct usbhost_freestate_s *entry =
+    (FAR struct usbhost_freestate_s *)usbclass;
   irqstate_t flags;
   DEBUGASSERT(entry != NULL);
 
@@ -690,7 +694,8 @@ static int usbhost_linecoding_send(FAR struct usbhost_cdcacm_s *priv)
   /* Initialize the control request */
 
   ctrlreq          = (FAR struct usb_ctrlreq_s *)priv->ctrlreq;
-  ctrlreq->type    = USB_DIR_OUT | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
+  ctrlreq->type    = USB_DIR_OUT | USB_REQ_TYPE_CLASS |
+                     USB_REQ_RECIPIENT_INTERFACE;
   ctrlreq->req     = ACM_SET_LINE_CODING;
 
   usbhost_putle16(ctrlreq->value, 0);
@@ -758,8 +763,9 @@ static void usbhost_notification_work(FAR void *arg)
           index = usbhost_getle16(inmsg->index);
           len   = usbhost_getle16(inmsg->len);
 
-          uinfo("type: %02x notification: %02x value: %04x index: %04x len: %04x\n",
-                 inmsg->type, inmsg->notification, value, index, len);
+          uinfo("type: %02x notification: %02x value: %04x index: %04x "
+                "len: %04x\n",
+                inmsg->type, inmsg->notification, value, index, len);
 
           /* We care only about the SerialState notification */
 
@@ -880,9 +886,10 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * UART buffer data transfer
- ************************************************************************************/
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_txdata_work
  *
@@ -1114,7 +1121,8 @@ static void usbhost_rxdata_work(FAR void *arg)
                * device was not disconnected.
                */
 
-              uerr("ERROR: DRVR_TRANSFER for packet failed: %d\n", (int)nread);
+              uerr("ERROR: DRVR_TRANSFER for packet failed: %d\n",
+                   (int)nread);
               break;
             }
 
@@ -1186,7 +1194,8 @@ static void usbhost_rxdata_work(FAR void *arg)
    */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->rxena && priv->rts && work_available(&priv->rxwork) && !priv->disconnected)
+  if (priv->rxena && priv->rts && work_available(&priv->rxwork) &&
+      !priv->disconnected)
 #else
   if (priv->rxena && work_available(&priv->rxwork) && !priv->disconnected)
 #endif
@@ -1320,9 +1329,9 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
-  FAR struct usbhost_epdesc_s bindesc;
-  FAR struct usbhost_epdesc_s boutdesc;
-  FAR struct usbhost_epdesc_s iindesc;
+  struct usbhost_epdesc_s bindesc;
+  struct usbhost_epdesc_s boutdesc;
+  struct usbhost_epdesc_s iindesc;
   int remaining;
   uint8_t found  = 0;
   uint8_t currif = 0;
@@ -1506,8 +1515,8 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
                 if (USB_ISEPIN(epdesc->addr))
                   {
 #ifdef HAVE_INTIN_ENDPOINT
-                    /* It is an IN interrupt endpoint.  There should be only one
-                     * interrupt IN endpoint.
+                    /* It is an IN interrupt endpoint.  There should be only
+                     * one interrupt IN endpoint.
                      */
 
                     if ((found & USBHOST_INTIN_FOUND) != 0)
@@ -1629,7 +1638,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
  *
  ****************************************************************************/
 
-static inline uint16_t usbhost_getle16(const uint8_t *val)
+static inline uint16_t usbhost_getle16(FAR const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
@@ -1648,7 +1657,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val)
  *
  ****************************************************************************/
 
-static inline uint16_t usbhost_getbe16(const uint8_t *val)
+static inline uint16_t usbhost_getbe16(FAR const uint8_t *val)
 {
   return (uint16_t)val[0] << 8 | (uint16_t)val[1];
 }
@@ -1668,7 +1677,7 @@ static inline uint16_t usbhost_getbe16(const uint8_t *val)
  *
  ****************************************************************************/
 
-static void usbhost_putle16(uint8_t *dest, uint16_t val)
+static void usbhost_putle16(FAR uint8_t *dest, uint16_t val)
 {
   dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
   dest[1] = val >> 8;
@@ -1690,7 +1699,7 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
  ****************************************************************************/
 
 #ifdef HAVE_CTRL_INTERFACE
-static void usbhost_putle32(uint8_t *dest, uint32_t val)
+static void usbhost_putle32(FAR uint8_t *dest, uint32_t val)
 {
   /* Little endian means LS halfword first in byte stream */
 
@@ -1911,7 +1920,6 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
 
           /* Set up the serial lower-half interface */
 
-
           uartdev              = &priv->uartdev;
           uartdev->recv.size   = CONFIG_USBHOST_CDCACM_RXBUFSIZE;
           uartdev->recv.buffer = priv->rxbuffer;
@@ -1950,6 +1958,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
 /****************************************************************************
  * struct usbhost_class_s methods
  ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_connect
  *
@@ -1970,8 +1979,8 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
- *   NOTE that the class instance remains valid upon return with a failure.  It is
- *   the responsibility of the higher level enumeration logic to call
+ *   NOTE that the class instance remains valid upon return with a failure.
+ *   It is the responsibility of the higher level enumeration logic to call
  *   CLASS_DISCONNECTED to free up the class driver resources.
  *
  * Assumptions:
@@ -2040,7 +2049,8 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 #endif
 
   /* Register the lower half serial instance with the upper half serial
-   * driver */
+   * driver.
+   */
 
   usbhost_mkdevname(priv, devname);
   uinfo("Register device: %s\n", devname);
@@ -2114,7 +2124,7 @@ errout:
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *usbclass)
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_cdcacm_s *priv = (FAR struct usbhost_cdcacm_s *)usbclass;
   FAR struct usbhost_hubport_s *hport;
@@ -2235,9 +2245,9 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
   flags = enter_critical_section();
   if (priv->disconnected)
     {
-      /* No... the block driver is no longer bound to the class.  That means that
-       * the USB CDC/ACM device is no longer connected.  Refuse any further
-       * attempts to open the driver.
+      /* No... the block driver is no longer bound to the class.  That means
+       * that the USB CDC/ACM device is no longer connected.  Refuse any
+       * further attempts to open the driver.
        */
 
       ret = -ENODEV;
@@ -2313,14 +2323,15 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
  * Name: usbhost_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -2353,16 +2364,20 @@ static void usbhost_detach(FAR struct uart_dev_s *uartdev)
 
 static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  struct inode *inode;
-  struct usbhost_cdcacm_s *priv;
-  int ret;
+  FAR struct inode *inode;
+  FAR struct usbhost_cdcacm_s *priv;
+  FAR struct uart_dev_s *uartdev;
+  int ret = 0;
 
   uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct usbhost_cdcacm_s *)inode->i_private;
+  uartdev = (FAR struct uart_dev_s *)inode->i_private;
+
+  DEBUGASSERT(uartdev && uartdev->priv);
+  priv  = (FAR struct usbhost_cdcacm_s *)uartdev->priv;
 
   /* Check if the CDC/ACM device is still connected */
 
@@ -2423,7 +2438,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
               ;
 
-            switch (priv->bits)
+            switch (priv->nbits)
               {
               case 5:
                 termiosp->c_cflag |= CS5;
@@ -2467,7 +2482,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 priv->parity = 0;
               }
 
-            priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+            priv->stop2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
             priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
@@ -2476,23 +2491,23 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
 
-            switch (termiosp->c_flag & CSIZE)
+            switch (termiosp->c_cflag & CSIZE)
               {
-              case C5:
-                priv->bits = 5;
+              case CS5:
+                priv->nbits = 5;
                 break;
 
-              case C6:
-                priv->bits = 6;
+              case CS6:
+                priv->nbits = 6;
                 break;
 
-              case C7:
-                priv->bits = 7;
+              case CS7:
+                priv->nbits = 7;
                 break;
 
               default:
-              case C8:
-                priv->bits = 8;
+              case CS8:
+                priv->nbits = 8;
                 break;
               }
 
@@ -2572,7 +2587,7 @@ static void usbhost_rxint(FAR struct uart_dev_s *uartdev, bool enable)
       (void)work_cancel(LPWORK, &priv->rxwork);
 
       /* Restart immediate RX data reception work (unless RX flow control
-       * is in* effect.
+       * is in effect.
        */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
