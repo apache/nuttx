@@ -363,7 +363,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 
 /* The following are defined only if networking AND sockets are supported */
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)
+#ifdef CONFIG_NET
   SYSCALL_LOOKUP(accept,                   3, STUB_accept)
   SYSCALL_LOOKUP(bind,                     3, STUB_bind)
   SYSCALL_LOOKUP(connect,                  3, STUB_connect)
