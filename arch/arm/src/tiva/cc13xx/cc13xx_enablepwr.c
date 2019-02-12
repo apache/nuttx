@@ -70,12 +70,12 @@ void cc13xx_periph_enablepwr(uint32_t peripheral)
 {
   irqstate_t flags;
   uint32_t domain;
-  int dndx;
-  int pndx;
+  unsigned int dndx;
+  unsigned int pndx;
 
   dndx   = PRCM_DOMAIN_INDEX(peripheral);
   pndx   = PRCM_PERIPH_ID(peripheral);
-  domain = (pndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
+  domain = (dndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
 
   /* Remember that this peripheral needs power in this domain */
 

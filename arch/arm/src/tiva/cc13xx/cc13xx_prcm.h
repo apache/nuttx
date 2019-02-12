@@ -509,6 +509,9 @@ static inline void prcm_cacheretention_disable(void)
  *                modes are:{PRCM_RUN_MODE, PRCM_SLEEP_MODE, or
  *                PRCM_DEEP_SLEEP_MODE}
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_infclock_configure(enum prcm_clkdivider_e clkdiv,
@@ -534,6 +537,9 @@ void prcm_infclock_configure(enum prcm_clkdivider_e clkdiv,
  *   mstdiv    - The desired master clock divider.
  *   worddiv   - The desired word clock divider.
  *   bitdiv    - The desired bit clock divider.
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
@@ -568,6 +574,9 @@ void prcm_audioclock_manual(uint32_t clkconfig, uint32_t mstdiv,
  *                rate configurations are: {I2S_SAMPLE_RATE_16K,
  *                I2S_SAMPLE_RATE_24K, I2S_SAMPLE_RATE_32K, or
  *                I2S_SAMPLE_RATE_48K}
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
@@ -626,6 +635,9 @@ void prcm_audioclock_configure(uint32_t clkconfig,
  *             5) PRCM_DOMAIN_SYSBUS
  *             6) PRCM_DOMAIN_CPU
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_powerdomain_on(uint32_t domains);
@@ -651,6 +663,9 @@ void prcm_powerdomain_on(uint32_t domains);
  *             5) PRCM_DOMAIN_SYSBUS
  *             6) PRCM_DOMAIN_CPU
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_powerdomain_off(uint32_t domains);
@@ -673,6 +688,9 @@ void prcm_powerdomain_off(uint32_t domains);
  * Returned Value
  *    - True:  The specified domains are all powered up.
  *    - False: One or more of the domains is powered down.
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
@@ -705,6 +723,9 @@ bool prcm_powerdomain_status(uint32_t domains);
  *   peripheral - The peripheral to enable. This is an encoded value.  See the
  *                PRCRM_PERIPH_* definitions for available encodings.
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_periph_runenable(uint32_t peripheral);
@@ -732,6 +753,9 @@ void prcm_periph_runenable(uint32_t peripheral);
  *   peripheral - The peripheral to enable. This is an encoded value.  See the
  *                PRCRM_PERIPH_* definitions for available encodings.
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_periph_rundisable(uint32_t peripheral);
@@ -757,6 +781,9 @@ void prcm_periph_rundisable(uint32_t peripheral);
  *   peripheral - The peripheral to enable in sleep mode. This is an encoded
  *                value.  See the PRCRM_PERIPH_* definitions for available
  *                encodings.
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
@@ -785,6 +812,9 @@ void prcm_periph_sleepenable(uint32_t peripheral);
  *                value.  See the PRCRM_PERIPH_* definitions for available
  *                encodings.
  *
+ * Returned Value:
+ *   None
+ *
  ******************************************************************************/
 
 void prcm_periph_sleepdisable(uint32_t peripheral);
@@ -810,6 +840,9 @@ void prcm_periph_sleepdisable(uint32_t peripheral);
  *   peripheral - The peripheral to ensable in deep sleep mode. This is an
  *                encoded value.  See the PRCRM_PERIPH_* definitions for
  *                available encodings.
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
@@ -839,6 +872,9 @@ void prcm_periph_deepsleepenable(uint32_t peripheral);
  *   peripheral - The peripheral to disable in deep sleep mode. This is an
  *                encoded value.  See the PRCRM_PERIPH_* definitions for
  *                available encodings.
+ *
+ * Returned Value:
+ *   None
  *
  ******************************************************************************/
 
