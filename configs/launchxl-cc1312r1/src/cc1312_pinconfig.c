@@ -51,18 +51,18 @@
 /* UART0:
  *
  * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
+ * UART0 (DIO2_RXD and DIO3_TXD).
  */
 
 const struct cc13xx_pinconfig_s g_gpio_uart0_rx =
 {
-  .gpio = GPIO_DIO(0),
+  .gpio = GPIO_DIO(2),
   .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_RX) | IOC_STD_INPUT
 };
 
 const struct cc13xx_pinconfig_s g_gpio_uart0_tx =
 {
-  .gpio = GPIO_DIO(1),
+  .gpio = GPIO_DIO(3),
   .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_UART0_TX) | IOC_STD_OUTPUT
 };
 #endif

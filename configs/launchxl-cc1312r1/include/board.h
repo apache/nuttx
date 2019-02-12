@@ -126,7 +126,7 @@
 /* UART0:
  *
  * The on-board XDS110 Debugger provide a USB virtual serial console using
- * UART0 (PA0/U0RX and PA1/U0TX).
+ * UART0 (DIO2_RXD and DIO3_TXD).
  */
 
 #  define GPIO_UART0_RX &g_gpio_uart0_rx

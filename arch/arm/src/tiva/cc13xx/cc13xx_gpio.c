@@ -48,15 +48,11 @@
 #include <nuttx/irq.h>
 
 #include "up_arch.h"
-#include "tiva_enablepwr.h"
-#include "tiva_enableclks.h"
 #include "tiva_gpio.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static bool g_gpio_powered;
 
 /****************************************************************************
  * Public Functions
@@ -67,6 +63,7 @@ static bool g_gpio_powered;
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *   NOTE: Power and clocking provided in __start().
  *
  ****************************************************************************/
 
@@ -81,17 +78,6 @@ int tiva_configgpio(pinconfig_t pinconfig)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = spin_lock_irqsave();
-
-  /* Enable power and clocking for this GPIO peripheral if this is the first
-   * GPIO pin configured.
-   */
-
-  if (!g_gpio_powered)
-    {
-      tiva_gpio_enablepwr();
-      tiva_gpio_enableclk();
-      g_gpio_powered = true;
-    }
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
   /* Mask and clear any pending GPIO interrupt */

@@ -21,21 +21,30 @@ Status
     development.  Serious board development will occur later.  Board
     support is missing LED and button support.
   2019-02-10:  Figured out how to connect J-Link and began debug.
-  2019-02-12:  Now hard-faults in tiva_lowsetup() here:
+  2019-02-12:  A little progress.  I do make it all the way into NSH:
 
-      352       ctl = getreg32(TIVA_CONSOLE_BASE + TIVA_UART_CTL_OFFSET);
+      ABCF
+      nx_start: Entry
+      uart_register: Registering /dev/console
+      uart_register: Registering /dev/ttyS0
+      work_hpstart: Starting high-priority kernel worker thread(s)
+      up_release_pending: From TCB=20000c00
+      nx_start_application: Starting init thread
 
-    Most likely UART0 clocking is not being enabled correctly.
+      NuttShell (NSH) NuttX-7.28
+      nsh> nx_start: CPU0: Beginning Idle Loop
+
+    But things are not very stable and I do not get any console input.
 
 Serial Console
 ==============
 
   The on-board XDS110 Debugger provide a USB virtual serial console using
-  UART0 (PA0/U0RX and PA1/U0TX).
+  UART0 (DIO2_RXD and DIO3_TXD).
 
   A J-Link debugger is used (see below), then the RXD/TXD jumper pins can
-  be used to support a serial console through appropriate TTL level adapater
-  (RS-232 or USB serial).
+  be used to support a serial console through these same pins via an
+  appropriate TTL level adapater (RS-232 or USB serial).
 
 LEDs and Buttons
 ================
@@ -133,5 +142,24 @@ Using J-Link
   NOTE:  When connecting the J-Link GDB server, the interface must be set to
   JTAG, not SWD as you might expect.
 
-  The RXD/TXD pins. PA0/U0RX and PA1/U0TX, can then support a Serial console
+  The RXD/TXD pins, DIO2_RXD and DIO3_TXD, can then support a Serial console
   using the appropriate TTL adapter (TTL to RS-232 or TTL to USB serial).
+
+  One odd behavior that I have found is after a reset from the J-Link, the
+  SP and PC registers are not automatically set and I had to manually set
+  them as shown below:
+
+    (gdb) target remote localhost:2331
+    (gdb) mon reset
+    (gdb) mon halt
+    (gdb) file nuttx
+    (gdb) mon memu32 0
+    Reading from address 0x00000000 (Data = 0x20001950)
+    (gdb) mon memu32 4
+    Reading from address 0x00000004 (Data = 0x00000139)
+    (gdb) mon reg sp 0x20001950
+    Writing register (SP = 0x20001950)
+    (gdb) mon reg pc 0x00000139
+    Writing register (PC = 0x00000139)
+    (gdb) n
+    232       cc13xx_trim_device();
