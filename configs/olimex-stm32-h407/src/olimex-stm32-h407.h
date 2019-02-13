@@ -115,20 +115,6 @@
 #    define SDIO_MINOR 0
 #  endif
 
-  /* SD card bringup does not work if performed on the IDLE thread because it
-   * will cause waiting.  Use either:
-   *
-   *  CONFIG_LIB_BOARDCTL=y, OR
-   *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
-   */
-
-#  if defined(CONFIG_BOARD_INITIALIZE) && !defined(CONFIG_LIB_BOARDCTL) && \
-     !defined(CONFIG_BOARD_INITTHREAD)
-#    warning SDIO initialization cannot be perfomed on the IDLE thread
-#    undef HAVE_SDIO
-#  endif
-#endif
-
 /* Check if we can support the RTC driver */
 
 #if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)

@@ -138,19 +138,6 @@
 #    define SDIO_MINOR 0
 #  endif
 
-  /* SD card bringup does not work if performed on the IDLE thread because it
-   * will cause waiting.  Use either:
-   *
-   *  CONFIG_LIB_BOARDCTL=y, OR
-   *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
-   */
-
-#  if defined(CONFIG_BOARD_INITIALIZE) && !defined(CONFIG_BOARD_INITTHREAD)
-#    warning "SDIO initialization cannot be perfomed on the IDLE thread"
-#    undef HAVE_SDIO
-#  endif
-#endif
-
 /* The CS43L22 depends on the CS43L22 driver, I2C1, and I2S3 support */
 
 #if !defined(CONFIG_AUDIO_CS43L22) || !defined(CONFIG_STM32_I2C1) || \
