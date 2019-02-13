@@ -336,13 +336,15 @@ static inline void nx_start_application(void)
  *
  ****************************************************************************/
 
-static inline int nx_start_task(int argc, FAR char **argv)
+#ifdef CONFIG_BOARD_INITIALIZE
+static int nx_start_task(int argc, FAR char **argv)
 {
   /* Do the board/application initialization and exit */
 
   nx_start_application();
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nx_create_initthread
@@ -363,6 +365,7 @@ static inline int nx_start_task(int argc, FAR char **argv)
 
 static inline void nx_create_initthread(void)
 {
+#ifdef CONFIG_BOARD_INITIALIZE
   int pid;
 
   /* Do the board/application initialization on a separate thread of
@@ -374,6 +377,11 @@ static inline void nx_create_initthread(void)
                       (main_t)nx_start_task, (FAR char * const *)NULL);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
+#else
+  /* Do the board/application initialization on this thread of execution. */
+
+  nx_start_application();
+#endif
 }
 
 /****************************************************************************
