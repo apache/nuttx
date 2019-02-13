@@ -123,7 +123,6 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
 #  elif CONFIG_NSH_MMCSDSLOTNO != 0
@@ -137,6 +136,7 @@
 #  else
 #    define SDIO_MINOR 0
 #  endif
+#endif
 
 /* The CS43L22 depends on the CS43L22 driver, I2C1, and I2S3 support */
 

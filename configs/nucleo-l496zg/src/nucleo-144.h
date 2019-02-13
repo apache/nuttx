@@ -139,7 +139,6 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-
 #  if defined(CONFIG_STM32L4_SDMMC1)
 #    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
 #  endif
@@ -154,6 +153,7 @@
 #  else
 #    define SDIO_MINOR 0
 #  endif
+#endif
 
 /* USB OTG FS
  *

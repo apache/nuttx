@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #define HAVE_USBDEV     1
@@ -103,7 +104,6 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning Only one MMC/SD slot, slot 0
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
@@ -114,6 +114,7 @@
 #  else
 #    define SDIO_MINOR 0
 #  endif
+#endif
 
 /* Check if we can support the RTC driver */
 
