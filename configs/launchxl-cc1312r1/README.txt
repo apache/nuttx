@@ -21,20 +21,9 @@ Status
     development.  Serious board development will occur later.  Board
     support is missing LED and button support.
   2019-02-10:  Figured out how to connect J-Link and began debug.
-  2019-02-12:  A little progress.  I do make it all the way into NSH:
-
-      ABCF
-      nx_start: Entry
-      uart_register: Registering /dev/console
-      uart_register: Registering /dev/ttyS0
-      work_hpstart: Starting high-priority kernel worker thread(s)
-      up_release_pending: From TCB=20000c00
-      nx_start_application: Starting init thread
-
-      NuttShell (NSH) NuttX-7.28
-      nsh> nx_start: CPU0: Beginning Idle Loop
-
-    But things are not very stable and I do not get any console input.
+  2019-02-12:  A little progress.  I do make it all the way into NSH, but
+    with no console input.
+  2019-02-13:  NSH is now fully functional.
 
 Serial Console
 ==============

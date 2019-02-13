@@ -132,7 +132,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
       /* Configure the GPIO as an output */
 
       regval  = getreg32(TIVA_GPIO_DOE);
-      regval |= ~(1 << dio);
+      regval |= (1 << dio);
       putreg32(regval, TIVA_GPIO_DOE);
     }
 

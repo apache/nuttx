@@ -130,32 +130,32 @@
 
 #define IOC_IOCFG_PORTID_SHIFT     (0)       /* Bits 0-5:  Selects DIO usage */
 #define IOC_IOCFG_PORTID_MASK      (0x3f << IOC_IOCFG_PORTID_SHIFT)
-#  define IOC_IOCFG_PORTID(n)        ((uint32_t)(n) << IOC_IOCFG_PORTID_SHIFT) /* See PORT ID definitions */
+#  define IOC_IOCFG_PORTID(n)      ((uint32_t)(n) << IOC_IOCFG_PORTID_SHIFT) /* See PORT ID definitions */
 #define IOC_IOCFG_IOEV_MCU_WUEN    (1 << 6)  /* Bit 6:  Input edge asserts MCU_WU event */
 #define IOC_IOCFG_IOEV_RTCEN       (1 << 7)  /* Bit 7:  Input edge asserts RTC event */
 #define IOC_IOCFG_IOSTR_SHIFT      (8)       /* Bits 8-9: I/O drive strength */
 #define IOC_IOCFG_IOSTR_MASK       (3 << IOC_IOCFG_IOSTR_SHIFT)
-#  define IOC_IOCFG_IOSTR_AUTO        (0 << IOC_IOCFG_IOSTR_SHIFT) /* Automatic drive strength */
-#  define IOC_IOCFG_IOSTR_MIN         (1 << IOC_IOCFG_IOSTR_SHIFT) /* Minimum drive strength */
-#  define IOC_IOCFG_IOSTR_MED         (2 << IOC_IOCFG_IOSTR_SHIFT) /* Medium drive strength */
-#  define IOC_IOCFG_IOSTR_MAX         (3 << IOC_IOCFG_IOSTR_SHIFT) /* Maximum drive strength */
+#  define IOC_IOCFG_IOSTR_AUTO     (0 << IOC_IOCFG_IOSTR_SHIFT) /* Automatic drive strength */
+#  define IOC_IOCFG_IOSTR_MIN      (1 << IOC_IOCFG_IOSTR_SHIFT) /* Minimum drive strength */
+#  define IOC_IOCFG_IOSTR_MED      (2 << IOC_IOCFG_IOSTR_SHIFT) /* Medium drive strength */
+#  define IOC_IOCFG_IOSTR_MAX      (3 << IOC_IOCFG_IOSTR_SHIFT) /* Maximum drive strength */
 #define IOC_IOCFG_IOCURR_SHIFT     (10)      /* Bits 10-11: I/O current mode */
 #define IOC_IOCFG_IOCURR_MASK      (3 << IOC_IOCFG_IOCURR_SHIFT)
-#  define IOC_IOCFG_IOCURR_2MA       (0 << IOC_IOCFG_IOCURR_SHIFT) /* Extended-Current (EC) mode */
-#  define IOC_IOCFG_IOCURR_4MA       (1 << IOC_IOCFG_IOCURR_SHIFT) /* High-Current (HC) mode */
-#  define IOC_IOCFG_IOCURR_8MA       (2 << IOC_IOCFG_IOCURR_SHIFT) /* Low-Current (LC) mode */
+#  define IOC_IOCFG_IOCURR_2MA     (0 << IOC_IOCFG_IOCURR_SHIFT) /* Extended-Current (EC) mode */
+#  define IOC_IOCFG_IOCURR_4MA     (1 << IOC_IOCFG_IOCURR_SHIFT) /* High-Current (HC) mode */
+#  define IOC_IOCFG_IOCURR_8MA     (2 << IOC_IOCFG_IOCURR_SHIFT) /* Low-Current (LC) mode */
 #define IOC_IOCFG_SLEW_RED         (1 << 12) /* Bit 12:  Reduces output slew rate */
 #define IOC_IOCFG_PULLCTL_SHIFT    (13)      /* Bits 13-14: Pull Control */
 #define IOC_IOCFG_PULLCTL_MASK     (3 << IOC_IOCFG_PULLCTL_SHIFT)
-#  define IOC_IOCFG_PULLCTL_DIS      (3 << IOC_IOCFG_PULLCTL_SHIFT) /* No pull */
-#  define IOC_IOCFG_PULLCTL_DWN      (1 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull down */
-#  define IOC_IOCFG_PULLCTL_UP       (2 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull up */
+#  define IOC_IOCFG_PULLCTL_DIS    (3 << IOC_IOCFG_PULLCTL_SHIFT) /* No pull */
+#  define IOC_IOCFG_PULLCTL_DWN    (1 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull down */
+#  define IOC_IOCFG_PULLCTL_UP     (2 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull up */
 #define IOC_IOCFG_EDGEDET_SHIFT    (16)      /* Bits 16-17: Enable edge events generation */
 #define IOC_IOCFG_EDGEDET_MASK     (3 << IOC_IOCFG_EDGEDET_SHIFT)
-#  define IOC_IOCFG_EDGEDET_NONE     (0 << IOC_IOCFG_EDGEDET_SHIFT) /* No edge detection */
-#  define IOC_IOCFG_EDGEDET_NEG      (1 << IOC_IOCFG_EDGEDET_SHIFT) /* Negative edge detection */
-#  define IOC_IOCFG_EDGEDET_POS      (2 << IOC_IOCFG_EDGEDET_SHIFT) /* Positive edge detection */
-#  define IOC_IOCFG_EDGEDET_BOTH     (3 << IOC_IOCFG_EDGEDET_SHIFT) /* Both edge detection */
+#  define IOC_IOCFG_EDGEDET_NONE   (0 << IOC_IOCFG_EDGEDET_SHIFT) /* No edge detection */
+#  define IOC_IOCFG_EDGEDET_NEG    (1 << IOC_IOCFG_EDGEDET_SHIFT) /* Negative edge detection */
+#  define IOC_IOCFG_EDGEDET_POS    (2 << IOC_IOCFG_EDGEDET_SHIFT) /* Positive edge detection */
+#  define IOC_IOCFG_EDGEDET_BOTH   (3 << IOC_IOCFG_EDGEDET_SHIFT) /* Both edge detection */
 #define IOC_IOCFG_EDGE_IRQEN       (1 << 18) /* Bit 18: Enable interrupt generation */
 #define IOC_IOCFG_IOEV_AON_PROG0   (1 << 21) /* Bit 21: Input edge asserts AON_PROG0 */
 #define IOC_IOCFG_IOEV_AON_PROG1   (1 << 22) /* Bit 22: Input edge asserts AON_PROG1 */
@@ -170,11 +170,11 @@
 #  define IOC_IOCFG_IOMODE_OPENSRCINV (7 << IOC_IOCFG_IOMODE_SHIFT) /* Open source, inverted I/O */
 #define IOC_IOCFG_WUCFG_SHIFT      (27)      /* Bits 27-28:  Wakeup Configuration */
 #define IOC_IOCFG_WUCFG_MASK       (3 << IOC_IOCFG_WUCFG_SHIFT)
-#  define IOC_IOCFG_WUCFG_NONE       (0 << IOC_IOCFG_WUCFG_SHIFT) /* 0, 1: Wakeup disabled */
-#  define IOC_IOCFG_WUCFG_ENABLE     (2 << IOC_IOCFG_WUCFG_SHIFT) /* 2, 3: Wakeup enabled */
-#  define IOC_IOCFG_WUCFG_WAKEUPL    (2 << IOC_IOCFG_WUCFG_SHIFT) /* Wakeup on transition low */
-#  define IOC_IOCFG_WUCFG_WEKUPH     (3 << IOC_IOCFG_WUCFG_SHIFT) /* Wakeup on transition high */
-#define IOC_IOCFG_IE               (1 >> 29) /* Bit 29: Input enable */
+#  define IOC_IOCFG_WUCFG_NONE     (0 << IOC_IOCFG_WUCFG_SHIFT) /* 0, 1: Wakeup disabled */
+#  define IOC_IOCFG_WUCFG_ENABLE   (2 << IOC_IOCFG_WUCFG_SHIFT) /* 2, 3: Wakeup enabled */
+#  define IOC_IOCFG_WUCFG_WAKEUPL  (2 << IOC_IOCFG_WUCFG_SHIFT) /* 2: Wakeup on transition low */
+#  define IOC_IOCFG_WUCFG_WEKUPH   (3 << IOC_IOCFG_WUCFG_SHIFT) /* 3: Wakeup on transition high */
+#define IOC_IOCFG_IE               (1 << 29) /* Bit 29: Input enable */
 #define IOC_IOCFG_HYSTEN           (1 << 30) /* Bit 30: Input hysteresis enable */
 
 /* PORTID definitions */
