@@ -43,7 +43,7 @@ CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c
 CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
 CSRCS += lib_memsostream.c lib_lowoutstream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
-CSRCS += lib_sscanf.c lib_libnoflush.c lib_libsnoflush.c
+CSRCS += lib_sscanf.c lib_libsscanf.c lib_libnoflush.c lib_libsnoflush.c
 
 ifeq ($(CONFIG_NANO_PRINTF),y)
 
@@ -78,7 +78,7 @@ CSRCS += lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c
 CSRCS += lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
 CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
 CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
-CSRCS += lib_clearerr.c
+CSRCS += lib_clearerr.c lib_scanf.c lib_fscanf.c lib_vfscanf.c
 
 endif
 

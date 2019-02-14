@@ -1,9 +1,8 @@
 /****************************************************************************
- * libs/libc/stdio/lib_sscanf.c
+ * libs/libc/stdio/lib_fscanf.c
  *
- *   Copyright (C) 2007-2009, 2011, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Johannes Schock
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Johannes Schock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,33 +38,25 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <stdarg.h>
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * sscanf
+ * Name: fscanf
  ****************************************************************************/
 
-int sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...)
+int fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
 {
-  struct lib_meminstream_s meminstream;
   va_list ap;
   int n;
 
-  /* Initialize a memory stream to write to the buffer */
-
-  lib_meminstream((FAR struct lib_meminstream_s *)&meminstream, buf,
-                  LIB_BUFLEN_UNKNOWN);
-
-  /* Then let lib_vsscanf do the real work */
+  /* vfprintf into the stream */
 
   va_start(ap, fmt);
-  n = lib_vsscanf((FAR struct lib_instream_s *)&meminstream.public, NULL,
-                  fmt, ap);
+  n = vfscanf(stream, fmt, ap);
   va_end(ap);
+
   return n;
 }

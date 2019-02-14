@@ -1,7 +1,7 @@
 /****************************************************************************
  * /libs/libc/stdlib/lib_strtoull.c
  *
- *   Copyright (C) 2009, 2010, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2010, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,7 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
   unsigned long long accum = 0;
   unsigned long long prev;
   int value;
+  char sign = 0;
 
   if (nptr)
     {
@@ -80,40 +81,62 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
 
       lib_skipspace(&nptr);
 
-      /* Check for unspecified base */
+      /* Check for leading + or - already done for strtol */
+
+      if (*nptr == '-' || *nptr == '+')
+        {
+          sign = *nptr;
+          nptr++;
+        }
+
+      /* Check for unspecified or incorrect base */
 
       base = lib_checkbase(base, &nptr);
 
       if (base < 0)
         {
           set_errno(EINVAL);
-          return 0;
+          accum = 0;
         }
-
-      /* Accumulate each "digit" */
-
-      while (lib_isbasedigit(*nptr, base, &value))
+      else
         {
-          prev  = accum;
-          accum = accum*base + value;
-          nptr++;
+          /* Accumulate each "digit" */
 
-          /* Check for overflow */
-
-          if (accum < prev)
+          while (lib_isbasedigit(*nptr, base, &value))
             {
-              set_errno(ERANGE);
-              accum = ULLONG_MAX;
-              break;
+              prev = accum;
+              accum = accum * base + value;
+              nptr++;
+
+              /* Check for overflow */
+
+              if (accum < prev)
+                {
+                  set_errno(ERANGE);
+                  accum = ULLONG_MAX;
+                  break;
+                }
+            }
+
+          if (sign == '-')
+            {
+              accum = (~accum) + 1;
             }
         }
+    }
 
-      /* Return the final pointer to the unused value */
+  /* Return the final pointer to the unused value */
 
-      if (endptr)
+  if (endptr)
+    {
+      if (sign)
         {
-          *endptr = (char *)nptr;
+          if (*(nptr - 1) == sign)
+            {
+              nptr--;
+            }
         }
+      *endptr = (FAR char *)nptr;
     }
 
   return accum;

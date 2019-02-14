@@ -459,6 +459,19 @@ int lib_sprintf(FAR struct lib_outstream_s *obj,
 int lib_vsprintf(FAR struct lib_outstream_s *obj,
                  FAR const IPTR char *src, va_list ap);
 
+/****************************************************************************
+ * Name: lib_sscanf and lib_vsscanf
+ *
+ * Description:
+ *  Stream-oriented versions of sscanf and vsscanf.
+ *
+ ****************************************************************************/
+
+int lib_sscanf(FAR struct lib_instream_s *obj,
+                FAR const IPTR char *fmt, ...);
+int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
+                 FAR const IPTR char *src, va_list ap);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

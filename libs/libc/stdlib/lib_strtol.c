@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_strtol.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -74,7 +70,8 @@
 long strtol(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long accum = 0;
-  bool negate = false;
+  long retval = 0;
+  char sign = 0;
 
   if (nptr)
     {
@@ -84,13 +81,9 @@ long strtol(FAR const char *nptr, FAR char **endptr, int base)
 
       /* Check for leading + or - */
 
-      if (*nptr == '-')
+      if (*nptr == '-' || *nptr == '+')
         {
-          negate = true;
-          nptr++;
-        }
-      else if (*nptr == '+')
-        {
+          sign = *nptr;
           nptr++;
         }
 
@@ -100,25 +93,46 @@ long strtol(FAR const char *nptr, FAR char **endptr, int base)
 
       /* Correct the sign of the result and check for overflow */
 
-      if (negate)
+      if (sign == '-')
         {
           const unsigned long limit = ((unsigned long)-(LONG_MIN + 1)) + 1;
 
           if (accum > limit)
             {
               set_errno(ERANGE);
-              return LONG_MIN;
+              retval = LONG_MIN;
             }
-
-          return (accum == limit) ? LONG_MIN : -(long)accum;
+          else
+            {
+              retval = (accum == limit) ? LONG_MIN : -(long)accum;
+            }
         }
-
-      if (accum > LONG_MAX)
+      else
         {
-          set_errno(ERANGE);
-          return LONG_MAX;
+          if (accum > LONG_MAX)
+            {
+              set_errno(ERANGE);
+              retval = LONG_MAX;
+            }
+          else
+            {
+              retval = accum;
+            }
         }
     }
 
-  return (long)accum;
+  /* Return the final pointer to the unused value */
+
+  if (endptr)
+    {
+      if (sign)
+        {
+          if (*((*endptr) - 1) == sign)
+            {
+              (*endptr)--;
+            }
+        }
+    }
+
+  return retval;
 }

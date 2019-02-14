@@ -1,9 +1,8 @@
 /****************************************************************************
- * libs/libc/stdio/lib_sscanf.c
+ * libs/libc/stdio/lib_vfscanf.c
  *
- *   Copyright (C) 2007-2009, 2011, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Johannes Schock
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Johannes Shock
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,34 +37,49 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
-#include <stdarg.h>
+#include <semaphore.h>
+
 #include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * sscanf
- ****************************************************************************/
-
-int sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...)
+int vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 {
-  struct lib_meminstream_s meminstream;
-  va_list ap;
-  int n;
+  struct lib_stdinstream_s stdinstream;
+  int n = ERROR;
+  int lastc;
 
-  /* Initialize a memory stream to write to the buffer */
+  if (stream)
+    {
+      /* Wrap the stream in a stream object and let lib_vsscanf do the work. */
 
-  lib_meminstream((FAR struct lib_meminstream_s *)&meminstream, buf,
-                  LIB_BUFLEN_UNKNOWN);
+      lib_stdinstream(&stdinstream, stream);
 
-  /* Then let lib_vsscanf do the real work */
+      /* Hold the stream semaphore throughout the lib_vsscanf call so that
+       * this thread can get its entire message out before being pre-empted by
+       * the next thread.
+       */
 
-  va_start(ap, fmt);
-  n = lib_vsscanf((FAR struct lib_instream_s *)&meminstream.public, NULL,
-                  fmt, ap);
-  va_end(ap);
+      lib_take_semaphore(stream);
+
+      n = lib_vsscanf(&stdinstream.public, &lastc, fmt, ap);
+
+      /* The lib_vsscanf function reads always one character more, this
+       * character needs to be written back.
+       */
+
+      if (lastc != EOF)
+        {
+          ungetc(lastc, stream);
+        }
+
+      lib_give_semaphore(stream);
+    }
+
   return n;
 }
