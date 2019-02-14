@@ -136,6 +136,7 @@ unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
               nptr--;
             }
         }
+
       *endptr = (FAR char *)nptr;
     }
 
