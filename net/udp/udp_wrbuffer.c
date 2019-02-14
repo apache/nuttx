@@ -50,6 +50,7 @@
 #include <queue.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/semaphore.h>
@@ -212,7 +213,7 @@ int udp_wrbuffer_test(void)
 {
   int val = 0;
   nxsem_getvalue(&g_wrbuffer.sem, &val);
-  return val > 0 ? OK : ERROR;
+  return val > 0 ? OK : -ENOSPC;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NET_UDP_WRITE_BUFFERS */

@@ -72,11 +72,11 @@
  *   iplen - Length of the IP and UDP headers
  *
  * Returned Value:
- *   OK    - The packet has been processed  and can be deleted
- *   ERROR - Hold the packet and try again later.  There is a listening
- *           socket but no receive in place to catch the packet yet.  The
- *           device's d_len will be set to zero in this case as there is
- *           no outgoing data.
+ *   OK     - The packet has been processed  and can be deleted
+ *  -EAGAIN - Hold the packet and try again later.  There is a listening
+ *            socket but no receive in place to catch the packet yet.  The
+ *            device's d_len will be set to zero in this case as there is
+ *            no outgoing data.
  *
  * Assumptions:
  *   The network is locked.
@@ -200,7 +200,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
           if ((flags & UDP_NEWDATA) != 0)
             {
-              /* No.. the packet was not processed now.  Return ERROR so
+              /* No.. the packet was not processed now.  Return -EAGAIN so
                * that the driver may retry again later.  We still need to
                * set d_len to zero so that the driver is aware that there
                * is nothing to be sent.
@@ -208,7 +208,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
               nwarn("WARNING: Packet not processed\n");
               dev->d_len = 0;
-              ret = ERROR;
+              ret = -EAGAIN;
             }
 
           /* If the application has data to send, setup the UDP/IP header */

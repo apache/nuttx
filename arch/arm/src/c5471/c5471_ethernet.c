@@ -51,8 +51,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arpa/inet.h>
 #include <net/ethernet.h>
@@ -774,7 +774,7 @@ static int c5471_phyinit (void)
   if (phyid != LU3X31_T64_PHYID)
     {
       nerr("ERROR: Unrecognized PHY ID: %08x\n", phyid);
-      return ERROR;
+      return -ENODEV;
     }
 
   /* Next, Set desired network rate, 10BaseT, 100BaseT, or auto. */
