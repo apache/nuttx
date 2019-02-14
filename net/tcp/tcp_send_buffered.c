@@ -759,13 +759,14 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
    * asked to retransmit data, (3) the connection is still healthy, and (4)
    * the outgoing packet is available for our use.  In this case, we are
    * now free to send more data to receiver -- UNLESS the buffer contains
-   * unprocessed incoming data.  In that event, we will have to wait for the
-   * next polling cycle.
+   * unprocessed incoming data or window size is zero.  In that event, we
+   * will have to wait for the next polling cycle.
    */
 
   if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
       (flags & (TCP_POLL | TCP_REXMIT)) &&
-      !(sq_empty(&conn->write_q)))
+      !(sq_empty(&conn->write_q)) &&
+      conn->winsize > 0)
     {
       /* Check if the destination IP address is in the ARP  or Neighbor
        * table.  If not, then the send won't actually make it out... it
@@ -803,8 +804,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               sndlen = conn->winsize;
             }
 
-          ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u\n",
-                wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen);
+          ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u winsize=%u\n",
+                wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
+                conn->winsize);
 
           /* Set the sequence number for this segment.  If we are
            * retransmitting, then the sequence number will already
