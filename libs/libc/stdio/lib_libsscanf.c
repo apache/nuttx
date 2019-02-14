@@ -276,6 +276,13 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   modifier    = NO_MOD;
   ngetstart   = obj->nget;      /* for %n calculations */
 
+  /* Make sure lastc is not NULL. */
+
+  if (lastc == NULL)
+    {
+      lastc = &c;
+    }
+
   /* Loop until all characters in the fmt string have been processed.  We may
    * have to continue loop after reaching the end the input data in order to
    * handle trailing %n format specifiers.
@@ -470,11 +477,7 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   if (!fwidth)
                     {
-                      if (lastc != NULL)
-                        {
-                          *lastc = c;
-                        }
-
+                      *lastc = c;
                       return assigncount;
                     }
 
@@ -538,11 +541,7 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   if (fwidth != width)
                     {
-                      if (lastc != NULL)
-                        {
-                          *lastc = c;
-                        }
-
+                      *lastc = c;
                       return assigncount;
                     }
 
@@ -875,11 +874,7 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   if (tmp == endptr || get_errno() == ERANGE)
                     {
-                      if (lastc != NULL)
-                        {
-                          *lastc = c;
-                        }
-
+                      *lastc = c;
                       return assigncount;
                     }
 
@@ -1027,6 +1022,7 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           if (!dot)
                             {
                               dot = true;
+                              sign = true;
                             }
                           else
                             {
@@ -1048,6 +1044,10 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       else if (!(c >= '0' && c <= '9'))
                         {
                           stopconv = true;
+                        }
+                      else
+                        {
+                          sign = true;
                         }
 
                       if (!stopconv)
@@ -1084,11 +1084,7 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   if (tmp == endptr || get_errno() == ERANGE)
                     {
-                      if (lastc != NULL)
-                        {
-                          *lastc = c;
-                        }
-
+                      *lastc = c;
                       return assigncount;
                     }
 
@@ -1235,10 +1231,6 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
    * matching failure or conversion.
    */
 
-  if (lastc != NULL)
-    {
-      *lastc = c;
-    }
-
+  *lastc = c;
   return (count || !conv) ? assigncount : EOF;
 }
