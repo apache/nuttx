@@ -121,9 +121,8 @@ config NANO_PRINTF
 	depends on !LIBC_LONG_LONG
 	---help---
 		Replace printf code with version from newlib-nano. This version
-		provides improved floating point output support, including 'g' mode
-		as well as making the default 'f' format include digits past the
-		decimal point. However, it does not include 'long long' support.
+		provides adds support for the 'g' format.  However, it does not
+		include 'long long' support.
 
 config NANO_PRINTLEVEL
 	int "Nano printf support level"
