@@ -622,9 +622,9 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   int prefix;
                   bool stopconv;
                   int errsave;
-                  unsigned long tmplong;
+                  unsigned long tmplong = 0;
 #ifdef CONFIG_LIBC_LONG_LONG
-                  unsigned long long tmplonglong;
+                  unsigned long long tmplonglong = 0;
 #endif
                   /* Copy the real string into a temporary working buffer. */
 
@@ -841,11 +841,13 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   switch (modifier)
                     {
+#ifndef CONFIG_LIBC_LONG_LONG
+                    case LL_MOD:
+#endif
                     case HH_MOD:
                     case H_MOD:
                     case NO_MOD:
                     default:
-                    case L_MOD:
                       if (sign)
                         {
                           tmplong = strtol(tmp, &endptr, base);
@@ -881,7 +883,6 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   set_errno(errsave);
                   if (!noassign)
                     {
-
                       /* We have to check whether we need to return a long or
                        * an int.
                        */
@@ -903,8 +904,10 @@ int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           *pint = (unsigned int)tmplong;
                           break;
 
-                        default:
+#ifndef CONFIG_LIBC_LONG_LONG
                         case L_MOD:
+#endif
+                        default:
                           linfo("Return %ld to 0x%p\n", tmplong, plong);
                           *plong = tmplong;
                           break;

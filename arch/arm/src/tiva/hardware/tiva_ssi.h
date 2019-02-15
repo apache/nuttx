@@ -234,7 +234,7 @@
 #  define SSI_DMACR_TXDMAE          (1 << 1)  /* Bit 1: Transmit DMA enable */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TIVA) */
+#if defined(CONFIG_ARCH_CHIP_LM) || defined(CONFIG_ARCH_CHIP_TIVA)
 /* SSI Peripheral Identification n (SSIPERIPHIDn), offset 0xfd0-0xfec */
 
 #  define SSI_PERIPHID_MASK         0xff      /* Bits 7-0: SSI Peripheral ID n */
