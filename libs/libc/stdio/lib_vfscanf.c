@@ -42,6 +42,8 @@
 #include <stdio.h>
 #include <semaphore.h>
 
+#include <nuttx/streams.h>
+
 #include "libc.h"
 
 /****************************************************************************

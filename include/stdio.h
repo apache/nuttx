@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/stdio.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2015, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2015, 2018-2019 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -158,6 +158,7 @@ int    fputs(FAR const char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
+int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 long   ftell(FAR FILE *stream);
@@ -168,31 +169,29 @@ FAR char *gets_s(FAR char *s, rsize_t n);
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
-int    fscanf(FAR FILE *stream, FAR const IPTR char *format, ...);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family */
 
-int    printf(FAR const IPTR char *format, ...);
+void   perror(FAR const char *s);
+int    printf(FAR const IPTR char *fmt, ...);
 int    puts(FAR const char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
-int    sprintf(FAR char *buf, FAR const IPTR char *format, ...);
+int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...);
 int    asprintf (FAR char **ptr, FAR const IPTR char *fmt, ...);
 int    snprintf(FAR char *buf, size_t size,
-         FAR const IPTR char *format, ...);
+         FAR const IPTR char *fmt, ...);
 int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...);
-void   perror(FAR const char *s);
 
-int    vprintf(FAR const IPTR FAR char *format, va_list ap);
-int    vfprintf(FAR FILE *stream, FAR const IPTR char *format,
-         va_list ap);
-int    vsprintf(FAR char *buf, FAR const IPTR char *format, va_list ap);
+int    scanf(FAR const IPTR char *fmt, ...);
 int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap);
-int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *format,
+int    vfprintf(FAR FILE *stream, FAR const IPTR char *fmt,
          va_list ap);
-int    vsscanf(FAR const char *buf, FAR const char *s, va_list ap);
-int    scanf(FAR const IPTR char *format, ...);
-int    vfscanf(FAR FILE *stream, FAR const IPTR char *format,
+int    vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap);
+int    vprintf(FAR const IPTR FAR char *fmt, va_list ap);
+int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
          va_list ap);
+int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap);
+int    vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
 
 /* Operations on file descriptors including:
  *

@@ -40,6 +40,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <nuttx/streams.h>
 #include "libc.h"
 
 /****************************************************************************
@@ -52,20 +53,14 @@
 
 int sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...)
 {
-  struct lib_meminstream_s meminstream;
   va_list ap;
   int n;
 
-  /* Initialize a memory stream to write to the buffer */
-
-  lib_meminstream((FAR struct lib_meminstream_s *)&meminstream, buf,
-                  LIB_BUFLEN_UNKNOWN);
-
-  /* Then let lib_vsscanf do the real work */
+  /* vsscanf from the buffer */
 
   va_start(ap, fmt);
-  n = lib_vsscanf((FAR struct lib_instream_s *)&meminstream.public, NULL,
-                  fmt, ap);
+  n = vsscanf(buf, fmt, ap);
   va_end(ap);
+
   return n;
 }

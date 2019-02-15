@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <stdarg.h>
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +54,7 @@ int fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
   va_list ap;
   int n;
 
-  /* vfprintf into the stream */
+  /* vscanf from the stream */
 
   va_start(ap, fmt);
   n = vfscanf(stream, fmt, ap);
