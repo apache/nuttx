@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 14, 2019)
+NuttX TODO List (Last updated February 15, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -22,7 +22,7 @@ nuttx/:
  (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
- (11)  Libraries (libs/libc/, libs/libm/)
+ (10)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
@@ -1926,20 +1926,6 @@ o Libraries (libs/libc/, libs/libm/)
   Status:      Open
   Priority:    Low
 
-  Title:       RESETTING GETOPT()
-  Description: There is an issue with the way that getopt() handles errors that
-               return '?'.
-
-               1. Does getopt() reset its global variables after returning '?' so
-                  that it can be re-used?  That would be required to support where
-                  the caller terminates parsing before reaching the last parameter.
-               2. Or is the client expected to continue parsing after getopt()
-                  returns '?'  and parse until the final parameter?
-
-               The current getopt() implementation only supports #2.
-  Status:      Open
-  Priority:    Low
-
   Title:       CONCURRENT STREAM READ/WRITE
   Description: NuttX only supports a single file pointer so reads and writes
                must be from the same position.  This prohibits implementation
@@ -1976,12 +1962,18 @@ o Libraries (libs/libc/, libs/libm/)
   Description: This implementation of dtoa in libs/libc/stdio is old and will not
                work with some newer compilers.  See
                http://patrakov.blogspot.com/2009/03/dont-use-old-dtoac.html
+               Update:  A new dtoa version is not available and enabled with
+               CONFIG_NANO_PRINF.  However, the old version of dtoa is still in
+               in place and lib_libvsprintf() has been dupliated.  I think this
+               issue should remain open until the implementations have been
+               unified.
   Status:      Open
   Priority:    ??
 
   Title:       FLOATING POINT FORMATS
   Description: Only the %f floating point format is supported.  Others are
                accepted but treated like %f.
+               Update:  %g is supported with CONFIG_NANO_PRINTF.
   Status:      Open
   Priority:    Medium (this might important to someone).
 
@@ -1989,6 +1981,7 @@ o Libraries (libs/libc/, libs/libm/)
   Description: A fieldwidth and precision is required with the %f format.  If %f
                is used with no format, than floating numbers will be printed with
                a precision of 0 (effectively presented as integers).
+               Update: Correct, but only with  CONFIG_NANO_PRINTF=y.
   Status:      Open
   Priority:    Medium (this might important to someone).
 
