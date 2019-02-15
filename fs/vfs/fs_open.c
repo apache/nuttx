@@ -148,14 +148,14 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
-   /* If the inode is block driver, then we may return a character driver
-    * proxy for the block driver.  block_proxy() will instantiate a BCH
-    * character driver wrapper around the block driver, open(), then
-    * unlink() the character driver.  On success, block_proxy() will
-    * return the file descriptor of the opened character driver.
-    *
-    * NOTE: This will recurse to open the character driver proxy.
-    */
+  /* If the inode is block driver, then we may return a character driver
+   * proxy for the block driver.  block_proxy() will instantiate a BCH
+   * character driver wrapper around the block driver, open(), then
+   * unlink() the character driver.  On success, block_proxy() will
+   * return the file descriptor of the opened character driver.
+   *
+   * NOTE: This will recurse to open the character driver proxy.
+   */
 
    if (INODE_IS_BLOCK(inode) || INODE_IS_MTD(inode))
      {
@@ -186,7 +186,8 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)) || !inode->u.i_ops)
+  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)) ||
+      !inode->u.i_ops)
 #else
   if (!INODE_IS_DRIVER(inode) || !inode->u.i_ops)
 #endif
@@ -272,7 +273,8 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
        */
 
       fd = (int)OPEN_GETFD(ret);
-      DEBUGASSERT((unsigned)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS));
+      DEBUGASSERT((unsigned)fd < (CONFIG_NFILE_DESCRIPTORS +
+                                  CONFIG_NSOCKET_DESCRIPTORS));
     }
 #endif
 

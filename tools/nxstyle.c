@@ -355,6 +355,19 @@ int main(int argc, char **argv, char **envp)
             {
               declnest = 1;
             }
+
+          /* Check for multiple definitions of local variables on the line.
+           * NOTE:  Will miss multiple global variable definitions on a line,
+           * but this is because the heuristic is not smart enough to
+           * distingush a global variable from a function prototype.
+           */
+
+          if (indent > 0 && strchr(&line[indent], ',') != NULL)
+            {
+              fprintf(stderr,
+                      "Multiple data definitions on line %d\n",
+                      lineno);
+            }
         }
 
       /* Check for a keyword indicating the beginning of a statement.
