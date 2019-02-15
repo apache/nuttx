@@ -22,7 +22,7 @@ nuttx/:
  (18)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
   (2)  Other drivers (drivers/)
- (10)  Libraries (libs/libc/, libs/libm/)
+  (9)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
@@ -1974,14 +1974,6 @@ o Libraries (libs/libc/, libs/libm/)
   Description: Only the %f floating point format is supported.  Others are
                accepted but treated like %f.
                Update:  %g is supported with CONFIG_NANO_PRINTF.
-  Status:      Open
-  Priority:    Medium (this might important to someone).
-
-  Title:       FLOATING POINT PRECISION
-  Description: A fieldwidth and precision is required with the %f format.  If %f
-               is used with no format, than floating numbers will be printed with
-               a precision of 0 (effectively presented as integers).
-               Update: Correct, but only with  CONFIG_NANO_PRINTF=y.
   Status:      Open
   Priority:    Medium (this might important to someone).
 

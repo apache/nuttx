@@ -118,6 +118,10 @@
 #  define FMT_PREV     src--                        /* Backup to the previous character */
 #endif
 
+/* Default precision to use with %f format if no precision is specified. */
+
+#define FLOAT_PRECISION_DEFAULT 6
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -1554,6 +1558,13 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
         {
           double dblval = va_arg(ap, double);
           int dblsize;
+
+          /* Set to default precision if none specified */
+
+          if (!IS_HASDOT(flags) && trunc == 0)
+            {
+              trunc = FLOAT_PRECISION_DEFAULT;
+            }
 
           /* Get the width of the output */
 
