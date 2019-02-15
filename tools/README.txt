@@ -7,6 +7,14 @@ The tools/ directory contains miscellaneous scripts and host C programs
 that are necessary parts of the NuttX build system.  These files
 include:
 
+check-hash.sh
+-------------
+
+  Tool to check commonly used hashes of externaly downloaded packages.
+  Good way of checking if download got corrupted or if there is man in the
+  middle attack going on. Also protects from situation when upstream
+  server gets hacked and sources are replaced with mallicious ones.
+
 cmpconfig.c
 -----------
 
