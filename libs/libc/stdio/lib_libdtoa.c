@@ -46,6 +46,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <math.h>
 #include <assert.h>
 
@@ -66,6 +67,23 @@
 #ifndef MAX
 #  define MAX(a,b) (a > b ? a : b)
 #endif
+
+/* Use (almost) the maximim precision with %g format if no precision is
+ * specified.  We do not use the full precision beause the least significant
+ * digits are probably garbage.
+ *
+ * REVISIT:  This should be smarter.  15 digits is the maximum size of the
+ * number.  The maximum precision is really 15 minus the number of digits
+ * in the integer part.
+ */
+
+#define DOUBLE_PRECISON_MAX 13 /* vs 15 which is the maximum */
+
+/* Use a default precision of 6 for the %f format if no precision is
+ * specified.
+ */
+
+#define DEFAULT_PRECISON    6
 
 /****************************************************************************
  * Private Functions
@@ -128,10 +146,11 @@ static void lib_dtoa_string(FAR struct lib_outstream_s *obj, const char *str)
  ****************************************************************************/
 
 static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
-                     uint8_t flags, double value)
+                     uint16_t flags, double value)
 {
   FAR char *digits;     /* String returned by __dtoa */
   FAR char *rve;        /* Points to the end of the return value */
+  bool notrailing;      /* True:  No trailing zeros */
   int  expt;            /* Integer value of exponent */
   int  numlen;          /* Actual number of digits returned by cvt */
   int  nchars;          /* Number of characters to print */
@@ -148,6 +167,22 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   DEBUGASSERT(up_interrupt_context() == false);
 #endif
+
+  /* Set to default precision if none specified */
+
+  notrailing = false;
+  if (!IS_HASDOT(flags) && prec == 0)
+    {
+      if (IS_NOTRAILINGZERO(flags))
+        {
+          prec       = DOUBLE_PRECISON_MAX;
+          notrailing = true;
+        }
+      else
+        {
+          prec       = DEFAULT_PRECISON;
+        }
+    }
 
   /* Special handling for NaN and Infinity */
 
@@ -178,8 +213,8 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   /* Perform the conversion */
 
-  digits   = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
-  numlen   = rve - digits;
+  digits = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
+  numlen = rve - digits;
 
   /* Avoid precision error from missing trailing zeroes */
 
@@ -198,7 +233,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
    * the print precision.
    */
 
-  if (value == 0 || expt < -prec)
+  if (value == 0.0 || (expt < (notrailing ? 0 : -prec)))
     {
       /* kludge for __dtoa irregularity */
 
@@ -208,13 +243,20 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
        * particular precision is requested.
        */
 
-      if (prec > 0 || IS_ALTFORM(flags))
+      if ((prec > 0 && !notrailing) || IS_ALTFORM(flags))
         {
           obj->put(obj, '.');
 
           /* Always print at least one digit to the right of the decimal point. */
 
-          prec = MAX(1, prec);
+          if (notrailing)
+            {
+              prec = MAX(1, numlen);
+            }
+          else
+            {
+              prec = MAX(1, prec);
+            }
         }
     }
 
@@ -222,7 +264,6 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   else
     {
-
       /* Handle the case where the value is less than 1.0 (in magnitude) and
        * will need a leading zero.
        */
@@ -239,7 +280,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
           /* Print any leading zeros to the right of the decimal point */
 
-          if (expt < 0)
+          if (expt < 0 || !notrailing)
             {
               nchars = MIN(-expt, prec);
               zeroes(obj, nchars);
@@ -277,7 +318,8 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
            * requested.
            */
 
-          if (numlen > 0 || prec > 0 || IS_ALTFORM(flags))
+          if (numlen > 0 || (prec > 0 && !notrailing) ||
+              IS_ALTFORM(flags))
             {
               /* Print the decimal point */
 
@@ -287,7 +329,14 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
                * point.
                */
 
-              prec = MAX(1, prec);
+              if (notrailing)
+                {
+                  prec = MAX(1, numlen);
+                }
+              else
+                {
+                  prec = MAX(1, prec);
+                }
             }
         }
 
@@ -319,7 +368,10 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   /* Finally, print any trailing zeroes */
 
-  zeroes(obj, prec);
+  if (!notrailing)
+    {
+      zeroes(obj, prec);
+    }
 }
 
 /****************************************************************************

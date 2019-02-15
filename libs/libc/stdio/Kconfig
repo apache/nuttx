@@ -120,9 +120,9 @@ config NANO_PRINTF
 	default n if !DEFAULT_SMALL
 	depends on !LIBC_LONG_LONG
 	---help---
-		Replace printf code with version from newlib-nano. This version
-		adds the 'g' format. However, it does not include 'long long'
-		support.
+		Replace printf code with version from newlib-nano. Can be
+		signifcantly smaller, especially if floating support is enabled.
+		However, it does not include 'long long' support.
 
 config NANO_PRINTLEVEL
 	int "Nano printf support level"

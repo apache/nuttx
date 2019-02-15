@@ -53,14 +53,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define FLAG_SHOWPLUS            0x01
-#define FLAG_ALTFORM             0x02
-#define FLAG_HASDOT              0x04
-#define FLAG_HASASTERISKWIDTH    0x08
-#define FLAG_HASASTERISKTRUNC    0x10
-#define FLAG_LONGPRECISION       0x20
-#define FLAG_LONGLONGPRECISION   0x40
-#define FLAG_NEGATE              0x80
+#define FLAG_SHOWPLUS            0x0001
+#define FLAG_ALTFORM             0x0002
+#define FLAG_HASDOT              0x0004
+#define FLAG_HASASTERISKWIDTH    0x0008
+#define FLAG_HASASTERISKTRUNC    0x0010
+#define FLAG_LONGPRECISION       0x0020
+#define FLAG_LONGLONGPRECISION   0x0040
+#define FLAG_NEGATE              0x0080
+#define FLAG_NOTRAILINGZERO      0x0100
 
 #define SET_SHOWPLUS(f)          do (f) |= FLAG_SHOWPLUS; while (0)
 #define SET_ALTFORM(f)           do (f) |= FLAG_ALTFORM; while (0)
@@ -70,6 +71,7 @@
 #define SET_LONGPRECISION(f)     do (f) |= FLAG_LONGPRECISION; while (0)
 #define SET_LONGLONGPRECISION(f) do (f) |= FLAG_LONGLONGPRECISION; while (0)
 #define SET_NEGATE(f)            do (f) |= FLAG_NEGATE; while (0)
+#define SET_NOTRAILINGZERO(f)    do (f) |= FLAG_NOTRAILINGZERO; while (0)
 
 #define CLR_SHOWPLUS(f)          do (f) &= ~FLAG_SHOWPLUS; while (0)
 #define CLR_ALTFORM(f)           do (f) &= ~FLAG_ALTFORM; while (0)
@@ -80,6 +82,7 @@
 #define CLR_LONGLONGPRECISION(f) do (f) &= ~FLAG_LONGLONGPRECISION; while (0)
 #define CLR_NEGATE(f)            do (f) &= ~FLAG_NEGATE; while (0)
 #define CLR_SIGNED(f)            do (f) &= ~(FLAG_SHOWPLUS|FLAG_NEGATE); while (0)
+#define CLR_NOTRAILINGZERO(f)    do (f) &= ~FLAG_NOTRAILINGZERO; while (0)
 
 #define IS_SHOWPLUS(f)           (((f) & FLAG_SHOWPLUS) != 0)
 #define IS_ALTFORM(f)            (((f) & FLAG_ALTFORM) != 0)
@@ -90,6 +93,7 @@
 #define IS_LONGLONGPRECISION(f)  (((f) & FLAG_LONGLONGPRECISION) != 0)
 #define IS_NEGATE(f)             (((f) & FLAG_NEGATE) != 0)
 #define IS_SIGNED(f)             (((f) & (FLAG_SHOWPLUS|FLAG_NEGATE)) != 0)
+#define IS_NOTRAILINGZERO(f)     (((f) & FLAG_NOTRAILINGZERO) != 0)
 
 /* If CONFIG_ARCH_ROMGETC is defined, then it is assumed that the format
  * string data cannot be accessed by simply de-referencing the format string
@@ -118,10 +122,6 @@
 #  define FMT_PREV     src--                        /* Backup to the previous character */
 #endif
 
-/* Default precision to use with %f format if no precision is specified. */
-
-#define FLOAT_PRECISION_DEFAULT 6
-
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -141,9 +141,9 @@ enum
 /* Pointer to ASCII conversion */
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
+static void ptohex(FAR struct lib_outstream_s *obj, uint16_t flags,
                    FAR void *p);
-static int  getsizesize(uint8_t fmt, uint8_t flags, FAR void *p)
+static int  getsizesize(uint8_t fmt, uint16_t flags, FAR void *p)
 #endif /* CONFIG_PTR_IS_NOT_INT */
 
 /* Unsigned int to ASCII conversion */
@@ -154,10 +154,10 @@ static void utohex(FAR struct lib_outstream_s *obj, unsigned int n,
 static void utooct(FAR struct lib_outstream_s *obj, unsigned int n);
 static void utobin(FAR struct lib_outstream_s *obj, unsigned int n);
 static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                     uint8_t flags, unsigned int lln);
+                     uint16_t flags, unsigned int lln);
 
-static void fixup(uint8_t fmt, FAR uint8_t *flags, int *n);
-static int  getusize(uint8_t fmt, uint8_t flags, unsigned int lln);
+static void fixup(uint8_t fmt, FAR uint16_t *flags, int *n);
+static int  getusize(uint8_t fmt, uint16_t flags, unsigned int lln);
 
 /* Unsigned long int to ASCII conversion */
 
@@ -168,9 +168,9 @@ static void lutohex(FAR struct lib_outstream_s *obj, unsigned long ln,
 static void lutooct(FAR struct lib_outstream_s *obj, unsigned long ln);
 static void lutobin(FAR struct lib_outstream_s *obj, unsigned long ln);
 static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                      uint8_t flags, unsigned long ln);
-static void lfixup(uint8_t fmt, FAR uint8_t *flags, long *ln);
-static int  getlusize(uint8_t fmt, FAR uint8_t flags, unsigned long ln);
+                      uint16_t flags, unsigned long ln);
+static void lfixup(uint8_t fmt, FAR uint16_t *flags, long *ln);
+static int  getlusize(uint8_t fmt, FAR uint16_t flags, unsigned long ln);
 #endif
 
 /* Unsigned long long int to ASCII conversions */
@@ -182,17 +182,17 @@ static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln,
 static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln);
 static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long lln);
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, unsigned long long lln);
-static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln);
-static int  getllusize(uint8_t fmt, FAR uint8_t flags,
+                       uint16_t flags, unsigned long long lln);
+static void llfixup(uint8_t fmt, FAR uint16_t *flags, FAR long long *lln);
+static int  getllusize(uint8_t fmt, FAR uint16_t flags,
                        FAR unsigned long long lln);
 #endif
 
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t justify, uint8_t flags, int fieldwidth,
+                       uint8_t justify, uint16_t flags, int fieldwidth,
                        int valwidth, int trunc);
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t justify,
-                        uint8_t flags, int fieldwidth, int valwidth,
+                        uint16_t flags, int fieldwidth, int valwidth,
                         int trunc);
 
 /****************************************************************************
@@ -216,7 +216,7 @@ static const char g_nullstring[] = "(null)";
  ****************************************************************************/
 
 #ifdef CONFIG_PTR_IS_NOT_INT
-static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
+static void ptohex(FAR struct lib_outstream_s *obj, uint16_t flags,
                    FAR void *p)
 {
   union
@@ -257,7 +257,7 @@ static void ptohex(FAR struct lib_outstream_s *obj, uint8_t flags,
  * Name: getpsize
  ****************************************************************************/
 
-static int getpsize(uint8_t flags, FAR void *p)
+static int getpsize(uint16_t flags, FAR void *p)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -379,7 +379,7 @@ static void utobin(FAR struct lib_outstream_s *obj, unsigned int n)
  ****************************************************************************/
 
 static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                     uint8_t flags, unsigned int n)
+                     uint16_t flags, unsigned int n)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -455,7 +455,7 @@ static void utoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: fixup
  ****************************************************************************/
 
-static void fixup(uint8_t fmt, FAR uint8_t *flags, FAR int *n)
+static void fixup(uint8_t fmt, FAR uint16_t *flags, FAR int *n)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -491,7 +491,7 @@ static void fixup(uint8_t fmt, FAR uint8_t *flags, FAR int *n)
  * Name: getusize
  ****************************************************************************/
 
-static int getusize(uint8_t fmt, uint8_t flags, unsigned int n)
+static int getusize(uint8_t fmt, uint16_t flags, unsigned int n)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -505,7 +505,7 @@ static int getusize(uint8_t fmt, uint8_t flags, unsigned int n)
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-static int getdblsize(uint8_t fmt, int trunc, uint8_t flags, double n)
+static int getdblsize(uint8_t fmt, int trunc, uint16_t flags, double n)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -628,7 +628,7 @@ static void lutobin(FAR struct lib_outstream_s *obj, unsigned long n)
  ****************************************************************************/
 
 static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                      uint8_t flags, unsigned long ln)
+                      uint16_t flags, unsigned long ln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -699,7 +699,7 @@ static void lutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: lfixup
  ****************************************************************************/
 
-static void lfixup(uint8_t fmt, FAR uint8_t *flags, FAR long *ln)
+static void lfixup(uint8_t fmt, FAR uint16_t *flags, FAR long *ln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -735,7 +735,7 @@ static void lfixup(uint8_t fmt, FAR uint8_t *flags, FAR long *ln)
  * Name: getlusize
  ****************************************************************************/
 
-static int getlusize(uint8_t fmt, uint8_t flags, unsigned long ln)
+static int getlusize(uint8_t fmt, uint16_t flags, unsigned long ln)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -858,7 +858,7 @@ static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long n)
  ****************************************************************************/
 
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t flags, unsigned long long lln)
+                       uint16_t flags, unsigned long long lln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -929,7 +929,7 @@ static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * Name: llfixup
  ****************************************************************************/
 
-static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln)
+static void llfixup(uint8_t fmt, FAR uint16_t *flags, FAR long long *lln)
 {
   /* Perform the integer conversion according to the format specifier */
 
@@ -965,7 +965,7 @@ static void llfixup(uint8_t fmt, FAR uint8_t *flags, FAR long long *lln)
  * Name: getllusize
  ****************************************************************************/
 
-static int getllusize(uint8_t fmt, uint8_t flags, unsigned long long lln)
+static int getllusize(uint8_t fmt, uint16_t flags, unsigned long long lln)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -981,7 +981,7 @@ static int getllusize(uint8_t fmt, uint8_t flags, unsigned long long lln)
  ****************************************************************************/
 
 static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
-                       uint8_t justify, uint8_t flags, int fieldwidth,
+                       uint8_t justify, uint16_t flags, int fieldwidth,
                        int valwidth, int trunc)
 {
   bool althex = (fmt == 'x' || fmt == 'X' || fmt == 'p' || fmt == 'P')
@@ -1144,7 +1144,7 @@ static void prejustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
  ****************************************************************************/
 
 static void postjustify(FAR struct lib_outstream_s *obj, uint8_t justify,
-                        uint8_t flags, int fieldwidth, int valwidth,
+                        uint16_t flags, int fieldwidth, int valwidth,
                         int trunc)
 {
   int i;
@@ -1190,13 +1190,13 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
                  va_list ap)
 {
   FAR char        *ptmp;
-  int             width;
-  int             trunc;
+  uint16_t        flags;
   uint8_t         justify;
-  uint8_t         flags;
 #ifdef CONFIG_ARCH_ROMGETC
   char            ch;
 #endif
+  int             width;
+  int             trunc;
 
   for (FMT_TOP; FMT_CHAR; FMT_BOTTOM)
     {
@@ -1559,11 +1559,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
           double dblval = va_arg(ap, double);
           int dblsize;
 
-          /* Set to default precision if none specified */
-
-          if (!IS_HASDOT(flags) && trunc == 0)
+          if (FMT_CHAR == 'g' || FMT_CHAR == 'G')
             {
-              trunc = FLOAT_PRECISION_DEFAULT;
+              flags |= FLAG_NOTRAILINGZERO;
             }
 
           /* Get the width of the output */
