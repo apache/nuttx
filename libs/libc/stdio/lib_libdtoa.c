@@ -46,7 +46,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <math.h>
 #include <assert.h>
 
@@ -67,17 +66,6 @@
 #ifndef MAX
 #  define MAX(a,b) (a > b ? a : b)
 #endif
-
-/* Use (almost) the maximim precision with %f format if no precision is
- * specified.  We do not use the full precision beause the least significant
- * digits are probably garbage.
- *
- * REVISIT:  This should be smarter.  15 digits is the maximum size of the
- * number.  The maximum precision is really 15 minus the number of digits
- * in the integer part.
- */
-
-#define DOUBLE_PRECISON_MAX 13 /* vs 15 which is the maximum */
 
 /****************************************************************************
  * Private Functions
@@ -144,7 +132,6 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 {
   FAR char *digits;     /* String returned by __dtoa */
   FAR char *rve;        /* Points to the end of the return value */
-  bool hasdot;          /* True: precision specified */
   int  expt;            /* Integer value of exponent */
   int  numlen;          /* Actual number of digits returned by cvt */
   int  nchars;          /* Number of characters to print */
@@ -161,14 +148,6 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   DEBUGASSERT(up_interrupt_context() == false);
 #endif
-
-  /* Set to default precision if none specified */
-
-  hasdot = IS_HASDOT(flags);
-  if (!hasdot && prec == 0)
-    {
-      prec = DOUBLE_PRECISON_MAX;
-    }
 
   /* Special handling for NaN and Infinity */
 
@@ -199,8 +178,8 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   /* Perform the conversion */
 
-  digits = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
-  numlen = rve - digits;
+  digits   = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
+  numlen   = rve - digits;
 
   /* Avoid precision error from missing trailing zeroes */
 
@@ -219,7 +198,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
    * the print precision.
    */
 
-  if (value == 0 || (expt < (hasdot ? -prec : 0)))
+  if (value == 0 || expt < -prec)
     {
       /* kludge for __dtoa irregularity */
 
@@ -229,20 +208,13 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
        * particular precision is requested.
        */
 
-      if ((prec > 0 && hasdot) || IS_ALTFORM(flags))
+      if (prec > 0 || IS_ALTFORM(flags))
         {
           obj->put(obj, '.');
 
           /* Always print at least one digit to the right of the decimal point. */
 
-          if (hasdot)
-            {
-              prec = MAX(1, prec);
-            }
-          else
-            {
-              prec = MAX(1, numlen);
-            }
+          prec = MAX(1, prec);
         }
     }
 
@@ -250,6 +222,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   else
     {
+
       /* Handle the case where the value is less than 1.0 (in magnitude) and
        * will need a leading zero.
        */
@@ -266,7 +239,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
           /* Print any leading zeros to the right of the decimal point */
 
-          if (expt < 0 || hasdot)
+          if (expt < 0)
             {
               nchars = MIN(-expt, prec);
               zeroes(obj, nchars);
@@ -304,8 +277,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
            * requested.
            */
 
-          if (numlen > 0 || (prec > 0 && hasdot) ||
-              IS_ALTFORM(flags))
+          if (numlen > 0 || prec > 0 || IS_ALTFORM(flags))
             {
               /* Print the decimal point */
 
@@ -315,14 +287,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
                * point.
                */
 
-              if (hasdot)
-                {
-                  prec = MAX(1, prec);
-                }
-              else
-                {
-                  prec = MAX(1, numlen);
-                }
+              prec = MAX(1, prec);
             }
         }
 
@@ -354,10 +319,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   /* Finally, print any trailing zeroes */
 
-  if (hasdot)
-    {
-      zeroes(obj, prec);
-    }
+  zeroes(obj, prec);
 }
 
 /****************************************************************************
