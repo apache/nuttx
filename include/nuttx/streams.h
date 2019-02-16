@@ -455,11 +455,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
                  FAR const IPTR char *src, va_list ap);
 
 /****************************************************************************
- * Name: lib_vsscanf
+ * Name: lib_vscanf
  *
  * Description:
- *  Stream-oriented implementation that underlies scanf family:  fscanf,
- *  vfscanf, sscanf, and vsscanf
+ *  Stream-oriented implementation that underlies scanf family:  scanf,
+ *  fscanf, vfscanf, sscanf, and vsscanf
  *
  ****************************************************************************/
 

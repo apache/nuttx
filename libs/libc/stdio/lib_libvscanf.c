@@ -200,10 +200,11 @@ doexit:
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  lib_vscanf
+ * Name: lib_vscanf
  *
  * Description:
- *    Stream-oriented version of vsscanf.
+ *  Stream-oriented implementation that underlies scanf family:  scanf,
+ *  fscanf, vfscanf, sscanf, and vsscanf
  *
  ****************************************************************************/
 

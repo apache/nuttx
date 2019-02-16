@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libvsprintf.c
  *
- *   Copyright (C) 2007-2012, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1183,7 +1183,12 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t justify,
  ****************************************************************************/
 
 /****************************************************************************
- * libs/libc/stdio/lib_vsprintf
+ * Name: lib_vsprintf
+ *
+ * Description:
+ *  Stream-oriented implementation that underlies printf family:  printf,
+ *  fprint, sprint, etc.
+ *
  ****************************************************************************/
 
 int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
