@@ -42,6 +42,8 @@
 
 #include <nuttx/compiler.h>
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -57,6 +59,10 @@
 
 /* Internal function for use from `printf'. */
 
-FAR char *__ultoa_invert(unsigned long val, FAR char *s, int base);
+#ifdef CONFIG_LIBC_LONG_LONG
+FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base);
+#else
+FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base);
+#endif
 
 #endif /* __LIBS_LIBC_STDIO_NANO_ULTOA_INVERT_H */

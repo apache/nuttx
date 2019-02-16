@@ -326,7 +326,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
+#  ifdef CONFIG_LIBC_LONG_LONG
+    unsigned char __buf[22];  /* Size for -1 in octal, without '\0' */
+#  else
     unsigned char __buf[11];  /* Size for -1 in octal, without '\0' */
+#  endif
 #  if PRINTF_LEVEL >= PRINTF_FLT
     struct dtoa_s __dtoa;
 #  endif
@@ -833,8 +837,16 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
       if (c == 'd' || c == 'i')
         {
           long x;
+#ifdef CONFIG_LIBC_LONG_LONG
+          long long x;
 
-          if (flags & FL_LONG)
+          if ((flags & FL_LONGLONG) != 0)
+            {
+              x = va_arg(ap, long long);
+            }
+          else
+#endif
+          if ((flags & FL_LONG) != 0)
             {
               x = va_arg(ap, long);
             }
@@ -865,10 +877,18 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
         }
       else
         {
-          int base;
           unsigned long x;
+          int base;
+#ifdef CONFIG_LIBC_LONG_LONG
+          unsigned long long x;
 
-          if (flags & FL_LONG)
+          if (flags & FL_LONGLONG) != 0)
+            {
+              x = va_arg(ap, unsigned long long);
+            }
+          else
+#endif
+          if ((flags & FL_LONG) != 0)
             {
               x = va_arg(ap, unsigned long);
             }
@@ -921,7 +941,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             }
           else
             {
-            c = __ultoa_invert(x, (char *)buf, base) - (char *)buf;
+              c = __ultoa_invert(x, (char *)buf, base) - (char *)buf;
             }
 
           flags &= ~FL_NEGATIVE;

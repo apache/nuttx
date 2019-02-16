@@ -118,7 +118,6 @@ config NANO_PRINTF
 	bool "Use nano printf code"
 	default y if DEFAULT_SMALL
 	default n if !DEFAULT_SMALL
-	depends on !LIBC_LONG_LONG
 	---help---
 		Replace printf code with version from newlib-nano. Can be
 		signifcantly smaller, especially if floating support is enabled.
@@ -128,8 +127,10 @@ config NANO_PRINTLEVEL
 	int "Nano printf support level"
 	default 2 if !LIBC_FLOATINGPOINT
 	default 3 if LIBC_FLOATINGPOINT
-	range 1 2 if !LIBC_FLOATINGPOINT
-	range 1 3 if LIBC_FLOATINGPOINT
+	range 1 2 if !LIBC_FLOATINGPOINT && !LIBC_LONG_LONG
+	range 1 3 if LIBC_FLOATINGPOINT && !LIBC_LONG_LONG
+	range 2 2 if !LIBC_FLOATINGPOINT && LIBC_LONG_LONG
+	range 2 3 if LIBC_FLOATINGPOINT && LIBC_LONG_LONG
 	depends on NANO_PRINTF
 	---help---
 		Nano printf can be built into more than one support level.  The

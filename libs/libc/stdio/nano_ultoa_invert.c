@@ -43,7 +43,11 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_LONG_LONG
+FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base)
+#else
 FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base)
+#endif
 {
   int upper = 0;
 
