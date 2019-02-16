@@ -443,6 +443,17 @@ int lib_noflush(FAR struct lib_outstream_s *stream);
 int lib_snoflush(FAR struct lib_sostream_s *this);
 
 /****************************************************************************
+ * Name: lib_sprintf
+ *
+ * Description:
+ *  Stream-oriented implementation of sprintf.  Used only by the SYSLOG.
+ *
+ ****************************************************************************/
+
+int lib_sprintf(FAR struct lib_outstream_s *obj,
+                FAR const IPTR char *fmt, ...);
+
+/****************************************************************************
  * Name: lib_vsprintf
  *
  * Description:
