@@ -38,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2UART_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2UART_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_UART_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_UART_H
 
 /************************************************************************************
  * Included Files
@@ -273,4 +273,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2UART_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_UART_H */
