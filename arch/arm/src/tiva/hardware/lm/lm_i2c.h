@@ -253,7 +253,7 @@
 #define TIVA_I2CS6_MIS                 (TIVA_I2C6_BASE + TIVA_I2CS_MIS_OFFSET)
 #define TIVA_I2CS6_ICR                 (TIVA_I2C6_BASE + TIVA_I2CS_ICR_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 6 */
 
 #if TIVA_NI2C > 7
 
@@ -279,6 +279,8 @@
 #define TIVA_I2CS7_MIS                 (TIVA_I2C7_BASE + TIVA_I2CS_MIS_OFFSET)
 #define TIVA_I2CS7_ICR                 (TIVA_I2C7_BASE + TIVA_I2CS_ICR_OFFSET)
 
+#endif /* TIVA_NI2C > 7 */
+
 #if TIVA_NI2C > 8
 
 /* I2C8 Master */
@@ -303,7 +305,7 @@
 #define TIVA_I2CS8_MIS                 (TIVA_I2C8_BASE + TIVA_I2CS_MIS_OFFSET)
 #define TIVA_I2CS8_ICR                 (TIVA_I2C8_BASE + TIVA_I2CS_ICR_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 8 */
 
 #if TIVA_NI2C > 9
 
@@ -329,7 +331,7 @@
 #define TIVA_I2CS9_MIS                 (TIVA_I2C9_BASE + TIVA_I2CS_MIS_OFFSET)
 #define TIVA_I2CS9_ICR                 (TIVA_I2C9_BASE + TIVA_I2CS_ICR_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 9 */
 
 /* I2C_Register Bit Definitions *****************************************************/
 

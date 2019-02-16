@@ -356,7 +356,7 @@
 #define TIVA_I2CSC6_PP                 (TIVA_I2C6_BASE + TIVA_I2CSC_PP_OFFSET)
 #define TIVA_I2CSC6_PC                 (TIVA_I2C6_BASE + TIVA_I2CSC_PC_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 6 */
 
 #if TIVA_NI2C > 7
 
@@ -395,7 +395,7 @@
 #define TIVA_I2CSC7_PP                 (TIVA_I2C7_BASE + TIVA_I2CSC_PP_OFFSET)
 #define TIVA_I2CSC7_PC                 (TIVA_I2C7_BASE + TIVA_I2CSC_PC_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 7 */
 
 #if TIVA_NI2C > 8
 
@@ -434,7 +434,7 @@
 #define TIVA_I2CSC8_PP                 (TIVA_I2C8_BASE + TIVA_I2CSC_PP_OFFSET)
 #define TIVA_I2CSC8_PC                 (TIVA_I2C8_BASE + TIVA_I2CSC_PC_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 8 */
 
 #if TIVA_NI2C > 9
 
@@ -473,7 +473,7 @@
 #define TIVA_I2CSC9_PP                 (TIVA_I2C9_BASE + TIVA_I2CSC_PP_OFFSET)
 #define TIVA_I2CSC9_PC                 (TIVA_I2C9_BASE + TIVA_I2CSC_PC_OFFSET)
 
-#endif /* TIVA_NI2C > 5 */
+#endif /* TIVA_NI2C > 9 */
 
 /* I2C_Register Bit Definitions *****************************************************/
 
