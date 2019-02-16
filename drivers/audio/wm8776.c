@@ -1151,7 +1151,7 @@ static void *wm8776_workerthread(pthread_addr_t pvarg)
   struct audio_msg_s msg;
   FAR struct ap_buffer_s *apb;
   int msglen;
-  int prio;
+  unsigned int prio;
   struct mq_attr attr;
 
   audinfo("Entry\n");

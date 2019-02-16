@@ -1248,7 +1248,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
   struct audio_msg_s      msg;
   FAR struct ap_buffer_s *apb;
   int                     size;
-  int                     prio;
+  unsigned int            prio;
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   uint16_t                reg;
 #endif

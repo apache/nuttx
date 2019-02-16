@@ -145,7 +145,7 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
   } u;
 
   ssize_t msgsize;
-  int priority;
+  unsigned int priority;
 
   DEBUGASSERT(mqd != NULL && buf != NULL);
 
@@ -192,7 +192,7 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf)
  *
  ****************************************************************************/
 
-int bt_queue_send(mqd_t mqd, FAR struct bt_buf_s *buf, int priority)
+int bt_queue_send(mqd_t mqd, FAR struct bt_buf_s *buf, unsigned int priority)
 {
   struct bt_bufmsg_s msg;
   int ret;

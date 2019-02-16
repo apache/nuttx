@@ -424,7 +424,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
   FAR struct null_dev_s *priv = (struct null_dev_s *) pvarg;
   struct audio_msg_s msg;
   int msglen;
-  int prio;
+  unsigned int prio;
 
   audinfo("Entry\n");
 

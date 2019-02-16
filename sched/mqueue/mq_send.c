@@ -82,7 +82,8 @@
  *
  ****************************************************************************/
 
-int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
+int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
+              unsigned int prio)
 {
   FAR struct mqueue_inode_s  *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
@@ -207,7 +208,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
  *
  ****************************************************************************/
 
-int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio)
+int mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen, unsigned int prio)
 {
   int ret;
 

@@ -87,11 +87,11 @@
  ****************************************************************************/
 
 int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
-                     int prio)
+                     unsigned int prio)
 {
   /* Verify the input parameters */
 
-  if (!msg || !mqdes || prio < 0 || prio > MQ_PRIO_MAX)
+  if (msg == NULL || mqdes == NULL || prio > MQ_PRIO_MAX)
     {
       return -EINVAL;
     }
@@ -339,7 +339,7 @@ int nxmq_wait_send(mqd_t mqdes)
  ****************************************************************************/
 
 int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                 FAR const char *msg, size_t msglen, int prio)
+                 FAR const char *msg, size_t msglen, unsigned int prio)
 {
   FAR struct tcb_s *btcb;
   FAR struct mqueue_inode_s *msgq;

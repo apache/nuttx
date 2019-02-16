@@ -153,15 +153,16 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen);
 int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg);
 ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                        FAR char *ubuffer, FAR int *prio);
+                        FAR char *ubuffer, FAR unsigned int *prio);
 
 /* mq_sndinternal.c ********************************************************/
 
-int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio);
+int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
+                     unsigned int prio);
 FAR struct mqueue_msg_s *nxmq_alloc_msg(void);
 int nxmq_wait_send(mqd_t mqdes);
 int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                 FAR const char *msg, size_t msglen, int prio);
+                 FAR const char *msg, size_t msglen, unsigned int prio);
 
 /* mq_release.c ************************************************************/
 

@@ -140,6 +140,6 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf);
  *
  ****************************************************************************/
 
-int bt_queue_send(mqd_t mqd, FAR struct bt_buf_s *buf, int priority);
+int bt_queue_send(mqd_t mqd, FAR struct bt_buf_s *buf, unsigned int priority);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_QUEUE_H */

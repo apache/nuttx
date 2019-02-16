@@ -85,7 +85,7 @@
  ****************************************************************************/
 
 ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                     FAR int *prio)
+                     FAR unsigned int *prio)
 {
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
@@ -179,7 +179,7 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
  ****************************************************************************/
 
 ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                   FAR int *prio)
+                   FAR unsigned int *prio)
 {
   int ret;
 

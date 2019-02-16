@@ -157,8 +157,8 @@ static void nxmq_sndtimeout(int argc, wdparm_t pid)
  *
  ****************************************************************************/
 
-int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
-                   FAR const struct timespec *abstime)
+int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
+                   unsigned int prio, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
@@ -382,8 +382,8 @@ errout_with_mqmsg:
  *
  ****************************************************************************/
 
-int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen, int prio,
-                 FAR const struct timespec *abstime)
+int mq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
+                 unsigned int prio, FAR const struct timespec *abstime)
 {
   int ret;
 

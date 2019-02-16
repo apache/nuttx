@@ -1560,7 +1560,7 @@ static void *cs43l22_workerthread(pthread_addr_t pvarg)
   struct audio_msg_s msg;
   FAR struct ap_buffer_s *apb;
   int msglen;
-  int prio;
+  unsigned int prio;
 
   audinfo("Entry\n");
 

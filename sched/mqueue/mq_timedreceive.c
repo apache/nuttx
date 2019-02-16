@@ -151,7 +151,8 @@ static void nxmq_rcvtimeout(int argc, wdparm_t pid)
  ****************************************************************************/
 
 ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                        FAR int *prio, FAR const struct timespec *abstime)
+                          FAR unsigned int *prio,
+                          FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_msg_s *mqmsg;
@@ -326,7 +327,8 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  ****************************************************************************/
 
 ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                        FAR int *prio, FAR const struct timespec *abstime)
+                        FAR unsigned int *prio,
+                        FAR const struct timespec *abstime)
 {
   int ret;
 

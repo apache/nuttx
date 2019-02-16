@@ -260,7 +260,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
  ****************************************************************************/
 
 ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                        FAR char *ubuffer, int *prio)
+                        FAR char *ubuffer, unsigned int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t flags;
