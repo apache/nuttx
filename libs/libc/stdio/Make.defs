@@ -59,6 +59,10 @@ else
 
 CSRCS += lib_libvsprintf.c
 
+ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
+CSRCS += lib_dtoa.c
+endif
+
 endif
 
 # The remaining sources files depend upon C streams
@@ -88,10 +92,6 @@ CSRCS += lib_setbuf.c lib_setvbuf.c
 endif
 
 # Other support that depends on specific, configured features.
-
-ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
-CSRCS += lib_dtoa.c
-endif
 
 # Add the stdio directory to the build
 
