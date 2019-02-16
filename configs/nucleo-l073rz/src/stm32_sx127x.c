@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-l073rz/src/stm32_rfm9x.c
+ * configs/nucleo-l073rz/src/stm32_sx127x.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -101,7 +101,7 @@ static void sx127x_chip_reset(void)
   /* Configure reset as output */
 
   stm32_configgpio(GPIO_SX127X_RESET | GPIO_OUTPUT | GPIO_SPEED_HIGH |
-                   GPIO_OUTPUT_SET);
+                   GPIO_OUTPUT_CLEAR);
 
   /* Set pin to zero */
 

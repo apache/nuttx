@@ -122,6 +122,12 @@ static inline void rcc_enableahb(void)
 {
   uint32_t regval = 0;
 
+  /* Set the appropriate bits in the AHBENR register to enabled the
+   * selected AHBENR peripherals.
+   */
+
+  regval  = getreg32(STM32_RCC_AHBENR);
+
 #ifdef CONFIG_STM32F0L0_DMA1
   /* DMA 1 clock enable */
 
@@ -295,10 +301,10 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_PWREN;
 #endif
 
-#ifdef CONFIG_STM32F0L0_DAC
-  /* DAC interface clock enable */
+#ifdef CONFIG_STM32F0L0_DAC1
+  /* DAC 1 interface clock enable */
 
-  regval |= RCC_APB1ENR_DACEN;
+  regval |= RCC_APB1ENR_DAC1EN;
 #endif
 
 #ifdef CONFIG_STM32F0L0_I2C3

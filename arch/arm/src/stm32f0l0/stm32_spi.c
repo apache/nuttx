@@ -95,10 +95,6 @@
 
 #ifdef CONFIG_STM32F0L0_SPI
 
-#ifdef ARCH_CHIP_STM32F0
-#  error SPI driver not tested for F0 yet
-#endif
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -505,37 +501,39 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
+    {
+    }
 
-  /* Then send the byte */
+  /* Then send the word */
 
-  spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
-}
+#ifdef HAVE_IP_SPI_V2
+  /* "When the data frame size fits into one byte (less than or equal to 8 bits),
+   *  data packing is used automatically when any read or write 16-bit access is
+   *  performed on the SPIx_DR register. The double data frame pattern is handled
+   *  in parallel in this case. At first, the SPI operates using the pattern
+   *  stored in the LSB of the accessed word, then with the other half stored in
+   *  the MSB...
+   *
+   *  "A specific problem appears if an odd number of such "fit into one byte"
+   *   data frames must be handled. On the transmitter side, writing the last
+   *   data frame of any odd sequence with an 8-bit access to SPIx_DR is enough.
+   *   ..."
+   *
+   * REVISIT: "...The receiver has to change the Rx_FIFO threshold level for the
+   * last data frame received in the odd sequence of frames in order to generate
+   * the RXNE event."
+   */
 
-/************************************************************************************
- * Name: spi_writebyte
- *
- * Description:
- *   Write one 8-bit frame to the SPI FIFO
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *   byte - Byte to send
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-static inline void spi_writebyte(FAR struct stm32_spidev_s *priv, uint8_t byte)
-{
-  /* Wait until the transmit buffer is empty */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
-
-  /* Then send the byte */
-
-  spi_putreg8(priv, STM32_SPI_DR_OFFSET, byte);
+  if (priv->nbits < 9)
+    {
+      spi_putreg8(priv, STM32_SPI_DR_OFFSET, (uint8_t)word);
+    }
+  else
+#endif
+    {
+      spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+    }
 }
 
 /************************************************************************************
@@ -554,7 +552,11 @@ static inline void spi_writebyte(FAR struct stm32_spidev_s *priv, uint8_t byte)
 
 static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv)
 {
+#ifdef HAVE_IP_SPI_V2
   return (priv->nbits > 8);
+#else
+  return ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0);
+#endif
 }
 
 /************************************************************************************
@@ -1101,6 +1103,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
+#ifdef HAVE_IP_SPI_V2
       /* Yes... Set CR2 appropriately */
       /* Set the number of bits (valid range 4-16) */
 
@@ -1129,6 +1132,29 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
       spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
       spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+#else
+      /* Yes... Set CR1 appropriately */
+
+      switch (nbits)
+        {
+        case 8:
+          setbits = 0;
+          clrbits = SPI_CR1_DFF;
+          break;
+
+        case 16:
+          setbits = SPI_CR1_DFF;
+          clrbits = 0;
+          break;
+
+        default:
+          return;
+        }
+
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+#endif
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1226,38 +1252,16 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   DEBUGASSERT(priv && priv->spibase);
 
-  /* According to the number of bits, access data register as word or byte
-   * This is absolutely required because of packing. With <=8 bit frames,
-   * two bytes are received by a 16-bit read of the data register!
-   */
+  spi_writeword(priv, wd);
+  ret = spi_readword(priv);
 
-  if (spi_16bitmode(priv))
-    {
-      spi_writeword(priv, wd);
-      ret = spi_readword(priv);
-    }
-  else
-    {
-      spi_writebyte(priv, (uint8_t)(wd & 0xFF));
-      ret = (uint16_t)spi_readbyte(priv);
-    }
-
-  /* Check and clear any error flags (Reading from the SR clears the error
-   * flags).
-   */
+  /* Check and clear any error flags (Reading from the SR clears the error flags) */
 
   regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
-  if (spi_16bitmode(priv))
-    {
-      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
-    }
-  else
-    {
-      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
-    }
-
+  spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
   UNUSED(regval);
+
   return ret;
 }
 
@@ -1637,6 +1641,7 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   int ret;
 #endif
 
+#ifdef HAVE_IP_SPI_V2
   /* Configure CR1 and CR2. Default configuration:
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
    *   Master:                        CR1.MSTR=1
@@ -1654,6 +1659,21 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
   clrbits = SPI_CR2_DS_MASK;
   setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
   spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
+#else
+  /* Configure CR1. Default configuration:
+   *   Mode 0:                        CPHA=0 and CPOL=0
+   *   Master:                        MSTR=1
+   *   8-bit:                         DFF=0
+   *   MSB transmitted first:         LSBFIRST=0
+   *   Replace NSS with SSI & SSI=1:  SSI=1 SSM=1 (prevents MODF error)
+   *   Two lines full duplex:         BIDIMODE=0 BIDIOIE=(Don't care) and RXONLY=0
+   */
+
+  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
+            SPI_CR1_RXONLY | SPI_CR1_DFF | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+  setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+#endif
 
   priv->frequency = 0;
   priv->nbits     = 8;

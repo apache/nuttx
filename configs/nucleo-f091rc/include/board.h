@@ -228,6 +228,18 @@
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate Pin Functions **********************************************************/
+
+/* I2C */
+
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* D15 - PB8 */
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* D14 - PB9 */
+
+/* SPI */
+
+#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1 /* D12 - PA6 */
+#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1 /* D11 - PA7 */
+#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1  /* D13 - PA5 */
+
 /* USART 1 */
 
 #define GPIO_USART1_TX           GPIO_USART1_TX_2

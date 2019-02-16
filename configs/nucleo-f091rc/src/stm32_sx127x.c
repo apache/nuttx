@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/b-l072z-lrwan1/src/stm32_boot.c
+ * configs/nucleo-f091rc/src/stm32_sx127x.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -53,14 +53,7 @@
 #include "stm32_exti.h"
 #include "stm32_spi.h"
 
-#include "b-l072z-lrwan1.h"
-
-/* WARNING: SX1276 on my CMWX1ZZABZ-091 module suddenly stopped
- * working (no SPI communication), so there might be a bug here,
- * something is missing in the configuration or something else.
- */
-
-#warning SX127X driver support for B-L072Z-LRWAN1 needs some additional verification!
+#include "nucleo-f091rc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -97,7 +90,7 @@ static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
 
   /* IRQ on rising edge */
 
-  (void)stm32_gpiosetevent(GPIO_SX127X_DIO0, false, true, false, isr, arg);
+  (void)stm32_gpiosetevent(GPIO_SX127X_DIO0, true, false, false, isr, arg);
   return OK;
 }
 
@@ -164,4 +157,3 @@ int stm32_lpwaninitialize(void)
 errout:
   return ret;
 }
-

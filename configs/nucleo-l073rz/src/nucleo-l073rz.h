@@ -100,8 +100,8 @@
 #define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTC | GPIO_PIN7)
 
 /* Dragino LORA shield (v1.4) - RF98 module (based on SX127X)
- * RESET - PC7 (PD9)
- * CS    - PB6 (PD10)
+ * RESET - PC7  (D9)
+ * CS    - PB6  (D10)
  * DIO0  - PA10 (D2)
  */
 

@@ -66,15 +66,7 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c # stm32_dma_v1.c
-CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c
-
-# Configuration-dependent STM32F0/L0 files
-
-ifeq ($(CONFIG_ARCH_CHIP_STM32F0),y)
-CHIP_CSRCS += stm32_clockconfig.c
-else ifeq ($(CONFIG_ARCH_CHIP_STM32L0),y)
-CHIP_CSRCS += stm32_rcc.c
-endif
+CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c stm32_rcc.c
 
 ifeq ($(CONFIG_STM32F0L0_PWR),y)
 CHIP_CSRCS += stm32_pwr.c

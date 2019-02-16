@@ -1505,6 +1505,15 @@ static void sx127x_isr0_process(FAR void *arg)
   FAR struct sx127x_dev_s *dev = (struct sx127x_dev_s *)arg;
   int ret = OK;
 
+  /* Return immediately if isr0_process is not initialized */
+
+  if (dev->ops.isr0_process == NULL)
+    {
+      return;
+    }
+
+  /* isr0_process depends on the current modulation scheme */
+
   ret = dev->ops.isr0_process(dev);
   if (ret < 0)
     {

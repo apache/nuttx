@@ -94,7 +94,7 @@
 
 /* DAC */
 
-#define GPIO_DAC_OUT1       (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_DAC1_OUT1      (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN4)
 
 /* I2C */
 

@@ -210,7 +210,7 @@
 #define RCC_APB2RSTR_USART6RST      (1 << 5)  /* Bit 5: USART6 reset */
 #define RCC_APB2RSTR_USART7RST      (1 << 6)  /* Bit 6: USART7 reset */
 #define RCC_APB2RSTR_USART8RST      (1 << 7)  /* Bit 7: USART8 reset */
-#define RCC_APB2RSTR_ADCRST         (1 << 9)  /* Bit 9: ADC interface reset */
+#define RCC_APB2RSTR_ADC1RST        (1 << 9)  /* Bit 9: ADC1 interface reset */
 #define RCC_APB2RSTR_TIM1RST        (1 << 11) /* Bit 11: TIM1 Timer reset */
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI 1 reset */
 #define RCC_APB2RSTR_USART1RST      (1 << 14) /* Bit 14: USART1 reset */
@@ -238,7 +238,7 @@
 #define RCC_APB1RSTR_CAN1RST        (1 << 25) /* Bit 25: CAN1 reset */
 #define RCC_APB1RSTR_CRSRST         (1 << 27) /* Bit 27: CRS / Backup interface reset */
 #define RCC_APB1RSTR_PWRRST         (1 << 28) /* Bit 28: Power interface reset */
-#define RCC_APB1RSTR_DACRST         (1 << 29) /* Bit 29: DAC interface reset */
+#define RCC_APB1RSTR_DAC1RST        (1 << 29) /* Bit 29: DAC1 interface reset */
 #define RCC_APB1RSTR_CECRST         (1 << 30) /* Bit 30: CEC reset */
 
 /* AHB Peripheral Clock enable register */
@@ -262,7 +262,7 @@
 #define RCC_APB2ENR_USART6EN        (1 << 5)  /* Bit 5: USART6 clock enable */
 #define RCC_APB2ENR_USART7EN        (1 << 6)  /* Bit 6: USART7 clock enable */
 #define RCC_APB2ENR_USART8EN        (1 << 7)  /* Bit 7: USART8 & COMP clock enable */
-#define RCC_APB2ENR_ADCEN           (1 << 9)  /* Bit 10: ADC interface clock enable */
+#define RCC_APB2ENR_ADC1EN          (1 << 9)  /* Bit 10: ADC1 interface clock enable */
 #define RCC_APB2ENR_TIM1EN          (1 << 11) /* Bit 11: TIM1 Timer clock enable */
 #define RCC_APB2ENR_SPI1EN          (1 << 12) /* Bit 12: SPI 1 clock enable */
 #define RCC_APB2ENR_USART1EN        (1 << 14) /* Bit 14: USART1 clock enable */
@@ -288,10 +288,10 @@
 #define RCC_APB1ENR_I2C1EN          (1 << 21) /* Bit 21: I2C 1 clock enable */
 #define RCC_APB1ENR_I2C2EN          (1 << 22) /* Bit 22: I2C 2 clock enable */
 #define RCC_APB1ENR_USBEN           (1 << 23) /* Bit 23: USB clock enable */
-#define RCC_APB1ENR_CANEN           (1 << 25) /* Bit 25: CAN clock enable */
+#define RCC_APB1ENR_CAN1EN          (1 << 25) /* Bit 25: CAN 1 clock enable */
 #define RCC_APB1ENR_CRSEN           (1 << 27) /* Bit 27: CRS / Backup interface clock enable */
 #define RCC_APB1ENR_PWREN           (1 << 28) /* Bit 28: Power interface clock enable */
-#define RCC_APB1ENR_DACEN           (1 << 29) /* Bit 29: DAC interface clock enable */
+#define RCC_APB1ENR_DAC1EN          (1 << 29) /* Bit 29: DAC1 interface clock enable */
 #define RCC_APB1ENR_CECEN           (1 << 30) /* Bit 30: CEC clock enable */
 
 /* RTC domain control register */

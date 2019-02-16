@@ -50,9 +50,8 @@
 #include "up_arch.h"
 
 #include "hardware/stm32_flash.h"
-#include "hardware/stm32_rcc.h"
 #include "stm32_gpio.h"
-#include "stm32_clockconfig.h"
+#include "stm32_rcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,7 +70,9 @@
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_ARCH_CHIP_STM32L0)
+#if defined(CONFIG_ARCH_CHIP_STM32F0)
+#  include "stm32f0_rcc.c"
+#elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "stm32l0_rcc.c"
 #else
 #  error "Unsupported STM32F0/L0 RCC"

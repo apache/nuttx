@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "stm32_clockconfig.h"
+#include "stm32_rcc.h"
 #include "stm32_lowputc.h"
 #include "stm32_start.h"
 

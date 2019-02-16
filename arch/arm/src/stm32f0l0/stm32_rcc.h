@@ -53,6 +53,18 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: stm32_clockconfig
+ *
+ * Description:
+ *   Called to initialize the STM32F0XX.  This does whatever setup is needed to put
+ *   the MCU in a usable state.  This includes the initialization of clocking using
+ *   the settings in board.h.
+ *
+ ************************************************************************************/
+
+void stm32_clockconfig(void);
+
+/************************************************************************************
  * Name: stm32_rcc_enablelse
  *
  * Description:

@@ -89,6 +89,18 @@
 #define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
                          GPIO_PORTC | GPIO_PIN13)
 
+/* Dragino LORA shield (v1.4) - RF98 module (based on SX127X)
+ * RESET - PC7  (D9)
+ * CS    - PB6  (D10)
+ * DIO0  - PA10 (D2)
+ */
+
+#define GPIO_SX127X_RESET (GPIO_PORTC | GPIO_PIN7)
+#define GPIO_SX127X_CS    (GPIO_OUTPUT | GPIO_SPEED_HIGH |        \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
+#define GPIO_SX127X_DIO0  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI |  \
+                           GPIO_PORTA | GPIO_PIN10)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -118,6 +130,29 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F0L0_SPI
+void stm32_spidev_initialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_lpwaninitialize
+ *
+ * Description:
+ *   Initialize SX127X LPWAN interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int stm32_lpwaninitialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NUCLEO_F091RC_SRC_NUCLEO_F091RC_H */

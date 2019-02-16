@@ -106,10 +106,10 @@
 #define STM32_I2C2_BASE      0x40005800     /* 0x40005800-0x40005bff I2C2 */
 #define STM32_USB_BASE       0x40005c00     /* 0x40005c00-0x40005fff USB device FS */
 #define STM32_USBRAM_BASE    0x40006000     /* 0x40006000-0x400063ff USB SRAM 512B */
-#define STM32_CAN_BASE       0x40006400     /* 0x40006400-0x400067ff bxCAN */
+#define STM32_CAN1_BASE      0x40006400     /* 0x40006400-0x400067ff bxCAN 1 */
 #define STM32_CRS_BASE       0x40006c00     /* 0x40006c00-0x40006fff CRS */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
-#define STM32_DAC_BASE       0x40007400     /* 0x40007400-0x400077ff DAC */
+#define STM32_DAC1_BASE      0x40007400     /* 0x40007400-0x400077ff DAC 1 */
 #define STM32_CEC_BASE       0x40007800     /* 0x40007800-0x40007bff HDMI CEC */
 
 /* APB2 Base Addresses **************************************************************/
@@ -119,7 +119,7 @@
 #define STM32_USART6_BASE    0x40011400     /* 0x40011400-0x400117ff USART6 */
 #define STM32_USART7_BASE    0x40011800     /* 0x40011800-0x40011bff USART7 */
 #define STM32_USART8_BASE    0x40011c00     /* 0x40011c00-0x40011fff USART8 */
-#define STM32_ADC_BASE       0x40012400     /* 0x40012400-0x400127ff ADC */
+#define STM32_ADC1_BASE      0x40012400     /* 0x40012400-0x400127ff ADC 1 */
 #define STM32_TIM1_BASE      0x40012c00     /* 0x40012c00-0x40012fff TIM1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff SPI1 */
 #define STM32_USART1_BASE    0x40013800     /* 0x40013800-0x40013bff USART1 */

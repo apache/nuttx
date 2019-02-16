@@ -69,6 +69,12 @@ void stm32_boardinitialize(void)
 
   board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_STM32F0L0_SPI
+  /* Configure SPI chip selects */
+
+  stm32_spidev_initialize();
+#endif
 }
 
 /****************************************************************************
