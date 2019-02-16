@@ -110,7 +110,6 @@
 /* Slave Data */
 
 #define I2C_SDR_DATA_SHIFT                      (0)       /* Bits 0-7: Data for transfer */
-#define I2C_SDR_DATA_MASK                                           0x000000ff
 #define I2C_SDR_DATA_MASK                       (0xff << I2C_SDR_DATA_SHIFT)
 #  define I2C_SDR_DATA(n)                       ((uint32_t)(n) << I2C_SDR_DATA_SHIFT)
 
