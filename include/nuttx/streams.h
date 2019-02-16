@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/streams.h
  *
- *   Copyright (C) 2009, 2011-2012, 2014-2016 Gregory Nutt.  All rights
- *     reserved.
+ *   Copyright (C) 2009, 2011-2012, 2014-2016, 2019 Gregory Nutt.  All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,6 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Types
@@ -447,30 +443,28 @@ int lib_noflush(FAR struct lib_outstream_s *stream);
 int lib_snoflush(FAR struct lib_sostream_s *this);
 
 /****************************************************************************
- * Name: lib_sprintf and lib_vsprintf
+ * Name: lib_vsprintf
  *
  * Description:
- *  Stream-oriented versions of sprintf and vsprintf.
+ *  Stream-oriented implementation that underlies printf family:  printf,
+ *  fprint, sprint, etc.
  *
  ****************************************************************************/
 
-int lib_sprintf(FAR struct lib_outstream_s *obj,
-                FAR const IPTR char *fmt, ...);
 int lib_vsprintf(FAR struct lib_outstream_s *obj,
                  FAR const IPTR char *src, va_list ap);
 
 /****************************************************************************
- * Name: lib_sscanf and lib_vsscanf
+ * Name: lib_vsscanf
  *
  * Description:
- *  Stream-oriented versions of sscanf and vsscanf.
+ *  Stream-oriented implementation that underlies scanf family:  fscanf,
+ *  vfscanf, sscanf, and vsscanf
  *
  ****************************************************************************/
 
-int lib_sscanf(FAR struct lib_instream_s *obj,
-                FAR const IPTR char *fmt, ...);
-int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
-                 FAR const IPTR char *src, va_list ap);
+int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
+               FAR const IPTR char *src, va_list ap);
 
 #undef EXTERN
 #if defined(__cplusplus)

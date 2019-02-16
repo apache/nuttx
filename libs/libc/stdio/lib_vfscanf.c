@@ -58,20 +58,20 @@ int vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 
   if (stream)
     {
-      /* Wrap the stream in a stream object and let lib_vsscanf do the work. */
+      /* Wrap the stream in a stream object and let lib_vscanf do the work. */
 
       lib_stdinstream(&stdinstream, stream);
 
-      /* Hold the stream semaphore throughout the lib_vsscanf call so that
+      /* Hold the stream semaphore throughout the lib_vscanf call so that
        * this thread can get its entire message out before being pre-empted by
        * the next thread.
        */
 
       lib_take_semaphore(stream);
 
-      n = lib_vsscanf(&stdinstream.public, &lastc, fmt, ap);
+      n = lib_vscanf(&stdinstream.public, &lastc, fmt, ap);
 
-      /* The lib_vsscanf function reads always one character more, this
+      /* The lib_vscanf function reads always one character more, this
        * character needs to be written back.
        */
 

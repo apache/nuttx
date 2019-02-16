@@ -200,34 +200,15 @@ doexit:
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  lib_sscanf
- *
- * Description:
- *    Stream-oriented version of sscanf.
- *
- ****************************************************************************/
-
-int lib_sscanf(FAR struct lib_instream_s *obj, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-  int count;
-
-  va_start(ap, fmt);
-  count = lib_vsscanf(obj, NULL, fmt, ap);
-  va_end(ap);
-  return count;
-}
-
-/****************************************************************************
- * Name:  lib_vsscanf
+ * Name:  lib_vscanf
  *
  * Description:
  *    Stream-oriented version of vsscanf.
  *
  ****************************************************************************/
 
-int lib_vsscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
-                FAR const IPTR char *fmt, va_list ap)
+int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
+               FAR const IPTR char *fmt, va_list ap)
 {
   int c;
   FAR char *tv;

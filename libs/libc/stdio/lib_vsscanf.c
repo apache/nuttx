@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libsprintf.c
+ * libs/libc/stdio/lib_vscanf.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@gnutt.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,27 +37,33 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
+#include <semaphore.h>
+
+#include <nuttx/streams.h>
+
 #include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: lib_sprintf
- ****************************************************************************/
-
-int lib_sprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *fmt,
-                ...)
+int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 {
-  va_list ap;
-  int     n;
+  struct lib_meminstream_s meminstream;
+  int n;
 
-  /* Let lib_vsprintf do the real work */
+  /* Initialize a memory stream to freadm from the buffer */
 
-  va_start(ap, fmt);
-  n = lib_vsprintf(obj, fmt, ap);
-  va_end(ap);
+  lib_meminstream((FAR struct lib_meminstream_s *)&meminstream, buf,
+                  LIB_BUFLEN_UNKNOWN);
+
+  /* Then let lib_vscanf do the real work */
+
+
+  n = lib_vscanf((FAR struct lib_instream_s *)&meminstream.public, NULL,
+                  fmt, ap);
   return n;
 }

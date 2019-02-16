@@ -34,16 +34,15 @@
 ############################################################################
 
 # Add the stdio C files to the build
-# This first group of C files do not depend on having file descriptors or
-# C streams.
+# This first group of C files do not depend on having C streams.
 
 CSRCS += lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
-CSRCS += lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
-CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c
+CSRCS += lib_snprintf.c lib_vsprintf.c lib_vasprintf.c lib_vsnprintf.c
+CSRCS += lib_dprintf.c lib_vdprintf.c
 CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
 CSRCS += lib_memsostream.c lib_lowoutstream.c
 CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
-CSRCS += lib_sscanf.c lib_vsscanf.c lib_libsscanf.c lib_libnoflush.c
+CSRCS += lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libnoflush.c
 CSRCS += lib_libsnoflush.c
 
 ifeq ($(CONFIG_NANO_PRINTF),y)
@@ -62,12 +61,7 @@ CSRCS += lib_libvsprintf.c
 
 endif
 
-# The remaining sources files depend upon file descriptors
-
-CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
-CSRCS += lib_rawsostream.c lib_remove.c
-
-# And these depend upon both file descriptors and C streams
+# The remaining sources files depend upon C streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 
@@ -79,7 +73,9 @@ CSRCS += lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c
 CSRCS += lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
 CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
 CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
-CSRCS += lib_clearerr.c lib_scanf.c lib_fscanf.c lib_vfscanf.c
+CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
+CSRCS += lib_rawsostream.c lib_remove.c lib_clearerr.c lib_scanf.c
+CSRCS += lib_fscanf.c lib_vfscanf.c
 
 endif
 
