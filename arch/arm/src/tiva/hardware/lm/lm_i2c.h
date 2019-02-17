@@ -368,19 +368,19 @@
 
 /* I2C Master Interrupt Mask (I2CM_IMR) */
 
-#define I2CM_IMR_MIM                  (1 << 0)  /* Bit 0:  Master Interrupt Mask */
+#define I2CM_IMR_MIM                   (1 << 0)  /* Bit 0:  Master Interrupt Mask */
 
 /* I2C Master Raw Interrupt Status (I2CM_RIS) */
 
-#define I2CM_RIS_MRIS                 (1 << 0)  /* Bit 0:  Master Raw Interrupt Status */
+#define I2CM_RIS_MRIS                  (1 << 0)  /* Bit 0:  Master Raw Interrupt Status */
 
 /* I2C Master Masked Interrupt Status (I2CM_MIS) */
 
-#define I2CM_MIS_MMIS                 (1 << 0)  /* Bit 0:  Maseter Masked Interrupt Status */
+#define I2CM_MIS_MMIS                  (1 << 0)  /* Bit 0:  Maseter Masked Interrupt Status */
 
 /* I2C Master Masked Interrupt Status (I2CM_ICR) */
 
-#define I2CM_ICR_MIC                  (1 << 0)  /* Bit 0:  Master Masked Interrupt Clear */
+#define I2CM_ICR_MIC                   (1 << 0)  /* Bit 0:  Master Masked Interrupt Clear */
 
 /* I2C Master Configuration (I2CM_CR) */
 

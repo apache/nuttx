@@ -511,28 +511,25 @@
 #define I2CM_TPR_MASK                  (0x7f << I2CM_TPR_SHIFT)
 #define I2CM_TPR_HS                    (1 << 7) /* Bit 7:  High-Speed Enable (write) */
 
-#define I2CM_TPR_SHIFT                 (0)      /* Bits 7-0: SCL Clock Period */
-#define I2CM_TPR_MASK                  (0xff << I2CM_TPR_SHIFT)
-
 /* I2C Master Interrupt Mask (I2CM_IMR) */
 
-#define I2CM_IMR_MIM                  (1 << 0)  /* Bit 0:  Master Interrupt Mask */
-#define I2CM_IMR_CLKIM                (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Mask */
+#define I2CM_IMR_MIM                   (1 << 0)  /* Bit 0:  Master Interrupt Mask */
+#define I2CM_IMR_CLKIM                 (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Mask */
 
 /* I2C Master Raw Interrupt Status (I2CM_RIS) */
 
-#define I2CM_RIS_MRIS                 (1 << 0)  /* Bit 0:  Master Raw Interrupt Status */
-#define I2CM_RIS_CLKRIS               (1 << 1)  /* Bit 1:  Clock Timeout Raw Interrupt Status */
+#define I2CM_RIS_MRIS                  (1 << 0)  /* Bit 0:  Master Raw Interrupt Status */
+#define I2CM_RIS_CLKRIS                (1 << 1)  /* Bit 1:  Clock Timeout Raw Interrupt Status */
 
 /* I2C Master Masked Interrupt Status (I2CM_MIS) */
 
-#define I2CM_MIS_MMIS                 (1 << 0)  /* Bit 0:  Maseter Masked Interrupt Status */
-#define I2CM_MIS_CLKMIS               (1 << 1)  /* Bit 1:  Clock Timeout Masked Interrupt Status */
+#define I2CM_MIS_MMIS                  (1 << 0)  /* Bit 0:  Maseter Masked Interrupt Status */
+#define I2CM_MIS_CLKMIS                (1 << 1)  /* Bit 1:  Clock Timeout Masked Interrupt Status */
 
 /* I2C Master Masked Interrupt Status (I2CM_ICR) */
 
-#define I2CM_ICR_MIC                  (1 << 0)  /* Bit 0:  Master Masked Interrupt Clear */
-#define I2CM_ICR_CLKC                 (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Clear */
+#define I2CM_ICR_MIC                   (1 << 0)  /* Bit 0:  Master Masked Interrupt Clear */
+#define I2CM_ICR_CLKC                  (1 << 1)  /* Bit 1:  Clock Timeout Interrupt Clear */
 
 /* I2C Master Configuration (I2CM_CR) */
 
