@@ -114,8 +114,8 @@
 #  define FL_PREC         0x0040
 
 #  define FL_LONG         0x0080
-#  define FL_LONGLONG     0x0100
-#  define FL_SHORT        0x0200
+#  define FL_SHORT        0x0100
+#  define FL_REPD_TYPE    0x0200
 
 #  define FL_NEGATIVE     0x0400
 
@@ -455,7 +455,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             {
               if ((flags & FL_LONG) != 0)
                 {
-                  flags |= FL_LONGLONG;
+                  flags |= FL_REPD_TYPE;
                 }
 
               flags |= FL_LONG;
@@ -465,6 +465,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if (c == 'h')
             {
+              if ((flags & FL_SHORT) != 0)
+                {
+                  flags |= FL_REPD_TYPE;
+                }
+
               flags |= FL_SHORT;
               flags &= ~FL_LONG;
               continue;
@@ -845,7 +850,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #else
           long long x;
 
-          if ((flags & FL_LONGLONG) != 0)
+          if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
               x = va_arg(ap, long long);
             }
@@ -860,7 +865,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               x = va_arg(ap, int);
               if ((flags & FL_SHORT) != 0)
                 {
-                  x = (short)x;
+                  if ((flags & FL_REPD_TYPE) == 0)
+                    {
+                      x = (short)x;
+                    }
+                  else
+                    {
+                      x = (signed char)x;
+                    }
                 }
             }
 
@@ -888,7 +900,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #else
           unsigned long long x;
 
-          if ((flags & FL_LONGLONG) != 0)
+          if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
               x = va_arg(ap, unsigned long long);
             }
@@ -903,7 +915,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               x = va_arg(ap, unsigned int);
               if ((flags & FL_SHORT) != 0)
                 {
-                  x = (unsigned short)x;
+                  if ((flags & FL_REPD_TYPE) == 0)
+                    {
+                      x = (unsigned short)x;
+                    }
+                  else
+                    {
+                      x = (unsigned char)x;
+                    }
                 }
             }
 
