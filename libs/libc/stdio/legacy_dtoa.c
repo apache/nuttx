@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_dtoa.c
+ * libs/libc/stdio/legacy_dtoa.c
  *
  * This file was ported to NuttX by Yolande Cates.
  *

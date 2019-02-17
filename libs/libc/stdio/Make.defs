@@ -47,9 +47,9 @@ CSRCS += lib_libsnoflush.c
 
 ifeq ($(CONFIG_LIBC_PRINT_LEGACY),y)
 
-CSRCS += lib_libvsprintf.c
+CSRCS += legacy_libvsprintf.c
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
-CSRCS += lib_dtoa.c
+CSRCS += legacy_dtoa.c
 endif
 
 #else

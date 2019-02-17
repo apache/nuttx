@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libvsprintf.c
+ * libs/libc/stdio/legacy_libvsprintf.c
  *
  *   Copyright (C) 2007-2012, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
