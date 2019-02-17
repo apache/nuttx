@@ -24,6 +24,16 @@ Status
   2019-02-12:  A little progress.  I do make it all the way into NSH, but
     with no console input.
   2019-02-13:  NSH is now fully functional.
+  2019-02-17:  My plan was to include develop an IEEE 802.15.4 driver
+    using the interface code for the Cortex-M0 co-processor.  Unfortunately,
+    that interface code is a part of the TI153STACK.  The source for that
+    stack is included in the SDK.  However, it looks like the licensing on
+    that code will prevent that (it is not BSD compatible).  That is a shame;
+    I only want the Cortex-M0 interface, not TI's stack (NuttX has its own
+    IEEE 802.15.4 stack).
+
+    NOTE:  This does not prevent you as an end-user from using the TI154STACK;
+    it only prevents me from re-distributing any part of it.
 
 Serial Console
 ==============

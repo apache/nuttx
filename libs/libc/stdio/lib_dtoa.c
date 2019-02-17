@@ -128,6 +128,16 @@ typedef struct bigint_s bigint_t;
  * Private Data
  ****************************************************************************/
 
+/* REVISIT:  __dtoa is not thread safe due to thse two global variables.
+ * Options:
+ *
+ * 1. Allocate on stack.  g_freelist is rather large, however.. around 275
+ *    bytes (it could be shrunk a little by using stdint types instead of int.
+ * 2. Semaphore protect the global variables and handle interrupt level
+ *    calls as a special case (perhaps refusing them?  Or having a duplicate
+ *    set of variables, one for tasks and one for interrupt usage)
+ */
+
 static FAR bigint_t *g_freelist[KMAX + 1];
 static FAR bigint_t *g_p5s;
 

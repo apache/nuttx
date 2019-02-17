@@ -498,11 +498,13 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE |
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                  TCB_FLAG_NONCANCELABLE |
                                   TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_NONCANCELABLE);
+      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                  TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -521,7 +523,8 @@ void nx_start(void)
       /* Set the IDLE task name */
 
 #  ifdef CONFIG_SMP
-      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", cpu);
+      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
+               cpu);
 #  else
       strncpy(g_idletcb[cpu].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
       g_idletcb[cpu].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
