@@ -58,26 +58,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MAX_PREC 16
-
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b)          (a < b ? a : b)
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (a > b ? a : b)
+#  define MAX(a,b)          (a > b ? a : b)
 #endif
 
-/* Use (almost) the maximim precision with %g format if no precision is
- * specified.  We do not use the full precision beause the least significant
- * digits are probably garbage.
- *
- * REVISIT:  This should be smarter.  15 digits is the maximum size of the
- * number.  The maximum precision is really 15 minus the number of digits
- * in the integer part.
+/* Use the maximim precision with %g format if no precision is specified.
+ * NOTE:  This may result in numbers with precision that exceeds the
+ * precision of type double.
  */
 
-#define DOUBLE_PRECISON_MAX 13 /* vs 15 which is the maximum */
+#define DOUBLE_PRECISON_MAX 15
 
 /* Use a default precision of 6 for the %f format if no precision is
  * specified.
@@ -105,6 +99,24 @@ static void zeroes(FAR struct lib_outstream_s *obj, int nzeroes)
     {
       obj->put(obj, '0');
     }
+}
+
+/****************************************************************************
+ * Name: truncate_zeroes
+ *
+ * Description:
+ *   Adjust the string length to eliminate zeros in the fractional part of
+ *   the string.
+ *
+ ****************************************************************************/
+
+static inline int truncate_zeroes(FAR char *digits, int expt, int numlen)
+{
+  for (; numlen > expt && digits[numlen - 1] == '0'; numlen--)
+    {
+    }
+
+  return numlen;
 }
 
 /****************************************************************************
@@ -215,6 +227,28 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 
   digits = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
   numlen = rve - digits;
+
+  /* If we are going to truncate trailing zeros, then make sure we have not
+   * exceeded the precision of type double.
+   */
+
+  if (notrailing && numlen > DOUBLE_PRECISON_MAX)
+    {
+      /* Make sure there are fractional digits to truncate */
+
+      if (expt <= DOUBLE_PRECISON_MAX)
+        {
+          numlen = DOUBLE_PRECISON_MAX;
+        }
+      else
+        {
+          numlen = expt;
+        }
+
+      /* Shortening the string probably now exposes some trailing zeroes */
+
+      numlen =  truncate_zeroes(digits, expt, numlen);
+    }
 
   /* Avoid precision error from missing trailing zeroes */
 
