@@ -1,7 +1,7 @@
 /****************************************************************************
- * libs/libc/stdio/nano_ultoa_invert.c
+ * libs/libc/stdio/lib_ultoa_invert.h
  *
- *   Copyright © 2017, Keith Packard
+ *   Copyright (c) 2005, Dmitry Xmelkov
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,51 +33,36 @@
  *
  ****************************************************************************/
 
+#ifndef __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H
+#define __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "nano_ultoa_invert.h"
+#include <nuttx/compiler.h>
+
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
+/* Next flags are to use with `base'. Unused fields are reserved. */
+
+#define XTOA_PREFIX  0x0100    /* Put prefix for octal or hex */
+#define XTOA_UPPER   0x0200    /* Use upper case letters */
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Internal function for use from `printf'. */
+
 #ifdef CONFIG_LIBC_LONG_LONG
-FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base)
+FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base);
 #else
-FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base)
+FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base);
 #endif
-{
-  int upper = 0;
 
-  if (base & XTOA_UPPER)
-    {
-      upper = 1;
-      base &= ~XTOA_UPPER;
-    }
-  do
-    {
-      int v;
-
-      v   = val % base;
-      val = val / base;
-
-      if (v <= 9)
-        {
-          v += '0';
-        }
-      else
-        {
-          if (upper)
-            v += 'A' - 10;
-          else
-            v += 'a' - 10;
-        }
-
-      *str++ = v;
-    }
-  while (val);
-
-  return str;
-}
+#endif /* __LIBS_LIBC_STDIO_LIB_ULTOA_INVERT_H */

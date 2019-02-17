@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/nano_dtoa_engine.h
+ * libs/libc/stdio/lib_dtoa_engine.h
  *
  *   Copyright © 2018, Keith Packard
  *   All rights reserved.
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBS_LIBC_STDIO_NANO_DTOA_ENGINE_H
-#define __LIBS_LIBC_STDIO_NANO_DTOA_ENGINE_H
+#ifndef __LIBS_LIBC_STDIO_LIB_DTOA_ENGINE_H
+#define __LIBS_LIBC_STDIO_LIB_DTOA_ENGINE_H
 
 /****************************************************************************
  * Included Files
@@ -186,4 +186,4 @@ extern const double g_dtoa_round[];
 int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals);
 
-#endif /* __LIBS_LIBC_STDIO_NANO_DTOA_ENGINE_H */
+#endif /* __LIBS_LIBC_STDIO_LIB_DTOA_ENGINE_H */

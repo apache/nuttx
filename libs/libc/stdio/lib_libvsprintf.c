@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/nano_libvsprintf.c
+ * libs/libc/stdio/lib_libvsprintf.c
  *
  *   Copyright (c) 2002, Alexander Popov (sasho@vip.bg)
  *   Copyright (c) 2002,2004,2005 Joerg Wunsch
@@ -49,8 +49,8 @@
 
 #include <nuttx/streams.h>
 
-#include "nano_dtoa_engine.h"
-#include "nano_ultoa_invert.h"
+#include "lib_dtoa_engine.h"
+#include "lib_ultoa_invert.h"
 
 /****************************************************************************
  * Pre-processor Definitions

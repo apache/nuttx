@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/nanoo_dtoa_engine.c
+ * libs/libc/stdio/lib_dtoa_engine.c
  *
  *   Copyright © 2018, Keith Packard
  *   All rights reserved.
@@ -39,7 +39,7 @@
 
 #include <math.h>
 
-#include "nano_dtoa_engine.h"
+#include "lib_dtoa_engine.h"
 
 /****************************************************************************
  * Pre-processor Definitions

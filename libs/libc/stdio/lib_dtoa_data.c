@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/nano_dtoa_data.c
+ * libs/libc/stdio/lib_dtoa_data.c
  *
  *   Copyright © 2018, Keith Packard
  *   All rights reserved.
@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "nano_dtoa_engine.h"
+#include "lib_dtoa_engine.h"
 
 /****************************************************************************
  * Pre-processor Definitions
