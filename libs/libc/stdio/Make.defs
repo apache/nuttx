@@ -52,7 +52,7 @@ ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += legacy_dtoa.c
 endif
 
-#else
+else
 
 CSRCS += lib_libvsprintf.c lib_ultoa_invert.c
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
