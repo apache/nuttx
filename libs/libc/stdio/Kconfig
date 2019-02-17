@@ -48,7 +48,17 @@ config NUNGET_CHARS
 	int "Number unget() characters"
 	default 2
 	---help---
-		Number of characters that can be buffered by ungetc() (Only if NFILE_STREAMS > 0)
+		Number of characters that can be buffered by ungetc() (Only if
+		NFILE_STREAMS > 0)
+
+config LIBC_PRINT_LEGACY
+	bool "Enable legacy printf logic"
+	default n
+	---help---
+		By default, printf (and friends) are implemented using a port from
+		newlib-nano.  That port can be signifcantly smaller, especially if
+		floating support is enabled.  This option may is avaiable, however,
+		to revert to the legacy printf version is so desired.
 
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
@@ -57,16 +67,24 @@ config LIBC_FLOATINGPOINT
 		By default, floating point support in printf, sscanf, etc. is
 		disabled.  This option will enable floating point support.
 
-		if CONFIG_NANO_PRINTF is enabled, tnen this option works a
-		little differently.  You still have to select
-		CONFIG_NANO_PRINTLEVEL=3 to get floating point support.  In
-		case, this option extends the range of acceptable
-		values that will permit selection of CONFIG_NANO_PRINTLEVEL=3.
-
 config LIBC_LONG_LONG
 	bool "Enable long long support in printf"
 	default y if !DEFAULT_SMALL
 	default n if DEFAULT_SMALL
+	---help---
+		Enables support for long long formats in printf, sscanf, etc. is
+		enabled.  This is enabled by default but if you are trying to
+		reduce the FLASH footprint, then disabling this feature is one
+		option.  The FLASH saves comes not from disabling the long long
+		formats, but rather from omitting the large long long arithmetic
+		libraries that will be drawn into the build if long long support
+		is enabled.
+
+config LIBC_PRINT_MINIMAL
+	bool "Minimal formatting support in printf"
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
+	depends on !LIBC_FLOATINGPOINT && !LIBC_LONG_LONG && !LIBC_PRINT_LEGACY
 	---help---
 		Enables support for long long formats in printf, sscanf, etc. is
 		enabled.  This is enabled by default but if you are trying to
@@ -113,30 +131,5 @@ config MEMCPY_VIK
 		Select this option to use the optimized memcpy() function by Daniel Vik.
 		Select this option for improved performance at the expense of increased
 		size. See licensing information in the top-level COPYING file.
-
-config NANO_PRINTF
-	bool "Use nano printf code"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
-	---help---
-		Replace printf code with version from newlib-nano. Can be
-		signifcantly smaller, especially if floating support is enabled.
-		However, it does not include 'long long' support.
-
-config NANO_PRINTLEVEL
-	int "Nano printf support level"
-	default 2 if !LIBC_FLOATINGPOINT
-	default 3 if LIBC_FLOATINGPOINT
-	range 1 2 if !LIBC_FLOATINGPOINT && !LIBC_LONG_LONG
-	range 1 3 if LIBC_FLOATINGPOINT && !LIBC_LONG_LONG
-	range 2 2 if !LIBC_FLOATINGPOINT && LIBC_LONG_LONG
-	range 2 3 if LIBC_FLOATINGPOINT && LIBC_LONG_LONG
-	depends on NANO_PRINTF
-	---help---
-		Nano printf can be built into more than one support level.  The
-		default is to offer the usual modifiers and integer formatting
-		support (level 2).  Level 1 maintains a minimal version that just
-		offers integer formatting, but no modifier support whatsoever.
-		Level 3 is intented for floating point support.
 
 endmenu #Standard C I/O

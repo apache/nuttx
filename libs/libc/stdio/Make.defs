@@ -45,22 +45,18 @@ CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
 CSRCS += lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libnoflush.c
 CSRCS += lib_libsnoflush.c
 
-ifeq ($(CONFIG_NANO_PRINTF),y)
-
-CSRCS += nano_libvsprintf.c nano_ultoa_invert.c
-
-ifeq ($(CONFIG_NANO_PRINTLEVEL),3)
-
-CSRCS += nano_dtoa_engine.c nano_dtoa_data.c
-
-endif
-
-else
+ifeq ($(CONFIG_LIBC_PRINT_LEGACY),y)
 
 CSRCS += lib_libvsprintf.c
-
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa.c
+endif
+
+#else
+
+CSRCS += nano_libvsprintf.c nano_ultoa_invert.c
+ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
+CSRCS += nano_dtoa_engine.c nano_dtoa_data.c
 endif
 
 endif

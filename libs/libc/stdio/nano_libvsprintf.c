@@ -66,24 +66,15 @@
  * is to offer the usual modifiers and integer formatting support
  * (level 2).  Level 1 maintains a minimal version that just offers
  * integer formatting, but no modifier support whatsoever.  Level 3 is
- * intented for floating point support.
+ * intended for floating point support.
  */
 
-#if defined(CONFIG_NANO_PRINTLEVEL)
-#  define PRINTF_LEVEL CONFIG_NANO_PRINTLEVEL
-#elif defined(CONFIG_LIBC_FLOATINGPOINT)
+#if defined(CONFIG_LIBC_FLOATINGPOINT)
 #  define PRINTF_LEVEL PRINTF_FLT
+#elif defined(CONFIG_LIB_LONG_LONG) || !defined(CONFIG_LIBC_PRINT_MINIMAL)
+#  define PRINT_LEVEL PRINTF_STD
 #else
-#  define PRINTF_LEVEL PRINTF_STD
-#endif
-
-#if PRINTF_LEVEL == PRINTF_MIN || PRINTF_LEVEL == PRINTF_STD || \
-    PRINTF_LEVEL == PRINTF_FLT
-
-/* OK */
-
-#else
-#  error "Not a known printf level."
+#  define PRINT_LEVEL PRINTF_MIN
 #endif
 
 #ifdef putc
