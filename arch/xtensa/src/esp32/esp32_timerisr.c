@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_timerisr.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@ static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
 
       diff = xtensa_getcount() - compare;
     }
-  while (diff < divisor);
+  while (diff >= divisor);
 
   return OK;
 }
