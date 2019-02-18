@@ -104,10 +104,10 @@ extern FAR struct i2c_master_s* g_i2c1_dev;
  * Description:
  *   Perform architecture-specific initialization
  *
- *   CONFIG_BOARD_INITIALIZE=y :
- *     Called from board_initialize().
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

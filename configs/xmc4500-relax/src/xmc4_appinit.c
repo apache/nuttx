@@ -76,11 +76,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board initialization */
 
   return xmc4_bringup();
 #else
   return OK;
-#endif /* CONFIG_BOARD_INITIALIZE */
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
 }

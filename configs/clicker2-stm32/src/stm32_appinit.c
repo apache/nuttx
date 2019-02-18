@@ -66,9 +66,9 @@
  *   CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_BOARD_LATE_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
  *   CONFIG_LIB_BOARDCTL=n :
- *     Called from board_initialize().
+ *     Called from board_late_initialize().
  *
  * Input Parameters:
  *   arg - The boardctl() argument is passed to the board_app_initialize()
@@ -91,9 +91,9 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-  /* Did we already initialize via board_initialize()? */
+  /* Did we already initialize via board_late_initialize()? */
 
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   ret = stm32_bringup();
   if (ret < 0)
     {

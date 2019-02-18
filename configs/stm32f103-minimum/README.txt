@@ -268,7 +268,7 @@ Nintendo Wii Nunchuck:
 
   - Enable to Custom board/driver initialization at RTOS Features -> RTOS hooks
 
-    CONFIG_BOARD_INITIALIZE=y
+    CONFIG_BOARD_LATE_INITIALIZE=y
 
   - Enable the I2C Driver Support at Device Drivers, it will enable this symbol:
 

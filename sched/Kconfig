@@ -1147,14 +1147,14 @@ endif # PRIORITY_INHERITANCE
 
 menu "RTOS hooks"
 
-config BOARD_INITIALIZE
-	bool "Custom board/driver initialization"
+config BOARD_DRIVER_INITIALIZE
+	bool "Custom board driver initialization"
 	default n
 	---help---
 		By default, there are three points in time where you can insert
 		custom initialization logic:
 
-		1) <arch>_boardinitialize():  This function is used only for
+		1) <arch>_board_initialize():  This function is used only for
 		initialization of very low-level things like configuration of
 		GPIO pins, power setting.  The OS has not been initialized
 		at this point, so you cannot allocate memory or initialize
@@ -1165,24 +1165,85 @@ config BOARD_INITIALIZE
 		The OS has been initialized at this point and it is okay to
 		initialize drivers in this phase.
 
-		3) And, finally, when the user application code starts.
+		At this same point in time, the OS will also call a board-
+		specific initialization function named board_driver_initialize()
+		if CONFIG_BOARD_DRIVER_INITIALIZE is selectd.  The context in
+		which board_driver_initialize() executes is suitable for early
+		initialization of most, simple device drivers and is a logical,
+		board-specific extension of up_initialize().
 
-		If BOARD_INITIALIZE is selected, then an additional initialization
-		call will be performed in the boot-up sequence to a function
-		called board_initialize().  board_initialize() will be
-		call between phases 2) and 3) above, immediately after
-		up_initialize() is called.  This additional initialization
-		phase may be used, for example, to initialize board-specific
-		device drivers.
-
+		 board_driver_initialize() runs on the startup, initialization thread.
 		Some initialization operations cannot be performed on the start-up,
 		initialization thread.  That is because the initialization thread
 		cannot wait for event.  Waiting may be required, for example, to
 		mount a file system or or initialize a device such as an SD card.
-		For this reason, board initialize will run on a temporary, internal
-		kernel thread.
+		For this reason, such driver initialize must be deferred to
+		board_late_initialize().
 
-if BOARD_INITIALIZE
+		3) And, finally, just before the user application code starts.
+
+		If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+		initialization call will be performed in the boot-up sequence to a
+		function called board_late_initialize().  board_late_initialize()
+		will be called after up_initialize() is called and just before the
+		main application is started.  This additional initialization
+		phase may be used, for example, to initialize more complex,
+		board-specific device drivers.
+
+		Waiting for events, use of I2C, SPI, etc are permissable in the
+		context of board_late_initialize().  That is because
+		board_late_initialize() will run on a temporary, internal kernel
+		thread.
+
+config BOARD_LATE_INITIALIZE
+	bool "Custom board late initialization"
+	default n
+	---help---
+		By default, there are three points in time where you can insert
+		custom initialization logic:
+
+		1) <arch>_board_initialize():  This function is used only for
+		initialization of very low-level things like configuration of
+		GPIO pins, power setting.  The OS has not been initialized
+		at this point, so you cannot allocate memory or initialize
+		device drivers at this phase.
+
+		2) The next level of initialization is performed by a call to
+		up_initialize() (in arch/<arch>/src/common/up_initialize.c).
+		The OS has been initialized at this point and it is okay to
+		initialize drivers in this phase.
+
+		At this same point in time, the OS will also call a board-
+		specific initialization function named board_driver_initialize()
+		if CONFIG_BOARD_DRIVER_INITIALIZE is selectd.  The context in
+		which board_driver_initialize() executes is suitable for early
+		initialization of most, simple device drivers and is a logical,
+		board-specific extension of up_initialize().
+
+		 board_driver_initialize() runs on the startup, initialization thread.
+		Some initialization operations cannot be performed on the start-up,
+		initialization thread.  That is because the initialization thread
+		cannot wait for event.  Waiting may be required, for example, to
+		mount a file system or or initialize a device such as an SD card.
+		For this reason, such driver initialize must be deferred to
+		board_late_initialize().
+
+		3) And, finally, just before the user application code starts.
+
+		If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+		initialization call will be performed in the boot-up sequence to a
+		function called board_late_initialize().  board_late_initialize()
+		will be called after up_initialize() is called and just before the
+		main application is started.  This additional initialization
+		phase may be used, for example, to initialize more complex,
+		board-specific device drivers.
+
+		Waiting for events, use of I2C, SPI, etc are permissable in the
+		context of board_late_initialize().  That is because
+		board_late_initialize() will run on a temporary, internal kernel
+		thread.
+
+if BOARD_LATE_INITIALIZE
 
 config BOARD_INITTHREAD_STACKSIZE
 	int "Board initialization thread stack size"
@@ -1200,7 +1261,7 @@ config BOARD_INITTHREAD_PRIORITY
 		started until the board initialization is completed.  Hence, there
 		is very little competition for the CPU.
 
-endif # BOARD_INITIALIZE
+endif # BOARD_LATE_INITIALIZE
 
 config SCHED_STARTHOOK
 	bool "Enable startup hook"

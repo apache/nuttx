@@ -110,10 +110,10 @@
  * Description:
  *   Bring up board features.
  *
- *   If CONFIG_BOARD_INITIALIZE=y, then this function will be called from
- *   board_initialize().
+ *   If CONFIG_BOARD_LATE_INITIALIZE=y, then this function will be called from
+ *   board_late_initialize().
  *
- *   If CONFIG_BOARD_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
+ *   If CONFIG_BOARD_LATE_INITIALIZE is not selected, but CONFIG_LIB_BOARDCTL=y
  *   then this function will *probably* be called from application logic via
  *   boardctl().
  *

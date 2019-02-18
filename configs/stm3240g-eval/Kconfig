@@ -40,15 +40,15 @@ config STM3240G_ILI9325_DISABLE
 
 endif # STM3240G_LCD
 
-if BOARD_INITIALIZE
+if BOARD_LATE_INITIALIZE
 
 config STM3240G_BOARDINIT_PRIO
 	int "Board initialization thread priority"
 	default 196
 	---help---
-		If BOARD_INITIALIZE initialize is defined, then the function
-		board_initialize() will be called to perform board-specific
-		initialization. board_initialize() runs on the IDLE thread.
+		If BOARD_LATE_INITIALIZE initialize is defined, then the function
+		board_late_initialize() will be called to perform board-specific
+		initialization. board_late_initialize() runs on the IDLE thread.
 		Depending on the features that are enabled, this  board
 		initialization logic may need to start a kernel thread that has
 		more capability than the IDLE thread.  This setting then provides
@@ -63,13 +63,13 @@ config STM3240G_BOARDINIT_STACK
 	int "Board initialization thread Size"
 	default 2048
 	---help---
-		If BOARD_INITIALIZE initialize is defined, then the function
-		board_initialize() will be called to perform board-specific
-		initialization. board_initialize() runs on the IDLE thread.
+		If BOARD_LATE_INITIALIZE initialize is defined, then the function
+		board_late_initialize() will be called to perform board-specific
+		initialization. board_late_initialize() runs on the IDLE thread.
 		Depending on the features that are enabled, this  board
 		initialization logic may need to start a kernel thread that has
 		more capability than the IDLE thread.  This setting then provides
 		the size of the stack to use with the initialization kernel thread.
 
-endif # BOARD_INITIALIZE
+endif # BOARD_LATE_INITIALIZE
 endif # ARCH_BOARD_STM3240G_EVAL

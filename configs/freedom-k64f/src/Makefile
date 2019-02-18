@@ -50,7 +50,7 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k64_appinit.c k64_bringup.c
-else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += k64_bringup.c
 endif
 

@@ -172,9 +172,9 @@ static void stm32_i2ctool(void)
  *   CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
- *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_BOARD_LATE_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
  *   CONFIG_LIB_BOARDCTL=n :
- *     Called from board_initialize().
+ *     Called from board_late_initialize().
  *
  ****************************************************************************/
 

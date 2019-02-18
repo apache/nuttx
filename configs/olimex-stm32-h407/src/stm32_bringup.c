@@ -82,8 +82,8 @@
  *       Called from the NSH library (or other application)
  *     Otherse, assumed to be called from some other application.
  *
- *   Otherwise CONFIG_BOARD_INITIALIZE=y:
- *     Called from board_initialize().
+ *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *     Called from board_late_initialize().
  *
  *   Otherise, bad news:  Never called
  *

@@ -76,7 +76,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board initialization */
 
   return sam_bringup();

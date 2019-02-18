@@ -1069,7 +1069,7 @@ static int usrsockdev_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: pipecommon_poll
+ * Name: usrsockdev_poll
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL

@@ -74,7 +74,7 @@
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   sim_bringup();
 #endif
 

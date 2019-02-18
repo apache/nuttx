@@ -40,7 +40,7 @@ CSRCS = max326_boot.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += max326_appinit.c max326_bringup.c
-else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += max326_bringup.c
 endif
 

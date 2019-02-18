@@ -245,12 +245,12 @@ static inline void nx_start_application(void)
 {
   int pid;
 
-#ifdef CONFIG_BOARD_INITIALIZE
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
    * configured.
    */
 
-  board_initialize();
+  board_late_initialize();
 #endif
 
   /* Start the application initialization task.  In a flat build, this is
@@ -281,12 +281,12 @@ static inline void nx_start_application(void)
 {
   int ret;
 
-#ifdef CONFIG_BOARD_INITIALIZE
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
    * configured.
    */
 
-  board_initialize();
+  board_late_initialize();
 #endif
 
 #ifdef CONFIG_INIT_MOUNT
@@ -301,7 +301,7 @@ static inline void nx_start_application(void)
 
   /* Start the application initialization program from a program in a
    * mounted file system.  Presumably the file system was mounted as part
-   * of the board_initialize() operation.
+   * of the board_late_initialize() operation.
    */
 
   sinfo("Starting init task: %s\n", CONFIG_USER_INITPATH);
@@ -336,7 +336,7 @@ static inline void nx_start_application(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
 static int nx_start_task(int argc, FAR char **argv)
 {
   /* Do the board/application initialization and exit */
@@ -365,7 +365,7 @@ static int nx_start_task(int argc, FAR char **argv)
 
 static inline void nx_create_initthread(void)
 {
-#ifdef CONFIG_BOARD_INITIALIZE
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
   int pid;
 
   /* Do the board/application initialization on a separate thread of
@@ -412,7 +412,7 @@ static inline void nx_create_initthread(void)
  *                 file system where we can expect to find the
  *                 initialization program.  Presumably, this file system
  *                 was mounted by board-specific logic when
- *                 board_initialize() was called.
+ *                 board_late_initialize() was called.
  *
  * Input Parameters:
  *   None

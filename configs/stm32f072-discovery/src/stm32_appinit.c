@@ -77,9 +77,9 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  /* Did we already initialize via board_initialize()? */
+  /* Did we already initialize via board_late_initialize()? */
 
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   return stm32_bringup();
 #else
   return OK;

@@ -38,7 +38,7 @@ include $(TOPDIR)/Make.defs
 ASRCS =
 CSRCS =
 
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
   CSRCS += sim_boot.c
 endif
 
@@ -46,7 +46,7 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
   CSRCS += sim_appinit.c
 endif
 
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
   CSRCS += sim_bringup.c
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c

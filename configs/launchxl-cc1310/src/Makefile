@@ -40,7 +40,7 @@ CSRCS = cc1310_boot.c cc1310_pinconfig.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += cc1310_appinit.c cc1310_bringup.c
-else ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += cc1310_bringup.c
 endif
 

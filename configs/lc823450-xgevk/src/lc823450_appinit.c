@@ -180,7 +180,7 @@ int board_app_initialize(uintptr_t arg)
 
   UNUSED(ret); /* May not be used */
 
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board initialization */
 
   return lc823450_bringup();

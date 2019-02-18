@@ -41,7 +41,7 @@ CSRCS = sam_boot.c sam_userleds.c
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c sam_bringup.c
 else
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += sam_bringup.c
 endif
 endif

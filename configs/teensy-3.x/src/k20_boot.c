@@ -81,8 +81,8 @@ void kinetis_boardinitialize(void)
 #endif
 }
 
-#if defined(CONFIG_BOARD_INITIALIZE)
-void board_initialize(void)
+#if defined(CONFIG_BOARD_LATE_INITIALIZE)
+void board_late_initialize(void)
 {
 #if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
   kinetis_i2cdev_initialize();

@@ -291,7 +291,7 @@ Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card 
 
   Application Configuration -> NSH Library
     CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, OR
-    CONFIG_BOARD_INITIALIZE=y
+    CONFIG_BOARD_LATE_INITIALIZE=y
 
 Using the SD card
 -----------------

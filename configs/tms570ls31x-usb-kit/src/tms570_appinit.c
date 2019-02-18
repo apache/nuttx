@@ -72,9 +72,9 @@
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform application level board initialization (if that was not already
-   * done in board_initialize().
+   * done in board_late_initialize().
    */
 
   tms570_bringup();

@@ -47,7 +47,7 @@ Example Configuration
 I have tested this using the sim/nsh configuration.  Here are the
 modifications to the configuration that I used for testing:
 
-  CONFIG_BOARD_INITIALIZE=y
+  CONFIG_BOARD_LATE_INITIALIZE=y
 
   CONFIG_LIBC_LOCALTIME=y
   CONFIG_LIBC_TZDIR="/share/zoneinfo"

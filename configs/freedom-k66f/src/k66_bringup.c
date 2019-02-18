@@ -53,7 +53,7 @@
 #include "kinetis_spi.h"
 #include "freedom-k66f.h"
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
+#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 
 /****************************************************************************
  * Public Functions
@@ -172,4 +172,4 @@ int k66_bringup(void)
   UNUSED(ret);
   return OK;
 }
-#endif /* CONFIG_LIB_BOARDCTL CONFIG_BOARD_INITIALIZE */
+#endif /* CONFIG_LIB_BOARDCTL CONFIG_BOARD_LATE_INITIALIZE */
