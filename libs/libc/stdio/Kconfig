@@ -97,7 +97,7 @@ config LIBC_PRINT_MINIMAL
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default n
-	depends on LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL
+	depends on (LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL) && !LIBC_PRINT_LEGACY
 	---help---
 		Enables support for numbered arguments in printf.
 
