@@ -573,6 +573,7 @@ void nx_start(void)
   g_nx_initstate = OSINIT_TASKLISTS;
 
   /* Initialize RTOS facilities *********************************************/
+
   /* Initialize the semaphore facility.  This has to be done very early
    * because many subsystems depend upon fully functional semaphores.
    */
@@ -711,6 +712,8 @@ void nx_start(void)
   net_initialize();
 #endif
 
+  /* Initialize Hardware Facilities *****************************************/
+
   /* The processor specific details of running the operating system
    * will be handled here.  Such things as setting up interrupt
    * service routines and starting the clock are some of the things
@@ -731,6 +734,8 @@ void nx_start(void)
   /* Hardware resources are now available */
 
   g_nx_initstate = OSINIT_HARDWARE;
+
+  /* Setup for Multi-Tasking ************************************************/
 
 #ifdef CONFIG_MM_SHM
   /* Initialize shared memory support */

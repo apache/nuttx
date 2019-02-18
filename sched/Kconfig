@@ -1151,8 +1151,8 @@ config BOARD_EARLY_INITIALIZE
 	bool "Custom board early initialization"
 	default n
 	---help---
-		By default, there are three points in time where you can insert
-		custom initialization logic:
+		There are three points in time where you can insert custom,
+		board-specific initialization logic:
 
 		1) <arch>_board_initialize():  This function is used only for
 		initialization of very low-level things like configuration of
@@ -1167,7 +1167,7 @@ config BOARD_EARLY_INITIALIZE
 
 		At this same point in time, the OS will also call a board-
 		specific initialization function named board_early_initialize()
-		if CONFIG_BOARD_EARLY_INITIALIZE is selectd.  The context in
+		if CONFIG_BOARD_EARLY_INITIALIZE is selected.  The context in
 		which board_early_initialize() executes is suitable for early
 		initialization of most, simple device drivers and is a logical,
 		board-specific extension of up_initialize().
@@ -1199,8 +1199,8 @@ config BOARD_LATE_INITIALIZE
 	bool "Custom board late initialization"
 	default n
 	---help---
-		By default, there are three points in time where you can insert
-		custom initialization logic:
+		There are three points in time where you can insert custom,
+		board-specific initialization logic:
 
 		1) <arch>_board_initialize():  This function is used only for
 		initialization of very low-level things like configuration of
@@ -1215,7 +1215,7 @@ config BOARD_LATE_INITIALIZE
 
 		At this same point in time, the OS will also call a board-
 		specific initialization function named board_early_initialize()
-		if CONFIG_BOARD_EARLY_INITIALIZE is selectd.  The context in
+		if CONFIG_BOARD_EARLY_INITIALIZE is selected.  The context in
 		which board_early_initialize() executes is suitable for early
 		initialization of most, simple device drivers and is a logical,
 		board-specific extension of up_initialize().

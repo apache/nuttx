@@ -72,18 +72,9 @@
  * 3. Common Board Interfaces.
  *
  *    Any interface that is common across all boards should be prefixed
- *    with board_ and should be prototyped in this header file. These
- *    board_ definitions provide the interface between the board-level
+ *    with board_ and should be prototyped in the board.h header file.
+ *    These board_ definitions provide the interface between the board-level
  *    logic and the architecture-specific logic.
- *
- *    Board related declarations are retained the file include/nuttx/board.h.
- *
- *    There is also a configs/<board>/include/board.h header file that
- *    can be used to communicate other board-specific information between
- *    the architecture logic and even application logic.  Any definitions
- *    which are common between a single architecture and several boards
- *    should go in this board.h header file; this file is reserved for
- *    board-related definitions common to all architectures.
  *
  * 4. Board-Specific Interfaces.
  *

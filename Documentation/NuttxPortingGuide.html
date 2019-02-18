@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 4, 2019</p>
+      <p>Last Updated: February 18, 2019</p>
     </td>
   </tr>
 </table>
@@ -97,94 +97,99 @@
       <a href="#upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a><br>
       <a href="#upputc">4.2.20 <code>up_putc()</code></a><br>
     </ul>
-    <a href="#systemtime">4.3 System Time and Clock</a>
+    <a href="#boardimports">4.3 APIs Exported by Board-Specific Logic to NuttX</a>
     <ul>
-      <a href="#basictimer">4.3.1 Basic System Timer</a><br>
-      <a href="#timerhw">4.3.2 Hardware</a><br>
-      <a href="#systcktime">4.3.3 System Tick and Time</a><br>
-      <a href="#tickless">4.3.4 Tickless OS</a><br>
-      <a href="#Watchdogs">4.3.5 Watchdog Timer Interfaces</a>
+      <a href="#boardearlyinit">4.3.1 <code>board_early_initialize()</code></a><br>
+      <a href="#boardlateinit">4.3.2 <code>board_late_initialize()</code></a><br>
     </ul>
-    <a href="#workqueues">4.4 Work Queues</a>
+    <a href="#systemtime">4.4 System Time and Clock</a>
     <ul>
-      <a href="#wqclasses">4.4.1 Classes of Work Queues</a>
+      <a href="#basictimer">4.4.1 Basic System Timer</a><br>
+      <a href="#timerhw">4.4.2 Hardware</a><br>
+      <a href="#systcktime">4.4.3 System Tick and Time</a><br>
+      <a href="#tickless">4.4.4 Tickless OS</a><br>
+      <a href="#Watchdogs">4.4.5 Watchdog Timer Interfaces</a>
+    </ul>
+    <a href="#workqueues">4.5 Work Queues</a>
+    <ul>
+      <a href="#wqclasses">4.5.1 Classes of Work Queues</a>
       <ul>
-        <a href="#hpwork">4.4.1.1 High Priority Kernel Work queue</a><br>
-        <a href="#lpwork">4.4.1.2 Low Priority Kernel Work Queue</a><br>
-        <a href="#usrwork">4.4.1.3 User-Mode Work Queue</a>
+        <a href="#hpwork">4.5.1.1 High Priority Kernel Work queue</a><br>
+        <a href="#lpwork">4.5.1.2 Low Priority Kernel Work Queue</a><br>
+        <a href="#usrwork">4.5.1.3 User-Mode Work Queue</a>
       </ul>
-      <a href="#cmnwqifs">4.4.2 Common Work Queue Interfaces</a>
+      <a href="#cmnwqifs">4.5.2 Common Work Queue Interfaces</a>
       <ul>
-        <a href="#wqids">4.4.2.1 Work Queue IDs</a><br>
-        <a href="#wqiftypes">4.4.2.2 Work Queue Interface Types</a><br>
-        <a href="#wqintfs">4.4.2.3 Work Queue Interfaces</a>
+        <a href="#wqids">4.5.2.1 Work Queue IDs</a><br>
+        <a href="#wqiftypes">4.5.2.2 Work Queue Interface Types</a><br>
+        <a href="#wqintfs">4.5.2.3 Work Queue Interfaces</a>
         <ul>
-          <a href="#workqueue">4.4.2.3.1 <code>work_queue()</code></a><br>
-          <a href="#workcancel">4.4.2.3.2 <code>work_cancel()</code></a><br>
-          <a href="#worksignal">4.4.2.3.3 <code>work_signal()</code></a><br>
-          <a href="#workavailable">4.4.2.3.4 <code>work_available()</code></a><br>
-          <a href="#workusrstart">4.4.2.3.5 <code>work_usrstart()</code></a><br>
-          <a href="#lpworkboostpriority">4.4.2.3.6 <code>lpwork_boostpriority()</code></a><br>
-          <a href="#lpworkrestorepriority">4.4.2.3.7 <code>lpwork_restorepriority()</code></a>
+          <a href="#workqueue">4.5.2.3.1 <code>work_queue()</code></a><br>
+          <a href="#workcancel">4.5.2.3.2 <code>work_cancel()</code></a><br>
+          <a href="#worksignal">4.5.2.3.3 <code>work_signal()</code></a><br>
+          <a href="#workavailable">4.5.2.3.4 <code>work_available()</code></a><br>
+          <a href="#workusrstart">4.5.2.3.5 <code>work_usrstart()</code></a><br>
+          <a href="#lpworkboostpriority">4.5.2.3.6 <code>lpwork_boostpriority()</code></a><br>
+          <a href="#lpworkrestorepriority">4.5.2.3.7 <code>lpwork_restorepriority()</code></a>
         </ul>
       </ul>
     </ul>
-    <a href="#addrenv">4.5 Address Environments</a>
+    <a href="#addrenv">4.6 Address Environments</a>
     <ul>
-      <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a><br>
-      <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a><br>
-      <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a><br>
-      <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a><br>
-      <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a><br>
-      <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a><br>
-      <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a><br>
-      <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a><br>
-      <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a><br>
-      <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a><br>
-      <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a><br>
-      <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a><br>
-      <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a><br>
-      <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a><br>
-      <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a><br>
-      <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>
+      <a href="#up_addrenv_create">4.6.1 <code>up_addrenv_create()</code></a><br>
+      <a href="#up_addrenv_destroy">4.6.2 <code>up_addrenv_destroy()</code></a><br>
+      <a href="#up_addrenv_vtext">4.6.3 <code>up_addrenv_vtext()</code></a><br>
+      <a href="#up_addrenv_vdata">4.6.4 <code>up_addrenv_vdata()</code></a><br>
+      <a href="#up_addrenv_heapsize">4.6.5 <code>up_addrenv_heapsize()</code></a><br>
+      <a href="#up_addrenv_select">4.6.6 <code>up_addrenv_select()</code></a><br>
+      <a href="#up_addrenv_restore">4.6.7 <code>up_addrenv_restore()</code></a><br>
+      <a href="#up_addrenv_clone">4.6.8 <code>up_addrenv_clone()</code></a><br>
+      <a href="#up_addrenv_attach">4.6.9 <code>up_addrenv_attach()</code></a><br>
+      <a href="#up_addrenv_detach">4.6.10 <code>up_addrenv_detach()</code></a><br>
+      <a href="#up_addrenv_ustackalloc">4.6.11 <code>up_addrenv_ustackalloc()</code></a><br>
+      <a href="#up_addrenv_ustackfree">4.6.12 <code>up_addrenv_ustackfree()</code></a><br>
+      <a href="#up_addrenv_vustack">4.6.13 <code>up_addrenv_vustack()</code></a><br>
+      <a href="#up_addrenv_ustackselect">4.6.14 <code>up_addrenv_ustackselect()</code></a><br>
+      <a href="#up_addrenv_kstackalloc">4.6.15 <code>up_addrenv_kstackalloc()</code></a><br>
+      <a href="#up_addrenv_kstackfree">4.6.16 <code>up_addrenv_kstackfree()</code></a>
     </ul>
-    <a href="#exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#osstart">4.6.1 <code>nx_start()</code></a><br>
-      <a href="#listmgmt">4.6.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a><br>
-      <a href="#schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a><br>
-      <a href="#irqdispatch">4.6.6 <code>irq_dispatch()</code></a>
+      <a href="#osstart">4.7.1 <code>nx_start()</code></a><br>
+      <a href="#listmgmt">4.7.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a><br>
+      <a href="#schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a><br>
+      <a href="#irqdispatch">4.7.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#internalOS">4.7 Application OS vs. Internal OS Interfaces</a><br>
-    <a href="#boardctl">4.8 <code>boardctl()</code> Application Interface</a><br>
-    <a href="#boardsmp">4.9 Symmetric Multiprocessing (SMP) Application Interface</a>
+    <a href="#internalOS">4.8 Application OS vs. Internal OS Interfaces</a><br>
+    <a href="#boardctl">4.9 <code>boardctl()</code> Application Interface</a><br>
+    <a href="#boardsmp">4.10 Symmetric Multiprocessing (SMP) Application Interface</a>
     <ul>
-      <a href="#uptestset">4.9.1 <code>up_testset()</code></a><br>
-      <a href="#upcpuindex">4.9.2 <code>up_cpu_index()</code></a><br>
-      <a href="#upcpustart">4.9.3 <code>up_cpu_start()</code></a><br>
-      <a href="#upcpupause">4.9.4 <code>up_cpu_pause()</code></a><br>
-      <a href="#upcpuresume">4.9.5 <code>up_cpu_resume()</code></a>
+      <a href="#uptestset">4.10.1 <code>up_testset()</code></a><br>
+      <a href="#upcpuindex">4.10.2 <code>up_cpu_index()</code></a><br>
+      <a href="#upcpustart">4.10.3 <code>up_cpu_start()</code></a><br>
+      <a href="#upcpupause">4.10.4 <code>up_cpu_pause()</code></a><br>
+      <a href="#upcpuresume">4.10.5 <code>up_cpu_resume()</code></a>
     </ul>
-    <a href="#shm">4.10 Shared Memory</a>
+    <a href="#shm">4.11 Shared Memory</a>
     <ul>
-      <a href="#upshmat">4.10.1 <code>up_shmat()</code></a><br>
-      <a href="#upshmdt">4.10.2 <code>up_shmdt()</code></a><br>
+      <a href="#upshmat">4.11.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.11.2 <code>up_shmdt()</code></a><br>
     </ul>
-    <a href="#demandpaging">4.11 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.12 LED Support</a>
+    <a href="#demandpaging">4.12 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.13 LED Support</a>
     <ul>
-      <a href="#ledheaders">4.12.1 Header Files</a><br>
-      <a href="#leddefinitions">4.12.2 LED Definitions</a><br>
-      <a href="#ledapis">4.12.3 Common LED interfaces</a>
+      <a href="#ledheaders">4.13.1 Header Files</a><br>
+      <a href="#leddefinitions">4.13.2 LED Definitions</a><br>
+      <a href="#ledapis">4.13.3 Common LED interfaces</a>
     </ul>
-    <a href="#iobs">4.13 I/O Buffer Management</a>
+    <a href="#iobs">4.14 I/O Buffer Management</a>
     <ul>
-      <a href="#iobconfig">4.13.1 Configuration Options</a><br>
-      <a href="#iobthrottle">4.13.2 Throttling</a><br>
-      <a href="#iobtypes">4.13.3 Public Types</a><br>
-      <a href="#iobprotos">4.13.4 Public Function Prototypes</a>
+      <a href="#iobconfig">4.14.1 Configuration Options</a><br>
+      <a href="#iobthrottle">4.14.2 Throttling</a><br>
+      <a href="#iobtypes">4.14.3 Public Types</a><br>
+      <a href="#iobprotos">4.14.4 Public Function Prototypes</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -1742,13 +1747,8 @@ The specific environmental definitions are unique for each board but should incl
   <li>
     <p>
       <b>Common Board Interfaces</b>.
-      Any interface that is common to all boards should be prefixed with <code>board_</code> and should also be prototyped in <code>include/nuttx/arch.h</code>.
-      These <code>board_</code> definitions provide the interface between the board-level logic and the architecture-specific logic.
-    </p>
-    <p>
-      There is also a <code>configs/&lt;board&gt;/include/board.h</code> header file that can be used to communicate other board-specific information between the architecture logic and even application logic.
-      Any definitions which are common between a single architecture and several boards should go in this <code>board.h</code> header file;
-      <code>include/nuttx/arch.h</code>is reserved for board-related definitions common to all architectures.
+      Any interface that is common to all boards should be prefixed with <code>board_</code> and should also be prototyped in <code>include/nuttx/board.h</code>.
+      These <code>board_</code> definitions provide the interface between the board-level logic and the commaon and architecture-specific logic.
     </p>
   <li>
     <p>
@@ -2272,9 +2272,62 @@ The specific environmental definitions are unique for each board but should incl
   Output one character on the console
 </p>
 
-<h2><a name="systemtime">4.3 System Time and Clock</a></h2>
+<h2><a name="boardimports">4.3 APIs Exported by Board-Specific Logic to NuttX</a></h2>
 
-<h3><a name="basictimer">4.3.1 Basic System Timer</a></h3>
+<p>
+  Exported board-specific interfaces are prototyped in the header file <code>include/nuttx/board.h</code>.
+  There are many interfaces exported from board- to architecture-specific logic.
+  But there are only a few exported from board-specific logic to common NuttX logic.
+  Those few will be discussed in this paragraph.
+</p>
+<p>
+  All of the board-specific interfaces used by the NuttX OS logic are for controlled board initialization.
+  There are three points in time where you can insert custom, board-specific initialization logic:
+</p>
+<p>
+  First, <code>&lt;arch&gt;_board_initialize()</code>:  This function is <i>not</i> called from the common OS logic, but rather from the architecture-specific power on reset logic.
+  This is used only for initialization of very low-level things like configuration of GPIO pins, power settings, DRAM initialization, etc.
+  The OS has not been initialized at this point, so you cannot allocate memory or initialize device drivers.
+</p>
+<p>
+  The other two board initialization <i>hooks</i> are called from the OS start-up logic and are described in the following paragraphs:
+</p>
+
+<h3><a name="boardearlyinit">4.3.1 board_early_initialize()</a></h3>
+
+<p>
+  The next level of initialization is performed by a call to <code>up_initialize()</code> (in <code>arch/&lt;arch&gt;/src/common/up_initialize.c</code>).  The OS has been initialized at this point and it is okay to initialize drivers in this phase.
+  <code>up_initialize()</code> is <i>not</i> a board-specific interface, but rather an architecture-specific, board-independent interface.
+</p>
+<p>
+  But at this same point in time, the OS will also call a board-specific initialization function named <code>board_early_initialize()</code> if <code>CONFIG_BOARD_EARLY_INITIALIZE=y</code> is selected in the configuration.
+  The context in which <code>board_early_initialize()</code> executes is suitable for early initialization of most, simple device drivers and is a logical, board-specific extension of up_initialize().
+</p>
+<p>
+  <code>board_early_initialize()</code> runs on the startup, initialization thread.
+  Some initialization operations cannot be performed on the start-up, initialization thread.
+  That is because the initialization thread cannot wait for event.
+  Waiting may be required, for example, to mount a file system or or initialize a device such as an SD card.
+  For this reason, such driver initialize must be deferred to <code>board_late_initialize()</code>.
+</p>
+
+<h3><a name="boardlateinit">4.3.2 board_late_initialize()</a></h3>
+
+<p>
+  And, finally, just before the user application code starts.
+  If <code>CONFIG_BOARD_LATE_INITIALIZE=y</code> is selected in the configuration, then an final, additional initialization call will be performed in the boot-up sequence to a function called <code>board_late_initialize()</code>.
+  <code>board_late_initialize()</code> will be called well after <code>up_initialize()</code> and <code>board_early_initialize()</code> are called.
+  <code>board_late_initialize()</code> will be called just before the main application task is started.
+  This additional initialization phase may be used, for example, to initialize more complex, board-specific device drivers.
+</p>
+<p>
+  Waiting for events, use of I2C, SPI, etc are permissable in the context of board_late_initialize().
+  That is because <code>board_late_initialize()</code> will run on a temporary, internal kernel thread.
+</p>
+
+<h2><a name="systemtime">4.4 System Time and Clock</a></h2>
+
+<h3><a name="basictimer">4.4.1 Basic System Timer</a></h3>
 
 <p><b>System Timer</b>
   In most implementations, system time is provided by a timer interrupt.
@@ -2357,7 +2410,7 @@ else
   In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
 </p>
 
-<h3><a name="timerhw">4.3.2 Hardware</a></h3>
+<h3><a name="timerhw">4.4.2 Hardware</a></h3>
 <p>
   To enable hardware module use the following configuration options:
 <p>
@@ -2421,7 +2474,7 @@ else
   </li>
 </ul>
 
-<h3><a name="systcktime">4.3.3 System Tick and Time</a></h3>
+<h3><a name="systcktime">4.4.3 System Tick and Time</a></h3>
 <p>
   The system tick is represented by::
 </p>
@@ -2444,8 +2497,8 @@ else
   To retrieve that variable use:
 </p>
 
-<h3><a name="tickless">4.3.4 Tickless OS</a></h3>
-<h4><a name="tickoverview">4.3.4.1 Tickless Overview</a></h4>
+<h3><a name="tickless">4.4.4 Tickless OS</a></h3>
+<h4><a name="tickoverview">4.4.4.1 Tickless Overview</a></h4>
 
 <p>
   <b>Default System Timer</b>.
@@ -2484,13 +2537,13 @@ else
   Using an interval timer, one can anticipate when the next interesting OS event will occur, program the interval time and wait for it to fire. When the interval time fires, then the scheduled activity is performed.
 </p>
 
-<h4><a name="tickplatform">4.3.4.2 Tickless Platform Support</a></h4>
+<h4><a name="tickplatform">4.4.4.2 Tickless Platform Support</a></h4>
 
 In order to use the Tickless OS, one must provide special support from the platform-specific code. Just as with the default system timer, the platform-specific code must provide the timer resources to support the OS behavior.
 
 Currently these timer resources are only provided on a few platforms. An example implementation is for the simulation is at <code>nuttx/arch/sim/src/up_tickless.c</code>.  There is another example for the Atmel SAMA5 at <code>nuttx/arch/arm/src/sama5/sam_tickless.c</code>.  These paragraphs will explain how to provide the Tickless OS support to any platform.
 
-<h4><a name="tickoptions">4.3.4.3 Tickless Configuration Options</a></h4>
+<h4><a name="tickoptions">4.4.4.3 Tickless Configuration Options</a></h4>
 <ul>
   <li>
     <p>
@@ -2541,7 +2594,7 @@ config ARCH_SIM
   </li>
 </ul>
 
-<h4><a name="tickimport">4.3.4.4 Tickless Imported Interfaces</a></h4>
+<h4><a name="tickimport">4.4.4.4 Tickless Imported Interfaces</a></h4>
 <p>
   The interfaces that must be provided by the platform specified code are defined in <code>include/nuttx/arch.h</code>, listed below, and summarized in the following paragraphs:
 </p>
@@ -2603,7 +2656,7 @@ config ARCH_SIM
   </li>
 </ul>
 
-<h5><a name="uptimerinit">4.3.4.4.1 <i>&lt;arch&gt;</i><code>_timer_initialize()</code></a></h5>
+<h5><a name="uptimerinit">4.4.4.4.1 <i>&lt;arch&gt;</i><code>_timer_initialize()</code></a></h5>
 <p><b>Function Prototype</b>:</p>
 <ul><pre>
 #include &quotup_internal.h&quot;
@@ -2626,7 +2679,7 @@ void <i>&lt;arch&gt;</i>_timer_initialize()(void);
   Called early in the initialization sequence before any special concurrency protections are required.
 </ul>
 
-<h5><a name="uptimergettime">4.3.4.4.2 <code>up_timer_gettime()</code></a></h5>
+<h5><a name="uptimergettime">4.4.4.4.2 <code>up_timer_gettime()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2650,7 +2703,7 @@ int up_timer_gettime(FAR struct timespec *ts);
   Called from the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
 </ul>
 
-<h5><a name="upalarmcancel">4.3.4.4.3 <code>up_alarm_cancel()</code></a></h5>
+<h5><a name="upalarmcancel">4.4.4.4.3 <code>up_alarm_cancel()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2673,7 +2726,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h5><a name="upalarmstart">4.3.4.4.4 <code>up_alarm_start()</code></a></h5>
+<h5><a name="upalarmstart">4.4.4.4.4 <code>up_alarm_start()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2696,7 +2749,7 @@ int up_alarm_start(FAR const struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. Interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h5><a name="uptimercancel">4.3.4.4.5 <code>up_timer_cancel()</code></a></h5>
+<h5><a name="uptimercancel">4.4.4.4.5 <code>up_timer_cancel()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2719,7 +2772,7 @@ int up_timer_cancel(FAR struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h5><a name="uptimerstart">4.3.4.4.6 <code>up_timer_start()</code></a></h5>
+<h5><a name="uptimerstart">4.4.4.4.6 <code>up_timer_start()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2742,7 +2795,7 @@ int up_timer_start(FAR const struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. Interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h3><a name="Watchdogs">4.3.5 Watchdog Timer Interfaces</a></h3>
+<h3><a name="Watchdogs">4.4.5 Watchdog Timer Interfaces</a></h3>
 <p>
   NuttX provides a general watchdog timer facility.
   This facility allows the NuttX user to specify a watchdog timer function
@@ -2753,16 +2806,16 @@ int up_timer_start(FAR const struct timespec *ts);
   or <code>kill()</code> to communicate with NuttX tasks.
 </p>
 <ul>
-  <li><a href="#wdcreate">4.3.5.1 wd_create/wd_static</a></li>
-  <li><a href="#wddelete">4.3.5.2 wd_delete</a></li>
-  <li><a href="#wdstart">4.3.5.3 wd_start</a></li>
-  <li><a href="#wdcancel">4.3.5.4 wd_cancel</a></li>
-  <li><a href="#wdgettime">4.3.5.5 wd_gettime</a></li>
-  <li><a href="#wdcallback">4.3.5.6 Watchdog Timer Callback</a></li>
+  <li><a href="#wdcreate">4.4.5.1 wd_create/wd_static</a></li>
+  <li><a href="#wddelete">4.4.5.2 wd_delete</a></li>
+  <li><a href="#wdstart">4.4.5.3 wd_start</a></li>
+  <li><a href="#wdcancel">4.4.5.4 wd_cancel</a></li>
+  <li><a href="#wdgettime">4.4.5.5 wd_gettime</a></li>
+  <li><a href="#wdcallback">4.4.5.6 Watchdog Timer Callback</a></li>
 
 </ul>
 
-<h4><a name="wdcreate">4.3.5.1 wd_create/wd_static</a></h4>
+<h4><a name="wdcreate">4.4.5.1 wd_create/wd_static</a></h4>
 
 <p>
 <b>Function Prototype:</b>
@@ -2802,7 +2855,7 @@ Differences from the VxWorks interface include:
 initialization time).
 </ul>
 
-<h4><a name="wddelete">4.3.5.2 wd_delete</a></h4>
+<h4><a name="wddelete">4.4.5.2 wd_delete</a></h4>
 
 <p>
 <b>Function Prototype:</b>
@@ -2847,7 +2900,7 @@ Differences from the VxWorks interface include:
 before deallocating it (i.e., never returns ERROR).
 </ul>
 
-<h4><a name="wdstart">4.3.5.3 wd_start</a></h4>
+<h4><a name="wdstart">4.4.5.3 wd_start</a></h4>
 
 <p>
 <b>Function Prototype:</b>
@@ -2905,7 +2958,7 @@ to wdentry; VxWorks supports only a single parameter.  The maximum
 number of parameters is determined by
 </ul>
 
-<h4><a name="wdcancel">4.3.5.4 wd_cancel</a></h4>
+<h4><a name="wdcancel">4.4.5.4 wd_cancel</a></h4>
 <p>
 <b>Function Prototype:</b>
 <pre>
@@ -2938,7 +2991,7 @@ VxWorks provides the following comparable interface:
     STATUS wdCancel (WDOG_ID wdog);
 </pre>
 
-<h3><a name="wdgettime">4.3.5.5 wd_gettime</a></h3>
+<h3><a name="wdgettime">4.4.5.5 wd_gettime</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -2962,7 +3015,7 @@ VxWorks provides the following comparable interface:
   means either that wdog is not valid or that the wdog has already expired.
 </p>
 
-<h4><a name="wdcallback">4.3.5.6 Watchdog Timer Callback</a></h4>
+<h4><a name="wdcallback">4.4.5.6 Watchdog Timer Callback</a></h4>
 <p>
   When a watchdog expires, the callback function with this type is called:
 </p>
@@ -2992,18 +3045,18 @@ typedef uint32_t  wdparm_t;
 #endif
 </pre></ul>
 
-<h2><a name="workqueues">4.4 Work Queues</a></h2>
+<h2><a name="workqueues">4.5 Work Queues</a></h2>
 <p><b>Work Queues</b>.
   NuttX provides <i>work queues</i>.  Work queues are threads that service a queue of work items to be performed.  They are useful for off-loading work to a different threading context, for delayed processing, or for serializing activities.
 </p>
 
-<h3><a name="wqclasses">4.4.1 Classes of Work Queues</a></h3>
+<h3><a name="wqclasses">4.5.1 Classes of Work Queues</a></h3>
 
 <p><b>Classes of Work Queues</b>.
   There are three different classes of work queues, each with different properties and intended usage.  These class of work queues along with the common work queue interface are described in the following paragraphs.
 </p>
 
-<h4><a name="hpwork">4.4.1.1 High Priority Kernel Work queue</a></h4>
+<h4><a name="hpwork">4.5.1.1 High Priority Kernel Work queue</a></h4>
 
 <p><b>High Priority Kernel Work queue</b>.
   The dedicated high-priority work queue is intended to handle delayed processing from interrupt handlers.  This work queue is required for some drivers but, if there are no complaints, can be safely disabled.  The high priority worker thread also performs garbage collection -- completing any delayed memory deallocations from interrupt handlers.  If the high-priority worker thread is disabled, then that clean up will be performed either by (1) the low-priority worker thread, if enabled, and if not (2) the IDLE thread instead (which runs at the lowest of priority and may not be appropriate if memory reclamation is of high priority)
@@ -3049,7 +3102,7 @@ typedef uint32_t  wdparm_t;
   </li>
 </ul>
 
-<h4><a name="lpwork">4.4.1.2 Low Priority Kernel Work Queue</a></h4>
+<h4><a name="lpwork">4.5.1.2 Low Priority Kernel Work Queue</a></h4>
 <p>
   <b>Low Priority Kernel Work Queue</b>.
   This lower priority work queue is better suited for more extended, application oriented processing such as file system clean-up, memory garbage collection and asynchronous I/O operations.
@@ -3090,7 +3143,7 @@ typedef uint32_t  wdparm_t;
   </li>
 </ul>
 
-<h4><a name="usrwork">4.4.1.3 User-Mode Work Queue</a></h4>
+<h4><a name="usrwork">4.5.1.3 User-Mode Work Queue</a></h4>
 <p>
   <b>Work Queue Accessibility</b>.
   The high- and low-priority worker threads are kernel-mode threads.  In the normal, <i>flat</i> NuttX build, these work queues are are useful to application code and may be shared.  However, in the NuttX protected and kernel build modes, kernel mode code is isolated and cannot be accessed from user-mode code.
@@ -3111,8 +3164,8 @@ typedef uint32_t  wdparm_t;
     The stack size allocated for the lower priority worker thread.  Default: 2048.
 </ul>
 
-<h3><a name="cmnwqifs">4.4.2 Common Work Queue Interfaces</a></h3>
-<h4><a name="wqids">4.4.2.1 Work Queue IDs</a></h4>
+<h3><a name="cmnwqifs">4.5.2 Common Work Queue Interfaces</a></h3>
+<h4><a name="wqids">4.5.2.1 Work Queue IDs</a></h4>
 
 <p>
   <b>Work queue IDs</b>.
@@ -3141,7 +3194,7 @@ typedef uint32_t  wdparm_t;
   </li>
 </ul>
 
-<h4><a name="wqiftypes">4.4.2.2 Work Queue Interface Types</a></h4>
+<h4><a name="wqiftypes">4.5.2.2 Work Queue Interface Types</a></h4>
 
 <ul>
   <li>
@@ -3154,8 +3207,8 @@ typedef uint32_t  wdparm_t;
   </li>
 </ul>
 
-<h4><a name="wqintfs">4.4.2.3 Work Queue Interfaces</a></h4>
-<h5><a name="workqueue">4.4.2.3.1 <code>work_queue()</code></a></h5>
+<h4><a name="wqintfs">4.5.2.3 Work Queue Interfaces</a></h4>
+<h5><a name="workqueue">4.5.2.3.1 <code>work_queue()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
@@ -3218,7 +3271,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
   </p>
 </ul>
 
-<h5><a name="workcancel">4.4.2.3.2 <code>work_cancel()</code></a></h5>
+<h5><a name="workcancel">4.5.2.3.2 <code>work_cancel()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
 #include &lt;nuttx/wqueue.h&gt;
@@ -3260,7 +3313,7 @@ int work_cancel(int qid, FAR struct work_s *work);
   </ul>
 </ul>
 
-<h5><a name="worksignal">4.4.2.3.3 <code>work_signal()</code></a></h5>
+<h5><a name="worksignal">4.5.2.3.3 <code>work_signal()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
 #include &lt;nuttx/wqueue.h&gt;
@@ -3291,7 +3344,7 @@ int work_signal(int qid);
   </p>
 </ul>
 
-<h5><a name="workavailable">4.4.2.3.4 <code>work_available()</code></a></h5>
+<h5><a name="workavailable">4.5.2.3.4 <code>work_available()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
@@ -3322,7 +3375,7 @@ bool work_available(FAR struct work_s *work);
   </p>
 </ul>
 
-<h5><a name="workusrstart">4.4.2.3.5 <code>work_usrstart()</code></a></h5>
+<h5><a name="workusrstart">4.5.2.3.5 <code>work_usrstart()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
@@ -3349,7 +3402,7 @@ int work_usrstart(void);
   </p>
 </ul>
 
-<h5><a name="lpworkboostpriority">4.4.2.3.6 <code>lpwork_boostpriority()</code></a></h5>
+<h5><a name="lpworkboostpriority">4.5.2.3.6 <code>lpwork_boostpriority()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
@@ -3379,7 +3432,7 @@ void lpwork_boostpriority(uint8_t reqprio);
   <b>Returned Value</b>: None
 </p>
 
-<h5><a name="lpworkrestorepriority">4.4.2.3.7 <code>lpwork_restorepriority()</code></a></h5>
+<h5><a name="lpworkrestorepriority">4.5.2.3.7 <code>lpwork_restorepriority()</code></a></h5>
 <p>
   <b>Function Prototype</b>:
   <ul><pre>
@@ -3409,7 +3462,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   <b>Returned Value</b>: None
 </p>
 
-<h2><a name="addrenv">4.5 Address Environments</a></h2>
+<h2><a name="addrenv">4.6 Address Environments</a></h2>
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
   The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ARCH_HAVE_ADDRENV=y</code>.
@@ -3432,35 +3485,35 @@ void lpwork_restorepriority(uint8_t reqprio);
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a>:
+        <a href="#up_addrenv_create">4.6.1 <code>up_addrenv_create()</code></a>:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.6.2 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a>:
+        <a href="#up_addrenv_vtext">4.6.3 <code>up_addrenv_vtext()</code></a>:
         Returns the virtual base address of the <code>.text</code> address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a>:
+        <a href="#up_addrenv_vdata">4.6.4 <code>up_addrenv_vdata()</code></a>:
         Returns the virtual base address of the <code>.bss</code>/<code>.data</code> address environment.
       </li>
       <li>
-        <a href="#up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a>:
+        <a href="#up_addrenv_heapsize">4.6.5 <code>up_addrenv_heapsize()</code></a>:
        Return the initial heap size.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a>:
+        <a href="#up_addrenv_select">4.6.6 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a>:
+        <a href="#up_addrenv_restore">4.6.7 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a>:
+        <a href="#up_addrenv_clone">4.6.8 <code>up_addrenv_clone()</code></a>:
         Copy an address environment from one location to another.
       </li>
     </ul>
@@ -3473,12 +3526,12 @@ void lpwork_restorepriority(uint8_t reqprio);
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a>:
+        <a href="#up_addrenv_attach">4.6.9 <code>up_addrenv_attach()</code></a>:
         Clone the group address environment assigned to a new thread.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a>:
+        <a href="#up_addrenv_detach">4.6.10 <code>up_addrenv_detach()</code></a>:
         Release the thread's reference to a group address environment when a task/thread exits.
       </li>
     </ul>
@@ -3501,19 +3554,19 @@ void lpwork_restorepriority(uint8_t reqprio);
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a>:
+        <a href="#up_addrenv_ustackalloc">4.6.11 <code>up_addrenv_ustackalloc()</code></a>:
         Create a stack address environment
       </li>
       <li>
-        <a href="#up_addrenv_ustackfree">4.5.12 <code>up_addrenv_ustackfree()</code></a>:
+        <a href="#up_addrenv_ustackfree">4.6.12 <code>up_addrenv_ustackfree()</code></a>:
         Destroy a stack address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a>:
+        <a href="#up_addrenv_vustack">4.6.13 <code>up_addrenv_vustack()</code></a>:
         Returns the virtual base address of the stack
       </li>
       <li>
-        <a href="#up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a>:
+        <a href="#up_addrenv_ustackselect">4.6.14 <code>up_addrenv_ustackselect()</code></a>:
         Instantiate a stack address environment
       </li>
     </ul>
@@ -3527,17 +3580,17 @@ void lpwork_restorepriority(uint8_t reqprio);
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a>:
+        <a href="#up_addrenv_kstackalloc">4.6.15 <code>up_addrenv_kstackalloc()</code></a>:
         Allocate the process kernel stack.
       </li>
-        <a href="#up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a>:
+        <a href="#up_addrenv_kstackfree">4.6.16 <code>up_addrenv_kstackfree()</code></a>:
         Free the process kernel stack.
       </li>
     </ul>
   </li>
 </ol>
 
-<h3><a name="up_addrenv_create">4.5.1 <code>up_addrenv_create()</code></a></h3>
+<h3><a name="up_addrenv_create">4.6.1 <code>up_addrenv_create()</code></a></h3>
 <p><b>Function Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize, FAR group_addrenv_t *addrenv);</code>
@@ -3559,7 +3612,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_destroy">4.5.2 <code>up_addrenv_destroy()</code></a></h3>
+<h3><a name="up_addrenv_destroy">4.6.2 <code>up_addrenv_destroy()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(group_addrenv_t *addrenv);</code>
@@ -3577,7 +3630,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vtext">4.5.3 <code>up_addrenv_vtext()</code></a></h3>
+<h3><a name="up_addrenv_vtext">4.6.3 <code>up_addrenv_vtext()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext);</code>
@@ -3597,7 +3650,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vdata">4.5.4 <code>up_addrenv_vdata()</code></a></h3>
+<h3><a name="up_addrenv_vdata">4.6.4 <code>up_addrenv_vdata()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vdata(FAR group_addrenv_t *addrenv, size_t textsize, FAR void **vdata);</code>
@@ -3618,7 +3671,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_heapsize">4.5.5 <code>up_addrenv_heapsize()</code></a></h3>
+<h3><a name="up_addrenv_heapsize">4.6.5 <code>up_addrenv_heapsize()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);</code>
@@ -3638,7 +3691,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   The initial heap size allocated is returned on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_select">4.5.6 <code>up_addrenv_select()</code></a></h3>
+<h3><a name="up_addrenv_select">4.6.6 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv);</code>
@@ -3662,7 +3715,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_restore">4.5.7 <code>up_addrenv_restore()</code></a></h3>
+<h3><a name="up_addrenv_restore">4.6.7 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(save_addrenv_t oldenv);</code>
@@ -3681,7 +3734,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_clone">4.5.8 <code>up_addrenv_clone()</code></a></h3>
+<h3><a name="up_addrenv_clone">4.6.8 <code>up_addrenv_clone()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_clone(FAR const task_group_s *src, FAR struct task_group_s *dest);</code>
@@ -3700,7 +3753,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_attach">4.5.9 <code>up_addrenv_attach()</code></a></h3>
+<h3><a name="up_addrenv_attach">4.6.9 <code>up_addrenv_attach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);</code>
@@ -3726,7 +3779,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_detach">4.5.10 <code>up_addrenv_detach()</code></a></h3>
+<h3><a name="up_addrenv_detach">4.6.10 <code>up_addrenv_detach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_detach(FAR struct task_group_s *group, FAR struct task_group_s *tcb);</code>
@@ -3745,7 +3798,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_ustackalloc">4.5.11 <code>up_addrenv_ustackalloc()</code></a></h3>
+<h3><a name="up_addrenv_ustackalloc">4.6.11 <code>up_addrenv_ustackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
@@ -3767,7 +3820,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_up_addrenv_ustackfreeattach">4.5.12 <code>up_addrenv_ustackfree()</code></a></h3>
+<h3><a name="up_addrenv_up_addrenv_ustackfreeattach">4.6.12 <code>up_addrenv_ustackfree()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackfree(FAR struct tcb_s *tcb);</code>
@@ -3788,7 +3841,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vustack">4.5.13 <code>up_addrenv_vustack()</code></a></h3>
+<h3><a name="up_addrenv_vustack">4.6.13 <code>up_addrenv_vustack()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);</code>
@@ -3809,7 +3862,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_ustackselect">4.5.14 <code>up_addrenv_ustackselect()</code></a></h3>
+<h3><a name="up_addrenv_ustackselect">4.6.14 <code>up_addrenv_ustackselect()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);</code>
@@ -3831,7 +3884,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_kstackalloc">4.5.15 <code>up_addrenv_kstackalloc()</code></a></h3>
+<h3><a name="up_addrenv_kstackalloc">4.6.15 <code>up_addrenv_kstackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);</code>
@@ -3853,7 +3906,7 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_kstackfree">4.5.16 <code>up_addrenv_kstackfree()</code></a></h3>
+<h3><a name="up_addrenv_kstackfree">4.6.16 <code>up_addrenv_kstackfree()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_kstackfree(FAR struct tcb_s *tcb);</code>
@@ -3875,23 +3928,23 @@ void lpwork_restorepriority(uint8_t reqprio);
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="exports">4.6 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h2><a name="exports">4.7 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.6.1 <code>nx_start()</code></a></h3>
+<h3><a name="osstart">4.7.1 <code>nx_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.6.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.7.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.6.3 <code>sched_process_timer()</code></a></h3>
+<h3><a name="schedprocesstimer">4.7.3 <code>sched_process_timer()</code></a></h3>
 <p><b>Function Prototype</b>:</p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3906,7 +3959,7 @@ void sched_process_timer(void);
   <code>CONFIG_USEC_PER_TICK</code>.
 </p>
 
-<h3><a name="schedtimerexpiration">4.6.4 <code>sched_timer_expiration()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3929,7 +3982,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.6.5 <code>sched_alarm_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -3952,7 +4005,7 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="irqdispatch">4.6.6 <code>irq_dispatch()</code></a></h3>
+<h3><a name="irqdispatch">4.7.6 <code>irq_dispatch()</code></a></h3>
 <p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -3961,7 +4014,7 @@ void sched_timer_expiration(void);
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="internalOS">4.7 Application OS vs. Internal OS Interfaces</a></h2>
+<h2><a name="internalOS">4.8 Application OS vs. Internal OS Interfaces</a></h2>
 
 <p>
   NuttX provides a standard, portable OS interface for use by applications.
@@ -4042,7 +4095,7 @@ void sched_timer_expiration(void);
   </li>
 </ul>
 
-<h2><a name="boardctl">4.8 <code>boardctl()</code> Application Interface</a></h2>
+<h2><a name="boardctl">4.9 <code>boardctl()</code> Application Interface</a></h2>
 
 <p><b>Function Prototype</b>:<p>
 <ul>
@@ -4092,7 +4145,7 @@ void sched_timer_expiration(void);
   -1 (<code>ERROR</code>) is returned on failure with the <code>errno</code> variable to to indicate the nature of the failure.
 </ul>
 
-<h4><a name="boardsmp">4.9 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
+<h4><a name="boardsmp">4.10 Symmetric Multiprocessing (SMP) Application Interface</a></h4>
 <p>
 According to Wikipedia: "Symmetric multiprocessing (SMP) involves a symmetric multiprocessor system hardware and software architecture where two or more identical processors connect to a single, shared main memory, have full access to all I/O devices, and are controlled by a single operating system instance that treats all processors equally, reserving none for special purposes. Most multiprocessor systems today use an SMP architecture. In the case of multi-core processors, the SMP architecture applies to the cores, treating them as separate processors.
 </p>
@@ -4106,7 +4159,7 @@ For a technical description of the NuttX implementation of SMP, see the NuttX <a
   None
 </ul>
 
-<h3><a name="uptestset">4.9.1 <code>up_testset()</code></a></h3>
+<h3><a name="uptestset">4.10.1 <code>up_testset()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/spinlock.h&gt;
@@ -4135,7 +4188,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
   </p>
 </ul>
 
-<h3><a name="upcpuindex">4.9.2 <code>up_cpu_index()</code></a></h3>
+<h3><a name="upcpuindex">4.10.2 <code>up_cpu_index()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4163,7 +4216,7 @@ int up_cpu_index(void);
   </p>
 </ul>
 
-<h3><a name="upcpustart">4.9.3 <code>up_cpu_start()</code></a></h3>
+<h3><a name="upcpustart">4.10.3 <code>up_cpu_start()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4203,7 +4256,7 @@ int up_cpu_start(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpupause">4.9.4 <code>up_cpu_pause()</code></a></h3>
+<h3><a name="upcpupause">4.10.4 <code>up_cpu_pause()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4235,7 +4288,7 @@ int up_cpu_pause(int cpu);
   </p>
 </ul>
 
-<h3><a name="upcpuresume">4.9.5 <code>up_cpu_resume()</code></a></h3>
+<h3><a name="upcpuresume">4.10.5 <code>up_cpu_resume()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4267,7 +4320,7 @@ int up_cpu_resume(int cpu);
   </p>
 </ul>
 
-<h2><a name="shm">4.10 Shared Memory</a></h2>
+<h2><a name="shm">4.11 Shared Memory</a></h2>
 <p>
   Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
   These interfaces support user memory regions that can be shared between multiple user processes.
@@ -4276,7 +4329,7 @@ int up_cpu_resume(int cpu);
   Those interfaces are described below:
 </p>
 
-<h3><a name="upshmat">4.10.1 <code>up_shmat()</code></a></h3>
+<h3><a name="upshmat">4.11.1 <code>up_shmat()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4305,7 +4358,7 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h3><a name="upshmdt">4.10.2 <code>up_shmdt()</code></a></h3>
+<h3><a name="upshmdt">4.11.2 <code>up_shmdt()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -4331,7 +4384,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
 </ul>
 
-<h2><a name="demandpaging">4.11 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.12 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -4340,7 +4393,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.12 LED Support</a></h2>
+<h2><a name="ledsupport">4.13 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -4350,7 +4403,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.12.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.13.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -4374,7 +4427,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.12.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.13.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -4438,7 +4491,7 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.12.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.13.3 Common LED interfaces</a></h3>
 
 <p>
   The <code>include/nuttx/board.h</code> has declarations like:
@@ -4488,7 +4541,7 @@ void board_autoled_off(int led);
   </li>
 </ul>
 
-<h2><a name="iobs">4.13 I/O Buffer Management</a></h2>
+<h2><a name="iobs">4.14 I/O Buffer Management</a></h2>
 
 NuttX supports generic I/O buffer management (IOB) logic.
 This logic was originally added to support network I/O buffering, but has been generalized to meet buffering requirements by all device drivers.
@@ -4520,7 +4573,7 @@ This objectives of this feature are:
   </li>
 </ol>
 
-<h3><a name="iobconfig">4.13.1 Configuration Options</a></h3>
+<h3><a name="iobconfig">4.14.1 Configuration Options</a></h3>
 
 <dl>
   <dt><code>CONFIG_MM_IOB</code>
@@ -4552,12 +4605,12 @@ This objectives of this feature are:
   NOTE that this selection is not available if DEBUG features are not enabled (<code>CONFIG_DEBUG_FEATURES</code>) with IOBs are being used to syslog buffering logic (<code>CONFIG_SYSLOG_BUFFER</code>).
 </dl>
 
-<h3><a name="iobthrottle">4.13.2 Throttling</a></h3>
+<h3><a name="iobthrottle">4.14.2 Throttling</a></h3>
 
 <b></b>
 An allocation throttle was added.  I/O buffer allocation logic supports a throttle value originally for read-ahead buffering to prevent the read-ahead logic from consuming all available I/O buffers and blocking the write buffering logic.  This throttle logic is only needed for networking only if both write buffering and read-ahead buffering are used.  Of use of I/O buffering might have other motivations for throttling.
 
-<h3><a name="iobtypes">4.13.3 Public Types</a></h3>
+<h3><a name="iobtypes">4.14.3 Public Types</a></h3>
 
 <p>
   This structure represents one I/O buffer.  A packet is contained by one or more I/O buffers in a chain.  The <code>io_pktlen</code> is only valid for the I/O buffer at the head of the chain.
@@ -4620,33 +4673,33 @@ struct iob_queue_s
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 </pre>
 
-<h3><a name="iobprotos">4.13.4 Public Function Prototypes</a></h3>
+<h3><a name="iobprotos">4.14.4 Public Function Prototypes</a></h3>
 
 <ul>
-  <li><a href="#iob_initialize">4.13.4.1 <code>iob_initialize()</code></a></li>
-  <li><a href="#iob_alloc">4.13.4.2 <code>iob_alloc()</code></a></li>
-  <li><a href="#iob_tryalloc">4.13.4.3 <code>iob_tryalloc()</code></a></li>
-  <li><a href="#iob_free">4.13.4.4 <code>iob_free()</code></a></li>
-  <li><a href="#iob_free_chain">4.13.4.5 <code>iob_free_chain()</code></a></li>
-  <li><a href="#iob_add_queue">4.13.4.6 <code>iob_add_queue()</code></a></li>
-  <li><a href="#iob_tryadd_queue">4.13.4.7 <code>iob_tryadd_queue()</code></a></li>
-  <li><a href="#iob_remove_queue">4.13.4.8 <code>iob_remove_queue()</code></a></li>
-  <li><a href="#iob_peek_queue">4.13.4.9 <code>iob_peek_queue()</code></a></li>
-  <li><a href="#iob_free_queue">4.13.4.10 <code>iob_free_queue()</code></a></li>
-  <li><a href="#iob_copyin">4.13.4.11 <code>iob_copyin()</code></a></li>
-  <li><a href="#iob_trycopyin">4.13.4.12 <code>iob_trycopyin()</code></a></li>
-  <li><a href="#iob_copyout">4.13.4.13 <code>iob_copyout()</code></a></li>
-  <li><a href="#iob_clone">4.13.4.14 <code>iob_clone()</code></a></li>
-  <li><a href="#iob_concat">4.13.4.15 <code>iob_concat()</code></a></li>
-  <li><a href="#iob_trimhead">4.13.4.16 <code>iob_trimhead()</code></a></li>
-  <li><a href="#iob_trimhead_queue">4.13.4.17 <code>iob_trimhead_queue()</code></a></li>
-  <li><a href="#iob_trimtail">4.13.4.18 <code>iob_trimtail()</code></a></li>
-  <li><a href="#iob_pack">4.13.4.19 <code>iob_pack()</code></a></li>
-  <li><a href="#iob_contig">4.13.4.20 <code>iob_contig()</code></a></li>
-  <li><a href="#iob_dump">4.13.4.21 <code>iob_dump()</code></a></li>
+  <li><a href="#iob_initialize">4.14.4.1 <code>iob_initialize()</code></a></li>
+  <li><a href="#iob_alloc">4.14.4.2 <code>iob_alloc()</code></a></li>
+  <li><a href="#iob_tryalloc">4.14.4.3 <code>iob_tryalloc()</code></a></li>
+  <li><a href="#iob_free">4.14.4.4 <code>iob_free()</code></a></li>
+  <li><a href="#iob_free_chain">4.14.4.5 <code>iob_free_chain()</code></a></li>
+  <li><a href="#iob_add_queue">4.14.4.6 <code>iob_add_queue()</code></a></li>
+  <li><a href="#iob_tryadd_queue">4.14.4.7 <code>iob_tryadd_queue()</code></a></li>
+  <li><a href="#iob_remove_queue">4.14.4.8 <code>iob_remove_queue()</code></a></li>
+  <li><a href="#iob_peek_queue">4.14.4.9 <code>iob_peek_queue()</code></a></li>
+  <li><a href="#iob_free_queue">4.14.4.10 <code>iob_free_queue()</code></a></li>
+  <li><a href="#iob_copyin">4.14.4.11 <code>iob_copyin()</code></a></li>
+  <li><a href="#iob_trycopyin">4.14.4.12 <code>iob_trycopyin()</code></a></li>
+  <li><a href="#iob_copyout">4.14.4.13 <code>iob_copyout()</code></a></li>
+  <li><a href="#iob_clone">4.14.4.14 <code>iob_clone()</code></a></li>
+  <li><a href="#iob_concat">4.14.4.15 <code>iob_concat()</code></a></li>
+  <li><a href="#iob_trimhead">4.14.4.16 <code>iob_trimhead()</code></a></li>
+  <li><a href="#iob_trimhead_queue">4.14.4.17 <code>iob_trimhead_queue()</code></a></li>
+  <li><a href="#iob_trimtail">4.14.4.18 <code>iob_trimtail()</code></a></li>
+  <li><a href="#iob_pack">4.14.4.19 <code>iob_pack()</code></a></li>
+  <li><a href="#iob_contig">4.14.4.20 <code>iob_contig()</code></a></li>
+  <li><a href="#iob_dump">4.14.4.21 <code>iob_dump()</code></a></li>
 </ul>
 
-<h4><a name="iob_initialize">4.13.4.1 <code>iob_initialize()</code></a></h4>
+<h4><a name="iob_initialize">4.14.4.1 <code>iob_initialize()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4657,7 +4710,7 @@ void iob_initialize(void);
   Set up the I/O buffers for normal operations.
 </p>
 
-<h4><a name="iob_alloc">4.13.4.2 <code>iob_alloc()</code></a></h4>
+<h4><a name="iob_alloc">4.14.4.2 <code>iob_alloc()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4668,7 +4721,7 @@ FAR struct iob_s *iob_alloc(bool throttled);
   Allocate an I/O buffer by taking the buffer at the head of the free list.
 </p>
 
-<h4><a name="iob_tryalloc">4.13.4.3 <code>iob_tryalloc()</code></a></h4>
+<h4><a name="iob_tryalloc">4.14.4.3 <code>iob_tryalloc()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4679,7 +4732,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled);
   Try to allocate an I/O buffer by taking the buffer at the head of the free list without waiting for a buffer to become free.
 </p>
 
-<h4><a name="iob_free">4.13.4.4 <code>iob_free()</code></a></h4>
+<h4><a name="iob_free">4.14.4.4 <code>iob_free()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4690,7 +4743,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
    Free the I/O buffer at the head of a buffer chain returning it to the free list.  The link to  the next I/O buffer in the chain is return.
 </p>
 
-<h4><a name="iob_free_chain">4.13.4.5 <code>iob_free_chain()</code></a></h4>
+<h4><a name="iob_free_chain">4.14.4.5 <code>iob_free_chain()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4701,7 +4754,7 @@ void iob_free_chain(FAR struct iob_s *iob);
   Free an entire buffer chain, starting at the beginning of the I/O buffer chain
 </p>
 
-<h4><a name="iob_add_queue">4.13.4.6 <code>iob_add_queue()</code></a></h4>
+<h4><a name="iob_add_queue">4.14.4.6 <code>iob_add_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4714,7 +4767,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
   Add one I/O buffer chain to the end of a queue.  May fail due to lack of resources.
 </p>
 
-<h4><a name="iob_tryadd_queue">4.13.4.7 <code>iob_tryadd_queue()</code></a></h4>
+<h4><a name="iob_tryadd_queue">4.14.4.7 <code>iob_tryadd_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4727,7 +4780,7 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
   Add one I/O buffer chain to the end of a queue without waiting for resources to become free.
 </p>
 
-<h4><a name="iob_remove_queue">4.13.4.8 <code>iob_remove_queue()</code></a></h4>
+<h4><a name="iob_remove_queue">4.14.4.8 <code>iob_remove_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4744,7 +4797,7 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
   Returns a reference to the I/O buffer chain at the head of the queue.
 </p>
 
-<h4><a name="iob_peek_queue">4.13.4.9 <code>iob_peek_queue()</code></a></h4>
+<h4><a name="iob_peek_queue">4.14.4.9 <code>iob_peek_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4761,7 +4814,7 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
   Returns a reference to the I/O buffer chain at the head of the queue.
 </p>
 
-<h4><a name="iob_free_queue">4.13.4.10 <code>iob_free_queue()</code></a></h4>
+<h4><a name="iob_free_queue">4.14.4.10 <code>iob_free_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4774,7 +4827,7 @@ void iob_free_queue(FAR struct iob_queue_s *qhead);
   Free an entire queue of I/O buffer chains.
 </p>
 
-<h4><a name="iob_copyin">4.13.4.11 <code>iob_copyin()</code></a></h4>
+<h4><a name="iob_copyin">4.14.4.11 <code>iob_copyin()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4786,7 +4839,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
   Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary.
 </p>
 
-<h4><a name="iob_trycopyin">4.13.4.12 <code>iob_trycopyin()</code></a></h4>
+<h4><a name="iob_trycopyin">4.14.4.12 <code>iob_trycopyin()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4798,7 +4851,7 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  Copy data <code>len</code> bytes from a user buffer into the I/O buffer chain, starting at <code>offset</code>, extending the chain as necessary BUT without waiting if buffers are not available.
 </p>
 
-<h4><a name="iob_copyout">4.13.4.13 <code>iob_copyout()</code></a></h4>
+<h4><a name="iob_copyout">4.14.4.13 <code>iob_copyout()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4810,7 +4863,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
  Copy data <code>len</code> bytes of data into the user buffer starting at <code>offset</code> in the I/O buffer, returning that actual number of bytes copied out.
 </p>
 
-<h4><a name="iob_clone">4.13.4.14 <code>iob_clone()</code></a></h4>
+<h4><a name="iob_clone">4.14.4.14 <code>iob_clone()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4821,7 +4874,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled);
   Duplicate (and pack) the data in <code>iob1</code> in <code>iob2</code>.  <code>iob2</code> must be empty.
 </p>
 
-<h4><a name="iob_concat">4.13.4.15 <code>iob_concat()</code></a></h4>
+<h4><a name="iob_concat">4.14.4.15 <code>iob_concat()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4832,7 +4885,7 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
   Concatenate iob_s chain iob2 to iob1.
 </p>
 
-<h4><a name="iob_trimhead">4.13.4.16 <code>iob_trimhead()</code></a></h4>
+<h4><a name="iob_trimhead">4.14.4.16 <code>iob_trimhead()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4843,7 +4896,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers are freed and, hence, the beginning of the chain may change.
 </p>
 
-<h4><a name="iob_trimhead_queue">4.13.4.17 <code>iob_trimhead_queue()</code></a></h4>
+<h4><a name="iob_trimhead_queue">4.14.4.17 <code>iob_trimhead_queue()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4864,7 +4917,7 @@ FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
   The new iob at the head of the queue is returned.
 </p>
 
-<h4><a name="iob_trimtail">4.13.4.18 <code>iob_trimtail()</code></a></h4>
+<h4><a name="iob_trimtail">4.14.4.18 <code>iob_trimtail()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4875,7 +4928,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
   Remove bytes from the end of an I/O chain.  Emptied I/O buffers are freed NULL will be returned in the special case where the entry I/O buffer chain is freed.
 </p>
 
-<h4><a name="iob_pack">4.13.4.19 <code>iob_pack()</code></a></h4>
+<h4><a name="iob_pack">4.14.4.19 <code>iob_pack()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4886,7 +4939,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
   Pack all data in the I/O buffer chain so that the data offset is zero and all but the final buffer in the chain are filled.  Any emptied buffers at the end of the chain are freed.
 </p>
 
-<h4><a name="iob_contig">4.13.4.20 <code>iob_contig()</code></a></h4>
+<h4><a name="iob_contig">4.14.4.20 <code>iob_contig()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
@@ -4897,7 +4950,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
   Ensure that there is <code>len</code> bytes of contiguous space at the beginning of the I/O buffer chain starting at <code>iob</code>.
 </p>
 
-<h4><a name="iob_dump">4.13.4.21 <code>iob_dump()</code></a></h4>
+<h4><a name="iob_dump">4.14.4.21 <code>iob_dump()</code></a></h4>
 <p><b>Function Prototype</b>:
 <pre>
 #include &lt;nuttx/mm/iob.h&gt;
