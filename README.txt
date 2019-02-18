@@ -2147,6 +2147,8 @@ apps/
  |   |  `- README.txt
  |   |- nxplayer/
  |   |  `- README.txt
+ |   |- psmq/
+ |   |  `- README.txt
  |   |- symtab/
  |   |   `- README.txt
  |   |- termcurses/

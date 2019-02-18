@@ -2278,7 +2278,8 @@ The specific environmental definitions are unique for each board but should incl
   Exported board-specific interfaces are prototyped in the header file <code>include/nuttx/board.h</code>.
   There are many interfaces exported from board- to architecture-specific logic.
   But there are only a few exported from board-specific logic to common NuttX logic.
-  Those few will be discussed in this paragraph.
+  Those few of those related to initialization will be discussed in this paragraph.
+  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be dicussed in other paragraphs.
 </p>
 <p>
   All of the board-specific interfaces used by the NuttX OS logic are for controlled board initialization.
