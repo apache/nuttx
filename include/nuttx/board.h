@@ -120,19 +120,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_late_initialize
+ * Name: board_early_initialize
  *
  * Description:
- *   If CONFIG_BOARD_DRIVER_INITIALIZE is selected, then an additional
+ *   If CONFIG_BOARD_EARLY_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_driver_initialize().  board_driver_initialize()
+ *   function called board_early_initialize().  board_early_initialize()
  *   will be called immediately after up_initialize() and well before
- *   board_driver_initialize() is called and the initial application is
- *   started.  The context in which board_driver_initialize() executes is
+ *   board_early_initialize() is called and the initial application is
+ *   started.  The context in which board_early_initialize() executes is
  *   suitable for early initialization of most, simple device drivers and
  *   is a logical, board-specific extension of up_initialize().
  *
- *   board_driver_initialize() runs on the startup, initialization thread.
+ *   board_early_initialize() runs on the startup, initialization thread.
  *   Some initialization operations cannot be performed on the start-up,
  *   initialization thread.  That is because the initialization thread
  *   cannot wait for event.  Waiting may be required, for example, to
@@ -142,8 +142,8 @@
 
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_DRIVER_INITIALIZE
-void board_driver_initialize(void);
+#ifdef CONFIG_BOARD_EARLY_INITIALIZE
+void board_early_initialize(void);
 #endif
 
 /****************************************************************************
@@ -153,10 +153,10 @@ void board_driver_initialize(void);
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
  *   function called board_late_initialize().  board_late_initialize() will
- *   be called after up_initialize() and board_driver_initialize() and just
+ *   be called after up_initialize() and board_early_initialize() and just
  *   before the initial application is started.  This additional
  *   initialization phase may be used, for example, to initialize board-
- *   specific device drivers for which board_driver_initialize() is not
+ *   specific device drivers for which board_early_initialize() is not
  *   suitable.
  *
  *   Waiting for events, use of I2C, SPI, etc are permissable in the context

@@ -1147,8 +1147,8 @@ endif # PRIORITY_INHERITANCE
 
 menu "RTOS hooks"
 
-config BOARD_DRIVER_INITIALIZE
-	bool "Custom board driver initialization"
+config BOARD_EARLY_INITIALIZE
+	bool "Custom board early initialization"
 	default n
 	---help---
 		By default, there are three points in time where you can insert
@@ -1166,13 +1166,13 @@ config BOARD_DRIVER_INITIALIZE
 		initialize drivers in this phase.
 
 		At this same point in time, the OS will also call a board-
-		specific initialization function named board_driver_initialize()
-		if CONFIG_BOARD_DRIVER_INITIALIZE is selectd.  The context in
-		which board_driver_initialize() executes is suitable for early
+		specific initialization function named board_early_initialize()
+		if CONFIG_BOARD_EARLY_INITIALIZE is selectd.  The context in
+		which board_early_initialize() executes is suitable for early
 		initialization of most, simple device drivers and is a logical,
 		board-specific extension of up_initialize().
 
-		 board_driver_initialize() runs on the startup, initialization thread.
+		board_early_initialize() runs on the startup, initialization thread.
 		Some initialization operations cannot be performed on the start-up,
 		initialization thread.  That is because the initialization thread
 		cannot wait for event.  Waiting may be required, for example, to
@@ -1214,13 +1214,13 @@ config BOARD_LATE_INITIALIZE
 		initialize drivers in this phase.
 
 		At this same point in time, the OS will also call a board-
-		specific initialization function named board_driver_initialize()
-		if CONFIG_BOARD_DRIVER_INITIALIZE is selectd.  The context in
-		which board_driver_initialize() executes is suitable for early
+		specific initialization function named board_early_initialize()
+		if CONFIG_BOARD_EARLY_INITIALIZE is selectd.  The context in
+		which board_early_initialize() executes is suitable for early
 		initialization of most, simple device drivers and is a logical,
 		board-specific extension of up_initialize().
 
-		 board_driver_initialize() runs on the startup, initialization thread.
+		board_early_initialize() runs on the startup, initialization thread.
 		Some initialization operations cannot be performed on the start-up,
 		initialization thread.  That is because the initialization thread
 		cannot wait for event.  Waiting may be required, for example, to

@@ -939,7 +939,7 @@ struct nx_callback_s
     <p>
       The NX server may be started in your board startup logic by simply calling the function <code> nxmu_start()</code>.
       The board startup logic usually resides the the <code>configs/<i>board</i>/src</code> directory.
-      The boar board startup logic can run automatically during the early system if <code>CONFIG_BOARD_LATE_INITIALIZE</code> is defined in the configuration.
+      The board startup logic can run automatically during the early system if <code>CONFIG_BOARD_LATE_INITIALIZE</code> is defined in the configuration.
       Or, the board startup logic can execute under control of the application by calling the <code>boardctl(BOARDIOC_INIT, arg)</code> OS interface.
     </p>
     <p>
