@@ -101,17 +101,22 @@
 #  define FL_LPAD         0x0008
 #  define FL_ALT          0x0010
 
-#  define FL_WIDTH        0x0020
-#  define FL_PREC         0x0040
+#  define FL_INDEX        0x0020
+#  define FL_ASTERISK     0x0040
 
-#  define FL_LONG         0x0080
-#  define FL_SHORT        0x0100
-#  define FL_REPD_TYPE    0x0200
+#  define FL_WIDTH        0x0080
+#  define FL_PREC         0x0100
 
-#  define FL_NEGATIVE     0x0400
+#  define FL_LONG         0x0200
+#  define FL_SHORT        0x0400
+#  define FL_REPD_TYPE    0x0800
 
-#  define FL_ALTUPP       0x0800
-#  define FL_ALTHEX       0x1000
+#  define FL_NEGATIVE     0x1000
+
+/* The next 2 groups are Exclusive Or */
+
+#  define FL_ALTUPP       0x2000
+#  define FL_ALTHEX       0x4000
 
 #  define FL_FLTUPP       0x2000
 #  define FL_FLTEXP       0x4000
@@ -195,7 +200,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
         }
 
       {
-        const char *pnt;
+        FAR const char *pnt;
 
         switch (c)
           {
@@ -208,7 +213,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             /* FALLTHROUGH */
 
           case 's':
-            pnt = va_arg(ap, char *);
+            pnt = va_arg(ap, FAR char *);
             while ((c = *pnt++) != 0)
               {
                 putc(c, stream);
@@ -234,7 +239,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               flags |= FL_NEGATIVE;
             }
 
-          c = __ultoa_invert(x, (char *)buf, 10) - (char *)buf;
+          c = __ultoa_invert(x, (FAR char *)buf, 10) - (FAR char *)buf;
         }
       else
         {
@@ -269,7 +274,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               c = __ultoa_invert((flags & FL_LONG)
                                  ? va_arg(ap, unsigned long)
                                  : va_arg(ap, unsigned int),
-                                 (char *)buf, base) - (char *)buf;
+                                 (FAR char *)buf, base) - (FAR char *)buf;
               break;
 
             default:
@@ -318,22 +323,32 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
-#  ifdef CONFIG_LIBC_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
     unsigned char __buf[22];  /* Size for -1 in octal, without '\0' */
-#  else
+#else
     unsigned char __buf[11];  /* Size for -1 in octal, without '\0' */
-#  endif
-#  if PRINTF_LEVEL >= PRINTF_FLT
+#endif
+#if PRINTF_LEVEL >= PRINTF_FLT
     struct dtoa_s __dtoa;
-#  endif
+#endif
   } u;
-  const char *pnt;
+
+#define buf     (u.__buf)
+#define _dtoa   (u.__dtoa)
+
+  FAR const char *pnt;
   size_t size;
   unsigned char len;
   int total_len = 0;
 
-#  define buf     (u.__buf)
-#  define _dtoa   (u.__dtoa)
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+  int argnumber;
+
+  va_list work_ap;
+  va_copy(work_ap, ap);
+#else
+#  define work_ap ap
+#endif
 
   for (; ; )
     {
@@ -392,6 +407,62 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if (flags < FL_LONG)
             {
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (c == '$')
+                {
+                  if ((flags & FL_INDEX) == 0)
+                    {
+                      if (width == 0 || (flags & FL_PREC) != 0)
+                        {
+                          goto ret;
+                        }
+
+                      /* It had been the argument number. */
+
+                      argnumber = width;
+                      flags    |= FL_INDEX;
+
+                      width     = 0;
+                      flags    &= ~FL_WIDTH;
+                    }
+                  else if ((flags & FL_ASTERISK) != 0)
+                    {
+                      flags    &= ~FL_ASTERISK;
+                      va_end(work_ap);
+                      va_copy(work_ap, ap);
+
+                      if ((flags & FL_PREC) == 0)
+                        {
+                          /* Jump to index */
+
+                          while (--width)
+                            {
+                              (void)va_arg(work_ap, int);
+                            }
+
+                          width = va_arg(work_ap, int);
+                        }
+                      else
+                        {
+                          /* Jump to index */
+
+                          while (--prec)
+                            {
+                              (void)va_arg(work_ap, int);
+                            }
+
+                          prec = va_arg(work_ap, int);
+                        }
+                    }
+                  else
+                    {
+                      goto ret;
+                    }
+
+                  continue;
+                }
+#endif
+
               if (c >= '0' && c <= '9')
                 {
                   c -= '0';
@@ -408,9 +479,17 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
               if (c == '*')
                 {
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+                  if ((flags & FL_INDEX) != 0)
+                    {
+                      flags |= FL_ASTERISK;
+                      continue;
+                    }
+#endif
+
                   if ((flags & FL_PREC) != 0)
                     {
-                      prec = va_arg(ap, int);
+                      prec = va_arg(work_ap, int);
                       if (prec < 0)
                         {
                           prec = 0;
@@ -418,8 +497,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                     }
                   else
                     {
-                      width = va_arg(ap, int);
+                      width  = va_arg(work_ap, int);
                       flags |= FL_WIDTH;
+
                       if (width < 0)
                         {
                           width = -width;
@@ -476,6 +556,21 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #    error
 #  endif
 
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+      if ((flags & FL_INDEX) != 0)
+        {
+          /* Jump to index */
+
+          va_end(work_ap);
+          va_copy(work_ap, ap);
+
+          while (--argnumber)
+            {
+              (void)va_arg(work_ap, int);
+            }
+        }
+#  endif
+
 #  if PRINTF_LEVEL >= PRINTF_FLT
       if (c >= 'E' && c <= 'G')
         {
@@ -526,7 +621,8 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               ndigs = DTOA_MAX_DIG;
             }
 
-          ndigs = __dtoa_engine(va_arg(ap, double), &_dtoa, ndigs, ndecimal);
+          ndigs = __dtoa_engine(va_arg(work_ap, double), &_dtoa, ndigs,
+                                ndecimal);
           exp   = _dtoa.exp;
 
           sign = 0;
@@ -545,7 +641,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
             {
-              const char *p;
+              FAR const char *p;
 
               ndigs = sign ? 4 : 3;
               if (width > ndigs)
@@ -789,8 +885,8 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #  else /* to: PRINTF_LEVEL >= PRINTF_FLT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
-          (void)va_arg(ap, double);
-          pnt = "*float*";
+          (void)va_arg(work_ap, double);
+          pnt  = "*float*";
           size = sizeof("*float*") - 1;
           goto str_lpad;
         }
@@ -800,14 +896,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
         {
 
         case 'c':
-          buf[0] = va_arg(ap, int);
-          pnt = (char *)buf;
+          buf[0] = va_arg(work_ap, int);
+          pnt = (FAR char *)buf;
           size = 1;
           goto str_lpad;
 
         case 's':
         case 'S':
-          pnt = va_arg(ap, char *);
+          pnt = va_arg(work_ap, FAR char *);
           size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
         str_lpad:
@@ -843,17 +939,17 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
-              x = va_arg(ap, long long);
+              x = va_arg(work_ap, long long);
             }
           else
 #endif
           if ((flags & FL_LONG) != 0)
             {
-              x = va_arg(ap, long);
+              x = va_arg(work_ap, long);
             }
           else
             {
-              x = va_arg(ap, int);
+              x = va_arg(work_ap, int);
               if ((flags & FL_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
@@ -880,7 +976,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             }
           else
             {
-              c = __ultoa_invert(x, (char *)buf, 10) - (char *)buf;
+              c = __ultoa_invert(x, (FAR char *)buf, 10) - (FAR char *)buf;
             }
         }
       else
@@ -893,17 +989,17 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
-              x = va_arg(ap, unsigned long long);
+              x = va_arg(work_ap, unsigned long long);
             }
           else
 #endif
           if ((flags & FL_LONG) != 0)
             {
-              x = va_arg(ap, unsigned long);
+              x = va_arg(work_ap, unsigned long);
             }
           else
             {
-              x = va_arg(ap, unsigned int);
+              x = va_arg(work_ap, unsigned int);
               if ((flags & FL_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
@@ -965,7 +1061,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
             }
           else
             {
-              c = __ultoa_invert(x, (char *)buf, base) - (char *)buf;
+              c = __ultoa_invert(x, (FAR char *)buf, base) - (FAR char *)buf;
             }
 
           flags &= ~FL_NEGATIVE;
@@ -1074,6 +1170,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
     }
 
 ret:
+
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+  va_end(work_ap);
+#endif
+
   return total_len;
 }
 

@@ -94,6 +94,19 @@ config LIBC_PRINT_MINIMAL
 		libraries that will be drawn into the build if long long support
 		is enabled.
 
+config LIBC_NUMBERED_ARGS
+	bool "Enable numbered arguments in printf"
+	default n
+	depends on LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL
+	---help---
+		Enables support for numbered arguments in printf.
+
+		  printf("%3$s %3$s %1$s %2$s\n", "1", "2", "3"); --> "3 3 1 2"
+		  printf("%3$*2$.*1$f\n", 4, 8, 1.234567); --> "  1.2346"
+
+		Attention mixing of numbered and traditional arguments in one
+		format string is not allowed according to POSIX.
+
 config LIBC_SCANSET
 	bool "Scanset support"
 	default n
