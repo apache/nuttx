@@ -46,6 +46,11 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 /****************************************************************************
  * Name: up_checkarch
  *
@@ -113,6 +118,10 @@ int up_relocateadd(FAR const Elf32_Rela *rel,
 
 #ifdef CONFIG_CXX_EXCEPTION
 int up_init_exidx(Elf32_Addr address, Elf32_Word size);
+#endif
+
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __INCLUDE_NUTTX_ELF_H */
