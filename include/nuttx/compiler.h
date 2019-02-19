@@ -260,7 +260,7 @@
 
 /* GCC supports inlined functions for version C99 and above */
 
-#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 #    define CONFIG_HAVE_INLINE 1
 #  else
 #    undef CONFIG_HAVE_INLINE
@@ -273,7 +273,7 @@
 
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef CONFIG_HAVE_ANONYMOUS_UNION
-#  if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
 #    define CONFIG_HAVE_ANONYMOUS_STRUCT 1
 #    define CONFIG_HAVE_ANONYMOUS_UNION 1
 #  endif
