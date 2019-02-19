@@ -101,7 +101,7 @@
 #  define FL_LPAD         0x0008
 #  define FL_ALT          0x0010
 
-#  define FL_INDEX        0x0020
+#  define FL_ARGNUMBER    0x0020
 #  define FL_ASTERISK     0x0040
 
 #  define FL_WIDTH        0x0080
@@ -410,9 +410,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if (c == '$')
                 {
-                  if ((flags & FL_INDEX) == 0)
+                  if ((flags & FL_ARGNUMBER) == 0)
                     {
-                      if (width == 0 || (flags & FL_PREC) != 0)
+                      /* No other flag except FL_WIDTH or FL_ZFILL (leading
+                       * zeros) and argument number must be at least 1
+                       */
+
+                      if ((flags & ~(FL_WIDTH | FL_ZFILL)) != 0 ||
+                          width == 0)
                         {
                           goto ret;
                         }
@@ -420,10 +425,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                       /* It had been the argument number. */
 
                       argnumber = width;
-                      flags    |= FL_INDEX;
+                      flags    |= FL_ARGNUMBER;
 
                       width     = 0;
-                      flags    &= ~FL_WIDTH;
+                      flags    &= ~(FL_WIDTH | FL_ZFILL);
                     }
                   else if ((flags & FL_ASTERISK) != 0)
                     {
@@ -433,7 +438,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
                       if ((flags & FL_PREC) == 0)
                         {
-                          /* Jump to index */
+                          /* Jump to argument */
 
                           while (--width)
                             {
@@ -444,7 +449,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                         }
                       else
                         {
-                          /* Jump to index */
+                          /* Jump to argument */
 
                           while (--prec)
                             {
@@ -480,7 +485,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
               if (c == '*')
                 {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-                  if ((flags & FL_INDEX) != 0)
+                  if ((flags & FL_ARGNUMBER) != 0)
                     {
                       flags |= FL_ASTERISK;
                       continue;
@@ -557,9 +562,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #  endif
 
 #  ifdef CONFIG_LIBC_NUMBERED_ARGS
-      if ((flags & FL_INDEX) != 0)
+      if ((flags & FL_ARGNUMBER) != 0)
         {
-          /* Jump to index */
+          /* Jump to argument */
 
           va_end(work_ap);
           va_copy(work_ap, ap);
