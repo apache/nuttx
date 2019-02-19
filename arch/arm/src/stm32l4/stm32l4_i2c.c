@@ -1880,7 +1880,7 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
                * can't write NBYTES to clear TCR so it will fire forever.
                */
 
-              if ((priv->msgc - 1) == 0)
+              if (priv->msgc == 1)
                 {
                   stm32l4_i2c_disable_reload(priv);
                 }
@@ -2031,11 +2031,18 @@ static int stm32l4_i2c_isr_process(struct stm32l4_i2c_priv_s *priv)
       i2cinfo("TC: ENTER dcnt = %i msgc = %i status 0x%08x\n",
               priv->dcnt, priv->msgc, status);
 
-      /* Prior message has been sent successfully */
+      /* Prior message has been sent successfully. Or there could have
+       * been an error that set msgc to 0; So test for that case as
+       * we do not want to decrement msgc less then zero nor move msgv
+       * past the last message.
+       */
 
-      priv->msgc--;
+      if (priv->msgc > 0)
+        {
+          priv->msgc--;
+        }
 
-      /* if additional messages remain to be transmitted / received */
+      /* Are there additional messages remain to be transmitted / received? */
 
       if (priv->msgc > 0)
         {
