@@ -72,9 +72,9 @@
 #if defined(CONFIG_LIBC_FLOATINGPOINT)
 #  define PRINTF_LEVEL PRINTF_FLT
 #elif defined(CONFIG_LIB_LONG_LONG) || !defined(CONFIG_LIBC_PRINT_MINIMAL)
-#  define PRINT_LEVEL PRINTF_STD
+#  define PRINTF_LEVEL PRINTF_STD
 #else
-#  define PRINT_LEVEL PRINTF_MIN
+#  define PRINTF_LEVEL PRINTF_MIN
 #endif
 
 #ifdef putc
