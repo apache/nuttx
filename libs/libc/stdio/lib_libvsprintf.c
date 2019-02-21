@@ -48,6 +48,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/streams.h>
 
 #include "lib_dtoa_engine.h"
@@ -56,6 +57,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
+ * support long long types.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_LIBC_LONG_LONG
+#endif
+
+/* [Re]define putc() */
 
 #ifdef putc
 #  undef putc

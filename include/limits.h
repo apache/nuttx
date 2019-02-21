@@ -293,7 +293,7 @@
  *   Minimum Acceptable Value: 10000
  */
 
-#define TMP_MAX10000
+#define TMP_MAX 10000
 
 /* Required for asynchronous I/O */
 
