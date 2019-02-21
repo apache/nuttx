@@ -57,79 +57,46 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration options for nano-printf PRINTF_LEVEL */
-
-#define PRINTF_MIN 1
-#define PRINTF_STD 2
-#define PRINTF_FLT 3
-
-/* This file can be compiled into more than one flavour.  The default
- * is to offer the usual modifiers and integer formatting support
- * (level 2).  Level 1 maintains a minimal version that just offers
- * integer formatting, but no modifier support whatsoever.  Level 3 is
- * intended for floating point support.
- */
-
-#if defined(CONFIG_LIBC_FLOATINGPOINT)
-#  define PRINTF_LEVEL PRINTF_FLT
-#elif defined(CONFIG_LIBC_LONG_LONG) || !defined(CONFIG_LIBC_PRINT_MINIMAL)
-#  define PRINTF_LEVEL PRINTF_STD
-#else
-#  define PRINTF_LEVEL PRINTF_MIN
-#endif
-
 #ifdef putc
 #  undef putc
 #endif
 
-#define putc(c,stream) (total_len++, (stream)->put(stream, c))
-
-#if PRINTF_LEVEL <= PRINTF_MIN
-
-#  define FL_ALTHEX       0x04
-#  define FL_ALT          0x10
-#  define FL_ALTLWR       0x20
-#  define FL_NEGATIVE     0x40
-#  define FL_LONG         0x80
-
-#else /* i.e. PRINTF_LEVEL > PRINTF_MIN */
+#define putc(c,stream)  (total_len++, (stream)->put(stream, c))
 
 /* Order is relevant here and matches order in format string */
 
-#  define FL_ZFILL        0x0001
-#  define FL_PLUS         0x0002
-#  define FL_SPACE        0x0004
-#  define FL_LPAD         0x0008
-#  define FL_ALT          0x0010
+#define FL_ZFILL           0x0001
+#define FL_PLUS            0x0002
+#define FL_SPACE           0x0004
+#define FL_LPAD            0x0008
+#define FL_ALT             0x0010
 
-#  define FL_ARGNUMBER    0x0020
-#  define FL_ASTERISK     0x0040
+#define FL_ARGNUMBER       0x0020
+#define FL_ASTERISK        0x0040
 
-#  define FL_WIDTH        0x0080
-#  define FL_PREC         0x0100
+#define FL_WIDTH           0x0080
+#define FL_PREC            0x0100
 
-#  define FL_LONG         0x0200
-#  define FL_SHORT        0x0400
-#  define FL_REPD_TYPE    0x0800
+#define FL_LONG            0x0200
+#define FL_SHORT           0x0400
+#define FL_REPD_TYPE       0x0800
 
-#  define FL_NEGATIVE     0x1000
+#define FL_NEGATIVE        0x1000
 
 /* The next 2 groups are Exclusive Or */
 
-#  define FL_ALTUPP       0x2000
-#  define FL_ALTHEX       0x4000
+#define FL_ALTUPP          0x2000
+#define FL_ALTHEX          0x4000
 
-#  define FL_FLTUPP       0x2000
-#  define FL_FLTEXP       0x4000
-#  define FL_FLTFIX       0x8000
+#define FL_FLTUPP          0x2000
+#define FL_FLTEXP          0x4000
+#define FL_FLTFIX          0x8000
 
-#  define TYPE_INT             1
-#  define TYPE_LONG            2
-#  define TYPE_LONG_LONG       3
-#  define TYPE_DOUBLE          4
-#  define TYPE_CHAR_POINTER    5
-
-#endif
+#define TYPE_INT           1
+#define TYPE_LONG          2
+#define TYPE_LONG_LONG     3
+#define TYPE_DOUBLE        4
+#define TYPE_CHAR_POINTER  5
 
 /* Support special access to CODE-space strings for Harvard architectures */
 
@@ -143,7 +110,6 @@
  * Private Types
  ****************************************************************************/
 
-#if PRINTF_LEVEL > PRINTF_MIN
 struct arg
 {
   unsigned char type;
@@ -158,13 +124,11 @@ struct arg
     FAR char *cp;
   } value;
 };
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#if PRINTF_LEVEL > PRINTF_MIN
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -180,7 +144,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else
     unsigned char __buf[11]; /* Size for -1 in octal, without '\0' */
 #endif
-#if PRINTF_LEVEL >= PRINTF_FLT
+#ifdef CONFIG_LIBC_FLOATINGPOINT
     struct dtoa_s __dtoa;
 #endif
   } u;
@@ -503,7 +467,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
 #endif
 
-#if PRINTF_LEVEL >= PRINTF_FLT
+#ifdef CONFIG_LIBC_FLOATINGPOINT
       if (c >= 'E' && c <= 'G')
         {
           flags |= FL_FLTUPP;
@@ -828,7 +792,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
           goto tail;
         }
 
-#else /* to: PRINTF_LEVEL >= PRINTF_FLT */
+#else /* !CONFIG_LIBC_FLOATINGPOINT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
           (void)va_arg(ap, double);
@@ -1207,200 +1171,10 @@ ret:
 
   return total_len;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#if PRINTF_LEVEL <= PRINTF_MIN
-int lib_vsprintf(FAR struct lib_outstream_s *stream,
-                 FAR const IPTR char *fmt, va_list ap)
-{
-  unsigned char c;              /* Holds a char from the format string */
-  unsigned char flags;
-  unsigned char buf[11];        /* Size for -1 in octal, without '\0' */
-  int total_len = 0;
-
-  for (; ; )
-    {
-      for (; ; )
-        {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-                  break;
-                }
-            }
-
-          putc(c, stream);
-        }
-
-      for (flags = 0; !(flags & FL_LONG);       /* 'll' will detect as error */
-           c = fmt_char(fmt))
-        {
-          if (c != '\0' && strchr(" +-.0123456789h", c) != NULL)
-            {
-              continue;
-            }
-
-          if (c == '#')
-            {
-              flags |= FL_ALT;
-              continue;
-            }
-
-          if (c == 'l')
-            {
-              flags |= FL_LONG;
-              continue;
-            }
-
-          break;
-        }
-
-      /* Only a format character is valid.  */
-
-      if (c && strchr("EFGefg", c))
-        {
-          (void)va_arg(ap, double);
-          putc('?', stream);
-          continue;
-        }
-
-      {
-        FAR const char *pnt;
-
-        switch (c)
-          {
-          case 'c':
-            putc(va_arg(ap, int), stream);
-            continue;
-
-          case 'S':
-
-            /* FALLTHROUGH */
-
-          case 's':
-            pnt = va_arg(ap, FAR char *);
-            while ((c = *pnt++) != 0)
-              {
-                putc(c, stream);
-              }
-
-            continue;
-          }
-      }
-
-      if (c == 'd' || c == 'i')
-        {
-          long x = (flags & FL_LONG) ? va_arg(ap, long) : va_arg(ap, int);
-
-          flags &= ~FL_ALT;
-          if (x < 0)
-            {
-              x = -x;
-
-              /* `putc ('-', stream)' will considarably inlarge stack size. So
-               * flag is used.
-               */
-
-              flags |= FL_NEGATIVE;
-            }
-
-          c = __ultoa_invert(x, (FAR char *)buf, 10) - (FAR char *)buf;
-        }
-      else
-        {
-          int base;
-
-          switch (c)
-            {
-            case 'u':
-              flags &= ~FL_ALT;
-              base   = 10;
-              goto ultoa;
-
-            case 'o':
-              base   = 8;
-              goto ultoa;
-
-            case 'p':
-              /* Determine size of pointer and set flags accordingly */
-
-              if (sizeof(FAR void *) == sizeof(unsigned long))
-                {
-                  flags |= FL_LONG;
-                }
-              else
-                {
-                  flags &= ~FL_LONG;
-                }
-
-              flags |= FL_ALT;
-
-              /* no break */
-
-            case 'x':
-              flags |= (FL_ALTHEX | FL_ALTLWR);
-              base   = 16;
-              goto ultoa;
-
-            case 'X':
-              flags |= FL_ALTHEX;
-              base   = 16 | XTOA_UPPER;
-
-            ultoa:
-              c = __ultoa_invert((flags & FL_LONG)
-                                 ? va_arg(ap, unsigned long)
-                                 : va_arg(ap, unsigned int),
-                                 (FAR char *)buf, base) - (FAR char *)buf;
-              break;
-
-            default:
-              goto ret;
-            }
-        }
-
-      /* Integer number output.  */
-
-      if ((flags & FL_NEGATIVE) != 0)
-        {
-          putc('-', stream);
-        }
-
-      if ((flags & FL_ALT) != 0 && buf[c - 1] != '0')
-        {
-          putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
-            {
-#if  FL_ALTLWR != 'x' - 'X'
-#  error
-#endif
-              putc('X' + (flags & FL_ALTLWR), stream);
-            }
-        }
-
-      do
-        {
-          putc(buf[--c], stream);
-        }
-      while (c);
-    }
-
-ret:
-  return total_len;
-}
-
-#else /* i.e. PRINTF_LEVEL > PRINTF_MIN */
 
 int lib_vsprintf(FAR struct lib_outstream_s *stream,
                  FAR const IPTR char *fmt, va_list ap)
@@ -1449,5 +1223,3 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
 #endif
 }
-
-#endif /* PRINTF_LEVEL > PRINTF_MIN */

@@ -80,24 +80,10 @@ config LIBC_LONG_LONG
 		libraries that will be drawn into the build if long long support
 		is enabled.
 
-config LIBC_PRINT_MINIMAL
-	bool "Minimal formatting support in printf"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
-	depends on !LIBC_FLOATINGPOINT && !LIBC_LONG_LONG && !LIBC_PRINT_LEGACY
-	---help---
-		Enables support for long long formats in printf, sscanf, etc. is
-		enabled.  This is enabled by default but if you are trying to
-		reduce the FLASH footprint, then disabling this feature is one
-		option.  The FLASH saves comes not from disabling the long long
-		formats, but rather from omitting the large long long arithmetic
-		libraries that will be drawn into the build if long long support
-		is enabled.
-
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default n
-	depends on (LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL) && !LIBC_PRINT_LEGACY
+	depends on (LIBC_FLOATINGPOINT || LIBC_LONG_LONG) && !LIBC_PRINT_LEGACY
 	---help---
 		Enables support for numbered arguments in printf.
 
