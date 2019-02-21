@@ -97,15 +97,27 @@ config LIBC_PRINT_MINIMAL
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default n
-	depends on (LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL) && !LIBC_PRINT_LEGACY && EXPERIMENTAL
+	depends on (LIBC_FLOATINGPOINT || LIBC_LONG_LONG || !LIBC_PRINT_MINIMAL) && !LIBC_PRINT_LEGACY
 	---help---
 		Enables support for numbered arguments in printf.
 
 		  printf("%3$s %3$s %1$s %2$s\n", "1", "2", "3"); --> "3 3 1 2"
 		  printf("%3$*2$.*1$f\n", 4, 8, 1.234567); --> "  1.2346"
 
-		Attention mixing of numbered and traditional arguments in one
+		Attention: Mixing of numbered and sequential arguments in one
 		format string is not allowed according to POSIX.
+
+config LIBC_NL_ARGMAX
+	int "Maximum number of numbered arguments for printf"
+	default 16
+	depends on LIBC_NUMBERED_ARGS
+	---help---
+		Applies only if there are numbered arguments in your format string.
+		The number of sequential arguments isn't affected.
+		Will be copied into stdio POSIX macro NL_ARGMAX.
+
+		Attention: Increasing this value will increase stack usage
+		of printf.
 
 config LIBC_SCANSET
 	bool "Scanset support"
