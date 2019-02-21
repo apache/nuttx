@@ -269,6 +269,10 @@
 
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
  * GCC 4.6 (but might be suppressed with -std= option)
+ *
+ * CAREFUL: This can cause issues for shared data structures shared between
+ * C and C++ if the two versions do not support the same features.  Structures
+ * and unions can lose binary compatibility!
  */
 
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT

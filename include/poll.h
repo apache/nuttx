@@ -114,24 +114,16 @@ typedef uint8_t pollevent_t;
 
 struct pollfd
 {
-  /* REVISIT:  Un-named unions are forbidden by the coding standard because
-   * they are not available in C89.
-   */
+  /* Standard field */
 
-#ifdef CONFIG_HAVE_ANONYMOUS_UNION
-  union
-  {
-    int        fd;      /* The descriptor being polled */
-    FAR void  *ptr;     /* The psock or file being polled */
-  };
-#else
   int          fd;      /* The descriptor being polled */
-  FAR void    *ptr;     /* The psock or file being polled */
-#endif
-
-  FAR sem_t   *sem;     /* Pointer to semaphore used to post output event */
   pollevent_t  events;  /* The input event flags */
   pollevent_t  revents; /* The output event flags */
+
+  /* Non-standard fields used internally by NuttX */
+
+  FAR void    *ptr;     /* The psock or file being polled */
+  FAR sem_t   *sem;     /* Pointer to semaphore used to post output event */
   FAR void    *priv;    /* For use by drivers */
 };
 
