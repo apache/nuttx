@@ -50,7 +50,7 @@
 
 /* Register Offsets *****************************************************************/
 
-#define IMXRT_ADC_HC0_OFFSET                0x4000  /* Control register for hardware triggers */
+#define IMXRT_ADC_HC0_OFFSET                0x0000  /* Control register for hardware triggers */
 #define IMXRT_ADC_HC1_OFFSET                0x0004  /* Control register for hardware triggers */
 #define IMXRT_ADC_HC2_OFFSET                0x0008  /* Control register for hardware triggers */
 #define IMXRT_ADC_HC3_OFFSET                0x000c  /* Control register for hardware triggers */
