@@ -114,7 +114,7 @@ typedef uint8_t pollevent_t;
 
 struct pollfd
 {
-  /* Standard field */
+  /* Standard fields */
 
   int          fd;      /* The descriptor being polled */
   pollevent_t  events;  /* The input event flags */

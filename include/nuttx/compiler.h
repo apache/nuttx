@@ -268,16 +268,23 @@
 #  endif
 
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
- * GCC 4.6 (but might be suppressed with -std= option)
+ * GCC 4.6 (but might be suppressed with -std= option).  ISO C++11 also
+ * adds un-named unions, but NOT unnamed structures (although compilers
+ * may support them).
  *
  * CAREFUL: This can cause issues for shared data structures shared between
  * C and C++ if the two versions do not support the same features.  Structures
  * and unions can lose binary compatibility!
+ *
+ * NOTE: The NuttX coding standard forbids the use of unnamed structures and
+ * unions within the OS.
  */
 
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef CONFIG_HAVE_ANONYMOUS_UNION
-#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
+
+#  if (defined(__cplusplus) && __cplusplus >= 201103L) || \
+      (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)
 #    define CONFIG_HAVE_ANONYMOUS_STRUCT 1
 #    define CONFIG_HAVE_ANONYMOUS_UNION 1
 #  endif
