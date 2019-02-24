@@ -177,7 +177,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
  *
  ****************************************************************************/
 
-int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
+int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, FAR const struct timespec *abs_timeout, bool intr)
 {
   int ret = EINVAL;
 
@@ -202,7 +202,7 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, bool intr)
            * returns zero on success and a positive errno value on failure.
            */
 
-          ret = pthread_sem_take(&mutex->sem, intr);
+          ret = pthread_sem_take(&mutex->sem, abs_timeout, intr);
           if (ret == OK)
             {
               /* Check if the holder of the mutex has terminated without

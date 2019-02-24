@@ -103,8 +103,48 @@
  *     been exceeded.
  *
  ****************************************************************************/
-
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
+{
+	 return pthread_mutex_timedlock(mutex, NULL);
+}
+
+ /****************************************************************************
+  * Name: pthread_mutex_timedlock
+  *
+  * Description:
+  *   The pthread_mutex_timedlock() function shall lock the mutex object
+  *   referenced by mutex. If the mutex is already locked, the calling
+  *   thread shall block until the mutex becomes available as in the
+  *   pthread_mutex_lock() function. If the mutex cannot be locked without
+  *   waiting for another thread to unlock the mutex, this wait shall be
+  *   terminated when the specified timeout expires.
+  *
+  *   The timeout shall expire when the absolute time specified by
+  *   abs_timeout passes, as measured by the clock on which timeouts are
+  *   based (that is, when the value of that clock equals or exceeds
+  *   abs_timeout), or if the absolute time specified by abs_timeout
+  *   has already been passed at the time of the call.
+  *
+  * Input Parameters:
+  *   mutex - A reference to the mutex to be locked.
+  *   abs_timeout - max wait time (NULL wait forever)
+  *
+  * Returned Value:
+  *   0 on success or an errno value on failure.  Note that the errno EINTR
+  *   is never returned by pthread_mutex_lock().
+  *   errno is ETIMEDOUT if mutex could not be locked before the specified
+  *   timeout expired
+  *
+  * Assumptions:
+  *
+  * POSIX Compatibility:
+  *   - This implementation does not return EAGAIN when the mutex could not be
+  *     acquired because the maximum number of recursive locks for mutex has
+  *     been exceeded.
+  *
+  ****************************************************************************/
+int pthread_mutex_timedlock(FAR pthread_mutex_t *restrict mutex,
+ 							FAR const struct timespec *abs_timeout)
 {
   int mypid = (int)getpid();
   int ret = EINVAL;
@@ -215,7 +255,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
              * default mutex.
              */
 
-            ret = pthread_mutex_take(mutex, true);
+            ret = pthread_mutex_take(mutex, NULL, true);
 
             /* If we successfully obtained the semaphore, then indicate
              * that we own it.
