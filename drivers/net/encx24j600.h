@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ENCX24J600 Commands ********************************************************/
+/* ENCX24J600 Commands ******************************************************/
 
 /* The SPI opcodes are divided into four families:
  *
@@ -59,11 +59,12 @@
  * data returned
  *
  * Three-Byte: Opcode with word length argument; includes read and write
- * operations, designed for pointer manipulation with word length data returned
+ * operations, designed for pointer manipulation with word length data
+ * returned
  *
  * N-Byte: Opcode with one or more bytes of argument; includes read and write
- * operations designed for general memory space access with one or more bytes of
- * data returned
+ * operations designed for general memory space access with one or more bytes
+ * of data returned
  */
 
 /* Single-Byte Instructions */
@@ -122,13 +123,13 @@
 /* Banked N-Byte Instructions */
 
 #define ENC_RCR         (0x00)  /* Read Control Register
-                                   000 | aaaaa | (Register value returned)) */
+                                 * 000 | aaaaa | (Register value returned) */
 #define ENC_WCR         (0x40)  /* Write Control Register
-                                   010 | aaaaa | dddddddd */
+                                 * 010 | aaaaa | dddddddd */
 #define ENC_BFS         (0x80)  /* Bit Field Set
-                                   100 | aaaaa | dddddddd */
+                                 * 100 | aaaaa | dddddddd */
 #define ENC_BFC         (0xa0)  /* Bit Field Clear
-                                   101 | aaaaa | dddddddd */
+                                 * 101 | aaaaa | dddddddd */
 
 /* Unbanked N-Byte Instructions */
 
@@ -147,6 +148,7 @@
 #define ENC_WUDADATA    (0x32)  /* Write Data from EUDADATA */
 
 /* Banked Control Registers *************************************************/
+
 /* Registers are described by 16 bit values. The high byte describes the bank
  * by the appropiate bank selection command.
  * For registers which are available on all banks the comnmand is set to 0.
@@ -277,11 +279,11 @@
 #define EIE_MODEXIE     (1 << 14)  /* Modular Exponentiation Interrupt Enable bit */
 #define EIE_INTIE       (1 << 15)  /* INT Global Interrupt Enable bit */
 
-/**
- * The last 10 bytes (16h to 1Fh) of all SPI banks point to a common set of five
- * registers: EUDAST, EUDAND, ESTAT, EIR and ECON1. These are key registers used
- * in controlling and monitoring the operation of the device. Their common
- * banked addresses allow easy access without switching the bank.
+/* The last 10 bytes (16h to 1Fh) of all SPI banks point to a common set of
+ * five registers: EUDAST, EUDAND, ESTAT, EIR and ECON1. These are key
+ * registers used in controlling and monitoring the operation of the device.
+ * Their common banked addresses allow easy access without switching the
+ * bank.
  */
 
 /* Common Register Addresses */
@@ -389,7 +391,6 @@
 
 /* PHY Auto-Negotiation Advertisement Register Bit Definitions */
 
-
 #define PHANA_ADIEEE0   (1 << 0)
 #define PHANA_ADIEEE1   (1 << 1)
 #define PHANA_ADIEEE2   (1 << 2)
@@ -399,11 +400,15 @@
 #define PHANA_AD10FD    (1 << 6)  /* Advertise 10Base-T Full-Duplex Ability bit */
 #define PHANA_AD100     (1 << 7)  /* Advertise 100Base-TX Half-Duplex Ability bit */
 #define PHANA_AD100FD   (1 << 8)  /* Advertise 100Base-TX Full-Duplex Ability bit */
-/* Advertise PAUSE Flow Control Ability bits */
-/* 11 = Local device supports both symmetric PAUSE and asymmetric PAUSE toward local device */
-/* 10 = Local device supports asymmetric PAUSE toward link partner only */
-/* 01 = Local device supports symmetric PAUSE only (Normal Flow Control mode) */
-/* 00 = Local device does not support PAUSE flow control */
+
+/* Advertise PAUSE Flow Control Ability bits:
+ * 11 = Local device supports both symmetric PAUSE and asymmetric PAUSE
+ *      toward local device
+ * 10 = Local device supports asymmetric PAUSE toward link partner only
+ * 01 = Local device supports symmetric PAUSE only (Normal Flow Control mode)
+ * 00 = Local device does not support PAUSE flow control
+ */
+
 #define PHANA_ADPAUS0   (1 << 10)
 #define PHANA_ADPAUS1   (1 << 11)
 #define PHANA_ADFAULT   (1 << 13) /* Advertise Remote Fault Condition bit */

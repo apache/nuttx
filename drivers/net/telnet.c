@@ -472,19 +472,19 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
             switch (priv->td_sb_count)
               {
                 case 0:
-                  priv->td_cols = (priv->td_cols & 0x00FF) | (ch << 8);
+                  priv->td_cols = (priv->td_cols & 0x00ff) | (ch << 8);
                   break;
 
                 case 1:
-                  priv->td_cols = (priv->td_cols & 0xFF00) | ch;
+                  priv->td_cols = (priv->td_cols & 0xff00) | ch;
                   break;
 
                 case 2:
-                  priv->td_rows = (priv->td_rows & 0x00FF) | (ch << 8);
+                  priv->td_rows = (priv->td_rows & 0x00ff) | (ch << 8);
                   break;
 
                 case 3:
-                  priv->td_rows = (priv->td_rows & 0xFF00) | ch;
+                  priv->td_rows = (priv->td_rows & 0xff00) | ch;
                   ninfo("NAWS: %d,%d", priv->td_cols, priv->td_rows);
                   break;
               }

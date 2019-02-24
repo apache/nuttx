@@ -310,8 +310,8 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
 
           skel_transmit(priv);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet.
+           * If not, return a non-zero value to terminate the poll.
            */
         }
     }
@@ -467,7 +467,8 @@ static void skel_receive(FAR struct skel_driver_s *priv)
           NETDEV_RXARP(&priv->sk_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->sk_dev.d_len > 0)
@@ -988,8 +989,8 @@ static int skel_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: skel_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure

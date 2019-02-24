@@ -366,9 +366,12 @@ static void write8(const uint8_t *ptr, int len);
 static void write16(const uint8_t *ptr, int len);
 static void write32(const uint8_t *ptr, int len);
 
-/* static uint16_t dm9x_readsrom(struct dm9x_driver_s *priv, int offset); */
-static uint16_t dm9x_phyread(struct dm9x_driver_s *priv, int reg);
-static void dm9x_phywrite(struct dm9x_driver_s *priv, int reg, uint16_t value);
+#if 0 /* Not used */
+static uint16_t dm9x_readsrom(FAR struct dm9x_driver_s *priv, int offset);
+#endif
+static uint16_t dm9x_phyread(FAR struct dm9x_driver_s *priv, int reg);
+static void dm9x_phywrite(FAR struct dm9x_driver_s *priv, int reg,
+              uint16_t value);
 
 #if defined(CONFIG_DM9X_CHECKSUM)
 static bool dm9x_rxchecksumready(uint8_t);
@@ -378,13 +381,13 @@ static bool dm9x_rxchecksumready(uint8_t);
 
 /* Common TX logic */
 
-static int  dm9x_transmit(struct dm9x_driver_s *priv);
-static int  dm9x_txpoll(struct net_driver_s *dev);
+static int  dm9x_transmit(FAR struct dm9x_driver_s *priv);
+static int  dm9x_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void dm9x_receive(struct dm9x_driver_s *priv);
-static void dm9x_txdone(struct dm9x_driver_s *priv);
+static void dm9x_receive(FAR struct dm9x_driver_s *priv);
+static void dm9x_txdone(FAR struct dm9x_driver_s *priv);
 
 static void dm9x_interrupt_work(FAR void *arg);
 static int  dm9x_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -399,21 +402,21 @@ static void dm9x_poll_expiry(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int dm9x_ifup(struct net_driver_s *dev);
-static int dm9x_ifdown(struct net_driver_s *dev);
+static int dm9x_ifup(FAR struct net_driver_s *dev);
+static int dm9x_ifdown(FAR struct net_driver_s *dev);
 
 static void dm9x_txavail_work(FAR void *arg);
-static int dm9x_txavail(struct net_driver_s *dev);
+static int dm9x_txavail(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int dm9x_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int dm9x_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Initialization functions */
 
-static void dm9x_bringup(struct dm9x_driver_s *priv);
-static void dm9x_reset(struct dm9x_driver_s *priv);
+static void dm9x_bringup(FAR struct dm9x_driver_s *priv);
+static void dm9x_reset(FAR struct dm9x_driver_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -609,7 +612,7 @@ static void write32(FAR const uint8_t *ptr, int len)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static uint16_t dm9x_readsrom(struct dm9x_driver_s *priv, int offset)
+static uint16_t dm9x_readsrom(FAR struct dm9x_driver_s *priv, int offset)
 {
   putreg(DM9X_EEPHYA, offset);
   putreg(DM9X_EEPHYC, DM9X_EEPHYC_ERPRR);
@@ -637,7 +640,7 @@ static uint16_t dm9x_readsrom(struct dm9x_driver_s *priv, int offset)
  *
  ****************************************************************************/
 
-static uint16_t dm9x_phyread(struct dm9x_driver_s *priv, int reg)
+static uint16_t dm9x_phyread(FAR struct dm9x_driver_s *priv, int reg)
 {
   /* Setup DM9X_EEPHYA, the EEPROM/PHY address register */
 
@@ -651,10 +654,12 @@ static uint16_t dm9x_phyread(struct dm9x_driver_s *priv, int reg)
 
   /* Return the data from the EEPROM/PHY data register pair */
 
-  return (((uint16_t)getreg(DM9X_EEPHYDH)) << 8) | (uint16_t)getreg(DM9X_EEPHYDL);
+  return (((uint16_t)getreg(DM9X_EEPHYDH)) << 8) |
+           (uint16_t)getreg(DM9X_EEPHYDL);
 }
 
-static void dm9x_phywrite(struct dm9x_driver_s *priv, int reg, uint16_t value)
+static void dm9x_phywrite(FAR struct dm9x_driver_s *priv, int reg,
+                          uint16_t value)
 {
   /* Setup DM9X_EEPHYA, the EEPROM/PHY address register */
 
@@ -717,10 +722,10 @@ static inline bool dm9x_rxchecksumready(uint8_t rxbyte)
  *
  ****************************************************************************/
 
-static int dm9x_transmit(struct dm9x_driver_s *priv)
+static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
 {
-  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-   * that can be 2 packets, otherwise it is a single packet.
+  /* Check if there is room in the DM90x0 to hold another packet.  In 100M
+   * mode, that can be 2 packets, otherwise it is a single packet.
    */
 
   if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
@@ -760,10 +765,11 @@ static int dm9x_transmit(struct dm9x_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->dm_txtimeout, DM6X_TXTIMEOUT, dm9x_txtimeout_expiry, 1,
-                     (wdparm_t)priv);
+      (void)wd_start(priv->dm_txtimeout, DM6X_TXTIMEOUT,
+                     dm9x_txtimeout_expiry, 1, (wdparm_t)priv);
       return OK;
     }
+
   return -EBUSY;
 }
 
@@ -771,8 +777,9 @@ static int dm9x_transmit(struct dm9x_driver_s *priv)
  * Name: dm9x_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the DM90x0 is reset
@@ -788,9 +795,9 @@ static int dm9x_transmit(struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-static int dm9x_txpoll(struct net_driver_s *dev)
+static int dm9x_txpoll(FAR struct net_driver_s *dev)
 {
-  struct dm9x_driver_s *priv = (struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -826,8 +833,9 @@ static int dm9x_txpoll(struct net_driver_s *dev)
 
           dm9x_transmit(priv);
 
-          /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-           * that can be 2 packets, otherwise it is a single packet.
+          /* Check if there is room in the DM90x0 to hold another packet.
+           * In 100M mode, that can be 2 packets, otherwise it is a single
+           * packet.
            */
 
           if (priv->dm_ntxpending > 1 || !priv->dm_b100M)
@@ -902,7 +910,8 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
         {
           /* Bad RX packet... update statistics */
 
-          nerr("ERROR: Received packet with errors: %02x\n", rx.desc.rx_status);
+          nerr("ERROR: Received packet with errors: %02x\n",
+               rx.desc.rx_status);
           NETDEV_RXERRORS(&priv->dm_dev);
 
           /* Drop this packet and continue to check the next packet */
@@ -912,7 +921,8 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 
       /* Also check if the packet is a valid size for the network configuration */
 
-      else if (rx.desc.rx_len < ETH_HDRLEN || rx.desc.rx_len > (CONFIG_NET_ETH_PKTSIZE + 2))
+      else if (rx.desc.rx_len < ETH_HDRLEN ||
+               rx.desc.rx_len > (CONFIG_NET_ETH_PKTSIZE + 2))
         {
           nerr("ERROR: RX length error\n");
           NETDEV_RXERRORS(&priv->dm_dev);
@@ -949,8 +959,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
               arp_ipin(&priv->dm_dev);
               ipv4_input(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should be
-               * sent out on the network, the field  d_len will set to a value > 0.
+              /* If the above function invocation resulted in data that should
+               * be sent out on the network, the field  d_len will set to a
+               * value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
@@ -987,8 +998,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 
               ipv6_input(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should be
-               * sent out on the network, the field  d_len will set to a value > 0.
+              /* If the above function invocation resulted in data that should
+               * be sent out on the network, the field  d_len will set to a
+               * value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
@@ -1021,8 +1033,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
               arp_arpin(&priv->dm_dev);
               NETDEV_RXARP(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should be
-               * sent out on the network, the field  d_len will set to a value > 0.
+              /* If the above function invocation resulted in data that should
+               * be sent out on the network, the field  d_len will set to a
+               * value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
@@ -1060,7 +1073,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-static void dm9x_txdone(struct dm9x_driver_s *priv)
+static void dm9x_txdone(FAR struct dm9x_driver_s *priv)
 {
   int  nsr;
 
@@ -1182,7 +1195,8 @@ static void dm9x_interrupt_work(FAR void *arg)
           up_mdelay(1);
         }
 
-      nerr("ERROR: delay: %dmS speed: %s\n", i, priv->dm_b100M ? "100M" : "10M");
+      nerr("ERROR: delay: %dmS speed: %s\n",
+           i, priv->dm_b100M ? "100M" : "10M");
     }
 
   /* Check if we received an incoming packet */
@@ -1382,8 +1396,8 @@ static void dm9x_poll_work(FAR void *arg)
 
   net_lock();
 
-  /* If the number of contiguous RX packets exceeds a threshold, reset the counter and
-   * re-enable RX interrupts
+  /* If the number of contiguous RX packets exceeds a threshold, reset the
+   * counter and re-enable RX interrupts
    */
 
   if (priv->ncrxpackets >= DM9X_CRXTHRES)
@@ -1392,8 +1406,8 @@ static void dm9x_poll_work(FAR void *arg)
       putreg(DM9X_IMR, DM9X_IMRENABLE);
     }
 
-  /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
-   * that can be 2 packets, otherwise it is a single packet.
+  /* Check if there is room in the DM90x0 to hold another packet.  In 100M
+   * mode, that can be 2 packets, otherwise it is a single packet.
    */
 
   if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
@@ -1453,7 +1467,7 @@ static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static inline void dm9x_phymode(struct dm9x_driver_s *priv)
+static inline void dm9x_phymode(FAR struct dm9x_driver_s *priv)
 {
   uint16_t phyreg0;
   uint16_t phyreg4;
@@ -1498,9 +1512,9 @@ static inline void dm9x_phymode(struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-static int dm9x_ifup(struct net_driver_s *dev)
+static int dm9x_ifup(FAR struct net_driver_s *dev)
 {
-  struct dm9x_driver_s *priv = (struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
   uint8_t netstatus;
   int i;
 
@@ -1564,9 +1578,9 @@ static int dm9x_ifup(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int dm9x_ifdown(struct net_driver_s *dev)
+static int dm9x_ifdown(FAR struct net_driver_s *dev)
 {
-  struct dm9x_driver_s *priv = (struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
   ninfo("Stopping\n");
@@ -1627,7 +1641,8 @@ static void dm9x_txavail_work(FAR void *arg)
        * mode, that can be 2 packets, otherwise it is a single packet.
        */
 
-      if (priv->dm_ntxpending < 1 || (priv->dm_b100M && priv->dm_ntxpending < 2))
+      if (priv->dm_ntxpending < 1 ||
+          (priv->dm_b100M && priv->dm_ntxpending < 2))
         {
           /* If so, then poll the network for new XMIT data */
 
@@ -1695,7 +1710,7 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int dm9x_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 
@@ -1710,8 +1725,8 @@ static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: dm9x_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1725,7 +1740,7 @@ static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int dm9x_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 
@@ -1752,7 +1767,7 @@ static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-static void dm9x_bringup(struct dm9x_driver_s *priv)
+static void dm9x_bringup(FAR struct dm9x_driver_s *priv)
 {
   ninfo("Initializing\n");
 
@@ -1849,7 +1864,7 @@ static void dm9x_bringup(struct dm9x_driver_s *priv)
  *
  ****************************************************************************/
 
-static void dm9x_reset(struct dm9x_driver_s *priv)
+static void dm9x_reset(FAR struct dm9x_driver_s *priv)
 {
   uint8_t save;
   int i;
@@ -1919,11 +1934,13 @@ int dm9x_initialize(void)
 
   vid = (((uint16_t)getreg(DM9X_VIDH)) << 8) | (uint16_t)getreg(DM9X_VIDL);
   pid = (((uint16_t)getreg(DM9X_PIDH)) << 8) | (uint16_t)getreg(DM9X_PIDL);
+
   ninfo("I/O base: %08x VID: %04x PID: %04x\n", CONFIG_DM9X_BASE, vid, pid);
 
   /* Check if a DM90x0 chip is recognized at this I/O base */
 
-  if (vid != DM9X_DAVICOMVID || (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
+  if (vid != DM9X_DAVICOMVID ||
+      (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
       nerr("ERROR: DM90x0 vendor/product ID not found at this base address\n");
       return -ENODEV;

@@ -132,7 +132,7 @@
 /* Receive/Phy Control Register */
 /* BANK 0 */
 
-#define RPC_REG                 0x000A
+#define RPC_REG                 0x000a
 #define RPC_SPEED               0x2000 /* When 1 PHY is in 100Mbps mode. */
 #define RPC_DPLX                0x1000 /* When 1 PHY is in Full-Duplex Mode */
 #define RPC_ANEG                0x0800 /* When 1 PHY is in Auto-Negotiate Mode */
@@ -150,12 +150,12 @@
                                 | (RPC_LED_100_10 << RPC_LSXA_SHFT) \
                                 | (RPC_LED_TX_RX << RPC_LSXB_SHFT))
 
-/* Bank 0 0x000C is reserved */
+/* Bank 0 0x000c is reserved */
 
 /* Bank Select Register */
 /* All Banks */
 
-#define BSR_REG                 0x000E
+#define BSR_REG                 0x000e
 
 /* Configuration Reg */
 /* BANK 1 */
@@ -186,12 +186,12 @@
 /* General Purpose Register */
 /* BANK 1 */
 
-#define  GP_REG                 0x010A
+#define  GP_REG                 0x010a
 
 /* Control Register */
 /* BANK 1 */
 
-#define CTL_REG                 0x010C
+#define CTL_REG                 0x010c
 #define CTL_RCV_BAD             0x4000 /* When 1 bad CRC packets are received */
 #define CTL_AUTO_RELEASE        0x0800 /* When 1 tx pages are released automatically */
 #define CTL_LE_ENABLE           0x0080 /* When 1 enables Link Error interrupt */
@@ -260,12 +260,12 @@
 /* Interrupt Status/Acknowledge Register */
 /* BANK 2 */
 
-#define INT_REG                 0x020C
+#define INT_REG                 0x020c
 
 /* Interrupt Mask Register */
 /* BANK 2 */
 
-#define IM_REG                  0x020D
+#define IM_REG                  0x020d
 #define IM_MDINT                0x80   /* PHY MI Register 18 Interrupt */
 #define IM_ERCV_INT             0x40   /* Early Receive Interrupt */
 #define IM_EPH_INT              0x20   /* Set by Etheret Protocol Handler section */
@@ -297,15 +297,15 @@
 /* BANK 3 */
 /* ( hi: chip id   low: rev # ) */
 
-#define REV_REG                 0x030A
+#define REV_REG                 0x030a
 
 /* Early RCV Register */
 /* BANK 3 */
 /* this is NOT on SMC9192 */
 
-#define ERCV_REG                0x030C
+#define ERCV_REG                0x030c
 #define ERCV_RCV_DISCRD         0x0080 /* When 1 discards a packet being received */
-#define ERCV_THRESHOLD          0x001F /* ERCV Threshold Mask */
+#define ERCV_THRESHOLD          0x001f /* ERCV Threshold Mask */
 
 /* External Register */
 /* BANK 7 */
@@ -347,8 +347,8 @@
  *  LAN83C183 == LAN91C111 Internal PHY
  */
 
-#define PHY_LAN83C183           0x0016F840
-#define PHY_LAN83C180           0x02821C50
+#define PHY_LAN83C183           0x0016f840
+#define PHY_LAN83C180           0x02821c50
 
 /* LPA full duplex flags */
 
@@ -373,7 +373,7 @@
 #define PHY_CFG1_CABLE          0x0080 /* 1=STP(150ohm), 0=UTP(100ohm) */
 #define PHY_CFG1_RLVL0          0x0040 /* 1=Rx Squelch level reduced by 4.5db */
 #define PHY_CFG1_TLVL_SHIFT     2      /* Transmit Output Level Adjust */
-#define PHY_CFG1_TLVL_MASK      0x003C
+#define PHY_CFG1_TLVL_MASK      0x003c
 #define PHY_CFG1_TRF_MASK       0x0003 /* Transmitter Rise/Fall time */
 
 /* PHY Configuration Register 2 */

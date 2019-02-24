@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* ENC28J60 Commands ********************************************************/
+
 /* A total of seven instructions are implemented on the ENC28J60.  Where:
  *
  *     aaaaaa is the 5-bit address of a control register, and
@@ -56,7 +57,7 @@
  */
 
 #define ENC_RCR             (0x00)    /* Read Control Register
-                                       * 000 | aaaaa | (Register value returned)) */
+                                       * 000 | aaaaa | (Register value returned) */
 #define ENC_RBM             (0x3a)    /* Read Buffer Memory
                                        * 001 | 11010 | (Read buffer data follows) */
 #define ENC_WCR             (0x40)    /* Write Control Register
@@ -71,6 +72,7 @@
                                        * 111 | 11111 | (No data) */
 
 /* Global Control Registers *************************************************/
+
 /* Control registers are accessed with the RCR, RBM, WCR, BFS, and BFC
  * commands. The following identifies all ENC28J60 control registers.  The
  * control register memory is partitioned into four banks, selectable by the
@@ -151,6 +153,7 @@
 #define ECON2_AUTOINC       (1 << 7) /* Bit 7: Automatic Buffer Pointer Increment Enable */
 
 /* Banked Control Registers *************************************************/
+
 /* The remaining control registers are identified with a a 5 bit address and
  * a bank selection.  We pack the bank number and an indication if this is
  * a MAC/PHY register access together with the control register address

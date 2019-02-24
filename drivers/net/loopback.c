@@ -459,8 +459,8 @@ static int lo_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: lo_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure

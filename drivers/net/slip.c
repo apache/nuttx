@@ -475,8 +475,8 @@ static void slip_txtask(int argc, FAR char *argv[])
 
       if (priv->bifup)
         {
-          /* Get exclusive access to the network (if it it is already being used
-           * slip_rxtask, then we have to wait).
+          /* Get exclusive access to the network (if it it is already being
+           * used slip_rxtask, then we have to wait).
            */
 
           slip_semtake(priv);
@@ -912,8 +912,8 @@ static int slip_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: slip_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure

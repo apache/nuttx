@@ -334,8 +334,10 @@ static int  enc_txpoll(struct net_driver_s *dev);
 /* Common RX logic */
 
 static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv);
-static void enc_rxldpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr);
-static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr);
+static void enc_rxldpkt(FAR struct enc_driver_s *priv,
+         FAR struct enc_descr_s *descr);
+static void enc_rxrmpkt(FAR struct enc_driver_s *priv,
+         FAR struct enc_descr_s *descr);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
 
 /* Interrupt handling */
@@ -529,7 +531,8 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
 {
 
   /* Check if a bank has to be set and if the bank setting has changed.
-   * For registers that are available on all banks, the bank command is set to 0.
+   * For registers that are available on all banks, the bank command is set
+   * to 0.
    */
 
   if (bank != 0 && bank != priv->bank)
@@ -576,7 +579,6 @@ static uint16_t enc_rdreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg)
 
   rddata = SPI_SEND(priv->spi, 0);        /* Clock in the low byte */
   rddata |= SPI_SEND(priv->spi, 0) << 8;  /* Clock in the high byte */
-
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET(0), false);
   enc_rddump(GETADDR(ctrlreg), rddata);
@@ -921,15 +923,15 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   /* "To read from a PHY register:
    *   1. Write the address of the PHY register to read from into the MIREGADR
-   *      register (Register 3-1). Make sure to also set reserved bit 8 of this
-   *      register.
+   *      register (Register 3-1). Make sure to also set reserved bit 8 of
+   *      this register.
    */
 
   enc_wrreg(priv, ENC_MIREGADR, phyaddr);
 
-  /*   2. Set the MIIRD bit (MICMD<0>, Register 3-2). The read operation begins
-   *      and the BUSY bit (MISTAT<0>, Register 3-3) is automatically set by
-   *      hardware.
+  /*   2. Set the MIIRD bit (MICMD<0>, Register 3-2). The read operation
+   *      begins and the BUSY bit (MISTAT<0>, Register 3-3) is automatically
+   *      set by hardware.
    */
 
   enc_bfs(priv, ENC_MICMD, MICMD_MIIRD);
@@ -948,8 +950,8 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
       enc_bfc(priv, ENC_MICMD, MICMD_MIIRD);
 
-      /* 5. Read the desired data from the MIRD register. For 8-bit interfaces,
-       *    the order that these bytes are read is unimportant."
+      /* 5. Read the desired data from the MIRD register. For 8-bit
+       *    interfaces, the order that these bytes are read is unimportant."
        */
 
       data = enc_rdreg(priv, ENC_MIRD);
@@ -993,13 +995,13 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
   enc_wrreg(priv, ENC_MIWR, phydata);
 
-  /*    3. Writing to the high byte of MIWR begins the MIIM transaction and the
-   *       BUSY (MISTAT<0>) bit is automatically set by hardware.
+  /*    3. Writing to the high byte of MIWR begins the MIIM transaction and
+   *       the BUSY (MISTAT<0>) bit is automatically set by hardware.
    *
-   * The PHY register is written after the MIIM operation completes, which takes
-   * 25.6 μs. When the write operation has completed, the BUSY bit clears
-   * itself. The host controller should not start any MIISCAN, MIWR or MIIRD
-   * operations while the BUSY bit is set.
+   * The PHY register is written after the MIIM operation completes, which
+   * takes 25.6 μs. When the write operation has completed, the BUSY bit
+   * clears itself. The host controller should not start any MIISCAN, MIWR
+   * or MIIRD operations while the BUSY bit is set.
    */
 
   up_udelay(26);
@@ -1076,8 +1078,8 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
  * Name: enc_txenqueue
  *
  * Description:
- *   Write packet from d_buf to the enc's SRAM if a free descriptor is available.
- *   The filled descriptor is enqueued for transmission.
+ *   Write packet from d_buf to the enc's SRAM if a free descriptor is
+ *   available.  The filled descriptor is enqueued for transmission.
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1399,7 +1401,8 @@ static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *descr)
+static void enc_rxrmpkt(FAR struct enc_driver_s *priv,
+                        FAR struct enc_descr_s *descr)
 {
   uint16_t addr;
 
@@ -1415,8 +1418,10 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, FAR struct enc_descr_s *d
       if (descr == (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue))
         {
           /* Wrap address properly around */
-          addr = (descr->addr - PKTMEM_RX_START + descr->len - 2 + PKTMEM_RX_SIZE)
-            % PKTMEM_RX_SIZE + PKTMEM_RX_START;
+
+          addr = (descr->addr - PKTMEM_RX_START + descr->len - 2 +
+                  PKTMEM_RX_SIZE)
+                 % PKTMEM_RX_SIZE + PKTMEM_RX_START;
 
           DEBUGASSERT(addr >= PKTMEM_RX_START &&  addr < PKTMEM_RX_END);
 
@@ -1503,7 +1508,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1545,7 +1551,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1585,7 +1592,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           enc_rxrmpkt(priv, descr);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1600,7 +1608,8 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           enc_rxrmpkt(priv, descr);
 
-          nerr("ERROR: Unsupported packet type dropped (%02x)\n", htons(BUF->type));
+          nerr("ERROR: Unsupported packet type dropped (%02x)\n",
+               htons(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 
@@ -1634,13 +1643,15 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   uint16_t curpkt;
   int pktcnt;
 
-  DEBUGASSERT(priv->nextpkt >= PKTMEM_RX_START && priv->nextpkt < PKTMEM_RX_END);
+  DEBUGASSERT(priv->nextpkt >= PKTMEM_RX_START &&
+              priv->nextpkt < PKTMEM_RX_END);
 
   /* Enqueue all pending packets to the RX queue until PKTCNT == 0 or
    * no more descriptors are available.
    */
 
-  pktcnt = (enc_rdreg(priv, ENC_ESTAT) & ESTAT_PKTCNT_MASK) >> ESTAT_PKTCNT_SHIFT;
+  pktcnt = (enc_rdreg(priv, ENC_ESTAT) & ESTAT_PKTCNT_MASK) >>
+           ESTAT_PKTCNT_SHIFT;
 
   while (pktcnt > 0)
     {
@@ -1651,8 +1662,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       enc_cmd(priv, ENC_WRXRDPT, curpkt);
 
       /* Read the next packet pointer and the 6 byte read status vector (RSV)
-       * at the beginning of the received packet. (ERXRDPT should auto-increment
-       * and wrap to the beginning of the read buffer as necessary)
+       * at the beginning of the received packet. (ERXRDPT should auto-
+       * increment and wrap to the beginning of the read buffer as necessary)
        */
 
       enc_rdbuffer(priv, rsv, 8);
@@ -1660,10 +1671,10 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       /* Decode the new next packet pointer, and the RSV.  The
        * RSV is encoded as:
        *
-       *  Bits 0-15:  Indicates length of the received frame. This includes the
-       *              destination address, source address, type/length, data,
-       *              padding and CRC fields. This field is stored in little-
-       *              endian format.
+       *  Bits 0-15:  Indicates length of the received frame. This includes
+       *              the destination address, source address, type/length,
+       *              data, padding and CRC fields. This field is stored in
+       *              little-endian format.
        *  Bits 16-47: Bit encoded RX status.
        */
 
@@ -1672,7 +1683,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       rxstat        = (uint32_t)rsv[7] << 24 | (uint32_t)rsv[6] << 16 |
                       (uint32_t)rsv[5] << 8  | (uint32_t)rsv[4];
 
-      ninfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
+      ninfo("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x "
+            "pktcnt: %d\n",
             priv->nextpkt, pktlen, rxstat, pktcnt);
 
       /* We enqueue the packet first and remove it later if its faulty.
@@ -1701,7 +1713,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       /* Check for a usable packet length (4 added for the CRC) */
 
-      else if (pktlen > (CONFIG_NET_ETH_PKTSIZE + 4) || pktlen <= (ETH_HDRLEN + 4))
+      else if (pktlen > (CONFIG_NET_ETH_PKTSIZE + 4) ||
+               pktlen <= (ETH_HDRLEN + 4))
         {
           nerr("ERROR: Bad packet size dropped (%d)\n", pktlen);
 
@@ -1721,7 +1734,8 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       /* Read out again, maybe there has another packet arrived */
 
-      pktcnt = (enc_rdreg(priv, ENC_ESTAT) & ESTAT_PKTCNT_MASK) >> ESTAT_PKTCNT_SHIFT;
+      pktcnt = (enc_rdreg(priv, ENC_ESTAT) & ESTAT_PKTCNT_MASK) >>
+               ESTAT_PKTCNT_SHIFT;
     }
 }
 
@@ -1731,14 +1745,14 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
  * Description:
  *   An interrupt was received indicating the abortion of an RX packet
  *
- *   "The receive abort interrupt occurs when the reception of a frame has been
- *   aborted. A frame being received is aborted when the Head Pointer attempts
- *   to overrun the Tail Pointer, or when the packet counter has reached FFh.
- *   In either case, the receive buffer is full and cannot fit the incoming
- *   frame, so the packet has been dropped.
- *   This interrupt does not occur when packets are dropped due to the receive
- *   filters rejecting a packet. The interrupt should be cleared by software
- *   once it has been serviced."
+ *   "The receive abort interrupt occurs when the reception of a frame has
+ *    been aborted. A frame being received is aborted when the Head Pointer
+ *    attempts to overrun the Tail Pointer, or when the packet counter has
+ *    reached FFh.  In either case, the receive buffer is full and cannot
+ *    fit the incoming frame, so the packet has been dropped.  This
+ *    interrupt does not occur when packets are dropped due to the receive
+ *    filters rejecting a packet. The interrupt should be cleared by
+ *    software once it has been serviced."
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1832,8 +1846,8 @@ static void enc_irqworker(FAR void *arg)
   enc_bfc(priv, ENC_EIE, EIE_INTIE);
 
   /* Loop until all interrupts have been processed (EIR==0).  Note that
-   * there is no infinite loop check... if there are always pending interrupts,
-   * we are just broken.
+   * there is no infinite loop check... if there are always pending
+   * interrupts, we are just broken.
    */
 
   while ((eir = enc_rdreg(priv, ENC_EIR) & EIR_ALLINTS) != 0)
@@ -1853,9 +1867,10 @@ static void enc_irqworker(FAR void *arg)
 
       /* LINKIF: The link change interrupt occurs when the PHY link status
        * changes. This flag is set by hardware when a link has either been
-       * established or broken between the device and a remote Ethernet partner.
-       * The current link status can be read from PHYLNK (ESTAT<8>). The
-       * interrupt should be cleared by software once it has been serviced.
+       * established or broken between the device and a remote Ethernet
+       * partner.  The current link status can be read from PHYLNK
+       * (ESTAT<8>).  The interrupt should be cleared by software once it
+       * has been serviced.
        *
        * To enable the link change interrupt, set LINKIE (EIE<11>).
        */
@@ -1881,11 +1896,11 @@ static void enc_irqworker(FAR void *arg)
       /* The receive abort interrupt occurs when the reception of a frame has
        * been aborted. A frame being received is aborted when the Head Pointer
        * attempts to overrun the Tail Pointer, or when the packet counter has
-       * reached FFh. In either case, the receive buffer is full and cannot fit
-       * the incoming frame, so the packet has been dropped. This interrupt does
-       * not occur when packets are dropped due to the receive filters rejecting
-       * a packet. The interrupt should be cleared by software once it has been
-       * serviced.
+       * reached FFh. In either case, the receive buffer is full and cannot
+       * fit the incoming frame, so the packet has been dropped.  This
+       * interrupt does not occur when packets are dropped due to the receive
+       * filters rejecting a packet. The interrupt should be cleared by
+       * software once it has been serviced.
        *
        * To enable the receive abort interrupt, set RXABTIE (EIE<1>).
        * The corresponding interrupt flag is RXABTIF (EIR<1>).
@@ -1899,12 +1914,12 @@ static void enc_irqworker(FAR void *arg)
         }
 
       /* The received packet pending interrupt occurs when one or more frames
-       * have been received and are ready for software processing. This flag is
-       * set when the PKTCNT<7:0> (ESTAT<7:0>) bits are non-zero. This interrupt
-       * flag is read-only and will automatically clear when the PKTCNT bits are
-       * decremented to zero. For more details about receiving and processing
-       * incoming frames, refer to Section 9.0 "Transmitting and Receiving
-       * Packets".
+       * have been received and are ready for software processing.  This flag
+       * is set when the PKTCNT<7:0> (ESTAT<7:0>) bits are non-zero.  This
+       * interrupt flag is read-only and will automatically clear when the
+       * PKTCNT bits are decremented to zero. For more details about
+       * receiving and processing incoming frames, refer to Section 9.0
+       * "Transmitting and Receiving Packets".
        *
        * To enable the received packet pending interrupt, set PKTIE (EIE<6>).
        * The corresponding interrupt flag is PKTIF (EIR<6>).
@@ -1922,12 +1937,13 @@ static void enc_irqworker(FAR void *arg)
 
 #ifdef CONFIG_NETDEV_STATISTICS
       /* The transmit abort interrupt occurs when the transmission of a frame
-       * has been aborted. An abort can occur for any of the following reasons:
+       * has been aborted. An abort can occur for any of the following
+       * reasons:
        *
        * * Excessive collisions occurred as defined by the Retransmission
        *   Maximum, MAXRET<3:0> bits (MACLCON<3:0>), setting. If this occurs,
-       *   the COLCNT bits (ETXSTAT<3:0>) will indicate the number of collisions
-       *   that occurred.
+       *   the COLCNT bits (ETXSTAT<3:0>) will indicate the number of
+       *   collisions that occurred.
        *
        * * A late collision occurred after 63 bytes were transmitted. If this
        *   occurs, LATECOL (ETXSTAT<10>) will be set.
@@ -1938,8 +1954,9 @@ static void enc_irqworker(FAR void *arg)
        * * The application aborted the transmission by clearing TXRTS
        *   (ECON1<1>).
        *
-       * The interrupt should be cleared by software once it has  been serviced.
-       * To enable the transmit abort interrupt, set TXABTIE (EIE<2>).
+       * The interrupt should be cleared by software once it has  been
+       * serviced.  To enable the transmit abort interrupt, set TXABTIE
+       * (EIE<2>).
        */
 
       if ((eir & EIR_TXABTIF) != 0) /* Transmit Abort */
@@ -2136,9 +2153,9 @@ static void enc_pollworker(FAR void *arg)
 
   if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
     {
-      /* Yes.. update TCP timing states and poll the network for new XMIT data. Hmmm..
-       * looks like a bug here to me.  Does this mean if there is a transmit
-       * in progress, we will missing TCP time state updates?
+      /* Yes.. update TCP timing states and poll the network for new XMIT
+       * data.  Hmmm.. looks like a bug here to me.  Does this mean if there
+       * is a transmit in progress, we will missing TCP time state updates?
        */
 
       (void)devif_timer(&priv->dev, enc_txpoll);
@@ -2189,9 +2206,10 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker, (FAR void *)priv, 0);
-  (void)ret;
+  ret = work_queue(ENCWORK, &priv->pollwork, enc_pollworker,
+                   (FAR void *)priv, 0);
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 }
 
 /****************************************************************************
@@ -2359,9 +2377,9 @@ static int enc_txavail(struct net_driver_s *dev)
   if (priv->ifstate == ENCSTATE_RUNNING)
     {
       /* Check if the hardware is ready to send another packet.  The driver
-       * starts a transmission process by setting ECON1.TXRTS. When the packet is
-       * finished transmitting or is aborted due to an error/cancellation, the
-       * ECON1.TXRTS bit will be cleared.
+       * starts a transmission process by setting ECON1.TXRTS.  When the
+       * packet is finished transmitting or is aborted due to an error/
+       * cancellation, the ECON1.TXRTS bit will be cleared.
        */
 
       if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
@@ -2422,8 +2440,8 @@ static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: enc_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2461,12 +2479,13 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  * Description:
  *   The ENCX24J600 may be placed in Power-Down mode through the command
- *   interface. In this mode, the device will no longer be able to transmit or
- *   receive any packets or perform DMA operations. However, most registers, and
- *   all buffer memories, retain their states and remain accessible by the host
- *   controller. The clock driver also remains operational, leaving the CLKOUT
- *   function unaffected. However, the MAC/MII and PHY registers all become
- *   inaccessible, and the PHY registers lose their current states.
+ *   interface. In this mode, the device will no longer be able to transmit
+ *   or receive any packets or perform DMA operations. However, most
+ *   registers, and all buffer memories, retain their states and remain
+ *   accessible by the host controller. The clock driver also remains
+ *   operational, leaving the CLKOUT function unaffected. However, the
+ *   MAC/MII and PHY registers all become inaccessible, and the PHY
+ *   registers lose their current states.
  *
  *   1. Turn off the Modular Exponentiation and AES engines by clearing
  *      CRYPTEN (EIR<15>).
@@ -2477,9 +2496,10 @@ static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *      that TXRTS (ECON1<1>) is clear.
  *   5. Power-down the PHY by setting the PSLEEP bit (PHCON1<11>).
  *   6. Power-down the Ethernet interface by clearing
- *      ETHEN and STRCH (ECON2<15,14>). Disabling the LED stretching behavior is
- *      necessary to ensure no LEDs get trapped in a perpetually illuminated
- *      state in the event they are being stretched on when ETHEN is cleared.
+ *      ETHEN and STRCH (ECON2<15,14>). Disabling the LED stretching behavior
+ *      is necessary to ensure no LEDs get trapped in a perpetually
+ *      illuminated state in the event they are being stretched on when ETHEN
+ *      is cleared.
  *
  * Note:
  *   Instead of providing a powerup function, the job is done by enc_reset.
@@ -2629,6 +2649,7 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 static void enc_resetbuffers(FAR struct enc_driver_s *priv)
 {
   int i;
+
   /* Initialize receive and transmit buffers  */
 
   priv->nextpkt = PKTMEM_RX_START;
@@ -2647,15 +2668,18 @@ static void enc_resetbuffers(FAR struct enc_driver_s *priv)
 
   for (i = 0; i < ENC_NTXDESCR; i++)
     {
-      priv->txdescralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
-      sq_addlast((FAR sq_entry_t *)&priv->txdescralloc[i], &priv->txfreedescr);
+      priv->txdescralloc[i].addr = PKTMEM_START +
+                                   PKTMEM_ALIGNED_BUFSIZE * i;
+      sq_addlast((FAR sq_entry_t *)&priv->txdescralloc[i],
+                 &priv->txfreedescr);
     }
 
   /* Receive descriptors addresses are set on reception */
 
   for (i = 0; i < CONFIG_ENCX24J600_NRXDESCR; i++)
     {
-      sq_addlast((FAR sq_entry_t *)&priv->rxdescralloc[i], &priv->rxfreedescr);
+      sq_addlast((FAR sq_entry_t *)&priv->rxdescralloc[i],
+                 &priv->rxfreedescr);
     }
 }
 
@@ -2729,8 +2753,8 @@ static int enc_reset(FAR struct enc_driver_s *priv)
    * (but with different PHANA_* settings) I did not investigate that further.
    */
 
-  /* "Typically, when using auto-negotiation, users should write 0x05E1 to PHANA
-   * to advertise flow control capability."
+  /* "Typically, when using auto-negotiation, users should write 0x05e1 to
+   * PHANA to advertise flow control capability."
    */
 
   enc_wrphy(priv, ENC_PHANA, PHANA_ADPAUS0 | PHANA_AD10FD | PHANA_AD10 |
@@ -2810,7 +2834,9 @@ int enc_initialize(FAR struct spi_dev_s *spi,
 
   /* Initialize the driver structure */
 
-  memset(g_encx24j600, 0, CONFIG_ENCX24J600_NINTERFACES*sizeof(struct enc_driver_s));
+  memset(g_encx24j600, 0,
+         CONFIG_ENCX24J600_NINTERFACES * sizeof(struct enc_driver_s));
+
   priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
   priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
@@ -2828,10 +2854,10 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->spi          = spi;           /* Save the SPI instance */
   priv->lower        = lower;         /* Save the low-level MCU interface */
 
-  /* The interface should be in the down state.  However, this function is called
-   * too early in initalization to perform the ENCX24J600 reset in enc_ifdown.  We
-   * are depending upon the fact that the application level logic will call enc_ifdown
-   * later to reset the ENCX24J600.
+  /* The interface should be in the down state.  However, this function is
+   * called too early in initalization to perform the ENCX24J600 reset in
+   * enc_ifdown.  We are depending upon the fact that the application level
+   * logic will call enc_ifdown later to reset the ENCX24J600.
    */
 
   priv->ifstate = ENCSTATE_UNINIT;

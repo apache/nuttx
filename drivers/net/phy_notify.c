@@ -65,6 +65,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The current design artificially limits the number of notification client.
  * This is an arbitrary limit.  If you exceed it, simply adjust the affected
  * areas.
@@ -77,6 +78,7 @@
 #endif
 
 /* Debug ********************************************************************/
+
 /* Extra, in-depth debug output that is only available if
  * CONFIG_NETDEV_PHY_DEBUG us defined.
  */
@@ -92,6 +94,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This describes the state of one notification.  There may be up to
  * CONFIG_PHY_NOTIFICATION_NCLIENTS such notifications active simultaneously.
  *
@@ -121,6 +124,7 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Serializes access to the g_notify_clients array */
 
 static sem_t g_notify_clients_sem = SEM_INITIALIZER(1);

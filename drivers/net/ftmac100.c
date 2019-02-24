@@ -154,8 +154,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The ftmac100_driver_s encapsulates all state information for a single hardware
- * interface
+/* The ftmac100_driver_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct ftmac100_driver_s
@@ -230,9 +230,11 @@ static void ftmac100_txavail_work(FAR void *arg);
 static int ftmac100_txavail(FAR struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int ftmac100_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int ftmac100_addmac(FAR struct net_driver_s *dev,
+                           FAR const uint8_t *mac);
 #ifdef CONFIG_NET_MCASTGROUP
-static int ftmac100_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int ftmac100_rmmac(FAR struct net_driver_s *dev,
+                          FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
 static void ftmac100_ipv6multicast(FAR struct ftmac100_driver_s *priv);
@@ -283,12 +285,10 @@ ftmac100_current_clean_txdes(FAR struct ftmac100_driver_s *priv)
 
 static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 {
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
   FAR struct ftmac100_txdes_s *txdes;
   int len = priv->ft_dev.d_len;
-//irqstate_t flags;
-//flags = enter_critical_section();
-//ninfo("flags=%08x\n", flags);
 
   txdes = ftmac100_current_txdes(priv);
 
@@ -301,7 +301,6 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 
   /* Send the packet: address=priv->ft_dev.d_buf, length=priv->ft_dev.d_len */
 
-//memcpy((void *)txdes->txdes2, priv->ft_dev.d_buf, len);
   txdes->txdes2  = (unsigned int)priv->ft_dev.d_buf;
   txdes->txdes1 &= FTMAC100_TXDES1_EDOTR;
   txdes->txdes1 |= (FTMAC100_TXDES1_FTS |
@@ -326,7 +325,6 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   (void)wd_start(priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
                  ftmac100_txtimeout_expiry, 1, (wdparm_t)priv);
 
-//leave_critical_section(flags);
   return OK;
 }
 
@@ -334,9 +332,9 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
  * Name: ftmac100_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets
- *   ready to send.  This is a callback from devif_poll().  devif_poll() may
- *   be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is
@@ -358,7 +356,8 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 
 static int ftmac100_txpoll(struct net_driver_s *dev)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -394,8 +393,8 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
 
           ftmac100_transmit(priv);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet.  If
+           * not, return a non-zero value to terminate the poll.
            */
         }
     }
@@ -426,7 +425,8 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
 
 static void ftmac100_reset(FAR struct ftmac100_driver_s *priv)
 {
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
 
   ninfo("%s(): iobase=%p\n", __func__, iobase);
 
@@ -455,7 +455,8 @@ static void ftmac100_reset(FAR struct ftmac100_driver_s *priv)
 
 static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 {
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
   FAR struct ftmac100_txdes_s *txdes = priv->txdes;
   FAR struct ftmac100_rxdes_s *rxdes = priv->rxdes;
   FAR unsigned char *kmem;
@@ -500,11 +501,9 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
       txdes[i].txdes1 = 0;
       txdes[i].txdes2 = 0;
       txdes[i].txdes3 = 0;
-//    txdes[i].txdes3 = (unsigned int)(txdes + i + 1); /* Next ring */
     }
 
   txdes[CONFIG_FTMAC100_TX_DESC - 1].txdes1 = FTMAC100_TXDES1_EDOTR;
-//txdes[CONFIG_FTMAC100_TX_DESC - 1].txdes3 = (unsigned int)txdes; /* Next ring */
 
   /* transmit ring */
 
@@ -516,23 +515,26 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 
   putreg32 ((unsigned int)rxdes, &iobase->rxr_badr);
 
-  /* set RXINT_THR and TXINT_THR */
+#if 0
+  /* Set RXINT_THR and TXINT_THR */
 
-//putreg32 (FTMAC100_ITC_RXINT_THR(1) | FTMAC100_ITC_TXINT_THR(1), &iobase->itc);
+  putreg32(FTMAC100_ITC_RXINT_THR(1) | FTMAC100_ITC_TXINT_THR(1),
+           &iobase->itc);
+#endif
 
-  /* poll receive descriptor automatically */
+  /* Poll receive descriptor automatically */
 
   putreg32 (FTMAC100_APTC_RXPOLL_CNT(1), &iobase->aptc);
 
-#if 1
   /* Set DMA burst length */
 
   putreg32 (FTMAC100_DBLAC_RXFIFO_LTHR(2) |
             FTMAC100_DBLAC_RXFIFO_HTHR(6) |
             FTMAC100_DBLAC_RX_THR_EN, &iobase->dblac);
 
-//putreg32 (getreg32(&iobase->fcr) | 0x1, &iobase->fcr);
-//putreg32 (getreg32(&iobase->bpr) | 0x1, &iobase->bpr);
+#if 0
+  putreg32 (getreg32(&iobase->fcr) | 0x1, &iobase->fcr);
+  putreg32 (getreg32(&iobase->bpr) | 0x1, &iobase->bpr);
 #endif
 
   /* enable transmitter, receiver */
@@ -562,7 +564,8 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
  *
  ****************************************************************************/
 
-static uint32_t ftmac100_mdio_read(FAR struct ftmac100_register_s *iobase, int reg)
+static uint32_t ftmac100_mdio_read(FAR struct ftmac100_register_s *iobase,
+                                   int reg)
 {
   int i;
   uint32_t phycr = FTMAC100_PHYCR_PHYAD(1)   |
@@ -605,7 +608,8 @@ static uint32_t ftmac100_mdio_read(FAR struct ftmac100_register_s *iobase, int r
 static void ftmac100_set_mac(FAR struct ftmac100_driver_s *priv,
                              FAR const unsigned char *mac)
 {
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
   unsigned int maddr = mac[0] << 8 | mac[1];
   unsigned int laddr = mac[2] << 24 | mac[3] << 16 | mac[4] << 8 | mac[5];
 
@@ -656,7 +660,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
 
           rxdes->rxdes0 = FTMAC100_RXDES0_RXDMA_OWN;
 
-          priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+          priv->rx_pointer = (priv->rx_pointer + 1) &
+                             (CONFIG_FTMAC100_RX_DESC - 1);
           rxdes = ftmac100_current_rxdes(priv);
         }
 
@@ -671,7 +676,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       data = (uint8_t *)rxdes->rxdes2;
 
       ninfo ("RX buffer %d (%08x), %x received (%d)\n",
-             priv->rx_pointer, data, len, (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
+             priv->rx_pointer, data, len,
+             (rxdes->rxdes0 & FTMAC100_RXDES0_LRS));
 
       /* Copy the data data from the hardware to priv->ft_dev.d_buf.  Set
        * amount of data in priv->ft_dev.d_len
@@ -701,7 +707,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
           ipv4_input(&priv->ft_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->ft_dev.d_len > 0)
@@ -738,7 +745,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
           ipv6_input(&priv->ft_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->ft_dev.d_len > 0)
@@ -771,7 +779,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
           arp_arpin(&priv->ft_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field  d_len will set to a value
+           * > 0.
            */
 
           if (priv->ft_dev.d_len > 0)
@@ -780,7 +789,8 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
             }
         }
 #endif
-      priv->rx_pointer = (priv->rx_pointer + 1) & (CONFIG_FTMAC100_RX_DESC - 1);
+      priv->rx_pointer = (priv->rx_pointer + 1) &
+                         (CONFIG_FTMAC100_RX_DESC - 1);
 
       rxdes->rxdes1 &= FTMAC100_RXDES1_EDORR;
       rxdes->rxdes1 |= FTMAC100_RXDES1_RXBUF_SIZE(RX_BUF_SIZE);
@@ -832,8 +842,8 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
       txdes->txdes2 = 0;
       txdes->txdes3 = 0;
 
-      priv->tx_clean_pointer = (priv->tx_clean_pointer + 1) & (CONFIG_FTMAC100_TX_DESC - 1);
-
+      priv->tx_clean_pointer = (priv->tx_clean_pointer + 1) &
+                               (CONFIG_FTMAC100_TX_DESC - 1);
       priv->tx_pending--;
     }
 
@@ -871,8 +881,10 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 
 static void ftmac100_interrupt_work(FAR void *arg)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)arg;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
   unsigned int status;
   unsigned int phycr;
 
@@ -903,9 +915,9 @@ static void ftmac100_interrupt_work(FAR void *arg)
       ftmac100_receive(priv);
     }
 
-  /* Check if a packet transmission just completed.  If so, call ftmac100_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
+  /* Check if a packet transmission just completed.  If so, call
+   * ftmac100_txdone().  This may disable further Tx interrupts if there are
+   * no pending transmissions.
    */
 
   if (status & (FTMAC100_INT_XPKT_OK))
@@ -939,9 +951,9 @@ static void ftmac100_interrupt_work(FAR void *arg)
         REG(0x98400030), REG(0x98400034), REG(0x98400038), REG(0x98400004),
         REG(0x98400000), REG(0x98400008));
   ninfo("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-        REG(0x98800014), REG(0x98800004), REG(0x9880000C), REG(0x98800010));
+        REG(0x98800014), REG(0x98800004), REG(0x9880000c), REG(0x98800010));
   ninfo("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n", REG(0x98800034),
-        REG(0x98800024), REG(0x9880002C), REG(0x98800020));
+        REG(0x98800024), REG(0x9880002c), REG(0x98800020));
   ninfo("=============================================================\n");
 #endif
 
@@ -976,7 +988,8 @@ out:
 static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ftmac100_driver_s *priv = &g_ftmac100[0];
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
@@ -1006,7 +1019,8 @@ static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(FTMAWORK, &priv->ft_irqwork, ftmac100_interrupt_work, priv, 0);
+  work_queue(FTMAWORK, &priv->ft_irqwork, ftmac100_interrupt_work,
+             priv, 0);
 
   return OK;
 }
@@ -1108,9 +1122,9 @@ static void ftmac100_poll_work(FAR void *arg)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
+  /* If so, update TCP timing states and poll the network for new XMIT data.
+   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
+   * progress, we will missing TCP time state updates?
    */
 
   (void)devif_timer(&priv->ft_dev, ftmac100_txpoll);
@@ -1168,7 +1182,8 @@ static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
 
 static int ftmac100_ifup(struct net_driver_s *dev)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
@@ -1228,8 +1243,10 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
 static int ftmac100_ifdown(struct net_driver_s *dev)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -1316,7 +1333,8 @@ static void ftmac100_txavail_work(FAR void *arg)
 
 static int ftmac100_txavail(struct net_driver_s *dev)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1327,7 +1345,8 @@ static int ftmac100_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(FTMAWORK, &priv->ft_pollwork, ftmac100_txavail_work, priv, 0);
+      work_queue(FTMAWORK, &priv->ft_pollwork, ftmac100_txavail_work,
+                 priv, 0);
     }
 
   return OK;
@@ -1354,9 +1373,13 @@ static int ftmac100_txavail(struct net_driver_s *dev)
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
 static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
-  uint32_t hash_value, hash_reg, hash_bit;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
+  uint32_t hash_value;
+  uint32_t hash_reg;
+  uint32_t hash_bit;
   uint32_t mta;
 
   /* Calculate Ethernet CRC32 for MAC */
@@ -1391,8 +1414,8 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: ftmac100_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1408,9 +1431,13 @@ static int ftmac100_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int ftmac100_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)dev->d_private;
-  FAR struct ftmac100_register_s *iobase = (FAR struct ftmac100_register_s *)priv->iobase;
-  uint32_t hash_value, hash_reg, hash_bit;
+  FAR struct ftmac100_driver_s *priv =
+    (FAR struct ftmac100_driver_s *)dev->d_private;
+  FAR struct ftmac100_register_s *iobase =
+    (FAR struct ftmac100_register_s *)priv->iobase;
+  uint32_t hash_value;
+  uint32_t hash_reg;
+  uint32_t hash_bit;
   uint32_t mta;
 
   /* Calculate Ethernet CRC32 for MAC */
@@ -1571,7 +1598,8 @@ int ftmac100_initialize(int intf)
 
   /* Read the MAC address from the hardware into priv->ft_dev.d_mac.ether.ether_addr_octet */
 
-  memcpy(priv->ft_dev.d_mac.ether.ether_addr_octet, (void *)(CONFIG_FTMAC100_MAC0_ENV_ADDR), 6);
+  memcpy(priv->ft_dev.d_mac.ether.ether_addr_octet,
+         (FAR void *)(CONFIG_FTMAC100_MAC0_ENV_ADDR), 6);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

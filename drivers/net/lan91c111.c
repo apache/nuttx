@@ -486,7 +486,8 @@ static int lan91c111_transmit(FAR struct net_driver_s *dev)
   lan91c111_command_mmu(priv, MC_ENQUEUE);
 
   /* Assume the transmission no error, otherwise
-   * revert the increment in lan91c111_txdone */
+   * revert the increment in lan91c111_txdone.
+   */
 
   NETDEV_TXDONE(dev);
   return OK;
@@ -548,8 +549,8 @@ static int lan91c111_txpoll(FAR struct net_driver_s *dev)
 
           lan91c111_transmit(dev);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet.  If
+           * not, return a non-zero value to terminate the poll.
            */
 
           return !(getreg16(priv, MIR_REG) & MIR_FREE_MASK);
@@ -632,7 +633,8 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
 {
   FAR struct lan91c111_driver_s *priv = dev->d_private;
   FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
-  uint16_t status, length;
+  uint16_t status;
+  uint16_t length;
 
   /* If the RX FIFO is empty then nothing to do */
 
@@ -974,7 +976,8 @@ static int lan91c111_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(LAN91C111_WORK, &priv->irqwork, lan91c111_interrupt_work, dev, 0);
+  work_queue(LAN91C111_WORK, &priv->irqwork, lan91c111_interrupt_work,
+             dev, 0);
   return OK;
 }
 
@@ -1016,9 +1019,9 @@ static void lan91c111_poll_work(FAR void *arg)
 
   if (getreg16(priv, MIR_REG) & MIR_FREE_MASK)
     {
-      /* If so, update TCP timing states and poll the network for new XMIT data.
-       * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-       * progress, we will missing TCP time state updates?
+      /* If so, update TCP timing states and poll the network for new XMIT
+       * data.  Hmmm.. might be bug here.  Does this mean if there is a
+       * transmit in progress, we will missing TCP time state updates?
        */
 
       devif_timer(dev, lan91c111_txpoll);
@@ -1297,8 +1300,10 @@ static int lan91c111_txavail(FAR struct net_driver_s *dev)
 static uint32_t lan91c111_crc32(FAR const uint8_t *src, size_t len)
 {
   uint32_t crc = 0xffffffff;
-  uint8_t carry, temp;
-  size_t i, j;
+  uint8_t carry;
+  uint8_t temp;
+  size_t i;
+  size_t j;
 
   for (i = 0; i < len; i++)
     {
@@ -1323,7 +1328,8 @@ static int lan91c111_addmac(FAR struct net_driver_s *dev,
                             FAR const uint8_t *mac)
 {
   FAR struct lan91c111_driver_s *priv = dev->d_private;
-  uint16_t off, bit;
+  uint16_t off;
+  uint16_t bit;
   uint32_t hash;
 
   /* Calculate Ethernet CRC32 for MAC */
@@ -1372,7 +1378,8 @@ static int lan91c111_rmmac(FAR struct net_driver_s *dev,
                            FAR const uint8_t *mac)
 {
   FAR struct lan91c111_driver_s *priv = dev->d_private;
-  uint16_t off, bit;
+  uint16_t off;
+  uint16_t bit;
   uint32_t hash;
 
   /* Calculate Ethernet CRC32 for MAC */
