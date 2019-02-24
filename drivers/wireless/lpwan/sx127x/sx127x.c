@@ -57,15 +57,13 @@
 #include <nuttx/wireless/lpwan/sx127x.h>
 #include "sx127x.h"
 
-/* This driver is WIP and depends on EXPERIMENTA flag mainly because
- * the communication betweew modules (RX+TX) hasn't been fully tested.
- *
- * TODO:
+/* TODO:
+ *   - OOK communication (RX+TX) deosnt work yet
  *   - Channel Activity Detection (CAD) for LORA
  *   - frequency hopping for LORA and FSK/OOK
  *   - modulation shaping for FSK/OOK
  *   - support for long payload for FSK/OOK (len > FIFO size)
- *   - transmitter/receiver configuration
+ *   - address filtering for FSK/OOK
  */
 
 /****************************************************************************
@@ -78,31 +76,30 @@
 
 /* Configuration ************************************************************/
 
-/* Default SPI bus frequency (in Hz) up to 10MHz */
-
-#define SX127X_SPIFREQ                (1000000)
-#define SX127X_MODULATION_DEFAULT     SX127X_MODULATION_FSK
-
 /* Device name */
 
 #define SX127X_DEV_NAME               "/dev/sx127x"
-
-/* Default modulation */
-
-#define SX127X_MODULATION_DEFAULT     SX127X_MODULATION_FSK
 
 /* Payload fixlen default */
 
 #define SX127X_RX_FIXLEN_DEFAULT      (0xff)
 
-/* Calibration frequency (TODO: Kconfig) */
+/* Calibration frequency */
 
-#define SX127X_FREQ_CALIBRATION       (868000000)
+#define SX127X_FREQ_CALIBRATION       (CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT)
+
+/* FSK default frequency deviation is 5kHz */
+
+#define SX127X_FDEV_DEFAULT           (5000)
+
+/* FSK/OOK bitrate default */
+
+#define SX127X_FOM_BITRATE_DEFAULT    (4800)
 
 /* FSK/OOK bandwidth default */
 
-#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_2p6kHz
-#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_2p6kHz
+#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_15p6kHz
+#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_20p8kHz
 
 /* Default LORA bandwidth */
 
@@ -112,10 +109,6 @@
 
 #define SX127X_LRM_SF_DEFAULT         (7)
 
-/* Disable implict header for LORA at default */
-
-#define SX127X_LRM_IMPLICTHDR_DEFAULT (false)
-
 /* FSK/OOK RX/TX FIFO size (two separate FIFOs) */
 
 #define SX127X_FOM_FIFO_LEN           (64)
@@ -123,14 +116,6 @@
 /* LORA RX/TX FIFO size (one FIFO) */
 
 #define SX127X_LRM_FIFO_LEN           (256)
-
-/* FSK default frequency deviation is 5 kHz */
-
-#define SX127X_FREQ_DEV_DEFAULT       (5000)
-
-/* Default preamble length for LORA and FSK/OOK */
-
-#define SX127X_PREAMBLE_LEN_DEFAULT   (8)
 
 /* LORA maximum payload length */
 
@@ -158,8 +143,11 @@
 
 /* Some assertions */
 
-#if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
-#  warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK
+#  warning OOK support is not complete, RX+TX doesnt work yet!
+#  if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
+#    warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
+#  endif
 #endif
 
 /****************************************************************************
@@ -240,7 +228,10 @@ struct sx127x_fskook_s
   uint32_t fdev;                /* Frequency deviation */
   uint8_t  rx_bw;               /* RX bandwidth */
   uint8_t  afc_bw;              /* AFC bandwidth */
+  uint8_t  addr_node;           /* Node address used in address filtering */
+  uint8_t  addr_brdcast;        /* Broadcast address used int address filtering */
   bool     fixlen;              /* Fix length */
+  bool     addr_fltr;           /* TODO: Address filtering */
   bool     seqon;               /* Sequencer enabled */
 };
 #endif
@@ -294,6 +285,8 @@ struct sx127x_dev_s
 #ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
   sem_t    tx_sem;                /* Wait for availability of send data */
   uint32_t tx_timeout;            /* TX timeout (not supported) */
+  int8_t   power;                 /* TX power */
+  bool     pa_force;              /* Force PA BOOST pin select */
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
   uint32_t rx_timeout;            /* RX timeout (not supported) */
@@ -353,7 +346,7 @@ static void sx127x_lora_syncword_get(FAR struct sx127x_dev_s *dev,
 static int8_t sx127x_lora_snr_get(FAR struct sx127x_dev_s *dev);
 static int16_t sx127x_lora_pckrssi_get(FAR struct sx127x_dev_s *dev,
                                        int8_t snr);
-static int sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev);
+static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev);
 #  endif
 #  ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
 static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
@@ -383,7 +376,7 @@ static int sx127x_fskook_syncword_set(FAR struct sx127x_dev_s *dev,
 static void sx127x_fskook_syncword_get(FAR struct sx127x_dev_s *dev,
                                        FAR uint8_t *sw, FAR uint8_t *len);
 #  ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-static int sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev);
+static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev);
 #  endif
 #  ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
 static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
@@ -411,6 +404,8 @@ static uint8_t sx127x_modulation_get(FAR struct sx127x_dev_s *dev);
 static int16_t sx127x_rssi_get(FAR struct sx127x_dev_s *dev);
 static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq);
 static uint32_t sx127x_frequency_get(FAR struct sx127x_dev_s *dev);
+static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power);
+static int8_t sx127x_power_get(FAR struct sx127x_dev_s *dev);
 static void sx127x_preamble_set(FAR struct sx127x_dev_s *dev, uint32_t len);
 static int sx127x_preamble_get(FAR struct sx127x_dev_s *dev);
 static int sx127x_opmode_set(FAR struct sx127x_dev_s *dev, uint8_t opmode);
@@ -498,7 +493,7 @@ static void sx127x_lock(FAR struct spi_dev_s *spi)
   SPI_LOCK(spi, 1);
   SPI_SETBITS(spi, 8);
   SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETFREQUENCY(spi, SX127X_SPIFREQ);
+  SPI_SETFREQUENCY(spi, CONFIG_LPWAN_SX127X_SPIFREQ);
 }
 
 /****************************************************************************
@@ -797,10 +792,6 @@ static int sx127x_open(FAR struct file *filep)
       goto errout;
     }
 
-  /* Dump registers after initial configuration */
-
-  sx127x_dumpregs(dev);
-
   dev->nopens++;
 
 errout:
@@ -949,7 +940,45 @@ static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
+  wlinfo("buflen=%d \n", buflen);
+
+  /* Change mode to STANDBY */
+
+  sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
+
+  /* Initialize TX mode */
+
+  ret = sx127x_opmode_init(dev, SX127X_OPMODE_TX);
+  if (ret < 0)
+    {
+      /* Restore IDLE mode settings */
+
+      sx127x_opmode_init(dev, dev->idle);
+
+      wlerr("Failed to initialize TX mode!\n");
+
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Call modulation specific send */
+
   ret = dev->ops.send(dev, (uint8_t *)buffer, buflen);
+
+  /* Change mode to TX to start data transfer */
+
+  sx127x_opmode_set(dev, SX127X_OPMODE_TX);
+
+  /* Wait for TXDONE */
+
+  nxsem_wait(&dev->tx_sem);
+
+errout:
+  /* Change mode to IDLE after transfer
+   * NOTE: if sequencer for FSK/OOK is ON - this should be done automatically
+   */
+
+  sx127x_opmode_set(dev, dev->idle);
 
   nxsem_post(&dev->dev_sem);
 
@@ -1010,10 +1039,32 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case WLIOC_GETRADIOFREQ:
         {
-          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
           *ptr = sx127x_frequency_get(dev);
+          break;
+        }
+
+      /* Set TX power. arg: Pointer to int8_t power value */
+
+      case WLIOC_SETTXPOWER:
+        {
+          FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+
+          sx127x_power_set(dev, *ptr);
+          break;
+        }
+
+      /* Get current TX power. arg: Pointer to int8_t power value */
+
+      case WLIOC_GETTXPOWER:
+        {
+          FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr != NULL);
+
+          *ptr = sx127x_power_get(dev);
           break;
         }
 
@@ -1263,20 +1314,10 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
   wlinfo("ISR0: IRQ = 0x%02x\n", irq);
 
-#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-  /* RX data valid ? */
-
-  if (dev->opmode == SX127X_OPMODE_TX && dev->crcon == true &&
-      (irq & SX127X_LRM_IRQ_PAYLOADCRCERR) != 0)
-    {
-      data_valid = false;
-    }
-#endif
-
   switch (dev->opmode)
     {
 #ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
-      /* TX DONE for FSK/OOK and LORA */
+      /* TX DONE */
 
       case SX127X_OPMODE_TX:
         {
@@ -1297,25 +1338,34 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
       case SX127X_OPMODE_RX:
       case SX127X_OPMODE_RXSINGLE:
         {
+          /* REVISIT: Always check PAYLOADCRCERR, even if CRCONPAYLOAD not set */
+
+          if ((irq & SX127X_LRM_IRQ_PAYLOADCRCERR) != 0)
+            {
+              data_valid = false;
+            }
+
           if (data_valid)
             {
-              sx127x_lora_rxhandle(dev);
-
-#ifndef CONFIG_DISABLE_POLL
-              if (dev->pfd)
+              ret = sx127x_lora_rxhandle(dev);
+              if (ret > 0)
                 {
-                  /* Data available for input */
+#ifndef CONFIG_DISABLE_POLL
+                  if (dev->pfd)
+                    {
+                      /* Data available for input */
 
-                  dev->pfd->revents |= POLLIN;
+                      dev->pfd->revents |= POLLIN;
 
-                  wlinfo("Wake up polled fd\n");
-                  nxsem_post(dev->pfd->sem);
-                }
+                      wlinfo("Wake up polled fd\n");
+                      nxsem_post(dev->pfd->sem);
+                    }
 #endif  /* CONFIG_DISABLE_POLL */
 
-              /* Wake-up any thread waiting in recv */
+                  /* Wake-up any thread waiting in recv */
 
-              nxsem_post(&dev->rx_sem);
+                  nxsem_post(&dev->rx_sem);
+                }
             }
           else
             {
@@ -1323,6 +1373,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
               wlinfo("Invalid LORA RX data!\n");
             }
+
 
           /* After receiving the data in RXSINGLE mode the chip goes into
            * STANBY mode
@@ -1335,8 +1386,8 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
           /* Clear RX interrupts  */
 
-          irq = SX127X_LRM_IRQ_RXDONE | SX127X_LRM_IRQ_PAYLOADCRCERR |
-                SX127X_LRM_IRQ_VALIDHDR;
+          irq = (SX127X_LRM_IRQ_RXDONE | SX127X_LRM_IRQ_PAYLOADCRCERR |
+                 SX127X_LRM_IRQ_VALIDHDR);
           break;
         }
 #endif  /* CONFIG_LPWAN_SX127X_RXSUPPORT */
@@ -1357,7 +1408,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
       default:
         {
-          wlwarn("WARNING: Interrupt not processed\n");
+          wlwarn("WARNING: Interrupt not processed, opmode=%d\n", dev->opmode);
           ret = -EINVAL;
           break;
         }
@@ -1403,20 +1454,10 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
   wlinfo("ISR0: IRQ1 = 0x%02x, IRQ2 = 0x%02x\n", irq1, irq2);
 
-#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-  /* RX data valid ? */
-
-  if (dev->opmode == SX127X_OPMODE_RX && dev->crcon == true &&
-      (irq2 & SX127X_FOM_IRQ2_CRCOK) == 0)
-    {
-      data_valid = false;
-    }
-#endif
-
   switch (dev->opmode)
     {
 #ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
-      /* TX DONE for FSK/OOK and LORA */
+      /* TX DONE */
 
       case SX127X_OPMODE_TX:
         {
@@ -1432,27 +1473,36 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
       case SX127X_OPMODE_RX:
         {
+          /* RX data valid ? */
+
+          if (dev->crcon == true && (irq2 & SX127X_FOM_IRQ2_CRCOK) == 0)
+            {
+              data_valid = false;
+            }
+
           if (data_valid == true)
             {
               /* RX data valid */
 
-              sx127x_fskook_rxhandle(dev);
-
-#ifndef CONFIG_DISABLE_POLL
-              if (dev->pfd)
+              ret = sx127x_fskook_rxhandle(dev);
+              if (ret > 0)
                 {
-                  /* Data available for input */
+#ifndef CONFIG_DISABLE_POLL
+                  if (dev->pfd)
+                    {
+                      /* Data available for input */
 
-                  dev->pfd->revents |= POLLIN;
+                      dev->pfd->revents |= POLLIN;
 
-                  wlinfo("Wake up polled fd\n");
-                  nxsem_post(dev->pfd->sem);
-                }
+                      wlinfo("Wake up polled fd\n");
+                      nxsem_post(dev->pfd->sem);
+                    }
 #endif  /* CONFIG_DISABLE_POLL */
 
-              /* Wake-up any thread waiting in recv */
+                  /* Wake-up any thread waiting in recv */
 
-              nxsem_post(&dev->rx_sem);
+                  nxsem_post(&dev->rx_sem);
+                }
             }
           else
             {
@@ -1529,11 +1579,11 @@ static int sx127x_irq0handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct sx127x_dev_s *dev = (FAR struct sx127x_dev_s *)arg;
 
-  DEBUGASSERT(arg);
+  DEBUGASSERT(dev != NULL);
 
-  work_queue(HPWORK, &dev->irq0_work, sx127x_isr0_process, dev, 0);
+  DEBUGASSERT(work_available(&dev->irq0_work));
 
-  return 0;
+  return work_queue(HPWORK, &dev->irq0_work, sx127x_isr0_process, arg, 0);
 }
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
@@ -1547,14 +1597,18 @@ static int sx127x_irq0handler(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-static int sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
+static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
 {
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
               dev->modulation == SX127X_MODULATION_OOK);
 
   struct sx127x_read_hdr_s rxdata;
   uint8_t datalen = 0;
-  uint8_t len     = 0;
+  size_t len      = 0;
+
+  /* Lock SPI */
+
+  sx127x_lock(dev->spi);
 
   /* Get data from chip fifo */
 
@@ -1571,9 +1625,23 @@ static int sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
       datalen = sx127x_readregbyte(dev, SX127X_CMN_FIFO);
     }
 
+  /* Ignore packets with unsupported data length */
+
+  if (datalen > SX127X_READ_DATA_MAX)
+    {
+      wlerr("Unsupported data length! %d > %d\n",
+            datalen, SX127X_READ_DATA_MAX);
+      sx127x_unlock(dev->spi);
+      goto errout;
+    }
+
   /* Read payload and store */
 
   sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+
+  /* Unlock SPI */
+
+  sx127x_unlock(dev->spi);
 
   /* No RX SNR data for FSK/OOK */
 
@@ -1595,6 +1663,7 @@ static int sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
 
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
 
+errout:
   /* Return total length */
 
   return len;
@@ -1610,18 +1679,32 @@ static int sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_LPWAN_SX127X_LORA
-static int sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
+static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
 {
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_LORA);
 
   struct sx127x_read_hdr_s rxdata;
+  size_t  len     = 0;
   uint8_t datalen = 0;
-  uint8_t len     = 0;
   uint8_t rx_ptr  = 0;
+
+  /* Lock SPI */
+
+  sx127x_lock(dev->spi);
 
   /* Get payload length */
 
   datalen = sx127x_readregbyte(dev, SX127X_LRM_RXBYTES);
+
+  /* Ignore packets with unsupported data length */
+
+  if (datalen > SX127X_READ_DATA_MAX)
+    {
+      wlerr("Unsupported data length! %d > %d\n",
+            datalen, SX127X_READ_DATA_MAX);
+      sx127x_unlock(dev->spi);
+      goto errout;
+    }
 
   /* Get start address of last packet received */
 
@@ -1634,6 +1717,10 @@ static int sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
   /* Read payload */
 
   sx127x_readreg(dev, SX127X_CMN_FIFO, rxdata.data, datalen);
+
+  /* Unlock SPI */
+
+  sx127x_unlock(dev->spi);
 
   /* Store last RX SNR */
 
@@ -1655,6 +1742,7 @@ static int sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
 
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
 
+errout:
   /* Return total length */
 
   return len;
@@ -1673,9 +1761,9 @@ static ssize_t sx127x_rxfifo_get(FAR struct sx127x_dev_s *dev,
                                  FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct sx127x_read_hdr_s *pkt = NULL;
-  uint8_t pktlen = 0;
-  uint8_t i      = 0;
-  int     ret    = 0;
+  size_t i      = 0;
+  size_t pktlen = 0;
+  size_t ret    = 0;
 
   ret = nxsem_wait(&dev->rx_buffer_sem);
   if (ret < 0)
@@ -1731,7 +1819,7 @@ no_data:
 static void sx127x_rxfifo_put(FAR struct sx127x_dev_s *dev,
                               FAR uint8_t *buffer, size_t buflen)
 {
-  uint8_t i   = 0;
+  size_t  i   = 0;
   int     ret = 0;
 
   ret = nxsem_wait(&dev->rx_buffer_sem);
@@ -1743,23 +1831,23 @@ static void sx127x_rxfifo_put(FAR struct sx127x_dev_s *dev,
       return;
     }
 
-    dev->rx_fifo_len++;
-    if (dev->rx_fifo_len > CONFIG_LPWAN_SX127X_RXFIFO_LEN)
-      {
-        dev->rx_fifo_len = CONFIG_LPWAN_SX127X_RXFIFO_LEN;
-        dev->nxt_read = (dev->nxt_read + 1) % CONFIG_LPWAN_SX127X_RXFIFO_LEN;
-      }
+  dev->rx_fifo_len++;
+  if (dev->rx_fifo_len > CONFIG_LPWAN_SX127X_RXFIFO_LEN)
+    {
+      dev->rx_fifo_len = CONFIG_LPWAN_SX127X_RXFIFO_LEN;
+      dev->nxt_read = (dev->nxt_read + 1) % CONFIG_LPWAN_SX127X_RXFIFO_LEN;
+    }
 
-    /* Put packet on fifo */
+  /* Put packet on fifo */
 
-    for (i = 0; i < (buflen + 1) && i < SX127X_RXFIFO_ITEM_SIZE; i += 1)
-      {
-        dev->rx_buffer[i + dev->nxt_write * SX127X_RXFIFO_ITEM_SIZE] =
-          buffer[i];
-      }
+  for (i = 0; i < (buflen + 1) && i < SX127X_RXFIFO_ITEM_SIZE; i += 1)
+    {
+      dev->rx_buffer[i + dev->nxt_write * SX127X_RXFIFO_ITEM_SIZE] =
+        buffer[i];
+    }
 
-    dev->nxt_write = (dev->nxt_write + 1) % CONFIG_LPWAN_SX127X_RXFIFO_LEN;
-    nxsem_post(&dev->rx_buffer_sem);
+  dev->nxt_write = (dev->nxt_write + 1) % CONFIG_LPWAN_SX127X_RXFIFO_LEN;
+  nxsem_post(&dev->rx_buffer_sem);
 }
 
 #endif /* CONFIG_LPWAN_SX127X_RXSUPPORT */
@@ -1813,29 +1901,18 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
     }
 
 #if 1
-  /* For now we don't support datalen > FIFO_LEN for FSK/OOK */
+  /* For now we don't support datalen > FIFO_LEN for FSK/OOK.
+   * For fixlen = true,  datalen <= 64
+   * For fixlen = false, datalen < 64 (we support this for now)
+   */
 
-  if (datalen > 64)
+  if (datalen > 63)
     {
       wlerr("Not supported data len!\n");
       ret = -EINVAL;
       goto errout;
     }
 #endif
-
-  /* Change mode to STANDBY */
-
-  sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
-
-  /* Initialize TX mode */
-
-  ret = sx127x_opmode_init(dev, SX127X_OPMODE_TX);
-  if (ret < 0)
-    {
-      wlerr("Failed to initialize TX mode!\n");
-      ret = -EINVAL;
-      goto errout;
-    }
 
   /* Lock SPI */
 
@@ -1861,20 +1938,6 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-  /* Change mode to TX to start data transfer */
-
-  sx127x_opmode_set(dev, SX127X_OPMODE_TX);
-
-  /* Wait for payload send IRQ */
-
-  nxsem_wait(&dev->tx_sem);
-
-  /* Change mode to IDLE after transfer
-   * NOTE: if sequencer is on - this should be done automatically
-   */
-
-  sx127x_opmode_set(dev, dev->idle);
 
 errout:
   return ret;
@@ -1906,20 +1969,6 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
       goto errout;
     }
 
-  /* Change mode to STANDBY */
-
-  sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
-
-  /* Initialize TX mode */
-
-  ret = sx127x_opmode_init(dev, SX127X_OPMODE_TX);
-  if (ret < 0)
-    {
-      wlerr("Failed to initialize TX mode!\n");
-      ret = -EINVAL;
-      goto errout;
-    }
-
   /* Lock SPI */
 
   sx127x_lock(dev->spi);
@@ -1935,19 +1984,6 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-  /* Change mode to TX to start data transfer */
-
-  sx127x_opmode_set(dev, SX127X_OPMODE_TX);
-
-  /* Wait for TXDONE */
-
-  nxsem_wait(&dev->tx_sem);
-
-  /* Change mode to IDLE after transfer */
-
-  /* sx127x_opmode_set(dev, dev->idle); */
-  dev->opmode = SX127X_OPMODE_STANDBY;
 
 errout:
   return ret;
@@ -1972,7 +2008,23 @@ static int sx127x_opmode_init(FAR struct sx127x_dev_s *dev, uint8_t opmode)
       goto errout;
     }
 
-  dev->ops.opmode_init(dev, opmode);
+  /* Board-specific opmode configuration */
+
+  ret = dev->lower->opmode_change(opmode);
+  if (ret < 0)
+    {
+      wlerr("Board-specific opmode_change failed %d!\n", ret);
+      goto errout;
+    }
+
+  /* Initialize opmode */
+
+  ret = dev->ops.opmode_init(dev, opmode);
+  if (ret < 0)
+    {
+      wlerr("opmode_init failed %d!\n", ret);
+      goto errout;
+    }
 
 errout:
   return ret;
@@ -2002,7 +2054,7 @@ static int sx127x_opmode_set(FAR struct sx127x_dev_s *dev, uint8_t opmode)
    * but where we should initialize RX ?
    */
 
-  if (opmode == SX127X_OPMODE_RX || opmode == SX127X_OPMODE_RXSINGLE)
+  if (opmode != SX127X_OPMODE_TX)
     {
       ret = sx127x_opmode_init(dev, opmode);
     }
@@ -2034,13 +2086,12 @@ static uint8_t sx127x_opmode_get(FAR struct sx127x_dev_s *dev)
   return 0;
 }
 
-#ifdef CONFIG_LPWAN_SX127X_FSKOOK
-
 /****************************************************************************
  * Name: sx127x_lora_opmode_init
  *
  * Description:
- *   Initialize operation mode for FSK/OOK
+ *   Initialize operation mode for FSK/OOK.
+ *   We need this even if FSK/OOK support is disabled
  *
  ****************************************************************************/
 
@@ -2089,6 +2140,17 @@ static int sx127x_fskook_opmode_init(FAR struct sx127x_dev_s *dev,
 
           dio0map = SX127X_FOM_DIOMAP1_DIO0_RXTX;
 
+          /* REVISIT: Configure RXCFG register:
+           * - AGC auto ON
+           * - AFC auto ON
+           * - RX trigger on PreableDetect
+           */
+
+          setbits = (SX127X_FOM_RXCFG_AGCAUTOON | SX127X_FOM_RXCFG_AFCAUTOON |
+                     SX127X_FOM_RXCFG_TRG_PREDET);
+
+          sx127x_writeregbyte(dev, SX127X_FOM_RXCFG, setbits);
+
           break;
         }
 
@@ -2116,7 +2178,8 @@ errout:
  * Name: sx127x_fskook_opmode_set
  *
  * Description:
- *   Set operation mode for FSK/OOK
+ *   Set operation mode for FSK/OOK.
+ *   We need this even if FSK/OOK support is disabled
  *
  ****************************************************************************/
 
@@ -2126,7 +2189,6 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
               dev->modulation == SX127X_MODULATION_OOK);
 
-  uint8_t regval  = 0;
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
   int     ret     = OK;
@@ -2161,29 +2223,13 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
   clrbits = SX127X_CMN_OPMODE_MODE_MASK;
   sx127x_modregbyte(dev, SX127X_CMN_OPMODE, setbits, clrbits);
 
-  /* Wait for mode ready */
-
-  do
-    {
-      usleep(1000);
-
-      if (opmode == SX127X_OPMODE_SLEEP)
-        {
-          /* REVISIT: Somehow MODERDY doesnt work for SLEEP,
-           * so we just break here
-           */
-          break;
-        }
-
-      regval = sx127x_readregbyte(dev, SX127X_FOM_IRQ1);
-    }
-  while (!(regval & SX127X_FOM_IRQ1_MODERDY));
-
   sx127x_unlock(dev->spi);
 
 errout:
   return ret;
 }
+
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK
 
 /****************************************************************************
  * Name: sx127x_fskook_rxbw_set
@@ -2434,16 +2480,6 @@ static void sx127x_fskook_syncword_get(FAR struct sx127x_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: sx127x_syncword_get
- ****************************************************************************/
-
-static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                                FAR uint8_t *len)
-{
-  dev->ops.syncword_get(dev, sw, len);
-}
-
-/****************************************************************************
  * Name: sx127x_fskook_syncword_set
  *
  * Description:
@@ -2478,20 +2514,19 @@ static int sx127x_fskook_syncword_set(FAR struct sx127x_dev_s *dev,
     {
       /* Disable sync word generation and detection */
 
-      clrbits = SX127X_FOM_SYNCCFG_SYNCSIZE_MASK |
-                SX127X_FOM_SYNCCFG_SYNCON;
+      clrbits = (SX127X_FOM_SYNCCFG_SYNCSIZE_MASK |
+                 SX127X_FOM_SYNCCFG_SYNCON);
       setbits = 0;
 
       sx127x_modregbyte(dev, SX127X_FOM_SYNCCFG, setbits, clrbits);
-
     }
   else
     {
       /* Configure sync word length */
 
       clrbits = SX127X_FOM_SYNCCFG_SYNCSIZE_MASK;
-      setbits = SX127X_FOM_SYNCCFG_SYNCON |
-                SX127X_FOM_SYNCCFG_SYNCSIZE(len - 1);
+      setbits = (SX127X_FOM_SYNCCFG_SYNCON |
+                 SX127X_FOM_SYNCCFG_SYNCSIZE(len - 1));
 
       sx127x_modregbyte(dev, SX127X_FOM_SYNCCFG, setbits, clrbits);
 
@@ -2513,16 +2548,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: sx127x_syncword_set
- ****************************************************************************/
-
-static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                               uint8_t len)
-{
-  return dev->ops.syncword_set(dev, sw, len);
-}
-
-/****************************************************************************
  * Name: sx127x_fskook_init
  *
  * Description:
@@ -2540,7 +2565,7 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
 
   /* Set FDEV */
 
-  sx127x_fskook_fdev_set(dev, SX127X_FREQ_DEV_DEFAULT);
+  sx127x_fskook_fdev_set(dev, SX127X_FDEV_DEFAULT);
 
   /* Set bitrate */
 
@@ -2553,9 +2578,12 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
   sx127x_fskook_seq_init(dev);
   sx127x_fskook_seq_start(dev, false);
 
-  /* Configure Sync Word - disable */
+  /* Configure Sync Word
+   * REVISIT: FSK communication doesnt work if syncword is disabled!
+   */
 
-  sx127x_fskook_syncword_set(dev, NULL, 0);
+  uint8_t syncword[] = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
+  sx127x_fskook_syncword_set(dev, syncword, 8);
 
   /* Configure bandwidth */
 
@@ -2572,9 +2600,9 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
    */
 
   setbits  = 0;
-  clrbits  = 0;
-  setbits |= (dev->fskook.fixlen == true ? SX127X_FOM_PKTCFG1_PCKFORMAT : 0);
+  setbits |= (dev->fskook.fixlen == true ?  0 : SX127X_FOM_PKTCFG1_PCKFORMAT);
   setbits |= (dev->crcon == true ? SX127X_FOM_PKTCFG1_CRCON : 0);
+  clrbits  = (SX127X_FOM_PKTCFG1_PCKFORMAT | SX127X_FOM_PKTCFG1_CRCON);
 
   /* Write packet mode settings 1 */
 
@@ -2585,17 +2613,17 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
    */
 
   setbits  = 0;
-  clrbits  = 0;
   setbits |= SX127X_FOM_PKTCFG2_DATAMODE;
+  clrbits  = 0;
 
   /* Write packet mode settings 2 */
 
-  sx127x_modregbyte(dev, SX127X_FOM_PKTCFG1, setbits, clrbits);
+  sx127x_modregbyte(dev, SX127X_FOM_PKTCFG2, setbits, clrbits);
 
   /* Configure PARAMP register */
 
-  setbits = SX127X_FSKOOK_SHAPING_DEFAULT | SX127X_FSKOOK_PARAMP_DEFAULT;
-  clrbits = SX127X_CMN_PARAMP_PARAMP_MASK | SX127X_CMN_PARAMP_SHAPING_MASK;
+  setbits = (SX127X_FSKOOK_SHAPING_DEFAULT | SX127X_FSKOOK_PARAMP_DEFAULT);
+  clrbits = (SX127X_CMN_PARAMP_PARAMP_MASK | SX127X_CMN_PARAMP_SHAPING_MASK);
 
   /* Write PARAMP register */
 
@@ -2686,7 +2714,7 @@ static int sx127x_fskook_fdev_set(FAR struct sx127x_dev_s *dev,
 
   dev->fskook.fdev = freq;
 
-  errout:
+errout:
   return ret;
 }
 
@@ -3244,8 +3272,6 @@ static int sx127x_lora_implicthdr_set(FAR struct sx127x_dev_s *dev,
 
   sx127x_modregbyte(dev, SX127X_LRM_MDMCFG1, setbits, clrbits);
 
-  sx127x_modregbyte(dev, SX127X_LRM_HOPCHAN, setbits, clrbits);
-
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
@@ -3296,7 +3322,7 @@ static void sx127x_lora_init(FAR struct sx127x_dev_s *dev)
 
   /* Configure LORA header */
 
-  sx127x_lora_implicthdr_set(dev, SX127X_LRM_IMPLICTHDR_DEFAULT);
+  sx127x_lora_implicthdr_set(dev, CONFIG_LPWAN_SX127X_LORA_IMPHEADER);
 
   /* Lock SPI */
 
@@ -3308,18 +3334,19 @@ static void sx127x_lora_init(FAR struct sx127x_dev_s *dev)
                       SX127X_LRM_PAYLOADMAX_DEFAULT);
 
   /* Modem PHY config 2:
-   *   - TX crc ON
+   *   - RXCRCON
+   *     NOTE: this works differently for implicit header and explicit header!
    *   - packet mode
    */
 
   setbits = (dev->crcon == true ? SX127X_LRM_MDMCFG2_RXCRCON : 0);
-  clrbits = SX127X_LRM_MDMCFG2_TXCONT;
+  clrbits = (SX127X_LRM_MDMCFG2_TXCONT | SX127X_LRM_MDMCFG2_RXCRCON);
   sx127x_modregbyte(dev, SX127X_LRM_MDMCFG2, setbits, clrbits);
 
   /* Invert I and Q signals if configured */
 
   setbits = (dev->lora.invert_iq == true ? SX127X_LRM_INVERTIQ_IIQ : 0);
-  clrbits = 0;
+  clrbits = SX127X_LRM_INVERTIQ_IIQ;
   sx127x_modregbyte(dev, SX127X_LRM_INVERTIQ, setbits, clrbits);
 
   /* Unlock SPI */
@@ -3500,6 +3527,26 @@ static int sx127x_lora_preamble_get(FAR struct sx127x_dev_s *dev)
 #endif  /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
+ * Name: sx127x_syncword_get
+ ****************************************************************************/
+
+static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
+                                FAR uint8_t *len)
+{
+  dev->ops.syncword_get(dev, sw, len);
+}
+
+/****************************************************************************
+ * Name: sx127x_syncword_set
+ ****************************************************************************/
+
+static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
+                               uint8_t len)
+{
+  return dev->ops.syncword_set(dev, sw, len);
+}
+
+/****************************************************************************
  * Name: sx127x_modulation_get
  *
  * Description:
@@ -3539,13 +3586,17 @@ static uint8_t sx127x_modulation_get(FAR struct sx127x_dev_s *dev)
 
 static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
 {
-#ifdef CONFIG_LPWAN_SX127X_FSKOOK
   if (modulation <= SX127X_MODULATION_OOK)
     {
-      dev->ops.init         = sx127x_fskook_init;
-      dev->ops.isr0_process = sx127x_fskook_isr0_process;
+      /* NOTE: we need opmode_init and opmode_set for FSK/OOK even if
+       * support for these modulations is disabled!
+       */
+
       dev->ops.opmode_init  = sx127x_fskook_opmode_init;
       dev->ops.opmode_set   = sx127x_fskook_opmode_set;
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK
+      dev->ops.init         = sx127x_fskook_init;
+      dev->ops.isr0_process = sx127x_fskook_isr0_process;
       dev->ops.preamble_set = sx127x_fskook_preamble_set;
       dev->ops.preamble_get = sx127x_fskook_preamble_get;
       dev->ops.rssi_get     = sx127x_fskook_rssi_get;
@@ -3557,8 +3608,8 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
       dev->ops.dumpregs     = sx127x_fskook_dumpregs;
 #endif
+#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
     }
-#endif
 #ifdef CONFIG_LPWAN_SX127X_LORA
   if (modulation == SX127X_MODULATION_LORA)
     {
@@ -3578,7 +3629,24 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
       dev->ops.dumpregs     = sx127x_lora_dumpregs;
 #endif
     }
-#endif
+#endif  /* CONFIG_LPWAN_SX127X_LORA */
+}
+
+/****************************************************************************
+ * Name: sx127x_modulation_init
+ ****************************************************************************/
+
+static void sx127x_modulation_init(FAR struct sx127x_dev_s *dev)
+{
+  dev->ops.init(dev);
+
+  /* Configure preamble */
+
+  sx127x_preamble_set(dev, CONFIG_LPWAN_SX127X_PREAMBLE_DEFAULT);
+
+  /* Dump registers after initial configuration */
+
+  sx127x_dumpregs(dev);
 }
 
 /****************************************************************************
@@ -3671,7 +3739,7 @@ static int sx127x_modulation_set(FAR struct sx127x_dev_s *dev,
 
   /* Initial configuration */
 
-  dev->ops.init(dev);
+  sx127x_modulation_init(dev);
 
 errout:
   return ret;
@@ -3709,7 +3777,7 @@ static bool sx127x_channel_scan(FAR struct sx127x_dev_s *dev,
 
   /* Set mode to RX */
 
-  dev->ops.opmode_set(dev, SX127X_OPMODE_RX);
+  sx127x_opmode_set(dev, SX127X_OPMODE_RX);
 
   /* Get start time */
 
@@ -3747,8 +3815,15 @@ static bool sx127x_channel_scan(FAR struct sx127x_dev_s *dev,
           break;
         }
 
+      /* Wait some time */
+
+      usleep(1000);
     }
   while (tstart.tv_sec + chanscan->stime > tnow.tv_sec);
+
+  /* Set mode to STANDBY */
+
+  sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
 
   /* Store limit values */
 
@@ -3802,6 +3877,8 @@ static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq)
   uint32_t frf = 0;
   int      ret = OK;
 
+  wlinfo("frequency %d->%d\n", dev->freq, freq);
+
   if (freq == dev->freq)
     {
       goto errout;
@@ -3837,8 +3914,166 @@ static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq)
 
   dev->freq = freq;
 
+  /* Call board-specific LF/HF configuration */
+
+  ret = dev->lower->freq_select(freq);
+  if (ret < 0)
+    {
+      wlerr("Board-specific freq_select failed %d!\n", ret);
+      goto errout;
+    }
+
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: sx127x_power_set
+ ****************************************************************************/
+
+static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
+{
+  bool pa_select  = false;
+  bool pa_dac     = false;
+  uint8_t setbits = 0;
+  uint8_t clrbits = 0;
+  int ret         = OK;
+
+  if (dev->power == power)
+    {
+      goto errout;
+    }
+
+  /* PA BOOST configuration */
+
+  if (power > SX127X_PASELECT_POWER || dev->pa_force == true)
+    {
+      pa_select = true;
+    }
+
+  /* High power PA BOOST */
+
+  if (power >= 20)
+    {
+      pa_dac = true;
+    }
+
+  /* Saturate power output */
+
+  if (pa_select == true)
+    {
+      if (pa_dac == true)
+        {
+          if (power < 5)
+            {
+              power = 5;
+            }
+          else if (power > 20)
+            {
+              power = 20;
+            }
+        }
+      else
+        {
+          if (power < 2)
+            {
+              power = 2;
+            }
+          else if (power > 17)
+            {
+              power = 17;
+            }
+        }
+    }
+  else
+    {
+      if (power < -1)
+        {
+          power = -1;
+        }
+      else if (power > 14)
+        {
+          power = 14;
+        }
+    }
+
+  wlinfo("power %d->%d, pa=%d, dac=%d\n", dev->power, power, pa_select, pa_dac);
+
+  sx127x_lock(dev->spi);
+
+  if (pa_select == true)
+    {
+      if (pa_dac == true)
+        {
+          /* Enable high power on PA_BOOST */
+
+          sx127x_writeregbyte(dev, SX127X_CMN_PADAC, SX127X_CMN_PADAC_BOOST);
+
+          /* Configure output power */
+
+          setbits = (power-5) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
+          clrbits = SX127X_CMN_PACFG_OUTPOWER_MASK;
+
+          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits );
+        }
+      else
+        {
+          /* Disable high power on PA_BOOST */
+
+          sx127x_writeregbyte(dev, SX127X_CMN_PADAC, SX127X_CMN_PADAC_DEFAULT);
+
+          /* Configure output power */
+
+          setbits = (power-2) << SX127X_CMN_PACFG_OUTPOWER_SHIFT;
+          clrbits = SX127X_CMN_PACFG_OUTPOWER_MASK;
+
+          sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits );
+        }
+
+      /* Enable PA BOOST output */
+
+      sx127x_modregbyte(dev, SX127X_CMN_PACFG, SX127X_CMN_PACFG_PASELECT, 0);
+    }
+  else
+    {
+      /* Configure output power and max power to 13.8 dBm */
+
+      setbits = ((power+1) << SX127X_CMN_PACFG_OUTPOWER_SHIFT);
+      setbits |= (5 << SX127X_CMN_PACFG_MAXPOWER_SHIFT);
+      clrbits = (SX127X_CMN_PACFG_OUTPOWER_MASK | SX127X_CMN_PACFG_MAXPOWER_SHIFT);
+
+      sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits);
+
+      /* Enable RFO output */
+
+      sx127x_modregbyte(dev, SX127X_CMN_PACFG, 0, SX127X_CMN_PACFG_PASELECT);
+    }
+
+  sx127x_unlock(dev->spi);
+
+  /* Call board-specific logic */
+
+  ret = dev->lower->pa_select(pa_select);
+  if (ret < 0)
+    {
+      wlerr("Board-specific pa_select failed %d!\n", ret);
+    }
+
+  /* Update local variable */
+
+  dev->power == power;
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sx127x_power_get
+ ****************************************************************************/
+
+static int8_t sx127x_power_get(FAR struct sx127x_dev_s *dev)
+{
+  return dev->power;
 }
 
 /****************************************************************************
@@ -3980,18 +4215,23 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
 
   dev->opmode = (((regval >> SX127X_CMN_OPMODE_MODE_SHIFT) &
                   SX127X_CMN_OPMODE_MODE_MASK) + 1);
-  dev->modulation = ((regval & SX127X_CMN_OPMODE_LRMODE) ?
-                     SX127X_MODULATION_LORA :
-                     (regval & SX127X_CMN_OPMODE_MODTYPE_OOK ?
-                      SX127X_MODULATION_OOK :
-                      SX127X_MODULATION_FSK));
+
+  /* After reset - FSK mode */
+
+  dev->modulation = SX127X_MODULATION_FSK;
+
+  /* Initialize modem ops */
+
+  sx127x_ops_set(dev, dev->modulation);
 
   wlinfo("Init state: modulation=%d, opmode=%d\n",
          dev->modulation, dev->opmode);
 
-  /* Set ops */
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK
+  /* Initialize FSK/OOK modem only if support is enabled */
 
-  sx127x_ops_set(dev, dev->modulation);
+  sx127x_modulation_init(dev);
+#endif
 
   /* Get chip version */
 
@@ -4015,25 +4255,29 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
       wlerr("ERROR: calibration failed \n");
     }
 
-  /* Set default modulation and configure */
+  /* Set default modulation */
 
-  sx127x_modulation_set(dev, SX127X_MODULATION_DEFAULT);
+  sx127x_modulation_set(dev, CONFIG_LPWAN_SX127X_MODULATION_DEFAULT);
 
   /* Enter SLEEP mode */
 
   sx127x_opmode_set(dev, SX127X_OPMODE_SLEEP);
 
-  /* Set channel frequency */
+  /* Set default channel frequency - common for FSK/OOK and LORA */
 
-  sx127x_frequency_set(dev, SX127X_FREQ_RF_DEFAULT);
+  ret = sx127x_frequency_set(dev, CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-  /* Configure preamble */
+  /* Configure RF output power - common for FSK/OOK and LORA */
 
-  sx127x_preamble_set(dev, SX127X_PREAMBLE_LEN_DEFAULT);
-
-  /* TODO: Configure RF output */
-
-  /* TODO: Configure RF input */
+  ret = sx127x_power_set(dev, CONFIG_LPWAN_SX127X_TXPOWER_DEFAULT);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
   wlinfo("Init sx127x dev - DONE\n");
 
@@ -4222,7 +4466,7 @@ static void sx127x_fskook_dumpregs(FAR struct sx127x_dev_s *dev)
   wlinfo("PLL:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PLL));
   sx127x_unlock(dev->spi);
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif
 
 /****************************************************************************
  * Name: sx127x_dumpregs
@@ -4310,6 +4554,11 @@ int sx127x_register(FAR struct spi_dev_s *spi,
 
   DEBUGASSERT(spi != NULL);
   DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(lower->reset != NULL);
+  DEBUGASSERT(lower->irq0attach != NULL);
+  DEBUGASSERT(lower->opmode_change != NULL);
+  DEBUGASSERT(lower->freq_select != NULL);
+  DEBUGASSERT(lower->pa_select != NULL);
 
   /* Only one sx127x device supported for now */
 
@@ -4324,9 +4573,19 @@ int sx127x_register(FAR struct spi_dev_s *spi,
   dev->spi   = spi;
   dev->lower = lower;
 
-  /* Initlaize IDLE mode */
+  /* Initlaize configuration */
 
-  dev->idle = SX127X_IDLE_OPMODE;
+  dev->idle             = SX127X_IDLE_OPMODE;
+  dev->pa_force         = lower->pa_force;
+  dev->crcon            = CONFIG_LPWAN_SX127X_CRCON;
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK
+  dev->fskook.fixlen    = false;
+#endif
+#ifdef CONFIG_LPWAN_SX127X_LORA
+  dev->lora.invert_iq   = false;
+#endif
+
+  /* Polled file decr */
 
 #ifndef CONFIG_DISABLE_POLL
   dev->pfd        = NULL;

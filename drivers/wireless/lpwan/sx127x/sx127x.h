@@ -342,7 +342,6 @@
 
 /* FSK/OOK: Bit Rate setting */
 
-#define SX127X_FOM_BITRATE_DEFAULT        (0x1a0b)
 #define SX127X_FOM_BITRATE_MAX            (0xffff)
 #define SX127X_FOM_BITRATE_MSB(v)         ((v >> 8) & 0xff)
 #define SX127X_FOM_BITRATE_LSB(v)         ((v >> 0) & 0xff)
@@ -359,14 +358,10 @@
 
 #define SX127X_FOM_RXCFG_TRG_SHIFT        (0)      /* Bits 0-2: RX trigger */
 #define SX127X_FOM_RXCFG_TRG_MASK         (7 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_0          (0 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_1          (1 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_2          (2 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_3          (3 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_4          (4 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_5          (5 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_6          (6 << SX127X_FOM_RXCFG_TRG_SHIFT)
-#  define SX127X_FOM_RXCFG_TRG_7          (7 << SX127X_FOM_RXCFG_TRG_SHIFT)
+#  define SX127X_FOM_RXCFG_TRG_NONE       (0 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 000: */
+#  define SX127X_FOM_RXCFG_TRG_RSSI       (1 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 001: */
+#  define SX127X_FOM_RXCFG_TRG_PREDET     (6 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 110: */
+#  define SX127X_FOM_RXCFG_TRG_RSSIPREDET (7 << SX127X_FOM_RXCFG_TRG_SHIFT) /* 111: */
 #define SX127X_FOM_RXCFG_AGCAUTOON        (1 << 3) /* Bit 3: AGC auto ON */
 #define SX127X_FOM_RXCFG_AFCAUTOON        (1 << 4) /* Bit 4: AFC auto ON */
 #define SX127X_FOM_RXCFG_RESRXWITHPLL     (1 << 5) /* Bit 5: Restar RX with PLL lock */
@@ -825,13 +820,6 @@
 
 /* Constants ***************************************************************/
 
-/* BAND3 (HF) -> 862(779) - 1020(960) MHz
- * BAND2 (LF) -> 410 - 525(480) MHz
- * BAND1 (LF) -> 137 - 175(160) MHz
- */
-
-#define SX127X_HFBAND_THR                 (525000000)
-
 /* FXOSC is 32 MHz */
 
 #define SX127X_FXOSC                      (32000000)
@@ -839,10 +827,6 @@
 /* FSTEP is FXOSC/(2**19) =~ 61 Hz */
 
 #define SX127X_FSTEP                      (SX127X_FXOSC/(2<<18))
-
-/* Default RF carrier frequency is 434 MHz */
-
-#define SX127X_FREQ_RF_DEFAULT            (434000000)
 
 /****************************************************************************
  * Public Data Types

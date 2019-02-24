@@ -51,6 +51,18 @@
 /****************************************************************************
  * Pre-Processor Declarations
  ****************************************************************************/
+/* Constants to SX127X */
+
+/* PA BOOST threshold power */
+
+#define SX127X_PASELECT_POWER (14)
+
+/* BAND3 (HF) -> 862(779) - 1020(960) MHz
+ * BAND2 (LF) -> 410      - 525(480) MHz
+ * BAND1 (LF) -> 137      - 175(160) MHz
+ */
+
+#define SX127X_HFBAND_THR                 (525000000)
 
 /* IOCTL commands ***********************************************************/
 
@@ -229,35 +241,59 @@ enum sx127x_lora_cr_e
   LORA_CR_4d8 = 4
 };
 
-/* Only DIO0 interrupts supported for now
- *
- * DIO0 - RXREADY/TXREADY/CADREADY
- * DIO1 - not supported yet
- * DIO2 - not supported yet
- * DIO3 - not supported yet
- * DIO4 - not supported yet
- * DIO5 - not supported yet
- */
+/* Board-specific operations and configuration */
 
 struct sx127x_lower_s
 {
+  /* Attach DIO0 interrupt - RXREADY/TXREADY/CADREADY */
+
   CODE int (*irq0attach)(xcpt_t handler, FAR void *arg);
+
 #ifdef CONFIG_LPWAN_SX127X_DIO1
+  /* Not supported: Attach DIO1 interrupt */
+
   CODE int (*irq1attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO2
+  /* Not supported: Attach DIO2 interrupt */
+
   CODE int (*irq2attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO3
+  /* Not supported: Attach DIO3 interrupt */
+
   CODE int (*irq3attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO4
+  /* Not supported: Attach DIO4 interrupt */
+
   CODE int (*irq4attach)(xcpt_t handler, FAR void *arg);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_DIO5
+  /* Not supported: Attach DIO5 interrupt */
+
   CODE int (*irq5attach)(xcpt_t handler, FAR void *arg);
 #endif
+
+  /* Reset radio module */
+
   CODE void (*reset)(void);
+
+  /* Change radio operation mode */
+
+  CODE int (*opmode_change)(int opmode);
+
+  /* Change radio frequency */
+
+  CODE int (*freq_select)(uint32_t freq);
+
+  /* Set PA BOOST output */
+
+  CODE int (*pa_select)(bool enable);
+
+  /* Force PA BOOST output */
+
+  bool pa_force;
 };
 
 /****************************************************************************

@@ -1,5 +1,6 @@
 /****************************************************************************
  * configs/nucleo-f091rc/src/stm32_sx127x.c
+ * This logic is specific for RFM98 modules (433MHz)
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Mateusz Szafoni <raiden00@railab.me>
@@ -68,6 +69,9 @@
  ****************************************************************************/
 
 static void sx127x_chip_reset(void);
+static int sx127x_opmode_change(int opmode);
+static int sx127x_freq_select(uint32_t freq);
+static int sx127x_pa_select(bool enable);
 static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg);
 
 /****************************************************************************
@@ -76,12 +80,20 @@ static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg);
 
 struct sx127x_lower_s lower =
 {
-  .irq0attach = sx127x_irq0_attach,
-  .reset = sx127x_chip_reset
+  .irq0attach    = sx127x_irq0_attach,
+  .reset         = sx127x_chip_reset,
+  .opmode_change = sx127x_opmode_change,
+  .freq_select   = sx127x_freq_select,
+  .pa_select     = sx127x_pa_select,
+  .pa_force      = true
 };
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sx127x_irq0_attach
  ****************************************************************************/
 
 static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
@@ -93,6 +105,10 @@ static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
   (void)stm32_gpiosetevent(GPIO_SX127X_DIO0, true, false, false, isr, arg);
   return OK;
 }
+
+/****************************************************************************
+ * Name: sx127x_chip_reset
+ ****************************************************************************/
 
 static void sx127x_chip_reset(void)
 {
@@ -118,6 +134,55 @@ static void sx127x_chip_reset(void)
   /* Wait 10 ms */
 
   usleep(10000);
+}
+
+/****************************************************************************
+ * Name: sx127x_opmode_change
+ ****************************************************************************/
+
+static int sx127x_opmode_change(int opmode)
+{
+  /* Do nothing */
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sx127x_freq_select
+ ****************************************************************************/
+
+static int sx127x_freq_select(uint32_t freq)
+{
+  int ret = OK;
+
+  /* NOTE: this depends on your module version */
+
+  if (freq > SX127X_HFBAND_THR)
+    {
+      ret = -EINVAL;
+      wlerr("HF output not supported\n");
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sx127x_pa_select
+ ****************************************************************************/
+
+static int sx127x_pa_select(bool enable)
+{
+  int ret = OK;
+
+  /* Only PA_BOOST output connected to antenna */
+
+  if (enable == false)
+    {
+      ret = -EINVAL;
+      wlerr("Module supports only PA_BOOST pin, so PA_SELECT must be enabled!\n");
+    }
+
+  return ret;
 }
 
 /****************************************************************************

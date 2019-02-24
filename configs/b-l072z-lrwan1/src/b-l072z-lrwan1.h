@@ -104,6 +104,16 @@
 #define GPIO_SX127X_DIO0  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI |  \
                            GPIO_PORTB | GPIO_PIN4)
 
+/* CMWX1ZZABZ-091 module antenna switch
+ * CRF1 - RX RFI HF - PA1
+ * CRF2 - TX RFO HF - PC2
+ * CRF3 - TX BOOST  - PC1
+ */
+
+#define GPIO_SX127X_CRF1  (GPIO_SPEED_HIGH | GPIO_PORTA | GPIO_PIN1)
+#define GPIO_SX127X_CRF2  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN2)
+#define GPIO_SX127X_CRF3  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN1)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
