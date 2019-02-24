@@ -102,6 +102,12 @@
 #  define CONFIG_TUN_NINTERFACES 1
 #endif
 
+/* Make sure that packet buffers include in configured guard size and are an
+ * even multiple of 16-bits in length.
+ */
+
+#define NET_TUN_PKTSIZE ((CONFIG_NET_TUN_PKTSIZE + CONFIG_NET_GUARDSIZE + 1) & ~1)
+
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second
  */
@@ -149,8 +155,8 @@ struct tun_device_s
    * is assured only by the preceding wide data types.
    */
 
-  uint8_t           read_buf[CONFIG_NET_TUN_PKTSIZE];
-  uint8_t           write_buf[CONFIG_NET_TUN_PKTSIZE];
+  uint8_t           read_buf[NET_TUN_PKTSIZE];
+  uint8_t           write_buf[NET_TUN_PKTSIZE];
 
   /* This holds the information visible to the NuttX network */
 
