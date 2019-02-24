@@ -129,9 +129,10 @@
 
 struct tun_device_s
 {
-  bool              bifup;   /* true:ifup false:ifdown */
-  WDOG_ID           txpoll;  /* TX poll timer */
-  struct work_s     work;    /* For deferring poll work to the work queue */
+  bool              bifup;     /* true:ifup false:ifdown */
+  bool              read_wait;
+  WDOG_ID           txpoll;    /* TX poll timer */
+  struct work_s     work;      /* For deferring poll work to the work queue */
 
   FAR struct file  *filep;
 
@@ -139,15 +140,17 @@ struct tun_device_s
   FAR struct pollfd *poll_fds;
 #endif
 
-  bool              read_wait;
-
-  uint8_t           read_buf[CONFIG_NET_TUN_PKTSIZE];
-  size_t            read_d_len;
-  uint8_t           write_buf[CONFIG_NET_TUN_PKTSIZE];
-  size_t            write_d_len;
-
   sem_t             waitsem;
   sem_t             read_wait_sem;
+  size_t            read_d_len;
+  size_t            write_d_len;
+
+  /* These packet buffer arrays required 16-bit alignment.  That alignment
+   * is assured only by the preceding wide data types.
+   */
+
+  uint8_t           read_buf[CONFIG_NET_TUN_PKTSIZE];
+  uint8_t           write_buf[CONFIG_NET_TUN_PKTSIZE];
 
   /* This holds the information visible to the NuttX network */
 
