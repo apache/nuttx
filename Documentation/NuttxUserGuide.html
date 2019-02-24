@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: July 15, 2018</p>
+      <p>Last Updated: February 24, 20189</p>
     </td>
   </tr>
 </table>
@@ -5823,8 +5823,9 @@ be sent.
     <li><a href="#pthreadmutexinit">2.8.37 pthread_mutex_init</a></li>
     <li><a href="#pthreadmutexdestrory">2.8.38 pthread_mutex_destroy</a></li>
     <li><a href="#pthreadmutexlock">2.8.39 pthread_mutex_lock</a></li>
-    <li><a href="#pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></li>
-    <li><a href="#pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></li>
+    <li><a href="#pthreadmutextimedlock">2.8.40 pthread_mutex_timedlock</a></li>
+    <li><a href="#pthreadmutextrylock">2.8.41 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.8.42 pthread_mutex_unlock</a></li>
   </ul>
   <p>
     <b>Condition Variables</b>.
@@ -7432,7 +7433,47 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.8.40 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextimedlock">2.8.40 pthread_mutex_timedlock</a></H3>
+<p>
+<b>Function Prototype:</b>
+<p>
+<pre>
+    #include &lt;pthread.h&gt;
+    int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *abs_timeout);
+</pre>
+<p>
+<b>Description:</b>
+  The <code>pthread_mutex_timedlock()</code> function will lock the mutex object referenced by <code>mutex</code>.
+  If the mutex is already locked, the calling thread will block until the mutex becomes available as in the <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code><a> function.
+  If the mutex cannot be locked without waiting for another thread to unlock the mutex, this wait will be terminated when the specified <code>abs_timeout</code> expires.
+</p>
+<p>
+  The timeout will expire when the absolute time specified by <code>abs_timeout </code> passes, as measured by the clock on which timeouts are based (that is, when the value of that clock equals or exceeds <code>abs_timeout</code>), or if the absolute time specified by  <code>abs_timeout</code> has already been passed at the time of the call.
+</p>
+<p>
+<b>Input Parameters:</b>
+<p>
+<ul>
+  <li><code>mutex</code>.  A reference to the mutex to be locked.</li>
+  <li><code>abs_timeout</code>.  Maximum wait time (with <code>NULL</code> meaning to wait forever).</li>
+</ul>
+<p>
+<b>Returned Value:</b>
+<p>
+If successful, the <code>pthread_mutex_trylock()</code> function will return zero (<code>OK</code>).
+Otherwise, an error number will be returned to indicate the error.
+Note that the errno <code>EINTR</code> is never returned by <code>pthread_mutex_timedlock()</code>.
+The returned errno is ETIMEDOUT if the mutex could not be locked before the specified timeout expired
+</p>
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX Compatibility:</b>
+  Comparable to the POSIX interface of the same name.
+  This implementation does not return <code>EAGAIN</code> when the mutex could not be acquired because the maximum number of recursive locks for mutex has been exceeded.
+</p>
+
+<H3><a name="pthreadmutextrylock">2.8.41 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7442,7 +7483,7 @@ interface of the same name.
 </pre>
 <p>
 <b>Description:</b>
-   The function pthread_mutex_trylock() is identical to <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code></a>
+   The function <code>pthread_mutex_trylock()</code> is identical to <a href="#pthreadmutexlock"><code>pthread_mutex_lock()</code></a>
    except that if the mutex object referenced by mutex is currently locked
    (by any thread, including the current thread), the call returns immediately
    with the <code>errno</code> <code>EBUSY</code>.
@@ -7472,7 +7513,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.8.41 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.8.42 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -10581,6 +10622,7 @@ notify a task when a message is available on a queue.
   <li><a href="#pthreadmutexdestrory">pthread_mutex_destroy</a></li>
   <li><a href="#pthreadmutexinit">pthread_mutex_init</a></li>
   <li><a href="#pthreadmutexlock">pthread_mutex_lock</a></li>
+  <li><a href="#pthreadmutextimedlock">pthread_mutex_timedlock</a></li>
   <li><a href="#pthreadmutextrylock">pthread_mutex_trylock</a></li>
   <li><a href="#pthreadmutexunlock">pthread_mutex_unlock</a></li>
   <li><a href="#pthreadocndattrdestroy">pthread_condattr_destroy</a></li>

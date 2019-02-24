@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_mutex.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,7 +177,8 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
  *
  ****************************************************************************/
 
-int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, FAR const struct timespec *abs_timeout, bool intr)
+int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
+                       FAR const struct timespec *abs_timeout, bool intr)
 {
   int ret = EINVAL;
 

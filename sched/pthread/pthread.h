@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,8 +95,8 @@ struct pthread_tcb_s; /* Forward reference */
 struct task_group_s;  /* Forward reference */
 
 void weak_function pthread_initialize(void);
-int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t start,
-                       pthread_startroutine_t entry);
+int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
+                       start_t start, pthread_startroutine_t entry);
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb);
@@ -108,14 +109,16 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
                                         pid_t pid);
 void pthread_release(FAR struct task_group_s *group);
 
-int pthread_sem_take(sem_t *sem, FAR const struct timespec *abs_timeout, bool intr);
+int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout,
+                     bool intr);
 #ifdef CONFIG_PTHREAD_MUTEX_UNSAFE
 int pthread_sem_trytake(sem_t *sem);
 #endif
 int pthread_sem_give(sem_t *sem);
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-int pthread_mutex_take(FAR struct pthread_mutex_s *mutex, FAR const struct timespec *abs_timeout, bool intr);
+int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
+                       FAR const struct timespec *abs_timeout, bool intr);
 int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
 int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
 void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
@@ -135,4 +138,3 @@ int pthread_mutexattr_verifytype(int type);
 #endif
 
 #endif /* __SCHED_PTHREAD_PTHREAD_H */
-
