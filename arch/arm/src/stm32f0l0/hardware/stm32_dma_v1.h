@@ -51,15 +51,20 @@
 #  define DMA_HAVE_CSELR 1
 #endif
 
+/* 2 DMA controllers */
+
+#define DMA1                       (0)
+#define DMA2                       (1)
+
 /* 12 Channels Total: 7 DMA1 Channels(1-7) and 5 DMA2 channels (1-5) */
 
-#define DMA1 0
-#define DMA2 1
-#define DMA3 2
-#define DMA4 3
-#define DMA5 4
-#define DMA6 5
-#define DMA7 6
+#define DMA_CHAN1                  (0)
+#define DMA_CHAN2                  (1)
+#define DMA_CHAN3                  (2)
+#define DMA_CHAN4                  (3)
+#define DMA_CHAN5                  (4)
+#define DMA_CHAN6                  (5)
+#define DMA_CHAN7                  (6)
 
 /* Register Offsets *****************************************************************/
 
