@@ -4061,7 +4061,7 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
   /* Update local variable */
 
-  dev->power == power;
+  dev->power = power;
 
 errout:
   return ret;
