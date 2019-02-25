@@ -98,6 +98,11 @@ STATUS
     identical peripherals.  None of these drivers have been verified on the
     SAMD51, However.  These include:  DMAC, I2C, SPI, and USB.
 
+  WARNING:  If you decide to invest the time to discover whey the XOSC32K
+  clock source is not working, be certain to use the SRAM configuration.
+  That configuration in FLASH is most likely lock up your board irrecoverably
+  is there are any start-up errors!
+
 Unlocking FLASH
 ===============
 

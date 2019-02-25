@@ -824,6 +824,7 @@
 #define ETH_TXDES3_UF                                    (1 << 2)  /* Bit 2:  Underflow error */
 #define ETH_TXDES3_ED                                    (1 << 3)  /* Bit 3:  Excessive deferral */
 #define ETH_TXDES3_CC_SHIFT                              (4)       /* Bits 4-7: Collision count */
+#define ETH_TXDES3_CC_MASK                               (15 << ETH_TXDES3_CC_SHIFT)
 #define ETH_TXDES3_EC                                    (1 << 8)  /* Bit 8:  Excessive collision */
 #define ETH_TXDES3_LC                                    (1 << 9)  /* Bit 9:  Late collision */
 #define ETH_TXDES3_NC                                    (1 << 10) /* Bit 10: No carrier */
