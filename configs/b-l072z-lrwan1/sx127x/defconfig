@@ -1,5 +1,3 @@
-# do not push this to upstream before cleaning !!!
-
 # CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NSH_ARGCAT is not set
 CONFIG_ARCH="arm"

@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/nucleo-l073rz/src/stm32_autoleds.c
+ * configs/nucleo-l073rz/src/stm32_buttons.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,8 +41,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 
 #include "stm32_gpio.h"
@@ -50,45 +51,79 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_autoled_initialize
+ * Name: board_button_initialize
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
+ *
  ****************************************************************************/
 
-void board_autoled_initialize(void)
+void board_button_initialize(void)
 {
-  /* Configure LED1 GPIO for output */
+  /* Configure the single button as an input.  NOTE that EXTI interrupts are
+   * also configured for the pin.
+   */
 
-  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_BTN_USER);
 }
 
 /****************************************************************************
- * Name: board_autoled_on
+ * Name: board_buttons
  ****************************************************************************/
 
-void board_autoled_on(int led)
+uint32_t board_buttons(void)
 {
-  if (led == BOARD_LED1)
-    {
-      stm32_gpiowrite(GPIO_LED1, true);
-    }
+  /* Check that state of each USER button. A LOW value means that the key is
+   * pressed.
+   */
+
+  bool released = stm32_gpioread(GPIO_BTN_USER);
+  return !released;
 }
 
-/****************************************************************************
- * Name: board_autoled_off
- ****************************************************************************/
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   board_button_initialize() must be called to initialize button resources.  After
+ *   that, board_buttons() may be called to collect the current state of all
+ *   buttons or board_button_irq() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After board_button_initialize() has been called, board_buttons() may be called to
+ *   collect the state of all buttons.  board_buttons() returns an 32-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   board_button_irq() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
+ *
+ ************************************************************************************/
 
-void board_autoled_off(int led)
+#ifdef CONFIG_ARCH_IRQBUTTONS
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-  if (led == BOARD_LED1)
-    {
-      stm32_gpiowrite(GPIO_LED1, false);
-    }
-}
+  int ret = -EINVAL;
 
-#endif /* CONFIG_ARCH_LEDS */
+  if (id == BUTTON_USER)
+    {
+      ret = stm32_gpiosetevent(GPIO_BTN_USER, true, true, true, irqhandler, arg);
+    }
+
+  return ret;
+}
+#endif
+#endif /* CONFIG_ARCH_BUTTONS */
