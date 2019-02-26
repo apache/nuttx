@@ -288,15 +288,18 @@ struct net_driver_s
 #endif
 
   /* The d_buf array is used to hold incoming and outgoing packets. The
-   * device driver should place incoming data into this buffer. When sending
+   * device driver should place incoming data into this buffer.  When sending
    * data, the device driver should read the link level headers and the
-   * TCP/IP headers from this buffer. The size of the link level headers is
+   * TCP/IP headers from this buffer.  The size of the link level headers is
    * configured by the NET_LL_HDRLEN(dev) define.
    *
    * The network will handle only a single buffer for both incoming and
    * outgoing packets.  However, the driver design may be concurrently
    * sending and filling separate, break-off buffers.  That buffer
    * management must be controlled by the driver.
+   *
+   * The d_buf array must be aligned to two-byte, 16-bit address boundaries
+   * in order to support aligned 16-bit accesses performed by the network.
    */
 
   FAR uint8_t *d_buf;
