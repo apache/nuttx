@@ -93,7 +93,7 @@
 "pthread_kill","pthread.h","!defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_PTHREAD)","int","pthread_t","int"
 "pthread_mutex_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
 "pthread_mutex_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*","FAR const pthread_mutexattr_t*"
-"pthread_mutex_lock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
+"pthread_mutex_timedlock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*","FAR const struct timespec*"
 "pthread_mutex_trylock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
 "pthread_mutex_unlock","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_mutex_t*"
 "pthread_mutex_consistent","pthread.h","!defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)","int","FAR pthread_mutex_t*"

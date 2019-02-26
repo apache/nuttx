@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -432,7 +432,7 @@
 #  define SYS_pthread_key_delete       (__SYS_pthread + 11)
 #  define SYS_pthread_mutex_destroy    (__SYS_pthread + 12)
 #  define SYS_pthread_mutex_init       (__SYS_pthread + 13)
-#  define SYS_pthread_mutex_lock       (__SYS_pthread + 14)
+#  define SYS_pthread_mutex_timedlock  (__SYS_pthread + 14)
 #  define SYS_pthread_mutex_trylock    (__SYS_pthread + 15)
 #  define SYS_pthread_mutex_unlock     (__SYS_pthread + 16)
 

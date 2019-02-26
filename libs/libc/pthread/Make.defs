@@ -1,7 +1,7 @@
 ############################################################################
 # libs/libc/pthread/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ CSRCS += pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
 CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
 CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 CSRCS += pthread_mutexattr_setrobust.c pthread_mutexattr_getrobust.c
+CSRCS += pthread_mutex_lock.c
 CSRCS += pthread_setcancelstate.c pthread_setcanceltype.c
 CSRCS += pthread_testcancel.c
 CSRCS += pthread_rwlock.c pthread_rwlock_rdlock.c pthread_rwlock_wrlock.c

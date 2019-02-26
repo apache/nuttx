@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -306,7 +306,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_key_delete,       1, STUB_pthread_key_delete)
   SYSCALL_LOOKUP(pthread_mutex_destroy,    1, STUB_pthread_mutex_destroy)
   SYSCALL_LOOKUP(pthread_mutex_init,       2, STUB_pthread_mutex_init)
-  SYSCALL_LOOKUP(pthread_mutex_lock,       1, STUB_pthread_mutex_lock)
+  SYSCALL_LOOKUP(pthread_mutex_timedlock,  2, STUB_pthread_mutex_timedlock)
   SYSCALL_LOOKUP(pthread_mutex_trylock,    1, STUB_pthread_mutex_trylock)
   SYSCALL_LOOKUP(pthread_mutex_unlock,     1, STUB_pthread_mutex_unlock)
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE

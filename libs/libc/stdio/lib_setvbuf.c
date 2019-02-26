@@ -69,11 +69,11 @@
  *   _IOLBF - Will cause input/output to be line buffered.
  *   _IONBF - Will cause input/output to be unbuffered.
  *
- * If buf is not a null pointer, the array it points to may be used instead
- * of a buffer allocated by setvbuf() and the argument size specifies the size
- * of the array; otherwise, size may determine the size of a buffer allocated
- * by the setvbuf() function. The contents of the array at any time are
- * unspecified.
+ *  If buf is not a null pointer, the array it points to may be used instead
+ *  of a buffer allocated by setvbuf() and the argument size specifies the size
+ *  of the array; otherwise, size may determine the size of a buffer allocated
+ *  by the setvbuf() function. The contents of the array at any time are
+ *  unspecified.
  *
  * Input Parameters:
  *   stream - the stream to flush
@@ -141,8 +141,8 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
   lib_take_semaphore(stream);
 
-  /* setvbuf() may only be called AFTER the file has been opened and BEFORE
-   * any operations have been performed on the string.
+  /* setvbuf() may only be called AFTER the stream has been opened and
+   * BEFORE any operations have been performed on the stream.
    */
 
   /* Return EBADF if the file is not open */

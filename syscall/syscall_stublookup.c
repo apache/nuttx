@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -311,7 +311,8 @@ uintptr_t STUB_pthread_key_delete(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_init(int nbr, uintptr_t parm1,
             uintptr_t parm2);
-uintptr_t STUB_pthread_mutex_lock(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_mutex_timedlock(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 uintptr_t STUB_pthread_mutex_trylock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_unlock(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_consistent(int nbr, uintptr_t parm1);
