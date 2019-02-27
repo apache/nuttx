@@ -208,14 +208,17 @@ extern int lc823450_dvfs_boost(int timeout);
 
 static struct lc823450_usbdev_s g_usbdev;
 
-static DMA_HANDLE hdma;
+static DMA_HANDLE g_hdma;
 static sem_t dma_wait;
-static struct lc823450_dma_llist dma_list[16];
+
+#ifdef CONFIG_USBMSC_OPT
+static struct lc823450_dma_llist g_dma_list[16];
+#endif
 
 #ifdef CONFIG_PM
 static void usbdev_pmnotify(struct pm_callback_s *cb,
                             enum pm_state_e pmstate);
-static struct pm_callback_s pm_cb =
+static struct pm_callback_s g_pm_cb =
 {
   .notify = usbdev_pmnotify,
 };
@@ -247,11 +250,11 @@ static const struct usbdev_ops_s g_devops =
 };
 
 #if defined(CONFIG_BATTERY) && defined(CONFIG_USBDEV_CHARGER)
-static struct work_s usb_reset_work;
+static struct work_s g_reset_work;
 #endif
 
 #ifdef CONFIG_WAKELOCK
-static struct work_s usb_suspend_work;
+static struct work_s g_suspend_work;
 #endif
 
 /****************************************************************************
@@ -550,7 +553,7 @@ static int lc823450_epdisable(struct usbdev_ep_s *ep)
 
   g_usbdev.bufoffset = 0x180;
   privep->disable = 1;
-  lc823450_dmastop(hdma);
+  lc823450_dmastop(g_hdma);
   nxsem_post(&dma_wait);
   return lc823450_epclearreq(ep);
 }
@@ -973,7 +976,7 @@ static void usb_reset_work_func(void *arg)
 #  endif
 
       g_usbdev.charger = 0;
-      work_queue(HPWORK, &usb_reset_work, usb_reset_work_func, NULL,
+      work_queue(HPWORK, &g_reset_work, usb_reset_work_func, NULL,
                  MSEC2TICK(100));
     }
   else
@@ -1002,8 +1005,8 @@ static void subintr_usbdev(void)
 #ifdef CONFIG_USBDEV_CHARGER
   if (g_usbdev.charger)
     {
-      work_cancel(HPWORK, &usb_reset_work);
-      work_queue(HPWORK, &usb_reset_work, usb_reset_work_func, NULL, 0);
+      work_cancel(HPWORK, &g_reset_work);
+      work_queue(HPWORK, &g_reset_work, usb_reset_work_func, NULL, 0);
 
       /* Disable interrupts */
 
@@ -1049,8 +1052,8 @@ static void subintr_usbdev(void)
 #ifdef CONFIG_WAKELOCK
       g_deepsleep_cancel = 0;
 
-      work_cancel(HPWORK, &usb_suspend_work);
-      work_queue(HPWORK, &usb_suspend_work, usb_suspend_work_func, priv,
+      work_cancel(HPWORK, &g_suspend_work);
+      work_queue(HPWORK, &g_suspend_work, usb_suspend_work_func, priv,
                  MSEC2TICK(1000));
 #endif
     }
@@ -1067,7 +1070,7 @@ static void subintr_usbdev(void)
 #endif
 #ifdef CONFIG_WAKELOCK
       wake_lock(&priv->wlock);
-      work_cancel(HPWORK, &usb_suspend_work);
+      work_cancel(HPWORK, &g_suspend_work);
 #endif
 
 #if defined(CONFIG_BATTERY) && defined(CONFIG_USBDEV_CHARGER)
@@ -1075,8 +1078,8 @@ static void subintr_usbdev(void)
           (USBSTAT_LINESTE_0 | USBSTAT_LINESTE_1))
         {
           g_usbdev.charger = 1;
-          work_cancel(HPWORK, &usb_reset_work);
-          work_queue(HPWORK, &usb_reset_work, usb_reset_work_func, NULL, 0);
+          work_cancel(HPWORK, &g_reset_work);
+          work_queue(HPWORK, &g_reset_work, usb_reset_work_func, NULL, 0);
         }
 #endif
     }
@@ -1467,8 +1470,8 @@ void up_usbinitialize(void)
     }
 
   nxsem_init(&dma_wait, 0, 0);
-  hdma = lc823450_dmachannel(DMA_CHANNEL_USBDEV);
-  lc823450_dmarequest(hdma, DMA_REQUEST_USBDEV);
+  g_hdma = lc823450_dmachannel(DMA_CHANNEL_USBDEV);
+  lc823450_dmarequest(g_hdma, DMA_REQUEST_USBDEV);
 
 #ifdef CONFIG_WAKELOCK
   wake_lock_init(&g_usbdev.wlock, "usb");
@@ -1614,7 +1617,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
         }
 
 #ifdef CONFIG_PM
-      pm_register(&pm_cb);
+      pm_register(&g_pm_cb);
 #endif /* CONFIG_PM */
       up_enable_irq(LC823450_IRQ_USBDEV);
     }
@@ -1671,7 +1674,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 #ifdef CONFIG_WAKELOCK
   /* cancel USB suspend work */
 
-  work_cancel(HPWORK, &usb_suspend_work);
+  work_cancel(HPWORK, &g_suspend_work);
 #endif
 
   /* Unbind the class driver */
@@ -1699,7 +1702,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   priv->driver = NULL;
 
 #ifdef CONFIG_PM
-  pm_unregister(&pm_cb);
+  pm_unregister(&g_pm_cb);
 #endif /* CONFIG_PM */
 
   spin_unlock_irqrestore(flags);
@@ -1734,7 +1737,7 @@ void usbdev_msc_read_enter()
   privep = &g_usbdev.eplist[CONFIG_USBMSC_EPBULKIN];
   privep->epcmd &= ~USB_EPCMD_EMPTY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKIN, (privep->epcmd));
-  lc823450_dmareauest_dir(hdma, DMA_REQUEST_USBDEV, 1);
+  lc823450_dmareauest_dir(g_hdma, DMA_REQUEST_USBDEV, 1);
   nxsem_init(&dma_wait, 0, 0);
 }
 
@@ -1786,30 +1789,30 @@ int usbdev_msc_epwrite(void *buf, int len)
 
   for (i = 1; i < len / pksz; i++)
     {
-      dma_list[i - 1].srcaddr = (uint32_t)buf + i * pksz;
-      dma_list[i - 1].dstaddr = (uint32_t)privep->inbuf + 0x8000;
+      g_dma_list[i - 1].srcaddr = (uint32_t)buf + i * pksz;
+      g_dma_list[i - 1].dstaddr = (uint32_t)privep->inbuf + 0x8000;
       if (i == (len / pksz) - 1)
         {
           /* last link */
 
-          dma_list[i - 1].nextlli = 0;
-          dma_list[i - 1].ctrl = ctrl | LC823450_DMA_ITC | pksz;
+          g_dma_list[i - 1].nextlli = 0;
+          g_dma_list[i - 1].ctrl = ctrl | LC823450_DMA_ITC | pksz;
         }
       else
         {
-          dma_list[i - 1].nextlli = (uint32_t)&dma_list[i];
-          dma_list[i - 1].ctrl = ctrl | pksz;
+          g_dma_list[i - 1].nextlli = (uint32_t)&g_dma_list[i];
+          g_dma_list[i - 1].ctrl = ctrl | pksz;
         }
     }
 
-  lc823450_dmallsetup(hdma,
+  lc823450_dmallsetup(g_hdma,
                       ctrl,
                       (uint32_t)buf,
                       (uint32_t)privep->inbuf + 0x8000,
                       pksz,
-                      len <= pksz ? 0 : (uint32_t)dma_list);
+                      len <= pksz ? 0 : (uint32_t)g_dma_list);
 
-  lc823450_dmastart(hdma, usbdev_dma_callback, &dma_wait);
+  lc823450_dmastart(g_hdma, usbdev_dma_callback, &dma_wait);
 
   putreg32(len, USB_DMATCI1);
 
@@ -1837,7 +1840,7 @@ void usbdev_msc_write_enter0(void)
   privep = &g_usbdev.eplist[CONFIG_USBMSC_EPBULKOUT];
   privep->epcmd &= ~USB_EPCMD_READY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKOUT, (privep->epcmd));
-  lc823450_dmareauest_dir(hdma, DMA_REQUEST_USBDEV, 0);
+  lc823450_dmareauest_dir(g_hdma, DMA_REQUEST_USBDEV, 0);
   nxsem_init(&dma_wait, 0, 0);
 }
 
@@ -1892,30 +1895,30 @@ int usbdev_msc_epread(void *buf, int len)
 
   for (i = 1; i < len / pksz; i++)
     {
-      dma_list[i - 1].srcaddr = (uint32_t)privep->outbuf + 0x8000;
-      dma_list[i - 1].dstaddr = (uint32_t)buf + i * pksz;
+      g_dma_list[i - 1].srcaddr = (uint32_t)privep->outbuf + 0x8000;
+      g_dma_list[i - 1].dstaddr = (uint32_t)buf + i * pksz;
       if (i == (len / pksz) - 1)
         {
           /* last link */
 
-          dma_list[i - 1].nextlli = 0;
-          dma_list[i - 1].ctrl = ctrl | LC823450_DMA_ITC | pksz;
+          g_dma_list[i - 1].nextlli = 0;
+          g_dma_list[i - 1].ctrl = ctrl | LC823450_DMA_ITC | pksz;
         }
       else
         {
-          dma_list[i - 1].nextlli = (uint32_t)&dma_list[i];
-          dma_list[i - 1].ctrl = ctrl | pksz;
+          g_dma_list[i - 1].nextlli = (uint32_t)&g_dma_list[i];
+          g_dma_list[i - 1].ctrl = ctrl | pksz;
         }
     }
 
-  lc823450_dmallsetup(hdma,
+  lc823450_dmallsetup(g_hdma,
                       ctrl,
                       (uint32_t)privep->outbuf + 0x8000,
                       (uint32_t)buf,
                       pksz,
-                      len <= pksz ? 0 : (uint32_t)dma_list);
+                      len <= pksz ? 0 : (uint32_t)g_dma_list);
 
-  lc823450_dmastart(hdma, usbdev_dma_callback, &dma_wait);
+  lc823450_dmastart(g_hdma, usbdev_dma_callback, &dma_wait);
 
   putreg32(len, USB_DMATCI1);
   putreg32(64 << USB_DMAC_BSIZE_SHIFT |
@@ -1929,7 +1932,7 @@ int usbdev_msc_epread(void *buf, int len)
 
 void usbdev_msc_stop(void)
 {
-  lc823450_dmastop(hdma);
+  lc823450_dmastop(g_hdma);
   nxsem_post(&dma_wait);
 }
 #endif /* CONFIG_USBMSC */
