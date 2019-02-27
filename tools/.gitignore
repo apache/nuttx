@@ -15,6 +15,7 @@
 /mksyscall
 /mkversion
 /nxstyle
+/rmcr
 /*.exe
 /*.dSYM
 /.k2h-body.dat
