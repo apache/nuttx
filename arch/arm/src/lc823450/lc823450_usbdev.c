@@ -220,7 +220,7 @@ static void usbdev_pmnotify(struct pm_callback_s *cb,
                             enum pm_state_e pmstate);
 static struct pm_callback_s g_pm_cb =
 {
-  .notify = usbdev_pmnotify,
+  .notify      = usbdev_pmnotify,
 };
 #endif
 

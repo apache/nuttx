@@ -1004,7 +1004,7 @@ int main(int argc, char **argv, char **envp)
                     int next;
 
                     curr = n;
-                    if (line[curr-1] != ' ')
+                    if (line[curr - 1] != ' ')
                       {
                         fprintf(stderr,
                                 "Operator/assignment must be preceded with whitespace at line %d:%d\n",
