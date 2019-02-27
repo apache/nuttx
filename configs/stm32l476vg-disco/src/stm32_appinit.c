@@ -208,7 +208,8 @@ FAR struct mtd_dev_s *mtd_temp;
 
         /* Setup a partition of 256KiB for our file system. */
 
-        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY, (unsigned long)(uintptr_t)&geo);
+        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY,
+                        (unsigned long)(uintptr_t)&geo);
         if (ret < 0)
           {
             _err("ERROR: MTDIOC_GEOMETRY failed\n");
@@ -291,8 +292,8 @@ FAR struct mtd_dev_s *mtd_temp;
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a
+   * thread that will monitor for USB connection and disconnection events.
    */
 
   ret = stm32l4_usbhost_initialize();
@@ -321,24 +322,26 @@ FAR struct mtd_dev_s *mtd_temp;
 #ifdef CONFIG_BOARDCTL_IOCTL
 int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
-  switch(cmd)
+  switch (cmd)
     {
 #ifdef HAVE_N25QXXX
       case BIOC_ENTER_MEMMAP:
         {
           struct qspi_meminfo_s meminfo;
 
-          /* Set up the meminfo like a regular memory transaction, many of the fields
-           * are not used, the others are to set up for the 'read' command that will
-           * automatically be issued by the controller as needed.
-           * 6 = CONFIG_N25QXXX_DUMMIES;
-           * 0xeb = N25QXXX_FAST_READ_QUADIO;
+          /* Set up the meminfo like a regular memory transaction, many of
+           * the fields are not used, the others are to set up for the
+           * 'read' command that will automatically be issued by the
+           * controller as needed.
+           *
+           *   6    = CONFIG_N25QXXX_DUMMIES;
+           *   0xeb = N25QXXX_FAST_READ_QUADIO;
            */
 
           meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
           meminfo.addrlen = 3;
-          meminfo.dummies = 6;    //CONFIG_N25QXXX_DUMMIES;
-          meminfo.cmd     = 0xeb;//N25QXXX_FAST_READ_QUADIO;
+          meminfo.dummies = 6;    /* CONFIG_N25QXXX_DUMMIES; */
+          meminfo.cmd     = 0xeb; /* N25QXXX_FAST_READ_QUADIO; */
           meminfo.addr    = 0;
           meminfo.buflen  = 0;
           meminfo.buffer  = NULL;
@@ -354,8 +357,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
 #endif
 
       default:
-          return -EINVAL;
-        break;
+        return -EINVAL;
     }
 
     return OK;

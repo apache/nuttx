@@ -1126,7 +1126,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct hrtim_dev_s* stm32_hrtiminitialize(void);
+FAR struct hrtim_dev_s *stm32_hrtiminitialize(void);
 
 /****************************************************************************
  * Name: hrtim_register

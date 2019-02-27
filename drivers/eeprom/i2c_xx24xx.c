@@ -249,7 +249,7 @@ static int ee24xx_waitwritecomplete(FAR struct ee24xx_dev_s *eedev,
      ret = I2C_TRANSFER(eedev->i2c, msgs, 1);
      retries--;
     }
-  while(ret != 0 && retries > 0);
+  while (ret != 0 && retries > 0);
 
   return ret;
 }
@@ -279,7 +279,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
-  msgs[0].buffer    = eedev->addrlen==2 ? &maddr[0] : &maddr[1];
+  msgs[0].buffer    = eedev->addrlen == 2 ? &maddr[0] : &maddr[1];
   msgs[0].length    = eedev->addrlen;
 
   /* Write data without a restart nor a control byte */
@@ -287,7 +287,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   msgs[1].frequency = msgs[0].frequency;
   msgs[1].addr      = msgs[0].addr;
   msgs[1].flags     = I2C_M_NOSTART;
-  msgs[1].buffer    = (uint8_t*)buffer;
+  msgs[1].buffer    = (uint8_t *)buffer;
   msgs[1].length    = len;
 
   return I2C_TRANSFER(eedev->i2c, msgs, 2);
@@ -441,22 +441,23 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Opengroup.org:
    *
-   *  "The lseek() function shall allow the file offset to be set beyond the end
-   *   of the existing data in the file. If data is later written at this point,
-   *   subsequent reads of data in the gap shall return bytes with the value 0
-   *   until data is actually written into the gap."
+   *  "The lseek() function shall allow the file offset to be set beyond the
+   *   end of the existing data in the file. If data is later written at
+   *   this point, subsequent reads of data in the gap shall return bytes
+   *   with the value 0 until data is actually written into the gap."
    *
-   * We can conform to the first part, but not the second.  But return EINVAL if
+   * We can conform to the first part, but not the second.  But return EINVAL
+   * if
    *
-   *  "...the resulting file offset would be negative for a regular file, block
-   *   special file, or directory."
+   *  "...the resulting file offset would be negative for a regular file,
+   *   block special file, or directory."
    */
 
   if (newpos >= 0)
     {
       filep->f_pos = newpos;
       ret = newpos;
-      finfo("SEEK newpos %d\n",newpos);
+      finfo("SEEK newpos %d\n", newpos);
     }
   else
     {
@@ -513,7 +514,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   msgs[0].frequency = eedev->freq;
   msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
-  msgs[0].buffer    = eedev->addrlen==2 ? &addr[0] : &addr[1];
+  msgs[0].buffer    = eedev->addrlen == 2 ? &addr[0] : &addr[1];
   msgs[0].length    = eedev->addrlen;
 
   /* Read data */
@@ -521,7 +522,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   msgs[1].frequency = msgs[0].frequency;
   msgs[1].addr      = msgs[0].addr;
   msgs[1].flags     = I2C_M_READ;
-  msgs[1].buffer    = (uint8_t*)buffer;
+  msgs[1].buffer    = (uint8_t *)buffer;
   msgs[1].length    = len;
 
   ret = I2C_TRANSFER(eedev->i2c, msgs, 2);
@@ -602,8 +603,8 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
 
   if (pageoff > 0)
     {
-      finfo("First %d unaligned bytes at %d (pageoff %d)\n", cnt, filep->f_pos,
-            pageoff);
+      finfo("First %d unaligned bytes at %d (pageoff %d)\n",
+            cnt, filep->f_pos, pageoff);
 
       ret = ee24xx_writepage(eedev, filep->f_pos, buffer, cnt);
       if (ret < 0)

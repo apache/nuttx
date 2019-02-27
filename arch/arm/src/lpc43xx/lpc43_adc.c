@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_adc.c
  *
  *   Copyright(C) 2012, 2016 Gregory Nutt. All rights reserved.
@@ -42,7 +42,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -164,7 +164,8 @@ static struct up_dev_s g_adcpriv =
   .mask_int    = CONFIG_LPC43_ADC0_MASK,
   .irq         = LPC43M4_IRQ_ADC0,
   .timer       = CONFIG_LPC43_ADC0_USE_TIMER,
-  .m_ch        = (CONFIG_LPC43_ADC0_MASK & (CONFIG_LPC43_ADC0_MASK - 1)) ? true : false
+  .m_ch        = (CONFIG_LPC43_ADC0_MASK & (CONFIG_LPC43_ADC0_MASK - 1)) ?
+                 true : false
 };
 
 static struct adc_dev_s g_adcdev =
@@ -181,8 +182,8 @@ static struct adc_dev_s g_adcdev =
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -227,7 +228,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval |= CCU_CLK_CFG_RUN;
   putreg32(regval, LPC43_CCU1_APB3_ADC0_CFG);
 
-  /* Calc config value*/
+  /* Calc config value */
 
   regval  = ADC_CR_PDN;
   regval |= priv->mask;
@@ -248,7 +249,8 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
           /* Enable synch timer 2 match 0 to adc */
 
-          putreg32(GIMA_EDGE | GIMA_SYNCH | GIMA_ADC1_SELECT_T2MAT0, LPC43_GIMA_ADCSTART1);
+          putreg32(GIMA_EDGE | GIMA_SYNCH | GIMA_ADC1_SELECT_T2MAT0,
+                   LPC43_GIMA_ADCSTART1);
 
           /* Power on */
 
@@ -264,12 +266,13 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
           putreg32(LPC43_CCLK/priv->freq/2-1, LPC43_TIMER2_BASE+LPC43_TMR_PR_OFFSET); /* set clock, divide by 2 - bug in chip */
 
-          putreg32(1, LPC43_TMR2_MR0); /* set match on 1*/
+          putreg32(1, LPC43_TMR2_MR0); /* set match on 1 */
         }
       else
         {
-          uint32_t clkdiv = BOARD_ABP3_FREQUENCY/priv->freq +(BOARD_ABP3_FREQUENCY%priv->freq != 0) - 1;
-          regval |= clkdiv<<ADC_CR_CLKDIV_SHIFT;
+          uint32_t clkdiv = BOARD_ABP3_FREQUENCY / priv->freq +
+                           (BOARD_ABP3_FREQUENCY % priv->freq != 0) - 1;
+          regval |= clkdiv << ADC_CR_CLKDIV_SHIFT;
         }
     }
 
@@ -480,7 +483,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 
   /* Read data, clear interrupt by this */
 
-  for(i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++)
     {
       if (priv->mask & (1 << i))
         {

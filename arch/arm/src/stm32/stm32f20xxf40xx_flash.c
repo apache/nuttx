@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32f20xx40xx_flash.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -31,19 +31,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provides standard flash access functions, to be used by the  flash mtd driver.
- * The interface is defined in the include/nuttx/progmem.h
+/* Provides standard flash access functions, to be used by the  flash mtd
+ * driver.  The interface is defined in the include/nuttx/progmem.h
  *
  * Requirements during write/erase operations on FLASH:
  *  - HSI must be ON.
  *  - Low Power Modes are not permitted during write/erase
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -67,9 +67,9 @@
 #  warning "Default Flash Configuration Used - See Override Flash Size Designator"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define FLASH_KEY1         0x45670123
 #define FLASH_KEY2         0xcdef89ab
@@ -77,15 +77,15 @@
 #define FLASH_OPTKEY2      0x4c5d6e7f
 #define FLASH_ERASEDVALUE  0xff
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static sem_t g_sem = SEM_INITIALIZER(1);
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static void sem_lock(void)
 {
@@ -150,9 +150,9 @@ static void data_cache_enable(void)
 }
 #endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_flash_unlock(void)
 {
@@ -168,13 +168,13 @@ void stm32_flash_lock(void)
   sem_unlock();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_flash_writeprotect
  *
  * Description:
  *   Enable or disable the write protection of a flash sector.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_flash_writeprotect(size_t page, bool enabled)
 {
@@ -213,11 +213,11 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 
   if (enabled)
     {
-      val &= ~(1 << (16+page) );
+      val &= ~(1 << (16 + page));
     }
   else
     {
-      val |=  (1 << (16+page) );
+      val |=  (1 << (16 + page));
     }
 
   /* Unlock options */
@@ -235,7 +235,10 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 
   /* Wait for completion */
 
-  while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
 
   /* Relock options */
 

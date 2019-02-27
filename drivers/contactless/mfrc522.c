@@ -100,9 +100,10 @@ static void mfrc522_unlock(FAR struct spi_dev_s *spi);
 
 static int mfrc522_open(FAR struct file *filep);
 static int mfrc522_close(FAR struct file *filep);
-static ssize_t mfrc522_read(FAR struct file *, FAR char *, size_t);
-static ssize_t mfrc522_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
+static ssize_t mfrc522_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
+static ssize_t mfrc522_write(FAR struct file *filep,
+                             FAR const char *buffer, size_t buflen);
 static int mfrc522_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
 
@@ -119,10 +120,13 @@ void mfrc522_softreset(FAR struct mfrc522_dev_s *dev);
 int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
                         FAR struct picc_uid_s *uid, uint8_t validbits);
 
-/* IRQ Handling TODO:
-static int mfrc522_irqhandler(FAR int irq, FAR void *context, FAR void* dev);
-static inline int mfrc522_attachirq(FAR struct mfrc522_dev_s *dev, xcpt_t isr);
-*/
+#if 0 /* TODO */
+/* IRQ Handling */
+
+static int mfrc522_irqhandler(FAR int irq, FAR void *context, FAR void *dev);
+static inline int mfrc522_attachirq(FAR struct mfrc522_dev_s *dev,
+                                    xcpt_t isr);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -384,12 +388,12 @@ int mfrc522_calc_crc(FAR struct mfrc522_dev_s *dev, uint8_t *buffer,
       tstart.tv_nsec -= 1000 * 1000 * 1000;
     }
 
-  while(1)
+  while (1)
     {
       uint8_t irqreg;
 
       irqreg = mfrc522_readu8(dev, MFRC522_DIV_IRQ_REG);
-      if ( irqreg & MFRC522_CRC_IRQ)
+      if (irqreg & MFRC522_CRC_IRQ)
         {
           break;
         }
@@ -488,7 +492,8 @@ int mfrc522_comm_picc(FAR struct mfrc522_dev_s *dev, uint8_t command,
   if (command == MFRC522_TRANSCV_CMD)
     {
       value = mfrc522_readu8(dev, MFRC522_BIT_FRAMING_REG);
-      mfrc522_writeu8(dev, MFRC522_BIT_FRAMING_REG, value | MFRC522_START_SEND);
+      mfrc522_writeu8(dev, MFRC522_BIT_FRAMING_REG,
+                      value | MFRC522_START_SEND);
     }
 
   /* Wait for the command to complete */
@@ -962,7 +967,8 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
           /* Transmit the buffer and receive the response */
 
           result = mfrc522_transcv_data(dev, buffer, buffer_used, resp_buf,
-                                        &resp_len, &txlastbits, rxalign, false);
+                                        &resp_len, &txlastbits, rxalign,
+                                        false);
 
           /* More than one PICC in the field => collision */
 
@@ -1023,6 +1029,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
               else
                 {
                   /* This was an ANTICOLLISION. */
+
                   /* We have all 32 bits of the UID in this Cascade Level */
 
                   curr_level_known_bits = 32;
@@ -1033,6 +1040,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
         }
 
       /* We do not check the CBB - it was constructed by us above. */
+
       /* Copy the found UID bytes from buffer[] to uid->uid_data[] */
 
       i = (buffer[2] == PICC_CMD_CT) ? 3 : 2;   /* source index in buffer[] */
@@ -1286,11 +1294,12 @@ void mfrc522_init(FAR struct mfrc522_dev_s *dev)
 
 int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
 {
-  uint8_t zeros[25] = {0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0,
-                       0, 0, 0, 0, 0};
+  uint8_t zeros[25] =
+  {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0
+  };
   char outbuf[3 * 8 + 1];
   uint8_t result[64];
   int i;
@@ -1599,7 +1608,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* If returned firmware version is unknown don't register the device */
 
-  if (fwver != 0x90 && fwver != 0x91 && fwver != 0x92 && fwver != 0x88 )
+  if (fwver != 0x90 && fwver != 0x91 && fwver != 0x92 && fwver != 0x88)
     {
       mfrc522err("None supported device detected!\n");
       goto firmware_error;

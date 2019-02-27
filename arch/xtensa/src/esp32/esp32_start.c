@@ -98,8 +98,8 @@ void IRAM_ATTR __start(void)
     register uint32_t *ptr;
     register int i;
 
-      /* If stack debug is enabled, then fill the stack with a recognizable value
-       * that we can use later to test for high water marks.
+      /* If stack debug is enabled, then fill the stack with a recognizable
+       * value that we can use later to test for high water marks.
        */
 
       for (i = 0, ptr = g_idlestack;  i < IDLETHREAD_STACKWORDS; i++)
@@ -153,5 +153,5 @@ void IRAM_ATTR __start(void)
   /* Bring up NuttX */
 
   nx_start();
-  for(; ; ); /* Should not return */
+  for (; ; ); /* Should not return */
 }

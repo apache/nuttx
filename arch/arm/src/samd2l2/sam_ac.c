@@ -129,14 +129,16 @@ int sam_ac_initialize(uint8_t gclkgen)
 
 int sam_ac_config(uint8_t channel, uint32_t compctrl)
 {
-  switch(channel)
+  switch (channel)
     {
       case 0:
         putreg32(compctrl, SAM_AC_COMPCTRL0);
         break;
+
       case 1:
         putreg32(compctrl, SAM_AC_COMPCTRL1);
         break;
+
       default:
         return -ENODEV;
     }
@@ -149,24 +151,36 @@ int sam_ac_config(uint8_t channel, uint32_t compctrl)
 int sam_ac_enable(uint8_t channel, bool enable)
 {
   uint32_t regval;
-  switch(channel)
+  switch (channel)
     {
       case 0:
         regval = getreg32(SAM_AC_COMPCTRL0);
-        if(enable == true)
-          regval |= AC_COMPCTRL_ENABLE;
+        if (enable == true)
+          {
+            regval |= AC_COMPCTRL_ENABLE;
+          }
         else
-          regval &= ~AC_COMPCTRL_ENABLE;
+          {
+            regval &= ~AC_COMPCTRL_ENABLE;
+          }
+
         putreg32(regval, SAM_AC_COMPCTRL0);
         break;
+
       case 1:
         regval = getreg32(SAM_AC_COMPCTRL1);
-        if(enable == true)
-          regval |= AC_COMPCTRL_ENABLE;
+        if (enable == true)
+          {
+            regval |= AC_COMPCTRL_ENABLE;
+          }
         else
-          regval &= ~AC_COMPCTRL_ENABLE;
+          {
+            regval &= ~AC_COMPCTRL_ENABLE;
+          }
+
         putreg32(regval, SAM_AC_COMPCTRL1);
         break;
+
       default:
         return -ENODEV;
     }

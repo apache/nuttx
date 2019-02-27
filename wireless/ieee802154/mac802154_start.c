@@ -82,10 +82,11 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
    * attempts to transmit a coordinator realignment command frame as described
    * in 5.1.2.3.2. If the transmission of the coordinator realignment command
    * fails due to a channel access failure, the MLME will not make any changes
-   * to the superframe configuration. (i.e., no PIB attributes will be changed).
-   * If the coordinator realignment command is successfully transmitted, the
-   * MLME updates the PIB attributes BeaconOrder, SuperframeOrder, PANId,
-   * ChannelPage, and ChannelNumber parameters. [1] pg. 106
+   * to the superframe configuration. (i.e., no PIB attributes will be
+   * changed).  If the coordinator realignment command is successfully
+   * transmitted, the MLME updates the PIB attributes BeaconOrder,
+   * SuperframeOrder, PANId, ChannelPage, and ChannelNumber parameters.
+   * [1] pg. 106
    */
 
   if (req->coordrealign)
@@ -122,7 +123,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   /* Set the beacon order */
 
-  if(req->beaconorder > 15)
+  if (req->beaconorder > 15)
     {
       ret = -EINVAL;
       goto errout;
@@ -136,7 +137,7 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
     {
       /* Set the superframe order */
 
-      if(req->superframeorder > 15)
+      if (req->superframeorder > 15)
         {
           ret = -EINVAL;
           goto errout;
@@ -158,10 +159,10 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   if (priv->sfspec.beaconorder < 15)
     {
-      /* If the BeaconOrder parameter is less than 15, the MLME sets macBattLifeExt to
-       * the value of the BatteryLifeExtension parameter. If the BeaconOrder parameter
-       * equals 15, the value of the BatteryLifeExtension parameter is ignored.
-       * [1] pg. 106
+      /* If the BeaconOrder parameter is less than 15, the MLME sets
+       * macBattLifeExt to the value of the BatteryLifeExtension parameter.
+       * If the BeaconOrder parameter equals 15, the value of the
+       * BatteryLifeExtension parameter is ignored.  [1] pg. 106
        */
 
       priv->sfspec.ble = req->battlifeext;

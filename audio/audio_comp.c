@@ -960,12 +960,13 @@ int audio_comp_initialize(FAR const char *name, ...)
 
   priv->export.ops = &g_audio_comp_ops;
 
-  while(va_arg(ap, FAR struct audio_lowerhalf_s *))
+  while (va_arg(ap, FAR struct audio_lowerhalf_s *))
     {
       priv->count++;
     }
 
-  priv->lower = kmm_calloc(priv->count, sizeof(FAR struct audio_lowerhalf_s *));
+  priv->lower = kmm_calloc(priv->count,
+                           sizeof(FAR struct audio_lowerhalf_s *));
   if (priv->lower == NULL)
     {
       goto free_priv;

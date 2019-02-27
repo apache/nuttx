@@ -620,14 +620,15 @@ static void esp32_shutdown(struct uart_dev_s *dev)
  * Name: esp32_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -680,8 +681,8 @@ static int esp32_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -760,7 +761,8 @@ static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
        * data, possibly resulting in an overrun error.
        */
 
-     if ((enabled & (UART_RXFIFO_FULL_INT_ENA | UART_RXFIFO_TOUT_INT_ENA)) != 0)
+     if ((enabled & (UART_RXFIFO_FULL_INT_ENA |
+                     UART_RXFIFO_TOUT_INT_ENA)) != 0)
        {
          /* Is there any data waiting in the Rx FIFO? */
 
@@ -774,8 +776,8 @@ static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
             }
        }
 
-      /* Are Tx interrupts enabled?  The upper layer will disable Tx interrupts
-       * when it has nothing to send.
+      /* Are Tx interrupts enabled?  The upper layer will disable Tx
+       * interrupts when it has nothing to send.
        */
 
       if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA)) != 0)
@@ -1016,7 +1018,8 @@ static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* Then return the actual received byte */
 
-  return (int)(esp32_serialin(priv, UART_FIFO_OFFSET) & UART_RXFIFO_RD_BYTE_M);
+  return (int)(esp32_serialin(priv, UART_FIFO_OFFSET) &
+               UART_RXFIFO_RD_BYTE_M);
 }
 
 /****************************************************************************
@@ -1037,8 +1040,8 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1149,7 +1152,8 @@ static bool esp32_txready(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) < 0x7f);
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) <
+          0x7f);
 }
 
 /****************************************************************************
@@ -1256,11 +1260,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      while(!esp32_txready(&CONSOLE_DEV));
+      while (!esp32_txready(&CONSOLE_DEV));
       esp32_send(&CONSOLE_DEV, '\r');
     }
 
-  while(!esp32_txready(&CONSOLE_DEV));
+  while (!esp32_txready(&CONSOLE_DEV));
   esp32_send(&CONSOLE_DEV, ch);
 
   esp32_restoreuartint(CONSOLE_DEV.priv, intena);

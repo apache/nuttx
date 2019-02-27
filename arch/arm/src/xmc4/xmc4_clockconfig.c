@@ -37,15 +37,15 @@
  *
  *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- * Infineon Technologies AG (Infineon) is supplying this software for use with
- * Infineon's microcontrollers.  This file can be freely distributed within
- * development tools that are supporting such microcontrollers.
+ * Infineon Technologies AG (Infineon) is supplying this software for use
+ * with Infineon's microcontrollers.  This file can be freely distributed
+ * within development tools that are supporting such microcontrollers.
  *
  * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE.  INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR
+ * SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ****************************************************************************/
 
@@ -130,7 +130,7 @@ static void delay(uint32_t cycles)
 {
   volatile uint32_t i;
 
-  for (i = 0; i < cycles ;++i)
+  for (i = 0; i < cycles; ++i)
     {
       __asm__ __volatile__ ("nop");
     }
@@ -177,6 +177,7 @@ void xmc4_clock_configure(void)
   /* Automatic calibration uses the fSTDBY */
 
   /* Enable HIB domain */
+
   /* Power up HIB domain if and only if it is currently powered down */
 
   regval = getreg32(XMC4_SCU_PWRSTAT);
@@ -188,7 +189,7 @@ void xmc4_clock_configure(void)
 
       /* Wait until HIB domain is enabled */
 
-      while((getreg32(XMC4_SCU_PWRSTAT) & SCU_PWR_HIBEN) == 0)
+      while ((getreg32(XMC4_SCU_PWRSTAT) & SCU_PWR_HIBEN) == 0)
         {
         }
     }
@@ -235,8 +236,8 @@ void xmc4_clock_configure(void)
 
       do
         {
-          /* Check SCU_MIRRSTS to ensure that no transfer over serial interface
-           * is pending.
+          /* Check SCU_MIRRSTS to ensure that no transfer over serial
+           * interface is pending.
            */
 
           while ((getreg32(XMC4_SCU_MIRRSTS) & SCU_MIRRSTS_HDCLR) != 0)
@@ -292,7 +293,8 @@ void xmc4_clock_configure(void)
     {
       regval  = getreg32(XMC4_SCU_OSCHPCTRL);
       regval &= ~(SCU_OSCHPCTRL_MODE_MASK | SCU_OSCHPCTRL_OSCVAL_MASK);
-      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
+      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) <<
+                SCU_OSCHPCTRL_OSCVAL_SHIFT;
       putreg32(regval, XMC4_SCU_OSCHPCTRL);
 
       /* Select OSC_HP clock as PLL input */
@@ -309,7 +311,8 @@ void xmc4_clock_configure(void)
 
       /* Wait till OSC_HP output frequency is usable */
 
-      while ((getreg32(XMC4_SCU_PLLSTAT) & SCU_PLLSTAT_OSC_USABLE) != SCU_PLLSTAT_OSC_USABLE)
+      while ((getreg32(XMC4_SCU_PLLSTAT) & SCU_PLLSTAT_OSC_USABLE) !=
+             SCU_PLLSTAT_OSC_USABLE)
         {
         }
 
@@ -361,7 +364,7 @@ void xmc4_clock_configure(void)
   regval |= SCU_PLLCON0_RESLD;
   putreg32(regval, XMC4_SCU_PLLCON0);
 
-  /* wait for PLL Lock at 24MHz*/
+  /* wait for PLL Lock at 24MHz */
 
   while ((getreg32(XMC4_SCU_PLLSTAT) & SCU_PLLSTAT_VCOLOCK) == 0)
     {
@@ -428,7 +431,8 @@ void xmc4_clock_configure(void)
   putreg32(regval, XMC4_SCU_EXTCLKCR);
 
 #if BOARD_ENABLE_PLL
-  /* PLL frequency stepping...*/
+  /* PLL frequency stepping... */
+
   /* Reset OSCDISCDIS */
 
   regval  = getreg32(XMC4_SCU_PLLCON0);
@@ -482,6 +486,7 @@ void xmc4_clock_configure(void)
   getreg32(regval, XMC4_SCU_USBPLLCON);
 
   /* USB PLL uses as clock input the OSC_HP */
+
   /* check and if not already running enable OSC_HP */
 
   if ((getreg32(XMC4_SCU_OSCHPCTRL) & SCU_OSCHPCTRL_MODE_MASK) != 0U)
@@ -500,7 +505,8 @@ void xmc4_clock_configure(void)
 
       regval  = getreg32(XMC4_SCU_OSCHPCTRL);
       regval &= ~(SCU_OSCHPCTRL_MODE_MASK | SCU_OSCHPCTRL_OSCVAL_MASK);
-      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) << SCU_OSCHPCTRL_OSCVAL_SHIFT;
+      regval |= ((BOARD_XTAL_FREQUENCY / FOSCREF) - 1) <<
+                SCU_OSCHPCTRL_OSCVAL_SHIFT;
       putreg32(regval, XMC4_SCU_OSCHPCTRL);
 
       /* Restart OSC Watchdog */
@@ -511,12 +517,14 @@ void xmc4_clock_configure(void)
 
       /* Wait till OSC_HP output frequency is usable */
 
-      while ((getreg32(XMC4_SCU_PLLSTAT) & SCU_PLLSTAT_OSC_USABLE) != SCU_PLLSTAT_OSC_USABLE)
+      while ((getreg32(XMC4_SCU_PLLSTAT) & SCU_PLLSTAT_OSC_USABLE) !=
+             SCU_PLLSTAT_OSC_USABLE)
         {
         }
     }
 
   /* Setup USB PLL */
+
   /* Go to bypass the USB PLL */
 
   regval  = getreg32(XMC4_SCU_USBPLLCON);
@@ -530,7 +538,8 @@ void xmc4_clock_configure(void)
 
   /* Setup Divider settings for USB PLL */
 
-  regval = (SCU_USBPLLCON_NDIV(BOARD_USB_NDIV) | SCU_USBPLLCON_PDIV(BOARD_USB_PDIV));
+  regval = (SCU_USBPLLCON_NDIV(BOARD_USB_NDIV) |
+            SCU_USBPLLCON_PDIV(BOARD_USB_PDIV));
   putreg32(regval, XMC4_SCU_USBPLLCON);
 
   /* Set OSCDISCDIS */
@@ -570,7 +579,8 @@ void xmc4_clock_configure(void)
 
 #if BOARD_EXTCKL_ENABLE
 #if BOARD_EXTCLK_PIN == EXTCLK_PIN_P0_8
-  /* enable EXTCLK output on P0.8 */
+  /* Enable EXTCLK output on P0.8 */
+
   regval  = getreg32(XMC4_PORT0_HWSEL);
   regval &= ~PORT_HWSEL_HW8_MASK;
   putreg32(regval, XMC4_PORT0_HWSEL);
@@ -584,7 +594,8 @@ void xmc4_clock_configure(void)
   regval |= PORT_IOCR8_PC8(0x11);       /* push-pull output, alt func 1 */
   putreg32(regval, XMC4_PORT0_IOCR8);
 #else
-  /* enable EXTCLK output on P1.15 */
+  /* Enable EXTCLK output on P1.15 */
+
 # warn "Not yet implemented"
 #endif
 #endif

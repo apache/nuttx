@@ -81,7 +81,7 @@ static int sam_eic_isr(int irq, FAR void *context, FAR void *arg)
 
   /* Dispatch the IRQ to the SAM_IRQ_EXTINTn handlers */
 
-  for(bit=0;bit<SAM_IRQ_NEXTINTS;bit++)
+  for (bit = 0; bit < SAM_IRQ_NEXTINTS; bit++)
     {
       if (intflag >> bit & 0x1)
         {
@@ -142,7 +142,8 @@ int sam_eic_initialize(uint8_t gclkgen)
 
   sam_eic_enableperiph();
 
-  regval = GCLK_CLKCTRL_ID_EIC | GCLK_CLKCTRL_GEN(gclkgen) | GCLK_CLKCTRL_CLKEN;
+  regval = GCLK_CLKCTRL_ID_EIC | GCLK_CLKCTRL_GEN(gclkgen) |
+           GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
   putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);

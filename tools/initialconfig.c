@@ -60,7 +60,8 @@
  * Private Types
  ****************************************************************************/
 
-typedef int (*direntcb_t)(const char *dirpath, struct dirent *entry, void *arg);
+typedef int (*direntcb_t)(const char *dirpath, struct dirent *entry,
+                          void *arg);
 
 /****************************************************************************
  * Private Data
@@ -160,7 +161,7 @@ static char *read_line(FILE *stream)
 {
   char *ptr;
 
-  for (;;)
+  for (; ; )
     {
       g_line[MAX_LINE] = '\0';
       if (!fgets(g_line, MAX_LINE, stream))
@@ -415,7 +416,7 @@ static int foreach_dirent(const char *dirpath, direntcb_t cb, void *arg)
       exit(EXIT_FAILURE);
     }
 
-  for (;;)
+  for (; ; )
     {
       ret = readdir_r(dirp, &entry, &result);
       if (ret != 0)
@@ -458,7 +459,8 @@ static int foreach_dirent(const char *dirpath, direntcb_t cb, void *arg)
  *
  ****************************************************************************/
 
-static int enum_architectures(const char *dirpath, struct dirent *entry, void *arg)
+static int enum_architectures(const char *dirpath, struct dirent *entry,
+                              void *arg)
 {
   char *archpath;
   char *testpath;
@@ -689,7 +691,7 @@ char *list_select(char **list, unsigned nitems)
         }
     }
 
-  for(; ; )
+  for (; ; )
     {
       bool input = false;
 
@@ -819,7 +821,8 @@ int main(int argc, char **argv)
   /* Enumerate the MCUs for the selected architecture */
 
   g_nmcu = 0;
-  asprintf(&archpath, "%s%c%s%csrc", g_archdir, g_delim, g_selected_arch, g_delim);
+  asprintf(&archpath, "%s%c%s%csrc",
+           g_archdir, g_delim, g_selected_arch, g_delim);
   foreach_dirent(archpath, enum_mcus, NULL);
 
   /* Select an MCU */

@@ -168,7 +168,8 @@ static void blake2s_set_lastblock(FAR blake2s_state *S)
   S->f[0] = (uint32_t)-1;
 }
 
-static void blake2s_increment_counter(FAR blake2s_state *S, const uint32_t inc)
+static void blake2s_increment_counter(FAR blake2s_state *S,
+                                      const uint32_t inc)
 {
   S->t[0] += inc;
   S->t[1] += (S->t[0] < inc);
@@ -236,8 +237,9 @@ static void blake2s_compress(FAR blake2s_state *S,
   } while(0)
 
   /* Size vs performance trade-off. With unrolling, on ARMv7-M function text
-   * is ~4 KiB and without ~1 KiB. Without unrolling we take ~25% performance
-   * hit. */
+   * is ~4 KiB and without ~1 KiB. Without unrolling we take ~25%
+   * performance hit.
+   */
 
 #if 1
   /* Smaller, slightly slower. */
@@ -249,7 +251,7 @@ static void blake2s_compress(FAR blake2s_state *S,
 #else
   /* Larger, slightly faster. */
 
-  (void)(round=0);
+  (void)(round = 0);
   ROUND(0);
   ROUND(1);
   ROUND(2);
@@ -277,11 +279,15 @@ static void blake2s_compress(FAR blake2s_state *S,
 static void selftest_seq(FAR uint8_t *out, size_t len, uint32_t seed)
 {
   size_t i;
-  uint32_t t, a, b;
+  uint32_t t;
+  uint32_t a;
+  uint32_t b;
 
   a = 0xDEAD4BAD * seed; /* prime */
   b = 1;
+
   /* fill the buf */
+
   for (i = 0; i < len; i++)
     {
       t = a + b;
@@ -304,11 +310,21 @@ static int blake2s_selftest(void)
 
   /* Parameter sets. */
 
-  static const size_t b2s_md_len[4] = { 16, 20, 28, 32 };
-  static const size_t b2s_in_len[6] = { 0, 3, 64, 65, 255, 1024 };
-  size_t i, j, outlen, inlen;
+  static const size_t b2s_md_len[4] =
+  {
+    16, 20, 28, 32
+  };
+  static const size_t b2s_in_len[6] =
+  {
+    0, 3, 64, 65, 255, 1024
+  };
+  size_t i;
+  size_t j;
+  size_t outlen;
+  size_t inlen;
   FAR uint8_t *in;
-  uint8_t md[32], key[32];
+  uint8_t md[32];
+  uint8_t key[32];
   blake2s_state ctx;
   int ret = -1;
 
@@ -418,7 +434,9 @@ int blake2s_init(FAR blake2s_state *S, size_t outlen)
   blake2_store16(P->xof_length, 0);
   P->node_depth = 0;
   P->inner_length = 0;
-  /* memset(P->reserved, 0, sizeof(P->reserved)); */
+#if 0
+  memset(P->reserved, 0, sizeof(P->reserved));
+#endif
   blake2_memset(P->salt, 0, sizeof(P->salt));
   blake2_memset(P->personal, 0, sizeof(P->personal));
   return blake2s_init_param(S, P);
@@ -449,7 +467,9 @@ int blake2s_init_key(FAR blake2s_state *S, size_t outlen, FAR const void *key,
   blake2_store16(P->xof_length, 0);
   P->node_depth = 0;
   P->inner_length = 0;
-  /* memset(P->reserved, 0, sizeof(P->reserved)); */
+#if 0
+  memset(P->reserved, 0, sizeof(P->reserved));
+#endif
   blake2_memset(P->salt, 0, sizeof(P->salt));
   blake2_memset(P->personal, 0, sizeof(P->personal));
 
@@ -465,8 +485,9 @@ int blake2s_init_key(FAR blake2s_state *S, size_t outlen, FAR const void *key,
 
 int blake2s_update(FAR blake2s_state *S, FAR const void *pin, size_t inlen)
 {
-  FAR const unsigned char * in = FAR (const unsigned char *)pin;
-  size_t left, fill;
+  FAR const unsigned char *in = FAR (const unsigned char *)pin;
+  size_t left;
+  size_t fill;
 
   if (inlen <= 0)
     {

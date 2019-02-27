@@ -124,6 +124,7 @@ static void flushconsole(void)
     {
       (void)fflush(g_logstream);
     }
+
   (void)fflush(stdout);
 }
 
@@ -153,10 +154,10 @@ static void sendfile(int fdtarg, char *filename, int verify)
 {
   char chin;
   char chout;
-  int  fdin;
-  int  nbytes;
-  int  ndots;
-  int  ret;
+  int fdin;
+  int nbytes;
+  int ndots;
+  int ret;
 
   /* Source the source file */
 
@@ -176,12 +177,14 @@ static void sendfile(int fdtarg, char *filename, int verify)
     {
       printconsole("Loading file '%s':\n", filename);
     }
+
   flushconsole();
 
   /* This loop processes each byte from the source file */
 
   nbytes = 0;
   ndots  = 0;
+
   while ((ret = readbyte(fdin, &chout)) == 1)
     {
       /* If verbose debug is OFF, then output dots at a low rate */
@@ -192,11 +195,13 @@ static void sendfile(int fdtarg, char *filename, int verify)
             {
               nbytes = 0;
               putconsole('.');
+
               if (++ndots > 72)
                 {
-                   putconsole('\n');
-                   ndots = 0;
+                  putconsole('\n');
+                  ndots = 0;
                 }
+
               flushconsole();
             }
         }
@@ -220,8 +225,8 @@ static void sendfile(int fdtarg, char *filename, int verify)
 
       writebyte(fdtarg, chout);
 
-      /* Get the response from the target.  Loop until the target responds
-       * by either echoing the byte sent or by sending '>'
+      /* Get the response from the target.  Loop until the target responds by
+       * either echoing the byte sent or by sending '>'
        */
 
       do
@@ -263,10 +268,11 @@ static void sendfile(int fdtarg, char *filename, int verify)
 
   writebyte(fdtarg, '>');
   do
-   {
-     ret = readbyte(fdtarg, &chin);
-   }
+    {
+      ret = readbyte(fdtarg, &chin);
+    }
   while (ret == 1 && chin != ENQ);
+
   close(fdin);
   writebyte(fdtarg, ACK);
 }
@@ -278,10 +284,10 @@ static void sendfile(int fdtarg, char *filename, int verify)
 static void receivefile(int fdtarg, char *filename)
 {
   char ch;
-  int  fdout;
-  int  nbytes;
-  int  ndots;
-  int  ret;
+  int fdout;
+  int nbytes;
+  int ndots;
+  int ret;
 
   fdout = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (fdout < 0)
@@ -326,10 +332,11 @@ static void receivefile(int fdtarg, char *filename)
           putconsole('.');
           if (++ndots > 72)
             {
-               putconsole('\n');
-               ndots = 0;
+              putconsole('\n');
+              ndots = 0;
             }
-            flushconsole();
+
+          flushconsole();
         }
 
       ret = readbyte(fdtarg, &ch);
@@ -339,7 +346,7 @@ static void receivefile(int fdtarg, char *filename)
         }
     }
 
-  close (fdout);
+  close(fdout);
 }
 
 /****************************************************************************
@@ -364,8 +371,9 @@ static void getfilename(int fd, char *name)
   while (ret == 1 && ch > ' ')
     {
       *name++ = ch;
-       ret = readbyte(fd, &ch);
+      ret = readbyte(fd, &ch);
     }
+
   *name++ = 0;
 }
 
@@ -384,18 +392,22 @@ static int readbyte(int fd, char *ch)
     {
       if (errno != EAGAIN)
         {
-          printconsole("ERROR: Failed to read from fd=%d: %s\n", fd, strerror(errno));
+          printconsole("ERROR: Failed to read from fd=%d: %s\n", fd,
+                       strerror(errno));
           close_tty();
           exit(12);
         }
+
       return -EAGAIN;
     }
   else if (ret > 1)
     {
-      printconsole("ERROR: Unexpected number of bytes read(%d) from fd=%d\n", ret, fd);
+      printconsole("ERROR: Unexpected number of bytes read(%d) from fd=%d\n",
+                   ret, fd);
       close_tty();
       exit(13);
     }
+
   return ret;
 }
 
@@ -408,7 +420,8 @@ static void writebyte(int fd, char byte)
   int ret = write(fd, &byte, 1);
   if (ret < 0)
     {
-      printconsole("ERROR: Failed to write to fd=%d: %s\n", fd, strerror(errno));
+      printconsole("ERROR: Failed to write to fd=%d: %s\n", fd,
+                   strerror(errno));
       close_tty();
       exit(14);
     }
@@ -432,8 +445,10 @@ static void close_tty(void)
       ret = tcsetattr(g_fd, TCSANOW, &g_termios);
       if (ret < 0)
         {
-          printconsole("ERROR: Failed to restore termios for %s: %s\n", g_ttydev, strerror(errno));
+          printconsole("ERROR: Failed to restore termios for %s: %s\n",
+                       g_ttydev, strerror(errno));
         }
+
       (void)close(g_fd);
     }
 
@@ -460,11 +475,14 @@ static void interrupt(int signo)
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s [-h] [-d] [-t <ttyname>] [-b <baud>] [-l <log-file>]\n", progname);
+  fprintf(stderr,
+          "\nUSAGE: %s [-h] [-d] [-t <ttyname>] [-b <baud>] [-l <log-file>]\n",
+          progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "\t-h: Prints this message then exit.\n");
   fprintf(stderr, "\t-d: Enable debug output (twice for verbose output).\n");
-  fprintf(stderr, "\t-t <ttyname>:  Use <ttyname> device instead of %s.\n", g_dfttydev);
+  fprintf(stderr, "\t-t <ttyname>:  Use <ttyname> device instead of %s.\n",
+          g_dfttydev);
   fprintf(stderr, "\t-b <baud>: Use <baud> instead of %d.\n", DEFAULT_BAUD);
   fprintf(stderr, "\t-l <log-file>: Echo console output in <log-file>.\n");
   exit(exitcode);
@@ -479,14 +497,14 @@ int main(int argc, char **argv, char **envp)
   struct termios tty;
   char filename[MAX_FILEPATH];
   char ch;
-  int  speed;
-  int  opt;
-  int  oflags;
-  int  ret;
+  int speed;
+  int opt;
+  int oflags;
+  int ret;
 
   while ((opt = getopt(argc, argv, ":dt:b:hl:")) != -1)
     {
-      switch(opt)
+      switch (opt)
         {
         case 'd':
           debug++;
@@ -528,25 +546,81 @@ int main(int argc, char **argv, char **envp)
 
   switch (g_baud)
     {
-    case 0:      speed = B0;      break;
-    case 50:     speed = B50;     break;
-    case 75:     speed = B75;     break;
-    case 110:    speed = B110;    break;
-    case 134:    speed = B134;    break;
-    case 150:    speed = B150;    break;
-    case 200:    speed = B200;    break;
-    case 300:    speed = B300;    break;
-    case 600:    speed = B600;    break;
-    case 1200:   speed = B1200;   break;
-    case 1800:   speed = B1800;   break;
-    case 2400:   speed = B2400;   break;
-    case 4800:   speed = B4800;   break;
-    case 9600:   speed = B9600;   break;
-    case 19200:  speed = B19200;  break;
-    case 38400:  speed = B38400;  break;
-    case 57600:  speed = B57600;  break;
-    case 115200: speed = B115200; break;
-    case 230400: speed = B230400; break;
+    case 0:
+      speed = B0;
+      break;
+
+    case 50:
+      speed = B50;
+      break;
+
+    case 75:
+      speed = B75;
+      break;
+
+    case 110:
+      speed = B110;
+      break;
+
+    case 134:
+      speed = B134;
+      break;
+
+    case 150:
+      speed = B150;
+      break;
+
+    case 200:
+      speed = B200;
+      break;
+
+    case 300:
+      speed = B300;
+      break;
+
+    case 600:
+      speed = B600;
+      break;
+
+    case 1200:
+      speed = B1200;
+      break;
+
+    case 1800:
+      speed = B1800;
+      break;
+
+    case 2400:
+      speed = B2400;
+      break;
+
+    case 4800:
+      speed = B4800;
+      break;
+
+    case 9600:
+      speed = B9600;
+      break;
+
+    case 19200:
+      speed = B19200;
+      break;
+
+    case 38400:
+      speed = B38400;
+      break;
+
+    case 57600:
+      speed = B57600;
+      break;
+
+    case 115200:
+      speed = B115200;
+      break;
+
+    case 230400:
+      speed = B230400;
+      break;
 
     default:
       fprintf(stderr, "ERROR: Unsupported BAUD=%d\n", g_baud);
@@ -560,7 +634,8 @@ int main(int argc, char **argv, char **envp)
       g_logstream = fopen(g_logfile, "w");
       if (!g_logstream)
         {
-          fprintf(stderr, "ERROR: Failed to open '%s' for writing\n", g_logfile);
+          fprintf(stderr, "ERROR: Failed to open '%s' for writing\n",
+                  g_logfile);
           return 5;
         }
     }
@@ -581,32 +656,35 @@ int main(int argc, char **argv, char **envp)
       return 7;
     }
 
-  /* Open the selected serial port (blocking)*/
+  /* Open the selected serial port (blocking) */
 
   g_fd = open(g_ttydev, O_RDWR);
   if (g_fd < 0)
     {
-      printconsole("ERROR: Failed to open %s: %s\n", g_ttydev, strerror(errno));
+      printconsole("ERROR: Failed to open %s: %s\n",
+                   g_ttydev, strerror(errno));
       return 8;
     }
 
-  /* Configure the serial port in at the selected baud in 8-bit, no-parity, raw mode
-   * and turn off echo, etc.
+  /* Configure the serial port in at the selected baud in 8-bit, no-parity,
+   * raw mode and turn off echo, etc.
    */
 
   ret = tcgetattr(g_fd, &g_termios);
   if (ret < 0)
     {
-      printconsole("ERROR: Failed to get termios for %s: %s\n", g_ttydev, strerror(errno));
+      printconsole("ERROR: Failed to get termios for %s: %s\n", g_ttydev,
+                   strerror(errno));
       close(g_fd);
       return 9;
     }
 
   memcpy(&tty, &g_termios, sizeof(struct termios));
-  tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+  tty.c_iflag &=
+    ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
   tty.c_oflag &= ~OPOST;
-  tty.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
-  tty.c_cflag &= ~(CSIZE|PARENB);
+  tty.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+  tty.c_cflag &= ~(CSIZE | PARENB);
   tty.c_cflag |= CS8;
 
   (void)cfsetispeed(&tty, speed);
@@ -615,18 +693,20 @@ int main(int argc, char **argv, char **envp)
   ret = tcsetattr(g_fd, TCSANOW, &tty);
   if (ret < 0)
     {
-      printconsole("ERROR: Failed to set termios for %s: %s\n", g_ttydev, strerror(errno));
+      printconsole("ERROR: Failed to set termios for %s: %s\n", g_ttydev,
+                   strerror(errno));
       close(g_fd);
       return 10;
     }
 
 #if 1
-  /* Open the selected serial port (non-blocking)*/
+  /* Open the selected serial port (non-blocking) */
 
   g_fdnb = open(g_ttydev, O_RDONLY | O_NONBLOCK);
   if (g_fdnb < 0)
     {
-      printconsole("ERROR: Failed to open %s: %s\n", g_ttydev, strerror(errno));
+      printconsole("ERROR: Failed to open %s: %s\n",
+                   g_ttydev, strerror(errno));
       return 11;
     }
 #else
@@ -635,7 +715,8 @@ int main(int argc, char **argv, char **envp)
   g_fdnb = dup(g_fd);
   if (g_fdnb < 0)
     {
-      printconsole("ERROR: Failed to dup %s fd=%d: %s\n", g_ttydev, g_fd, strerror(errno));
+      printconsole("ERROR: Failed to dup %s fd=%d: %s\n", g_ttydev, g_fd,
+                   strerror(errno));
       close_tty();
       return 12;
     }
@@ -657,15 +738,15 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
-  /* Catch attempts to control-C out of the program so that we can restore
-   * the TTY settings.
+  /* Catch attempts to control-C out of the program so that we can restore the
+   * TTY settings.
    */
 
   signal(SIGINT, interrupt);
 
   /* Loopo until control-C */
 
-  for (;;)
+  for (; ; )
     {
       /* Read characters from the console, and echo them to the target tty */
 
@@ -686,7 +767,8 @@ int main(int argc, char **argv, char **envp)
       ret = readbyte(g_fdnb, &ch);
       if (ret == 0)
         {
-          printconsole("ERROR: Unexpected number of bytes read(%d) from %s\n", ret, g_ttydev);
+          printconsole("ERROR: Unexpected number of bytes read(%d) from %s\n",
+                       ret, g_ttydev);
           close_tty();
           return 15;
         }
@@ -701,14 +783,19 @@ int main(int argc, char **argv, char **envp)
               ret = readbyte(g_fd, &ch1);
               if (ret != 1)
                 {
-                  printconsole("ERROR: Unexpected number of bytes read(%d) from %s\n", ret, g_ttydev);
+                  printconsole
+                    ("ERROR: Unexpected number of bytes read(%d) from %s\n",
+                     ret, g_ttydev);
                   close_tty();
                   return 15;
                 }
+
               ret = readbyte(g_fd, &ch2);
               if (ret != 1)
                 {
-                  printconsole("ERROR: Unexpected number of bytes read(%d) from %s\n", ret, g_ttydev);
+                  printconsole
+                    ("ERROR: Unexpected number of bytes read(%d) from %s\n",
+                     ret, g_ttydev);
                   close_tty();
                   return 16;
                 }

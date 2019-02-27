@@ -1954,7 +1954,7 @@ errout_with_exclsem:
 
 static int roundf(float num)
 {
-    if(((int)(num + 0.5f)) > num)
+    if (((int)(num + 0.5f)) > num)
       {
         return num + 1;
       }

@@ -244,7 +244,8 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
           x += 2;
         }
 
-      else if (relpath[x] == '/' && relpath[x+1] != '/' && relpath[x+1] != '\0')
+      else if (relpath[x] == '/' && relpath[x + 1] != '/' &&
+               relpath[x + 1] != '\0')
         {
           depth++;
           x++;
@@ -277,7 +278,6 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Sanity checks */
 
   DEBUGASSERT((filep->f_priv == NULL) && (filep->f_inode != NULL));
-
 
   /* Get the mountpoint inode reference from the file structure and the
    * mountpoint private data from the inode structure
@@ -391,12 +391,14 @@ static int hostfs_close(FAR struct file *filep)
   hostfs_semtake(fs);
 
   /* Check if we are the last one with a reference to the file and
-   * only close if we are. */
+   * only close if we are.
+   */
 
   if (hf->crefs > 1)
     {
       /* The file is opened more than once.  Just decrement the
-       * reference count and return. */
+       * reference count and return.
+       */
 
       hf->crefs--;
       goto okout;
@@ -933,7 +935,9 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = (FAR struct hostfs_mountpt_s *)kmm_zalloc(sizeof(struct hostfs_mountpt_s));
+  fs = (FAR struct hostfs_mountpt_s *)
+    kmm_zalloc(sizeof(struct hostfs_mountpt_s));
+
   if (fs == NULL)
     {
       return -ENOMEM;
@@ -951,7 +955,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   ptr = strtok_r(options, ",", &saveptr);
-  while(ptr != NULL)
+  while (ptr != NULL)
     {
       if ((strncmp(ptr, "fs=", 3) == 0))
         {
@@ -964,7 +968,8 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   kmm_free(options);
 
   /* If the global semaphore hasn't been initialized, then
-   * initialized it now. */
+   * initialized it now.
+   */
 
   fs->fs_sem = &g_sem;
   if (!g_seminitialized)

@@ -181,7 +181,7 @@
  *  To configure the ISR timeout using dynamic values (CONFIG_STM32H7_I2C_DYNTIMEO=y):
  *
  *    CONFIG_STM32H7_I2C_DYNTIMEO_USECPERBYTE  (Timeout in microseconds per byte)
- *    CONFIG_STM32H7_I2C_DYNTIMEO_STARTSTOP    (Timeout for start/stop in milliseconds)
+ *    CONFIG_STM32H7_I2C_DYNTIMEO_STARTSTOP    (Timeout for start/stop in msec)
  *
  *  Debugging output enabled with:
  *
@@ -236,7 +236,8 @@
 
 #undef INVALID_CLOCK_SOURCE
 
-#if defined(CONFIG_STM32H7_I2C1) || defined(CONFIG_STM32H7_I2C2) || defined(CONFIG_STM32H7_I2C3)
+#if defined(CONFIG_STM32H7_I2C1) || defined(CONFIG_STM32H7_I2C2) || \
+    defined(CONFIG_STM32H7_I2C3)
 #  if STM32_RCC_D2CCIP2R_I2C123SRC != RCC_D2CCIP2R_I2C123SEL_HSI
 #    warning "Clock Source STM32_RCC_D2CCIP2R_I2C123SRC must be HSI"
 #    define INVALID_CLOCK_SOURCE
@@ -427,10 +428,10 @@ struct stm32_i2c_inst_s
 
 static inline uint16_t stm32_i2c_getreg(FAR struct stm32_i2c_priv_s *priv,
                                         uint8_t offset);
-static inline void stm32_i2c_putreg(FAR struct stm32_i2c_priv_s *priv, uint8_t offset,
-                                    uint16_t value);
-static inline void stm32_i2c_putreg32(FAR struct stm32_i2c_priv_s *priv, uint8_t offset,
-                                    uint32_t value);
+static inline void stm32_i2c_putreg(FAR struct stm32_i2c_priv_s *priv,
+                                    uint8_t offset, uint16_t value);
+static inline void stm32_i2c_putreg32(FAR struct stm32_i2c_priv_s *priv,
+                                      uint8_t offset, uint32_t value);
 static inline void stm32_i2c_modifyreg32(FAR struct stm32_i2c_priv_s *priv,
                                          uint8_t offset, uint32_t clearbits,
                                          uint32_t setbits);
@@ -464,8 +465,8 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv);
 
 static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
                              int count);
-static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                              int count);
+static int stm32_i2c_transfer(FAR struct i2c_master_s *dev,
+                              FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
 static int stm32_i2c_reset(FAR struct i2c_master_s * dev);
 #endif
@@ -676,7 +677,6 @@ static inline void stm32_i2c_putreg32(FAR struct stm32_i2c_priv_s *priv,
   putreg32(value, priv->config->base + offset);
 }
 
-
 /************************************************************************************
  * Name: stm32_i2c_modifyreg32
  *
@@ -759,7 +759,8 @@ static useconds_t stm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 #ifndef CONFIG_I2C_POLLED
 static inline void stm32_i2c_enableinterrupts(struct stm32_i2c_priv_s *priv)
 {
-    stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, (I2C_CR1_TXRX | I2C_CR1_NACKIE));
+    stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
+                          (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
 
@@ -986,7 +987,6 @@ stm32_i2c_disable_reload(FAR struct stm32_i2c_priv_s *priv)
 {
   stm32_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_RELOAD, 0);
 }
-
 
 /************************************************************************************
  * Name: stm32_i2c_sem_waitstop
@@ -1979,7 +1979,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
           priv->flags  = priv->msgv->flags;
 
           /* if this is the last message, disable reload so the
-           * TC event fires next time */
+           * TC event fires next time.
+           */
 
           if (priv->msgc == 0)
             {
@@ -2105,7 +2106,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       stm32_i2c_traceevent(priv, I2CEVENT_ISR_SHUTDOWN, 0);
 
       /* clear pointer to message content to reflect we are done
-       * with the current transaction */
+       * with the current transaction.
+       */
 
       priv->msgv = NULL;
 
@@ -2267,7 +2269,8 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
  *
  ************************************************************************************/
 
-static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count)
+static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
+                             int count)
 {
   struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
   FAR struct stm32_i2c_priv_s *priv = inst->priv;
@@ -2359,12 +2362,12 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
       errval = ETIMEDOUT;
       i2cerr("ERROR: Waitdone timed out CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
-             cr1, cr2,status);
+             cr1, cr2, status);
     }
   else
     {
       i2cinfo("Waitdone success: CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
-             cr1, cr2,status );
+             cr1, cr2, status);
     }
 
   UNUSED(cr1);
@@ -2467,9 +2470,9 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
       status = stm32_i2c_getstatus(priv);
 
-      while(status & I2C_ISR_BUSY)
+      while ((status & I2C_ISR_BUSY) != 0)
         {
-          if((clock_systimer() - start) > timeout)
+          if ((clock_systimer() - start) > timeout)
             {
               i2cerr("ERROR: I2C Bus busy");
               errval = EBUSY;
@@ -2496,8 +2499,8 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
  *
  ************************************************************************************/
 
-static int stm32_i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs,
-                              int count)
+static int stm32_i2c_transfer(FAR struct i2c_master_s *dev,
+                              FAR struct i2c_msg_s *msgs, int count)
 {
   stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
   return stm32_i2c_process(dev, msgs, count);

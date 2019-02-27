@@ -59,12 +59,12 @@
 void am335x_wdog_disable_all(void)
 {
   putreg32(WDT_WSPR_STOP_FEED_A, AM335X_WDT_WSPR);
-  while((getreg32(AM335X_WDT_WWPS) & WDT_WWPS_W_PEND_WSPR) != 0)
+  while ((getreg32(AM335X_WDT_WWPS) & WDT_WWPS_W_PEND_WSPR) != 0)
     {
     }
 
   putreg32(WDT_WSPR_STOP_FEED_B, AM335X_WDT_WSPR);
-  while((getreg32(AM335X_WDT_WWPS) & WDT_WWPS_W_PEND_WSPR) != 0)
+  while ((getreg32(AM335X_WDT_WWPS) & WDT_WWPS_W_PEND_WSPR) != 0)
     {
     }
 }

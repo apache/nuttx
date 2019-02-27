@@ -814,7 +814,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
                   }
                 else
                   {
-                    if ( (ud_delta != 0) && (lr_delta != 0))
+                    if ((ud_delta != 0) && (lr_delta != 0))
                       {
                         priv->gesture_state = FAR_STATE;
                       }
@@ -1006,7 +1006,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
 
   /* Keep looping as long as gesture data is valid */
 
-  while(1)
+  while (1)
     {
       /* Wait some time to collect next batch of FIFO data */
 
@@ -1087,8 +1087,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
                     {
                       if (apds9960_decodegesture(priv))
                         {
-                            //***TODO: U-Turn Gestures
-                            //sninfo("gesture_motion = %d\n", gesture_motion);
+                            /* TODO: U-Turn Gestures */
                         }
                     }
 

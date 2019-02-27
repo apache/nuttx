@@ -36,7 +36,7 @@
  * "Lanczos Implementation of the Gamma Function" - Paul Godfrey (2001)
  * "An Analysis of the Lanczos Gamma Approximation" - Glendon Ralph Pugh (2004)
  *
- * approximation method:
+ * Approximation method:
  *
  *                         (x - 0.5)         S(x)
  * Gamma(x) = (x + g - 0.5)         *  ----------------
@@ -94,7 +94,7 @@
           __x = (x);                        \
         }                                   \
     } \
-  while(0)
+  while (0)
 
 #define N 12
 

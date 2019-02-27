@@ -72,11 +72,15 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  if(led == LED_STARTED)
-    stm32_gpiowrite(GPIO_LED_STATUS, true);
+  if (led == LED_STARTED)
+    {
+      stm32_gpiowrite(GPIO_LED_STATUS, true);
+    }
 
-  if(led == LED_ASSERTION || led == LED_PANIC)
+  if (led == LED_ASSERTION || led == LED_PANIC)
+    {
       stm32_gpiowrite(GPIO_LED_STATUS, false);
+    }
 }
 
 /****************************************************************************
@@ -85,11 +89,15 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  if(led == LED_STARTED)
+  if (led == LED_STARTED)
+    {
       stm32_gpiowrite(GPIO_LED_STATUS, false);
+    }
 
-    if(led == LED_ASSERTION || led == LED_PANIC)
-        stm32_gpiowrite(GPIO_LED_STATUS, true);
+  if (led == LED_ASSERTION || led == LED_PANIC)
+    {
+      stm32_gpiowrite(GPIO_LED_STATUS, true);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

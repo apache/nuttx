@@ -98,7 +98,7 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
 {
   uint8_t reg;
 
-  /* Manually enable the LNA*/
+  /* Manually enable the LNA */
 
   mrf24j40_setpamode(dev, MRF24J40_PA_ED);
 
@@ -116,7 +116,7 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
    *    complete.
    */
 
-  while(!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
+  while (!(mrf24j40_getreg(dev->spi, MRF24J40_BBREG6) & 0x01));
 
   /* 3. Read RSSI 0x210<7:0> – The RSSI register contains the averaged RSSI
    *    received power level for 8 symbol periods.
@@ -239,7 +239,7 @@ void mrf24j40_dopoll_gts(FAR void *arg)
             {
               /* Now the txdesc is in use */
 
-              dev->gts_busy[gts]= 1;
+              dev->gts_busy[gts] = 1;
 
               /* Setup the transaction on the device in the open GTS FIFO */
 
@@ -287,7 +287,8 @@ void mrf24j40_norm_setup(FAR struct mrf24j40_radio_s *dev,
 
   /* Setup the FIFO */
 
-  mrf24j40_setup_fifo(dev, frame->io_data, frame->io_len, MRF24J40_TXNORM_FIFO);
+  mrf24j40_setup_fifo(dev, frame->io_data, frame->io_len,
+                      MRF24J40_TXNORM_FIFO);
 
   /* If the frame control field contains an acknowledgment request, set the
    * TXNACKREQ bit. See IEEE 802.15.4/2003 7.2.1.1 page 112 for info.
@@ -364,8 +365,9 @@ void mrf24j40_gts_setup(FAR struct mrf24j40_radio_s *dev, uint8_t fifo,
  *
  ****************************************************************************/
 
-void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *buf,
-                         uint8_t length, uint32_t fifo_addr)
+void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
+                         FAR const uint8_t *buf, uint8_t length,
+                         uint32_t fifo_addr)
 {
 
   int hlen = 3; /* Include frame control and seq number */
@@ -377,11 +379,13 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *bu
   frame_ctrl = buf[0];
   frame_ctrl |= (buf[1] << 8);
 
-  if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR)== IEEE802154_ADDRMODE_SHORT)
+  if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) ==
+      IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2 + 2; /* Destination PAN + shortaddr */
     }
-  else if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) == IEEE802154_ADDRMODE_EXTENDED)
+  else if ((frame_ctrl & IEEE802154_FRAMECTRL_DADDR) ==
+           IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 2 + 8; /* Destination PAN + extaddr */
     }
@@ -391,11 +395,13 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *bu
       hlen += 2; /* No PAN compression, source PAN is different from dest PAN */
     }
 
-  if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR)== IEEE802154_ADDRMODE_SHORT)
+  if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) ==
+      IEEE802154_ADDRMODE_SHORT)
     {
       hlen += 2; /* Source saddr */
     }
-  else if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) == IEEE802154_ADDRMODE_EXTENDED)
+  else if ((frame_ctrl & IEEE802154_FRAMECTRL_SADDR) ==
+           IEEE802154_ADDRMODE_EXTENDED)
     {
       hlen += 8; /* Ext saddr */
     }
@@ -403,7 +409,6 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *bu
   /* Header len, 0, TODO for security modes */
 
   mrf24j40_setreg(dev->spi, fifo_addr++, hlen);
-
 
   /* Frame length */
 

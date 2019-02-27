@@ -64,6 +64,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Asserions ****************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32F334R8
@@ -92,42 +93,42 @@
 
 /* Phase 1 is TIM1 CH1 */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 0
-#  ifndef CONFIG_STM32_TIM1_CH1OUT
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 0
+#    ifndef CONFIG_STM32_TIM1_CH1OUT
+#      error
+#    endif
+#    ifndef CONFIG_STM32_TIM6
+#      error
+#    endif
 #  endif
-#  ifndef CONFIG_STM32_TIM6
-#    error
-#  endif
-#endif
 
 /* Phase 2 is TIM1 CH2 */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 1
-#  ifndef CONFIG_STM32_TIM1_CH2OUT
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 1
+#    ifndef CONFIG_STM32_TIM1_CH2OUT
+#      error
+#    endif
 #  endif
-#endif
 
 /* Phase 3 is TIM1 CH3 */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 2
-#  ifndef CONFIG_STM32_TIM1_CH3OUT
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 2
+#    ifndef CONFIG_STM32_TIM1_CH3OUT
+#      error
+#    endif
 #  endif
-#endif
 
 /* Phase 4 is TIM1 CH4 */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 3
-#  ifndef CONFIG_STM32_TIM1_CH4OUT
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 3
+#    ifndef CONFIG_STM32_TIM1_CH4OUT
+#      error
+#    endif
+#  endif
+
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM != PWM_TIM1_NCHANNELS
 #    error
 #  endif
-#endif
-
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM != PWM_TIM1_NCHANNELS
-#  error
-#endif
 
 #endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
 
@@ -137,57 +138,57 @@
 
 /* Phase 1 is TIMA */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 0
-#  ifndef CONFIG_STM32_HRTIM_TIMA
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 0
+#    ifndef CONFIG_STM32_HRTIM_TIMA
+#      error
+#    endif
+#    ifndef CONFIG_STM32_HRTIM_MASTER
+#      error
+#    endif
 #  endif
-#  ifndef CONFIG_STM32_HRTIM_MASTER
-#    error
-#  endif
-#endif
 
 /* Phase 2 is TIMB */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 1
-#  ifndef CONFIG_STM32_HRTIM_TIMB
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 1
+#    ifndef CONFIG_STM32_HRTIM_TIMB
+#      error
+#    endif
 #  endif
-#endif
 
 /* Phase 3 is TIMC */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 2
-#  ifndef CONFIG_STM32_HRTIM_TIMC
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 2
+#    ifndef CONFIG_STM32_HRTIM_TIMC
+#      error
+#    endif
 #  endif
-#endif
 
 /* Phase 4 is TIMD */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 3
-#  ifndef CONFIG_STM32_HRTIM_TIMD
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 3
+#    ifndef CONFIG_STM32_HRTIM_TIMD
+#      error
+#    endif
 #  endif
-#endif
 
 /* Phase 5 is TIME */
 
-#if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 4
-#  ifndef CONFIG_STM32_HRTIM_TIME
-#    error
+#  if CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM > 4
+#    ifndef CONFIG_STM32_HRTIM_TIME
+#      error
+#    endif
 #  endif
-#endif
 
 #endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
 
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1
-#define PWM_TIMERS_IN_USE CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM
+#  define PWM_TIMERS_IN_USE CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM
 #endif
 
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_TIM1
-#define PWM_TIMERS_IN_USE 1
+#  define PWM_TIMERS_IN_USE 1
 #endif
 
 #define SPWM_PHASE_SHIFT ((360.0f/CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM))
@@ -211,19 +212,20 @@
 
 struct spwm_s
 {
-  FAR struct pwm_timer_s     *pwm;
+  FAR struct pwm_timer_s *pwm;
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_TIM1
   FAR struct stm32_tim_dev_s *tim;
 #endif
-  float                      waveform[SAMPLES_NUM];   /* Waveform samples */
-  float                      phase_step;              /* Waveform phase step */
-  float                      waveform_freq;           /* Waveform frequency */
-  uint16_t                   cmp[SAMPLES_NUM];        /* PWM TIM compare table */
-  uint16_t                   per;                     /* PWM TIM period */
-  uint16_t                   samples;                 /* Modulation waveform samples num */
-  uint16_t                   phase_shift[PHASES_NUM]; /* Phase offset */
-  volatile uint16_t          sample_now[PHASES_NUM];  /* Current sumple number for phase */
-  uint8_t                    phases;                  /* Number of PWM phases */
+  float waveform[SAMPLES_NUM];        /* Waveform samples */
+  float phase_step;                   /* Waveform phase step */
+  float waveform_freq;                /* Waveform frequency */
+  uint16_t cmp[SAMPLES_NUM];          /* PWM TIM compare table */
+  uint16_t per;                       /* PWM TIM period */
+  uint16_t samples;                   /* Modulation waveform samples num */
+  uint16_t phase_shift[PHASES_NUM];   /* Phase offset */
+  volatile uint16_t sample_now[PHASES_NUM];  /* Current sample number for
+                                              * phase */
+  uint8_t phases;                     /* Number of PWM phases */
 };
 
 /****************************************************************************
@@ -233,8 +235,8 @@ struct spwm_s
 static struct spwm_s g_spwm =
 {
   .waveform_freq = ((float)CONFIG_NUCLEOF334R8_SPWM_FREQ),
-  .phases   = PHASES_NUM,
-  .samples  = SAMPLES_NUM,
+  .phases        = PHASES_NUM,
+  .samples       = SAMPLES_NUM,
 };
 
 /****************************************************************************
@@ -278,11 +280,11 @@ static int spwm_setup(FAR struct spwm_s *spwm);
 
 static float waveform_func(float x)
 {
-  DEBUGASSERT(x >= 0 && x <= 2*M_PI);
+  DEBUGASSERT(x >= 0 && x <= 2 * M_PI);
 
   /* Sine modulation */
 
-  return (sinf(x)+1.0f)/2.0f;
+  return (sinf(x) + 1.0f) / 2.0f;
 }
 
 /****************************************************************************
@@ -295,35 +297,34 @@ static float waveform_func(float x)
 
 static int waveform_init(FAR struct spwm_s *spwm, float (*f)(float))
 {
-  uint16_t i     = 0;
-  int      ret   = 0;
+  uint16_t i = 0;
+  int ret = 0;
 
   printf("Initialize waveform\n");
 
   /* Get phase step to acheive one sine waveform period */
 
-  spwm->phase_step = (float)(2*M_PI/spwm->samples);
+  spwm->phase_step = (float)(2 * M_PI / spwm->samples);
 
   /* Initialize sine and PWM compare tables */
 
-  for (i = 0; i< spwm->samples; i += 1)
+  for (i = 0; i < spwm->samples; i += 1)
     {
       /* We need sine in range from 0 to 1.0 */
 
-      spwm->waveform[i] = f(spwm->phase_step*i);
+      spwm->waveform[i] = f(spwm->phase_step * i);
 
-      DEBUGASSERT(spwm->waveform[i] >= 0.0 && spwm->waveform[i] <= 2*M_PI);
+      DEBUGASSERT(spwm->waveform[i] >= 0.0 && spwm->waveform[i] <= 2 * M_PI);
 
       spwm->cmp[i] = (uint16_t)(spwm->waveform[i] * spwm->per);
     }
 
-  /* Configure phase shift
-   * TODO: this should be configurable
-   */
+  /* Configure phase shift TODO: this should be configurable */
 
   for (i = 0; i < spwm->phases; i += 1)
     {
-      spwm->phase_shift[i] = (spwm->samples / CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM) * i;
+      spwm->phase_shift[i] =
+        (spwm->samples / CONFIG_NUCLEOF334R8_SPWM_PHASE_NUM) * i;
     }
 
   /* Initialize offstes */
@@ -360,7 +361,7 @@ static int spwm_start(FAR struct spwm_s *spwm)
   spwm_hrtim_start(spwm);
 
 #elif defined(CONFIG_NUCLEOF334R8_SPWM_USE_TIM1)
-  /* Start TIM1  */
+  /* Start TIM1 */
 
   spwm_tim1_start(spwm);
 
@@ -413,15 +414,14 @@ static int spwm_stop(FAR struct spwm_s *spwm)
 static int master_configure(FAR struct spwm_s *spwm)
 {
   FAR struct hrtim_dev_s *hrtim = spwm->pwm;
-  uint64_t per  = 0;
+  uint64_t per = 0;
   uint64_t fclk = 0;
   uint64_t freq = 0;
-  uint16_t cmp  = 0;
-  int      ret  = 0;
+  uint16_t cmp = 0;
+  int ret = 0;
 
-  /* Frequency with which we will change samples.
-   *
-   * master_freq = samples_num * waveform_freq
+  /* Frequency with which we will change samples. master_freq = samples_num *
+   * waveform_freq.
    */
 
   freq = spwm->samples * spwm->waveform_freq;
@@ -429,7 +429,7 @@ static int master_configure(FAR struct spwm_s *spwm)
   /* Configure Master Timer period */
 
   fclk = HRTIM_FCLK_GET(hrtim, HRTIM_TIMER_MASTER);
-  per = fclk/freq;
+  per = fclk / freq;
   if (per > HRTIM_PER_MAX)
     {
       printf("ERROR: can not achieve master freq=%llu if fclk=%llu\n",
@@ -456,16 +456,16 @@ errout:
 static int slaves_configure(FAR struct spwm_s *spwm)
 {
   FAR struct hrtim_dev_s *hrtim = spwm->pwm;
-  uint64_t fclk  = 0;
-  uint64_t per   = 0;
-  uint8_t  index = 0;
-  uint8_t  i     = 0;
-  int      ret   = 0;
+  uint64_t fclk = 0;
+  uint64_t per = 0;
+  uint8_t index = 0;
+  uint8_t i = 0;
+  int ret = 0;
 
   /* Get timer period value for given frequency */
 
   fclk = HRTIM_FCLK_GET(hrtim, HRTIM_TIMER_TIMA);
-  per = fclk/CONFIG_NUCLEOF334R8_SPWM_PWM_FREQ;
+  per = fclk / CONFIG_NUCLEOF334R8_SPWM_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
       printf("ERROR: can not achieve pwm freq=%llu if fclk=%llu\n",
@@ -476,17 +476,18 @@ static int slaves_configure(FAR struct spwm_s *spwm)
 
   spwm->per = (uint16_t)per;
 
-  for(i = 0; i < spwm->phases; i+=1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
       /* Get slave timer index */
 
-      index = (1<<(i+1));
+      index = (1 << (i + 1));
 
       /* Prescalers for slave timers must be the same !!! */
 
       if (fclk != HRTIM_FCLK_GET(hrtim, index))
         {
-          printf("ERROR: prescaler for HRTIM TIMER %d doesn't match!\n", index);
+          printf("ERROR: prescaler for HRTIM TIMER %d doesn't match!\n",
+                 index);
           ret = -EINVAL;
           goto errout;
         }
@@ -506,10 +507,10 @@ errout:
 
 static void hrtim_master_handler(void)
 {
-  FAR struct spwm_s      *spwm = &g_spwm;
+  FAR struct spwm_s *spwm = &g_spwm;
   FAR struct hrtim_dev_s *hrtim = spwm->pwm;
   uint32_t pending = 0;
-  uint8_t  i       = 0;
+  uint8_t i = 0;
 
   pending = HRTIM_IRQ_GET(hrtim, HRTIM_TIMER_MASTER);
 
@@ -517,13 +518,12 @@ static void hrtim_master_handler(void)
     {
       /* Update CMP for slaves */
 
-      for(i = 0; i < spwm->phases; i += 1)
+      for (i = 0; i < spwm->phases; i += 1)
         {
           /* Set new CMP for timers */
 
-          HRTIM_CMP_SET(hrtim, (1<<(i+1)), HRTIM_CMP1,
+          HRTIM_CMP_SET(hrtim, (1 << (i + 1)), HRTIM_CMP1,
                         spwm->cmp[spwm->sample_now[i]]);
-
 
           /* Increase sample pointer */
 
@@ -537,9 +537,9 @@ static void hrtim_master_handler(void)
 
       /* Software update all slaves */
 
-      for(i = 0; i < spwm->phases; i += 1)
+      for (i = 0; i < spwm->phases; i += 1)
         {
-          HRTIM_SOFT_UPDATE(hrtim, 1<<(i+1));
+          HRTIM_SOFT_UPDATE(hrtim, 1 << (i + 1));
         }
     }
 
@@ -552,7 +552,7 @@ static void hrtim_master_handler(void)
 
 static int spwm_hrtim_setup(FAR struct spwm_s *spwm)
 {
-  FAR struct hrtim_dev_s *pwm  = NULL;
+  FAR struct hrtim_dev_s *pwm = NULL;
   int ret = OK;
 
   /* Configure HRTIM */
@@ -572,7 +572,8 @@ static int spwm_hrtim_setup(FAR struct spwm_s *spwm)
   ret = up_ramvec_attach(STM32_IRQ_HRTIMTM, hrtim_master_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "spwm_main: ERROR: up_ramvec_attach failed: %d\n", ret);
+      fprintf(stderr, "spwm_main: ERROR: up_ramvec_attach failed: %d\n",
+              ret);
       ret = -1;
       goto errout;
     }
@@ -582,7 +583,8 @@ static int spwm_hrtim_setup(FAR struct spwm_s *spwm)
   ret = up_prioritize_irq(STM32_IRQ_HRTIMTM, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
-      fprintf(stderr, "spwm_main: ERROR: up_prioritize_irq failed: %d\n", ret);
+      fprintf(stderr, "spwm_main: ERROR: up_prioritize_irq failed: %d\n",
+              ret);
       ret = -1;
       goto errout;
     }
@@ -622,9 +624,9 @@ errout:
 static int spwm_hrtim_start(FAR struct spwm_s *spwm)
 {
   FAR struct hrtim_dev_s *hrtim = spwm->pwm;
-  uint8_t  timers  = 0;
+  uint8_t timers = 0;
   uint16_t outputs = 0;
-  int      i       = 0;
+  int i = 0;
 
   /* Enable HRTIM Master interrupt */
 
@@ -632,16 +634,16 @@ static int spwm_hrtim_start(FAR struct spwm_s *spwm)
 
   /* Get HRTIM timers (master+slaves) */
 
-  for(i = 0; i < spwm->phases+1; i += 1)
+  for (i = 0; i < spwm->phases + 1; i += 1)
     {
-      timers |= (1<<i);
+      timers |= (1 << i);
     }
 
   /* Get HRTIM outputs */
 
-  for(i = 0; i < spwm->phases; i += 1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
-      outputs |=  (1<<(i*2));
+      outputs |= (1 << (i * 2));
     }
 
   /* Enable HRTIM outpus */
@@ -662,9 +664,9 @@ static int spwm_hrtim_start(FAR struct spwm_s *spwm)
 static int spwm_hrtim_stop(FAR struct spwm_s *spwm)
 {
   FAR struct hrtim_dev_s *hrtim = spwm->pwm;
-  uint8_t  timers  = 0;
+  uint8_t timers = 0;
   uint16_t outputs = 0;
-  int      i       = 0;
+  int i = 0;
 
   /* Disable HRTIM Master interrupt */
 
@@ -672,16 +674,16 @@ static int spwm_hrtim_stop(FAR struct spwm_s *spwm)
 
   /* Get HRTIM timers (master+slaves) */
 
-  for(i = 0; i < spwm->phases+1; i += 1)
+  for (i = 0; i < spwm->phases + 1; i += 1)
     {
-      timers |= (1<<i);
+      timers |= (1 << i);
     }
 
   /* Get HRTIM outputs */
 
-  for(i = 0; i < spwm->phases; i += 1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
-      outputs |=  (1<<(i*2));
+      outputs |= (1 << (i * 2));
     }
 
   /* Disable HRTIM outpus */
@@ -705,16 +707,16 @@ static int spwm_hrtim_stop(FAR struct spwm_s *spwm)
 
 static void tim6_handler(void)
 {
-  FAR struct spwm_s          *spwm = &g_spwm;
+  FAR struct spwm_s *spwm = &g_spwm;
   FAR struct stm32_pwm_dev_s *pwm = spwm->pwm;
-  FAR struct stm32_tim_dev_s *tim  = spwm->tim;
+  FAR struct stm32_tim_dev_s *tim = spwm->tim;
   uint8_t i = 0;
 
-  for(i = 0; i < spwm->phases; i += 1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
       /* Set new CMP for timers */
 
-      PWM_CCR_UPDATE(pwm, i+1, spwm->cmp[spwm->sample_now[i]]);
+      PWM_CCR_UPDATE(pwm, i + 1, spwm->cmp[spwm->sample_now[i]]);
 
       /* Increase sample pointer */
 
@@ -737,10 +739,10 @@ static void tim6_handler(void)
 
 static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_tim_dev_s *tim  = NULL;
+  FAR struct stm32_tim_dev_s *tim = NULL;
   uint64_t freq = 0;
-  uint32_t per  = 0;
-  int      ret  = OK;
+  uint32_t per = 0;
+  int ret = OK;
 
   /* Get TIM6 interface */
 
@@ -756,11 +758,11 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 
   /* Frequency with which we will change samples.
    *
-   * tim6_freq = samples_num * waveform_freq
+   * tim6_freq = samples_num * waveform_freq.
    */
 
   freq = spwm->samples * spwm->waveform_freq;
-  per = BOARD_TIM6_FREQUENCY/freq;
+  per = BOARD_TIM6_FREQUENCY / freq;
   if (per > 0xFFFF)
     {
       printf("ERROR: can not achieve TIM6 frequency\n");
@@ -805,7 +807,7 @@ errout:
 
 static int spwm_tim6_start(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_tim_dev_s *tim  = spwm->tim;
+  FAR struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
@@ -821,7 +823,7 @@ static int spwm_tim6_start(FAR struct spwm_s *spwm)
 
 static int spwm_tim6_stop(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_tim_dev_s *tim  = spwm->tim;
+  FAR struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Disable the timer interrupt at the NVIC and at TIM6 */
 
@@ -837,7 +839,7 @@ static int spwm_tim6_stop(FAR struct spwm_s *spwm)
 
 static int spwm_tim1_setup(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_pwm_dev_s *pwm  = NULL;
+  FAR struct stm32_pwm_dev_s *pwm = NULL;
   int ret = OK;
 
   /* Get TIM1 PWM interface */
@@ -888,15 +890,15 @@ errout:
 
 static int spwm_tim1_start(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_pwm_dev_s *pwm  = spwm->pwm;
+  FAR struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
-  int      i       = 0;
+  int i = 0;
 
   /* Get outputs */
 
-  for(i = 0; i < spwm->phases; i+=1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
-      outputs |= (1<<(i*2));
+      outputs |= (1 << (i * 2));
     }
 
   /* Enable PWM outputs */
@@ -916,15 +918,15 @@ static int spwm_tim1_start(FAR struct spwm_s *spwm)
 
 static int spwm_tim1_stop(FAR struct spwm_s *spwm)
 {
-  FAR struct stm32_pwm_dev_s *pwm  = spwm->pwm;
+  FAR struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
-  int      i       = 0;
+  int i = 0;
 
   /* Get outputs */
 
-  for(i = 0; i < spwm->phases; i+=1)
+  for (i = 0; i < spwm->phases; i += 1)
     {
-      outputs |= (1<<(i*2));
+      outputs |= (1 << (i * 2));
     }
 
   /* Disable PWM outputs */
@@ -996,9 +998,9 @@ errout:
 
 int spwm_main(int argc, char *argv[])
 {
-  FAR struct spwm_s      *spwm = NULL;
+  FAR struct spwm_s *spwm = NULL;
   int ret = OK;
-  int i   = 0;
+  int i = 0;
 
   spwm = &g_spwm;
 
@@ -1008,10 +1010,10 @@ int spwm_main(int argc, char *argv[])
 
   ret = spwm_setup(spwm);
   if (ret < 0)
-  {
-    printf("ERROR: failed to setup SPWM %d!\n", ret);
-    goto errout;
-  }
+    {
+      printf("ERROR: failed to setup SPWM %d!\n", ret);
+      goto errout;
+    }
 
   /* Initialize modulation waveform */
 
@@ -1054,4 +1056,4 @@ errout:
   return 0;
 }
 
-#endif /* CONFIG_NUCLEOF334R8_SPWM */
+#endif  /* CONFIG_NUCLEOF334R8_SPWM */

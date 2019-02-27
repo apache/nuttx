@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -226,7 +227,8 @@ void adc_handler(void)
 
       /* Do some floating point operations */
 
-      g_highpri.r_volt[g_highpri.current] = (float)g_highpri.r_val[g_highpri.current] * ref / bit;
+      g_highpri.r_volt[g_highpri.current] =
+        (float)g_highpri.r_val[g_highpri.current] * ref / bit;
 
       if (g_highpri.current >= REG_NCHANNELS-1)
         {
@@ -408,7 +410,8 @@ int highpri_main(int argc, char *argv[])
   ret = up_ramvec_attach(STM32_IRQ_ADC, adc_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n", ret);
+      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n",
+              ret);
       ret = EXIT_FAILURE;
       goto errout;
     }
@@ -418,7 +421,8 @@ int highpri_main(int argc, char *argv[])
   ret = up_prioritize_irq(STM32_IRQ_ADC, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n", ret);
+      fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n",
+              ret);
       ret = EXIT_FAILURE;
       goto errout;
     }
@@ -432,7 +436,8 @@ int highpri_main(int argc, char *argv[])
   ret = up_ramvec_attach(STM32_IRQ_DMA2S0, dma2s0_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n", ret);
+      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n",
+              ret);
       ret = EXIT_FAILURE;
       goto errout;
     }
@@ -442,7 +447,8 @@ int highpri_main(int argc, char *argv[])
   ret = up_prioritize_irq(STM32_IRQ_DMA2S0, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n", ret);
+      fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n",
+              ret);
       ret = EXIT_FAILURE;
       goto errout;
     }
@@ -482,7 +488,7 @@ int highpri_main(int argc, char *argv[])
   PWM_TIM_ENABLE(pwm1, true);
 #endif
 
-  while(1)
+  while (1)
     {
 #ifndef CONFIG_STM32_ADC1_DMA
       /* Software trigger for regular sequence */

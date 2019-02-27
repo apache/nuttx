@@ -149,7 +149,7 @@ int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan)
 {
   if (chan < 11 || chan > 26)
     {
-      wlerr("ERROR: Invalid chan: %d\n",chan);
+      wlerr("ERROR: Invalid chan: %d\n", chan);
       return -EINVAL;
     }
 
@@ -240,9 +240,11 @@ int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
  * Name: mrf24j40_setcoordsaddr
  *
  * Description:
- *   Define the coordinator short address. The following addresses are special:
- *   FFFEh : Broadcast
- *   FFFFh : Unspecified
+ *   Define the coordinator short address. The following addresses are
+ *   special:
+ *
+ *     FFFEh : Broadcast
+ *     FFFFh : Unspecified
  *
  ****************************************************************************/
 
@@ -262,8 +264,10 @@ int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
  * Name: mrf24j40_setcoordeaddr
  *
  * Description:
- *   Define the coordinator extended address. The following addresses are special:
- *   FFFFFFFFFFFFFFFFh : Unspecified
+ *   Define the coordinator extended address. The following addresses are
+ *   special:
+ *
+ *     FFFFFFFFFFFFFFFFh : Unspecified
  *
  ****************************************************************************/
 
@@ -364,9 +368,9 @@ int mrf24j40_settxpower(FAR struct mrf24j40_radio_s *dev,
       return -EINVAL;
     }
 
-  wlinfo("Remaining attenuation: %d mBm\n",txpwr);
+  wlinfo("Remaining attenuation: %d mBm\n", txpwr);
 
-  switch(txpwr/100)
+  switch (txpwr / 100)
     {
       case -9:
       case -8:

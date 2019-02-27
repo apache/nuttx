@@ -145,36 +145,36 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
             (uint32_t)((uint32_t)0x5u << 4u) | /* No Error Interrupt */
             (uint32_t)((uint32_t)0xau << 8u) | /* Single Shot mode */
             (uint32_t)((uint32_t)0x5u << 12u); /* No Done Interrupt */
-  putreg32(regval,TMS570_DCC_BASE);
+  putreg32(regval, TMS570_DCC_BASE);
 
   /* Clear ERR and DONE bits */
 
   regval = 3u;
-  putreg32(regval,TMS570_DCC_BASE + 0x14);
+  putreg32(regval, TMS570_DCC_BASE + 0x14);
 
   /* DCC1 Clock0 Counter Seed value configuration */
 
   regval = 68u;
-  putreg32(regval,TMS570_DCC_BASE + 0x08);
+  putreg32(regval, TMS570_DCC_BASE + 0x08);
 
   /* DCC1 Clock0 Valid Counter Seed value configuration */
 
   regval = 4u;
-  putreg32(regval,TMS570_DCC_BASE + 0x0c);
+  putreg32(regval, TMS570_DCC_BASE + 0x0c);
 
   /* DCC1 Clock1 Counter Seed value configuration */
 
   regval =  972u;
-  putreg32(regval,TMS570_DCC_BASE + 0x10);
+  putreg32(regval, TMS570_DCC_BASE + 0x10);
 
   /* DCC1 Clock1 Source 1 Select */
 
   regval = (uint32_t)((uint32_t)10u << 12u) |  /* DCC Enable / Disable Key */
                       (uint32_t) cnt1_clksrc;  /* DCC1 Clock Source 1 */
-  putreg32(regval,TMS570_DCC_BASE + 0x24);
+  putreg32(regval, TMS570_DCC_BASE + 0x24);
 
   regval = (uint32_t)15;  /* DCC1 Clock Source 0 */
-  putreg32(regval,TMS570_DCC_BASE + 0x28);
+  putreg32(regval, TMS570_DCC_BASE + 0x28);
 
   /* DCC1 Global Control register configuration */
 
@@ -183,8 +183,8 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
            (uint32_t)((uint32_t)0xau << 8u) |  /* Single Shot mode */
            (uint32_t)((uint32_t)0x5u << 12u);  /* No Done Interrupt */
 
-  putreg32(regval,TMS570_DCC_BASE);
-  while(getreg32(TMS570_DCC_BASE + 0x14) == 0u)
+  putreg32(regval, TMS570_DCC_BASE);
+  while (getreg32(TMS570_DCC_BASE + 0x14) == 0u)
     {
       /* Wait */
     }
@@ -203,7 +203,7 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
  *
  ****************************************************************************/
 
-uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
+uint32_t _errata_SSWF021_45_both_plls(uint32_t count)
 {
   uint32_t failcode;
   uint32_t retries;
@@ -224,7 +224,7 @@ uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
   regval = SYS_CLKCNTL_PENA;
   putreg32(regval, TMS570_SYS_CLKCNTL);
 
-  for(retries = 0u; (retries < count) || (count == 0u); retries++)
+  for (retries = 0u; (retries < count) || (count == 0u); retries++)
     {
       failcode = 0u;
 
@@ -233,27 +233,27 @@ uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
       regval =  0x00000002u | 0x00000040u;
       putreg32(regval, TMS570_SYS_CSDISSET);
 
-      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+      while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
         {
         }
 
       /* Clear Global Status Register */
 
       regval = 0x00000301u;
-      putreg32(regval,TMS570_SYS_GLBSTAT);
+      putreg32(regval, TMS570_SYS_GLBSTAT);
 
       /* Clear the ESM PLL slip flags */
 
-      putreg32(ESM_SR1_PLL1SLIP,TMS570_ESM_SR1);
-      putreg32(ESM_SR4_PLL2SLIP,TMS570_ESM_SR4);
+      putreg32(ESM_SR1_PLL1SLIP, TMS570_ESM_SR1);
+      putreg32(ESM_SR4_PLL2SLIP, TMS570_ESM_SR4);
 
       /* Set both PLLs to OSCIN/1*27/(2*1) */
 
       regval = 0x20001a00u;
-      putreg32(regval,TMS570_SYS_PLLCTL1);
+      putreg32(regval, TMS570_SYS_PLLCTL1);
 
       regval = 0x3fc0723du;
-      putreg32(regval,TMS570_SYS_PLLCTL2);
+      putreg32(regval, TMS570_SYS_PLLCTL2);
 
       regval = 0x20001a00u;
       putreg32(regval, 0xffffe100);
@@ -273,7 +273,7 @@ uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
 
      /* If PLL1 valid, check the frequency */
 
-     if((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) != 0u)
+     if ((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) != 0u)
        {
          failcode |= 1u;
        }
@@ -284,7 +284,7 @@ uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
 
      /* If PLL2 valid, check the frequency */
 
-     if((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) != 0u)
+     if ((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) != 0u)
        {
          failcode |= 2u;
        }
@@ -304,11 +304,11 @@ uint32_t _errata_SSWF021_45_both_plls( uint32_t count)
   regval = 0x00000002U | 0x00000040U;
   putreg32(regval, TMS570_SYS_CSDISSET);
 
-  while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+  while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
     {
     }
 
-  /* restore CLKCNTL, VCLKR and PENA first */
+  /* Restore CLKCNTL, VCLKR and PENA first */
 
   clkcntrlsave = getreg32(TMS570_SYS_CLKCNTL);
 
@@ -391,7 +391,7 @@ static void tms570_pll_setup(void)
   regval =  SYS_CSDIS_CLKSRC_PLL1 | SYS_CSDIS_CLKSRC_PLL2;
   putreg32(regval, TMS570_SYS_CSDISSET);
 
-  while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+  while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
     {
     }
 
@@ -408,16 +408,16 @@ static void tms570_pll_setup(void)
                 SYS_CSDIS_CLKSRC_OSC;
       putreg32(regval, TMS570_SYS_CSDISSET);
 
-      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+      while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
         {
         }
 
-      putreg32(SYS_GLBSTAT_OSC_ERR_CLR,TMS570_SYS_GLBSTAT);
+      putreg32(SYS_GLBSTAT_OSC_ERR_CLR, TMS570_SYS_GLBSTAT);
 
       regval =  SYS_CSDIS_CLKSRC_OSC;
       putreg32(regval, TMS570_SYS_CSDISCLR);
 
-      while((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
+      while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
         {
         }
    }
@@ -448,7 +448,7 @@ static void tms570_pll_setup(void)
   regval =  SYS_CSDIS_CLKSRC_PLL1 | SYS_CSDIS_CLKSRC_PLL2;
   putreg32(regval, TMS570_SYS_CSDISCLR);
 
-  while((getreg32(TMS570_SYS_CSDIS) & regval) != 0)
+  while ((getreg32(TMS570_SYS_CSDIS) & regval) != 0)
     {
     }
 }
@@ -634,7 +634,9 @@ static void tms570_flash_setup(void)
   putreg32(FLASH_FSMWRENA_ENABLE, TMS570_FLASH_FSMWRENA);
   regval = FLASH_EEPROMCFG_GRACE(2) | FLASH_EEPROMCFG_EWAIT(BOARD_EWAIT);
   putreg32(regval, TMS570_FLASH_EEPROMCFG);
-  //putreg32(FLASH_FSMWRENA_DISABLE, TMS570_FLASH_FSMWRENA);
+#if 0
+  putreg32(FLASH_FSMWRENA_DISABLE, TMS570_FLASH_FSMWRENA);
+#endif
   putreg32(0x0a, TMS570_FLASH_FSMWRENA);
 
   /* Setup flash bank power modes */
@@ -659,8 +661,8 @@ static void tms570_clocksrc_configure(void)
   uint32_t csvstat;
   uint32_t csdis;
 
-  /* Disable / Enable clock domains.  Writing a '1' to the CDDIS register turns
-   * the clock off.
+  /* Disable / Enable clock domains.  Writing a '1' to the CDDIS register
+   * turns the clock off.
    *
    *   GCLK          Bit 0  On
    *   HCLK/VCLK_sys Bit 1  On
@@ -732,7 +734,7 @@ static void tms570_clocksrc_configure(void)
   putreg32(regval, TMS570_SYS_VCLKASRC);
 
 #if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
-  regval = SYS_VCLKASRC_VCLKA4S_VCLK |SYS_VCLKASRC_VCLKA3R_VCLK;
+  regval = SYS_VCLKASRC_VCLKA4S_VCLK | SYS_VCLKASRC_VCLKA3R_VCLK;
   putreg32(regval, TMS570_SYS2_VCLKACON1);
 #endif
 
@@ -744,7 +746,7 @@ static void tms570_clocksrc_configure(void)
   putreg32(regval, TMS570_SYS_CLKCNTL);
 
   regval  = getreg32(TMS570_SYS_CLKCNTL);
-  regval &= ~( SYS_CLKCNTL_VCLKR_MASK);
+  regval &= ~(SYS_CLKCNTL_VCLKR_MASK);
   regval |= SYS_CLKCNTL_VCLKR;
   putreg32(regval, TMS570_SYS_CLKCNTL);
 

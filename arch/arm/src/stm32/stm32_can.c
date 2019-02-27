@@ -1866,7 +1866,7 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
   stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   ret = stm32can_enterinitmode(priv);
-  if(ret != 0)
+  if (ret != 0)
     {
       return ret;
     }

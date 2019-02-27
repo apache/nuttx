@@ -106,6 +106,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This structure holds the state of the MTD driver */
 
 static struct tiva_dev_s g_lmdev =
@@ -190,8 +191,8 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf)
+static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, FAR uint8_t *buf)
 {
   DEBUGASSERT(startblock + nblocks <= TIVA_VIRTUAL_NPAGES);
 
@@ -209,11 +210,12 @@ static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
  *
  ****************************************************************************/
 
-static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buf)
+static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, FAR const uint8_t *buf)
 {
   FAR uint32_t *src = (uint32_t *)buf;
-  FAR uint32_t *dst = (uint32_t *)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE);
+  FAR uint32_t *dst = (uint32_t *)(TIVA_VIRTUAL_BASE +
+                                   startblock * TIVA_FLASH_PAGESIZE);
   int i;
 
   DEBUGASSERT(nblocks <= TIVA_VIRTUAL_NPAGES);
@@ -248,8 +250,8 @@ static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
  *
  ****************************************************************************/
 
-static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buf)
+static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
+                         size_t nbytes, FAR uint8_t *buf)
 {
   DEBUGASSERT(offset + nbytes < TIVA_VIRTUAL_NPAGES * TIVA_FLASH_PAGESIZE);
 
@@ -268,15 +270,16 @@ static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                          FAR const uint8_t *buf)
+static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, FAR const uint8_t *buf)
 {
   FAR const uint32_t *src = (uint32_t *)((uintptr_t)buf & ~3);
   ssize_t remaining;
   uint32_t regval;
 
   DEBUGASSERT(dev != NULL && buf != NULL);
-  DEBUGASSERT(((uintptr_t)buf & 3) == 0 && (offset & 3) == 0 && (nbytes && 3) == 0);
+  DEBUGASSERT(((uintptr_t)buf & 3) == 0 && (offset & 3) == 0 &&
+              (nbytes && 3) == 0);
 
   /* Clear the flash access and error interrupts. */
 
@@ -302,8 +305,8 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
       /* Loop over the words in this 32-word block. */
 
-      while(((offset & 0x7c) || (getreg32(TIVA_FLASH_FWBN) == 0)) &&
-            (remaining > 0))
+      while (((offset & 0x7c) || (getreg32(TIVA_FLASH_FWBN) == 0)) &&
+             (remaining > 0))
         {
           /* Write this word into the write buffer. */
 
@@ -318,7 +321,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
        /* Wait until the write buffer has been programmed. */
 
-       while(getreg32(TIVA_FLASH_FMC2) & FLASH_FMC2_WRBUF)
+       while (getreg32(TIVA_FLASH_FMC2) & FLASH_FMC2_WRBUF)
          {
          }
      }
@@ -333,7 +336,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes
 
        /* Wait until the word has been programmed. */
 
-       while(getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
+       while (getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
 
        /* Increment to the next word. */
 
@@ -373,13 +376,13 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information needed to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE: that the device is treated as though it where just an
+               * array of fixed size blocks.  That is most likely not true,
+               * but the client will expect the device logic to do whatever
+               * is necessary to make it appear so.
                */
 
               geo->blocksize    = TIVA_FLASH_PAGESIZE;  /* Size of one read/write block */

@@ -157,8 +157,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a
+   * thread that will monitor for USB connection and disconnection events.
    */
 
   ret = stm32l4_usbhost_initialize();
@@ -199,11 +199,10 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_BOARDCTL_IOCTL
 int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
-  switch(cmd)
+  switch (cmd)
     {
       default:
-          return -EINVAL;
-        break;
+        return -EINVAL;
     }
 
     return OK;

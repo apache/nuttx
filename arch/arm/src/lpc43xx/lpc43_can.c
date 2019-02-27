@@ -725,7 +725,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   uint32_t dlc;
   uint8_t txobj;
 
-  if(msg == NULL)
+  if (msg == NULL)
     {
       return ERROR;
     }

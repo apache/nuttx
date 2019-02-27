@@ -274,7 +274,7 @@ void up_timer_getmask(FAR uint64_t *mask)
       ONESHOT_MAX_DELAY(g_oneshot_lower, &maxts);
       maxticks = timespec_to_usec(&maxts) / USEC_PER_TICK;
 
-      for(; ; )
+      for (; ; )
         {
           uint64_t next = (*mask << 1) | 1;
           if (next > maxticks)
@@ -392,7 +392,7 @@ int up_alarm_start(FAR const struct timespec *ts)
 }
 #endif
 
-/********************************************************************************
+/*****************************************************************************
  * Name: up_critmon_*
  *
  * Description:
@@ -409,7 +409,7 @@ int up_alarm_start(FAR const struct timespec *ts)
  *
  *   The second interface simple converts an elapsed time into well known
  *   units.
- ********************************************************************************/
+ *****************************************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 uint32_t up_critmon_gettime(void)

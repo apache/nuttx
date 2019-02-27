@@ -69,7 +69,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_STM32L4_SYSCFG
 #  error "CONFIG_STM32L4_SYSCFG is required"
@@ -251,6 +252,7 @@
                           OTGFS_GINT_WKUP)
 
 /* Debug ***********************************************************************/
+
 /* Trace error codes */
 
 #define STM32L4_TRACEERR_ALLOCFAIL            0x01
@@ -588,6 +590,7 @@ static bool       stm32l4_req_addlast(FAR struct stm32l4_ep_s *privep,
                     FAR struct stm32l4_req_s *req);
 
 /* Low level data transfers and request operations *****************************/
+
 /* Special endpoint 0 data transfer logic */
 
 static void        stm32l4_ep0in_setupresponse(FAR struct stm32l4_usbdev_s *priv,
@@ -610,11 +613,14 @@ static void        stm32l4_epin_request(FAR struct stm32l4_usbdev_s *priv,
 
 static void        stm32l4_rxfifo_read(FAR struct stm32l4_ep_s *privep,
                      FAR uint8_t *dest, uint16_t len);
-static void        stm32l4_rxfifo_discard(FAR struct stm32l4_ep_s *privep, int len);
+static void        stm32l4_rxfifo_discard(FAR struct stm32l4_ep_s *privep,
+                     int len);
 static void        stm32l4_epout_complete(FAR struct stm32l4_usbdev_s *priv,
                      FAR struct stm32l4_ep_s *privep);
-static inline void stm32l4_ep0out_receive(FAR struct stm32l4_ep_s *privep, int bcnt);
-static inline void stm32l4_epout_receive(FAR struct stm32l4_ep_s *privep, int bcnt);
+static inline void stm32l4_ep0out_receive(FAR struct stm32l4_ep_s *privep,
+                     int bcnt);
+static inline void stm32l4_epout_receive(FAR struct stm32l4_ep_s *privep,
+                     int bcnt);
 static void        stm32l4_epout_request(FAR struct stm32l4_usbdev_s *priv,
                      FAR struct stm32l4_ep_s *privep);
 
@@ -649,7 +655,8 @@ static inline void stm32l4_epout_interrupt(FAR struct stm32l4_usbdev_s *priv);
 
 static inline void stm32l4_epin_runtestmode(FAR struct stm32l4_usbdev_s *priv);
 static inline void stm32l4_epin(FAR struct stm32l4_usbdev_s *priv, uint8_t epno);
-static inline void stm32l4_epin_txfifoempty(FAR struct stm32l4_usbdev_s *priv, int epno);
+static inline void stm32l4_epin_txfifoempty(FAR struct stm32l4_usbdev_s *priv,
+                                            int epno);
 static inline void stm32l4_epin_interrupt(FAR struct stm32l4_usbdev_s *priv);
 
 /* Other second level interrupt processing */
@@ -669,9 +676,11 @@ static inline void stm32l4_otginterrupt(FAR struct stm32l4_usbdev_s *priv);
 
 /* First level interrupt processing */
 
-static int         stm32l4_usbinterrupt(int irq, FAR void *context, FAR void *arg);
+static int         stm32l4_usbinterrupt(int irq, FAR void *context,
+                     FAR void *arg);
 
 /* Endpoint operations *********************************************************/
+
 /* Global OUT NAK controls */
 
 static void        stm32l4_enablegonak(FAR struct stm32l4_ep_s *privep);
@@ -702,8 +711,10 @@ static void        stm32l4_ep_freereq(FAR struct usbdev_ep_s *ep,
 /* Endpoint buffer management */
 
 #ifdef CONFIG_USBDEV_DMA
-static void       *stm32l4_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
-static void        stm32l4_ep_freebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+static void       *stm32l4_ep_allocbuffer(FAR struct usbdev_ep_s *ep,
+                     unsigned bytes);
+static void        stm32l4_ep_freebuffer(FAR struct usbdev_ep_s *ep,
+                     FAR void *buf);
 #endif
 
 /* Endpoint request submission */
@@ -751,6 +762,7 @@ static void        stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Since there is only a single USB interface, all status information can be
  * be simply retained in a single global instance.
  */
@@ -904,8 +916,8 @@ static uint32_t stm32l4_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register?  If so, suppress some of the output.
    */
 
   if (addr == prevaddr && val == preval)
@@ -977,7 +989,8 @@ static void stm32l4_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static FAR struct stm32l4_req_s *stm32l4_req_remfirst(FAR struct stm32l4_ep_s *privep)
+static FAR struct stm32l4_req_s *
+  stm32l4_req_remfirst(FAR struct stm32l4_ep_s *privep)
 {
   FAR struct stm32l4_req_s *ret = privep->head;
 
@@ -1047,7 +1060,8 @@ static void stm32l4_ep0in_setupresponse(FAR struct stm32l4_usbdev_s *priv,
  *
  ****************************************************************************/
 
-static inline void stm32l4_ep0in_transmitzlp(FAR struct stm32l4_usbdev_s *priv)
+static inline void
+  stm32l4_ep0in_transmitzlp(FAR struct stm32l4_usbdev_s *priv)
 {
   stm32l4_ep0in_setupresponse(priv, NULL, 0);
 }
@@ -1199,7 +1213,8 @@ static void stm32l4_epin_transfer(FAR struct stm32l4_ep_s *privep,
        *   perform the transfer.
        */
 
-      pktcnt  = ((uint32_t)nbytes + (privep->ep.maxpacket - 1)) / privep->ep.maxpacket;
+      pktcnt  = ((uint32_t)nbytes + (privep->ep.maxpacket - 1)) /
+                privep->ep.maxpacket;
     }
 
   /* Set the XFRSIZ and PKTCNT */
@@ -1324,9 +1339,9 @@ static void stm32l4_epin_request(FAR struct stm32l4_usbdev_s *priv,
         privep->epphy, privreq, privreq->req.len,
         privreq->req.xfrd, privep->zlp);
 
-  /* Check for a special case:  If we are just starting a request (xfrd==0) and
-   * the class driver is trying to send a zero-length packet (len==0).  Then set
-   * the ZLP flag so that the packet will be sent.
+  /* Check for a special case:  If we are just starting a request (xfrd==0)
+   * and the class driver is trying to send a zero-length packet (len==0).
+   * Then set the ZLP flag so that the packet will be sent.
    */
 
   if (privreq->req.len == 0)
@@ -1422,7 +1437,8 @@ static void stm32l4_epin_request(FAR struct stm32l4_usbdev_s *priv,
       regval = stm32l4_getreg(regaddr);
       if ((int)(regval & OTGFS_DTXFSTS_MASK) < nwords)
         {
-          usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_EPIN_EMPWAIT), (uint16_t)regval);
+          usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_EPIN_EMPWAIT),
+                   (uint16_t)regval);
 
           /* There is insufficient space in the TxFIFO.  Wait for a TxFIFO
            * empty interrupt and try again.
@@ -1551,7 +1567,7 @@ static void stm32l4_rxfifo_discard(FAR struct stm32l4_ep_s *privep, int len)
           (void)data;
         }
 
-      uinfo("<<< discarding %d\n",len);
+      uinfo("<<< discarding %d\n", len);
     }
 }
 
@@ -2782,6 +2798,7 @@ static inline void stm32l4_epout_interrupt(FAR struct stm32l4_usbdev_s *priv)
            */
 #if 1
           /* REVISIT: */
+
           if ((doepint & OTGFS_DOEPINT_EPDISD) != 0)
             {
               usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_EPOUT_EPDISD),
@@ -3016,6 +3033,7 @@ static inline void stm32l4_epin_interrupt(FAR struct stm32l4_usbdev_s *priv)
           diepint = stm32l4_getreg(STM32L4_OTGFS_DIEPINT(epno)) & mask;
 
           /* Decode and process the enabled, pending interrupts */
+
           /* Transfer completed interrupt */
 
           if ((diepint & OTGFS_DIEPINT_XFRC) != 0)
@@ -3225,157 +3243,155 @@ static inline void stm32l4_rxinterrupt(FAR struct stm32l4_usbdev_s *priv)
   int bcnt;
   int epphy;
 
-  while(0 != (stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINT_RXFLVL))
+  while (0 != (stm32l4_getreg(STM32L4_OTGFS_GINTSTS) & OTGFS_GINT_RXFLVL))
     {
+      /* Get the status from the top of the FIFO */
 
-    /* Get the status from the top of the FIFO */
+      regval = stm32l4_getreg(STM32L4_OTGFS_GRXSTSP);
 
-    regval = stm32l4_getreg(STM32L4_OTGFS_GRXSTSP);
+      /* Decode status fields */
 
-    /* Decode status fields */
+      epphy  = (regval & OTGFS_GRXSTSD_EPNUM_MASK) >> OTGFS_GRXSTSD_EPNUM_SHIFT;
 
-    epphy  = (regval & OTGFS_GRXSTSD_EPNUM_MASK) >> OTGFS_GRXSTSD_EPNUM_SHIFT;
+      /* Workaround for bad values read from the STM32L4_OTGFS_GRXSTSP register
+       * happens regval is 0xb4e48168 or 0xa80c9367 or 267E781c
+       * All of which provide out of range indexes for  epout[epphy]
+       */
 
-        /* Workaround for bad values read from the STM32L4_OTGFS_GRXSTSP register
-         * happens regval is 0xb4e48168 or 0xa80c9367 or 267E781c
-         * All of which provide out of range indexes for  epout[epphy]
-         */
+      if (epphy < STM32L4_NENDPOINTS)
+        {
+          privep = &priv->epout[epphy];
 
-    if (epphy < STM32L4_NENDPOINTS)
-      {
-        privep = &priv->epout[epphy];
+          /* Handle the RX event according to the packet status field */
 
-        /* Handle the RX event according to the packet status field */
-
-        switch (regval & OTGFS_GRXSTSD_PKTSTS_MASK)
-          {
-          /* Global OUT NAK.  This indicate that the global OUT NAK bit has taken
-           * effect.
-           *
-           * PKTSTS = Global OUT NAK, BCNT = 0, EPNUM = Don't Care, DPID = Don't
-           * Care.
-           */
-
-          case OTGFS_GRXSTSD_PKTSTS_OUTNAK:
+          switch (regval & OTGFS_GRXSTSD_PKTSTS_MASK)
             {
-              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTNAK), 0);
+            /* Global OUT NAK.  This indicate that the global OUT NAK bit has taken
+             * effect.
+             *
+             * PKTSTS = Global OUT NAK, BCNT = 0, EPNUM = Don't Care, DPID = Don't
+             * Care.
+             */
+
+            case OTGFS_GRXSTSD_PKTSTS_OUTNAK:
+              {
+                usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTNAK), 0);
+              }
+              break;
+
+            /* OUT data packet received.
+             *
+             * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
+             * EPNUM = EPNUM on which the packet was received, DPID = Actual Data PID.
+             */
+
+            case OTGFS_GRXSTSD_PKTSTS_OUTRECVD:
+              {
+                usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTRECVD), epphy);
+                bcnt = (regval & OTGFS_GRXSTSD_BCNT_MASK) >> OTGFS_GRXSTSD_BCNT_SHIFT;
+                if (bcnt > 0)
+                  {
+                    stm32l4_epout_receive(privep, bcnt);
+                  }
+              }
+              break;
+
+            /* OUT transfer completed.  This indicates that an OUT data transfer for
+             * the specified OUT endpoint has completed. After this entry is popped
+             * from the receive FIFO, the core asserts a Transfer Completed interrupt
+             * on the specified OUT endpoint.
+             *
+             * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
+             * which the data transfer is complete, DPID = Don't Care.
+             */
+
+            case OTGFS_GRXSTSD_PKTSTS_OUTDONE:
+              {
+                usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTDONE), epphy);
+              }
+              break;
+
+            /* SETUP transaction completed. This indicates that the Setup stage for
+             * the specified endpoint has completed and the Data stage has started.
+             * After this entry is popped from the receive FIFO, the core asserts a
+             * Setup interrupt on the specified control OUT endpoint (triggers an
+             * interrupt).
+             *
+             * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
+             * DPID = Don't Care.
+             */
+
+            case OTGFS_GRXSTSD_PKTSTS_SETUPDONE:
+              {
+                usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
+
+                /* On the L4 This event does not occur on the next SETUP
+                 * after a SETUP OUT.
+                 */
+              }
+              break;
+
+            /* SETUP data packet received.  This indicates that a SETUP packet for the
+             * specified endpoint is now available for reading from the receive FIFO.
+             *
+             * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
+             */
+
+            case OTGFS_GRXSTSD_PKTSTS_SETUPRECVD:
+              {
+                uint16_t datlen;
+
+                usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPRECVD), epphy);
+
+                /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are received,
+                 * the last one overwrites the previous setup packets and only that
+                 * last SETUP packet will be processed.
+                 */
+
+                stm32l4_rxfifo_read(&priv->epout[EP0], (FAR uint8_t *)&priv->ctrlreq,
+                                    USB_SIZEOF_CTRLREQ);
+
+                /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,
+                 * then we need to wait for the completion of the data phase to
+                 * process the setup command.  If it is an IN SETUP packet, then
+                 * we must processing the command BEFORE we enter the DATA phase.
+                 *
+                 * If the data associated with the OUT SETUP packet is zero length,
+                 * then, of course, we don't need to wait.
+                 */
+
+                datlen = GETUINT16(priv->ctrlreq.len);
+                if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
+                  {
+                     /* Reset the endpoint and Stop NAK-ing */
+
+                     stm32l4_ep0out_ctrlsetup(priv);
+
+                    /* Wait for the data phase. */
+
+                    priv->ep0state = EP0STATE_SETUP_OUT;
+                  }
+                else
+                  {
+                    /* We can process the setup data Now no need to wait for SETUP done word
+                     * to be popped of the RxFIFO.
+                     */
+
+                    priv->ep0state = EP0STATE_SETUP_READY;
+                    stm32l4_ep0out_setup(priv);
+                  }
+              }
+              break;
+
+            default:
+              {
+                usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS),
+                         (regval & OTGFS_GRXSTSD_PKTSTS_MASK) >>
+                         OTGFS_GRXSTSD_PKTSTS_SHIFT);
+              }
+              break;
             }
-            break;
-
-          /* OUT data packet received.
-           *
-           * PKTSTS = DataOUT, BCNT = size of the received data OUT packet,
-           * EPNUM = EPNUM on which the packet was received, DPID = Actual Data PID.
-           */
-
-          case OTGFS_GRXSTSD_PKTSTS_OUTRECVD:
-            {
-              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTRECVD), epphy);
-              bcnt = (regval & OTGFS_GRXSTSD_BCNT_MASK) >> OTGFS_GRXSTSD_BCNT_SHIFT;
-              if (bcnt > 0)
-                {
-                  stm32l4_epout_receive(privep, bcnt);
-                }
-            }
-            break;
-
-          /* OUT transfer completed.  This indicates that an OUT data transfer for
-           * the specified OUT endpoint has completed. After this entry is popped
-           * from the receive FIFO, the core asserts a Transfer Completed interrupt
-           * on the specified OUT endpoint.
-           *
-           * PKTSTS = Data OUT Transfer Done, BCNT = 0, EPNUM = OUT EP Num on
-           * which the data transfer is complete, DPID = Don't Care.
-           */
-
-          case OTGFS_GRXSTSD_PKTSTS_OUTDONE:
-            {
-              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_OUTDONE), epphy);
-            }
-            break;
-
-          /* SETUP transaction completed. This indicates that the Setup stage for
-           * the specified endpoint has completed and the Data stage has started.
-           * After this entry is popped from the receive FIFO, the core asserts a
-           * Setup interrupt on the specified control OUT endpoint (triggers an
-           * interrupt).
-           *
-           * PKTSTS = Setup Stage Done, BCNT = 0, EPNUM = Control EP Num,
-           * DPID = Don't Care.
-           */
-
-          case OTGFS_GRXSTSD_PKTSTS_SETUPDONE:
-            {
-              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPDONE), epphy);
-
-              /* On the L4 This event does not occur on the next SETUP
-               * after a SETUP OUT.
-               */
-
-            }
-            break;
-
-          /* SETUP data packet received.  This indicates that a SETUP packet for the
-           * specified endpoint is now available for reading from the receive FIFO.
-           *
-           * PKTSTS = SETUP, BCNT = 8, EPNUM = Control EP Num, DPID = D0.
-           */
-
-          case OTGFS_GRXSTSD_PKTSTS_SETUPRECVD:
-            {
-              uint16_t datlen;
-
-              usbtrace(TRACE_INTDECODE(STM32L4_TRACEINTID_SETUPRECVD), epphy);
-
-              /* Read EP0 setup data.  NOTE:  If multiple SETUP packets are received,
-               * the last one overwrites the previous setup packets and only that
-               * last SETUP packet will be processed.
-               */
-
-              stm32l4_rxfifo_read(&priv->epout[EP0], (FAR uint8_t *)&priv->ctrlreq,
-                               USB_SIZEOF_CTRLREQ);
-
-              /* Was this an IN or an OUT SETUP packet.  If it is an OUT SETUP,
-               * then we need to wait for the completion of the data phase to
-               * process the setup command.  If it is an IN SETUP packet, then
-               * we must processing the command BEFORE we enter the DATA phase.
-               *
-               * If the data associated with the OUT SETUP packet is zero length,
-               * then, of course, we don't need to wait.
-               */
-
-              datlen = GETUINT16(priv->ctrlreq.len);
-              if (USB_REQ_ISOUT(priv->ctrlreq.type) && datlen > 0)
-                {
-                   /* Reset the endpoint and Stop NAK-ing */
-
-                   stm32l4_ep0out_ctrlsetup(priv);
-
-                  /* Wait for the data phase. */
-
-                  priv->ep0state = EP0STATE_SETUP_OUT;
-                }
-              else
-                {
-                  /* We can process the setup data Now no need to wait for SETUP done word
-                   * to be popped of the RxFIFO.
-                   */
-
-                  priv->ep0state = EP0STATE_SETUP_READY;
-                  stm32l4_ep0out_setup(priv);
-
-                }
-            }
-            break;
-
-          default:
-            {
-              usbtrace(TRACE_DEVERROR(STM32L4_TRACEERR_INVALIDPARMS),
-                       (regval & OTGFS_GRXSTSD_PKTSTS_MASK) >> OTGFS_GRXSTSD_PKTSTS_SHIFT);
-            }
-            break;
-          }
-      }
+        }
     }
 }
 
@@ -3498,7 +3514,8 @@ static inline void stm32l4_isocoutinterrupt(FAR struct stm32l4_usbdev_s *priv)
   /* When it receives an IISOOXFR interrupt, the application must read the
    * control registers of all isochronous OUT endpoints to determine which
    * endpoints had an incomplete transfer in the current microframe. An
-   * endpoint transfer is incomplete if both the following conditions are true:
+   * endpoint transfer is incomplete if both the following conditions are
+   * true:
    *
    *   DOEPCTLx:EONUM = DSTS:SOFFN[0], and
    *   DOEPCTLx:EPENA = 1
@@ -3643,7 +3660,6 @@ static int stm32l4_usbinterrupt(int irq, FAR void *context, FAR void *arg)
        */
 
       stm32l4_putreg(((regval | reserved) & OTGFS_GINT_RC_W1), STM32L4_OTGFS_GINTSTS);
-
 
       /* Break out of the loop when there are no further pending (and
        * unmasked) interrupts to be processes.
@@ -4018,7 +4034,6 @@ static int stm32l4_epin_configure(FAR struct stm32l4_ep_s *privep, uint8_t eptyp
       mpsiz = (maxpacket << OTGFS_DIEPCTL_MPSIZ_SHIFT);
     }
 
-
   /* If the endpoint is already active don't change the endpoint control
    * register.
    */
@@ -4032,7 +4047,8 @@ static int stm32l4_epin_configure(FAR struct stm32l4_ep_s *privep, uint8_t eptyp
           regval |= OTGFS_DIEPCTL_CNAK;
         }
 
-      regval &= ~(OTGFS_DIEPCTL_MPSIZ_MASK | OTGFS_DIEPCTL_EPTYP_MASK | OTGFS_DIEPCTL_TXFNUM_MASK);
+      regval &= ~(OTGFS_DIEPCTL_MPSIZ_MASK | OTGFS_DIEPCTL_EPTYP_MASK |
+                  OTGFS_DIEPCTL_TXFNUM_MASK);
       regval |= mpsiz;
       regval |= (eptype << OTGFS_DIEPCTL_EPTYP_SHIFT);
       regval |= (privep->epphy << OTGFS_DIEPCTL_TXFNUM_SHIFT);
@@ -4163,6 +4179,7 @@ static void stm32l4_epout_disable(FAR struct stm32l4_ep_s *privep)
   while ((stm32l4_getreg(regaddr) & OTGFS_DOEPINT_EPDISD) == 0);
 #else
   /* REVISIT: */
+
   up_udelay(10);
 #endif
 
@@ -4594,6 +4611,7 @@ static int stm32l4_epout_setstall(FAR struct stm32l4_ep_s *privep)
   while ((stm32l4_getreg(regaddr) & OTGFS_DOEPINT_EPDISD) == 0);
 #else
   /* REVISIT: */
+
   up_udelay(10);
 #endif
 
@@ -5392,7 +5410,6 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
   stm32l4_putreg(regval, STM32L4_OTGFS_DIEPTXF(5));
 #endif
 
-
   /* Flush the FIFOs */
 
   stm32l4_txfifo_flush(OTGFS_GRSTCTL_TXFNUM_DALL);
@@ -5561,7 +5578,8 @@ void up_usbinitialize(void)
 #endif
 
   /* Uninitialize the hardware so that we know that we are starting from a
-   * known state. */
+   * known state.
+   */
 
   up_usbuninitialize();
 

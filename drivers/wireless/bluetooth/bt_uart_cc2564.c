@@ -11,13 +11,13 @@
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -103,7 +103,6 @@ static void cc2564_recv(FAR const struct btuart_lowerhalf_s *lower,
     }
 }
 
-
 static int cc2564_load(FAR const struct btuart_lowerhalf_s *lower,
                        FAR const uint8_t *chipdata)
 {
@@ -113,7 +112,7 @@ static int cc2564_load(FAR const struct btuart_lowerhalf_s *lower,
   uint32_t length  = 0;
   FAR const uint8_t *data;
 
-  for(data = chipdata; *data++; data += length)
+  for (data = chipdata; *data++; data += length)
     {
       uint16_t opcode;
       opcode = ((uint16_t)(*(data+1)) << 8) + *data;
@@ -223,4 +222,3 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
 
   return ret;
 }
-

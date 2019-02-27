@@ -70,15 +70,17 @@ static void mac802154_rxenabletimeout(FAR void *arg);
  *
  * Description:
  *   Function registered with MAC timer that gets called via the work queue to
- *   handle a timeout for extracting the Association Response from the Coordinator.
+ *   handle a timeout for extracting the Association Response from the
+ *   Coordinator.
  *
  ****************************************************************************/
 
 static void mac802154_rxenabletimeout(FAR void *arg)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct ieee802154_privmac_s *priv =
+    (FAR struct ieee802154_privmac_s *)arg;
 
-  while(mac802154_lock(priv, true) != 0);
+  while (mac802154_lock(priv, true) != 0);
 
   if (priv->curr_op != MAC802154_OP_RXENABLE)
     {
@@ -130,10 +132,11 @@ int mac802154_req_rxenable(MACHANDLE mac,
     {
       if (req->rxon_dur > 0)
         {
-          /* Get exlusive access to the operation sempaphore. This must happen before
-           * getting exclusive access to the MAC struct or else there could be a lockup
-           * condition. This would occur if another thread is using the cmdtrans but
-           * needs access to the MAC in order to unlock it.
+          /* Get exlusive access to the operation sempaphore.  This must
+           * happen before getting exclusive access to the MAC struct or
+           * else there could be a lockup condition. This would occur if
+           * another thread is using the cmdtrans but needs access to the
+           * MAC in order to unlock it.
            */
 
           ret = mac802154_takesem(&priv->opsem, true);
@@ -161,7 +164,8 @@ int mac802154_req_rxenable(MACHANDLE mac,
 
           if (req->rxon_dur != 0xFFFFFFFF)
             {
-              mac802154_timerstart(priv, req->rxon_dur, mac802154_rxenabletimeout);
+              mac802154_timerstart(priv, req->rxon_dur,
+                                   mac802154_rxenabletimeout);
             }
         }
       else

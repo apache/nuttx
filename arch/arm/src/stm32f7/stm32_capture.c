@@ -60,6 +60,7 @@
 /************************************************************************************
  * Private Types
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 #if defined(GPIO_TIM1_CH1IN) || defined(GPIO_TIM2_CH1IN) || defined(GPIO_TIM3_CH1IN) || \
@@ -96,8 +97,8 @@
 #  define USE_EXT_CLOCK 1
 #endif
 
-/* This module then only compiles if there are enabled timers that are not intended for
- * some other purpose.
+/* This module then only compiles if there are enabled timers that are not intended
+ * for some other purpose.
  */
 
 #if defined(CONFIG_STM32F7_TIM1_CAP)  || defined(CONFIG_STM32F7_TIM2_CAP)  || \
@@ -182,7 +183,7 @@ static inline void stm32_putreg32(FAR const struct stm32_cap_priv_s *priv,
 static inline uint32_t stm32_cap_gpio(FAR const struct stm32_cap_priv_s *priv,
                                       int channel)
 {
-  switch(priv->base)
+  switch (priv->base)
     {
 #ifdef CONFIG_STM32F7_TIM1_CAP
       case STM32_TIM1_BASE:
@@ -627,7 +628,7 @@ static inline int stm32_cap_set_rcc(FAR const struct stm32_cap_priv_s *priv,
  ************************************************************************************/
 
 static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t clk,
-                              uint32_t prescaler,uint32_t max)
+                              uint32_t prescaler, uint32_t max)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   uint16_t regval = 0;
@@ -654,8 +655,7 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t c
       prescaler = 0xffff;
     }
 
-
-  switch(clk)
+  switch (clk)
     {
       case STM32_CAP_CLK_INT:
           regval = GTIM_SMCR_DISAB;
@@ -701,7 +701,8 @@ static int stm32_cap_setclock(FAR struct stm32_cap_dev_s *dev, stm32_cap_clk_t c
   return prescaler;
 }
 
-static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler, void *arg)
+static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler,
+                            void *arg)
 {
   const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
   int irq;
@@ -748,7 +749,6 @@ static int stm32_cap_setisr(FAR struct stm32_cap_dev_s *dev, xcpt_t handler, voi
 
   return OK;
 }
-
 
 static void stm32_cap_enableint(FAR struct stm32_cap_dev_s *dev,
                                 stm32_cap_flags_t src, bool on)

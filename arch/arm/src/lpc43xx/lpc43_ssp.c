@@ -589,7 +589,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
           if (rxbuffer)
             {
-              if(priv->nbits > 8)
+              if (priv->nbits > 8)
                 {
                   *rx.p16++ = (uint16_t)data;
                 }

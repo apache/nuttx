@@ -76,7 +76,6 @@ struct hostent_info_s
   char hi_data[1];
 };
 
-
 /****************************************************************************
  * Private functions
  ****************************************************************************/
@@ -181,8 +180,9 @@ static int lib_skipline(FAR FILE *stream, FAR size_t *nread)
  *
  ****************************************************************************/
 
-static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr, FAR size_t *nread,
-                              size_t buflen, FAR int *terminator)
+static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
+                              FAR size_t *nread, size_t buflen,
+                              FAR int *terminator)
 {
   size_t nwritten = 0;
   int ch;
@@ -191,7 +191,7 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr, FAR size_t *nread
    * encountered
    */
 
-  for(;;)
+  for (; ; )
     {
       /* Read the next character from the file */
 
@@ -214,6 +214,7 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr, FAR size_t *nread
           *ptr++ = '\0';
 
           /* Return EOF if nothing has written */
+
           return nwritten == 0 ? 0 : nwritten + 1;
         }
 

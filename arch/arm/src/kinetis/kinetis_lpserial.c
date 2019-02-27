@@ -72,6 +72,7 @@
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one LPUART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_LPUART_DEVICE
@@ -202,7 +203,6 @@
 #define LPUART_STAT_ERRORS      (LPUART_STAT_OR | LPUART_STAT_FE | \
                                  LPUART_STAT_PF | LPUART_STAT_NF)
 
-
 /* The LPUART does not have an common set of aligned bits for the interrupt
  * enable and the status. So map the ctrl to the stat bits
  */
@@ -253,8 +253,8 @@ static int  kinetis_receive(struct uart_dev_s *dev, uint32_t *status);
 static void kinetis_rxint(struct uart_dev_s *dev, bool enable);
 static bool kinetis_rxavailable(struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool kinetis_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
-                             bool upper);
+static bool kinetis_rxflowcontrol(struct uart_dev_s *dev,
+                                  unsigned int nbuffered, bool upper);
 #endif
 static void kinetis_send(struct uart_dev_s *dev, int ch);
 static void kinetis_txint(struct uart_dev_s *dev, bool enable);
@@ -751,7 +751,8 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
 
           /* Reset any Errors */
 
-          kinetis_serialout(priv, KINETIS_LPUART_STAT_OFFSET, stat & LPUART_STAT_ERRORS);
+          kinetis_serialout(priv, KINETIS_LPUART_STAT_OFFSET,
+                            stat & LPUART_STAT_ERRORS);
           return OK;
         }
 
@@ -786,7 +787,8 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
       stat = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
       ctrl = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
       stat &= LPUART_CTRL2STAT(ctrl);
-    } while(stat != 0);
+    }
+  while (stat != 0);
 
   return OK;
 }
@@ -1047,9 +1049,9 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: kinetis_receive
  *
  * Description:
- *   Called (usually) from the interrupt level to receive one
- *   character from the LPUART.  Error bits associated with the
- *   receipt are provided in the return 'status'.
+ *   Called (usually) from the interrupt level to receive one character from
+ *   the LPUART.  Error bits associated with the receipt are provided in the
+ *   return 'status'.
  *
  ****************************************************************************/
 
@@ -1140,10 +1142,10 @@ static bool kinetis_rxavailable(struct uart_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
 
-  /* Return true if the receive data register is full (RDRF).
-   */
+  /* Return true if the receive data register is full (RDRF). */
 
-  return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) & LPUART_STAT_RDRF) != 0;
+  return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) &
+          LPUART_STAT_RDRF) != 0;
 }
 
 /****************************************************************************
@@ -1206,8 +1208,8 @@ static bool kinetis_rxflowcontrol(struct uart_dev_s *dev,
       else
         {
           /* We might leave Rx interrupt disabled if full recv buffer was
-           * read empty.  Enable Rx interrupt to make sure that more input is
-           * received.
+           * read empty.  Enable Rx interrupt to make sure that more input
+           * is received.
            */
 
           kinetis_rxint(dev, true);
@@ -1287,7 +1289,8 @@ static bool kinetis_txready(struct uart_dev_s *dev)
 
   /* Return true if the transmit data register is "empty." */
 
-  return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) != 0;
+  return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) &
+          LPUART_STAT_TDRE) != 0;
 }
 
 /****************************************************************************
@@ -1301,8 +1304,8 @@ static bool kinetis_txready(struct uart_dev_s *dev)
  *   Performs the low level LPUART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in kinetis_lowsetup() and main clock initialization
- *   performed in up_clkinitialize().
+ *   configuration performed in kinetis_lowsetup() and main clock
+ *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 

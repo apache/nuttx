@@ -156,7 +156,7 @@ static FAR const char *findscanset(FAR const char *fmt,
           if (n == ']' || n < c)
             {
               c = '-';
-              break;            /* Resume the for(;;) */
+              break;            /* Resume the for (; ; ) */
             }
 
           fmt++;
@@ -1210,3 +1210,4 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   *lastc = c;
   return (count || !conv) ? assigncount : EOF;
 }
+

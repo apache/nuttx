@@ -364,18 +364,21 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
   switch (cfg->inp)
     {
     case STM32L4_COMP_INP_PIN_1:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_1 : GPIO_COMP2_INP_1);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_1 :
+                                                GPIO_COMP2_INP_1);
       regval |= COMP_CSR_INPSEL_PIN1;
       break;
 
     case STM32L4_COMP_INP_PIN_2:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_2 : GPIO_COMP2_INP_2);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_2 :
+                                                GPIO_COMP2_INP_2);
       regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
     case STM32L4_COMP_INP_PIN_3:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_3 : GPIO_COMP2_INP_3);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_3 :
+                                                GPIO_COMP2_INP_3);
       regval |= COMP_CSR_INPSEL_PIN3;
       break;
 #endif
@@ -422,12 +425,14 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
       break;
 
   case STM32L4_COMP_INM_PIN_1:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_1 : GPIO_COMP2_INM_1);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_1 :
+                                                GPIO_COMP2_INM_1);
       regval |= COMP_CSR_INMSEL_PIN1;
       break;
 
   case STM32L4_COMP_INM_PIN_2:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_2 : GPIO_COMP2_INM_2);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_2 :
+                                                GPIO_COMP2_INM_2);
 #if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
     defined(CONFIG_STM32L4_STM32L4XR)
       regval |= COMP_CSR_INMSEL_PIN2;
@@ -440,21 +445,24 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
     case STM32L4_COMP_INM_PIN_3:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_3 : GPIO_COMP2_INM_3);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_3 :
+                                                GPIO_COMP2_INM_3);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
       regval |= COMP_CSR_INMESEL_PIN3;
       break;
 
     case STM32L4_COMP_INM_PIN_4:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_4 : GPIO_COMP2_INM_4);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_4 :
+                                                GPIO_COMP2_INM_4);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
       regval |= COMP_CSR_INMESEL_PIN4;
       break;
 
     case STM32L4_COMP_INM_PIN_5:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_5 : GPIO_COMP2_INM_5);
+      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_5 :
+                                                GPIO_COMP2_INM_5);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
       regval |= COMP_CSR_INMESEL_PIN5;
@@ -493,7 +501,7 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
   /* Power/speed Mode */
 
   mask |= COMP_CSR_PWRMODE_MASK;
-  switch(cfg->speed)
+  switch (cfg->speed)
     {
     case STM32L4_COMP_SPEED_HIGH:
       regval |= COMP_CSR_PWRMODE_HIGH;
@@ -537,8 +545,9 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
 
   if (cfg->interrupt.cb && (cfg->interrupt.rising || cfg->interrupt.falling))
     {
-      ret = stm32l4_exti_comp(cmp, cfg->interrupt.rising, cfg->interrupt.falling,
-                              0, stm32l4_exti_comp_isr, (void *)dev);
+      ret = stm32l4_exti_comp(cmp, cfg->interrupt.rising,
+                              cfg->interrupt.falling, 0,
+                              stm32l4_exti_comp_isr, (void *)dev);
       if (ret < 0)
         {
           aerr("stm32l4_exti_comp failed ret = %d\n", ret);
@@ -569,8 +578,9 @@ static int stm32l4_compconfig(FAR const struct comp_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR struct comp_dev_s* stm32l4_compinitialize(int intf,
-                                              FAR const struct stm32l4_comp_config_s *cfg)
+FAR struct comp_dev_s *
+  stm32l4_compinitialize(int intf,
+                         FAR const struct stm32l4_comp_config_s *cfg)
 {
   FAR struct comp_dev_s *dev;
 

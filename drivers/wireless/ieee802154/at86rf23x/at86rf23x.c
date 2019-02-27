@@ -61,9 +61,9 @@
 
 #include "at86rf23x.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SCHED_HPWORK
 #  error High priority work queue required in this driver
@@ -94,14 +94,14 @@
 #define AT86RF23X_PA_ED    2
 #define AT86RF23X_PA_SLEEP 3
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* AT86RF23x device instance
  *
- * Make sure that struct ieee802154_radio_s remains first.  If not it will break the
- * code
+ * Make sure that struct ieee802154_radio_s remains first.  If not it will
+ * break the code
  */
 
 struct at86rf23x_dev_s
@@ -132,8 +132,8 @@ static void at86rf23x_unlock(FAR struct spi_dev_s *spi);
 static void at86rf23x_setreg(FAR struct spi_dev_s *spi, uint32_t addr,
               uint8_t val);
 static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr);
-static int  at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
-              uint8_t len);
+static int  at86rf23x_writeframe(FAR struct spi_dev_s *spi,
+              FAR uint8_t *frame, uint8_t len);
 static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
               FAR uint8_t *frame_rx);
 static int  at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
@@ -147,7 +147,6 @@ static void at86rf23x_irqwork_rx(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqwork_tx(FAR struct at86rf23x_dev_s *dev);
 static void at86rf23x_irqworker(FAR void *arg);
 static int  at86rf23x_interrupt(int irq, FAR void *context, FAR void *arg);
-
 
 static int  at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
               uint8_t chan);
@@ -293,7 +292,7 @@ static uint8_t at86rf23x_getreg(FAR struct spi_dev_s *spi, uint32_t addr)
 
   at86rf23x_unlock(spi);
 
-  wlinfo("r[0x%02X]=0x%02X\n",addr,val[1]);
+  wlinfo("r[0x%02X]=0x%02X\n", addr, val[1]);
 
   return val[1];
 }
@@ -349,8 +348,11 @@ static uint8_t at86rf23x_getregbits(FAR struct spi_dev_s *spi, uint8_t addr,
 static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
                                 uint8_t len)
 {
-//report_packet(frame_wr, len);
   uint8_t reg = RF23X_SPI_FRAME_WRITE;
+
+#if 0
+  report_packet(frame_wr, len);
+#endif
 
   at86rf23x_lock(spi);
 
@@ -378,7 +380,8 @@ static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
 static uint8_t at86rf23x_readframe(FAR struct spi_dev_s *spi,
                                    FAR uint8_t *frame_rx)
 {
-  uint8_t len, reg;
+  uint8_t len;
+  uint8_t reg;
 
   reg = RF23X_SPI_FRAME_READ;
 
@@ -413,10 +416,10 @@ static uint8_t at86rf23x_getTRXstate(FAR struct at86rf23x_dev_s *dev)
  *
  * Description:
  *   Set the TRX state machine to the desired state.  If the state machine
- *   cannot move to the desired state an ERROR is returned.  If the transistion
- *   is successful an OK is returned.  This is a long running function due to
- *   waiting for the transistion delay between states.  This can be as long as
- *   510us.
+ *   cannot move to the desired state an ERROR is returned.  If the
+ *   transistion is successful an OK is returned.  This is a long running
+ *   function due to waiting for the transistion delay between states.  This
+ *   can be as long as 510us.
  *
  ****************************************************************************/
 
@@ -446,7 +449,7 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
 
   /* Start the state change */
 
-  switch(state)
+  switch (state)
     {
     case TRX_CMD_TRXOFF:
       if (status == TRX_STATUS_TRXOFF)
@@ -473,7 +476,8 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
         }
       else if (force)
         {
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_FORCETRXOFF);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_FORCETRXOFF);
           up_udelay(RF23X_TIME_FORCE_TRXOFF);
         }
 
@@ -550,14 +554,16 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
         {
           at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
 
-          (status == TRX_STATUS_TRXOFF) ? up_udelay(RF23X_TIME_TRXOFF_TO_PLL) :
-          up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
+          (status == TRX_STATUS_TRXOFF) ?
+            up_udelay(RF23X_TIME_TRXOFF_TO_PLL) :
+            up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
         }
 
       status = at86rf23x_getTRXstate(dev);
       if ((status == TRX_STATUS_RXON) || (status == TRX_STATUS_PLLON))
         {
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_AACK_ON);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_RX_AACK_ON);
           up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
         }
 
@@ -577,21 +583,25 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
 
       if (status == TRX_STATUS_TRXOFF)
         {
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_RX_ON);
           up_udelay(RF23X_TIME_TRXOFF_TO_PLL);
         }
 
       if ((status == TRX_STATUS_RXON) || (status == TRX_STATUS_PLLON))
         {
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_TX_ARET_ON);
           up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
         }
       else if (status == TRX_STATUS_RXAACKON)
         {
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_RX_ON);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_RX_ON);
           up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
 
-          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_TX_ARET_ON);
+          at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE,
+                               TRX_CMD_TX_ARET_ON);
           up_udelay(RF23X_TIME_TRANSITION_PLL_ACTIVE);
         }
 
@@ -615,7 +625,7 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
 
     default:
       wlerr("ERRPR: %s \n", EINVAL_STR);
-      init_status = 0;/* Placed this here to keep compiler happy when not in debug */
+      init_status = 0;  /* Placed this here to keep compiler if no debug */
       return -EINVAL;
     }
 
@@ -624,7 +634,8 @@ static int at86rf23x_setTRXstate(FAR struct at86rf23x_dev_s *dev,
       wlerr("ERROR: State Transistion Error\n");
     }
 
-  wlinfo("Radio state change state[0x%02x]->state[0x%02x]\n", init_status, status);
+  wlinfo("Radio state change state[0x%02x]->state[0x%02x]\n",
+         init_status, status);
   return ret;
 }
 
@@ -653,7 +664,7 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   if (chan < 11 || chan > 26)
     {
-      wlerr("ERROR: Invalid requested chan: %d\n",chan);
+      wlerr("ERROR: Invalid requested chan: %d\n", chan);
       return -EINVAL;
     }
 
@@ -663,7 +674,8 @@ static int at86rf23x_setchannel(FAR struct ieee802154_radio_s *ieee,
 
   if ((TRX_STATUS_SLEEP == state) || (TRX_STATUS_PON == state))
     {
-      wlerr("ERROR: Radio in invalid mode [%02x] to set the channel\n", state);
+      wlerr("ERROR: Radio in invalid mode [%02x] to set the channel\n",
+            state);
       return ERROR;
     }
 
@@ -862,8 +874,8 @@ static int at86rf23x_setpromisc(FAR struct ieee802154_radio_s *ieee,
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
   /* TODO: Check what mode I should be in to activate promiscuous mode:
-   * This is way to simple of an implementation.  Many other things should be set
-   * and/or checked before we set the device into promiscuous mode
+   * This is way to simple of an implementation.  Many other things should
+   * be set and/or checked before we set the device into promiscuous mode
    */
 
   at86rf23x_setregbits(dev->spi, RF23X_XAHCTRL1_BITS_PROM_MODE, promisc);
@@ -1000,7 +1012,7 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
       break;
 
    case RF23X_TXPWR_POS_3_7:
-      *txpwr =0;
+      *txpwr = 0;
       break;
 
    case RF23X_TXPWR_POS_3_4:
@@ -1024,7 +1036,7 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
       break;
 
    case RF23X_TXPWR_0:
-      *txpwr =0;
+      *txpwr = 0;
       break;
 
    case RF23X_TXPWR_NEG_1:
@@ -1177,7 +1189,8 @@ int at86rf23x_initialize(FAR struct at86rf23x_dev_s *dev)
 static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
 {
   FAR const struct at86rf23x_lower_s *lower = dev->lower;
-  uint8_t trx_status, retry_cnt = 0;
+  uint8_t trx_status;
+  uint8_t retry_cnt = 0;
 
   /* Reset the radio */
 
@@ -1287,7 +1300,7 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
 {
   uint32_t i;
   char buf[4 + 16 * 3 + 2 + 1];
-  int len=0;
+  int len = 0;
 
   wlinfo("RF23X regs:\n");
 
@@ -1311,7 +1324,7 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
       if ((i & 15) == 15 || i == 0x2f)
         {
           sprintf(buf + len, "\n");
-          wlinfo("%s" ,buf);q
+          wlinfo("%s", buf);
         }
     }
 
@@ -1335,9 +1348,9 @@ static void at86rf23x_irqworker(FAR void *arg)
 
   wlinfo("IRQ: 0x%02X\n", irq_status);
 
-  if ((irq_status & (1<<3)) != 0)
+  if ((irq_status & (1 << 3)) != 0)
     {
-      if ((irq_status & (1<<2)) != 0)
+      if ((irq_status & (1 << 2)) != 0)
         {
           at86rf23x_irqwork_rx(dev);
         }
@@ -1430,10 +1443,11 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
 
   /* TODO:
-   *     A plan needs to be made on when we declare the transmission successful.
-   *       1.  If the packet is sent
-   *       2.  If we receive an ACK.
-   *       3.  Where do we control the retry process?
+   * A plan needs to be made on when we declare the transmission successful.
+   *
+   * 1.  If the packet is sent
+   * 2.  If we receive an ACK.
+   * 3.  Where do we control the retry process?
    */
 
   if (at86rf23x_setTRXstate(dev, TRX_CMD_PLL_ON, false))
@@ -1469,8 +1483,9 @@ static int at86rf23x_transmit(FAR struct ieee802154_radio_s *ieee,
  *
  ****************************************************************************/
 
-FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
-                                              FAR const struct at86rf23x_lower_s *lower)
+FAR struct ieee802154_radio_s *
+  at86rf23x_init(FAR struct spi_dev_s *spi,
+                 FAR const struct at86rf23x_lower_s *lower)
 {
   FAR struct at86rf23x_dev_s *dev;
   struct ieee802154_cca_s   cca;
@@ -1530,17 +1545,23 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
 
   at86rf23x_setchannel(&dev->ieee, 12);
 
+#if 0
   /* Configure the Pan id */
 
-  //at86rf23x_setpanid(&dev->ieee, IEEE802154_PAN_DEFAULT);
+  at86rf23x_setpanid(&dev->ieee, IEEE802154_PAN_DEFAULT);
+#endif
 
+#if 0
   /* Configure the Short Addr */
 
-  //at86rf23x_setsaddr(&dev->ieee, IEEE802154_SADDR_UNSPEC);
+  at86rf23x_setsaddr(&dev->ieee, IEEE802154_SADDR_UNSPEC);
+#endif
 
+#if 0
   /* Configure the IEEE Addr */
 
-  //at86rf23x_seteaddr(&dev->ieee, IEEE802154_EADDR_UNSPEC);
+  at86rf23x_seteaddr(&dev->ieee, IEEE802154_EADDR_UNSPEC);
+#endif
 
   /* Default device params at86rf23x defaults to energy detect only */
 
@@ -1550,8 +1571,11 @@ FAR struct ieee802154_radio_s *at86rf23x_init(FAR struct spi_dev_s *spi,
                       * threshold -69 dBm */
   at86rf23x_setcca(&dev->ieee, &cca);
 
+#if 0
   /* Put the Device to RX ON Mode */
-  //at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
+
+  at86rf23x_setTRXstate(dev, TRX_CMD_RX_ON, false);
+#endif
 
   /* Enable Radio IRQ */
 

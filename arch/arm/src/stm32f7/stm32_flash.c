@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_flash.c
  *
  *   Copyright (C) 2018 Wolpike LLC. All rights reserved.
@@ -36,19 +36,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provides standard flash access functions, to be used by the  flash mtd driver.
- * The interface is defined in the include/nuttx/progmem.h
+/* Provides standard flash access functions, to be used by the  flash mtd
+ * driver.  The interface is defined in the include/nuttx/progmem.h
  *
  * Requirements during write/erase operations on FLASH:
  *  - HSI must be ON.
  *  - Low Power Modes are not permitted during write/erase
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -62,9 +62,9 @@
 #include "up_arch.h"
 #include "cache.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define FLASH_KEY1         0x45670123
 #define FLASH_KEY2         0xcdef89ab
@@ -72,15 +72,15 @@
 #define FLASH_OPTKEY2      0x4c5d6e7f
 #define FLASH_ERASEDVALUE  0xff
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static sem_t g_sem = SEM_INITIALIZER(1);
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static void up_waste(void)
 {
@@ -131,9 +131,9 @@ static void flash_lock(void)
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_flash_unlock(void)
 {
@@ -149,13 +149,13 @@ void stm32_flash_lock(void)
   sem_unlock();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_flash_writeprotect
  *
  * Description:
  *   Enable or disable the write protection of a flash sector.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_flash_writeprotect(size_t page, bool enabled)
 {
@@ -194,11 +194,11 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 
   if (enabled)
     {
-      val &= ~(1 << (16+page) );
+      val &= ~(1 << (16 + page));
     }
   else
     {
-      val |=  (1 << (16+page) );
+      val |=  (1 << (16 + page));
     }
 
   /* Unlock options */
@@ -216,7 +216,10 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 
   /* Wait for completion */
 
-  while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
 
   /* Re-lock options */
 
@@ -399,8 +402,9 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       putreg8(*byte, addr);
 
-      /* Data synchronous Barrier (DSB) just after the write operation. This will
-       * force the CPU to respect the sequence of instruction (no optimization).
+      /* Data synchronous Barrier (DSB) just after the write operation. This
+       * will force the CPU to respect the sequence of instruction (no
+       * optimization).
        */
 
       ARM_DSB();

@@ -64,16 +64,16 @@
  ************************************************************************************/
 
 struct stm32l4_firewall_t
-  {
-  uintptr_t   codestart;
-  size_t      codelen;
-  uintptr_t   nvdatastart;
-  size_t      nvdatalen;
-  uintptr_t   datastart;
-  size_t      datalen;
-  uint8_t     datashared:1;
-  uint8_t     dataexec  :1;
-  };
+{
+  uintptr_t  codestart;
+  size_t     codelen;
+  uintptr_t  nvdatastart;
+  size_t     nvdatalen;
+  uintptr_t  datastart;
+  size_t     datalen;
+  uint8_t    datashared : 1;
+  uint8_t    dataexec   : 1;
+};
 
 /************************************************************************************
  * Public Data
@@ -114,4 +114,3 @@ int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_FIREWALL_H */
-
