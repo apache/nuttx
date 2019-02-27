@@ -672,7 +672,7 @@ static uint32_t hrtim_tim_getreg(FAR struct stm32_hrtim_s *priv, uint8_t timer,
 static FAR struct stm32_hrtim_tim_s *hrtim_tim_get(FAR struct stm32_hrtim_s *priv,
                                                    uint8_t timer);
 #if defined(CONFIG_STM32_HRTIM_PWM) || defined(CONFIG_STM32_HRTIM_FAULTS)
-static FAR struct stm32_hrtim_slave_priv_s
+static FAR struct stm32_hrtim_slave_priv_s *
          hrtim_slave_get(FAR struct stm32_hrtim_s *priv, uint8_t timer);
 #endif
 static uint32_t hrtim_base_get(FAR struct stm32_hrtim_s *priv, uint8_t timer);
