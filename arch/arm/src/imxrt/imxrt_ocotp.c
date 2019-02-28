@@ -221,7 +221,7 @@ int imxrt_ocotp_reload()
   if (ret == OK)
     {
       imxrt_ocotp_reset_errors();
-      imxrt_ocotp_setup_read_timing();
+      imxrt_ocotp_initialize();
 
       putreg32(OCOTP_CTRL_RELOAD_SHADOWS, IMXRT_OCOTP_CTRL_SET);
       ret = imxrt_ocotp_wait_for_completion(OCOTP_OPT_TIMEOUT_MS);
