@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 15, 2019)
+NuttX TODO List (Last updated February 28, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -14,7 +14,7 @@ nuttx/:
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (5)  Signals (sched/signal, arch/)
-  (2)  pthreads (sched/pthread)
+  (3)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
  (10)  Kernel/Protected Build
   (3)  C++ Support
@@ -804,8 +804,8 @@ o Signals (sched/signal, arch/)
                complained about it.  Apparently the visibility of the problem is
                very low.
 
-o pthreads (sched/pthreads)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^
+o pthreads (sched/pthreads libs/libc/pthread)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PTHREAD_PRIO_PROTECT
   Description: Extend pthread_mutexattr_setprotocol().  It should support
@@ -895,6 +895,29 @@ o pthreads (sched/pthreads)
   Status:      Open
   Priority:    Low.  This change would improve real-time performance of the
                OS but is not otherwise required.
+
+  Title:       PTHREAD SPINLOCK ISSUES
+  Description: Basic support for pthread spinlocks was added on 2019-02-28,
+               However, there are some issues related to the implementation
+               as it stands.
+
+               1. The Use is not fully verified.  How are these interfaces
+                  used?  How should they be tested?
+               2. These interfaces depend on architecture specific support
+                  support fraom each architecture that support is not be
+                  fully available to the pthread library in all cases.
+               3. It is also restricted to CONFIG_BUILD_FLAT because the
+                  critical test and set function (up_testset()) as
+                  prototyped in include/nuttx/spinlock() does not permit an
+                  inline function or macro to be used in user-mode
+                  application space.
+
+               For these reasons, the selection is marked EXPERIMENTAL.
+  Status:      Open
+  Priority:    Low.  These are new interfaces and not yet in wide use.  The
+               use case for these interfaces is not well defined, but I
+               think it would be restricted to multi-core CPU implmentations
+               which are not widespread in the embedded world.
 
 o Message Queues (sched/mqueue)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
