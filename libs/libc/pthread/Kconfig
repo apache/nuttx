@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "pthread support"
+	depends on !CONFIG_DISABLE_PTHREAD
+
+config PTHREAD_SPINLOCKS
+	bool "pthread spinlock support"
+	default n
+	depends on SPINLOCK && BUILD_FLAT && EXPERIMENTAL
+	---help---
+		Enable EXPERIMENTAL support for pthread spinlocks.
+
+		This is marked EXPERIMENTAL for two reasons (1) the use case is not
+		fully verified, and (2) it depends on architecture specific
+		support provided by each architecture that may not be fully
+		available to the pthread library.
+
+		It also currently depends on CONFIG_BUILD_FLAT because the
+		critical test and set function (up_testset()) as prototyped in
+		include/nuttx/spinlock() does not permit an inline function or
+		macro to be used in user-mode application space.
+
+endmenu # pthread support

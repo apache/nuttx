@@ -11,6 +11,7 @@ source libs/libc/machine/Kconfig
 source libs/libc/stdlib/Kconfig
 source libs/libc/unistd/Kconfig
 source libs/libc/string/Kconfig
+source libs/libc/pthread/Kconfig
 source libs/libc/dlfcn/Kconfig
 source libs/libc/modlib/Kconfig
 source libs/libc/wchar/Kconfig

@@ -55,6 +55,20 @@
 
 #include <nuttx/semaphore.h> /* For sem_t and SEM_PRIO_* defines */
 
+#ifdef CONFIG_PTHREAD_SPINLOCKS
+/* The architecture specific spinlock.h header file must provide the
+ * following:
+ *
+ *   SP_LOCKED   - A definition of the locked state value (usually 1)
+ *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
+ *   spinlock_t  - The type of a spinlock memory object.
+ *
+ * SP_LOCKED and SP_UNLOCKED must constants of type spinlock_t.
+ */
+
+#  include <arch/spinlock.h>
+#endif
+
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
@@ -381,6 +395,25 @@ typedef int pthread_rwlockattr_t;
                                      PTHREAD_COND_INITIALIZER, \
                                      0, 0, false}
 
+#ifdef CONFIG_PTHREAD_SPINLOCKS
+#ifndef __PTHREAD_SPINLOCK_T_DEFINED
+/* This (non-standard) structure represents a pthread spinlock */
+
+struct pthread_spinlock_s
+{
+  volatile spinlock_t sp_lock;  /* Indicates if the spinlock is locked or
+                                 * not.  See the* values SP_LOCKED and
+                                 * SP_UNLOCKED. */
+  pthread_t sp_holder;          /* ID of the thread that holds the spinlock */
+};
+
+/* It is referenced via this standard type */
+
+typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
+#define __PTHREAD_SPINLOCK_T_DEFINED 1
+#endif
+#endif /* JCONFIG_PTHREAD_SPINLOCKS */
+
 #ifdef CONFIG_PTHREAD_CLEANUP
 /* This type describes the pthread cleanup callback (non-standard) */
 
@@ -622,6 +655,16 @@ int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);
 int pthread_kill(pthread_t thread, int sig);
 int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
+#ifdef CONFIG_PTHREAD_SPINLOCKS
+/* Pthread spinlocks */
+
+int pthread_spin_init(FAR pthread_spinlock_t *lock, int pshared);
+int pthread_spin_destroy(FAR pthread_spinlock_t *lock);
+int pthread_spin_lock(FAR pthread_spinlock_t *lock);
+int pthread_spin_trylock(FAR pthread_spinlock_t *lock);
+int pthread_spin_unlock(FAR pthread_spinlock_t *lock);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
@@ -694,6 +737,14 @@ struct pthread_barrier_s;
 typedef struct pthread_barrier_s pthread_barrier_t;
 #  define __PTHREAD_BARRIER_T_DEFINED 1
 #endif
+
+#ifdef CONFIG_PTHREAD_SPINLOCKS
+#ifndef __PTHREAD_SPINLOCK_T_DEFINED
+struct pthread_spinlock_s;
+typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
+#define __PTHREAD_SPINLOCK_T_DEFINED 1
+#endif
+#endif /* CONFIG_PTHREAD_SPINLOCKS */
 
 #ifndef __PTHREAD_ONCE_T_DEFINED
 typedef bool pthread_once_t;

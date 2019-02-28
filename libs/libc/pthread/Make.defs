@@ -63,6 +63,10 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
 
+ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)
+CSRCS += pthread_spinlock.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += pthread_startup.c
 endif
