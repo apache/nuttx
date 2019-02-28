@@ -79,7 +79,9 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
   for (; ; )
     {
-      /* Test if this task is already handling a signal */
+      /* Test if this task is already handling a signal (we don't permit
+       * nested signals on the same thread).
+       */
 
       flags = enter_critical_section();
       if ((stcb->flags & TCB_FLAG_SIGNAL_ACTION) != 0)

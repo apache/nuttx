@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_serial.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -505,7 +505,7 @@ static int esp32_setup(struct uart_dev_s *dev)
 
   if (priv->stopbits2)
     {
-      conf0 |= 3 << UART_STOP_BIT_NUM_S;
+      conf0 |= 2 << UART_STOP_BIT_NUM_S;
     }
   else
     {
@@ -594,17 +594,17 @@ static void esp32_shutdown(struct uart_dev_s *dev)
   /* Revert pins to inputs and detach UART signals */
 
   esp32_configgpio(priv->config->txpin, INPUT);
-  gpio_matrix_out(MATRIX_DETACH_OUT_SIG, priv->config->txsig, true, false);
+  gpio_matrix_out(priv->config->txsig, MATRIX_DETACH_OUT_SIG, true, false);
 
   esp32_configgpio(priv->config->rxpin, INPUT);
-  gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN, priv->config->rxsig, false);
+  gpio_matrix_in(priv->config->rxsig, MATRIX_DETACH_IN_LOW_PIN, false);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
   esp32_configgpio(priv->config->rtspin, INPUT);
-  gpio_matrix_out(MATRIX_DETACH_OUT_SIG, priv->config->rtssig, true, false);
+  gpio_matrix_out(priv->config->rtssig, MATRIX_DETACH_OUT_SIG, true, false);
 
   esp32_configgpio(priv->config->ctspin, INPUT);
-  gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN, priv->config->ctssig, false);
+  gpio_matrix_in(priv->config->ctssig, MATRIX_DETACH_IN_LOW_PIN, false);
 #endif
 
   /* Unconfigure and disable the UART */
@@ -1168,7 +1168,8 @@ static bool esp32_txempty(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) > 0);
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M)
+          == 0);
 }
 
 /****************************************************************************

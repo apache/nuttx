@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched/sched_waitid.c
  *
- *   Copyright (C) 2013, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015, 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,28 +166,36 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   int errcode;
   int ret;
 
-  /* waitid() is a cancellation point */
-
-  (void)enter_cancellation_point();
-
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this function
    * should returned immediately.  However, there is no mechanism available now
    * know if the thread has child:  The children remember their parents (if
    * CONFIG_SCHED_HAVE_PARENT) but the parents do not remember their children.
    */
 
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Only ID types P_PID and P_ALL are supported */
+
+  if (idtype != P_PID && idtype != P_ALL)
+    {
+      set_errno(ENOSYS);
+      return ERROR;
+    }
+
   /* None of the options are supported except for WEXITED (which must be
    * provided.  Currently SIGCHILD always reports CLD_EXITED so we cannot
    * distinguish any other events.
    */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (options != WEXITED)
     {
       set_errno(ENOSYS);
       return ERROR;
     }
 #endif
+
+  /* waitid() is a cancellation point */
+
+  (void)enter_cancellation_point();
 
   /* Create a signal set that contains only SIGCHLD */
 
