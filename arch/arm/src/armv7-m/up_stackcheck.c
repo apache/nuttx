@@ -96,6 +96,7 @@ void __cyg_profile_func_enter(void *func, void *caller)
             "1:                     \n"
             "   cmp r2, r10         \n" /* compare stack with limit */
             "   bgt 2f              \n" /* stack is above limit and thus OK */
+            "   mov r11, r2         \n" /* fault with R11 set to calculated low */
             "   b __stack_overflow_trap\n"
             "2:                     \n"
             "   bx lr               \n"
