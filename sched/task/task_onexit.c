@@ -149,5 +149,3 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 }
 
 #endif /* CONFIG_SCHED_ONEXIT */
-
-

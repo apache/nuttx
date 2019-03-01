@@ -115,6 +115,3 @@ int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

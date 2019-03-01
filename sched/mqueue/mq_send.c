@@ -122,8 +122,8 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
 
       if (msgq->nmsgs >= msgq->maxmsgs) /* Message queue not-FULL? */
         {
-         /* Yes.. the message queue is full.  Wait for space to become
-          * available in the message queue.
+          /* Yes.. the message queue is full.  Wait for space to become
+           * available in the message queue.
            */
 
           ret = nxmq_wait_send(mqdes);

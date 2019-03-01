@@ -512,8 +512,9 @@ bool nxsig_iscatchable(int signo)
 
   if (handler == SIG_IGN)
     {
-      /* We are unsetting the default action */
-      /* sigdelset() is not atomic (but neither is sigaction()) */
+      /* We are unsetting the default action.  NOTE that sigdelset() is not
+       * atomic (but neither is sigaction()).
+       */
 
       flags = spin_lock_irqsave();
       (void)sigdelset(&group->tg_sigdefault, signo);

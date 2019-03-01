@@ -903,14 +903,23 @@ o pthreads (sched/pthreads libs/libc/pthread)
 
                1. The Use is not fully verified.  How are these interfaces
                   used?  How should they be tested?
+
                2. These interfaces depend on architecture specific support
                   support fraom each architecture that support is not be
                   fully available to the pthread library in all cases.
+
+                  There should a setting, say CONFIG_ARCH_HAVE_TESTSET=y
+                  that indicates if the architect provides up_testset().
+
                3. It is also restricted to CONFIG_BUILD_FLAT because the
                   critical test and set function (up_testset()) as
                   prototyped in include/nuttx/spinlock() does not permit an
                   inline function or macro to be used in user-mode
                   application space.
+
+                  Update: A better alternative would be to move the CPU-
+                  depending up_testset() implementation from the arch/
+                  directories and into libs/libc/machine.
 
                For these reasons, the selection is marked EXPERIMENTAL.
   Status:      Open

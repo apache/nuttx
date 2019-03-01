@@ -61,6 +61,38 @@ static void show_usage(char *progname, int exitcode)
   exit(exitcode);
 }
 
+static void check_spaces_left(char *line, int lineno, int ndx)
+{
+  /* Unary operator should generally be preceded by a space but make also
+   * follow a left parenthesis at the beginning of a parthentical list or
+   * expression or follow a right parentheses in the case of a cast.
+   */
+
+  if (ndx > 0 && line[ndx - 1] != ' ' && line[ndx - 1] != '(' && line[ndx - 1] != ')')
+    {
+      fprintf(stderr,
+              "Operator/assignment must be preceded with whitespace at line %d:%d\n",
+              lineno, ndx);
+    }
+}
+
+static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
+{
+  if (ndx1 > 0 && line[ndx1 - 1] != ' ')
+    {
+      fprintf(stderr,
+              "Operator/assignment must be preceded with whitespace at line %d:%d\n",
+              lineno, ndx1);
+    }
+
+  if (line[ndx2 + 1] != '\0' && line[ndx2 + 1] != '\n' && line[ndx2 + 1] != ' ')
+    {
+      fprintf(stderr,
+              "Operator/assignment must be followed with whitespace at line %d:%d\n",
+              lineno, ndx2);
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -876,204 +908,312 @@ int main(int argc, char **argv, char **envp)
                 /* Check for space around various operators */
 
                 case '-':
-                  /* -> */
+                  /* ->, -- */
 
-                  if (line[n + 1] == '>')
+                  if (line[n + 1] == '>' || line[n + 1] == '-')
                     {
                       n++;
-                      break;
                     }
+
+                  /* -= */
+
+                  else if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      /* '-' may function as a unary operator and snuggle
+                       * on the left.
+                       */
+
+                      check_spaces_left(line, lineno, n);
+                    }
+
+                  break;
 
                 case '+':
-                  /* ++, -- */
+                  /* ++ */
 
-                  if (line[n + 1] == line[n])
+                  if (line[n + 1] == '+')
                     {
                       n++;
-                      break;
                     }
+
+                  /* += */
+
+                  else if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      /* '+' may function as a unary operator and snuggle
+                       * on the left.
+                       */
+
+                      check_spaces_left(line, lineno, n);
+                    }
+
+                  break;
 
                 case '&':
-                  /* && */
-
-                  if (line[n] == '&' && line[n + 1] == line[n])
-                    {
-                      int curr;
-                      int next;
-
-                      curr = n;
-                      n++;
-                      next = n + 1;
-
-                      if (line[curr-1] != ' ')
-                        {
-                          fprintf(stderr,
-                                  "Operator/assignment must be preceded with whitespace at line %d:%d\n",
-                                  lineno, curr);
-                        }
-
-                      if (line[next] != ' ' && line[next] != '\n')
-                        {
-                          fprintf(stderr,
-                                  "Operator/assignment needs whitespace separation at line %d:%d\n",
-                                  lineno, curr);
-                        }
-
-                      break;
-                    }
 
                   /* &<variable> OR &(<expression>) */
 
-                  else if (isalpha((int)line[n + 1]) || line[n + 1] == '_' || line[n + 1] == '(')
+                  if (isalpha((int)line[n + 1]) || line[n + 1] == '_' ||
+                      line[n + 1] == '(')
+                    {
+                    }
+
+                  /* &&, &= */
+
+                  else if (line[n + 1] == '=' || line[n + 1] == '&')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
+                case '/':
+                  /* C++-style comment */
+
+                  if (line[n] == '/')
+                    {
+                       if (line[n - 1] == '*')
+                         {
+                           n++;
+                         }
+                       else if (line[n + 1] == '/')
+                         {
+                           fprintf(stderr, "C++ style comment on at %d:%d\n",
+                                   lineno, n);
+                           n++;
+                        }
+                    }
+
+                  /* /= */
+
+                  else if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
+                case '*':
+                  /* *\/, ** */
+
+                  if (line[n] == '*' &&
+                      (line[n + 1] == '/' ||
+                       line[n + 1] == '*'))
+                    {
+                     n++;
+                     break;
+                    }
+
+                  /* *<variable>, *(<expression>) */
+
+                  else if (isalpha((int)line[n + 1]) ||
+                           line[n + 1] == '_' ||
+                           line[n + 1] == '(')
                     {
                       break;
                     }
 
-                case '/':
-                  {
-                    if (line[n] == '/')
-                      {
-                         if (line[n - 1] == '*')
-                           {
-                             n++;
-                             break;
-                           }
-                         else if (line[n + 1] == '/')
-                          {
-                            fprintf(stderr, "C++ style comment on at %d:%d\n",
-                                    lineno, n);
-                             n++;
-                             break;
-                          }
-                      }
-                  }
+                  /* (<type> *) */
 
-                case '*':
-                  {
-                    /* *\/, ** */
+                  else if (line[n + 1] == ')')
+                    {
+                      /* REVISIT: This gives false alarms on syntax like *--ptr */
 
-                    if (line[n] == '*' &&
-                        (line[n + 1] == '/' ||
-                         line[n + 1] == '*'))
-                      {
-                       n++;
-                       break;
-                      }
+                      if (line[n - 1] != ' ')
+                        {
+                          fprintf(stderr,
+                                  "Operator/assignment must be preceded with whitespace at line %d:%d\n",
+                                  lineno, n);
+                        }
 
-                    /* *<variable>, *(<expression>) */
+                      break;
+                    }
 
-                    else if (isalpha((int)line[n + 1]) ||
-                             line[n + 1] == '_' ||
-                             line[n + 1] == '(')
-                      {
-                        break;
-                      }
+                  /* *= */
 
-                    /* (<type> *) */
+                  else if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      /* A single '*' may be an binary operator, but
+                       * it could also be a unary operator when used to deference
+                       * a pointer.
+                       */
 
-                    else if (line[n + 1] == ')')
-                      {
-                        /* REVISIT: This gives false alarms on syntax like *--ptr */
+                      check_spaces_left(line, lineno, n);
+                    }
 
-                        if (line[n - 1] != ' ')
-                          {
-                            fprintf(stderr,
-                                    "Operator/assignment must be preceded with whitespace at line %d:%d\n",
-                                    lineno, n);
-                          }
-
-                        break;
-                      }
-                  }
+                  break;
 
                 case '%':
-                  {
-                    if (isalnum((int)line[n + 1]))
-                      {
-                        break;
-                      }
-                  }
+                  /* %= */
+
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
 
                 case '<':
+                  /* <=, <<, <<= */
+
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else if (line[n + 1] == '<')
+                    {
+                      if (line[n + 2] == '=')
+                        {
+                          check_spaces_leftright(line, lineno, n, n + 2);
+                          n += 2;
+                        }
+                      else
+                        {
+                          check_spaces_leftright(line, lineno, n, n + 1);
+                          n++;
+                        }
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
                 case '>':
+                  /* >=, >>, >>= */
+
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else if (line[n + 1] == '>')
+                    {
+                      if (line[n + 2] == '=')
+                        {
+                          check_spaces_leftright(line, lineno, n, n + 2);
+                          n += 2;
+                        }
+                      else
+                        {
+                          check_spaces_leftright(line, lineno, n, n + 1);
+                          n++;
+                        }
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
                 case '|':
+                  /* |=, || */
+
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else if (line[n + 1] == '|')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
                 case '^':
+                  /* ^= */
+
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
+
+                  break;
+
                 case '=':
-                  {
-                    int curr;
-                    int next;
+                  /* == */
 
-                    curr = n;
-                    if (line[curr - 1] != ' ')
-                      {
-                        fprintf(stderr,
-                                "Operator/assignment must be preceded with whitespace at line %d:%d\n",
-                                lineno, curr);
-                      }
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_leftright(line, lineno, n, n);
+                    }
 
-                    next = n + 1;
-
-                    /* <<, >>, <<=, >>= */
-
-                    if (line[curr] == '>' || line[curr] == '<')
-                      {
-                        if (line[next] == line[curr])
-                          {
-                            next++;
-                            n++;
-                          }
-
-                        if (line[next] == '=')
-                          {
-                            next++;
-                            n++;
-                          }
-                      }
-                    else if (line[next] == '=' || line[next] == line[n])
-                      {
-                        next++;
-                        n++;
-                      }
-
-                    /* REVISIT: This gives false alarms on syntax like *--ptr */
-
-                    if (line[curr] != '-' && line[next] != ' ' && line[next] != '\n')
-                      {
-                        fprintf(stderr,
-                                "Operator/assignment needs whitespace separation at line %d:%d\n",
-                                lineno, curr);
-                      }
-                  }
                   break;
 
                 case '~':
+                  check_spaces_left(line, lineno, n);
+                  break;
+
                 case '!':
-                  {
-                    int curr;
-                    int next;
+                  /* != */
 
-                    curr = n;
-                    next = n + 1;
-                    if (line[next] == '=' || line[next] == line[n])
-                      {
-                        next++;
-                        n++;
+                  if (line[n + 1] == '=')
+                    {
+                      check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
 
-                        if (line[next] != ' ' && line[next] != '\n')
-                          {
-                            fprintf(stderr,
-                                    "Operator/assignment needs whitespace separation at line %d:%d\n",
-                                    lineno, curr);
-                          }
-                      }
+                  /* !! */
 
-                    if (line[curr-1] != ' ' && line[curr-1] != '(')
-                      {
-                        fprintf(stderr,
-                                "Operator/assignment must be preceded with whitespace at line %d:%d\n",
-                                lineno, curr);
-                      }
-                  }
+                  else if (line[n + 1] == '!')
+                    {
+                      check_spaces_left(line, lineno, n);
+                      n++;
+                    }
+                  else
+                    {
+                      check_spaces_left(line, lineno, n);
+                    }
+
                   break;
 
                 default:

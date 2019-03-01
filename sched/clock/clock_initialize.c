@@ -293,7 +293,9 @@ void clock_synchronize(void)
 #if defined(CONFIG_RTC) && !defined(CONFIG_SCHED_TICKLESS)
 void clock_resynchronize(FAR struct timespec *rtc_diff)
 {
-  struct timespec rtc_time, bias, curr_ts;
+  struct timespec rtc_time;
+  struct timespec bias;
+  struct timespec curr_ts;
   struct timespec rtc_diff_tmp;
   irqstate_t flags;
   int32_t carry;

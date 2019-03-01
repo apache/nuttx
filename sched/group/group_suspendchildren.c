@@ -87,7 +87,7 @@ static int group_suspendchildren_handler(pid_t pid, FAR void *arg)
         }
     }
 
-  /* Always return zero.  We need to visit each member of the group*/
+  /* Always return zero.  We need to visit each member of the group. */
 
   return OK;
 }

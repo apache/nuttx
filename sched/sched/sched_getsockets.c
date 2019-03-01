@@ -72,5 +72,3 @@ FAR struct socketlist *sched_getsockets(void)
   return &group->tg_socketlist;
 }
 #endif
-
-

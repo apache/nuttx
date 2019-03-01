@@ -152,5 +152,3 @@ int atexit(void (*func)(void))
 }
 
 #endif /* CONFIG_SCHED_ATEXIT */
-
-

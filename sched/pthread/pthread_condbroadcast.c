@@ -121,5 +121,3 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
   sinfo("Returning %d\n", ret);
   return ret;
 }
-
-

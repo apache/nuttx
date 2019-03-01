@@ -68,7 +68,8 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
   if (sigq->type == SIG_ALLOC_FIXED)
     {
       /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers. */
+       * list from interrupt handlers.
+       */
 
       flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingaction);
@@ -82,7 +83,8 @@ void nxsig_release_pendingsigaction(FAR sigq_t *sigq)
   else if (sigq->type == SIG_ALLOC_IRQ)
     {
       /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers. */
+       * list from interrupt handlers.
+       */
 
       flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)sigq, &g_sigpendingirqaction);

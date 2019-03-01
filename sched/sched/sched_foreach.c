@@ -90,5 +90,3 @@ void sched_foreach(sched_foreach_t handler, FAR void *arg)
       leave_critical_section(flags);
     }
 }
-
-

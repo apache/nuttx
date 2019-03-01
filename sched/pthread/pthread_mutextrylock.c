@@ -211,6 +211,3 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
   sinfo("Returning %d\n", ret);
   return ret;
 }
-
-
-

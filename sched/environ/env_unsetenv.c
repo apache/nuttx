@@ -133,6 +133,3 @@ int unsetenv(FAR const char *name)
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

@@ -434,14 +434,14 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
             }
           else
 #endif
-           {
-             /* We were awakened by a timeout.  Set EAGAIN and return an
-              * error.
-              */
+            {
+              /* We were awakened by a timeout.  Set EAGAIN and return an
+               * error.
+               */
 
-             DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
-             ret = -EAGAIN;
-           }
+              DEBUGASSERT(rtcb->sigunbinfo.si_signo == SIG_WAIT_TIMEOUT);
+              ret = -EAGAIN;
+            }
         }
 
       /* Return the signal info to the caller if so requested */

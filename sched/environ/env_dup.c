@@ -137,6 +137,3 @@ int env_dup(FAR struct task_group_s *group)
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

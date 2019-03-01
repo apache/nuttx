@@ -199,45 +199,43 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 #endif /* !CONFIG_PTHREAD_MUTEX_UNSAFE || CONFIG_PTHREAD_MUTEX_TYPES */
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-        /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
+      /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
 
-        if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
-          {
-            /* This is a recursive mutex and we there are multiple locks held. Retain
-             * the mutex lock, just decrement the count of locks held, and return
-             * success.
-             */
+      if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
+        {
+          /* This is a recursive mutex and we there are multiple locks held. Retain
+           * the mutex lock, just decrement the count of locks held, and return
+           * success.
+           */
 
-            mutex->nlocks--;
-            ret = OK;
-          }
-        else
+          mutex->nlocks--;
+          ret = OK;
+        }
+      else
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
-          /* This is either a non-recursive mutex or is the outermost unlock of
-           * a recursive mutex.
-           *
-           * In the case where the calling thread is NOT the holder of the thread,
-           * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
-           * We allow the other thread to release the mutex even though it does
-           * not own it.
-           */
+        /* This is either a non-recursive mutex or is the outermost unlock of
+         * a recursive mutex.
+         *
+         * In the case where the calling thread is NOT the holder of the thread,
+         * the behavior is undefined per POSIX.  Here we do the same as GLIBC:
+         * We allow the other thread to release the mutex even though it does
+         * not own it.
+         */
 
-          {
-            /* Nullify the pid and lock count then post the semaphore */
+        {
+          /* Nullify the pid and lock count then post the semaphore */
 
-            mutex->pid    = -1;
+          mutex->pid    = -1;
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-            mutex->nlocks = 0;
+          mutex->nlocks = 0;
 #endif
-            ret = pthread_mutex_give(mutex);
-          }
+          ret = pthread_mutex_give(mutex);
+        }
     }
 
   sched_unlock();
   sinfo("Returning %d\n", ret);
   return ret;
 }
-
-

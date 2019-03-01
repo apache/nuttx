@@ -56,6 +56,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Is this worth making a configuration option? */
 
 #define GROUP_REALLOC_MEMBERS 4

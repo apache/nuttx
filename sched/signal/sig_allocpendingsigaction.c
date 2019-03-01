@@ -83,7 +83,8 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
     }
 
   /* If we were not called from an interrupt handler, then we are
-   * free to allocate pending signal action structures if necessary. */
+   * free to allocate pending signal action structures if necessary.
+   */
 
   else
     {

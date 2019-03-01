@@ -93,7 +93,8 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
     {
       /* Allocate a new element for the signal queue.  NOTE:
        * nxsig_alloc_pendingsigaction will force a system crash if it is
-       * unable to allocate memory for the signal data */
+       * unable to allocate memory for the signal data.
+       */
 
       sigq = nxsig_alloc_pendingsigaction();
       if (!sigq)

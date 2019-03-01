@@ -324,7 +324,8 @@ void work_notifier_signal(enum work_evtype_e evtype,
   sched_lock();
 
   /* Process the notification at the head of the pending list until the
-   * pending list is empty  */
+   * pending list is empty
+   */
 
   for (entry = dq_peek(&g_notifier_pending);
        entry != NULL;
