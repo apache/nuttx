@@ -101,6 +101,7 @@ struct skel_level1_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* File system methods */
 
 static int     skel_open(FAR struct file *filep, FAR const char *relpath,
@@ -108,7 +109,9 @@ static int     skel_open(FAR struct file *filep, FAR const char *relpath,
 static int     skel_close(FAR struct file *filep);
 static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
+
 /* TODO:  Should not support skel_write if read-only */
+
 static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     skel_dup(FAR const struct file *oldp,
@@ -140,7 +143,9 @@ const struct procfs_operations skel_procfsoperations =
   skel_open,       /* open */
   skel_close,      /* close */
   skel_read,       /* read */
+
   /* TODO:  Decide if this procfs entry supports write access */
+
 #if 0 /* NULL if the procfs entry does not support write access. */
   NULL,            /* write */
 #else
@@ -270,6 +275,7 @@ static ssize_t skel_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 /* TODO: Should not support skel_write if read-only */
+
 static ssize_t skel_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
@@ -502,10 +508,11 @@ static int skel_stat(FAR const char *relpath, FAR struct stat *buf)
   buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
 
   /* TODO:  Set S_IFREG if the relpath refers to a file.
-  /* TODO:  If the skel_write() method is supported, then stat must also
+   * TODO:  If the skel_write() method is supported, then stat must also
    *        report S_IWOTH | S_IWGRP | S_IWUSR for files (but not for
    *        directories) as well.
-  /* TODO:  Other 'struct buf' settings may be appropriate (optional) */
+   * TODO:  Other 'struct buf' settings may be appropriate (optional)
+   */
 
   ret = OK;
 

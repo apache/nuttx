@@ -142,7 +142,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
             {
               if (eph->evs[i].data.fd == fd)
                 {
-                  if (i != eph->occupied-1)
+                  if (i != eph->occupied - 1)
                     {
                       memmove(&eph->evs[i], &eph->evs[i + 1],
                               eph->occupied - i);

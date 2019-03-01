@@ -438,13 +438,13 @@ uint32_t fat_systime2fattime(void)
               uint16_t fattime;
               uint16_t fatdate;
 
-              fattime  = (tm.tm_sec       >>  1) & 0x001f; /* Bits 0-4: 2 second count (0-29) */
-              fattime |= (tm.tm_min       <<  5) & 0x07e0; /* Bits 5-10: minutes (0-59) */
-              fattime |= (tm.tm_hour      << 11) & 0xf800; /* Bits 11-15: hours (0-23) */
+              fattime  = (tm.tm_sec         >>  1) & 0x001f; /* Bits 0-4: 2 second count (0-29) */
+              fattime |= (tm.tm_min         <<  5) & 0x07e0; /* Bits 5-10: minutes (0-59) */
+              fattime |= (tm.tm_hour        << 11) & 0xf800; /* Bits 11-15: hours (0-23) */
 
-              fatdate  =  tm.tm_mday             & 0x001f; /* Bits 0-4: Day of month (1-31) */
-              fatdate |= ((tm.tm_mon+1)   <<  5) & 0x01e0; /* Bits 5-8: Month of year (1-12) */
-              fatdate |= ((tm.tm_year-80) <<  9) & 0xfe00; /* Bits 9-15: Year from 1980 */
+              fatdate  =  tm.tm_mday               & 0x001f; /* Bits 0-4: Day of month (1-31) */
+              fatdate |= ((tm.tm_mon + 1)   <<  5) & 0x01e0; /* Bits 5-8: Month of year (1-12) */
+              fatdate |= ((tm.tm_year - 80) <<  9) & 0xfe00; /* Bits 9-15: Year from 1980 */
 
               return (uint32_t)fatdate << 16 | (uint32_t)fattime;
             }
@@ -490,7 +490,7 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 
   tm.tm_mday =  (fatdate & 0x001f);             /* Bits 0-4: Day of month (1-31) */
   tmp        = ((fatdate & 0x01e0) >>  5);      /* Bits 5-8: Month of year (1-12) */
-  tm.tm_mon  =   tmp > 0 ? tmp-1 : 0;
+  tm.tm_mon  =   tmp > 0 ? tmp - 1 : 0;
   tm.tm_year = ((fatdate & 0xfe00) >>  9) + 80; /* Bits 9-15: Year from 1980 */
 
   /* Then convert the broken out time into seconds since the epoch */
@@ -1395,7 +1395,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
            * has been examined.
            */
 
-          if ((sector & (fs->fs_fatsecperclus-1)) == 0)
+          if ((sector & (fs->fs_fatsecperclus - 1)) == 0)
             {
               /* Get next cluster */
 
@@ -1542,7 +1542,7 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
       return cluster;
     }
 
-  clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;;
+  clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
   remaining   = length;
 
   while (cluster >= 2 && cluster < fs->fs_nclusters)

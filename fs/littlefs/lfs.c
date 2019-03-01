@@ -814,17 +814,17 @@ static int lfs_dir_commit(FAR lfs_t *lfs, FAR lfs_dir_t *dir,
 
       break;
 
-    relocate:
-      /* commit was corrupted */
+relocate:
+      /* Commit was corrupted */
 
       LFS_DEBUG("Bad block at %" PRIu32, dir->pair[0]);
 
-      /* drop caches and prepare to relocate block */
+      /* Drop caches and prepare to relocate block */
 
       relocated = true;
       lfs_cache_drop(lfs, &lfs->pcache);
 
-      /* can't relocate superblock, filesystem is now frozen */
+      /* Can't relocate superblock, filesystem is now frozen */
 
       if (lfs_paircmp(oldpair, (const lfs_block_t[2]){ 0, 1 }) == 0)
         {

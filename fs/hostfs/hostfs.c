@@ -258,7 +258,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   if (depth >= 0)
     {
-      strncat(path, &relpath[first], pathlen-strlen(path)-1);
+      strncat(path, &relpath[first], pathlen - strlen(path) - 1);
     }
 }
 
@@ -1000,12 +1000,12 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       /* Remove trailing '/' */
 
-      fs->fs_root[len-1] = '\0';
+      fs->fs_root[len - 1] = '\0';
     }
 
   /* Append a '/' to the name now */
 
-  if (fs->fs_root[len-1] != '/')
+  if (fs->fs_root[len - 1] != '/')
     {
       strcat(fs->fs_root, "/");
     }

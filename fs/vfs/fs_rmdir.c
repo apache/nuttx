@@ -137,8 +137,8 @@ int rmdir(FAR const char *pathname)
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* If this is a "dangling" pseudo-directory node (i.e., it has no operations)
-   * then rmdir should remove the node.
+  /* If this is a "dangling" pseudo-directory node (i.e., it has no
+   * operations) then rmdir should remove the node.
    */
 
   if (!inode->u.i_ops)

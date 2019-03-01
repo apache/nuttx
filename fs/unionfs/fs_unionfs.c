@@ -78,6 +78,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure describes one contained file system mountpoint */
 
 struct unionfs_mountpt_s
@@ -107,6 +108,7 @@ struct unionfs_file_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Helper functions */
 
 static int     unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint);
@@ -357,7 +359,6 @@ static bool unionfs_ispartprefix(FAR const char *partprefix,
     }
 
   /* Check for NUL or empty full prefix */
-
 
   if (prefix == NULL || *prefix == '\0')
     {
@@ -703,7 +704,7 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
     {
       /* Yes.. extend the file name by prepending the path */
 
-      if (path[pathlen-1] == '/')
+      if (path[pathlen - 1] == '/')
         {
           ret = asprintf(&relpath, "%s%s", path, name);
         }
@@ -1715,7 +1716,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * directories.
        */
 
-      strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX+1);
+      strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX + 1);
 
       /* Describe this as a read only directory */
 
@@ -1789,7 +1790,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                    * be multiple directories.
                    */
 
-                  strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX+1);
+                  strncpy(dir->fd_dir.d_name, um->um_prefix, NAME_MAX + 1);
 
                   /* Describe this as a read only directory */
 

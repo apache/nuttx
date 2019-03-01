@@ -238,7 +238,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   if (ret == OK)
     {
-      /* The name exists -- but is is a file or a directory ? */
+      /* The name exists -- but is is a file or a directory? */
 
       if (sf->entry.flags & SMARTFS_DIRENT_TYPE_DIR)
         {
@@ -261,7 +261,8 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
       /* TODO: Test open mode based on the file mode */
 
       /* The file exists.  Check if we are opening it for O_CREAT or
-       * O_TRUNC mode and delete the sector chain if we are. */
+       * O_TRUNC mode and delete the sector chain if we are.
+       */
 
       if ((oflags & (O_CREAT | O_TRUNC)) != 0)
         {
@@ -429,12 +430,14 @@ static int smartfs_close(FAR struct file *filep)
   smartfs_semtake(fs);
 
   /* Check if we are the last one with a reference to the file and
-   * only close if we are. */
+   * only close if we are.
+   */
 
   if (sf->crefs > 1)
     {
       /* The file is opened more than once.  Just decrement the
-       * reference count and return. */
+       * reference count and return.
+       */
 
       sf->crefs--;
       goto okout;
@@ -675,7 +678,8 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
     }
 
   /* First test if we are overwriting an existing location or writing to
-   * a new one. */
+   * a new one.
+   */
 
   header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
   byteswritten = 0;
@@ -1402,7 +1406,8 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
     }
 
   /* If the global semaphore hasn't been initialized, then
-   * initialized it now. */
+   * initialized it now.
+   */
 
   fs->fs_sem = &g_sem;
   if (!g_seminitialized)
@@ -1648,7 +1653,8 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
   else if (ret == -ENOENT)
     {
       /* It doesn't exist ... we can create it, but only if we have
-       * the right permissions and if the parentdirsector is valid. */
+       * the right permissions and if the parentdirsector is valid.
+       */
 
       if (parentdirsector == 0xFFFF)
         {

@@ -115,8 +115,10 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
 
           stats->nblocks++;
 
-          /* Collect statistics */
-          /* Check if this is a block that should be recognized by NXFFS */
+          /* Collect statistics.
+           *
+           * Check if this is a block that should be recognized by NXFFS.
+           */
 
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
             {
@@ -189,8 +191,10 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
 
           FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s *)volume->pack;
 
-          /* Collect statistics */
-          /* Check if this is a block that should be recognized by NXFFS */
+          /* Collect statistics.
+           *
+           * Check if this is a block that should be recognized by NXFFS.
+           */
 
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
             {

@@ -919,7 +919,6 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Set up for the new file position */
 
-
   data_spndx  = (pos > 0 ? (pos - 1) : 0) / SPIFFS_DATA_PAGE_SIZE(fs);
   objndx_spndx = SPIFFS_OBJNDX_ENTRY_SPNDX(fs, data_spndx);
 
@@ -1127,7 +1126,7 @@ static int spiffs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   fobj = oldp->f_priv;
 
-  /* Increment the reference count (atomically)*/
+  /* Increment the reference count (atomically) */
 
   spiffs_lock_volume(fs);
   fobj->crefs++;
@@ -1676,8 +1675,9 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
     }
   else
     {
-      /* Otherwise, we will need to re-open the file */
-      /* Allocate  new file object */
+      /* Otherwise, we will need to re-open the file.
+       * First, allocate  new file object.
+       */
 
       fobj = (FAR struct spiffs_file_s *)kmm_zalloc(sizeof(struct spiffs_file_s));
       if (fobj == NULL)

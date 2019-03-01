@@ -166,7 +166,6 @@ int mq_close(mqd_t mqdes)
   return ret;
 }
 
-
 /****************************************************************************
  * Name: mq_inode_release
  *

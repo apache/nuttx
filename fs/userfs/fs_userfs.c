@@ -1377,7 +1377,7 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   client.sin_port        = 0;
   client.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 
-  ret = psock_bind(&priv->psock, (struct sockaddr*)&client,
+  ret = psock_bind(&priv->psock, (FAR struct sockaddr *)&client,
                    sizeof(struct sockaddr_in));
   if (ret < 0)
     {

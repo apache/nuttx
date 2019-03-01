@@ -58,6 +58,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This structure supports access to one inode data stream */
 
 struct nxffs_packstream_s

@@ -86,7 +86,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
 
       if (ch == '\0' || ch == '/')
         {
-          /* This logic just suppors "//" sequences in the path name */
+          /* This logic just supports "//" sequences in the path name */
 
           if (ch == '\0' || nbytes > 0)
             {
@@ -390,7 +390,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
                  FAR struct nfs_fattr *dir_attributes)
 {
   FAR const char *path = relpath;
-  char            buffer[NAME_MAX+1];
+  char            buffer[NAME_MAX + 1];
   char            terminator;
   uint32_t         tmp;
   int             error;

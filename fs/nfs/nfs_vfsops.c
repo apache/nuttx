@@ -535,8 +535,10 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
       return EEXIST;
     }
 
-  /* Initialize the file private data */
-  /* Copy the file handle */
+  /* Initialize the file private data.
+   *
+   * Copy the file handle.
+   */
 
   np->n_fhsize      = (uint8_t)fhandle.length;
   memcpy(&np->n_fhandle, &fhandle.handle, fhandle.length);
@@ -2119,7 +2121,9 @@ int nfs_fsinfo(FAR struct nfsmount *nmp)
 
   /* Save the root file system attributes */
 
-//memcpy(&nmp->nm_fattr. &fsp.obj_attributes, sizeof(struct nfs_fattr));
+#if 0
+  memcpy(&nmp->nm_fattr. &fsp.obj_attributes, sizeof(struct nfs_fattr));
+#endif
 
   pref = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_wtpref);
   if (pref < nmp->nm_wsize)
@@ -2560,8 +2564,8 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   struct nfsmount        *nmp;
   struct file_handle      from_handle;
   struct file_handle      to_handle;
-  char                    from_name[NAME_MAX+1];
-  char                    to_name[NAME_MAX+1];
+  char                    from_name[NAME_MAX + 1];
+  char                    to_name[NAME_MAX + 1];
   struct nfs_fattr        fattr;
   FAR uint32_t           *ptr;
   int                     namelen;

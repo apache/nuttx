@@ -83,6 +83,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* TMPFS helpers */
 
 static void tmpfs_lock_reentrant(FAR struct tmpfs_sem_s *sem);
@@ -1411,8 +1412,9 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_filelock;
         }
 
-      /* Check if the caller has sufficient privileges to open the file */
-      /* REVISIT: No file protection implemented */
+      /* Check if the caller has sufficient privileges to open the file.
+       * REVISIT: No file protection implemented
+       */
 
       /* If O_TRUNC is specified and the file is opened for writing,
        * then truncate the file.  This operation requires that the file is
@@ -1770,7 +1772,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   tfo = oldp->f_priv;
   DEBUGASSERT(tfo != NULL);
 
-  /* Increment the reference count (atomically)*/
+  /* Increment the reference count (atomically) */
 
   tmpfs_lock_file(tfo);
   tfo->tfo_refs++;
@@ -1810,7 +1812,7 @@ static int tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   tmpfs_lock_file(tfo);
 
-  /* Return information about the file in the stat buffer.*/
+  /* Return information about the file in the stat buffer. */
 
   tmpfs_stat_common((FAR struct tmpfs_object_s *)tfo, buf);
 

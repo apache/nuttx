@@ -104,7 +104,8 @@ static int parse_partition(FAR struct partition_state_s *state,
                            partition_handler_t handler,
                            FAR void *arg)
 {
-  int i, ret = 0;
+  int i;
+  int ret = 0;
 
   for (i = 0; g_parser[i] != NULL; i++)
     {

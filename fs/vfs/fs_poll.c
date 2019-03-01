@@ -107,7 +107,8 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
       /* Perform the socket ioctl */
 
 #ifdef CONFIG_NET
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS +
+                              CONFIG_NSOCKET_DESCRIPTORS))
         {
           return net_poll(fd, fds, setup);
         }
@@ -478,18 +479,20 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
     defined(CONFIG_HAVE_LONG_LONG)
-          ticks = (((unsigned long long)timeout * USEC_PER_MSEC) + (USEC_PER_TICK - 1)) /
+          ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
+                   (USEC_PER_TICK - 1)) /
                   USEC_PER_TICK;
 #else
-          ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
+          ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
+                  MSEC_PER_TICK;
 #endif
 
           /* Either wait for either a poll event(s), for a signal to occur,
            * or for the specified timeout to elapse with no event.
            *
-           * NOTE: If a poll event is pending (i.e., the semaphore has already
-           * been incremented), nxsem_tickwait() will not wait, but will return
-           * immediately.
+           * NOTE: If a poll event is pending (i.e., the semaphore has
+           * already been incremented), nxsem_tickwait() will not wait, but
+           * will return immediately.
            */
 
            ret = nxsem_tickwait(&sem, clock_systimer(), ticks);
@@ -512,8 +515,8 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
           ret = poll_semtake(&sem);
         }
 
-      /* Teardown the poll operation and get the count of events.  Zero will be
-       * returned in the case of a timeout.
+      /* Teardown the poll operation and get the count of events.  Zero will
+       * be returned in the case of a timeout.
        *
        * Preserve ret, if negative, since it holds the result of the wait.
        */

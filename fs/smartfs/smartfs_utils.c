@@ -184,7 +184,7 @@ void smartfs_wrle32(uint8_t *dest, uint32_t val)
   /* Little endian means LS halfword first in byte stream */
 
   smartfs_wrle16(dest, (uint16_t)(val & 0xffff));
-  smartfs_wrle16(dest+2, (uint16_t)(val >> 16));
+  smartfs_wrle16(dest + 2, (uint16_t)(val >> 16));
 }
 
 /****************************************************************************
@@ -669,7 +669,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
                           direntry->dfirst = dirstack[depth];
                           if (direntry->name == NULL)
                             {
-                              direntry->name = (char *) kmm_malloc(fs->fs_llformat.namesize+1);
+                              direntry->name = (FAR char *)
+                                kmm_malloc(fs->fs_llformat.namesize + 1);
                             }
 
                           memset(direntry->name, 0, fs->fs_llformat.namesize + 1);
@@ -1073,10 +1074,10 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   direntry->datlen = 0;
   if (direntry->name == NULL)
     {
-      direntry->name = (FAR char *) kmm_malloc(fs->fs_llformat.namesize+1);
+      direntry->name = (FAR char *)kmm_malloc(fs->fs_llformat.namesize + 1);
     }
 
-  memset(direntry->name, 0, fs->fs_llformat.namesize+1);
+  memset(direntry->name, 0, fs->fs_llformat.namesize + 1);
   strncpy(direntry->name, filename, fs->fs_llformat.namesize);
 
   ret = OK;
@@ -1218,6 +1219,7 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 #endif
             {
               /* Count this entry */
+
               count++;
             }
 
@@ -1370,6 +1372,7 @@ int smartfs_countdirentries(struct smartfs_mountpt_s *fs,
 #endif
             {
               /* Count this entry */
+
               count++;
             }
 
@@ -1439,7 +1442,8 @@ int smartfs_sync_internal(FAR struct smartfs_mountpt_s *fs,
 #else  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
   /* Test if we have written bytes to the current sector that
-   * need to be recorded in the chain header's used bytes field. */
+   * need to be recorded in the chain header's used bytes field.
+   */
 
   if (sf->byteswritten > 0)
     {
@@ -1571,8 +1575,9 @@ off_t smartfs_seek_internal(FAR struct smartfs_mountpt_s *fs,
     {
       /* Seeking within the current sector.  Just update the offset */
 
-      sf->curroffset = sizeof(struct smartfs_chain_header_s) + newpos-sectorstartpos;
-      sf->filepos = newpos;
+      sf->curroffset = sizeof(struct smartfs_chain_header_s) +
+                       newpos - sectorstartpos;
+      sf->filepos    = newpos;
 
       return newpos;
     }
@@ -1931,7 +1936,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
       readwrite.count     = fs->fs_llformat.availbytes - sf->curroffset;
       if (readwrite.count > remaining)
         {
-          /* Limit the write to the size for our smaller working buffer*/
+          /* Limit the write to the size for our smaller working buffer */
 
           readwrite.count = SMARTFS_TRUNCBUFFER_SIZE;
         }

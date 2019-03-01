@@ -100,7 +100,6 @@ struct spiffs_gc_s
  *
  ****************************************************************************/
 
-
 static int spiffs_gc_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
 {
   int ret;
@@ -109,6 +108,7 @@ static int spiffs_gc_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
   spiffs_gcinfo("Erase block=%04x\n", blkndx);
 
   /* Erase the block */
+
   ret = spiffs_erase_block(fs, blkndx);
   if (ret < 0)
     {
@@ -332,7 +332,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
        * probably not so many blocks
        */
 
-      if (ret >= 0 /* && deleted_pages_in_block > 0 */ )
+      if (ret >= 0 /* && deleted_pages_in_block > 0 */)
         {
           int32_t score;
           int16_t erase_count;
@@ -754,7 +754,6 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                                  */
         }
 
-
       if (ret < 0)
         {
           break;
@@ -1134,7 +1133,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 #if 0
   if (fs->free_blocks <= 2 && (int32_t)needed_pages > free_pages)
     {
-      spiffs_gcinfo("Full freeblk=%d" needed=%d" free=%d dele=%d\n",
+      spiffs_gcinfo("Full freeblk=%d needed=%d free=%d dele=%d\n",
                     fs->free_blocks, needed_pages, free_pages,
                     fs->deleted_pages);
       return -ENOSPC;

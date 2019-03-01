@@ -79,6 +79,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure describes the state of the automounter */
 
 struct automounter_state_s

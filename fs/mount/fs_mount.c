@@ -63,7 +63,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* In the canonical case, a file system is bound to a block driver.  However,
  * some less typical cases a block driver is not required.  Examples are
  * pseudo file systems (like BINFS or PROCFS) and MTD file systems (like NXFFS).

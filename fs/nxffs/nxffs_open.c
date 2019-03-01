@@ -1180,7 +1180,6 @@ int nxffs_close(FAR struct file *filep)
       ofile->crefs--;
     }
 
-
   filep->f_priv = NULL;
   nxsem_post(&volume->exclsem);
 

@@ -63,7 +63,8 @@ int dup(int fd)
   int ret = OK;
 
   /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+   * descriptor.
+   */
 
   if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {

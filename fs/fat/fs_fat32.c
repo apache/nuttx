@@ -1765,8 +1765,10 @@ static int fat_truncate(FAR struct file *filep, off_t length)
       FAR uint8_t *direntry;
       int ndx;
 
-      /* We are shrinking the file. */
-      /* Read the directory entry into the fs_buffer. */
+      /* We are shrinking the file.
+       *
+       * Read the directory entry into the fs_buffer.
+       */
 
       ret = fat_fscacheread(fs, ff->ff_dirsector);
       if (ret < 0)
@@ -2255,7 +2257,7 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 #ifdef CONFIG_FAT_LFN
       buf->f_namelen = LDIR_MAXFNAME;         /* Maximum length of filenames */
 #else
-      buf->f_namelen = (8+1+3);               /* Maximum length of filenames */
+      buf->f_namelen = (8 + 1 + 3);           /* Maximum length of filenames */
 #endif
     }
 
@@ -2295,8 +2297,10 @@ static int fat_unlink(FAR struct inode *mountpt, FAR const char *relpath)
        * open reference to the file is closed.
        */
 
-      /* Remove the file */
-      /* TODO: Need to defer deleting cluster chain if the file is open. */
+      /* Remove the file
+       *
+       * TODO: Need to defer deleting cluster chain if the file is open.
+       */
 
       ret = fat_remove(fs, relpath, false);
     }
@@ -2463,7 +2467,7 @@ static int fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   /* So far, the two entries are nearly the same */
 
   memcpy(direntry2, direntry, DIR_SIZE);
-  direntry2[DIR_NAME+1] = '.';
+  direntry2[DIR_NAME + 1] = '.';
 
   /* Now add the cluster information to both directory entries */
 
@@ -2554,8 +2558,10 @@ int fat_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
        * open reference to the directory is closed.
        */
 
-      /* Remove the directory */
-      /* TODO: Need to defer deleting cluster chain if the file is open. */
+      /* Remove the directory.
+       *
+       * TODO: Need to defer deleting cluster chain if the file is open.
+       */
 
       ret = fat_remove(fs, relpath, true);
     }
@@ -2578,7 +2584,7 @@ int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   FAR struct fat_dirinfo_s dirinfo;
   FAR struct fat_dirseq_s dirseq;
   uint8_t *direntry;
-  uint8_t dirstate[DIR_SIZE-DIR_ATTRIBUTES];
+  uint8_t dirstate[DIR_SIZE - DIR_ATTRIBUTES];
   int ret;
 
   /* Sanity checks */
@@ -2631,7 +2637,7 @@ int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   /* Save the non-name-related portion of the directory entry intact */
 
   direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-  memcpy(dirstate, &direntry[DIR_ATTRIBUTES], DIR_SIZE-DIR_ATTRIBUTES);
+  memcpy(dirstate, &direntry[DIR_ATTRIBUTES], DIR_SIZE - DIR_ATTRIBUTES);
 
   /* Now find the directory where we should create the newpath object */
 
@@ -2683,7 +2689,7 @@ int fat_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   /* Copy the unchanged information into the new short file name entry. */
 
   direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-  memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
+  memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE - DIR_ATTRIBUTES);
   fs->fs_dirty = true;
 
   /* Remove the old entry, flushing the new directory entry to disk.  If

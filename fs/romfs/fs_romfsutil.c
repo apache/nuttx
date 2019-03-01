@@ -94,7 +94,7 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm,
                                    int entrylen,
                                    struct romfs_dirinfo_s *dirinfo)
 {
-  char name[NAME_MAX+1];
+  char name[NAME_MAX + 1];
   uint32_t linkoffset;
   uint32_t next;
   uint32_t info;

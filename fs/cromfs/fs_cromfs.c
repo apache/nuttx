@@ -1059,7 +1059,9 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       case S_IFIFO:  /* FIFO */
       case S_IFCHR:  /* Character driver */
       case S_IFBLK:  /* Block driver */
-   /* case S_IFSOCK:    Socket */
+#if 0
+      case S_IFSOCK: /* Socket */
+#endif
       case S_IFMQ:   /* Message queue */
       case S_IFSEM:  /* Semaphore */
       case S_IFSHM:  /* Shared memory */
@@ -1183,7 +1185,7 @@ static int cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Sanity checks */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && buf != NULL );
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && buf != NULL);
   memset(buf, 0, sizeof(struct stat));
 
   /* Recover our private data from the inode instance */

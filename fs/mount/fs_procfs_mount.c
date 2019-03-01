@@ -307,7 +307,10 @@ static int usage_entry(FAR const char *mountpoint, FAR struct statfs *statbuf,
   char sizelabel;
   char freelabel;
   char usedlabel;
-  static const char labels[5] = { 'B', 'K', 'M', 'G', 'T' };
+  static const char labels[5] =
+  {
+    'B', 'K', 'M', 'G', 'T'
+  };
 
   DEBUGASSERT(mountpoint != NULL && statbuf != NULL && info != NULL);
 

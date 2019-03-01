@@ -390,7 +390,7 @@ next_subdir:
                 {
                   FAR char *subdirname;
 
-                 /* Yes.. In this case, the target of the rename must be a
+                  /* Yes.. In this case, the target of the rename must be a
                    * subdirectory of newinode, not the newinode itself.  For
                    * example: mv b a/ must move b to a/b.
                    */
@@ -414,7 +414,8 @@ next_subdir:
                       FAR char *tmp = subdir;
 
                       subdir = NULL;
-                      (void)asprintf(&subdir, "%s/%s", newrelpath, subdirname);
+                      (void)asprintf(&subdir, "%s/%s", newrelpath,
+                                     subdirname);
 
                       if (tmp != NULL)
                         {

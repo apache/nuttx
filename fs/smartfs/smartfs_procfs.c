@@ -115,6 +115,7 @@ struct smartfs_procfs_entry_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* File system methods */
 
 static int      smartfs_open(FAR struct file *filep, FAR const char *relpath,
@@ -187,6 +188,7 @@ const struct procfs_operations smartfs_procfsoperations =
   smartfs_read,       /* read */
 
   /* No write supported */
+
   smartfs_write,      /* write */
 
   smartfs_dup,        /* dup */
@@ -646,7 +648,8 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
             }
 
           dir->fd_dir.d_type = DTYPE_DIRECTORY;
-          strncpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name, NAME_MAX+1);
+          strncpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name,
+                  NAME_MAX + 1);
 
           /* Advance to next entry */
 
@@ -658,14 +661,16 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
           /* Listing the contents of a specific mount */
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strncpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name, NAME_MAX+1);
+          strncpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name,
+                  NAME_MAX + 1);
         }
       else if (level1->base.level == 3)
         {
           /* Listing the contents of a specific entry */
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strncpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name, NAME_MAX+1);
+          strncpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name,
+                  NAME_MAX + 1);
           level1->base.index++;
         }
 
@@ -798,7 +803,6 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 
-
   /* Initialize the read length to zero and test if we are at the
    * end of the file (i.e. already read the data.
    */
@@ -878,7 +882,6 @@ static size_t   smartfs_mem_read(FAR struct file *filep, FAR char *buffer,
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 
-
   /* Initialize the read length to zero and test if we are at the
    * end of the file (i.e. already read the data.
    */
@@ -905,7 +908,7 @@ static size_t   smartfs_mem_read(FAR struct file *filep, FAR char *buffer,
 
               if (procfs_data.allocs[x].ptr != NULL)
                 {
-                  len += snprintf(&buffer[len], buflen-len, "   %s: %d\n",
+                  len += snprintf(&buffer[len], buflen - len, "   %s: %d\n",
                       procfs_data.allocs[x].name, procfs_data.allocs[x].size);
                   total += procfs_data.allocs[x].size;
                 }
@@ -913,7 +916,7 @@ static size_t   smartfs_mem_read(FAR struct file *filep, FAR char *buffer,
 
           /* Add the total allocation amount to the buffer */
 
-          len += snprintf(&buffer[len], buflen-len, "\nTotal: %d\n", total);
+          len += snprintf(&buffer[len], buflen - len, "\nTotal: %d\n", total);
         }
 
       /* Indicate we have done the read */
@@ -988,7 +991,7 @@ static size_t   smartfs_erasemap_read(FAR struct file *filep, FAR char *buffer,
 
               if (copylen >= priv->offset)
                 {
-                  buffer[len++] = procfs_data.erasecounts[y*cols+x] + 'A';
+                  buffer[len++] = procfs_data.erasecounts[y * cols + x] + 'A';
                   priv->offset++;
 
                   if (len >= buflen)

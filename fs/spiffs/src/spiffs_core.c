@@ -1901,7 +1901,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
               /* On subsequent passes, create a new object index page */
 
               len_objndx_spndx =
-                SPIFFS_OBJNDX_ENTRY_SPNDX(fs,(fobj->size - 1) /
+                SPIFFS_OBJNDX_ENTRY_SPNDX(fs, (fobj->size - 1) /
                                             SPIFFS_DATA_PAGE_SIZE(fs));
 
               if (nwritten > 0 || cur_objndx_spndx > len_objndx_spndx)

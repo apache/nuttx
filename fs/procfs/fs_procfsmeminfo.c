@@ -90,7 +90,7 @@ struct progmem_info_s
   int ordblks;                    /* This is the number of free chunks */
   int mxordblk;                   /* Size of the largest free chunk */
   int uordblks;                   /* Total size of memory for allocated chunks */
-  int fordblks;                   /* Total size of memory for free chunks.*/
+  int fordblks;                   /* Total size of memory for free chunks. */
 };
 #endif
 

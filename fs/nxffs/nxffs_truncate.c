@@ -117,8 +117,10 @@ int nxffs_truncate(FAR struct file *filep, off_t length)
     }
   else if (oldsize > length)
     {
-      /* We are shrinking the file */
-      /* REVISIT:  Logic to shrink the file has not yet been implemented */
+      /* We are shrinking the file.
+       *
+       * REVISIT:  Logic to shrink the file has not yet been implemented.
+       */
 
       ret = -ENOSYS;
     }

@@ -270,6 +270,7 @@ static FAR struct spiffs_cache_page_s *
           FAR struct spiffs_cache_page_s *cp;
 
           /* We found one */
+
           cp                    = spiffs_get_cache_page_hdr(fs, cache, i);
           cache->cpage_use_map |= (1 << i);
           cp->last_access       = cache->last_access;
@@ -311,7 +312,7 @@ void spiffs_cache_initialize(FAR struct spiffs_s *fs)
   int cache_entries;
 
   sz            = fs->cache_size;
-  cache_entries = (sz - sizeof(struct spiffs_cache_s )) /
+  cache_entries = (sz - sizeof(struct spiffs_cache_s)) /
                   (SPIFFS_CACHE_PAGE_SIZE(fs));
 
   if (fs->cache == 0)
@@ -330,14 +331,14 @@ void spiffs_cache_initialize(FAR struct spiffs_s *fs)
       cache_mask |= 1;
     }
 
-  memset(&cache, 0, sizeof(struct spiffs_cache_s ));
+  memset(&cache, 0, sizeof(struct spiffs_cache_s));
   cache.cpage_count    = cache_entries;
-  cache.cpages         = (FAR uint8_t*)
-    ((FAR uint8_t *)fs->cache + sizeof(struct spiffs_cache_s ));
+  cache.cpages         = (FAR uint8_t *)
+    ((FAR uint8_t *)fs->cache + sizeof(struct spiffs_cache_s));
 
   cache.cpage_use_map  = 0xffffffff;
   cache.cpage_use_mask = cache_mask;
-  memcpy(fs->cache, &cache, sizeof(struct spiffs_cache_s ));
+  memcpy(fs->cache, &cache, sizeof(struct spiffs_cache_s));
 
   cp = spiffs_get_cache(fs);
   memset(cp->cpages, 0, cp->cpage_count * SPIFFS_CACHE_PAGE_SIZE(fs));

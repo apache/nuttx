@@ -320,7 +320,7 @@ static int spiffs_check_rewrite_index(FAR struct spiffs_s *fs,
     }
 
   ret = spiffs_cache_write(fs, SPIFFS_OP_T_OBJ_LU | SPIFFS_OP_C_UPDT, 0,
-                           SPIFFS_BLOCK_TO_PADDR(fs, SPIFFS_BLOCK_FOR_PAGE(fs,free_pgndx)) +
+                           SPIFFS_BLOCK_TO_PADDR(fs, SPIFFS_BLOCK_FOR_PAGE(fs, free_pgndx)) +
                            SPIFFS_OBJ_LOOKUP_ENTRY_FOR_PAGE(fs, free_pgndx) *
                            sizeof(int16_t), sizeof(int16_t),
                            (FAR uint8_t *)&objid);
@@ -2029,7 +2029,6 @@ int spiffs_check_objidconsistency(FAR struct spiffs_s *fs)
   return ret;
 }
 
-
 /****************************************************************************
  * Name: spiffs_dump
  *
@@ -2086,7 +2085,7 @@ int spiffs_dump(FAR struct spiffs_s *fs)
                  cur_entry < (int)(SPIFFS_GEO_PAGES_PER_BLOCK(fs) -
                  SPIFFS_OBJ_LOOKUP_PAGES(fs)))
           {
-            int16_t objid = objlu_buf[cur_entry-entry_offset];
+            int16_t objid = objlu_buf[cur_entry - entry_offset];
 
             if (cur_entry == 0)
               {
@@ -2157,8 +2156,9 @@ int spiffs_dump(FAR struct spiffs_s *fs)
   spiffs_checkinfo("page_alloc:  %d\n", fs->alloc_pages);
   spiffs_checkinfo("page_delet:  %d\n", fs->deleted_pages);
 
-  /* The following duplicates some logic from spiffs_statfs() */
-   /* -2 for  spare blocks, +1 for emergency page */
+  /* The following duplicates some logic from spiffs_statfs().
+   * -2 for  spare blocks, +1 for emergency page.
+   */
 
   pages_per_block  = SPIFFS_GEO_PAGES_PER_BLOCK(fs);
   blocks           = SPIFFS_GEO_BLOCK_COUNT(fs);

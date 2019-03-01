@@ -76,6 +76,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* See include/nuttx/sched.h: */
 
 #undef HAVE_GROUPID
@@ -1696,8 +1697,11 @@ static int proc_readdir(struct fs_dirent_s *dir)
           return -ENOENT;
         }
 
-      /* The TCB is still valid (or at least was when we entered this function) */
-      /* Handle the directory listing by the node type */
+      /* The TCB is still valid (or at least was when we entered this
+       * function)
+       *
+       * Handle the directory listing by the node type.
+       */
 
       switch (procdir->node->node)
         {
@@ -1718,7 +1722,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
       /* Save the filename and file type */
 
       dir->fd_dir.d_type = node->dtype;
-      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX+1);
+      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX + 1);
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.

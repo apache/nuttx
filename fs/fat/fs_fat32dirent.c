@@ -909,8 +909,8 @@ static inline int fat_uniquealias(struct fat_mountpt_s *fs,
               /* Back up the tilde and break out of the inner loop */
 
               tilde--;
-              dirinfo->fd_name[tilde]   = '~';
-              dirinfo->fd_name[tilde+1] = '1';
+              dirinfo->fd_name[tilde]     = '~';
+              dirinfo->fd_name[tilde + 1] = '1';
               break;
             }
 
@@ -1219,7 +1219,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
    */
 
   namelen = strlen((FAR char *)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME + 1);
 
   /* How many LFN directory entries are we expecting? */
 
@@ -1520,7 +1520,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
    */
 
   namelen = strlen((char *)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME + 1);
 
   /* How many LFN directory entries are we expecting? */
 
@@ -1859,7 +1859,7 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
                * spaces.
                */
 
-              for (; nsrc > 0 && lfname[nsrc-1] == ' '; nsrc--);
+              for (; nsrc > 0 && lfname[nsrc - 1] == ' '; nsrc--);
 
               /* Further reduce the length so that it fits in the destination
                * buffer.
@@ -1875,14 +1875,14 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
                * terminator will fit).
                */
 
-              dir->fd_dir.d_name[offset+nsrc] = '\0';
+              dir->fd_dir.d_name[offset + nsrc] = '\0';
             }
 
           /* Then transfer the characters */
 
-          for (i = 0; i < nsrc && offset+i < NAME_MAX; i++)
+          for (i = 0; i < nsrc && offset + i < NAME_MAX; i++)
             {
-              dir->fd_dir.d_name[offset+i] = lfname[i];
+              dir->fd_dir.d_name[offset + i] = lfname[i];
             }
         }
 
@@ -2061,7 +2061,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
    */
 
   namelen = strlen((FAR char *)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME + 1);
 
   /* How many LFN directory entries do we need to write? */
 
@@ -2159,7 +2159,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
             {
               nbytes = MIN(6, remainder);
               fat_putlfnchunk(LDIR_PTRWCHAR6_11(direntry),
-                              &dirinfo->fd_lfname[offset+5], nbytes);
+                              &dirinfo->fd_lfname[offset + 5], nbytes);
               remainder -= nbytes;
             }
 
@@ -2167,7 +2167,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
             {
               nbytes = MIN(2, remainder);
               fat_putlfnchunk(LDIR_PTRWCHAR12_13(direntry),
-                              &dirinfo->fd_lfname[offset+11], nbytes);
+                              &dirinfo->fd_lfname[offset + 11], nbytes);
               remainder -= nbytes;
             }
 
@@ -2182,9 +2182,9 @@ static int fat_putlfname(struct fat_mountpt_s *fs,
           fat_putlfnchunk(LDIR_PTRWCHAR1_5(direntry),
                           &dirinfo->fd_lfname[offset], 5);
           fat_putlfnchunk(LDIR_PTRWCHAR6_11(direntry),
-                          &dirinfo->fd_lfname[offset+5], 6);
+                          &dirinfo->fd_lfname[offset + 5], 6);
           fat_putlfnchunk(LDIR_PTRWCHAR12_13(direntry),
-                          &dirinfo->fd_lfname[offset+11], 2);
+                          &dirinfo->fd_lfname[offset + 11], 2);
         }
 
       /* Write the remaining directory entries */
@@ -2727,7 +2727,7 @@ int fat_dirname2path(struct fat_mountpt_s *fs, struct fs_dirent_s *dir)
     {
       /* No.. Get the name from a short file name directory entries */
 
-      return fat_getsfname(direntry, dir->fd_dir.d_name, NAME_MAX+1);
+      return fat_getsfname(direntry, dir->fd_dir.d_name, NAME_MAX + 1);
     }
 }
 

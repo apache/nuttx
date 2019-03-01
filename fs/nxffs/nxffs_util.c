@@ -130,7 +130,7 @@ void nxffs_wrle32(uint8_t *dest, uint32_t val)
   /* Little endian means LS halfword first in byte stream */
 
   nxffs_wrle16(dest, (uint16_t)(val & 0xffff));
-  nxffs_wrle16(dest+2, (uint16_t)(val >> 16));
+  nxffs_wrle16(dest + 2, (uint16_t)(val >> 16));
 }
 
 /****************************************************************************
