@@ -47,12 +47,35 @@
  ************************************************************************************/
 
 /* STM32H7X3XX Address Blocks *******************************************************/
-/* To be provided */
+
+#define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb CODE block */
+#define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb SRAM block */
+#define STM32_PERIPH_BASE    0x40000000     /* 0x40000000-0x5fffffff: 512Mb AHB1-2 peripheral blocks */
+#define STM32_FMC_BANK1      0x60000000     /* 0x60000000-0x6fffffff: 256Mb NOR/PSRMA/SRAM */
+#define STM32_FMC_BANK2      0x70000000     /* 0x70000000-0x7fffffff: 256Mb SDRAM */
+#define STM32_FMC_BANK3      0x80000000     /* 0x80000000-0x8fffffff: 256Mb NAND FLASH */
+#define STM32_FMC_BANK4      0x90000000     /* 0x90000000-0x9fffffff: 256Mb QUADSPI */
+#define STM32_FMC_BANK5      0xc0000000     /* 0xc0000000-0xcfffffff: 256Mb FMC SDRAM Bank 1 */
+#define STM32_FMC_BANK6      0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FMC SDRAM Bank 2 */
+#define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
+
+#define STM32_REGION_MASK    0xf0000000
+#define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
+#define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
+
+
+/* Code Base Addresses **************************************************************/
+
+#define STM32_ITCM_BASE      0x00000000     /* 0x00000000-0x0000ffff: ITCM */
+#define STM32_FLASH_BANK1    0x08000000     /* 0x08000000-0x080fffff: FLASH memory 1 */
+#define STM32_FLASH_BANK2    0x08100000     /* 0x08100000-0x081fffff: FLASH memory 2 */
+#define STM32_FLASH_BASE     STM32_FLASH_BANK1
+#define STM32_SYSMEM_MEM     0x1ff00000     /* 0x1ff00000-0x1ff1ffff: System memory */
 
 /* SRAM Base Addresses **************************************************************/
 
 #define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2001ffff: DTCM-RAM on TCM interface */
-#define STM32_SRAM_BASE      0x24000000     /* 0x24000000-0x247fffff: System SRAM */
+#define STM32_AXISRAM_BASE   0x24000000     /* 0x24000000-0x247fffff: System AXI SRAM */
 #define STM32_SRAM1_BASE     0x30000000     /* 0x30000000-0x3001ffff: System SRAM1 */
 #define STM32_SRAM2_BASE     0x30020000     /* 0x30020000-0x3003ffff: System SRAM2 */
 #define STM32_SRAM3_BASE     0x3004c000     /* 0x30040000-0x30047fff: System SRAM3 */
@@ -129,13 +152,13 @@
 
 /* AHB1 Base Addresses **************************************************************/
 
-#define STM32_DMA1_BASE        0x52007000     /* 0x40020000-0x400203ff DMA1 */
-#define STM32_DMA2_BASE        0x52007000     /* 0x40020400-0x400207ff DMA2 */
-#define STM32_DMAMUX1_BASE     0x52007000     /* 0x40020800-0x40020bff DMAMUX1 */
-#define STM32_ADC12_BASE       0x52007000     /* 0x40022000-0x400223ff ADC1-ADC2 */
-#define STM32_EMAC_BASE        0x52007000     /* 0x40028000-0x400293ff Ethernet MAC */
-#define STM32_USB1_BASE        0x52007000     /* 0x40040000-0x4007ffff USB1 OTG HS/FS */
-#define STM32_USB2_BASE        0x52007000     /* 0x40080000-0x400bffff USB2 OTG FS */
+#define STM32_DMA1_BASE        0x40020000     /* 0x40020000-0x400203ff DMA1 */
+#define STM32_DMA2_BASE        0x40020400     /* 0x40020400-0x400207ff DMA2 */
+#define STM32_DMAMUX1_BASE     0x40020800     /* 0x40020800-0x40020bff DMAMUX1 */
+#define STM32_ADC12_BASE       0x40022000     /* 0x40022000-0x400223ff ADC1-ADC2 */
+#define STM32_EMAC_BASE        0x40028000     /* 0x40028000-0x400293ff Ethernet MAC */
+#define STM32_USB1_BASE        0x40040000     /* 0x40040000-0x4007ffff USB1 OTG HS/FS */
+#define STM32_USB2_BASE        0x40080000     /* 0x40080000-0x400bffff USB2 OTG FS */
 
 /* AHB2 Base Addresses **************************************************************/
 
@@ -156,7 +179,7 @@
 #define STM32_GPV_BASE         0x51000000     /* 0x51000000-0x510fffff AXI interconnect */
 #define STM32_MDMA_BASE        0x52000000     /* 0x52000000-0x52000fff MDMA */
 #define STM32_DMA2D_BASE       0x52001000     /* 0x52001000-0x52001fff Chrom-Art (DMA2D) */
-#define STM32_FLASH_BASE       0x52002000     /* 0x52002000-0x52002fff FLASH interface */
+#define STM32_FLASHIF_BASE     0x52002000     /* 0x52002000-0x52002fff FLASH interface */
 #define STM32_JPEG_BASE        0x52003000     /* 0x52003000-0x52003fff JPEG codec */
 #define STM32_FMC_BASE         0x52004000     /* 0x52004000-0x52004fff FMC control */
 #define STM32_NORC_BASE        0x52004000     /*                       NOR/PSRAM controller */

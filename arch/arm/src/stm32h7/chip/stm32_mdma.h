@@ -49,8 +49,24 @@
 
 /* Register Offsets *****************************************************************/
 
+#define STM32_MDMA_OFFSET(x)          (0x40+0x40*(x))
 #define STM32_MDMA_GISR0_OFFSET       0x0000 /* MDMA global interrupt/status register */
                                              /* 0x0004-0x003C: Reserved */
+
+#define STM32_MDMACH_CISR_OFFSET      0x0040
+#define STM32_MDMACH_CIFCR_OFFSET     0x0044
+#define STM32_MDMACH_CESR_OFFSET      0x0048
+#define STM32_MDMACH_CCR_OFFSET       0x004C
+#define STM32_MDMACH_CTCR_OFFSET      0x0050
+#define STM32_MDMACH_CBNDTR_OFFSET    0x0054
+#define STM32_MDMACH_CSAR_OFFSET      0x0058
+#define STM32_MDMACH_CDAR_OFFSET      0x005C
+#define STM32_MDMACH_CBRUR_OFFSET     0x0060
+#define STM32_MDMACH_CLAR_OFFSET      0x0064
+#define STM32_MDMACH_CTBR_OFFSET      0x0068
+#define STM32_MDMACH_CMAR_OFFSET      0x0070
+#define STM32_MDMACH_CMDR_OFFSET      0x0074
+
 #define STM32_MDMA_CXISR_OFFSET(x)    (0x0040+0x040*(x)) /* MDMA channel x interrupt/status register*/
 #define STM32_MDMA_C0ISR_OFFSET       STM32_MDMA_CXISR_OFFSET(0)
 #define STM32_MDMA_C1ISR_OFFSET       STM32_MDMA_CXISR_OFFSET(1)
@@ -231,7 +247,7 @@
 #define STM32_MDMA_C14LAR_OFFSET    STM32_MDMA_CXLAR_OFFSET(14)
 #define STM32_MDMA_C15LAR_OFFSET    STM32_MDMA_CXLAR_OFFSET(15)
 
-#define STM32_MDMA_CXTBR_OFFSET(x)  (0x0064+0x040*(x)) /* MDMA channel x trigger and bus selection register */
+#define STM32_MDMA_CXTBR_OFFSET(x)  (0x0068+0x040*(x)) /* MDMA channel x trigger and bus selection register */
 #define STM32_MDMA_C0TBR_OFFSET     STM32_MDMA_CXTBR_OFFSET(0)
 #define STM32_MDMA_C1TBR_OFFSET     STM32_MDMA_CXTBR_OFFSET(1)
 #define STM32_MDMA_C2TBR_OFFSET     STM32_MDMA_CXTBR_OFFSET(2)
@@ -249,7 +265,7 @@
 #define STM32_MDMA_C14TBR_OFFSET    STM32_MDMA_CXTBR_OFFSET(14)
 #define STM32_MDMA_C15TBR_OFFSET    STM32_MDMA_CXTBR_OFFSET(15)
 
-#define STM32_MDMA_CXMAR_OFFSET(x)  (0x0068+0x040*(x)) /* MDMA channel x mask address register */
+#define STM32_MDMA_CXMAR_OFFSET(x)  (0x0070+0x040*(x)) /* MDMA channel x mask address register */
 #define STM32_MDMA_C0MAR_OFFSET     STM32_MDMA_CXMAR_OFFSET(0)
 #define STM32_MDMA_C1MAR_OFFSET     STM32_MDMA_CXMAR_OFFSET(1)
 #define STM32_MDMA_C2MAR_OFFSET     STM32_MDMA_CXMAR_OFFSET(2)
@@ -267,7 +283,7 @@
 #define STM32_MDMA_C14MAR_OFFSET    STM32_MDMA_CXMAR_OFFSET(14)
 #define STM32_MDMA_C15MAR_OFFSET    STM32_MDMA_CXMAR_OFFSET(15)
 
-#define STM32_MDMA_CXMDR_OFFSET(x)  (0x0070+0x040*(x)) /* MDMA channel x mask data register */
+#define STM32_MDMA_CXMDR_OFFSET(x)  (0x0074+0x040*(x)) /* MDMA channel x mask data register */
 #define STM32_MDMA_C0MDR_OFFSET     STM32_MDMA_CXMDR_OFFSET(0)
 #define STM32_MDMA_C1MDR_OFFSET     STM32_MDMA_CXMDR_OFFSET(1)
 #define STM32_MDMA_C2MDR_OFFSET     STM32_MDMA_CXMDR_OFFSET(2)
@@ -609,10 +625,10 @@
 
 #define MDMA_CBNDTR_BNDT_SHIFT    (0) /* Bits 0-16: Block number of data bytes to transfer */
 #define MDMA_CBNDTR_BNDT_MASK     (0x1ffff << MDMA_CBNDTR_BNDT_SHIFT)
-#define MDMA_CBNDTR_BNDT_BRSUM    (18) /* Bit 18: Block repeat source address update mode */
-#define MDMA_CBNDTR_BNDT_BRDUM    (19) /* Bit 19: Block repeat destination address update mode */
-#define MDMA_CBNDTR_BNDT_SHIFT    (20) /* Bits 20-31: Block repeat count */
-#define MDMA_CBNDTR_BNDT_MASK     (0xfff << MDMA_CBNDTR_BNDT_SHIFT)
+#define MDMA_CBNDTR_BRSUM         (18) /* Bit 18: Block repeat source address update mode */
+#define MDMA_CBNDTR_BRDUM         (19) /* Bit 19: Block repeat destination address update mode */
+#define MDMA_CBNDTR_BRC_SHIFT     (20) /* Bits 20-31: Block repeat count */
+#define MDMA_CBNDTR_BRC_MASK      (0xfff << MDMA_CBNDTR_BNDT_SHIFT)
 
 /* MDMA channel x block repeat address update register */
 

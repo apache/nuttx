@@ -69,13 +69,13 @@
 #define STM32_IRQ_EXTI2        (STM32_IRQ_FIRST + 8)   /*  8: EXTI Line 2 interrupt */
 #define STM32_IRQ_EXTI3        (STM32_IRQ_FIRST + 9)   /*  9: EXTI Line 3 interrupt */
 #define STM32_IRQ_EXTI4        (STM32_IRQ_FIRST + 10)  /* 10: EXTI Line 4 interrupt */
-#define STM32_IRQ_DMA1STR0     (STM32_IRQ_FIRST + 11)  /* 11: DMA1 Stream0 global interrupt */
-#define STM32_IRQ_DMA1STR1     (STM32_IRQ_FIRST + 12)  /* 12: DMA1 Stream1 global interrupt */
-#define STM32_IRQ_DMA1STR2     (STM32_IRQ_FIRST + 13)  /* 13: DMA1 Stream2 global interrupt */
-#define STM32_IRQ_DMA1STR3     (STM32_IRQ_FIRST + 14)  /* 14: DMA1 Stream3 global interrupt */
-#define STM32_IRQ_DMA1STR4     (STM32_IRQ_FIRST + 15)  /* 15: DMA1 Stream4 global interrupt */
-#define STM32_IRQ_DMA1STR5     (STM32_IRQ_FIRST + 16)  /* 16: DMA1 Stream5 global interrupt */
-#define STM32_IRQ_DMA1STR6     (STM32_IRQ_FIRST + 17)  /* 17: DMA1 Stream6 global interrupt */
+#define STM32_IRQ_DMA1S0       (STM32_IRQ_FIRST + 11)  /* 11: DMA1 Stream0 global interrupt */
+#define STM32_IRQ_DMA1S1       (STM32_IRQ_FIRST + 12)  /* 12: DMA1 Stream1 global interrupt */
+#define STM32_IRQ_DMA1S2       (STM32_IRQ_FIRST + 13)  /* 13: DMA1 Stream2 global interrupt */
+#define STM32_IRQ_DMA1S3       (STM32_IRQ_FIRST + 14)  /* 14: DMA1 Stream3 global interrupt */
+#define STM32_IRQ_DMA1S4       (STM32_IRQ_FIRST + 15)  /* 15: DMA1 Stream4 global interrupt */
+#define STM32_IRQ_DMA1S5       (STM32_IRQ_FIRST + 16)  /* 16: DMA1 Stream5 global interrupt */
+#define STM32_IRQ_DMA1S6       (STM32_IRQ_FIRST + 17)  /* 17: DMA1 Stream6 global interrupt */
 #define STM32_IRQ_ADC12        (STM32_IRQ_FIRST + 18)  /* 18: ADC1 and ADC2 global interrupt */
 #define STM32_IRQ_FDCAN1_0     (STM32_IRQ_FIRST + 19)  /* 19: FDCAN1 Interrupt 0 */
 #define STM32_IRQ_FDCAN2_0     (STM32_IRQ_FIRST + 20)  /* 20: FDCAN2 Interrupt 0 */
@@ -108,21 +108,21 @@
 #define STM32_IRQ_TIM8TRGCOM   (STM32_IRQ_FIRST + 45)  /* 45: TIM8 trigger /commutation interrupt */
 #define STM32_IRQ_TIM14        (STM32_IRQ_FIRST + 45)  /* 45: TIM14 global interrupts */
 #define STM32_IRQ_TIM8CC       (STM32_IRQ_FIRST + 46)  /* 46: TIM8 capture / compare interrupts */
-#define STM32_IRQ_DMA1STR7     (STM32_IRQ_FIRST + 47)  /* 47: DMA1 Stream7 global interrupt */
+#define STM32_IRQ_DMA1S7       (STM32_IRQ_FIRST + 47)  /* 47: DMA1 Stream7 global interrupt */
 #define STM32_IRQ_FMC          (STM32_IRQ_FIRST + 48)  /* 48: FMC global interrupt */
 #define STM32_IRQ_SDMMC1       (STM32_IRQ_FIRST + 49)  /* 49: SDMMC1 global interrupt */
 #define STM32_IRQ_TIM5         (STM32_IRQ_FIRST + 50)  /* 50: TIM5 global interrupt */
 #define STM32_IRQ_SPI3         (STM32_IRQ_FIRST + 51)  /* 51: SPI3 global interrupt */
-#define STM32_IRQ_ UART4       (STM32_IRQ_FIRST + 52)  /* 52: UART4 global interrupt */
+#define STM32_IRQ_UART4        (STM32_IRQ_FIRST + 52)  /* 52: UART4 global interrupt */
 #define STM32_IRQ_UART5        (STM32_IRQ_FIRST + 53)  /* 53: UART5 global interrupt */
 #define STM32_IRQ_TIM6         (STM32_IRQ_FIRST + 54)  /* 54: TIM6 global interrupt */
-#define STM32_IRQ_DAC          (STM32_IRQ_FIRST + 54)  /* 54: DAC underrun error interrupt */
+#define STM32_IRQ_DAC1         (STM32_IRQ_FIRST + 54)  /* 54: DAC1 underrun error interrupt */
 #define STM32_IRQ_TIM7         (STM32_IRQ_FIRST + 55)  /* 55: TIM7 global interrupt */
-#define STM32_IRQ_DMA2STR0     (STM32_IRQ_FIRST + 56)  /* 56: DMA2 Stream0 interrupt */
-#define STM32_IRQ_DMA2STR1     (STM32_IRQ_FIRST + 57)  /* 57: DMA2 Stream1 interrupt */
-#define STM32_IRQ_DMA2STR2     (STM32_IRQ_FIRST + 58)  /* 58: FMA2 Stream2 interrupt */
-#define STM32_IRQ_DMA2STR3     (STM32_IRQ_FIRST + 59)  /* 59: DMA2 Stream3 interrupt */
-#define STM32_IRQ_DMA2STR4     (STM32_IRQ_FIRST + 60)  /* 60: DMA2 Stream4 interrupt */
+#define STM32_IRQ_DMA2S0       (STM32_IRQ_FIRST + 56)  /* 56: DMA2 Stream0 interrupt */
+#define STM32_IRQ_DMA2S1       (STM32_IRQ_FIRST + 57)  /* 57: DMA2 Stream1 interrupt */
+#define STM32_IRQ_DMA2S2       (STM32_IRQ_FIRST + 58)  /* 58: FMA2 Stream2 interrupt */
+#define STM32_IRQ_DMA2S3       (STM32_IRQ_FIRST + 59)  /* 59: DMA2 Stream3 interrupt */
+#define STM32_IRQ_DMA2S4       (STM32_IRQ_FIRST + 60)  /* 60: DMA2 Stream4 interrupt */
 #define STM32_IRQ_ETH          (STM32_IRQ_FIRST + 61)  /* 61: Ethernet global interrupt */
 #define STM32_IRQ_ETHWKUP      (STM32_IRQ_FIRST + 62)  /* 62: Ethernet wakeup through EXTI line interrupt */
 #define STM32_IRQ_FDCANCAL     (STM32_IRQ_FIRST + 63)  /* 63: CAN2TX interrupts */
@@ -130,9 +130,9 @@
 #define STM32_IRQ_RESERVED65   (STM32_IRQ_FIRST + 65)  /* 65: Reserved */
 #define STM32_IRQ_RESERVED66   (STM32_IRQ_FIRST + 66)  /* 66: Reserved */
 #define STM32_IRQ_RESERVED67   (STM32_IRQ_FIRST + 67)  /* 67: Reserved */
-#define STM32_IRQ_DMA2STR5     (STM32_IRQ_FIRST + 68)  /* 68: DMA2 Stream5 interrupt */
-#define STM32_IRQ_DMA2STR6     (STM32_IRQ_FIRST + 69)  /* 69: DMA2 Stream6 interrupt */
-#define STM32_IRQ_DMA2STR7     (STM32_IRQ_FIRST + 70)  /* 70: DMA2 Stream7 interrupt */
+#define STM32_IRQ_DMA2S5       (STM32_IRQ_FIRST + 68)  /* 68: DMA2 Stream5 interrupt */
+#define STM32_IRQ_DMA2S6       (STM32_IRQ_FIRST + 69)  /* 69: DMA2 Stream6 interrupt */
+#define STM32_IRQ_DMA2S7       (STM32_IRQ_FIRST + 70)  /* 70: DMA2 Stream7 interrupt */
 #define STM32_IRQ_USART6       (STM32_IRQ_FIRST + 71)  /* 71: USART6 global interrupt */
 #define STM32_IRQ_I2C3EV       (STM32_IRQ_FIRST + 72)  /* 72: I2C3 event interrupt */
 #define STM32_IRQ_I2C3ER       (STM32_IRQ_FIRST + 73)  /* 73: I2C3 error interrupt*/
@@ -178,17 +178,17 @@
 #define STM32_IRQ_DFSDM1FLT2   (STM32_IRQ_FIRST + 112)  /* 112: DFSDM1 filter 2 interrupt */
 #define STM32_IRQ_DFSDM1FLT3   (STM32_IRQ_FIRST + 113)  /* 113: DFSDM1 filter 3 interrupt */
 #define STM32_IRQ_SAI3         (STM32_IRQ_FIRST + 114)  /* 114: SAI3 global interrupt */
-#define STM32_IRQ_ SWPMI1      (STM32_IRQ_FIRST + 115)  /* 115: SWPMI global interrupt/wakeup */
-#define STM32_IRQ_ TIM15       (STM32_IRQ_FIRST + 116)  /* 116: TIM15 global interrupt */
-#define STM32_IRQ_ TIM16       (STM32_IRQ_FIRST + 117)  /* 117: TIM16 global interrupt */
-#define STM32_IRQ_ TIM17       (STM32_IRQ_FIRST + 118)  /* 118: TIM17 global interrupt */
-#define STM32_IRQ_ MDIOSWKUP   (STM32_IRQ_FIRST + 119)  /* 119: MDIOS wakeup */
-#define STM32_IRQ_ MDIOS       (STM32_IRQ_FIRST + 120)  /* 120: MDIOS global interrupt */
-#define STM32_IRQ_ JPEG        (STM32_IRQ_FIRST + 121)  /* 121: JPEG  global interrupt */
-#define STM32_IRQ_ MDMA        (STM32_IRQ_FIRST + 122)  /* 122: MDMA */
+#define STM32_IRQ_SWPMI1       (STM32_IRQ_FIRST + 115)  /* 115: SWPMI global interrupt/wakeup */
+#define STM32_IRQ_TIM15        (STM32_IRQ_FIRST + 116)  /* 116: TIM15 global interrupt */
+#define STM32_IRQ_TIM16        (STM32_IRQ_FIRST + 117)  /* 117: TIM16 global interrupt */
+#define STM32_IRQ_TIM17        (STM32_IRQ_FIRST + 118)  /* 118: TIM17 global interrupt */
+#define STM32_IRQ_MDIOSWKUP    (STM32_IRQ_FIRST + 119)  /* 119: MDIOS wakeup */
+#define STM32_IRQ_MDIOS        (STM32_IRQ_FIRST + 120)  /* 120: MDIOS global interrupt */
+#define STM32_IRQ_JPEG         (STM32_IRQ_FIRST + 121)  /* 121: JPEG  global interrupt */
+#define STM32_IRQ_MDMA         (STM32_IRQ_FIRST + 122)  /* 122: MDMA */
 #define STM32_IRQ_RESERVED123  (STM32_IRQ_FIRST + 123)  /* 123: Reserved */
-#define STM32_IRQ_ SDMMC       (STM32_IRQ_FIRST + 124)  /* 124: SDMMC global interrupt */
-#define STM32_IRQ_ HSEM0       (STM32_IRQ_FIRST + 125)  /* 125:  HSEM global interrupt 1 */
+#define STM32_IRQ_SDMMC        (STM32_IRQ_FIRST + 124)  /* 124: SDMMC global interrupt */
+#define STM32_IRQ_HSEM0        (STM32_IRQ_FIRST + 125)  /* 125: HSEM global interrupt 1 */
 #define STM32_IRQ_RESERVED126  (STM32_IRQ_FIRST + 126)  /* 126: Reserved */
 #define STM32_IRQ_ADC3         (STM32_IRQ_FIRST + 127)  /* 127: ADC3 global interrupt */
 #define STM32_IRQ_DMAMUX2OVR   (STM32_IRQ_FIRST + 128)  /* 128: DMAMUX2 overrun interrupt */

@@ -49,8 +49,15 @@
 
 /* Register Offsets *****************************************************************/
 
+#define STM32_BDMA_OFFSET(x)        (0x08+0x14*(x))
 #define STM32_BDMA_ISR_OFFSET       0x0000 /* BDMA interrupt status register */
 #define STM32_BDMA_IFCR_OFFSET      0x0004 /* BDMA interrupt flag clear register */
+
+#define STM32_BDMACH_CCR_OFFSET     0x0008
+#define STM32_BDMACH_CNDTR_OFFSET   0x000C
+#define STM32_BDMACH_CPAR_OFFSET    0x0010
+#define STM32_BDMACH_CM0AR_OFFSET   0x0014
+#define STM32_BDMACH_CM1AR_OFFSET   0x0018
 
 #define STM32_BDMA_CCRX_OFFSET(x)   (0x0008+(x*0x0014)) /* BDMA channel x configuration register */
 #define STM32_BDMA_CCR0_OFFSET      STM32_BDMA_CCRX_OFFSET(0)

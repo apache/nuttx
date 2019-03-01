@@ -85,9 +85,9 @@
 #define STM32_RCC_APB2RSTR_OFFSET       0x0098  /* APB2 Peripheral reset register */
 #define STM32_RCC_APB3RSTR_OFFSET       0x008c  /* APB3 Peripheral reset register */
 #define STM32_RCC_APB4RSTR_OFFSET       0x009c  /* APB4 Peripheral reset register */
-#define STM32_RCC_GCR_OFFSET            0x00a0  /* */
-#define STM32_RCC_D3AMR_OFFSET          0x00a8  /* */
-#define STM32_RCC_RSR_OFFSET            0x00d0  /* */
+#define STM32_RCC_GCR_OFFSET            0x00a0  /* RCC Global Control register */
+#define STM32_RCC_D3AMR_OFFSET          0x00a8  /* D3 Autonomous mode register */
+#define STM32_RCC_RSR_OFFSET            0x00d0  /* RCC Reset Status register */
 #define STM32_RCC_AHB1ENR_OFFSET        0x00d8  /* AHB1 Peripheral Clock enable register */
 #define STM32_RCC_AHB2ENR_OFFSET        0x00dc  /* AHB2 Peripheral Clock enable register */
 #define STM32_RCC_AHB3ENR_OFFSET        0x00d4  /* AHB3 Peripheral Clock enable register */
@@ -765,7 +765,7 @@
                                                     /* Bits 24-26: Reserved */
 #define RCC_APB1LRSTR_HDMICECRST        (1 << 27)   /* RCC APB1LRSTR: HDMICECRST */
                                                     /* Bit 28: Reserved */
-#define RCC_APB1LRSTR_DAC12RST          (1 << 29)   /* RCC APB1LRSTR: DAC12RST */
+#define RCC_APB1LRSTR_DAC1RST           (1 << 29)   /* RCC APB1LRSTR: DAC1RST */
 #define RCC_APB1LRSTR_USART7RST         (1 << 30)   /* RCC APB1LRSTR: USART7RST */
 #define RCC_APB1LRSTR_USART8RST         (1 << 31)   /* RCC APB1LRSTR: USART8RST */
 
@@ -783,92 +783,99 @@
 
 /* APB2 peripheral reset register */
 
-#define RCC_APB2RSTR_TIM1RST            (0x1ul)         /* RCC APB2RSTR: TIM1RST */
-#define RCC_APB2RSTR_TIM8RST            (0x2ul)         /* RCC APB2RSTR: TIM8RST */
-#define RCC_APB2RSTR_USART1RST          (0x10ul)        /* RCC APB2RSTR: USART1RST */
-#define RCC_APB2RSTR_USART6RST          (0x20ul)        /* RCC APB2RSTR: USART6RST */
-#define RCC_APB2RSTR_SPI1RST            (0x1000ul)      /* RCC APB2RSTR: SPI1RST */
-#define RCC_APB2RSTR_SPI4RST            (0x2000ul)      /* RCC APB2RSTR: SPI4RST */
-#define RCC_APB2RSTR_TIM15RST           (0x10000ul)     /* RCC APB2RSTR: TIM15RST */
-#define RCC_APB2RSTR_TIM16RST           (0x20000ul)     /* RCC APB2RSTR: TIM16RST */
-#define RCC_APB2RSTR_TIM17RST           (0x40000ul)     /* RCC APB2RSTR: TIM17RST */
-#define RCC_APB2RSTR_SPI5RST            (0x100000ul)    /* RCC APB2RSTR: SPI5RST */
-#define RCC_APB2RSTR_SAI1RST            (0x400000ul)    /* RCC APB2RSTR: SAI1RST */
-#define RCC_APB2RSTR_SAI2RST            (0x800000ul)    /* RCC APB2RSTR: SAI2RST */
-#define RCC_APB2RSTR_SAI3RST            (0x1000000ul)   /* RCC APB2RSTR: SAI3RST */
-#define RCC_APB2RSTR_DFSDM1RST          (0x10000000ul)  /* RCC APB2RSTR: DFSDM1RST */
-#define RCC_APB2RSTR_HRTIMRST           (0x20000000ul)  /* RCC APB2RSTR: HRTIMRST */
+#define RCC_APB2RSTR_TIM1RST            (1 << 0)    /* RCC APB2RSTR: TIM1RST */
+#define RCC_APB2RSTR_TIM8RST            (1 << 1)    /* RCC APB2RSTR: TIM8RST */
+#define RCC_APB2RSTR_USART1RST          (1 << 4)    /* RCC APB2RSTR: USART1RST */
+#define RCC_APB2RSTR_USART6RST          (1 << 5)    /* RCC APB2RSTR: USART6RST */
+#define RCC_APB2RSTR_SPI1RST            (1 << 12)   /* RCC APB2RSTR: SPI1RST */
+#define RCC_APB2RSTR_SPI4RST            (1 << 13)   /* RCC APB2RSTR: SPI4RST */
+#define RCC_APB2RSTR_TIM15RST           (1 << 16)   /* RCC APB2RSTR: TIM15RST */
+#define RCC_APB2RSTR_TIM16RST           (1 << 17)   /* RCC APB2RSTR: TIM16RST */
+#define RCC_APB2RSTR_TIM17RST           (1 << 18)   /* RCC APB2RSTR: TIM17RST */
+#define RCC_APB2RSTR_SPI5RST            (1 << 20)   /* RCC APB2RSTR: SPI5RST */
+#define RCC_APB2RSTR_SAI1RST            (1 << 22)   /* RCC APB2RSTR: SAI1RST */
+#define RCC_APB2RSTR_SAI2RST            (1 << 23)   /* RCC APB2RSTR: SAI2RST */
+#define RCC_APB2RSTR_SAI3RST            (1 << 24)   /* RCC APB2RSTR: SAI3RST */
+#define RCC_APB2RSTR_DFSDM1RST          (1 << 28)   /* RCC APB2RSTR: DFSDM1RST */
+#define RCC_APB2RSTR_HRTIMRST           (1 << 29)   /* RCC APB2RSTR: HRTIMRST */
 
 /* APB4 peripheral reset register */
 
-#define RCC_APB4RSTR_SYSCFGRST          (0x2ul)         /* RCC APB4RSTR: SYSCFGRST */
-#define RCC_APB4RSTR_LPUART1RST         (0x8ul)         /* RCC APB4RSTR: LPUART1RST */
-#define RCC_APB4RSTR_SPI6RST            (0x20ul)        /* RCC APB4RSTR: SPI6RST */
-#define RCC_APB4RSTR_I2C4RST            (0x80ul)        /* RCC APB4RSTR: I2C4RST */
-#define RCC_APB4RSTR_LPTIM2RST          (0x200ul)       /* RCC APB4RSTR: LPTIM2RST */
-#define RCC_APB4RSTR_LPTIM3RST          (0x400ul)       /* RCC APB4RSTR: LPTIM3RST */
-#define RCC_APB4RSTR_LPTIM4RST          (0x800ul)       /* RCC APB4RSTR: LPTIM4RST */
-#define RCC_APB4RSTR_LPTIM5RST          (0x1000ul)      /* RCC APB4RSTR: LPTIM5RST */
-#define RCC_APB4RSTR_COMP12RST          (0x4000ul)      /* RCC APB4RSTR: COMP12RST */
-#define RCC_APB4RSTR_VREFRST            (0x8000ul)      /* RCC APB4RSTR: VREFRST */
-#define RCC_APB4RSTR_SAI4RST            (0x200000ul)    /* RCC APB4RSTR: SAI4RST */
+#define RCC_APB4RSTR_SYSCFGRST          (1 << 1)    /* RCC APB4RSTR: SYSCFGRST */
+#define RCC_APB4RSTR_LPUART1RST         (1 << 3)    /* RCC APB4RSTR: LPUART1RST */
+#define RCC_APB4RSTR_SPI6RST            (1 << 5)    /* RCC APB4RSTR: SPI6RST */
+#define RCC_APB4RSTR_I2C4RST            (1 << 7)    /* RCC APB4RSTR: I2C4RST */
+#define RCC_APB4RSTR_LPTIM2RST          (1 << 9)    /* RCC APB4RSTR: LPTIM2RST */
+#define RCC_APB4RSTR_LPTIM3RST          (1 << 10)   /* RCC APB4RSTR: LPTIM3RST */
+#define RCC_APB4RSTR_LPTIM4RST          (1 << 11)   /* RCC APB4RSTR: LPTIM4RST */
+#define RCC_APB4RSTR_LPTIM5RST          (1 << 12)   /* RCC APB4RSTR: LPTIM5RST */
+#define RCC_APB4RSTR_COMP12RST          (1 << 14)   /* RCC APB4RSTR: COMP12RST */
+#define RCC_APB4RSTR_VREFRST            (1 << 15)   /* RCC APB4RSTR: VREFRST */
+#define RCC_APB4RSTR_SAI4RST            (1 << 21)   /* RCC APB4RSTR: SAI4RST */
+
+/* RCC Global Control resgister */
+
+#define RCC_GCR_WW1RSC                  (1 << 0)    /* Bit 0: WWDG1 reset scope control */
+
+/* TODO: D3 Autonomous mode register */
+
+/* TODO: RCC Reset Status register */
 
 /* AHB3 Peripheral Clock enable register */
 
-#define RCC_AHB3ENR_MDMAEN              (0x1ul)         /* RCC AHB3ENR: MDMAEN */
-#define RCC_AHB3ENR_DMA2DEN             (0x10ul)        /* RCC AHB3ENR: DMA2DEN */
-#define RCC_AHB3ENR_JPGDECEN            (0x20ul)        /* RCC AHB3ENR: JPGDECEN */
-#define RCC_AHB3ENR_FMCEN               (0x1000ul)      /* RCC AHB3ENR: FMCEN */
-#define RCC_AHB3ENR_QSPIEN              (0x4000ul)      /* RCC AHB3ENR: QSPIEN */
-#define RCC_AHB3ENR_SDMMC1EN            (0x10000ul)     /* RCC AHB3ENR: SDMMC1EN */
-
+#define RCC_AHB3ENR_MDMAEN              (1 << 0)    /* RCC AHB3ENR: MDMAEN */
+#define RCC_AHB3ENR_DMA2DEN             (1 << 4)    /* RCC AHB3ENR: DMA2DEN */
+#define RCC_AHB3ENR_JPGDECEN            (1 << 5)    /* RCC AHB3ENR: JPGDECEN */
+#define RCC_AHB3ENR_FMCEN               (1 << 12)   /* RCC AHB3ENR: FMCEN */
+#define RCC_AHB3ENR_QSPIEN              (1 << 14)   /* RCC AHB3ENR: QSPIEN */
+#define RCC_AHB3ENR_SDMMC1EN            (1 << 16)   /* RCC AHB3ENR: SDMMC1EN */
 /* AHB1 Peripheral Clock enable register */
 
-#define RCC_AHB1ENR_DMA1EN              (0x1ul)         /* RCC AHB1ENR: DMA1EN */
-#define RCC_AHB1ENR_DMA2EN              (0x2ul)         /* RCC AHB1ENR: DMA2EN */
-#define RCC_AHB1ENR_ADC12EN             (0x20ul)        /* RCC AHB1ENR: ADC12EN */
-#define RCC_AHB1ENR_ETH1MACEN           (0x8000ul)      /* RCC AHB1ENR: ETH1MACEN */
-#define RCC_AHB1ENR_ETH1TXEN            (0x10000ul)     /* RCC AHB1ENR: ETH1TXEN */
-#define RCC_AHB1ENR_ETH1RXEN            (0x20000ul)     /* RCC AHB1ENR: ETH1RXEN */
-#define RCC_AHB1ENR_USB1OTGEN           (0x2000000ul)   /* RCC AHB1ENR: USB1OTGEN */
-#define RCC_AHB1ENR_USB1ULPIEN          (0x4000000ul)   /* RCC AHB1ENR: USB1ULPIEN */
-#define RCC_AHB1ENR_USB2OTGEN           (0x8000000ul)   /* RCC AHB1ENR: USB2OTGEN */
-#define RCC_AHB1ENR_USB2ULPIEN          (0x10000000ul)  /* RCC AHB1ENR: USB2ULPIEN */
+#define RCC_AHB1ENR_DMA1EN              (1 << 0)    /* RCC AHB1ENR: DMA1EN */
+#define RCC_AHB1ENR_DMA2EN              (1 << 1)    /* RCC AHB1ENR: DMA2EN */
+#define RCC_AHB1ENR_ADC12EN             (1 << 5)    /* RCC AHB1ENR: ADC12EN */
+#define RCC_AHB1ENR_ETH1MACEN           (1 << 15)   /* RCC AHB1ENR: ETH1MACEN */
+#define RCC_AHB1ENR_ETH1TXEN            (1 << 16)   /* RCC AHB1ENR: ETH1TXEN */
+#define RCC_AHB1ENR_ETH1RXEN            (1 << 17)   /* RCC AHB1ENR: ETH1RXEN */
+#define RCC_AHB1ENR_USB1OTGEN           (1 << 25)   /* RCC AHB1ENR: USB1OTGEN */
+#define RCC_AHB1ENR_USB1ULPIEN          (1 << 26)   /* RCC AHB1ENR: USB1ULPIEN */
+#define RCC_AHB1ENR_USB2OTGEN           (1 << 27)   /* RCC AHB1ENR: USB2OTGEN */
+#define RCC_AHB1ENR_USB2ULPIEN          (1 << 28)   /* RCC AHB1ENR: USB2ULPIEN */
 
 /* AHB2 Peripheral Clock enable register */
 
-#define RCC_AHB2ENR_CAMITFEN            (0x1ul)         /* RCC AHB2ENR: CAMITFEN */
-#define RCC_AHB2ENR_CRYPTEN             (0x10ul)        /* RCC AHB2ENR: CRYPTEN */
-#define RCC_AHB2ENR_HASHEN              (0x20ul)        /* RCC AHB2ENR: HASHEN */
-#define RCC_AHB2ENR_RNGEN               (0x40ul)        /* RCC AHB2ENR: RNGEN */
-#define RCC_AHB2ENR_SDMMC2EN            (0x200ul)       /* RCC AHB2ENR: SDMMC2EN */
-#define RCC_AHB2ENR_SRAM1EN             (0x20000000ul)  /* RCC AHB2ENR: SRAM1EN */
-#define RCC_AHB2ENR_SRAM2EN             (0x40000000ul)  /* RCC AHB2ENR: SRAM2EN */
-#define RCC_AHB2ENR_SRAM3EN             (0x80000000ul)  /* RCC AHB2ENR: SRAM3EN */
+#define RCC_AHB2ENR_CAMITFEN            (1 << 0)    /* RCC AHB2ENR: CAMITFEN */
+#define RCC_AHB2ENR_CRYPTEN             (1 << 4)    /* RCC AHB2ENR: CRYPTEN */
+#define RCC_AHB2ENR_HASHEN              (1 << 5)    /* RCC AHB2ENR: HASHEN */
+#define RCC_AHB2ENR_RNGEN               (1 << 6)    /* RCC AHB2ENR: RNGEN */
+#define RCC_AHB2ENR_SDMMC2EN            (1 << 9)    /* RCC AHB2ENR: SDMMC2EN */
+#define RCC_AHB2ENR_SRAM1EN             (1 << 29)   /* RCC AHB2ENR: SRAM1EN */
+#define RCC_AHB2ENR_SRAM2EN             (1 << 30)   /* RCC AHB2ENR: SRAM2EN */
+#define RCC_AHB2ENR_SRAM3EN             (1 << 31)   /* RCC AHB2ENR: SRAM3EN */
 
 /* AHB4 Peripheral Clock enable register */
 
-#define RCC_AHB4ENR_GPIOAEN             (0x1ul)         /* RCC AHB4ENR: GPIOAEN */
-#define RCC_AHB4ENR_GPIOBEN             (0x2ul)         /* RCC AHB4ENR: GPIOBEN */
-#define RCC_AHB4ENR_GPIOCEN             (0x4ul)         /* RCC AHB4ENR: GPIOCEN */
-#define RCC_AHB4ENR_GPIODEN             (0x8ul)         /* RCC AHB4ENR: GPIODEN */
-#define RCC_AHB4ENR_GPIOEEN             (0x10ul)        /* RCC AHB4ENR: GPIOEEN */
-#define RCC_AHB4ENR_GPIOFEN             (0x20ul)        /* RCC AHB4ENR: GPIOFEN */
-#define RCC_AHB4ENR_GPIOGEN             (0x40ul)        /* RCC AHB4ENR: GPIOGEN */
-#define RCC_AHB4ENR_GPIOHEN             (0x80ul)        /* RCC AHB4ENR: GPIOHEN */
-#define RCC_AHB4ENR_GPIOIEN             (0x100ul)       /* RCC AHB4ENR: GPIOIEN */
-#define RCC_AHB4ENR_GPIOJEN             (0x200ul)       /* RCC AHB4ENR: GPIOJEN */
-#define RCC_AHB4ENR_GPIOKEN             (0x400ul)       /* RCC AHB4ENR: GPIOKEN */
-#define RCC_AHB4ENR_CRCEN               (0x80000ul)     /* RCC AHB4ENR: CRCEN */
-#define RCC_AHB4ENR_BDMAEN              (0x200000ul)    /* RCC AHB4ENR: BDMAEN */
-#define RCC_AHB4ENR_ADC3EN              (0x1000000ul)   /* RCC AHB4ENR: ADC3EN */
-#define RCC_AHB4ENR_HSEMEN              (0x2000000ul)   /* RCC AHB4ENR: HSEMEN */
-#define RCC_AHB4ENR_BKPRAMEN            (0x10000000ul)  /* RCC AHB4ENR: BKPRAMEN */
+#define RCC_AHB4ENR_GPIOAEN             (1 << 0)    /* RCC AHB4ENR: GPIOAEN */
+#define RCC_AHB4ENR_GPIOBEN             (1 << 1)    /* RCC AHB4ENR: GPIOBEN */
+#define RCC_AHB4ENR_GPIOCEN             (1 << 2)    /* RCC AHB4ENR: GPIOCEN */
+#define RCC_AHB4ENR_GPIODEN             (1 << 3)    /* RCC AHB4ENR: GPIODEN */
+#define RCC_AHB4ENR_GPIOEEN             (1 << 4)    /* RCC AHB4ENR: GPIOEEN */
+#define RCC_AHB4ENR_GPIOFEN             (1 << 5)    /* RCC AHB4ENR: GPIOFEN */
+#define RCC_AHB4ENR_GPIOGEN             (1 << 6)    /* RCC AHB4ENR: GPIOGEN */
+#define RCC_AHB4ENR_GPIOHEN             (1 << 7)    /* RCC AHB4ENR: GPIOHEN */
+#define RCC_AHB4ENR_GPIOIEN             (1 << 8)    /* RCC AHB4ENR: GPIOIEN */
+#define RCC_AHB4ENR_GPIOJEN             (1 << 9)    /* RCC AHB4ENR: GPIOJEN */
+#define RCC_AHB4ENR_GPIOKEN             (1 << 10)   /* RCC AHB4ENR: GPIOKEN */
+#define RCC_AHB4ENR_CRCEN               (1 << 19)   /* RCC AHB4ENR: CRCEN */
+#define RCC_AHB4ENR_BDMAEN              (1 << 21)   /* RCC AHB4ENR: BDMAEN and DMAMUX2 */
+#define RCC_AHB4ENR_ADC3EN              (1 << 24)   /* RCC AHB4ENR: ADC3EN */
+#define RCC_AHB4ENR_HSEMEN              (1 << 25)   /* RCC AHB4ENR: HSEMEN */
+#define RCC_AHB4ENR_BKPRAMEN            (1 << 28)   /* RCC AHB4ENR: BKPRAMEN */
 
 /* APB3 Peripheral Clock enable register */
 
-#define RCC_APB3ENR_LTDCEN              (0x8ul)   /* RCC APB3ENR: LTDCEN */
-#define RCC_APB3ENR_WWDG1EN             (0x40ul)  /* RCC APB3ENR: WWDG1EN  */
+#define RCC_APB3ENR_LTDCEN              (1 << 3)   /* RCC APB3ENR: LTDCEN */
+#define RCC_APB3ENR_WWDG1EN             (1 << 6)   /* RCC APB3ENR: WWDG1EN  */
 
 /* APB1 L Peripheral Clock enable register */
 
@@ -896,7 +903,7 @@
                                                   /* Bits 24-25: Reserved */
 #define RCC_APB1LENR_HDMICECEN          (1 << 27) /* RCC APB1LENR: HDMICECEN */
                                                   /* Bit 28: Reserved */
-#define RCC_APB1LENR_DAC12EN            (1 << 29) /* RCC APB1LENR: DAC12EN */
+#define RCC_APB1LENR_DAC1EN             (1 << 29) /* RCC APB1LENR: DAC1EN */
 #define RCC_APB1LENR_USART7EN           (1 << 30) /* RCC APB1LENR: USART7EN */
 #define RCC_APB1LENR_USART8EN           (1 << 31) /* RCC APB1LENR: USART8EN */
 
@@ -1045,7 +1052,7 @@
 #define RCC_APB1LLPENR_I2C2LPEN         (0x400000ul)   /* RCC APB1LLPENR: I2C2LPEN */
 #define RCC_APB1LLPENR_I2C3LPEN         (0x800000ul)   /* RCC APB1LLPENR: I2C3LPEN */
 #define RCC_APB1LLPENR_HDMICECLPEN      (0x8000000ul)  /* RCC APB1LLPENR: HDMICECLPEN */
-#define RCC_APB1LLPENR_DAC12LPEN        (0x20000000ul) /* RCC APB1LLPENR: DAC12LPEN */
+#define RCC_APB1LLPENR_DAC1LPEN         (0x20000000ul) /* RCC APB1LLPENR: DAC1LPEN */
 #define RCC_APB1LLPENR_USART7LPEN       (0x40000000ul) /* RCC APB1LLPENR: USART7LPEN */
 #define RCC_APB1LLPENR_USART8LPEN       (0x80000000ul) /* RCC APB1LLPENR: USART8LPEN */
 

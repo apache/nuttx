@@ -196,6 +196,12 @@ static inline void rcc_enableahb3(void)
 
   regval = getreg32(STM32_RCC_AHB3ENR);
 
+#ifdef CONFIG_STM32H7_MDMA
+  /* MDMA clock enable */
+
+  regval |= RCC_AHB3ENR_MDMAEN;
+#endif
+
   // TODO: ...
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
@@ -254,6 +260,12 @@ static inline void rcc_enableahb4(void)
              | RCC_AHB4ENR_GPIOKEN
 #endif
     );
+#endif
+
+#ifdef CONFIG_STM32H7_BDMA
+  /* BDMA clock enable */
+
+  regval |= RCC_AHB4ENR_BDMAEN;
 #endif
 
 #ifdef CONFIG_STM32H7_CRC

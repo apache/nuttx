@@ -47,6 +47,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define DMAMUX1 0
+#define DMAMUX2 0
+
 /* Register Offsets *****************************************************************/
 
 #define STM32_DMAMUX_CXCR_OFFSET(x)  (0x0000+0x0004*(x)) /* DMAMUX12 request line multiplexer channel x configuration register */
@@ -145,17 +148,17 @@
 
 /* DMAMUX12 request line multiplexer channel x configuration register */
 
-#define DMAMUX_CXCR_DMAREQID_SHIFT (0)  /* Bits 0-6: DMA request identification */
-#define DMAMUX_CXCR_DMAREQID_MASK  (0x7f << DMAMUX_CXCR_DMAREQID_SHIFT)
-#define DMAMUX_CXCR_SOIE           (8)  /* Bit 8: Synchronization overrun interrupt enable */
-#define DMAMUX_CXCR_EGE            (9)  /* Bit 9: Event generation enable */
-#define DMAMUX_CXCR_SE             (16) /* Bit 16: Synchronization enable */
-#define DMAMUX_CXCR_SPOL_SHIFT     (17) /* Bits 17-18: Synchronization polarity */
-#define DMAMUX_CXCR_SPOL_MASK      (3 << DMAMUX_CXCR_SPOL_SHIFT)
-#define DMAMUX_CXCR_NBREQ_SHIFT    (19) /* Bits 19-23: Number of DMA request - 1 to forward */
-#define DMAMUX_CXCR_NBREQ_MASK     (0x1f << DMAMUX_CXCR_NBREQ_SHIFT)
-#define DMAMUX_CXCR_SYNCID_SHIFT   (24) /* Bits 24-26: Synchronization identification */
-#define DMAMUX_CXCR_SYNCID_MASK    (7 << DMAMUX_CXCR_SYNCID_SHIFT)
+#define DMAMUX_CCR_DMAREQID_SHIFT (0)  /* Bits 0-6: DMA request identification */
+#define DMAMUX_CCR_DMAREQID_MASK  (0x7f << DMAMUX_CCR_DMAREQID_SHIFT)
+#define DMAMUX_CCR_SOIE           (8)  /* Bit 8: Synchronization overrun interrupt enable */
+#define DMAMUX_CCR_EGE            (9)  /* Bit 9: Event generation enable */
+#define DMAMUX_CCR_SE             (16) /* Bit 16: Synchronization enable */
+#define DMAMUX_CCR_SPOL_SHIFT     (17) /* Bits 17-18: Synchronization polarity */
+#define DMAMUX_CCR_SPOL_MASK      (3 << DMAMUX_CCR_SPOL_SHIFT)
+#define DMAMUX_CCR_NBREQ_SHIFT    (19) /* Bits 19-23: Number of DMA request - 1 to forward */
+#define DMAMUX_CCR_NBREQ_MASK     (0x1f << DMAMUX_CCR_NBREQ_SHIFT)
+#define DMAMUX_CCR_SYNCID_SHIFT   (24) /* Bits 24-26: Synchronization identification */
+#define DMAMUX_CCR_SYNCID_MASK    (7 << DMAMUX_CCR_SYNCID_SHIFT)
 
 /* DMAMUX12 request line multiplexer interrupt channel status register */
 
@@ -167,15 +170,15 @@
 
 /* DMAMUX12 request generator channel x configuration register */
 
-#define DMAMUX_RGXCR_SIGID_SHIFT   (0)  /* Bits 0-4: Signal identifiaction */
+#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction */
                                         /* WARNING: different length for DMAMUX1 and DMAMUX2 !*/
-#define DMAMUX_RGXCR_SIGID_MASK    (0x1f << DMAMUX_RGXCR_SIGID_SHIFT)
-#define DMAMUX_RGXCR_OIE           (8)  /* Bit 8: Trigger overrun interrupt enable */
-#define DMAMUX_RGXCR_GE            (16) /* Bit 16: DMA request generator channel X enable*/
-#define DMAMUX_RGXCR_GPOL_SHIFT    (17) /* Bits 17-18: DMA request generator trigger polarity */
-#define DMAMUX_RGXCR_GPOL_MASK     (7 << DMAMUX_RGXCR_GPOL_SHIFT)
-#define DMAMUX_RGXCR_GNBREQ_SHIFT  (17) /* Bits 19-23: Number of DMA requests to be generated -1 */
-#define DMAMUX_RGXCR_GNBREQL_MASK  (7 << DMAMUX_RGXCR_GNBREQ_SHIFT)
+#define DMAMUX_RGCR_SIGID_MASK     (0x1f << DMAMUX_RGCR_SIGID_SHIFT)
+#define DMAMUX_RGCR_OIE            (8)  /* Bit 8: Trigger overrun interrupt enable */
+#define DMAMUX_RGCR_GE             (16) /* Bit 16: DMA request generator channel X enable*/
+#define DMAMUX_RGCR_GPOL_SHIFT     (17) /* Bits 17-18: DMA request generator trigger polarity */
+#define DMAMUX_RGCR_GPOL_MASK      (7 << DMAMUX_RGCR_GPOL_SHIFT)
+#define DMAMUX_RGCR_GNBREQ_SHIFT   (17) /* Bits 19-23: Number of DMA requests to be generated -1 */
+#define DMAMUX_RGCR_GNBREQL_MASK   (7 << DMAMUX_RGCR_GNBREQ_SHIFT)
 
 /* DMAMUX12 request generator interrupt status register */
 
@@ -185,14 +188,17 @@
 
 #define DMAMUX1_RGCFR_SOF(x)       (1 << x) /* Clear trigger overrun event flag */
 
-/* DMA Stream mapping.
- * TODO:
+/* DMA channel mapping
+ *
+ * XXXXX.DDD.CCCCCCCC
+ * C - DMAMUX request
+ * D - DMA controller
+ * X - free bits
  */
 
-#define STM32_DMA_MAP(d,s,c)       ((d) << 7 | (s) << 4 | (c))
-#define STM32_DMA_CONTROLLER(m)    (((m) >> 7) & 1)
-#define STM32_DMA_STREAM(m)        (((m) >> 4) & 7)
-#define STM32_DMA_CHANNEL(m)       ((m) & 15)
+#define DMAMAP_MAP(d,c)           ((d) << 8 | c)
+#define DMAMAP_CONTROLLER(m)      ((m) >> 8 & 0x07)
+#define DMAMAP_REQUEST(m)         ((m) >> 0 & 0xff)
 
 /* Import DMAMUX map */
 

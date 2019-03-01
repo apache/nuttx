@@ -49,12 +49,12 @@
 
 /* 2 DMA controllers + 1 MDMA + 1 BDMA*/
 
-#define DMA1                      (0)
-#define DMA2                      (1)
-#define MDMA                      (3)
-#define BDMA                      (4)
+#define MDMA                      (0)
+#define DMA1                      (1)
+#define DMA2                      (2)
+#define BDMA                      (3)
 
-/* 8 DMA streams */
+/* 8 DMA streams for standard DMA */
 
 #define DMA_STREAM0               (0)
 #define DMA_STREAM1               (1)

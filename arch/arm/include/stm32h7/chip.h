@@ -92,6 +92,7 @@
 /* Peripherals */
 
 #  define STM32H7_NGPIO                   (11)        /* GPIOA-GPIOK */
+#  define STM32H7_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
 #  define STM32H7_NADC                    (3)         /* (3) ADC1-3*/
 #  define STM32H7_NDAC                    (2)         /* (2) DAC1-2*/
 #  define STM32H7_NCMP                    (2)         /* (2) ultra-low power comparators */
