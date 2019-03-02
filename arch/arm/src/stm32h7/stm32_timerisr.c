@@ -68,7 +68,18 @@
  * HCLK set to 150 MHz).
  */
 
-#define STM32_SYSTICK_CLOCK  (STM32_CPUCLK_FREQUENCY / 8)
+#undef CONFIG_STM32H7_SYSTICK_HCLKd8
+
+/* REVISIT:
+ *   It looks like SYSTICK for H7 is always clocked from CPUCLK and doesn't
+ *   depend on the SYSTICK_CTRL_CLKSOURCE bit settings.
+ */
+
+#ifdef CONFIG_STM32H7_SYSTICK_HCLKd8
+#  define STM32_SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY / 8)
+#else
+#  define STM32_SYSTICK_CLOCK  (STM32_CPUCLK_FREQUENCY)
+#endif
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -140,14 +151,17 @@ void arm_timer_initialize(void)
 
   /* Enable SysTick interrupts:
    *
-   *   NVIC_SYSTICK_CTRL_CLKSOURCE=0 : Use the implementation defined clock
-   *                                   source which, for the STM32H7, will be
-   *                                   HCLK/8
+   *   NVIC_SYSTICK_CTRL_CLKSOURCE   : Configurable, 0=HCLK/8, 1=CPU
    *   NVIC_SYSTICK_CTRL_TICKINT=1   : Generate interrupts
    *   NVIC_SYSTICK_CTRL_ENABLE      : Enable the counter
    */
 
-  regval = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
+  regval  = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
+#ifndef CONFIG_STM32H7_SYSTICK_HCLKd8
+  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
+#else
+  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
+#endif
   putreg32(regval, NVIC_SYSTICK_CTRL);
 
   /* And enable the timer interrupt */
