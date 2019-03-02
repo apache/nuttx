@@ -63,7 +63,7 @@
  * Private Function
  ****************************************************************************/
 
-static inline void imxrt_ocotp_reset_errorsvoid(void)
+static inline void imxrt_ocotp_reset_errors(void)
 {
   putreg32(OCOTP_CTRL_ERROR, IMXRT_OCOTP_CTRL_CLR);
 }
