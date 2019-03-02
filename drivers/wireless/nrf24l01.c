@@ -1489,10 +1489,11 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
       return -ENOMEM;
     }
 
-  dev->rx_fifo    = rx_fifo;
-  dev->nxt_read   = 0;
-  dev->nxt_write  = 0;
-  dev->fifo_len   = 0;
+  dev->rx_fifo         = rx_fifo;
+  dev->nxt_read        = 0;
+  dev->nxt_write       = 0;
+  dev->fifo_len        = 0;
+  dev->irq_work.worker = 0;
 
   nxsem_init(&(dev->sem_fifo), 0, 1);
   nxsem_init(&(dev->sem_rx), 0, 0);
