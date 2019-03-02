@@ -921,6 +921,10 @@ o pthreads (sched/pthreads libs/libc/pthread)
                   depending up_testset() implementation from the arch/
                   directories and into libs/libc/machine.
 
+                  That assumes, of course, that the spinlock operation can
+                  be perform with only user level priveleges.  That may not
+                  always be the case.
+
                For these reasons, the selection is marked EXPERIMENTAL.
   Status:      Open
   Priority:    Low.  These are new interfaces and not yet in wide use.  The
