@@ -516,12 +516,11 @@ static void stm32_stdclockconfig(void)
 
   if (timeout > 0)
     {
-
-      /* Set the HCLK source/divider */
+      /* Set the D1 domain Core prescaler and the HCLK source/divider */
 
       regval = getreg32(STM32_RCC_D1CFGR);
-      regval &= ~RCC_D1CFGR_HPRE_MASK;
-      regval |= STM32_RCC_D1CFGR_HPRE;
+      regval &= ~(RCC_D1CFGR_HPRE_MASK | RCC_D1CFGR_D1CPRE_MASK);
+      regval |= (STM32_RCC_D1CFGR_HPRE | STM32_RCC_D1CFGR_D1CPRE);
       putreg32(regval, STM32_RCC_D1CFGR);
 
       /* Set PCLK1 */

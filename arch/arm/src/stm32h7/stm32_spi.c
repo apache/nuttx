@@ -88,6 +88,7 @@
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
+#include "stm32_dma.h"
 
 #if defined(CONFIG_STM32H7_SPI1) || defined(CONFIG_STM32H7_SPI2) || \
     defined(CONFIG_STM32H7_SPI3) || defined(CONFIG_STM32H7_SPI4) || \
@@ -102,10 +103,6 @@
 
 #ifdef CONFIG_STM32H7_SPI_INTERRUPTS
 #  error "Interrupt driven SPI not yet supported"
-#endif
-
-#ifdef CONFIG_STM32H7_SPI_DMA
-#  error "SPI DMA not supported yet"
 #endif
 
 /* Can't have both interrupt driven SPI and SPI DMA */
@@ -200,8 +197,8 @@ struct stm32_spidev_s
   bool             defertrig;    /* Flag indicating that trigger should be deferred */
   bool             trigarmed;    /* Flag indicating that the trigger is armed */
 #endif
-  uint8_t          rxch;         /* The RX DMA channel number */
-  uint8_t          txch;         /* The TX DMA channel number */
+  uint32_t         rxch;         /* The RX DMA channel number */
+  uint32_t         txch;         /* The TX DMA channel number */
   DMA_HANDLE       rxdma;        /* DMA channel handle for RX transfers */
   DMA_HANDLE       txdma;        /* DMA channel handle for TX transfers */
   sem_t            rxsem;        /* Wait for RX DMA to complete */
@@ -961,6 +958,8 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
                            FAR void *rxdummy, size_t nwords)
 {
+  stm32_dmacfg_t dmacfg;
+
   /* 8- or 16-bit mode? */
 
   if (spi_9to16bitmode(priv))
@@ -994,8 +993,13 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
 
   /* Configure the RX DMA */
 
-  stm32_dmasetup(priv->rxdma, priv->spibase + STM32_SPI_RXDR_OFFSET,
-                 (uint32_t)rxbuffer, nwords, priv->rxccr);
+  dmacfg.paddr = priv->spibase + STM32_SPI_RXDR_OFFSET;
+  dmacfg.maddr = (uint32_t)rxbuffer;
+  dmacfg.ndata = nwords;
+  dmacfg.cfg1  = priv->rxccr;
+  dmacfg.cfg2  = 0;
+
+  stm32_dmasetup(priv->rxdma, &dmacfg);
 }
 #endif
 
@@ -1011,6 +1015,8 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
 static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbuffer,
                            FAR const void *txdummy, size_t nwords)
 {
+  stm32_dmacfg_t dmacfg;
+
   /* 8- or 16-bit mode? */
 
   if (spi_9to16bitmode(priv))
@@ -1042,10 +1048,15 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
         }
     }
 
+  dmacfg.paddr = priv->spibase + STM32_SPI_TXDR_OFFSET;
+  dmacfg.maddr = (uint32_t)txbuffer;
+  dmacfg.ndata = nwords;
+  dmacfg.cfg1  = priv->txccr;
+  dmacfg.cfg2  = 0;
+
   /* Setup the TX DMA */
 
-  stm32_dmasetup(priv->txdma, priv->spibase + STM32_SPI_TXDR_OFFSET,
-                 (uint32_t)txbuffer, nwords, priv->txccr);
+  stm32_dmasetup(priv->txdma, &dmacfg);
 }
 #endif
 
@@ -1358,6 +1369,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       spi_enable(priv, false);
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_RXDMAEN | SPI_CFG1_TXDMAEN);
+      spi_enable(priv, true);
 #endif
 
       /* Save the mode so that subsequent re-configurations will be faster */
@@ -1704,8 +1716,23 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   DEBUGASSERT(priv != NULL);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
-  if ((txbuffer && !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
-      (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+  stm32_dmacfg_t dmacfg1;
+  stm32_dmacfg_t dmacfg2;
+
+  /* TX transfer configuration */
+
+  dmacfg1.maddr = (uint32_t)txbuffer;
+  dmacfg1.ndata = nwords;
+  dmacfg1.cfg1  = priv->txccr;
+
+  /* RX transfer configuration */
+
+  dmacfg2.maddr = (uint32_t)rxbuffer;
+  dmacfg2.ndata = nwords;
+  dmacfg2.cfg1  = priv->rxccr;
+
+  if ((txbuffer && !stm32_dmacapable(priv->txdma, &dmacfg1)) ||
+      (rxbuffer && !stm32_dmacapable(priv->rxdma, &dmacfg2)))
     {
       /* Unsupported memory region, fall back to non-DMA method. */
 
@@ -1738,6 +1765,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         {
           arch_flush_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + buflen);
         }
+
+      /* REVISIT: Master transfer start */
+
+      spi_modifyreg(priv, STM32_SPI_CR1_OFFSET, 0, SPI_CR1_CSTART);
 
 #ifdef CONFIG_SPI_TRIGGER
       /* Is deferred triggering in effect? */

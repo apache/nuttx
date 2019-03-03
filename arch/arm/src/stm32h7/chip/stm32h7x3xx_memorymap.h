@@ -59,10 +59,9 @@
 #define STM32_FMC_BANK6      0xd0000000     /* 0xd0000000-0xdfffffff: 256Mb FMC SDRAM Bank 2 */
 #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M7 block */
 
-#define STM32_REGION_MASK    0xf0000000
+#define STM32_REGION_MASK    0xff000000
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 #define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
-
 
 /* Code Base Addresses **************************************************************/
 
@@ -85,14 +84,18 @@
 
 /* Peripheral Base Addresses ********************************************************/
 
-#define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x40007fff: APB1 */
-#define STM32_APB2_BASE      0x40010000     /* 0x40010000-0x40016bff: APB2 */
-#define STM32_AHB1_BASE      0x40020000     /* 0x40020000-0x4007ffff: APB1 */
-#define STM32_AHB2_BASE      0x48020000     /* 0x50000000-0x48022bff: AHB2 */
-#define STM32_APB3_BASE      0x50000000     /* 0x60000000-0x50003fff: APB3 */
-#define STM32_AHB3_BASE      0x51000000     /* 0x51000000-0x52008fff: AHB3 */
-#define STM32_APB4_BASE      0x58000000     /* 0x60000000-0x58006bff: APB4 */
-#define STM32_AHB4_BASE      0x58020000     /* 0x58020000-0x580267ff: AHB4 */
+#define STM32_PREGION_MASK   0xff000000
+#define STM32_D2_BASE        0x40000000     /* 0x40000000-0x48022800: D2 domain */
+#  define STM32_APB1_BASE    0x40000000     /* 0x40000000-0x40007fff: APB1 */
+#  define STM32_APB2_BASE    0x40010000     /* 0x40010000-0x40016bff: APB2 */
+#  define STM32_AHB1_BASE    0x40020000     /* 0x40020000-0x4007ffff: APB1 */
+#  define STM32_AHB2_BASE    0x48020000     /* 0x50000000-0x48022bff: AHB2 */
+#define STM32_D1_BASE        0x50000000     /* 0x50000000-0x50003fff: D1 domain */
+#  define STM32_APB3_BASE    0x50000000     /* 0x60000000-0x50003fff: APB3 */
+#  define STM32_AHB3_BASE    0x51000000     /* 0x51000000-0x52008fff: AHB3 */
+#define STM32_D3_BASE        0x58000000     /* 0x58000000-0x580267ff: D3 domain */
+#  define STM32_APB4_BASE    0x58000000     /* 0x60000000-0x58006bff: APB4 */
+#  define STM32_AHB4_BASE    0x58020000     /* 0x58020000-0x580267ff: AHB4 */
 
 /* APB1 Base Addresses **************************************************************/
 

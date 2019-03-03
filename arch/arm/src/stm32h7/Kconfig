@@ -147,6 +147,20 @@ config STM32H7_DMA2
 	select STM32H7_DMA
 	select ARCH_DMA
 
+config STM32H7_MDMA
+	bool "MDMA"
+	default n
+	depends on EXPERIMENTAL
+	select STM32H7_DMA
+	select ARCH_DMA
+
+config STM32H7_BDMA
+	bool "BDMA"
+	default n
+	depends on EXPERIMENTAL
+	select STM32H7_DMA
+	select ARCH_DMA
+
 menu "STM32H7 I2C Selection"
 
 config STM32H7_I2C1
@@ -331,6 +345,16 @@ config STM32H7_SPI_DMA
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT.
 
 endmenu # "SPI Configuration"
+
+config STM32H7_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on ARCH_DMA
+	default n
+	---help---
+		This option enables the DMA interface stm32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
 
 menu "U[S]ART Configuration"
 	depends on STM32H7_USART
