@@ -56,6 +56,9 @@ STATUS
   2018-07-12:  After several commits focused primarily on the H7 RCC and
     serial driver, Mateusz Szafoni states the basic NSH configuration is
     now functional.
+  2018-09-16:  I2C Driver added by Mateusz Szafoni.
+  2018-10-02:  SPI Driver added by Mateusz Szafoni.
+  2019-03-02:  DMA support contributed by Mateusz Szafoni.
 
 Serial Console
 ==============
