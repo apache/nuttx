@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated February 28, 2019)
+NuttX TODO List (Last updated March 4, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
- (10)  Graphics Subsystem (graphics/)
+ (11)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (5)  ARM (arch/arm/)
@@ -2515,6 +2515,19 @@ o Graphics Subsystem (graphics/)
                depth.  If such a beast ever shows up, then this priority would be
                higher.
 
+  Title:       RE-PARITITION NxTK AND NxTERM
+  Description: NxTK should not be a part of OS.  Move NxTK from nuttx/libs/libnx
+               to apps/graphics.  Then, later, convert NxTK to a C++ class.
+
+               Within the OS, NxTK currently used only in graphics/nxterm.  With
+               some effort, I think NxTerm could be moved to apps/ as well.
+
+               Currently, nxterm violates POSIX interface.  nxtk_register() and
+               nx_register() called from application.  see apps/examples/nxterm
+               and apps/graphics/NxWidgets/nxwm./src/cnxterm.cxx.
+
+  Status:      Open
+  Priority:    Low
 o Build system
   ^^^^^^^^^^^^
 
