@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
- *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,10 +110,18 @@
  * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
  *
  * CMD:           BOARDIOC_NX_START
- * DESCRIPTION:   Start the NX servier
+ * DESCRIPTION:   Start the NX server
  * ARG:           None
  * CONFIGURATION: CONFIG_NX
  * DEPENDENCIES:  Base graphics logic provides nxmu_start()
+ *
+ * CMD:           BOARDIOC_TESTSET
+ * DESCRIPTION:   Access architecture-specific up_testset() operation
+ * ARG:           A pointer to a write-able spinlock object.  On success
+ *                the  preceding spinlock state is returned:  0=unlocked,
+ *                1=locked.
+ * CONFIGURATION: CONFIG_BOARDCTL_TESTSET
+ * DEPENDENCIES:  Architecture-specific logic provides up_testset()
  */
 
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
@@ -125,6 +133,7 @@
 #define BOARDIOC_OS_SYMTAB         _BOARDIOC(0x0007)
 #define BOARDIOC_USBDEV_CONTROL    _BOARDIOC(0x0008)
 #define BOARDIOC_NX_START          _BOARDIOC(0x0009)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x000a)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -133,7 +142,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0009)
+#define BOARDIOC_USER              _BOARDIOC(0x000b)
 
 /****************************************************************************
  * Public Type Definitions

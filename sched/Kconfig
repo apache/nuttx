@@ -257,6 +257,7 @@ menu "Tasks and Scheduling"
 config SPINLOCK
 	bool "Support Spinlocks"
 	default n
+	depends on ARCH_HAVE_TESTSET
 	---help---
 		Enables suppport for spinlocks.  Spinlocks are current used only for
 		SMP suppport.

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/boardctl.c
  *
- *   Copyright (C) 2015-2017, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,10 @@
 #  include <nuttx/usb/pl2303.h>
 #  include <nuttx/usb/usbmsc.h>
 #  include <nuttx/usb/composite.h>
+#endif
+
+#ifdef CONFIG_BOARDCTL_TESTSET
+#  include <nuttx/spinlock.h>
 #endif
 
 #ifdef CONFIG_LIB_BOARDCTL
@@ -416,6 +420,32 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_NX_START:
         {
           ret = nxmu_start();
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_TESTSET
+      /* CMD:           BOARDIOC_TESTSET
+       * DESCRIPTION:   Access architecture-specific up_testset() operation
+       * ARG:           A pointer to a write-able spinlock object.  On success
+       *                the  preceding spinlock state is returned:  0=unlocked,
+       *                1=locked.
+       * CONFIGURATION: CONFIG_BOARDCTL_TESTSET
+       * DEPENDENCIES:  Architecture-specific logic provides up_testset()
+       */
+
+      case BOARDIOC_TESTSET:
+        {
+          volatile FAR spinlock_t *lock = (volatile FAR spinlock_t *)arg;
+
+          if (lock == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = up_testset(lock) == SP_LOCKED ? 1 : 0;
+            }
         }
         break;
 #endif

@@ -40,20 +40,19 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/boardctl.h>
+
 #include <pthread.h>
 #include <sched.h>
 
 /* The architecture specific spinlock.h header file must provide the
  * following:
  *
- *   SP_LOCKED        - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED      - A definition of the unlocked state value (usually 0)
- *   spinlock_t       - The type of a spinlock memory object (usually uint8_t).
- *   SP_DSB(),        - Memory barriers
- *   SP_DMB
+ *   SP_LOCKED    - A definition of the locked state value (usually 1)
+ *   SP_UNLOCKED  - A definition of the unlocked state value (usually 0)
+ *   spinlock_t   - The type of a spinlock memory object (usually uint8_t).
  */
 
-#include <nuttx/spinlock.h>
 #include <arch/spinlock.h>
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
@@ -184,6 +183,7 @@ int pthread_spin_destroy(pthread_spinlock_t *lock)
 int pthread_spin_lock(pthread_spinlock_t *lock)
 {
   pthread_t me = pthread_self();
+  int ret;
 
   DEBUGASSERT(lock != NULL);
   if (lock == NULL)
@@ -195,14 +195,32 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
       return EDEADLOCK;
     }
 
-  while (up_testset(&lock->sp_lock) == SP_LOCKED)
+  /* Loop until we successfully take the spinlock (i.e., until the previous
+   * state of the spinlock was SP_UNLOCKED).  NOTE that the test/set operaion
+   * is performed via boardctl() to avoid a variety of issues.
+   */
+
+  do
     {
-      SP_DSB();
+      ret = boardctl(BOARDIOC_TESTSET, (uintptr_t)&lock->sp_lock);
+    }
+  while (ret == 1);
+
+  /* Check for success (previous state was SP_UNLOCKED) */
+
+  if (ret == 0)
+    {
+      lock->sp_holder = me;
+    }
+  else
+    {
+      /* An error of some kind is the only other possibility */
+
+      DEBUGASSERT(ret < 0);
+      ret = -ret;
     }
 
-  lock->sp_holder = me;
-  SP_DMB();
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -229,26 +247,40 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
 int pthread_spin_trylock(pthread_spinlock_t *lock)
 {
   pthread_t me = pthread_self();
+  int ret;
 
   DEBUGASSERT(lock != NULL);
   if (lock == NULL)
     {
-      return EINVAL;
+      ret = EINVAL;
     }
   else if (lock->sp_holder == me)
     {
-      return OK;
-    }
-  else if (up_testset(&lock->sp_lock) == SP_LOCKED)
-    {
-      lock->sp_holder = me;
-      SP_DMB();
-      return OK;
+      ret = OK;
     }
   else
     {
-      return EBUSY;
+      /* Perform the test/set operation via boardctl() */
+
+      ret = boardctl(BOARDIOC_TESTSET, (uintptr_t)&lock->sp_lock);
+      switch (ret)
+        {
+          case 0:  /* Previously unlocked.  We hold the spinlock */
+            lock->sp_holder = me;
+            break;
+
+          case 1:  /* Previously locked.  We did not get the spinlock  */
+            ret = EBUSY;
+            break;
+
+          default:
+            DEBUGASSERT(ret < 0);
+            ret = -ret;
+            break;
+        }
     }
+
+  return ret;
 }
 
 /****************************************************************************
