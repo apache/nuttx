@@ -36,7 +36,7 @@
 /* The i.MXRT1050-EVK has 64Mb of Hyper FLASH beginning at address,
  * 0x0060:0000, 512Kb of DTCM RAM beginning at 0x2000:0000, and 512Kb OCRAM
  * beginning at 0x2020:0000.  Neither DTCM or SDRAM are used in this
- * configuratin.
+ * configuration.
  *
  * The user and kernel space partitions will be spanned with a single
  * region of size 2**n bytes.  As a consequence, as the partitions increase

@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/imxrt1050-evk/src/imxrt_flexspi_nor_boot.c
+ * configs/imxrt1050-evk/src/imxrt_lcd.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,31 +37,47 @@
  * Included Files
  ****************************************************************************/
 
-#include "imxrt_flexspi_nor_boot.h"
+#include <nuttx/config.h>
+
+#include <stdbool.h>
+#include <debug.h>
+
+#include "imxrt_lcd.h"
+#include "imxrt_gpio.h"
+
+#include "imxrt1050-evk.h"
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-__attribute__((section(".boot_hdr.ivt")))
-const struct ivt_s g_image_vector_table =
-{
-  IVT_HEADER,                         /* IVT Header */
-  0x60002000,                         /* Image  Entry Function */
-  IVT_RSVD,                           /* Reserved = 0 */
-  (uint32_t)DCD_ADDRESS,              /* Address where DCD information is stored */
-  (uint32_t)BOOT_DATA_ADDRESS,        /* Address where BOOT Data Structure is stored */
-  (uint32_t)&g_image_vector_table,    /* Pointer to IVT Self (absolute address */
-  (uint32_t)CSF_ADDRESS,              /* Address where CSF file is stored */
-  IVT_RSVD                            /* Reserved = 0 */
-};
+/****************************************************************************
+ * Name: imxrt_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD.  Setup backlight (initially off)
+ *
+ ****************************************************************************/
 
-__attribute__((section(".boot_hdr.boot_data")))
-const struct boot_data_s g_boot_data =
+void imxrt_lcdinitialize(void)
 {
-  FLASH_BASE,                         /* boot start location */
-  (FLASH_END - FLASH_BASE),           /* size */
-  PLUGIN_FLAG,                        /* Plugin flag*/
-  0xFFFFFFFF                          /* empty - extra data word */
-};
+  /* Configure the LCD backlight (and turn the backlight off) */
 
+  imxrt_config_gpio(GPIO_LCD_BL);
+}
+
+/****************************************************************************
+ * Name: imxrt_backlight
+ *
+ * Description:
+ *   If CONFIG_IMXRT_LCD_BACKLIGHT is defined, then the board-specific
+ *   logic must provide this interface to turn the backlight on and off.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+void imxrt_backlight(bool blon)
+{
+  imxrt_gpio_write(GPIO_LCD_BL, blon); /* High illuminates */
+}
+#endif

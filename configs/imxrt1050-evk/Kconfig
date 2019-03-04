@@ -17,4 +17,10 @@ config IMXRT1050_EVK_QSPI_FLASH
 
 endchoice # Boot Flash
 
+config IMXRT1050_EVK_SDRAM
+	bool "Enable SDRAM"
+	default n
+	---help---
+		Activate DCD configuration of SDRAM
+
 endif

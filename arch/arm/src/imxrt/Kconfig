@@ -25,7 +25,7 @@ config ARCH_CHIP_MIMXRT1052DVL6A
 	select ARCH_FAMILY_MXRT105xDVL6A
 
 config ARCH_CHIP_MIMXRT1052CVL5A
-	bool "MIMXRT1052DVL6A"
+	bool "MIMXRT1052DVL5A"
 	select ARCH_FAMILY_MIMXRT1052CVL5A
 
 config ARCH_CHIP_MIMXRT1061DVL6A
@@ -71,6 +71,7 @@ config ARCH_FAMILY_IMXRT105x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
+	select IMXRT_HAVE_LCD
 
 config ARCH_FAMILY_MXRT106xDVL6A
 	bool
@@ -96,6 +97,7 @@ config ARCH_FAMILY_IMXRT106x
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 	select IMXRT_HIGHSPEED_GPIO
+	select IMXRT_HAVE_LCD
 
 # Peripheral support
 
@@ -115,6 +117,10 @@ config IMXRT_HIGHSPEED_GPIO
 	bool
 	default n
 
+config IMXRT_HAVE_LCD
+	bool
+	default n
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA
@@ -128,6 +134,11 @@ config IMXRT_ENET
 	select ARCH_HAVE_PHY
 	select ARCH_PHY_INTERRUPT
 	select ARCH_HAVE_NETDEV_STATISTICS
+
+config IMXRT_LCD
+	bool "LCD controller"
+	default n
+	depends on IMXRT_HAVE_LCD
 
 menu "FlexIO Peripherals"
 
@@ -730,5 +741,151 @@ config IMXRT_RTC_MAGIC
 		Value used as Magic to determine if the RTC is already setup
 
 endmenu
+
+menu "LCD Configuration"
+	depends on IMXRT_LCD
+
+config IMXRT_LCD_VIDEO_PLL_FREQ
+	int "Video PLL Frequency"
+	default 92000000
+	range 41500000 1300000000
+	---help---
+		Frequency of Video PLL.
+
+config IMXRT_LCD_VRAMBASE
+	hex "Video RAM base address"
+	default 0x80000000
+	---help---
+		Base address of the video RAM frame buffer.
+		Default: SDRAM
+
+config IMXRT_LCD_REFRESH_FREQ
+	int "LCD refesh rate (Hz)"
+	default 60
+	---help---
+		LCD refesh rate (Hz)
+
+config IMXRT_LCD_BACKLIGHT
+	bool "Enable backlight"
+	default y
+	---help---
+		Enable backlight support.  If IMXRT_LCD_BACKLIGHT is selected, then
+		the board-specific logic must provide this IMXRT_backlight()
+		interface so that the LCD driver can turn the backlight on and off
+		as necessary.  You should select this option and implement
+		IMXRT_backlight() if your board provides GPIO control over the
+		backlight.  This interface provides only ON/OFF control of the
+		backlight.  If you want finer control over the backlight level (for
+		example, using PWM), then this interface would need to be extended.
+
+choice
+	prompt "Input Bits per pixel"
+	default IMXRT_LCD_INPUT_BPP16
+
+config IMXRT_LCD_INPUT_BPP8_LUT
+	bool "8 BPP Color Map"
+	select FB_CMAP
+
+config IMXRT_LCD_INPUT_BPP8
+	bool "8 BPP RGB_332"
+
+config IMXRT_LCD_INPUT_BPP15
+	bool "16 BPP RGB_555"
+
+config IMXRT_LCD_INPUT_BPP16
+	bool "16 BPP RGB_565"
+
+config IMXRT_LCD_INPUT_BPP24
+	bool "24 BPP RGB_888"
+
+config IMXRT_LCD_INPUT_BPP32
+	bool "32 BPP RGB_0888"
+
+endchoice
+
+config IMXRT_LCD_BGR
+	bool "Blue-Green-Red color order"
+	default n
+	---help---
+		This option selects BGR color order vs. default RGB
+
+choice
+	prompt "Output Bus width"
+	default IMXRT_LCD_OUTPUT_16
+
+config IMXRT_LCD_OUTPUT_8
+	bool "8 Bit LCD Bus"
+
+config IMXRT_LCD_OUTPUT_16
+	bool "16 Bit LCD Bus"
+
+config IMXRT_LCD_OUTPUT_18
+	bool "18 Bit LCD Bus"
+
+config IMXRT_LCD_OUTPUT_24
+	bool "24 Bit LCD Bus"
+
+endchoice
+
+config IMXRT_LCD_BACKCOLOR
+	hex "Initial background color"
+	default 0x0
+	---help---
+		Initial background color
+
+config IMXRT_LCD_HWIDTH
+	int "Display width (pixels)"
+	default 480
+	---help---
+		Horizontal width the display in pixels
+
+config IMXRT_LCD_HPULSE
+	int "Horizontal pulse"
+	default 41
+
+config IMXRT_LCD_HFRONTPORCH
+	int "Horizontal front porch"
+	default 4
+
+config IMXRT_LCD_HBACKPORCH
+	int "Horizontal back porch"
+	default 8
+
+config IMXRT_LCD_VHEIGHT
+	int "Display height (rows)"
+	default 272
+	---help---
+		Vertical height of the display in rows
+
+config IMXRT_LCD_VPULSE
+	int "Vertical pulse"
+	default 10
+
+config IMXRT_LCD_VFRONTPORCH
+	int "Vertical front porch"
+	default 4
+
+config IMXRT_LCD_VBACKPORCH
+	int "Vertical back porch"
+	default 2
+
+config IMXRT_VSYNC_ACTIVE_HIGH
+	bool "V-sync active high"
+	default n
+
+config IMXRT_HSYNC_ACTIVE_HIGH
+	bool "H-sync active high"
+	default n
+
+config IMXRT_DATAEN_ACTIVE_HIGH
+	bool "Data enable active high"
+	default y
+
+config IMXRT_DATA_RISING_EDGE
+	bool "Data clock rising edge"
+	default y
+
+endmenu # LCD Configuration
+
 endif # ARCH_CHIP_IMXRT
 

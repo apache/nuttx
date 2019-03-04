@@ -1,7 +1,7 @@
 ############################################################################
 # configs/imxrt1050-evk/src/Makefile
 #
-#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -66,12 +66,20 @@ ifeq ($(CONFIG_IMXRT_LPSPI),y)
 CSRCS += imxrt_spi.c
 endif
 
+ifeq ($(CONFIG_IMXRT_LCD),y)
+CSRCS += imxrt_lcd.c
+endif
+
 ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += imxrt_mmcsd_spi.c
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += imxrt_gpio.c
+endif
+
+ifeq ($(CONFIG_IMXRT1050_EVK_SDRAM),y)
+CSRCS += imxrt_sdram_ini_dcd.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

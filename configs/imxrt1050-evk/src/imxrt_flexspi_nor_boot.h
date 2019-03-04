@@ -77,8 +77,13 @@
 #define FLASH_END                   0x7f7fffff
 #define SCLK 1
 
-#define DCD_ADDRESS                 0
-#define BOOT_DATA_ADDRESS           &boot_data
+#ifdef CONFIG_IMXRT1050_EVK_SDRAM
+#  define DCD_ADDRESS               &g_dcd_data
+#else
+#  define DCD_ADDRESS               0
+#endif
+
+#define BOOT_DATA_ADDRESS           &g_boot_data
 #define CSF_ADDRESS                 0
 #define PLUGIN_FLAG                 (uint32_t)0
 
@@ -143,6 +148,10 @@ struct boot_data_s
  * Public Data
  ****************************************************************************/
 
-extern const struct boot_data_s boot_data;
+extern const struct boot_data_s g_boot_data;
+
+#ifdef CONFIG_IMXRT1050_EVK_SDRAM
+extern const uint8_t g_dcd_data[];
+#endif
 
 #endif /* __CONFIGS_IMXRT1050_EVK_SRC_IMXRT_FLEXSPI_NOR_BOOT_H */
