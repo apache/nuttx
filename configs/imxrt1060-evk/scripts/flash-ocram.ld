@@ -46,9 +46,9 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
-EXTERN(flash_config)
-EXTERN(image_vector_table)
-EXTERN(boot_data)
+EXTERN(g_flash_config)
+EXTERN(g_image_vector_table)
+EXTERN(g_boot_data)
 
 ENTRY(_stext)
 
