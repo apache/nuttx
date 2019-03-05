@@ -41,7 +41,7 @@ __attribute__((section(".boot_hdr.dcd_data")))
 
 const uint8_t g_dcd_data[] =
 {
-  /* 0000 */ dcd_tag_header,
+  /* 0000 */ DCD_TAG_HEADER,
   0x04,
   0x30,
   0x41,
