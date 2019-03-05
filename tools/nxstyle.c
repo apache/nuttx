@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/nxstyle.c
  *
- *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,6 +186,8 @@ int main(int argc, char **argv, char **envp)
   comment_lineno = -1;    /* Line on which the last one line comment was closed */
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
+
+  /* Process each line in the input stream */
 
   while (fgets(line, LINE_SIZE, instream))
     {
@@ -512,7 +514,8 @@ int main(int argc, char **argv, char **envp)
         }
       else if (strncmp(&line[indent], "switch(", 7) == 0)
         {
-          fprintf(stderr, "Missing whitespace after keyword at line %d:%d\n", lineno, n);
+          fprintf(stderr, "Missing whitespace after keyword at line %d:%d\n",
+                  lineno, n);
           bswitch = true;
         }
 
@@ -523,6 +526,42 @@ int main(int argc, char **argv, char **envp)
 
       for (; line[n] != '\n' && line[n] != '\0'; n++)
         {
+          /* Skip over indentifiers */
+
+          if (ncomment == 0 && !bstring && (line[n] == '_' || isalpha(line[n])))
+            {
+              bool have_upper = false;
+              bool have_lower = false;
+              int ident_index = n;
+
+              /* Parse over the identifier.  Check if it contains mixed upper-
+               * and lower-case characters.
+               */
+
+              do
+                {
+                  have_upper |= isupper(line[n]);
+                  have_lower |= islower(line[n]);
+                  n++;
+                }
+              while (line[n] == '_' || isalnum(line[n]));
+
+              if (have_upper && have_lower)
+                {
+                  fprintf(stderr, "Mixed case identifier found at line %d:%d\n",
+                          lineno, ident_index);
+                }
+
+              /* Check if the identifier is the last thing on the line */
+
+              if (line[n] == '\n' || line[n] == '\0')
+                {
+                  break;
+                }
+            }
+
+          /* Handle comments */
+
           if (line[n] == '/' && !bstring)
             {
               /* Check for start of a C comment */
