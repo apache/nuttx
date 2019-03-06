@@ -39,7 +39,7 @@
  * 0x20000000 bank0 first and 8KB at 0x20002000 at bank0 second. And 16KB
  * at 0x20004000 on bank1.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64KB of
+ * For MPU support, the kernel-mode NuttX section is assumed to be 128KB of
  * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
  * also configs/open1788/scripts/kernel-space.ld).
  *
@@ -80,15 +80,15 @@ MEMORY
 {
     /* 256Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 64K
-    uflash (rx)      : ORIGIN = 0x00010000, LENGTH = 64K
-    xflash (rx)      : ORIGIN = 0x00010000, LENGTH = 384K
+    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 128K
+    xflash (rx)      : ORIGIN = 0x00020000, LENGTH = 128K /* Wasted */
+    uflash (rx)      : ORIGIN = 0x00040000, LENGTH = 256K
 
     /* 64Kb of SRAM in the CPU block */
 
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K
+    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K   /* May include waste */
     usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 4K
-    xsram (rwx)      : ORIGIN = 0x10001000, LENGTH = 56K
+    xsram (rwx)      : ORIGIN = 0x10002000, LENGTH = 24K  /* All used as heap */
 
     /* Other peripheral memory (free, nothing is linked here) */
 
