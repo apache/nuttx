@@ -473,7 +473,49 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             }
         }
         break;
+
+      /* CMD:           BOARDIOC_NXTERM_REDRAW
+       * DESCRIPTION:   Re-draw a portion of the NX console.  This function
+       *                should be called from the appropriate window callback
+       *                logic.
+       * ARG:           A reference readable instance of struct
+       *                boardioc_nxterm_redraw_s
+       * CONFIGURATION: CONFIG_NXTERM
+       * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
+       */
+
+       case BOARDIOC_NXTERM_REDRAW:
+         {
+           FAR struct boardioc_nxterm_redraw_s *redraw =
+             (FAR struct boardioc_nxterm_redraw_s *)((uintptr_t)arg);
+
+           nxterm_redraw(redraw->handle, &redraw->rect, redraw->more);
+           ret = OK;
+         }
+         break;
+
+      /* CMD:           BOARDIOC_NXTERM_KBDIN
+       * DESCRIPTION:   Provide NxTerm keyboard input to NX.
+       * ARG:           A reference readable instance of struct
+       *                boardioc_nxterm_kbdin_s
+       * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
+       * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
+       */
+
+       case BOARDIOC_NXTERM_KBDIN:
+         {
+#ifdef CONFIG_NXTERM_NXKBDIN
+           FAR struct boardioc_nxterm_kbdin_s *kbdin =
+             (FAR struct boardioc_nxterm_kbdin_s *)((uintptr_t)arg);
+
+           nxterm_kbdin(kbdin->handle, kbdin-buffer, kbdin->buflen);
+           ret = OK;
+#else
+           ret = -ENOSYS;
 #endif
+         }
+         break;
+#endif /* CONFIG_NXTERM */
 
 #ifdef CONFIG_BOARDCTL_TESTSET
       /* CMD:           BOARDIOC_TESTSET

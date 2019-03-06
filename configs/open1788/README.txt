@@ -405,9 +405,8 @@ Configuration Directories
     STATUS:
       2019-03-06:  This configuration was created.  It doew not yet link
         correctly, however, because certain nxterm interfaces are improperly
-        exported: nxterm_redraw() and nxterm_kbdin().  I am thinking that
-        these might be moved into libc/libnx with a little repartitioning
-        effort.
+        exported: nxterm_redraw() and nxterm_kbdin().  There were replaced
+        with boardctl() calls but have not yet been verified.
 
   nsh
   ---
