@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nxterm.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,6 +221,10 @@ extern "C"
  *   Register a console device on a raw NX window.  The device will be
  *   registered at /dev/nxtermN where N is the provided minor number.
  *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.  Application access is supported only indirectly via
+ *   the boardctl(BOARDIOC_NXTERM) interface.
+ *
  * Input Parameters:
  *   hwnd - A handle that will be used to access the window.  The window must
  *     persist and this handle must be valid for the life of the NX console.
@@ -244,6 +248,10 @@ NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo,
  *   Register a console device on a framed NX window.  The device will be
  *   registered at /dev/nxtermN where N is the provided minor number.
  *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.  Application access is supported only indirectly via
+ *   the boardctl(BOARDIOC_NXTERM) interface.
+ *
  * Input Parameters:
  *   hfwnd - A handle that will be used to access the window.  The window must
  *     persist and this handle must be valid for the life of the NX console.
@@ -266,7 +274,12 @@ NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
  * Description:
  *   Register a console device on a toolbar of a framed NX window.  The
  *   device will be registered at /dev/nxtermN where N is the provided minor
- *   number.
+ *   number.  Application access is supported only indirectly via
+ *   the boardctl(BOARDIOC_NXTERM) interface.
+ *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.  Application access is supported only indirectly via
+ *   the boardctl(BOARDIOC_NXTERM) interface.
  *
  * Input Parameters:
  *   hfwnd - A handle that will be used to access the toolbar.  The toolbar
@@ -291,6 +304,9 @@ NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
  * Description:
  *   Un-register to NX console device.
  *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.
+ *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
  *     nxtool_register.
@@ -308,6 +324,9 @@ void nxterm_unregister(NXTERM handle);
  * Description:
  *   Re-draw a portion of the NX console.  This function should be called
  *   from the appropriate window callback logic.
+ *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
@@ -338,6 +357,9 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
  *  receive its input from stdin (/dev/console).  This works great but
  *  cannot be shared between different windows.  Chaos will ensue if you
  *  try to support multiple NxTerm windows without CONFIG_NXTERM_NXKBDIN
+ *
+ *   This is an internal NuttX interface and should not be called directly
+ *   from applications.
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or

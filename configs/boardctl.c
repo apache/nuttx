@@ -424,6 +424,57 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_NXTERM
+      /* CMD:           BOARDIOC_NXTERM
+       * DESCRIPTION:   Create an NX terminal device
+       * ARG:           A reference readable/writable instance of struct
+       *                boardioc_nxterm_create_s
+       * CONFIGURATION: CONFIG_NXTERM
+       * DEPENDENCIES:  Base NX terminal logic provides nx_register() and
+       *                nxtk_register()
+       */
+
+      case BOARDIOC_NXTERM:
+        {
+          FAR struct boardioc_nxterm_create_s *nxterm =
+            (FAR struct boardioc_nxterm_create_s *)arg;
+
+          if (nxterm == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else if (nxterm->type == BOARDIOC_XTERM_RAW)
+            {
+              nxterm->nxterm = nx_register((NXWINDOW)nxterm->hwnd,
+                                           &nxterm->wndo,
+                                           (int)nxterm->minor);
+
+              ret = nxterm->nxterm == NULL ? -ENODEV : OK;
+            }
+          else if (nxterm->type == BOARDIOC_XTERM_FRAMED)
+            {
+              nxterm->nxterm = nxtk_register((NXTKWINDOW)nxterm->hwnd,
+                                             &nxterm->wndo,
+                                             (int)nxterm->minor);
+
+              ret = nxterm->nxterm == NULL ? -ENODEV : OK;
+            }
+          else if (nxterm->type == BOARDIOC_XTERM_TOOLBAR)
+            {
+              nxterm->nxterm = nxtool_register((NXTKWINDOW)nxterm->hwnd,
+                                               &nxterm->wndo,
+                                               (int)nxterm->minor);
+
+              ret = nxterm->nxterm == NULL ? -ENODEV : OK;
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_TESTSET
       /* CMD:           BOARDIOC_TESTSET
        * DESCRIPTION:   Access architecture-specific up_testset() operation
