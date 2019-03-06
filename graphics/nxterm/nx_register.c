@@ -49,18 +49,18 @@
  ****************************************************************************/
 
 static int nxterm_fill(FAR struct nxterm_state_s *priv,
-                      FAR const struct nxgl_rect_s *rect,
-                      nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
+                       FAR const struct nxgl_rect_s *rect,
+                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
 #ifndef CONFIG_NX_WRITEONLY
 static int nxterm_move(FAR struct nxterm_state_s *priv,
-                      FAR const struct nxgl_rect_s *rect,
-                      FAR const struct nxgl_point_s *offset);
+                       FAR const struct nxgl_rect_s *rect,
+                       FAR const struct nxgl_point_s *offset);
 #endif
 static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
-                        FAR const struct nxgl_rect_s *dest,
-                        FAR const void *src[CONFIG_NX_NPLANES],
-                        FAR const struct nxgl_point_s *origin,
-                        unsigned int stride);
+                         FAR const struct nxgl_rect_s *dest,
+                         FAR const void *src[CONFIG_NX_NPLANES],
+                         FAR const struct nxgl_point_s *origin,
+                         unsigned int stride);
 
 /****************************************************************************
  * Private Data
@@ -96,8 +96,8 @@ static const struct nxterm_operations_s g_nxops =
  ****************************************************************************/
 
 static int nxterm_fill(FAR struct nxterm_state_s *priv,
-                      FAR const struct nxgl_rect_s *rect,
-                      nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES])
+                       FAR const struct nxgl_rect_s *rect,
+                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES])
 {
   return nx_fill((NXWINDOW)priv->handle, rect, wcolor);
 }
@@ -121,8 +121,8 @@ static int nxterm_fill(FAR struct nxterm_state_s *priv,
 
 #ifndef CONFIG_NX_WRITEONLY
 static int nxterm_move(FAR struct nxterm_state_s *priv,
-              FAR const struct nxgl_rect_s *rect,
-              FAR const struct nxgl_point_s *offset)
+                       FAR const struct nxgl_rect_s *rect,
+                       FAR const struct nxgl_point_s *offset)
 {
   return nx_move((NXWINDOW)priv->handle, rect, offset);
 }
@@ -152,10 +152,10 @@ static int nxterm_move(FAR struct nxterm_state_s *priv,
  ****************************************************************************/
 
 static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
-                        FAR const struct nxgl_rect_s *dest,
-                        FAR const void *src[CONFIG_NX_NPLANES],
-                        FAR const struct nxgl_point_s *origin,
-                        unsigned int stride)
+                         FAR const struct nxgl_rect_s *dest,
+                         FAR const void *src[CONFIG_NX_NPLANES],
+                         FAR const struct nxgl_point_s *origin,
+                         unsigned int stride)
 {
   return nx_bitmap((NXWINDOW)priv->handle, dest, src, origin, stride);
 }
