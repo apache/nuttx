@@ -66,6 +66,18 @@
  * The SysTick calibration value is fixed to 18750, which gives a reference
  * time base of 1 ms with the SysTick clock set to 18.75 MHz (HCLK/8, with
  * HCLK set to 150 MHz).
+ *
+ * REVISIT:  Per ES0392 Rev 4: STM32H743xI Errata sheet STM32H743xI device
+ * limitations
+ *
+ *   SysTick external clock is not HCLK/8
+ *   Description
+ *     The SysTick external clock is the system clock, instead of the system
+ *     clock divided by 8 (HCLK/8).
+ *   Workaround
+ *     Use the system clock (HCLK) as external clock and multiply the reload
+ *     value by 8 in STK_LOAD register (take care that the maximum value is
+ *     224-1).
  */
 
 #undef CONFIG_STM32H7_SYSTICK_HCLKd8
