@@ -2486,8 +2486,8 @@ o Graphics Subsystem (graphics/)
                Within the OS, NxTK currently used only in graphics/nxterm.  With
                some effort, I think NxTerm could be moved to apps/ as well.
 
-               Currently, nxterm violates POSIX interface.  nxtk_register() and
-               nx_register() called from application.  see apps/examples/nxterm
+               Currently, nxterm violates POSIX interface.  nxterm_redraw() and
+               nxterm_kbdin() are called from applications.  see apps/examples/nxterm
                and apps/graphics/NxWidgets/nxwm./src/cnxterm.cxx.
 
   Status:      Open

@@ -37,8 +37,11 @@ ifeq ($(CONFIG_NXTERM),y)
 
 CSRCS += nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c
 CSRCS += nxterm_redraw.c nxterm_register.c nxterm_scroll.c
-CSRCS += nxterm_vt100.c nxterm_unregister.c nxtk_register.c
-CSRCS += nxtool_register.c
+CSRCS += nxterm_vt100.c nxtk_register.c nxtool_register.c
+
+ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
+CSRCS += nxterm_unregister.c
+endif
 
 ifeq ($(CONFIG_NXTERM_NXKBDIN),y)
 CSRCS += nxterm_kbdin.c

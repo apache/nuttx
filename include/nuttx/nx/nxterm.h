@@ -299,26 +299,6 @@ NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
                        int minor);
 
 /****************************************************************************
- * Name: nxterm_unregister
- *
- * Description:
- *   Un-register to NX console device.
- *
- *   This is an internal NuttX interface and should not be called directly
- *   from applications.
- *
- * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxterm_unregister(NXTERM handle);
-
-/****************************************************************************
  * Name: nxterm_redraw
  *
  * Description:

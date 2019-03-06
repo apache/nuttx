@@ -50,6 +50,8 @@
 
 #include "nxterm.h"
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,27 +60,24 @@
  * Name: nxterm_unregister
  *
  * Description:
- *   Un-register to NX console device.
+ *   Un-register an NX console device.
  *
  * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
+ *   priv - NxTerm private state structure instance.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxterm_unregister(NXTERM handle)
+void nxterm_unregister(FAR struct nxterm_state_s *priv)
 {
-  FAR struct nxterm_state_s *priv;
   char devname[NX_DEVNAME_SIZE];
 
-  DEBUGASSERT(handle);
+  DEBUGASSERT(priv != NULL);
 
-  /* Get the reference to the driver structure from the handle */
+  /* Destroy semaphores */
 
-  priv = (FAR struct nxterm_state_s *)handle;
   nxsem_destroy(&priv->exclsem);
 #ifdef CONFIG_NXTERM_NXKBDIN
   nxsem_destroy(&priv->waitsem);
@@ -95,5 +94,7 @@ void nxterm_unregister(NXTERM handle)
 
   /* Free the private data structure */
 
-  kmm_free(handle);
+  kmm_free(priv);
 }
+
+#endif /* !CONFIG_DISABLE_PSEUDOFS_OPERATIONS */

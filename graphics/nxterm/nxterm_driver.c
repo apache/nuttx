@@ -56,8 +56,12 @@
  ****************************************************************************/
 
 static int     nxterm_open(FAR struct file *filep);
+static int     nxterm_close(FAR struct file *filep);
 static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     nxterm_unlink(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -70,14 +74,18 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 const struct file_operations g_nxterm_drvrops =
 {
   nxterm_open,  /* open */
-  0,           /* close */
+  nxterm_close, /* close */
   nxterm_read,  /* read */
   nxterm_write, /* write */
-  0,           /* seek */
-  0            /* ioctl */
+  0,            /* seek */
+  0             /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   ,
   nxterm_poll   /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  ,
+  nxterm_unlink /* unlink */
 #endif
 };
 
@@ -86,14 +94,18 @@ const struct file_operations g_nxterm_drvrops =
 const struct file_operations g_nxterm_drvrops =
 {
   nxterm_open,  /* open */
-  0,           /* close */
-  0,           /* read */
+  nxterm_close, /* close */
+  0,            /* read */
   nxterm_write, /* write */
-  0,           /* seek */
-  0            /* ioctl */
+  0,            /* seek */
+  0             /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   ,
-  0            /* poll */
+  0             /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  ,
+  nxterm_unlink /* unlink */
 #endif
 };
 
@@ -130,9 +142,63 @@ static int nxterm_open(FAR struct file *filep)
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  /* Increment the count of open file references */
+
+  DEBUGASSERT(priv->orefs != UINT8_MAX);
+  priv->orefs++;
+#endif
+
   /* Assign the driver structure to the file */
 
   filep->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxterm_close
+ ****************************************************************************/
+
+static int nxterm_close(FAR struct file *filep)
+{
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  FAR struct nxterm_state_s *priv;
+  int ret;
+
+  /* Recover our private state structure */
+
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
+  priv = (FAR struct nxterm_state_s *)filep->f_priv;
+
+  /* Get exclusive access */
+
+  ret = nxterm_semwait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Has the driver been unlinked?  Was this the last open refernce to the
+   * terminal driver?
+   */
+
+  DEBUGASSERT(priv->orefs > 0);
+  if (priv->unlinked && priv->orefs <= 1)
+    {
+      /* Yes.. Unregister the terminal device */
+
+      nxterm_unregister(priv);
+    }
+  else
+    {
+      /* No.. Just decrement the count of open file references */
+
+      priv->orefs--;
+    }
+
+  nxterm_sempost(priv);
+#endif
+
   return OK;
 }
 
@@ -151,7 +217,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Recover our private state structure */
 
-  DEBUGASSERT(filep && filep->f_priv);
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL);
   priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access */
@@ -247,6 +313,49 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
   nxterm_sempost(priv);
   return (ssize_t)buflen;
 }
+
+/****************************************************************************
+ * Name: nxterm_unlink
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int nxterm_unlink(FAR struct inode *inode)
+{
+  FAR struct nxterm_state_s *priv;
+  int ret;
+
+  DEBUGASSERT(inode != NULLL && inode->i_private != NULL);
+  priv = inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = nxterm_semwait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Are there open references to the terminal driver? */
+
+  if (priv->orefs > 0)
+    {
+      /* Yes.. Just mark the driver unlinked.  Resources will be cleaned up
+       * when the final reference is close.
+       */
+
+      priv->unlinked = true;
+    }
+  else
+    {
+      /* No.. Unregister the terminal device now */
+
+      nxterm_unregister(priv);
+    }
+
+  nxterm_sempost(priv);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
