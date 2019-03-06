@@ -324,7 +324,7 @@ static int nxterm_unlink(FAR struct inode *inode)
   FAR struct nxterm_state_s *priv;
   int ret;
 
-  DEBUGASSERT(inode != NULLL && inode->i_private != NULL);
+  DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = inode->i_private;
 
   /* Get exclusive access */

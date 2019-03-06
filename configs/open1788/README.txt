@@ -394,6 +394,21 @@ Configuration Directories
        If you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
+  knxterm
+  -------
+
+    This is another protected mode build.  This configuration was used to
+    verify that NxTerms can be used in protected mode.  See the knsh
+    configuration notes for instructions on building and loading this
+    configuration.
+
+    STATUS:
+      2019-03-06:  This configuration was created.  It doew not yet link
+        correctly, however, because certain nxterm interfaces are improperly
+        exported: nxterm_redraw() and nxterm_kbdin().  I am thinking that
+        these might be moved into libc/libnx with a little repartitioning
+        effort.
+
   nsh
   ---
     Configures the NuttShell (nsh) located at examples/nsh.  The
