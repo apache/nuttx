@@ -63,7 +63,8 @@
 
 FAR struct nxterm_state_s *
   nxterm_register(NXTERM handle, FAR struct nxterm_window_s *wndo,
-                 FAR const struct nxterm_operations_s *ops, int minor)
+                  FAR struct nxgl_size_s *wsize,
+                  FAR const struct nxterm_operations_s *ops, int minor)
 {
   FAR struct nxterm_state_s *priv;
   FAR const struct nx_font_s *fontset;
@@ -87,7 +88,9 @@ FAR struct nxterm_state_s *
   priv->ops     = ops;
   priv->handle  = handle;
   priv->minor   = minor;
+
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
+  memcpy(&priv->wsize, wsize, sizeof(struct nxgl_size_s));
 
   nxsem_init(&priv->exclsem, 0, 1);
 #ifdef CONFIG_DEBUG_FEATURES

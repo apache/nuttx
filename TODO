@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 4, 2019)
+NuttX TODO List (Last updated March 7, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -16,7 +16,7 @@ nuttx/:
   (5)  Signals (sched/signal, arch/)
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
- (10)  Kernel/Protected Build
+  (9)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (18)  Network (net/, drivers/net)
@@ -938,15 +938,6 @@ o Kernel/Protected Build
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
-
-  Title:       NxTERM PARTITIONING.
-  Description: NxTerm is implemented (correctly) as a driver that resides
-               in the nuttx/ directory.  However, the user interfaces must be
-               moved into a NuttX library or into apps/.  Currently
-               applications calls to the NxTerm user interfaces are
-               undefined in the Kernel/Protected builds.
-  Status:      Open
-  Priority:    Medium
 
   Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
@@ -2479,14 +2470,15 @@ o Graphics Subsystem (graphics/)
                depth.  If such a beast ever shows up, then this priority would be
                higher.
 
-  Title:       RE-PARITITION NxTK AND NxTERM
-  Description: NxTK should not be a part of OS.  Move NxTK from nuttx/libs/libnx
-               to apps/graphics.  Then, later, convert NxTK to a C++ class.
-
-               Within the OS, NxTK currently used only in graphics/nxterm.  With
-               some effort, I think NxTerm could be moved to apps/ as well.
+  Title:       NXTERM BROKEN?
+  Description: Has NxTerm been broken.  Testing with the open1788/knxterm configuration
+               I am seeing some bad behaviors after scrolling.  Everything looks good
+               until the first call to nxterm_scroll().  After that, some characters
+               are missing on the display (replaced with spaced).
+               NOTE: This may be an issue only with the Open1788 configuration(?)
   Status:      Open
-  Priority:    Low
+  Priority:    Medium
+
 o Build system
   ^^^^^^^^^^^^
 

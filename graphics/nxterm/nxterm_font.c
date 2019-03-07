@@ -83,6 +83,59 @@ static int nxterm_fontsize(FAR struct nxterm_state_s *priv, uint8_t ch,
 }
 
 /****************************************************************************
+ * Name: nxterm_fillspace
+ ****************************************************************************/
+
+static void nxterm_fillspace(FAR struct nxterm_state_s *priv,
+                             FAR const struct nxgl_rect_s *rect,
+                             FAR const struct nxterm_bitmap_s *bm)
+{
+#if 0 /* Not necessary */
+  struct nxgl_rect_s bounds;
+  struct nxgl_rect_s intersection;
+  int ret;
+
+  /* Construct a bounding box for the glyph */
+
+  bounds.pt1.x = bm->pos.x;
+  bounds.pt1.y = bm->pos.y;
+  bounds.pt2.x = bm->pos.x + priv->spwidth - 1;
+  bounds.pt2.y = bm->pos.y + priv->fheight - 1;
+
+# /* Should this also be clipped to a region in the window? */
+
+  if (rect != NULL)
+    {
+      /* Get the intersection of the redraw region and the character bitmap */
+
+      nxgl_rectintersect(&intersection, rect, &bounds);
+    }
+  else
+    {
+      /* The intersection is the whole glyph */
+
+      nxgl_rectcopy(&intersection, &bounds);
+    }
+
+  /* Check for empty intersections */
+
+  if (!nxgl_nullrect(&intersection))
+    {
+      /* Fill the bitmap region with the background color, erasing the
+       * character from the display.  NOTE:  This region might actually
+       * be obscured... NX will handle that case.
+       */
+
+      ret = priv->ops->fill(priv, &intersection, priv->wndo.wcolor);
+      if (ret < 0)
+        {
+          gerr("ERROR: fill() method failed: %d\n", ret);
+        }
+    }
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -150,7 +203,7 @@ nxterm_addchar(FAR struct nxterm_state_s *priv, uint8_t ch)
  ****************************************************************************/
 
 int nxterm_hidechar(FAR struct nxterm_state_s *priv,
-                   FAR const struct nxterm_bitmap_s *bm)
+                    FAR const struct nxterm_bitmap_s *bm)
 {
   struct nxgl_rect_s bounds;
   struct nxgl_size_s fsize;
@@ -285,6 +338,7 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
 
   if (BM_ISSPACE(bm))
     {
+      nxterm_fillspace(priv, rect, bm);
       return;
     }
 
@@ -311,7 +365,7 @@ void nxterm_fillchar(FAR struct nxterm_state_s *priv,
 
   /* Should this also be clipped to a region in the window? */
 
-  if (rect)
+  if (rect != NULL)
     {
       /* Get the intersection of the redraw region and the character bitmap */
 

@@ -48,6 +48,10 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: nxterm_putc
  *
  * Description:
@@ -77,7 +81,7 @@ void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch)
 
   /* Will another character fit on this line? */
 
-  if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
+  if (priv->fpos.x + priv->fwidth > priv->wsize.w)
     {
 #ifndef CONFIG_NXTERM_NOWRAP
       /* No.. move to the next line */
@@ -113,7 +117,7 @@ void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch)
   /* Check if we need to scroll up */
 
   lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
-  while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
+  while (priv->fpos.y >= priv->wsize.h - lineheight)
     {
       nxterm_scroll(priv, lineheight);
     }
@@ -143,7 +147,7 @@ void nxterm_showcursor(FAR struct nxterm_state_s *priv)
 
   /* Will another character fit on this line? */
 
-  if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
+  if (priv->fpos.x + priv->fwidth > priv->wsize.w)
     {
 #ifndef CONFIG_NXTERM_NOWRAP
       /* No.. move to the next line */
@@ -157,7 +161,7 @@ void nxterm_showcursor(FAR struct nxterm_state_s *priv)
   /* Check if we need to scroll up */
 
   lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
-  while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
+  while (priv->fpos.y >= priv->wsize.h - lineheight)
     {
       nxterm_scroll(priv, lineheight);
     }

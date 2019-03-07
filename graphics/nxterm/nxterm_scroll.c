@@ -85,7 +85,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
    */
 
   rect.pt1.x = 0;
-  rect.pt2.x = priv->wndo.wsize.w - 1;
+  rect.pt2.x = priv->wsize.w - 1;
 
   for (row = CONFIG_NXTERM_LINESEPARATION; row < bottom; row += scrollheight)
     {
@@ -107,7 +107,8 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
       for (i = 0; i < priv->nchars; i++)
         {
           bm = &priv->bm[i];
-          if (bm->pos.y <= rect.pt2.y && bm->pos.y + priv->fheight >= rect.pt1.y)
+          if (bm->pos.y <= rect.pt2.y &&
+              bm->pos.y + priv->fheight >= rect.pt1.y)
             {
               nxterm_fillchar(priv, &rect, bm);
             }
@@ -117,7 +118,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   /* Finally, clear the vacated part of the display */
 
   rect.pt1.y = bottom;
-  rect.pt2.y = priv->wndo.wsize.h - 1;
+  rect.pt2.y = priv->wsize.h - 1;
 
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
@@ -145,8 +146,8 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
 
   rect.pt1.x = 0;
   rect.pt1.y = scrollheight;
-  rect.pt2.x = priv->wndo.wsize.w - 1;
-  rect.pt2.y = priv->wndo.wsize.h - 1;
+  rect.pt2.x = priv->wsize.w - 1;
+  rect.pt2.y = priv->wsize.h - 1;
 
   /* The offset that determines how far to move the source rectangle */
 
@@ -163,7 +164,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
 
   /* Finally, clear the vacated bottom part of the display */
 
-  rect.pt1.y = priv->wndo.wsize.h - scrollheight;
+  rect.pt1.y = priv->wsize.h - scrollheight;
 
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
@@ -198,9 +199,9 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
         {
           /* Yes... Delete the character by moving all of the data */
 
-          for (j = i; j < priv->nchars-1; j++)
+          for (j = i; j < priv->nchars - 1; j++)
             {
-              memcpy(&priv->bm[j], &priv->bm[j+1],
+              memcpy(&priv->bm[j], &priv->bm[j + 1],
                      sizeof(struct nxterm_bitmap_s));
             }
 
@@ -209,6 +210,8 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
            */
 
           priv->nchars--;
+          priv->bm[priv->nchars].code  = ' ';
+          priv->bm[priv->nchars].flags = BMFLAGS_NOGLYPH;
         }
 
       /* No.. just decrement its vertical position (moving it "up" the

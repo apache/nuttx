@@ -39,9 +39,11 @@
  * 0x20000000 bank0 first and 8KB at 0x20002000 at bank0 second. And 16KB
  * at 0x20004000 on bank1.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 128KB of
+ * For MPU support, the kernel-mode NuttX section is assumed to be 256KB of
  * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).
+ * also configs/open1788/scripts/kernel-space.ld); 256KB is probably much
+ * more than is needed by the RTOS!  That size is selected only because it
+ * is available due to alignment issues for the user space FLASH memory.
  *
  * Alignment of the user space FLASH partition is a critical factor: The
  * user space FLASH partition will be spanned with a single region of size
@@ -80,8 +82,7 @@ MEMORY
 {
     /* 256Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 128K
-    xflash (rx)      : ORIGIN = 0x00020000, LENGTH = 128K /* Wasted */
+    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 256K /* More than needed */
     uflash (rx)      : ORIGIN = 0x00040000, LENGTH = 256K
 
     /* 64Kb of SRAM in the CPU block */

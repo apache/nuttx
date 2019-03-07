@@ -161,6 +161,24 @@ static int nxtool_bitmap(FAR struct nxterm_state_s *priv,
 }
 
 /****************************************************************************
+ * Name: nxterm_toolbar_size
+ *
+ * Description:
+ *   Get the current size of the toolbar.
+ *
+ ****************************************************************************/
+
+static void nxterm_toolbar_size(NXTKWINDOW hfwnd,
+                                FAR struct nxgl_size_s *size)
+{
+  FAR struct nxgl_rect_s bounds;
+
+  (void)nxtk_toolbarbounds(hfwnd, &bounds);
+  size->w = bounds.pt2.x - bounds.pt1.x + 1;
+  size->h = bounds.pt2.y - bounds.pt1.y + 1;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -186,6 +204,9 @@ static int nxtool_bitmap(FAR struct nxterm_state_s *priv,
 
 NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo, int minor)
 {
-  return nxterm_register((NXTERM)hfwnd, wndo, &g_nxtoolops, minor);
+  FAR struct nxgl_size_s tbsize;
+
+  nxterm_toolbar_size(hfwnd, &tbsize);
+  return nxterm_register((NXTERM)hfwnd, wndo, &tbsize, &g_nxtoolops, minor);
 }
 

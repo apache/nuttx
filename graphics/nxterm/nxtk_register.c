@@ -161,6 +161,22 @@ static int nxtkcon_bitmap(FAR struct nxterm_state_s *priv,
 }
 
 /****************************************************************************
+ * Name: nxterm_tbheight
+ *
+ * Description:
+ *   Get the current height of the toolbar.
+ *
+ ****************************************************************************/
+
+static nxgl_coord_t nxterm_tbheight(NXTKWINDOW hfwnd)
+{
+  FAR struct nxgl_rect_s bounds;
+
+  (void)nxtk_toolbarbounds(hfwnd, &bounds);
+  return bounds.pt2.y - bounds.pt1.y + 1;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -182,7 +198,16 @@ static int nxtkcon_bitmap(FAR struct nxterm_state_s *priv,
  *
  ****************************************************************************/
 
-NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo, int minor)
+NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
+                     int minor)
 {
-  return nxterm_register((NXTERM)hfwnd, wndo, &g_nxtkops, minor);
+  struct nxgl_size_s wsize;
+
+  /* REVISIT:  What if the window or toolbar size changes? */
+
+  wsize.w = wndo->wsize.w - 2 * CONFIG_NXTK_BORDERWIDTH;
+  wsize.h = wndo->wsize.h - nxterm_tbheight(hfwnd) -
+            2 * CONFIG_NXTK_BORDERWIDTH;
+
+  return nxterm_register((NXTERM)hfwnd, wndo, &wsize, &g_nxtkops, minor);
 }

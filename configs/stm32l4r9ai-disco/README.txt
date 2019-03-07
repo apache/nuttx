@@ -1,4 +1,3 @@
-XXX all this needs review and update
 README
 ======
 
@@ -47,10 +46,9 @@ Contents
   - Hardware
     - Button
     - LED
-    - USARTs and Serial Consoles
+    - U[S]ARTs and Serial Consoles
+  - Segger J-Link
   - LQFP64
-  - mbed
-  - Shields
   - Configurations
 
 mbed
@@ -106,8 +104,8 @@ Hardware
   running normally. If LD2 is flashing at approximately 2Hz, then a fatal error
   has been detected and the system has halted.
 
-Serial Consoles
-===============
+  U[S]ARTs and Serial Consoles
+  ----------------------------
 
   USART1
   ------
@@ -223,6 +221,21 @@ Serial Consoles
   -------
   As shipped, SB62 and SB63 are open and SB13 and SB14 closed, so the
   virtual COM port is enabled.
+
+Segger J-Link
+=============
+
+  Reference: https://www.segger.com/downloads/application-notes/AN00021
+
+  1. Connect J-Link VTref     (1) to pin VDD
+  2. Connect J-Link SWDIO     (7) to pin PA13
+  3. Connect J-Link SWCLK     (9) to pin PA14
+  4. Connect J-Link SWO      (13) to pin PB3
+  5. Connect J-Link RESET    (15) to pin NRST
+  6. Connect J-Link 5V-Supply (1) to pin 5V
+  7. Connect J-Link GND       (4) to pin GND
+
+  Jumpers on CN4 (ST-Link) must be removed for external debug.
 
 Configurations
 ==============

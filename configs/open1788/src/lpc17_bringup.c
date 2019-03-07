@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
@@ -377,6 +378,16 @@ static int nsh_usbhostinitialize(void)
 int open1788_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system at the default location, /proc */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs: %d\n", ret);
+    }
+#endif
 
   /* Initialize SPI-based microSD */
 

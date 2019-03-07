@@ -402,11 +402,13 @@ Configuration Directories
     configuration notes for instructions on building and loading this
     configuration.
 
-    STATUS:
-      2019-03-06:  This configuration was created.  It doew not yet link
-        correctly, however, because certain nxterm interfaces are improperly
-        exported: nxterm_redraw() and nxterm_kbdin().  There were replaced
-        with boardctl() calls but have not yet been verified.
+    This is a very minimal configuration intended only for low level testing.
+    To be useful, the font sizes, windows sizes, and line widths would need
+    to be optimized to make a friendlier display.
+
+    STATUS:  2019-03-08:  Currently I am seeing a problem.  The display looks
+      good until it begins scrolling when the display is full.  Then there are
+      missing characters.
 
   nsh
   ---
