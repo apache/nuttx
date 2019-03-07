@@ -860,7 +860,7 @@ static ssize_t mpu_write(FAR struct file *filep, FAR const char *buf,
 
   UNUSED(inode);
   UNUSED(dev);
-  snerr("%s: %p %p %d\n", __FUNCTION__, inode, dev, len);
+  snerr("ERROR: %p %p %d\n", inode, dev, len);
 
   return len;
 }
@@ -877,7 +877,7 @@ static off_t mpu_seek(FAR struct file *filep, off_t offset, int whence)
   UNUSED(inode);
   UNUSED(dev);
 
-  snerr("%s: %p %p\n", __FUNCTION__, inode, dev);
+  snerr("ERROR: %p %p\n", inode, dev);
 
   return 0;
 }
@@ -894,10 +894,16 @@ static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   UNUSED(inode);
   UNUSED(dev);
 
-  snerr("%s: %p %p\n", __FUNCTION__, inode, dev);
+  snerr("ERROR: %p %p\n", inode, dev);
 
-  return -EINVAL;
+  /* ENOTTY is the standard return if an IOCTL command is not supported. */
+
+  return -ENOTTY;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: mpu60x0_register
