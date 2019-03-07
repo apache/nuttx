@@ -227,13 +227,13 @@ Segger J-Link
 
   Reference: https://www.segger.com/downloads/application-notes/AN00021
 
-  1. Connect J-Link VTref     (1) to pin VDD
-  2. Connect J-Link SWDIO     (7) to pin PA13
-  3. Connect J-Link SWCLK     (9) to pin PA14
-  4. Connect J-Link SWO      (13) to pin PB3
-  5. Connect J-Link RESET    (15) to pin NRST
-  6. Connect J-Link 5V-Supply (1) to pin 5V
-  7. Connect J-Link GND       (4) to pin GND
+  1. Connect J-Link VTref      (1) to pin VDD
+  2. Connect J-Link SWDIO      (7) to pin PA13
+  3. Connect J-Link SWCLK      (9) to pin PA14
+  4. Connect J-Link SWO       (13) to pin PB3
+  5. Connect J-Link RESET     (15) to pin NRST
+  6. Connect J-Link 5V-Supply (19) to pin 5V
+  7. Connect J-Link GND        (4) to pin GND
 
   Jumpers on CN4 (ST-Link) must be removed for external debug.
 
