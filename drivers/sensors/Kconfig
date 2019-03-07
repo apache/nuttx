@@ -431,6 +431,48 @@ config SENSORS_ADXL372
 	---help---
 		Enable driver support for the Analog Devices ADXL372 Sensor.
 
+config SENSORS_MPU60X0
+       bool "Invensense MPU60x0 Sensor support"
+       default n
+       ---help---
+               Enable driver support for Invensense MPU60x0 MotionTracker(tm) device.
+
+if SENSORS_MPU60X0
+
+choice
+	prompt "MPU60x0 Interface"
+	default MPU60X0_SPI
+
+config MPU60X0_SPI
+	bool "MPU6000 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface (MPU6000 only)
+
+config MPU60X0_I2C
+	bool "MPU60x0 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface (MPU6000
+		or MPU6050, autodetected during driver initialization)
+
+endchoice
+
+config MPU60X0_EXTI
+	bool "Enable interrupts"
+	default n
+	---help---
+                Select this when the MPU60x0's INT pin is connected to an
+		interrupt line on the host processor, and identify the pin
+		during device registration. The driver will use interrupts to
+		manage FIFO-full and/or sample-ready events, depending on how
+		the device is being used. The interface will block until the
+		next sample is ready, which will naturally synchronize the user
+		to the sampling rate chosen during operation.
+		Default:  No interrupts or blocking, i.e. user-driven sampling.
+
+endif # SENSORS_MPU60X0
+
 config SENSORS_MAX44009
 	bool "Maxim MAX44009 ALS sensor"
 	default n

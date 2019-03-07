@@ -182,6 +182,7 @@ endif # CONFIG_I2C
 # These drivers depend on SPI support
 
 ifeq ($(CONFIG_SPI),y)
+
 ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
 endif
@@ -196,6 +197,10 @@ endif
 
 ifeq ($(CONFIG_LIS3DH),y)
   CSRCS += lis3dh.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MPU60X0),y)
+  CSRCS += mpu60x0.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
