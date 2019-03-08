@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_OMNIBUSF4
+
+config STM32_ROMFS
+	bool "Automount baked-in ROMFS image"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Select STM32_ROMFS_IMAGEFILE, STM32_ROMFS_DEV_MINOR, STM32_ROMFS_MOUNTPOINT
+
+config STM32_ROMFS_DEV_MINOR
+	int "Minor for the block device backing the data"
+	depends on STM32_ROMFS
+	default 64
+
+config STM32_ROMFS_MOUNTPOINT
+	string "Mountpoint of the custom romfs image"
+	depends on STM32_ROMFS
+	default "/rom"
+
+config STM32_ROMFS_IMAGEFILE
+	string "ROMFS image file to include into build"
+	depends on STM32_ROMFS
+	default "../../../rom.img"
+
+endif

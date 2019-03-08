@@ -529,6 +529,9 @@ configs/olimex-strp711
   further information.  STATUS: Configurations for the basic OS test and NSH
   are complete and verified.
 
+configs/omnibusf4
+  Flight controllers compatible with the OMINBUSF4 Betaflight target
+
 configs/or1k
   Generic OpenRISC board.
 

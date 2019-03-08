@@ -1360,6 +1360,13 @@ config ARCH_BOARD_STM32F334_DISCO
 	---help---
 		STMicro STM32F334-Discovery board based on the STMicro STM32F334C8T6 MCU.
 
+config ARCH_BOARD_OMNIBUSF4
+	bool "OMNIBUSF4 flight controller"
+	depends on ARCH_CHIP_STM32F405RG
+	select ARCH_HAVE_LEDS
+	---help---
+		Flight controllers compatible with the OMINBUSF4 Betaflight target
+
 config ARCH_BOARD_STM32F4_DISCOVERY
 	bool "STMicro STM32F4-Discovery board"
 	depends on ARCH_CHIP_STM32F407VG
@@ -1866,6 +1873,7 @@ config ARCH_BOARD
 	default "olimex-stm32-p407"        if ARCH_BOARD_OLIMEX_STM32P407
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
 	default "olimexino-stm32"          if ARCH_BOARD_OLIMEXINO_STM32
+	default "omnibusf4"                if ARCH_BOARD_OMNIBUSF4
 	default "open1788"                 if ARCH_BOARD_OPEN1788
 	default "or1k"                     if ARCH_BOARD_OR1K
 	default "p112"                     if ARCH_BOARD_P112
@@ -2254,6 +2262,9 @@ source "configs/olimex-strp711/Kconfig"
 endif
 if ARCH_BOARD_OLIMEXINO_STM32
 source "configs/olimexino-stm32/Kconfig"
+endif
+if ARCH_BOARD_OMNIBUSF4
+source "configs/omnibusf4/Kconfig"
 endif
 if ARCH_BOARD_OPEN1788
 source "configs/open1788/Kconfig"
