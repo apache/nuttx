@@ -406,3 +406,9 @@ Configurations
          CONFIG_NSH_USBDEV_TRACETRANSFERS=y
          CONFIG_NSH_USBDEV_TRACECONTROLLER=y
          CONFIG_NSH_USBDEV_TRACEINTERRUPTS=y
+
+  nxhello:
+  -------
+
+    A simple NSH example using apps/examples/nxhello, a very simply test of
+    basic NX functionality.
