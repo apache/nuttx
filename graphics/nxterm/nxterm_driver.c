@@ -294,6 +294,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
                   {
                     priv->seq[i-1] = priv->seq[i];
                   }
+
                 priv->nseq--;
 
                 /* Then loop again and check if what remains is part of a

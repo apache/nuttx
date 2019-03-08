@@ -1,7 +1,7 @@
 /****************************************************************************
  * libs/libnx/nxfonts/nxfonts_cache.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,7 +135,7 @@ static void nxf_list_lock(void)
 static inline void nxf_removecache(FAR struct nxfonts_fcache_s *fcache,
                                    FAR struct nxfonts_fcache_s *prev)
 {
-  /* Remove the cache for the list.  First check for removal from the head */
+  /* Remove the cache from the list.  First check for removal from the head */
 
   if (prev == NULL)
     {
@@ -288,7 +288,7 @@ static inline void nxf_addglyph(FAR struct nxfonts_fcache_s *priv,
  ****************************************************************************/
 
 static FAR struct nxfonts_glyph_s *
-nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
+  nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
 {
   FAR struct nxfonts_glyph_s *glyph;
   FAR struct nxfonts_glyph_s *prev;
@@ -333,6 +333,7 @@ nxf_findglyph(FAR struct nxfonts_fcache_s *priv, uint8_t ch)
            */
 
           nxf_removeglyph(priv, glyph, prev);
+          lib_free(glyph);
           return NULL;
         }
     }
@@ -517,8 +518,8 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
  ****************************************************************************/
 
 static inline FAR struct nxfonts_glyph_s *
-nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
-                FAR const struct nx_fontbitmap_s *fbm, uint8_t ch)
+  nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
+                  FAR const struct nx_fontbitmap_s *fbm, uint8_t ch)
 {
   FAR struct nxfonts_glyph_s *glyph = NULL;
   size_t bmsize;
@@ -592,8 +593,8 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
  ****************************************************************************/
 
 static FAR struct nxfonts_fcache_s *
-nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
-              nxgl_mxpixel_t bgcolor, int bpp)
+  nxf_findcache(enum nx_fontid_e fontid, nxgl_mxpixel_t fgcolor,
+                nxgl_mxpixel_t bgcolor, int bpp)
 {
   FAR struct nxfonts_fcache_s *fcache;
 
@@ -783,6 +784,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
 errout_with_fcache:
   lib_free(priv);
+
 errout_with_lock:
   nxf_list_unlock();
   set_errno(errcode);

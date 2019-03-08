@@ -406,11 +406,6 @@ Configuration Directories
     To be useful, the font sizes, windows sizes, and line widths would need
     to be optimized to make a friendlier display.
 
-    STATUS:  2019-03-08:  Currently I am seeing a problem.  The display looks
-      good until it begins scrolling when the display is full.  Then there are
-      missing characters.  This is probably related to clearing of the final
-      line of the display after the scroll(?)
-
   nsh
   ---
     Configures the NuttShell (nsh) located at examples/nsh.  The

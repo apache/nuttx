@@ -90,7 +90,7 @@ static void nxterm_fillspace(FAR struct nxterm_state_s *priv,
                              FAR const struct nxgl_rect_s *rect,
                              FAR const struct nxterm_bitmap_s *bm)
 {
-#if 0 /* Not necessary */
+#if 0 /* Not necessary now, but perhaps in the future with VT100 support. */
   struct nxgl_rect_s bounds;
   struct nxgl_rect_s intersection;
   int ret;
@@ -149,7 +149,7 @@ static void nxterm_fillspace(FAR struct nxterm_state_s *priv,
  ****************************************************************************/
 
 FAR const struct nxterm_bitmap_s *
-nxterm_addchar(FAR struct nxterm_state_s *priv, uint8_t ch)
+  nxterm_addchar(FAR struct nxterm_state_s *priv, uint8_t ch)
 {
   FAR struct nxterm_bitmap_s *bm = NULL;
   FAR const struct nxfonts_glyph_s *glyph;
