@@ -73,6 +73,7 @@
 int up_fbinitialize(int display)
 {
   /* Custom LCD display with RGB interface */
+
   stm32_configgpio(GPIO_LCD_DISP);
   stm32_configgpio(GPIO_LCD_BL);
 

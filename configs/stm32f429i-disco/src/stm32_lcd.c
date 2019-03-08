@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -528,25 +529,30 @@ int board_lcd_initialize(void)
 
 int up_fbinitialize(int display)
 {
-#ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
+  static bool initialized = false;
   int ret;
 
-  /* Initialize the ili9341 LCD controller */
-
-  ret = stm32_ili9341_initialize();
-
-  if (ret == OK)
+  if (!initialized)
     {
+#ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
+      /* Initialize the ili9341 LCD controller */
+
+      ret = stm32_ili9341_initialize();
+      if (ret >= OK)
+        {
+          ret = stm32_ltdcinitialize();
+        }
+
+#else
+      /* Custom LCD display with RGB interface */
+
       ret = stm32_ltdcinitialize();
+#endif
+
+      initialized = (ret >= OK);
     }
 
   return ret;
-
-#else
-  /* Custom LCD display with RGB interface */
-
-  return stm32_ltdcinitialize();
-#endif
 }
 
 /****************************************************************************
