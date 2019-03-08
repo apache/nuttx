@@ -684,7 +684,7 @@ static void        stm32_ep_freereq(FAR struct usbdev_ep_s *ep,
 
 #ifdef CONFIG_USBDEV_DMA
 static void       *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep,
-                     unsigned bytes);
+                     uint16_t bytes);
 static void        stm32_ep_freebuffer(FAR struct usbdev_ep_s *ep,
                      FAR void *buf);
 #endif
@@ -4356,7 +4356,7 @@ static void stm32_ep_freereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
+static void *stm32_ep_allocbuffer(FAR struct usbdev_ep_s *ep, uint16_t bytes)
 {
   usbtrace(TRACE_EPALLOCBUFFER, ((FAR struct stm32_ep_s *)ep)->epphy);
 
