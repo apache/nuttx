@@ -542,7 +542,8 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
   /* Allocate the glyph (always succeeds) */
 
   bmsize = stride * height;
-  glyph  = (FAR struct nxfonts_glyph_s *)lib_malloc(SIZEOF_NXFONTS_GLYPH_S(bmsize));
+  glyph  = (FAR struct nxfonts_glyph_s *)
+    lib_malloc(SIZEOF_NXFONTS_GLYPH_S(bmsize));
 
   if (glyph != NULL)
     {

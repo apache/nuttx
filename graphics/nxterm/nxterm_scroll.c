@@ -210,8 +210,6 @@ void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
            */
 
           priv->nchars--;
-          priv->bm[priv->nchars].code  = ' ';
-          priv->bm[priv->nchars].flags = BMFLAGS_NOGLYPH;
         }
 
       /* No.. just decrement its vertical position (moving it "up" the

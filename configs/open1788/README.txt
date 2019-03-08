@@ -408,7 +408,8 @@ Configuration Directories
 
     STATUS:  2019-03-08:  Currently I am seeing a problem.  The display looks
       good until it begins scrolling when the display is full.  Then there are
-      missing characters.
+      missing characters.  This is probably related to clearing of the final
+      line of the display after the scroll(?)
 
   nsh
   ---
