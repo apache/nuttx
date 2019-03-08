@@ -508,7 +508,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
            FAR struct boardioc_nxterm_kbdin_s *kbdin =
              (FAR struct boardioc_nxterm_kbdin_s *)((uintptr_t)arg);
 
-           nxterm_kbdin(kbdin->handle, kbdin-buffer, kbdin->buflen);
+           nxterm_kbdin(kbdin->handle, kbdin->buffer, kbdin->buflen);
            ret = OK;
 #else
            ret = -ENOSYS;
