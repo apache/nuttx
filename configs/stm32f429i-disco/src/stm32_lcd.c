@@ -530,7 +530,7 @@ int board_lcd_initialize(void)
 int up_fbinitialize(int display)
 {
   static bool initialized = false;
-  int ret;
+  int ret = OK;
 
   if (!initialized)
     {
