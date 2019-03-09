@@ -546,10 +546,29 @@ int main(int argc, char **argv, char **envp)
                 }
               while (line[n] == '_' || isalnum(line[n]));
 
+              /* Check for mixed upper and lower case */
+
               if (have_upper && have_lower)
                 {
-                  fprintf(stderr, "Mixed case identifier found at line %d:%d\n",
-                          lineno, ident_index);
+                  /* Special case hex constants.  These will look like
+                   * identifiers starting with 'x' or 'X' but preceded
+                   * with '0'
+                   */
+
+                  if (ident_index < 1 ||
+                      (line[ident_index] != 'x' && line[ident_index] != 'X') ||
+                      line[ident_index - 1] != '0')
+                    {
+                      fprintf(stderr,
+                              "Mixed case identifier found at line %d:%d\n",
+                              lineno, ident_index);
+                    }
+                  else if (have_upper)
+                    {
+                      fprintf(stderr,
+                              "Upper case hex constant found at line %d:%d\n",
+                              lineno, ident_index);
+                    }
                 }
 
               /* Check if the identifier is the last thing on the line */
