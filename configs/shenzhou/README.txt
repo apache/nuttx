@@ -554,7 +554,7 @@ Where <subdir> is one of the following:
     This limits some graphics capabilities.
 
     Reading from the LCD is not supported only because it has not
-    been test.  If you get inspired to test this feature, you can
+    been tested.  If you get inspired to test this feature, you can
     turn the LCD read functionality on by setting:
 
       -CONFIG_LCD_NOGETRUN=y

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 7, 2019)
+NuttX TODO List (Last updated March 8, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
- (11)  Graphics Subsystem (graphics/)
+ (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (5)  ARM (arch/arm/)
@@ -2469,15 +2469,6 @@ o Graphics Subsystem (graphics/)
                I have never encountered a hardware framebuffer with sub-byte pixel
                depth.  If such a beast ever shows up, then this priority would be
                higher.
-
-  Title:       NXTERM BROKEN?
-  Description: Has NxTerm been broken.  Testing with the open1788/knxterm configuration
-               I am seeing some bad behaviors after scrolling.  Everything looks good
-               until the first call to nxterm_scroll().  After that, some characters
-               are missing on the display (replaced with spaced).
-               NOTE: This may be an issue only with the Open1788 configuration(?)
-  Status:      Open
-  Priority:    Medium
 
 o Build system
   ^^^^^^^^^^^^

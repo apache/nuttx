@@ -775,7 +775,10 @@ Where <subdir> is one of the following:
           for networking in this configuration.
 
        b. The NxTerm windows are disabled. There are also issues with the
-          NxTerm build now (see the top-level TODO file).
+          NxTerm build now.
+
+          NOTE:  Those issues have been resolved.  However, this configuration
+          has not yet be re-verified with NxTerm enabled.
 
        c. The initialization sequence is quite different:  NX and the
           touchscreen are initialized in kernel mode by logic in this src/
