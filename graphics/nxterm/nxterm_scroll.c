@@ -85,7 +85,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
    */
 
   rect.pt1.x = 0;
-  rect.pt2.x = priv->wsize.w - 1;
+  rect.pt2.x = priv->wndo.wsize.w - 1;
 
   for (row = CONFIG_NXTERM_LINESEPARATION; row < bottom; row += scrollheight)
     {
@@ -118,7 +118,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
   /* Finally, clear the vacated part of the display */
 
   rect.pt1.y = bottom;
-  rect.pt2.y = priv->wsize.h - 1;
+  rect.pt2.y = priv->wndo.wsize.h - 1;
 
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
@@ -146,8 +146,8 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
 
   rect.pt1.x = 0;
   rect.pt1.y = scrollheight;
-  rect.pt2.x = priv->wsize.w - 1;
-  rect.pt2.y = priv->wsize.h - 1;
+  rect.pt2.x = priv->wndo.wsize.w - 1;
+  rect.pt2.y = priv->wndo.wsize.h - 1;
 
   /* The offset that determines how far to move the source rectangle */
 
@@ -164,7 +164,7 @@ static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
 
   /* Finally, clear the vacated bottom part of the display */
 
-  rect.pt1.y = priv->wsize.h - scrollheight;
+  rect.pt1.y = priv->wndo.wsize.h - scrollheight;
 
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)

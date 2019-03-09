@@ -200,13 +200,16 @@
 
 typedef FAR void *NXTERM;
 
-/* This structure describes the window and font characteristics */
+/* This structure describes the window and font characteristics.
+ * For raw windows, wsize if the full size of the window.  For
+ * NxTK windows, wsize is the size of the sub-window.
+ */
 
 struct nxterm_window_s
 {
   nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]; /* Window background color */
   nxgl_mxpixel_t fcolor[CONFIG_NX_NPLANES]; /* Font color */
-  struct nxgl_size_s wsize;                 /* Window size */
+  struct nxgl_size_s wsize;                 /* Window/Sub-window size */
   int fontid;                               /* The ID of the font to use */
 };
 

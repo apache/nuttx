@@ -124,7 +124,6 @@ struct nxterm_state_s
   FAR const struct nxterm_operations_s *ops; /* Window operations */
   FAR void *handle;                          /* The window handle */
   FAR struct nxterm_window_s wndo;           /* Describes the window and font */
-  struct nxgl_size_s wsize;                  /* NXTK main window size */
   sem_t exclsem;                             /* Forces mutually exclusive access */
 #ifdef CONFIG_DEBUG_FEATURES
   pid_t holder;                              /* Deadlock avoidance */
@@ -203,8 +202,8 @@ int nxterm_sempost(FAR struct nxterm_state_s *priv);
 /* Common device registration/un-registration */
 
 FAR struct nxterm_state_s *nxterm_register(NXTERM handle,
-    FAR struct nxterm_window_s *wndo, FAR struct nxgl_size_s *wsize,
-    FAR const struct nxterm_operations_s *ops, int minor);
+    FAR struct nxterm_window_s *wndo, FAR const struct nxterm_operations_s *ops,
+    int minor);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 void nxterm_unregister(FAR struct nxterm_state_s *priv);
 #endif
@@ -223,6 +222,7 @@ enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch);
 /* Generic text display helpers */
 
 void nxterm_home(FAR struct nxterm_state_s *priv);
+void nxterm_clear(FAR struct nxterm_state_s *priv);
 void nxterm_newline(FAR struct nxterm_state_s *priv);
 FAR const struct nxterm_bitmap_s *nxterm_addchar(FAR struct nxterm_state_s *priv,
     uint8_t ch);
