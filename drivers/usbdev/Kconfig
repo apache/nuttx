@@ -119,7 +119,7 @@ config USBDEV_TRACE_STRINGS
 		#endif
 
 config USBDEV_TRACE_INITIALIDSET
-	bool "Initial enable bits"
+	int "Initial enable bits"
 	default 0
 	---help---
 		This is the set of initial USB features that are enabled at boot

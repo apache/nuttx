@@ -109,6 +109,17 @@
 
 /* Power control register 3 (CR3) */
 
+#define STM32_PWR_CR3_BYPASS       (1 << 0)  /* Bit 0: Power management unit bypass */
+#define STM32_PWR_CR3_LDOEN        (1 << 1)  /* Bit 1: Low drop-out regulator enable */
+#define STM32_PWR_CR3_LDOESCUEN    (1 << 2)  /* Bit 2: Supply configuration update enable */
+                                             /* Bits 3-7: Reserved */
+#define STM32_PWR_CR3_VBE          (1 << 8)  /* Bit 8: VBAT charging enable */
+#define STM32_PWR_CR3_VBRS         (1 << 9)  /* Bit 9: VBAT charging resistor selection */
+                                             /* Bits 10-23: Reserved */
+#define STM32_PWR_CR3_USB33DEN     (1 << 24) /* Bit 24: VDD33USB voltage level detector enable */
+#define STM32_PWR_CR3_USBREGEN     (1 << 25) /* Bit 25: USB regulator enable */
+#define STM32_PWR_CR3_USB33RDY     (1 << 26) /* Bit 26: USB supply ready */
+
 /* Power CPU control register (CPUCR) */
 
 /* Power D3 domain control register (D3CR) */

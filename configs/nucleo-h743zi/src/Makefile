@@ -52,6 +52,10 @@ ifeq ($(CONFIG_STM32H7_SPI),y)
 CSRCS += stm32_spi.c
 endif
 
+ifeq ($(CONFIG_STM32H7_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
 CSRCS += stm32_lsm6dsl.c
 endif

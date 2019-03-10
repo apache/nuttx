@@ -161,6 +161,40 @@ config STM32H7_BDMA
 	select STM32H7_DMA
 	select ARCH_DMA
 
+config STM32H7_OTGFS
+	bool "OTG FS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32H7_OTGHS
+	bool "OTG HS"
+	default n
+	depends on EXPERIMENTAL
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32H7_OTG_SOFOUTPUT
+	bool "OTG SOF output"
+	default n
+
+config STM32H7_OTG_USBREGEN
+	bool "Enable USB voltage regulator"
+	default n
+
+config STM32H7_USBDEV_REGDEBUG
+	bool "OTG USBDEV REGDEBUG"
+	default n
+	depends on USBDEV
+
+config STM32H7_USBHOST_REGDEBUG
+	bool "OTG USBHOST REGDEBUG"
+	default n
+	depends on USBHOST
+
+config STM32H7_USBHOST_PKTDUMP
+	bool "OTG USBHOST PKTDUMP"
+	default n
+	depends on USBHOST
+
 menu "STM32H7 I2C Selection"
 
 config STM32H7_I2C1
@@ -228,6 +262,10 @@ config STM32H7_SPI6
 	depends on STM32H7_HAVE_SPI6 && EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
+
+config STM32H7_SYSCFG
+	bool "SYSCFG"
+	default y
 
 endmenu # STM32H7 SPI Selection
 

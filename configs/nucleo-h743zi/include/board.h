@@ -111,9 +111,9 @@
  *
  *   PLL1_VCO = (8,000,000 / 2) * 200 = 800 MHz
  *
- *   PLL1P = PLL1_VCO/2 = 800 MHz / 2 = 400 MHz
- *   PLL1Q = PLL1_VCO/4 = 800 MHz / 4 = 200 MHz
- *   PLL1R = PLL1_VCO/8 = 800 MHz / 8 = 100 MHz
+ *   PLL1P = PLL1_VCO/2  = 800 MHz / 2   = 400 MHz
+ *   PLL1Q = PLL1_VCO/4  = 800 MHz / 4   = 200 MHz
+ *   PLL1R = PLL1_VCO/8  = 800 MHz / 8   = 100 MHz
  */
 
 #define STM32_PLLCFG_PLL1CFG     (RCC_PLLCFGR_PLL1VCOSEL_WIDE | \
@@ -212,7 +212,7 @@
 
 #define STM32_RCC_D2CCIP3R_I2C4SRC   RCC_D2CCIP3R_I2C4SEL_HSI
 
-/* SPI123 clock source - PLL1 */
+/* SPI123 clock source - PLL1Q */
 
 #define STM32_RCC_D2CCIP1R_SPI123SRC RCC_D2CCIP1R_SPI123SEL_PLL1
 
@@ -223,6 +223,10 @@
 /* SPI6 clock source - APB (PCLK4) */
 
 #define STM32_RCC_D3CCIP1R_SPI6SRC   RCC_D3CCIP1R_SPI6SEL_PCLK4
+
+/* USB 1 and 2 clock source - HSI48 */
+
+#define STM32_RCC_D2CCIP2R_USBSRC RCC_D2CCIP2R_USBSEL_HSI48
 
 /* FLASH wait states
  *

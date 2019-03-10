@@ -152,6 +152,24 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_DMA2EN;
 #endif
 
+#ifdef CONFIG_STM32H7_OTGFS
+  /* USB OTG FS clock enable */
+
+  regval |= RCC_AHB1ENR_OTGFSEN;
+#endif
+
+#ifdef CONFIG_STM32H7_OTGHS
+#ifdef BOARD_ENABLE_USBOTG_HSULPI
+  /* Enable clocking for USB OTG HS and external PHY */
+
+  regval |= (RCC_AHB1ENR_OTGHSEN | RCC_AHB1ENR_OTGHSULPIEN);
+#else
+  /* Enable only clocking for USB OTG HS */
+
+  regval |= RCC_AHB1ENR_OTGHSEN;
+#endif
+#endif
+
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
@@ -424,9 +442,11 @@ static inline void rcc_enableapb4(void)
 
   regval = getreg32(STM32_RCC_APB4ENR);
 
+#ifdef CONFIG_STM32H7_SYSCFG
   /* System configuration controller clock enable */
 
   regval |= RCC_APB4ENR_SYSCFGEN;
+#endif
 
 #ifdef CONFIG_STM32H7_I2C4
   /* I2C4 clock enable */
@@ -506,6 +526,21 @@ static void stm32_stdclockconfig(void)
 
           break;
         }
+    }
+#endif
+
+#define CONFIG_STM32H7_HSI48
+#ifdef CONFIG_STM32H7_HSI48
+  /* Enable HSI48 */
+
+  regval  = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_HSI48ON;
+  putreg32(regval, STM32_RCC_CR);
+
+  /* Wait until the HSI48 is ready */
+
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_HSI48RDY) == 0)
+    {
     }
 #endif
 
@@ -691,6 +726,15 @@ static void stm32_stdclockconfig(void)
       regval &= ~RCC_D3CCIPR_SPI6SEL_MASK;
       regval |= STM32_RCC_D3CCIPR_SPI6SRC;
       putreg32(regval, STM32_RCC_D3CCIPR);
+#endif
+
+      /* Configure USB source clock */
+
+#if defined(STM32_RCC_D2CCIP2R_USBSRC)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USBSEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USBSRC;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
 
 #if defined(CONFIG_STM32H7_IWDG) || defined(CONFIG_STM32H7_RTC_LSICLOCK)

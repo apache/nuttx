@@ -160,8 +160,8 @@
 #define STM32_DMAMUX1_BASE     0x40020800     /* 0x40020800-0x40020bff DMAMUX1 */
 #define STM32_ADC12_BASE       0x40022000     /* 0x40022000-0x400223ff ADC1-ADC2 */
 #define STM32_EMAC_BASE        0x40028000     /* 0x40028000-0x400293ff Ethernet MAC */
-#define STM32_USB1_BASE        0x40040000     /* 0x40040000-0x4007ffff USB1 OTG HS/FS */
-#define STM32_USB2_BASE        0x40080000     /* 0x40080000-0x400bffff USB2 OTG FS */
+#define STM32_OTGHS_BASE       0x40040000     /* 0x40040000-0x4007ffff USB1 OTG HS/FS */
+#define STM32_OTGFS_BASE       0x40080000     /* 0x40080000-0x400bffff USB2 OTG FS */
 
 /* AHB2 Base Addresses **************************************************************/
 
