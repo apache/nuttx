@@ -121,6 +121,10 @@ config IMXRT_HAVE_LCD
 	bool
 	default n
 
+config IMXRT_SEMC_INIT_DONE
+	bool
+	default n
+
 menu "i.MX RT Peripheral Selection"
 
 config IMXRT_EDMA
