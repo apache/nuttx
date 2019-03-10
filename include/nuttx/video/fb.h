@@ -602,9 +602,13 @@ extern "C"
  * Description:
  *   Initialize the framebuffer video hardware associated with the display.
  *
+ *   There are multiple logic paths that may call up_fbinitialize() so any
+ *   implementation of up_fbinitialize() should be tolerant of being called
+ *   multiple times.
+ *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
+ *             specifies the display.  Normally this is zero.
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -623,8 +627,8 @@ int up_fbinitialize(int display);
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *   vplane - Identifies the plane being queried.
+ *             specifies the display.  Normally this is zero.
+ *   vplane  - Identifies the plane being queried.
  *
  * Returned Value:
  *   A non-NULL pointer to the frame buffer access structure is returned on
@@ -642,7 +646,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane);
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
+ *             specifies the display.  Normally this is zero.
  *
  * Returned Value:
  *   None

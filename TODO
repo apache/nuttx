@@ -2393,11 +2393,10 @@ o Graphics Subsystem (graphics/)
   Priority:    Low
 
   Title:       AUTO-RAISE DISABLED
-  Description: Auto-raise is currently disabled in NX multi-server mode.  The
-               reason is complex:
+  Description: Auto-raise is currently disabled.  The reason is complex:
                - Most touchscreen controls send touch data a high rates
                - In multi-server mode, touch events get queued in a message
-                  queue.
+                 queue.
                - The logic that receives the messages performs the auto-raise.
                  But it can do stupid things after the first auto-raise as
                  it operates on the stale data in the message queue.
