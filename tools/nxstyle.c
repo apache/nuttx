@@ -124,6 +124,7 @@ int main(int argc, char **argv, char **envp)
   int comment_lineno;   /* Line on which the last one line comment was closed */
   int blank_lineno;     /* Line number of the last blank line */
   int noblank_lineno;   /* A blank line is not needed after this line */
+  int lbrace_lineno;    /* Line number of last left brace */
   int linelen;          /* Length of the line */
   int maxline;          /* Lines longer that this generate warnings */
   int n;
@@ -186,6 +187,7 @@ int main(int argc, char **argv, char **envp)
   comment_lineno = -1;    /* Line on which the last one line comment was closed */
   blank_lineno   = -1;    /* Line number of the last blank line */
   noblank_lineno = -1;    /* A blank line is not needed after this line */
+  lbrace_lineno  = -1;    /* Line number of last left brace */
 
   /* Process each line in the input stream */
 
@@ -220,6 +222,11 @@ int main(int argc, char **argv, char **envp)
           else if (lineno == blank_lineno + 1)
             {
               fprintf(stderr,  "Too many blank lines at line %d\n", lineno);
+            }
+          else if (lineno == lbrace_lineno + 1)
+            {
+              fprintf(stderr, "Blank line follows left brace at line %d\n",
+                      lineno);
             }
 
           blank_lineno = lineno;
@@ -768,11 +775,14 @@ int main(int argc, char **argv, char **envp)
                     /* Suppress error for comment following a left brace */
 
                     noblank_lineno = lineno;
+                    lbrace_lineno  = lineno;
                   }
                   break;
 
                 case '}':
                   {
+                   /* Decrement the brace nesting level */
+
                    if (bnest < 1)
                      {
                        fprintf(stderr, "Unmatched right brace at line %d:%d\n", lineno, n);
@@ -787,6 +797,8 @@ int main(int argc, char **argv, char **envp)
                          }
                      }
 
+                    /* Decrement the declaration nesting level */
+
                     if (dnest < 3)
                       {
                         dnest = 0;
@@ -795,6 +807,8 @@ int main(int argc, char **argv, char **envp)
                       {
                         dnest--;
                       }
+
+                    /* The right brace should be on a separate line */
 
                     if (n > indent)
                       {
@@ -805,9 +819,12 @@ int main(int argc, char **argv, char **envp)
                                    lineno, n);
                           }
                       }
-                    else if (line[n + 1] != '\n' &&
-                             line[n + 1] != ',' &&
-                             line[n + 1] != ';')
+
+                    /* Check for garbage following the left brace */
+
+                    if (line[n + 1] != '\n' &&
+                        line[n + 1] != ',' &&
+                        line[n + 1] != ';')
                       {
                         /* One case where there may be garbage after the right
                          * bracket is, for example, when declaring a until or
@@ -825,6 +842,16 @@ int main(int argc, char **argv, char **envp)
                                     "Garbage follows right bracket at line %d:%d\n",
                                     lineno, n);
                           }
+                      }
+
+                    /* The right brace should not be preceded with a a blank line */
+
+
+                    if (lineno == blank_lineno + 1)
+                      {
+                        fprintf(stderr,
+                                "Blank line precedes right brace at line %d\n",
+                                lineno);
                       }
                   }
                   break;

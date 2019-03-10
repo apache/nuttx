@@ -140,7 +140,6 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
                   &g_cpu_irqlock);
     }
 #endif /* CONFIG_SMP */
-
 }
 
 #endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_RESUMESCHEDULER */

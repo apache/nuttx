@@ -353,7 +353,6 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 
               sq_addafter((FAR sq_entry_t *)prev, (FAR sq_entry_t *)wdog,
                           &g_wdactivelist);
-
             }
         }
 
