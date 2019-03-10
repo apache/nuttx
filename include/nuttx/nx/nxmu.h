@@ -480,7 +480,8 @@ extern "C"
  *   boardctl() interface with the BOARDIOC_NX_START command.
  *
  * Input Parameters:
- *   None
+ *   display - Display number served by this NXMU instance.
+ *   plane   - Plane number to use for display info
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  This indicates that the NX server
@@ -492,7 +493,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxmu_start(void);
+int nxmu_start(int display, int plane);
 
 /****************************************************************************
  * Name: nxfe_constructwindow

@@ -42,6 +42,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
@@ -58,7 +59,7 @@
  * Private Data
  ****************************************************************************/
 
-static bool g_nxserver_started;
+static bool g_nxserver_started[CONFIG_NX_NDISPLAYS];
 
 /****************************************************************************
  * Private Functions
@@ -83,7 +84,14 @@ static bool g_nxserver_started;
 static int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
+  int display;
+  int plane;
   int ret;
+
+  /* Get display parameters from the command line */
+
+  display = atoi(argv[1]);
+  plane   = atoi(argv[2]);
 
 #if defined(CONFIG_NXSTART_EXTERNINIT)
   /* Use external graphics driver initialization */
@@ -91,7 +99,8 @@ static int nx_server(int argc, char *argv[])
   dev = board_graphics_setup(CONFIG_NXSTART_DEVNO);
   if (!dev)
     {
-      gerr("ERROR: board_graphics_setup failed, devno=%d\n", CONFIG_NXSTART_DEVNO);
+      gerr("ERROR: board_graphics_setup failed, devno=%d\n",
+           CONFIG_NXSTART_DEVNO);
       return EXIT_FAILURE;
     }
 
@@ -117,24 +126,24 @@ static int nx_server(int argc, char *argv[])
 
   /* Turn the LCD on at 75% power */
 
-  (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+  (void)dev->setpower(dev, ((3 * CONFIG_LCD_MAXPOWER + 3) / 4));
 
 #else /* CONFIG_NX_LCDDRIVER */
   /* Initialize the frame buffer device.
    * REVISIT: display == 0 is assumed.
    */
 
-  ret = up_fbinitialize(CONFIG_NXSTART_DISPLAYNO);
+  ret = up_fbinitialize(display);
   if (ret < 0)
     {
       gerr("ERROR: up_fbinitialize failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 
-  dev = up_fbgetvplane(CONFIG_NXSTART_DISPLAYNO, CONFIG_NXSTART_VPLANE);
+  dev = up_fbgetvplane(display, plane);
   if (!dev)
     {
-      gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", CONFIG_NXSTART_VPLANE);
+      gerr("ERROR: up_fbgetvplane failed, vplane=%d\n", plane);
       return EXIT_FAILURE;
     }
 
@@ -164,7 +173,8 @@ static int nx_server(int argc, char *argv[])
  *   boardctl() interface with the BOARDIOC_NX_START command.
  *
  * Input Parameters:
- *   None
+ *   display - Display number served by this NXMU instance.
+ *   plane   - Plane number to use for display info
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  This indicates that the NX server
@@ -176,19 +186,33 @@ static int nx_server(int argc, char *argv[])
  *
  ****************************************************************************/
 
-int nxmu_start(void)
+int nxmu_start(int display, int plane)
 {
+  DEBUGASSERT((unsigned)display < CONFIG_NX_NDISPLAYS &&
+              (unsigned)plane   < CONFIG_NX_NPLANES);
+
   /* Do nothing is the server has already been started */
 
-  if (!g_nxserver_started)
+  if (!g_nxserver_started[display])
     {
+      FAR char display_str[8];
+      FAR char plane_str[8];
+      FAR char * const argv[3] =
+      {
+        (FAR char * const)display_str,
+        (FAR char * const)plane_str,
+        NULL
+      };
       pid_t server;
 
       /* Start the server kernel thread */
 
+      snprintf(display_str, 8, "%d", display);
+      snprintf(plane_str, 8, "%d", plane);
+
       ginfo("Starting server task\n");
       server = kthread_create("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                              CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
+                              CONFIG_NXSTART_SERVERSTACK, nx_server, argv);
       if (server < 0)
         {
           gerr("ERROR: Failed to create nx_server kernel thread: %d\n",
@@ -196,7 +220,7 @@ int nxmu_start(void)
           return (int)server;
         }
 
-      g_nxserver_started = true;
+      g_nxserver_started[display] = true;
 
       /* Wait a bit to make sure that the server get started.  NOTE that
        * this operation cannot be done from the IDLE thread!

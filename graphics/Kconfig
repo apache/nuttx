@@ -23,9 +23,19 @@ config NX_LCDDRIVER
 		this this option is provide to select, instead, the LCD driver interface
 		defined in include/nuttx/lcd/lcd.h.
 
+config NX_NDISPLAYS
+	int "Maximum number of displays supported"
+	default 1
+	range 1 9
+	---help---
+		The maximum number of displays that can be supported by the NX server.
+		Normally this takes the value one but may be increased to support systems
+		with multiple displays.
+
 config NX_NPLANES
 	int "Number of Color Planes"
 	default 1
+	range 1 8
 	---help---
 		Some YUV color formats requires support for multiple planes, one for
 		each color component.  Unless you have such special hardware (and
@@ -422,22 +432,6 @@ config NXSTART_DEVNO
 	---help---
 		LCD device number (in case there are more than one LCDs connected).
 		Default: 0
-
-config NXSTART_DISPLAYNO
-	int "Display Number"
-	default 0
-	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
-	---help---
-		Framebuffer display number (in case there are more than one framebuffers).
-		Default: 0
-
-config NXSTART_VPLANE
-	int "Plane Number"
-	default 0
-	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
-	---help---
-		Only a single video plane is supported. Default: 0
-
 source "graphics/vnc/Kconfig"
 
 endif # NX

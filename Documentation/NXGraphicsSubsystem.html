@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: April 15, 2018</p>
+      <p>Last Updated: March 10, 2019</p>
     </td>
   </tr>
 </table>
@@ -956,7 +956,7 @@ struct nx_callback_s
 <ul><pre>
 #include &lt;nuttx/nx/nx.h&gt;
 
-int nxmu_start(void);
+int nxmu_start(int display, int plane);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -964,7 +964,12 @@ int nxmu_start(void);
 </p>
 <p>
   <b>Input Parameters:</b>
-  None
+  <ul><dl>
+    <dt><code>display</code>
+    <dd>The display number to be served by this new NXMU instance.
+    <dt><code>plane</code>
+    <dd>The plane number to use to get information about the display geometry and color format.
+  </dl></ul>
 </p>
 <p>
   <b>Returned Value:</b>

@@ -115,7 +115,7 @@
  *
  * CMD:           BOARDIOC_NX_START
  * DESCRIPTION:   Start the NX server
- * ARG:           None
+ * ARG:           Integer display number to be served by this NXMU instance.
  * CONFIGURATION: CONFIG_NX
  * DEPENDENCIES:  Base graphics logic provides nxmu_start()
  *

@@ -412,14 +412,20 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 #ifdef CONFIG_NX
       /* CMD:           BOARDIOC_NX_START
        * DESCRIPTION:   Start the NX servier
-       * ARG:           None
+       * ARG:           Integer display number to be served by this NXMU
+       (                instance.
        * CONFIGURATION: CONFIG_NX
        * DEPENDENCIES:  Base graphics logic provides nxmu_start()
        */
 
       case BOARDIOC_NX_START:
         {
-          ret = nxmu_start();
+          /* REVISIT:  Plane number is forced to zero.  On multiplanar
+           * displays there may be multiple planes.  Only one is supported
+           * here.
+           */
+
+          ret = nxmu_start((int)arg, 0);
         }
         break;
 #endif

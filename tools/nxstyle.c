@@ -250,7 +250,7 @@ int main(int argc, char **argv, char **envp)
               if (line[n] != '}' /* && line[n] != '#' */)
                 {
                   fprintf(stderr,
-                          "Missing blank line after comment line. Found at line %d\n",
+                          "Missing blank line after comment found at line %d\n",
                           comment_lineno);
                 }
             }
@@ -691,7 +691,7 @@ int main(int argc, char **argv, char **envp)
 
               else if (line[n + 1] == '/')
                 {
-                  fprintf(stderr, "C++ style comment on at %d:%d\n",
+                  fprintf(stderr, "C++ style comment at %d:%d\n",
                           lineno, n);
                   n++;
                   continue;
