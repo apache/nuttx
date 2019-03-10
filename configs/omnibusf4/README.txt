@@ -11,9 +11,8 @@ Airbot is one such vendor, and they publish a schematic here:
     http://bit.ly/obf4pro
 
 Other software that supports the OmnibusF4 family include Betaflight,
-iNAV, and many others. PX4 recently added support as well, in their
-own, non-upstreamed, bespoke port of NuttX. No code from any of those
-sources is included in this port.
+iNAV, and many others. PX4 recently added support as well. No code
+from any of those sources is included in this port.
 
 Since OmnibusF4 is a drone FMU, most of its IO is already allocated to
 FMU-specific tasks. As such, we don't need to make the board support
