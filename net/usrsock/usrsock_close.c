@@ -108,7 +108,9 @@ static uint16_t close_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
 static int do_close_request(FAR struct usrsock_conn_s *conn)
 {
-  struct usrsock_request_close_s req = {};
+  struct usrsock_request_close_s req =
+  {
+  };
   struct iovec bufs[1];
 
   /* Prepare request for daemon to read. */
@@ -135,7 +137,9 @@ static int do_close_request(FAR struct usrsock_conn_s *conn)
 
 int usrsock_close(FAR struct usrsock_conn_s *conn)
 {
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   int ret;
 
   net_lock();

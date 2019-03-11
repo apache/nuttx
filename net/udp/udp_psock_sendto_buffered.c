@@ -766,8 +766,10 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           goto errout_with_lock;
         }
 
-      /* Initialize the write buffer */
-      /* Check if the socket is connected */
+      /* Initialize the write buffer
+       *
+       * Check if the socket is connected
+       */
 
       if (_SS_ISCONNECTED(psock->s_flags))
         {
@@ -915,11 +917,13 @@ int psock_udp_cansend(FAR struct socket *psock)
     }
 
   /* In order to setup the send, we need to have at least one free write
-   * buffer head and at least one free IOB to initialize the write buffer head.
+   * buffer head and at least one free IOB to initialize the write buffer
+   * head.
    *
-   * REVISIT:  The send will still block if we are unable to buffer the entire
-   * user-provided buffer which may be quite large.  We will almost certainly
-   * need to have more than one free IOB, but we don't know how many more.
+   * REVISIT:  The send will still block if we are unable to buffer the
+   * entire user-provided buffer which may be quite large.  We will almost
+   * certainly need to have more than one free IOB, but we don't know how
+   * many more.
    */
 
   if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)

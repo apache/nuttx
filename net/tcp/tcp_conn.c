@@ -265,9 +265,9 @@ static int tcp_selectport(uint8_t domain, FAR const union ip_addr_u *ipaddr,
   if (portno == 0)
     {
       /* No local port assigned. Loop until we find a valid listen port number
-       * that is not being used by any other connection. NOTE the following loop
-       * is assumed to terminate but could not if all 32000-4096+1 ports are
-       * in used (unlikely).
+       * that is not being used by any other connection. NOTE the following
+       * loop is assumed to terminate but could not if all 32000-4096+1 ports
+       * are in used (unlikely).
        */
 
       do
@@ -701,7 +701,8 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
           /* Now there is guaranteed to be one free connection.  Get it! */
 
-          conn = (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
+          conn = (FAR struct tcp_conn_s *)
+            dq_remfirst(&g_free_tcp_connections);
         }
     }
 #endif
@@ -753,8 +754,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   DEBUGASSERT(conn->crefs == 0);
   net_lock();
 
-  /* Free remaining callbacks, actually there should be only the close callback
-   * left.
+  /* Free remaining callbacks, actually there should be only the close
+   * callback left.
    */
 
   for (cb = conn->list; cb; cb = next)
@@ -783,12 +784,14 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
 
-  while ((wrbuffer = (struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q)) != NULL)
+  while ((wrbuffer = (struct tcp_wrbuffer_s *)
+                     sq_remfirst(&conn->write_q)) != NULL)
     {
       tcp_wrbuffer_release(wrbuffer);
     }
 
-  while ((wrbuffer = (struct tcp_wrbuffer_s *)sq_remfirst(&conn->unacked_q)) != NULL)
+  while ((wrbuffer = (struct tcp_wrbuffer_s *)
+                     sq_remfirst(&conn->unacked_q)) != NULL)
     {
       tcp_wrbuffer_release(wrbuffer);
     }

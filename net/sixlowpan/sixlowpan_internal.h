@@ -80,8 +80,10 @@
   memcpy(dest, src, len)
 
 #ifdef CONFIG_WIRELESS_IEEE802154
-/* IEEE 802.15.4  address macros */
-/* Copy a an IEEE 802.15.4 address */
+/* IEEE 802.15.4  address macros
+ *
+ * Copy a an IEEE 802.15.4 address.
+ */
 
 #define sixlowpan_saddrcopy(dest,src) \
   sixlowpan_anyaddrcopy(dest,src,NET_6LOWPAN_SADDRSIZE)

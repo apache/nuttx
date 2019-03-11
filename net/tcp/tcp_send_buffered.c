@@ -286,8 +286,10 @@ static inline void send_ipselect(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ETHERNET
 static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 {
-  /* Only Ethernet drivers are supported by this function */
-  /* REVISIT: Could the MAC address not also be in a routing table? */
+  /* Only Ethernet drivers are supported by this function.
+   *
+   * REVISIT: Could the MAC address not also be in a routing table?
+   */
 
   if (conn->dev->d_lltype != NET_LL_ETHERNET)
     {
@@ -804,7 +806,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               sndlen = conn->winsize;
             }
 
-          ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u winsize=%u\n",
+          ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u "
+                "winsize=%u\n",
                 wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
                 conn->winsize);
 
@@ -1270,7 +1273,8 @@ int psock_tcp_cansend(FAR struct socket *psock)
     }
 
   /* In order to setup the send, we need to have at least one free write
-   * buffer head and at least one free IOB to initialize the write buffer head.
+   * buffer head and at least one free IOB to initialize the write buffer
+   * head.
    *
    * REVISIT:  The send will still block if we are unable to buffer the entire
    * user-provided buffer which may be quite large.  We will almost certainly

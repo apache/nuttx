@@ -289,8 +289,10 @@ int ipv6_input(FAR struct net_driver_s *dev)
   g_netstats.ipv6.recv++;
 #endif
 
-  /* Start of IP input header processing code. */
-  /* Check validity of the IP header. */
+  /* Start of IP input header processing code.
+   *
+   * Check validity of the IP header.
+   */
 
   if ((ipv6->vtc & 0xf0) != 0x60)
     {

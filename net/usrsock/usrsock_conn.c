@@ -124,7 +124,8 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _usrsock_semtake(&g_free_sem);
-  conn = (FAR struct usrsock_conn_s *)dq_remfirst(&g_free_usrsock_connections);
+  conn = (FAR struct usrsock_conn_s *)
+    dq_remfirst(&g_free_usrsock_connections);
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
@@ -287,7 +288,8 @@ int usrsock_setup_data_request_callback(FAR struct usrsock_conn_s *conn,
 {
   pstate->valuelen = 0;
   pstate->valuelen_nontrunc = 0;
-  return usrsock_setup_request_callback(conn, &pstate->reqstate, event, flags);
+  return usrsock_setup_request_callback(conn, &pstate->reqstate, event,
+                                        flags);
 }
 
 /****************************************************************************

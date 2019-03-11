@@ -140,7 +140,6 @@ static int arp_match(FAR struct net_driver_s *dev, FAR void *arg)
   return 1;
 }
 
-
 /****************************************************************************
  * Name: arp_return_old_entry
  *

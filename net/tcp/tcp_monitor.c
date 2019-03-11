@@ -94,7 +94,8 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
    * And we need to set these two socket status bits appropriately:
    *
    *  _SF_CONNECTED==1 && _SF_CLOSED==0 - the socket is connected
-   *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully disconnected
+   *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully
+   *                                       disconnected
    *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
    */
 
@@ -111,8 +112,8 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
     }
   else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
-      /* The loss of connection was less than graceful.  This will (eventually)
-       * be reported as an ENOTCONN error.
+      /* The loss of connection was less than graceful.  This will
+       * (eventually) be reported as an ENOTCONN error.
        */
 
       psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
@@ -162,7 +163,8 @@ static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
       else if ((flags & TCP_CONNECTED) != 0)
         {
 #if 0 /* REVISIT: Assertion fires.  Why? */
-          FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
+          FAR struct tcp_conn_s *conn =
+            (FAR struct tcp_conn_s *)psock->s_conn;
 
           /* Make sure that this is the device bound to the connection */
 

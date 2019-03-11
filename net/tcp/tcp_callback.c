@@ -171,9 +171,9 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    *                 and that no further process of the new data should be
    *                 attempted.
    *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
-   *                 to indicate that an ACK should be included in the response.
-   *                 (In TCP_NEWDATA is cleared but TCP_SNDACK is not set, then
-   *                 dev->d_len should also be cleared).
+   *                 to indicate that an ACK should be included in the
+   *                 response.  (In TCP_NEWDATA is cleared but TCP_SNDACK is
+   *                 not set, then dev->d_len should also be cleared).
    */
 
   flags = devif_conn_event(dev, conn, flags, conn->list);

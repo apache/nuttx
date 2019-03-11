@@ -299,18 +299,18 @@ void mld_new_pollcycle(FAR struct net_driver_s *dev)
 
   /* Update member ship in every group  */
 
-   for (member = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
-        member;
-        member = member->next)
-     {
-       /* Save the number of members that reported in the previous query
-        * cycle; reset the number of members that have reported in the new
-        * query cycle.
-        */
+  for (member = (FAR struct mld_group_s *)dev->d_mld.grplist.head;
+       member;
+       member = member->next)
+    {
+      /* Save the number of members that reported in the previous query
+       * cycle; reset the number of members that have reported in the new
+       * query cycle.
+       */
 
-       member->lstmbrs = member->members;
-       member->members = 0;
-     }
+      member->lstmbrs = member->members;
+      member->members = 0;
+    }
 }
 #endif
 

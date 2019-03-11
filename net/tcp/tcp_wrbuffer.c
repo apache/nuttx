@@ -163,8 +163,8 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 
   wrb->wb_iob = net_ioballoc(false);
 
-  /* Did we get an IOB?  We should always get one except under some really weird
-   * error conditions.
+  /* Did we get an IOB?  We should always get one except under some really
+   * weird error conditions.
    */
 
   if (wrb->wb_iob == NULL)

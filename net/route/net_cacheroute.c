@@ -466,7 +466,6 @@ static void net_reset_ipv6_cache(void)
     {
       net_add_newest_ipv6(&g_prealloc_ipv6cache[i]);
     }
-
 }
 #endif
 
@@ -538,8 +537,10 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
       return ret;
     }
 
-  /* First, check if the route already exists in the cache */
-  /* Visit each entry in the cache */
+  /* First, check if the route already exists in the cache.
+   *
+   * Visit each entry in the cache
+   */
 
   for (prev = NULL, cache = g_ipv4_cache.head;
        cache != NULL;
@@ -618,8 +619,10 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
       return ret;
     }
 
-  /* First, check if the route already exists in the cache */
-  /* Visit each entry in the cache */
+  /* First, check if the route already exists in the cache.
+   *
+   * Visit each entry in the cache.
+   */
 
   for (prev = NULL, cache = g_ipv6_cache.head;
        cache != NULL;

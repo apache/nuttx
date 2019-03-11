@@ -298,8 +298,7 @@ static int netlink_getpeername(FAR struct socket *psock,
                                FAR socklen_t *addrlen)
 {
 #warning Missing logic for NETLINK getsockname
-  return -EOPNOTSUPP;
-//return -EAFNOSUPPORT;
+  return -EOPNOTSUPP;  /* Or maybe return -EAFNOSUPPORT; */
 }
 
 /****************************************************************************

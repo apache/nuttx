@@ -137,7 +137,7 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
       !sixlowpan_ismacbased(ipv6->srcipaddr, &radio->r_dev.d_mac.radio) ||
       !sixlowpan_islinklocal(ipv6->destipaddr) ||
       !sixlowpan_ismacbased(ipv6->destipaddr, destmac) ||
-      ( 1
+      (1
 #ifdef CONFIG_NET_TCP
         && ipv6->proto != IP_PROTO_TCP
 #endif
@@ -306,8 +306,9 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
 
   ninfo("fptr=%p g_frame_hdrlen=%u\n", fptr, g_frame_hdrlen);
 
-  /* Format the IPv6 header in the device d_buf */
-  /* Set version, traffic clase, and flow label.  This assumes that Bit 4 is
+  /* Format the IPv6 header in the device d_buf.
+   *
+   * Set version, traffic clase, and flow label.  This assumes that Bit 4 is
    * set in HC1.
    */
 
@@ -363,9 +364,11 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
             /* UDP ports, len, checksum */
 
             udp->srcport =
-              htons(CONFIG_NET_6LOWPAN_MINPORT + (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] >> 4));
+              htons(CONFIG_NET_6LOWPAN_MINPORT +
+                    (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] >> 4));
             udp->destport =
-              htons(CONFIG_NET_6LOWPAN_MINPORT + (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] & 0x0F));
+              htons(CONFIG_NET_6LOWPAN_MINPORT +
+                    (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] & 0x0f));
 
             ninfo("UDP srcport=%04x destport=%04x\n", udp->srcport, udp->destport);
 
@@ -459,7 +462,7 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
       /* This is a 1st fragment */
 
       ipv6->len[0] = (iplen - IPv6_HDRLEN) >> 8;
-      ipv6->len[1] = (iplen - IPv6_HDRLEN) & 0x00FF;
+      ipv6->len[1] = (iplen - IPv6_HDRLEN) & 0x00ff;
     }
 
   ninfo("IPv6 len=%02x:%02x\n", ipv6->len[0], ipv6->len[1]);

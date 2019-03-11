@@ -309,15 +309,16 @@ int psock_local_connect(FAR struct socket *psock,
 
         case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
           {
-            if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1) == 0)
+            if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1)
+                == 0)
               {
                 int ret = OK;
 
                 /* Bind the address and protocol */
 
                 client->lc_proto = conn->lc_proto;
-                strncpy(client->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
-                client->lc_path[UNIX_PATH_MAX-1] = '\0';
+                strncpy(client->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1);
+                client->lc_path[UNIX_PATH_MAX - 1] = '\0';
                 client->lc_instance_id = local_generate_instance_id();
 
                 /* The client is now bound to an address */

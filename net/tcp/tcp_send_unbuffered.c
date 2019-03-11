@@ -234,8 +234,10 @@ static inline void tcpsend_ipselect(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_ETHERNET
 static inline bool psock_send_addrchck(FAR struct tcp_conn_s *conn)
 {
-  /* Only Ethernet drivers are supported by this function */
-  /* REVISIT: Could the MAC address not also be in a routing table? */
+  /* Only Ethernet drivers are supported by this function.
+   *
+   * REVISIT: Could the MAC address not also be in a routing table?
+   */
 
   if (conn->dev->d_lltype != NET_LL_ETHERNET)
     {
@@ -525,11 +527,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * Then we will split the remaining, single packet into two partial
        * packets.  This will stimulate the RFC 1122 peer to ACK sooner.
        *
-       * Don't try to split very small packets (less than CONFIG_NET_TCP_SPLIT_SIZE).
-       * Only the first even packet and the last odd packets could have
-       * sndlen less than CONFIG_NET_TCP_SPLIT_SIZE.  The value of sndlen on
-       * the last even packet is guaranteed to be at least MSS/2 by the
-       * logic below.
+       * Don't try to split very small packets (less than
+       * CONFIG_NET_TCP_SPLIT_SIZE).  Only the first even packet and the
+       * last odd packets could have sndlen less than
+       * CONFIG_NET_TCP_SPLIT_SIZE.  The value of sndlen on the last even
+       * packet is guaranteed to be at least MSS / 2 by the logic below.
        */
 
       if (sndlen >= CONFIG_NET_TCP_SPLIT_SIZE)
@@ -599,11 +601,12 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
         {
-          /* Set the sequence number for this packet.  NOTE:  The network updates
-           * sndseq on receipt of ACK *before* this function is called.  In that
-           * case sndseq will point to the next unacknowledged byte (which might
-           * have already been sent).  We will overwrite the value of sndseq
-           * here before the packet is sent.
+          /* Set the sequence number for this packet.  NOTE:  The network
+           * updates sndseq on receipt of ACK *before* this function is
+           * called.  In that case sndseq will point to the next
+           * unacknowledged byte (which might have already been sent).  We
+           * will overwrite the value of sndseq here before the packet is
+           * sent.
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
@@ -637,7 +640,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
               pstate->snd_sent += sndlen;
               ninfo("SEND: acked=%d sent=%d buflen=%d\n",
                     pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
-
             }
         }
     }
@@ -934,8 +936,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have returned negated errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal.
+   * In this case, net_lockedwait will have returned negated errno
+   * appropriately.
    */
 
   if (ret < 0)

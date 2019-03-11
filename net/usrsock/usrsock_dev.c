@@ -279,7 +279,8 @@ static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
 #endif
 
   /* Each connection can one only one request/response pending. So map
-   * connection structure index to xid value. */
+   * connection structure index to xid value.
+   */
 
   conn_idx = usrsock_connidx(conn);
 
@@ -341,7 +342,8 @@ static bool usrsockdev_is_opened(FAR struct usrsockdev_s *dev)
  * Name: usrsockdev_pollnotify
  ****************************************************************************/
 
-static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev, pollevent_t eventset)
+static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
+                                  pollevent_t eventset)
 {
 #ifndef CONFIG_DISABLE_POLL
   int i;
@@ -561,7 +563,8 @@ static ssize_t usrsockdev_handle_response(FAR struct usrsockdev_s *dev,
   if (USRSOCK_MESSAGE_REQ_IN_PROGRESS(hdr->head.flags))
     {
       /* In-progress response is acknowledgment that response was
-       * received. */
+       * received.
+       */
 
       conn->resp.inprogress = true;
     }
@@ -593,7 +596,8 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 {
   FAR const struct usrsock_message_datareq_ack_s *datahdr = buffer;
   FAR const struct usrsock_message_req_ack_s *hdr = &datahdr->reqack;
-  int num_inbufs, iovpos;
+  int num_inbufs;
+  int iovpos;
   ssize_t ret;
 
   if (USRSOCK_MESSAGE_REQ_IN_PROGRESS(hdr->head.flags))
@@ -612,7 +616,8 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
         }
 
       /* In-progress response is acknowledgment that response was
-       * received. */
+       * received.
+       */
 
       conn->resp.inprogress = true;
 
@@ -635,7 +640,8 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
       if (datahdr->valuelen > 0 || datahdr->valuelen_nontrunc > 0)
         {
-          nerr("error: response result negative, and valuelen or valuelen_nontrunc non-zero.\n");
+          nerr("error: response result negative, and valuelen or "
+               "valuelen_nontrunc non-zero.\n");
 
           ret = -EINVAL;
           goto unlock_out;
@@ -788,8 +794,9 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
 
   if (dev->req.ack_xid == hdr->xid && dev->req.iov)
     {
-      /* Signal that request was received and read by daemon and acknowledgment
-       * response was received. */
+      /* Signal that request was received and read by daemon and
+       * acknowledgment response was received.
+       */
 
       dev->req.iov = NULL;
 
@@ -830,8 +837,8 @@ static ssize_t usrsockdev_handle_message(FAR struct usrsockdev_s *dev,
  * Name: usrsockdev_write
  ****************************************************************************/
 
-static ssize_t usrsockdev_write(FAR struct file *filep, FAR const char *buffer,
-                                size_t len)
+static ssize_t usrsockdev_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsock_conn_s *conn;
@@ -860,7 +867,8 @@ static ssize_t usrsockdev_write(FAR struct file *filep, FAR const char *buffer,
   if (!dev->datain_conn)
     {
       /* Start of message, buffer length should be at least size of common
-       * message header. */
+       * message header.
+       */
 
       if (len < sizeof(struct usrsock_message_common_s))
         {
@@ -932,7 +940,8 @@ static int usrsockdev_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
-  int ret, tmp;
+  int ret;
+  int tmp;
 
   DEBUGASSERT(inode);
 
@@ -1239,7 +1248,8 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
     }
   else
     {
-      ninfo("usockid=%d; daemon abruptly closed /usr/usrsock.\n", conn->usockid);
+      ninfo("usockid=%d; daemon abruptly closed /usr/usrsock.\n",
+            conn->usockid);
       ret = -ESHUTDOWN;
     }
 
@@ -1271,7 +1281,8 @@ void usrsockdev_register(void)
   nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
   nxsem_setprotocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
 
-  (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666, &g_usrsockdev);
+  (void)register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
+                        &g_usrsockdev);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

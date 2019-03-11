@@ -90,7 +90,8 @@ static uint16_t sendto_event(FAR struct net_driver_s *dev, FAR void *pvconn,
       if (pstate->result >= 0 || pstate->result == -EAGAIN)
         {
           /* After reception of data, mark input not ready. Daemon will
-           * send event to restore this flag. */
+           * send event to restore this flag.
+           */
 
           conn->flags &= ~USRSOCK_EVENT_SENDTO_READY;
         }
@@ -152,7 +153,9 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
                              FAR const struct sockaddr *addr,
                              socklen_t addrlen)
 {
-  struct usrsock_request_sendto_s req = {};
+  struct usrsock_request_sendto_s req =
+  {
+  };
   struct iovec bufs[3];
 
   if (addrlen > UINT16_MAX)
@@ -210,7 +213,9 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
                        socklen_t tolen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   ssize_t ret;
 #ifdef CONFIG_NET_SOCKOPTS
   struct timespec abstime;
@@ -229,7 +234,8 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

@@ -102,7 +102,9 @@ static uint16_t listen_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 
 static int do_listen_request(FAR struct usrsock_conn_s *conn, int backlog)
 {
-  struct usrsock_request_listen_s req = {};
+  struct usrsock_request_listen_s req =
+  {
+  };
   struct iovec bufs[1];
 
   if (backlog > UINT16_MAX)
@@ -155,7 +157,9 @@ static int do_listen_request(FAR struct usrsock_conn_s *conn, int backlog)
 int usrsock_listen(FAR struct socket *psock, int backlog)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   int ret;
 
   DEBUGASSERT(conn);
@@ -170,7 +174,8 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
       ninfo("usockid=%d; listen() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNREFUSED;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNREFUSED;
       goto errout_unlock;
     }
 

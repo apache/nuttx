@@ -63,7 +63,8 @@
 void udp_wrbuffer_dump(FAR const char *msg, FAR struct udp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset)
 {
-  syslog(LOG_DEBUG, "%s: wrb=%p pktlen=%d\n", msg, wrb, wrb->wb_iob->io_pktlen);
+  syslog(LOG_DEBUG, "%s: wrb=%p pktlen=%d\n",
+         msg, wrb, wrb->wb_iob->io_pktlen);
   iob_dump("I/O Buffer Chain", wrb->wb_iob, len, offset);
 }
 

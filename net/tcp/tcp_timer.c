@@ -393,8 +393,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                       if (conn->keepretries >= conn->keepcnt)
                         {
-                          /* Yes... stop the network monitor, closing the connection and all sockets
-                           * associated with the connection.
+                          /* Yes... stop the network monitor, closing the
+                           * connection and all sockets associated with the
+                           * connection.
                            */
 
                           tcp_stop_monitor(conn, TCP_ABORT);
@@ -445,8 +446,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                           tcp_setsequence(conn->sndseq, saveseq);
 
-                          /* Increment the number of un-ACKed bytes due to the dummy
-                           * byte that we just sent.
+                          /* Increment the number of un-ACKed bytes due to the
+                           * dummy byte that we just sent.
                            */
 
                           conn->unacked++;

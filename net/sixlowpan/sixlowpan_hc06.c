@@ -106,6 +106,7 @@ struct sixlowpan_addrcontext_s
  ****************************************************************************/
 
 /* HC06 specific variables **************************************************/
+
 /* Use of global variables simplifies the logic and is safe in the multi-
  * device environment because access is serialized via the network lock.
  *
@@ -124,6 +125,7 @@ static struct sixlowpan_addrcontext_s
 static FAR uint8_t *g_hc06ptr;
 
 /* Constant Data ************************************************************/
+
 /* Uncompression of linklocal
  *
  *   0 -> 16 bytes from packet
@@ -487,8 +489,10 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
           ipaddr[6] = HTONS(0xfe00);
         }
 
-      /* Handle the even bytes in the address */
-      /* If the postcount is even then take extra care with endian-ness */
+      /* Handle the even bytes in the address.
+       *
+       * If the postcount is even then take extra care with endian-ness.
+       */
 
       destndx = 8 - (postcount >> 1);
 
@@ -802,8 +806,10 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
         }
     }
 
-  /* Note that the payload length is always compressed */
-  /* Next header. We compress it if UDP */
+  /* Note that the payload length is always compressed.
+   *
+   * Next header. We compress it if UDP.
+   */
 
 #ifdef CONFIG_NET_UDP
   if (ipv6->proto == IP_PROTO_UDP)
@@ -1169,8 +1175,9 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           tmp        = *g_hc06ptr;
           g_hc06ptr += 4;
 
-          /* hc06 format of tc is ECN | DSCP , original is DSCP | ECN */
-          /* set version, pick highest DSCP bits and set in vtc */
+          /* hc06 format of tc is ECN | DSCP , original is DSCP | ECN
+           * Set version, pick highest DSCP bits and set in vtc.
+           */
 
           ipv6->vtc  = 0x60 | ((tmp >> 2) & 0x0f);
 
@@ -1193,15 +1200,17 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     }
   else
     {
-      /* Version is always 6! */
-      /* Version and flow label are compressed */
+      /* Version is always 6!
+       *
+       * Version and flow label are compressed.
+       */
 
       if ((iphc0 & SIXLOWPAN_IPHC_TC_01) == 0)
         {
           /* Traffic class is inline */
 
           ipv6->vtc   = 0x60 | ((*g_hc06ptr >> 2) & 0x0f);
-          ipv6->tcf   = ((*g_hc06ptr << 6) & 0xC0) | ((*g_hc06ptr >> 2) & 0x30);
+          ipv6->tcf   = ((*g_hc06ptr << 6) & 0xc0) | ((*g_hc06ptr >> 2) & 0x30);
           ipv6->flow  = 0;
           g_hc06ptr  += 1;
         }
@@ -1268,8 +1277,9 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
             }
         }
 
-      /* If tmp == 0 we do not have a address context and therefore no prefix */
-      /* REVISIT: Source address may not be the same size as the destination
+      /* If tmp == 0 we do not have a address context and therefore no prefix.
+       *
+       * REVISIT: Source address may not be the same size as the destination
        * address.
        */
 
@@ -1279,8 +1289,9 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     }
   else
     {
-      /* No compression and link local */
-      /* REVISIT: Source address may not be the same size as the destination
+      /* No compression and link local.
+       *
+       * REVISIT: Source address may not be the same size as the destination
        * address.
        */
 
@@ -1288,8 +1299,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
                       ipv6->srcipaddr);
     }
 
-  /* Destination address */
-  /* Put the destination address compression mode into tmp */
+  /* Destination address.
+   *
+   * Put the destination address compression mode into tmp.
+   */
 
   tmp = ((iphc1 & SIXLOWPAN_IPHC_DAM_MASK) >> SIXLOWPAN_IPHC_DAM_BIT) & 0x03;
 
@@ -1320,7 +1333,11 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
            *   DAM 11: 8 bits    ff02::00xx
            */
 
-          uint8_t prefix[] = { 0xff, 0x02 };
+          uint8_t prefix[] =
+          {
+            0xff, 0x02
+          };
+
           if (tmp > 0 && tmp < 3)
             {
               prefix[1] = *g_hc06ptr;
@@ -1333,8 +1350,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     }
   else
     {
-      /* No multicast */
-      /* Context based */
+      /* No multicast.
+       *
+       * Context based.
+       */
 
       if ((iphc1 & SIXLOWPAN_IPHC_DAC) != 0)
         {

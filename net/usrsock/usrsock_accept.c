@@ -98,7 +98,8 @@ static uint16_t accept_event(FAR struct net_driver_s *dev, FAR void *pvconn,
           pstate->reqstate.result == -EAGAIN)
         {
           /* After reception of connection, mark input not ready. Daemon will
-           * send event to restore this flag. */
+           * send event to restore this flag.
+           */
 
           conn->flags &= ~USRSOCK_EVENT_RECVFROM_AVAIL;
         }
@@ -153,9 +154,12 @@ static uint16_t accept_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  * Name: do_accept_request
  ****************************************************************************/
 
-static int do_accept_request(FAR struct usrsock_conn_s *conn, socklen_t addrlen)
+static int do_accept_request(FAR struct usrsock_conn_s *conn,
+                             socklen_t addrlen)
 {
-  struct usrsock_request_accept_s req = {};
+  struct usrsock_request_accept_s req =
+  {
+  };
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -226,7 +230,9 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_data_reqstate_s state = {};
+  struct usrsock_data_reqstate_s state =
+  {
+  };
   FAR struct usrsock_conn_s *newconn;
   struct iovec inbufs[2];
   socklen_t inaddrlen = 0;
@@ -259,7 +265,8 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       ninfo("usockid=%d; accept() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 
@@ -422,7 +429,8 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
       /* We might start getting events for this socket right after
-       * returning to daemon, so setup 'newconn' already here. */
+       * returning to daemon, so setup 'newconn' already here.
+       */
 
       newconn->state = USRSOCK_CONN_STATE_READY;
 
@@ -455,7 +463,8 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               newsock->s_sockif  = psock->s_sockif;
 
               /* Store length of 'from' address that was available at
-               * daemon-side. */
+               * daemon-side.
+               */
 
               outaddrlen = state.valuelen_nontrunc;
 

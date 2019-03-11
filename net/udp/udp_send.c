@@ -139,7 +139,8 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           if (conn->domain == PF_INET6 &&
               ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr))
             {
-              in_addr_t raddr = ip6_get_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr);
+              in_addr_t raddr =
+                ip6_get_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr);
               net_ipv4addr_hdrcopy(ipv4->destipaddr, &raddr);
             }
           else

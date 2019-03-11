@@ -67,8 +67,8 @@
 
 static void neighbor_dump_address(FAR const void *buf, unsigned int buflen)
 {
-  char outbuf[16*3 + 9]; /* 6-byte header header + 16 hex bytes +
-                          * 2 space separator + NUL termination */
+  char outbuf[16 * 3 + 9]; /* 6-byte header header + 16 hex bytes +
+                            * 2 space separator + NUL termination */
   FAR const uint8_t *buffer = buf;
   FAR char *ptr;
   unsigned int i;

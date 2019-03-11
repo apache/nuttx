@@ -82,7 +82,6 @@ int mld_report(FAR struct net_driver_s *dev, FAR const net_ipv6addr_t grpaddr)
       return -EINVAL;
     }
 
-
   group = mld_grpallocfind(dev, grpaddr);
   if (group == NULL)
     {

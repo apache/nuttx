@@ -223,7 +223,6 @@ static uint8_t devif_reassembly(FAR struct net_driver_s *dev)
           g_reassembly_bitmap[offset / (8 * 8)] |=
             g_bitmap_bits[(offset / 8) & 7] &
               ~g_bitmap_bits[((offset + len) / 8) & 7];
-
         }
       else
         {
@@ -342,8 +341,10 @@ int ipv4_input(FAR struct net_driver_s *dev)
   g_netstats.ipv4.recv++;
 #endif
 
-  /* Start of IP input header processing code. */
-  /* Check validity of the IP header. */
+  /* Start of IP input header processing code.
+   *
+   * Check validity of the IP header.
+   */
 
   if (ipv4->vhl != 0x45)
     {

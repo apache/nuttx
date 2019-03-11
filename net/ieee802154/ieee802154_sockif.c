@@ -421,8 +421,9 @@ static int ieee802154_bind(FAR struct socket *psock,
 
   iaddr = (FAR const struct sockaddr_ieee802154_s *)addr;
 
-  /* Very that some address was provided */
-  /* REVISIT: Currently and explict address must be assigned.  Should we
+  /* Very that some address was provided.
+   *
+   * REVISIT: Currently and explict address must be assigned.  Should we
    * support some moral equivalent to INADDR_ANY?
    */
 

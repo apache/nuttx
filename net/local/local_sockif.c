@@ -558,6 +558,7 @@ static int local_connect(FAR struct socket *psock,
         {
           /* Perform the datagram connection logic */
 #warning Missing logic
+
           return -ENOSYS;
         }
         break;
@@ -703,6 +704,7 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
         {
           /* Local UDP packet send */
 #warning Missing logic
+
           ret = -ENOSYS;
         }
         break;

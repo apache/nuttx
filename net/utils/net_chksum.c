@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/utils/net_chksum.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014-2015 Gregory Nutt.  All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +70,9 @@
  *   data and len.
  *
  * Input Parameters:
- *   sum  - Partial calculations carried over from a previous call to chksum().
- *          This should be zero on the first time that check sum is called.
+ *   sum  - Partial calculations carried over from a previous call to
+ *          chksum().  This should be zero on the first time that check
+ *          sum is called.
  *   data - Beginning of the data to include in the checksum.
  *   len  - Length of the data to include in the checksum.
  *

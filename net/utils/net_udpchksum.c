@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/utils/net_udpchksum.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

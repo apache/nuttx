@@ -109,7 +109,9 @@ static int do_bind_request(FAR struct usrsock_conn_s *conn,
                            FAR const struct sockaddr *addr,
                            socklen_t addrlen)
 {
-  struct usrsock_request_bind_s req = {};
+  struct usrsock_request_bind_s req =
+  {
+  };
   struct iovec bufs[2];
 
   /* Prepare request for daemon to read. */
@@ -165,7 +167,9 @@ int usrsock_bind(FAR struct socket *psock,
                  socklen_t addrlen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   ssize_t ret;
 
   DEBUGASSERT(conn);
@@ -180,7 +184,8 @@ int usrsock_bind(FAR struct socket *psock,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

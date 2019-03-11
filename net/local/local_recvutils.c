@@ -219,7 +219,7 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
    * of the whole Unix domain address.
    */
 
-  pathlen = strnlen(conn->lc_path, UNIX_PATH_MAX-1);
+  pathlen = strnlen(conn->lc_path, UNIX_PATH_MAX - 1);
   totlen  = sizeof(sa_family_t) + pathlen + 1;
 
   /* If the length of the whole Unix domain address is larger than the

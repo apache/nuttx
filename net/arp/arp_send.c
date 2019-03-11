@@ -144,8 +144,10 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      /* It looks like we are good to send the data */
-      /* Copy the packet data into the device packet buffer and send it */
+      /* It looks like we are good to send the data.
+       *
+       * Copy the packet data into the device packet buffer and send it.
+       */
 
       arp_format(dev, state->snd_ipaddr);
 

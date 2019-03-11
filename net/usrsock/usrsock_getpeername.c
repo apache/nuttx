@@ -120,7 +120,9 @@ static uint16_t getpeername_event(FAR struct net_driver_s *dev,
 static int do_getpeername_request(FAR struct usrsock_conn_s *conn,
                                   socklen_t addrlen)
 {
-  struct usrsock_request_getpeername_s req = {};
+  struct usrsock_request_getpeername_s req =
+  {
+  };
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -170,7 +172,9 @@ int usrsock_getpeername(FAR struct socket *psock,
                         FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_data_reqstate_s state = {};
+  struct usrsock_data_reqstate_s state =
+  {
+  };
   struct iovec inbufs[1];
   ssize_t ret;
   socklen_t outaddrlen = 0;
@@ -185,7 +189,8 @@ int usrsock_getpeername(FAR struct socket *psock,
       ninfo("usockid=%d; usrsock_getpeername() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

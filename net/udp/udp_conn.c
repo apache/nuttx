@@ -420,7 +420,8 @@ static inline FAR struct udp_conn_s *
        *      IP address is available and we will insist that the
        *      destination IP matches the bound address. If a socket is bound
        *      to INADDR6_ANY (laddr), then it should receive all packets
-       *      directed to the port. REVISIT: Should also depend on SO_BROADCAST.
+       *      directed to the port. REVISIT: Should also depend on
+       *      SO_BROADCAST.
        *
        * 2. If this is a connection mode UDP socket, then the source address
        *    is verified against the connected remote address.
@@ -638,7 +639,8 @@ void udp_free(FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
 
-  while ((wrbuffer = (struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q)) != NULL)
+  while ((wrbuffer = (struct udp_wrbuffer_s *)
+          sq_remfirst(&conn->write_q)) != NULL)
     {
       udp_wrbuffer_release(wrbuffer);
     }
@@ -762,7 +764,8 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * interfaces for receiving (Sending will use the default port).
        */
 
-      net_ipv6addr_copy(conn->u.ipv6.laddr, inaddr->sin6_addr.in6_u.u6_addr16);
+      net_ipv6addr_copy(conn->u.ipv6.laddr,
+                        inaddr->sin6_addr.in6_u.u6_addr16);
     }
 #endif /* CONFIG_NET_IPv6 */
 

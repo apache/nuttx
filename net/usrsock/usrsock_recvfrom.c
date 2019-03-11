@@ -59,8 +59,9 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t recvfrom_event(FAR struct net_driver_s *dev, FAR void *pvconn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
+                               FAR void *pvconn, FAR void *pvpriv,
+                               uint16_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pvconn;
@@ -103,7 +104,8 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev, FAR void *pvconn,
           pstate->reqstate.result == -EAGAIN)
         {
           /* After reception of data, mark input not ready. Daemon will
-           * send event to restore this flag. */
+           * send event to restore this flag.
+           */
 
           conn->flags &= ~USRSOCK_EVENT_RECVFROM_AVAIL;
         }
@@ -161,7 +163,9 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
                                socklen_t addrlen)
 {
-  struct usrsock_request_recvfrom_s req = {};
+  struct usrsock_request_recvfrom_s req =
+  {
+  };
   struct iovec bufs[1];
 
   if (addrlen > UINT16_MAX)
@@ -214,7 +218,9 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                          FAR socklen_t *fromlen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_data_reqstate_s state = {};
+  struct usrsock_data_reqstate_s state =
+  {
+  };
   struct iovec inbufs[2];
   socklen_t addrlen = 0;
   socklen_t outaddrlen = 0;
@@ -246,7 +252,8 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 
@@ -432,7 +439,8 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           if (ret >= 0)
             {
               /* Store length of 'from' address that was available at
-               * daemon-side. */
+               * daemon-side.
+               */
 
               outaddrlen = state.valuelen_nontrunc;
             }

@@ -60,8 +60,9 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t setsockopt_event(FAR struct net_driver_s *dev, FAR void *pvconn,
-                                 FAR void *pvpriv, uint16_t flags)
+static uint16_t setsockopt_event(FAR struct net_driver_s *dev,
+                                 FAR void *pvconn, FAR void *pvpriv,
+                                 uint16_t flags)
 {
   FAR struct usrsock_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pvconn;
@@ -110,7 +111,9 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
                                  int level, int option, FAR const void *value,
                                  socklen_t value_len)
 {
-  struct usrsock_request_setsockopt_s req = {};
+  struct usrsock_request_setsockopt_s req =
+  {
+  };
   struct iovec bufs[2];
 
   if (level < INT16_MIN || level > INT16_MAX)
@@ -154,7 +157,8 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
  *   at the protocol level specified by the 'level' argument, to the value
- *   pointed to by the 'value' argument for the socket on the 'psock' argument.
+ *   pointed to by the 'value' argument for the socket on the 'psock'
+ *   argument.
  *
  *   The 'level' argument specifies the protocol level of the option. To set
  *   options at the socket level, specify the level argument as SOL_SOCKET.
@@ -173,7 +177,9 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
 int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
                        FAR const void *value, FAR socklen_t value_len)
 {
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   ssize_t ret;
 
   DEBUGASSERT(conn);
@@ -188,7 +194,8 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

@@ -70,7 +70,6 @@
 
 int local_release(FAR struct local_conn_s *conn)
 {
-
   /* There should be no references on this structure */
 
   DEBUGASSERT(conn->lc_crefs == 0);

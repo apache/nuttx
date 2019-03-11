@@ -229,8 +229,9 @@ static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
       meta->flags.ackreq = TRUE;
     }
 
-  /* Destination address */
-  /* If the output address is NULL, then it is broadcast on the 802.15.4
+  /* Destination address.
+   *
+   * If the output address is NULL, then it is broadcast on the 802.15.4
    * network.
    */
 

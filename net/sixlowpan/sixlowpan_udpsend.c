@@ -445,7 +445,6 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 
   if (dev != NULL && dev->d_len > 0 && fwddev != NULL)
     {
-
       sixlowpan_dumpbuffer("Outgoing UDP packet",
                            (FAR const uint8_t *)ipv6udp, dev->d_len);
 

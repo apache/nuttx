@@ -109,7 +109,9 @@ static int do_connect_request(FAR struct usrsock_conn_s *conn,
                               FAR const struct sockaddr *addr,
                               socklen_t addrlen)
 {
-  struct usrsock_request_connect_s req = {};
+  struct usrsock_request_connect_s req =
+  {
+  };
   struct iovec bufs[2];
 
   if (addrlen > UINT16_MAX)
@@ -157,7 +159,9 @@ int usrsock_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   int ret;
 
   DEBUGASSERT(conn);
@@ -172,7 +176,8 @@ int usrsock_connect(FAR struct socket *psock,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNREFUSED;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNREFUSED;
       goto errout_unlock;
     }
 

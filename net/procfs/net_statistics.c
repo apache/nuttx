@@ -58,6 +58,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Line generating functions */
 
 static int     netprocfs_header(FAR struct netprocfs_file_s *netfile);

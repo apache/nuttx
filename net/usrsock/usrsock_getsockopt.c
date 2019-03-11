@@ -60,8 +60,9 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t getsockopt_event(FAR struct net_driver_s *dev, FAR void *pvconn,
-                                 FAR void *pvpriv, uint16_t flags)
+static uint16_t getsockopt_event(FAR struct net_driver_s *dev,
+                                 FAR void *pvconn, FAR void *pvpriv,
+                                 uint16_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pvconn;
@@ -118,7 +119,9 @@ static uint16_t getsockopt_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
                                  int option, socklen_t value_len)
 {
-  struct usrsock_request_getsockopt_s req = {};
+  struct usrsock_request_getsockopt_s req =
+  {
+  };
   struct iovec bufs[1];
 
   if (level < INT16_MIN || level > INT16_MAX)
@@ -183,7 +186,9 @@ static int do_getsockopt_request(FAR struct usrsock_conn_s *conn, int level,
 int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
                        FAR void *value, FAR socklen_t *value_len)
 {
-  struct usrsock_data_reqstate_s state = {};
+  struct usrsock_data_reqstate_s state =
+  {
+  };
   struct iovec inbufs[1];
   ssize_t ret;
 
@@ -197,7 +202,8 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
       ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

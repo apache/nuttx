@@ -1804,7 +1804,6 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
 
       netdown_notifier_signal(dev);
 #endif
-
     }
 }
 

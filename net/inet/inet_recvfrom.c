@@ -1548,8 +1548,9 @@ ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
-  /* Read from the network interface driver buffer */
-  /* Or perform the TCP/IP or UDP recv() operation */
+  /* Read from the network interface driver buffer.
+   * Or perform the TCP/IP or UDP recv() operation.
+   */
 
   switch (psock->s_type)
     {

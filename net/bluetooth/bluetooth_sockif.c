@@ -420,8 +420,9 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   iaddr = (FAR const struct sockaddr_bt_s *)addr;
 
-  /* Very that some address was provided */
-  /* REVISIT: Currently and explict address must be assigned.  Should we
+  /* Very that some address was provided.
+   *
+   * REVISIT: Currently and explict address must be assigned.  Should we
    * support some moral equivalent to INADDR_ANY?
    */
 
@@ -667,7 +668,7 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
     {
       /* send() may be used only if the socket is has been connected. */
 
-      if (!_SS_ISCONNECTED( psock->s_flags))
+      if (!_SS_ISCONNECTED(psock->s_flags))
         {
           ret = -ENOTCONN;
         }

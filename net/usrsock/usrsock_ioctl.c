@@ -119,7 +119,9 @@ static uint16_t ioctl_event(FAR struct net_driver_s *dev,
 static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
                                  FAR void *arg, size_t arglen)
 {
-  struct usrsock_request_ioctl_s req = {};
+  struct usrsock_request_ioctl_s req =
+  {
+  };
   struct iovec bufs[2];
 
   if (arglen > UINT16_MAX)
@@ -159,10 +161,13 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
  *
  ****************************************************************************/
 
-int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg, size_t arglen)
+int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
+                  size_t arglen)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_data_reqstate_s state = {};
+  struct usrsock_data_reqstate_s state =
+  {
+  };
   struct iovec inbufs[1];
   int ret;
 
@@ -176,7 +181,8 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg, size_t argle
       ninfo("usockid=%d; ioctl() with uninitialized usrsock.\n",
             conn->usockid);
 
-      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE : -ECONNRESET;
+      ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
+            -ECONNRESET;
       goto errout_unlock;
     }
 

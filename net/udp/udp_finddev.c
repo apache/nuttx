@@ -106,7 +106,6 @@ static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
 #  define upd_bound_device(c) netdev_default();
 #endif
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -250,8 +249,9 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
-              /* Not a suitable IPv4 unicast address for device lookup */
-              /* Return the device bound to this UDP socket, if any */
+              /* Not a suitable IPv4 unicast address for device lookup.
+               * Return the device bound to this UDP socket, if any.
+               */
 
               return upd_bound_device(conn);
             }
@@ -302,8 +302,9 @@ FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn)
             }
           else
             {
-              /* Not a suitable IPv6 unicast address for device lookup */
-              /* Return the device bound to this UDP socket, if any */
+              /* Not a suitable IPv6 unicast address for device lookup.
+               * Return the device bound to this UDP socket, if any.
+               */
 
               return upd_bound_device(conn);
             }

@@ -246,8 +246,9 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   ipv6tcp->tcp.urgp[0]   = 0;                     /* No urgent data */
   ipv6tcp->tcp.urgp[1]   = 0;
 
-  /* Set the sequency number information */
-  /* REVISIT:  There is currently no wait for the data to be ACKed and,
+  /* Set the sequency number information.
+   *
+   * REVISIT:  There is currently no wait for the data to be ACKed and,
    * hence, no mechanism to retransmit the packet.
    */
 

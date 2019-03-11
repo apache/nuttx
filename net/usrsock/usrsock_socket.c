@@ -90,7 +90,8 @@ static uint16_t socket_event(FAR struct net_driver_s *dev, FAR void *pvconn,
       if (pstate->result >= 0)
         {
           /* We might start getting events for this socket right after
-           * returning to daemon, so setup 'conn' already here. */
+           * returning to daemon, so setup 'conn' already here.
+           */
 
           conn->state   = USRSOCK_CONN_STATE_READY;
           conn->usockid = pstate->result;
@@ -117,7 +118,9 @@ static uint16_t socket_event(FAR struct net_driver_s *dev, FAR void *pvconn,
 static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
                              int type, int protocol)
 {
-  struct usrsock_request_socket_s req = {};
+  struct usrsock_request_socket_s req =
+  {
+  };
   struct iovec bufs[1];
 
   /* Prepare request for daemon to read. */
@@ -160,10 +163,11 @@ static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
  *   structure.
  *
  * Input Parameters:
- *   domain   (see sys/socket.h)
- *   type     (see sys/socket.h)
- *   protocol (see sys/socket.h)
- *   psock    A pointer to a user allocated socket structure to be initialized.
+ *   domain   - (see sys/socket.h)
+ *   type     - (see sys/socket.h)
+ *   protocol - (see sys/socket.h)
+ *   psock    - A pointer to a user allocated socket structure to be
+ *              initialized.
  *
  * Returned Value:
  *   0 on success; negative error-code on error
@@ -190,9 +194,12 @@ static int do_socket_request(FAR struct usrsock_conn_s *conn, int domain,
  *
  ****************************************************************************/
 
-int usrsock_socket(int domain, int type, int protocol, FAR struct socket *psock)
+int usrsock_socket(int domain, int type, int protocol,
+                   FAR struct socket *psock)
 {
-  struct usrsock_reqstate_s state = {};
+  struct usrsock_reqstate_s state =
+  {
+  };
   FAR struct usrsock_conn_s *conn;
   int err;
   int ret;

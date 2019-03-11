@@ -213,8 +213,9 @@ FAR struct ieee802154_conn_s *
        conn != NULL;
        conn = (FAR struct ieee802154_conn_s *)conn->node.flink)
     {
-      /* Does the destination address match the bound address of the socket. */
-      /* REVISIT: Currently and explicit address must be assigned.  Should we
+      /* Does the destination address match the bound address of the socket.
+       *
+       * REVISIT: Currently and explicit address must be assigned.  Should we
        * support some moral equivalent to INADDR_ANY?
        */
 

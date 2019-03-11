@@ -1068,20 +1068,20 @@ int main(int argc, char **argv, char **envp)
                   break;
 
                 case '/':
-                  /* C++-style comment */
+                  /* C comment terminator*/
 
-                  if (line[n] == '/')
+                  if (line[n - 1] == '*')
                     {
-                       if (line[n - 1] == '*')
-                         {
-                           n++;
-                         }
-                       else if (line[n + 1] == '/')
-                         {
-                           fprintf(stderr, "C++ style comment on at %d:%d\n",
-                                   lineno, n);
-                           n++;
-                        }
+                      n++;
+                    }
+
+                    /* C++-style comment */
+
+                  else if (line[n + 1] == '/')
+                    {
+                      fprintf(stderr, "C++ style comment on at %d:%d\n",
+                              lineno, n);
+                      n++;
                     }
 
                   /* /= */
@@ -1091,6 +1091,9 @@ int main(int argc, char **argv, char **envp)
                       check_spaces_leftright(line, lineno, n, n + 1);
                       n++;
                     }
+
+                  /* Division operator */
+
                   else
                     {
                       check_spaces_leftright(line, lineno, n, n);

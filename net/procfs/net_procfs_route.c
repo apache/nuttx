@@ -231,7 +231,6 @@ static const char g_route_ipv4_subdir[] = "ipv4";
 static const char g_route_ipv6_subdir[] = "ipv6";
 #endif
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -735,7 +734,7 @@ static int route_readdir(struct fs_dirent_s *dir)
   /* Save the filename and file type */
 
   dir->fd_dir.d_type = DTYPE_FILE;
-  strncpy(dir->fd_dir.d_name, dname, NAME_MAX+1);
+  strncpy(dir->fd_dir.d_name, dname, NAME_MAX + 1);
 
   /* Set up the next directory entry offset.  NOTE that we could use the
    * standard f_pos instead of our own private index.

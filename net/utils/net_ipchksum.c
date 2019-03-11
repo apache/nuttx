@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_ipchksum.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017-2018 Gregory Nutt. All
+ *   Copyright (C) 2007-2010, 2012, 2014-2015, 2017-2018 Gregory Nutt.  All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -100,8 +100,10 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
       return 0;
     }
 
-  /* First sum pseudo-header. */
-  /* IP protocol and length fields. This addition cannot carry. */
+  /* First sum pseudo-header.
+   *
+   * IP protocol and length fields. This addition cannot carry.
+   */
 
   sum = upperlen + proto;
 
@@ -173,7 +175,8 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (FAR uint8_t *)&ipv6->srcipaddr, 2 * sizeof(net_ipv6addr_t));
+  sum = chksum(sum, (FAR uint8_t *)&ipv6->srcipaddr,
+               2 * sizeof(net_ipv6addr_t));
 
   /* Sum IP payload data. */
 

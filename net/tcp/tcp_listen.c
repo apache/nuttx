@@ -294,7 +294,8 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
       else
         {
           /* Add the connection to the backlog and notify any threads that
-           * may be waiting on poll()/select() that the connection is available.
+           * may be waiting on poll()/select() that the connection is
+           * available.
            */
 
           ret = tcp_backlogadd(listener, conn);

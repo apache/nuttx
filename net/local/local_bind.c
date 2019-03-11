@@ -91,7 +91,7 @@ int psock_local_bind(FAR struct socket *psock,
     }
   else
     {
-      namelen = strnlen(unaddr->sun_path, UNIX_PATH_MAX-1);
+      namelen = strnlen(unaddr->sun_path, UNIX_PATH_MAX - 1);
       if (namelen <= 0)
         {
           /* Zero-length sun_path... This is an abstract Unix domain socket */
@@ -107,8 +107,8 @@ int psock_local_bind(FAR struct socket *psock,
 
           /* Copy the path into the connection structure */
 
-          (void)strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX-1);
-          conn->lc_path[UNIX_PATH_MAX-1] = '\0';
+          (void)strncpy(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1);
+          conn->lc_path[UNIX_PATH_MAX - 1] = '\0';
           conn->lc_instance_id = -1;
         }
     }

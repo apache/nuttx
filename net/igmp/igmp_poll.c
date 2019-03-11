@@ -81,6 +81,7 @@ static inline void igmp_sched_send(FAR struct net_driver_s *dev,
   in_addr_t *dest;
 
   /* REVISIT:  This should be deferred to a work queue */
+
   /* Check what kind of message we need to send.  There are only two
    * possibilities:
    */
