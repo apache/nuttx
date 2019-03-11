@@ -55,13 +55,14 @@
 #endif
 
 #include "stm32_rcc.h"
-// TODO: #include "stm32_userspace.h"
+#include "stm32_userspace.h"
 #include "stm32_lowputc.h"
 #include "stm32_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Memory Map ***************************************************************/
 /*
  * TODO: Fix this

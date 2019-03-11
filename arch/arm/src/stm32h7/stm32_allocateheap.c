@@ -58,7 +58,7 @@
 #include "up_internal.h"
 
 #include "chip/stm32_memorymap.h"
-// TODO: #include "stm32_mpuinit.h"
+#include "stm32_mpuinit.h"
 // TODO: #include "stm32_dtcm.h"
 
 /****************************************************************************
@@ -203,7 +203,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   size_t    usize = SRAM123_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)SRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)SRAM123_END);
 
   /* Adjust that size to account for MPU alignment requirements.
    * NOTE that there is an implicit assumption that the SRAM123_END
