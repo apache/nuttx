@@ -108,7 +108,7 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
  *
  ****************************************************************************/
 
-#if (defined CONFIG_NET_LOOPBACK)  && defined (CONFIG_NET_IPv6)
+#if (defined CONFIG_NET_LOOPBACK) && defined (CONFIG_NET_IPv6)
 static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr6 *ipv6addr;
