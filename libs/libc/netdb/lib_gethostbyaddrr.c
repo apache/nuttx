@@ -82,9 +82,9 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
   if (type == AF_INET && len >= sizeof(struct in_addr))
     {
       ipv4addr = (FAR struct in_addr *)addr;
-      return net_ipv4addr_maskcmp(ipv4addr->sin_addr.s_addr,
-                                  g_lo_ipv4addr->s_addr,
-                                  g_lo_ipv4addr->s_addr);
+      return net_ipv4addr_maskcmp(ipv4addr->s_addr,
+                                  g_lo_ipv4addr,
+                                  g_lo_ipv4addr);
     }
 
   return false;
@@ -108,7 +108,7 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LOOPBACK
+#if (defined CONFIG_NET_LOOPBACK)  && defined (CONFIG_NET_IPv6)
 static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr6 *ipv6addr;
@@ -167,7 +167,8 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
       src              = (FAR uint8_t *)&g_lo_ipv4addr;
       host->h_addrtype = AF_INET;
     }
-  else if (lib_lo_ipv4match(addr, len, type))
+#ifdef CONFIG_NET_IPv6
+  else if (lib_lo_ipv6match(addr, len, type))
     {
       /* Setup to transfer the IPv6 address */
 
@@ -175,6 +176,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
       src              = (FAR uint8_t *)&g_lo_ipv6addr;
       host->h_addrtype = AF_INET6;
     }
+#endif
   else
     {
       /* Return 1 meaning that we have no errors but no match either */
