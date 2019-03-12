@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/include/nrf52xxx/irq.h
+ * arch/arm/include/nrf52/irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -77,8 +77,8 @@
 
 /* Cortex-M4 External interrupts (vectors >= 16) */
 
-#if defined(CONFIG_ARCH_FAMILY_NRF52832)
-#  include <arch/nrf52/nrf52832_irq.h>
+#if defined(CONFIG_ARCH_FAMILY_NRF52832) ||  defined(CONFIG_ARCH_FAMILY_NRF52840)
+#  include <arch/nrf52/nrf52_irq.h>
 #else
 #  error "Unsupported NRF52XX MCU"
 #endif
