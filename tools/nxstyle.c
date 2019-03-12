@@ -548,7 +548,74 @@ int main(int argc, char **argv, char **envp)
               do
                 {
                   have_upper |= isupper(line[n]);
-                  have_lower |= islower(line[n]);
+
+                  /* The coding standard provides for some exceptions of lower
+                   * case characters in pre-processor strings:
+                   *
+                   *   IPv[4|6]    as an IP version number
+                   *   ICMPv6      as an ICMP version number
+                   *   IGMPv2      as an IGMP version number
+                   *   [0-9]p[0-9] as a decimal point
+                   *   d[0-9]      as a divisor
+                   */
+
+                   if (!have_lower && islower(line[n]))
+                     {
+                       switch (line[n])
+                       {
+                         case 'v':
+                           if (n > 1 &&
+                               line[n - 2] == 'I' &&
+                               line[n - 1] == 'P' &&
+                               (line[n + 1] == '4' ||
+                                line[n + 1] == '6'))
+                             {
+                             }
+                           else if (n > 3 &&
+                                    line[n - 4] == 'I' &&
+                                    line[n - 3] == 'C' &&
+                                    line[n - 2] == 'M' &&
+                                    line[n - 1] == 'P' &&
+                                    line[n + 1] == '6')
+                             {
+                             }
+                           else if (n > 3 &&
+                                    line[n - 4] == 'I' &&
+                                    line[n - 3] == 'G' &&
+                                    line[n - 2] == 'M' &&
+                                    line[n - 1] == 'P' &&
+                                    line[n + 1] == '2')
+                             {
+                             }
+                           else
+                             {
+                               have_lower = true;
+                             }
+                           break;
+
+                         case 'p':
+                           if (have_upper &&
+                               (n < 1 ||
+                                !isdigit(line[n - 1]) ||
+                                !isdigit(line[n + 1])))
+                             {
+                               have_lower = true;
+                             }
+                             break;
+
+                         case 'd':
+                           if (have_upper && !isdigit(line[n + 1]))
+                             {
+                               have_lower = true;
+                             }
+                             break;
+
+                         default:
+                           have_lower = true;
+                           break;
+                       }
+                     }
+
                   n++;
                 }
               while (line[n] == '_' || isalnum(line[n]));

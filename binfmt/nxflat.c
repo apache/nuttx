@@ -258,7 +258,7 @@ static int nxflat_unloadbinary(FAR struct binary_s *binp)
 
       /* Mark alloc[0] (dspace) as freed */
 
-       binp->alloc[0] = NULL;
+      binp->alloc[0] = NULL;
 
       /* The reference count will be decremented to zero and the dspace
        * container will be freed in sched/sched_releasetcb.c
