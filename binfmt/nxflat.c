@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/nxflat.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,8 @@
 #include <errno.h>
 
 #include <arpa/inet.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/nxflat.h>
 
@@ -78,9 +80,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nxflat_loadbinary(struct binary_s *binp);
+static int nxflat_loadbinary(FAR struct binary_s *binp);
+static int nxflat_unloadbinary(FAR struct binary_s *binp);
+
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
-static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo);
+static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo);
 #endif
 
 /****************************************************************************
@@ -91,7 +95,7 @@ static struct binfmt_s g_nxflatbinfmt =
 {
   NULL,                /* next */
   nxflat_loadbinary,   /* load */
-  NULL,                /* unload */
+  nxflat_unloadbinary, /* unload */
 };
 
 /****************************************************************************
@@ -103,7 +107,7 @@ static struct binfmt_s g_nxflatbinfmt =
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
-static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
+static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
 {
   unsigned long dsize = loadinfo->datasize + loadinfo->bsssize;
 
@@ -146,7 +150,7 @@ static void nxflat_dumploadinfo(struct nxflat_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static int nxflat_loadbinary(struct binary_s *binp)
+static int nxflat_loadbinary(FAR struct binary_s *binp)
 {
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
   int                      ret;
@@ -225,6 +229,36 @@ errout_with_init:
   nxflat_uninit(&loadinfo);
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxflat_unloadbinary
+ *
+ * Description:
+ *   Verify that the file is an NXFLAT binary and, if so, load the NXFLAT
+ *   binary into memory
+ *
+ ****************************************************************************/
+
+static int nxflat_unloadbinary(FAR struct binary_s *binp)
+{
+  FAR struct dspace_s *dspace = (FAR struct dspace_s *)binp->alloc[0];
+
+  if (dspace != NULL)
+    {
+      /* Free dspace region */
+
+      kumm_free(dspace->region);
+      dspace->region = 0;
+    }
+
+  /* Mark alloc[0] (dspace) as freed */
+
+ binp->alloc[0] = NULL;
+
+ /* dspace container will be freed in sched/sched_releasetcb */
+
+ return OK;
 }
 
 /****************************************************************************
