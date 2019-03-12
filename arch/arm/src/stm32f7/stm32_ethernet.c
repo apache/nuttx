@@ -2675,11 +2675,11 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
       registeraddress = STM32_ETH_MACHTLR;
     }
 
-  temp = stm32_getreg(registeraddress);
+  temp  = stm32_getreg(registeraddress);
   temp |= 1 << hashindex;
   stm32_putreg(temp, registeraddress);
 
-  temp = stm32_getreg(STM32_ETH_MACFFR);
+  temp  = stm32_getreg(STM32_ETH_MACFFR);
   temp |= (ETH_MACFFR_HM | ETH_MACFFR_HPF);
   stm32_putreg(temp, STM32_ETH_MACFFR);
 
