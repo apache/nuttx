@@ -168,7 +168,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 #ifdef CONFIG_PIC
       /* Delete the task's allocated DSpace region (external modules only) */
 
-      if (tcb->dspace)
+      if (tcb->dspace != NULL)
         {
           if (tcb->dspace->crefs <= 1)
             {

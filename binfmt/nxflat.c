@@ -246,17 +246,27 @@ static int nxflat_unloadbinary(FAR struct binary_s *binp)
 
   if (dspace != NULL)
     {
-      /* Free dspace region */
+      /* Check if this is the last reference to dspace.  It may still be
+       * needed by other threads.  In that case, it must persist after this
+       * thread terminates.
+       */
 
-      kumm_free(dspace->region);
-      dspace->region = 0;
+      if (dspace->crefs == 1)
+         {
+          /* Free the dspace region */
+
+          kumm_free(dspace->region);
+          dspace->region = NULL;
+
+          /* Mark alloc[0] (dspace) as freed */
+
+           binp->alloc[0] = NULL;
+
+          /* The reference count will be decremented to zero and the dspace
+           * container will be freed in sched/sched_releasetcb.c
+           */
+        }
     }
-
-  /* Mark alloc[0] (dspace) as freed */
-
- binp->alloc[0] = NULL;
-
- /* dspace container will be freed in sched/sched_releasetcb */
 
  return OK;
 }
