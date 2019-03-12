@@ -563,6 +563,10 @@ int main(int argc, char **argv, char **envp)
                      {
                        switch (line[n])
                        {
+                         /* Sequence containing 'v' may occur at the
+                          * beginning of the identifier.
+                          */
+
                          case 'v':
                            if (n > 1 &&
                                line[n - 2] == 'I' &&
@@ -593,9 +597,12 @@ int main(int argc, char **argv, char **envp)
                              }
                            break;
 
+                         /* Sequence containing 'p' or 'd' must have been
+                          * preceded by upper case characters.
+                          */
+
                          case 'p':
-                           if (have_upper &&
-                               (n < 1 ||
+                           if (!have_upper || n < 1 ||
                                 !isdigit(line[n - 1]) ||
                                 !isdigit(line[n + 1])))
                              {
@@ -604,7 +611,7 @@ int main(int argc, char **argv, char **envp)
                              break;
 
                          case 'd':
-                           if (have_upper && !isdigit(line[n + 1]))
+                           if (!have_upper || !isdigit(line[n + 1]))
                              {
                                have_lower = true;
                              }
