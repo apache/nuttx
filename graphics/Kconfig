@@ -42,6 +42,28 @@ config NX_NPLANES
 		are willing to debug a lot of untested logic), this value should be
 		set to 1.
 
+config NX_RAMBACKED
+	bool "RAM backed windows"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		If this option is selected, then windows may be optionally created
+		with a RAM frambuffer backing up the window content.  Rending into
+		the window will result in rending into the backup framebuffer, then
+		updating the physical display from the framebuffer.
+
+		The advantage of this option is that the application that manages
+		window will no longer receive redraw() callbacks.  Those calls
+		normally occur when a window "above" moves exposing a portion of the
+		window below.  If this option is selected, then the system will
+		redraw the exposed portion of the window from the backup framebuffer
+		without intervention of the window applications.  This greatly
+		reduces the complexity of the application and performance of the
+		window at the expense of increased memory usage.
+
+		Redraw requests in other cases are also suppressed:  Changes to window
+		position, size, etc.
+
 config NX_BGCOLOR
 	hex "Initial background color"
 	default 0x0

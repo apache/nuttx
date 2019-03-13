@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: March 10, 2019</p>
+      <p>Last Updated: March 13, 2019</p>
     </td>
   </tr>
 </table>
@@ -1348,7 +1348,7 @@ int nx_eventnotify(NXHANDLE handle, int signo);
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nx.h&gt;
 
-NXWINDOW nx_openwindow(NXHANDLE handle,
+NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
                        FAR const struct nx_callback_s *cb,
                        FAR void *arg);
 </pre></ul>
@@ -1360,6 +1360,10 @@ NXWINDOW nx_openwindow(NXHANDLE handle,
   <ul><dl>
     <dt><code>handle</code>
     <dd>The handle returned by <a href="#nxconnectinstance"><code>nx_connect()</code></a>.
+    <dt><code>flags</code>
+    <dd>Optional flags.
+    Must be zero unless <code>CONFIG_NX_RAMBACKED</code> is enabled.
+    In that case, it may be zero or <code>NXBE_WINDOW_RAMBACKED</code>.
     <dt><code>cb</code>
     <dd>Callbacks used to process window events
     <dt><code>arg</code>
@@ -2073,7 +2077,7 @@ typedef FAR void *NXTKWINDOW;
 #include &lt;nuttx/nx/nx.h&gt;
 #include &lt;nuttx/nx/nxtk.h&gt;
 
-NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
+NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
                            FAR const struct nx_callback_s *cb,
                            FAR void *arg);
 </pre></ul>
@@ -2085,6 +2089,10 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
   <dl>
     <dt><code>handle</code>
     <dd>The handle returned by <a href="#nxconnectinstance"><code>nx_connect()</code></a>.
+    <dt><code>flags</code>
+    <dd>Optional flags.
+    Must be zero unless <code>CONFIG_NX_RAMBACKED</code> is enabled.
+    In that case, it may be zero or <code>NXBE_WINDOW_RAMBACKED</code>.
     <dt><code>cb</code>
     <dd>Callbacks used to process window events
     <dt><code>arg</code>
@@ -3243,7 +3251,20 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 <ul>
   <dl>
     <dt><code>CONFIG_NX</code>
-    Enables overall support for graphics library and NX
+    <dd>Enables overall support for graphics library and NX
+    <dt><code>CONFIG_NX_RAMBACKED</code>
+    <dd>Enables RAM backed window support.
+    If this option is selected, then windows may be optionally created with a RAM frambuffer backing up the window content.
+    Rending into the window will result in rending into the backup framebuffer, then updating the physical display from the framebuffer.
+    <p>
+      The advantage of this option is that the application that manages window will no longer receive redraw() callbacks.
+      Those calls normally occur, for example, when a window "above" moves exposing a portion of the window below.
+      If this option is selected, then the system will redraw the exposed portion of the window from the backup framebuffer without intervention of the window applications.
+      This greatly reduces the complexity of the application and performance of the window at the expense of increased memory usage.
+    </p>
+    <p>
+      Redraw requests in other cases are also suppressed:  Changes to window position, size, etc.
+    </p>
   </dl>
 </ul>
 

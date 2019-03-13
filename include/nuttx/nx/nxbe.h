@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/nx/nxbe.h
  *
- *   Copyright (C) 2008-2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,13 +63,32 @@
 #endif
 
 /* NXBE Definitions *********************************************************/
-/* Window flags and helper macros */
 
-#define NXBE_WINDOW_BLOCKED  (1 << 0) /* The window is blocked and will not
-                                       * receive further input. */
+/* Window flags and helper macros:
+ *
+ * NXBE_WINDOW_BLOCKED   - Window input is blocked (internal use only)
+ * NXBE_WINDOW_RAMBACKED - Window is backed by a framebuffer
+ */
 
-#define NXBE_ISBLOCKED(wnd)  (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
-#define NXBE_SETBLOCKED(wnd) do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
+#define NXBE_WINDOW_BLOCKED   (1 << 0) /* The window is blocked and will not
+                                        * receive further input. */
+#define NXBE_WINDOW_RAMBACKED (1 << 1) /* Window is backed by a framebuffer */
+
+#ifdef CONFIG_NX_RAMBACKED
+#  define NXBE_WINDOW_USER NXBE_WINDOW_RAMBACKED
+#else
+#  define NXBE_WINDOW_USER 0
+#endif
+
+#define NXBE_ISBLOCKED(wnd) \
+  (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
+#define NXBE_SETBLOCKED(wnd) \
+  do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
+
+#define NXBE_ISRAMBACKED(wnd) \
+  (((wnd)->flags & NXBE_WINDOW_RAMBACKED) != 0)
+#define NXBE_SETRAMBACKED(wnd) \
+  do { (wnd)->flags |= NXBE_WINDOW_RAMBACKED; } while (0)
 
 /****************************************************************************
  * Public Types

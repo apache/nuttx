@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libnx/nxmu/nx_openwindow.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +61,9 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
+ *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
+ *            enabled.  In that case, it may be zero or
+ *            NXBE_WINDOW_RAMBACKED
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -69,8 +73,8 @@
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
+                       FAR const struct nx_callback_s *cb, FAR void *arg)
 {
   FAR struct nxbe_window_s *wnd;
   int ret;
@@ -94,7 +98,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   /* Then let nx_constructwindow do the rest */
 
-  ret = nx_constructwindow(handle, (NXWINDOW)wnd, cb, arg);
+  ret = nx_constructwindow(handle, (NXWINDOW)wnd, flags, cb, arg);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */
@@ -109,4 +113,3 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   return (NXWINDOW)wnd;
 }
-

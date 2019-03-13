@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/nx/nx.h
  *
- *   Copyright (C) 2008-2011, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2015, 2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -379,6 +380,9 @@ int nx_eventnotify(NXHANDLE handle, int signo);
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect()
+ *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
+ *            enabled.  In that case, it may be zero or
+ *            NXBE_WINDOW_RAMBACKED
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -388,8 +392,8 @@ int nx_eventnotify(NXHANDLE handle, int signo);
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg);
+NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
+                       FAR const struct nx_callback_s *cb, FAR void *arg);
 
 /****************************************************************************
  * Name: nx_closewindow
@@ -908,6 +912,9 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   hwnd   - The pre-allocated window structure.
+ *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
+ *            enabled.  In that case, it may be zero or
+ *            NXBE_WINDOW_RAMBACKED
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -917,7 +924,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *
  ****************************************************************************/
 
-int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
+int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
                        FAR const struct nx_callback_s *cb, FAR void *arg);
 
 #undef EXTERN

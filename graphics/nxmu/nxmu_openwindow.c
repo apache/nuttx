@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_openwindow.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,26 +43,6 @@
 #include "nxmu.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,12 +64,13 @@
 void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 {
   /* The window structure was allocated in nx_openwindow and all fields have
-   * been set to zero cb and conn which were initialized on the client side.
-   * On the server side, we need only initialize a few more the non zero fields
-   * and insert the new window at the top of the display.
+   * been set to zero; conn, flags, cb, and arg which were initialized on
+   * the client side.  On the server side, we need only initialize a few
+   * more the non zero fields and insert the new window at the top of the
+   * display.
    */
 
-  wnd->be   = be;
+  wnd->be           = be;
 
   /* Now, insert the new window at the top on the display.  topwind is
    * never NULL (it may point only at the background window, however)
@@ -105,9 +86,9 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 
   nxmu_reportposition(wnd);
 
+#ifdef CONFIG_NX_XYINPUT
   /* Provide the initial mouse settings to the client */
 
-#ifdef CONFIG_NX_XYINPUT
   nxmu_mousereport(wnd);
 #endif
 }

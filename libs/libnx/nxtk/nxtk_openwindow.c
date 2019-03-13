@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libnx/nxtk/nxtk_openwindow.c
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,6 +89,9 @@ nxgl_mxpixel_t g_bordercolor3[CONFIG_NX_NPLANES] =
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
+ *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
+ *            enabled.  In that case, it may be zero or
+ *            NXBE_WINDOW_RAMBACKED
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NXTK callbacks.
  *
@@ -97,7 +101,7 @@ nxgl_mxpixel_t g_bordercolor3[CONFIG_NX_NPLANES] =
  *
  ****************************************************************************/
 
-NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
+NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
                            FAR const struct nx_callback_s *cb,
                            FAR void *arg)
 {
@@ -105,7 +109,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
   int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!handle || !cb)
+  if (handle == NULL || cb == NULL)
     {
       set_errno(EINVAL);
       return NULL;
@@ -117,7 +121,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
   fwnd = (FAR struct nxtk_framedwindow_s *)
     lib_uzalloc(sizeof(struct nxtk_framedwindow_s));
 
-  if (!fwnd)
+  if (fwnd == NULL)
     {
       set_errno(ENOMEM);
       return NULL;
@@ -130,7 +134,8 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
 
   /* Then let nx_constructwindow do the rest */
 
-  ret = nx_constructwindow(handle, (NXWINDOW)&fwnd->wnd, &g_nxtkcb, NULL);
+  ret = nx_constructwindow(handle, (NXWINDOW)&fwnd->wnd, flags, &g_nxtkcb,
+                           NULL);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */

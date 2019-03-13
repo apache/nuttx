@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nx/nxtk.h
  *
- *   Copyright (C) 2008-2012, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,6 +122,9 @@ extern "C"
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
+ *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
+ *            enabled.  In that case, it may be zero or
+ *            NXBE_WINDOW_RAMBACKED
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NXTK callbacks.
  *
@@ -131,8 +134,9 @@ extern "C"
  *
  ****************************************************************************/
 
-NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
-                           FAR const struct nx_callback_s *cb, FAR void *arg);
+NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
+                           FAR const struct nx_callback_s *cb,
+                           FAR void *arg);
 
 /****************************************************************************
  * Name: nxtk_closewindow
