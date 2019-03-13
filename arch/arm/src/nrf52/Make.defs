@@ -76,8 +76,12 @@ CMN_CSRCS += up_copyarmstate.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_clrpend.c
+CHIP_CSRCS  = nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
 CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c nrf52_nvmc.c
+
+ifeq ($(CONFIG_ARCH_FAMILY_NRF52832),y)
+CHIP_CSRCS += nrf52832_errdata.c
+endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += nrf52_timerisr.c
@@ -104,3 +108,8 @@ endif
 ifeq ($(CONFIG_NRF52_WDT),y)
 CHIP_CSRCS += nrf52_wdt.c
 endif
+
+ifeq ($(CONFIG_NRF52_RNG),y)
+CHIP_CSRCS += nrf52_rng.c
+endif
+

@@ -77,6 +77,7 @@ config NRF52_UART0
 config NRF52_RNG
 	bool "Random Generator"
 	default n
+	select ARCH_HAVE_RNG
 
 config NRF52_QSPI
 	bool "QSPI"

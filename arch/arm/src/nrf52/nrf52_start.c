@@ -48,9 +48,8 @@
 #include "nvic.h"
 
 #include "nrf52_clockconfig.h"
-//#include "nrf52_userspace.h"
+#include "chip/nrf52_utils.h"
 #include "nrf52_lowputc.h"
-//#include "nrf52_serial.h"
 #include "nrf52_start.h"
 #include "nrf52_gpio.h"
 #include "nrf52_serial.h"
@@ -94,7 +93,8 @@
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while
+ *  either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -218,6 +218,12 @@ void __start(void)
 
   showprogress('C');
 
+#if defined(CONFIG_ARCH_FAMILY_NRF52832)
+  /* Initialize the errdata work-around */
+
+  nrf52832_errdata_init();
+#endif
+
   /* Initialize the FPU (if configured) */
 
   nrf52_fpuconfig();
@@ -229,20 +235,20 @@ void __start(void)
 
   showprogress('D');
 
+#ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization */
 
-#ifdef USE_EARLYSERIALINIT
   nrf52_earlyserialinit();
 #endif
   showprogress('E');
 
+#ifdef CONFIG_BUILD_PROTECTED
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
    * segments.
    */
 
-#ifdef CONFIG_BUILD_PROTECTED
   nrf52_userspace();
   showprogress('F');
 #endif

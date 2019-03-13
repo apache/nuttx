@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_clrpend.c
+ * arch/arm/src/nrf52/nrf52_utils.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,6 +45,7 @@
 #include "up_arch.h"
 
 #include "nrf52_irq.h"
+#include "chip/nrf52_utils.h"
 
 /****************************************************************************
  * Public Functions
