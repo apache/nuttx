@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-int nxmu_sendserver(FAR struct nxfe_conn_s *conn, FAR const void *msg,
+int nxmu_sendserver(FAR struct nxmu_conn_s *conn, FAR const void *msg,
                     size_t msglen)
 {
   int ret;

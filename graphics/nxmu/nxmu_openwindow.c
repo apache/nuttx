@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -103,7 +103,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 
   /* Report the initial size/position of the window to the client */
 
-  nxfe_reportposition(wnd);
+  nxmu_reportposition(wnd);
 
   /* Provide the initial mouse settings to the client */
 

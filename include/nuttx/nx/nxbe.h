@@ -83,13 +83,13 @@
  */
 
 struct nxbe_state_s;
-struct nxfe_conn_s;
+struct nxmu_conn_s;
 struct nxbe_window_s
 {
   /* State information */
 
   FAR struct nxbe_state_s *be;        /* The back-end state structure */
-  FAR struct nxfe_conn_s *conn;       /* Connection to the window client */
+  FAR struct nxmu_conn_s *conn;       /* Connection to the window client */
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
 
   /* The following links provide the window's vertical position using a

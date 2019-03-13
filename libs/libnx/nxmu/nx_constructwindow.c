@@ -84,7 +84,7 @@
 int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
                        FAR const struct nx_callback_s *cb, FAR void *arg)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_openwindow_s outmsg;
 

@@ -42,7 +42,7 @@
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Types
@@ -96,5 +96,5 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
    * it is not obscured by another window
    */
 
-  nxfe_redrawreq(wnd, &wnd->bounds);
+  nxmu_redrawreq(wnd, &wnd->bounds);
 }

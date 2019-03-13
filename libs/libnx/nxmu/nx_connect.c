@@ -101,7 +101,7 @@ static uint32_t g_nxcid    = 1;
 
 NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 {
-  FAR struct nxfe_conn_s *conn;
+  FAR struct nxmu_conn_s *conn;
   struct nxsvrmsg_s       outmsg;
   char                    climqname[NX_CLIENT_MXNAMELEN];
   struct mq_attr          attr;
@@ -119,7 +119,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Allocate the NX client structure */
 
-  conn = (FAR struct nxfe_conn_s *)lib_uzalloc(sizeof(struct nxfe_conn_s));
+  conn = (FAR struct nxmu_conn_s *)lib_uzalloc(sizeof(struct nxmu_conn_s));
   if (!conn)
     {
       set_errno(ENOMEM);

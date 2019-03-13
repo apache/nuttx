@@ -44,7 +44,7 @@
 
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,14 +71,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxfe_reportposition
+ * Name: nxmu_reportposition
  *
  * Description:
  *   Report the new size/position of the window.
  *
  ****************************************************************************/
 
-void nxfe_reportposition(FAR struct nxbe_window_s *wnd)
+void nxmu_reportposition(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxclimsg_newposition_s outmsg;
   int ret;

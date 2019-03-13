@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nxfe.h
+ * graphics/nxmu/nxmu.h
  *
- *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXMU_NXFE_H
-#define __GRAPHICS_NXMU_NXFE_H
+#ifndef __GRAPHICS_NXMU_NXMU_H
+#define __GRAPHICS_NXMU_NXMU_H
 
 /****************************************************************************
  * Included Files
@@ -64,18 +64,18 @@
 
 /* This the server 'front-end' state structure */
 
-struct nxfe_state_s
+struct nxmu_state_s
 {
   /* The 'back-end' window status.  Must be first so that instances of
    * struct nxbe_state_s can be simply cast to an instance of struct
-   * nxfe_state_s
+   * nxmu_state_s
    */
 
   struct nxbe_state_s be;
 
   /* This is the server's connection to itself */
 
-  struct nxfe_conn_s conn;
+  struct nxmu_conn_s conn;
 };
 
 /****************************************************************************
@@ -111,7 +111,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxmu_sendclient(FAR struct nxfe_conn_s *conn,
+int nxmu_sendclient(FAR struct nxmu_conn_s *conn,
                     FAR const void *msg, size_t msglen);
 
 /****************************************************************************
@@ -169,7 +169,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
+void nxmu_requestbkgd(FAR struct nxmu_conn_s *conn,
                       FAR struct nxbe_state_s *be,
                       FAR const struct nx_callback_s *cb,
                       FAR void *arg);
@@ -189,27 +189,27 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
  *
  ****************************************************************************/
 
-void nxmu_releasebkgd(FAR struct nxfe_state_s *fe);
+void nxmu_releasebkgd(FAR struct nxmu_state_s *fe);
 
 /****************************************************************************
- * Name: nxfe_reportposition
+ * Name: nxmu_reportposition
  *
  * Description:
  *   Report the new size/position of the window.
  *
  ****************************************************************************/
 
-void nxfe_reportposition(FAR struct nxbe_window_s *wnd);
+void nxmu_reportposition(FAR struct nxbe_window_s *wnd);
 
 /****************************************************************************
- * Name: nxfe_redrawreq
+ * Name: nxmu_redrawreq
  *
  * Description:
  *   Request the client that has this window to redraw the rectangular region.
  *
  ****************************************************************************/
 
-void nxfe_redrawreq(FAR struct nxbe_window_s *wnd,
+void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
                     FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
@@ -253,7 +253,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_XYINPUT
-int nxmu_mousein(FAR struct nxfe_state_s *fe,
+int nxmu_mousein(FAR struct nxmu_state_s *fe,
                  FAR const struct nxgl_point_s *pos, int button);
 #endif
 
@@ -268,7 +268,7 @@ int nxmu_mousein(FAR struct nxfe_state_s *fe,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-void nxmu_kbdin(FAR struct nxfe_state_s *fe, uint8_t nch, FAR uint8_t *ch);
+void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch);
 #endif
 
 #undef EXTERN
@@ -276,4 +276,4 @@ void nxmu_kbdin(FAR struct nxfe_state_s *fe, uint8_t nch, FAR uint8_t *ch);
 }
 #endif
 
-#endif  /* __GRAPHICS_NXMU_NXFE_H */
+#endif  /* __GRAPHICS_NXMU_NXMU_H */

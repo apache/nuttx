@@ -46,7 +46,7 @@
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Types

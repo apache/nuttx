@@ -64,7 +64,7 @@
 
 int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_mousein_s outmsg;
 
   /* Inform the server that this client no longer exists */

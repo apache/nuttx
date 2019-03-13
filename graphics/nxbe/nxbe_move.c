@@ -44,7 +44,7 @@
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Types
@@ -123,7 +123,7 @@ static void nxbe_clipmoveobscured(FAR struct nxbe_clipops_s *cops,
   struct nxgl_rect_s dst;
 
   nxgl_rectoffset(&dst, rect, info->offset.x, info->offset.y);
-  nxfe_redrawreq(info->wnd, &dst);
+  nxmu_redrawreq(info->wnd, &dst);
 }
 
 /****************************************************************************
@@ -160,7 +160,7 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
     {
       if (!nxgl_nullrect(&nonintersecting[i]))
         {
-          nxfe_redrawreq(dstdata->wnd, &nonintersecting[i]);
+          nxmu_redrawreq(dstdata->wnd, &nonintersecting[i]);
         }
     }
 

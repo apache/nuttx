@@ -64,7 +64,7 @@
 
 int nx_kbdchin(NXHANDLE handle, uint8_t ch)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_kbdin_s outmsg;
 
   /* Inform the server of the new keypad data */

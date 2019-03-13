@@ -45,7 +45,7 @@
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Types
@@ -72,7 +72,7 @@ static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
   FAR struct nxbe_window_s *wnd = ((struct nxbe_redraw_s *)cops)->wnd;
   if (wnd)
     {
-      nxfe_redrawreq(wnd, rect);
+      nxmu_redrawreq(wnd, rect);
     }
 }
 

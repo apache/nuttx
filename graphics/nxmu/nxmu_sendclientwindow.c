@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions

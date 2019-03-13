@@ -101,7 +101,7 @@ enum nx_clistate_e
 
 /* This structure represents a connection between the client and the server */
 
-struct nxfe_conn_s
+struct nxmu_conn_s
 {
   /* This number uniquely identifies the client */
 
@@ -181,8 +181,9 @@ struct nxclimsg_disconnected_s
   uint32_t msgid;                  /* NX_CLIMSG_REDRAW_DISCONNECTED */
 };
 
-/* This message is received when a requested window has been opened.  If wnd is NULL
- * then errorcode is the errno value that provides the explanation of the error.
+/* This message is received when a requested window has been opened.  If wnd
+ * is NULL then errorcode is the errno value that provides the explanation of
+ * the error.
  */
 
 struct nxclimsg_redraw_s
@@ -249,7 +250,7 @@ struct nxclimsg_blocked_s
 struct nxsvrmsg_s                 /* Generic server message */
 {
   uint32_t msgid;                 /* One of enum nxsvrmsg_e */
-  FAR struct nxfe_conn_s *conn;   /* The specific connection sending the message */
+  FAR struct nxmu_conn_s *conn;   /* The specific connection sending the message */
 };
 
 /* This message requests the server to create a new window */
@@ -286,7 +287,7 @@ struct nxsvrmsg_blocked_s
 struct nxsvrmsg_requestbkgd_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_REQUESTBKGD */
-  FAR struct nxfe_conn_s *conn;    /* The specific connection sending the message */
+  FAR struct nxmu_conn_s *conn;    /* The specific connection sending the message */
   FAR const struct nx_callback_s *cb; /* Event handling callbacks */
   FAR void *arg;                   /* Client argument used with callbacks */
 };
@@ -527,7 +528,7 @@ void nxmu_semtake(sem_t *sem);
  *
  ****************************************************************************/
 
-int nxmu_sendserver(FAR struct nxfe_conn_s *conn,
+int nxmu_sendserver(FAR struct nxmu_conn_s *conn,
                     FAR const void *msg, size_t msglen);
 
 /****************************************************************************

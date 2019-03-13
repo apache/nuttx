@@ -69,7 +69,7 @@
 
 void nx_disconnect(NXHANDLE handle)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_s       outmsg;
   char                    climqname[NX_CLIENT_MXNAMELEN];
   int                     ret;

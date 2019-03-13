@@ -42,7 +42,7 @@
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Public Functions
@@ -90,7 +90,7 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   /* Report the new size/position */
 
-  nxfe_reportposition(wnd);
+  nxmu_reportposition(wnd);
 
   /* Then redraw this window AND all windows below it. Having resized the
    * window, we may have exposed previoulsy obscured portions of windows

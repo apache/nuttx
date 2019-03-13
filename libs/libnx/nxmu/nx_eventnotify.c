@@ -78,7 +78,7 @@
 
 int nx_eventnotify(NXHANDLE handle, int signo)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct sigevent se;
 
   se.sigev_notify          = SIGEV_SIGNAL;

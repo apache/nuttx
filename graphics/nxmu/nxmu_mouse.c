@@ -46,7 +46,7 @@
 
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 #ifdef CONFIG_NX_XYINPUT
 
@@ -169,7 +169,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
  *
  ****************************************************************************/
 
-int nxmu_mousein(FAR struct nxfe_state_s *fe,
+int nxmu_mousein(FAR struct nxmu_state_s *fe,
                  FAR const struct nxgl_point_s *pos, int buttons)
 {
   FAR struct nxbe_window_s *wnd;

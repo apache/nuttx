@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-static inline void nx_connected(FAR struct nxfe_conn_s *conn)
+static inline void nx_connected(FAR struct nxmu_conn_s *conn)
 {
   DEBUGASSERT(conn->state == NX_CLISTATE_NOTCONNECTED);
   conn->state = NX_CLISTATE_CONNECTED;
@@ -75,7 +75,7 @@ static inline void nx_connected(FAR struct nxfe_conn_s *conn)
  * Name: nx_disconnected
  ****************************************************************************/
 
-static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
+static inline void nx_disconnected(FAR struct nxmu_conn_s *conn)
 {
   /* Close the server and client MQs */
 
@@ -120,7 +120,7 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
 
 int nx_eventhandler(NXHANDLE handle)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_s *msg;
   struct nxbe_window_s *wnd;
   char buffer[NX_MXCLIMSGLEN];

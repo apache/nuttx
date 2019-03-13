@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Public Functions
@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
+void nxmu_requestbkgd(FAR struct nxmu_conn_s *conn,
                       FAR struct nxbe_state_s *be,
                       FAR const struct nx_callback_s *cb,
                       FAR void *arg)
@@ -85,11 +85,11 @@ void nxmu_requestbkgd(FAR struct nxfe_conn_s *conn,
 
   /* Report the size/position of the background window to the client */
 
-  nxfe_reportposition((NXWINDOW)&be->bkgd);
+  nxmu_reportposition((NXWINDOW)&be->bkgd);
 
   /* Redraw the background window */
 
-  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
+  nxmu_redrawreq(&be->bkgd, &be->bkgd.bounds);
 
   /* Provide the mouse settings */
 

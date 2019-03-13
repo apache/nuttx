@@ -45,7 +45,7 @@
 
 #include <nuttx/mqueue.h>
 
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Public Functions
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-int nxmu_sendclient(FAR struct nxfe_conn_s *conn, FAR const void *msg,
+int nxmu_sendclient(FAR struct nxmu_conn_s *conn, FAR const void *msg,
                     size_t msglen)
 {
   int ret;

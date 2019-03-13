@@ -53,7 +53,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Data

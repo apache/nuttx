@@ -67,7 +67,7 @@
 int nx_setbgcolor(NXHANDLE handle,
                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_setbgcolor_s outmsg;
 
 #ifdef CONFIG_DEBUG_FEATURES

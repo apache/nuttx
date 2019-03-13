@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-void nxmu_releasebkgd(FAR struct nxfe_state_s *fe)
+void nxmu_releasebkgd(FAR struct nxmu_state_s *fe)
 {
   FAR struct nxbe_state_s *be = &fe->be;
 
@@ -105,6 +105,6 @@ void nxmu_releasebkgd(FAR struct nxfe_state_s *fe)
 
   /* Redraw the background window */
 
-  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
+  nxmu_redrawreq(&be->bkgd, &be->bkgd.bounds);
 }
 

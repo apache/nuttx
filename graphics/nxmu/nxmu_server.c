@@ -52,7 +52,7 @@
 #include <nuttx/mqueue.h>
 #include <nuttx/nx/nx.h>
 
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Private Functions
@@ -62,7 +62,7 @@
  * Name: nxmu_disconnect
  ****************************************************************************/
 
-static inline void nxmu_disconnect(FAR struct nxfe_conn_s *conn)
+static inline void nxmu_disconnect(FAR struct nxmu_conn_s *conn)
 {
   struct nxclimsg_disconnected_s outmsg;
   int ret;
@@ -86,7 +86,7 @@ static inline void nxmu_disconnect(FAR struct nxfe_conn_s *conn)
  * Name: nxmu_connect
  ****************************************************************************/
 
-static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
+static inline void nxmu_connect(FAR struct nxmu_conn_s *conn)
 {
   char mqname[NX_CLIENT_MXNAMELEN];
   struct nxclimsg_connected_s outmsg;
@@ -119,7 +119,7 @@ static inline void nxmu_connect(FAR struct nxfe_conn_s *conn)
  * Name: nxmu_shutdown
  ****************************************************************************/
 
-static inline void nxmu_shutdown(FAR struct nxfe_state_s *fe)
+static inline void nxmu_shutdown(FAR struct nxmu_state_s *fe)
 {
   FAR struct nxbe_window_s *wnd;
 
@@ -162,12 +162,12 @@ static inline void nxmu_blocked(FAR struct nxbe_window_s *wnd, FAR void *arg)
  ****************************************************************************/
 
 static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
-                             FAR struct nxfe_state_s *fe)
+                             FAR struct nxmu_state_s *fe)
 {
   struct mq_attr attr;
   int            ret;
 
-  memset(fe, 0, sizeof(struct nxfe_state_s));
+  memset(fe, 0, sizeof(struct nxmu_state_s));
 
   /* Configure the framebuffer/LCD device */
 
@@ -278,7 +278,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
 
 int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 {
-  struct nxfe_state_s    fe;
+  struct nxmu_state_s    fe;
   FAR struct nxsvrmsg_s *msg;
   char                   buffer[NX_MXSVRMSGLEN];
   int                    nbytes;
@@ -396,7 +396,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_GETPOSITION: /* Get the window size/position */
            {
              FAR struct nxsvrmsg_getposition_s *getposmsg = (FAR struct nxsvrmsg_getposition_s *)buffer;
-             nxfe_reportposition(getposmsg->wnd);
+             nxmu_reportposition(getposmsg->wnd);
            }
            break;
 
@@ -502,7 +502,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_REDRAWREQ: /* Request re-drawing of rectangular region */
            {
              FAR struct nxsvrmsg_redrawreq_s *redrawmsg = (FAR struct nxsvrmsg_redrawreq_s *)buffer;
-             nxfe_redrawreq(redrawmsg->wnd, &redrawmsg->rect);
+             nxmu_redrawreq(redrawmsg->wnd, &redrawmsg->rect);
            }
            break;
 

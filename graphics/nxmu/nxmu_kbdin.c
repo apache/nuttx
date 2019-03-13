@@ -47,7 +47,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
 
-#include "nxfe.h"
+#include "nxmu.h"
 
 #ifdef CONFIG_NX_KBD
 
@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void nxmu_kbdin(FAR struct nxfe_state_s *fe, uint8_t nch, FAR uint8_t *ch)
+void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch)
 {
   FAR struct nxclimsg_kbdin_s *outmsg;
   int size;

@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include "nxmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,14 +71,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxfe_redrawreq
+ * Name: nxmu_redrawreq
  *
  * Description:
  *   Request the client that has this window to redraw the rectangular region.
  *
  ****************************************************************************/
 
-void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect)
+void nxmu_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect)
 {
   struct nxclimsg_redraw_s outmsg;
 
