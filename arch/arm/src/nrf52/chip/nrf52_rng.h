@@ -79,4 +79,3 @@
 #define NRF52_RNG_INT_EVENT_RDY         (1<<0)
 
 #endif  /* __ARCH_ARM_SRC_NRF52_CHIP_STM32_RNG_H */
-
