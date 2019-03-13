@@ -84,14 +84,7 @@ static bool g_nxserver_started[CONFIG_NX_NDISPLAYS];
 static int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
-  int display;
-  int plane;
   int ret;
-
-  /* Get display parameters from the command line */
-
-  display = atoi(argv[1]);
-  plane   = atoi(argv[2]);
 
 #if defined(CONFIG_NXSTART_EXTERNINIT)
   /* Use external graphics driver initialization */
@@ -129,9 +122,15 @@ static int nx_server(int argc, char *argv[])
   (void)dev->setpower(dev, ((3 * CONFIG_LCD_MAXPOWER + 3) / 4));
 
 #else /* CONFIG_NX_LCDDRIVER */
-  /* Initialize the frame buffer device.
-   * REVISIT: display == 0 is assumed.
-   */
+  /* Initialize the frame buffer device. */
+
+  int display;
+  int plane;
+
+  /* Get display parameters from the command line */
+
+  display = atoi(argv[1]);
+  plane   = atoi(argv[2]);
 
   ret = up_fbinitialize(display);
   if (ret < 0)
