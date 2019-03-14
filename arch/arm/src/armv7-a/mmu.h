@@ -1252,7 +1252,7 @@ static inline void cp15_wrdacr(unsigned int dacr)
 {
   __asm__ __volatile__
     (
-      "\tmcr p15, 0,0, c3, c0, 0\n"
+      "\tmcr p15, 0, %0, c3, c0, 0\n"
       "\tnop\n"
       "\tnop\n"
       "\tnop\n"
@@ -1286,7 +1286,7 @@ static inline void cp15_wrttb(unsigned int ttb)
 {
   __asm__ __volatile__
     (
-      "\tmcr p15, 0,0, c2, c0, 0\n"
+      "\tmcr p15, 0, %0, c2, c0, 0\n"
       "\tnop\n"
       "\tnop\n"
       "\tnop\n"
