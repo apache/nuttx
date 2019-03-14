@@ -63,6 +63,40 @@ CSRCS += nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c
 CSRCS += nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c
 CSRCS += nxglib_copyrectangle_32bpp.c
 
+ifeq ($(CONFIG_NX_RAMBACKED),y)
+
+CSRCS += pwfb_setpixel_1bpp.c pwfb_setpixel_2bpp.c
+CSRCS += pwfb_setpixel_4bpp.c pwfb_setpixel_8bpp.c
+CSRCS += pwfb_setpixel_16bpp.c pwfb_setpixel_24bpp.c
+CSRCS += pwfb_setpixel_32bpp.c
+
+CSRCS += pwfb_fillrectangle_1bpp.c pwfb_fillrectangle_2bpp.c
+CSRCS += pwfb_fillrectangle_4bpp.c pwfb_fillrectangle_8bpp.c
+CSRCS += pwfb_fillrectangle_16bpp.c pwfb_fillrectangle_24bpp.c
+CSRCS += pwfb_fillrectangle_32bpp.c
+
+CSRCS += pwfb_getrectangle_1bpp.c pwfb_getrectangle_2bpp.c
+CSRCS += pwfb_getrectangle_4bpp.c pwfb_getrectangle_8bpp.c
+CSRCS += pwfb_getrectangle_16bpp.c pwfb_getrectangle_24bpp.c
+CSRCS += pwfb_getrectangle_32bpp.c
+
+CSRCS += pwfb_filltrapezoid_1bpp.c pwfb_filltrapezoid_2bpp.c
+CSRCS += pwfb_filltrapezoid_4bpp.c pwfb_filltrapezoid_8bpp.c
+CSRCS += pwfb_filltrapezoid_16bpp.c pwfb_filltrapezoid_24bpp.c
+CSRCS += pwfb_filltrapezoid_32bpp.c
+
+CSRCS += pwfb_moverectangle_1bpp.c pwfb_moverectangle_2bpp.c
+CSRCS += pwfb_moverectangle_4bpp.c pwfb_moverectangle_8bpp.c
+CSRCS += pwfb_moverectangle_16bpp.c pwfb_moverectangle_24bpp.c
+CSRCS += pwfb_moverectangle_32bpp.c
+
+CSRCS += pwfb_copyrectangle_1bpp.c pwfb_copyrectangle_2bpp.c
+CSRCS += pwfb_copyrectangle_4bpp.c pwfb_copyrectangle_8bpp.c
+CSRCS += pwfb_copyrectangle_16bpp.c pwfb_copyrectangle_24bpp.c
+CSRCS += pwfb_copyrectangle_32bpp.c
+
+endif
+
 DEPPATH += --dep-path nxglib
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
 #VPATH += :nxglib

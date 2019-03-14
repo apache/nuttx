@@ -4,4 +4,10 @@
 /nxglib_filltrapezoid_*bpp.c
 /nxglib_moverectangle_*bpp.c
 /nxglib_copyrectangle_*bpp.c
+/pwfb_setpixel_*bpp.c
+/pwfb_fillrectangle_*bpp.c
+/pwfb_getrectangle_*bpp.c
+/pwfb_filltrapezoid_*bpp.c
+/pwfb_moverectangle_*bpp.c
+/pwfb_copyrectangle_*bpp.c
 

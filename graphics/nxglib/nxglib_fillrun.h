@@ -69,14 +69,6 @@ static uint8_t g_wide_2bpp[4] = { 0x00, 0x55, 0xaa, 0xff };
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -90,7 +82,7 @@ static uint8_t g_wide_2bpp[4] = { 0x00, 0x55, 0xaa, 0xff };
 
 #if NXGLIB_BITSPERPIXEL == 1
 static inline void nxgl_fillrun_1bpp(FAR uint8_t *run, nxgl_mxpixel_t color,
-                                    size_t npixels)
+                                     size_t npixels)
 {
   /* Get the number of bytes to fill */
 
@@ -171,6 +163,7 @@ static inline void nxgl_fillrun_16bpp(FAR uint16_t *run, nxgl_mxpixel_t color,
 static inline void nxgl_fillrun_24bpp(FAR uint32_t *run, nxgl_mxpixel_t color, size_t npixels)
 {
   /* Fill the run with the color (it is okay to run a fractional byte overy the end */
+
 #warning "Assuming 24-bit color is not packed"
   while (npixels-- > 0)
     {
@@ -192,5 +185,3 @@ static inline void nxgl_fillrun_32bpp(FAR uint32_t *run, nxgl_mxpixel_t color, s
 #  error "Unsupported value of NXGLIB_BITSPERPIXEL"
 #endif
 #endif /* __GRAPHICS_NXGLIB_NXGLIB_FILLRUN_H */
-
-
