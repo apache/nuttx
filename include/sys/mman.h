@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/sys/mman.h
  *
- *   Copyright (C) 2008, 2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011, 2014, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,30 +52,35 @@
  * yet support any of these, but are provided for source level compatibility
  */
 
-#define PROT_NONE       0x0             /* Page may not be accessed */
-#define PROT_READ       0x1             /* Page may be read */
-#define PROT_WRITE      0x2             /* Page may be written */
-#define PROT_EXEC       0x4             /* Page may be executed */
+#define PROT_NONE       0x0             /*        Page may not be accessed */
+#define PROT_READ       (1 << 0)        /* Bit 0: Page may be read */
+#define PROT_WRITE      (1 << 1)        /* Bit 1: Page may be written */
+#define PROT_EXEC       (1 << 2)        /* Bit 2: Page may be executed */
 
-/* Sharing types -- ignored by NuttX. */
+/* mmpa() flags bits.  Only MAP_SHARED, MAP_PRIVATE, and MAP_FIXED are
+ * specified by OpenGroup.org.  The rest are unique to NuttX or are
+ * definitions used by other systems.
+ */
 
-#define MAP_SHARED      0x00001         /* Share this mapping */
-#define MAP_PRIVATE     0x00002         /* Create a private copy-on-write mapping */
-#define MAP_TYPE        0x0000f         /* Mask for type of mapping */
-#define MAP_FIXED       0x00010         /* Map to specified address exactly */
-#define MAP_FILE        0x00000         /* The mapping is backed by a file */
-#define MAP_ANONYMOUS   0x00020         /* The mapping is not backed by any file */
-#define MAP_ANON        MAP_ANONYMOUS
+/* Sharing types (most are not implemented). */
 
-/* These are Linux-specific.  */
+#define MAP_SHARED      (1 << 0)        /* Bit 0:  Share this mapping */
+#define MAP_PRIVATE     (1 << 1)        /* Bit 1:  Create a private copy-on-write mapping */
+#define MAP_TYPE        (3 << 0)        /*         Mask for type of mapping */
+#define MAP_FIXED       (1 << 2)        /* Bit 2:  Map to specified address exactly */
+#define MAP_FILE        (1 << 3)        /* Bit 3:  The mapping is backed by a file */
+#define MAP_ANONYMOUS   (1 << 4)        /* Bit 4:  The mapping is not backed by any file */
+#define MAP_ANON        MAP_ANONYMOUS   /*         Alias */
 
-#define MAP_GROWSDOWN   0x00100         /* Used to stack allocations */
-#define MAP_DENYWRITE   0x00800         /* Do not permit writes to file */
-#define MAP_EXECUTABLE  0x01000         /* Mark it as an executable */
-#define MAP_LOCKED      0x02000         /* Lock pages mapped into memory */
-#define MAP_NORESERVE   0x04000         /* Do not reserve swap space for this mapping */
-#define MAP_POPULATE    0x08000         /* Populate (prefault) pagetables */
-#define MAP_NONBLOCK    0x10000         /* Do not block on IO */
+/* These are Linux-specific (none are implemented).  */
+
+#define MAP_GROWSDOWN   (1 << 5)        /* Bit 5:  Used to stack allocations */
+#define MAP_DENYWRITE   (1 << 6)        /* Bit 6:  Do not permit writes to file */
+#define MAP_EXECUTABLE  (1 << 7)        /* Bit 7:  Mark it as an executable */
+#define MAP_LOCKED      (1 << 8)        /* Bit 8:  Lock pages mapped into memory */
+#define MAP_NORESERVE   (1 << 9)        /* Bit 9:  Do not reserve swap space for this mapping */
+#define MAP_POPULATE    (1 << 10)       /* Bit 10: opulate (prefault) page tables */
+#define MAP_NONBLOCK    (1 << 11)       /* Bit 11: Do not block on IO */
 
 /* Failure return */
 

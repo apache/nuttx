@@ -38,6 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <errno.h>
+
+#ifdef CONFIG_NX_RAMBACKED
+#ifdef CONFIG_BUILD_KERNEL
+#  include "nuttx/pgalloc.h"
+#else
+#  include "nuttx/kmalloc.h"
+#endif
+#  include <nuttx/nx/nxbe.h>
+#endif
 
 #include <nuttx/nx/nx.h>
 #include "nxmu.h"
@@ -63,6 +73,13 @@
 
 void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 {
+#ifdef CONFIG_NX_RAMBACKED
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+  size_t fbsize;
+  unsigned int bpp;
+#endif
+
   /* The window structure was allocated in nx_openwindow and all fields have
    * been set to zero; conn, flags, cb, and arg which were initialized on
    * the client side.  On the server side, we need only initialize a few
@@ -71,6 +88,66 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
    */
 
   wnd->be           = be;
+
+#ifdef CONFIG_NX_RAMBACKED
+  /* Allocate framebuffer memory if the per-window framebuffer feature has
+   * been selected.
+   */
+
+  if (NXBE_ISRAMBACKED(wnd))
+    {
+      width         = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
+      height        = wnd->bounds.pt2.y - wnd->bounds.pt1.y + 1;
+      bpp           = wnd->be->plane[0].pinfo.bpp;
+      wnd->stride   = (bpp * width + 7) >> 8;
+      fbsize        = wnd->stride * height;
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* Allocate memory from the page pool because:
+       *
+       *   1) The page pool is the largest memory pool and best for
+       *      framebuffers.
+       *   2) The allocation will be contiguous and much easier to
+       *      map into a user address later.
+       */
+
+      /* Determine the number of pages to be allocated */
+
+      wnd->npages = (uint16_t)MM_NPAGES(fbsize);
+
+      /* Allocate the pages */
+
+      wnd->fb = (FAR nxgl_mxpixel_t *)mm_pgalloc(wnd->npages);
+      if (wnd->fb == NULL)
+        {
+          /* Fall back to no RAM back up */
+
+          gerr("ERROR: mm_pgalloc() failed\n");
+          wnd->stride = 0;
+          wnd->npages = 0;
+          NXBE_CLRRAMBACKED(wnd);
+        }
+#else
+      /* Allocate memory from the user space heap because:
+       *
+       *   1) The  user space heap is the larger memory pool and best for
+       *      framebuffers (protected mode).
+       *   2) The user space heap is openly accessible at all privilege
+       *      levels.
+       */
+
+      wnd->fb = (FAR nxgl_mxpixel_t *)kumm_malloc(fbsize);
+      if (wnd->fb == NULL)
+        {
+          /* Fall back to no RAM back up */
+
+          gerr("ERROR: mm_pgalloc() failed\n");
+          wnd->stride = 0;
+          NXBE_CLRRAMBACKED(wnd);
+        }
+#endif
+    }
+#endif
 
   /* Now, insert the new window at the top on the display.  topwind is
    * never NULL (it may point only at the background window, however)

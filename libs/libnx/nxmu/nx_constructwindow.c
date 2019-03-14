@@ -114,6 +114,13 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
   wnd->flags  = flags;
   wnd->cb     = cb;
   wnd->arg    = arg;
+#ifdef CONFIG_NX_RAMBACKED
+#ifdef CONFIG_BUILD_KERNEL
+  wnd->npages = 0;
+#endif
+  wnd->stride = 0;
+  wnd->fb     = NULL;
+#endif
 
   /* Request initialization the new window from the server */
 

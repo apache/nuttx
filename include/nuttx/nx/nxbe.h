@@ -84,11 +84,15 @@
   (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
 #define NXBE_SETBLOCKED(wnd) \
   do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
+#define NXBE_CLRBLOCKED(wnd) \
+  do { (wnd)->flags &= ~NXBE_WINDOW_BLOCKED; } while (0)
 
 #define NXBE_ISRAMBACKED(wnd) \
   (((wnd)->flags & NXBE_WINDOW_RAMBACKED) != 0)
 #define NXBE_SETRAMBACKED(wnd) \
   do { (wnd)->flags |= NXBE_WINDOW_RAMBACKED; } while (0)
+#define NXBE_CLRRAMBACKED(wnd) \
+  do { (wnd)->flags &= ~NXBE_WINDOW_RAMBACKED; } while (0)
 
 /****************************************************************************
  * Public Types
@@ -128,6 +132,18 @@ struct nxbe_window_s
   /* Window flags (see the NXBE_* bit definitions above) */
 
   uint8_t flags;
+
+#ifdef CONFIG_NX_RAMBACKED
+  /* Per-window framebuffer support */
+
+#ifdef CONFIG_BUILD_KERNEL
+  uint16_t npages;                    /* Number of pages in allocation */
+#endif
+  nxgl_coord_t stride;                /* Width of framebuffer in bytes */
+  FAR nxgl_mxpixel_t *fb;             /* Allocated framebuffer in kernal
+                                       * address spaced.  Must be contiguous.
+                                       */
+#endif
 
   /* Client state information this is provide in window callbacks */
 
