@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_fill.c
+ * graphics/nxbe/nxbe_getrectangle.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,6 +117,8 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
   if (!nxgl_nullrect(&remaining))
     {
       FAR struct nxbe_plane_s *pplane = &wnd->be->plane[plane];
-      pplane->getrectangle(&pplane->pinfo, &remaining, dest, deststride);
+
+      pplane->dev.getrectangle(&pplane->pinfo, &remaining, dest,
+                               deststride);
     }
 }

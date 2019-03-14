@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_filltrapezoid.c
  *
- *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +92,8 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
 
   /* Draw the trapezond */
 
-  plane->filltrapezoid(&plane->pinfo, &fillinfo->trap, rect, fillinfo->color);
+  plane->dev.filltrapezoid(&plane->pinfo, &fillinfo->trap, rect,
+                           fillinfo->color);
 
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */

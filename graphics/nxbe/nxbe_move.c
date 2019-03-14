@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_move.c
  *
- *   Copyright (C) 2008-2009, 2011-2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2016, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,9 +90,9 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
       offset.x = rect->pt1.x + info->offset.x;
       offset.y = rect->pt1.y + info->offset.y;
 
-      /* Move the source rectangle to the destination position */
+      /* Move the source rectangle to the destination position in the device */
 
-      plane->moverectangle(&plane->pinfo, rect, &offset);
+      plane->dev.moverectangle(&plane->pinfo, rect, &offset);
 
 #ifdef CONFIG_NX_UPDATE
       /* Notify external logic that the display has been updated */

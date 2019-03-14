@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_fill.c
  *
- *   Copyright (C) 2008-2009, 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2016, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,9 +74,9 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
 {
   struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
 
-  /* Draw the rectangle */
+  /* Draw the rectangle to the graphics device. */
 
-  plane->fillrectangle(&plane->pinfo, rect, fillinfo->color);
+  plane->dev.fillrectangle(&plane->pinfo, rect, fillinfo->color);
 
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */

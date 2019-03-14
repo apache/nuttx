@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2016, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,14 +68,12 @@
 
 /* Rasterization ************************************************************/
 
-/* A tiny vtable of raster operation function pointers.  The types of the
+/* A vtable of raster operation function pointers.  The types of the
  * function points must match the rasterizer types exported by nxglib
  */
 
-struct nxbe_plane_s
+struct nxbe_vtable_s
 {
-  /* Raster operation callbacks for this bits-per-pixel value */
-
   CODE void (*setpixel)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_point_s *pos,
                         nxgl_mxpixel_t color);
@@ -96,6 +95,21 @@ struct nxbe_plane_s
                              FAR const void *src,
                              FAR const struct nxgl_point_s *origin,
                              unsigned int srcstride);
+};
+
+/* Encapsulates everything needed support window rasterization commands. */
+
+struct nxbe_plane_s
+{
+  /* Raster device operation callbacks for this plane */
+
+  struct nxbe_vtable_s dev;
+
+#ifdef CONFIG_NX_RAMBACKED
+  /* Raster per-window framebuffer operation callbacks for this plane */
+
+  struct nxbe_vtable_s pwfb;
+#endif
 
   /* Framebuffer plane info describing destination video plane */
 

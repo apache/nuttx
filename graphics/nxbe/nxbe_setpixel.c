@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_setpixel.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,9 +73,9 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
 {
   struct nxbe_setpixel_s *fillinfo = (struct nxbe_setpixel_s *)cops;
 
-  /* Set the pixel */
+  /* Set the pixel in the graphics device. */
 
-  plane->setpixel(&plane->pinfo, &rect->pt1, fillinfo->color);
+  plane->dev.setpixel(&plane->pinfo, &rect->pt1, fillinfo->color);
 
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */

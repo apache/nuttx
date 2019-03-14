@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_bitmap.c
  *
- *   Copyright (C) 2008-2009, 2012, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2016, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,10 +77,10 @@ static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
 {
   struct nx_bitmap_s *bminfo = (struct nx_bitmap_s *)cops;
 
-  /* Copy the rectangular region */
+  /* Copy the rectangular region to the graphics device. */
 
-  plane->copyrectangle(&plane->pinfo, rect, bminfo->src,
-                       &bminfo->origin, bminfo->stride);
+  plane->dev.copyrectangle(&plane->pinfo, rect, bminfo->src,
+                           &bminfo->origin, bminfo->stride);
 
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */
