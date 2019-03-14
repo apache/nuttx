@@ -117,8 +117,8 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 
       /* Allocate the pages */
 
-      wnd->fb = (FAR nxgl_mxpixel_t *)mm_pgalloc(wnd->npages);
-      if (wnd->fb == NULL)
+      wnd->fbmem = (FAR nxgl_mxpixel_t *)mm_pgalloc(wnd->npages);
+      if (wnd->fbmem == NULL)
         {
           /* Fall back to no RAM back up */
 
@@ -136,8 +136,8 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
        *      levels.
        */
 
-      wnd->fb = (FAR nxgl_mxpixel_t *)kumm_malloc(fbsize);
-      if (wnd->fb == NULL)
+      wnd->fbmem = (FAR nxgl_mxpixel_t *)kumm_malloc(fbsize);
+      if (wnd->fbmem == NULL)
         {
           /* Fall back to no RAM back up */
 

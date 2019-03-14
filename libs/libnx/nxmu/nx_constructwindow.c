@@ -119,7 +119,7 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
   wnd->npages = 0;
 #endif
   wnd->stride = 0;
-  wnd->fb     = NULL;
+  wnd->fbmem  = NULL;
 #endif
 
   /* Request initialization the new window from the server */

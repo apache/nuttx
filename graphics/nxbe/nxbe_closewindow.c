@@ -121,18 +121,18 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
 #ifdef CONFIG_NX_RAMBACKED
   /* Free any allocated, per-window framebuffer */
 
-  if (wnd->fb != NULL)
+  if (wnd->fbmem != NULL)
     {
 #ifdef CONFIG_BUILD_KERNEL
       DEBUGASSERT(wnd->npages > 0);
 
       /* Return the pages to the poll */
 
-      mm_pgfree((uintptr_t)wnd->fb, wnd->npages);
+      mm_pgfree((uintptr_t)wnd->fbmem, wnd->npages);
 #else
       /* Return the memory to the user heap */
 
-      kumm_free(wnd->fb);
+      kumm_free(wnd->fbmem);
 #endif
     }
 #endif

@@ -140,7 +140,7 @@ struct nxbe_window_s
   uint16_t npages;                    /* Number of pages in allocation */
 #endif
   nxgl_coord_t stride;                /* Width of framebuffer in bytes */
-  FAR nxgl_mxpixel_t *fb;             /* Allocated framebuffer in kernal
+  FAR nxgl_mxpixel_t *fbmem;          /* Allocated framebuffer in kernel
                                        * address spaced.  Must be contiguous.
                                        */
 #endif

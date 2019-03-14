@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/fb/nxsglib_copyrectangle.c
+ * graphics/nxglib/fb/nxglib_copyrectangle.c
  *
  *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
