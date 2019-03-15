@@ -1870,6 +1870,8 @@ nuttx/
  |   |   `- README.txt
  |   |- nucleo-f410rb
  |   |   `- README.txt
+ |   |- nucleo-f446re
+ |   |   `- README.txt
  |   |- nucleo-l432kc/
  |   |   `- README.txt
  |   |- nucleo-l452re/
@@ -1899,6 +1901,8 @@ nuttx/
  |   |- olimex-stm32-p407/
  |   |   `- README.txt
  |   |- olimex-strp711/
+ |   |   `- README.txt
+ |   |- omnibusf4/
  |   |   `- README.txt
  |   |- open1788/
  |   |   `- README.txt
