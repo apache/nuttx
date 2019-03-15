@@ -229,6 +229,8 @@ void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
  *
  ****************************************************************************/
 
+struct nxbe_window_s; /* Forward reference.  See include/nuttx/nx/nxbe.h */
+
 /* For direct access to graphics device memory */
 
 void nxgl_setpixel_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
