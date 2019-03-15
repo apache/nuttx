@@ -216,6 +216,6 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
 
       /* Rend the bitmap directly to the graphics device in any case */
 
-       nxbe_fill_dev(wnd, rect, color);
+       nxbe_fill_dev(wnd, &remaining, color);
     }
 }

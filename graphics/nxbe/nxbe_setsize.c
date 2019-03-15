@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #ifdef CONFIG_NX_RAMBACKED
 #  include <debug.h>
 #  include <string.h>

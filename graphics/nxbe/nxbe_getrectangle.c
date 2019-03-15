@@ -114,6 +114,7 @@ static inline void nxbe_getrectangle_dev(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NX_RAMBACKED
 static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
                                           FAR const struct nxgl_rect_s *rect,
                                           unsigned int plane,
@@ -126,6 +127,7 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
 
   pplane->pwfb.getrectangle(wnd, rect, dest, deststride);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
