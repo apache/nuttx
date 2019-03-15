@@ -81,6 +81,7 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
   struct nxbe_move_s *info = (struct nxbe_move_s *)cops;
   struct nxgl_point_s offset;
 #ifdef CONFIG_NX_UPDATE
+  FAR struct nxbe_window_s *wnd;
   struct nxgl_rect_s update;
 #endif
 
@@ -100,6 +101,7 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
        * apply the offset.
        */
 
+      wnd = info->wnd;
       nxgl_rectoffset(&update, rect, offset.x - wnd->bounds.pt1.x,
                       offset.y - wnd->bounds.pt1.y);
 
