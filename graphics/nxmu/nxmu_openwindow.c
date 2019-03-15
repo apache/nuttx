@@ -92,6 +92,13 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
 #ifdef CONFIG_NX_RAMBACKED
   /* Allocate framebuffer memory if the per-window framebuffer feature has
    * been selected.
+   *
+   * REVISIT:  This initial state of the framebuffer is uninitialized and
+   * not synchronized with the graphic device content.  It will take a full
+   * screen update from the application to force the framebuffer and device
+   * to be consistent.
+   *
+   * REVISIT:  Assumes a single color plane.
    */
 
   if (NXBE_ISRAMBACKED(wnd))

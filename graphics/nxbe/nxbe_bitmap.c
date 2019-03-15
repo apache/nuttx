@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -63,7 +64,7 @@ struct nx_bitmap_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxs_clipcopy
+ * Name: bitmap_clipcopy
  *
  * Description:
  *  Called from nxbe_clipper() to performed the fill operation on visible portions
@@ -71,9 +72,9 @@ struct nx_bitmap_s
  *
  ****************************************************************************/
 
-static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
-                         FAR struct nxbe_plane_s *plane,
-                         FAR const struct nxgl_rect_s *rect)
+static void bitmap_clipcopy(FAR struct nxbe_clipops_s *cops,
+                            FAR struct nxbe_plane_s *plane,
+                            FAR const struct nxgl_rect_s *rect)
 {
   struct nx_bitmap_s *bminfo = (struct nx_bitmap_s *)cops;
 
@@ -90,15 +91,11 @@ static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxbe_bitmap
+ * Name: nxbe_bitmap_pwfb
  *
  * Description:
- *   Copy a rectangular region of a larger image into the rectangle in the
- *   specified window.
+ *   Copy a rectangular region of a larger image into the per-window
+ *   framebuffer.
  *
  * Input Parameters:
  *   wnd   - The window that will receive the bitmap image
@@ -108,30 +105,27 @@ static void nxs_clipcopy(FAR struct nxbe_clipops_s *cops,
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
  *            may lie outside of the display.
- *   stride - The width of the full source image in pixels.
+ *   stride - The width of the full source image in bytes.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *dest,
-                 FAR const void *src[CONFIG_NX_NPLANES],
-                 FAR const struct nxgl_point_s *origin, unsigned int stride)
+#ifdef CONFIG_NX_RAMBACKED
+static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
+                                    FAR const struct nxgl_rect_s *dest,
+                                    FAR const void *src[CONFIG_NX_NPLANES],
+                                    FAR const struct nxgl_point_s *origin,
+                                    unsigned int stride)
 {
-  struct nx_bitmap_s info;
   struct nxgl_rect_s bounds;
   struct nxgl_point_s offset;
   struct nxgl_rect_s remaining;
   unsigned int deststride;
-  int i;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !dest || !src || !origin)
-    {
-      return;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && dest != NULL && src != NULL && origin != NULL);
+  DEBUGASSERT(wnd->be != NULL && wnd->be->plane != NULL);
 
   /* Verify that the destination rectangle begins "below" and to the "right"
    * of the origin
@@ -147,7 +141,96 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
    * width of the source bitmap data (taking into account the bitmap origin)
    */
 
-  deststride = (((dest->pt2.x - origin->x + 1) * wnd->be->plane[0].pinfo.bpp + 7) >> 3);
+  deststride = (((dest->pt2.x - origin->x + 1) *
+                 wnd->be->plane[0].pinfo.bpp + 7) >> 3);
+  if (deststride > stride)
+    {
+      gerr("ERROR: Bad dest width\n");
+      return;
+    }
+
+  /* Offset the rectangle and image origin by the window origin */
+
+  nxgl_rectoffset(&bounds, dest, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
+  nxgl_vectoradd(&offset, origin, &wnd->bounds.pt1);
+
+  /* Clip to the limits of the window and of the background screen */
+
+  nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
+
+  if (!nxgl_nullrect(&remaining))
+    {
+      /* Copy the rectangular region to the framebuffer (no clipping).
+       * REVISIT:  Assumes a single color plane.
+       */
+
+      DEBUGASSERT(wnd->be->plane[0].pwfb.copyrectangle != NULL);
+      wnd->be->plane[0].pwfb.copyrectangle(wnd, &remaining, src[0],
+                                           &offset, stride);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxbe_bitmap_dev
+ *
+ * Description:
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified window.  The graphics output is written to the graphics
+ *   device unconditionally.
+ *
+ * Input Parameters:
+ *   wnd   - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular on the display that will receive the
+ *            the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in bytes.
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
+                     FAR const struct nxgl_rect_s *dest,
+                     FAR const void *src[CONFIG_NX_NPLANES],
+                     FAR const struct nxgl_point_s *origin,
+                     unsigned int stride)
+{
+  struct nx_bitmap_s info;
+  struct nxgl_rect_s bounds;
+  struct nxgl_point_s offset;
+  struct nxgl_rect_s remaining;
+  unsigned int deststride;
+  int i;
+
+  DEBUGASSERT(wnd != NULL && dest != NULL && src != NULL && origin != NULL);
+  DEBUGASSERT(wnd->be != NULL && wnd->be->plane != NULL);
+
+  /* Verify that the destination rectangle begins "below" and to the "right"
+   * of the origin
+   */
+
+  if (dest->pt1.x < origin->x || dest->pt1.y < origin->y)
+    {
+      gerr("ERROR: Bad dest start position\n");
+      return;
+    }
+
+  /* Verify that the width of the destination rectangle does not exceed the
+   * width of the source bitmap data (taking into account the bitmap origin)
+   */
+
+  deststride = (((dest->pt2.x - origin->x + 1) *
+                 wnd->be->plane[0].pinfo.bpp + 7) >> 3);
   if (deststride > stride)
     {
       gerr("ERROR: Bad dest width\n");
@@ -177,7 +260,9 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
   i = 0;
 #endif
     {
-      info.cops.visible  = nxs_clipcopy;
+      DEBUGASSERT(wnd->be->plane[i].dev.copyrectangle != NULL);
+
+      info.cops.visible  = bitmap_clipcopy;
       info.cops.obscured = nxbe_clipnull;
       info.src           = src[i];
       info.origin.x      = offset.x;
@@ -188,3 +273,50 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
                    &info.cops, &wnd->be->plane[i]);
     }
 }
+
+/****************************************************************************
+ * Name: nxbe_bitmap
+ *
+ * Description:
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified window.  This is a front end to nxbe_bitmap_dev() that is
+ *   used only if CONFIG_NX_RAMBACKED=y.  If the per-window frame buffer is
+ *   selected, then the bit map will be written to both the graphics device
+ *   and shadowed in the per-window framebuffer.
+ *
+ * Input Parameters:
+ *   wnd   - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular on the display that will receive the
+ *            the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
+void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *dest,
+                 FAR const void *src[CONFIG_NX_NPLANES],
+                 FAR const struct nxgl_point_s *origin,
+                 unsigned int stride)
+{
+  /* If this window supports a pre-window frame buffer then shadow the full,
+   * unclipped bitmap in that framebuffer.
+   */
+
+  if (NXBE_ISRAMBACKED(wnd))
+    {
+      nxbe_bitmap_pwfb(wnd, dest, src, origin, stride);
+    }
+
+  /* Rend the bitmap directly to the graphics device in any case */
+
+  nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+}
+#endif

@@ -40,7 +40,9 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <fixedmath.h>
+
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
@@ -110,6 +112,108 @@ static void nxbe_clipfilltrapezoid(FAR struct nxbe_clipops_s *cops,
 }
 
 /****************************************************************************
+ * Name: nxbe_filltrapezoid_dev
+ *
+ * Description:
+ *  Fill the specified rectangle in the device graphics memory with the
+ *  specified color
+ *
+ * Input Parameters:
+ *   wnd    - The window structure reference
+ *   bounds - Trapezoid bounding box (in absolute window coordinates)
+ *   rect   - The location to be filled (in relative window coordinates)
+ *   col    - The color to use in the fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
+                                          FAR const struct nxgl_rect_s *bounds,
+                                          FAR const struct nxgl_trapezoid_s *trap,
+                                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+{
+  struct nxbe_filltrap_s info;
+  int i;
+
+  info.cops.visible  = nxbe_clipfilltrapezoid;
+  info.cops.obscured = nxbe_clipnull;
+
+  nxgl_trapcopy(&info.trap, trap);
+
+  /* Process each color plane */
+
+#if CONFIG_NX_NPLANES > 1
+  for (i = 0; i < wnd->be->vinfo.nplanes; i++)
+#else
+  i = 0;
+#endif
+    {
+      info.color = color[i];
+      nxbe_clipper(wnd->above, bounds, NX_CLIPORDER_DEFAULT,
+                   &info.cops, &wnd->be->plane[i]);
+    }
+}
+
+/****************************************************************************
+ * Name: nxbe_filltrapezoid_pwfb
+ *
+ * Description:
+ *  Fill the specified rectangle in the window with the specified color
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   bounds - Trapezoid bounding box (in absolute window coordinates)
+ *   rect - The location to be filled (in relative window coordinates)
+ *   col  - The color to use in the fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
+static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
+                                           FAR const struct nxgl_rect_s *bounds,
+                                           FAR const struct nxgl_trapezoid_s *trap,
+                                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+{
+  struct nxgl_rect_s newbounds;
+  FAR const void *src[CONFIG_NX_NPLANES] =
+  {
+    (FAR const void *)wnd->fbmem
+  };
+  struct nxgl_point_s origin =
+  {
+    0, 0
+  };
+
+  /* Copy the trapezoidal region to the framebuffer (no clipping).
+   * REVISIT:  Assumes a single color plane.
+   */
+
+   DEBUGASSERT(wnd->be->plane[0].pwfb.filltrapezoid != NULL);
+   wnd->be->plane[0].pwfb.filltrapezoid(wnd, trap, bounds, color[0]);
+
+  /* Copy the porition of the per-window framebuffer to the device graphics
+   * memory.
+   */
+
+  /* Restore the rectangle origin to (0,0) as required by nxbe_bitmap_dev().
+   * nxbe_bitmap_dev() will offset the bounds yet again.
+   */
+
+  nxgl_rectoffset(&newbounds, bounds,
+                  -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+  /* Then perform the bitmap copy from the pre-window framebuffer */
+
+  nxbe_bitmap_dev(wnd, &newbounds, src, &origin, wnd->stride);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -135,33 +239,27 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
                         FAR const struct nxgl_trapezoid_s *trap,
                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  struct nxbe_filltrap_s info;
   struct nxgl_rect_s remaining;
-  int i;
+  struct nxgl_trapezoid_s offset_trap;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !trap)
-    {
-      return;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && trap != NULL);
 
   /* Offset the trapezoid by the window origin to position it within
    * the framebuffer region
    */
 
-  nxgl_trapoffset(&info.trap, trap, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
+  nxgl_trapoffset(&offset_trap, trap, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
   /* Create a bounding box that contains the trapezoid */
 
-  remaining.pt1.x = b16toi(ngl_min(info.trap.top.x1, info.trap.bot.x1));
-  remaining.pt1.y = info.trap.top.y;
-  remaining.pt2.x = b16toi(ngl_max(info.trap.top.x2, info.trap.bot.x2));
-  remaining.pt2.y = info.trap.bot.y;
+  remaining.pt1.x = b16toi(ngl_min(offset_trap.top.x1, offset_trap.bot.x1));
+  remaining.pt1.y = offset_trap.top.y;
+  remaining.pt2.x = b16toi(ngl_max(offset_trap.top.x2, offset_trap.bot.x2));
+  remaining.pt2.y = offset_trap.bot.y;
 
   /* Clip to any user specified clipping window */
 
-  if (clip)
+  if (clip != NULL)
     {
       struct nxgl_rect_s tmp;
       nxgl_rectoffset(&tmp, clip, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
@@ -175,20 +273,19 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
 
   if (!nxgl_nullrect(&remaining))
     {
-      info.cops.visible  = nxbe_clipfilltrapezoid;
-      info.cops.obscured = nxbe_clipnull;
+#ifdef CONFIG_NX_RAMBACKED
+      /* Update the pre-window framebuffer first, then the device memory. */
 
-      /* Then process each color plane */
-
-#if CONFIG_NX_NPLANES > 1
-      for (i = 0; i < wnd->be->vinfo.nplanes; i++)
-#else
-      i = 0;
+      if (NXBE_ISRAMBACKED(wnd))
+        {
+          nxbe_filltrapezoid_pwfb(wnd, &remaining, &offset_trap, color);
+        }
+      else
 #endif
         {
-          info.color = color[i];
-          nxbe_clipper(wnd->above, &remaining, NX_CLIPORDER_DEFAULT,
-                       &info.cops, &wnd->be->plane[i]);
+          /* Update only the graphics device memory. */
+
+          nxbe_filltrapezoid_dev(wnd, &remaining, &offset_trap, color);
         }
     }
 }

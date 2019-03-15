@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_setsize.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,171 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_NX_RAMBACKED
+#  include <debug.h>
+#  include <string.h>
+#ifdef CONFIG_BUILD_KERNEL
+#  include <nuttx/pgalloc.h>
+#else
+#  include <nuttx/kmalloc.h>
+#endif
+#endif
+
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
 #include "nxmu.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) ((a < b) ? a : b)
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxbe_realloc
+ *
+ * Description:
+ *   After the display size has changed, reallocate the pre-window frame
+ *   buffer for the new framebuffer size.
+ *
+ *   REVISIT:  This currently takes a brute force force approach, allocating
+ *   the new framebuffer while the old framebuffer is still in place.  There
+ *   may be some clever way to do this reallocation in place.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
+static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
+                         FAR struct nxgl_rect_s *oldbounds)
+{
+  FAR nxgl_mxpixel_t *newfb;
+  FAR uint8_t *src;
+  FAR uint8_t *dest;
+  nxgl_coord_t minheight;
+  nxgl_coord_t newidth;
+  nxgl_coord_t newheight;
+  nxgl_coord_t oldheight;
+  nxgl_coord_t row;
+  size_t newfbsize;
+  unsigned int minstride;
+  unsigned int newstride;
+  unsigned int bpp;
+#ifdef CONFIG_BUILD_KERNEL
+  unsigned int newnpages;
+#endif
+
+  /* Allocate framebuffer memory if the per-window framebuffer feature has
+   * been selected.
+   *
+   * REVISIT:  This initial state of the framebuffer is uninitialized and
+   * not synchronized with the graphic device content.  It will take a full
+   * screen update from the application to force the framebuffer and device
+   * to be consistent.
+   */
+
+  if (NXBE_ISRAMBACKED(wnd))
+    {
+      oldheight       = oldbounds->pt2.y - oldbounds->pt1.y + 1;
+
+      newidth         = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
+      newheight       = wnd->bounds.pt2.y - wnd->bounds.pt1.y + 1;
+      bpp             = wnd->be->plane[0].pinfo.bpp;
+      newstride       = (bpp * newidth + 7) >> 8;
+      newfbsize       = newstride * newheight;
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* Re-allocate memory from the page pool. */
+
+      /* Determine the number of pages to be allocated. */
+
+      newnpages = (uint16_t)MM_NPAGES(newfbsize);
+
+      /* Allocate the pages */
+
+      newfb = (FAR nxgl_mxpixel_t *)mm_pgalloc(newnpages);
+      if (newfb == NULL)
+        {
+          /* Fall back to no RAM back up */
+
+          gerr("ERROR: mm_pgalloc() failed\n");
+          mm_pgfree(wnd->fbmem, wnd->npages);
+          wnd->stride = 0;
+          wnd->npages = 0;
+          wnd->fbmem  = NULL;
+          NXBE_CLRRAMBACKED(wnd);
+          return;
+        }
+#else
+      /* Re-allocate memory from the user space heap. */
+
+      newfb = (FAR nxgl_mxpixel_t *)kumm_malloc(newfbsize);
+      if (newfb == NULL)
+        {
+          /* Fall back to no RAM back up */
+
+          gerr("ERROR: mm_pgalloc() failed\n");
+          kumm_free(wnd->fbmem);
+          wnd->stride = 0;
+          wnd->fbmem  = NULL;
+          NXBE_CLRRAMBACKED(wnd);
+          return;
+        }
+#endif
+
+      /* Copy the content of the old framebuffer to the new frame buffer */
+
+      minheight = MIN(oldheight, newheight);
+      minstride = MIN(wnd->stride, newstride);
+
+      /* Process each line one at a time */
+
+      for (src  = (FAR uint8_t *)wnd->fbmem, dest = (FAR uint8_t *)newfb,
+           row = 0;
+           row < minheight;
+           src += wnd->stride, dest += newstride, row++)
+        {
+          /* Copy valid row data */
+
+          memcpy(src, dest, minstride);
+
+          /* Pad any extra pixel data on the right (with zeroes?) */
+
+          if (minstride < newstride)
+            {
+              memset(dest + minstride, 0, newstride - minstride);
+            }
+        }
+
+      /* Pad any extra lines at the bottom (with zeroes?) */
+
+      if (row < newheight)
+        {
+          size_t nbytes = newstride * (newheight - row);
+          memset(dest, 0, nbytes);
+        }
+
+      /* Free the old framebuffer and configure for the new framebuffer */
+
+#ifdef CONFIG_BUILD_KERNEL
+      mm_pgfree(wnd->fbmem, wnd->npages);
+      wnd->npages = newnpages;
+#else
+      kumm_free(wnd->fbmem);
+#endif
+      wnd->stride = newstride;
+      wnd->fbmem  = newfb;
+    }
+}
+#else
+#  define nxbe_realloc(w,b)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -62,18 +223,15 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 {
   struct nxgl_rect_s bounds;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd)
-    {
-      return;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && size != NULL);
 
-  /* Save the before size of the window's bounding box */
+  /* Save the 'before' size of the window's bounding box */
 
   nxgl_rectcopy(&bounds, &wnd->bounds);
 
-  /* Add the window origin to the supplied size get the new window bounding box */
+  /* Add the window origin to the supplied size get the new window bounding
+   * box
+   */
 
   wnd->bounds.pt2.x = wnd->bounds.pt1.x + size->w - 1;
   wnd->bounds.pt2.y = wnd->bounds.pt1.y + size->h - 1;
@@ -82,8 +240,13 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   nxgl_rectintersect(&wnd->bounds, &wnd->bounds, &wnd->be->bkgd.bounds);
 
-  /* We need to update the larger of the two rectangles.  That will be the
-   * union of the before and after sizes.
+  /* Re-allocate the per-window framebuffer memory for the new window size. */
+
+  nxbe_realloc(wnd, &bounds);
+
+  /* We need to update the larger of the two regions described by the
+   * original bounding box and the new bounding box.   That will be the
+   * union of the two bounding boxes.
    */
 
   nxgl_rectunion(&bounds, &bounds, &wnd->bounds);

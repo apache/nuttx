@@ -1,7 +1,8 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_redrawreq.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2012, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,15 +59,42 @@
  *
  ****************************************************************************/
 
-void nxmu_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect)
+void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
+                    FAR const struct nxgl_rect_s *rect)
 {
-  struct nxclimsg_redraw_s outmsg;
+#ifdef CONFIG_NX_RAMBACKED
+  /* If this window supports a pre-window frame buffer, then we can just
+   * update the device content from that framebuffer.
+   */
 
-  outmsg.msgid = NX_CLIMSG_REDRAW;
-  outmsg.wnd   = wnd;
-  outmsg.more  = false;
-  nxgl_rectoffset(&outmsg.rect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+  if (NXBE_ISRAMBACKED(wnd))
+    {
+      FAR const void *src[CONFIG_NX_NPLANES] =
+      {
+        (FAR const void *)wnd->fbmem
+      };
+      struct nxgl_point_s origin =
+      {
+        0, 0
+      };
 
-  (void)nxmu_sendclientwindow(wnd, &outmsg, sizeof(struct nxclimsg_redraw_s));
+      nxbe_bitmap_dev(wnd, rect, src, &origin, wnd->stride);
+    }
+  else
+#endif
+    {
+      struct nxclimsg_redraw_s outmsg;
+
+      /* Send the client redraw message */
+
+      outmsg.msgid = NX_CLIMSG_REDRAW;
+      outmsg.wnd   = wnd;
+      outmsg.more  = false;
+      nxgl_rectoffset(&outmsg.rect, rect,
+                      -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+      (void)nxmu_sendclientwindow(wnd, &outmsg,
+                                  sizeof(struct nxclimsg_redraw_s));
+    }
 }
 

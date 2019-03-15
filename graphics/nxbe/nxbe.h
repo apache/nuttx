@@ -69,10 +69,10 @@
 /* Rasterization ************************************************************/
 
 /* A vtable of raster operation function pointers.  The types of the
- * function points must match the rasterizer types exported by nxglib
+ * function points must match the device rasterizer types exported by nxglib.
  */
 
-struct nxbe_vtable_s
+struct nxbe_dev_vtable_s
 {
   CODE void (*setpixel)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_point_s *pos,
@@ -88,7 +88,7 @@ struct nxbe_vtable_s
                              FAR const struct nxgl_rect_s *bounds,
                              nxgl_mxpixel_t color);
   CODE void (*moverectangle)(FAR NX_PLANEINFOTYPE *pinfo,
-                            FAR const struct nxgl_rect_s *rect,
+                             FAR const struct nxgl_rect_s *rect,
                              FAR struct nxgl_point_s *offset);
   CODE void (*copyrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                              FAR const struct nxgl_rect_s *dest,
@@ -97,18 +97,50 @@ struct nxbe_vtable_s
                              unsigned int srcstride);
 };
 
+#ifdef CONFIG_NX_RAMBACKED
+/* A vtable of raster operation function pointers.  The types of the
+ * function points must match the per-window framebuffer rasterizer types
+ * exported by nxglib.
+ */
+
+struct nxbe_pwfb_vtable_s
+{
+  CODE void (*setpixel)(FAR struct nxbe_window_s *bwnd,
+                        FAR const struct nxgl_point_s *pos,
+                        nxgl_mxpixel_t color);
+  CODE void (*fillrectangle)(FAR struct nxbe_window_s *bwnd,
+                             FAR const struct nxgl_rect_s *rect,
+                             nxgl_mxpixel_t color);
+  CODE void (*getrectangle)(FAR struct nxbe_window_s *bwnd,
+                            FAR const struct nxgl_rect_s *rect,
+                           FAR void *dest, unsigned int deststride);
+  CODE void (*filltrapezoid)(FAR struct nxbe_window_s *bwnd,
+                             FAR const struct nxgl_trapezoid_s *trap,
+                             FAR const struct nxgl_rect_s *bounds,
+                             nxgl_mxpixel_t color);
+  CODE void (*moverectangle)(FAR struct nxbe_window_s *bwnd,
+                             FAR const struct nxgl_rect_s *rect,
+                             FAR struct nxgl_point_s *offset);
+  CODE void (*copyrectangle)(FAR struct nxbe_window_s *bwnd,
+                             FAR const struct nxgl_rect_s *dest,
+                             FAR const void *src,
+                             FAR const struct nxgl_point_s *origin,
+                             unsigned int srcstride);
+};
+#endif
+
 /* Encapsulates everything needed support window rasterization commands. */
 
 struct nxbe_plane_s
 {
-  /* Raster device operation callbacks for this plane */
+  /* Raster device operation callbacks */
 
-  struct nxbe_vtable_s dev;
+  struct nxbe_dev_vtable_s dev;
 
 #ifdef CONFIG_NX_RAMBACKED
-  /* Raster per-window framebuffer operation callbacks for this plane */
+  /* Raster per-window framebuffer operation callbacks */
 
-  struct nxbe_vtable_s pwfb;
+  struct nxbe_pwfb_vtable_s pwfb;
 #endif
 
   /* Framebuffer plane info describing destination video plane */
@@ -373,11 +405,12 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
                FAR const struct nxgl_point_s *offset);
 
 /****************************************************************************
- * Name: nxbe_bitmap
+ * Name: nxbe_bitmap_dev
  *
  * Description:
  *   Copy a rectangular region of a larger image into the rectangle in the
- *   specified window.
+ *   specified window.  The graphics output is written to the graphics
+ *   device unconditionally.
  *
  * Input Parameters:
  *   wnd   - The window that will receive the bitmap image
@@ -390,15 +423,50 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  *   stride - The width of the full source image in pixels.
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   None
  *
  ****************************************************************************/
 
+void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
+                     FAR const struct nxgl_rect_s *dest,
+                     FAR const void *src[CONFIG_NX_NPLANES],
+                     FAR const struct nxgl_point_s *origin,
+                     unsigned int stride);
+
+/****************************************************************************
+ * Name: nxbe_bitmap
+ *
+ * Description:
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified window.  This is a front end to nxbe_bitmap_dev() that is
+ *   used only if CONFIG_NX_RAMBACKED=y.  If the per-window frame buffer is
+ *   selected, then the bit map will be written to both the graphics device
+ *   and shadowed in the per-window framebuffer.
+ *
+ * Input Parameters:
+ *   wnd   - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular on the display that will receive the
+ *            the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
 void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
                  FAR const struct nxgl_rect_s *dest,
                  FAR const void *src[CONFIG_NX_NPLANES],
                  FAR const struct nxgl_point_s *origin,
                  unsigned int stride);
+#else
+#  define nxbe_bitmap(w,d,s,o,n) nxbe_bitmap_dev(w,d,s,o,n)
+#endif
 
 /****************************************************************************
  * Name: nxbe_redraw
