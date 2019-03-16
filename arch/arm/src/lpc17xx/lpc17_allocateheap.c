@@ -407,7 +407,7 @@ void up_addregion(void)
     else
       {
         /* Use the entire SDRAM for heap (possible reserving a portion at
-         * the beginning of DRAM.
+         * the beginning of DRAM).
          */
 
         dram_start = LPC17_EXTDRAM_CS0 + CONFIG_LPC17_EXTDRAMHEAP_OFFSET;

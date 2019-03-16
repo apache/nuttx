@@ -177,7 +177,7 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
         {
           /* Copy valid row data */
 
-          memcpy(src, dest, minstride);
+          memcpy(dest, src, minstride);
 
           /* Pad any extra pixel data on the right (with zeroes?) */
 
