@@ -69,6 +69,7 @@ void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
 
   if (NXBE_ISRAMBACKED(wnd))
     {
+      struct nxgl_rect_s wndrect;
       FAR const void *src[CONFIG_NX_NPLANES] =
       {
         (FAR const void *)wnd->fbmem
@@ -78,7 +79,14 @@ void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
         0, 0
       };
 
-      nxbe_bitmap_dev(wnd, rect, src, &origin, wnd->stride);
+      /* Put the rectangle back relative to the window */
+
+      nxgl_rectoffset(&wndrect, rect,
+                      -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+      /* And render the bitmap */
+
+      nxbe_bitmap_dev(wnd, &wndrect, src, &origin, wnd->stride);
     }
   else
 #endif
@@ -97,4 +105,3 @@ void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
                                   sizeof(struct nxclimsg_redraw_s));
     }
 }
-

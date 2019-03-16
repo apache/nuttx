@@ -572,3 +572,12 @@ Configuration Directories
        has been verified that the pdcurses demos that require menu
        interactions work well with the discrete joystick.
 
+  pwfb:
+  -----
+
+    This configuration uses the test at apps/examples/pwfb to verify the
+    operation of the per-window framebuffers.
+
+    STATUS:
+      2019-03-16:  The test does not succeed.  There are still numerou
+        problems to be overcome.

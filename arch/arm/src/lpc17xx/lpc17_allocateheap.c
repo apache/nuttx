@@ -381,6 +381,14 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS >= 3
 #if defined(CONFIG_LPC17_EXTDRAM) && defined(CONFIG_LPC17_EXTDRAMHEAP)
   {
+    /* Memory may be reserved at the beginning of DRAM for other purposes
+     * (for example for video framebuffers).  Memory can similar be
+     * reserved at the end of DRAM using LPC17_EXTDRAMSIZE.  The amount to
+     * be added to the heap will be from DRAM_BASE + LPC17_EXTDRAMHEAP_OFFSET
+     * through DRAM_BASE + LPC17_EXTDRAMSIZE where (DRAM_BASE is the base
+     * address of CS0).
+     */
+
     uintptr_t dram_end = LPC17_EXTDRAM_CS0 + CONFIG_LPC17_EXTDRAMSIZE;
     uintptr_t dram_start;
     uintptr_t heap_size;
@@ -398,9 +406,11 @@ void up_addregion(void)
       }
     else
       {
-        /* Use the entire SDRAM for heap */
+        /* Use the entire SDRAM for heap (possible reserving a portion at
+         * the beginning of DRAM.
+         */
 
-        dram_start = LPC17_EXTDRAM_CS0;
+        dram_start = LPC17_EXTDRAM_CS0 + CONFIG_LPC17_EXTDRAMHEAP_OFFSET;
       }
 
     heap_size = dram_end - dram_start;

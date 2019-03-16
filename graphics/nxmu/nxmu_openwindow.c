@@ -106,7 +106,7 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
       width         = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
       height        = wnd->bounds.pt2.y - wnd->bounds.pt1.y + 1;
       bpp           = wnd->be->plane[0].pinfo.bpp;
-      wnd->stride   = (bpp * width + 7) >> 8;
+      wnd->stride   = (bpp * width + 7) >> 3;
       fbsize        = wnd->stride * height;
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -129,7 +129,9 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
         {
           /* Fall back to no RAM back up */
 
-          gerr("ERROR: mm_pgalloc() failed\n");
+          gerr("ERROR: mm_pgalloc() failed for fbsize=%lu, npages=%u\n",
+               (unsigned long)fbsize, wnd->npages);
+
           wnd->stride = 0;
           wnd->npages = 0;
           NXBE_CLRRAMBACKED(wnd);
@@ -148,7 +150,9 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
         {
           /* Fall back to no RAM back up */
 
-          gerr("ERROR: mm_pgalloc() failed\n");
+          gerr("ERROR: kumm_malloc() failed for fbsize=%lu\n",
+               (unsigned long)fbsize);
+
           wnd->stride = 0;
           NXBE_CLRRAMBACKED(wnd);
         }

@@ -451,6 +451,18 @@ config LPC17_EXTDRAMHEAP
 	---help---
 		Add the external SDRAM into the heap.
 
+config LPC17_EXTDRAMHEAP_OFFSET
+	int "DRAM heap offset"
+	default 0
+	depends on LPC17_EXTDRAMHEAP
+	---help---
+		Memory may be reserved at the beginning of DRAM for other purposes
+		(for example for video framebuffers).  Memory can similar be
+		reserved at the end of DRAM using LPC17_EXTDRAMSIZE.  The amount to
+		be added to the heap will be from DRAM_BASE + LPC17_EXTDRAMHEAP_OFFSET
+		through DRAM_BASE + LPC17_EXTDRAMSIZE where (DRAM_BASE is the base
+		address of CS0).
+
 endif
 
 config LPC17_EXTSRAM0
