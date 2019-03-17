@@ -7,7 +7,7 @@ README
 
   In the two pass build, the application logic is built during the first
   phase, pass 1.  In that phase, the application may generate and install
-  source files in the pass1/directory.
+  source files into the pass1/ directory.
 
   The operating system is built during phase 2 of the build.  At that time,
   those source files in the pass1/ directory will be built and incorporated

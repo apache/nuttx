@@ -161,7 +161,7 @@ static int binfs_open(FAR struct file *filep, FAR const char *relpath,
   index = builtin_isavail(relpath);
   if (index < 0)
     {
-      ferr("ERROR: Builting %s does not exist\n", relpath);
+      ferr("ERROR: Built-in %s does not exist\n", relpath);
       return -ENOENT;
     }
 

@@ -43,10 +43,10 @@ arch/<arch-name>/arch.h as described below).
 Directory Structure
 ^^^^^^^^^^^^^^^^^^^
 
-The arch directory contains architecture specific logic.  The complete
-board port in is defined by the architecture-specific code in this
-directory (plus the board-specific configurations in the config/
-subdirectory).  Each architecture must provide a subdirectory <arch-name>
+The arch/ directory contains architecture-specific logic.  The complete
+board port is defined by the architecture-specific code in this
+directory plus the board-specific configurations in the config/
+subdirectory.  Each architecture must provide a subdirectory <arch-name>
 under arch/ with the following characteristics:
 
 
@@ -81,16 +81,16 @@ include/types.h
 
     _int8_t, _uint8_t, _int16_t, _uint16_t, _int32_t, _uint32_t
 
-  and if the architecture supports 64-bit integers.
+  and if the architecture supports 64-bit integers:
 
-    _int24_t, _uint24_t, int64_t, uint64_t
+    _int24_t, _uint24_t, _int64_t, _uint64_t
 
   NOTE that these type names have a leading underscore character.  This
   file will be included(indirectly) by include/stdint.h and typedef'ed to
   the final name without the underscore character.  This roundabout way of
   doings things allows the stdint.h to be removed from the include/
   directory in the event that the user prefers to use the definitions
-  provided by their toolchain header files
+  provided by their toolchain header files.
 
     irqstate_t
 
@@ -101,10 +101,10 @@ include/types.h
   available to all files.
 
 include/irq.h
-  This file needs to define some architecture specific functions (usually
-  inline if the compiler supports inlining) and structure.  These include:
+  This file needs to define some architecture-specific functions (usually
+  inline if the compiler supports inlining) and structures.  These include:
 
-  - struct xcptcontext.  This structures represents the saved context
+  - struct xcptcontext.  This structure represents the saved context
     of a thread.
 
   - irqstate_t up_irq_save(void) -- Used to disable all interrupts.
@@ -113,7 +113,7 @@ include/irq.h
     enables to the same state as before up_irq_save was called.
 
   NOTE: These interfaces are not available to application code but can
-  only be used withint the operating system code.  And, in general,
+  only be used within the operating system code.  And, in general,
   these functions should *never* be called directly, not unless you
   know absolutely well what you are doing.  Rather you shoudl typically
   use the wrapper functions enter_critical_section() and leave_critical_section()

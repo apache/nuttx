@@ -12,11 +12,11 @@ Contents:
 Files in this directory
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-dev_null.c, dev_urandom, and dev_zero.c
-  These files provide the standard /dev/null, /dev/urandom, and /dev/zero
-  devices.  See include/nuttx/drivers/driers.h for prototypes of functions
-  that should be called if you want to register these devices
-  (devnull_register(), devurandom_register(), and devzero_register()).
+dev_null.c and dev_zero.c
+  These files provide the standard /dev/null and /dev/zero devices.  See
+  include/nuttx/drivers/driers.h for prototypes of functions that should
+  be called if you want to register these devices (devnull_register()
+  and devzero_register()).
 
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
@@ -56,7 +56,8 @@ contactless/
   to contactless cards and tags.
 
 crypto/
-  Contains crypto drivers and support logic.
+  Contains crypto drivers and support logic, including the /dev/urandom
+  device.
 
 eeprom/
   An EEPROM is a form of Memory Technology Device (see drivers/mtd).
