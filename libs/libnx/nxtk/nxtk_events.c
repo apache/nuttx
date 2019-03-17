@@ -94,10 +94,11 @@ const struct nx_callback_s g_nxtkcb =
 static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                         bool more, FAR void *arg)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
+  FAR struct nxtk_framedwindow_s *fwnd;
   struct nxgl_rect_s intersection;
 
-  DEBUGASSERT(hwnd && rect && fwnd->fwcb);
+  DEBUGASSERT(hwnd != NULL && rect != NULL && fwnd->fwcb != NULL);
+  fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
 
   ginfo("hwnd=%p rect={(%d,%d),(%d,%d)} more=%d\n",
         hwnd, rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y, more);

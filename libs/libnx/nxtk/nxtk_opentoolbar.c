@@ -100,7 +100,5 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
 
   nx_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
 
-  /* Return the initialized toolbar reference */
-
   return OK;
 }

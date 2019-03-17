@@ -127,7 +127,7 @@ struct nxbe_window_s
    * absolute screen coordinate system (0,0)->(xres,yres)
    */
 
-  struct nxgl_rect_s bounds;          /* The bounding rectangle of window */
+  struct nxgl_rect_s bounds;          /* The bounding rectangle of the window */
 
   /* Window flags (see the NXBE_* bit definitions above) */
 
