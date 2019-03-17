@@ -85,7 +85,7 @@ static void nxtk_drawframeside(FAR struct nxtk_framedwindow_s *fwnd,
  * Input Parameters:
  *   fwnd   - the framed window whose frame needs to be re-drawn.  This must
  *            have been previously created by nxtk_openwindow().
- *   bounds - Only draw the ports of the frame within this bounding box.
+ *   bounds - Only draw the parts of the frame within this bounding box.
  *            (window relative coordinates).
  *
  * Returned Value:
