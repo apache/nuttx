@@ -99,7 +99,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 
   /* Check the number of color planes */
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_GRAPHICS
   if (be->vinfo.nplanes > CONFIG_NX_NPLANES)
     {
       gerr("ERROR: NX configured for only %d planes, controller wants %d\n",

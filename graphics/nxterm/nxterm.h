@@ -127,7 +127,7 @@ struct nxterm_state_s
   FAR void *handle;                          /* The window handle */
   FAR struct nxterm_window_s wndo;           /* Describes the window and font */
   sem_t exclsem;                             /* Forces mutually exclusive access */
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_GRAPHICS
   pid_t holder;                              /* Deadlock avoidance */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -193,7 +193,7 @@ extern const struct file_operations g_nxterm_drvrops;
 
 /* Semaphore helpers */
 
-#ifdef CONFIG_DEBUG_FEATURES
+#ifdef CONFIG_DEBUG_GRAPHICS
 int nxterm_semwait(FAR struct nxterm_state_s *priv);
 int nxterm_sempost(FAR struct nxterm_state_s *priv);
 #else

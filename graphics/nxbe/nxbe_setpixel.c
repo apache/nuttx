@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 
@@ -112,12 +114,7 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s rect;
   int i;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !pos)
-    {
-      return;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && pos != NULL);
 
   /* Offset the position by the window origin */
 

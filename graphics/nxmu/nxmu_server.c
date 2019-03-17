@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
- *   Copyright (C) 2008-2012, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ static inline void nxmu_disconnect(FAR struct nxmu_conn_s *conn)
   ret = nxmu_sendclient(conn, &outmsg, sizeof(struct nxclimsg_disconnected_s));
   if (ret < 0)
     {
-      gerr("ERROR: nxmu_sendclient failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendclient failed: %d\n", ret);
     }
 
   /* Close the outgoing client message queue */
@@ -111,7 +111,7 @@ static inline void nxmu_connect(FAR struct nxmu_conn_s *conn)
   ret = nxmu_sendclient(conn, &outmsg, sizeof(struct nxclimsg_connected_s));
   if (ret < 0)
     {
-      gerr("ERROR: nxmu_sendclient failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendclient failed: %d\n", ret);
     }
 }
 
@@ -150,10 +150,11 @@ static inline void nxmu_blocked(FAR struct nxbe_window_s *wnd, FAR void *arg)
   outmsg.wnd   = wnd;
   outmsg.arg   = arg;
 
-  ret = nxmu_sendclient(wnd->conn, &outmsg, sizeof(struct nxclimsg_blocked_s));
+  ret = nxmu_sendclient(wnd->conn, &outmsg,
+                        sizeof(struct nxclimsg_blocked_s));
   if (ret < 0)
     {
-      gerr("ERROR: nxmu_sendclient failed: %d\n", errno);
+      gerr("ERROR: nxmu_sendclient failed: %d\n", ret);
     }
 }
 
@@ -174,18 +175,16 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   ret = nxbe_configure(dev, &fe->be);
   if (ret < 0)
     {
-      gerr("ERROR: nxbe_configure failed: %d\n", -ret);
-      set_errno(-ret);
-      return ERROR;
+      gerr("ERROR: nxbe_configure failed: %d\n", ret);
+      return ret;
     }
 
 #ifdef CONFIG_FB_CMAP
   ret = nxbe_colormap(dev);
   if (ret < 0)
     {
-      gerr("ERROR: nxbe_colormap failed: %d\n", -ret);
-      set_errno(-ret);
-      return ERROR;
+      gerr("ERROR: nxbe_colormap failed: %d\n", ret);
+      return ret;
     }
 #endif /* CONFIG_FB_CMAP */
 
@@ -204,8 +203,9 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   fe->conn.crdmq = mq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr);
   if (fe->conn.crdmq == (mqd_t)-1)
     {
-      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errno);
-      return ERROR; /* mq_open sets errno */
+      int errcode = get_errno();
+      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errcode);
+      return -errcode;
     }
 
   /* NOTE that the outgoing client MQ (cwrmq) is not initialized.  The
@@ -220,9 +220,10 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   fe->conn.swrmq = mq_open(mqname, O_WRONLY);
   if (fe->conn.swrmq == (mqd_t)-1)
     {
-      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errno);
+      int errcode = get_errno();
+      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errcode);
       mq_close(fe->conn.crdmq);
-      return ERROR; /* mq_open sets errno */
+      return -errcode;
     }
 
   /* The server is now "connected" to itself via the background window */
@@ -272,7 +273,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
  *
  * Returned Value:
  *   This function usually does not return.  If it does return, it will
- *   return ERROR and errno will be set appropriately.
+ *   return a negated errno value indicating the cause of the failure.
  *
  ****************************************************************************/
 
@@ -293,7 +294,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
   ret = nxmu_setup(mqname, dev, &fe);
   if (ret < 0)
     {
-      return ret; /* nxmu_setup sets errno */
+      return ret;
     }
 
   /* Produce the initial, background display */
@@ -536,6 +537,5 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
 errout:
   nxmu_shutdown(&fe);
-  set_errno(-ret);
-  return ERROR;
+  return ret;
 }

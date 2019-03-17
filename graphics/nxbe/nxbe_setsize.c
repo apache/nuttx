@@ -89,7 +89,7 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
   FAR uint8_t *src;
   FAR uint8_t *dest;
   nxgl_coord_t minheight;
-  nxgl_coord_t newidth;
+  nxgl_coord_t newwidth;
   nxgl_coord_t newheight;
   nxgl_coord_t oldheight;
   nxgl_coord_t row;
@@ -114,10 +114,10 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
     {
       oldheight       = oldbounds->pt2.y - oldbounds->pt1.y + 1;
 
-      newidth         = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
+      newwidth        = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
       newheight       = wnd->bounds.pt2.y - wnd->bounds.pt1.y + 1;
       bpp             = wnd->be->plane[0].pinfo.bpp;
-      newstride       = (bpp * newidth + 7) >> 3;
+      newstride       = (bpp * newwidth + 7) >> 3;
       newfbsize       = newstride * newheight;
 
 #ifdef CONFIG_BUILD_KERNEL

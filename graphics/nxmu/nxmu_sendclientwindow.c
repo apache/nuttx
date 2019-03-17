@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_sendclientwindow.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <mqueue.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -66,19 +67,11 @@
  ****************************************************************************/
 
 int nxmu_sendclientwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
-                    size_t msglen)
+                          size_t msglen)
 {
-    int ret = OK;
+  int ret = OK;
 
-  /* Sanity checking */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !wnd->conn)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && wnd->conn != NULL && msg != NULL);
 
   /* Ignore messages destined to a blocked window (no errors reported) */
 

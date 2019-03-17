@@ -122,10 +122,19 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
                                           unsigned int deststride)
 {
   FAR struct nxbe_plane_s *pplane = &wnd->be->plane[plane];
+  struct nxgl_rect_s relrect;
 
   DEBUGASSERT(pplane != NULL && pplane->pwfb.getrectangle != NULL);
 
-  pplane->pwfb.getrectangle(wnd, rect, dest, deststride);
+  /* The rectangle that we receive here is in abolute device coordinates.  We
+   * need to restore this to windows relative coordinates.
+   */
+
+  nxgl_rectoffset(&relrect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+  /* Then get the rectangle from the framebuffer */
+
+  pplane->pwfb.getrectangle(wnd, &relrect, dest, deststride);
 }
 #endif
 

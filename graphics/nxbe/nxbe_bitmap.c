@@ -119,9 +119,7 @@ static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
                                     FAR const struct nxgl_point_s *origin,
                                     unsigned int stride)
 {
-  struct nxgl_rect_s bounds;
-  struct nxgl_point_s offset;
-  struct nxgl_rect_s remaining;
+  struct nxgl_rect_s destrect;
   unsigned int deststride;
 
   DEBUGASSERT(wnd != NULL && dest != NULL && src != NULL && origin != NULL);
@@ -149,25 +147,33 @@ static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
       return;
     }
 
-  /* Offset the rectangle and image origin by the window origin */
+  /* Offset the rectangle and image origin by the window origin.  This
+   * converts the rectangle in the device absolute coordinates.
+   */
 
-  nxgl_rectoffset(&bounds, dest, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
-  nxgl_vectoradd(&offset, origin, &wnd->bounds.pt1);
+  nxgl_rectoffset(&destrect, dest, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
-  /* Clip to the limits of the window and of the background screen */
+  /* Clip to the limits of the window and of the background screen (in
+   * device coordinates.
+   */
 
-  nxgl_rectintersect(&remaining, &bounds, &wnd->bounds);
-  nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
+  nxgl_rectintersect(&destrect, &destrect, &wnd->bounds);
+  nxgl_rectintersect(&destrect, &destrect, &wnd->be->bkgd.bounds);
 
-  if (!nxgl_nullrect(&remaining))
+  if (!nxgl_nullrect(&destrect))
     {
+      /* Restore the destination rectangle to relative window coordinates. */
+
+      nxgl_rectoffset(&destrect, &destrect,
+                      -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
       /* Copy the rectangular region to the framebuffer (no clipping).
        * REVISIT:  Assumes a single color plane.
        */
 
       DEBUGASSERT(wnd->be->plane[0].pwfb.copyrectangle != NULL);
-      wnd->be->plane[0].pwfb.copyrectangle(wnd, &remaining, src[0],
-                                           &offset, stride);
+      wnd->be->plane[0].pwfb.copyrectangle(wnd, &destrect, src[0],
+                                           origin, stride);
     }
 }
 #endif

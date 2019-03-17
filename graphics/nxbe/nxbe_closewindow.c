@@ -74,13 +74,7 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s *be;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (wnd == NULL)
-    {
-      return;
-    }
-#endif
-
+  DEBUGASSERT(wnd != NULL);
   be = wnd->be;
 
   /* The background window should never be closed */

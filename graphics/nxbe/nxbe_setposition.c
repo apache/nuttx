@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_setposition.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
@@ -63,12 +65,7 @@ void nxbe_setposition(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s before;
   struct nxgl_rect_s rect;
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd)
-    {
-      return;
-    }
-#endif
+  DEBUGASSERT(wnd != NULL && pos != NULL);
 
   /* Back out the old window origin position from the bounding box */
 
