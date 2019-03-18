@@ -72,13 +72,22 @@
 
 #define NXBE_WINDOW_BLOCKED   (1 << 0) /* The window is blocked and will not
                                         * receive further input. */
-#define NXBE_WINDOW_RAMBACKED (1 << 1) /* Window is backed by a framebuffer */
+#define NXBE_WINDOW_FRAMED    (1 << 1) /* Framed (NxTK) Window */
+#define NXBE_WINDOW_RAMBACKED (1 << 2) /* Window is backed by a framebuffer */
+
+/* Valid user flags for different window types */
 
 #ifdef CONFIG_NX_RAMBACKED
-#  define NXBE_WINDOW_USER NXBE_WINDOW_RAMBACKED
+#  define NX_WINDOW_USER      NXBE_WINDOW_RAMBACKED
+#  define NXTK_WINDOW_USER    (NXBE_WINDOW_FRAMED | NXBE_WINDOW_RAMBACKED)
+#  define NXBE_WINDOW_USER    (NXBE_WINDOW_FRAMED | NXBE_WINDOW_RAMBACKED)
 #else
-#  define NXBE_WINDOW_USER 0
+#  define NX_WINDOW_USER      0
+#  define NXTK_WINDOW_USER    NXBE_WINDOW_FRAMED
+#  define NXBE_WINDOW_USER    NXBE_WINDOW_FRAMED
 #endif
+
+/* Helpful flag macros */
 
 #define NXBE_ISBLOCKED(wnd) \
   (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
@@ -86,6 +95,13 @@
   do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
 #define NXBE_CLRBLOCKED(wnd) \
   do { (wnd)->flags &= ~NXBE_WINDOW_BLOCKED; } while (0)
+
+#define NXBE_ISFRAMED(wnd) \
+  (((wnd)->flags & NXBE_WINDOW_FRAMED) != 0)
+#define NXBE_SETFRAMED(wnd) \
+  do { (wnd)->flags |= NXBE_WINDOW_FRAMED; } while (0)
+#define NXBE_CLRFRAMED(wnd) \
+  do { (wnd)->flags &= ~NXBE_WINDOW_FRAMED; } while (0)
 
 #define NXBE_ISRAMBACKED(wnd) \
   (((wnd)->flags & NXBE_WINDOW_RAMBACKED) != 0)

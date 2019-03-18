@@ -179,16 +179,11 @@ static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
                                            FAR const struct nxgl_trapezoid_s *trap,
                                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
+  FAR const void *src[CONFIG_NX_NPLANES];
   struct nxgl_trapezoid_s reltrap;
   struct nxgl_rect_s relbounds;
-  FAR const void *src[CONFIG_NX_NPLANES] =
-  {
-    (FAR const void *)wnd->fbmem
-  };
-  struct nxgl_point_s origin =
-  {
-    0, 0
-  };
+  struct nxgl_point_s origin;
+  unsigned int bpp;
 
   /* Both the rectangle that we receive here are in abolute device
    * coordinates.  We need to restore both to windows relative coordinates.
@@ -207,7 +202,55 @@ static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
    wnd->be->plane[0].pwfb.filltrapezoid(wnd, &reltrap, &relbounds,
                                         color[0]);
 
-  /* Copy the portion of the per-window framebuffer in the bounding box
+  /* Get the source of address of the trapezoid bounding box in the
+   * framebuffer.
+   */
+
+  bpp    = wnd->be->plane[0].pinfo.bpp;
+  src[0] = (FAR const void *)
+           ((FAR uint8_t *)wnd->fbmem +
+            relbounds.pt1.y * wnd->stride +
+            ((bpp * relbounds.pt1.x) >> 3));
+
+  /* For resolutions less than 8-bits, the starting pixel will be contained
+   * in the byte pointed to by src[0]but may not be properly aligned for
+   * the transfer.  We fix this by modifying the origin.
+   */
+
+  origin.x = relbounds.pt1.x;
+  origin.y = relbounds.pt1.y;
+
+  switch (bpp)
+    {
+#ifndef CONFIG_NX_DISABLE_1BPP
+      case 1:  /* 1 bit per pixel */
+        {
+          origin.x &= ~7;
+        }
+        break;
+#endif
+
+#ifndef CONFIG_NX_DISABLE_2BPP
+      case 2:  /* 2 bits per pixel */
+        {
+          origin.x &= ~3;
+        }
+        break;
+#endif
+
+#ifndef CONFIG_NX_DISABLE_4BPP
+      case 4:  /* 4 bits per pixel */
+        {
+          origin.x &= ~1;
+        }
+        break;
+#endif
+
+      default:
+        break;
+    }
+
+/* Copy the portion of the per-window framebuffer in the bounding box
    * to the device graphics memory.
    */
 

@@ -109,7 +109,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
   int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (handle == NULL || cb == NULL)
+  if (handle == NULL || cb == NULL ||  (flags & ~NXTK_WINDOW_USER) != 0)
     {
       set_errno(EINVAL);
       return NULL;
@@ -134,8 +134,8 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
 
   /* Then let nx_constructwindow do the rest */
 
-  ret = nx_constructwindow(handle, (NXWINDOW)&fwnd->wnd, flags, &g_nxtkcb,
-                           NULL);
+  ret = nx_constructwindow(handle, (NXWINDOW)&fwnd->wnd,
+                           flags | NXBE_WINDOW_FRAMED, &g_nxtkcb, NULL);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */

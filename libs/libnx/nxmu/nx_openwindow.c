@@ -80,7 +80,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
   int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!handle || !cb)
+  if (handle == NULL || cb == NULL || (flags & ~NX_WINDOW_USER) != 0)
     {
       set_errno(EINVAL);
       return NULL;

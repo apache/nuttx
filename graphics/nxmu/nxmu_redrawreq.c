@@ -69,20 +69,61 @@ void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
 
   if (NXBE_ISRAMBACKED(wnd))
     {
+      FAR const void *src[CONFIG_NX_NPLANES];
       struct nxgl_rect_s wndrect;
-      FAR const void *src[CONFIG_NX_NPLANES] =
-      {
-        (FAR const void *)wnd->fbmem
-      };
-      struct nxgl_point_s origin =
-      {
-        0, 0
-      };
+      struct nxgl_point_s origin;
+      unsigned int bpp;
 
       /* Put the rectangle back relative to the window */
 
       nxgl_rectoffset(&wndrect, rect,
                       -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+      /* Get the source of address of the rectangle in the framebuffer. */
+
+      bpp    = wnd->be->plane[0].pinfo.bpp;
+      src[0] = (FAR const void *)
+               ((FAR uint8_t *)wnd->fbmem +
+                wndrect.pt1.y * wnd->stride +
+               ((bpp * wndrect.pt1.x) >> 3));
+
+      /* For resolutions less than 8-bits, the starting pixel will be
+       * contained in the byte pointed to by src[0]but may not be properly
+       * aligned for the transfer.  We fix this by modifying the origin.
+       */
+
+      origin.x = wndrect.pt1.x;
+      origin.y = wndrect.pt1.y;
+
+      switch (bpp)
+        {
+#ifndef CONFIG_NX_DISABLE_1BPP
+          case 1:  /* 1 bit per pixel */
+            {
+              origin.x &= ~7;
+            }
+            break;
+#endif
+
+#ifndef CONFIG_NX_DISABLE_2BPP
+          case 2:  /* 2 bits per pixel */
+            {
+              origin.x &= ~3;
+            }
+            break;
+#endif
+
+#ifndef CONFIG_NX_DISABLE_4BPP
+          case 4:  /* 4 bits per pixel */
+            {
+              origin.x &= ~1;
+            }
+            break;
+#endif
+
+          default:
+            break;
+        }
 
       /* And render the bitmap */
 

@@ -99,9 +99,6 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
    * callbacks.  Normally the frame is updated with every redraw callback.
    * However, as a minimum, the frame only has to but updated after the
    * window or toolbar sizes change.
-   *
-   * REVISIT: Since this works for RAM backed windows, it should work for
-   * all windows.  Why not simplify?
    */
 
   if (ret >= 0 && NXBE_ISRAMBACKED(&fwnd->wnd))

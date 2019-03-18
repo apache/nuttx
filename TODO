@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 15, 2019)
+NuttX TODO List (Last updated March 18, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -24,7 +24,7 @@ nuttx/:
   (2)  Other drivers (drivers/)
   (9)  Libraries (libs/libc/, libs/libm/)
  (12)  File system/Generic drivers (fs/, drivers/)
-  (9)  Graphics Subsystem (graphics/)
+ (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (5)  ARM (arch/arm/)
@@ -2449,6 +2449,26 @@ o Graphics Subsystem (graphics/)
                I have never encountered a hardware framebuffer with sub-byte pixel
                depth.  If such a beast ever shows up, then this priority would be
                higher.
+
+  Title:       INCOMPLATE PLANAR COLOR SUPPORT
+  Description: The original NX design included support for planar colors,
+               i.e,. for devices that provide separate framebuffers for each
+               color component.  Planar graphics hard was common some years
+               back but is rarely encountered today.  In fact, I am not aware
+               of any MCU that implements planar framebuffers.
+
+               Support for planar colors is, however, unverified and
+               incomplete.  In fact, many recent changes explicitly assume a
+               single color plane:  Planar colors are specified by a array
+               of components; some recent logic uses only component [0],
+               ignoring the possible existence of other color componet frames.
+
+               Completely removing planar color support is one reasonable
+               options; it is not likely that NuttX will encounter planar
+               color hardware and this would greatly simplify the logic and
+               eliminate inconsistencies in the immplementation.
+  Status:      Open
+  Priority:    Low.  There is no problem other than one of aesthetics.
 
 o Build system
   ^^^^^^^^^^^^
