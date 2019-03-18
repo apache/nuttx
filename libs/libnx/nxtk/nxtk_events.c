@@ -97,7 +97,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   FAR struct nxtk_framedwindow_s *fwnd;
   struct nxgl_rect_s intersection;
 
-  DEBUGASSERT(hwnd != NULL && rect != NULL && fwnd->fwcb != NULL);
+  DEBUGASSERT(hwnd != NULL && rect != NULL);
   fwnd = (FAR struct nxtk_framedwindow_s *)hwnd;
 
   ginfo("hwnd=%p rect={(%d,%d),(%d,%d)} more=%d\n",
@@ -109,6 +109,7 @@ static void nxtk_redraw(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
    * forward the redraw callback.
    */
 
+  DEBUGASSERT(fwnd->fwcb != NULL);
   if (fwnd->fwcb->redraw)
     {
       /* Clip the redraw rectangle so that it lies within the client sub-window

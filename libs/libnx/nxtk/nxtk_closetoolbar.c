@@ -68,7 +68,8 @@
 
 int nxtk_closetoolbar(NXTKWINDOW hfwnd)
 {
-  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  FAR struct nxtk_framedwindow_s *fwnd =
+    (FAR struct nxtk_framedwindow_s *)hfwnd;
 
   /* Un-initialize the toolbar info */
 
@@ -80,10 +81,25 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd)
 
   nxtk_setsubwindows(fwnd);
 
-  /* Then redraw the entire window, even the client window must be
-   * redrawn because it has changed its vertical position and size.
+#ifdef CONFIG_NX_RAMBACKED
+  /* The redraw request has no effect if a framebuffer is used with the
+   * window.  For that type of window, the application must perform the
+   * window update itself and not rely on a redraw notification.
    */
 
-  nx_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
+  if (NXBE_ISRAMBACKED(&fwnd->wnd))
+    {
+      (void)nxtk_drawframe(fwnd, &fwnd->wnd.bounds); /* Does not fail */
+    }
+  else
+#endif
+    {
+      /* Redraw the entire window, even the client window must be redrawn
+       * because it has changed its vertical position and size.
+       */
+
+      nx_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
+    }
+
   return OK;
 }
