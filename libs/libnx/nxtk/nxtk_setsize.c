@@ -103,7 +103,16 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
 
   if (ret >= 0 && NXBE_ISRAMBACKED(&fwnd->wnd))
     {
-      ret = nxtk_drawframe(fwnd, &fwnd->wnd.bounds);
+      struct nxgl_rect_s relbounds;
+
+      /* Convert to a window-relative bounding box */
+
+      nxgl_rectoffset(&relbounds, &fwnd->wnd.bounds,
+                      -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+
+      /* Then re-draw the frame */
+
+      (void)nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
     }
 #endif
 

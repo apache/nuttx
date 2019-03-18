@@ -103,7 +103,16 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
 
   if (NXBE_ISRAMBACKED(&fwnd->wnd))
     {
-      (void)nxtk_drawframe(fwnd, &fwnd->wnd.bounds); /* Does not fail */
+      struct nxgl_rect_s relbounds;
+
+      /* Convert to a window-relative bounding box */
+
+      nxgl_rectoffset(&relbounds, &fwnd->wnd.bounds,
+                      -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+
+      /* Then re-draw the frame */
+
+      (void)nxtk_drawframe(fwnd, &relbounds); /* Does not fail */
     }
   else
 #endif
