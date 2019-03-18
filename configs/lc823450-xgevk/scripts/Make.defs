@@ -84,7 +84,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -nostdinc
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti -nostdinc++
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
