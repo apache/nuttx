@@ -157,14 +157,7 @@ const size_t g_num_mappings = NMAPPINGS;
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void am335x_setupmappings(void)
 {
-  int i;
-
-  /* Set up each group of section mappings */
-
-  for (i = 0; i < g_num_mappings; i++)
-    {
-      mmu_l1_map_region(&g_section_mapping[i]);
-    }
+  mmu_l1_map_regions(g_section_mapping, g_num_mappings);
 }
 #else
 #  define am335x_setupmappings()
@@ -181,14 +174,7 @@ static inline void am335x_setupmappings(void)
 #ifdef NEED_SDRAM_REMAPPING
 static inline void am335x_remap(void)
 {
-  int i;
-
-  /* Re-map each group of section */
-
-  for (i = 0; i < g_num_opmappings; i++)
-    {
-      mmu_l1_map_region(&g_operational_mapping[i]);
-    }
+  mmu_l1_map_regions(g_operational_mapping, g_num_opmappings);
 }
 #endif
 

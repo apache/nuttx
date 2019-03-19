@@ -2,7 +2,7 @@
  * arch/arm/src/armv7-a/mmu.h
  * CP15 MMU register definitions
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -1452,20 +1452,37 @@ void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
                      uint32_t mmuflags);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: mmu_l1_map_region
  *
  * Description:
- *   Set multiple level 1 translation table entries in order to map a region of
- *   memory.
+ *   Set multiple level 1 translation table entries in order to map a region
+ *   of memory.
  *
  * Input Parameters:
  *   mapping - Describes the mapping to be performed.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_map_region(const struct section_mapping_s *mapping);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l1_map_regions
+ *
+ * Description:
+ *   Set multiple level 1 translation table entries in order to map a region
+ *   array of memory.
+ *
+ * Input Parameters:
+ *   mappings - Describes the array of mappings to be performed.
+ *   count    - The number of mappings to be performed.
+ *
+ ****************************************************************************/
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l1_map_regions(const struct section_mapping_s *mappings,
+                        size_t count);
 #endif
 
 /****************************************************************************

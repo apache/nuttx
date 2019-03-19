@@ -132,14 +132,7 @@ static const struct section_mapping_s section_mapping[] =
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void a1x_setupmappings(void)
 {
-  int i;
-
-  /* Set up each group of section mappings */
-
-  for (i = 0; i < NMAPPINGS; i++)
-    {
-      mmu_l1_map_region(&section_mapping[i]);
-    }
+  mmu_l1_map_regions(section_mapping, NMAPPINGS);
 }
 #endif
 

@@ -92,14 +92,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline void sam_setupmappings(void)
 {
-  int i;
-
-  /* Set up each group of section mappings */
-
-  for (i = 0; i < g_num_mappings; i++)
-    {
-      mmu_l1_map_region(&g_section_mapping[i]);
-    }
+  mmu_l1_map_regions(g_section_mapping, g_num_mappings);
 }
 #endif
 
@@ -114,14 +107,7 @@ static inline void sam_setupmappings(void)
 #ifdef NEED_SDRAM_REMAPPING
 static inline void sam_remap(void)
 {
-  int i;
-
-  /* Re-map each group of section */
-
-  for (i = 0; i < g_num_opmappings; i++)
-    {
-      mmu_l1_map_region(&g_operational_mapping[i]);
-    }
+  mmu_l1_map_regions(g_operational_mapping, g_num_opmappings);
 }
 #endif
 
