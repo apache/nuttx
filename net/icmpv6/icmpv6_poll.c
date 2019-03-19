@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_poll.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,8 @@
  *   Poll a UDP "connection" structure for availability of TX data
  *
  * Input Parameters:
- *   dev - The device driver structure to use in the send operation
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - A pointer to the ICMPv6 connection structure
  *
  * Returned Value:
  *   None
@@ -71,7 +72,8 @@
  *
  ****************************************************************************/
 
-void icmpv6_poll(FAR struct net_driver_s *dev)
+void icmpv6_poll(FAR struct net_driver_s *dev,
+                 FAR struct icmpv6_conn_s *conn)
 {
   /* Setup for the application callback */
 
@@ -81,7 +83,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev)
 
   /* Perform the application callback */
 
-  (void)devif_conn_event(dev, NULL, ICMPv6_POLL, dev->d_conncb);
+  (void)devif_conn_event(dev, conn, ICMPv6_POLL, conn->list);
 }
 
 #endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR */

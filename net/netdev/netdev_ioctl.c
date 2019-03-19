@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev/netdev_ioctl.c
  *
- *   Copyright (C) 2007-2012, 2015-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2015-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -897,7 +897,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev)
             {
-              ret = icmpv6_autoconfig(dev);
+              ret = icmpv6_autoconfig(dev, psock);
             }
         }
         break;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_netpoll.c
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -197,19 +197,9 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   net_lock();
 
-  /* Get the device that will provide the provide the NETDEV_DOWN event.
-   * NOTE: in the event that the local socket is bound to INADDR_ANY, the
-   * dev value will be zero and there will be no NETDEV_DOWN notifications.
-   */
-
-  if (conn->dev == NULL)
-    {
-      conn->dev = netdev_default();
-    }
-
   /* Allocate a ICMP callback structure */
 
-  cb = icmp_callback_alloc(conn->dev);
+  cb = icmp_callback_alloc(conn->dev, conn);
   if (cb == NULL)
     {
       ret = -EBUSY;
@@ -315,7 +305,7 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Release the callback */
 
       net_lock();
-      icmp_callback_free(conn->dev, info->cb);
+      icmp_callback_free(conn->dev, conn, info->cb);
       net_unlock();
 
       /* Release the poll/select data slot */

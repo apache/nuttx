@@ -2,8 +2,8 @@
  * net/icmp/icmp_input.c
  * Handling incoming ICMP input
  *
- *   Copyright (C) 2007-2009, 2012, 2014-2015, 2017 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014-2015, 2017, 2019 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -289,28 +289,28 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   else if (ipicmp->type == ICMP_ECHO_REPLY)
     {
+      FAR struct icmp_conn_s *conn;
       uint16_t flags;
 
-      flags = devif_conn_event(dev, NULL, ICMP_ECHOREPLY, dev->d_conncb);
+      /* Nothing consumed the ICMP reply.  That might because this is
+       * an old, invalid reply or simply because the ping application
+       * has not yet put its poll or recv in place.
+       */
+
+      /* Is there any connection that might expect this reply? */
+
+      conn = icmp_findconn(dev, ipicmp->id);
+      if (conn == NULL)
+        {
+          /* No.. drop the packet */
+
+          goto drop;
+        }
+
+      flags = devif_conn_event(dev, conn, ICMP_ECHOREPLY, conn->list);
       if ((flags & ICMP_ECHOREPLY) != 0)
         {
-          FAR struct icmp_conn_s *conn;
           uint16_t nbuffered;
-
-          /* Nothing consumed the ICMP reply.  That might because this is
-           * an old, invalid reply or simply because the ping application
-           * has not yet put its poll or recv in place.
-           */
-
-          /* Is there any connection that might expect this reply? */
-
-          conn = icmp_findconn(dev, ipicmp->id);
-          if (conn == NULL)
-            {
-              /* No.. drop the packet */
-
-              goto drop;
-            }
 
           /* Add the ICMP echo reply to the IPPROTO_ICMP socket read-ahead
            * buffer.

@@ -193,23 +193,11 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       return -ENOMEM;
     }
 
-  /* Some of the  following must be atomic */
+  /* Some of the following must be atomic */
 
   net_lock();
 
-  /* Get the device that will provide the provide the NETDEV_DOWN event.
-   * NOTE: in the event that the local socket is bound to IN6ADDR_ANY, the
-   * dev value will be zero and there will be no NETDEV_DOWN notifications.
-   */
-
-  /* Allocate a ICMP callback structure */
-
-  if (conn->dev == NULL)
-    {
-      conn->dev = netdev_default();
-    }
-
-  cb = icmpv6_callback_alloc(conn->dev);
+  cb = icmpv6_callback_alloc(conn->dev, conn);
   if (cb == NULL)
     {
       ret = -EBUSY;
@@ -315,7 +303,7 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       /* Release the callback */
 
       net_lock();
-      icmpv6_callback_free(conn->dev, info->cb);
+      icmpv6_callback_free(conn->dev, conn, info->cb);
       net_unlock();
 
       /* Release the poll/select data slot */

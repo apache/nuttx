@@ -61,8 +61,10 @@
 
 /* Allocate/free an ICMP data callback */
 
-#define icmp_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
-#define icmp_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
+#define icmp_callback_alloc(dev, conn) \
+  devif_callback_alloc((dev), &(conn)->list)
+#define icmp_callback_free(dev, conn, cb) \
+  devif_conn_callback_free((dev), (cb), &(conn)->list)
 
 /****************************************************************************
  * Public types
@@ -71,14 +73,14 @@
 #ifdef CONFIG_NET_ICMP_SOCKET
 /* Representation of a IPPROTO_ICMP socket connection */
 
-struct devif_callback_s; /* Forward reference */
+struct devif_callback_s;         /* Forward reference */
 
 struct icmp_conn_s
 {
-  dq_entry_t node;     /* Supports a double linked list */
-  uint16_t   id;       /* ICMP ECHO request ID */
-  uint8_t    nreqs;    /* Number of requests with no response received */
-  uint8_t    crefs;    /* Reference counts on this instance */
+  dq_entry_t node;               /* Supports a double linked list */
+  uint16_t   id;                 /* ICMP ECHO request ID */
+  uint8_t    nreqs;              /* Number of requests with no response received */
+  uint8_t    crefs;              /* Reference counts on this instance */
 
   /* The device that the ICMP request was sent on */
 
@@ -92,6 +94,10 @@ struct icmp_conn_s
 
   struct iob_queue_s readahead;  /* Read-ahead buffering */
 #endif
+
+  /* Defines the list of ICMP callbacks */
+
+  FAR struct devif_callback_s *list;
 };
 #endif
 
@@ -236,7 +242,8 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
  *   Poll a device "connection" structure for availability of ICMP TX data
  *
  * Input Parameters:
- *   dev - The device driver structure to use in the send operation
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - A pointer to the ICMP connection structure
  *
  * Returned Value:
  *   None
@@ -247,7 +254,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_SOCKET
-void icmp_poll(FAR struct net_driver_s *dev);
+void icmp_poll(FAR struct net_driver_s *dev, FAR struct icmp_conn_s *conn);
 #endif
 
 /****************************************************************************

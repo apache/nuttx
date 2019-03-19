@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014, 2016-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2010, 2012, 2014, 2016-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -324,17 +324,27 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
 static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
                                   devif_poll_callback_t callback)
 {
-  /* Perform the ICMP poll */
+  FAR struct icmp_conn_s *conn = NULL;
+  int bstop = 0;
 
-  icmp_poll(dev);
+  /* Traverse all of the allocated ICMP connections and perform the poll action */
 
-  /* Perform any necessary conversions on outgoing packets */
+  while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
+    {
+      /* Perform the ICMP poll */
 
-  devif_packet_conversion(dev, DEVIF_ICMP);
+      icmp_poll(dev, conn);
 
-  /* Call back into the driver */
+      /* Perform any necessary conversions on outgoing packets */
 
-  return callback(dev);
+      devif_packet_conversion(dev, DEVIF_ICMP);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  return bstop;
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */
 
@@ -350,17 +360,27 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
                                     devif_poll_callback_t callback)
 {
-  /* Perform the ICMPv6 poll */
+  FAR struct icmpv6_conn_s *conn = NULL;
+  int bstop = 0;
 
-  icmpv6_poll(dev);
+  /* Traverse all of the allocated ICMPV6 connections and perform the poll action */
 
-  /* Perform any necessary conversions on outgoing packets */
+  while (!bstop && (conn = icmpv6_nextconn(conn)) != NULL)
+    {
+      /* Perform the ICMPV6 poll */
 
-  devif_packet_conversion(dev, DEVIF_ICMP6);
+      icmpv6_poll(dev, conn);
 
-  /* Call back into the driver */
+      /* Perform any necessary conversions on outgoing packets */
 
-  return callback(dev);
+      devif_packet_conversion(dev, DEVIF_ICMPV6);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  return bstop;
 }
 #endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR*/
 

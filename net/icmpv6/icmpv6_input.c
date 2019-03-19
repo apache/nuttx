@@ -450,35 +450,35 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
     case ICMPv6_ECHO_REPLY:
       {
+        FAR struct icmpv6_echo_reply_s *reply;
+        FAR struct icmpv6_conn_s *conn;
         uint16_t flags = ICMPv6_ECHOREPLY;
+
+        /* Nothing consumed the ICMP reply.  That might be because this is
+         * an old, invalid reply or simply because the ping application
+         * has not yet put its poll or recv in place.
+         */
+
+        /* Is there any connection that might expect this reply? */
+
+        reply = ICMPv6REPLY;
+        conn = icmpv6_findconn(dev, reply->id);
+        if (conn == NULL)
+          {
+            /* No.. drop the packet */
+
+            goto icmpv6_drop_packet;
+          }
 
         /* Dispatch the ECHO reply to the waiting thread */
 
-        flags = devif_conn_event(dev, NULL, flags, dev->d_conncb);
+        flags = devif_conn_event(dev, conn, flags, conn->list);
 
         /* Was the ECHO reply consumed by any waiting thread? */
 
         if ((flags & ICMPv6_ECHOREPLY) != 0)
           {
-            FAR struct icmpv6_echo_reply_s *reply;
-            FAR struct icmpv6_conn_s *conn;
             uint16_t nbuffered;
-
-            /* Nothing consumed the ICMP reply.  That might because this is
-             * an old, invalid reply or simply because the ping application
-             * has not yet put its poll or recv in place.
-             */
-
-            /* Is there any connection that might expect this reply? */
-
-            reply = ICMPv6REPLY;
-            conn = icmpv6_findconn(dev, reply->id);
-            if (conn == NULL)
-              {
-                /* No.. drop the packet */
-
-                goto icmpv6_drop_packet;
-              }
 
             /* Yes.. Add the ICMP echo reply to the IPPROTO_ICMP socket read
              * ahead buffer.

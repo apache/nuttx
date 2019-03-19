@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
- *   Copyright (C) 2015-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -184,6 +184,7 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   dev       - The device to use to send the solicitation
+ *   conn      - A pointer to the ICMPv6 connection structure
  *   advertise - True: Send the Neighbor Advertisement message
  *
  * Returned Value:
@@ -195,7 +196,9 @@ static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
+static int icmpv6_send_message(FAR struct net_driver_s *dev,
+                               FAR struct icmpv6_conn_s *conn,
+                               bool advertise)
 {
   struct icmpv6_router_s state;
   int ret;
@@ -220,7 +223,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * want anything to happen until we are ready.
    */
 
-  state.snd_cb = icmpv6_callback_alloc(dev);
+  state.snd_cb = icmpv6_callback_alloc(dev, conn);
   if (!state.snd_cb)
     {
       nerr("ERROR: Failed to allocate a cllback\n");
@@ -252,7 +255,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   while (!state.snd_sent);
 
   ret = state.snd_result;
-  icmpv6_callback_free(dev, state.snd_cb);
+  icmpv6_callback_free(dev, conn, state.snd_cb);
 
 errout_with_semaphore:
   nxsem_destroy(&state.snd_sem);
@@ -279,7 +282,8 @@ errout_with_semaphore:
  *   address it can use based on that information.
  *
  * Input Parameters:
- *   dev - The device driver structure to assign the address to
+ *   dev   - The device driver structure to assign the address to
+ *   psock - A pointer to a NuttX-specific, internal socket structure
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -287,8 +291,9 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-int icmpv6_autoconfig(FAR struct net_driver_s *dev)
+int icmpv6_autoconfig(FAR struct net_driver_s *dev, FAR struct socket *psock)
 {
+  FAR struct icmpv6_conn_s *conn = psock->s_conn;
   struct icmpv6_rnotify_s notify;
   struct timespec delay;
   net_ipv6addr_t lladdr;
@@ -393,7 +398,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Send the ICMPv6 Router solicitation message */
 
-      ret = icmpv6_send_message(dev, false);
+      ret = icmpv6_send_message(dev, conn, false);
       if (ret < 0)
         {
           nerr("ERROR: Failed send router solicitation: %d\n", ret);
@@ -429,7 +434,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
        * Advertisement message.
        */
 
-      ret = icmpv6_send_message(dev, true);
+      ret = icmpv6_send_message(dev, conn, true);
       if (ret < 0)
         {
           nerr("ERROR: Failed send neighbor advertisement: %d\n", ret);

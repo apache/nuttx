@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_sendto.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -449,7 +449,7 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Set up the callback */
 
-  state.snd_cb = icmpv6_callback_alloc(dev);
+  state.snd_cb = icmpv6_callback_alloc(dev, conn);
   if (state.snd_cb)
     {
       state.snd_cb->flags   = (ICMPv6_POLL | NETDEV_DOWN);
@@ -478,7 +478,7 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
       ninfo("Start time: 0x%08x\n", state.snd_time);
       net_lockedwait(&state.snd_sem);
 
-      icmpv6_callback_free(dev, state.snd_cb);
+      icmpv6_callback_free(dev, conn, state.snd_cb);
     }
 
   net_unlock();
