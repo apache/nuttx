@@ -373,7 +373,7 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
 
       /* Perform any necessary conversions on outgoing packets */
 
-      devif_packet_conversion(dev, DEVIF_ICMPV6);
+      devif_packet_conversion(dev, DEVIF_ICMP6);
 
       /* Call back into the driver */
 
