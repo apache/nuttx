@@ -53,5 +53,12 @@ config ELF_RELOCATION_BUFFERCOUNT
 	int "ELF Relocation Table Buffer Count"
 	default 256
 	---help---
-		This is an cache buffer that is used to store elf relocation table to
+		This is an relocation buffer that is used to store elf relocation table to
+		reduce access fs. Default: 256
+
+config ELF_SYMBOL_CACHECOUNT
+	int "ELF SYMBOL Table Cache Count"
+	default 256
+	---help---
+		This is an cache that is used to store elf symbol table to
 		reduce access fs. Default: 256
