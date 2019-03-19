@@ -46,7 +46,6 @@
 #include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
-#include "pg_macros.h"
 
 #include "chip.h"
 #include "up_internal.h"

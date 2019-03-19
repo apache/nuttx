@@ -47,7 +47,6 @@
 #include <nuttx/page.h>
 
 #include "chip.h"
-#include "pg_macros.h"
 #include "up_internal.h"
 
 #ifdef CONFIG_PAGING
