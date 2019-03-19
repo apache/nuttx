@@ -675,6 +675,7 @@ __start:
  ***************************************************************************/
 
 	.global	arm_data_initialize
+	.weak	arm_data_initialize
 	.type	arm_data_initialize, #function
 
 arm_data_initialize:
