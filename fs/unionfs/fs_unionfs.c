@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/unionfs/fs_unionfs.c
  *
- *   Copyright (C) 2015, 2017-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,6 +177,8 @@ static int     unionfs_readdir(FAR struct inode *mountpt,
 static int     unionfs_rewinddir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 
+static int     unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
+                 FAR void **handle);
 static int     unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                  unsigned int flags);
 static int     unionfs_statfs(FAR struct inode *mountpt,
@@ -199,6 +201,9 @@ static int     unionfs_stat(FAR struct inode *mountpt,
 
 static int     unionfs_getmount(FAR const char *path,
                  FAR struct inode **inode);
+static int     unionfs_dobind(FAR const char *fspath1,
+                 FAR const char *prefix1, FAR const char *fspath2,
+                 FAR const char *prefix2, FAR void **handle);
 
 /****************************************************************************
  * Public Data
@@ -209,7 +214,7 @@ static int     unionfs_getmount(FAR const char *path,
  * with any compiler.
  */
 
-static const struct mountpt_operations g_unionfs_mops =
+const struct mountpt_operations unionfs_operations =
 {
   unionfs_open,        /* open */
   unionfs_close,       /* close */
@@ -228,7 +233,7 @@ static const struct mountpt_operations g_unionfs_mops =
   unionfs_readdir,     /* readdir */
   unionfs_rewinddir,   /* rewinddir */
 
-  NULL,                /* bind */
+  unionfs_bind,        /* bind */
   unionfs_unbind,      /* unbind */
   unionfs_statfs,      /* statfs */
 
@@ -870,7 +875,8 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Try to open the file on file system 1 */
 
   um = &ui->ui_fs[0];
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
 
   uf->uf_file.f_oflags = filep->f_oflags;
   uf->uf_file.f_pos    = 0;
@@ -895,7 +901,8 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
       uf->uf_file.f_inode  = um->um_node;
       uf->uf_file.f_priv   = NULL;
 
-      ret = unionfs_tryopen(&uf->uf_file, relpath, um->um_prefix, oflags, mode);
+      ret = unionfs_tryopen(&uf->uf_file, relpath, um->um_prefix, oflags,
+                            mode);
       if (ret < 0)
         {
           goto errout_with_semaphore;
@@ -948,7 +955,8 @@ static int unionfs_close(FAR struct file *filep)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   finfo("Closing: ui_nopen=%d\n", ui->ui_nopen);
@@ -1012,7 +1020,8 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level read operation */
@@ -1060,7 +1069,8 @@ static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level write operation */
@@ -1107,7 +1117,8 @@ static off_t unionfs_seek(FAR struct file *filep, off_t offset, int whence)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Invoke the file seek method if available */
@@ -1183,7 +1194,8 @@ static int unionfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level ioctl operation */
@@ -1230,7 +1242,8 @@ static int unionfs_sync(FAR struct file *filep)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level sync operation */
@@ -1278,14 +1291,16 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   DEBUGASSERT(oldpriv->uf_ndx == 0 || oldpriv->uf_ndx == 1);
   um = &ui->ui_fs[oldpriv->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   DEBUGASSERT(newp != NULL && newp->f_priv == NULL);
 
   /* Allocate a new container for the union FS open file */
 
-  newpriv = (FAR struct unionfs_file_s *)kmm_malloc(sizeof(struct unionfs_file_s));
+  newpriv = (FAR struct unionfs_file_s *)
+    kmm_malloc(sizeof(struct unionfs_file_s));
   if (newpriv != NULL)
     {
       /* Clone the old file structure into the newly allocated one */
@@ -1352,7 +1367,8 @@ static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level write operation */
@@ -1403,7 +1419,8 @@ static int unionfs_truncate(FAR struct file *filep, off_t length)
   DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
   um = &ui->ui_fs[uf->uf_ndx];
 
-  DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
   /* Perform the lower level write operation */
@@ -1485,7 +1502,8 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* Allocate yet another dirent structure for the lower file system 1 */
 
-      lowerdir = (FAR struct fs_dirent_s *)kmm_zalloc(sizeof(struct fs_dirent_s));
+      lowerdir = (FAR struct fs_dirent_s *)
+        kmm_zalloc(sizeof(struct fs_dirent_s));
       if (lowerdir == NULL)
         {
           ret = -ENOMEM;
@@ -1493,8 +1511,8 @@ static int unionfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         }
     }
 
-  /* Check if the user is stat'ing some "fake" node between the unionfs root and
-   * the file system 1/2 root directory.
+  /* Check if the user is stat'ing some "fake" node between the unionfs root
+   * and the file system 1/2 root directory.
    */
 
   else if (unionfs_ispartprefix(relpath, ui->ui_fs[1].um_prefix))
@@ -1618,7 +1636,8 @@ static int unionfs_closedir(FAR struct inode *mountpt,
         {
           um = &ui->ui_fs[i];
 
-          DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+          DEBUGASSERT(um != NULL && um->um_node != NULL &&
+                      um->um_node->u.i_mops != NULL);
           ops = um->um_node->u.i_mops;
 
           /* Perform the lower level closedir operation */
@@ -1846,8 +1865,9 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                               um->um_node->u.i_mops != NULL);
                   ops = um->um_node->u.i_mops;
 
-                  /* Make sure that the second file system directory enumeration
-                   * is rewound to the beginning of the directory.
+                  /* Make sure that the second file system directory
+                   * enumeration is rewound to the beginning of the
+                   * directory.
                    */
 
                   if (ops->rewinddir != NULL)
@@ -1909,7 +1929,8 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        */
 
       dir->fd_position = fu->fu_lower[fu->fu_ndx]->fd_position;
-      memcpy(&dir->fd_dir, &fu->fu_lower[fu->fu_ndx]->fd_dir, sizeof(struct dirent));
+      memcpy(&dir->fd_dir, &fu->fu_lower[fu->fu_ndx]->fd_dir,
+             sizeof(struct dirent));
     }
 
   return ret;
@@ -1962,7 +1983,8 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
       DEBUGASSERT(fu->fu_lower[fu->fu_ndx] != NULL);
       um = &ui->ui_fs[fu->fu_ndx];
 
-      DEBUGASSERT(um != NULL && um->um_node != NULL && um->um_node->u.i_mops != NULL);
+      DEBUGASSERT(um != NULL && um->um_node != NULL &&
+                  um->um_node->u.i_mops != NULL);
       ops = um->um_node->u.i_mops;
 
       /* Perform the file system rewind operation */
@@ -1979,6 +2001,58 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
     }
 
   unionfs_semgive(ui);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: unionfs_bind
+ ****************************************************************************/
+
+static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
+                        FAR void **handle)
+{
+  FAR const char *fspath1 = "";
+  FAR const char *prefix1 = "";
+  FAR const char *fspath2 = "";
+  FAR const char *prefix2 = "";
+  FAR char *dup;
+  FAR char *tmp;
+  FAR char *tok;
+  int ret;
+
+  /* Parse options from mount syscall */
+
+  dup = tmp = strdup(data);
+  if (!dup)
+    {
+      return -ENOMEM;
+    }
+
+  while ((tok = strsep(&tmp, ",")))
+    {
+      if (tok == strstr(tok, "fspath1="))
+        {
+          fspath1 = tok + 8;
+        }
+      else if (tok == strstr(tok, "prefix1="))
+        {
+          prefix1 = tok + 8;
+        }
+      else if (tok == strstr(tok, "fspath2="))
+        {
+          fspath2 = tok + 8;
+        }
+      else if (tok == strstr(tok, "prefix2="))
+        {
+          prefix2 = tok + 8;
+        }
+    }
+
+  /* Call unionfs_dobind to do the real work. */
+
+  ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2, handle);
+  kmm_free(dup);
+
   return ret;
 }
 
@@ -2062,11 +2136,13 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
    */
 
   um1 = &ui->ui_fs[0];
-  DEBUGASSERT(um1 != NULL && um1->um_node != NULL && um1->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um1 != NULL && um1->um_node != NULL &&
+              um1->um_node->u.i_mops != NULL);
   ops1 = um1->um_node->u.i_mops;
 
   um2 = &ui->ui_fs[1];
-  DEBUGASSERT(um2 != NULL && um2->um_node != NULL && um2->um_node->u.i_mops != NULL);
+  DEBUGASSERT(um2 != NULL && um2->um_node != NULL &&
+              um2->um_node->u.i_mops != NULL);
   ops2 = um2->um_node->u.i_mops;
 
   if (ops1->statfs != NULL && ops2->statfs != NULL)
@@ -2177,7 +2253,8 @@ static int unionfs_unlink(FAR struct inode *mountpt,
 
   /* Recover the union file system data from the struct inode instance */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && relpath != NULL);
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL &&
+              relpath != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
 
   /* Get exclusive access to the file system data structures */
@@ -2249,7 +2326,8 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Recover the union file system data from the struct inode instance */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && relpath != NULL);
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL &&
+              relpath != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
 
   /* Get exclusive access to the file system data structures */
@@ -2322,7 +2400,8 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   /* Recover the union file system data from the struct inode instance */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && relpath != NULL);
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL &&
+              relpath != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
 
   /* Get exclusive access to the file system data structures */
@@ -2471,7 +2550,8 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Recover the union file system data from the struct inode instance */
 
-  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL && relpath != NULL);
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL &&
+              relpath != NULL);
   ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
 
   /* Get exclusive access to the file system data structures */
@@ -2510,8 +2590,8 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       return OK;
     }
 
-  /* Special case the unionfs root directory when both file systems are offset.
-   * In that case, both of the above trystat calls will fail.
+  /* Special case the unionfs root directory when both file systems are
+   * offset.  In that case, both of the above trystat calls will fail.
    */
 
   if (ui->ui_fs[0].um_prefix != NULL && ui->ui_fs[1].um_prefix != NULL)
@@ -2600,46 +2680,24 @@ errout_with_search:
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: unionfs_dobind
  ****************************************************************************/
 
-/****************************************************************************
- * Name: unionfs_mount
- *
- * Description:
- *   Create and mount a union file system
- *
- * Input Parameters:
- *   fspath1 - The full path to the first file system mountpoint
- *   prefix1 - An optiona prefix that may be applied to make the first
- *             file system appear a some path below the unionfs mountpoint,
- *   fspath2 - The full path to the second file system mountpoint
- *   prefix2 - An optiona prefix that may be applied to make the first
- *             file system appear a some path below the unionfs mountpoint,
- *   mountpt - The full path to the mountpoint for the union file system
- *
- * Returned Value:
- *   Zero (OK) is returned if the union file system was correctly created and
- *   mounted.  On any failure, a negated error value will be returned to
- *   indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
-                  FAR const char *fspath2, FAR const char *prefix2,
-                  FAR const char *mountpt)
+static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
+                          FAR const char *fspath2, FAR const char *prefix2,
+                          FAR void **handle)
 {
   FAR struct unionfs_inode_s *ui;
-  FAR struct inode *mpinode;
   int ret;
 
-  DEBUGASSERT(fspath1 != NULL && fspath2 != NULL && mountpt != NULL);
+  DEBUGASSERT(fspath1 != NULL && fspath2 != NULL && handle != NULL);
 
   /* Allocate a structure a structure that will describe the union file
    * system.
    */
 
-  ui = (FAR struct unionfs_inode_s *)kmm_zalloc(sizeof(struct unionfs_inode_s));
+  ui = (FAR struct unionfs_inode_s *)
+    kmm_zalloc(sizeof(struct unionfs_inode_s));
   if (!ui)
     {
       ferr("ERROR: Failed to allocated union FS state structure\n");
@@ -2688,14 +2746,80 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
         }
     }
 
-  /* Finally, mount the union FS.  We should adapt the standard mount to do
+  /* Unlink the contained mountpoint inodes from the pseudo file system.
+   * The inodes will be marked as deleted so that they will be removed when
+   * the reference count decrements to zero in inode_release().  Because we
+   * hold a reference count on the inodes, they will not be deleted until
+   * this logic calls inode_release() in the unionfs_destroy() function.
+   */
+
+  (void)inode_remove(fspath1);
+  (void)inode_remove(fspath2);
+
+  *handle = ui;
+  return OK;
+
+errout_with_prefix1:
+  if (ui->ui_fs[0].um_prefix != NULL)
+    {
+      kmm_free(ui->ui_fs[0].um_prefix);
+    }
+
+errout_with_fs2:
+  inode_release(ui->ui_fs[1].um_node);
+
+errout_with_fs1:
+  inode_release(ui->ui_fs[0].um_node);
+
+errout_with_uinode:
+  nxsem_destroy(&ui->ui_exclsem);
+  kmm_free(ui);
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: unionfs_mount
+ *
+ * Description:
+ *   Create and mount a union file system
+ *
+ * Input Parameters:
+ *   fspath1 - The full path to the first file system mountpoint
+ *   prefix1 - An optiona prefix that may be applied to make the first
+ *             file system appear a some path below the unionfs mountpoint,
+ *   fspath2 - The full path to the second file system mountpoint
+ *   prefix2 - An optiona prefix that may be applied to make the first
+ *             file system appear a some path below the unionfs mountpoint,
+ *   mountpt - The full path to the mountpoint for the union file system
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the union file system was correctly created and
+ *   mounted.  On any failure, a negated error value will be returned to
+ *   indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
+                  FAR const char *fspath2, FAR const char *prefix2,
+                  FAR const char *mountpt)
+{
+  FAR struct inode *mpinode;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL);
+
+  /* Mount the union FS.  We should adapt the standard mount to do
    * this using optional parameters.  This custom mount should do the job
    * for now, however.
    */
 
   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
-   * NOTE that the inode will be created with a refernce count of zero.
+   * NOTE that the inode will be created with a reference count of zero.
    */
 
   inode_semtake();
@@ -2718,47 +2842,28 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   INODE_SET_MOUNTPT(mpinode);
 
-  mpinode->u.i_mops  = &g_unionfs_mops;
+  mpinode->u.i_mops  = &unionfs_operations;
 #ifdef CONFIG_FILE_MODE
   mpinode->i_mode    = 0755;
 #endif
-  mpinode->i_private = ui;
 
-  /* Unlink the contained mountpoint inodes from the pseudo file system.
-   * The inodes will be marked as deleted so that they will be removed when
-   * the reference count decrements to zero in inode_release().  Because we
-   * hold a reference count on the inodes, they will not be deleted until
-   * this logic calls inode_release() in the unionfs_destroy() function.
-   */
+  /* Call unionfs_dobind to do the real work. */
 
-  (void)inode_remove(fspath1);
-  (void)inode_remove(fspath2);
+  ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2,
+                       &mpinode->i_private);
+  if (ret < 0)
+   {
+     goto errout_with_mountpt;
+   }
+
   inode_semgive();
   return OK;
 
+errout_with_mountpt:
+  inode_release(mpinode);
+
 errout_with_semaphore:
   inode_semgive();
-
-  if (ui->ui_fs[1].um_prefix != NULL)
-    {
-      kmm_free(ui->ui_fs[1].um_prefix);
-    }
-
-errout_with_prefix1:
-  if (ui->ui_fs[0].um_prefix != NULL)
-    {
-      kmm_free(ui->ui_fs[0].um_prefix);
-    }
-
-errout_with_fs2:
-  inode_release(ui->ui_fs[1].um_node);
-
-errout_with_fs1:
-  inode_release(ui->ui_fs[0].um_node);
-
-errout_with_uinode:
-  nxsem_destroy(&ui->ui_exclsem);
-  kmm_free(ui);
   return ret;
 }
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_UNIONFS */
