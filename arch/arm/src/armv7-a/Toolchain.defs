@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/armv7-a/Toolchain.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -91,12 +91,15 @@ endif
 #
 
 ARCHCPUFLAGS += -march=armv7-a
+
 ifeq ($(CONFIG_ARM_THUMB),y)
 ARCHCPUFLAGS += -mthumb
 endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 ARCHCPUFLAGS += -mfloat-abi=hard
 endif
+
 ifeq ($(CONFIG_ARCH_CORTEXA5),y)
 ARCHCPUFLAGS += -mcpu=cortex-a5
 elif ($(CONFIG_ARCH_CORTEXA7),y)
