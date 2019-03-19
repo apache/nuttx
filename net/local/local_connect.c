@@ -97,7 +97,7 @@ static inline void _local_semtake(sem_t *sem)
     {
       /* Take the semaphore (perhaps waiting) */
 
-      ret = nxsem_wait(sem);
+      ret = net_lockedwait(sem);
 
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.

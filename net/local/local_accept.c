@@ -70,7 +70,7 @@ static int local_waitlisten(FAR struct local_conn_s *server)
     {
       /* No.. wait for a connection or a signal */
 
-      ret = nxsem_wait(&server->lc_waitsem);
+      ret = net_lockedwait(&server->lc_waitsem);
       if (ret < 0)
         {
           DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
