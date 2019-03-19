@@ -940,11 +940,11 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.prog_size   = fs->geo.blocksize;
   fs->cfg.block_size  = fs->geo.erasesize;
   fs->cfg.block_count = fs->geo.neraseblocks;
-  fs->cfg.lookahead   = 4 * ((fs->cfg.block_count + 31) / 32);
+  fs->cfg.lookahead   = 32 * ((fs->cfg.block_count + 31) / 32);
 
-  if (fs->cfg.lookahead > fs->cfg.read_size)
+  if (fs->cfg.lookahead > 32 * fs->cfg.read_size)
     {
-      fs->cfg.lookahead = fs->cfg.read_size;
+      fs->cfg.lookahead = 32 * fs->cfg.read_size;
     }
 
   /* Then get information about the littlefs filesystem on the devices
