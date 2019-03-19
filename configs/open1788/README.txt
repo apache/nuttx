@@ -581,3 +581,5 @@ Configuration Directories
     STATUS:
       2019-03-16:  The test does not succeed.  There are still numerou
         problems to be overcome.
+      2019-03-18:  Every works fine!  Hmm... except the colors some off,
+        everything is too blue????

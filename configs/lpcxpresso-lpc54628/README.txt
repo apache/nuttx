@@ -482,3 +482,9 @@ Configurations
 
       apps/graphics/NxWidgets/UnitTests/nxwm
 
+  pwfb:
+
+    This configuration uses the test at apps/examples/pwfb to verify the
+    operation of the per-window framebuffers.
+
+      2019-03-19:  Every works fine!
