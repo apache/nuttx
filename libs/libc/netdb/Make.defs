@@ -51,7 +51,7 @@ endif
 
 ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
 CSRCS += lib_dnsinit.c lib_dnsbind.c lib_dnsquery.c lib_dnsaddserver.c
-CSRCS += lib_dnsforeach.c
+CSRCS += lib_dnsforeach.c lib_dnsnotify.c
 
 ifneq ($(CONFIG_NETDB_DNSCLIENT_ENTRIES),0)
 CSRCS += lib_dnscache.c

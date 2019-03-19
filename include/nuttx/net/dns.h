@@ -227,6 +227,26 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg);
 
+/****************************************************************************
+ * Name: dns_register_notify
+ *
+ * Description:
+ *   This function is called in order to receive the nameserver change.
+ *
+ ****************************************************************************/
+
+int dns_register_notify(dns_callback_t callback, FAR void *arg);
+
+/****************************************************************************
+ * Name: dns_unregister_notify
+ *
+ * Description:
+ *   This function is called in order to unsubscribe the notification.
+ *
+ ****************************************************************************/
+
+int dns_unregister_notify(dns_callback_t callback, FAR void *arg);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

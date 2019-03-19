@@ -198,6 +198,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       goto errout;
     }
 
+  dns_notify_nameserver(addr, addrlen);
   ret = OK;
 
 errout:
@@ -267,6 +268,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   /* We now have a valid DNS address */
 
   g_dns_address = true;
+  dns_notify_nameserver(addr, addrlen);
   return OK;
 }
 

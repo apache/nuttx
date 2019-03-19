@@ -1,8 +1,8 @@
 /****************************************************************************
- * libs/libc/netdb/lib_dnsinit.c
+ * libs/libc/netdb/lib_dnsnotify.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Pinecone Inc. All rights reserved.
+ *   Author: Xiang Xiao <xiaoxiang@pinecone.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,144 +39,112 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <assert.h>
+#include <nuttx/net/dns.h>
+#include <queue.h>
 
-#include <arpa/inet.h>
-
-#include <nuttx/semaphore.h>
-
+#include "libc.h"
 #include "netdb/lib_dns.h"
+
+#ifdef CONFIG_NETDB_DNSCLIENT
+
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+struct dns_notify_s
+{
+  struct dq_entry_s entry;   /* Supports a doubly linked list */
+  dns_callback_t callback;
+  FAR void *arg;
+};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* Protects g_seqno, DNS cache and notify */
-
-static sem_t g_dns_sem = SEM_INITIALIZER(1);
+static dq_queue_t g_dns_notify;
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#if defined(CONFIG_NETDB_DNSSERVER_IPv6) && !defined(CONFIG_NETDB_RESOLVCONF)
-
-/* This is the default IPv6 DNS server address */
-
-static const uint16_t g_ipv6_hostaddr[8] =
-{
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_1),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_2),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_3),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_4),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_5),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_6),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_7),
-  HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_8)
-};
-#endif
-
-/****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dns_initialize
+ * Name: dns_register_notify
  *
  * Description:
- *   Make sure that the DNS client has been properly initialized for use.
+ *   This function is called in order to receive the nameserver change.
  *
  ****************************************************************************/
 
-bool dns_initialize(void)
+int dns_register_notify(dns_callback_t callback, FAR void *arg)
 {
-#ifndef CONFIG_NETDB_RESOLVCONF
-  /* Has the DNS server IP address been assigned? */
+  FAR struct dns_notify_s *notify;
 
-  if (!g_dns_address)
+  notify = lib_malloc(sizeof(*notify));
+  if (notify == NULL)
     {
-#if defined(CONFIG_NETDB_DNSSERVER_IPv4)
-       struct sockaddr_in addr4;
-       int ret;
-
-       /* No, configure the default IPv4 DNS server address */
-
-       addr4.sin_family      = AF_INET;
-       addr4.sin_port        = HTONS(DNS_DEFAULT_PORT);
-       addr4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR);
-
-       ret = dns_add_nameserver((FAR struct sockaddr *)&addr4,
-                                sizeof(struct sockaddr_in));
-       if (ret < 0)
-         {
-           return false;
-         }
-
-#elif defined(CONFIG_NETDB_DNSSERVER_IPv6)
-       struct sockaddr_in6 addr6;
-       int ret;
-
-       /* No, configure the default IPv6 DNS server address */
-
-       addr6.sin6_family = AF_INET6;
-       addr6.sin6_port   = HTONS(DNS_DEFAULT_PORT);
-       memcpy(addr6.sin6_addr.s6_addr, g_ipv6_hostaddr, 16);
-
-       ret = dns_add_nameserver((FAR struct sockaddr *)&addr6,
-                                sizeof(struct sockaddr_in6));
-       if (ret < 0)
-         {
-           return false;
-         }
-
-#else
-       /* Then we are not ready to perform DNS queries */
-
-       return false;
-#endif
+      return -ENOMEM;
     }
-#endif /* !CONFIG_NETDB_RESOLVCONF */
 
-  return true;
+  notify->callback = callback;
+  notify->arg      = arg;
+
+  dns_semtake();
+  dq_addlast(&notify->entry, &g_dns_notify);
+  dns_semgive();
+
+  /* Notify the existed nameserver */
+
+  dns_foreach_nameserver(callback, arg);
+  return OK;
 }
 
 /****************************************************************************
- * Name: dns_semtake
+ * Name: dns_unregister_notify
  *
  * Description:
- *   Take the DNS semaphore, ignoring errors do to the receipt of signals.
+ *   This function is called in order to unsubscribe the notification.
  *
  ****************************************************************************/
 
-void dns_semtake(void)
+int dns_unregister_notify(dns_callback_t callback, FAR void *arg)
 {
-  int errcode = 0;
-  int ret;
+  FAR dq_entry_t *entry;
 
-  do
+  dns_semtake();
+  for (entry = dq_peek(&g_dns_notify); entry; entry = dq_next(entry))
     {
-       ret = _SEM_WAIT(&g_dns_sem);
-       if (ret < 0)
-         {
-           errcode = _SEM_ERRNO(ret);
-           DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-         }
+      FAR struct dns_notify_s *notify = (FAR struct dns_notify_s *)entry;
+
+      if (notify->callback == callback && notify->arg == arg)
+        {
+           dq_rem(&notify->entry, &g_dns_notify);
+           dns_semgive();
+           lib_free(notify);
+           return OK;
+        }
     }
-  while (ret < 0 && errcode == EINTR);
+
+  dns_semgive();
+  return -EINVAL;
 }
 
 /****************************************************************************
- * Name: dns_semgive
- *
- * Description:
- *   Release the DNS semaphore
- *
+ * Name: dns_notify_nameserver
  ****************************************************************************/
 
-void dns_semgive(void)
+void dns_notify_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  DEBUGVERIFY(_SEM_POST(&g_dns_sem));
+  FAR dq_entry_t *entry;
+
+  dns_semtake();
+  for (entry = dq_peek(&g_dns_notify); entry; entry = dq_next(entry))
+    {
+      FAR struct dns_notify_s *notify = (FAR struct dns_notify_s *)entry;
+      notify->callback(notify->arg, (FAR struct sockaddr *)addr, addrlen);
+    }
+
+  dns_semgive();
 }
+
+#endif /* CONFIG_NETDB_DNSCLIENT */

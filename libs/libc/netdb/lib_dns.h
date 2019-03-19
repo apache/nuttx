@@ -248,6 +248,12 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
                     FAR int *naddr);
 #endif
 
+/****************************************************************************
+ * Name: dns_notify_nameserver
+ ****************************************************************************/
+
+void dns_notify_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
