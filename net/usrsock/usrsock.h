@@ -100,6 +100,7 @@ struct usrsock_conn_s
 
   struct
   {
+    sem_t    sem;         /* Request semaphore (only one outstanding request) */
     uint8_t  xid;         /* Expected message exchange id */
     bool     inprogress;  /* Request was received but daemon is still processing */
     uint16_t valuelen;    /* Length of value from daemon */
@@ -127,6 +128,7 @@ struct usrsock_reqstate_s
   sem_t                   recvsem;   /* Semaphore signals recv completion */
   int                     result;    /* OK on success, otherwise a negated errno. */
   bool                    completed;
+  bool                    unlock;    /* True: unlock is required */
 };
 
 struct usrsock_data_reqstate_s
