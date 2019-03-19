@@ -56,6 +56,30 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Vector Table Offset Register (VECTAB).  This mask seems to vary among
+ * ARMv7-M implementations.  It may need to be redefined in some
+ * architecture-specific header file. By default, the base address of the
+ * new vector table must be aligned to the size of the vector table extended
+ * to the next larger power of 2.
+ */
+
+#ifndef NVIC_VECTAB_TBLOFF_MASK
+#  if ARMV7M_VECTAB_SIZE > 512
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffff000)
+#  elif ARMV7M_VECTAB_SIZE > 256
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffff800)
+#  elif ARMV7M_VECTAB_SIZE > 128
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffc00)
+#  elif ARMV7M_VECTAB_SIZE > 64
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffe00)
+#  elif ARMV7M_VECTAB_SIZE > 32
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff00)
+#  else
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff80)
+#  endif
+#endif
+
 /* Alignment ****************************************************************/
 /* Per the ARMv7M Architecture reference manual, the NVIC vector table
  * requires 7-bit address alignment (i.e, bits 0-6 of the address of the
