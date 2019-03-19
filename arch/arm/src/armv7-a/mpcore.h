@@ -60,7 +60,11 @@
 /* Peripheral Base Offsets **************************************************/
 
 #define MPCORE_SCU_OFFSET  0x0000 /* 0x0000-0x00fc SCU registers */
+#ifdef CONFIG_ARCH_CORTEXA7
+#define MPCORE_ICC_OFFSET  0x2000 /* 0x0000-0x00FC Interrupt conroller interface */
+#else
 #define MPCORE_ICC_OFFSET  0x0100 /* 0x0000-0x00FC Interrupt conroller interface */
+#endif
 #define MPCORE_GTM_OFFSET  0x0200 /* 0x0200-0x02ff Global timer */
                                   /* 0x0300-0x05ff Reserved */
 #define MPCORE_PTM_OFFSET  0x0600 /* 0x0600-0x06ff Private timers and watchdogs */

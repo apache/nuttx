@@ -90,6 +90,23 @@ endif
 #                   reliable code generation.
 #
 
+ARCHCPUFLAGS += -march=armv7-a
+ifeq ($(CONFIG_ARM_THUMB),y)
+ARCHCPUFLAGS += -mthumb
+endif
+ifeq ($(CONFIG_ARCH_FPU),y)
+ARCHCPUFLAGS += -mfloat-abi=hard
+endif
+ifeq ($(CONFIG_ARCH_CORTEXA5),y)
+ARCHCPUFLAGS += -mcpu=cortex-a5
+elif ($(CONFIG_ARCH_CORTEXA7),y)
+ARCHCPUFLAGS += -mcpu=cortex-a7
+elif ($(CONFIG_ARCH_CORTEXA8),y)
+ARCHCPUFLAGS += -mcpu=cortex-a8
+elif ($(CONFIG_ARCH_CORTEXA9),y)
+ARCHCPUFLAGS += -mcpu=cortex-a9
+endif
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 endif

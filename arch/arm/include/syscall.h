@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/syscall.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,14 +46,11 @@
 
 /* Include ARM architecture-specific syscall macros */
 
-#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
-    defined(CONFIG_ARCH_CORTEXA9)
+#if defined(CONFIG_ARCH_ARMV7A)
 #  include <arch/armv7-a/syscall.h>
-#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
-      defined(CONFIG_ARCH_CORTEXR7)
+#elif defined(CONFIG_ARCH_ARMV7R)
 #  include <arch/armv7-r/syscall.h>
-#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
-      defined(CONFIG_ARCH_CORTEXM7)
+#elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/syscall.h>
 #elif defined(CONFIG_ARCH_CORTEXM0)
 #  include <arch/armv6-m/syscall.h>

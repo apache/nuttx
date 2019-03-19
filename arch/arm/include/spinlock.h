@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/spinlock.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,11 @@
  * save structure and up_irq_save()/up_irq_restore() functions)
  */
 
-#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
-    defined(CONFIG_ARCH_CORTEXA9)
+#if defined(CONFIG_ARCH_ARMV7A)
 #  include <arch/armv7-a/spinlock.h>
-#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
-      defined(CONFIG_ARCH_CORTEXR7)
+#elif defined(CONFIG_ARCH_ARMV7R)
 #  include <arch/armv7-r/spinlock.h>
-#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
-      defined(CONFIG_ARCH_CORTEXM7)
+#elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/spinlock.h>
 #elif defined(CONFIG_ARCH_CORTEXM0)
 #  include <arch/armv6-m/spinlock.h>

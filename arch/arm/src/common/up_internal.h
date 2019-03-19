@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,8 +100,7 @@
  * some configurations.
  */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
-    defined(CONFIG_ARCH_CORTEXM4) || defined(CONFIG_ARCH_CORTEXM7)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.  This only
@@ -115,14 +114,11 @@
 #  endif
 #  define up_restorestate(regs) (CURRENT_REGS = regs)
 
-/* The Cortex-A and Cortex-R supports the same mechanism, but only lazy
+/* The Cortex-A and Cortex-R support the same mechanism, but only lazy
  * floating point register save/restore.
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
-      defined(CONFIG_ARCH_CORTEXA9) || \
-      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
-      defined(CONFIG_ARCH_CORTEXR7)
+#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.
@@ -335,8 +331,7 @@ void up_pminitialize(void);
 #  define up_pminitialize()
 #endif
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
-    defined(CONFIG_ARCH_CORTEXM4) || defined(CONFIG_ARCH_CORTEXM7)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
 void up_systemreset(void) noreturn_function;
 #endif
 
@@ -346,8 +341,7 @@ void up_irqinitialize(void);
 
 /* Exception handling logic unique to the Cortex-M family */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
-    defined(CONFIG_ARCH_CORTEXM4) || defined(CONFIG_ARCH_CORTEXM7)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
 
 /* Interrupt acknowledge and dispatch */
 
@@ -359,8 +353,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 int  up_svcall(int irq, FAR void *context, FAR void *arg);
 int  up_hardfault(int irq, FAR void *context, FAR void *arg);
 
-#  if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
-      defined(CONFIG_ARCH_CORTEXM7)
+#  if defined(CONFIG_ARCH_ARMV7M)
 
 int  up_memfault(int irq, FAR void *context, FAR void *arg);
 
@@ -370,10 +363,7 @@ int  up_memfault(int irq, FAR void *context, FAR void *arg);
 * (but should be back-ported to the ARM7 and ARM9 families).
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
-      defined(CONFIG_ARCH_CORTEXA9) || \
-      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
-      defined(CONFIG_ARCH_CORTEXR7)
+#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R)
 
 /* Interrupt acknowledge and dispatch */
 
