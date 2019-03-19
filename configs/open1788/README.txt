@@ -576,7 +576,17 @@ Configuration Directories
   -----
 
     This configuration uses the test at apps/examples/pwfb to verify the
-    operation of the per-window framebuffers.
+    operation of the per-window framebuffers.  That example shows three
+    windows containing text moving around, crossing each other from
+    "above" and from "below".  The example application is NOT updating the
+    windows any anyway!  The application is only changing the window
+    position.  The windows are being updated from the per-winidow
+    framebuffers automatically.
+
+    This example is reminescent of Pong:  Each window travels in straight
+    line until it hits an edge, then it bounces off.  The window is also
+    raised when it hits the edge (gets "focus").  This tests all
+    combinations of overap.
 
     STATUS:
       2019-03-16:  The test does not succeed.  There are still numerou
