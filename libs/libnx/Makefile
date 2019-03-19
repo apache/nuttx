@@ -262,10 +262,10 @@ endif
 
 .depend: Makefile gensources $(SRCS)
 ifeq ($(CONFIG_BUILD_FLAT),y)
-	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >bin/Make.dep
 else
-	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
-	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >ubin/Make.dep
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep
 endif
 	$(Q) touch $@
 
@@ -294,11 +294,11 @@ distclean: clean
 	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
-	$(call DELFILE, Make_bin.dep)
-	$(call DELFILE, Make_ubin.dep)
-	$(call DELFILE, Make_kbin.dep)
+	$(call DELFILE, bin/Make.dep)
+	$(call DELFILE, ubin/Make.dep)
+	$(call DELFILE, kbin/Make.dep)
 	$(call DELFILE, .depend)
 
--include Make_bin.dep
--include Make_ubin.dep
--include Make_kbin.dep
+-include bin/Make.dep
+-include ubin/Make.dep
+-include kbin/Make.dep
