@@ -46,7 +46,8 @@ endif
 ASRCS =
 CSRCS =
 
-CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx  libxx_cxa_atexit.cxx
+CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx libxx_cxa_atexit.cxx
+CXXSRCS += libxx_cxa_guard.cxx
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CXXSRCS += libxx__gnu_unwind_find_exidx.cxx
 endif
@@ -58,12 +59,6 @@ ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
 CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
-endif
-
-# uClibc++ doesn't need this file
-
-ifneq ($(CONFIG_UCLIBCXX),y)
-CXXSRCS += libxx_cxa_guard.cxx
 endif
 
 # Paths
