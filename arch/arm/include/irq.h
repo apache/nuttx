@@ -59,9 +59,8 @@
 #if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
     defined(CONFIG_ARCH_CORTEXA9)
 #  include <arch/armv7-a/irq.h>
-#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
-      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
-      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
+      defined(CONFIG_ARCH_CORTEXR7)
 #  include <arch/armv7-r/irq.h>
 #elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
       defined(CONFIG_ARCH_CORTEXM7)

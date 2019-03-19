@@ -119,11 +119,10 @@
  * floating point register save/restore.
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)  || \
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
       defined(CONFIG_ARCH_CORTEXA9) || \
-      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
-      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
-      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
+      defined(CONFIG_ARCH_CORTEXR7)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.
@@ -371,11 +370,10 @@ int  up_memfault(int irq, FAR void *context, FAR void *arg);
 * (but should be back-ported to the ARM7 and ARM9 families).
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)  || \
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8) || \
       defined(CONFIG_ARCH_CORTEXA9) || \
-      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR4F) || \
-      defined(CONFIG_ARCH_CORTEXR5) || defined(CONFIG_ARCH_CORTEXR5F) || \
-      defined(CONFIG_ARCH_CORTEXR7) || defined(CONFIG_ARCH_CORTEXR7F)
+      defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
+      defined(CONFIG_ARCH_CORTEXR7)
 
 /* Interrupt acknowledge and dispatch */
 

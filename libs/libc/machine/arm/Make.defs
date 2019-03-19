@@ -47,15 +47,9 @@ else ifeq ($(CONFIG_ARCH_CORTEXA9),y)   # Cortex-A9 is ARMv7-A
 include ${TOPDIR}/libs/libc/machine/arm/armv7-a/Make.defs
 else ifeq ($(CONFIG_ARCH_CORTEXR4),y)   # Cortex-R4 is ARMv7-R
 include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
-else ifeq ($(CONFIG_ARCH_CORTEXR4F),y)  # Cortex-R4F is ARMv7-R
-include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
 else ifeq ($(CONFIG_ARCH_CORTEXR5),y)   # Cortex-R5 is ARMv7-R
 include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
-else ifeq ($(CONFIG_ARCH_CORTEXR5F),y)  # Cortex-R5F is ARMv7-R
-include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
 else ifeq ($(CONFIG_ARCH_CORTEXR7),y)   # Cortex-R7 is ARMv7-R
-include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
-else ifeq ($(CONFIG_ARCH_CORTEXR7F),y)  # Cortex-R7F is ARMv7-R
 include ${TOPDIR}/libs/libc/machine/arm/armv7-r/Make.defs
 else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
 include ${TOPDIR}/libs/libc/machine/arm/armv6-m/Make.defs

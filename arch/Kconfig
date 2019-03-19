@@ -195,6 +195,17 @@ config ARCH_HAVE_VFORK
 	bool
 	default n
 
+config ARCH_HAVE_FPU
+	bool
+	default n
+
+config ARCH_HAVE_DPFPU
+	bool
+	default n
+
+config ARCH_HAVE_LAZYFPU
+	bool
+
 config ARCH_HAVE_MMU
 	bool
 	default n
@@ -247,6 +258,22 @@ config ARCH_GLOBAL_IRQDISABLE
 		all interrupts globally on all CPUs, or (2) will disable interprocessor
 		interrupts as well so that no context switches can occur on the CPU
 		that disabled "local" interrupts.
+
+config ARCH_FPU
+	bool "FPU support"
+	default y
+	depends on ARCH_HAVE_FPU
+	---help---
+		Build in support for the Floating Point Unit (FPU).
+		Check your chip specifications first; not all chips support the FPU.
+
+config ARCH_DPFPU
+	bool "Double precision FPU support"
+	default y
+	depends on ARCH_FPU && ARCH_HAVE_DPFPU
+	---help---
+		Enable toolchain support for double precision (64-bit) floating
+		point if both the toolchain and the hardware support it.
 
 config ARCH_USE_MMU
 	bool "Enable MMU"
