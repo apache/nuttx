@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_bind.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/elf.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/binfmt/symtab.h>
 
@@ -82,18 +83,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: elf_readrel
+ * Name: elf_readrels
  *
  * Description:
- *   Read the ELF32_Rel structure into memory.
+ *   Read the (ELF32_Rel structure * buffer count) into memory.
  *
  ****************************************************************************/
 
-static inline int elf_readrel(FAR struct elf_loadinfo_s *loadinfo,
+static inline int elf_readrels(FAR struct elf_loadinfo_s *loadinfo,
                               FAR const Elf32_Shdr *relsec,
-                              int index, FAR Elf32_Rel *rel)
+                              int index, FAR Elf32_Rel *rels)
 {
   off_t offset;
+  int size;
 
   /* Verify that the symbol table index lies within symbol table */
 
@@ -105,11 +107,17 @@ static inline int elf_readrel(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Get the file offset to the symbol table entry */
 
-  offset = relsec->sh_offset + sizeof(Elf32_Rel) * index;
+  offset = sizeof(Elf32_Rel) * index;
+  size = sizeof(Elf32_Rel) * CONFIG_ELF_RELOCATION_BUFFERCOUNT;
+  if (offset + size > relsec->sh_size)
+    {
+      size = relsec->sh_size - offset;
+    }
 
   /* And, finally, read the symbol table entry into memory */
 
-  return elf_read(loadinfo, (FAR uint8_t *)rel, sizeof(Elf32_Rel), offset);
+  return elf_read(loadinfo, (FAR uint8_t *)rels, size,
+                  relsec->sh_offset + offset);
 }
 
 /****************************************************************************
@@ -130,7 +138,8 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 {
   FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
   FAR Elf32_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
-  Elf32_Rel       rel;
+  FAR Elf32_Rel  *rels;
+  FAR Elf32_Rel  *rel;
   Elf32_Sym       sym;
   FAR Elf32_Sym  *psym;
   uintptr_t       addr;
@@ -138,10 +147,19 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
   int             ret;
   int             i;
 
+  rels = kmm_malloc(CONFIG_ELF_RELOCATION_BUFFERCOUNT * sizeof(Elf32_Rel));
+  if (rels == NULL)
+    {
+      berr("Failed to allocate memory for elf relocation rels\n");
+      return -ENOMEM;
+    }
+
   /* Examine each relocation in the section.  'relsec' is the section
    * containing the relations.  'dstsec' is the section containing the data
    * to be relocated.
    */
+
+  ret = OK;
 
   for (i = 0; i < relsec->sh_size / sizeof(Elf32_Rel); i++)
     {
@@ -149,19 +167,24 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Read the relocation entry into memory */
 
-      ret = elf_readrel(loadinfo, relsec, i, &rel);
-      if (ret < 0)
+      rel = &rels[i % CONFIG_ELF_RELOCATION_BUFFERCOUNT];
+
+      if (!(i % CONFIG_ELF_RELOCATION_BUFFERCOUNT))
         {
-          berr("Section %d reloc %d: Failed to read relocation entry: %d\n",
-               relidx, i, ret);
-          return ret;
+          ret = elf_readrels(loadinfo, relsec, i, rels);
+          if (ret < 0)
+            {
+              berr("Section %d reloc %d: Failed to read relocation entry: %d\n",
+                      relidx, i, ret);
+              break;
+            }
         }
 
       /* Get the symbol table index for the relocation.  This is contained
        * in a bit-field within the r_info element.
        */
 
-      symidx = ELF32_R_SYM(rel.r_info);
+      symidx = ELF32_R_SYM(rel->r_info);
 
       /* Read the symbol table entry into memory */
 
@@ -170,7 +193,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
         {
           berr("Section %d reloc %d: Failed to read symbol[%d]: %d\n",
                relidx, i, symidx, ret);
-          return ret;
+          break;
         }
 
       /* Get the value of the symbol (in sym.st_value) */
@@ -198,32 +221,35 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
             {
               berr("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
                   relidx, i, symidx, ret);
-              return ret;
+              break;
             }
         }
 
       /* Calculate the relocation address. */
 
-      if (rel.r_offset < 0 || rel.r_offset > dstsec->sh_size - sizeof(uint32_t))
+      if (rel->r_offset < 0 || rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
-               relidx, i, rel.r_offset, dstsec->sh_size);
-          return -EINVAL;
+               relidx, i, rel->r_offset, dstsec->sh_size);
+          ret = -EINVAL;
+          break;
         }
 
-      addr = dstsec->sh_addr + rel.r_offset;
+      addr = dstsec->sh_addr + rel->r_offset;
 
       /* Now perform the architecture-specific relocation */
 
-      ret = up_relocate(&rel, psym, addr);
+      ret = up_relocate(rel, psym, addr);
       if (ret < 0)
         {
           berr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
-          return ret;
+          break;
         }
     }
 
-  return OK;
+  kmm_free(rels);
+
+  return ret;
 }
 
 static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,

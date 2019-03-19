@@ -65,6 +65,13 @@ config MODLIB_HAVE_SYMTAB
 		option in order to use it.  Symbol tables are required in most
 		cases in order to link executable programs to the base code.
 
+config MODLIB_RELOCATION_BUFFERCOUNT
+	int "MODLIB Relocation Table Buffer Count"
+	default 256
+	---help---
+		This is an cache buffer that is used to store elf relocation table to
+		reduce access fs. Default: 256
+
 if MODLIB_HAVE_SYMTAB
 
 config MODLIB_SYMTAB_ARRAY

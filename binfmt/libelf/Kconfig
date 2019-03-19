@@ -48,3 +48,10 @@ config ELF_EXIDX_SECTNAME
 		be loaded by the ELF binary loader.
 
 		This is needed to support exception handling on loadable ELF modules.
+
+config ELF_RELOCATION_BUFFERCOUNT
+	int "ELF Relocation Table Buffer Count"
+	default 256
+	---help---
+		This is an cache buffer that is used to store elf relocation table to
+		reduce access fs. Default: 256

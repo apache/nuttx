@@ -119,4 +119,3 @@ config SYMTAB_ORDEREDBYNAME
 		the logic can perform faster lookups using a binary search.
 		Otherwise, the symbol table is assumed to be un-ordered an only
 		slow, linear searches are supported.
-
