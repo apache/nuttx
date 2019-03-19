@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_start.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "barriers.h"
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"

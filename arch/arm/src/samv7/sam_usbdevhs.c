@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_usbdevhs.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * This code derives from the UDPHS device controller driver for the SAMA5D3.
@@ -70,6 +70,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "barriers.h"
 
 #include "chip.h"
 #include "sam_periphclks.h"

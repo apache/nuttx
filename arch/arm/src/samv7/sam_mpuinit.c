@@ -44,6 +44,8 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
+#include "barriers.h"
+
 #include "chip/sam_memorymap.h"
 
 #include "sam_mpuinit.h"

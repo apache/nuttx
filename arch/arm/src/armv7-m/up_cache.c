@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_cache.c
  *
- *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Bob Feretich <bob.feretich@rafresearch.com>
  *
@@ -47,6 +47,7 @@
 #include <nuttx/cache.h>
 
 #include "up_arch.h"
+#include "barriers.h"
 #include "nvic.h"
 
 /****************************************************************************
@@ -70,16 +71,6 @@
   (((n) & NVIC_CCSIDR_NUMSETS_MASK) >> NVIC_CCSIDR_NUMSETS_SHIFT)
 #define CCSIDR_LSSHIFT(n) \
   (((n) & NVIC_CCSIDR_LINESIZE_MASK) >> NVIC_CCSIDR_LINESIZE_SHIFT)
-
-/* intrinsics are used in these inline functions */
-
-#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
-#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
-#define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
-
-#define ARM_DSB()  arm_dsb(15)
-#define ARM_ISB()  arm_isb(15)
-#define ARM_DMB()  arm_dmb(15)
 
 /****************************************************************************
  * Inline Functions

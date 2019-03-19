@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_qspi.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
+#include "barriers.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"

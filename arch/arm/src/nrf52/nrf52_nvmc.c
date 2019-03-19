@@ -45,6 +45,8 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
+#include "barriers.h"
+
 #include "chip/nrf52_ficr.h"
 #include "chip/nrf52_nvmc.h"
 #include "nrf52_nvmc.h"

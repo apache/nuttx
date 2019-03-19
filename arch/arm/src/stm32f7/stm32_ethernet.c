@@ -62,6 +62,7 @@
 #endif
 
 #include "up_internal.h"
+#include "barriers.h"
 
 #include "chip/stm32_syscfg.h"
 #include "chip/stm32_pinmap.h"
