@@ -50,6 +50,8 @@
 #include "chip.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_PAGING
+
 	.file	"arm_pghead.S"
 
 /**********************************************************************************
@@ -835,4 +837,5 @@ g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 #endif
 	.size	g_idle_topstack, .-g_idle_topstack
+#endif
 	.end

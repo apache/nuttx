@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include "cp15.h"
 
+#ifdef CONFIG_ARCH_FPU
+
 	.file	"arm_fpuconfig.S"
 
 /****************************************************************************
@@ -95,4 +97,5 @@ arm_fpuconfig:
 	fmxr	fpexc, r0
 	bx		lr
 	.size	arm_fpuconfig, . - arm_fpuconfig
+#endif
 	.end

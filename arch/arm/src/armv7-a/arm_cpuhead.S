@@ -50,6 +50,8 @@
 #include "chip.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_SMP
+
 	.file	"arm_cpuhead.S"
 
 /**********************************************************************************
@@ -492,5 +494,5 @@ g_cpu3_idlestack:
 #endif /* CONFIG_SMP_NCPUS > 3 */
 #endif /* CONFIG_SMP_NCPUS > 2 */
 #endif /* CONFIG_SMP_NCPUS > 1 */
-
+#endif
 	.end
