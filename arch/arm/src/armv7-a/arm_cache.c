@@ -42,7 +42,7 @@
 #include <nuttx/irq.h>
 
 #include "cp15_cacheops.h"
-#include "barriersh"
+#include "barriers.h"
 #include "l2cc.h"
 
 /****************************************************************************
