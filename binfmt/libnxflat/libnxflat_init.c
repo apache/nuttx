@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_init.c
  *
- *   Copyright (C) 2009, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   if (loadinfo->filfd < 0)
     {
       ret = loadinfo->filfd;
-      berr("Failed to open NXFLAT binary %s: %d\n", filename, ret);
+      berr("ERROR: Failed to open NXFLAT binary %s: %d\n", filename, ret);
       return ret;
     }
 
@@ -123,7 +123,8 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
                     sizeof(struct nxflat_hdr_s), 0);
   if (ret < 0)
     {
-      berr("Failed to read NXFLAT header: %d\n", ret);
+      berr("ERROR: Failed to read NXFLAT header: %d\n", ret);
+      close(loadinfo->filfd);
       return ret;
     }
 
@@ -141,7 +142,8 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
        * done so.
        */
 
-      berr("Bad NXFLAT header\n");
+      berr("ERROR: Bad NXFLAT header\n");
+      close(loadinfo->filfd);
       return -ENOEXEC;
     }
 
