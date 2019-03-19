@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_schedulesigaction.c
  *
- *   Copyright (C) 2013, 2015-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2015-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,16 +147,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * the signals have been delivered.
                */
 
-              tcb->xcp.sigdeliver    = sigdeliver;
-              tcb->xcp.saved_pc      = CURRENT_REGS[REG_PC];
-              tcb->xcp.saved_cpsr    = CURRENT_REGS[REG_CPSR];
+              tcb->xcp.sigdeliver     = sigdeliver;
+              tcb->xcp.saved_pc       = CURRENT_REGS[REG_PC];
+              tcb->xcp.saved_cpsr     = CURRENT_REGS[REG_CPSR];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              CURRENT_REGS[REG_PC]   = (uint32_t)up_sigdeliver;
-              CURRENT_REGS[REG_CPSR] = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+              CURRENT_REGS[REG_PC]    = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_CPSR]  = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+              CURRENT_REGS[REG_CPSR] |= PSR_T_BIT;
+#endif
 
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
@@ -178,16 +181,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * have been delivered.
            */
 
-          tcb->xcp.sigdeliver     = sigdeliver;
-          tcb->xcp.saved_pc       = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_cpsr     = tcb->xcp.regs[REG_CPSR];
+          tcb->xcp.sigdeliver      = sigdeliver;
+          tcb->xcp.saved_pc        = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_cpsr      = tcb->xcp.regs[REG_CPSR];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]   = (uint32_t)up_sigdeliver;
-          tcb->xcp.regs[REG_CPSR] = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+          tcb->xcp.regs[REG_PC]    = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+          tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
+#endif
         }
     }
 
@@ -268,16 +274,19 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * by the signal trampoline after the signal has been delivered.
                    */
 
-                  tcb->xcp.sigdeliver     = sigdeliver;
-                  tcb->xcp.saved_pc       = tcb->xcp.regs[REG_PC];
-                  tcb->xcp.saved_cpsr     = tcb->xcp.regs[REG_CPSR];
+                  tcb->xcp.sigdeliver      = sigdeliver;
+                  tcb->xcp.saved_pc        = tcb->xcp.regs[REG_PC];
+                  tcb->xcp.saved_cpsr      = tcb->xcp.regs[REG_CPSR];
 
                   /* Then set up to vector to the trampoline with interrupts
                    * disabled
                    */
 
-                  tcb->xcp.regs[REG_PC]   = (uint32_t)up_sigdeliver;
-                  tcb->xcp.regs[REG_CPSR] = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+                  tcb->xcp.regs[REG_PC]    = (uint32_t)up_sigdeliver;
+                  tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+                  tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
+#endif
                 }
               else
                 {
@@ -289,17 +298,20 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * delivered.
                    */
 
-                  tcb->xcp.sigdeliver     = (FAR void *)sigdeliver;
-                  tcb->xcp.saved_pc       = CURRENT_REGS[REG_PC];
-                  tcb->xcp.saved_cpsr     = CURRENT_REGS[REG_CPSR];
+                  tcb->xcp.sigdeliver      = (FAR void *)sigdeliver;
+                  tcb->xcp.saved_pc        = CURRENT_REGS[REG_PC];
+                  tcb->xcp.saved_cpsr      = CURRENT_REGS[REG_CPSR];
 
                   /* Then set up vector to the trampoline with interrupts
                    * disabled.  The kernel-space trampoline must run in
                    * privileged thread mode.
                    */
 
-                  CURRENT_REGS[REG_PC]   = (uint32_t)up_sigdeliver;
-                  CURRENT_REGS[REG_CPSR] = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+                  CURRENT_REGS[REG_PC]    = (uint32_t)up_sigdeliver;
+                  CURRENT_REGS[REG_CPSR]  = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+                  CURRENT_REGS[REG_CPSR] |= PSR_T_BIT;
+#endif
 
                   /* And make sure that the saved context in the TCB is the same
                    * as the interrupt return context.
@@ -346,9 +358,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * have been delivered.
            */
 
-          tcb->xcp.sigdeliver     = sigdeliver;
-          tcb->xcp.saved_pc       = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_cpsr     = tcb->xcp.regs[REG_CPSR];
+          tcb->xcp.sigdeliver      = sigdeliver;
+          tcb->xcp.saved_pc        = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_cpsr      = tcb->xcp.regs[REG_CPSR];
 
           /* Increment the IRQ lock count so that when the task is restarted,
            * it will hold the IRQ spinlock.
@@ -361,8 +373,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC]   = (uint32_t)up_sigdeliver;
-          tcb->xcp.regs[REG_CPSR] = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+          tcb->xcp.regs[REG_PC]    = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
+#ifdef CONFIG_ARM_THUMB
+          tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
+#endif
         }
     }
 

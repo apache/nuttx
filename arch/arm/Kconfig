@@ -498,9 +498,14 @@ config ARCH_CORTEXM23
 	bool
 	default n
 
+config ARCH_ARMV7M
+	bool
+	default n
+
 config ARCH_CORTEXM3
 	bool
 	default n
+	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_RAMVECTORS
@@ -518,6 +523,7 @@ config ARCH_CORTEXM33
 config ARCH_CORTEXM4
 	bool
 	default n
+	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_RAMVECTORS
@@ -531,6 +537,7 @@ config ARCH_CORTEXM4
 config ARCH_CORTEXM7
 	bool
 	default n
+	select ARCH_ARMV7M
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -542,9 +549,24 @@ config ARCH_CORTEXM7
 	select ARCH_HAVE_HARDFAULT_DEBUG
 	select ARCH_HAVE_MEMFAULT_DEBUG
 
+config ARCH_ARMV7A
+	bool
+	default n
+
 config ARCH_CORTEXA5
 	bool
 	default n
+	select ARCH_ARMV7A
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	select ARCH_HAVE_TESTSET
+
+config ARCH_CORTEXA7
+	bool
+	default n
+	select ARCH_ARMV7A
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
@@ -554,6 +576,7 @@ config ARCH_CORTEXA5
 config ARCH_CORTEXA8
 	bool
 	default n
+	select ARCH_ARMV7A
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
@@ -563,15 +586,21 @@ config ARCH_CORTEXA8
 config ARCH_CORTEXA9
 	bool
 	default n
+	select ARCH_ARMV7A
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	select ARCH_HAVE_TESTSET
 
+config ARCH_ARMV7R
+	bool
+	default n
+
 config ARCH_CORTEXR4
 	bool
 	default n
+	select ARCH_ARMV7R
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
@@ -580,6 +609,7 @@ config ARCH_CORTEXR4
 config ARCH_CORTEXR5
 	bool
 	default n
+	select ARCH_ARMV7R
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
@@ -588,6 +618,7 @@ config ARCH_CORTEXR5
 config ARCH_CORTEXR7
 	bool
 	default n
+	select ARCH_ARMV7R
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
@@ -597,9 +628,9 @@ config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 	default "armv6-m"	if ARCH_CORTEXM0
-	default "armv7-a"	if ARCH_CORTEXA5 || ARCH_CORTEXA8 || ARCH_CORTEXA9
-	default "armv7-m"	if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
-	default "armv7-r"	if ARCH_CORTEXR4 || ARCH_CORTEXR5 || ARCH_CORTEXR7
+	default "armv7-a"	if ARCH_ARMV7A
+	default "armv7-m"	if ARCH_ARMV7M
+	default "armv7-r"	if ARCH_ARMV7R
 
 config ARCH_CHIP
 	string
@@ -664,6 +695,11 @@ config ARCH_TRUSTZONE_BOTH
 	depends on EXPERIMENTAL
 
 endchoice # TrustZone Configuration
+
+config ARM_THUMB
+	bool
+	default n
+	depends on ARCH_ARMV7A
 
 config ARM_HAVE_MPU_UNIFIED
 	bool
@@ -759,13 +795,13 @@ config ARM_SEMIHOSTING_HOSTFS
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif
-if ARCH_CORTEXA5 || ARCH_CORTEXA8 || ARCH_CORTEXA9
+if ARCH_ARMV7A
 source arch/arm/src/armv7-a/Kconfig
 endif
-if ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
+if ARCH_ARMV7M
 source arch/arm/src/armv7-m/Kconfig
 endif
-if ARCH_CORTEXR4 || ARCH_CORTEXR5 || ARCH_CORTEXR7
+if ARCH_ARMV7R
 source arch/arm/src/armv7-r/Kconfig
 endif
 if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ

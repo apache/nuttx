@@ -124,5 +124,9 @@ void up_initial_state(struct tcb_s *tcb)
 #endif /* !CONFIG_ARMV7A_DECODEFIQ */
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
+#ifdef CONFIG_ARM_THUMB
+  cpsr |= PSR_T_BIT;
+#endif
+
   xcp->regs[REG_CPSR] = cpsr;
 }

@@ -87,12 +87,11 @@ up_saveusercontext:
 	add		r1, r0, #(4*REG_CPSR)
 	str		r2, [r1]
 
-	/* Save the return address as the PC so that we return to the exit from
-	 * this function.
-	 */
+	/* Save the return address */
 
+	ldr		r2, =1f
 	add		r1, r0, #(4*REG_PC)
-	str		lr, [r1]
+	str		r2, [r1]
 
 	/* Save the floating point registers.
 	 * REVISIT:  Not all of the floating point registers need to be saved.
@@ -122,5 +121,13 @@ up_saveusercontext:
 
 	mov		r0, #0			/* Return value == 0 */
 	mov		pc, lr			/* Return */
+
+1:
+
+	/* Return 1 now indicating that this return is a context switch */
+
+	mov		r0, #1			/* Return value == 1 */
+	mov		pc, lr			/* Return */
+
 	.size	up_saveusercontext, . - up_saveusercontext
 	.end
