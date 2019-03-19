@@ -69,7 +69,6 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "cache.h"
 
 #include "sam_memories.h"
 #include "sam_dmac.h"
@@ -1294,7 +1293,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
    * that memory will be re-cached after the DMA completes).
    */
 
-  arch_invalidate_dcache(vdest, vdest + nbytes);
+  up_invalidate_dcache(vdest, vdest + nbytes);
 
   /* DMA will need physical addresses. */
 
@@ -1379,7 +1378,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
    * the data to be transferred lies in physical memory
    */
 
-  arch_clean_dcache(vsrc, vsrc + nbytes);
+  up_clean_dcache(vsrc, vsrc + nbytes);
 
   /* DMA will need physical addresses. */
 

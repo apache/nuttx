@@ -467,7 +467,7 @@ arm_data_initialize:
 
 	adr		r3, ..Lramfunc
 	ldmia	r3, {r0, r1}
-	ldr     r3, =arch_clean_dcache
+	ldr     r3, =up_clean_dcache
 	b		r3
 #else
 	/* Otherwise return to the caller */

@@ -48,7 +48,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
 
-#include "cache.h"
 #include "mmu.h"
 #include "pgalloc.h"
 
@@ -105,8 +104,8 @@ static uintptr_t alloc_pgtable(void)
        * memory.
        */
 
-      arch_flush_dcache((uintptr_t)l2table,
-                        (uintptr_t)l2table + MM_PGSIZE);
+      up_flush_dcache((uintptr_t)l2table,
+                      (uintptr_t)l2table + MM_PGSIZE);
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section page table entry */
@@ -297,8 +296,8 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
        * memory.
        */
 
-      arch_flush_dcache((uintptr_t)&l2table[index],
-                        (uintptr_t)&l2table[index] + sizeof(uint32_t));
+      up_flush_dcache((uintptr_t)&l2table[index],
+                      (uintptr_t)&l2table[index] + sizeof(uint32_t));
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch L1 page table entry */

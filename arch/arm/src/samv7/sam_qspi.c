@@ -60,7 +60,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"

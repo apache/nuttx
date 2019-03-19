@@ -61,7 +61,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"
@@ -1760,7 +1759,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * the DMA completes
        */
 
-      arch_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+      up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
       /* Use normal RX memory incrementing. */
 

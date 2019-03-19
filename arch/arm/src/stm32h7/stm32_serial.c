@@ -59,7 +59,6 @@
 #  include <termios.h>
 #endif
 
-#include "cache.h"
 #include "up_arch.h"
 #include "up_internal.h"
 

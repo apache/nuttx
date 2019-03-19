@@ -388,7 +388,6 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
         }
     }
 
-#if defined(CONFIG_ARCH_HAVE_COHERENT_DCACHE)
   /* Ensure that the I and D caches are coherent before starting the newly
    * loaded module by cleaning the D cache (i.e., flushing the D cache
    * contents to memory and invalidating the I cache).
@@ -396,8 +395,6 @@ int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
 
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
   up_coherent_dcache(loadinfo->datastart, loadinfo->datasize);
-
-#endif
 
   return ret;
 }

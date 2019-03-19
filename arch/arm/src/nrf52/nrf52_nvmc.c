@@ -44,7 +44,6 @@
 
 #include <nuttx/config.h>
 #include <stdbool.h>
-#include "cache.h"
 
 #include "chip/nrf52_ficr.h"
 #include "chip/nrf52_nvmc.h"

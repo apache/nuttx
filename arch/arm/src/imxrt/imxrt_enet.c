@@ -64,7 +64,6 @@
 #endif
 
 #include "up_arch.h"
-#include "cache.h"
 #include "chip.h"
 #include "imxrt_config.h"
 #include "chip/imxrt_enet.h"
@@ -502,8 +501,8 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
     }
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
-  arch_invalidate_dcache((uintptr_t)txdesc,
-                         (uintptr_t)txdesc + sizeof(struct enet_desc_s));
+  up_invalidate_dcache((uintptr_t)txdesc,
+                       (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
   DEBUGASSERT(priv->txtail != priv->txhead &&
              (txdesc->status1 & TXDESC_R) == 0);
@@ -816,8 +815,8 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv)
        */
 
       rxdesc = &priv->rxdesc[priv->rxtail];
-      arch_invalidate_dcache((uintptr_t)rxdesc,
-                             (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
+      up_invalidate_dcache((uintptr_t)rxdesc,
+                           (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
 
       /* Check if the data buffer associated with the descriptor has
        * been filled with valid data.
@@ -837,8 +836,8 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv)
            * from memory when the packet content is accessed.
            */
 
-          arch_invalidate_dcache((uintptr_t)priv->dev.d_buf,
-                                 (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+          up_invalidate_dcache((uintptr_t)priv->dev.d_buf,
+                               (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
 
           /* Dispatch (or drop) the newly received packet */
 
@@ -911,8 +910,8 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
        */
 
       txdesc = &priv->txdesc[priv->txtail];
-      arch_invalidate_dcache((uintptr_t)txdesc,
-                             (uintptr_t)txdesc + sizeof(struct enet_desc_s));
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
       txdone = false;
       if ((txdesc->status1 & TXDESC_R) == 0 && priv->txtail != priv->txhead)

@@ -61,7 +61,6 @@
 
 #include <arch/board/board.h>
 
-#include "cache.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -1582,8 +1581,8 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
     {
       /* Invalidate the DMA buffer */
 
-      arch_invalidate_dcache((uintptr_t)priv->rxfifo,
-                             (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
+      up_invalidate_dcache((uintptr_t)priv->rxfifo,
+                           (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
 
       /* Now read from the DMA buffer */
 

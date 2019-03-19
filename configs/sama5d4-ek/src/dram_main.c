@@ -43,11 +43,12 @@
 #include <debug.h>
 #include <hex2bin.h>
 
+#include <nuttx/cache.h>
 #include <arch/irq.h>
 
 #include "up_arch.h"
 #include "mmu.h"
-#include "cache.h"
+#include "cp15_cacheops.h"
 
 #include "sama5d4-ek.h"
 
@@ -143,9 +144,8 @@ int dram_main(int argc, char *argv)
    * we disable caching.
    */
 
-  arch_clean_dcache((uintptr_t)SAM_DDRCS_VSECTION,
-                    (uintptr_t)(SAM_DDRCS_VSECTION +
-                                CONFIG_SAMA5_DDRCS_SIZE));
+  up_clean_dcache((uintptr_t)SAM_DDRCS_VSECTION,
+                  (uintptr_t)(SAM_DDRCS_VSECTION + CONFIG_SAMA5_DDRCS_SIZE));
 
   /* Interrupts must be disabled through the following.  In this
    * configuration, there should only be timer interrupts.  Your NuttX

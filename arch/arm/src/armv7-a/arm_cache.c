@@ -1,7 +1,7 @@
-/************************************************************************************
- * arch/arm/src/armv7-r/cache.h
+/****************************************************************************
+ * arch/arm/src/armv7-a/arm_cache.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,25 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_CACHE_H
-#define __ARCH_ARM_SRC_ARMV7_R_CACHE_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "sctlr.h"
 #include "cp15_cacheops.h"
 #include "l2cc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Intrinsics are used in these inline functions */
 
@@ -61,14 +58,12 @@
 #define ARM_ISB()  arm_isb(15)
 #define ARM_DMB()  arm_dmb(15)
 
-/************************************************************************************
- * Inline Functions
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_invalidate_dcache
+ * Name: up_invalidate_dcache
  *
  * Description:
  *   Invalidate the data cache within the specified region; we will be
@@ -89,14 +84,14 @@
  *
  ****************************************************************************/
 
-static inline void arch_invalidate_dcache(uintptr_t start, uintptr_t end)
+void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
   cp15_invalidate_dcache(start, end);
   l2cc_invalidate(start, end);
 }
 
 /****************************************************************************
- * Name: arch_invalidate_dcache_all
+ * Name: up_invalidate_dcache_all
  *
  * Description:
  *   Invalidate the entire contents of D cache.
@@ -112,7 +107,7 @@ static inline void arch_invalidate_dcache(uintptr_t start, uintptr_t end)
  *
  ****************************************************************************/
 
-static inline void arch_invalidate_dcache_all(void)
+void up_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
   irqstate_t flags = enter_critical_section();
@@ -124,11 +119,12 @@ static inline void arch_invalidate_dcache_all(void)
 #endif
 }
 
-/************************************************************************************
- * Name: arch_invalidate_icache
+/****************************************************************************
+ * Name: up_invalidate_icache_all
  *
  * Description:
- *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *   Invalidate all instruction caches to PoU, also flushes branch target
+ *   cache
  *
  * Input Parameters:
  *   None
@@ -136,12 +132,15 @@ static inline void arch_invalidate_dcache_all(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#define arch_invalidate_icache() cp15_invalidate_icache()
+void up_invalidate_icache_all(void)
+{
+  cp15_invalidate_icache();
+}
 
 /****************************************************************************
- * Name: arch_clean_dcache
+ * Name: up_clean_dcache
  *
  * Description:
  *   Clean the data cache within the specified region by flushing the
@@ -161,14 +160,14 @@ static inline void arch_invalidate_dcache_all(void)
  *
  ****************************************************************************/
 
-static inline void arch_clean_dcache(uintptr_t start, uintptr_t end)
+void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
   cp15_clean_dcache(start, end);
   l2cc_clean(start, end);
 }
 
 /****************************************************************************
- * Name: arch_flush_dcache
+ * Name: up_flush_dcache
  *
  * Description:
  *   Flush the data cache within the specified region by cleaning and
@@ -188,14 +187,14 @@ static inline void arch_clean_dcache(uintptr_t start, uintptr_t end)
  *
  ****************************************************************************/
 
-static inline void arch_flush_dcache(uintptr_t start, uintptr_t end)
+void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
   cp15_flush_dcache(start, end);
   l2cc_flush(start, end);
 }
 
 /****************************************************************************
- * Name: arch_enable_icache
+ * Name: up_enable_icache
  *
  * Description:
  *   Enable the I-Cache
@@ -208,76 +207,100 @@ static inline void arch_flush_dcache(uintptr_t start, uintptr_t end)
  *
  ****************************************************************************/
 
-static inline void arch_enable_icache(void)
+void up_enable_icache(void)
 {
-#ifdef CONFIG_ARMV7R_ICACHE
-  uint32_t regval;
-
-  ARM_DSB();
-  ARM_ISB();
-
-  /* Enable the I-Cache */
-
-  regval = cp15_rdsctlr();
-  if ((regval & SCTLR_I) == 0)
-    {
-      cp15_wrsctlr(regval | SCTLR_I);
-    }
-
-  ARM_DSB();
-  ARM_ISB();
-#endif
+  cp15_enable_icache();
 }
 
 /****************************************************************************
-* Name: arch_enable_dcache
-*
-* Description:
-*   Enable the D-Cache
-*
-* Input Parameters:
-*   None
-*
-* Returned Value:
-*   None
-*
-****************************************************************************/
-
-static inline void arch_enable_dcache(void)
-{
-#ifdef CONFIG_ARMV7R_DCACHE
-  uint32_t regval;
-
-  /* Enable the D-Cache */
-
-  regval = cp15_rdsctlr();
-  if ((regval & SCTLR_C) == 0)
-    {
-      cp15_wrsctlr(regval | SCTLR_C);
-    }
-#endif
-}
-
-/****************************************************************************
- * Public Data
+ * Name: up_disable_icache
+ *
+ * Description:
+ *   Disable the I-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+void up_disable_icache(void)
 {
-#else
-#define EXTERN extern
-#endif
+  cp15_disable_icache();
+}
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: up_enable_dcache
+ *
+ * Description:
+ *   Enable the D-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+void up_enable_dcache(void)
+{
+  cp15_enable_dcache();
+  l2cc_enable();
 }
-#endif
-#endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_R_CACHE_H */
+/****************************************************************************
+ * Name: up_disable_dcache
+ *
+ * Description:
+ *   Disable the D-Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_disable_dcache(void)
+{
+  cp15_disable_dcache();
+  l2cc_disable();
+}
+
+/****************************************************************************
+ * Name: up_coherent_dcache
+ *
+ * Description:
+ *   Ensure that the I and D caches are coherent within specified region
+ *   by cleaning the D cache (i.e., flushing the D cache contents to memory
+ *   and invalidating the I cache. This is typically used when code has been
+ *   written to a memory region, and will be executed.
+ *
+ * Input Parameters:
+ *   addr - virtual start address of region
+ *   len  - Size of the address region in bytes
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_coherent_dcache(uintptr_t addr, size_t len)
+{
+  if (len > 0)
+    {
+      /* Perform the operation on the L1 cache */
+
+      cp15_coherent_dcache(addr, addr + len);
+
+#ifdef CONFIG_ARCH_L2CACHE
+      /* If we have an L2 cache, then there more things that need to done */
+
+#  warning This is insufficient
+#endif
+    }
+}

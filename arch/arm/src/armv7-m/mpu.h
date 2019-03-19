@@ -268,7 +268,6 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARMV7M_HAVE_ICACHE) || defined(CONFIG_ARMV7M_DCACHE)
 static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
@@ -300,7 +299,6 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
            MPU_RASR_AP_RWNO;                              /* P:RW   U:None  */
   putreg32(regval, MPU_RASR);
 }
-#endif
 
 /****************************************************************************
  * Name: mpu_user_flash

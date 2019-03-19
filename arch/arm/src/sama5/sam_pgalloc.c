@@ -49,7 +49,6 @@
 
 #include "chip.h"
 #include "mmu.h"
-#include "cache.h"
 
 #include "sam_pgalloc.h"
 

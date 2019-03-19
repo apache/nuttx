@@ -49,7 +49,6 @@
 
 #include "chip.h"
 #include "mmu.h"
-#include "cache.h"
 
 #include "pgalloc.h"
 
@@ -115,8 +114,8 @@ uintptr_t arm_physpgaddr(uintptr_t vaddr)
                */
 
               index = (vaddr & SECTION_MASK) >> MM_PGSHIFT;
-              arch_invalidate_dcache((uintptr_t)&l2table[index],
-                                     (uintptr_t)&l2table[index] + sizeof(uint32_t));
+              up_invalidate_dcache((uintptr_t)&l2table[index],
+                                   (uintptr_t)&l2table[index] + sizeof(uint32_t));
 
               /* Get the Level 2 page table entry corresponding to this virtual
                * address.  Extract the physical address of the page containing

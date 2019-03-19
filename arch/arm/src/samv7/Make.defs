@@ -72,14 +72,7 @@ CMN_ASRCS += up_exception.S
 endif
 CMN_CSRCS += up_vectors.c
 
-ifeq ($(CONFIG_ARMV7M_DCACHE),y)
-CMN_CSRCS += arch_enable_dcache.c arch_disable_dcache.c
-CMN_CSRCS += arch_invalidate_dcache.c arch_invalidate_dcache_all.c
-ifneq ($(CONFIG_ARMV7M_DCACHE_WRITETHROUGH),y)
-CMN_CSRCS += arch_clean_dcache.c arch_clean_dcache_all.c
-CMN_CSRCS += arch_flush_dcache.c arch_flush_dcache_all.c
-endif
-endif
+CMN_CSRCS += up_cache.c
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
@@ -99,12 +92,6 @@ CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
 endif
 endif
-endif
-
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_coherent_dcache.c
-else ifeq ($(CONFIG_MODULE),y)
-CMN_CSRCS += up_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

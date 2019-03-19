@@ -83,7 +83,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "cache.h"
 
 #include "chip/sam_pinmap.h"
 #include "chip/sam_chipid.h"
@@ -1419,8 +1418,8 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
        */
 
       memcpy((void *)txdesc->addr, dev->d_buf, dev->d_len);
-      arch_clean_dcache((uint32_t)txdesc->addr,
-                        (uint32_t)txdesc->addr + dev->d_len);
+      up_clean_dcache((uint32_t)txdesc->addr,
+                      (uint32_t)txdesc->addr + dev->d_len);
     }
 
   /* Update TX descriptor status (with USED=0). */
@@ -1434,8 +1433,8 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   /* Update the descriptor status and flush the updated value to RAM */
 
   txdesc->status = status;
-  arch_clean_dcache((uint32_t)txdesc,
-                    (uint32_t)txdesc + sizeof(struct emac_txdesc_s));
+  up_clean_dcache((uint32_t)txdesc,
+                  (uint32_t)txdesc + sizeof(struct emac_txdesc_s));
 
   /* Increment the head index */
 
@@ -1665,8 +1664,8 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
   /* Invalidate the RX descriptor to force re-fetching from RAM. */
 
-  arch_invalidate_dcache((uintptr_t)rxdesc,
-                         (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+  up_invalidate_dcache((uintptr_t)rxdesc,
+                       (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
   ninfo("Entry rxndx[%d]: %d\n", qid, rxndx);
 
@@ -1693,9 +1692,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
               /* Flush the modified RX descriptor to RAM */
 
-              arch_clean_dcache((uintptr_t)rxdesc,
-                                (uintptr_t)rxdesc +
-                                sizeof(struct emac_rxdesc_s));
+              up_clean_dcache((uintptr_t)rxdesc,
+                              (uintptr_t)rxdesc +
+                              sizeof(struct emac_rxdesc_s));
 
               /* Increment the RX index to the start fragment */
 
@@ -1741,9 +1740,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  arch_clean_dcache((uintptr_t)rxdesc,
-                                    (uintptr_t)rxdesc +
-                                    sizeof(struct emac_rxdesc_s));
+                  up_clean_dcache((uintptr_t)rxdesc,
+                                  (uintptr_t)rxdesc +
+                                  sizeof(struct emac_rxdesc_s));
 
                   /* Increment the RX index */
 
@@ -1771,7 +1770,7 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
            */
 
           src = (const uint8_t *)(rxdesc->addr & EMACRXD_ADDR_MASK);
-          arch_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
+          up_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
 
           /* Copy the data from the driver managed the ring buffer.  If we
            * wanted to support zero copy transfers, we would need to make
@@ -1805,9 +1804,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  arch_clean_dcache((uintptr_t)rxdesc,
-                                    (uintptr_t)rxdesc +
-                                    sizeof(struct emac_rxdesc_s));
+                  up_clean_dcache((uintptr_t)rxdesc,
+                                  (uintptr_t)rxdesc +
+                                  sizeof(struct emac_rxdesc_s));
 
                   /* Increment the RX index of the descriptor that was just
                    * released.
@@ -1850,9 +1849,9 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
           /* Flush the modified RX descriptor to RAM */
 
-          arch_clean_dcache((uintptr_t)rxdesc,
-                            (uintptr_t)rxdesc +
-                            sizeof(struct emac_rxdesc_s));
+          up_clean_dcache((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc +
+                          sizeof(struct emac_rxdesc_s));
 
           /* rxndx already points to the next fragment to be examined.
            * Use it to update the candidate Start-of-Frame.
@@ -1869,8 +1868,8 @@ static int sam_recvframe(struct sam_emac_s *priv, int qid)
 
       /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-     arch_invalidate_dcache((uintptr_t)rxdesc,
-                             (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+     up_invalidate_dcache((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
     }
 
   /* isframe indicates that we have found a SOF. If we've received a SOF,
@@ -2090,8 +2089,8 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
       /* Yes.. check the next buffer at the tail of the list */
 
       txdesc = &xfrq->txdesc[tail];
-      arch_invalidate_dcache((uintptr_t)txdesc,
-                             (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 
       /* Break out of the loop if frame has not yet been sent.  On TX
        * completion, the GMAC sets the USED bit only into the very first
@@ -2123,8 +2122,8 @@ static void sam_txdone(struct sam_emac_s *priv, int qid)
           /* Get the next TX descriptor */
 
           txdesc = &xfrq->txdesc[tail];
-          arch_invalidate_dcache((uintptr_t)txdesc,
-                                 (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+          up_invalidate_dcache((uintptr_t)txdesc,
+                               (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
         }
 
       /* Go to first buffer of the next frame */
@@ -2218,8 +2217,8 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
 
       /* Make H/W updates to the TX descriptor visible to the CPU. */
 
-      arch_invalidate_dcache((uintptr_t)txdesc,
-                             (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 
       /* Go to the last buffer descriptor of the frame */
 
@@ -2236,8 +2235,8 @@ static void sam_txerr_interrupt(FAR struct sam_emac_s *priv, int qid)
           /* Get the next TX descriptor */
 
           txdesc = &xfrq->txdesc[tail];
-          arch_invalidate_dcache((uintptr_t)txdesc,
-                                 (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+          up_invalidate_dcache((uintptr_t)txdesc,
+                               (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
         }
 
       /* Go to first buffer of the next frame */
@@ -4387,9 +4386,9 @@ static void sam_txreset(struct sam_emac_s *priv, int qid)
 
   /* Flush the entire TX descriptor table to RAM */
 
-  arch_clean_dcache((uintptr_t)txdesc,
-                    (uintptr_t)txdesc +
-                    xfrq->ntxbuffers * sizeof(struct emac_txdesc_s));
+  up_clean_dcache((uintptr_t)txdesc,
+                  (uintptr_t)txdesc +
+                  xfrq->ntxbuffers * sizeof(struct emac_txdesc_s));
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
@@ -4458,9 +4457,9 @@ static void sam_rxreset(struct sam_emac_s *priv, int qid)
 
   /* Flush the entire RX descriptor table to RAM */
 
-  arch_clean_dcache((uintptr_t)rxdesc,
-                    (uintptr_t)rxdesc +
-                    xfrq->nrxbuffers * sizeof(struct emac_rxdesc_s));
+  up_clean_dcache((uintptr_t)rxdesc,
+                  (uintptr_t)rxdesc +
+                  xfrq->nrxbuffers * sizeof(struct emac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Pointer Register */
 

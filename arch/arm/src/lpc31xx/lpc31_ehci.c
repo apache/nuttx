@@ -61,8 +61,6 @@
 #include <nuttx/usb/usbhost_trace.h>
 
 #include "up_arch.h"
-#include "cache.h"
-
 #include "chip.h"
 #include "lpc31.h"
 #include "lpc31_cgudrvr.h"
@@ -1371,8 +1369,8 @@ static int lpc31_qtd_invalidate(struct lpc31_qtd_s *qtd, uint32_t **bp, void *ar
    * memory over the specified address range.
    */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   return OK;
 }
 #endif
@@ -1390,8 +1388,8 @@ static int lpc31_qh_invalidate(struct lpc31_qh_s *qh)
 {
   /* Invalidate the QH first so that we reload the qTD list head */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
   /* Then invalidate all of the qTD entries in the queue */
 
@@ -1415,10 +1413,8 @@ static int lpc31_qtd_flush(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
    * to force re-loading of the data from memory when next accessed.
    */
 
-  cp15_flush_idcache((uintptr_t)&qtd->hw,
-                     (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_flush_dcache((uintptr_t)&qtd->hw,
+                  (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 
   return OK;
 }
@@ -1438,10 +1434,8 @@ static int lpc31_qh_flush(struct lpc31_qh_s *qh)
    * reloaded from D-Cache.
    */
 
-  cp15_flush_idcache((uintptr_t)&qh->hw,
-                     (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_flush_dcache((uintptr_t)&qh->hw,
+                  (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
   /* Then flush all of the qTD entries in the queue */
 
@@ -1672,8 +1666,8 @@ static void lpc31_qh_enqueue(struct lpc31_qh_s *qhead, struct lpc31_qh_s *qh)
 
   physaddr = (uintptr_t)lpc31_physramaddr((uintptr_t)qh);
   qhead->hw.hlp = lpc31_swap32(physaddr | QH_HLP_TYP_QH);
-  cp15_flush_idcache((uintptr_t)&qhead->hw,
-                     (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)&qhead->hw,
+                  (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
 }
 
 /****************************************************************************
@@ -1832,8 +1826,7 @@ static int lpc31_qtd_addbpl(struct lpc31_qtd_s *qtd, const void *buffer, size_t 
    * will be accessed for an OUT DMA.
    */
 
-  cp15_flush_idcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-  cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  up_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
   /* Loop, adding the aligned physical addresses of the buffer to the buffer page
    * list.  Only the first entry need not be aligned (because only the first
@@ -2523,7 +2516,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
        * invalid in this memory region.
        */
 
-      cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
 #endif
 
@@ -2673,8 +2666,8 @@ static int lpc31_qtd_ioccheck(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   lpc31_qtd_print(qtd);
 
   /* Remove the qTD from the list
@@ -2724,8 +2717,8 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   lpc31_qh_print(qh);
 
   /* Get the endpoint info pointer from the extended QH data.  Only the
@@ -2778,7 +2771,7 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
        */
 
       **bp = qh->hw.hlp;
-      cp15_flush_idcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+      up_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
       /* Check for errors, update the data toggle */
 
@@ -2878,8 +2871,8 @@ static int lpc31_qtd_cancel(struct lpc31_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   lpc31_qtd_print(qtd);
 
   /* Remove the qTD from the list
@@ -2923,8 +2916,8 @@ static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   lpc31_qh_print(qh);
 
   /* Check if this is the QH that we are looking for */
@@ -2953,7 +2946,7 @@ static int lpc31_qh_cancel(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
    */
 
   **bp = qh->hw.hlp;
-  cp15_flush_idcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+  up_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
   /* Re-enable the schedules (if they were enabled before. */
 
@@ -3003,8 +2996,8 @@ static inline void lpc31_ioc_bottomhalf(void)
   /* Check the Asynchronous Queue */
   /* Make sure that the head of the asynchronous queue is invalidated */
 
-  cp15_invalidate_dcache((uintptr_t)&g_asynchead.hw,
-                         (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&g_asynchead.hw,
+                       (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward QH pointer of the asynchronous
    * queue head.
@@ -3034,8 +3027,8 @@ static inline void lpc31_ioc_bottomhalf(void)
   /* Check the Interrupt Queue */
   /* Make sure that the head of the interrupt queue is invalidated */
 
-  cp15_invalidate_dcache((uintptr_t)&g_intrhead.hw,
-                         (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&g_intrhead.hw,
+                       (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward qTD pointer of the asynchronous
    * queue head.
@@ -5200,8 +5193,8 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   g_asynchead.hw.overlay.token = lpc31_swap32(QH_TOKEN_HALTED);
   g_asynchead.fqp              = lpc31_swap32(QTD_NQP_T);
 
-  cp15_flush_idcache((uintptr_t)&g_asynchead.hw,
-                     (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)&g_asynchead.hw,
+                  (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the Current Asynchronous List Address. */
 
@@ -5231,10 +5224,10 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   /* Set the Periodic Frame List Base Address. */
 
-  cp15_flush_idcache((uintptr_t)&g_intrhead.hw,
-                     (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
-  cp15_flush_idcache((uintptr_t)g_framelist,
-                     (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
+  up_clean_dcache((uintptr_t)&g_intrhead.hw,
+                  (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)g_framelist,
+                  (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
 
   physaddr = lpc31_physramaddr((uintptr_t)g_framelist);
   lpc31_putreg(lpc31_swap32(physaddr), &HCOR->periodiclistbase);

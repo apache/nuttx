@@ -62,7 +62,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "chip.h"
 #include "sam_pio.h"
@@ -1339,8 +1338,8 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
        * DMA buffer after starting the DMA transfer.
        */
 
-      arch_invalidate_dcache((uintptr_t)apb->samp,
-                             (uintptr_t)apb->samp + apb->nmaxbytes);
+      up_invalidate_dcache((uintptr_t)apb->samp,
+                           (uintptr_t)apb->samp + apb->nmaxbytes);
 
     }
 #if 1 /* REVISIT: Chained RX transfers */
@@ -1754,7 +1753,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
        * before starting the DMA.
        */
 
-      arch_clean_dcache(samp, samp + nbytes);
+      up_clean_dcache(samp, samp + nbytes);
     }
 #if 1 /* REVISIT: Chained TX transfers */
   while (0);

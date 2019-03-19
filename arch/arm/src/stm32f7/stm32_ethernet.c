@@ -61,7 +61,6 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "cache.h"
 #include "up_internal.h"
 
 #include "chip/stm32_syscfg.h"
@@ -1067,8 +1066,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   /* Flush the contents of the TX buffer into physical memory */
 
-  arch_clean_dcache((uintptr_t)priv->dev.d_buf,
-                    (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+  up_clean_dcache((uintptr_t)priv->dev.d_buf,
+                  (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
 
   /* Is the size to be sent greater than the size of the Ethernet buffer? */
 
@@ -1140,8 +1139,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
            * memory.
            */
 
-          arch_clean_dcache((uintptr_t)txdesc,
-                            (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+          up_clean_dcache((uintptr_t)txdesc,
+                          (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
           /* Get the next descriptor in the link list */
 
@@ -1176,8 +1175,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
        * memory.
        */
 
-      arch_clean_dcache((uintptr_t)txdesc,
-                        (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+      up_clean_dcache((uintptr_t)txdesc,
+                      (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
       /* Point to the next available TX descriptor */
 
@@ -1528,8 +1527,8 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
        * memory.
        */
 
-      arch_clean_dcache((uintptr_t)rxdesc,
-                        (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+      up_clean_dcache((uintptr_t)rxdesc,
+                      (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
 
       /* Get the next RX descriptor in the chain (cache coherency should not
        * be an issue because the link address is constant.
@@ -1614,8 +1613,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
   /* Forces the first RX descriptor to be re-read from physical memory */
 
-  arch_invalidate_dcache((uintptr_t)rxdesc,
-                         (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+  up_invalidate_dcache((uintptr_t)rxdesc,
+                       (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
 
   for (i = 0;
        (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 &&
@@ -1693,8 +1692,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * physical memory.
                */
 
-              arch_clean_dcache((uintptr_t)rxcurr,
-                                (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+              up_clean_dcache((uintptr_t)rxcurr,
+                              (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
 
               /* Remember where we should re-start scanning and reset the segment
                * scanning logic
@@ -1707,8 +1706,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * physical memory.
                */
 
-              arch_invalidate_dcache((uintptr_t)dev->d_buf,
-                                     (uintptr_t)dev->d_buf + dev->d_len);
+              up_invalidate_dcache((uintptr_t)dev->d_buf,
+                                   (uintptr_t)dev->d_buf + dev->d_len);
 
               ninfo("rxhead: %p d_buf: %p d_len: %d\n",
                     priv->rxhead, dev->d_buf, dev->d_len);
@@ -1734,8 +1733,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
       /* Force the next RX descriptor to be re-read from physical memory */
 
-      arch_invalidate_dcache((uintptr_t)rxdesc,
-                             (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+      up_invalidate_dcache((uintptr_t)rxdesc,
+                           (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
     }
 
   /* We get here after all of the descriptors have been scanned or when rxdesc points
@@ -1946,8 +1945,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
       /* Force re-reading of the TX descriptor for physical memory */
 
-      arch_invalidate_dcache((uintptr_t)txdesc,
-                             (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
       for (i = 0; (txdesc->tdes0 & ETH_TDES0_OWN) == 0; i++)
         {
@@ -1977,8 +1976,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
            * physical memory.
            */
 
-          arch_clean_dcache((uintptr_t)txdesc,
-                            (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+          up_clean_dcache((uintptr_t)txdesc,
+                          (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
 
           /* Check if this is the last segment of a TX frame */
 
@@ -2010,8 +2009,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
           /* Force re-reading of the TX descriptor for physical memory */
 
-          arch_invalidate_dcache((uintptr_t)txdesc,
-                                 (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+          up_invalidate_dcache((uintptr_t)txdesc,
+                               (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
@@ -2833,9 +2832,9 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
 
   /* Flush all of the initialized TX descriptors to physical memory */
 
-  arch_clean_dcache((uintptr_t)txtable,
-                    (uintptr_t)txtable +
-                      TXTABLE_SIZE * sizeof(union stm32_txdesc_u));
+  up_clean_dcache((uintptr_t)txtable,
+                  (uintptr_t)txtable +
+                  TXTABLE_SIZE * sizeof(union stm32_txdesc_u));
 
   /* Set Transmit Descriptor List Address Register */
 
@@ -2923,9 +2922,9 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 
   /* Flush all of the initialized RX descriptors to physical memory */
 
-  arch_clean_dcache((uintptr_t)rxtable,
-                    (uintptr_t)rxtable +
-                      RXTABLE_SIZE * sizeof(union stm32_rxdesc_u));
+  up_clean_dcache((uintptr_t)rxtable,
+                  (uintptr_t)rxtable +
+                  RXTABLE_SIZE * sizeof(union stm32_rxdesc_u));
 
   /* Set Receive Descriptor List Address Register */
 

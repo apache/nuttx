@@ -60,7 +60,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "stm32l4_gpio.h"
 #include "stm32l4_dma.h"

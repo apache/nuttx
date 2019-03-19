@@ -43,10 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/pgalloc.h>
-
 #include <nuttx/irq.h>
 
-#include "cache.h"
 #include "mmu.h"
 #include "pgalloc.h"
 #include "addrenv.h"
@@ -166,9 +164,9 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
        * memory.
        */
 
-      arch_flush_dcache((uintptr_t)l2table,
-                        (uintptr_t)l2table +
-                        ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      up_flush_dcache((uintptr_t)l2table,
+                      (uintptr_t)l2table +
+                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section L1 page table entry */

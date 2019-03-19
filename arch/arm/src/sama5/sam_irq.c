@@ -55,7 +55,7 @@
 
 #include "chip.h"
 #include "mmu.h"
-#include "cache.h"
+#include "cp15_cacheops.h"
 #include "sctlr.h"
 #include "chip/sam_aic.h"
 #include "chip/sam_matrix.h"

@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include "cache.h"
+#include "cp15_cacheops.h"
 #include "mmu.h"
 
 /****************************************************************************

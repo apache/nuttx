@@ -25,10 +25,12 @@ config OR1K_CPU_FREQUENCY
 config OR1K_ICACHE
 	bool "Enable Instruction Cache"
 	default n
+	select ARCH_ICACHE
 
 config OR1K_DCACHE
 	bool "Enable Data Cache"
 	default n
+	select ARCH_DCACHE
 
 config OR1K_MMU
 	bool "Enable MMU"

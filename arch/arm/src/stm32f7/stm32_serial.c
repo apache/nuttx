@@ -59,7 +59,6 @@
 #  include <termios.h>
 #endif
 
-#include "cache.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -2575,7 +2574,7 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
           /* Invalidate the DMA buffer range */
 
           addr = (uintptr_t)&priv->rxfifo[priv->rxdmanext];
-          arch_invalidate_dcache(addr, addr + rxdmaavail);
+          up_invalidate_dcache(addr, addr + rxdmaavail);
 
           /* We don't need to invalidate the data cache for the next
            * rxdmaavail number of next bytes.

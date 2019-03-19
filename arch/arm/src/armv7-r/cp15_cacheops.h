@@ -202,6 +202,26 @@
 #ifdef __ASSEMBLY__
 
 /************************************************************************************
+ * Name: cp15_enable_dcache
+ *
+ * Description:
+ *   Enable L1 D Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+	.macro	cp15_enable_dcache, tmp
+	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
+	orr		\tmp, \tmp, #(0x1 << 2)		/* Enable D cache */
+	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
+	.endm
+
+/************************************************************************************
  * Name: cp15_disable_dcache
  *
  * Description:
@@ -222,10 +242,10 @@
 	.endm
 
 /************************************************************************************
- * Name: cp15_disable_caches
+ * Name: cp15_enable_icache
  *
  * Description:
- *   Disable L1 Caches
+ *   Enable L1 I Cache
  *
  * Input Parameters:
  *   None
@@ -235,10 +255,29 @@
  *
  ************************************************************************************/
 
-	.macro	cp15_disable_caches, tmp
+	.macro	cp15_enable_icache, tmp
+	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
+	orr		\tmp, \tmp, #(0x1 << 12)	/* Enable I cache */
+	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
+	.endm
+
+/************************************************************************************
+ * Name: cp15_disable_icache
+ *
+ * Description:
+ *   Disable L1 I Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+	.macro	cp15_disable_icache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
 	bic		\tmp, \tmp, #(0x1 << 12)	/* Disable I cache */
-	bic		\tmp, \tmp, #(0x1 << 2)		/* Disable D cache */
 	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
@@ -490,10 +529,37 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
+ * Name: cp15_enable_dcache
+ *
+ * Description:
+ *   Enable L1 D Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void cp15_enable_dcache(void)
+{
+  __asm__ __volatile__
+    (
+      "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
+      "\torr  r0, r0, #(1 << 2)\n"      /* Enable D cache */
+      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Update the SCTLR */
+      :
+      :
+      : "r0", "memory"
+    );
+}
+
+/************************************************************************************
  * Name: cp15_disable_dcache
  *
  * Description:
- *   Disable L1 Caches
+ *   Disable L1 D Cache
  *
  * Input Parameters:
  *   None
@@ -517,10 +583,10 @@ static inline void cp15_disable_dcache(void)
 }
 
 /************************************************************************************
- * Name: cp15_disable_caches
+ * Name: cp15_enable_icache
  *
  * Description:
- *   Disable L1 Caches
+ *   Enable L1 I Cache
  *
  * Input Parameters:
  *   None
@@ -530,13 +596,39 @@ static inline void cp15_disable_dcache(void)
  *
  ************************************************************************************/
 
-static inline void cp15_disable_caches(void)
+static inline void cp15_enable_icache(void)
+{
+  __asm__ __volatile__
+    (
+      "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
+      "\torr  r0, r0, #(1 << 12)\n"     /* Enable I cache */
+      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Update the SCTLR */
+      :
+      :
+      : "r0", "memory"
+    );
+}
+
+/************************************************************************************
+ * Name: cp15_disable_icache
+ *
+ * Description:
+ *   Disable L1 I Cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void cp15_disable_icache(void)
 {
   __asm__ __volatile__
     (
       "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
       "\tbic  r0, r0, #(1 << 12)\n"     /* Disable I cache */
-      "\tbic  r0, r0, #(1 << 2)\n"      /* Disable D cache */
       "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Update the SCTLR */
       :
       :

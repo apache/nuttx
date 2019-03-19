@@ -60,7 +60,6 @@
 
 #include "chip/stm32_flash.h"
 #include "up_arch.h"
-#include "cache.h"
 
 /****************************************************************************
  * Pre-processor Definitions

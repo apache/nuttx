@@ -139,7 +139,6 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "cache.h"
 #include "up_arch.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"

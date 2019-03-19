@@ -74,7 +74,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "cache.h"
 
 #include "chip.h"
 #include "chip/sam_pinmap.h"
@@ -717,7 +716,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
 
       virtaddr = sam_virtramaddr(txdesc->addr);
       memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
-      arch_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
+      up_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
     }
 
   /* Update TX descriptor status. */
@@ -731,8 +730,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
   /* Update the descriptor status and flush the updated value to RAM */
 
   txdesc->status = status;
-  arch_clean_dcache((uint32_t)txdesc,
-                    (uint32_t)txdesc + sizeof(struct gmac_txdesc_s));
+  up_clean_dcache((uint32_t)txdesc,
+                  (uint32_t)txdesc + sizeof(struct gmac_txdesc_s));
 
   /* Increment the head index */
 
@@ -947,8 +946,8 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
   /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-  arch_invalidate_dcache((uintptr_t)rxdesc,
-                         (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
+  up_invalidate_dcache((uintptr_t)rxdesc,
+                       (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
 
   ninfo("rxndx: %d\n", rxndx);
 
@@ -971,9 +970,9 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
               /* Flush the modified RX descriptor to RAM */
 
-              arch_clean_dcache((uintptr_t)rxdesc,
-                                (uintptr_t)rxdesc +
-                                sizeof(struct gmac_rxdesc_s));
+              up_clean_dcache((uintptr_t)rxdesc,
+                              (uintptr_t)rxdesc +
+                              sizeof(struct gmac_rxdesc_s));
 
               /* Increment the RX index */
 
@@ -1016,9 +1015,9 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  arch_clean_dcache((uintptr_t)rxdesc,
-                                    (uintptr_t)rxdesc +
-                                    sizeof(struct gmac_rxdesc_s));
+                  up_clean_dcache((uintptr_t)rxdesc,
+                                  (uintptr_t)rxdesc +
+                                  sizeof(struct gmac_rxdesc_s));
 
                   /* Increment the RX index */
 
@@ -1046,7 +1045,7 @@ static int sam_recvframe(struct sam_gmac_s *priv)
           physaddr = (uintptr_t)(rxdesc->addr & GMACRXD_ADDR_MASK);
           src = (const uint8_t *)sam_virtramaddr(physaddr);
 
-          arch_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
+          up_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
 
           /* And do the copy */
 
@@ -1076,9 +1075,9 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  arch_clean_dcache((uintptr_t)rxdesc,
-                                    (uintptr_t)rxdesc +
-                                    sizeof(struct gmac_rxdesc_s));
+                  up_clean_dcache((uintptr_t)rxdesc,
+                                  (uintptr_t)rxdesc +
+                                  sizeof(struct gmac_rxdesc_s));
 
                   /* Increment the RX index */
 
@@ -1114,9 +1113,9 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
           /* Flush the modified RX descriptor to RAM */
 
-          arch_clean_dcache((uintptr_t)rxdesc,
-                            (uintptr_t)rxdesc +
-                            sizeof(struct gmac_rxdesc_s));
+          up_clean_dcache((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc +
+                          sizeof(struct gmac_rxdesc_s));
 
           priv->rxndx = rxndx;
         }
@@ -1127,8 +1126,8 @@ static int sam_recvframe(struct sam_gmac_s *priv)
 
       /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-      arch_invalidate_dcache((uintptr_t)rxdesc,
-                             (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
+      up_invalidate_dcache((uintptr_t)rxdesc,
+                           (uintptr_t)rxdesc + sizeof(struct gmac_rxdesc_s));
     }
 
   /* isframe indicates that we have found a SOF. If we've received a SOF,
@@ -1335,8 +1334,8 @@ static void sam_txdone(struct sam_gmac_s *priv)
       /* Yes.. check the next buffer at the tail of the list */
 
       txdesc = &priv->txdesc[priv->txtail];
-      arch_invalidate_dcache((uintptr_t)txdesc,
-                             (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
 
       /* Is this TX descriptor still in use? */
 
@@ -1354,8 +1353,8 @@ static void sam_txdone(struct sam_gmac_s *priv)
               sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_GMAC_TBQB))
             {
               txdesc->status = (uint32_t)GMACTXD_STA_USED;
-              arch_clean_dcache((uintptr_t)txdesc,
-                                (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
+              up_clean_dcache((uintptr_t)txdesc,
+                              (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
             }
           else
             {
@@ -3372,9 +3371,9 @@ static void sam_txreset(struct sam_gmac_s *priv)
 
   /* Flush the entire TX descriptor table to RAM */
 
-  arch_clean_dcache((uintptr_t)txdesc,
-                    (uintptr_t)txdesc +
-                    CONFIG_SAMA5_GMAC_NTXBUFFERS * sizeof(struct gmac_txdesc_s));
+  up_clean_dcache((uintptr_t)txdesc,
+                  (uintptr_t)txdesc +
+                  CONFIG_SAMA5_GMAC_NTXBUFFERS * sizeof(struct gmac_txdesc_s));
 
   /* Set the Transmit Buffer Queue Base Register */
 
@@ -3436,9 +3435,9 @@ static void sam_rxreset(struct sam_gmac_s *priv)
 
   /* Flush the entire RX descriptor table to RAM */
 
-  arch_clean_dcache((uintptr_t)rxdesc,
-                    (uintptr_t)rxdesc +
-                    CONFIG_SAMA5_GMAC_NRXBUFFERS * sizeof(struct gmac_rxdesc_s));
+  up_clean_dcache((uintptr_t)rxdesc,
+                  (uintptr_t)rxdesc +
+                  CONFIG_SAMA5_GMAC_NRXBUFFERS * sizeof(struct gmac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Base Register */
 

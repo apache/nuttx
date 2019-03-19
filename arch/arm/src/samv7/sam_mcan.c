@@ -58,7 +58,6 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/can/can.h>
 
-#include "cache.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
@@ -1815,7 +1814,7 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
           /* Flush the filter entry into physical RAM */
 
-          arch_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
+          up_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
 
           /* Is this the first extended filter? */
 
@@ -2066,7 +2065,7 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
 
           /* Flush the filter entry into physical RAM */
 
-          arch_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
+          up_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
 
           /* Is this the first standard filter? */
 
@@ -2953,7 +2952,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* Flush the D-Cache to memory before initiating the transfer */
 
   msglen = 2 * sizeof(uint32_t) + nbytes;
-  arch_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
+  up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + msglen);
   UNUSED(msglen);
 
   /* Enable transmit interrupts from the TX FIFOQ buffer by setting TC
@@ -3327,7 +3326,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
 
   nbytes = (nwords << 2);
-  arch_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+  up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
   /* Format the CAN header */
   /* Work R0 contains the CAN ID */

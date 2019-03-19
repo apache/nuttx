@@ -171,11 +171,15 @@ config ARCH_HAVE_IRQPRIO
 	bool
 	default n
 
-config ARCH_L2CACHE
+config ARCH_ICACHE
 	bool
 	default n
 
-config ARCH_HAVE_COHERENT_DCACHE
+config ARCH_DCACHE
+	bool
+	default n
+
+config ARCH_L2CACHE
 	bool
 	default n
 

@@ -49,7 +49,6 @@
 #include <nuttx/addrenv.h>
 
 #include "mmu.h"
-#include "cache.h"
 #include "addrenv.h"
 #include "pgalloc.h"
 
@@ -195,9 +194,9 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
        * flush the entire L2 page table numerous times.
        */
 
-      arch_flush_dcache((uintptr_t)l2table,
-                        (uintptr_t)l2table +
-                        ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      up_flush_dcache((uintptr_t)l2table,
+                      (uintptr_t)l2table +
+                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section L1 page table entry */
@@ -313,9 +312,9 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
        * flush the entire L2 page table numerous times.
        */
 
-      arch_flush_dcache((uintptr_t)l2table,
-                        (uintptr_t)l2table +
-                        ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      up_flush_dcache((uintptr_t)l2table,
+                      (uintptr_t)l2table +
+                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section L1 page table entry */

@@ -918,8 +918,8 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
-   * mode (not write-through) because a) arch_invalidate_dcache could lose
-   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory if
+   * mode (not write-through) because a) up_invalidate_dcache could lose
+   * buffered writes and b) up_flush_dcache could corrupt adjacent memory if
    * the maddr and the mend+1, the next next address are not on
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */

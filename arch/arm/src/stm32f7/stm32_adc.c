@@ -69,7 +69,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "cache.h"
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_tim.h"
@@ -1190,8 +1189,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int i;
 
-  arch_invalidate_dcache((uintptr_t)priv->dmabuffer,
-                         (uintptr_t)priv->dmabuffer + sizeof(priv->dmabuffer));
+  up_invalidate_dcache((uintptr_t)priv->dmabuffer,
+                       (uintptr_t)priv->dmabuffer + sizeof(priv->dmabuffer));
 
   /* Verify that the upper-half driver has bound its callback functions */
 

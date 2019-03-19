@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_OR1K_ICACHE
-static void up_enable_icache(void)
+void up_enable_icache(void)
 {
   uint32_t iccfg;
   uint32_t sr;
@@ -98,7 +98,7 @@ static void up_enable_icache(void)
 #endif
 
 #ifdef CONFIG_OR1K_DCACHE
-static void up_enable_dcache(void)
+void up_enable_dcache(void)
 {
   uint32_t dccfg;
   uint32_t sr;

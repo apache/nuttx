@@ -49,7 +49,6 @@
 #  include <debug.h>
 
 #  include "up_arch.h"
-#  include "cache.h"
 #  include "sctlr.h"
 #  include "cp15.h"
 #endif
@@ -410,7 +409,6 @@ static inline void mpu_control(bool enable)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARMV7R_HAVE_ICACHE) || defined(CONFIG_ARMV7R_DCACHE)
 static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 {
   unsigned int region = mpu_allocregion();
@@ -444,7 +442,6 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
            ((uint32_t)subregions << MPU_RASR_SRD_SHIFT);  /* Sub-regions    */
   mpu_set_drsr(regval);
 }
-#endif
 
 /****************************************************************************
  * Name: mpu_user_flash

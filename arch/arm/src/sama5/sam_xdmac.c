@@ -50,7 +50,6 @@
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
-#include "cache.h"
 #include "up_internal.h"
 #include "sched/sched.h"
 
@@ -1399,8 +1398,8 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
                * that hardware will be accessing the descriptor via DMA.
                */
 
-              arch_clean_dcache((uintptr_t)descr,
-                                (uintptr_t)descr + sizeof(struct chnext_view1_s));
+              up_clean_dcache((uintptr_t)descr,
+                              (uintptr_t)descr + sizeof(struct chnext_view1_s));
               break;
             }
         }
@@ -1803,7 +1802,7 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
 
   if (xdmach->rx)
     {
-      arch_invalidate_dcache(xdmach->rxaddr, xdmach->rxaddr + xdmach->rxsize);
+      up_invalidate_dcache(xdmach->rxaddr, xdmach->rxaddr + xdmach->rxsize);
     }
 
   /* Perform the DMA complete callback */
@@ -2223,7 +2222,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
-  arch_clean_dcache(maddr, maddr + nbytes);
+  up_clean_dcache(maddr, maddr + nbytes);
   return ret;
 }
 
@@ -2304,7 +2303,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
-  arch_clean_dcache(maddr, maddr + nbytes);
+  up_clean_dcache(maddr, maddr + nbytes);
   return ret;
 }
 

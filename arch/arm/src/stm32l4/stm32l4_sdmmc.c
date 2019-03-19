@@ -60,7 +60,6 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "cache.h"
 #include "chip.h"
 #include "up_arch.h"
 
@@ -2813,7 +2812,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #else
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
-   * mode (not write-through) because the arch_invalidate_dcache could lose
+   * mode (not write-through) because the up_invalidate_dcache could lose
    * buffered buffered writes if the buffer alignment and sizes are not on
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
@@ -2859,7 +2858,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Force RAM reread */
 
-  arch_invalidate_dcache((uintptr_t)buffer,(uintptr_t)buffer + buflen);
+  up_invalidate_dcache((uintptr_t)buffer,(uintptr_t)buffer + buflen);
 
   /* Start the DMA */
 
@@ -2903,7 +2902,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 #else
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
-   * mode (not write-through) because the arch_flush_dcache would corrupt adjacent
+   * mode (not write-through) because the up_flush_dcache would corrupt adjacent
    * memory if the buffer alignment and sizes are not on ARMV7M_DCACHE_LINESIZE
    * boundaries.
    */
@@ -2927,7 +2926,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Flush cache to physical memory */
 
-  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  up_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
   /* Save the source buffer information for use by the interrupt handler */
 

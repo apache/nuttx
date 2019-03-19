@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
 #endif
@@ -52,7 +53,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
-#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -348,8 +348,8 @@ static void am335x_copyvectorblock(void)
 #else
   /* Flush the DCache to assure that the vector data is in physical RAM */
 
-  arch_clean_dcache((uintptr_t)AM335X_VECTOR_VSRAM,
-                    (uintptr_t)AM335X_VECTOR_VSRAM + am335x_vectorsize());
+  up_clean_dcache((uintptr_t)AM335X_VECTOR_VSRAM,
+                  (uintptr_t)AM335X_VECTOR_VSRAM + am335x_vectorsize());
 #endif
 }
 

@@ -54,7 +54,6 @@
 
 #include "chip.h"
 #include "arm.h"
-#include "cache.h"
 #include "fpu.h"
 #include "sctlr.h"
 #include "up_internal.h"

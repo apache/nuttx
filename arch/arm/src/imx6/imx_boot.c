@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
 #endif
@@ -53,7 +54,6 @@
 #include "arm.h"
 #include "mmu.h"
 #include "scu.h"
-#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -287,8 +287,8 @@ static void imx_copyvectorblock(void)
 #else
   /* Flush the DCache to assure that the vector data is in physical RAM */
 
-  arch_clean_dcache((uintptr_t)IMX_VECTOR_VSRAM,
-                    (uintptr_t)IMX_VECTOR_VSRAM + imx_vectorsize());
+  up_clean_dcache((uintptr_t)IMX_VECTOR_VSRAM,
+                  (uintptr_t)IMX_VECTOR_VSRAM + imx_vectorsize());
 #endif
 }
 
@@ -453,7 +453,7 @@ void arm_boot(void)
    * be available when fetched into the I-Cache.
    */
 
-  arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
+  up_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
   PROGRESS('F');
 #endif
 

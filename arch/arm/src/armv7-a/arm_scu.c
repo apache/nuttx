@@ -44,7 +44,6 @@
 #include "up_arch.h"
 #include "cp15_cacheops.h"
 #include "sctlr.h"
-#include "cache.h"
 #include "scu.h"
 
 #ifdef CONFIG_SMP

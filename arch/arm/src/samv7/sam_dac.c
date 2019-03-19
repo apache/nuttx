@@ -54,7 +54,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "chip/sam_dacc.h"
 #include "chip/sam_pmc.h"

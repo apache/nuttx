@@ -44,7 +44,6 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
-#include "cache.h"
 #include "chip/imxrt_memorymap.h"
 
 #include "imxrt_mpuinit.h"

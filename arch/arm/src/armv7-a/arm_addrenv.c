@@ -118,7 +118,6 @@
 #include <nuttx/irq.h>
 
 #include "pgalloc.h"
-#include "cache.h"
 #include "mmu.h"
 #include "addrenv.h"
 
@@ -181,8 +180,8 @@ static int up_addrenv_initdata(uintptr_t l2table)
 
   /* Invalidate D-Cache so that we read from the physical memory */
 
-  arch_invalidate_dcache((uintptr_t)virtptr,
-                         (uintptr_t)virtptr + sizeof(uint32_t));
+  up_invalidate_dcache((uintptr_t)virtptr,
+                       (uintptr_t)virtptr + sizeof(uint32_t));
 
   /* Get the physical address of the first page of of .bss/.data */
 
@@ -208,8 +207,8 @@ static int up_addrenv_initdata(uintptr_t l2table)
 
   /* Make sure that the initialized data is flushed to physical memory. */
 
-  arch_flush_dcache((uintptr_t)virtptr,
-                    (uintptr_t)virtptr + ARCH_DATA_RESERVE_SIZE);
+  up_flush_dcache((uintptr_t)virtptr,
+                  (uintptr_t)virtptr + ARCH_DATA_RESERVE_SIZE);
 
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
   /* Restore the scratch section L1 page table entry */
@@ -715,18 +714,18 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
 
 #warning REVISIT... causes crashes
 #if 0
-  arch_clean_dcache(CONFIG_ARCH_TEXT_VBASE,
-                    CONFIG_ARCH_TEXT_VBASE +
-                    CONFIG_ARCH_TEXT_NPAGES * MM_PGSIZE - 1);
+  up_clean_dcache(CONFIG_ARCH_TEXT_VBASE,
+                  CONFIG_ARCH_TEXT_VBASE +
+                  CONFIG_ARCH_TEXT_NPAGES * MM_PGSIZE - 1);
 
-  arch_clean_dcache(CONFIG_ARCH_DATA_VBASE,
-                    CONFIG_ARCH_DATA_VBASE +
-                    CONFIG_ARCH_DATA_NPAGES * MM_PGSIZE - 1);
+  up_clean_dcache(CONFIG_ARCH_DATA_VBASE,
+                  CONFIG_ARCH_DATA_VBASE +
+                  CONFIG_ARCH_DATA_NPAGES * MM_PGSIZE - 1);
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL
-  arch_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
-                    CONFIG_ARCH_HEAP_VBASE + addrenv->heapsize);
+  up_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
+                  CONFIG_ARCH_HEAP_VBASE + addrenv->heapsize);
 #endif
 
   return OK;

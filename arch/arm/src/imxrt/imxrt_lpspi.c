@@ -82,7 +82,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "cache.h"
 #include "chip.h"
 
 #include "imxrt_lpspi.h"

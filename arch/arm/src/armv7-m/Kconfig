@@ -89,11 +89,13 @@ config ARMV7M_ICACHE
 	bool "Use I-Cache"
 	default n
 	depends on ARMV7M_HAVE_ICACHE
+	select ARCH_ICACHE
 
 config ARMV7M_DCACHE
 	bool "Use D-Cache"
 	default n
 	depends on ARMV7M_HAVE_DCACHE
+	select ARCH_DCACHE
 
 config ARMV7M_DCACHE_WRITETHROUGH
 	bool "D-Cache Write-Through"

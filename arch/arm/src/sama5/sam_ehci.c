@@ -60,8 +60,6 @@
 #include <nuttx/usb/usbhost_trace.h>
 
 #include "up_arch.h"
-#include "cache.h"
-
 #include "chip.h"
 #include "sam_periphclks.h"
 #include "sam_memories.h"
@@ -1173,8 +1171,8 @@ static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
    * memory over the specified address range.
    */
 
-  arch_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   return OK;
 }
 #endif
@@ -1192,8 +1190,8 @@ static int sam_qh_invalidate(struct sam_qh_s *qh)
 {
   /* Invalidate the QH first so that we reload the qTD list head */
 
-  arch_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
   /* Then invalidate all of the qTD entries in the queue */
 
@@ -1218,13 +1216,13 @@ static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
    */
 
 #if 0 /* Didn't behave as expected */
-  arch_flush_dcache((uintptr_t)&qtd->hw,
-                    (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_flush_dcache((uintptr_t)&qtd->hw,
+                  (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 #else
-  arch_clean_dcache((uintptr_t)&qtd->hw,
-                    (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
-  arch_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_clean_dcache((uintptr_t)&qtd->hw,
+                  (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 #endif
 
   return OK;
@@ -1246,13 +1244,13 @@ static int sam_qh_flush(struct sam_qh_s *qh)
    */
 
 #if 0 /* Didn't behave as expected */
-  arch_flush_dcache((uintptr_t)&qh->hw,
-                    (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_flush_dcache((uintptr_t)&qh->hw,
+                  (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 #else
-  arch_clean_dcache((uintptr_t)&qh->hw,
-                     (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
-  arch_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)&qh->hw,
+                  (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 #endif
 
   /* Then flush all of the qTD entries in the queue */
@@ -1484,8 +1482,8 @@ static void sam_qh_enqueue(struct sam_qh_s *qhead, struct sam_qh_s *qh)
 
   physaddr = (uintptr_t)sam_physramaddr((uintptr_t)qh);
   qhead->hw.hlp = sam_swap32(physaddr | QH_HLP_TYP_QH);
-  arch_clean_dcache((uintptr_t)&qhead->hw,
-                    (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)&qhead->hw,
+                  (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
 }
 
 /****************************************************************************
@@ -1645,10 +1643,10 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
    */
 
 #if 0 /* Didn't behave as expected */
-  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  up_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #else
-  arch_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-  arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #endif
 
   /* Loop, adding the aligned physical addresses of the buffer to the buffer page
@@ -2338,7 +2336,7 @@ static ssize_t sam_transfer_wait(struct sam_epinfo_s *epinfo)
        * invalid in this memory region.
        */
 
-      arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
 #endif
 
@@ -2488,8 +2486,8 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  arch_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   sam_qtd_print(qtd);
 
   /* Remove the qTD from the list
@@ -2539,8 +2537,8 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  arch_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   sam_qh_print(qh);
 
   /* Get the endpoint info pointer from the extended QH data.  Only the
@@ -2593,7 +2591,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
        */
 
       **bp = qh->hw.hlp;
-      arch_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+      up_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
       /* Check for errors, update the data toggle */
 
@@ -2692,8 +2690,8 @@ static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  arch_invalidate_dcache((uintptr_t)&qtd->hw,
-                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  up_invalidate_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   sam_qtd_print(qtd);
 
   /* Remove the qTD from the list
@@ -2735,8 +2733,8 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  arch_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   sam_qh_print(qh);
 
   /* Check if this is the QH that we are looking for */
@@ -2814,8 +2812,8 @@ static inline void sam_ioc_bottomhalf(void)
   /* Check the Asynchronous Queue */
   /* Make sure that the head of the asynchronous queue is invalidated */
 
-  arch_invalidate_dcache((uintptr_t)&g_asynchead.hw,
-                         (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&g_asynchead.hw,
+                       (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward QH pointer of the asynchronous
    * queue head.
@@ -2845,8 +2843,8 @@ static inline void sam_ioc_bottomhalf(void)
   /* Check the Interrupt Queue */
   /* Make sure that the head of the interrupt queue is invalidated */
 
-  arch_invalidate_dcache((uintptr_t)&g_intrhead.hw,
-                         (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
+  up_invalidate_dcache((uintptr_t)&g_intrhead.hw,
+                       (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward qTD pointer of the asynchronous
    * queue head.
@@ -5012,8 +5010,8 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   g_asynchead.hw.overlay.token = sam_swap32(QH_TOKEN_HALTED);
   g_asynchead.fqp              = sam_swap32(QTD_NQP_T);
 
-  arch_clean_dcache((uintptr_t)&g_asynchead.hw,
-                    (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)&g_asynchead.hw,
+                  (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the Current Asynchronous List Address. */
 
@@ -5043,10 +5041,10 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   /* Set the Periodic Frame List Base Address. */
 
-  arch_clean_dcache((uintptr_t)&g_intrhead.hw,
-                    (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
-  arch_clean_dcache((uintptr_t)g_framelist,
-                    (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
+  up_clean_dcache((uintptr_t)&g_intrhead.hw,
+                  (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
+  up_clean_dcache((uintptr_t)g_framelist,
+                  (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
 
   physaddr = sam_physramaddr((uintptr_t)g_framelist);
   sam_putreg(sam_swap32(physaddr), &HCOR->periodiclistbase);

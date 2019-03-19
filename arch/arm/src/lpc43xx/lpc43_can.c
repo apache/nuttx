@@ -52,7 +52,6 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "chip.h"
 #include "lpc43_gpio.h"

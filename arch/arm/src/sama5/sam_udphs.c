@@ -66,7 +66,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "cache.h"
 
 #include "sam_periphclks.h"
 #include "sam_memories.h"
@@ -904,7 +903,7 @@ static void sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
   /* Flush the contents of the DMA buffer to RAM */
 
   buffer = (uintptr_t)&privreq->req.buf[privreq->req.xfrd];
-  arch_clean_dcache(buffer, buffer + privreq->inflight);
+  up_clean_dcache(buffer, buffer + privreq->inflight);
 
   /* Set up the DMA */
 
@@ -2414,7 +2413,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           DEBUGASSERT(USB_ISEPOUT(privep->ep.eplog));
           buf = &privreq->req.buf[privreq->req.xfrd];
-          arch_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + xfrsize);
+          up_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + xfrsize);
 
           /* Complete this transfer, return the request to the class
            * implementation, and try to start the next, queue read request.
@@ -2470,7 +2469,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
        */
 
       buf = &privreq->req.buf[privreq->req.xfrd];
-      arch_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + xfrsize);
+      up_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + xfrsize);
 
       /* Complete this transfer, return the request to the class
        * implementation, and try to start the next, queue read request.

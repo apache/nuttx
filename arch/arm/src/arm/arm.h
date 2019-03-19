@@ -44,12 +44,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#undef CONFIG_ALIGNMENT_TRAP
-#undef CONFIG_DCACHE_WRITETHROUGH
-#undef CONFIG_CACHE_ROUND_ROBIN
-#undef CONFIG_DCACHE_DISABLE
-#undef CONFIG_ICACHE_DISABLE
-
 /* ARM9EJS **************************************************************************/
 
 /* PSR bits */
