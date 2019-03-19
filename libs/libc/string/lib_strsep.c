@@ -66,7 +66,7 @@ FAR char *strsep(FAR char **strp, FAR const char *delim)
   FAR char *sbegin = *strp;
   FAR char *end;
 
-  if !sbegin == NULL)
+  if (sbegin == NULL)
     {
       return NULL;
     }
