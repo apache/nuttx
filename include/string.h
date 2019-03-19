@@ -83,6 +83,7 @@ size_t     strspn(FAR const char *, FAR const char *);
 size_t     strcspn(FAR const char *, FAR const char *);
 FAR char  *strstr(FAR const char *, FAR const char *);
 FAR char  *strcasestr(FAR const char *, FAR const char *);
+FAR char  *strsep(FAR char **, FAR const char *);
 FAR char  *strsignal(int signum);
 FAR char  *strtok(FAR char *, FAR const char *);
 FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
