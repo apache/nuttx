@@ -336,7 +336,7 @@ void arm_gic_initialize(void)
 
   iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
              GIC_ICCICRU_IRQBYPDISGRP1);
-  icddcr  = GIC_ICDDCR_ENABLEGRP1;
+  icddcr  = GIC_ICDDCR_ENABLE;
 
 #endif
 
