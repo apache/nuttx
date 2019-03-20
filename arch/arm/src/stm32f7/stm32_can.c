@@ -63,7 +63,8 @@
 #include "stm32_gpio.h"
 
 #if defined(CONFIG_CAN) && \
-   (defined(CONFIG_STM32F7_CAN1) || defined(CONFIG_STM32F7_CAN2))
+   (defined(CONFIG_STM32F7_CAN1) || defined(CONFIG_STM32F7_CAN2) || \
+    defined(CONFIG_STM32F7_CAN3))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1739,8 +1740,8 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
 
   else
     {
-      ts1 = CONFIG_STM32_CAN_TSEG1;
-      ts2 = CONFIG_STM32_CAN_TSEG2;
+      ts1 = CONFIG_STM32F7_CAN_TSEG1;
+      ts2 = CONFIG_STM32F7_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }

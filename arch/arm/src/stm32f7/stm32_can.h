@@ -72,24 +72,24 @@
 
 /* User-defined TSEG1 and TSEG2 settings may be used.
  *
- * CONFIG_STM32_CAN_TSEG1 = the number of CAN time quanta in segment 1
- * CONFIG_STM32_CAN_TSEG2 = the number of CAN time quanta in segment 2
+ * CONFIG_STM32F7_CAN_TSEG1 = the number of CAN time quanta in segment 1
+ * CONFIG_STM32F7_CAN_TSEG2 = the number of CAN time quanta in segment 2
  * CAN_BIT_QUANTA   = The number of CAN time quanta in on bit time
  */
 
-#ifndef CONFIG_STM32_CAN_TSEG1
-#  define CONFIG_STM32_CAN_TSEG1 6
+#ifndef CONFIG_STM32F7_CAN_TSEG1
+#  define CONFIG_STM32F7_CAN_TSEG1 6
 #endif
 
-#if CONFIG_STM32_CAN_TSEG1 < 1 || CONFIG_STM32_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
+#if CONFIG_STM32F7_CAN_TSEG1 < 1 || CONFIG_STM32F7_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
 #  errror "CONFIG_STM32_CAN_TSEG1 is out of range"
 #endif
 
-#ifndef CONFIG_STM32_CAN_TSEG2
-#  define CONFIG_STM32_CAN_TSEG2 7
+#ifndef CONFIG_STM32F7_CAN_TSEG2
+#  define CONFIG_STM32F7_CAN_TSEG2 7
 #endif
 
-#if CONFIG_STM32_CAN_TSEG2 < 1 || CONFIG_STM32_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
+#if CONFIG_STM32F7_CAN_TSEG2 < 1 || CONFIG_STM32F7_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
 #  errror "CONFIG_STM32_CAN_TSEG2 is out of range"
 #endif
 
