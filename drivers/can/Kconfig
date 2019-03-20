@@ -170,5 +170,10 @@ config MCP2515_SJW
 	---help---
 		The duration of a synchronization jump is SJW.
 
+config MCP2515_CLK_FREQUENCY
+	int "MCP2515 on-board clock frequency"
+	default 8000000
+	range 1 25000000
+
 endif # CAN_MCP2515
 endif # CAN
