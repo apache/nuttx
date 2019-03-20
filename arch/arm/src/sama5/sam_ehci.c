@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ehci.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/cache.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
@@ -72,7 +73,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+ 
+/* Configuration ************************************************************/
+
 /* Pre-requisites */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -133,7 +136,7 @@
 
 #undef CONFIG_SAMA5_UHPHS_RHPORT1
 
-/* Driver-private Definitions **************************************************/
+/* Driver-private Definitions ************************************************/
 
 /* This is the set of interrupts handled by this driver */
 
@@ -2763,7 +2766,7 @@ static int sam_qh_cancel(struct sam_qh_s *qh, uint32_t **bp, void *arg)
    */
 
   **bp = qh->hw.hlp;
-  cp15_flush_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+  up_flush_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
   /* Re-enable the schedules (if they were enabled before. */
 

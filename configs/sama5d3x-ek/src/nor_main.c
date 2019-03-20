@@ -180,7 +180,8 @@ int nor_main(int argc, char *argv)
    */
 
   cp15_disable_mmu();
-  cp15_disable_caches();
+  up_disable_icache();
+  up_disable_dcache();
 
   /* Invalidate caches and TLBs */
 

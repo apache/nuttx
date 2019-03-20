@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7/arm_addrenv.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,9 +116,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/cache.h>
 
 #include "pgalloc.h"
 #include "mmu.h"
+#include "cp15_cacheops.h"
 #include "addrenv.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
