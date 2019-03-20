@@ -74,16 +74,14 @@
  * Private Types
  ****************************************************************************/
 
-/* REVISIT:  This naming breaks the NuttX coding standard, but is consistent
- * with legacy naming of other ELF32 types.
- */
-
-typedef struct
+struct elf32_symcache_s
 {
-  dq_entry_t      entry;
-  Elf32_Sym       sym;
-  int             idx;
-} Elf32_SymCache;
+  dq_entry_t    entry;
+  Elf32_Sym     sym;
+  int           idx;
+};
+
+typedef struct elf32_symcache_s elf32_symcache_t;
 
 /****************************************************************************
  * Private Data
@@ -148,19 +146,19 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
                         FAR const struct symtab_s *exports, int nexports)
 
 {
-  FAR Elf32_Shdr     *relsec = &loadinfo->shdr[relidx];
-  FAR Elf32_Shdr     *dstsec = &loadinfo->shdr[relsec->sh_info];
-  FAR Elf32_Rel      *rels;
-  FAR Elf32_Rel      *rel;
-  FAR Elf32_SymCache *cache;
-  FAR Elf32_Sym      *sym;
-  FAR dq_entry_t     *e;
-  dq_queue_t          q;
-  uintptr_t           addr;
-  int                 symidx;
-  int                 ret;
-  int                 i;
-  int                 j;
+  FAR Elf32_Shdr       *relsec = &loadinfo->shdr[relidx];
+  FAR Elf32_Shdr       *dstsec = &loadinfo->shdr[relsec->sh_info];
+  FAR Elf32_Rel        *rels;
+  FAR Elf32_Rel        *rel;
+  FAR elf32_symcache_t *cache;
+  FAR Elf32_Sym        *sym;
+  FAR dq_entry_t       *e;
+  dq_queue_t            q;
+  uintptr_t             addr;
+  int                   symidx;
+  int                   ret;
+  int                   i;
+  int                   j;
 
   rels = kmm_malloc(CONFIG_ELF_RELOCATION_BUFFERCOUNT * sizeof(Elf32_Rel));
   if (rels == NULL)
@@ -207,7 +205,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       sym = NULL;
       for (e = dq_peek(&q); e; e = dq_next(e))
         {
-          cache = (FAR Elf32_SymCache *)e;
+          cache = (FAR elf32_symcache_t *)e;
           if (cache->idx == symidx)
             {
               dq_rem(&cache->entry, &q);
@@ -225,7 +223,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
         {
           if (j < CONFIG_ELF_SYMBOL_CACHECOUNT)
             {
-              cache = kmm_malloc(sizeof(Elf32_SymCache));
+              cache = kmm_malloc(sizeof(elf32_symcache_t));
               if (!cache)
                 {
                   berr("Failed to allocate memory for elf symbols\n");
@@ -237,7 +235,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
             }
           else
             {
-              cache = (FAR Elf32_SymCache *)dq_remlast(&q);
+              cache = (FAR elf32_symcache_t *)dq_remlast(&q);
             }
 
           sym = &cache->sym;
