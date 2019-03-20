@@ -2054,28 +2054,6 @@ void sched_alarm_expiration(FAR const struct timespec *ts);
 #endif
 
 /****************************************************************************
- * Name: sched_process_cpuload
- *
- * Description:
- *   Collect data that can be used for CPU load measurements.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   This function is called from a timer interrupt handler with all
- *   interrupts disabled.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-void weak_function sched_process_cpuload(void);
-#endif
-
-/****************************************************************************
  * Name: irq_dispatch
  *
  * Description:

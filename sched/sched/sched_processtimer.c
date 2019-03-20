@@ -210,10 +210,10 @@ void sched_process_timer(void)
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (sched_process_cpuload != NULL)
+  if (nxsched_process_cpuload != NULL)
 #endif
     {
-      sched_process_cpuload();
+      nxsched_process_cpuload();
     }
 #endif
 
