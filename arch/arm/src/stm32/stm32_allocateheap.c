@@ -260,7 +260,7 @@
        /* Only one memory region.  Force Configuration 1 */
 
 #      ifndef CONFIG_STM32_CCMEXCLUDE
-#        if CONFIG_STM32_HAVE_CCM
+#        ifdef CONFIG_STM32_HAVE_CCM
 #          warning "CCM SRAM excluded from the heap"
 #        endif
 #        define CONFIG_STM32_CCMEXCLUDE 1
@@ -476,7 +476,7 @@
 #    endif
 
 #    if CONFIG_MM_REGIONS < 2
-#      if CONFIG_STM32_HAVE_CCM
+#      ifdef CONFIG_STM32_HAVE_CCM
 #        error "CCM SRAM excluded from the heap because CONFIG_MM_REGIONS < 2"
 #      endif
 #      undef CONFIG_STM32_CCMEXCLUDE
