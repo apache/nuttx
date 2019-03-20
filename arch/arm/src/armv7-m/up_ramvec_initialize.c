@@ -66,17 +66,17 @@
 
 #ifndef NVIC_VECTAB_TBLOFF_MASK
 #  if ARMV7M_VECTAB_SIZE > 512
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffff000)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff000)
 #  elif ARMV7M_VECTAB_SIZE > 256
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffff800)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff800)
 #  elif ARMV7M_VECTAB_SIZE > 128
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffc00)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffc00)
 #  elif ARMV7M_VECTAB_SIZE > 64
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffe00)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffe00)
 #  elif ARMV7M_VECTAB_SIZE > 32
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff00)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff00)
 #  else
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff80)
+#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff80)
 #  endif
 #endif
 
