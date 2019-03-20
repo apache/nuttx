@@ -63,7 +63,7 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "barrier.h"
+#include "barriers.h"
 
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
