@@ -118,15 +118,15 @@
 
 #ifdef CONFIG_STM32F7_QSPI_DMA
 
-#ifdef DMAMAP_QUADSPI
+#  ifdef DMAMAP_QUADSPI
 
 /* QSPI DMA Channel/Stream selection.  There
  * are multiple DMA stream options that must be dis-ambiguated in the board.h
  * file.
  */
 
-#  define DMACHAN_QUADSPI           DMAMAP_QUADSPI
-#endif
+#    define DMACHAN_QUADSPI           DMAMAP_QUADSPI
+#  endif
 
 #  if defined(CONFIG_STM32F7_QSPI_DMAPRIORITY_LOW)
 #    define QSPI_DMA_PRIO  DMA_CCR_PRILO
@@ -140,7 +140,7 @@
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
 #  endif
 
-#endif //CONFIG_STM32F7_QSPI_DMA
+#endif /* CONFIG_STM32F7_QSPI_DMA */
 
 #ifndef STM32_SYSCLK_FREQUENCY
 #  error your board.h needs to define the value of STM32_SYSCLK_FREQUENCY
@@ -294,12 +294,6 @@ static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
 /* DMA support */
 
 #ifdef CONFIG_STM32F7_QSPI_DMA
-
-#  if defined(CONFIG_QSPI_DMAPRIO)
-#    define QSPI_DMA_PRIO  CONFIG_QSPI_DMAPRIO
-#  else
-#    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
-#  endif
 
 #  ifdef CONFIG_STM32F7_QSPI_DMADEBUG
 #    define qspi_dma_sample(s,i) stm32f7_dmasample((s)->dmach, &(s)->dmaregs[i])
@@ -1426,7 +1420,8 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
       dmaflags = (QSPI_DMA_PRIO | DMA_SCR_MSIZE_8BITS |
                   DMA_SCR_PSIZE_8BITS | DMA_SCR_MINC | DMA_SCR_DIR_M2P);
 
-      up_clean_dcache(meminfo->buffer, meminfo->buffer + meminfo->buflen);
+      up_clean_dcache((uintptr_t)meminfo->buffer,
+                      (uintptr_t)meminfo->buffer + meminfo->buflen);
     }
   else
     {
@@ -1484,8 +1479,8 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
 
       if (QSPIMEM_ISREAD(meminfo->flags))
         {
-          up_invalidate_dcache(meminfo->buffer,
-                               meminfo->buffer + meminfo->buflen);
+          up_invalidate_dcache((uintptr_t)meminfo->buffer,
+                               (uintptr_t)meminfo->buffer + meminfo->buflen);
         }
 
       /* Cancel the watchdog timeout */
