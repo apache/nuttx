@@ -174,7 +174,7 @@ CHIP_CSRCS += stm32_otghost.c
 endif
 
 ifeq ($(CONFIG_STM32F7_TIM),y)
-CHIP_CSRCS += stm32_tim.c
+CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_STM32F7_ADC),y)

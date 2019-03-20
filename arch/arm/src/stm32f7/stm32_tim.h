@@ -163,13 +163,16 @@ struct stm32_tim_ops_s
 
   /* General and Advanced Timers Adds */
 
-  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode);
-  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint32_t compare);
+  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                     stm32_tim_channel_t mode);
+  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                     uint32_t compare);
   int  (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void *arg, int source);
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void *arg,
+                 int source);
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
@@ -195,8 +198,9 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
  *   register the timer drivers at 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the timer device. This should be of the form /dev/timer0
- *   timer - the timer number.
+ *   devpath - The full path to the timer device. This should be of the
+ *             form /dev/timer0
+ *   timer   - the timer number.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -205,7 +209,8 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32_timer_initialize(FAR const char *devpath, int timer);
+FAR struct timer_lowerhalf_s* stm32_timer_initialize(FAR const char *devpath,
+                                                     int timer);
 #endif
 
 #undef EXTERN
