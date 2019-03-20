@@ -102,11 +102,11 @@ endif
 
 ifeq ($(CONFIG_ARCH_CORTEXA5),y)
 ARCHCPUFLAGS += -mcpu=cortex-a5
-elif ($(CONFIG_ARCH_CORTEXA7),y)
+else ifeq ($(CONFIG_ARCH_CORTEXA7),y)
 ARCHCPUFLAGS += -mcpu=cortex-a7
-elif ($(CONFIG_ARCH_CORTEXA8),y)
+else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
 ARCHCPUFLAGS += -mcpu=cortex-a8
-elif ($(CONFIG_ARCH_CORTEXA9),y)
+else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
 ARCHCPUFLAGS += -mcpu=cortex-a9
 endif
 
