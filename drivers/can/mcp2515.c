@@ -2570,7 +2570,7 @@ FAR struct can_dev_s *mcp2515_initialize(FAR struct mcp2515_can_s *mcp2515can)
 
   /* Allocate a CAN Device structure */
 
-  dev = (FAR struct can_dev_s *)kmm_malloc(sizeof(struct can_dev_s));
+  dev = (FAR struct can_dev_s *)kmm_zalloc(sizeof(struct can_dev_s));
   if (dev == NULL)
     {
       canerr("ERROR: Failed to allocate instance of can_dev_s!\n");
