@@ -19,6 +19,11 @@ config EE25XX_SPIMODE
 	default 0
 	depends on SPI_EE_25XX
 
+config EE25XX_FREQUENCY
+	int "SPI EEPROM SCK frequency"
+	default 10000000
+	depends on SPI_EE_25XX
+
 endif # SPI_EE_25XX
 
 config I2C_EE_24XX
