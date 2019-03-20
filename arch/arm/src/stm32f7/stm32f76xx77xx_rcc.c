@@ -496,6 +496,13 @@ static inline void rcc_enableapb1(void)
   regval |= (RCC_APB1ENR_CAN1EN | RCC_APB1ENR_CAN2EN);
 #endif
 
+#ifdef CONFIG_STM32F7_CAN3
+  /* CAN3 clock enable. */
+
+  regval |= (RCC_APB1ENR_CAN3EN);
+#endif
+
+
 #ifdef CONFIG_STM32F7_CEC
   /* CEC clock enable. */
 

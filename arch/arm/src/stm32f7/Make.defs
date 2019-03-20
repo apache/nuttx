@@ -214,3 +214,7 @@ endif
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
+
+ifeq ($(CONFIG_STM32F7_CAN),y)
+CHIP_CSRCS += stm32_can.c
+endif
