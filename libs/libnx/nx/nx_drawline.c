@@ -80,7 +80,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
   int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!hwnd || !vector || width < 1 || !color)
+  if (hwnd == NULL || vector == NULL || width < 1 || color == NULL)
     {
       set_errno(EINVAL);
       return ERROR;

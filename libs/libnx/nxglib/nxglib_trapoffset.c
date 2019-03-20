@@ -60,4 +60,3 @@ void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
   nxgl_runoffset(&dest->top, &src->top, dx, dy);
   nxgl_runoffset(&dest->bot, &src->bot, dx, dy);
 }
-

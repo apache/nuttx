@@ -285,9 +285,10 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   struct nxgl_rect_s remaining;
+  struct nxgl_rect_s absclip;
   struct nxgl_trapezoid_s devtrap;
 
-  DEBUGASSERT(wnd != NULL && trap != NULL);
+  DEBUGASSERT(wnd != NULL && clip != NULL && trap != NULL);
 
   /* Offset the trapezoid by the window origin to position it within
    * the device graphics coordinate system.
@@ -304,12 +305,8 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
 
   /* Clip to any user specified clipping window */
 
-  if (clip != NULL)
-    {
-      struct nxgl_rect_s tmp;
-      nxgl_rectoffset(&tmp, clip, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
-      nxgl_rectintersect(&remaining, &remaining, &tmp);
-    }
+  nxgl_rectoffset(&absclip, clip, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
+  nxgl_rectintersect(&remaining, &remaining, &absclip);
 
   /* Clip to the limits of the window and of the background screen */
 

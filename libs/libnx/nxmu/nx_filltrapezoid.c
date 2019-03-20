@@ -77,10 +77,10 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
   struct nxsvrmsg_filltrapezoid_s outmsg;
   int i;
 
+#ifdef CONFIG_DEBUG_FEATURES
   /* Some debug-only sanity checks */
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !trap || !color)
+  if (wnd == NULL || trap == NULL || color == NULL)
     {
       set_errno(EINVAL);
       return ERROR;
@@ -94,13 +94,22 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 
   /* If no clipping window was provided, then use the size of the entire window */
 
-  if (clip)
+  if (clip != NULL)
     {
       nxgl_rectcopy(&outmsg.clip, clip);
     }
   else
     {
-      nxgl_rectcopy(&outmsg.clip, &wnd->bounds);
+      struct nxgl_rect_s tmpclip;
+
+      /* Convert the window bounds to window relative coordinates */
+
+      nxgl_rectoffset(&tmpclip, &wnd->bounds,
+                     -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
+
+      /* And use that for the clipping winding */
+
+      nxgl_rectcopy(&outmsg.clip, &tmpclip);
     }
 
   /* Copy the trapezod and the color into the message */
