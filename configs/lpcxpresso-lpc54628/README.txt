@@ -497,5 +497,14 @@ Configurations
     raised when it hits the edge (gets "focus").  This tests all
     combinations of overap.
 
+      2019-03-19:  Everything works fine!
 
-      2019-03-19:  Every works fine!
+  pwlines:
+
+    This configuration uses the test at apps/examples/pwline.  It is another
+    verification of the operation of the per-window framebuffers.  This
+    examples is very similar to the pwfb example used in pwfb configuration
+    except that instead of text, each window has an (trivial) animated
+    graphic (based on the rotating line of apps/examples/nslines).
+
+      2019-03-20:  Everything works fine!
