@@ -185,6 +185,10 @@ ifeq ($(CONFIG_STM32F7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_STM32F7_QUADSPI),y)
+CHIP_CSRCS += stm32_qspi.c
+endif
+
 ifeq ($(CONFIG_STM32F7_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32_exti_alarm.c
