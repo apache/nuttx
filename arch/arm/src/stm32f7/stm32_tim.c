@@ -712,6 +712,11 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
         ccer_val |= ATIM_CCER_CC1E << (channel << 2);
         break;
 
+      case STM32_TIM_CH_OUTTOGGLE:
+          ccmr_val  =  (ATIM_CCMR_MODE_OCREFTOG << ATIM_CCMR1_OC1M_SHIFT) + ATIM_CCMR1_OC1PE;
+          ccer_val |= ATIM_CCER_CC1E << (channel << 2);
+          break;
+
       default:
         return -EINVAL;
     }
