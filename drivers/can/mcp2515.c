@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/can/mcp2515.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -65,6 +65,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* MCP2515 Configuration ****************************************************/
 
 /* Bit timing */
@@ -143,6 +144,7 @@
 #endif
 
 /* Interrupts ***************************************************************/
+
 /* Interrupts Errors
  *
  *   MCP2515_INT_MERR  - Message Error Interrupt Flag bit
@@ -169,6 +171,7 @@
 #define MCP2515_TXBUFFER_INTS  (MCP2515_INT_TX0 | MCP2515_INT_TX1 | MCP2515_INT_TX2)
 
 /* Debug ********************************************************************/
+
 /* Debug configurations that may be enabled just for testing MCP2515 */
 
 #ifndef CONFIG_DEBUG_CAN_INFO
@@ -233,7 +236,8 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
               uint8_t mask, uint8_t value);
 #ifdef CONFIG_MCP2515_REGDEBUG
-static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv, FAR const char *msg);
+static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
+              FAR const char *msg);
 #else
 #  define mcp2515_dumpregs(priv,msg)
 #endif
@@ -264,7 +268,8 @@ static void mcp2515_txint(FAR struct can_dev_s *dev, bool enable);
 static int  mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
               unsigned long arg);
 static int  mcp2515_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
+static int  mcp2515_send(FAR struct can_dev_s *dev,
+              FAR struct can_msg_s *msg);
 static bool mcp2515_txready(FAR struct can_dev_s *dev);
 static bool mcp2515_txempty(FAR struct can_dev_s *dev);
 
@@ -382,7 +387,7 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   for (i = 0; i < len; i++)
     {
-      caninfo("%02x<-%02x\n", regaddr+i, buffer[i]);
+      caninfo("%02x<-%02x\n", regaddr + i, buffer[i]);
     }
 #endif
 
@@ -477,7 +482,8 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_MCP2515_REGDEBUG
-static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv, FAR const char *msg)
+static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
+                             FAR const char *msg)
 {
   FAR struct mcp2515_config_s *config = priv->config;
 }
@@ -564,9 +570,9 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
           /* Format and write filter */
 
-          DEBUGASSERT(extconfig->sf_id1 <= CAN_MAX_STDMSGID);
+          DEBUGASSERT(extconfig->xf_id1 <= CAN_MAX_STDMSGID);
 
-          DEBUGASSERT(extconfig->sf_id2 <= CAN_MAX_STDMSGID);
+          DEBUGASSERT(extconfig->xf_id2 <= CAN_MAX_STDMSGID);
 
           /* We can reach all RXFn registers (RXFnSIDH, RXFnSIDL,
            * RXFnEID8 and RXFnEID0) using this formula:
@@ -589,7 +595,8 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
            * but to separate these messages we will make this
            * driver more complex. So let to consider that the
            * first 2 IDs inserted in the filter will have more
-           * priority than the latest 4 IDs*/
+           * priority than the latest 4 IDs.
+           */
 
           if (extconfig->sf_prio == CAN_MSGPRIO_LOW)
             {
@@ -613,7 +620,8 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
                 break;
 
               case CAN_FILTER_RANGE:
-                /* not supported */
+                /* Not supported */
+
                 break;
             }
 
@@ -631,29 +639,30 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
               /* EID0 - EID7 */
 
-              regval = (uint8_t) (extconfig->xf_id1 & 0xff);
+              regval = (uint8_t)(extconfig->xf_id1 & 0xff);
               mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* EID8 - EID15 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0xff00) >> 8);
+              regval = (uint8_t)((extconfig->xf_id1 & 0xff00) >> 8);
               mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* EID16 - EID17 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0x30000) >> 16);
+              regval = (uint8_t)((extconfig->xf_id1 & 0x30000) >> 16);
 
-              /* STD0 - STD2*/
+              /* STD0 - STD2 */
 
-              regval = (regval) | (uint8_t) (((extconfig->xf_id1 & 0x1C0000) >> 16) << 3);
+              regval = (regval) |
+                       (uint8_t)(((extconfig->xf_id1 & 0x1c0000) >> 16) << 3);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* STD3 - STD10 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0x1fe00000 ) >> 21);
+              regval = (uint8_t)((extconfig->xf_id1 & 0x1fe00000) >> 21);
               regval |= RXFSIDL_EXIDE;
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
@@ -662,26 +671,27 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
               /* EID0 - EID7 */
 
-              regval = (uint8_t) (extconfig->xf_id2 & 0xff);
+              regval = (uint8_t)(extconfig->xf_id2 & 0xff);
               mcp2515_writeregs(priv, MCP2515_RXM0EID0 + offset, &regval, 1);
 
               /* EID8 - EID15 */
 
-              regval = (uint8_t) ((extconfig->xf_id2 & 0xff00) >> 8);
+              regval = (uint8_t)((extconfig->xf_id2 & 0xff00) >> 8);
               mcp2515_writeregs(priv, MCP2515_RXM0EID8 + offset, &regval, 1);
 
               /* EID16 - EID17 */
 
-              regval = (uint8_t) ((extconfig->xf_id2 & 0x30000) >> 16);
+              regval = (uint8_t)((extconfig->xf_id2 & 0x30000) >> 16);
 
-              /* STD0 - STD2*/
+              /* STD0 - STD2 */
 
-              regval = (regval) | (uint8_t) (((extconfig->xf_id2 & 0x1c0000) >> 16) << 3);
+              regval = (regval) |
+                       (uint8_t)(((extconfig->xf_id2 & 0x1c0000) >> 16) << 3);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
 
               /* STD3 - STD10 */
 
-              regval = (uint8_t) ((extconfig->xf_id2 & 0x1fe00000 ) >> 21);
+              regval = (uint8_t)((extconfig->xf_id2 & 0x1fe00000) >> 21);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
             }
           else
@@ -692,25 +702,25 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
               /* EID0 - EID7 */
 
-              regval = (uint8_t) (extconfig->xf_id1 & 0xff);
+              regval = (uint8_t)(extconfig->xf_id1 & 0xff);
               mcp2515_writeregs(priv, MCP2515_RXF0EID0 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0EID0 + offset, &regval, 1);
 
               /* EID8 - EID15 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0xff00) >> 8);
+              regval = (uint8_t)((extconfig->xf_id1 & 0xff00) >> 8);
               mcp2515_writeregs(priv, MCP2515_RXF0EID8 + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0EID8 + offset, &regval, 1);
 
               /* EID16 - EID17 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0x30000) >> 16);
+              regval = (uint8_t)((extconfig->xf_id1 & 0x30000) >> 16);
 
               /* STD0 - STD2 */
 
-              regval = (regval) | (uint8_t) (((extconfig->xf_id1 &
+              regval = (regval) | (uint8_t)(((extconfig->xf_id1 &
                                 0x1c0000) >> 16) << 3) | RXFSIDL_EXIDE;
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
@@ -718,7 +728,7 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
 
               /* STD3 - STD10 */
 
-              regval = (uint8_t) ((extconfig->xf_id1 & 0x1fe00000 ) >> 21);
+              regval = (uint8_t)((extconfig->xf_id1 & 0x1fe00000) >> 21);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset, &regval, 1);
@@ -735,7 +745,6 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
         }
     }
 
-  DEBUGASSERT(priv->nstdalloc == priv->config->nstdfilters);
   mcp2515_dev_unlock(priv);
   return -EAGAIN;
 }
@@ -749,7 +758,8 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
  *
  * Input Parameters:
  *   priv - An instance of the MCP2515 driver state structure.
- *   ndx  - The filter index previously returned by the mcp2515_add_extfilter().
+ *   ndx  - The filter index previously returned by the
+ *          mcp2515_add_extfilter().
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
@@ -913,7 +923,8 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
            * but to separate these messages we will make this
            * driver more complex. So let to consider that the
            * first 2 IDs inserted in the filter will have more
-           * priority than the latest 4 IDs*/
+           * priority than the latest 4 IDs.
+           */
 
           if (stdconfig->sf_prio == CAN_MSGPRIO_LOW)
             {
@@ -938,6 +949,7 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
 
               case CAN_FILTER_RANGE:
                 /* not supported */
+
                 break;
             }
 
@@ -953,20 +965,20 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
 
               /* Setup the Filter */
 
-              regval = (uint8_t) (((stdconfig->sf_id1) & 0x7f8) >> 3);
+              regval = (uint8_t)(((stdconfig->sf_id1) & 0x7f8) >> 3);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
-              regval = (uint8_t) ((stdconfig->sf_id1 & 0x07 ) << 5);
+              regval = (uint8_t)((stdconfig->sf_id1 & 0x07) << 5);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
               /* Setup the Mask */
 
-              regval = (uint8_t) (((stdconfig->sf_id2) & 0x7f8) >> 3);
+              regval = (uint8_t)(((stdconfig->sf_id2) & 0x7f8) >> 3);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDH + offset, &regval, 1);
 
-              regval = (uint8_t) ((stdconfig->sf_id2 & 0x07 ) << 5);
+              regval = (uint8_t)((stdconfig->sf_id2 & 0x07) << 5);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
             }
           else
@@ -975,12 +987,12 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
 
               /* Setup the Filter */
 
-              regval = (uint8_t) (((stdconfig->sf_id1) & 0x7f8) >> 3);
+              regval = (uint8_t)(((stdconfig->sf_id1) & 0x7f8) >> 3);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDH + offset, &regval, 1);
 
-              regval = (uint8_t) ((stdconfig->sf_id1 & 0x07 ) << 5);
+              regval = (uint8_t)((stdconfig->sf_id1 & 0x07) << 5);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
@@ -1007,7 +1019,6 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
         }
     }
 
-  DEBUGASSERT(priv->nstdalloc == priv->config->nstdfilters);
   mcp2515_dev_unlock(priv);
   return -EAGAIN;
 }
@@ -1020,7 +1031,8 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
  *
  * Input Parameters:
  *   priv - An instance of the MCP2515 driver state structure.
- *   ndx  - The filter index previously returned by the mcp2515_add_stdfilter().
+ *   ndx  - The filter index previously returned by the
+ *          mcp2515_add_stdfilter().
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
@@ -1194,10 +1206,10 @@ static void mcp2515_reset(FAR struct can_dev_s *dev)
  * Name: mcp2515_setup
  *
  * Description:
- *   Configure the MCP2515. This method is called the first time that the MCP2515
- *   device is opened.  This will occur when the device file is first opened.
- *   This setup includes configuring and attaching MCP2515 interrupts.
- *   All MCP2515 interrupts are disabled upon return.
+ *   Configure the MCP2515. This method is called the first time that the
+ *   MCP2515 device is opened.  This will occur when the device file is
+ *   first opened.  This setup includes configuring and attaching MCP2515
+ *   interrupts.  All MCP2515 interrupts are disabled upon return.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -1219,8 +1231,6 @@ static int mcp2515_setup(FAR struct can_dev_s *dev)
   config = priv->config;
   DEBUGASSERT(config);
 
-  //caninfo("MCP2515%d pid: %d\n", config->port, config->pid);
-
   /* Get exclusive access to the MCP2515 peripheral */
 
   mcp2515_dev_lock(priv);
@@ -1230,13 +1240,15 @@ static int mcp2515_setup(FAR struct can_dev_s *dev)
   ret = mcp2515_hw_initialize(priv);
   if (ret < 0)
     {
-      canerr("ERROR: MCP2515%d H/W initialization failed: %d\n", config->devid, ret);
+      canerr("ERROR: MCP2515%d H/W initialization failed: %d\n",
+            config->devid, ret);
       return ret;
     }
 
   /* Attach the MCP2515 interrupt handler. */
 
-  ret = config->attach(config, (mcp2515_handler_t)mcp2515_interrupt, (FAR void *)dev);
+  ret = config->attach(config, (mcp2515_handler_t)mcp2515_interrupt,
+                       (FAR void *)dev);
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach to IRQ Handler!\n");
@@ -1256,8 +1268,8 @@ static int mcp2515_setup(FAR struct can_dev_s *dev)
  * Name: mcp2515_shutdown
  *
  * Description:
- *   Disable the MCP2515.  This method is called when the MCP2515 device is closed.
- *   This method reverses the operation the setup method.
+ *   Disable the MCP2515.  This method is called when the MCP2515 device is
+ *   closed.  This method reverses the operation the setup method.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -1377,7 +1389,8 @@ static void mcp2515_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
+                         unsigned long arg)
 {
   FAR struct mcp2515_can_s *priv;
   int ret = -ENOTTY;
@@ -1394,11 +1407,11 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_GET_BITTIMING:
        *   Description:    Return the current bit timing settings
        *   Argument:       A pointer to a write-able instance of struct
-       *                   canioc_bittiming_s in which current bit timing values
-       *                   will be returned.
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *                   canioc_bittiming_s in which current bit timing
+       *                   values will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
        *   Dependencies:   None
        */
 
@@ -1431,18 +1444,18 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_SET_BITTIMING:
        *   Description:    Set new current bit timing values
        *   Argument:       A pointer to a read-able instance of struct
-       *                   canioc_bittiming_s in which the new bit timing values
-       *                   are provided.
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *                   canioc_bittiming_s in which the new bit timing
+       *                   values are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set to
+       *                   indicate the nature of the error.
        *   Dependencies:   None
        *
        * REVISIT: There is probably a limitation here:  If there are multiple
-       * threads trying to send CAN packets, when one of these threads reconfigures
-       * the bitrate, the MCP2515 hardware will be reset and the context of operation
-       * will be lost.  Hence, this IOCTL can only safely be executed in quiescent
-       * time periods.
+       * threads trying to send CAN packets, when one of these threads
+       * reconfigures the bitrate, the MCP2515 hardware will be reset and
+       * the context of operation will be lost.  Hence, this IOCTL can only
+       * safely be executed in quiescent time periods.
        */
 
       case CANIOC_SET_BITTIMING:
@@ -1501,22 +1514,27 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           /* Setup CNF1 register */
 
           mcp2515_readregs(priv, MCP2515_CNF1, &regval, 1);
-          regval = (regval & ~CNF1_BRP_MASK) | (brp << CNF1_BRP_SHIFT);
-          regval = (regval & ~CNF1_SJW_MASK) | ((sjw) << CNF1_SJW_SHIFT);
+          regval = (regval & ~CNF1_BRP_MASK) |
+                   (brp << CNF1_BRP_SHIFT);
+          regval = (regval & ~CNF1_SJW_MASK) |
+                   ((sjw) << CNF1_SJW_SHIFT);
           mcp2515_writeregs(priv, MCP2515_CNF1, &regval, 1);
 
           /* Setup CNF2 register */
 
           mcp2515_readregs(priv, MCP2515_CNF2, &regval, 1);
-          regval = (regval & ~CNF2_PRSEG_MASK) | ((prseg - 1) << CNF2_PRSEG_SHIFT);
-          regval = (regval & ~CNF2_PHSEG1_MASK) | (phseg1 << CNF2_PHSEG1_SHIFT);
+          regval = (regval & ~CNF2_PRSEG_MASK) |
+                   ((prseg - 1) << CNF2_PRSEG_SHIFT);
+          regval = (regval & ~CNF2_PHSEG1_MASK) |
+                   (phseg1 << CNF2_PHSEG1_SHIFT);
           regval = (regval | CNF2_SAM | CNF2_BTLMODE);
           mcp2515_writeregs(priv, MCP2515_CNF2, &regval, 1);
 
           /* Setup CNF3 register */
 
           mcp2515_readregs(priv, MCP2515_CNF3, &regval, 1);
-          regval = (regval & ~CNF3_PHSEG2_MASK) | (tseg2 << CNF3_PHSEG2_SHIFT);
+          regval = (regval & ~CNF3_PHSEG2_MASK) |
+                   (tseg2 << CNF3_PHSEG2_SHIFT);
           regval = (regval | CNF3_SOF);
           mcp2515_writeregs(priv, MCP2515_CNF3, &regval, 1);
 
@@ -1545,17 +1563,19 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       case CANIOC_ADD_EXTFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = mcp2515_add_extfilter(priv, (FAR struct canioc_extfilter_s *)arg);
+          ret = mcp2515_add_extfilter(priv,
+                                      (FAR struct canioc_extfilter_s *)arg);
         }
         break;
 
       /* CANIOC_DEL_EXTFILTER:
-       *   Description:    Remove an address filter for a standard 29 bit address.
+       *   Description:    Remove an address filter for a standard 29 bit
+       *                   address.
        *   Argument:       The filter index previously returned by the
        *                   CANIOC_ADD_EXTFILTER command
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set to
+       *                   indicate the nature of the error.
        */
 
       case CANIOC_DEL_EXTFILTER:
@@ -1580,17 +1600,19 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       case CANIOC_ADD_STDFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = mcp2515_add_stdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
+          ret = mcp2515_add_stdfilter(priv,
+                                      (FAR struct canioc_stdfilter_s *)arg);
         }
         break;
 
       /* CANIOC_DEL_STDFILTER:
-       *   Description:    Remove an address filter for a standard 11 bit address.
+       *   Description:    Remove an address filter for a standard 11 bit
+       *                   address.
        *   Argument:       The filter index previously returned by the
        *                   CANIOC_ADD_STDFILTER command
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set to
+       *                   indicate the nature of the error.
        */
 
       case CANIOC_DEL_STDFILTER:
@@ -1838,7 +1860,7 @@ static bool mcp2515_txready(FAR struct can_dev_s *dev)
    * REVISIT: Dedicated TX buffers are not used by this driver.
    */
 
-  DEBUGASSERT(config->ntxbuffers > 0);
+  DEBUGASSERT(priv->config->ntxbuffers > 0);
 
   /* Get exclusive access to the MCP2515 peripheral */
 
@@ -1910,7 +1932,7 @@ static bool mcp2515_txempty(FAR struct can_dev_s *dev)
    * REVISIT: Dedicated TX buffers are not used by this driver.
    */
 
-  DEBUGASSERT(config->ntxbuffers > 0);
+  DEBUGASSERT(priv->config->ntxbuffers > 0);
 
   /* Get exclusive access to the MCP2515 peripheral */
 
@@ -2115,7 +2137,6 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 #ifdef CONFIG_CAN_EXTID
   if ((regval & RXBSIDL_IDE) != 0)
     {
-
       /* Save the extended ID of the newly received message */
 
       /* EID7 - EID0 */
@@ -2213,7 +2234,8 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
  *
  ****************************************************************************/
 
-static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
+static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
+                             FAR void *arg)
 {
   FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
   FAR struct mcp2515_can_s *priv;
@@ -2285,7 +2307,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
 
               /* Clear TX0 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX0, ~MCP2515_INT_TX0);
+              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX0,
+                                ~MCP2515_INT_TX0);
             }
 
           if (pending & MCP2515_INT_TX1)
@@ -2294,7 +2317,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
 
               /* Clear TX1 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX1, ~MCP2515_INT_TX1);
+              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX1,
+                                ~MCP2515_INT_TX1);
             }
 
           if (pending & MCP2515_INT_TX2)
@@ -2303,7 +2327,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
 
               /* Clear TX2 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX2, ~MCP2515_INT_TX2);
+              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX2,
+                                ~MCP2515_INT_TX2);
             }
 
           handled = true;
@@ -2318,9 +2343,11 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
         }
       else if ((pending & priv->txints) != 0)
         {
+#if 0
           /* Clear unhandled TX events */
 
-          //mcp2515_putreg(priv, MCP2515_IR_OFFSET, priv->txints);
+          mcp2515_putreg(priv, MCP2515_IR_OFFSET, priv->txints);
+#endif
           handled = true;
         }
 
@@ -2339,7 +2366,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
 
               /* Clear RX0 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX0, ~MCP2515_INT_RX0);
+              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX0,
+                                ~MCP2515_INT_RX0);
             }
           else
             {
@@ -2349,7 +2377,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
 
                   /* Clear RX1 interrupt */
 
-                  mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX1, ~MCP2515_INT_RX1);
+                  mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX1,
+                                    ~MCP2515_INT_RX1);
                 }
             }
 
@@ -2370,7 +2399,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config, FAR void *arg)
  *   MCP2515 hardware initialization
  *
  * Input Parameters:
- *   priv - A pointer to the private data structure for this MCP2515 peripheral
+ *   priv - A pointer to the private data structure for this MCP2515
+ *          peripheral
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -2388,34 +2418,41 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
   /* Setup CNF1 register */
 
   mcp2515_readregs(priv, MCP2515_CNF1, &regval, 1);
-  regval = (regval & ~CNF1_BRP_MASK) | (MCP2515_BRP << CNF1_BRP_SHIFT);
-  regval = (regval & ~CNF1_SJW_MASK) | ((MCP2515_SJW - 1) << CNF1_SJW_SHIFT);
+  regval = (regval & ~CNF1_BRP_MASK) |
+           (MCP2515_BRP << CNF1_BRP_SHIFT);
+  regval = (regval & ~CNF1_SJW_MASK) |
+           ((MCP2515_SJW - 1) << CNF1_SJW_SHIFT);
   mcp2515_writeregs(priv, MCP2515_CNF1, &regval, 1);
 
   /* Setup CNF2 register */
 
   mcp2515_readregs(priv, MCP2515_CNF2, &regval, 1);
-  regval = (regval & ~CNF2_PRSEG_MASK) | ((MCP2515_PROPSEG - 1) << CNF2_PRSEG_SHIFT);
-  regval = (regval & ~CNF2_PHSEG1_MASK) | ((MCP2515_PHSEG1 - 1) << CNF2_PHSEG1_SHIFT);
+  regval = (regval & ~CNF2_PRSEG_MASK) |
+           ((MCP2515_PROPSEG - 1) << CNF2_PRSEG_SHIFT);
+  regval = (regval & ~CNF2_PHSEG1_MASK) |
+           ((MCP2515_PHSEG1 - 1) << CNF2_PHSEG1_SHIFT);
   regval = (regval | CNF2_SAM | CNF2_BTLMODE);
   mcp2515_writeregs(priv, MCP2515_CNF2, &regval, 1);
 
   /* Setup CNF3 register */
 
   mcp2515_readregs(priv, MCP2515_CNF3, &regval, 1);
-  regval = (regval & ~CNF3_PHSEG2_MASK) | ((MCP2515_PHSEG2 - 1) << CNF3_PHSEG2_SHIFT);
+  regval = (regval & ~CNF3_PHSEG2_MASK) |
+           ((MCP2515_PHSEG2 - 1) << CNF3_PHSEG2_SHIFT);
   regval = (regval | CNF3_SOF);
   mcp2515_writeregs(priv, MCP2515_CNF3, &regval, 1);
 
   /* Mask all messages to be received */
 
   mcp2515_readregs(priv, MCP2515_RXB0CTRL, &regval, 1);
-  regval = (regval & ~RXBCTRL_RXM_MASK) | (RXBCTRL_RXM_ALLVALID << RXBCTRL_RXM_SHIFT);
+  regval = (regval & ~RXBCTRL_RXM_MASK) |
+           (RXBCTRL_RXM_ALLVALID << RXBCTRL_RXM_SHIFT);
   regval = (regval | RXB0CTRL_BUKT); /* Enable Rollover from RXB0 to RXB1 */
   mcp2515_writeregs(priv, MCP2515_RXB0CTRL, &regval, 1);
 
   mcp2515_readregs(priv, MCP2515_RXB1CTRL, &regval, 1);
-  regval = (regval & ~RXBCTRL_RXM_MASK) | (RXBCTRL_RXM_ALLVALID << RXBCTRL_RXM_SHIFT);
+  regval = (regval & ~RXBCTRL_RXM_MASK) |
+           (RXBCTRL_RXM_ALLVALID << RXBCTRL_RXM_SHIFT);
   mcp2515_writeregs(priv, MCP2515_RXB1CTRL, &regval, 1);
 
   regval = 0x00;
@@ -2491,7 +2528,8 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
  *
  ****************************************************************************/
 
-FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *config)
+FAR struct mcp2515_can_s *
+  mcp2515_instantiate(FAR struct mcp2515_config_s *config)
 {
   FAR struct mcp2515_can_s *priv;
   uint8_t  canctrl;
@@ -2517,12 +2555,14 @@ FAR struct mcp2515_can_s *mcp2515_instantiate(FAR struct mcp2515_config_s *confi
   memset(priv, 0, sizeof(struct mcp2515_can_s));
   priv->config = config;
 
+#if 0
   /* Set the initial bit timing.  This might change subsequently
    * due to IOCTL command processing.
    */
 
-  //priv->btp    = config->btp;
-  //priv->fbtp   = config->fbtp;
+  priv->btp    = config->btp;
+  priv->fbtp   = config->fbtp;
+#endif
 
   /* Initialize semaphores */
 
