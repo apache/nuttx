@@ -56,13 +56,13 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
-#include "cache.h"
 
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
@@ -1426,7 +1426,7 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
       dmaflags = (QSPI_DMA_PRIO | DMA_SCR_MSIZE_8BITS |
                   DMA_SCR_PSIZE_8BITS | DMA_SCR_MINC | DMA_SCR_DIR_M2P);
 
-      arch_clean_dcache(meminfo->buffer, meminfo->buffer + meminfo->buflen);
+      up_clean_dcache(meminfo->buffer, meminfo->buffer + meminfo->buflen);
     }
   else
     {
@@ -1484,8 +1484,8 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
 
       if (QSPIMEM_ISREAD(meminfo->flags))
         {
-          arch_invalidate_dcache(meminfo->buffer,
-                                 meminfo->buffer + meminfo->buflen);
+          up_invalidate_dcache(meminfo->buffer,
+                               meminfo->buffer + meminfo->buflen);
         }
 
       /* Cancel the watchdog timeout */
