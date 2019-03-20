@@ -44,6 +44,7 @@
 
 #include <nuttx/pgalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/cache.h>
 
 #include "mmu.h"
 #include "pgalloc.h"
