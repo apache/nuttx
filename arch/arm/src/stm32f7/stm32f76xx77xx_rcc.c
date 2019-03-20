@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include "stm32_pwr.h"
+#include "stm32_dbgmcu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1007,6 +1008,18 @@ static void stm32_stdclockconfig(void)
 }
 #endif
 
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+static inline void rcc_itm_syslog(void)
+{
+  /* Enable SWO output */
+
+  modifyreg32(STM32_DBGMCU_CR, DBGMCU_CR_TRACEMODE_MASK,
+              DBGMCU_CR_ASYNCH | DBGMCU_CR_TRACEIOEN);
+}
+#else
+#  define rcc_itm_syslog()
+#endif
+
 /****************************************************************************
  * Name: rcc_enableperiphals
  ****************************************************************************/
@@ -1018,6 +1031,7 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb3();
   rcc_enableapb1();
   rcc_enableapb2();
+  rcc_itm_syslog();
 }
 
 /****************************************************************************
