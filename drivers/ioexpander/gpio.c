@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/ioexpander/gpio.c
  *
- *   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <signal.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/ioexpander/gpio.h>
@@ -62,6 +63,7 @@ static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
+static off_t   gpio_seek(FAR struct file *filep, off_t offset, int whence);
 static int     gpio_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
 
@@ -75,7 +77,7 @@ static const struct file_operations g_gpio_drvrops =
   gpio_close, /* close */
   gpio_read,  /* read */
   gpio_write, /* write */
-  NULL,       /* seek */
+  gpio_seek,  /* seek */
   gpio_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , NULL      /* poll */
@@ -129,6 +131,7 @@ static int gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin)
 
 static int gpio_open(FAR struct file *filep)
 {
+  filep->f_pos = 0;
   return OK;
 }
 
@@ -156,7 +159,47 @@ static int gpio_close(FAR struct file *filep)
 static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen)
 {
-  return 0;
+  FAR struct inode *inode;
+  FAR struct gpio_dev_s *dev;
+  int ret;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  DEBUGASSERT(inode->i_private != NULL);
+  dev = inode->i_private;
+
+  DEBUGASSERT(buffer != NULL);
+  if (buflen == 0)
+    {
+      return 0;  /* Zero will be interpreted as the End-of-File. */
+    }
+
+  /* Check for End-of-File.
+   *
+   * REVISIT:  Returning End-of-File after one byte has been written permits
+   * you to cat or echo the GPIO.  This, however, is an un-natural use of a
+   * file position since there is no file position associated with a GPIO.
+   * It also makes the read() method difficult to use programmatically.
+   */
+
+  if (filep->f_pos > 0)
+    {
+      return 0;
+    }
+
+  /* Read the GPIO value */
+
+  ret = dev->gp_ops->go_read(dev, (FAR uint8_t *)&buffer[0]);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Convert the GPIO value to ASCII and increment the file position */
+
+  buffer[0]    += '0';
+  filep->f_pos  = 1;
+  return 1;
 }
 
 /****************************************************************************
@@ -165,12 +208,99 @@ static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
  * Description:
  *   Standard character driver write method.
  *
+ *   REVISIT:  The read() method obeys the semantics of a file position and
+ *   requires re-opening the driver or seeking to address 0.  The write()
+ *   method does not.  This is an inconsistency.
+ *
  ****************************************************************************/
 
 static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
-  return (ssize_t)buflen;
+  FAR struct inode *inode;
+  FAR struct gpio_dev_s *dev;
+  int ret;
+  bool val;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode = filep->f_inode;
+  DEBUGASSERT(inode->i_private != NULL);
+  dev = inode->i_private;
+
+  DEBUGASSERT(buffer != NULL);
+
+  /* Check if this pin is write-able */
+
+  if (dev->gp_pintype != GPIO_OUTPUT_PIN)
+    {
+      return -EACCES;
+    }
+
+  /* Verfy that a buffer containing data was provided */
+
+  DEBUGASSERT(buffer != NULL);
+  if (buflen != 0)
+    {
+      /* Only values '0' and '1' can be written */
+
+      if (buffer[0] == '0')
+        {
+          val = 0;
+        }
+      else if (buffer[0] == '1')
+        {
+          val = 1;
+        }
+
+      /* Write the GPIO value */
+
+      ret = dev->gp_ops->go_write(dev, val);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* One byte written */
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: gpio_seek
+ *
+ * Description:
+ *   Reset read flag on seek to 0
+ *
+ *   REVISIT:  Seeking address zero is required to return addition GPIO
+ *   values from read().  This, however, is an un-natural use of a file
+ *   position since there is no file position associated with a GPIO.  It
+ *   also makes the read() method difficult to use programmatically.
+ *
+ ****************************************************************************/
+
+static off_t gpio_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  /* Only SEEK_SET is supported, return ENOSYS for other valid options */
+
+  if (whence == SEEK_CUR || whence == SEEK_END)
+    {
+      return -ENOSYS;
+    }
+
+  /* Only Offset zero makes sense,  POSIX permits setting the file position
+   * beyond the end of the file, but that makes little sense here.
+   */
+
+  if (whence == SEEK_SET && offset == 0)
+    {
+      filep->f_pos = 0;
+      return 0;
+    }
+
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -189,7 +319,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   pid_t pid;
   int ret;
   int i;
-  int j;
+  int j = 0;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
@@ -238,7 +368,8 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case GPIOC_PINTYPE:
         {
-          FAR enum gpio_pintype_e *ptr = (FAR enum gpio_pintype_e *)((uintptr_t)arg);
+          FAR enum gpio_pintype_e *ptr =
+            (FAR enum gpio_pintype_e *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
           *ptr = dev->gp_pintype;
@@ -405,7 +536,8 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
   char devname[16];
   int ret;
 
-  DEBUGASSERT(dev != NULL && dev->gp_ops != NULL && (unsigned int)minor < 100);
+  DEBUGASSERT(dev != NULL && dev->gp_ops != NULL &&
+              (unsigned int)minor < 100);
 
   switch (dev->gp_pintype)
     {
@@ -421,7 +553,6 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
           DEBUGASSERT(dev->gp_ops->go_read != NULL &&
                      dev->gp_ops->go_write != NULL);
           fmt = "/dev/gpout%u";
-
         }
         break;
 
