@@ -141,7 +141,7 @@ static void nxsched_timer_start(unsigned int ticks);
 static struct timespec g_stop_time;
 #else
 /* This is the duration of the currently active timer or, when
- * sched_timer_expiration() is called, the duration of interval timer
+ * nxsched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
  */
 
@@ -533,7 +533,7 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
 #endif
 
 /****************************************************************************
- * Name: sched_timer_expiration
+ * Name: nxsched_timer_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -549,7 +549,7 @@ void sched_alarm_expiration(FAR const struct timespec *ts)
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
-void sched_timer_expiration(void)
+void nxsched_timer_expiration(void)
 {
   unsigned int elapsed;
   unsigned int nexttime;

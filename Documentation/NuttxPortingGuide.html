@@ -158,7 +158,7 @@
       <a href="#osstart">4.7.1 <code>nx_start()</code></a><br>
       <a href="#listmgmt">4.7.2 OS List Management APIs</a><br>
       <a href="#schedprocesstimer">4.7.3 <code>nxsched_process_timer()</code></a><br>
-      <a href="#schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a><br>
+      <a href="#schedtimerexpiration">4.7.4 <code>nxsched_timer_expiration()</code></a><br>
       <a href="#schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a><br>
       <a href="#irqdispatch">4.7.6 <code>irq_dispatch()</code></a>
     </ul>
@@ -2653,7 +2653,7 @@ config ARCH_SIM
     <a href="#schedalarmexpiration"><code>sched_alarm_expiration()</code></a>. Called by the platform-specific logic when the alarm expires.
   </li>
   <li>
-    <a href="#schedtimerexpiration"><code>sched_timer_expiration()</code></a>. Called by the platform-specific logic when the interval time expires.
+    <a href="#schedtimerexpiration"><code>nxsched_timer_expiration()</code></a>. Called by the platform-specific logic when the interval time expires.
   </li>
 </ul>
 
@@ -2711,7 +2711,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 int up_alarm_cancel(FAR struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Cancel the alarm and return the time of cancellation of the alarm. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the alarm is restarted with <code>up_alarm_start()</code>. If, as a race condition, the alarm has already expired when this function is called, then time returned is the current time.
+  Cancel the alarm and return the time of cancellation of the alarm. These two steps need to be as nearly atomic as possible. <code>nxsched_timer_expiration()</code> will not be called unless the alarm is restarted with <code>up_alarm_start()</code>. If, as a race condition, the alarm has already expired when this function is called, then time returned is the current time.
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2734,12 +2734,12 @@ int up_alarm_cancel(FAR struct timespec *ts);
 int up_alarm_start(FAR const struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alarm_cancel</code> is called to stop it).
+  Start the alarm. <code>nxsched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alarm_cancel</code> is called to stop it).
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>ts</code>: The time in the future at the alarm is expected to occur.  When the alarm occurs the timer logic will call <code>sched_timer_expiration()</code>.</li>
+  <li><code>ts</code>: The time in the future at the alarm is expected to occur.  When the alarm occurs the timer logic will call <code>nxsched_timer_expiration()</code>.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
@@ -2757,7 +2757,7 @@ int up_alarm_start(FAR const struct timespec *ts);
 int up_timer_cancel(FAR struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>sched_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
+  Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>nxsched_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>nxsched_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2780,12 +2780,12 @@ int up_timer_cancel(FAR struct timespec *ts);
 int up_timer_start(FAR const struct timespec *ts);
 </pre></ul>
 <p><b>Description</b>:</p>
-  Start the interval timer. <code>sched_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
+  Start the interval timer. <code>nxsched_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>ts</code>: Provides the time interval until <code>sched_timer_expiration()</code> is called.</li>
+  <li><code>ts</code>: Provides the time interval until <code>nxsched_timer_expiration()</code> is called.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
@@ -3960,11 +3960,11 @@ void nxsched_process_timer(void);
   <code>CONFIG_USEC_PER_TICK</code>.
 </p>
 
-<h3><a name="schedtimerexpiration">4.7.4 <code>sched_timer_expiration()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.7.4 <code>nxsched_timer_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
-void sched_timer_expiration(void);
+void nxsched_timer_expiration(void);
 </pre></ul>
 <p><b>Description</b>:</p>
   Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
@@ -3987,7 +3987,7 @@ void sched_timer_expiration(void);
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
-void sched_timer_expiration(void);
+void nxsched_timer_expiration(void);
 </ul>
 <p><b>Description</b>:</p>
   Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.

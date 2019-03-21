@@ -1434,7 +1434,7 @@ int up_prioritize_irq(int irq, int priority);
  *   void sched_alarm_expiration(FAR const struct timespec *ts):  Called
  *     by the platform-specific logic when the alarm expires.
  * #else
- *   void sched_timer_expiration(void):  Called by the platform-specific
+ *   void nxsched_timer_expiration(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  * #endif
  *
@@ -1554,7 +1554,7 @@ int up_alarm_start(FAR const struct timespec *ts);
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   sched_timer_expiration() will not be called unless the timer is
+ *   nxsched_timer_expiration() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -1592,14 +1592,14 @@ int up_timer_cancel(FAR struct timespec *ts);
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  sched_timer_expiration() will be called at
+ *   Start the interval timer.  nxsched_timer_expiration() will be called at
  *   the completion of the timeout (unless up_timer_cancel is called to stop
  *   the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until sched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_timer_expiration() is
  *        called.
  *
  * Returned Value:
@@ -2006,7 +2006,7 @@ void nxsched_process_timer(void);
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_expiration
+ * Name:  nxsched_timer_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -2026,7 +2026,7 @@ void nxsched_process_timer(void);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
-void sched_timer_expiration(void);
+void nxsched_timer_expiration(void);
 #endif
 
 /****************************************************************************

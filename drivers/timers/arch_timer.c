@@ -222,7 +222,7 @@ static bool timer_callback(FAR uint32_t *next_interval_us, FAR void *arg)
   g_timer.timebase     += *next_interval_us;
   next_interval         = g_timer.maxtimeout;
   g_timer.next_interval = &next_interval;
-  sched_timer_expiration();
+  nxsched_timer_expiration();
   g_timer.next_interval = NULL;
 
   TIMER_GETSTATUS(g_timer.lower, &status);
@@ -344,7 +344,7 @@ int up_timer_gettime(FAR struct timespec *ts)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   sched_timer_expiration() will not be called unless the timer is
+ *   nxsched_timer_expiration() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -393,14 +393,14 @@ int up_timer_cancel(FAR struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  sched_timer_expiration() will be called at
+ *   Start the interval timer.  nxsched_timer_expiration() will be called at
  *   the completion of the timeout (unless up_timer_cancel is called to stop
  *   the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until sched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_timer_expiration() is
  *        called.
  *
  * Returned Value:

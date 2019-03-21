@@ -530,7 +530,7 @@ static inline void lpc43_tl_alarm(uint32_t curr)
   up_timer_gettime(&ts);
   sched_alarm_expiration(&ts);
 #else
-  sched_timer_expiration();
+  nxsched_timer_expiration();
 #endif
 }
 

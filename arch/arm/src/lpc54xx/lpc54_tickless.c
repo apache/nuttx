@@ -560,7 +560,7 @@ static inline void lpc54_tl_alarm(uint64_t curr)
   up_timer_gettime(&ts);
   sched_alarm_expiration(&ts);
 #else
-  sched_timer_expiration();
+  nxsched_timer_expiration();
 #endif
 }
 
