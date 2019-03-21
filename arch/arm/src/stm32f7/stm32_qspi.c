@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_qspi.c
+ * arch/arm/src/stm32f7/stm32_qspi.c
  *
  *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: dev@ziggurat29.com
@@ -130,13 +130,13 @@
 #  endif
 
 #  if defined(CONFIG_STM32F7_QSPI_DMAPRIORITY_LOW)
-#    define QSPI_DMA_PRIO  DMA_CCR_PRILO
+#    define QSPI_DMA_PRIO  DMA_SCR_PRILO
 #  elif defined(CONFIG_STM32F7_QSPI_DMAPRIORITY_MEDIUM)
-#    define QSPI_DMA_PRIO  DMA_CCR_PRIMED
+#    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
 #  elif defined(CONFIG_STM32F7_QSPI_DMAPRIORITY_HIGH)
-#    define QSPI_DMA_PRIO  DMA_CCR_PRIHI
+#    define QSPI_DMA_PRIO  DMA_SCR_PRIHI
 #  elif defined(CONFIG_STM32F7_QSPI_DMAPRIORITY_VERYHIGH)
-#    define QSPI_DMA_PRIO  DMA_CCR_PRIVERYHI
+#    define QSPI_DMA_PRIO  DMA_SCR_PRIVERYHI
 #  else
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
 #  endif
