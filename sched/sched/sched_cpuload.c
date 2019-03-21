@@ -154,7 +154,10 @@ static inline void nxsched_cpu_process_cpuload(int cpu)
  * Name: nxsched_process_cpuload
  *
  * Description:
- *   Collect data that can be used for CPU load measurements.
+ *   Collect data that can be used for CPU load measurements.  When
+ *   CONFIG_SCHED_CPULOAD_EXTCLK is defined, this is an exported interface,
+ *   use the the external clock logic.  Otherwise, it is an OS Internal
+ *   interface.
  *
  * Input Parameters:
  *   None
