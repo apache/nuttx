@@ -93,7 +93,7 @@ static int max326_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
-  sched_process_timer();
+  nxsched_process_timer();
   return 0;
 }
 

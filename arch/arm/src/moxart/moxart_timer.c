@@ -112,7 +112,7 @@ static int moxart_timerisr(int irq, uint32_t *regs, void *arg)
 
   putreg32(cmp, TM1_ADDR + COUNTER_TIMER);
 
-  sched_process_timer();
+  nxsched_process_timer();
   return 0;
 }
 

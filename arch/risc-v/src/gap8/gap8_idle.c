@@ -67,7 +67,7 @@ void up_idle(void)
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
 #else
 
   /* GAP8 would sleep on software event #3, which would be triggered at

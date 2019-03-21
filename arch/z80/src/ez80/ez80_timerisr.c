@@ -76,7 +76,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 
   /* Process timer interrupt */
 
-  sched_process_timer();
+  nxsched_process_timer();
 
   /* Architecture specific hook into the timer interrupt handler */
 

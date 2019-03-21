@@ -103,7 +103,7 @@ int misoc_timer_isr(int irq, void *context, void *arg)
 
   /* Process timer interrupt */
 
-  sched_process_timer();
+  nxsched_process_timer();
   return 0;
 }
 

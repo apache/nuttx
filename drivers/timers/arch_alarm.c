@@ -176,7 +176,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
       static uint64_t tick = 1;
       struct timespec next;
 
-      sched_process_timer();
+      nxsched_process_timer();
       timespec_from_usec(&next, ++tick * USEC_PER_TICK);
       ONESHOT_CURRENT(g_oneshot_lower, &now);
       clock_timespec_subtract(&next, &now, &delta);

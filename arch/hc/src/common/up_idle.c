@@ -79,7 +79,7 @@ void up_idle(void)
    * will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
 #endif
 }
 

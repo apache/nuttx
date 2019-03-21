@@ -117,7 +117,7 @@ static void imx_output_compare(uint32_t sr, uint32_t of)
     {
       /* Process timer interrupt event */
 
-      sched_process_timer();
+      nxsched_process_timer();
     }
 }
 

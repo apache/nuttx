@@ -234,7 +234,7 @@ static bool timer_callback(FAR uint32_t *next_interval_us, FAR void *arg)
 
 #else
   g_timer.timebase += USEC_PER_TICK;
-  sched_process_timer();
+  nxsched_process_timer();
 #endif
 
   return true;

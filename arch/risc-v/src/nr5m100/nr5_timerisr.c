@@ -107,7 +107,7 @@ static int nr5m100_timerisr(int irq, void *context, FAR void *arg)
 {
   /* Process timer interrupt */
 
-  sched_process_timer();
+  nxsched_process_timer();
   return 0;
 }
 

@@ -142,7 +142,7 @@ static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
 
       /* Process one timer tick */
 
-      sched_process_timer();
+      nxsched_process_timer();
 
       /* Check if we are falling behind and need to process multiple timer
        * interrupts.

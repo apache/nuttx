@@ -84,7 +84,7 @@ static struct gap8_tim_instance fc_basic_timer =
 
 static int gap8_timisr(int irq, void *context, FAR void *arg)
 {
-  sched_process_timer();
+  nxsched_process_timer();
   return 0;
 }
 

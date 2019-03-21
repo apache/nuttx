@@ -143,7 +143,7 @@
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * the system timer is given by USEC_PER_TICK.  This is the expected number
  * of microseconds between calls from the processor-specific logic to
- * sched_process_timer().  The default value of USEC_PER_TICK is 10000
+ * nxsched_process_timer().  The default value of USEC_PER_TICK is 10000
  * microseconds (100KHz).  However, this default setting can be overridden
  * by defining the interval in microseconds as CONFIG_USEC_PER_TICK in the
  * NuttX configuration file.

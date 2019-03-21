@@ -92,7 +92,7 @@ void up_idle(void)
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
 #else
 
 /* If the g_dma_inprogress is zero, then there is no DMA in progress.  This

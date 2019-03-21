@@ -129,7 +129,7 @@ void up_idle(void)
    * Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
 #endif
 
 #if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_SIM_UART_DATAPOST)
@@ -167,7 +167,7 @@ void up_idle(void)
 #endif
 
 #if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-  /* Wait a bit so that the sched_process_timer() is called close to the
+  /* Wait a bit so that the nxsched_process_timer() is called close to the
    * correct rate.
    */
 

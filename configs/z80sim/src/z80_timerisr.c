@@ -63,7 +63,7 @@ int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
 {
    /* Process timer interrupt */
 
-   sched_process_timer();
+   nxsched_process_timer();
    return 0;
 }
 

@@ -68,7 +68,7 @@ void up_idle(void)
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
 #else
 
   /* This would be an appropriate place to put some MCU-specific logic to

@@ -724,7 +724,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  * Name: up_sched_have_garbage and up_sched_garbage_collection
  *
  * Description:
- *   Some architectures may soft unique memory allocators.  If
+ *   Some architectures may support unique memory allocators.  If
  *   CONFIG_ARCH_HAVE_GARBAGE is defined, those architectures must provide
  *   both up_sched_have_garbage and up_sched_garbage_collection.  These will
  *   be tied into the NuttX memory garbage collection logic.
@@ -1985,12 +1985,12 @@ void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
 
 /****************************************************************************
- * These are standard interfaces that are exported by the OS for use by the
+ * These are standard interfaces that are exported by the OS for use by thecd .
  * architecture specific logic
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_process_timer
+ * Name: nxsched_process_timer
  *
  * Description:
  *   This function handles system timer events (only when
@@ -2002,7 +2002,7 @@ void up_udelay(useconds_t microseconds);
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_TICKLESS
-void sched_process_timer(void);
+void nxsched_process_timer(void);
 #endif
 
 /****************************************************************************

@@ -103,7 +103,7 @@ static int sam_timerisr(int irq, uint32_t *regs, void *arg)
 
   while (picnt-- > 0)
     {
-      sched_process_timer();
+      nxsched_process_timer();
     }
 
   return OK;

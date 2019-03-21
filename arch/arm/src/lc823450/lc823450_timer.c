@@ -387,7 +387,7 @@ int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
   putreg32(1 << 1, rMT00STS);
 #endif
 
-  sched_process_timer();
+  nxsched_process_timer();
 
 #ifdef CONFIG_LCA_SOUNDSKIP_CHECK
   extern void lca_check_soundskip(void);
