@@ -54,7 +54,7 @@
  * Name:  stm32_dfumode
  *
  * Description:
- *   Reboot the part in DFU mode.
+ *   Reboot the part in DFU mode (GCC only).
  *
  *   https://community.st.com/s/question/0D50X00009XkhAzSAJ/calling-stm32429ieval-bootloader
  *
@@ -62,8 +62,10 @@
 
 void stm32_dfumode(void)
 {
+#ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
   sleep(1);
+#endif
 
   asm("ldr r0, =0x40023844\n\t"    /* RCC_APB2ENR */
       "ldr r1, =0x00004000\n\t"    /* Enable SYSCFG clock */
@@ -76,5 +78,5 @@ void stm32_dfumode(void)
       "ldr r0,[r0, #4]\n\t"        /* PC @ 4 */
       "bx r0\n");
 
-  __builtin_unreachable();       /* Tell compiler we will not return */
+  __builtin_unreachable();         /* Tell compiler we will not return */
 }
