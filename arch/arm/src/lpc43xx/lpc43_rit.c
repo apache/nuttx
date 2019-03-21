@@ -101,7 +101,7 @@ static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
 
       g_ts.tv_sec = (uint32_t)(internal_timer / 1000000000);
       g_ts.tv_nsec = (uint32_t)(internal_timer % 1000000000);
-      sched_alarm_expiration(&g_ts);
+      nxsched_alarm_expiration(&g_ts);
     }
 
   leave_critical_section(flags);

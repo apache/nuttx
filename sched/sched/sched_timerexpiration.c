@@ -465,7 +465,7 @@ static void nxsched_timer_start(unsigned int ticks)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_alarm_expiration
+ * Name:  nxsched_alarm_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -485,7 +485,7 @@ static void nxsched_timer_start(unsigned int ticks)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-void sched_alarm_expiration(FAR const struct timespec *ts)
+void nxsched_alarm_expiration(FAR const struct timespec *ts)
 {
   unsigned int elapsed;
   unsigned int nexttime;

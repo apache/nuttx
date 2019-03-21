@@ -159,7 +159,7 @@
       <a href="#listmgmt">4.7.2 OS List Management APIs</a><br>
       <a href="#schedprocesstimer">4.7.3 <code>nxsched_process_timer()</code></a><br>
       <a href="#schedtimerexpiration">4.7.4 <code>nxsched_timer_expiration()</code></a><br>
-      <a href="#schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a><br>
+      <a href="#schedalarmexpiration">4.7.5 <code>nxsched_alarm_expiration()</code></a><br>
       <a href="#irqdispatch">4.7.6 <code>irq_dispatch()</code></a>
     </ul>
     <a href="#internalOS">4.8 Application OS vs. Internal OS Interfaces</a><br>
@@ -2650,7 +2650,7 @@ config ARCH_SIM
 </p>
 <ul>
   <li>
-    <a href="#schedalarmexpiration"><code>sched_alarm_expiration()</code></a>. Called by the platform-specific logic when the alarm expires.
+    <a href="#schedalarmexpiration"><code>nxsched_alarm_expiration()</code></a>. Called by the platform-specific logic when the alarm expires.
   </li>
   <li>
     <a href="#schedtimerexpiration"><code>nxsched_timer_expiration()</code></a>. Called by the platform-specific logic when the interval time expires.
@@ -3983,7 +3983,7 @@ void nxsched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="schedalarmexpiration">4.7.5 <code>sched_alarm_expiration()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.7.5 <code>nxsched_alarm_expiration()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;

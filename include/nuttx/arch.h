@@ -1431,7 +1431,7 @@ int up_prioritize_irq(int irq, int priority);
  * specific interval timer implementation:
  *
  * #ifdef CONFIG_SCHED_TICKLESS_ALARM
- *   void sched_alarm_expiration(FAR const struct timespec *ts):  Called
+ *   void nxsched_alarm_expiration(FAR const struct timespec *ts):  Called
  *     by the platform-specific logic when the alarm expires.
  * #else
  *   void nxsched_timer_expiration(void):  Called by the platform-specific
@@ -1488,7 +1488,7 @@ void up_timer_getmask(FAR uint64_t *mask);
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   sched_alarm_expiration() will not be called unless the alarm is
+ *   nxsched_alarm_expiration() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -1524,14 +1524,14 @@ int up_alarm_cancel(FAR struct timespec *ts);
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  sched_alarm_expiration() will be called when the
+ *   Start the alarm.  nxsched_alarm_expiration() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
- *        the alarm occurs the timer logic will call sched_alarm_expiration().
+ *        the alarm occurs the timer logic will call nxsched_alarm_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -2030,7 +2030,7 @@ void nxsched_timer_expiration(void);
 #endif
 
 /****************************************************************************
- * Name:  sched_alarm_expiration
+ * Name:  nxsched_alarm_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -2050,7 +2050,7 @@ void nxsched_timer_expiration(void);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-void sched_alarm_expiration(FAR const struct timespec *ts);
+void nxsched_alarm_expiration(FAR const struct timespec *ts);
 #endif
 
 /****************************************************************************
