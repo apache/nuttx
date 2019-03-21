@@ -56,6 +56,8 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 void stm32_dfumode(void) noreturn_function;
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32_DFUMODE_H */
