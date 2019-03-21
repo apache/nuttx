@@ -58,6 +58,12 @@
  *
  *   https://community.st.com/s/question/0D50X00009XkhAzSAJ/calling-stm32429ieval-bootloader
  *
+ *  REVISIT:  STM32_SYSMEM_BASE is not 0x1fff000 for all STM32's.  Fof F3's
+ *  The SYSMEM base is at 0x1fffd800
+ *
+ *  REVISIT:  RCC_APB2ENR_SYSCFGEN is not bit bit 14 for all STM32's.  For
+ *  F3's and L15's, it is bit 0.
+ *
  ****************************************************************************/
 
 void stm32_dfumode(void)
