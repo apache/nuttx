@@ -100,9 +100,9 @@ static int stm32_oneshot_handler(int irg_num, void * context, void *arg)
    */
 
   STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32_TIM_DISABLEINT(oneshot->tch, ATIM_DIER_UIE);
+  STM32_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
-  STM32_TIM_ACKINT(oneshot->tch, ATIM_SR_UIF);
+  STM32_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
 
   /* The timer is no longer running */
 
@@ -326,8 +326,8 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
 
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_PULSE);
 
-  STM32_TIM_ACKINT(oneshot->tch, ATIM_SR_UIF);
-  STM32_TIM_ENABLEINT(oneshot->tch, ATIM_DIER_UIE);
+  STM32_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
+  STM32_TIM_ENABLEINT(oneshot->tch, GTIM_DIER_UIE);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -407,7 +407,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
 
   /* Now we can disable the interrupt and stop the timer. */
 
-  STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
   STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
   STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 

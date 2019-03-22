@@ -218,7 +218,7 @@ int highpri_main(int argc, char *argv[])
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
   up_enable_irq(STM32_IRQ_TIM6);
-  STM32_TIM_ENABLEINT(dev, ATIM_SR_UIF);
+  STM32_TIM_ENABLEINT(dev, ATIM_DIER_UIE);
 
   /* Monitor interrupts */
 

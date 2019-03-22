@@ -86,7 +86,7 @@ static int up_lcdextcominisr(int irq, void *context, void *arg)
   if (g_isr == NULL)
     {
       lcderr("ERROR: error, irq not attached, disabled\n");
-      STM32_TIM_DISABLEINT(tim, 0);
+      STM32_TIM_DISABLEINT(tim, ATIM_DIER_UIE);
       return OK;
     }
 
