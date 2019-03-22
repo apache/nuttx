@@ -342,7 +342,7 @@ static void stm32_timing_handler(void)
 {
   g_tickless.overflow++;
 
-  STM32_TIM_ACKINT(g_tickless.tch, 0);
+  STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
@@ -581,8 +581,8 @@ void arm_timer_initialize(void)
 
   /* Start the timer */
 
-  STM32_TIM_ACKINT(g_tickless.tch, 0);
-  STM32_TIM_ENABLEINT(g_tickless.tch, 0);
+  STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
+  STM32_TIM_ENABLEINT(g_tickless.tch, GTIM_DIER_UIE);
 }
 
 /****************************************************************************
@@ -651,7 +651,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   if (pending)
     {
-      STM32_TIM_ACKINT(g_tickless.tch, 0);
+      STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.

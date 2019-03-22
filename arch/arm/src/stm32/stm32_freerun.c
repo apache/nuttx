@@ -82,7 +82,7 @@ static int stm32_freerun_handler(int irq, void *context, void *arg)
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
 
-  STM32_TIM_ACKINT(freerun->tch, 0);
+  STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
   return OK;
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
@@ -161,8 +161,8 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
   STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_UP);
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-  STM32_TIM_ACKINT(freerun->tch, 0);
-  STM32_TIM_ENABLEINT(freerun->tch, 0);
+  STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
+  STM32_TIM_ENABLEINT(freerun->tch, GTIM_DIER_UIE);
 #endif
 
   return OK;
@@ -221,7 +221,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 
   if (pending)
     {
-      STM32_TIM_ACKINT(freerun->tch, 0);
+      STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.
@@ -298,7 +298,7 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
 
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  STM32_TIM_DISABLEINT(freerun->tch, 0);
+  STM32_TIM_DISABLEINT(freerun->tch, GTIM_DIER_UIE);
   STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_DISABLED);
   STM32_TIM_SETISR(freerun->tch, NULL, NULL, 0);
 
