@@ -251,6 +251,10 @@ static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
         {
           val = 1;
         }
+      else
+        {
+          return -EINVAL;
+        }
 
       /* Write the GPIO value */
 
