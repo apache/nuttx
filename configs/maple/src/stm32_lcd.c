@@ -118,12 +118,12 @@ static void up_lcddispcontrol(bool on)
   if (on)
     {
       stm32_gpiowrite(GPIO_MEMLCD_DISP, 1);
-      STM32_TIM_ENABLEINT(tim, ATIM_SR_UIF);
+      STM32_TIM_ENABLEINT(tim, ATIM_DIER_UIE);
     }
   else
     {
       stm32_gpiowrite(GPIO_MEMLCD_DISP, 0);
-      STM32_TIM_DISABLEINT(tim, ATIM_SR_UIF);
+      STM32_TIM_DISABLEINT(tim, ATIM_DIER_UIE);
     }
 }
 
