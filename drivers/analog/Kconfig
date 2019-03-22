@@ -90,7 +90,7 @@ config ADC_PGA11X
 	default n
 	select SPI
 	---help---
-		Enables support for the  PGA112, PGA113, PGA116, PGA117 Zerø-Drift
+		Enables support for the  PGA112, PGA113, PGA116, PGA117 Zero-Drift
 		PROGRAMMABLE GAIN AMPLIFIER with MUX
 
 if ADC_PGA11X
