@@ -663,7 +663,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 #ifdef CONFIG_STM32_TIM1_CHANNEL5
   {
     .channel = 5,
-    .mode    = CONFIG_STM32_TIM1_CH5MODE
+    .mode    = CONFIG_STM32_TIM1_CH5MODE,
 #ifdef CONFIG_STM32_TIM1_CH5OUT
     .out1 =
     {
@@ -678,7 +678,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 #ifdef CONFIG_STM32_TIM1_CHANNEL6
   {
     .channel = 6,
-    .mode    = CONFIG_STM32_TIM1_CH6MODE
+    .mode    = CONFIG_STM32_TIM1_CH6MODE,
 #ifdef CONFIG_STM32_TIM1_CH6OUT
     .out1 =
     {
@@ -1223,7 +1223,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 #ifdef CONFIG_STM32_TIM8_CHANNEL5
   {
     .channel = 5,
-    .mode    = CONFIG_STM32_TIM8_CH5MODE
+    .mode    = CONFIG_STM32_TIM8_CH5MODE,
 #ifdef CONFIG_STM32_TIM8_CH5OUT
     .out1 =
     {
@@ -1238,7 +1238,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 #ifdef CONFIG_STM32_TIM8_CHANNEL6
   {
     .channel = 6,
-    .mode    = CONFIG_STM32_TIM8_CH6MODE
+    .mode    = CONFIG_STM32_TIM8_CH6MODE,
 #ifdef CONFIG_STM32_TIM8_CH6OUT
     .out1 =
     {
