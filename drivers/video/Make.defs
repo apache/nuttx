@@ -51,6 +51,16 @@ endif
 
 endif
 
+# These video drivers depend on SPI support
+
+ifeq ($(CONFIG_SPI),y)
+
+ifeq ($(CONFIG_VIDEO_MAX7456),y)
+  CSRCS += max7456.c
+endif
+
+endif
+
 # Include video driver build support
 
 DEPPATH += --dep-path video
