@@ -2874,7 +2874,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
   /* Configure output polarity (all PWM timers) */
 
-  if (priv->channels[channel-1].out1.pol == STM32_POL_POS)
+  if (priv->channels[channel-1].out1.pol == STM32_POL_NEG)
     {
       ccer |= (GTIM_CCER_CC1P << ((channel-1)*4));
     }
@@ -2912,7 +2912,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
       /* Configure complementary output polarity */
 
-      if (priv->channels[channel-1].out2.pol == STM32_POL_POS)
+      if (priv->channels[channel-1].out2.pol == STM32_POL_NEG)
         {
           ccer |= (ATIM_CCER_CC1NP << ((channel-1)*4));
         }
