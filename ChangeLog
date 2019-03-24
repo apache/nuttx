@@ -23033,7 +23033,7 @@
 	  1 (which should be the file header).  From Gregory Nutt (2019-02-08).
 	* include/: Correct naming of standard header file.  Should be dlfcn.h,
 	  not dllfcn.h.  From Gregory Nutt (2019-02-09).
-	* configs/launchxl-cc1312r1:  Add support for on-board LEDs and buttons. 
+	* configs/launchxl-cc1312r1:  Add support for on-board LEDs and buttons.
 	  From Gregory Nutt (2019-02-10).
 	* configs/launchxl-cc1310:  Clone LED and button support from the
 	  launchxl-cc1312r1.  The number of LEDs and buttons as well as DIO usage
@@ -23102,7 +23102,7 @@
 	  should have unsigned type:
 	  http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/mqueue.h.html
 	  From Michał Łyszczek (2019-02-15).
-	* arch/arm/src/tiva/hardware:  Add CC13x0 and CC13x2 I2C header files. 
+	* arch/arm/src/tiva/hardware:  Add CC13x0 and CC13x2 I2C header files.
 	  From Gregory Nutt (2019-02-16).
 	* syscall/syscall.csv:  Change to mqueue function protothypes must be
 	  reflected in the KERNEL mode proxies as well.  From Gregory Nutt
@@ -23174,7 +23174,7 @@
 	* include/nuttx/elf.h: Adds missing extern "C" __cplusplus guard.  From
 	  Anthony Merlino (2019-02-19).
 	* libs/libc/stdio/lib_libvsprintf.c: Cleaned naming and allow for leading
-	  zeros in argument number (which doesn't make sense but should be). 
+	  zeros in argument number (which doesn't make sense but should be).
 	  From Johannes (2019-02-19).
 	* arch/arm/src/stm32f7/stm32_i2c.c:  Fix another memory access issue on a
 	  bus error.  From David Sidrane (2019-02-19).
@@ -23468,7 +23468,7 @@
 	  correct temp which will be used by RNG module 3. use general
 	  task_trigger / event_clear inline api for all driver.  From Levin Li
 	  (2019-03-13).
-	* include/nuttx/nx/nxmu.h:  Remove prototype of non-existent function. 
+	* include/nuttx/nx/nxmu.h:  Remove prototype of non-existent function.
 	  From Gregory Nutt (2019-03-13).
 	* This commit removes naming associated with and naming for the now
 	  non-existent NXFE graphics layer.
@@ -23507,7 +23507,7 @@
 	* configs/teensy-3.x/usbnsh/defconfig:  Fix a mismatch in types.  From
 	  Gregory Nutt (2019-03-14).
 	* graphics:  Extend NXBE data structures to include the per-window
-	  framebuffer (pwfb) vtable.  Add logic to initialize the pwfb vtable. 
+	  framebuffer (pwfb) vtable.  Add logic to initialize the pwfb vtable.
 	  From Gregory Nutt (2019-03-14).
 	* fs/procfs/fs_procfsuptime.c:  Fix procfs typo.  From Sebastien Lorquet
 	  (2019-03-14).
@@ -23544,14 +23544,14 @@
 	* Fix defconfigs.  A few people have been lazy or are perhaps ignorant of
 	  the procedures.  But the have been committing .config files as though
 	  they were defconfig files.  Wrong, wrong, wrong.  defconfig files are
-	  specially formatted files that you create through 'make defconfig'. 
+	  specially formatted files that you create through 'make defconfig'.
 	  From Gregory Nutt (2019-03-15).
 	* configs/open1788/nxlines/defconfig:  Enable anti-aliasing.  From
 	  Gregory Nutt (2019-03-15).
 	* configs/open1788/pwfb:  Add an example for testing per-window frame
 	  buffers.  arch/arm/src/lpc17xx:  Add a configuration option to skip
 	  over the framebuffer when adding DRAM to the heap.  graphics:  Early
-	  fixes from testing per-window framebuffer.  Still lots of problems. 
+	  fixes from testing per-window framebuffer.  Still lots of problems.
 	  From Gregory Nutt (2019-03-16).
 	* include/fixedmath.h:  Add macros for conversion between types b16_t and
 	  type double  From Gregory Nutt (2019-03-16).
@@ -23562,7 +23562,7 @@
 	  - graphics/:  Review use of device coordinate system with window
 	    frambebuffer and make fixes accordingly.
 	  - graphics/nxbe/nxbe_fill.c:  Fix a coordinate system bug.  Was trying
-	    to update the window fraembuffer using the device coordinate system. 
+	    to update the window fraembuffer using the device coordinate system.
 	    Need to use the relative coordinate system.
 	  - graphics/:  Use DEBUGASSERT instead of return an error since the is
 	    no user to handle the errors within the NX server.  Use
@@ -23587,7 +23587,7 @@
 	  loading fails  From Valmantas Palikša (2019-03-19).
 	* configs/lpcxpresso-lpc54628/pwfb:  Add per-window framebuffer
 	  configuration.  From Gregory Nutt (2019-03-19).
-	* fs/littlefs/lfs_vfs.c:  Lookahead should use bit unit not byte unit. 
+	* fs/littlefs/lfs_vfs.c:  Lookahead should use bit unit not byte unit.
 	  From Xiang Xiao (2019-03-19).
 	* libs/libc/string/lib_strsep.c:  Add strsep BSD/Linux function.  From
 	  Xiang Xiao (2019-03-19).
@@ -23599,7 +23599,7 @@
 	  filesystem access.  From anchao (2019-03-19).
 	* net/usrsock:  Add mutual exclusion so that only user can perform a
 	  socket request  From zhangyuan7 (2019-03-19).
-	* net/icmp and icmpv6:  Bind icmp callback from device to connection. 
+	* net/icmp and icmpv6:  Bind icmp callback from device to connection.
 	  Resolves the issue that bind() could not be called before send()  From
 	  anchao (2019-03-19).
 	* net/udp/udp_callback.c:  Initialize address structure to avoid random
@@ -23614,7 +23614,7 @@
 	  Xiao (2019-03-19).
 	* include/nuttx/compiler.h:  Assume inline support if __STDC_VERSION__
 	  not defined.  From Xiang Xiao (2019-03-19).
-	* libs/libxx/Makefile:  Always add libxx_cxa_guard.cxx for uclibcxx. 
+	* libs/libxx/Makefile:  Always add libxx_cxa_guard.cxx for uclibcxx.
 	  From zhangyuan7 (2019-03-19).
 	* ibs/libc/Makefile, libs/libnx/Makefile, and mm/Makefile:  Remove
 	  obj-path MKDEPS option since make dependency target (MT) is not
@@ -23630,7 +23630,7 @@
 	  base address of the new vector table must be aligned to the size of
 	  the vector table extended to the next larger power of 2.  From Xiang
 	  Xiao (2019-03-19).
-	* arch/arm/armv7-a:  Support thumb mode and fix interworking issue. 
+	* arch/arm/armv7-a:  Support thumb mode and fix interworking issue.
 	  From zhangyuan7 (2019-03-19).
 	* arch/arm/src/armv7-a:  Remove inclusion pg_macros.h for armv7-a since
 	  this header file does not exist.  From zhangyuan7 (2019-03-19).
@@ -23652,12 +23652,12 @@
 	  zhangyuan7 (2019-03-19).
 	* arch/arm:  The last big change that unified the cache interfaces had a
 	  bad side-effect:  It also removed the memory barrier definitions that
-	  were also in the removed architecture-specific cache.h header files. 
+	  were also in the removed architecture-specific cache.h header files.
 	  Fixed by adding a new barriers.h header file that provides these
 	  definitions.  From Gregory Nutt (2019-03-19).
-	* ARMv7-A/R:  Add barriers.h header file for consistency with ARMv7-M. 
+	* ARMv7-A/R:  Add barriers.h header file for consistency with ARMv7-M.
 	  From Gregory Nutt (2019-03-19).
-	* arch/arm:  Fix more errors resulting from universal cache interfaces. 
+	* arch/arm:  Fix more errors resulting from universal cache interfaces.
 	  The old cache-specific head file also provided a sneak way to include
 	  other necessary header files.  With the old cache.h removed, those
 	  files all fail to build.  From Gregory Nutt (2019-03-19).
@@ -23676,9 +23676,9 @@
 	  (2019-03-20).
 	* arch/arm/src/stm32f7/stm32_can.c:  Fix bittiming calculation.  From
 	  Valmantas Paliksa (2019-03-20).
-	* drivers/eeprom/spi_xx25xx.c:  Add configurable SPI eeprom frequency. 
+	* drivers/eeprom/spi_xx25xx.c:  Add configurable SPI eeprom frequency.
 	  From Valmantas Paliksa (2019-03-20).
-	* arch/arm/src/stm32f7/stm32_qspi.c:  Added stm32f7 Quad SPI support. 
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Added stm32f7 Quad SPI support.
 	  From Valmantas Paliksa (2019-03-20).
 	* drivers/can/mcp2515.c: Fix MCP2515 compile errors.  From Valmantas
 	  Paliksa (2019-03-20).
@@ -23716,7 +23716,7 @@
 	  CONFIG_STM32F7_QUADSPI=y from the configuration.  This was apparently
 	  set before the implementation was added.  Now that the implemenation
 	  was added, the configuration will not build because it requires that
-	  QSPI GPIO pin definitions be provided in the board.h header file. 
+	  QSPI GPIO pin definitions be provided in the board.h header file.
 	  From Gregory Nutt (2019-03-20).
 	* arch/arm/src/stm32f7/stm32_qspi.c:  Fix a warning about QSPI_DMA_PRIO
 	  being redefined.  From Gregory Nutt (2019-03-20).
