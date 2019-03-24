@@ -445,6 +445,7 @@ static int regaddr_from_name(FAR const char *name)
  *
  * Return value:
  *   Returns number of bytes read, or a negative errno.
+ *
  ****************************************************************************/
 
 static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
@@ -515,6 +516,7 @@ static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
  *
  * Return value:
  *   Returns number of bytes written, or a negative errno.
+ *
  ****************************************************************************/
 
 static int __mx7_write_reg(FAR struct mx7_dev_s *dev,
@@ -562,6 +564,7 @@ static int __mx7_write_reg(FAR struct mx7_dev_s *dev,
  *
  * Return value:
  *   Returns the value in STAT, or negative errno.
+ *
  ****************************************************************************/
 
 static inline int __mx7_read_reg__stat(FAR struct mx7_dev_s *dev)
@@ -591,6 +594,7 @@ static inline int __mx7_read_reg__stat(FAR struct mx7_dev_s *dev)
  *
  * Return value:
  *   Returns the value held in in DMM, or negative errno.
+ *
  ****************************************************************************/
 
 static inline int __mx7_read_reg__dmm(FAR struct mx7_dev_s *dev)
@@ -612,6 +616,7 @@ static inline int __mx7_read_reg__dmm(FAR struct mx7_dev_s *dev)
  *
  * Description:
  *   Waits until the chip finishes its reset activities.
+ *
  ****************************************************************************/
 
 static inline void __mx7_wait_reset(FAR struct mx7_dev_s *dev)
@@ -641,6 +646,7 @@ static inline void __mx7_wait_reset(FAR struct mx7_dev_s *dev)
  *
  * Return value:
  *   Returns the number of bytes written (always 1), or a negative errno.
+ *
  ****************************************************************************/
 
 static inline int __mx7_write_reg__vm0(FAR struct mx7_dev_s *dev, uint8_t val)
@@ -656,6 +662,7 @@ static inline int __mx7_write_reg__vm0(FAR struct mx7_dev_s *dev, uint8_t val)
  *
  * Return value:
  *   Returns the register value, or a negative errno.
+ *
  ****************************************************************************/
 
 static inline int __mx7_read_reg__osdbl(FAR struct mx7_dev_s *dev)
@@ -847,6 +854,7 @@ static void mx7_reset(FAR struct mx7_dev_s *dev)
  *
  * Returned value:
  *   Returns the number of bytes written, or a negative errno.
+ *
  ****************************************************************************/
 
 static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
@@ -1049,6 +1057,7 @@ static int mx7_close(FAR struct file *filep)
  *   details of our capabilities: display size, PAL vs. NTSC, etc., but I
  *   would want to have more experience with other chips before deciding how
  *   to best generalize those things.
+ *
  ****************************************************************************/
 
 static ssize_t mx7_read(FAR struct file *filep, FAR char *buf, size_t len)
@@ -1168,6 +1177,7 @@ static ssize_t mx7_write(FAR struct file *filep,
  *
  * Description:
  *   Does nothing, because I don't like ioctls.
+ *
  ****************************************************************************/
 
 static int mx7_ioctl(FAR struct file *filep,
