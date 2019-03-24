@@ -246,10 +246,10 @@
 0.3.3 2007-11-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* Removed unused uIP files
-	* sched/, mm/, and net/ subsystem debug can not be selectively enabled/disabled
+	* sched/, mm/, and net/ subsystem debug can now be selectively enabled/disabled
 	* Correct socket close logic: needs to disconnect TCP socket on close
 	* uIP webserver now seems to be fully functional
-	* fs/ and lib/ subystem debug can not be selectively enabled/disabled
+	* fs/ and lib/ subystem debug can now be selectively enabled/disabled
 	* Added vsnprintf
 	* Integrated uIP telnetd
 	* Add missing logic to read-ahead buffer logic
@@ -546,7 +546,7 @@
 	  This is the size of stack used with the user_start() thread is created.  The two stacks
 	  no longer have to be the same.
 	* Add a loop device that converts a file into a block device.
-	* Each NSH command can not be disabled through a configuration setting. All of these
+	* Each NSH command can now be disabled through a configuration setting. All of these
 	 settings make the configuration of NSH potentially complex but also allow it to squeeze
 	  into very small memory footprints.
 	* Added a block to character (BCH) driver.	This is kind of the reverse of the loop
@@ -22793,7 +22793,7 @@
 	  non-network environment.  CONFIG_NET_HOSTNAME changed to
 	  CONFIG_LIB_HOSTNAME.  From Xiang Xiao (2019-01-27).
 	* Remove the unused libs/libc/endian/Kconfig  From Xiang Xiao (2019-01-27).
-	* libs/libxx/Kconfig:  utomatically select CONFIG_LIBC_WCHAR and
+	* libs/libxx/Kconfig:  Automatically select CONFIG_LIBC_WCHAR and
 	  CONFIG_TIME_EXTENDED when CONFIG_LIBCXX is selected since libcxx
 	  compile fails if without these two option  From Gregory Nutt
 	  (2019-01-27).
@@ -22964,7 +22964,7 @@
 	  only a start.  Eventually, need to rename all sched_ functions
 	  prototyped in sched/sched/sched.h and in include/nuttx with nxsched_.
 	  From Gregory Nutt (2019-02-03).
-	* arch/:  The saved return register state is available on the user
+	* arch/ Signals:  The saved return register state is available on the user
 	  stack.  Thic commit reorders some logic so that certain, critical
 	  registers are preserved in the TCB.  This does not make the logic 100%
 	  secure, but does prevent some obvious things.
@@ -23476,7 +23476,7 @@
 	    is no longer an nxfe layer.
 	  - graphics/:  Rename nxfe_redrawreq to nxmu_redrawreq.  The is no
 	    longer an nxfe layer.
-	  - graphics/nxmu/nxmu.h:  Renmae nxfe.h to nxmu.h.  There is no long an
+	  - graphics/nxmu/nxmu.h:  Rename nxfe.h to nxmu.h.  There is no long an
 	    nxfe layer.
 	  - graphics/: Rename nxfe_state_s to nxmu_state_s.  There is no longer
 	    an nxfe layer.

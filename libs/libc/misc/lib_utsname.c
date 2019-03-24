@@ -106,10 +106,10 @@ int uname(FAR struct utsname *name)
       ret = -1;
     }
 
-  name->nodename[HOST_NAME_MAX-1] = '\0';
+  name->nodename[HOST_NAME_MAX - 1] = '\0';
 
   strncpy(name->release,  CONFIG_VERSION_STRING, SYS_NAMELEN);
-  name->release[SYS_NAMELEN-1] = '\0';
+  name->release[SYS_NAMELEN - 1] = '\0';
 
 #if defined(__DATE__) && defined(__TIME__)
   snprintf(name->version, VERSION_NAMELEN, "%s %s %s",
@@ -117,10 +117,10 @@ int uname(FAR struct utsname *name)
 #else
   strncpy(name->version,  CONFIG_VERSION_BUILD, VERSION_NAMELEN);
 #endif
-  name->version[VERSION_NAMELEN-1] = '\0';
+  name->version[VERSION_NAMELEN - 1] = '\0';
 
   strncpy(name->machine,  CONFIG_ARCH, SYS_NAMELEN);
-  name->machine[SYS_NAMELEN-1] = '\0';
+  name->machine[SYS_NAMELEN - 1] = '\0';
 
   return ret;
 }

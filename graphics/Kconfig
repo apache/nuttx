@@ -63,10 +63,10 @@ config NX_RAMBACKED
 		Redraw requests in other cases are also suppressed:  Changes to window
 		position, size, etc.  As a consequence, some manual updates will be
 		required when certain events occurr (like removing a toolbar from a
-		window)
+		window).
 
-		NOTE:  A significant amount of RAM, usually external SDRAM, is
-		required to run this demo.
+		NOTE:  A significant amount of RAM, usually external SDRAM, may be
+		required to use per-window framebuffers.
 
 config NX_BGCOLOR
 	hex "Initial background color"
