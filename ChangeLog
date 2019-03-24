@@ -22609,4 +22609,1159 @@
 	* arch/arm/include/kinetis/kinetis_sim.h:  Remove extra characters following
 	  #undef.  From Daniel Agar (2018-01-19).
 
-7.29 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.29 2019-03-25 Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/stm32/chip:  Don't try including stm32l_gpio.h from within
+	  chip/*.h header files.  Not only is bad style for a layered inclusion
+	  system, but it doesn't always work.  From Gregory Nutt (2019-01-19).
+	* Initial support for sx127x radio  From Mateusz Szafoni (2019-01-20).
+	* arch/arm/src/samd2l2:  Add RS485 support to SAMD2L2 serial  From Alan
+	  Carvalho de Assis (2019-01-20).
+	* include/nuttx/lcd/edid.h:  Add extended EDID block IDs  From Gregory
+	  Nutt (2019-01-20).
+	* Completes the CC13x2 AUX SYSIF header file.  From Gregory Nutt
+	  (2019-01-20).
+	* arch/arm/src/stm32f7/stm32_lse.c:  Add configuration of LSE oscillator
+	  drive capability  From Jussi Kivilinna (2019-01-22).
+	* tools/convert-comments.c:  Fix an error in handling of a blank C++
+	  comment before a comment block.  For example, this testfile:
+
+	  1
+	  2  //
+	  3  // Multi-line comment
+	  4  // The second line
+	  5
+
+	  Was generating this output:
+
+	  1
+	  2
+	  3   * Multi-line comment
+	  4   * The second line
+	  5   */
+	  6
+
+	  Now correctly generates:
+
+	  1
+	  2  /* Multi-line comment
+	  3   * The second line
+	  4   */
+	  5  From Gregory Nutt (2019-01-22).
+	* arch/arm/src/tiva/cc13xx:  The trim files from the TI DriverLib now
+	  compile successfully.  This merge also brings in the ROM files from the
+	  TI DriverLib which do NOT year compile correctly.  This is still a work
+	  in progress.  There merge also adds unverified support for the
+	  LaunchXL-CC1310.  From Gregory Nutt (2019-01-22).
+	* arch/arm/src/samd2l2/sam_serial.c:  Add missing RS-485 DIR pin write to
+	  sam_serial.c  From Alan Carvalho de Assis (2019-01-22).
+	* crypto/aes.c:  When we upgraded our code to NuttX 7.28 crypto/aes.c
+	  would no longer compile. Attached is a patch which fixes the
+	  compilation errors.  From Gregory Nutt (2019-01-23).
+	* arch/arm/src/tiva/cc13xx:  Fixes to get a clean build of the
+	  configs/launchxl-cc1312r1 configuration.  Still untested.  From Gregory
+	  Nutt (2019-01-23).
+	* arch/arm/src/tiva/hardware:  Add CC13xx SMPH and AUX SMPH header
+	  files.  Still need DDI0 OSC header file for CC13x0 compilation.  From
+	  Gregory Nutt (2019-01-23).
+	* Improvements for STM32 PWM
+	  - arch/arm/src/stm32/stm32_pwm: fix polarity and IDLE state configuration
+	  for advanced timer PWM
+	  - include/dsp.h: raise error if math.h not present
+	  From Mateusz Szafoni
+	  (2019-01-23).
+	* arch/arm/src/tiva/hardware:  Add CC13x0 DDI0 OSC header file.
+	  arch/arm/src/tiva/cc13xx:  Fix miscellaneous compilation issues.  From
+	  Gregory Nutt (2019-01-23).
+	* tools/.gitignore:  Ignore new tool binaries.  From David Sidrane
+	  (2019-01-24).
+	* arch/arm/src/stm32l4/stm32l4_lse.c:  Ports Jussi Kivilinna's recent
+	  STM32F7 LSE change to STM32L4.  From Juha Niskanen (Haltian)
+	  (2019-01-24).
+	* fs/vfs/fs_open.c:  Fix not returning failure for block_proxy() call.
+	  From David Sidrane (2019-01-25).
+	* up_initialize():  As noted by Roland Takacs in Bitbucket issue 141,
+	  there is a compilation error for STM32 if CONFIG_NET and
+	  CONFIG_NETDEV_LATEINIT are selected.  That was due in part to commit
+	  19e16cb which extended up_netinitialize() with a
+	  !defined(CONFIG_NETDEV_LATEINIT) guard but did not add the guard to
+	  concrete implementations.  I say "in part" because I don't think that
+	  the original intent of commit 19e16cb was to enable an alternative
+	  initialization of MCU internal Ethernet support but rather to enable
+	  support of external Ethernet devices that may have dependencies on, for
+	  example, SPI.  However, this is still a proper fix to avoid the
+	  compilation error that can occur with this combination of configuration
+	  options.  From Gregory Nutt (2019-01-25).
+	* arch/arm/src/lpc17xx/lpc17_can.c:  The name can_txready clashes with
+	  Nuttx CAN core global function.  LPC178x has only single
+	  LPC17_SYSCON_PCLKSEL with only single divisor.  From Pavel Pisa
+	  (2019-01-25).
+	* arch/arm/src/tiva/cc13xx/cc13x2_v1_trim.c and cc13x2_cc26x2_v1_rom.c:
+	  Review and modified for coding style.  Now pass tools/nxstyle wihout
+	  complaint.  From Gregory Nutt (2019-01-25).
+	* arch/xxx/include/: Remove watchdog.h and arm-elf.h because they are
+	  empty.  The arm-elf header file was never used; the empty watchdog.h
+	  header file was used in only one place.  From Xiang Xiao (2019-01-26).
+	* arch/arm/include/armv-7m/irq.h and armv6-m/irq.h:  Remove redundant
+	  conditioning on CONFIG_BUILD_PROTECTED  From Xiang Xiao (2019-01-26).
+	* mm/mm_heap/mm_sbrk.c: Fix backward conditional test.  Should call
+	  mm_initialize() when brkaddr equal zero  From Xiang Xiao (2019-01-26).
+	* arch/Kconfig and arm/src/armv7-m/Kconfig: ARCH_HIPRI_INTERRUPT
+	  shouldn't select ARMV7M_USEBASEPRI.  First because that is a violation
+	  of the layered nature of the Kconfig architecture, but also because
+	  then Kconfig will generated errors when high priority interrupts are
+	  used with other architectures.  From Xiang Xiao (2019-01-26).
+	* mm/umm_heap/umm_sbrk.c:  Pass ARCH_HEAP_VEND as maxbreak argument  From
+	  Xiang Xiao (2019-01-26).
+	* arch/xxx/src/common/up_initialize.c:  Move up_pminitialize() after
+	  timer_initialize()  From ligd (2019-01-26).
+	* arch/arm/src/include/xxx/syscall.h:  Align semi-hosting call style with
+	  other syscalls  From Xiang Xiao (2019-01-26).
+	* arch/arm/include/syscall.h:  Add missing inclusion of
+	  arch/armv7-r/syscall.h for CortexR.  From Xiang Xiao (2019-01-26).
+	* mm/kmm_heap/kmm_kernel.c:  Remove unused, duplicated kmm_heapmember().
+	  From Xiang Xiao (2019-01-26).
+	* mm/iob/iob_alloc.c:  iob_allocwait should decrease semcount manually.
+	  From Xiang Xiao (2019-01-26).
+	* drivers/sensors/ina3221.c:  Fix errors in register field address.
+	  Signed value was losing its signed-ness due to use of unsigned type for
+	  register.  From Ken Pettit (2019-01-26).
+	* mm/iob/iob_notifier.c:  Don't check iob_navail in iob_notifier_setup to
+	  avoid a potential race condition.  From Xiang Xiao (2019-01-26).
+	* mm/iob/iob_dump.c:  Format the whole line before log to avoid the
+	  multiple timestamp prefix in each line  From Xiang Xiao (2019-01-26).
+	* drivers/sensors/ina3221.h:  Fix errors in register addresses and
+	  bitfield values.  From Ken Pettit (2019-01-26).
+	* mm/shm:  Convert bytes to pages by MM_NPAGES instead of MM_PGALIGNUP
+	  From Xiang Xiao (2019-01-26).
+	* mm/shm/shmget.c:  Should call shm_extend to allocate the physical
+	  memory  From Xiang Xiao (2019-01-26).
+	* mm/mm_gran/mm_pgalloc.c: mm/pgalloc: shouldn't just allocate one page
+	  always.  From Xiang Xiao (2019-01-26).
+	* mm/mm_gran/mm_graninfo.c:  Fix the wrong data in g_1bit_info and make
+	  the internal function static  From Xiang Xiao (2019-01-26).
+	* mm/umm_heap: Ensure all user allocation try sbrk before fail  From
+	  Xiang Xiao (2019-01-26).
+	* mm/iob/iob_copyin.c:  iob_copyin() should wait for each buffer and
+	  adjust the return value of iob_copyin_internal return to simplify the
+	  code  From Xiang Xiao (2019-01-26).
+	* arch/xxx/src/xxx/up_assert.c:  Dump CPU0 IDLE stack only when PID
+	  equals 0.  IDLE threads of other CPUs do not need this special check
+	  From Xiang Xiao (2019-01-26).
+	* binfmt/, binfmt/libelf/, include/nuttx, libs/libc/machine,
+	  libs/libc/modlib, and others:  Move elf related arch function to
+	  include/nuttx/elf.h because the implementation is located in
+	  libs/libc/machine and in order to avoid the conflict with the 3rd party
+	  libraries and clean up the file inclusion:  (1) Remove redundant
+	  elf32.h, (2) Remove nuttx/binfmt/elf.h in libs/libc/machine, (2) Remove
+	  nuttx/binfmt/elf.h in modlib, and (4) Rmove nuttx/module.h in modlib.
+	  From Xiang Xiao (2019-01-26).
+	* Kconfig files, binfmt/libelf, libs/libc/machin, libs/libxx:  Correct
+	  libcxx exception handling by introducing the generic
+	  config(CXX_EXCEPTION and CXX_LIBSUPCXX)  From Xiang Xiao (2019-01-26).
+	* binfmt/:  If there is an address environment (CONFIG_ARCH_ADDRENV),
+	  binfmt/elf doesn't need to free ctor/dtor alloc since freeing the
+	  address environment releases the heap automatically.  From Xiang Xiao
+	  (2019-01-26).
+	* binfmt/libelf, libs/libc/modlib:  Optimize elf load speed:  (1) Don't
+	  zero out memory, (2) Reduce the initial buffer size to 32 bytes.  From
+	  Xiang Xiao (2019-01-26).
+	* binfmt/, binfmt/libelf:  binfmt/elf:  Call umm_initialize as soon as
+	  possible  otherwise elf_loadctors/elf_loaddtors will fail to allocate
+	  memory.  From Xiang Xiao (2019-01-26).
+	* libs/libc/dllfcn:  Implement dlerror using strerror.  From Xiang Xiao
+	  (2019-01-26).
+	* libs/libc/dllfcn, sched/init:  Add LD_LIBRARY_PATH environment variable
+	  support.  From anchao (2019-01-26).
+	* libs/libc/machine/arm/armv7-m/arch_elf.c:  Add support for the
+	  R_ARM_THM_JUMP11 relocation type.  This relocation type may be
+	  generated when LTO optimization is enabled.  From anchao (2019-01-26).
+	* libs/libc/machine/arm:  Fix the minor issue in libc arm machine folder;
+	  MOVW/MOVT should use zero(not sign) extension.  From Xiang Xiao
+	  (2019-01-26).
+	* libs/libc/symtab/symtab_findorderedbyvalue.c:  Remove unused
+	  symtab_findorderedbyvalue.  From Xiang Xiao (2019-01-26).
+	* arch/arm/src/samd2l2 serial: Fix SAMD2L2 serial driver it needs
+	  sam_usart_enable() to work  From Alan Carvalho de Assis (2019-01-26).
+	* Remove empty seria.h and all references  From Xiang Xiao (2019-01-26).
+	* libs/libc/stdio/lib_libvsprintf.c:  Correct justification for alternate
+	  forms of %p and %P  From ligd (2019-01-27).
+	* libs/libc/misc/lib_utsname.c:  Add build date and time to uname output
+	  (like Linux).  From Gregory Nutt (2019-01-27).
+	* libs/unistd and other affected files:  Hostname support no longer
+	  depends on CONFIG_NET since the host name is also useful in the
+	  non-network environment.  CONFIG_NET_HOSTNAME changed to
+	  CONFIG_LIB_HOSTNAME.  From Xiang Xiao (2019-01-27).
+	* Remove the unused libs/libc/endian/Kconfig  From Xiang Xiao (2019-01-27).
+	* libs/libxx/Kconfig:  utomatically select CONFIG_LIBC_WCHAR and
+	  CONFIG_TIME_EXTENDED when CONFIG_LIBCXX is selected since libcxx
+	  compile fails if without these two option  From Gregory Nutt
+	  (2019-01-27).
+	* - drivers/timers/oneshot.c:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/timers/rtc.c:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/input/ajoystick.c:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/input/djoystick.c:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/input/button_upper.c:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/sensors/zerocross.c: Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/wireless/ieee802154:  Support signal notification through
+	    SIGEV_THREAD
+	  - drivers/lcd/ft80x.c: Support signal notification through SIGEV_THREAD
+	  From Xiang Xiao (2019-01-27).
+	* drivers/net/phy_notify.c and all network drivers that support PHY
+	  notifications:  Support the signal notification through SIGEV_THREAD
+	  From Xiang Xiao (2019-01-27).
+	* aio_cancel need signal caller after the succeed and fix minor issue in
+	  the error handler  From Xiang Xiao (2019-01-27).
+	* drivers/timers/watchdog.c:  Support auto-monitor service  From Gregory
+	  Nutt (2019-01-27).
+	* drivers/timers/rtc.c:  Protect the RTC state with a semaphore.  From
+	  Xiang Xiao (2019-01-27).
+	* drivers/timers/rtc.c:  Protect the timer state with a semaphore.  From
+	  Xiang Xiao (2019-01-27).
+	* Critical Section Monitor (sched/ and fs/procfs:  Remove
+	  SCHED_IRQMONITOR_GETTIME to simplify the clock source selection:  (1)
+	  Use up_critmon_gettime if SCHED_IRQMONITOR, (2) Call clock_systimespec
+	  if SCHED_TICKLESS, (3) Don't collect timing info for all other cases
+	  and move up_critmon_* to arch.h avoid the duplicated declaration.  From
+	  Xiang Xiao (2019-01-27).
+	* drivers/timers/arch_alarm.c and arch_timer.c:  Implement
+	  up_critmon_gettime and up_critmon_convert and remove the critical
+	  section from current_usec to infinite recursion.  From Xiang Xiao
+	  (2019-01-27).
+	* Improvements in STM32 ADC, PWM and TIM
+	  - arch/arm/src/stm32/chip/stm32_adc_v2.h: missing T1TRGO2 for JEXTSEL
+	  - arch/arm/src/stm32/stm32_adc: configure injected channels external
+	    trigger when ADC enabled
+	  - arch/arm/src/stm32/stm32_adc: update injected conversion queue of
+	    context after configuration
+	  - arch/arm/src/stm32/stm32_adc: fix sample time configuration for
+	    channels. The array index for channels was missing
+	  - arch/arm/src/stm32/stm32_adc: support for offset configuration
+	  - arch/arm/src/stm32/stm32_pwm: fix TRGO/TRGO2 configuration
+	  - arch/arm/src/stm32/stm32_pwm: support for advanced timers channel 5
+	    and 6
+	  From Mateusz Szafoni (2019-01-27).
+	* drivers/serial/serial.c:  Initialize OPOST and ONLCR in uart_register
+	  From Xiang Xiao (2019-01-27).
+	* drivers/serial/serial.c:  Call pm_activity() when characters are
+	  received on a console device.  From Gregory Nutt (2019-01-27).
+	* drivers/serial/uart_16550.c:  Fix error: 'g_uart0port' undeclared.
+	  From Xiang Xiao (2019-01-27).
+	* drivers/serial/serial.c:  Don't reset the circular buffer on close
+	  since DMA may still be transferring data in the background if the user
+	  closes the handle too quickly and the handle is opened with
+	  O_NONBLOCK.  From Xiang Xiao (2019-01-27).
+	* drivers/serial/uart_16550.c:  Fix typo for UART1 flow field
+	  initialization  From Gregory Nutt (2019-01-27).
+	* sched/wqueue/kwork_notifier.c and several Kconfig files:  Notifier
+	  should work with either lpwork or hpwork and other minor typo fix.
+	  From Xiang Xiao (2019-01-27).
+	* sched/Kconfig:  Change SCHED_NOTE_GET type from int to bool
+	  From Gregory Nutt (2019-01-27).
+	* sched/sched/sched_timerexpiration.c:  Fix macro SEC2TICK() 32-bits
+	  overflow by using uint64_t in calculation.  From ligd (2019-01-27).
+	* drivers/power/pm_activity.c:  Add pm_staycount API for get stay
+	  numbers.  This function is currently not used and a waste of FLASH
+	  space.  From ligd (2019-01-27).
+	* include/nuttx/irq.h:  Fix enter_critical_section/spin_lock_irqsave
+	  macro typo error and remove the duplicated inclusion of arch/irq.h
+	  From Xiang Xiao (2019-01-27).
+	* include/stdbool.h:  Define bool only when __cplusplus isn't defined.
+	  From Xiang Xiao (2019-01-27).
+	* include/nuttx/fs/fs.h: Move the union inode_ops_u i_mtd field into the
+	  mount section of inode_ops_u and remove the guard to simplify fs which
+	  support both block and mtd.  From Xiang Xiao (2019-01-27).
+	* include/nuttx/list.h:  Added a Linux-compatible list implementation.
+	  From zhuyanlin (2019-01-27).
+	* fs/mount and fs/romfs:  Add support to mount a ROMFS volume using an
+	  MTD driver interface using the standard mount() operation.  From Xiang
+	  Xiao (2019-01-27).
+	* fs/hostfs/hostfs.c:  Remove the unnecessary use of host_stat() in
+	  hostfs_bind()  From ligd (2019-01-27).
+	* drivers/syslog/ramlog.c:  Fix error: Conflicting types for
+	  'ramlog_addchar'  From Xiang Xiao (2019-01-27).
+	* fs/littlefs:  Fix a minor issue found in code review:  (1) Replace
+	  printf to finfo/fwarn/ferr, (2) Replace malloc/free to
+	  kmm_malloc/kmm_free, (3) define LFS_NAME_MAX to NAME_MAX, (4) Check the
+	  big endian using CONFIG_ENDIAN_BIG.  From Xiang Xiao (2019-01-27).
+	* fs/littlefs:  VFS wrapper improvement:  (1) Support block device
+	  interface, (2) support ioctl, stat and sync file operation, (3) support
+	  forceformat and autoformat option, (4) update file->f_pos and
+	  dir->fd_position, (5) remove the internal struct from dir, and (6)
+	  remove mtd byte read/write requirement.  From Xiang Xiao (2019-01-27).
+	* arch/arm/src/am335x/am335x_serial.c:  Eliminate an error 'TIOCSBRK
+	  undeclared.  From Gregory Nutt (2019-01-27).
+	* Every file that uses serial IOCTLs (TIOC*) must explicity include
+	  nuttx/fs/ioctl.h.  This was included previously via sneak path in the
+	  now deleted arch/serial.h.  From Gregory Nutt (2019-01-27).
+	* arch/arm/src/lpc17xx/lpc176x_clockconfig.c:  The code preserves
+	  undocumented reserved bits only if board does not set them to keep
+	  previous behavior for boards where developers (hopefully) know what
+	  values should be set into these bits.  From Pavel Pisa (2019-01-27).
+	* arch/arm/src/lpc17xx/:  The enable of EMC clocks has to be preserved
+	  when already enabled by loader.  EMC and related pins configuration has
+	  to be skipped if the system is run from SDRAM.  A region of SDRAM which
+	  is used by system must not be used for heap.  From Pavel Pisa
+	  (2019-01-27).
+	* configs/nucleo-l432kc/src/stm32_appinit.c:  Add support for I2C driver
+	  initialization.  From Nikolay Semenov (2019-01-28).
+	* drivers/timers/timer.c:  Support the signal notification through
+	  SIGEV_THREAD  From Gregory Nutt (2019-01-28).
+	* configs/nucleo-144/f767-netnsh/defconfig:  Correct one location where
+	  CONFIG_NET_HOSTNAME was not changed to CONFIG_LIB_HOSTNAME.  From
+	  Gregory Nutt (2019-01-29).
+	* arch/arm/src/imxrt:  Add XBAR Support  From David Sidrane (2019-01-29).
+	* arch/arm/src/imxrt/chip/imxrt_tmr.h:  Fix addressing and restructure
+	  using common offset  From David Sidrane (2019-01-29).
+	* sched/sched/sched_processtimer.c:  Add a configurable call out to a
+	  user-provided function, 'timer hook', on each timer interrupt.  From
+	  Gregory Nutt (2019-01-30).
+	* - /arch/arm/src/samv7/sam_spi.c: DMA Tx/Rx timeout issue.
+	  - /arch/arm/src/samv7/sam_qspi.c: Compile error when set
+	    CONFIG_SAMV7_QSPI_DLYBCT
+	  - Fix compiling error when set
+	    CONFIG_BOARDCTL_IOCTL/CONFIG_BOARDCTL_UNIQUEID
+	  From Kevin Liu (2019-01-30).
+	* arch/arm/src/imxrt/chip/imxrt_gpt.h:  Correct register offsets.  From
+	  David Sidrane (2019-01-30).
+	* arch/arm/src/samv7/sam_emac.c:  The logic for determining the number of
+	  queues for SAMV71 must be extended.  All SAMv7 parts increase the
+	  number of queues from 3 to 6 at revision B, not just the SAMV71.  From
+	  Gregory Nutt (2019-02-01).
+	* arch/arm/src/samv7/sam_emac.c:  Fix a compile problem introduced with
+	  commit cf1e0f79762284da2df372fe80eb3eca09488e24.  From Gregory Nutt
+	  (2019-02-01).
+	* arch/arm/src/samv7/sam_emac.c: Fixes rxdesc index logic to handle
+	  Buffer Not Available (BNA) condition.
+
+	  If a SOF is found, but no EOF, don't move past the frame. Instead,
+	  keep the index at the SOF buffer until the rest of the data is written.
+
+	  This fixes a receiver lockup condition where the peripheral and this
+	  driver get out of sync with there head pointers. In this case the
+	  driver has moved past buffers it owns, without clearing ownership,
+	  which results in the peripheral and driver in a deadlock with each
+	  other.
+
+	  From Anthony Merlino (2019-02-02).
+	* arch/arm/src/sam34 and sama5:  Port Anthony Merlino's fix to similar
+	  Ethernet drivers for parts in other SAM families.  From Gregory Nutt
+	  (2019-02-02).
+	* arch/mips/src/pic32mz: Add support for the PIC32MZ timers (driver,
+	  lowerhalf, freerun and oneshot)  From Abdelatif Guettouche (2019-02-02).
+	* sched/signal/sig_deliver.c:  Restructure nxsig_deliver() so that the
+	  signal handler is not called with the pre-emption disabled (or, at
+	  least no with pre-emption disabled by nxsig_deliver() itself).  From
+	  Gregory Nutt (2019-02-03).
+	* sched/sched:  Rename all internal, static functions from sched_* to
+	  nxsched_* to indicate that they are NuttX internal functions.  This is
+	  only a start.  Eventually, need to rename all sched_ functions
+	  prototyped in sched/sched/sched.h and in include/nuttx with nxsched_.
+	  From Gregory Nutt (2019-02-03).
+	* arch/:  The saved return register state is available on the user
+	  stack.  Thic commit reorders some logic so that certain, critical
+	  registers are preserved in the TCB.  This does not make the logic 100%
+	  secure, but does prevent some obvious things.
+	  sched/signal/sig_delivery:  Add a flag to the TCB to indicate that we
+	  are in a signal handler.  Use this flag to assure that a there a never
+	  attempts to nest signal handling operations on a thread.  This was
+	  guaranteed before but when locking of pre-emption during signal
+	  delivering was eliminated in a previous commit, there was a remote
+	  possibility of an attempt to do nested signal handling.  This flag
+	  assures that there is only one signal handled at a time.  From Gregory
+	  Nutt (2019-02-03).
+	* This commit renames all internal OS functions defined under sched/task
+	  so that they begin with the prefix.  For example, nxtask_exit() vs.
+	  task_exit().  From Gregory Nutt (2019-02-04).
+	* - sched/init/nx_bringup.c:  Fix a naming collision.
+	  - sched/init:  Rename os_start() to nx_start()
+	  - sched/init:  Rename os_smp* to nx_smp*
+	  - sched/init:  Rename os_bringup to nx_bringup
+	  - sched/init:  rename all internal static functions to begin with nx_
+	    vs os_
+	  From Gregory Nutt (2019-02-04).
+	* graphics/nxmu/nxmu_start.c:  Fix a naming collision introduced with the
+	  last commit.  Ye olde nx_start that started the NX graphics is now
+	  nxmu_start().
+	  include/nuttx/nxmu.h:  Due the name change, the nxmu_start() belongs
+	  more appropriately in nxmu.h than nx.h.  From Gregory Nutt (2019-02-04).
+	* include/nuttx/nx/nxmu.h:  This header file could be lethal; it declared
+	  an #error if CONFIG_DISABLE_MQUEUE=y.  From Gregory Nutt (2019-02-04).
+	* libs/libc/unistd/lib_getopt.c: Add logic to reinitialize the stale
+	  context for the FLAT/PROTECTED builds.  In these builds getopt() global
+	  varriables may be shared by many tasks.  If any task exits the getopt()
+	  loop before all command line arguments have been parsed, then getopt()
+	  global variables will be left in a bad state.  The next time getopt()
+	  is called, this logic should detect the bad state and force the state
+	  of getopt() to be re-initialized so that it can be reused.  This logic
+	  is not full proof (it would fail, for example, if you tried to parse
+	  the same command line twice) but should catch the typical misuse
+	  cases.  From Xiang Xiao (2019-02-05).
+	* drivers/ioexpander/tca64xx.c: Fix some errors in the TCA64XX driver.
+	  From Bruno Schwander (2019-02-06).
+	* configs/stm32f769i-disco/src/stm32_appinitialize.c:  Florian R.
+	  Hölzlwimmer reports that stm32_appinitialize.c often has missing OK and
+	  NULL definitions.  This should be fixed by including sys/types.h where
+	  they are defined.  From GregoryN (2019-02-06).
+	* libs/libc/stdio:  Add newlib-nano fprintf as an option.  This fprintf
+	  code was originally adapted from AVR libc and provides improved
+	  floating point output support, including 'g' mode and making 'f' mode
+	  include digits past the decimal by default. However, this version does
+	  not have any long long support.  On a demonstration cortex M4 build,
+	  this version saves about 5kB of ROM.  The newlib version can be found
+	  here:  https://salsa.debian.org/electronics-team/toolchains/newlib-nano
+	  .  That project is GPL overall, but the newlib-nano printf portions are
+	  BSD licensed as described in the COPYING.NEWLIB file.  From Keith
+	  Packard (2019-02-06).
+	* - arch/misoc/src/minerva:  Add support for the Minerva architecture
+	  - configs/Kconfig and misoc/nsh/defconfig:  Add support for the
+	    Verilator board.
+	  From Ramtin Amin (2019-02-07).
+	* tools/lowhex.c:  Fix an initialization problem that was causing some
+	  odd behavior at the beginning of lines.  From Gregory Nutt (2019-02-07).
+	* tools/rmcr.c:  Add a tools to remove carriage returns and dangline
+	  whitespace at the end of lines.  From Gregory Nutt (2019-02-07).
+	* tools/nxstyle.c:  Can now detect if the C comment closing is not on a
+	  separate line.  From Gregory Nutt (2019-02-08).
+	* tools/nxstyle.c:  Make sure that all files begin with a comment on line
+	  1 (which should be the file header).  From Gregory Nutt (2019-02-08).
+	* include/: Correct naming of standard header file.  Should be dlfcn.h,
+	  not dllfcn.h.  From Gregory Nutt (2019-02-09).
+	* configs/launchxl-cc1312r1:  Add support for on-board LEDs and buttons. 
+	  From Gregory Nutt (2019-02-10).
+	* configs/launchxl-cc1310:  Clone LED and button support from the
+	  launchxl-cc1312r1.  The number of LEDs and buttons as well as DIO usage
+	  is identical.  From Gregory Nutt (2019-02-10).
+	* drivers/usbhost/usbhost_cdcacm.c:  Fixes to the IOCTL method in
+	  recovery of UART pointer and in names of Termios-related field.  From
+	  xhbm (2019-02-11).
+	* CONFIG_NFILE_DESCRIPTORS=0 can no longer be used to disable the file
+	  system.  NuttX with no file system does not make sense and is no longer
+	  supported.  From Gregory Nutt (2019-02-11).
+	* configs/sama5d2-xult:  Move console from FLEXCOM4 to UART1.  FLEXCOM4
+	  does not work for the Arduino serial.  UART1 is used with the VCOM
+	  provided by the EDBG.  From Gregory Nutt (2019-02-11).
+	* Fix conditional logic:  The setup seems to support a network without
+	  sockets (CONFIG_NSOCKET_DESCRIPTORS == 0).  That is not the case; if
+	  the network is enabled, sockets must be provided.  From Gregory Nutt
+	  (2019-02-11).
+	* configs/launchxl-cc1312r1:  Correct DIOs used to provide the UART0
+	  serial console.  Board boots to NSH prompt now.  But I am not getting
+	  serial input.  Things are probably not very stable in general.  From
+	  Gregory Nutt (2019-02-12).
+	* sched/:  Remove the option CONFIG_BOARD_INITTHREAD.  Now, if
+	  CONFIG_BOARD_INITIALIZE is selected, then the board_initialize() logic
+	  will ALWAYS run on an internal kernel thread.  This will prevent the
+	  problems people have had doing inappropriate board_initialization on
+	  the IDLE thread.  From Gregory Nutt (2019-02-12).
+	* arch/arm/src/tiva:  The LauchXL-CC1312R1 NSH configuration is now fully
+	  functional.  On to bigger and better things.  From Gregory Nutt
+	  (2019-02-13).
+	* - Move vscanf logic to lib_sscanf.c  Switched to stream interface
+	  (tricky, because the old implementation used massive read ahead, which
+	  isn't suitable for streams, chars already read are gone).
+	  - Added scanf and fscanf
+	  - Added hh, h, and ll modifiers
+	  - Fixes for standard compliance in scanf
+	  - Fixes for standard compliance in strto... function family (don't
+	    consume single '-' or '+', allow sign in strotul(l))
+	  From Johannes (2019-02-14).
+	* net/tcp/tcp_send_buffered.c:  Fix assertion crash when window size is
+	  zero.  From Gregory Nutt (2019-02-14).
+	* net/:  The value ERROR should never be returned from internal OS
+	  functions.  That is reserved for returning values to appliations with
+	  the errno value set.  Within the OS, errors are returned with a negated
+	  errno value ALWAYS.  From Gregory Nutt (2019-02-14).
+	* libs/libc/stdio/lib_libsscanf.c: Initialized the lastc pointer to avoid
+	  the checks for NULL. Removed a bug in the floating point parsing which
+	  allowed several signs after each other.  From Johannes (2019-02-14).
+	* tools/nxstyle.c:  Add check for multiple definitions of local variables
+	  on a line.  From Gregory Nutt (2019-02-14).
+	* libs/libc/stdio/lib_libvsprintf.c:  No precision specifier resulted in
+	  precision 0 but should be precision 6.  From Johannes (2019-02-15).
+	* libs/libc/stdio:  Add support for %g format which, for these purpose,
+	  is equivalent to %f except that trailing zeroes are suppressed.  From
+	  Gregory Nutt (2019-02-15).
+	* libs/libc/stdio:  In the recent changes we lost the implementation of
+	  vsscanf().  This commit restores vsscanf().  sscanf() is not just a
+	  front end for vsscanf().  From Gregory Nutt (2019-02-15).
+	* libs/libc/stdio:  Remove unused, non-standard functions lib_sscanf()
+	  and lib_sprintf().  From Gregory Nutt (2019-02-15).
+	* libs/libc/stdio/nano_libvsprintf.c:  Add long long support.
+	  CONFIG_LIBC_LONG_LONG needs at least CONFIG_NANO_PRINTLEVEL 2.  Code
+	  size for compile without CONFIG_LIBC_LONG_LONG shouldn't be affected.
+	  From Johannes (2019-02-15).
+	* nuttx/sched/mqueue:  Change 'int prio' to 'unsigned int prio'.
+	  According to open group specification, priority field in mq_* functions
+	  should have unsigned type:
+	  http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/mqueue.h.html
+	  From Michał Łyszczek (2019-02-15).
+	* arch/arm/src/tiva/hardware:  Add CC13x0 and CC13x2 I2C header files. 
+	  From Gregory Nutt (2019-02-16).
+	* syscall/syscall.csv:  Change to mqueue function protothypes must be
+	  reflected in the KERNEL mode proxies as well.  From Gregory Nutt
+	  (2019-02-16).
+	* libs/libc/stdio/Make.defs:  lib_dtoa.c is only used in the
+	  LIBC_CONFIG_NANO_PRINTF=n case.  From Johannes (2019-02-16).
+	* Restore lib_sprintf().  It was removed because I thought was not used.
+	  But I was wrong; there is logic in drivers/syslog that depends on
+	  lib_sprintf().  From Gregory Nutt (2019-02-16).
+	* arch/arm/src/tiva/hardware/tiva_wdt.h:  Add WDT register definition
+	  header file for all LM, Tiva, and CC13xx parts.  From Gregory Nutt
+	  (2019-02-16).
+	* - arch/arm/src/stm32f0l0: SPI support for F0
+	  - arch/arm/src/stm32f0l0/Kconfig: L0 parts should select
+	    STM32F0L0_STM32L0
+	  - arch/arm/src/stm32f0l0/hardware: unify names for ADC/DAC/DMA/CAN
+	  - drivers/wireless/lpwan/sx127x/sx127x.c: return immediately when ISR0
+	    is called but sx127x is not initialized
+	  - configs/nucleo-f091rc: support for sx127x
+	  - configs/b-l072z-lrwan1/include/board.h: use HSI as default clock
+	    source and fix typo in SPI1 pins.
+	  From Mateusz Szafoni (2019-02-16).
+	* libs/libc/stdio/lib_dtoa.c:  Lots of risky turmoil to get this file
+	  closer to the NuttX coding style.  Seems to check out, but still
+	  risky.  libs/libc/stdio/lib_libdtoa.c:  A fix for the %g format.  The
+	  algorithm will sometimes generate number greater than the precision of
+	  type double.  This adds a check if the precision has been exceeded and
+	  logic to remove the least significant garbage.  From Gregory Nutt
+	  (2019-02-16).
+	* libs/libc/stdio/nano_libvsprintf.c:  Added hh type modifier (without
+	  extending the flag variable).  From Johannes (2019-02-17).
+	* tools/nxstyle.c:  Beef up logic that detects multiple variable
+	  definitions per line.  From Gregory Nutt (2019-02-17).
+	* libs/libc/stdio:  This commits makes the nano-printf the defualt logic
+	  for the printf family.  The legacy printf is still available via
+	  CONFIG_LIBC_PRINT_LEGACY.  This commit also modifies the nano-prinf
+	  configure:  The PRINT_LEVEL is not long selectable.  Instead, a not
+	  CONFIG_LIBC_PRINT_MINIMAL boolean setting was added and the PRINT_LEVEL
+	  is derived from a combination of CONFIG_LIBC_PRINT_MINIMAL,
+	  CONFIG_LIBC_FLOATINGPOINT, and CONFIG_LIBC_LONG_LONG.  From Gregory
+	  Nutt (2019-02-17).
+	* libs/libc/stdio:  Rename lib_dtoa.c to legacy_dtoa.c; rename
+	  lib_libvsprint.c to legacy_libvsprintf.c  From Gregory Nutt (2019-02-17).
+	* libs/libc/stdio:  Rename all nano_*.c and nano_*.h files to lib_*.c and
+	  lib_*.h to emphasize that these are now the defaults, not an optional
+	  implementation.  From Gregory Nutt (2019-02-17).
+	* arch/xtensa/src/esp32/esp32_timerisr.c:  Fix backward comparison.  From
+	  Gregory Nutt (2019-02-17).
+	* libs/libc/stdio/lib_libvsprintf.c: Adds configurable support for
+	  numbered arguments.  From Johannes (2019-02-18).
+	* libs/libc/stdio/Kconfig: Need to guard LIBC_NUMBERED_ARGS against
+	  LIBC_LEGACY_PRINTF  From Johannes (2019-02-18).
+	* - sched/init/nx_start.c:  Add support for
+	    CONFIG_BOARD_DRIVER_INITIALIZE.  If this option is selected then
+	    nx_start() will call a board-provided function board_early_initialize()
+	    immediately after calling up_initialize().
+	  - Rename CONFIG_BOARD_INITIALIZE to CONFIG_BOARD_LATE_INITIALIZE.
+	  - Rename board_initialize() to board_late_initialize()
+	  From Gregory Nutt (2019-02-18).
+	* include/nuttx/compiler.h:  Important fix for C++ users.  compiler.h was
+	  using the value of __STDC_VERSION__ to determine if inline functions
+	  are supported or not.  If not then the keyword inline was defined out.
+	  Good for C but bad for C++ because C++ does not defined
+	  __STDC_VERSION__ at all.  C++ applications may draw in compiler.h
+	  indirectly via other head files and this can result in C++ compiler
+	  problems since 'inline' is defined out.  This fix is to ignore the
+	  (undefined) __STDC_VERSION__ if __cplusplus is defined.  From Gregory
+	  Nutt (2019-02-19).
+	* include/nuttx/elf.h: Adds missing extern "C" __cplusplus guard.  From
+	  Anthony Merlino (2019-02-19).
+	* libs/libc/stdio/lib_libvsprintf.c: Cleaned naming and allow for leading
+	  zeros in argument number (which doesn't make sense but should be). 
+	  From Johannes (2019-02-19).
+	* arch/arm/src/stm32f7/stm32_i2c.c:  Fix another memory access issue on a
+	  bus error.  From David Sidrane (2019-02-19).
+	* arch/arm/src/stm32h7 and stm32l4:  Apply David Sidrane's fix for the
+	  STM32F7 to the STM32L4 and STM32H7.  The same change might be
+	  appropropriate to STMF0/LO and STM32, but the patch does not apply
+	  cleanly.  It would have to be manually checked.  From Gregory Nutt
+	  (2019-02-19).
+	* libs/libc/stdio/Kconfig:  CONFIG_LIBC_NUMBERED_ARGS now depends on
+	  EXPERIMENTAL.  Per Johannes: I tested numbered arguments on i.mx rt
+	  1050, and it isn't working.  Only on Linux/MSYS 64bit all relevant data
+	  types are size 8 bytes, and therefore my loop through the arg list is
+	  working. On 32bit systems, all is 4 bytes except floating point
+	  variables which is implicit 8 byte double.  From Gregory Nutt
+	  (2019-02-20).
+	* libs/libc/stdio/lib_libvsprintf.c:  Fix typo:  PRINTF_LEVEL, not
+	  PRINT_LEVEL.  From Gregory Nutt (2019-02-20).
+	* - libs/libc/stdio/lib_vsprintf.c and Kconfig: Numbered arguments now
+	    work by using two pass parsing and an argument list. The maximum
+	    number of numbered args is determined by CONFIG_LIBC_NL_ARGMAX which
+	    is then copied into NL_ARGMAX.  Size of pointer argument ('p') is
+	    determined before output.
+	  - include/limits.h:  Define NL_ARGMAX (as well as some of the other
+	    'invariant values' per
+	    http://pubs.opengroup.org/onlinepubs/7908799/xsh/limits.h.html)
+	  From Johannes (2019-02-21).
+	* libs/libc/lib_libvsprintf.c and Kconfig:  Remove
+	  CONFIG_LIBC_PRINT_MINIMAL.  The output in that configuration is
+	  unsatisfactory and inappropriate for use with NuttX.  For example, the
+	  output from many NSH commands become corrupted and useless.  Doesn't
+	  belong in this context.  From Gregory Nutt (2019-02-21).
+	* libs/libc/stdio/Kconfig:  Add 'range 9 999999' to
+	  CONFIG_LIBC_NL_ARGMAX.  Per OpenGroup.org, the minimum value for
+	  NL_ARGMAX is 9.  From Gregory Nutt (2019-02-21).
+	* include/poll.h:  Remove un-named union from 'struct pollfd'.  It is not
+	  required by OpenGroup.org and violates the NuttX C coding standard
+	  because it is not C89 compatible.  From Gregory Nutt (2019-02-21).
+	* imxrt_adc:  Error in offset  From David Sidrane (2019-02-22).
+	* drivers/net/tun.c:  Re-order all TUN/TAP driver state data.  Not only
+	  was was with wasting memory due to alignement requirements, it was also
+	  causing network packet buffers to be improperly aligned causing
+	  problems because the network requires 16-bit packet buffer alignment
+	  for uint16_t accesses.  This alignment problem was discovered by Alan
+	  Carvalho de Assis.  From Gregory Nutt (2019-02-24).
+	* drivers/net/tun.c:  Packet buffer size should include the configured
+	  GUARD_SIZE.  And, given how the buffers are allocated, the allocation
+	  size must be an even number of 16-bit values to preserve alignment.
+	  From Gregory Nutt (2019-02-24).
+	* drivers/net/tun.c:  Cosmetic changes from review for coding style
+	  compliance.  From Gregory Nutt (2019-02-24).
+	* SX127X improvements
+	  - drivers/wireless/lpwan/sx127x/sx127x:  Add TX power configuration
+	  - drivers/wireless/lpwan/sx127x/sx127x:  Discard RX packets with
+	    unsupported length
+	  - drivers/wireless/lpwan/sx127x/sx127x:  Refactor some logic
+	  - drivers/wireless/lpwan/Kconfig:  Move some hardcoded sx127x
+	    configuration to Kconfig
+	  - drivers/wireless/lpwan/Kconfig:  Remove EXPERIMENTAL flag
+	  - configs/b-l072z-lrwan1/sx127x:  Board-specific sx127x configuration
+	  - configs/nucleo-f091rc/sx127x:  Board-specific sx127x configuration
+	  - configs/nucleo-l073rz/sx127x:  Board-specific sx127x configuration
+	    LORA and FSK look fine but there is something missing for OOK and
+	    communication is not working yet.
+	  From Mateusz Szafoni (2019-02-24).
+	* support for pthread_mutex_timedlock  From Leif Jakob (2019-02-24).
+	* sched/pthread/pthread_mutexlock.c: Fix an error in last PR.  The
+	  abs_timeout value as not being passed from pthread_mutex_timedlock() to
+	  pthread_mutex_take().  From Gregory Nutt (2019-02-24).
+	* Missing definitions and better organistaion for STM32H7 DMA
+	  - arch/arm/src/stm32f0l0/hardware/stm32_dma_v1.h: rename DMA channel
+	    definitions
+	  - arch/arm/src/stm32h7/chip/stm32_dma: separated files for MDMA, DMA,
+	    BDMA and DMAMUX
+	  - arch/arm/src/stm32h7/chip/stm32_dma: missing definitions for MDMA,
+	    BDMA and DMAMUX
+	  From Mateusz Szafoni (2019-02-25).
+	* Add some sx127x demo configurations
+	  - configs/b-l072z-lrwan1/sx127x/defconfig: add configuration for sx127x
+	    demo app
+	  - configs/nucleo-f091rc/sx127x/defconfig: add configuration for sx127x
+	    demo app
+	  - configs/nucleo-l073rz/sx127x/defconfig: add configuration for sx127x
+	    demo app
+	  From Mateusz Szafoni (2019-02-25).
+	* arch/arm/src/imxrt/chip/imxrt_usb_analog.h:  Add USB analog header
+	  file.  From David Sidrane (2019-02-25).
+	* libs/libc/pthread, syscall/, and include/sys/syscall.h:  Support for
+	  pthread_mutex_timedlock() was added recently, however no new system
+	  call was added for the API make is usable only in the FLAT build. With
+	  a pthread_mutex_timedlock() system call, there is no reason for a
+	  pthread_mutex_lock() system call since it is now nothing more than an
+	  wrapper around pthread_mutex_timedlock(), passing NULL for the time
+	  value.  The pthread_mutex_lock() syscall was removed and the
+	  pthread_mutex_lock() implemented was moved from /sched/pthread to where
+	  it now belows in libs/libc/pthread.  From Gregory Nutt (2019-02-25).
+	* configs/nucleo-l073rz/src/stm32_buttons.c:  By default button support
+	  is enabled.  This causes errors because button support was not
+	  implemented for this configuration.  Solution:  Port button logic from
+	  nucleo-f072 which appears to be the same.  From Gregory Nutt
+	  (2019-02-26).
+	* arch/arm/src/imxrt:  Added OCOTP Support.  From David Sidrane
+	  (2019-02-27).
+	* tools/.gitignore:  Ignore rmcr binary  From David Sidrane (2019-02-27).
+	* include/pthread.h and libs/libc/pthread/pthread_spinlock.c:  Add a very
+	  preliminary implementation of the new POSIX pthread_spinlock_*
+	  interfaces.  This feature is marked EXPERIMENTAL.  There are usage
+	  model issues to be examined and there are also architectural issues
+	  that currently limit the implemantion to the FLAT build (that is,
+	  however, fixable when the APIs are needed.  From Gregory Nutt
+	  (2019-02-28).
+	* - arch/xtensa/src/esp32/esp32_serial.c:  Fix some backward arguments.
+	    Correct 2-stop bit setting.
+	  - sched/sched/sched_waitid.c:  Could exit without leaving critical
+	    section on some error conditions.
+	  From Gregory Nutt (2019-02-28).
+	* imxrt:  ocotp Fixed call to undefined function.  From David Sidrane
+	  (2019-02-28).
+	* armv7-m:  stackcheck allow faulting stack calculation to make it to the
+	  up_assert reg dump  From David Sidrane (2019-02-28).
+	* tools/nxstyle.c:  Fix logic that detects if an operator is correctly
+	  delimited with spaces.  sched/:  Various changes because sched/ C files
+	  were used as Guinea Pigs to test nstyle.c.  From Gregory Nutt
+	  (2019-03-01).
+	* Improvements for H7 towards the DMA support
+	  - arch/arm/include/stm32h7/stm32h7x3xx_irq.h: fix typos and rename
+	    DMA1/2 irq names to match those from other STM32
+	  - arch/arm/src/stm32h7/chip/stm32_bdma.h: add auxiliary definitions
+	  - arch/arm/src/stm32h7/chip/stm32_dmamux.h: add auxliary definitions
+	    and fix some typos
+	  - arch/arm/src/stm32h7/chip/stm32_mdma.h: add auxliary definitions and
+	    fix some typos
+	  - arch/arm/src/stm32h7/chip/stm32h7x3xx_dmamux.h: add DMAMAP
+	    definitions for MDMA, DMA1, DMA2 and BDMA
+	  - arch/arm/src/stm32h7/chip/stm32h7x3xx_memorymap.h: fix AHB1 base
+	    adresses and add some address blocks
+	  - arch/arm/src/stm32h7/chip/stm32h7x3xx_rcc.h: fix some definitions to
+	    match other STM32 ports
+	  - arch/arm/src/stm32h7/stm32_allocateheap.c: use SRAM from D2 domain
+	    (SRAM123) for now
+	  - arch/arm/src/stm32h7/stm32h7x3xx_rcc.c: enable clock for MDMA and BDMA
+	  From Mateusz Szafoni (2019-03-01).
+	* drivers/wireless/nrf24l01.c:  Fix uninitialized irq_work which was
+	  causing a hard_fault on interrupt handler whenever something was sent
+	  from nrf24l01_term  From Petri Ahonen (2019-03-02).
+	* arch/arm/src/stm32h7/stm32_timerisr.c:  H7 appears to ignore the
+	  SysTick CLKSOURCE bit and use the CPU clock in all cases.  From Mateusz
+	  Szafoni (2019-03-02).
+	* Initial DMA support for STM32H7
+	  - arch/arm/src/stm32h7: SPI DMA mode
+	  - arch/arm/src/stm32h7/chip/stm32h7x3xx_memorymap.h: add base addresses
+	    for D1, D2 and D3 domain; use 2 bytes to specify memory region
+	  - arch/arm/src/stm32h7/stm32h7x3xx_rcc.c: add D1 domain core prescaler
+	    configuration
+	  From Mateusz Szafoni (2019-03-03).
+	* tools/Makefile.unix, .win, and all defconfig files:  Modify
+	  tools/Makefiles to add warning on defconfig files  From Alan Carvalho
+	  de Assis (2019-03-03).
+	* arch/arm/src/imxrt and configs/imxrt1050-evk:  Adds framebuffer support
+	  for thje i.MXRT 1050.  Includdd DCD initialization for SDRAM to provide
+	  space for the framebufer. External code I used/ported is from NXP and
+	  is BSD 3-clause license.  From Johannes (2019-03-04).
+	* - libs/libc/pthread/pthread_spinlock.c:  Resolve several TODO issues by
+	    accessing up_testset() via the boardctl() interface rather than
+	    attempting to call it directly.
+	  - configs/boardctl.c, include/sys/boardctl.h:  Add access to
+	    architecture-specific up_testset() via boardctl().
+	  - arch/Kconfig's, sched/Kconfig, and include/nuttx/spinlock.h:
+	    Spinlocks are not available unless the architecture supports the
+	    up_testset() operation.
+	  From Gregory Nutt (2019-03-04).
+	* tools/nxstyle.c:  Add capability to detect CamelCase identifiers.  From
+	  Gregory Nutt (2019-03-05).
+	* configs/boardctl.c and include/sys/boardctl.h:  Add support for
+	  BOARDIOC_NXTERM which can be used to create an NxTerm terminal.  From
+	  Gregory Nutt (2019-03-06).
+	* graphics/nxterm:  Remove the nxterm_unregister interface.  The correct
+	  way to unregister a device is to unlink it.  From Gregory Nutt
+	  (2019-03-06).
+	* configs/open1788/knxterm:  Add a configuration to test NxTerms in the
+	  PROTECTED mode.  This configuration does not yet link correctly because
+	  a few NxTerms interfaces are improperly exported from the OS:
+	  nxterm_redraw() and nxterm_kbdin().  From Gregory Nutt (2019-03-06).
+	* configs/boardctl.c:  Add boardctl() commands to replace direct calls to
+	  nxterm_redraw() and nxterm_kbdin().  From Gregory Nutt (2019-03-06).
+	* configs/open1788/knxterm/defconfig:  Add missing MPU configuration
+	  option.  From Gregory Nutt (2019-03-06).
+	* configs/open1788:  Re-arrange PROTECTED mode link map to make more
+	  space for large kernels with debug enabled.  From Gregory Nutt
+	  (2019-03-06).
+	* graphics/nxterm and configs/open1788: Various fixes to get the NxTerm
+	  example working in PROTECTED mode with the Open1788 knxterm
+	  configuration.  Basically works until the screen becomes full and it
+	  starts scrolling.  Then characters are missing from the display.  Needs
+	  more debug and test.  From Gregory Nutt (2019-03-07).
+	* drivers/sensors/mpu60x0.c:  Initial support for TDK InvenSense MPU6000
+	  and MPU6050 6-axis gyroscope and accelerometers.  This commit supports
+	  SPI media only.  From Bill Gatliff (2019-03-07).
+	* configs/stm32f429i-disco/nxhello/defconfig:  Add an
+	  apps/examples/examples/nxhello configuration.  From Gregory Nutt
+	  (2019-03-07).
+	* configs/omnibusf4: Initial support for the OmnibusF4 family of flight
+	  management units.  "OmnibusF4" is not a product name per se, but rather
+	  a design spec that many product vendors adhere to. The spec defines the
+	  major components, and how those components are wired into the
+	  microcontroller. Airbot is one such vendor, and they publish a
+	  schematic here:  http://bit.ly/obf4pro.   Other software that supports
+	  the OmnibusF4 family include Betaflight, iNAV, and many others. PX4
+	  recently added support as well, using their own, non-upstreamed,
+	  bespoke port of NuttX. No code from those resources is included in this
+	  port.  From Bill Gatliff (2019-03-08).
+	* libs/libnx/nxfonts:  Fix a memory leak in the font cache.  With a busy
+	  NxTerm display, this could drain off all the memory pretty quickly!
+	  From Gregory Nutt (2019-03-08).
+	* configs/stm32f429i-disco/src/stm32_lcd.c:  Handle multiple calls to
+	  up_fbinitialize()  From Gregory Nutt (2019-03-08).
+	* arch/arm/src/stm32/stm32_otgfsdev.c/stm32_otghsdev,
+	  stm32f7/stm32_otgdev.c, and stm32l4/stm32l4_otgfsdev.c:  Fix a warnings
+	  due to a function prototype mismatch.  From Gregory Nutt (2019-03-08).
+	* tools/nxstyle.c:  Was confusing hex constants with strings staring with
+	  'x'.  Added logic to complain about hex constants containing upper case
+	  characters.  From Gregory Nutt (2019-03-09).
+	* - graphics/nxterm:  Needs to clear display initially.  Otherwise,
+	    garbage from previous display may still be present from preceding
+	    NxWM window.
+	  - graphics/nxterm:  Back out most of the preceding NxTerm changes
+	    related to window size.  apps/examples/nxterm passed the complete
+	    NxTK window size.  Those changes were needed to make
+	    aps/examples/nxterm work.  But NxWM passes the the size of the NxTK
+	    main sub-window.  So I needed to back out the changes and then change
+	    the applications so that they passed the same value (the size of the
+	    NxTK sub-window).
+	  From Gregory Nutt (2019-03-09).
+	* Initial OTG support for STM32H7 and some minor improvements
+	  - arch/arm/src/stm32h7/stm32h7x3xx_rcc.c: add support for HSI48 clock
+	  - configs/nucleo-f207zg: add support for USB and initialize CDCACM if
+	    configured
+	  - configs/nucleo-h743zi: add support for USB and initialize CDCACM if
+	    configured
+	  - drivers/usbdev/Kconfig: fix type for USBDEV_TRACE_INITIALIDSET
+	  - configs/teensy-3.x/usbnsh/defconfig: update config according to
+	    change in USBDEV_TRACE_INITIALIDSET
+	  From Mateusz Szafoni (2019-03-10).
+	* arch/arm/src/imxrt/imxrt_clockconfig.c:  If SDRAM is actived it was
+	  only running at 40MHz.  This was becaus imxrt_clockconfig.c changed the
+	  SEMC clock divider after the DCD was configured.  This commit corrects
+	  that.  From Johannes (2019-03-10).
+	* configs/omnibusf4/README.txt:  Add README file for OmnibusFS target.
+	  From Bill Gatliff (2019-03-10).
+	* tools/nxstyle.c:  Add logic to detect a blank line following a left
+	  brace or a blank line preceding a right brace.  From Gregory Nutt
+	  (2019-03-10).
+	* graphics/nxmu/nxmu_start.c:  Extend nxmu_start so that receives a
+	  display number as an argument.  This makes it possible to have multiple
+	  instances of the NX server running on boards that support multiple
+	  displays.  Also includes updates to boardctl() to accept display number
+	  paramters.  From Gregory Nutt (2019-03-10).
+	* Add three patches about STM32 intherupts and network loopback files
+	  - Add the missing macro STM32_IRQ_NIRQS used by
+	    ./arch/arm/src/stm32f7/stm32_irq.c
+	  - The struct in_addr doesn't have the member sin_addr.
+	  - The function lib_lo_ipv6match() is for IPv6.  Correct the function it
+	    calls from lib_lo_ipv4matchto() to lib_lo_ipv6match().  Also add
+	    CONFIG_NET_IPv6 for configuration.
+	  From Kejun ZHOU (2019-03-11).
+	* arch/arm/src/stm32h7: initial support for protected build mode. Not
+	  functional yet. It compiles without errors and passes initialization
+	  but after entering the user app strange things happen.  From Mateusz
+	  Szafoni (2019-03-11).
+	* tools/nxstyle.c:  Fix logic error that prevent detecion of '/' and '/='
+	  as operators.  net/:  Minor updates resulting from testing
+	  tools/nxstyle.  From Gregory Nutt (2019-03-11).
+	* arch/arm/include/nrf52/ and arch/arm/src/nrf52:  1. Added 52840 family
+	  support 2. Use common irq and memory layout header file for 52832 &
+	  52840.  From Levin Li (2019-03-12).
+	* binfmt/nxflat.c:  Correct a double free debug assertion.  This occurs
+	  when groups are enabled:  (1) once via binfmt_exit and unload_module,
+	  and (2) once via sched_releasetcb().  this was corrected by adding
+	  logic to free/unload the memory once and nullify the pointer so that
+	  cannot be freed a second time.  This commit resolves Bitbucket issue
+	  #145.  From Valmantas Palikša (2019-03-12).
+	* binfmt/nxflat.c: Update to last NxFLAT change:  The logic must respect
+	  the reference count before freeing the dspace memory region.  From
+	  Gregory Nutt (2019-03-12).
+	* tools/nxstyle.c:  Don't complain about certain lowercase characters in
+	  otherwise uppercase pre-processor identifers:  IPv6, IPv4, ICMPv6,
+	  IGMPv2, p as a decimal point, d signifying a divisor.  It was a bad
+	  idea to let the door open a crack for there.  While they improve
+	  readability, the inconsistently also causes other problems.  From
+	  Gregory Nutt (2019-03-12).
+	* arch/arm/src/nrf52:   1. added RNG device driver 2. added errdata to
+	  correct temp which will be used by RNG module 3. use general
+	  task_trigger / event_clear inline api for all driver.  From Levin Li
+	  (2019-03-13).
+	* include/nuttx/nx/nxmu.h:  Remove prototype of non-existent function. 
+	  From Gregory Nutt (2019-03-13).
+	* This commit removes naming associated with and naming for the now
+	  non-existent NXFE graphics layer.
+	  - graphics/:  Rename nxfe_reportposition to nxmu_reportposition.  The
+	    is no longer an nxfe layer.
+	  - graphics/:  Rename nxfe_redrawreq to nxmu_redrawreq.  The is no
+	    longer an nxfe layer.
+	  - graphics/nxmu/nxmu.h:  Renmae nxfe.h to nxmu.h.  There is no long an
+	    nxfe layer.
+	  - graphics/: Rename nxfe_state_s to nxmu_state_s.  There is no longer
+	    an nxfe layer.
+	  - graphics/: Rename nxfe_conn_s to nxmu_conn_s.  There is no longer an
+	    nxfe layer.
+	  From Gregory Nutt (2019-03-13).
+	* - graphics/:  nx_openwindow() and nxtk_openwindow() now accept an
+	    additional 'flag' parameter.  This argument is not used at present but
+	    will, eventually enable a RAM backed, per-window framebuffer.
+	  - graphics/Kconfig:  Add configuration to support a rambacked
+	    framebuffer. Current marked as EXPERIMENTAL because this is a work in
+	    progress.
+	  From Gregory Nutt (2019-03-13).
+	* A little more progress toward the implementation of per-window
+	  framebuffers.
+	  - graphics/:  Add logic to allocate the per-window framebuffer.
+	  - graphics/:  A few fragmentary thoughts on how a per-window
+	    framebuffer could be represented and allocated.
+	  Still missing:
+	  - Logic that generates the low lever framebuffer renderers for the
+	    per-window framebuffers,
+	  - The logic that picks off the per-window framebuffer updates from
+	    normal graphics device updates.  This logic must update both the
+	    per-window framebuffer and the graphics device (from the framebuffer).
+	  From Gregory Nutt (2019-03-14).
+	* graphics/nxflig/pwfb:  Clone logic for new bit blitters for per-window
+	  framebuffers.  From Gregory Nutt (2019-03-14).
+	* configs/teensy-3.x/usbnsh/defconfig:  Fix a mismatch in types.  From
+	  Gregory Nutt (2019-03-14).
+	* graphics:  Extend NXBE data structures to include the per-window
+	  framebuffer (pwfb) vtable.  Add logic to initialize the pwfb vtable. 
+	  From Gregory Nutt (2019-03-14).
+	* fs/procfs/fs_procfsuptime.c:  Fix procfs typo.  From Sebastien Lorquet
+	  (2019-03-14).
+	* arch/arm/src/armv7-a/mmu.h:  pdating the cp15_wrttb and cp15_wrdacr
+	  functions to use inline assembly in the correct way. The incorrect
+	  method was generating errors as ARMv7-a expects the MCR/MRC
+	  instructions to provide registers as an argument(MRC p15, 0, <Rt>, c2,
+	  c0, 0) and the code was providing a constant value(and hence the build
+	  error).  From Bilal Wasim (2019-03-14).
+	* This commit brings the per-framebuffer logic to code-complete.  Still
+	  untested.
+	  - graphics/nxbe:  The moverectangle renderer now supports updates to
+	    the per-window framebuffer (unclipped) as well as the graphics device
+	    memory (clipped).
+	  - graphics/nxbe:  The filltrapezond renderer now supports updates to
+	    the per-window framebuffer (unclipped) as well as the graphics device
+	    memory (clipped).
+	  - graphics/nxbe:  The getrectangle method now returns data from the
+	    per-window framebuffer if available.
+	  - graphics/nxbe:  The fillrectangle renderer now supports updates to
+	    the per-window framebuffer (unclipped) as well as the graphics device
+	    memory (clipped).
+	  - graphics/nxmu:  If a window supports a per-window framebuffer, then
+	    redraw callbacks are suppressed and the device content is updated
+	    from the shadow, per-window framebuffer.  graphics/nxbe:  The
+	    copyrectangle renderer now supports updates to the per-window
+	    framebuffer (unclipped) as well as the graphics device memory
+	    (clipped).
+	  - graphics/nxbe/nxbe_setsize.c:  Reallocate the per-window framebuffer
+	    when the window size changes.
+	  From Gregory Nutt (2019-03-15).
+	* configs/nucleo-f446re:  Add support for the Nucleo F446RE.  From
+	  Sebastien Lorquet (2019-03-15).
+	* Fix defconfigs.  A few people have been lazy or are perhaps ignorant of
+	  the procedures.  But the have been committing .config files as though
+	  they were defconfig files.  Wrong, wrong, wrong.  defconfig files are
+	  specially formatted files that you create through 'make defconfig'. 
+	  From Gregory Nutt (2019-03-15).
+	* configs/open1788/nxlines/defconfig:  Enable anti-aliasing.  From
+	  Gregory Nutt (2019-03-15).
+	* configs/open1788/pwfb:  Add an example for testing per-window frame
+	  buffers.  arch/arm/src/lpc17xx:  Add a configuration option to skip
+	  over the framebuffer when adding DRAM to the heap.  graphics:  Early
+	  fixes from testing per-window framebuffer.  Still lots of problems. 
+	  From Gregory Nutt (2019-03-16).
+	* include/fixedmath.h:  Add macros for conversion between types b16_t and
+	  type double  From Gregory Nutt (2019-03-16).
+	* app/graphics/nxbe/nxbe_setsize.c:  Fix backward source/destination in
+	  memcpy() in new per-window framebuffer logic.  From Gregory Nutt
+	  (2019-03-16).
+	* - graphics/nxbe/nxbe_bitmap.c:  Fix another coordinate system problem.
+	  - graphics/:  Review use of device coordinate system with window
+	    frambebuffer and make fixes accordingly.
+	  - graphics/nxbe/nxbe_fill.c:  Fix a coordinate system bug.  Was trying
+	    to update the window fraembuffer using the device coordinate system. 
+	    Need to use the relative coordinate system.
+	  - graphics/:  Use DEBUGASSERT instead of return an error since the is
+	    no user to handle the errors within the NX server.  Use
+	    CONFIG_DEBUG_GRAPHICS instead of CONFIG_DEBUG_FEATURES in most cases.
+	  - graphics/:  Nothing under graphics/ should set the errno.
+	  From Gregory Nutt (2019-03-17).
+	* libs/libnx/nxtk/nxtk_setsize.c:  Add logic to redraw NXTK borders for
+	  the case of per-window framebuffers.  There are no redraw callbacks in
+	  this case, so we cannot rely on the callbacks to redraw the borders.
+	  From Gregory Nutt (2019-03-17).
+	* configs/lc823450-xgevk: Remove -nostdinc to avoid build error  From
+	  Masayuki Ishikawa (2019-03-18).
+	* libs/libc/libc.csv:  Should be locale.h not local.h.  From Joao Matos
+	  (2019-03-18).
+	* libs/libnx/nxtk:  Add logic to re-draw the frame when the toolbar is
+	  added or removed.  From Gregory Nutt (2019-03-18).
+	* libs/libc/libc.csv:  Needed logic for correct compilation if not using
+	  CONFIG_LIBC_WCHAR  From Joao Matos (2019-03-18).
+	* libs/libnx/nxtk:  Fix more cases where we were using the wrong
+	  coordinate system.  From Gregory Nutt (2019-03-18).
+	* binfmt/libnxflat/libnxflat_init.c:  File descriptor leaks when nxflat
+	  loading fails  From Valmantas Palikša (2019-03-19).
+	* configs/lpcxpresso-lpc54628/pwfb:  Add per-window framebuffer
+	  configuration.  From Gregory Nutt (2019-03-19).
+	* fs/littlefs/lfs_vfs.c:  Lookahead should use bit unit not byte unit. 
+	  From Xiang Xiao (2019-03-19).
+	* libs/libc/string/lib_strsep.c:  Add strsep BSD/Linux function.  From
+	  Xiang Xiao (2019-03-19).
+	* fs/mount and fs/unionfs:  Support mount unionfs from nsh command.  From
+	  Xiang Xiao (2019-03-19).
+	* binfmt/libelf and libs/libc/modlib:  Add relocation buffer table to
+	  reduce filesystem access.  From anchao (2019-03-19).
+	* binfmt/libelf/ and libs/libc/modlib:  Add symbol buffer table to reduce
+	  filesystem access.  From anchao (2019-03-19).
+	* net/usrsock:  Add mutual exclusion so that only user can perform a
+	  socket request  From zhangyuan7 (2019-03-19).
+	* net/icmp and icmpv6:  Bind icmp callback from device to connection. 
+	  Resolves the issue that bind() could not be called before send()  From
+	  anchao (2019-03-19).
+	* net/udp/udp_callback.c:  Initialize address structure to avoid random
+	  values in padding.  From anchao (2019-03-19).
+	* net/local/local_connect.c:  Initialize lc_result before giving
+	  lc_waitsem  From zhangyuan7 (2019-03-19).
+	* net/local:  Fixed deadlock issue by replacing nxsem_wait() with
+	  net_lockedwait() so that we do not wait with the network locked.  From
+	  zhangyuan7 (2019-03-19).
+	* libs/libc/netdb: Support the nameserver change notification then we
+	  can pass dns info from server to client in usrsock case.  From Xiang
+	  Xiao (2019-03-19).
+	* include/nuttx/compiler.h:  Assume inline support if __STDC_VERSION__
+	  not defined.  From Xiang Xiao (2019-03-19).
+	* libs/libxx/Makefile:  Always add libxx_cxa_guard.cxx for uclibcxx. 
+	  From zhangyuan7 (2019-03-19).
+	* ibs/libc/Makefile, libs/libnx/Makefile, and mm/Makefile:  Remove
+	  obj-path MKDEPS option since make dependency target (MT) is not
+	  supported by some toolchains.  From anchao (2019-03-19).
+	* include/nuttx/userspace.h:  Add add a new field (us_heapend) to struct
+	  userspace_s that labels the end of the heap.  From Xiang Xiao
+	  (2019-03-19).
+	* arch/Kconfig:  Move FPU options to a common place and unify the usage
+	  by removing ARCH_CORTEXRxF.  From Xiang Xiao (2019-03-19).
+	* arch/:  Unify the cache interface for all architectures  From Xiang
+	  Xiao (2019-03-19).
+	* arch/armv7-m:  Make the default NVIC_VECTAB_TBLOFF_MASK safer.  The
+	  base address of the new vector table must be aligned to the size of
+	  the vector table extended to the next larger power of 2.  From Xiang
+	  Xiao (2019-03-19).
+	* arch/arm/armv7-a:  Support thumb mode and fix interworking issue. 
+	  From zhangyuan7 (2019-03-19).
+	* arch/arm/src/armv7-a:  Remove inclusion pg_macros.h for armv7-a since
+	  this header file does not exist.  From zhangyuan7 (2019-03-19).
+	* arch/arm/src/armv7-a:  Guard some assembly files if configuration not
+	  selected.  From zhangyuan7 (2019-03-19).
+	* arch/arm/src/armv7-a/arm_head.S:  Add weak attribute to
+	  arm_data_initialize so platform could provide the new implemenation as
+	  needed.  From zhangyuan7 (2019-03-19).
+	* arch/arm/src/armv7-a:  Fix assemble error when including gic.h  From
+	  Xiang Xiao (2019-03-19).
+	* arch/arm/src/armv7-a/arm_gicv2.c:  Don't use GIC_ICDDCR_ENABLEGRP1 for
+	  NONSECURE since this bit doesn't exist in this mode.  From liuzhuang
+	  (2019-03-19).
+	* arch/arm/src/armv7-a/sctlr.h:  Add SCR bit definitions.  From Xiang
+	  Xiao (2019-03-19).
+	* arm/armv7-a:  Add mmu_l1_map_regions() to remove the code
+	  duplication.  From Xiang Xiao (2019-03-19).
+	* arch/arm:  Add the initial cortex-a7 architecture support  From
+	  zhangyuan7 (2019-03-19).
+	* arch/arm:  The last big change that unified the cache interfaces had a
+	  bad side-effect:  It also removed the memory barrier definitions that
+	  were also in the removed architecture-specific cache.h header files. 
+	  Fixed by adding a new barriers.h header file that provides these
+	  definitions.  From Gregory Nutt (2019-03-19).
+	* ARMv7-A/R:  Add barriers.h header file for consistency with ARMv7-M. 
+	  From Gregory Nutt (2019-03-19).
+	* arch/arm:  Fix more errors resulting from universal cache interfaces. 
+	  The old cache-specific head file also provided a sneak way to include
+	  other necessary header files.  With the old cache.h removed, those
+	  files all fail to build.  From Gregory Nutt (2019-03-19).
+	* arch/arm/src/armv7-a/arm_scu.c:  Another place where universal cached
+	  control change borked a compile due to missing ARM_DSB() definition.
+	  From Gregory Nutt (2019-03-19).
+	* arch/arm/src/stm32f7/stm32_tim.c:  Add OUTTOGGLE mode for STM32f7
+	  timer  From Valmantas Paliksa (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_tim_lowerhalf.c:  Add timer lowerhalf
+	  driver for stm32f7.  From Valmantas Paliksa (2019-03-20).
+	* drivers/can/mcp2515.c:  Use kmm_zalloc to allocate device state
+	  structure.  From Valmantas Paliksa (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_can.c:  Add CAN driver with support for
+	  three bxCAN interfaces.  From Valmantas Paliksa (2019-03-20).
+	* arch/arm/src/stm32f7:  Add ITM syslog support.  From Valmantas Paliksa
+	  (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_can.c:  Fix bittiming calculation.  From
+	  Valmantas Paliksa (2019-03-20).
+	* drivers/eeprom/spi_xx25xx.c:  Add configurable SPI eeprom frequency. 
+	  From Valmantas Paliksa (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Added stm32f7 Quad SPI support. 
+	  From Valmantas Paliksa (2019-03-20).
+	* drivers/can/mcp2515.c: Fix MCP2515 compile errors.  From Valmantas
+	  Paliksa (2019-03-20).
+	* drivers/can/Kconfig:  Add MCP2515 clock input config to KConfig.  From
+	  Valmantas Paliksa (2019-03-20).
+	* sched/sched and include/nuttx/arch.h:   Rename sched_process_cpuload
+	  to nxsched_process_cpuload.  All internal sched_ functions should be
+	  prefixed with nx.  From Valmantas Paliksa (2019-03-20).
+	* arch/arm/src/armv7-a/Toolchain.defs:  Correct conditional logic.  Was
+	  mixing C preprocessor and Makefile semantics.  From Gregory Nutt
+	  (2019-03-20).
+	* arch/arm/src/stm32/stm32_allocateheap.c:  Change 'if
+	  CONFIG_STM32_HAVE_CCM' to 'ifdef CONFIG_STM32_HAVE_CCM' to avoid a
+	  warning when CONFIG_STM32_HAVE_CCM is not defined.  From Gregory Nutt
+	  (2019-03-20).
+	* binfmt/libelf/libelf_bind.c:  Make naming of internal type compliant
+	  with coding standard.  Yes, the ELF32 types do not follow the standard
+	  for historical reasons (and will be fixed someday), but let's not
+	  perpetuate the naming violation.  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Update for new universal cache
+	  conrols.  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/armv7-m/up_ramvec_initialize.c:  Correct bad
+	  NVIC_VECTAB_TBLOFF_MASK definitions in previous commit.  Were missing
+	  bits in the mask.  Raised DEBUGASSERT in
+	  armv7-m/up_ramvec_initialize.c line: 144.  From Mateusz Szafoni
+	  (2019-03-20).
+	* libs/libnx/nxmu/nx_filltrapezoid.c:  Fix a coordinate system error.
+	  When no clipping rectangle is falls, it falls back to use the entire
+	  window as for the clip.  However, that window must then then be in
+	  window relative coordinates, not in absoute device coordinates.  From
+	  Gregory Nutt (2019-03-20).
+	* configs/lpcxpresso-lpc54628:  Add a configuration for
+	  apps/examples/pwlines.  From Gregory Nutt (2019-03-20).
+	* configs/stm32f769i-disco/netnsh/defconfig:  Remove
+	  CONFIG_STM32F7_QUADSPI=y from the configuration.  This was apparently
+	  set before the implementation was added.  Now that the implemenation
+	  was added, the configuration will not build because it requires that
+	  QSPI GPIO pin definitions be provided in the board.h header file. 
+	  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Fix a warning about QSPI_DMA_PRIO
+	  being redefined.  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Fix a warning about ARM_DSB()
+	  being implicitly defined.  From Gregory Nutt (2019-03-20).
+	* arch/ and configs/:  Fix more errors related to cache interface
+	  changes.  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/armv7-a/arm_addrenv_utils.c:  Fix a new cache interface
+	  related warning.  From Gregory Nutt (2019-03-20).
+	* Backs out part of a commit.  When CONFIG_SCHED_CPULOAD_EXTCLK is
+	  defined, the prototype must still be available in nuttx/arch.h  From
+	  Gregory Nutt (2019-03-20).
+	* Rename sched_process_timer to nxsched_process_timer.  That is the
+	  appropriate name for an internal sched/ function (still many named
+	  incorrectly).  From Gregory Nutt (2019-03-20).
+	* Rename sched_timer_expiration to nxsched_timer_expiration.  That is
+	  the appropriate name for an internal sched/ function (still many named
+	  incorrectly).  From Gregory Nutt (2019-03-20).
+	* Rename sched_alarm_expiration to nxsched_alarm_expiration.  That is
+	  the appropriate name for an internal sched/ function (still many named
+	  incorrectly).  From Gregory Nutt (2019-03-20).
+	* arch/arm/src/stm32f7/stm32_qspi.c:  Fix QuadSPI priority constants.
+	  From Valmantas Paliksa (2019-03-21).
+	* drivers/ioexpander/gpio.c:  Support reading and writing gpio pins
+	  using cat and echo.  From Valmantas Paliksa (2019-03-21).
+	* arch/arm/src/stm32/stm32_dfumode.c:  Add logic to reboot the STM32 in
+	  DFU mode.  Current implementation only works for STM32F2 and F4.  From
+	  Bill Gatliff (2019-03-21).
+	* drivers/ioexpander/gpio.c:  Return EINVAL if written value is not 0
+	  nor 1.  From Valmantas Paliksa (2019-03-22).
+	* arch/arm/src/stm32/stm32_oneshot.c:  Corrects error introduced by
+	  and earlier commit:  Also affects stm32_oneshot.c (I noticed that ps
+	  on my STM32F4 did not show any CPU load in nuttx-7.27 onward).  From
+	  Maximilian Kriegleder (2019-03-22).
+	* arch/arm/src/stm32/stm32_tickless.c and
+	  arch/arm/src/stm32/stm32_freerun.c:  Apply Max's stm32_oneshot.c fix
+	  to the tickless implementation and to the freerunning time.  From
+	  Mateusz Szafoni (2019-03-22).
+	* drivers/video/max7456.c:  Support for the Maxim MAX7456
+	  on-screen-display chip.  From Bill Gatliff (2019-03-24).
+	* configs/omnibusf4: Add MAX7546 support.  From Bill Gatliff (2019-03-24).
+	* arch/arm/src/stm32/stm32_pwm.c:  Set CCPxP and CCPxNP bits if polarity
+	  is negative.  From Mateusz Szafoni (2019-03-24).
+	* arch/arm/src/stm32/stm32_pwm.c:  Missing commas in initializers can
+	  break compilation in certain configurations.  From Mateusz Szafoni
+	  (2019-03-24).
+
+7.30 2019-xx-xx Gregory Nutt <gnutt@nuttx.org>
