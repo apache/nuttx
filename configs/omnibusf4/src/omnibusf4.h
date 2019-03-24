@@ -74,6 +74,12 @@
                            GPIO_OPENDRAIN | GPIO_PORTC | GPIO_PIN4)
 #define DEVNODE_MPU6000   "/dev/imu0"
 
+#define SPIPORT_MAX7456   3
+#define SPIMINOR_MAX7456  0
+#define GPIO_CS_MAX7456   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |  \
+                           GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN15)
+#define DEVNODE_MAX7456   "/dev/osd0"
+
 /* USB OTG FS ***************************************************************/
 
 /* PC5  OTG_FS_VBUS VBUS sensing */

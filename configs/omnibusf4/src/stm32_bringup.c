@@ -79,6 +79,22 @@
 #endif
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_MPU60X0
+/* Initialize the MPU6000 device. */
+
+int stm32_mpu6000_initialize(void);
+#endif
+
+#ifdef CONFIG_VIDEO_MAX7456
+/* Initialize the MAX7456 OSD device. */
+
+int stm32_max7456_initialize(void);
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -216,13 +232,23 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_MPU60X0
   /* Initialize the MPU6000 device. */
 
-  int stm32_mpu6000_initialize(void);
   ret = stm32_mpu6000_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_mpu6000_initialize() failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_VIDEO_MAX7456
+  /* Initialize the MAX7456 OSD device. */
+
+  ret = stm32_max7456_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_max7456_initialize() failed: %d\n", ret);
+    }
+#endif
+
 
 #ifdef CONFIG_USERLED
   /* Register the LED driver */

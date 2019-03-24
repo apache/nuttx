@@ -55,7 +55,8 @@
 
 #include "omnibusf4.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3)
 
 /****************************************************************************
  * Public Functions
@@ -72,12 +73,15 @@
 void weak_function stm32_spidev_initialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
-        stm32_configgpio(GPIO_CS_MPU6000);
-        stm32_configgpio(GPIO_EXTI_MPU6000);
+  stm32_configgpio(GPIO_CS_MPU6000);
+  stm32_configgpio(GPIO_EXTI_MPU6000);
+#endif
+#ifdef CONFIG_STM32_SPI3
+  stm32_configgpio(GPIO_CS_MAX7456);
 #endif
 #if defined(CONFIG_MMCSD_SPI)
-        (void)stm32_configgpio(GPIO_MMCSD_NCD);  /* SD_DET */
-        (void)stm32_configgpio(GPIO_MMCSD_NSS);  /* CS */
+  (void)stm32_configgpio(GPIO_MMCSD_NCD);  /* SD_DET */
+  (void)stm32_configgpio(GPIO_MMCSD_NSS);  /* CS */
 #endif
 }
 
@@ -120,7 +124,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 }
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-        return 0;
+  return 0;
 }
 #endif
 
@@ -147,10 +151,12 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
-  /* Note: I don't know what is on SPI3 yet. */
-
   spiinfo("devid: %d %s\n",
           (int)devid, selected ? "assert" : "de-assert");
+
+  /* Note: MAX7456 CS is active-low. */
+
+  stm32_gpiowrite(GPIO_CS_MAX7456, selected ? 0 : 1);
 }
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
