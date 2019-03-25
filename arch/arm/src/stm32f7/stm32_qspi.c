@@ -105,7 +105,7 @@
 
 /* Can't have both interrupt-driven QSPI and DMA QSPI */
 
-#if defined(STM32F7_QSPI_INTERRUPTS) && defined(CONFIG_STM32F7_QSPI_DMA)
+#if defined(CONFIG_STM32F7_QSPI_INTERRUPTS) && defined(CONFIG_STM32F7_QSPI_DMA)
 #  error "Cannot enable both interrupt mode and DMA mode for QSPI"
 #endif
 
@@ -189,7 +189,7 @@ struct stm32f7_qspidev_s
   sem_t exclsem;                /* Assures mutually exclusive access to QSPI */
   bool memmap;                  /* TRUE: Controller is in memory mapped mode */
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   xcpt_t handler;               /* Interrupt handler */
   uint8_t irq;                  /* Interrupt number */
   sem_t op_sem;                 /* Block until complete */
@@ -247,7 +247,7 @@ struct qspi_xctnspec_s
   uint8_t isddr;          /* true if 'double data rate' */
   uint8_t issioo;         /* true if 'send instruction only once' mode */
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   uint8_t function;       /* functional mode; to distinguish a read or write */
   int8_t disposition;     /* how it all turned out */
   uint32_t idxnow;        /* index into databuffer of current byte in transfer */
@@ -287,7 +287,7 @@ static void     qspi_dumpgpioconfig(const char *msg);
 
 /* Interrupts */
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
 static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
 
 #endif
@@ -356,9 +356,9 @@ static struct stm32f7_qspidev_s g_qspi0dev =
     .ops             = &g_qspi0ops,
   },
   .base              = STM32_QUADSPI_BASE,
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   .handler           = qspi0_interrupt,
-  .irq               = STM32F7_IRQ_QUADSPI,
+  .irq               = STM32_IRQ_QUADSPI,
 #endif
   .intf              = 0,
 #ifdef CONFIG_STM32F7_QSPI_DMA
@@ -804,7 +804,7 @@ static int qspi_setupxctnfromcmd(struct qspi_xctnspec_s *xctn,
       xctn->isddr = 0;
     }
 
-#if defined(STM32F7_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32F7_QSPI_INTERRUPTS)
   xctn->function = QSPICMD_ISWRITE(cmdinfo->flags) ? CCR_FMODE_INDWR :
                                                      CCR_FMODE_INDRD;
   xctn->disposition = - EIO;
@@ -934,7 +934,7 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
 
   xctn->isddr = 0;
 
-#if defined(STM32F7_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32F7_QSPI_INTERRUPTS)
   xctn->function = QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR :
                                                      CCR_FMODE_INDRD;
   xctn->disposition = - EIO;
@@ -1057,7 +1057,7 @@ static void qspi_ccrconfig(struct stm32f7_qspidev_s *priv,
     }
 }
 
-#if defined(STM32F7_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32F7_QSPI_INTERRUPTS)
 /****************************************************************************
  * Name: qspi0_interrupt
  *
@@ -1142,7 +1142,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
   {
     /* Acknowledge interrupt */
 
-    qspi_putreg(&g_qspi0dev, QSPI_FCR_CTCF, STM32_QUADSPI_FCR);
+    qspi_putreg(&g_qspi0dev, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
 
     /* Disable the QSPI FIFO Threshold, Transfer Error and Transfer complete Interrupts */
 
@@ -1196,7 +1196,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Acknowledge interrupt */
 
-      qspi_putreg(&g_qspi0dev, QSPI_FCR_CSMF, STM32_QUADSPI_FCR);
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CSMF, STM32_QUADSPI_FCR_OFFSET);
 
       /* If 'automatic poll mode stop' is activated, we're done */
 
@@ -1228,7 +1228,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Acknowledge interrupt */
 
-      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTEF, STM32_QUADSPI_FCR);
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTEF, STM32_QUADSPI_FCR_OFFSET);
 
       /* Disable all the QSPI Interrupts */
 
@@ -1256,7 +1256,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
     {
       /* Acknowledge interrupt */
 
-      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32_QUADSPI_FCR);
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32_QUADSPI_FCR_OFFSET);
 
       /* XXX this interrupt simply means that, in 'memory mapped mode',
        * the QSPI memory has not been accessed for a while, and the
@@ -1546,7 +1546,7 @@ static int qspi_memory_dma(struct stm32f7_qspidev_s *priv,
 }
 #endif
 
-#if !defined(STM32F7_QSPI_INTERRUPTS)
+#if !defined(CONFIG_STM32F7_QSPI_INTERRUPTS)
 /****************************************************************************
  * Name: qspi_receive_blocking
  *
@@ -1608,7 +1608,7 @@ static int qspi_receive_blocking(struct stm32f7_qspidev_s *priv,
           /* Wait for transfer complete, then clear it */
 
           qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
-          qspi_putreg(priv, QSPI_FCR_CTCF, STM32_QUADSPI_FCR);
+          qspi_putreg(priv, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
 
           /* Use Abort to clear the busy flag, and ditch any extra bytes in fifo */
 
@@ -1669,7 +1669,7 @@ static int qspi_transmit_blocking(struct stm32f7_qspidev_s *priv,
           /* Wait for transfer complete, then clear it */
 
           qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
-          qspi_putreg(priv, QSPI_FCR_CTCF, STM32_QUADSPI_FCR);
+          qspi_putreg(priv, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
 
           /* Use Abort to clear the Busy flag */
 
@@ -1878,7 +1878,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
        *  3    1    1
        */
 
-      regval  = qspi_getreg(priv, STM32_QUADSPI_DCR);
+      regval  = qspi_getreg(priv, STM32_QUADSPI_DCR_OFFSET);
       regval &= ~(QSPI_DCR_CKMODE);
 
       switch (mode)
@@ -1898,7 +1898,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
           return;
         }
 
-      qspi_putreg(priv, regval, STM32_QUADSPI_DCR);
+      qspi_putreg(priv, regval, STM32_QUADSPI_DCR_OFFSET);
       spiinfo("DCR=%08x\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
@@ -1985,9 +1985,9 @@ static int qspi_command(struct qspi_dev_s *dev,
 
   qspi_putreg(priv,
               QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
-              STM32_QUADSPI_FCR);
+              STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   /* interrupt mode will need access to the transaction context */
 
   priv->xctn = &xctn;
@@ -2167,9 +2167,9 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   qspi_putreg(priv,
               QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
-              STM32_QUADSPI_FCR);
+              STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   /* interrupt mode will need access to the transaction context */
 
   priv->xctn = &xctn;
@@ -2570,7 +2570,7 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
         }
 #endif
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
       /* Attach the interrupt handler */
 
       ret = irq_attach(priv->irq, priv->handler, NULL);
@@ -2604,7 +2604,7 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
 
       priv->initialized = true;
       priv->memmap = false;
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
       up_enable_irq(priv->irq);
 #endif
     }
@@ -2612,7 +2612,7 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
   return &priv->qspi;
 
 errout_with_irq:
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   irq_detach(priv->irq);
 
 errout_with_dmadog:
@@ -2687,9 +2687,9 @@ void stm32f7_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 
       /* Clear Timeout interrupt */
 
-      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32_QUADSPI_FCR);
+      qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
       /* Enable Timeout interrupt */
 
       regval  = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
@@ -2708,7 +2708,7 @@ void stm32f7_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 
   qspi_setupxctnfrommem(&xctn, meminfo);
 
-#ifdef STM32F7_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
   priv->xctn = NULL;
 #endif
 
