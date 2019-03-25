@@ -195,7 +195,7 @@
 /* USB Soft Connect Pullup: PC.13 */
 
 #define GPIO_USB_PULLUP   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN12)
 
 /* GPIO pins used by the GPIO Subsystem */
 
