@@ -138,20 +138,22 @@ static inline void nxmu_shutdown(FAR struct nxmu_state_s *fe)
 }
 
 /****************************************************************************
- * Name: nxmu_blocked
+ * Name: nxmu_event
  ****************************************************************************/
 
-static inline void nxmu_blocked(FAR struct nxbe_window_s *wnd, FAR void *arg)
+static inline void nxmu_event(FAR struct nxbe_window_s *wnd,
+                              enum nx_event_e event, FAR void *arg)
 {
-  struct nxclimsg_blocked_s outmsg;
+  struct nxclimsg_event_s outmsg;
   int ret;
 
-  outmsg.msgid = NX_CLIMSG_BLOCKED;
+  outmsg.msgid = NX_CLIMSG_EVENT;
   outmsg.wnd   = wnd;
   outmsg.arg   = arg;
+  outmsg.event = event;
 
   ret = nxmu_sendclient(wnd->conn, &outmsg,
-                        sizeof(struct nxclimsg_blocked_s));
+                        sizeof(struct nxclimsg_event_s));
   if (ret < 0)
     {
       gerr("ERROR: nxmu_sendclient failed: %d\n", ret);
@@ -363,7 +365,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_BLOCKED: /* Block messsages to a window */
            {
              FAR struct nxsvrmsg_blocked_s *blocked = (FAR struct nxsvrmsg_blocked_s *)buffer;
-             nxmu_blocked(blocked->wnd, blocked->arg);
+             nxmu_event(blocked->wnd, NXEVENT_BLOCKED, blocked->arg);
            }
            break;
 

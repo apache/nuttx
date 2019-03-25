@@ -130,7 +130,7 @@ enum nxmsg_e
   NX_CLIMSG_NEWPOSITION,      /* New window size/position */
   NX_CLIMSG_MOUSEIN,          /* New mouse positional data available for window */
   NX_CLIMSG_KBDIN,            /* New keypad input available for window */
-  NX_CLIMSG_BLOCKED,          /* The window is blocked */
+  NX_CLIMSG_EVENT,            /* Server->client event */
 
   /* Client-to-Server Messages **********************************************/
 
@@ -229,15 +229,14 @@ struct nxclimsg_kbdin_s
 };
 #endif
 
-/* This message confirms that that all queued window messages have been
- * flushed and that the all further window messages are blocked.
- */
+/* This message provides server event notifications to the client. */
 
-struct nxclimsg_blocked_s
+struct nxclimsg_event_s
 {
   uint32_t msgid;                /* NX_CLIMSG_BLOCKED */
   FAR struct nxbe_window_s *wnd; /* The window that is blocked */
   FAR void *arg;                 /* User argument */
+  enum nx_event_e event;         /* Server event */
 };
 
 /* Client-to-Server Message Structures **************************************/
