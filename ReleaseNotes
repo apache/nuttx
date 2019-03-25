@@ -22036,14 +22036,14 @@ Additional new features and extended functionality:
       - i.MXRT XBAR:  Add XBAR Support.  From David Sidrane.
       - i.MXRT USB:  Add USB analog header file.  From David Sidrane.
       - i.MXRT OCOTP:  Added OCOTP Support.  From David Sidrane.
-      - i.MXRT LCD:  Adds framebuffer support for thje i.MXRT 1050.
+      - i.MXRT LCD:  Adds framebuffer support for the i.MXRT 1050.
         Includes DCD initialization for SDRAM to provide space for the
         framebufer. External code I used/ported is from NXP and is BSD
         3-clause license.  From Johannes.
 
     * NXP i.MX RT Boards:
 
-      - IMXRT1050-EVK:  Adds framebuffer support for thje i.MXRT 1050.
+      - IMXRT1050-EVK:  Adds framebuffer support for the i.MXRT 1050.
         From Johannes.
 
     * NXP LPC17xx
@@ -22112,9 +22112,9 @@ Additional new features and extended functionality:
 
     * STMicro STM32 Boards:
 
-      - B-L072Z-LRWAN1:  Add sx127x configuration.  From Mateusz Szafoni.
+      - B-L072Z-LRWAN1:  Add SX127x configuration.  From Mateusz Szafoni.
       - Nucleo-F091RC:  Add support for SX127x radio.  From Mateusz Szafoni.
-      - Nucleo-F091RC:  Add sx127x configuration.  From Mateusz Szafoni.
+      - Nucleo-F091RC:  Add SX127x configuration.  From Mateusz Szafoni.
       - Nucleo-F207ZG:  Add support for USB and initialize CDCACM if
         configured.  From Mateusz Szafoni.
       - STM32F429I-DISCO:  Add an apps/examples/examples/nxhello
@@ -22123,7 +22123,7 @@ Additional new features and extended functionality:
         Lorquet.
       - B-L072Z-LRWAN1:  Use HSI as default clock source.  From Mateusz
         Szafoni.
-      - Nucleo-L073RZ:  Add sx127x configuration.  From Mateusz Szafoni.
+      - Nucleo-L073RZ:  Add SX127x configuration.  From Mateusz Szafoni.
       - Nucleo-L073RZ:  Port button logic from nucleo-f072 which appears to
         be the same.  From Gregory Nutt.
       - Nucleo-L432KC:  Add support for I2C driver initialization.  From
@@ -22145,7 +22145,7 @@ Additional new features and extended functionality:
     * TI CCxx:
 
       - CC1312R1:  Code complete and builds successfully.  Stalled on
-        further radio developed.  I planned to integrate the IEEE 802.15.4
+        further radio development.  I planned to integrate the IEEE 802.15.4
         radio interface, but the Cortex-M0 interface is not available with
         an open license.
 
