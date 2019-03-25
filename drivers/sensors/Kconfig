@@ -64,16 +64,16 @@ config SENSORS_HCSR04
 if SENSORS_HCSR04
 
 config HCSR04_DEBUG
-        bool "Debug support for the HC-SR04"
-        default n
-        ---help---
-                Enables debug features for the HC-SR04
+	bool "Debug support for the HC-SR04"
+	default n
+	---help---
+		Enables debug features for the HC-SR04
 
 config HCSR04_NPOLLWAITERS
-        int "Number of waiters to poll"
-        default 1
-        ---help---
-                Number of waiters to poll
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
 
 endif # SENSORS_HCSR04
 
@@ -432,10 +432,10 @@ config SENSORS_ADXL372
 		Enable driver support for the Analog Devices ADXL372 Sensor.
 
 config SENSORS_MPU60X0
-       bool "Invensense MPU60x0 Sensor support"
-       default n
-       ---help---
-               Enable driver support for Invensense MPU60x0 MotionTracker(tm) device.
+	bool "Invensense MPU60x0 Sensor support"
+	default n
+	---help---
+		Enable driver support for Invensense MPU60x0 MotionTracker(tm) device.
 
 if SENSORS_MPU60X0
 
@@ -462,7 +462,7 @@ config MPU60X0_EXTI
 	bool "Enable interrupts"
 	default n
 	---help---
-                Select this when the MPU60x0's INT pin is connected to an
+		Select this when the MPU60x0's INT pin is connected to an
 		interrupt line on the host processor, and identify the pin
 		during device registration. The driver will use interrupts to
 		manage FIFO-full and/or sample-ready events, depending on how
