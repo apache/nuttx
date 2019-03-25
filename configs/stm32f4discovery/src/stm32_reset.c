@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <arch.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 
 #ifdef CONFIG_BOARDCTL_RESET

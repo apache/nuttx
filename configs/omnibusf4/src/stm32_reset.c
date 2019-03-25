@@ -41,8 +41,7 @@
 
 #include <nuttx/config.h>
 
-#include <arch.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 
 #include "stm32_dfumode.h"
