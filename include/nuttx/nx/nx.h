@@ -101,7 +101,7 @@ typedef FAR void *NXWINDOW;
 enum nx_event_e
 {
   NXEVENT_BLOCKED = 0,   /* Window messages are blocked */
-  NXEVENT_SYCNCHED,      /* Synchronization handshake */
+  NXEVENT_SYNCHED,       /* Synchronization handshake */
 };
 
 /* These define callbacks that must be provided to nx_openwindow.  These
@@ -227,7 +227,7 @@ struct nx_callback_s
    *     safely closed.  Closing the window prior with pending callbacks can
    *     lead to bad behavior when the callback is executed.
    *
-   *   NXEVENT_SYCNCHED - Synchronization handshake
+   *   NXEVENT_SYNCHED - Synchronization handshake
    *
    *     This completes the handshake started by nx_synch().  nx_synch()
    *     sends a syncrhonization messages to the NX server which responds
@@ -444,22 +444,23 @@ int nx_closewindow(NXWINDOW hwnd);
  *   This is callback will do to things:  (1) any queue a 'blocked' callback
  *   to the window and then (2) block any further window messaging.
  *
- *   The 'blocked' callback is the response from nx_block (or nxtk_block).
- *   Those blocking interfaces are used to assure that no further messages are
- *   are directed to the window. Receipt of the blocked callback signifies
- *   that (1) there are no further pending callbacks and (2) that the
- *   window is now 'defunct' and will receive no further callbacks.
+ *   The 'event' callback with the NXEVENT_BLOCKED event is the response
+ *   from nx_block (or nxtk_block).  Those blocking interfaces are used to
+ *   assure that no further messages are are directed to the window. Receipt
+ *   of the NXEVENT_BLOCKED event signifies that (1) there are no further
+ *    pending callbacks and (2) that the window is now 'defunct' and will
+ *   receive no further callbacks.
  *
- *   This callback supports coordinated destruction of a window.  In multi-
- *   user mode, the client window logic must stay intact until all of the
- *   queued callbacks are processed.  Then the window may be safely closed.
- *   Closing the window prior with pending callbacks can lead to bad behavior
- *   when the callback is executed.
+ *   This callback supports coordinated destruction of a window.  The client
+ *   window logic must stay intact until all of the queued callbacks are
+ *   processed.  Then the window may be safely closed.  Closing the window
+ *   prior with pending callbacks can lead to bad behavior when the callback
+ *   is executed.
  *
  * Input Parameters:
  *   wnd - The window to be blocked
  *   arg - An argument that will accompany the block messages (This is arg2
- *         in the blocked callback).
+ *         in the event callback).
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -467,6 +468,56 @@ int nx_closewindow(NXWINDOW hwnd);
  ****************************************************************************/
 
 int nx_block(NXWINDOW hwnd, FAR void *arg);
+
+/****************************************************************************
+ * Name: nx_synch
+ *
+ * Description:
+ *   This interface can be used to syncrhonize the window client with the
+ *   NX server.  It really just implements an 'echo':  A synch message is
+ *   sent from the window client to the server which then responds
+ *   immediately by sending the NXEVENT_SYNCHED back to the windows client.
+ *
+ *   Due to the highly asynchronous nature of client-server communications,
+ *   nx_synch() is sometimes necessary to assure that the client and server
+ *   are fully synchronized in time.
+ *
+ *   Usage by the window client might be something like this:
+ *
+ *     extern bool g_synched;
+ *     extern sem_t g_synch_sem;
+ *
+ *     g_synched = false;
+ *     ret = nx_synch(hwnd, handle);
+ *     if (ret < 0)
+ *       {
+ *          -- Handle the error --
+ *       }
+ *
+ *     while (!g_synched)
+ *       {
+ *         ret = sem_wait(&g_sync_sem);
+ *         if (ret < 0)
+ *           {
+ *              -- Handle the error --
+ *           }
+ *       }
+ *
+ *   When the windwo listener thread receives the NXEVENT_SYNCHED event, it
+ *   would set g_synched to true and post g_synch_sem, waking up the above
+ *   loop.
+ *
+ * Input Parameters:
+ *   wnd - The window to be synched
+ *   arg - An argument that will accompany the block messages (This is arg2
+ *         in the event callback).
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nx_synch(NXWINDOW hwnd, FAR void *arg);
 
 /****************************************************************************
  * Name: nx_requestbkgd

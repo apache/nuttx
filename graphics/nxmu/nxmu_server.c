@@ -141,8 +141,8 @@ static inline void nxmu_shutdown(FAR struct nxmu_state_s *fe)
  * Name: nxmu_event
  ****************************************************************************/
 
-static inline void nxmu_event(FAR struct nxbe_window_s *wnd,
-                              enum nx_event_e event, FAR void *arg)
+static void nxmu_event(FAR struct nxbe_window_s *wnd, enum nx_event_e event,
+                       FAR void *arg)
 {
   struct nxclimsg_event_s outmsg;
   int ret;
@@ -366,6 +366,13 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            {
              FAR struct nxsvrmsg_blocked_s *blocked = (FAR struct nxsvrmsg_blocked_s *)buffer;
              nxmu_event(blocked->wnd, NXEVENT_BLOCKED, blocked->arg);
+           }
+           break;
+
+         case NX_SVRMSG_SYNCH: /* Synchronization request */
+           {
+             FAR struct nxsvrmsg_synch_s *synch = (FAR struct nxsvrmsg_synch_s *)buffer;
+             nxmu_event(synch->wnd, NXEVENT_SYNCHED, synch->arg);
            }
            break;
 

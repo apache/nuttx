@@ -105,7 +105,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg)
 
       NXBE_SETBLOCKED(wnd);
 
-      /* Send the message inicating that the window is blocked (and because of
+      /* Send the message indicating that the window is blocked (and because of
        * queue also that there are no additional queue messages for the window)
        */
 
