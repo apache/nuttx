@@ -245,13 +245,14 @@ int board_power_off(int status);
  * Name: board_reset
  *
  * Description:
- *   Reset board.  This function may or may not be supported by a
- *   particular board architecture.
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
  *
  * Input Parameters:
  *   status - Status information provided with the reset event.  This
- *     meaning of this status information is board-specific.  If not used by
- *     a board, the value zero may be provided in calls to board_reset.
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
  *
  * Returned Value:
  *   If this function returns, then it was not possible to power-off the

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/moxart/moxart_systemreset.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 
 #include "up_arch.h"
@@ -79,29 +80,3 @@ void up_systemreset(void)
   for (; ; );
 }
 
-/****************************************************************************
- * Name: board_reset
- *
- * Description:
- *   Reset board.  This function may or may not be supported by a
- *   particular board architecture.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *     meaning of this status information is board-specific.  If not used by
- *     a board, the value zero may be provided in calls to board_reset.
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARDCTL_RESET
-int board_reset(int status)
-{
-  up_systemreset();
-  return 0;
-}
-#endif

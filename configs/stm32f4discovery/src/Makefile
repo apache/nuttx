@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm32f4discovery/src/Makefile
 #
-#   Copyright (C) 2011-2013, 2015-2016, 2018 Gregory Nutt. All rights
+#   Copyright (C) 2011-2013, 2015-2016, 2018-2019 Gregory Nutt. All rights
 #     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
@@ -139,6 +139,9 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += stm32_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)

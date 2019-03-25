@@ -261,8 +261,6 @@ void up_pminitialize(void);
 #  define up_pminitialize()
 #endif
 
-void up_systemreset(void) noreturn_function;
-
 /* Interrupt handling *******************************************************/
 
 void up_irqinitialize(void);

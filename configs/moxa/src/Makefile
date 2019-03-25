@@ -38,8 +38,11 @@
 ASRCS =
 CSRCS = moxart_boot.c
 
-ifeq ($(CONFIG_NSH_LIBRARY),y)
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += moxart_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += moxart_reset.c
+endif
 endif
 
 include $(TOPDIR)/configs/Board.mk

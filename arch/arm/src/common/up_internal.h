@@ -331,10 +331,6 @@ void up_pminitialize(void);
 #  define up_pminitialize()
 #endif
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
-void up_systemreset(void) noreturn_function;
-#endif
-
 /* Interrupt handling *******************************************************/
 
 void up_irqinitialize(void);

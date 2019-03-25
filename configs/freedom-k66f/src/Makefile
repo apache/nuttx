@@ -1,7 +1,7 @@
 ############################################################################
 # configs/freedom-k66f/src/Makefile
 #
-#   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #           David Sidrane <david_s5@nscdg.com>
 #
@@ -51,6 +51,9 @@ endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += k66_appinit.c k66_bringup.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += k66_reset.c
+endif
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += k66_bringup.c
 endif

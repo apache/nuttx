@@ -98,6 +98,7 @@
 
 #include <arch/arch.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/cache.h>
 
 /****************************************************************************
@@ -188,6 +189,18 @@ EXTERN volatile bool g_rtc_enabled;
  ****************************************************************************/
 
 void up_initialize(void);
+
+/****************************************************************************
+ * Name: up_systemreset
+ *
+ * Description:
+ *   The function up_systemreset() will reset the MCU.  Optional!
+ *   Availability of this function is dependent upon the architecture
+ *   support.
+ *
+ ****************************************************************************/
+
+void up_systemreset(void) noreturn_function;
 
 /****************************************************************************
  * Name: up_idle
