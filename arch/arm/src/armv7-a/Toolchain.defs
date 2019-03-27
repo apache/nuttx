@@ -90,8 +90,6 @@ endif
 #                   reliable code generation.
 #
 
-ARCHCPUFLAGS += -march=armv7-a
-
 ifeq ($(CONFIG_ARM_THUMB),y)
 ARCHCPUFLAGS += -mthumb
 endif
