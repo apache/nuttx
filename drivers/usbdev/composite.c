@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/composite.c
  *
- *   Copyright (C) 2012, 2016-2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2016-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -500,6 +500,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   uint16_t len;
   bool dispatched = false;
   int ret = -EOPNOTSUPP;
+  uint8_t recipient;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!driver || !dev || !dev->ep0 || !ctrl)
@@ -534,7 +535,10 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
         ctrl->type, ctrl->req, value, index, len);
   UNUSED(index);
 
-  if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD)
+  recipient = ctrl->type & USB_REQ_RECIPIENT_MASK;
+
+  if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD &&
+      recipient == USB_REQ_RECIPIENT_DEVICE)
     {
       /**********************************************************************
        * Standard Requests
@@ -701,10 +705,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
       ret = composite_msftdescriptor(priv, dev, ctrl, ctrlreq, &dispatched);
     }
 #endif
-  else
+  else if (recipient == USB_REQ_RECIPIENT_INTERFACE ||
+           recipient == USB_REQ_RECIPIENT_ENDPOINT)
     {
-      uint8_t recipient;
-
       /**********************************************************************
        * Non-Standard Class Requests
        **********************************************************************/
@@ -713,12 +716,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
         * requests.
         */
 
-       recipient = ctrl->type & USB_REQ_RECIPIENT_MASK;
-       if (recipient == USB_REQ_RECIPIENT_INTERFACE || recipient == USB_REQ_RECIPIENT_ENDPOINT)
-         {
-           ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
-           dispatched = true;
-         }
+      ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
+      dispatched = true;
     }
 
   /* Respond to the setup command if (1) data was returned, and (2) the
