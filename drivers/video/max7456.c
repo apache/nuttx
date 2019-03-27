@@ -121,10 +121,12 @@
 
 #define FROM_BITFIELD(m,v) (((v) >> (m ##__SHIFT)) & MASK(m ##__WIDTH))
 
-/* SPI read/write codes */
+/* SPI read/write codes and speed */
 
 #define SPI_REG_READ 0x80
 #define SPI_REG_WRITE 0
+#define SPI_FREQ 10000000UL
+#define SPI_MODE SPIDEV_MODE0
 
 /****************************************************************************
  * Private Types
@@ -134,75 +136,77 @@
 
 enum mx7_regaddr_e
 {
-  VM0                   = 0, /* video mode (config) 0 */
-  VM0__PAL              = BIT(6),
-  VM0__SYNCSEL__SHIFT   = 4,
-  VM0__SYNCSEL__WIDTH   = 2,
-  VM0__ENABLE           = BIT(3),
-  VM0__VSYNC_EN         = BIT(2),
-  VM0__RESET            = BIT(1),
-  VM0__VBUF_EN          = BIT(0),
+  VM0                 = 0,                  /* video mode (config) 0 */
+  VM0__PAL            = BIT(6),
+  VM0__SYNCSEL__SHIFT = 4,
+  VM0__SYNCSEL__WIDTH = 2,
+  VM0__ENABLE         = BIT(3),
+  VM0__VSYNC_EN       = BIT(2),
+  VM0__RESET          = BIT(1),
+  VM0__VBUF_EN        = BIT(0),
 
-  VM1                   = 1, /* video mode (config) 1 */
-  VM1__GRAY             = BIT(7),
-  VM1__OSD_PCT__SHIFT   = 4,
-  VM1__OSD_PCT__WIDTH   = 3,
-  VM1__BT__SHIFT        = 2,
-  VM1__BT__WIDTH        = 2,
-  VM1__BD__SHIFT        = 0,
-  VM1__BD__WIDTH        = 2,
+  VM1                 = 1,                  /* video mode (config) 1 */
+  VM1__GRAY           = BIT(7),
+  VM1__OSD_PCT__SHIFT = 4,
+  VM1__OSD_PCT__WIDTH = 3,
+  VM1__BT__SHIFT      = 2,
+  VM1__BT__WIDTH      = 2,
+  VM1__BD__SHIFT      = 0,
+  VM1__BD__WIDTH      = 2,
 
-  HOS                   = 2, /* horizontal position */
-  HOS__HPOS__SHIFT      = 0,
-  HOS__HPOS__WIDTH      = 6,
+  HOS                 = 2,                  /* horizontal position */
+  HOS__HPOS__SHIFT    = 0,
+  HOS__HPOS__WIDTH    = 6,
 
-  VOS                   = 3, /* vertical position */
-  VOS__VPOS__SHIFT      = 0,
-  VOS__VPOS__WIDTH      = 5,
+  VOS                 = 3,                  /* vertical position */
+  VOS__VPOS__SHIFT    = 0,
+  VOS__VPOS__WIDTH    = 5,
 
-  DMM                   = 4, /* display memory mode */
-  DMM__8BIT             = BIT(6),
-  DMM__LBC              = BIT(5),
-  DMM__BLK              = BIT(4),
-  DMM__INV              = BIT(3),
-  DMM__CA__SHIFT        = 3, /* character attribute bit field */
-  DMM__CA__WIDTH        = 3, /* (shorthand for lcb, blk, and inv) */
-  DMM__CLEAR            = BIT(2),
-  DMM__VCLEAR           = BIT(1),
-  DMM__AUTOINC          = BIT(0),
+  DMM                 = 4,                  /* display memory mode */
+  DMM__8BIT           = BIT(6),
+  DMM__LBC            = BIT(5),
+  DMM__BLK            = BIT(4),
+  DMM__INV            = BIT(3),
+  DMM__CA__SHIFT      = 3,                  /* character attr */
+  DMM__CA__WIDTH      = 3,
+  DMM__CLEAR          = BIT(2),
+  DMM__VCLEAR         = BIT(1),
+  DMM__AUTOINC        = BIT(0),
 
-  DMAH                  = 5, /* display memory address register, high */
+  DMAH                  = 5,                /* display mem addr, high */
   DMAH__ATTR            = BIT(1),
   DMAH__ADDRBIT8__SHIFT = 0,
   DMAH__ADDRBIT8__WIDTH = 1,
 
-  DMAL                  = 6, /* display memory address register, low */
+  DMAL                  = 6,                /* display mem addr, low */
   DMAL__ADDR__SHIFT     = 0,
   DMAL__ADDR__WIDTH     = 8,
 
-  DMDI                  = 7, /* display memory data in */
+  DMDI                  = 7,                /* display memory data in */
   DMDI__SHIFT           = 0,
   DMDI__WIDTH           = 8,
 
-  CMM                   = 8, /* character memory mode */
+  CMM                   = 8,                /* character memory mode */
+  CMM__READ_NVM         = BIT(6) | BIT(4),
+  CMM__WRITE_NVM        = BIT(7) | BIT(5),
 
-  CMAH                  = 9, /* character memory address, high */
+  CMAH                  = 9,                /* char memory addr, high */
   CMAH__SHIFT           = 0,
   CMAH__WIDTH           = 6,
 
-  CMAL                  = 0xa, /* character memory address, low */
+  CMAL                  = 0xa,              /* char memory addr, low */
   CMAL__ADDR__SHIFT     = 0,
   CMAL__ADDR__WIDTH     = 6,
 
-  CMDI                  = 0xb, /* character memory data in */
+  CMDI                  = 0xb,              /* character memory data in */
 
-  OSDM                  = 0xc, /* osd insertion mux */
-  OSDM__RISET__SHIFT    = 3, /* rise time */
+  OSDM                  = 0xc,              /* osd insertion mux */
+  OSDM__RISET__SHIFT    = 3,                /* rise time */
   OSDM__RISET__WIDTH    = 3,
-  OSDM__SWITCHT__SHIFT  = 0, /* switching time */
+  OSDM__SWITCHT__SHIFT  = 0,                /* switching time */
   OSDM__SWITCHT__WIDTH  = 3,
 
-  RB0                   = 0x10, /* row N brightness */
+  RB0                   = 0x10,             /* row N brightness */
   RB1                   = (RB0 + 1),
   RB2                   = (RB0 + 2),
   RB3                   = (RB0 + 4),
@@ -218,22 +222,22 @@ enum mx7_regaddr_e
   RB14                  = (RB0 + 14),
   RB15                  = (RB0 + 15),
 
-  OSDBL                 = 0x6c, /* osd black level */
+  OSDBL                 = 0x6c,             /* osd black level */
   OSDBL__DISABLE        = BIT(4),
-  OSDBL__PRESET__SHIFT  = 0, /* note: value must be preserved during writes */
+  OSDBL__PRESET__SHIFT  = 0,
   OSDBL__PRESET__WIDTH  = 4,
 
-  STAT                  = 0xa0, /* status (ro) */
-  STAT__INRESET         = BIT(6),  /* 1 = chip is performing power-on reset */
-  STAT__CHARUNAVAIL     = BIT(5),  /* 1 = character memory unavailable for writes */
-  STAT__NVSYNC          = BIT(4),  /* 0 = "active during vertical sync time" */
-  STAT__NHSYNC          = BIT(3),  /* 0 = "active during horizontal sync time" */
-  STAT__LOS             = BIT(2),  /* 1 = no sync (after 32 missing input video lines) */
-  STAT__NTSC            = BIT(1),  /* 1 = ntsc video stream detected */
-  STAT__PAL             = BIT(0),  /* 1 = pal video stream detected */
+  STAT                  = 0xa0,             /* status (ro) */
+  STAT__INRESET         = BIT(6),           /* 1 = in power-on reset */
+  STAT__CHARUNAVAIL     = BIT(5),           /* 1 = unavailable for writes */
+  STAT__NVSYNC          = BIT(4),           /* 1 = in vertical sync time */
+  STAT__NHSYNC          = BIT(3),           /* 1 = in horizontal sync time */
+  STAT__LOS             = BIT(2),           /* 1 = lost sync */
+  STAT__NTSC            = BIT(1),           /* 1 = ntsc video detected */
+  STAT__PAL             = BIT(0),           /* 1 = pal video detected */
 
-  DMDO                  = 0xb0, /* data memory data out */ /* ro */
-  CMD0                  = 0xc0, /* character memolry data out */ /* ro */
+  DMDO                  = 0xb0,             /* data memory data out (ro) */
+  CMDO                  = 0xc0,             /* char memory data out (ro) */
 };
 
 struct path_name_map_s
@@ -246,21 +250,24 @@ struct path_name_map_s
 
 enum mx7_interface_e
 {
-  FB,     /* 8-bit ASCII interface (or as best we can manage) */
-  RAW,    /* 16-bit interface in chip's native format */
-  VSYNC   /* blocks until vertical blanking interval */
+  FB,                         /* 8-bit read/write interface */
+  RAW,                        /* 16-bit interface in chip's native format */
+  VSYNC,                      /* blocks until vertical blanking interval */
+  CM                          /* Character Memory, i.e. the character map */
 };
 
 static struct path_name_map_s node_map[] =
 {
   PATH_MAP_ENTRY(FB),
   PATH_MAP_ENTRY(RAW),
-  PATH_MAP_ENTRY(VSYNC)
+  PATH_MAP_ENTRY(VSYNC),
+  PATH_MAP_ENTRY(CM),
 };
 
 #define NODE_MAP_LEN (sizeof(node_map) / sizeof(*node_map))
 
 #if defined(DEBUG)
+
 /* Maps between register names and addresses */
 
 static struct path_name_map_s reg_name_map[] =
@@ -296,7 +303,7 @@ static struct path_name_map_s reg_name_map[] =
   PATH_MAP_ENTRY(OSDBL),
   PATH_MAP_ENTRY(STAT),
   PATH_MAP_ENTRY(DMDO),
-  PATH_MAP_ENTRY(CMD0)
+  PATH_MAP_ENTRY(CMDO)
 };
 #endif
 
@@ -309,7 +316,7 @@ struct mx7_dev_s
   mutex_t lock;               /* mutex for this structure */
   struct mx7_config_s config; /* board-specific information */
 
-  uint8_t ca;                 /* current character attribute (lbc, blink, etc.) */
+  uint8_t ca;                 /* character attribute (lbc, blink, etc.) */
 
 #if defined(DEBUG)
   char debug[2];              /* stash for debugging-related output */
@@ -322,18 +329,20 @@ struct mx7_dev_s
 
 static int mx7_open(FAR struct file *filep);
 static int mx7_close(FAR struct file *filep);
-static ssize_t mx7_read(FAR struct file *filep, FAR char *buf, size_t len);
-static ssize_t mx7_write(FAR struct file *filep, FAR const char *buf,
-                         size_t len);
-static int mx7_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t mx7_read(FAR struct file *filep,
+                        FAR char *buf, size_t len);
+static ssize_t mx7_write(FAR struct file *filep,
+                         FAR const char *buf, size_t len);
+static int mx7_ioctl(FAR struct file *filep,
+                     int cmd, unsigned long arg);
 
 #if defined(DEBUG)
 static int mx7_debug_open(FAR struct file *filep);
 static int mx7_debug_close(FAR struct file *filep);
-static ssize_t mx7_debug_read(FAR struct file *filep, FAR char *buf,
-                              size_t len);
-static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
-                               size_t len);
+static ssize_t mx7_debug_read(FAR struct file *filep,
+                              FAR char *buf, size_t len);
+static ssize_t mx7_debug_write(FAR struct file *filep,
+                               FAR const char *buf, size_t len);
 #endif
 
 /****************************************************************************
@@ -345,7 +354,7 @@ static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
 static const struct file_operations g_mx7_fops =
 {
 #ifndef CONFIG_DISABLE_POLL
-  .poll = NULL,
+  .poll   = NULL,
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = NULL,
@@ -364,7 +373,7 @@ static const struct file_operations g_mx7_fops =
 static const struct file_operations g_mx7_debug_fops =
 {
 #ifndef CONFIG_DISABLE_POLL
-  .poll = NULL,
+  .poll   = NULL,
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = NULL,
@@ -381,7 +390,7 @@ static const struct file_operations g_mx7_debug_fops =
  ****************************************************************************/
 
 /* Translates an interface name name to its associated mx7_interface_e
- * enumerator
+ * enumerator.
  */
 
 static int node_from_name(FAR const char *name)
@@ -397,7 +406,7 @@ static int node_from_name(FAR const char *name)
   return -1;
 }
 
-/* Translates a register name to its associated address */
+/* Translates a register name to its associated address. */
 
 static int regaddr_from_name(FAR const char *name)
 {
@@ -438,19 +447,19 @@ static int regaddr_from_name(FAR const char *name)
  * Note: The caller must hold @dev->lock before calling this function.
  *
  * Input parameters:
- *   @dev       - the target device's handle
- *   @addr      - starting register address
- *   @buf       - where to store the register values
- *   @len       - number of registers to read
+ *   dev       - the target device's handle
+ *   addr      - starting register address
+ *   buf       - where to store the register values
+ *   len       - number of registers to read
  *
- * Return value:
+ * Returned value:
  *   Returns number of bytes read, or a negative errno.
  *
  ****************************************************************************/
 
 static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
                           enum mx7_regaddr_e addr,
-                          FAR uint8_t *buf, uint8_t len)
+                          FAR uint8_t * buf, uint8_t len)
 {
   int ret;
   FAR struct spi_dev_s *spi = dev->config.spi;
@@ -460,14 +469,11 @@ static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
 
   ret = len;
 
-  /* Grab the SPI master controller, and set the mode.
-   *
-   * Per datasheet, SCLK is always max 10MHz.
-   */
+  /* Grab the SPI master controller, and set the mode. */
 
   SPI_LOCK(spi, true);
-  SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETFREQUENCY(spi, 10000000);
+  SPI_SETMODE(spi, SPI_MODE);
+  SPI_SETFREQUENCY(spi, SPI_FREQ);
 
   /* Select the chip. */
 
@@ -509,19 +515,19 @@ static int __mx7_read_reg(FAR struct mx7_dev_s *dev,
  * Note: The caller must hold @dev->lock before calling this function.
  *
  * Input parameters:
- *   @dev       - the target device's handle
- *   @addr      - starting register address
- *   @buf       - byte sequence to write
- *   @len       - length of @buf, number of bytes to write
+ *   dev       - the target device's handle
+ *   addr      - starting register address
+ *   buf       - byte sequence to write
+ *   len       - length of @buf, number of bytes to write
  *
- * Return value:
+ * Returned value:
  *   Returns number of bytes written, or a negative errno.
  *
  ****************************************************************************/
 
 static int __mx7_write_reg(FAR struct mx7_dev_s *dev,
                            enum mx7_regaddr_e addr,
-                           FAR const uint8_t *buf, uint8_t len)
+                           FAR const uint8_t * buf, uint8_t len)
 {
   int ret = len;
   FAR struct spi_dev_s *spi = dev->config.spi;
@@ -530,8 +536,8 @@ static int __mx7_write_reg(FAR struct mx7_dev_s *dev,
   /* Grab and configure the SPI master device. */
 
   SPI_LOCK(spi, true);
-  SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETFREQUENCY(spi, 10000000);
+  SPI_SETMODE(spi, SPI_MODE);
+  SPI_SETFREQUENCY(spi, SPI_FREQ);
 
   /* Select the chip. */
 
@@ -562,7 +568,7 @@ static int __mx7_write_reg(FAR struct mx7_dev_s *dev,
  * Description:
  *   Reads the contents of the STAT register.
  *
- * Return value:
+ * Returned value:
  *   Returns the value in STAT, or negative errno.
  *
  ****************************************************************************/
@@ -592,7 +598,7 @@ static inline int __mx7_read_reg__stat(FAR struct mx7_dev_s *dev)
  * Description:
  *   Reads the contents of the DMM register.
  *
- * Return value:
+ * Returned value:
  *   Returns the value held in in DMM, or negative errno.
  *
  ****************************************************************************/
@@ -612,39 +618,12 @@ static inline int __mx7_read_reg__dmm(FAR struct mx7_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: __mx7_wait_reset
- *
- * Description:
- *   Waits until the chip finishes its reset activities.
- *
- ****************************************************************************/
-
-static inline void __mx7_wait_reset(FAR struct mx7_dev_s *dev)
-{
-  int stat = 0; /* contents of STAT register */
-  int dmm  = 0; /* contents of DMM register */
-
-  do
-    {
-      /* If we're here, a reset command has probably just been issued;
-       * wait 100usec before checking, per the datasheet.
-       */
-
-      up_udelay(100);
-
-      stat = __mx7_read_reg__stat(dev);
-      dmm = __mx7_read_reg__dmm(dev);
-    }
-  while ((stat & STAT__INRESET) || (dmm & DMM__CLEAR));
-}
-
-/****************************************************************************
  * Name: __mx7_write_reg__vm0
  *
  * Description:
  *   Writes @val to VM0. A simple helper around __mx7_write_reg().
  *
- * Return value:
+ * Returned value:
  *   Returns the number of bytes written (always 1), or a negative errno.
  *
  ****************************************************************************/
@@ -655,12 +634,105 @@ static inline int __mx7_write_reg__vm0(FAR struct mx7_dev_s *dev, uint8_t val)
 }
 
 /****************************************************************************
+ * Name: __mx7_read_reg__vm0
+ *
+ * Description:
+ *   Returns the contents of VM0.
+ *
+ * Returned value:
+ *   Returns the register value, or a negative errno.
+ *
+ ****************************************************************************/
+
+static inline int __mx7_read_reg__vm0(FAR struct mx7_dev_s *dev)
+{
+  uint8_t val = 0xff;
+  int ret;
+
+  ret = __mx7_read_reg(dev, VM0, &val, sizeof(val));
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return val;
+}
+
+/****************************************************************************
+ * Name: __mx7_write_reg__cmah
+ *
+ * Description:
+ *   Writes @val to CMAH.
+ *
+ * Returned value:
+ *   Returns the number of bytes written (always 1), or a negative errno.
+ *
+ ****************************************************************************/
+
+static inline int __mx7_write_reg__cmah(FAR struct mx7_dev_s *dev,
+                                        uint8_t val)
+{
+  return __mx7_write_reg(dev, CMAH, &val, sizeof(val));
+}
+
+/****************************************************************************
+ * Name: __mx7_write_reg__cmm
+ *
+ * Description:
+ *   Writes @val to CMM.
+ *
+ * Returned value:
+ *   Returns the number of bytes written (always 1), or a negative errno.
+ *
+ ****************************************************************************/
+
+static inline int __mx7_write_reg__cmm(FAR struct mx7_dev_s *dev, uint8_t val)
+{
+  return __mx7_write_reg(dev, CMM, &val, sizeof(val));
+}
+
+/****************************************************************************
+ * Name: __mx7_write_reg__cmal
+ *
+ * Description:
+ *   Writes @val to CMAL.
+ *
+ * Returned value:
+ *   Returns the number of bytes written (always 1), or a negative errno.
+ *
+ ****************************************************************************/
+
+static inline int __mx7_write_reg__cmal(FAR struct mx7_dev_s *dev,
+                                        uint8_t val)
+{
+  return __mx7_write_reg(dev, CMAL, &val, sizeof(val));
+}
+
+/****************************************************************************
+ * Name: __mx7_write_reg__osdbl
+ *
+ * Description:
+ *   Writes @val to OSDBL.
+ *
+ * Returned value:
+ *   Returns the number of bytes written (always 1), or a negative errno.
+ *
+ ****************************************************************************/
+
+static inline int __mx7_write_reg__osdbl(FAR struct mx7_dev_s *dev,
+                                         uint8_t val)
+{
+  return __mx7_write_reg(dev, OSDBL, &val, sizeof(val));
+}
+
+/****************************************************************************
  * Name: __mx7_read_reg__osdbl
  *
  * Description:
- *   Returns the contents of OSDBL. A simple helper around __mx7_read_reg().
+ *   Returns the contents of OSDBL.
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
@@ -681,20 +753,29 @@ static inline int __mx7_read_reg__osdbl(FAR struct mx7_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: __mx7_read_reg__osdbl
+ * Name: __mx7_read_reg__cmdo
  *
  * Description:
- *   Returns the contents of OSDBL. A simple helper around __mx7_read_reg().
+ *   Returns the contents of CMDO.
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
 
-static inline int __mx7_write_reg__osdbl(FAR struct mx7_dev_s *dev,
-                                         uint8_t val)
+static inline int __mx7_read_reg__cmdo(FAR struct mx7_dev_s *dev)
 {
-  return __mx7_write_reg(dev, OSDBL, &val, sizeof(val));
+  uint8_t val = 0xff;
+  int ret;
+
+  ret = __mx7_read_reg(dev, CMDO, &val, sizeof(val));
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return val;
 }
 
 /****************************************************************************
@@ -703,7 +784,7 @@ static inline int __mx7_write_reg__osdbl(FAR struct mx7_dev_s *dev,
  * Description:
  *   Returns the contents of DMM. A simple helper around __mx7_read_reg().
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
@@ -719,7 +800,7 @@ static inline int __mx7_write_reg__dmm(FAR struct mx7_dev_s *dev, uint8_t val)
  * Description:
  *   Returns the contents of DMDI. A simple helper around __mx7_read_reg().
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
@@ -736,7 +817,7 @@ static inline int __mx7_write_reg__dmdi(FAR struct mx7_dev_s *dev,
  * Description:
  *   Returns the contents of DMAH. A simple helper around __mx7_read_reg().
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
@@ -753,7 +834,7 @@ static inline int __mx7_write_reg__dmah(FAR struct mx7_dev_s *dev,
  * Description:
  *   Returns the contents of DMAL. A simple helper around __mx7_read_reg().
  *
- * Return value:
+ * Returned value:
  *   Returns the register value, or a negative errno.
  *
  ****************************************************************************/
@@ -762,6 +843,65 @@ static inline int __mx7_write_reg__dmal(FAR struct mx7_dev_s *dev,
                                         uint8_t val)
 {
   return __mx7_write_reg(dev, DMAL, &val, sizeof(val));
+}
+
+/****************************************************************************
+ * Name: __mx7_wait_reset
+ *
+ * Description:
+ *   Waits until the chip finishes its reset activities.
+ *
+ ****************************************************************************/
+
+static inline void __mx7_wait_reset(FAR struct mx7_dev_s *dev)
+{
+  int stat = 0;                 /* contents of STAT register */
+  int dmm = 0;                  /* contents of DMM register */
+  int vm0 = 0;                  /* contents of VM0 register */
+
+  do
+    {
+      /* If we're here, a reset command has probably just been issued; wait
+       * 100usec before checking, per the datasheet.
+       */
+
+      up_udelay(100);
+
+      vm0 = __mx7_read_reg__vm0(dev);
+      if (vm0 & VM0__RESET)
+        {
+          continue;
+        }
+
+      stat = __mx7_read_reg__stat(dev);
+      dmm = __mx7_read_reg__dmm(dev);
+    }
+  while ((stat & STAT__INRESET) || (dmm & DMM__CLEAR));
+}
+
+/****************************************************************************
+ * Name: __mx7_read_nvm
+ *
+ * Description:
+ *   Commands the NVM to move the current CMAH:CMAL into shadow RAM.
+ ****************************************************************************/
+
+static inline void __mx7_read_nvm(FAR struct mx7_dev_s *dev)
+{
+  int stat = 0;
+
+  /* Initiate the command. */
+
+  __mx7_write_reg__cmm(dev, CMM__READ_NVM);
+
+  do
+    {
+      /* Wait for it to finish. */
+
+      up_udelay(10);
+      stat = __mx7_read_reg__stat(dev);
+    }
+  while (stat & STAT__CHARUNAVAIL);
 }
 
 /****************************************************************************
@@ -813,15 +953,7 @@ static void mx7_reset(FAR struct mx7_dev_s *dev)
 {
   __lock(dev);
 
-  /* Make sure we aren't already in RESET. */
-
-  __mx7_wait_reset(dev);
-
-  /* Issue the reset command. We do this regardless of what we found
-   * above, because by calling this function the user is requesting us
-   * to issue a reset; we don't care if/why the chip might already
-   * have been in reset.
-   */
+  /* Issue the reset command. */
 
   __mx7_write_reg__vm0(dev, VM0__RESET);
 
@@ -858,8 +990,8 @@ static void mx7_reset(FAR struct mx7_dev_s *dev)
  ****************************************************************************/
 
 static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
-                    FAR const uint8_t *buf, size_t len,
-                    uint8_t ca, size_t pos)
+                          FAR const uint8_t * buf, size_t len,
+                          uint8_t ca, size_t pos)
 {
   ssize_t ret = len;
   FAR struct spi_dev_s *spi = dev->config.spi;
@@ -868,8 +1000,8 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
   /* Configure the bus and grab the chip as usual. */
 
   SPI_LOCK(spi, true);
-  SPI_SETMODE(spi, SPIDEV_MODE0);
-  SPI_SETFREQUENCY(spi, 10000000);
+  SPI_SETMODE(spi, SPI_MODE);
+  SPI_SETFREQUENCY(spi, SPI_FREQ);
   SPI_SELECT(spi, id, true);
 
   while (len != 0)
@@ -878,11 +1010,10 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
        *
        * "When in 16-Bit [Auto-Increment] Operating Mode:
        *
-       *  1) Write DMAH[0] = X to select the MSB and DMAL[7:0] = XX to
-       *     select the lower order address bits of the starting address
-       *     for auto-increment operation.  This address determines the
-       *     location of the first character on the display (see Figures
-       *     10 and 21)."
+       * 1) Write DMAH[0] = X to select the MSB and DMAL[7:0] = XX to select
+       *    the lower order address bits of the starting address for
+       *    auto-increment operation.  This address determines the location
+       *    of the first character on the display (see Figures 10 and 21)."
        */
 
       SPI_SEND(spi, DMAH | SPI_REG_WRITE);
@@ -895,8 +1026,8 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
        *  3) Write DMM[6] = 0 to set the 16-bit operating mode.
        *
        *  4) Write DMM[5:3] = XXX to set the Local Background Control
-       *     (LBC), Blink (BLK) and Invert (INV) attribute bits that will
-       *     be applied to all characters."
+       *     (LBC), Blink (BLK) and Invert (INV) attribute bits that
+       *     will be applied to all characters."
        */
 
       SPI_SEND(spi, DMM | SPI_REG_WRITE);
@@ -906,16 +1037,16 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
        *     NVM character map] data in the intended character order to
        *     display text on the screen. It will be stored along with a
        *     Character Attribute byte derived from DMM[5:3].  See Figure
-       *     19. This is the single byte operation. The DMDI[7:0] address
-       *     is automatically set by autoincrement mode. The display memory
+       *     19. This is the single byte operation. The DMDI[7:0] address is
+       *     automatically set by autoincrement mode. The display memory
        *     address is automatically incremented following the write
        *     operation until the final display memory address is reached."
        */
 
       while (len != 0)
         {
-          /* Send the byte to the DMDI register. The "auto-increment"
-           * mode will update DMAH and DMAL for us.
+          /* Send the byte to the DMDI register. The "auto-increment" mode
+           * will update DMAH and DMAL for us.
            */
 
           SPI_SEND(spi, DMDI | SPI_REG_WRITE);
@@ -925,25 +1056,22 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
 
           if (*buf == 0xff)
             {
-              /* An embedded 0xff terminates auto-increment mode,
-               * and since we've already sent it, pause here to
-               * deal with it.
-               *
-               * Betaflight, et. al just skip the byte and
-               * continue, and then retrace their steps later. I
-               * think it's a better workflow to just deal with it
-               * now. Plus, there's only a 1/256 chance of there
-               * being such a byte anyway, and if performance ends
-               * up being a problem then the user can move the CA
-               * to a different index in their NVM map.
+              /* An embedded 0xff terminates auto-increment mode, and since
+               * we've already sent it, pause here to deal with
+               * it. Betaflight, et. al just skip the byte and continue, and
+               * then retrace their steps later. I think it's a better
+               * workflow to just deal with it now. Plus, there's only a
+               * 1/256 chance of there being such a byte anyway, and if
+               * performance ends up being a problem then the user can move
+               * the CA to a different index in their NVM map.
                */
 
               break;
             }
           else
             {
-              /* It was an ordinary byte, so we're still in
-               * auto-increment mode; count it and keep going.
+              /* It was an ordinary byte, so we're still in auto-increment
+               * mode; count it and keep going.
                */
 
               buf++;
@@ -953,16 +1081,16 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
         }
 
       /* (Use of while() here instead of if() catches repeated 0xff's while
-       * we're already out of auto-increment mode. Since you mustached,
-       * this shaves a transaction or two when they occur.)
+       * we're already out of auto-increment mode. Since you mustached, this
+       * shaves a transaction or two when they occur.)
        */
 
       while (len != 0 && *buf == 0xff)
         {
           /* We're out of the auto-increment loop but still have data
-           * remaining, which means there's an 0xff in the data
-           * stream. We must send it the hard way, but we can still use
-           * the attribute byte already stored in DMM.
+           * remaining, which means there's an 0xff in the data stream. We
+           * must send it the hard way, but we can still use the attribute
+           * byte already stored in DMM.
            */
 
           SPI_SEND(spi, DMAH | SPI_REG_WRITE);
@@ -977,14 +1105,10 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
           buf++;
           pos++;
           len--;
-      }
-  }
+        }
+    }
 
-  /* "6) Write CA = FFh to terminate the auto-increment mode."
-   *
-   * (We can do this safely even if we aren't in auto-increment mode, so we
-   * don't need to check.)
-   */
+  /* "6) Write CA = FFh to terminate the auto-increment mode." */
 
   SPI_SEND(spi, DMDI | SPI_REG_WRITE);
   SPI_SEND(spi, 0xff);
@@ -995,12 +1119,151 @@ static ssize_t __write_fb(FAR struct mx7_dev_s *dev,
    */
 
   SPI_SEND(spi, DMM | SPI_REG_WRITE);
-  SPI_SEND(spi, DMM__AUTOINC | TO_BITFIELD(DMM__CA, ca));
+  SPI_SEND(spi, TO_BITFIELD(DMM__CA, ca));
 
   /* And, finally, we're all done. */
 
   SPI_SELECT(spi, id, false);
   SPI_LOCK(spi, false);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: __read_cm
+ *
+ * Description:
+ *    Reads the chip's Character Memory area.
+ *
+ *    Each entry in the Character Memory area is 3x18=54 bytes, so one would
+ *    expect that the @len parameter would always be an integer multiple of
+ *    that quantity. But we don't require that here, because the chip doesn't
+ *    either.
+ *
+ *    Each row in the CA EEPROM is 64 bytes wide, but only the first 54 bytes
+ *    are used. The rest are marked as "unused memory" in the datasheet. All
+ *    64 bytes of each row are included in the data we return, if the user's
+ *    request spans that area. We assume that the user understands the format.
+ *
+ *    In total, the chip has 64 bytes per row x 256 rows of EEPROM.
+ *
+ *    Finally, each pixel of a character requires two bits to define. Thus,
+ *    there are four pixels per byte.
+ *
+ * Input parameters:
+ *   dev  - device handle
+ *   pos - starting address to read from, i.e. offset in bytes from the start
+ *          of character memory
+ *   buf  - buffer to return the character map data
+ *   len  - number of bytes to return
+ *
+ * Returned value:
+ *  Returns the number of bytes read on success, or negative errno.
+ *
+ ****************************************************************************/
+
+static ssize_t __read_cm(FAR struct mx7_dev_s *dev,
+                         size_t pos, FAR uint8_t * buf, size_t len)
+{
+  const size_t eeprom_rows = 256;
+  const size_t eeprom_cols = 64;
+  const size_t eeprom_bytes = eeprom_rows * eeprom_cols;
+  ssize_t ret = len;
+  int vm0 = 0;
+  int cmah = 0;
+  int cmal = 0;
+
+  /* Does the request stay in-bounds? */
+
+  if (pos + len >= eeprom_bytes)
+    {
+      if (pos >= eeprom_bytes)
+        {
+          /* They want to start out-of-bounds. No. */
+
+          len = 0;
+        }
+
+      /* The starting position is in-bounds, but somewhere after that they
+       * run out of bounds. Truncate the length of their request to what
+       * will fit, per the usual read() semantics. Next time, they'll
+       * probably call us with a position that's out of bounds. We'll catch
+       * them above, and return 0.
+       */
+
+      len = eeprom_bytes - pos;
+    }
+
+  /* If we have nothing to do, do nothing. */
+
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  /* Thus sayeth the datasheet (p. 38):
+   *
+   * "Steps for Reading Character Bytes from Character Memory:
+   *
+   * 1) Write VM0[3] = 0 to disable the OSD image."
+   */
+
+  vm0 = __mx7_read_reg__vm0(dev);
+  __mx7_write_reg__vm0(dev, vm0 & ~VM0__ENABLE);
+
+  while (len != 0)
+    {
+      /* "2) Write CMAH[7:0] = xxH to select the character (0–255) to be
+       *     read (Figures 10 and 13)."
+       *
+       * Put another way: CMAH is the row number in the EEPROM.
+       */
+
+      cmah = pos / eeprom_cols;
+      __mx7_write_reg__cmah(dev, cmah);
+
+      /* "3) Write CMM[7:0] = 0101xxxx to read the character data from the
+       *     NVM to the shadow RAM (Figure 13)."
+       *
+       * They forgot to mention STAT[5], but we remembered it.
+       */
+
+      __mx7_read_nvm(dev);
+
+      /* "4) Write CMAL[7:0] = xxH to select the 4-pixel byte (0–63) in
+       *     the character to be read (Figures 10 and 13)."
+       *
+       * That means CMAL is the column number.
+       */
+
+      cmal = pos % eeprom_cols;
+
+      /* The shadow RAM is large enough to hold an entire row, so we don't
+       * need to go back for another until we've read all of this one.
+       */
+      do
+        {
+          __mx7_write_reg__cmal(dev, cmal);
+
+          /* "5) Read CMDO[7:0] = xxH to read the selected 4-pixel byte of
+           * data (Figures 11 and 13)."
+           */
+
+          *buf = __mx7_read_reg__cmdo(dev);
+
+          /* "6) Repeat steps 4 and 5 to read other bytes of 4-pixel data." */
+
+          buf++;
+          pos++;
+          len--;
+          cmal++;
+        }
+      while (cmal < eeprom_cols);
+    }
+
+  /* "7) Write VM0[3] = 1 to enable the OSD image display." */
+
+  __mx7_write_reg__vm0(dev, vm0);
 
   return ret;
 }
@@ -1047,6 +1310,27 @@ static int mx7_close(FAR struct file *filep)
 }
 
 /****************************************************************************
+ * Name: mx7_read_cm
+ *
+ * Description:
+ *   Reads from Character Memory, the chip's NVM character map.
+ *
+ ****************************************************************************/
+
+static ssize_t mx7_read_cm(FAR struct file *filep, FAR char *buf, size_t len)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct mx7_dev_s *dev = inode->i_private;
+  ssize_t ret;
+
+  __lock(dev);
+  ret = __read_cm(dev, filep->f_pos, (FAR uint8_t *) buf, len);
+  __unlock(dev);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: mx7_read
  *
  * Description:
@@ -1063,10 +1347,34 @@ static int mx7_close(FAR struct file *filep)
 static ssize_t mx7_read(FAR struct file *filep, FAR char *buf, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct mx7_dev_s *dev = inode->i_private;
-  UNUSED(inode);
-  UNUSED(dev);
-  return 0;
+  ssize_t ret = 0;
+
+  /* Which interface are they using? */
+
+  switch (node_from_name(inode->i_name))
+    {
+    case CM:
+
+      /* Reading from Character Memory (character map). */
+
+      ret = mx7_read_cm(filep, buf, len);
+      break;
+
+    default:
+
+      /* Someday we'll have others, I'm sure... */
+
+      break;
+    }
+
+  if (ret > 0)
+    {
+      /* Successful read, so update the file position. */
+
+      filep->f_pos += ret;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1100,7 +1408,7 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
   ssize_t ret;
 
   __lock(dev);
-  ret = __write_fb(dev, (FAR uint8_t *)buf, len, dev->ca, filep->f_pos);
+  ret = __write_fb(dev, (FAR uint8_t *) buf, len, dev->ca, filep->f_pos);
   __unlock(dev);
 
   return ret;
@@ -1142,34 +1450,37 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
  ****************************************************************************/
 
 static ssize_t mx7_write(FAR struct file *filep,
-                   FAR const char *buf,
-                   size_t len)
+                         FAR const char *buf, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
+  ssize_t ret = -EINVAL;
 
   /* Which interface are they using? */
 
   switch (node_from_name(inode->i_name))
     {
-      case FB :
-        /* The "here is some stuff to display" interface */
+    case FB:
 
-        return mx7_write_fb(filep, buf, len);
+      /* The "here is some stuff to display" interface */
 
-      case RAW :
-        /* The "raw" interface (unimplemented) */
+      ret = mx7_write_fb(filep, buf, len);
+      break;
 
-        break; /* return mx7_write_raw(filep, buf, len); */
+    default:
 
-      default:
-        /* Someday we'll have others, I'm sure... */
+      /* Someday we'll have others, I'm sure... */
 
-        break;
+      break;
     }
 
-  /* If you get here, we have no idea what you are asking for. */
+  if (ret > 0)
+    {
+      /* Successful read, so update the file position. */
 
-  return -EINVAL;
+      filep->f_pos += ret;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1180,15 +1491,14 @@ static ssize_t mx7_write(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int mx7_ioctl(FAR struct file *filep,
-               int cmd, unsigned long arg)
+static int mx7_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mx7_dev_s *dev = inode->i_private;
 
   UNUSED(inode);
   UNUSED(dev);
-  return -ENOTTY; /* unsupported ioctl */
+  return -ENOTTY;               /* unsupported ioctl */
 }
 
 #if defined(DEBUG)
@@ -1303,8 +1613,8 @@ static int mx7_debug_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t mx7_debug_read(FAR struct file *filep, FAR char *buf,
-                              size_t len)
+static ssize_t mx7_debug_read(FAR struct file *filep,
+                              FAR char *buf, size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mx7_dev_s *dev = inode->i_private;
@@ -1322,7 +1632,7 @@ static ssize_t mx7_debug_read(FAR struct file *filep, FAR char *buf,
 
   if (filep->f_pos >= sizeof(dev->debug))
     {
-      return 0; /* 0 == "eof" */
+      return 0;                 /* 0 == "eof" */
     }
 
   /* Populate the register value "cache" if needed. */
@@ -1390,7 +1700,9 @@ static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
 
   /* Write the register value. */
 
+  __lock(dev);
   __mx7_write_reg(dev, addr, &val, 1);
+  __unlock(dev);
 
   return len;
 }
@@ -1416,10 +1728,9 @@ static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
  ****************************************************************************/
 
 static int add_interface(FAR const char *path,
-                   FAR const char *name,
-                   FAR const struct file_operations *fops,
-                   mode_t mode,
-                   FAR void *private)
+                         FAR const char *name,
+                         FAR const struct file_operations *fops,
+                         mode_t mode, FAR void *private)
 {
   char buf[128];
 
@@ -1490,7 +1801,9 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
   memset(dev, 0, sizeof(*dev));
   nxmutex_init(&dev->lock);
 
-  /* Keep a copy of the config structure, in case the caller discards theirs. */
+  /* Keep a copy of the config structure, in case the caller discards
+   * theirs.
+   */
 
   dev->config = *config;
 
@@ -1501,27 +1814,28 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
   /* Turn the display on. */
 
   /* Note: we don't _really_ need to lock this, because nobody can see our
-   * device yet. But since we're using the lock-requiring functions below, I'm
-   * doing it anyway for consistency.
+   * device yet. But since we're using the lock-requiring functions below,
+   * I'm doing it anyway for consistency.
    */
 
   __lock(dev);
 
   /* Thus sayeth the datasheet (pp. 38):
    *
-   * "The following two steps enable viewing of the OSD image. These steps are
-   *  not required to read from or write to the display memory:
+   * "The following two steps enable viewing of the OSD image. These steps
+   *  are not required to read from or write to the display memory:
    *
-   *  1) Write VM0[3] = 1 to enable the display of the OSD image."
+   * 1) Write VM0[3] = 1 to enable the display of the OSD image."
    */
 
   __mx7_write_reg__vm0(dev, VM0__ENABLE);
 
-  /* "2) Write OSDBL[4] = 0 to enable automatic OSD black level control [Note:
-   *     there is no "manual" control]. This ensures the correct OSD image
-   *     brightness. This register contains 4 factory-preset bits [3:0] that
-   *     must not be changed. Therefore, when changing bit 4, first read
-   *     OSDBL[7:0], modify bit 4, and then write back the updated byte."
+  /* "2) Write OSDBL[4] = 0 to enable automatic OSD black level control
+   *     [Note: there is no "manual" control]. This ensures the correct
+   *     OSD image brightness. This register contains 4 factory-preset
+   *     bits [3:0] that must not be changed. Therefore, when changing
+   *     bit 4, first read OSDBL[7:0], modify bit 4, and then write back
+   *     the updated byte."
    */
 
   osdbl = __mx7_read_reg__osdbl(dev);
@@ -1529,10 +1843,10 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
   __mx7_write_reg__osdbl(dev, osdbl);
 
   /* Create device nodes for the ordinary user interfaces:
-   *
-   *   /dev/osd0/fb
-   *   /dev/osd0/raw
-   *   /dev/osd0/vsync
+   *    /dev/osd0/fb
+   *    /dev/osd0/raw
+   *    /dev/osd0/vsync
+   *    /dev/osd0/cm
    */
 
   for (int n = 0; ret >= 0 && n < NODE_MAP_LEN; n++)
