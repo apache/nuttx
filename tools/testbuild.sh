@@ -48,7 +48,7 @@ unset testfile
 
 function showusage {
     echo ""
-    echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-a <appsdir>] [-n <nxdir>] <testlist-file>"
+    echo "USAGE: $progname [-w|l] [-c|u|n] [-s] [-d] [-x] [-a <apps-dir>] [-t <nuttx-dir><testlist-file>"
     echo "       $progname -h"
     echo ""
     echo "Where:"
@@ -56,10 +56,10 @@ function showusage {
     echo "  -c|u|n selects Windows environment option:  Cygwin (c), Ubuntu under"
     echo "     Windows 10 (u), or Windows native (n).  Default Cygwin"
     echo "  -s Use C++ unsigned long size_t in new operator. Default unsigned int"
-    echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
-    echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
     echo "  -d enables script debug output"
     echo "  -x exit on build failures"
+    echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
+    echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
     echo "  -h will show this help test and terminate"
     echo "  <testlist-file> selects the list of configurations to test.  No default"
     echo ""

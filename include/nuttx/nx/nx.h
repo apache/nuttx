@@ -243,7 +243,7 @@ struct nx_callback_s
    *   event - The server event
    *   arg1  - User provided argument (see nx_openwindow, nx_requestbkgd,
    *           nxtk_openwindow, or nxtk_opentoolbar)
-   *   arg2  - User provided argument (see nx_block or nxtk_block)
+   *   arg2  - User provided argument (see nx[tk]_block or nx[tk]_synch)
    *
    * Returned Value:
    *   None
