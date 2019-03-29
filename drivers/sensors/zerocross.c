@@ -417,7 +417,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
-  DEBUGASSERT(inode->i_private)
+  DEBUGASSERT(inode->i_private);
   priv = (FAR struct zc_upperhalf_s *)inode->i_private;
 
   /* Get exclusive access to the device structures */

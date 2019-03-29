@@ -204,7 +204,7 @@ static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   FAR struct stm32gpint_dev_s *stm32gpint = (FAR struct stm32gpint_dev_s *)dev;
 
   DEBUGASSERT(stm32gpint != NULL && value != NULL);
-  DEBUGASSERT(stm32gpint->stm32gpio && stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
+  DEBUGASSERT(stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
   gpioinfo("Reading int pin...\n");
 
   *value = stm32_gpioread(g_gpiointinputs[stm32gpint->stm32gpio.id]);
