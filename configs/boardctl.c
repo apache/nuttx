@@ -53,6 +53,10 @@
 #  include <nuttx/nx/nxmu.h>
 #endif
 
+#ifdef CONFIG_VNCSERVER
+#  include <nuttx/video/vnc.h>
+#endif
+
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
 #  include <nuttx/usb/cdcacm.h>
 #  include <nuttx/usb/pl2303.h>
@@ -411,9 +415,9 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
 #ifdef CONFIG_NX
       /* CMD:           BOARDIOC_NX_START
-       * DESCRIPTION:   Start the NX servier
+       * DESCRIPTION:   Start the NX server
        * ARG:           Integer display number to be served by this NXMU
-       (                instance.
+       *                instance.
        * CONFIGURATION: CONFIG_NX
        * DEPENDENCIES:  Base graphics logic provides nxmu_start()
        */
@@ -426,6 +430,34 @@ int boardctl(unsigned int cmd, uintptr_t arg)
            */
 
           ret = nxmu_start((int)arg, 0);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_VNCSERVER
+      /* CMD:           BOARDIOC_VNC_START
+       * DESCRIPTION:   Start the NX server and framebuffer driver.
+       * ARG:           A reference readable instance of struct
+       *                boardioc_vncstart_s
+       * CONFIGURATION: CONFIG_VNCSERVER
+       * DEPENDENCIES:  VNC server provides vnc_default_fbinitialize()
+       */
+
+      case BOARDIOC_VNC_START:
+        {
+          FAR struct boardioc_vncstart_s *vnc =
+            (FAR struct boardioc_vncstart_s *)arg;
+
+          if (vnc == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              /* Setup the VNC server to support keyboard/mouse inputs */
+
+              ret = vnc_default_fbinitialize(vnc->display, vnc->handle);
+            }
         }
         break;
 #endif
