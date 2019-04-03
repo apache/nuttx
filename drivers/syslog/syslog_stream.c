@@ -225,7 +225,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Allocate an IOB */
 
-  iob                  = iob_alloc(true);
+  iob                  = iob_tryalloc(true);
   stream->iob          = iob;
 
   if (iob != NULL)
