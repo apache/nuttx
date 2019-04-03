@@ -5454,7 +5454,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
    */
 
   regval = stm32_getreg(STM32_RCC_AHB1LPENR);
-  regval &= ~RCC_AHB1ENR_OTGULPIEN;
+  regval &= ~RCC_AHB1ENR_OTGHSULPIEN;
   stm32_putreg(regval, STM32_RCC_AHB1LPENR);
 #endif
 
