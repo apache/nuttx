@@ -1,7 +1,7 @@
 /********************************************************************************************
  * arch/mips/src/pic32mz/pic32mz-ioport.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,10 +121,30 @@
 #define PIC32MZ_IOPORT_CNENSET_OFFSET   0x0088 /* Change Notice Interrupt Enable set register */
 #define PIC32MZ_IOPORT_CNENINV_OFFSET   0x008c /* Change Notice Interrupt Enable invert register */
 
-#define PIC32MZ_IOPORT_CNSTAT_OFFSET    0x0080 /* Change Notice Control register */
-#define PIC32MZ_IOPORT_CNSTATCLR_OFFSET 0x0084 /* Change Notice Control clear register*/
-#define PIC32MZ_IOPORT_CNSTATSET_OFFSET 0x0088 /* Change Notice Control set register */
-#define PIC32MZ_IOPORT_CNSTATINV_OFFSET 0x008c /* Change Notice Control invert register */
+#define PIC32MZ_IOPORT_CNSTAT_OFFSET    0x0090 /* Change Notice Status register */
+#define PIC32MZ_IOPORT_CNSTATCLR_OFFSET 0x0094 /* Change Notice Status clear register*/
+#define PIC32MZ_IOPORT_CNSTATSET_OFFSET 0x0098 /* Change Notice Status set register */
+#define PIC32MZ_IOPORT_CNSTATINV_OFFSET 0x009c /* Change Notice Status invert register */
+
+#define PIC32MZ_IOPORT_CNNE_OFFSET      0x00a0 /* Change Notice Interrupt Enable register */
+#define PIC32MZ_IOPORT_CNNECLR_OFFSET   0x00a4 /* Change Notice Interrupt Enable clear register */
+#define PIC32MZ_IOPORT_CNNESET_OFFSET   0x00a8 /* Change Notice Interrupt Enable set register */
+#define PIC32MZ_IOPORT_CNNEINV_OFFSET   0x00ac /* Change Notice Interrupt Enable invert register */
+
+#define PIC32MZ_IOPORT_CNF_OFFSET       0x00b0 /* Change Notice Status register */
+#define PIC32MZ_IOPORT_CNFCLR_OFFSET    0x00b4 /* Change Notice Status clear register */
+#define PIC32MZ_IOPORT_CNFSET_OFFSET    0x00b8 /* Change Notice Status set register */
+#define PIC32MZ_IOPORT_CNFINV_OFFSET    0x00bc /* Change Notice Status invert register */
+
+#define PIC32MZ_IOPORT_SRCON0_OFFSET    0x00c0 /* Slew Rate Control0 register */
+#define PIC32MZ_IOPORT_SRCON0CLR_OFFSET 0x00c4 /* Slew Rate Control0 clear register */
+#define PIC32MZ_IOPORT_SRCON0SET_OFFSET 0x00c8 /* Slew Rate Control0 set register */
+#define PIC32MZ_IOPORT_SRCON0INV_OFFSET 0x00cc /* Slew Rate Control0 invert register */
+
+#define PIC32MZ_IOPORT_SRCON1_OFFSET    0x00d0 /* Slew Rate Control1 register */
+#define PIC32MZ_IOPORT_SRCON1CLR_OFFSET 0x00d4 /* Slew Rate Control1 clear register */
+#define PIC32MZ_IOPORT_SRCON1SET_OFFSET 0x00d8 /* Slew Rate Control1 set register */
+#define PIC32MZ_IOPORT_SRCON1INV_OFFSET 0x00dc /* Slew Rate Control1 invert register */
 
 /* IOPort Peripheral Addresses **************************************************************/
 
@@ -823,7 +843,8 @@
 
 /* Change Notice Control register */
 
-#define IOPORT_CNCON_SIDL              (1 << 13) /* Bit 13: Stop in idle mode */
+#define IOPORT_CNCON_EDGEDETECT        (1 << 11) /* Bit 11: Change Notification Style bit */
+#define IOPORT_CNCON_SIDL              (1 << 13) /* Bit 13: Stop in Idle Control bit */
 #define IOPORT_CNCON_ON                (1 << 15) /* Bit 15: Change notice module enable */
 
 /* Change Notice Interrupt Enable register */
@@ -835,6 +856,26 @@
 
 #define IOPORT_CNSTAT(n)               (1 << (n)) /* Bits 0-15: Change notice control pin n */
 #define IOPORT_CNSTAT_ALL              0x0000ffff
+
+/* Change Notice Interrupt Enable register (Negative edge) */
+
+#define IOPORT_CNNE(n)                 (1 << (n)) /* Bits 0-15: 1=Interrupt enabled */
+#define IOPORT_CNNE_ALL                0x0000ffff
+
+/* Change Notice Status register */
+
+#define IOPORT_CNF(n)                  (1 << (n)) /* Bits 0-15: Change notice control pin n */
+#define IOPORT_CNF_ALL                 0x0000ffff
+
+/* Slew Rate Control0 register */
+
+#define IOPORT_SRCON0(n)               (1 << (n)) /* Bits 0-15: Slew Rate control pin n */
+#define IOPORT_SRCON0_ALL              0x0000ffff
+
+/* Slew Rate Control1 register */
+
+#define IOPORT_SRCON1(n)               (1 << (n)) /* Bits 0-15: Slew Rate control pin n */
+#define IOPORT_SRCON1_ALL              0x0000ffff
 
 /********************************************************************************************
  * Public Types

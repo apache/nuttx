@@ -70,6 +70,8 @@ static inline unsigned int pic32mz_ioport(pinset_t pinset);
 static inline unsigned int pic32mz_pin(pinset_t pinset);
 static inline bool pic32mz_input(pinset_t pinset);
 static inline bool pic32mz_interrupt(pinset_t pinset);
+static inline bool pic32mz_edgedetect(pinset_t pinset);
+static inline unsigned int pic32mz_edgemode(pinset_t pinset);
 static inline bool pic32mz_pullup(pinset_t pinset);
 static inline bool pic32mz_pulldown(pinset_t pinset);
 static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg);
@@ -174,12 +176,22 @@ static struct ioport_level2_s * const g_level2_handlers[CHIP_NPORTS] =
 
 static inline bool pic32mz_input(pinset_t pinset)
 {
-  return ((pinset & GPIO_MODE_MASK) != GPIO_INPUT);
+  return (((pinset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT) == GPIO_INPUT);
 }
 
 static inline bool pic32mz_interrupt(pinset_t pinset)
 {
   return ((pinset & GPIO_INTERRUPT) != 0);
+}
+
+static inline bool pic32mz_edgedetect(pinset_t pinset)
+{
+  return ((pinset & GPIO_EDGE_DETECT) != 0);
+}
+
+static inline unsigned int pic32mz_edgemode(pinset_t pinset)
+{
+  return ((pinset & GPIO_EDGE_RISING));
 }
 
 static inline bool pic32mz_pullup(pinset_t pinset)
@@ -215,8 +227,11 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
   struct ioport_level2_s *handlers;
   xcpt_t handler;
   uintptr_t base;
-  uint32_t cnstat;
+  uint32_t cncon;
   uint32_t cnen;
+  uint32_t cnne;
+  uint32_t cnstat;
+  uint32_t cnf;
   uint32_t pending;
   uint32_t regval;
   int ioport;
@@ -240,50 +255,105 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
   base     = g_gpiobase[ioport];
   DEBUGASSERT(handlers && base);
 
+  /* Get the control registers. It will be used to get the interrupt type. */
+
+  cncon = getreg32(base + PIC32MZ_IOPORT_CNCON_OFFSET);
+
   if (handlers && base)
     {
-      /* Get the interrupt status associated with this interrupt */
+      /* Mismatch mode selected? */
 
-      cnstat  = getreg32(base + PIC32MZ_IOPORT_CNSTAT_OFFSET);
-      cnen    = getreg32(base + PIC32MZ_IOPORT_CNSTAT_OFFSET);
-      pending = cnstat & cnen;
-
-      /* Hmmm.. the data sheet implies that the status will pend
-       * until the corresponding PORTx registers is read?  Clear
-       * pending status.
-       */
-
-      regval = getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET);
-      UNUSED(regval);
-
-      /* Call all attached handlers for each pending interrupt */
-
-      for (i = 0; i < 16; i++)
+      if ((cncon & IOPORT_CNCON_EDGEDETECT) == 0)
         {
-          /* Is this interrupt pending */
+          /* Get the interrupt status associated with this interrupt */
 
-          if ((pending & (1 << IOPORT_CNSTAT(i))) != 0)
+          cnstat  = getreg32(base + PIC32MZ_IOPORT_CNSTAT_OFFSET);
+          cnen    = getreg32(base + PIC32MZ_IOPORT_CNEN_OFFSET);
+          pending = cnstat & cnen;
+
+          /* Call all attached handlers for each pending interrupt */
+
+          for (i = 0; i < 16; i++)
             {
-              /* Yes.. Has the user attached a handler? */
+              /* Is this interrupt pending */
 
-              handler = handlers->handler[i].entry;
-              if (handler)
+              if ((pending & (IOPORT_CNSTAT(i))) != 0)
                 {
-                  /* Yes.. call the attached handler */
+                  /* Yes.. Has the user attached a handler? */
 
-                  status = handler(irq, context, handlers->handler[i].arg);
-
-                  /* Keep track of the status of the last handler that
-                   * failed.
-                   */
-
-                  if (status < 0)
+                  handler = handlers->handler[i].entry;
+                  if (handler)
                     {
-                      ret = status;
+                      /* Yes.. call the attached handler */
+
+                      status = handler(irq, context, handlers->handler[i].arg);
+
+                      /* Keep track of the status of the last handler that
+                       * failed.
+                       */
+
+                      if (status < 0)
+                        {
+                          ret = status;
+                        }
                     }
                 }
             }
+
+          /* Clear pending status. */
+
+          regval = getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET);
+          UNUSED(regval);
         }
+
+      /* Edge detect mode selected. */
+
+      else
+        {
+          /* Get the interrupt status associated with this interrupt.
+           * The interrupt is controlled by either CNEN (positive edge)
+           * or CNNE (negative edge).
+           */
+
+          cnen    = getreg32(base + PIC32MZ_IOPORT_CNEN_OFFSET);
+          cnne    = getreg32(base + PIC32MZ_IOPORT_CNNE_OFFSET);
+          cnf     = getreg32(base + PIC32MZ_IOPORT_CNF_OFFSET);
+          pending = cnf & (cnen | cnne);
+
+          /* Call all attached handlers for each pending interrupt */
+
+          for (i = 0; i < 16; i++)
+            {
+              /* Is this interrupt pending */
+
+              if ((pending & (IOPORT_CNF(i))) != 0)
+                {
+                  /* Yes.. Has the user attached a handler? */
+
+                  handler = handlers->handler[i].entry;
+                  if (handler)
+                    {
+                      /* Yes.. call the attached handler */
+
+                      status = handler(irq, context, handlers->handler[i].arg);
+
+                      /* Keep track of the status of the last handler that
+                       * failed.
+                       */
+
+                      if (status < 0)
+                        {
+                          ret = status;
+                        }
+                    }
+                }
+            }
+
+          /* Clear pending status. */
+
+          putreg32(pending, base + PIC32MZ_IOPORT_CNFCLR_OFFSET);
+        }
+
     }
 
   /* Clear the pending interrupt */
@@ -309,6 +379,7 @@ static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
 void pic32mz_gpioirqinitialize(void)
 {
   uintptr_t base;
+  uint32_t regval;
   int ret;
   int i;
 
@@ -327,6 +398,7 @@ void pic32mz_gpioirqinitialize(void)
       /* Reset all registers and disable the CN module */
 
       putreg32(IOPORT_CNEN_ALL, base + PIC32MZ_IOPORT_CNENCLR_OFFSET);
+      putreg32(IOPORT_CNNE_ALL, base + PIC32MZ_IOPORT_CNNECLR_OFFSET);
       putreg32(IOPORT_CNPU_ALL, base + PIC32MZ_IOPORT_CNPUCLR_OFFSET);
       putreg32(IOPORT_CNPD_ALL, base + PIC32MZ_IOPORT_CNPDCLR_OFFSET);
       putreg32(0,               base + PIC32MZ_IOPORT_CNCON_OFFSET);
@@ -350,9 +422,14 @@ void pic32mz_gpioirqinitialize(void)
 
           putreg32(IOPORT_CNCON_ON, base + PIC32MZ_IOPORT_CNCON_OFFSET);
 
-          /* And enable the GPIO interrupt.  Same assumption as above. */
+          /* Read the port to clear the interrupt. */
 
-          up_enable_irq(PIC32MZ_IRQ_PORTA + i);
+          regval = getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET);
+          UNUSED(regval);
+
+          /* Clear the CN interrupt flag. Same assumption as above. */
+
+          up_clrpend_irq(PIC32MZ_IRQ_PORTA + i);
         }
     }
 }
@@ -382,16 +459,13 @@ void pic32mz_gpioirqinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PIC32MZ_GPIOIRQ
-int pic32mz_gpioattach(uint32_t pinset, xcpt_t handler, void *arg)
+int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg)
 {
   struct ioport_level2_s *handlers;
   irqstate_t flags;
   uintptr_t base;
   int ioport;
   int pin;
-
-  DEBUGASSERT(pin < IOPORT_NUMCN);
 
   /* First verify that the pinset is configured as an interrupting input */
 
@@ -468,6 +542,7 @@ int pic32mz_gpioattach(uint32_t pinset, xcpt_t handler, void *arg)
            */
 
           putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENCLR_OFFSET);
+          putreg32(1 << pin, base + PIC32MZ_IOPORT_CNNECLR_OFFSET);
 
           /* Set the new handler (perhaps NULLifying the current handler) */
 
@@ -506,12 +581,43 @@ void pic32mz_gpioirqenable(pinset_t pinset)
   DEBUGASSERT(base);
   if (base)
     {
-      /* And enable the interrupt.  NOTE that we don't actually check if
+      /* Enable the correct CN interrupt.
+       * NOTE that we don't actually check if
        * interrupts are configured for this IO port.  If not, this operation
        * should do nothing.
        */
 
-      putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENSET_OFFSET);
+      if (!pic32mz_edgedetect(pinset))
+        {
+          /* If Edge detect is not selected, then CNEN
+           * controls the interrupt.
+           */
+
+          putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENSET_OFFSET);
+        }
+      else
+        {
+          /* Enable edge detect. */
+
+          putreg32(IOPORT_CNCON_EDGEDETECT, base + PIC32MZ_IOPORT_CNCONSET_OFFSET);
+
+          if (pic32mz_edgemode(pinset) == GPIO_EDGE_RISING)
+            {
+              /* Rising edge selected. CNEN controls the interrupt. */
+
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENSET_OFFSET);
+            }
+          else
+            {
+              /* Falling edge selected. CNNE controls the interrupt. */
+
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNNESET_OFFSET);
+            }
+        }
+
+      /* And enable the interrupt. */
+
+      up_enable_irq(ioport + PIC32MZ_IRQ_PORTA);
     }
 }
 
@@ -541,12 +647,39 @@ void pic32mz_gpioirqdisable(pinset_t pinset)
   DEBUGASSERT(base);
   if (base)
     {
-      /* And disable the interrupt.  NOTE that we don't actually check if
+      /* And disable the correct interrupt.
+       * NOTE that we don't actually check if
        * interrupts are configured for this IO port.  If not, this operation
        * should do nothing.
        */
 
-      putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENCLR_OFFSET);
+      if (!pic32mz_edgedetect(pinset))
+        {
+          /* If Edge detect is not selected, then CNEN
+           * controls the interrupt.
+           */
+
+          putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENCLR_OFFSET);
+        }
+      else
+        {
+          if (pic32mz_edgemode(pinset) == GPIO_EDGE_RISING)
+            {
+              /* Rising edge selected.
+               * CNEN controls the interrupt.
+               */
+
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNENCLR_OFFSET);
+            }
+          else
+            {
+              /* Falling edge selected.
+               * CNNE controls the interrupt.
+               */
+
+              putreg32(1 << pin, base + PIC32MZ_IOPORT_CNNECLR_OFFSET);
+            }
+        }
     }
 }
 

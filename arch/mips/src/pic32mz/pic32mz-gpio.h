@@ -51,58 +51,119 @@
 /* GPIO settings used in the configport, readport, writeport, etc.
  *
  * General encoding:
- * MMAV IIDR RRRx PPPP
+ * xxxx xxxx xxxx xSSM MAVI IIII RRRR PPPP
+ *
+ * x = Not implemented
+ * S = Slew Rate
+ * M = Mode (input/output)
+ * I = Interrupt
+ * R = Register
+ * P = Pin
  */
 
-#define GPIO_MODE_SHIFT   (14)      /* Bits 14-15: I/O mode */
-#define GPIO_MODE_MASK    (3 << GPIO_MODE_SHIFT)
-#  define GPIO_INPUT      (0 << GPIO_MODE_SHIFT) /* 00 Normal input */
-#  define GPIO_OUTPUT     (2 << GPIO_MODE_SHIFT) /* 10 Normal output */
-#  define GPIO_OPENDRAN   (3 << GPIO_MODE_SHIFT) /* 11 Open drain output */
+/* Slew Rate Control.
+ *
+ * .... .... .... .SS. .... .... .... ....
+ */
 
-#define GPIO_ANALOG_MASK   (1 << 13) /* Bit 13: Analog */
-#  define GPIO_ANALOG      (1 << 13)
-#  define GPIO_DIGITAL     (0)
+#define GPIO_SR_SHIFT        (17) /* Bits 17-18: Slew Rate Control */
+#define GPIO_SR_MASK         (3 << GPIO_SR_SHIFT)
+#  define GPIO_FASTEST       (0 << GPIO_SR_SHIFT) /* 00: Disabled and set to fastest */
+#  define GPIO_MEDIUM        (1 << GPIO_SR_SHIFT) /* 01: Enabled and set to medium   */
+#  define GPIO_SLOW          (2 << GPIO_SR_SHIFT) /* 10: Enabled and set to slow     */
+#  define GPIO_SLOWEST       (3 << GPIO_SR_SHIFT) /* 11: Enabled and set to slowest  */
+#define GPIO_SR_CON0_SHIFT   (0) /* Bit 0: SRCON0x */
+#define GPIO_SR_CON0_MASK    (1 << GPIO_SR_CON0_SHIFT)
+#define GPIO_SR_CON1_SHIFT   (1) /* Bit 1: SRCON1x */
+#define GPIO_SR_CON1_MASK    (1 << GPIO_SR_CON1_SHIFT)
 
-#define GPIO_VALUE_MASK   (1 << 12) /* Bit 12: Initial output value */
-#  define GPIO_VALUE_ONE  (1 << 12)
-#  define GPIO_VALUE_ZERO (0)
+/* Input/Output mode:
+ *
+ * .... .... .... ...M M... .... .... ....
+ */
 
-#define GPIO_INTERRUPT    (1 << 11) /* Bit 11: Change notification enable */
-#define GPIO_PULLUP       (1 << 10) /* Bit 10: Change notification pull-up */
-#define GPIO_PULLDOWN     (1 << 9)  /* Bit 9:  Change notification pull-down */
+#define GPIO_MODE_SHIFT      (15)      /* Bits 15-16: I/O mode */
+#define GPIO_MODE_MASK       (3 << GPIO_MODE_SHIFT)
+#  define GPIO_INPUT         (0 << GPIO_MODE_SHIFT) /* 00 Normal input */
+#  define GPIO_OUTPUT        (2 << GPIO_MODE_SHIFT) /* 10 Normal output */
+#  define GPIO_OPENDRAIN     (3 << GPIO_MODE_SHIFT) /* 11 Open drain output */
 
-#define GPIO_PORT_SHIFT   (5)       /* Bits 5-8: Port number */
-#define GPIO_PORT_MASK    (15 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTA      (0 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTB      (1 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTC      (2 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTD      (3 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTE      (4 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTF      (5 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTG      (6 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTH      (7 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTJ      (8 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTK      (9 << GPIO_PORT_SHIFT)
+/* Analog mode.
+ *
+ * .... .... .... .... .A.. .... .... ....
+ */
 
-#define GPIO_PIN_SHIFT    0        /* Bits 0-3: GPIO number: 0-15 */
-#define GPIO_PIN_MASK     (15 << GPIO_PIN_SHIFT)
-#define GPIO_PIN0         (0  << GPIO_PIN_SHIFT)
-#define GPIO_PIN1         (1  << GPIO_PIN_SHIFT)
-#define GPIO_PIN2         (2  << GPIO_PIN_SHIFT)
-#define GPIO_PIN3         (3  << GPIO_PIN_SHIFT)
-#define GPIO_PIN4         (4  << GPIO_PIN_SHIFT)
-#define GPIO_PIN5         (5  << GPIO_PIN_SHIFT)
-#define GPIO_PIN6         (6  << GPIO_PIN_SHIFT)
-#define GPIO_PIN7         (7  << GPIO_PIN_SHIFT)
-#define GPIO_PIN8         (8  << GPIO_PIN_SHIFT)
-#define GPIO_PIN9         (9  << GPIO_PIN_SHIFT)
-#define GPIO_PIN10        (10 << GPIO_PIN_SHIFT)
-#define GPIO_PIN11        (11 << GPIO_PIN_SHIFT)
-#define GPIO_PIN12        (12 << GPIO_PIN_SHIFT)
-#define GPIO_PIN13        (13 << GPIO_PIN_SHIFT)
-#define GPIO_PIN14        (14 << GPIO_PIN_SHIFT)
-#define GPIO_PIN15        (15 << GPIO_PIN_SHIFT)
+#define GPIO_ANALOG_SHIFT    (14) /* Bit 14: Analog */
+#define GPIO_ANALOG_MASK     (1 << GPIO_ANALOG_SHIFT)
+#  define GPIO_ANALOG        (1 << GPIO_ANALOG_SHIFT)
+#  define GPIO_DIGITAL       (0)
+
+/* Pin Value.
+ *
+ * .... .... .... .... ..V. .... .... ....
+ */
+
+#define GPIO_VALUE_SHIFT     (13) /* Bit 13: Initializetial output value */
+#define GPIO_VALUE_MASK      (1 << GPIO_VALUE_SHIFT)
+#  define GPIO_VALUE_ONE     (1 << GPIO_VALUE_SHIFT)
+#  define GPIO_VALUE_ZERO    (0)
+
+/* Change Notification config.
+ *
+ * .... .... .... .... ...I IIII .... ....
+ */
+
+#define GPIO_CN_SHIFT        (8) /* Bit 8 - 12: Change notification bits */
+#define GPIO_CN_MASK         (31 << GPIO_CN_SHIFT)
+#  define GPIO_INTERRUPT     (1  << GPIO_CN_SHIFT)  /* Bit 8:  Change notification enable bit */
+#  define GPIO_PULLUP        (2  << GPIO_CN_SHIFT)  /* Bit 9:  Change notification pull-up */
+#  define GPIO_PULLDOWN      (4  << GPIO_CN_SHIFT)  /* Bit 10: Change notification pull-down */
+#  define GPIO_EDGE_DETECT   (8  << GPIO_CN_SHIFT)  /* Bit 11: Change notification interrupt mode */
+#  define GPIO_MISMATCH      (0)
+#  define GPIO_EDGE_RISING   (12 << GPIO_CN_SHIFT)  /* Bit 12: Change notification edge type */
+#  define GPIO_EDGE_FALLING  (0)
+
+/* GPIO Port.
+ *
+ * .... .... .... .... .... .... RRRR ....
+ */
+
+#define GPIO_PORT_SHIFT      (4)       /* Bits 4-7: Port number */
+#define GPIO_PORT_MASK       (15 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTA         (0 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTB         (1 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTC         (2 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTD         (3 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTE         (4 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTF         (5 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTG         (6 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTH         (7 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTJ         (8 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTK         (9 << GPIO_PORT_SHIFT)
+
+/* GPIO Pin.
+ *
+ * .... .... .... .... .... .... .... PPPP
+ */
+
+#define GPIO_PIN_SHIFT       0        /* Bits 0-3: GPIO number: 0-15 */
+#define GPIO_PIN_MASK        (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN0            (0  << GPIO_PIN_SHIFT)
+#define GPIO_PIN1            (1  << GPIO_PIN_SHIFT)
+#define GPIO_PIN2            (2  << GPIO_PIN_SHIFT)
+#define GPIO_PIN3            (3  << GPIO_PIN_SHIFT)
+#define GPIO_PIN4            (4  << GPIO_PIN_SHIFT)
+#define GPIO_PIN5            (5  << GPIO_PIN_SHIFT)
+#define GPIO_PIN6            (6  << GPIO_PIN_SHIFT)
+#define GPIO_PIN7            (7  << GPIO_PIN_SHIFT)
+#define GPIO_PIN8            (8  << GPIO_PIN_SHIFT)
+#define GPIO_PIN9            (9  << GPIO_PIN_SHIFT)
+#define GPIO_PIN10           (10 << GPIO_PIN_SHIFT)
+#define GPIO_PIN11           (11 << GPIO_PIN_SHIFT)
+#define GPIO_PIN12           (12 << GPIO_PIN_SHIFT)
+#define GPIO_PIN13           (13 << GPIO_PIN_SHIFT)
+#define GPIO_PIN14           (14 << GPIO_PIN_SHIFT)
+#define GPIO_PIN15           (15 << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -110,7 +171,7 @@
 
 #ifndef __ASSEMBLY__
 
-typedef uint16_t pinset_t;
+typedef uint32_t pinset_t;
 
 /************************************************************************************
  * Public Data
@@ -210,7 +271,7 @@ void pic32mz_gpioirqinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
-int pic32mz_gpioattach(uint32_t pinset, xcpt_t handler, void *arg);
+int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg);
 #else
 #  define pic32mz_gpioattach(p,h,a) (0)
 #endif
@@ -252,7 +313,7 @@ void pic32mz_gpioirqdisable(pinset_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
-void pic32mz_dumpgpio(uint32_t pinset, const char *msg);
+void pic32mz_dumpgpio(pinset_t pinset, const char *msg);
 #else
 #  define pic32mz_dumpgpio(p,m)
 #endif
