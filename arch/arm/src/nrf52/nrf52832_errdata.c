@@ -110,12 +110,13 @@ static void nrf52832_errdata_66_temp(void)
 
   if (errata_66())
     {
-      uint32_t temp_offset = 0x520;
+      uint32_t temp_offset      = 0x520;
       uint32_t temp_ficr_offset = 0x404;
+      int i;
 
       /* slot A : 6 totals */
 
-      for (int i = 0; i < 6; i++)
+      for (i = 0; i < 6; i++)
         {
           putreg32(getreg32(NRF52_FICR_BASE + temp_ficr_offset + i * 4),
                             NRF52_TEMP_BASE + temp_offset + i * 4);
@@ -123,9 +124,10 @@ static void nrf52832_errdata_66_temp(void)
 
       /* Slot B : 6 totals */
 
-      temp_offset = 0x540;
+      temp_offset      = 0x540;
       temp_ficr_offset = 0x41c;
-      for (int i = 0 ; i < 6; i++)
+
+      for (i = 0 ; i < 6; i++)
         {
           putreg32(getreg32(NRF52_FICR_BASE + temp_ficr_offset + i * 4),
                    NRF52_TEMP_BASE + temp_offset + i * 4);
@@ -133,9 +135,10 @@ static void nrf52832_errdata_66_temp(void)
 
       /* slot C : 5 totals */
 
-      temp_offset = 0x560;
+      temp_offset      = 0x560;
       temp_ficr_offset = 0x434;
-      for (int i = 0; i < 5; i++)
+
+      for (i = 0; i < 5; i++)
         {
           putreg32(getreg32(NRF52_FICR_BASE + temp_ficr_offset + i * 4),
                    NRF52_TEMP_BASE + temp_offset + i * 4);
