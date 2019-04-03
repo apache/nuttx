@@ -184,12 +184,22 @@
 #define STM32_SDMMC_CLKCR_MMCXFR    (STM32_SDMMC_MMCXFR_CLKDIV    | \
                                      STM32_SDMMC_CLKCR_EDGE | \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
-#define STM32_SDMMC_CLCKR_SDXFR     (STM32_SDMMC_SDXFR_CLKDIV     | \
-                                     STM32_SDMMC_CLKCR_EDGE | \
-                                     STM32_SDMMC_CLKCR_WIDBUS_D1)
-#define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     | \
-                                     STM32_SDMMC_CLKCR_EDGE | \
-                                     STM32_SDMMC_CLKCR_WIDBUS_D4)
+
+#ifdef STM32_SDMMC_SDXFR_BYPCLKDIV
+#  define STM32_SDMMC_CLCKR_SDXFR     (STM32_SDMMC_CLKCR_BYPASS     | \
+                                       STM32_SDMMC_CLKCR_EDGE | \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D1)
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_CLKCR_BYPASS     | \
+                                       STM32_SDMMC_CLKCR_EDGE | \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#else
+#  define STM32_SDMMC_CLCKR_SDXFR     (STM32_SDMMC_SDXFR_CLKDIV     | \
+                                       STM32_SDMMC_CLKCR_EDGE | \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D1)
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     | \
+                                       STM32_SDMMC_CLKCR_EDGE | \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#endif
 
 /* Timing */
 
