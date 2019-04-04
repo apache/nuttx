@@ -244,6 +244,7 @@ uintptr_t STUB_lseek(int nbr, uintptr_t parm1, uintptr_t parm2,
 uintptr_t STUB_mmap(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
+uintptr_t STUB_munmap(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_open(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
