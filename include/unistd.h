@@ -63,9 +63,9 @@
 /* Bit values for the second argument to access */
 
 #define F_OK        0  /* Test existence */
-#define R_OK        1  /* Test read permission */
+#define X_OK        1  /* Test execute permission */
 #define W_OK        2  /* Test write permission */
-#define X_OK        4  /* Test execute permission */
+#define R_OK        4  /* Test read permission */
 
 /* POSIX feature set macros */
 
