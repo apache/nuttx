@@ -93,7 +93,7 @@
 
 int uname(FAR struct utsname *name)
 {
-  int ret = 1;
+  int ret = 0;
 
   /* Copy the strings.  Assure that each is NUL terminated. */
 
