@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize)
+int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize)
 {
   int ret;
 
