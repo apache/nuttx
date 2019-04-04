@@ -3051,7 +3051,7 @@ int lfs_format(FAR lfs_t *lfs, FAR const struct lfs_config_s *cfg)
       superblock.d.block_size  = lfs->cfg->block_size;
       superblock.d.block_count = lfs->cfg->block_count;
       superblock.d.root[0]     = lfs->root[0];
-      superblock.d.root[0]     = lfs->root[1];
+      superblock.d.root[1]     = lfs->root[1];
 
       memcpy(superblock.d.magic, "littlefs", 8);
 
