@@ -136,6 +136,12 @@ struct arg
   } value;
 };
 
+ /****************************************************************************
+  * Private Constant Data
+  ****************************************************************************/
+
+ static const char g_nullstring[] = "(null)";
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -847,6 +853,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else
           pnt = va_arg(ap, FAR char *);
 #endif
+          if (pnt == NULL)
+            {
+              pnt = g_nullstring;
+            }
+
           size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
         str_lpad:
