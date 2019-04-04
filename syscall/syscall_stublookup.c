@@ -308,6 +308,8 @@ uintptr_t STUB_pthread_join(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_pthread_key_create(int nbr, uintptr_t parm1,
             uintptr_t parm2);
 uintptr_t STUB_pthread_key_delete(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_get_stackaddr_np(int nbr, uintptr_t parm1);
+uintptr_t STUB_pthread_get_stacksize_np(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_pthread_mutex_init(int nbr, uintptr_t parm1,
             uintptr_t parm2);

@@ -46,6 +46,7 @@ CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
 CSRCS += pthread_cancel.c
 CSRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
 CSRCS += pthread_release.c pthread_setschedprio.c
+CSRCS += pthread_get_stackaddr_np.c pthread_get_stacksize_np.c
 
 ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
 CSRCS += pthread_mutex.c pthread_mutexconsistent.c pthread_mutexinconsistent.c

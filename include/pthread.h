@@ -466,12 +466,17 @@ int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize);
 int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, long *stackaddr);
 
-/* Set or obtain stack address and size */
+/* Set or obtain stack address and size attributes */
 
 int pthread_attr_setstack(FAR pthread_attr_t *attr,
                           FAR void *stackaddr, long stacksize);
 int pthread_attr_getstack(FAR pthread_attr_t *attr,
                           FAR void **stackaddr, FAR long *stacksize);
+
+/* Get run-time stack address and size */
+
+FAR void *pthread_get_stackaddr_np(FAR pthread_t thread);
+ssize_t pthread_get_stacksize_np(FAR pthread_t thread);
 
 /* To create a thread object and runnable thread, a routine must be specified
  * as the new thread's start routine.  An argument may be passed to this
