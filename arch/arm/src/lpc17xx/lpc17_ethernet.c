@@ -2601,16 +2601,20 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         priv->lp_mode = LPC17_10BASET_HD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
+
       case MII_PHYCTRL1_MODE_100HDX: /* 100BASE-T half duplex */
         priv->lp_mode = LPC17_100BASET_HD;
         break;
+
       case MII_PHYCTRL1_MODE_10FDX: /* 10BASE-T full duplex */
         priv->lp_mode = LPC17_10BASET_FD;
         lpc17_putreg(0, LPC17_ETH_SUPP);
         break;
+
       case MII_PHYCTRL1_MODE_100FDX: /* 100BASE-T full duplex */
         priv->lp_mode = LPC17_100BASET_FD;
         break;
+
       default:
         nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
