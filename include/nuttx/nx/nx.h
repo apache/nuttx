@@ -653,7 +653,7 @@ int nx_raise(NXWINDOW hwnd);
  *   Lower the specified window to the bottom of the display.
  *
  * Input Parameters:
- *   hwnd - the window to be lowered
+ *   hwnd - The window to be lowered
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -661,6 +661,24 @@ int nx_raise(NXWINDOW hwnd);
  ****************************************************************************/
 
 int nx_lower(NXWINDOW hwnd);
+
+/****************************************************************************
+ * Name: nx_modal
+ *
+ * Description:
+ *   May be used to either (1) raise a window to the top of the display and
+ *   select modal behavior, or (2) disable modal behavior.
+ *
+ * Input Parameters:
+ *   hwnd  - The window to be modified
+ *   modal - True: enter modal state; False: leave modal state
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nx_modal(NXWINDOW hwnd, bool modal);
 
 /****************************************************************************
  * Name: nx_setpixel

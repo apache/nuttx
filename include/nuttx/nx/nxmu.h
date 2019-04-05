@@ -147,6 +147,7 @@ enum nxmsg_e
   NX_SVRMSG_GETPOSITION,      /* Get the current window position and size */
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
+  NX_SVRMSG_MODAL,            /* Select/de-slect window modal state */
   NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_GETRECTANGLE,     /* Get a rectangular region in the window */
@@ -350,7 +351,18 @@ struct nxsvrmsg_raise_s
 struct nxsvrmsg_lower_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_LOWER */
-  FAR struct nxbe_window_s *wnd;   /* The window to be lowered  */
+  FAR struct nxbe_window_s *wnd;   /* The window to be lowered */
+};
+
+/* This message either (1) raises a window to the top of the display and
+ * selects the modal state, or (2) de-selects the modal state.
+ */
+
+struct nxsvrmsg_modal_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_MODAL */
+  FAR struct nxbe_window_s *wnd;   /* The window to be modified */
+  bool modal;                      /* True: enter modal state; False: leave modal state */
 };
 
 /* Set a single pixel in the window with a color */

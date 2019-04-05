@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_closewindow.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,9 +81,25 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
 
   DEBUGASSERT(wnd != &be->bkgd);
 
+  /* Are we closing a modal window? */
+
+  if (NXBE_ISMODAL(wnd))
+    {
+      /* Yes.. this should be the top window and the back-end should also
+       * indicate the modal state.
+       */
+
+      DEBUGASSERT(wnd->above == NULL & NXBE_STATE_ISMODAL(be));
+
+      /* Leave the modal state */
+
+      NXBE_CLRMODAL(wnd);
+      NXBE_STATE_CLRMODAL(be);
+    }
+
   /* Is there a window above the one being closed? */
 
-  if (wnd->above)
+  if (wnd->above != NULL)
     {
       /* Yes, now the window below that one is the window below
        * the one being closed.

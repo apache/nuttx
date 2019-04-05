@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_lower.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,11 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd)
   FAR struct nxbe_state_s  *be = wnd->be;
   FAR struct nxbe_window_s *below;
 
-  /* If the window is already at the bottom, then there is nothing to do */
+  /* If the window is already at the bottom, then there is nothing to do.
+   * Refuse to lower the background window; Refuse to lower a modal window.
+   */
 
-  if (!wnd->below || wnd->below == &be->bkgd)
+  if (wnd->below == NULL || wnd->below == &be->bkgd || NXBE_ISMODAL(wnd))
     {
       return;
     }

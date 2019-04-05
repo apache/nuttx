@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch)
+void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch)
 {
   FAR struct nxclimsg_kbdin_s *outmsg;
   int size;
@@ -82,7 +82,7 @@ void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch)
       /* Give the keypad input only to the top child */
 
       outmsg->msgid = NX_CLIMSG_KBDIN;
-      outmsg->wnd   = fe->be.topwnd;
+      outmsg->wnd   = nxmu->be.topwnd;
       outmsg->nch   = nch;
 
       for (i = 0; i < nch; i++)
@@ -90,7 +90,7 @@ void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch)
           outmsg->ch[i] = ch[i];
         }
 
-      (void)nxmu_sendclientwindow(fe->be.topwnd, outmsg, size);
+      (void)nxmu_sendclientwindow(nxmu->be.topwnd, outmsg, size);
       kmm_free(outmsg);
     }
 }

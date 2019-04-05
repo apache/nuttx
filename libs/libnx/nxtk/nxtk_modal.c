@@ -1,7 +1,7 @@
 /****************************************************************************
- * libs/libnx/nxmu/nx_lower.c
+ * libs/libnx/nxtk/nxtk_modal.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,40 +39,36 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
+
+#include "nxtk.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_raise
+ * Name: nxtk_modal
  *
  * Description:
- *   Lower the specified window to the bottom of the display.
+ *   May be used to either (1) raise a window to the top of the display and
+ *   select modal behavior, or (2) disable modal behavior.
  *
  * Input Parameters:
- *   hwnd - the window to be lowered
+ *   hfwnd - The window to be modified
+ *   modal - True: enter modal state; False: leave modal state
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_lower(NXWINDOW hwnd)
+int nxtk_modal(NXTKWINDOW hfwnd, bool modal)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_lower_s   outmsg;
-
-  /* Send the LOWER message */
-
-  outmsg.msgid = NX_SVRMSG_LOWER;
-  outmsg.wnd   = wnd;
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_lower_s));
+  return nx_modal((NXWINDOW)hfwnd, modal);
 }

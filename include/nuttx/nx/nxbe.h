@@ -67,13 +67,16 @@
 /* Window flags and helper macros:
  *
  * NXBE_WINDOW_BLOCKED   - Window input is blocked (internal use only)
+ * NXBE_WINDOW_FRAMED    - Framed (NxTK) Window
  * NXBE_WINDOW_RAMBACKED - Window is backed by a framebuffer
+ * NXBE_WINDOW_MODAL     - Window is in a focused, modal state
  */
 
-#define NXBE_WINDOW_BLOCKED   (1 << 0) /* The window is blocked and will not
-                                        * receive further input. */
-#define NXBE_WINDOW_FRAMED    (1 << 1) /* Framed (NxTK) Window */
-#define NXBE_WINDOW_RAMBACKED (1 << 2) /* Window is backed by a framebuffer */
+#define NXBE_WINDOW_BLOCKED   (1 << 0) /* Bit 0: The window is blocked and will
+                                        *        not receive further input. */
+#define NXBE_WINDOW_FRAMED    (1 << 1) /* Bit 1: Framed (NxTK) Window */
+#define NXBE_WINDOW_RAMBACKED (1 << 2) /* Bit 2: Window is backed by a framebuffer */
+#define NXBE_WINDOW_MODAL     (1 << 3) /* Bit 3: Window is in a focused, modal state */
 
 /* Valid user flags for different window types */
 
@@ -109,6 +112,13 @@
   do { (wnd)->flags |= NXBE_WINDOW_RAMBACKED; } while (0)
 #define NXBE_CLRRAMBACKED(wnd) \
   do { (wnd)->flags &= ~NXBE_WINDOW_RAMBACKED; } while (0)
+
+#define NXBE_ISMODAL(wnd) \
+  (((wnd)->flags & NXBE_WINDOW_MODAL) != 0)
+#define NXBE_SETMODAL(wnd) \
+  do { (wnd)->flags |= NXBE_WINDOW_MODAL; } while (0)
+#define NXBE_CLRMODAL(wnd) \
+  do { (wnd)->flags &= ~NXBE_WINDOW_MODAL; } while (0)
 
 /****************************************************************************
  * Public Types

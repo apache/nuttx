@@ -113,6 +113,15 @@ void stm32_spidev_initialize(void)
 #  endif
 
 #endif  /*  CONFIG_STM32F0L0_SPI1 */
+
+#ifdef CONFIG_STM32F0L0_SPI2
+  /* Configure the SPI-based MFRC522 chip select GPIO */
+
+#  ifdef CONFIG_CL_MFRC522
+  (void)stm32_configgpio(GPIO_MFRC522_CS);
+#  endif
+
+#endif  /* CONFIG_STM32F0L0_SPI2 */
 }
 
 /****************************************************************************
@@ -213,11 +222,42 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  switch (devid)
+    {
+#ifdef CONFIG_CL_MFRC522
+      case SPIDEV_CONTACTLESS(0):
+        {
+          stm32_gpiowrite(GPIO_MFRC522_CS, !selected);
+        }
+#endif
+      default:
+        {
+          break;
+        }
+    }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  return 0;
+  uint8_t status = 0;
+
+  switch (devid)
+    {
+#ifdef CONFIG_CL_MFRC522
+      case SPIDEV_CONTACTLESS(0):
+        {
+          status |= SPI_STATUS_PRESENT;
+          break;
+        }
+#endif
+      default:
+        {
+          break;
+        }
+    }
+
+  return status;
 }
 #endif  /* CONFIG_STM32F0L0_SPI2 */
 

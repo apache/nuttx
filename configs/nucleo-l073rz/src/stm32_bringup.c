@@ -151,6 +151,14 @@ int stm32_bringup(void)
     }
 #endif  /* CONFIG_LPWAN_SX127X */
 
+#ifdef CONFIG_CL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+    }
+#endif  /* CONFIG_CL_MFRC522 */
+
   UNUSED(ret);
   return OK;
 }

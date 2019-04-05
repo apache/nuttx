@@ -329,6 +329,24 @@ int nxtk_raise(NXTKWINDOW hfwnd);
 int nxtk_lower(NXTKWINDOW hfwnd);
 
 /****************************************************************************
+ * Name: nxtk_modal
+ *
+ * Description:
+ *   May be used to either (1) raise a window to the top of the display and
+ *   select modal behavior, or (2) disable modal behavior.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be modified
+ *   modal - True: enter modal state; False: leave modal state
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nxtk_modal(NXTKWINDOW hfwnd, bool modal);
+
+/****************************************************************************
  * Name: nxtk_fillwindow
  *
  * Description:

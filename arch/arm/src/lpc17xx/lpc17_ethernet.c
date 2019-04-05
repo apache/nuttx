@@ -199,6 +199,11 @@
 #  define LPC17_PHYID1       MII_PHYID1_LAN8720
 #  define LPC17_PHYID2       MII_PHYID2_LAN8720
 #  define LPC17_HAVE_PHY     1
+#elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#  define LPC17_PHYNAME      "KSZ8081"
+#  define LPC17_PHYID1       MII_PHYID1_KSZ8081
+#  define LPC17_PHYID2       MII_PHYID2_KSZ8081
+#  define LPC17_HAVE_PHY     1
 #else
 #  warning "No PHY specified!"
 #  undef LPC17_HAVE_PHY
@@ -2436,7 +2441,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
    * latches different at different addresses.
    */
 
-  for (phyaddr = 1; phyaddr < 32; phyaddr++)
+  for (phyaddr = 0; phyaddr < 32; phyaddr++)
     {
       /* Check if we can see the selected device ID at this
        * PHY address.
@@ -2587,7 +2592,33 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+#elif defined(CONFIG_ETH0_PHY_KSZ8081)
+  phyreg = lpc17_phyread(phyaddr, MII_KSZ8081_PHYCTRL1);
 
+  switch (phyreg & MII_PHYCTRL1_MODE_MASK)
+    {
+      case MII_PHYCTRL1_MODE_10HDX:  /* 10BASE-T half duplex */
+        priv->lp_mode = LPC17_10BASET_HD;
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        break;
+
+      case MII_PHYCTRL1_MODE_100HDX: /* 100BASE-T half duplex */
+        priv->lp_mode = LPC17_100BASET_HD;
+        break;
+
+      case MII_PHYCTRL1_MODE_10FDX: /* 10BASE-T full duplex */
+        priv->lp_mode = LPC17_10BASET_FD;
+        lpc17_putreg(0, LPC17_ETH_SUPP);
+        break;
+
+      case MII_PHYCTRL1_MODE_100FDX: /* 100BASE-T full duplex */
+        priv->lp_mode = LPC17_100BASET_FD;
+        break;
+
+      default:
+        nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
   phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
 

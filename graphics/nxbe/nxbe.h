@@ -62,6 +62,23 @@
 #define NX_CLIPORDER_BRLT    (3)   /* Bottom-right-left-top */
 #define NX_CLIPORDER_DEFAULT NX_CLIPORDER_TLRB
 
+/* Server flags and helper macros:
+ *
+ * NXBE_STATE_MODAL     - One window is in a focused, modal state
+ */
+
+#define NXBE_STATE_MODAL     (1 << 0) /* Bit 0: One window is in a focused,
+                                       *        modal state */
+
+/* Helpful flag macros */
+
+#define NXBE_STATE_ISMODAL(nxbe) \
+  (((nxbe)->flags & NXBE_STATE_MODAL) != 0)
+#define NXBE_STATE_SETMODAL(nxbe) \
+  do { (nxbe)->flags |= NXBE_STATE_MODAL; } while (0)
+#define NXBE_STATE_CLRMODAL(nxbe) \
+  do { (nxbe)->flags &= ~NXBE_STATE_MODAL; } while (0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -171,6 +188,8 @@ struct nxbe_clipops_s
 
 struct nxbe_state_s
 {
+  uint8_t flags;                    /* NXBE_STATE_* flags */
+
   /* The window list (with the background window always at the bottom) */
 
   FAR struct nxbe_window_s *topwnd; /* The window at the top of the display */
@@ -294,6 +313,17 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 void nxbe_lower(FAR struct nxbe_window_s *wnd);
+
+/****************************************************************************
+ * Name: nxbe_modal
+ *
+ * Description:
+ *   May be used to either (1) raise a window to the top of the display and
+ *   select modal behavior, or (2) disable modal behavior.
+ *
+ ****************************************************************************/
+
+void nxbe_modal(FAR struct nxbe_window_s *wnd, bool enable);
 
 /****************************************************************************
  * Name: nxbe_setpixel
