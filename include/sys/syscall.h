@@ -339,24 +339,30 @@
 #define SYS_fcntl                      (__SYS_filedesc + 3)
 #define SYS_lseek                      (__SYS_filedesc + 4)
 #define SYS_mmap                       (__SYS_filedesc + 5)
-#define SYS_munmap                     (__SYS_filedesc + 6)
-#define SYS_open                       (__SYS_filedesc + 7)
-#define SYS_opendir                    (__SYS_filedesc + 8)
-#define SYS_readdir                    (__SYS_filedesc + 9)
-#define SYS_rewinddir                  (__SYS_filedesc + 10)
-#define SYS_seekdir                    (__SYS_filedesc + 11)
-#define SYS_stat                       (__SYS_filedesc + 12)
-#define SYS_fstat                      (__SYS_filedesc + 13)
-#define SYS_statfs                     (__SYS_filedesc + 14)
-#define SYS_fstatfs                    (__SYS_filedesc + 15)
-#define SYS_telldir                    (__SYS_filedesc + 16)
+#define SYS_open                       (__SYS_filedesc + 6)
+#define SYS_opendir                    (__SYS_filedesc + 7)
+#define SYS_readdir                    (__SYS_filedesc + 8)
+#define SYS_rewinddir                  (__SYS_filedesc + 9)
+#define SYS_seekdir                    (__SYS_filedesc + 10)
+#define SYS_stat                       (__SYS_filedesc + 11)
+#define SYS_fstat                      (__SYS_filedesc + 12)
+#define SYS_statfs                     (__SYS_filedesc + 13)
+#define SYS_fstatfs                    (__SYS_filedesc + 14)
+#define SYS_telldir                    (__SYS_filedesc + 15)
+
+#ifdef CONFIG_FS_RAMMAP
+#  define SYS_munmap                   (__SYS_filedesc + 16)
+#  define __SYS_link                   (__SYS_filedesc + 17)
+#else
+#  define __SYS_link                   (__SYS_filedesc + 16)
+#endif
 
 #if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-#  define SYS_link                     (__SYS_filedesc + 17)
-#  define SYS_readlink                 (__SYS_filedesc + 18)
-#  define __SYS_pipes                  (__SYS_filedesc + 19)
+#  define SYS_link                     (__SYS_link + 0)
+#  define SYS_readlink                 (__SYS_link + 1)
+#  define __SYS_pipes                  (__SYS_link + 2)
 #else
-#  define __SYS_pipes                  (__SYS_filedesc + 17)
+#  define __SYS_pipes                  __SYS_link
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0

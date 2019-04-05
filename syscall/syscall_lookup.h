@@ -234,7 +234,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(fcntl,                    6, STUB_fcntl)
   SYSCALL_LOOKUP(lseek,                    3, STUB_lseek)
   SYSCALL_LOOKUP(mmap,                     6, STUB_mmap)
-  SYSCALL_LOOKUP(munmap,                   2, STUB_munmap)
   SYSCALL_LOOKUP(open,                     6, STUB_open)
   SYSCALL_LOOKUP(opendir,                  1, STUB_opendir)
   SYSCALL_LOOKUP(readdir,                  1, STUB_readdir)
@@ -245,6 +244,10 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(statfs,                   2, STUB_statfs)
   SYSCALL_LOOKUP(fstatfs,                  2, STUB_fstatfs)
   SYSCALL_LOOKUP(telldir,                  1, STUB_telldir)
+
+#if defined(CONFIG_FS_RAMMAP)
+  SYSCALL_LOOKUP(munmap,                   2, STUB_munmap)
+#endif
 
 #if defined(CONFIG_PSEUDOFS_SOFTLINKS)
   SYSCALL_LOOKUP(link,                     2, STUB_link)
