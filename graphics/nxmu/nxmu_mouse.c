@@ -169,7 +169,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
  *
  ****************************************************************************/
 
-int nxmu_mousein(FAR struct nxmu_state_s *fe,
+int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
                  FAR const struct nxgl_point_s *pos, int buttons)
 {
   FAR struct nxbe_window_s *wnd;
@@ -216,7 +216,7 @@ int nxmu_mousein(FAR struct nxmu_state_s *fe,
 
       if (oldbuttons)
         {
-          g_mwnd = nxmu_revalidate_g_mwnd(fe->be.topwnd);
+          g_mwnd = nxmu_revalidate_g_mwnd(nxmu->be.topwnd);
           if (g_mwnd && g_mwnd->cb->mousein)
             {
               struct nxclimsg_mousein_s outmsg;
@@ -240,7 +240,7 @@ int nxmu_mousein(FAR struct nxmu_state_s *fe,
        * report
        */
 
-      for (wnd = fe->be.topwnd; wnd; wnd = wnd->below)
+      for (wnd = nxmu->be.topwnd; wnd; wnd = wnd->below)
         {
           /* The background window normally has no callback structure (unless
            * a client has taken control of the background via nx_requestbkgd()).

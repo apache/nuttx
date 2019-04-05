@@ -58,25 +58,25 @@
  *   and return control of the background to NX.
  *
  * Input Parameters:
- *   fe - The front-end state structure
+ *   nxmu - The NXMU state structure
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxmu_releasebkgd(FAR struct nxmu_state_s *fe)
+void nxmu_releasebkgd(FAR struct nxmu_state_s *nxmu)
 {
   FAR struct nxbe_state_s *be;
 
-  DEBUGASSERT(fe != NULL);
+  DEBUGASSERT(nxmu != NULL);
 
   /* Destroy the client window callbacks and restore the server connection. */
 
-  be            = &fe->be;
+  be            = &nxmu->be;
   be->bkgd.cb   = NULL;
   be->bkgd.arg  = NULL;
-  be->bkgd.conn = &fe->conn;
+  be->bkgd.conn = &nxmu->conn;
 
   /* Redraw the background window */
 

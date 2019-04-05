@@ -160,15 +160,33 @@ void nxmu_openwindow(FAR struct nxbe_state_s *be, FAR struct nxbe_window_s *wnd)
     }
 #endif
 
-  /* Now, insert the new window at the top on the display.  topwind is
-   * never NULL (it may point only at the background window, however)
+  /* Now, insert the new window at the correct position in the hierarchy.
+   * topwnd is never NULL (it may point only at the background window,
+   * however).  If we are in a modal state, then we cannot insert the
+   * window at the top of the display.
    */
 
-  wnd->above        = NULL;
-  wnd->below        = be->topwnd;
+  if (NXBE_STATE_ISMODAL(be) && be->topwnd->below != NULL)
+    {
+      /* We are in a modal state.  The topwnd is not the background and it
+       * has focus.
+       */
 
-  be->topwnd->above = wnd;
-  be->topwnd        = wnd;
+      wnd->above        = be->topwnd;
+      wnd->below        = be->topwnd->below;
+
+      be->topwnd->below = wnd;
+    }
+  else
+    {
+      /* Otherwise insert the new window at the top on the display. */
+
+      wnd->above        = NULL;
+      wnd->below        = be->topwnd;
+
+      be->topwnd->above = wnd;
+      be->topwnd        = wnd;
+    }
 
   /* Report the initial size/position of the window to the client */
 

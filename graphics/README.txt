@@ -71,13 +71,15 @@ graphics/nxbe
   This is the "back-end" of a tiny windowing system.  It contains most
   of the important window management logic:  clipping, window controls,
   window drawing, etc.  Currently, the NXserver is the only "front-end"
+  (Historically, there was a single user front-end, NXSU, but that front-
+  end no longer exists).
 
 graphics/nxmu
 libnx/nxmu
   This is the NX multi user "front end".  When combined with the generic
   "back-end" (nxbe), it implements a multi-threaded, multi-user windowing
   system.  The files in this directory present the window APIs described in
-  include/nuttx/nx/nx.h.  The multi-user front end includes the NX graphics
+  include/nuttx/nx/nx.h.  The multi-user front-end includes the NX graphics
   server that executes on its own thread;  multiple graphics clients then
   communicate with the server via a POSIX message queue to serialize window
   operations from many threads. The multi-user front-end is selected

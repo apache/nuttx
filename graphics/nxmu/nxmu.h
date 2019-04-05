@@ -62,7 +62,7 @@
 
 /* Server state structure ***************************************************/
 
-/* This the server 'front-end' state structure */
+/* This the server NXMU state structure */
 
 struct nxmu_state_s
 {
@@ -182,14 +182,14 @@ void nxmu_requestbkgd(FAR struct nxmu_conn_s *conn,
  *   and return control of the background to NX.
  *
  * Input Parameters:
- *   fe - The front-end state structure
+ *   nxmu - The NXMU state structure
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxmu_releasebkgd(FAR struct nxmu_state_s *fe);
+void nxmu_releasebkgd(FAR struct nxmu_state_s *nxmu);
 
 /****************************************************************************
  * Name: nxmu_reportposition
@@ -253,7 +253,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_XYINPUT
-int nxmu_mousein(FAR struct nxmu_state_s *fe,
+int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
                  FAR const struct nxgl_point_s *pos, int button);
 #endif
 
@@ -268,7 +268,7 @@ int nxmu_mousein(FAR struct nxmu_state_s *fe,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-void nxmu_kbdin(FAR struct nxmu_state_s *fe, uint8_t nch, FAR uint8_t *ch);
+void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch);
 #endif
 
 #undef EXTERN
