@@ -111,6 +111,16 @@
 #define GPIO_SX127X_DIO0  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI |  \
                            GPIO_PORTA | GPIO_PIN10)
 
+/* MFRC522
+ * CS    - PB4
+ * RESET - PB11
+ */
+
+#define GPIO_MFRC522_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_HIGH|  \
+                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN4)
+#define GPIO_MFRC522_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_HIGH|  \
+                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -119,7 +129,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/*****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
@@ -135,13 +145,13 @@
 
 int stm32_bringup(void);
 
-/************************************************************************************
+/*****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F0L0_SPI
 void stm32_spidev_initialize(void);
@@ -167,6 +177,18 @@ int stm32_wlinitialize(void);
 
 #ifdef CONFIG_LPWAN_SX127X
 int stm32_lpwaninitialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_mfrc522initialize
+ *
+ * Description:
+ *   Function used to initialize the MFRC522 RFID Transceiver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CL_MFRC522
+int stm32_mfrc522initialize(FAR const char *devpath);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

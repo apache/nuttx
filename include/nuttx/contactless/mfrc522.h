@@ -67,13 +67,6 @@ enum mfrc522_state_e
 
 struct mfrc522_dev_s;
 
-struct picc_uid_s
-{
-  uint8_t  size;         /* Number of bytes in the UID. 4, 7 or 10 */
-  uint8_t  uid_data[10];
-  uint8_t  sak;          /* The SAK (Select Acknowledge) return by the PICC */
-};
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

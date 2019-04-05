@@ -772,7 +772,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
 
   /* The number of known UID bits in the current Cascade Level. */
 
-  uint8_t curr_level_known_bits;
+  int8_t curr_level_known_bits;
 
   /* The SELECT/ANTICOLLISION uses a 7 byte standard frame + 2 bytes CRC_A */
 
@@ -1226,6 +1226,51 @@ void mfrc522_setantennagain(FAR struct mfrc522_dev_s *dev, uint8_t mask)
 }
 
 /****************************************************************************
+ * Name: mfrc522_mifare_read
+ ****************************************************************************/
+
+int mfrc522_mifare_read(FAR struct mfrc522_dev_s *dev,
+                        FAR struct mifare_tag_data_s *data)
+{
+  uint8_t buffer[18];
+  uint8_t command[4];
+  uint8_t length    = 18;
+  uint8_t validbits = 0;
+  int     ret       = OK;
+
+  /* Read block from address */
+
+  command[0] = PICC_CMD_MF_READ;
+  command[1] = data->address;
+
+  /* Get CRC */
+
+  ret = mfrc522_calc_crc(dev, command, 2, &command[2]);
+  if (ret != OK)
+    {
+      goto errout;
+    }
+
+  /* Send data and read response.
+   * We read back 16 bytes block data nad 2 bytes CRC.
+   */
+
+  ret = mfrc522_transcv_data(dev, command, 4, buffer, &length,
+                             &validbits, 0, false);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Copy block data */
+
+  memcpy(data->data, buffer, 16);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
  * Name: mfrc522_init
  *
  * Description:
@@ -1464,8 +1509,10 @@ static ssize_t mfrc522_read(FAR struct file *filep, FAR char *buffer,
 
   mfrc522_picc_select(dev, &uid, 0);
 
-  if (uid.sak != 0)
+  if (uid.sak != PICC_TYPE_NOT_COMPLETE)
     {
+      /* TODO: double/triple UID */
+
       if (buffer)
         {
           snprintf(buffer, buflen, "0x%02X%02X%02X%02X",
@@ -1517,29 +1564,59 @@ static int mfrc522_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case MFRC522IOC_GET_PICC_UID:
-      {
-        struct picc_uid_s *uid = (struct picc_uid_s *)arg;
+      case MFRC522IOC_GET_PICC_UID:
+        {
+          FAR struct picc_uid_s *uid = (FAR struct picc_uid_s *)arg;
 
-        /* Is a card near? */
+          /* Is a card near? */
 
-        if (mfrc522_picc_detect(dev))
-          {
-            ret = mfrc522_picc_select(dev, uid, 0);
-          }
-      }
-      break;
+          ret = mfrc522_picc_detect(dev);
+          if (ret < 0)
+            {
+              goto errout;
+            }
 
-    case MFRC522IOC_GET_STATE:
-      ret = dev->state;
-      break;
+          /* Get UID and select card */
 
-    default:
-      mfrc522err("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
+          ret = mfrc522_picc_select(dev, uid, 0);
+          if (ret < 0)
+            {
+              goto errout;
+            }
+
+          break;
+        }
+
+      case CLIOC_READ_MIFARE_DATA:
+        {
+          FAR struct mifare_tag_data_s *data = (struct mifare_tag_data_s *)arg;
+
+          /* We assume that tag is selected!
+           *
+           * TODO: authentication for MIFARE Classic.
+           * Without authentication this will works only for MIFARE Ultralight.
+           */
+
+          ret = mfrc522_mifare_read(dev, data);
+
+          break;
+        }
+
+      case MFRC522IOC_GET_STATE:
+        {
+          ret = dev->state;
+          break;
+        }
+
+      default:
+        {
+          mfrc522err("ERROR: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+          break;
+        }
     }
 
+errout:
   return ret;
 }
 
