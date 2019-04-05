@@ -250,11 +250,11 @@ static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
         break;
     }
 
-/* Copy the portion of the per-window framebuffer in the bounding box
+  /* Copy the portion of the per-window framebuffer in the bounding box
    * to the device graphics memory.
    */
 
-  nxbe_bitmap_dev(wnd, &relbounds, src, &origin, wnd->stride);
+  nxbe_flush(wnd, &relbounds, src, &origin, wnd->stride);
 }
 #endif
 

@@ -125,9 +125,9 @@ void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
             break;
         }
 
-      /* And render the bitmap */
+      /* And render the bitmap into device graphics memory */
 
-      nxbe_bitmap_dev(wnd, &wndrect, src, &origin, wnd->stride);
+      nxbe_flush(wnd, &wndrect, src, &origin, wnd->stride);
     }
   else
 #endif

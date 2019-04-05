@@ -443,9 +443,9 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  *   device unconditionally.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -474,9 +474,74 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  *   and shadowed in the per-window framebuffer.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *dest,
+                 FAR const void *src[CONFIG_NX_NPLANES],
+                 FAR const struct nxgl_point_s *origin,
+                 unsigned int stride);
+
+/****************************************************************************
+ * Name: nxbe_sprite_refresh
+ *
+ * Description:
+ *   Prior to calling nxbe_bitmap_dev(), update any "sprites" tht need to
+ *   be overlaid on the per-window frambuffer.  This could include such
+ *   things as OSD functionality, a software cursor, selection boxes, etc.
+ *
+ * Input Parameters (same as for nxbe_bitmap_dev):
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that was
+ *            modified (in device coordinates)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
+#if 0 /* There are none yet */
+void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
+                         FAR const struct nxgl_rect_s *dest);
+#else
+#  define nxbe_sprite_refresh(wnd, dest)
+#endif
+#endif
+
+/****************************************************************************
+ * Name: nxbe_flush
+ *
+ * Description:
+ *   After per-window frambuffer has been updated, the modified region must
+ *   be written to device graphics memory.  That function is managed by this
+ *   simple function.  It does the following:
+ *
+ *   1) It calls nxbe_sprite_refresh() to update any "sprite" graphics on top
+ *      of the RAM framebuffer.   This could include such things as OSD
+ *      functionality, a software cursor, selection boxes, etc.
+ *   2) Then it calls nxbe_bitmap_dev() to copy the modified per-window
+ *      frambuffer into device memory.
+ *
+ *   This the "sprite" image is always on top of the device display, this
+ *   supports flicker-free software sprites.
+ *
+ * Input Parameters (same as for nxbe_bitmap_dev):
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -489,13 +554,11 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_RAMBACKED
-void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+void nxbe_flush(FAR struct nxbe_window_s *wnd,
                  FAR const struct nxgl_rect_s *dest,
                  FAR const void *src[CONFIG_NX_NPLANES],
                  FAR const struct nxgl_point_s *origin,
                  unsigned int stride);
-#else
-#  define nxbe_bitmap(w,d,s,o,n) nxbe_bitmap_dev(w,d,s,o,n)
 #endif
 
 /****************************************************************************
