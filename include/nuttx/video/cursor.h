@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDIO_CURSOR_H
-#define __INCLUDE_NUTTX_VIDIO_CURSOR_H
+#ifndef __INCLUDE_NUTTX_VIDEO_CURSOR_H
+#define __INCLUDE_NUTTX_VIDEO_CURSOR_H
 
 /****************************************************************************
  * Included Files
@@ -69,7 +69,7 @@ struct cursor_image_s
 {
   cursor_coord_t width;        /* Width of the cursor image in pixels */
   cursor_coord_t height;       /* Height of the cursor image in pixels */
-  FAR const uint8_t *image;    /* Pointer to image data */
+  FAR const uint8_t *image;    /* Pointer to bitmap image data */
 };
 
 /* The following structure defines the cursor position */
@@ -90,4 +90,4 @@ struct cursor_size_s
   cursor_coord_t w;            /* Width in pixels */
 };
 
-#endif /* __INCLUDE_NUTTX_VIDIO_CURSOR_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_CURSOR_H */

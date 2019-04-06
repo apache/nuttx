@@ -188,12 +188,25 @@ struct nxbe_clipops_s
 
 struct nxbe_state_s
 {
-  uint8_t flags;                    /* NXBE_STATE_* flags */
+  uint8_t flags;                     /* NXBE_STATE_* flags */
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+  /* Cursor support */
+
+  struct
+  {
+    bool visible;                    /* True: the cursor is visible */
+    struct cursor_pos_s pos;         /* The current cursor position */
+#ifdef CONFIG_NX_SWCURSOR
+    FAR struct cursor_image_s image; /* Cursor image */
+#endif
+  } cursor;
+#endif
 
   /* The window list (with the background window always at the bottom) */
 
-  FAR struct nxbe_window_s *topwnd; /* The window at the top of the display */
-  struct nxbe_window_s bkgd;        /* The background window is always at the bottom */
+  FAR struct nxbe_window_s *topwnd;  /* The window at the top of the display */
+  struct nxbe_window_s bkgd;         /* The background window is always at the bottom */
 
   /* At present, only a solid colored background is supported for refills.  The
    * following provides the background color.  It would be nice to support
@@ -253,6 +266,65 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
  ****************************************************************************/
 
 int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be);
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+/****************************************************************************
+ * Name: nxbe_cursor_enable
+ *
+ * Description:
+ *   Enable/disable presentation of the cursor
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   enable - True: show the cursor, false: hide the cursor.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
+
+/****************************************************************************
+ * Name: nxbe_cursor_setimage
+ *
+ * Description:
+ *   Set the cursor image
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   image - Describes the cursor image in the expected format.  For a
+ *           software cursor, this is the format used with the display.  The
+ *           format may be different if a hardware cursor is used.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
+void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
+                          FAR struct cursor_image_s *image);
+#endif
+
+/****************************************************************************
+ * Name: nxcursor_setposition
+ *
+ * Description:
+ *   Move the cursor to the specified position
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   pos - The new cursor position
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxcursor_setposition(FAR struct nxbe_state_s *be,
+                          FAR const struct cursor_pos_s *pos);
+#endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
 
 /****************************************************************************
  * Name: nxbe_closewindow

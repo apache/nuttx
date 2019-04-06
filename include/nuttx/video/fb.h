@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDIO_FB_H
-#define __INCLUDE_NUTTX_VIDIO_FB_H
+#ifndef __INCLUDE_NUTTX_VIDEO_FB_H
+#define __INCLUDE_NUTTX_VIDEO_FB_H
 
 /****************************************************************************
  * Included Files
@@ -653,4 +653,4 @@ int fb_register(int display, int plane);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_VIDIO_FB_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_FB_H */

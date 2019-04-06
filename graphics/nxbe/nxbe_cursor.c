@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/nx/cursor.h
+ * graphics/nxbe/nxbe_cursor.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,75 +33,64 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NX_NXCURSOR_H
-#define __INCLUDE_NUTTX_NX_NXCURSOR_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <assert.h>
 
-#include <nuttx/video/cursor.h>
-
-#ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include "nxbe.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 /****************************************************************************
- * Name: nxcursor_enable
+ * Name: nxbe_cursor_enable
  *
  * Description:
  *   Enable/disable presentation of the cursor
  *
  * Input Parameters:
- *   hnd    - The server handle returned by nx_connect()
+ *   be  - The back-end state structure instance
  *   enable - True: show the cursor, false: hide the cursor.
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   None
  *
  ****************************************************************************/
 
-int nxcursor_enable(NXHANDLE hnd, bool enable);
+void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
+{
+#warning Missing logic
+}
 
 /****************************************************************************
- * Name: nxcursor_setimage
+ * Name: nxbe_cursor_setimage
  *
  * Description:
- *   Set the cursor image.
- *
- *   NOTE: The NX logic will reference the user image buffer repeatedly.
- *   That image buffer must persist for as long as the NX server connection
- *   persists.
+ *   Set the cursor image
  *
  * Input Parameters:
- *   hnd   - The server handle returned by nx_connect()
+ *   be  - The back-end state structure instance
  *   image - Describes the cursor image in the expected format.  For a
  *           software cursor, this is the format used with the display.  The
  *           format may be different if a hardware cursor is used.
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   None
  *
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
+void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
+                          FAR struct cursor_image_s *image);
+{
+#warning Missing logic
+}
 #endif
 
 /****************************************************************************
@@ -112,43 +100,18 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
  *   Move the cursor to the specified position
  *
  * Input Parameters:
- *   hnd - The server handle returned by nx_connect()
+ *   be  - The back-end state structure instance
  *   pos - The new cursor position
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   None
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
-
-/****************************************************************************
- * Name: nxcursor_get_position
- *
- * Description:
- *   Return the current cursor position.
- *
- *   CAUTION:  The current cursor position is not updated until the display
- *   is actually changed.  Due to asynchronies caused by queue, the new
- *   current cursor position may not match the cursor position set until
- *   the client and server are syncrhonized.
- *
- * Input Parameters:
- *   hnd - The server handle returned by nx_connect()
- *   pos - The location to return the cursor position
- *
- * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
- *
- ****************************************************************************/
-
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos);
-
-#undef EXTERN
-#if defined(__cplusplus)
+void nxcursor_setposition(FAR struct nxbe_state_s *be,
+                          FAR const struct cursor_pos_s *pos)
+{
+#warning Missing logic
 }
-#endif
 
 #endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
-#endif /* __INCLUDE_NUTTX_NX_NXCURSOR_H */
-

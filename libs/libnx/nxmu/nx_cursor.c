@@ -1,8 +1,7 @@
 /****************************************************************************
- * include/nuttx/nx/cursor.h
+ * libs/libnx/nxmu/nx_cursor.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,30 +33,19 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NX_NXCURSOR_H
-#define __INCLUDE_NUTTX_NX_NXCURSOR_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <sys/types.h>
+#include <errno.h>
 
 #include <nuttx/video/cursor.h>
+#include <nuttx/nx/nxcursor.h>
 
 #ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -78,7 +66,27 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxcursor_enable(NXHANDLE hnd, bool enable);
+int nxcursor_enable(NXHANDLE hnd, bool enable)
+{
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  struct nxsvrmsg_curenable_s outmsg;
+  int ret;
+
+  /* Send the cursor enable/disable message */
+
+  outmsg.msgid = NX_SVRMSG_CURSOR_ENABLE;
+  outmsg.enable  = enable;
+
+  ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_curenable_s));
+  if (ret < 0)
+    {
+      gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
+      set_errno(-ret);
+      return ERROR
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: nxcursor_setimage
@@ -102,7 +110,33 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
+int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
+{
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  struct nxsvrmsg_curimage_s outmsg;
+  int ret;
+
+  DEBUGASSERT(hnd != NULL && image != NULL);
+
+  /* Send the new cursor image to the server */
+
+  outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
+  outmsg.image.width  = image->width;
+  outmsg.image.height = image->height;
+  outmsg.image.image  = image->image;  /* The user pointer is sent, no data */
+
+  /* We will finish the teardown upon receipt of the DISCONNECTED message */
+
+  ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_curimage_s));
+  if (ret < 0)
+    {
+      gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
+      set_errno(-ret);
+      return ERROR
+    }
+
+  return OK;
+}
 #endif
 
 /****************************************************************************
@@ -120,7 +154,32 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
+int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
+{
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  struct nxsvrmsg_curpos_s outmsg;
+  int ret;
+
+  DEBUGASSERT(hnd != NULL && pos != NULL);
+
+  /* Send the new cursor position to the server */
+
+  outmsg.msgid  = NX_SVRMSG_CURSOR_SETPOS;
+  outmsg.pos.x  = pos->x;
+  outmsg.pos.y  = pos->y;
+
+  /* We will finish the teardown upon receipt of the DISCONNECTED message */
+
+  ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_curpos_s));
+  if (ret < 0)
+    {
+      gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
+      set_errno(-ret);
+      return ERROR
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: nxcursor_get_position
@@ -142,13 +201,15 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
  *
  ****************************************************************************/
 
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos);
+int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos)
+{
+  /* REVISIT:  The cursor position is not accessible from here.  It is in hnd,
+   * be we don't have the definitions exposed to get it.
+   */
 
-#undef EXTERN
-#if defined(__cplusplus)
+#warning Missing logic
+  set_errno(ENOSYS);
+  return ERROR;
 }
-#endif
 
-#endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
 #endif /* __INCLUDE_NUTTX_NX_NXCURSOR_H */
-

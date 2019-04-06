@@ -75,7 +75,7 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   struct nxsvrmsg_fill_s  outmsg;
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!wnd || !rect || !color)
+  if (wnd == NULL || rect == NULL || color == NULL)
     {
       set_errno(EINVAL);
       return ERROR;
