@@ -160,12 +160,12 @@ static const struct fb_planeinfo_s g_planeinfo =
 /* Current cursor position */
 
 #ifdef CONFIG_FB_HWCURSOR
-static struct fb_cursorpos_s g_cpos;
+static struct cursor_pos_s g_cpos;
 
 /* Current cursor size */
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-static struct fb_cursorsize_s g_csize;
+static struct cursor_size_s g_csize;
 #endif
 #endif
 

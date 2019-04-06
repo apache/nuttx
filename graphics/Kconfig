@@ -68,6 +68,28 @@ config NX_RAMBACKED
 		NOTE:  A significant amount of RAM, usually external SDRAM, may be
 		required to use per-window framebuffers.
 
+choice
+	prompt "Cursor support"
+	default NX_NOCURSOR
+
+config NX_NOCURSOR
+	bool "No cursor support"
+
+config NX_SWCURSOR
+	bool "Software cursor support"
+	depends on NX_RAMBACKED && EXPERIMENTAL
+
+config NX_HWCURSOR
+	bool "Software cursor support"
+	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
+
+endchoice # Cursor support
+
+config NX_HWCURSORIMAGE
+	bool "Support cursor images"
+	default n
+	depends on NX_HWCURSOR
+
 config NX_BGCOLOR
 	hex "Initial background color"
 	default 0x0
