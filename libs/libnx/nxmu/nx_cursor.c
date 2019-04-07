@@ -94,15 +94,21 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
  * Description:
  *   Set the cursor image.
  *
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ *   is as followings:
+ *
+ *   00 - The transparent background
+ *   01 - Color1:  The main color of the cursor
+ *   10 - Color2:  The color of any border
+ *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ *
  *   NOTE: The NX logic will reference the user image buffer repeatedly.
  *   That image buffer must persist for as long as the NX server connection
  *   persists.
  *
  * Input Parameters:
  *   hnd   - The server handle returned by nx_connect()
- *   image - Describes the cursor image in the expected format.  For a
- *           software cursor, this is the format used with the display.  The
- *           format may be different if a hardware cursor is used.
+ *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -123,6 +129,10 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
   outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
   outmsg.image.width  = image->width;
   outmsg.image.height = image->height;
+  outmsg.image.stride = image->stride;
+  outmsg.image.color1 = image->color1;
+  outmsg.image.color2 = image->color2;
+  outmsg.image.color3 = image->color3;
   outmsg.image.image  = image->image;  /* The user pointer is sent, no data */
 
   /* We will finish the teardown upon receipt of the DISCONNECTED message */

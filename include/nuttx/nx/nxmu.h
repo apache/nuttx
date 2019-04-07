@@ -313,7 +313,7 @@ struct nxsvrmsg_curenable_s
 struct nxsvrmsg_curimage_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_CURSOR_IMAGE */
-  FAR struct cursor_image_s image  /* True: show the cursor, false: hide the cursor */
+  FAR struct cursor_image_s image  /* Describes the cursor image */
 };
 #endif
 

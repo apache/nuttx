@@ -46,6 +46,12 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifdef CONFIG_NX
+#  include <nuttx/nx/nxtypes.h>
+#else
+#  include <nuttx/video/fb.h>
+#endif
+
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -54,25 +60,46 @@
  * Public Types
  ****************************************************************************/
 
-/* If any dimension of the display exceeds 65,536 pixels, then the following
- * type will need to change.  This should match the types of fb_coord_t and
- * nxgl_coord_t.
- */
+#ifdef CONFIG_NX
+/* If NX is defined, make types agree with NX */
 
-typedef uint16_t cursor_coord_t;
+typedef nxgl_coord_t   cursor_coord_t;
+typedef nxgl_mxpixel_t cursor_color_t[CONFIG_NX_NPLANES];
+
+#else
+/* Otherwise use framebuffer and worst case types */
+
+typedef fb_coord_t     cursor_coord_t;
+typedef uint32_t       cursor_color_t;
+
+#endif
 
 /* For cursor controllers that support custem cursor images, this structure
  * is used to provide the cursor image.
+ *
+ * The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ * is as followings:
+ *
+ * 00 - The transparent background
+ * 01 - Color1:  The main color of the cursor
+ * 10 - Color2:  The color of any border
+ * 11 - Color3:  A blend color for better imaging (fake anti-aliasing).
  */
 
 struct cursor_image_s
 {
   cursor_coord_t width;        /* Width of the cursor image in pixels */
   cursor_coord_t height;       /* Height of the cursor image in pixels */
+  cursor_coord_t stride;       /* Width of the image in bytes */
+  cursor_color_t color1;       /* Color1 is main color of the cursor */
+  cursor_color_t color2;       /* Color2 is color of any border */
+  cursor_color_t color3;       /* Color3 is the blended color */
   FAR const uint8_t *image;    /* Pointer to bitmap image data */
 };
 
-/* The following structure defines the cursor position */
+/* The following structure defines the cursor position.  If CONFIG_NX=y,
+ * this structure is equivalent to struct nxgl_pos_s.
+ */
 
 struct cursor_pos_s
 {
@@ -81,7 +108,8 @@ struct cursor_pos_s
 };
 
 /* If the hardware supports setting the cursor size, then this structure
- * is used to provide the cursor size.
+ * is used to provide the cursor size.  If CONFIG_NX=y, this structure is
+ * equivalent to struct nxgl_size_s.
  */
 
 struct cursor_size_s

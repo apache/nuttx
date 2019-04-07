@@ -199,6 +199,7 @@ struct nxbe_state_s
     struct cursor_pos_s pos;         /* The current cursor position */
 #ifdef CONFIG_NX_SWCURSOR
     FAR struct cursor_image_s image; /* Cursor image */
+    FAR nxgl_mxpixel_t *bkgd;        /* Cursor background */
 #endif
   } cursor;
 #endif
@@ -291,11 +292,17 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
  * Description:
  *   Set the cursor image
  *
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ *   is as followings:
+ *
+ *   00 - The transparent background
+ *   01 - Color1:  The main color of the cursor
+ *   10 - Color2:  The color of any border
+ *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ *
  * Input Parameters:
  *   be  - The back-end state structure instance
- *   image - Describes the cursor image in the expected format.  For a
- *           software cursor, this is the format used with the display.  The
- *           format may be different if a hardware cursor is used.
+ *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
  *   None
