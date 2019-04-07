@@ -90,7 +90,6 @@ struct cursor_image_s
 {
   cursor_coord_t width;        /* Width of the cursor image in pixels */
   cursor_coord_t height;       /* Height of the cursor image in pixels */
-  cursor_coord_t stride;       /* Width of the image in bytes */
   cursor_color_t color1;       /* Color1 is main color of the cursor */
   cursor_color_t color2;       /* Color2 is color of any border */
   cursor_color_t color3;       /* Color3 is the blended color */

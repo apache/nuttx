@@ -129,7 +129,6 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
   outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
   outmsg.image.width  = image->width;
   outmsg.image.height = image->height;
-  outmsg.image.stride = image->stride;
   outmsg.image.color1 = image->color1;
   outmsg.image.color2 = image->color2;
   outmsg.image.color3 = image->color3;

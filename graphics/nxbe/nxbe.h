@@ -182,6 +182,24 @@ struct nxbe_clipops_s
                    FAR const struct nxgl_rect_s *rect);
 };
 
+/* Cursor *******************************************************************/
+
+#if defined(CONFIG_NX_SWCURSOR)
+struct nxbe_cursor_s
+{
+  bool visible;                    /* True: the cursor is visible */
+  struct nxgl_rect_s bounds;       /* Cursor image bounding box */
+  FAR uint8_t *cimage;             /* Cursor image at 2-bits/pixel */
+  FAR nxgl_mxpixel_t *backgd;      /* Cursor background in device pixels */
+};
+#elif defined(CONFIG_NX_HWCURSOR)
+struct nxbe_cursor_s
+{
+  bool visible;                    /* True: the cursor is visible */
+  struct cursor_pos_s pos;         /* The current cursor position */
+};
+#endif
+
 /* Back-end state ***********************************************************/
 
 /* This structure describes the overall back-end window state */
@@ -193,15 +211,7 @@ struct nxbe_state_s
 #if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
   /* Cursor support */
 
-  struct
-  {
-    bool visible;                    /* True: the cursor is visible */
-    struct cursor_pos_s pos;         /* The current cursor position */
-#ifdef CONFIG_NX_SWCURSOR
-    FAR struct cursor_image_s image; /* Cursor image */
-    FAR nxgl_mxpixel_t *bkgd;        /* Cursor background */
-#endif
-  } cursor;
+  struct nxbe_cursor_s cursor;       /* Cursor support */
 #endif
 
   /* The window list (with the background window always at the bottom) */

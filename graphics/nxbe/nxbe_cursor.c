@@ -41,13 +41,186 @@
 
 #include <assert.h>
 
+#include "nxglib_bitblit.h"
 #include "nxbe.h"
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxbe_map_color
+ *
+ * Description:
+ *   Map a 2-bit cursor pixel value to a device pixel value
+ *
+ * Input Parameters:
+ *   be   - The back-end state structure instance
+ *   pixel - Pixel to be mapped
+ *
+ * Returned Value:
+ *   The mapped pixel.
+ *
+ ****************************************************************************/
+
+static nxgl_mxcolor_t nxbe_map_color(FAR struct nxbe_state_s *be, int plane,
+                                     uint8_t pixel)
+{
+  switch pixel
+    {
+      case 0:
+      default:
+        return 0;  /* Should not happen */
+
+      case 1:
+        return be->cursor.color1[plane];
+        break;
+
+      case 2:
+        return be->cursor.color2[plane];
+        break;
+
+      case 3:
+        return be->cursor.color3[plane];
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: nxbe_cursor_update
+ *
+ * Description:
+ *   Update the cursor region
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nxbe_cursor_update(FAR struct nxbe_state_s *be, int plane)
+{
+  struct nxgl_rect_s intersection;
+  FAR struct nxbe_plane_s *plane;
+  FAR unsigned int *sstride;
+  FAR unsigned int *dstride;
+  FAR uint8_t *fbmem;
+  FAR uint8_t *src;
+  FAR uint8_t *sline;
+  FAR NXGL_PIXEL_T *dest;
+  FAR uint8_t *dline;
+  nxgl_coord_t width;
+  nxgl_coord_t height;
+  int row;
+  int col;
+
+  /* Handle the case some or all of the cursor image is off of the display. */
+
+  nxgl_rectintersect(&intersction, &be->cursor.bounds, &be->backgd.bounds);
+  if (!nxgl_nullrect(&intersection))
+    {
+      /* Get the width and the height of the images in pixels/rows */
+
+      width   = be->cursor.bounds.pt2.x = be->cursor.bounds.pt1.x + 1;
+      height  = be->cursor.bounds.pt2.y = be->cursor.bounds.pt1.xy + 1;
+
+      /* Get the width of the images in bytes. */
+
+      sstride = (width + 3) >> 2;  /* 2 bits per pixel, 4 pixels per byte */
+
+      plane   = &wnd->be->plane[0];
+      dstride = plane->pinfo.stride;
+
+      /* Erase the old cursor position */
+#warning Missing logic
+
+      /* Update any cursor graphics on top of the device display to include
+       * the modified cursor.
+       *
+       * REVISIT:  This will only work for a single plane and for bits per pixel
+       * greater than or equal to 8.
+       */
+
+      fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
+      sline  = be->cursor.image;
+      dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
+               NXGL_SCALEX(be->cursor.bounds.pt1.x);
+
+      for (row = 0; row < height; row++)
+        {
+          src  = sline;
+          dest = (FAR NXGL_PIXEL_T *)dline;
+
+          for (col = 0; col < width; )
+            {
+              /* Data is always packed MS first */
+
+              uint8_t spixel = (*src & >> 6) & 3
+              if (pixel != 0)
+                {
+                  *dest = nxbe_map_color(be, 0, spixel);
+                }
+
+              col++;
+              dest++;
+
+              if (col < width)
+                {
+                  spixel = (*src & >> 4) & 3
+                  if (pixel != 0)
+                    {
+                      *dest = nxbe_map_color(be, 0, spixel);
+                    }
+                }
+
+              col++;
+              dest++;
+
+              if (col < width)
+                {
+                  spixel = (*src & >> 2) & 3
+                  if (pixel != 0)
+                    {
+                      *dest = nxbe_map_color(be, 0, spixel);
+                    }
+                }
+
+              col++;
+              dest++;
+
+              if (col < width)
+                {
+                  spixel = *src & 3
+                  if (pixel != 0)
+                    {
+                      *dest = nxbe_map_color(be, 0, spixel);
+                    }
+                }
+
+              col++;
+              dest++;
+
+              /* Update source column addresses */
+
+              src++;
+            }
+
+          /* Update the row addresses */
+
+          sline += sstride;
+          dline += dstride;
+       }
+    }
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 /****************************************************************************
  * Name: nxbe_cursor_enable
  *
@@ -65,7 +238,41 @@
 
 void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 {
-#warning Missing logic
+  /* Are we enabling the cursor */
+
+  if (enable && !be->cursor.visible)
+    {
+      /* Mark the cursor visible */
+
+      be->cursor.visible = true;
+    }
+
+  /* Are we disabling the cursor ? */
+
+  else if (!enable && be->cursor.visible)
+    {
+      /* Mark the cursor not visible */
+
+      be->cursor.visible = false;
+    }
+  else
+    {
+      /* No change in state.. do nothing */
+
+      return;
+    }
+
+#ifdef CONFIG_NX_SWCURSOR
+  /* For the software cursor, we need to update the cursor region */
+
+  nxbe_cursor_update(be);
+#else
+  /* For a hardware cursor, this would require some interaction with the
+   * grahics device.
+   */
+
+#  error Missing logic
+#endif
 }
 
 /****************************************************************************

@@ -77,7 +77,7 @@ config NX_NOCURSOR
 
 config NX_SWCURSOR
 	bool "Software cursor support"
-	depends on NX_RAMBACKED && EXPERIMENTAL
+	depends on NX_RAMBACKED && !NX_LCDDRIVER && EXPERIMENTAL
 
 config NX_HWCURSOR
 	bool "Software cursor support"
