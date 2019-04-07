@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_LPC17_ETHERNET)
+#include <sys/ioctl.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -72,7 +73,7 @@
 
 #include <arch/board/board.h>
 
-/* Does this chip have and Ethernet controller? */
+/* Does this chip have an Ethernet controller? */
 
 #if LPC17_NETHCONTROLLERS > 0
 
@@ -240,6 +241,40 @@
 #  endif
 #endif
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+#  if defined( CONFIG_ETH0_PHY_AM79C874)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KS8721)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8041)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8051)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8061)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_KSZ8081)
+#    define MII_INT_REG    MII_KSZ8081_INT
+#    define MII_INT_SETEN  MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN
+#    define MII_INT_CLREN  0
+#  elif defined( CONFIG_ETH0_PHY_KSZ90x1)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DP83848C)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8720)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8740A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_LAN8742A)
+#    error missing logic
+#  elif defined( CONFIG_ETH0_PHY_DM9161)
+#    error missing logic
+#  else
+#    error unknown PHY
+#  endif
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -361,6 +396,11 @@ static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
+#ifdef CONFIG_NETDEV_IOCTL
+static int  lpc17_eth_ioctl(struct net_driver_s *dev, int cmd,
+              unsigned long arg);
+#endif
+
 /* Initialization functions */
 
 #if defined(CONFIG_LPC17_NET_REGDEBUG) && defined(CONFIG_DEBUG_GPIO_INFO)
@@ -378,6 +418,9 @@ static void lpc17_showmii(uint8_t phyaddr, const char *msg);
 #    define lpc17_showmii(phyaddr,msg)
 #  endif
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int  lpc17_phyintenable(FAR struct lpc17_driver_s *priv);
+#endif
 static void lpc17_phywrite(uint8_t phyaddr, uint8_t regaddr,
                            uint16_t phydata);
 static uint16_t lpc17_phyread(uint8_t phyaddr, uint8_t regaddr);
@@ -2078,6 +2121,124 @@ static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Name: lpc17_eth_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int lpc17_eth_ioctl(struct net_driver_s *dev, int cmd,
+                           unsigned long arg)
+{
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
+#endif
+  int ret;
+
+  /* Decode and dispatch the driver-specific IOCTL command */
+
+  switch (cmd)
+    {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
+          struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
+          ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+          if (ret == OK)
+            {
+              /* Enable PHY link up/down interrupts */
+
+              ret = lpc17_phyintenable(priv);
+            }
+        }
+        break;
+#endif
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = priv->lp_phyaddr;
+          ret = OK;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->val_out = lpc17_phyread(priv->lp_phyaddr, req->reg_num);
+          ret = OK;
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          lpc17_phywrite(priv->lp_phyaddr, req->reg_num, req->val_in);
+          ret = OK;
+        }
+        break;
+#endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
+
+      default:
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        return -ENOTTY;  /* Special return value for this case */
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Function: lpc17_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like
+ *  this:
+ *
+ *  - Interrupt status is cleared when the interrupt is enabled.
+ *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when
+ *    is received.
+ *  - Interrupt status is cleared when the interrupt is re-enabled.
+ *
+ * Input Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int lpc17_phyintenable(struct lpc17_driver_s *priv)
+{
+  uint16_t phyval;
+
+  phyval = lpc17_phyread(priv->lp_phyaddr, MII_INT_REG);
+
+  /* Enable link up/down interrupts */
+
+  lpc17_phywrite(priv->lp_phyaddr, MII_INT_REG,
+                           (phyval & ~MII_INT_CLREN) | MII_INT_SETEN);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: lpc17_showpins
  *
  * Description:
@@ -3051,26 +3212,29 @@ static inline int lpc17_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct lpc17_driver_s));
-  priv->lp_dev.d_buf     = pktbuf;        /* Single packet buffer */
-  priv->lp_dev.d_ifup    = lpc17_ifup;    /* I/F down callback */
-  priv->lp_dev.d_ifdown  = lpc17_ifdown;  /* I/F up (new IP address) callback */
-  priv->lp_dev.d_txavail = lpc17_txavail; /* New TX data callback */
+  priv->lp_dev.d_buf     = pktbuf;          /* Single packet buffer */
+  priv->lp_dev.d_ifup    = lpc17_ifup;      /* I/F down callback */
+  priv->lp_dev.d_ifdown  = lpc17_ifdown;    /* I/F up (new IP address) callback */
+  priv->lp_dev.d_txavail = lpc17_txavail;   /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->lp_dev.d_addmac  = lpc17_addmac;  /* Add multicast MAC address */
-  priv->lp_dev.d_rmmac   = lpc17_rmmac;   /* Remove multicast MAC address */
+  priv->lp_dev.d_addmac  = lpc17_addmac;    /* Add multicast MAC address */
+  priv->lp_dev.d_rmmac   = lpc17_rmmac;     /* Remove multicast MAC address */
 #endif
-  priv->lp_dev.d_private = (void *)priv;  /* Used to recover private state from dev */
+#ifdef CONFIG_NETDEV_IOCTL
+  priv->lp_dev.d_ioctl   = lpc17_eth_ioctl; /* Handle network IOCTL commands */
+#endif
+  priv->lp_dev.d_private = (void *)priv;    /* Used to recover private state from dev */
 
 #if CONFIG_LPC17_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->lp_base          = ??;            /* Ethernet controller base address */
-  priv->lp_irq           = ??;            /* Ethernet controller IRQ number */
+  priv->lp_base          = ??;              /* Ethernet controller base address */
+  priv->lp_irq           = ??;              /* Ethernet controller IRQ number */
 #endif
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
-  priv->lp_txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->lp_txtimeout     = wd_create();   /* Create TX timeout timer */
+  priv->lp_txpoll        = wd_create();     /* Create periodic poll timer */
+  priv->lp_txtimeout     = wd_create();     /* Create TX timeout timer */
 
   /* Reset the Ethernet controller and leave in the ifdown statue.  The
    * Ethernet controller will be properly re-initialized each time

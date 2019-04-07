@@ -191,9 +191,9 @@ static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
  *   device unconditionally.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -291,9 +291,9 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  *   and shadowed in the per-window framebuffer.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -305,24 +305,30 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_RAMBACKED
 void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
                  FAR const struct nxgl_rect_s *dest,
                  FAR const void *src[CONFIG_NX_NPLANES],
                  FAR const struct nxgl_point_s *origin,
                  unsigned int stride)
 {
+#ifdef CONFIG_NX_RAMBACKED
   /* If this window supports a pre-window frame buffer then shadow the full,
    * unclipped bitmap in that framebuffer.
    */
 
   if (NXBE_ISRAMBACKED(wnd))
     {
+      /* Update the per-window framebuffer */
+
       nxbe_bitmap_pwfb(wnd, dest, src, origin, stride);
+
+      /* Overlay any update any sprites on the per-window frambuffer */
+
+      nxbe_sprite_refresh(wnd, dest);
     }
+#endif
 
   /* Rend the bitmap directly to the graphics device in any case */
 
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 }
-#endif

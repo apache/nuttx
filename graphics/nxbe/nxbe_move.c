@@ -377,7 +377,7 @@ static inline void nxbe_move_pwfb(FAR struct nxbe_window_s *wnd,
    * framebuffer to the destination rectangle device graphics memory.
    */
 
-  nxbe_bitmap_dev(wnd, &destrect, src, &origin, wnd->stride);
+  nxbe_flush(wnd, &destrect, src, &origin, wnd->stride);
 }
 #endif
 

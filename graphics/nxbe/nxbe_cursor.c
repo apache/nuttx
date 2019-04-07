@@ -1,7 +1,7 @@
 /****************************************************************************
- * libs/libnx/nxmu/nx_fill.c
+ * graphics/nxbe/nxbe_cursor.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,58 +39,79 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
-#include <errno.h>
-#include <debug.h>
+#include <assert.h>
 
-#include <nuttx/nx/nxglib.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include "nxbe.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 /****************************************************************************
- * Name: nx_fill
+ * Name: nxbe_cursor_enable
  *
  * Description:
- *  Fill the specified rectangle in the window with the specified color
+ *   Enable/disable presentation of the cursor
  *
  * Input Parameters:
- *   hwnd  - The window handle
- *   rect  - The location to be filled
- *   color - The color to use in the fill
+ *   be  - The back-end state structure instance
+ *   enable - True: show the cursor, false: hide the cursor.
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   None
  *
  ****************************************************************************/
 
-int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_fill_s  outmsg;
+#warning Missing logic
+}
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (wnd == NULL || rect == NULL || color == NULL)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
+/****************************************************************************
+ * Name: nxbe_cursor_setimage
+ *
+ * Description:
+ *   Set the cursor image
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   image - Describes the cursor image in the expected format.  For a
+ *           software cursor, this is the format used with the display.  The
+ *           format may be different if a hardware cursor is used.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
+void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
+                          FAR struct cursor_image_s *image);
+{
+#warning Missing logic
+}
 #endif
 
-  /* Format the fill command */
+/****************************************************************************
+ * Name: nxcursor_setposition
+ *
+ * Description:
+ *   Move the cursor to the specified position
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   pos - The new cursor position
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-  outmsg.msgid = NX_SVRMSG_FILL;
-  outmsg.wnd   = wnd;
-
-  nxgl_rectcopy(&outmsg.rect, rect);
-  nxgl_colorcopy(outmsg.color, color);
-
-  /* Forward the fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_fill_s));
+void nxcursor_setposition(FAR struct nxbe_state_s *be,
+                          FAR const struct cursor_pos_s *pos)
+{
+#warning Missing logic
 }
+
+#endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */

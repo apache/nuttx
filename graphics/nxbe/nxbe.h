@@ -188,12 +188,25 @@ struct nxbe_clipops_s
 
 struct nxbe_state_s
 {
-  uint8_t flags;                    /* NXBE_STATE_* flags */
+  uint8_t flags;                     /* NXBE_STATE_* flags */
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+  /* Cursor support */
+
+  struct
+  {
+    bool visible;                    /* True: the cursor is visible */
+    struct cursor_pos_s pos;         /* The current cursor position */
+#ifdef CONFIG_NX_SWCURSOR
+    FAR struct cursor_image_s image; /* Cursor image */
+#endif
+  } cursor;
+#endif
 
   /* The window list (with the background window always at the bottom) */
 
-  FAR struct nxbe_window_s *topwnd; /* The window at the top of the display */
-  struct nxbe_window_s bkgd;        /* The background window is always at the bottom */
+  FAR struct nxbe_window_s *topwnd;  /* The window at the top of the display */
+  struct nxbe_window_s bkgd;         /* The background window is always at the bottom */
 
   /* At present, only a solid colored background is supported for refills.  The
    * following provides the background color.  It would be nice to support
@@ -253,6 +266,65 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
  ****************************************************************************/
 
 int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be);
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+/****************************************************************************
+ * Name: nxbe_cursor_enable
+ *
+ * Description:
+ *   Enable/disable presentation of the cursor
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   enable - True: show the cursor, false: hide the cursor.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
+
+/****************************************************************************
+ * Name: nxbe_cursor_setimage
+ *
+ * Description:
+ *   Set the cursor image
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   image - Describes the cursor image in the expected format.  For a
+ *           software cursor, this is the format used with the display.  The
+ *           format may be different if a hardware cursor is used.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
+void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
+                          FAR struct cursor_image_s *image);
+#endif
+
+/****************************************************************************
+ * Name: nxcursor_setposition
+ *
+ * Description:
+ *   Move the cursor to the specified position
+ *
+ * Input Parameters:
+ *   be  - The back-end state structure instance
+ *   pos - The new cursor position
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxcursor_setposition(FAR struct nxbe_state_s *be,
+                          FAR const struct cursor_pos_s *pos);
+#endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
 
 /****************************************************************************
  * Name: nxbe_closewindow
@@ -443,9 +515,9 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  *   device unconditionally.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -474,9 +546,74 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  *   and shadowed in the per-window framebuffer.
  *
  * Input Parameters:
- *   wnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in bytes.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *dest,
+                 FAR const void *src[CONFIG_NX_NPLANES],
+                 FAR const struct nxgl_point_s *origin,
+                 unsigned int stride);
+
+/****************************************************************************
+ * Name: nxbe_sprite_refresh
+ *
+ * Description:
+ *   Prior to calling nxbe_bitmap_dev(), update any "sprites" tht need to
+ *   be overlaid on the per-window frambuffer.  This could include such
+ *   things as OSD functionality, a software cursor, selection boxes, etc.
+ *
+ * Input Parameters (same as for nxbe_bitmap_dev):
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that was
+ *            modified (in device coordinates)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_RAMBACKED
+#if 0 /* There are none yet */
+void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
+                         FAR const struct nxgl_rect_s *dest);
+#else
+#  define nxbe_sprite_refresh(wnd, dest)
+#endif
+#endif
+
+/****************************************************************************
+ * Name: nxbe_flush
+ *
+ * Description:
+ *   After per-window frambuffer has been updated, the modified region must
+ *   be written to device graphics memory.  That function is managed by this
+ *   simple function.  It does the following:
+ *
+ *   1) It calls nxbe_sprite_refresh() to update any "sprite" graphics on top
+ *      of the RAM framebuffer.   This could include such things as OSD
+ *      functionality, a software cursor, selection boxes, etc.
+ *   2) Then it calls nxbe_bitmap_dev() to copy the modified per-window
+ *      frambuffer into device memory.
+ *
+ *   This the "sprite" image is always on top of the device display, this
+ *   supports flicker-free software sprites.
+ *
+ * Input Parameters (same as for nxbe_bitmap_dev):
+ *   wnd    - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -489,13 +626,11 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_RAMBACKED
-void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+void nxbe_flush(FAR struct nxbe_window_s *wnd,
                  FAR const struct nxgl_rect_s *dest,
                  FAR const void *src[CONFIG_NX_NPLANES],
                  FAR const struct nxgl_point_s *origin,
                  unsigned int stride);
-#else
-#  define nxbe_bitmap(w,d,s,o,n) nxbe_bitmap_dev(w,d,s,o,n)
 #endif
 
 /****************************************************************************

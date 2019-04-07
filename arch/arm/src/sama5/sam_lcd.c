@@ -645,9 +645,9 @@ struct sam_lcdc_s
   struct sam_layer_s layer[LCDC_NLAYERS];
 
 #ifdef CONFIG_FB_HWCURSOR
-  struct fb_cursorpos_s cpos;     /* Current cursor position */
+  struct cursor_pos_s cpos;       /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
-  struct fb_cursorsize_s csize;   /* Current cursor size */
+  struct cursor_size_s csize;     /* Current cursor size */
 #endif
 #endif
 

@@ -1,7 +1,8 @@
 /****************************************************************************
- * libs/libnx/nxmu/nx_fill.c
+ * include/nuttx/video/cursor.h
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013, 2016-2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,64 +34,60 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_VIDEO_CURSOR_H
+#define __INCLUDE_NUTTX_VIDEO_CURSOR_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/nx/nxglib.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <sys/types.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_fill
- *
- * Description:
- *  Fill the specified rectangle in the window with the specified color
- *
- * Input Parameters:
- *   hwnd  - The window handle
- *   rect  - The location to be filled
- *   color - The color to use in the fill
- *
- * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
- *
+ * Public Types
  ****************************************************************************/
 
-int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+/* If any dimension of the display exceeds 65,536 pixels, then the following
+ * type will need to change.  This should match the types of fb_coord_t and
+ * nxgl_coord_t.
+ */
+
+typedef uint16_t cursor_coord_t;
+
+/* For cursor controllers that support custem cursor images, this structure
+ * is used to provide the cursor image.
+ */
+
+struct cursor_image_s
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_fill_s  outmsg;
+  cursor_coord_t width;        /* Width of the cursor image in pixels */
+  cursor_coord_t height;       /* Height of the cursor image in pixels */
+  FAR const uint8_t *image;    /* Pointer to bitmap image data */
+};
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (wnd == NULL || rect == NULL || color == NULL)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-#endif
+/* The following structure defines the cursor position */
 
-  /* Format the fill command */
+struct cursor_pos_s
+{
+  cursor_coord_t x;            /* X position in pixels */
+  cursor_coord_t y;            /* Y position in rows */
+};
 
-  outmsg.msgid = NX_SVRMSG_FILL;
-  outmsg.wnd   = wnd;
+/* If the hardware supports setting the cursor size, then this structure
+ * is used to provide the cursor size.
+ */
 
-  nxgl_rectcopy(&outmsg.rect, rect);
-  nxgl_colorcopy(outmsg.color, color);
+struct cursor_size_s
+{
+  cursor_coord_t h;            /* Height in rows */
+  cursor_coord_t w;            /* Width in pixels */
+};
 
-  /* Forward the fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_fill_s));
-}
+#endif /* __INCLUDE_NUTTX_VIDEO_CURSOR_H */

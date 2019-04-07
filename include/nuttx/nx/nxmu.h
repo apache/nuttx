@@ -140,6 +140,9 @@ enum nxmsg_e
   NX_SVRMSG_CLOSEWINDOW,      /* Close an existing window */
   NX_SVRMSG_BLOCKED,          /* The window is blocked */
   NX_SVRMSG_SYNCH,            /* Window syncrhonization request */
+  NX_SVRMSG_CURSOR_ENABLE,    /* Enable/disablel cursor presentation */
+  NX_SVRMSG_CURSOR_IMAGE,     /* Set cursor image */
+  NX_SVRMSG_CURSOR_SETPOS,    /* Set cursor position */
   NX_SVRMSG_REQUESTBKGD,      /* Open the background window */
   NX_SVRMSG_RELEASEBKGD,      /* Release the background window */
   NX_SVRMSG_SETPOSITION,      /* Window position has changed */
@@ -294,6 +297,34 @@ struct nxsvrmsg_synch_s
   FAR struct nxbe_window_s *wnd; /* The window that requires synch'ing */
   FAR void *arg;                 /* User argument */
 };
+
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+/* Enable/disable cursor */
+
+struct nxsvrmsg_curenable_s
+{
+  uint32_t msgid;                /* NX_SVRMSG_CURSOR_ENABLE */
+  bool enable;                   /* True: show the cursor, false: hide the cursor */
+};
+
+#if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
+/* Set cursor image. */
+
+struct nxsvrmsg_curimage_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_IMAGE */
+  FAR struct cursor_image_s image  /* True: show the cursor, false: hide the cursor */
+};
+#endif
+
+/* Set cursor position. */
+
+struct nxsvrmsg_curpos_s
+{
+  uint32_t msgid;                /* NX_SVRMSG_CURSOR_SETPOS */
+  FAR struct cursor_pos_s pos;   /* The new cursor position */
+};
+#endif
 
 /* This message requests the server to create a new window */
 
