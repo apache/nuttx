@@ -199,4 +199,3 @@ extern "C"
 #endif
 
 #endif /* __INCLUDE_NUTTX_NX_NXBE_H */
-
