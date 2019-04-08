@@ -348,6 +348,13 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_2
 #define GPIO_USART1_TX GPIO_USART1_TX_1
 
+/* I2C1 - the I2C1 bus is shared by audio (Cirrus WM8994),
+ * camera (DCMI SDA/SCL) and external connectors CN2 & Arduino D14/D15.
+ */
+
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2
+
 /* I2C - There is a FT5336 TouchPanel on I2C3 using these pins: */
 
 #define GPIO_I2C3_SCL GPIO_I2C3_SCL_2
