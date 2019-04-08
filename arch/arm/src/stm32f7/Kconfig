@@ -1978,21 +1978,18 @@ choice
 
 config STM32F7_NO_ULPI
 	bool "No External ULPI"
-	default y
 	---help---
 	Select to enable the presence of an external ULPI PHY
 
 config STM32F7_EXTERNAL_ULPI
 	 bool "External ULPI"
 	depends on STM32F7_HAVE_EXTERNAL_ULPI
-	default n
 	---help---
 		Select to enable the presence of an external ULPI PHY
 
 config STM32F7_INTERNAL_ULPI
 	bool "Internal ULPI PHY"
 	depends on STM32F7_HAVE_INTERNAL_ULPI
-	default y
 	---help---
 		Select to enable the internal ULPI for USB HS
 endchoice #"ULPI Selection"
