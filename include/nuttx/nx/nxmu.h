@@ -49,6 +49,7 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxcursor.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -312,8 +313,8 @@ struct nxsvrmsg_curenable_s
 
 struct nxsvrmsg_curimage_s
 {
-  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_IMAGE */
-  FAR struct cursor_image_s image  /* Describes the cursor image */
+  uint32_t msgid;                    /* NX_SVRMSG_CURSOR_IMAGE */
+  FAR struct nx_cursorimage_s image  /* Describes the cursor image */
 };
 #endif
 
@@ -321,8 +322,8 @@ struct nxsvrmsg_curimage_s
 
 struct nxsvrmsg_curpos_s
 {
-  uint32_t msgid;                /* NX_SVRMSG_CURSOR_SETPOS */
-  FAR struct cursor_pos_s pos;   /* The new cursor position */
+  uint32_t msgid;                  /* NX_SVRMSG_CURSOR_SETPOS */
+  FAR struct nxgl_point_s pos;     /* The new cursor position */
 };
 #endif
 

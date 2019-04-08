@@ -47,7 +47,6 @@
 #include <stdint.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/video/cursor.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -412,6 +411,40 @@ struct fb_cmap_s
 #endif
 
 #ifdef CONFIG_FB_HWCURSOR
+#ifdef CONFIG_FB_HWCURSORIMAGE
+/* If the video controller hardware supports a hardware cursor and
+ * that hardware cursor supports user-provided images, then the
+ * following structure may be used to provide the cursor image
+ */
+
+struct fb_cursorimage_s
+{
+  fb_coord_t     width;    /* Width of the cursor image in pixels */
+  fb_coord_t     height    /* Height of the cursor image in pixels */
+  const uint8_t *image;    /* Pointer to image data */
+};
+#endif
+
+/* The following structure defines the cursor position/size */
+
+struct fb_cursorpos_s
+{
+  fb_coord_t x;            /* X position in pixels */
+  fb_coord_t y;            /* Y position in rows */
+};
+
+/* If the hardware supports setting the cursor size, then this structure
+ * is used to provide the size.
+ */
+
+#ifdef CONFIG_FB_HWCURSORSIZE
+struct fb_cursorsize_s
+{
+  fb_coord_t h;            /* Height in rows */
+  fb_coord_t w;            /* Width in pixels */
+};
+#endif
+
 /* The following are used to get/get the cursor attributes via IOCTL command. */
 
 struct fb_cursorattrib_s
@@ -419,22 +452,22 @@ struct fb_cursorattrib_s
 #ifdef CONFIG_FB_HWCURSORIMAGE
   uint8_t fmt;                   /* Video format of cursor */
 #endif
-  struct cursor_pos_s  pos;      /* Current cursor position */
+  struct fb_cursorpos_s  pos;    /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
-  struct cursor_size_s mxsize;   /* Maximum cursor size */
-  struct cursor_size_s size;     /* Current size */
+  struct fb_cursorsize_s mxsize; /* Maximum cursor size */
+  struct fb_cursorsize_s size;   /* Current size */
 #endif
 };
 
 struct fb_setcursor_s
 {
-  uint8_t flags;                /* See FB_CUR_* definitions */
-  struct cursor_pos_s pos;      /* Cursor position */
+  uint8_t flags;                 /* See FB_CUR_* definitions */
+  struct fb_cursorpos_s pos;     /* Cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
-  struct cursor_size_s  size;   /* Cursor size */
+  struct fb_cursorsize_s  size;  /* Cursor size */
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
-  struct cursor_image_s img;    /* Cursor image */
+  struct fb_cursorimage_s img;   /* Cursor image */
 #endif
 };
 #endif

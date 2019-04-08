@@ -300,7 +300,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
 void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
-                          FAR struct cursor_image_s *image);
+                          FAR struct nx_cursorimage_s *image);
 {
 #warning Missing logic
 }
@@ -322,7 +322,7 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
  ****************************************************************************/
 
 void nxcursor_setposition(FAR struct nxbe_state_s *be,
-                          FAR const struct cursor_pos_s *pos)
+                          FAR const struct nxgl_point_s *pos)
 {
 #warning Missing logic
 }

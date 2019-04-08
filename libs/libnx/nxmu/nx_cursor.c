@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include <nuttx/video/cursor.h>
 #include <nuttx/nx/nxcursor.h>
 
 #ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
@@ -116,7 +115,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
+int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
 {
   FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_curimage_s outmsg;
@@ -127,8 +126,8 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
   /* Send the new cursor image to the server */
 
   outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
-  outmsg.image.width  = image->width;
-  outmsg.image.height = image->height;
+  outmsg.image.size.x = image->size.x;
+  outmsg.image.size.y = image->size.y;
   outmsg.image.color1 = image->color1;
   outmsg.image.color2 = image->color2;
   outmsg.image.color3 = image->color3;
@@ -163,7 +162,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image)
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
+int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
 {
   FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
   struct nxsvrmsg_curpos_s outmsg;
@@ -210,7 +209,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos)
  *
  ****************************************************************************/
 
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos)
+int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos)
 {
   /* REVISIT:  The cursor position is not accessible from here.  It is in hnd,
    * be we don't have the definitions exposed to get it.

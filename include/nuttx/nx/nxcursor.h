@@ -46,7 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/video/cursor.h>
+#include <nuttx/nx/nxtypes.h>
 
 #ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
@@ -58,6 +58,31 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/* For cursor controllers that support custem cursor images, this structure
+ * is used to provide the cursor image.
+ *
+ * The image is provided a a 2-bits-per-pixel image.  The two bit incoding
+ * is as followings:
+ *
+ * 00 - The transparent background
+ * 01 - Color1:  The main color of the cursor
+ * 10 - Color2:  The color of any border
+ * 11 - Color3:  A blend color for better imaging (fake anti-aliasing).
+ */
+
+struct nx_cursorimage_s
+{
+  struct nxgl_size_s size;                  /* The size of the cursor image */
+  nxgl_mxpixel_t color1[CONFIG_NX_NPLANES]; /* Color1 is main color of the cursor */
+  nxgl_mxpixel_t color2[CONFIG_NX_NPLANES]; /* Color2 is color of any border */
+  nxgl_mxpixel_t color3[CONFIG_NX_NPLANES]; /* Color3 is the blended color */
+  FAR const uint8_t *image;                 /* Pointer to bitmap image data */
+};
 
 /****************************************************************************
  * Public Functions
@@ -108,7 +133,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
+int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image);
 #endif
 
 /****************************************************************************
@@ -126,7 +151,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct cursor_image_s *image);
  *
  ****************************************************************************/
 
-int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
+int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxcursor_get_position
@@ -148,7 +173,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct cursor_pos_s *pos);
  *
  ****************************************************************************/
 
-int nxcursor_get_position(NXHANDLE hnd, FAR struct cursor_pos_s *pos);
+int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos);
 
 #undef EXTERN
 #if defined(__cplusplus)

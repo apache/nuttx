@@ -132,12 +132,12 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 /* Current cursor position */
 
 #ifdef CONFIG_FB_HWCURSOR
-static struct cursor_pos_s g_cpos;
+static struct fb_cursorpos_s g_cpos;
 
 /* Current cursor size */
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-static struct cursor_size_s g_csize;
+static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 
