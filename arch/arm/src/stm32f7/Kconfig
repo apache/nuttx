@@ -95,6 +95,7 @@ config ARCH_CHIP_STM32F723RE
 config ARCH_CHIP_STM32F723VC
 	bool "STM32F723VC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_V
 	---help---
@@ -103,6 +104,7 @@ config ARCH_CHIP_STM32F723VC
 config ARCH_CHIP_STM32F723VE
 	bool "STM32F723VE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_V
 	---help---
@@ -111,6 +113,7 @@ config ARCH_CHIP_STM32F723VE
 config ARCH_CHIP_STM32F723ZC
 	bool "STM32F723ZC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_Z
 	---help---
@@ -119,6 +122,7 @@ config ARCH_CHIP_STM32F723ZC
 config ARCH_CHIP_STM32F723ZE
 	bool "STM32F723ZE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_Z
 	---help---
@@ -127,6 +131,7 @@ config ARCH_CHIP_STM32F723ZE
 config ARCH_CHIP_STM32F723IC
 	bool "STM32F723IC"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_C
 	select STM32F7_IO_CONFIG_I
 	---help---
@@ -135,6 +140,7 @@ config ARCH_CHIP_STM32F723IC
 config ARCH_CHIP_STM32F723IE
 	bool "STM32F723IE"
 	select STM32F7_STM32F723XX
+	select STM32F7_HAVE_INTERNAL_ULPI
 	select STM32F7_FLASH_CONFIG_E
 	select STM32F7_IO_CONFIG_I
 	---help---
@@ -666,6 +672,7 @@ config STM32F7_STM32F722XX
 	select STM32F7_HAVE_SPI5 if !(STM32F7_IO_CONFIG_R || STM32F7_IO_CONFIG_V)
 	select STM32F7_HAVE_CRYP
 	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_R
+	select STM32F7_HAVE_EXTERNAL_ULPI
 
 config STM32F7_STM32F723XX
 	bool
@@ -724,6 +731,7 @@ config STM32F7_STM32F746XX
 	select STM32F7_HAVE_DMA2D
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
+	select STM32F7_HAVE_EXTERNAL_ULPI
 
 config STM32F7_STM32F756XX
 	bool
@@ -1199,6 +1207,14 @@ config STM32F7_HAVE_DFSDM1
 	bool
 	default n
 
+config STM32F7_HAVE_INTERNAL_ULPI
+	bool
+	default n
+
+config STM32F7_HAVE_EXTERNAL_ULPI
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -1427,8 +1443,8 @@ config STM32F7_OTGFS
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
-config STM32F7_OTGHS
-	bool "OTG HS"
+config STM32F7_OTGFSHS
+	bool "OTG FS/HS"
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
@@ -1953,6 +1969,36 @@ endif
 
 endmenu # U[S]ART Configuration
 
+menu "STM32F7_OTG_HS Configuration"
+	depends on STM32F7_OTGFSHS
+
+choice
+	prompt "ULPI Selection"
+	default STM32F7_NO_ULPI
+
+config STM32F7_NO_ULPI
+	bool "No External ULPI"
+	default y
+	---help---
+	Select to enable the presence of an external ULPI PHY
+
+config STM32F7_EXTERNAL_ULPI
+	 bool "External ULPI"
+	depends on STM32F7_HAVE_EXTERNAL_ULPI
+	default n
+	---help---
+		Select to enable the presence of an external ULPI PHY
+
+config STM32F7_INTERNAL_ULPI
+	bool "Internal ULPI PHY"
+	depends on STM32F7_HAVE_INTERNAL_ULPI
+	default y
+	---help---
+		Select to enable the internal ULPI for USB HS
+endchoice #"ULPI Selection"
+
+endmenu # OTG_HS Config
+
 menu "QuadSPI Configuration"
 	depends on STM32F7_QUADSPI
 
@@ -2103,7 +2149,7 @@ config STM32F7_SPI_DMA
 	default n
 	---help---
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
-		
+
 config STM32F7_SPI1_DMA
 	bool "SPI1 DMA"
 	default n

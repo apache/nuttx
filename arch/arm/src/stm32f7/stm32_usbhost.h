@@ -43,7 +43,7 @@
  *  CONFIG_USBHOST        - Enable general USB host support
  *  CONFIG_STM32F7_OTGFS  - Enable the STM32 USB OTG FS block
  *     or
- *  CONFIG_STM32F7_OTGHS  - Enable the STM32 USB OTG HS block
+ *  CONFIG_STM32F7_OTGFSHS  - Enable the STM32 USB OTG HS block
  *  CONFIG_STM32F7_SYSCFG - Needed
  *
  * Options:
@@ -68,7 +68,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#if (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGHS)) && \
+#if (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGFSHS)) && \
     defined(CONFIG_USBHOST)
 
 /************************************************************************************
@@ -120,5 +120,5 @@ void stm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* (CONFIG_STM32F7_OTGFS || CONFIG_STM32F7_OTGHS) && CONFIG_USBHOST */
+#endif /* (CONFIG_STM32F7_OTGFS || CONFIG_STM32F7_OTGFSHS) && CONFIG_USBHOST */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_USBHOST_H */

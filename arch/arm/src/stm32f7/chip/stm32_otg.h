@@ -149,6 +149,11 @@
 #define STM32_OTG_DFIFO_DEP_OFFSET(n) (0x1000 + ((n) << 12))
 #define STM32_OTG_DFIFO_HCH_OFFSET(n) (0x1000 + ((n) << 12))
 
+/* USB PHY OFFSET */
+
+#define STM32_USBPHYC_PLL1_OFFSET     0x0000 /* USBPHYC PLL1 control register */
+#define STM32_USBPHYC_TUNE_OFFSET     0x000c /* USBPHYC tuning control register */
+#define STM32_USBPHYC_LDO_OFFSET      0x0018 /* USBPHYC LDO control and status register */
 
 /* Register Addresses *******************************************************************************/
 
@@ -231,6 +236,11 @@
 #define STM32_OTG_DFIFO_DEP(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_DEP_OFFSET(n))
 #define STM32_OTG_DFIFO_HCH(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_HCH_OFFSET(n))
 
+/* USB PHY Registers */
+
+#define STM32_USBPHYC_PLL1            (STM32_USBPHYC_BASE+STM32_USBPHYC_PLL1_OFFSET)
+#define STM32_USBPHYC_TUNE            (STM32_USBPHYC_BASE+STM32_USBPHYC_TUNE_OFFSET)
+#define STM32_USBPHYC_LDO             (STM32_USBPHYC_BASE+STM32_USBPHYC_LDO_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 /* Core global control and status registers */
@@ -250,56 +260,68 @@
 #define OTG_GOTGCTL_HSHNPEN           (1 << 10) /* Bit 10: host set HNP enable */
 #define OTG_GOTGCTL_DHNPEN            (1 << 11) /* Bit 11: Device HNP enabled */
 #define OTG_GOTGCTL_EHEN              (1 << 12) /* Bit 12: Embedded host enable */
-                                                  /* Bits 13-15: Reserved, must be kept at reset value */
+                                                /* Bits 13-15: Reserved, must be kept at reset value */
 #define OTG_GOTGCTL_CIDSTS            (1 << 16) /* Bit 16: Connector ID status */
 #define OTG_GOTGCTL_DBCT              (1 << 17) /* Bit 17: Long/short debounce time */
 #define OTG_GOTGCTL_ASVLD             (1 << 18) /* Bit 18: A-session valid */
 #define OTG_GOTGCTL_BSVLD             (1 << 19) /* Bit 19: B-session valid */
 #define OTG_GOTGCTL_OTGVER            (1 << 20) /* Bit 20: OTG version */
-                                                  /* Bits 21-31: Reserved, must be kept at reset value */
+                                                /* Bits 21-31: Reserved, must be kept at reset value */
 /* Interrupt register */
-                                                  /* Bits 1:0 Reserved, must be kept at reset value */
+                                                /* Bits 1:0 Reserved, must be kept at reset value */
 #define OTG_GOTGINT_SEDET             (1 << 2)  /* Bit 2: Session end detected */
-                                                  /* Bits 3-7: Reserved, must be kept at reset value */
+                                                /* Bits 3-7: Reserved, must be kept at reset value */
 #define OTG_GOTGINT_SRSSCHG           (1 << 8)  /* Bit 8: Session request success status change */
 #define OTG_GOTGINT_HNSSCHG           (1 << 9)  /* Bit 9: Host negotiation success status change */
-                                                  /* Bits 16:10 Reserved, must be kept at reset value */
+                                                /* Bits 16:10 Reserved, must be kept at reset value */
 #define OTG_GOTGINT_HNGDET            (1 << 17) /* Bit 17: Host negotiation detected */
 #define OTG_GOTGINT_ADTOCHG           (1 << 18) /* Bit 18: A-device timeout change */
 #define OTG_GOTGINT_DBCDNE            (1 << 19) /* Bit 19: Debounce done */
 #define OTG_GOTGINT_IDCHNG            (1 << 20) /* Bit 20: Change in ID pin input value */
-                                                  /* Bits 21-31: Reserved, must be kept at reset value */
+                                                /* Bits 21-31: Reserved, must be kept at reset value */
 
 /* AHB configuration register */
 
 #define OTG_GAHBCFG_GINTMSK           (1 << 0)  /* Bit 0: Global interrupt mask */
-                                                  /* Bits 1-6: Reserved, must be kept at reset value */
+                                                /* Bits 1-6: Reserved, must be kept at reset value */
 #define OTG_GAHBCFG_TXFELVL           (1 << 7)  /* Bit 7: TxFIFO empty level */
 #define OTG_GAHBCFG_PTXFELVL          (1 << 8)  /* Bit 8: Periodic TxFIFO empty level */
-                                                  /* Bits 20-31: Reserved, must be kept at reset value */
+                                                /* Bits 20-31: Reserved, must be kept at reset value */
 /* USB configuration register */
 
 #define OTG_GUSBCFG_TOCAL_SHIFT       (0)       /* Bits 0-2: FS timeout calibration */
 #define OTG_GUSBCFG_TOCAL_MASK        (7 << OTG_GUSBCFG_TOCAL_SHIFT)
-                                                  /* Bits 3-5: Reserved, must be kept at reset value */
+                                                /* Bits 3-5: Reserved, must be kept at reset value */
+#define OTG_GUSBCFG_ULPISEL           (1 << 4)  /* Bit 4: Select which high speed interface is to be used STM32F7x3 only*/
 #define OTG_GUSBCFG_PHYSEL            (1 << 6)  /* Bit 6: Full Speed serial transceiver select */
-                                                  /* Bit 7: Reserved, must be kept at reset value */
+                                                /* Bit 7: Reserved, must be kept at reset value */
 #define OTG_GUSBCFG_SRPCAP            (1 << 8)  /* Bit 8: SRP-capable */
 #define OTG_GUSBCFG_HNPCAP            (1 << 9)  /* Bit 9: HNP-capable */
 #define OTG_GUSBCFG_TRDT_SHIFT        (10)      /* Bits 10-13: USB turnaround time */
 #define OTG_GUSBCFG_TRDT_MASK         (15 << OTG_GUSBCFG_TRDT_SHIFT)
 #  define OTG_GUSBCFG_TRDT(n)         ((n) << OTG_GUSBCFG_TRDT_SHIFT)
-                                                  /* Bits 14-28: Reserved, must be kept at reset value */
+                                                /* Bit 14: Reserved, must be kept at reset value */
+#define OTG_GUSBCFG_PHYLPC            (1 << 15) /* Bit 15: PHY Low-power clock select for USB OTG HS */
+                                                /* Bit 16: Reserved, must be kept at reset value */
+#define OTG_GUSBCFG_ULPIFSLS          (1 << 17) /* Bit 17: ULPI FS/LS select for USB OTG HS */
+#define OTG_GUSBCFG_ULPIAR            (1 << 18) /* Bit 18: ULPI Auto-resume for USB OTG HS */
+#define OTG_GUSBCFG_ULPICSM           (1 << 19) /* Bit 19: ULPI clock SuspendM for USB OTG HS */
+#define OTG_GUSBCFG_ULPIEVBUSD        (1 << 20) /* Bit 20: ULPI External VBUS Drive for USB OTG HS */
+#define OTG_GUSBCFG_ULPIEVBUSI        (1 << 21) /* Bit 21: ULPI external VBUS indicator for USB OTG HS */
+#define OTG_GUSBCFG_TSDPS             (1 << 22) /* Bit 22: TermSel DLine pulsing selection for USB OTG HS */
+#define OTG_GUSBCFG_PCCI              (1 << 23) /* Bit 23: Indicator complement for USB OTG HS */
+#define OTG_GUSBCFG_PTCI              (1 << 24) /* Bit 24: Indicator pass through for USB OTG HS */
+#define OTG_GUSBCFG_ULPIIPD           (1 << 25) /* Bit 24: ULPI interface protect disable for USB OTG HS */
+                                                /* Bit 26-28: Reserved, must be kept at reset value */
 #define OTG_GUSBCFG_FHMOD             (1 << 29) /* Bit 29: Force host mode */
 #define OTG_GUSBCFG_FDMOD             (1 << 30) /* Bit 30: Force device mode */
-#define OTG_GUSBCFG_CTXPKT            (1 << 31) /* Bit 31: Corrupt Tx packet */
-                                                  /* Bits 20-31: Reserved, must be kept at reset value */
+                                                /* Bits 20-31: Reserved, must be kept at reset value */
 /* Reset register */
 
 #define OTG_GRSTCTL_CSRST             (1 << 0)  /* Bit 0: Core soft reset */
 #define OTG_GRSTCTL_HSRST             (1 << 1)  /* Bit 1: HCLK soft reset */
 #define OTG_GRSTCTL_FCRST             (1 << 2)  /* Bit 2: Host frame counter reset */
-                                                  /* Bit 3 Reserved, must be kept at reset value */
+                                                /* Bit 3 Reserved, must be kept at reset value */
 #define OTG_GRSTCTL_RXFFLSH           (1 << 4)  /* Bit 4: RxFIFO flush */
 #define OTG_GRSTCTL_TXFFLSH           (1 << 5)  /* Bit 5: TxFIFO flush */
 #define OTG_GRSTCTL_TXFNUM_SHIFT      (6)       /* Bits 6-10: TxFIFO number */
@@ -337,12 +359,15 @@
 #define OTG_GINT_IISOIXFR             (1 << 20) /* Bit 20: Incomplete isochronous IN transfer */
 #define OTG_GINT_IISOOXFR             (1 << 21) /* Bit 21: Incomplete isochronous OUT transfer (device) */
 #define OTG_GINT_IPXFR                (1 << 21) /* Bit 21: Incomplete periodic transfer (host) */
-#define OTG_GINT_RES22                (1 << 22) /* Bits 22: Reserved, must be kept at reset value */
+#define OTG_GINT_RES22                (1 << 22) /* Bit 22: Reserved, must be kept at reset value */
+#define OTG_GINT_DATAFSUSP            (1 << 22) /* Bit 22: Data fetch suspended for USB OTG HS */
+#define OTG_GINT_RES23                (1 << 23) /* Bit 23: Reserved, must be kept at reset value */
 #define OTG_GINT_RSTDET               (1 << 23) /* Bit 23: Reset detected interrupt */
 #define OTG_GINT_HPRT                 (1 << 24) /* Bit 24: Host port interrupt */
 #define OTG_GINT_HC                   (1 << 25) /* Bit 25: Host channels interrupt */
 #define OTG_GINT_PTXFE                (1 << 26) /* Bit 26: Periodic TxFIFO empty */
 #define OTG_GINT_LPMINT               (1 << 27) /* Bit 27: LPM interrupt */
+#define OTG_GINT_RES27                (1 << 27) /* Bit 27: Reserved, must be kept at reset value */
 #define OTG_GINT_CIDSCHG              (1 << 28) /* Bit 28: Connector ID status change */
 #define OTG_GINT_DISC                 (1 << 29) /* Bit 29: Disconnect detected interrupt */
 #define OTG_GINT_SRQ                  (1 << 30) /* Bit 30: Session request/new session detected interrupt */
@@ -388,7 +413,7 @@
 #  define OTG_GRXSTSD_PKTSTS_SETUPRECVD (6 << OTG_GRXSTSD_PKTSTS_SHIFT) /* SETUP data packet received */
 #define OTG_GRXSTSD_FRMNUM_SHIFT      (21)      /* Bits 21-24: Frame number */
 #define OTG_GRXSTSD_FRMNUM_MASK       (15 << OTG_GRXSTSD_FRMNUM_SHIFT)
-                                                  /* Bits 25-31: Reserved, must be kept at reset value */
+                                                /* Bits 25-31: Reserved, must be kept at reset value */
 /* Receive FIFO size register */
 
 #define OTG_GRXFSIZ_MASK              (0xffff)
@@ -431,13 +456,14 @@
 #  define OTG_HNPTXSTS_CHNUM_MASK     (15 << OTG_HNPTXSTS_CHNUM_SHIFT)
 #  define OTG_HNPTXSTS_EPNUM_SHIFT    (27)      /* Bits 27-30: Endpoint number */
 #  define OTG_HNPTXSTS_EPNUM_MASK     (15 << OTG_HNPTXSTS_EPNUM_SHIFT)
-                                                  /* Bit 31 Reserved, must be kept at reset value */
+                                                /* Bit 31 Reserved, must be kept at reset value */
 /* General core configuration register */
-                                                  /* Bits 0-15: Reserved, must be kept at reset value */
+                                                /* Bits 0-15: Reserved, must be kept at reset value */
 #define OTG_GCCFG_PWRDWN              (1 << 16) /* Bit 16: Power down */
-                                                  /* Bit 17 Reserved, must be kept at reset value */
+                                                /* Bit 17 Reserved, must be kept at reset value */
 #define OTG_GCCFG_VBDEN               (1 << 21) /* Bit 21: USB VBUS detection enable */
-                                                  /* Bits 22-31: Reserved, must be kept at reset value */
+#define OTG_GCCFG_PHYHSEN             (1 << 23) /* Bit 21: NOT In datasheet but in STMCube.. */
+                                                /* Bits 22-31: Reserved, must be kept at reset value */
 /* Core ID register  (32-bit product ID) */
 
 /* Host periodic transmit FIFO size register */
@@ -465,7 +491,7 @@
 #  define OTG_HCFG_FSLSPCS_LS48MHz    (1 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode,  Select 48 MHz PHY clock frequency */
 #  define OTG_HCFG_FSLSPCS_LS6MHz     (2 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode, Select 6 MHz PHY clock frequency */
 #define OTG_HCFG_FSLSS                (1 << 2)  /* Bit 2: FS- and LS-only support */
-                                                  /* Bits 31:3 Reserved, must be kept at reset value */
+                                                /* Bits 31:3 Reserved, must be kept at reset value */
 /* Host frame interval register */
 
 #define OTG_HFIR_MASK                 (0xffff)
@@ -514,7 +540,7 @@
 #define OTG_HPRT_PRES                 (1 << 6)  /* Bit 6:  Port resume */
 #define OTG_HPRT_PSUSP                (1 << 7)  /* Bit 7:  Port suspend */
 #define OTG_HPRT_PRST                 (1 << 8)  /* Bit 8:  Port reset */
-                                                  /* Bit 9:  Reserved, must be kept at reset value */
+                                                /* Bit 9:  Reserved, must be kept at reset value */
 #define OTG_HPRT_PLSTS_SHIFT          (10)      /* Bits 10-11: Port line status */
 #define OTG_HPRT_PLSTS_MASK           (3 << OTG_HPRT_PLSTS_SHIFT)
 #  define OTG_HPRT_PLSTS_DP           (1 << 10) /* Bit 10: Logic level of OTG_FS_FS_DP */
@@ -532,7 +558,7 @@
 #define OTG_HPRT_PSPD_MASK            (3 << OTG_HPRT_PSPD_SHIFT)
 #  define OTG_HPRT_PSPD_FS            (1 << OTG_HPRT_PSPD_SHIFT) /* Full speed */
 #  define OTG_HPRT_PSPD_LS            (2 << OTG_HPRT_PSPD_SHIFT) /* Low speed */
-                                                  /* Bits 19-31: Reserved, must be kept at reset value */
+                                                /* Bits 19-31: Reserved, must be kept at reset value */
 
 /* Host channel-n characteristics register */
 
@@ -543,7 +569,7 @@
 #define OTG_HCCHAR_EPDIR              (1 << 15) /* Bit 15: Endpoint direction */
 #  define OTG_HCCHAR_EPDIR_OUT        (0)
 #  define OTG_HCCHAR_EPDIR_IN         OTG_HCCHAR_EPDIR
-                                                  /* Bit 16 Reserved, must be kept at reset value */
+                                                /* Bit 16 Reserved, must be kept at reset value */
 #define OTG_HCCHAR_LSDEV              (1 << 17) /* Bit 17: Low-speed device */
 #define OTG_HCCHAR_EPTYP_SHIFT        (18)      /* Bits 18-19: Endpoint type */
 #define OTG_HCCHAR_EPTYP_MASK         (3 << OTG_HCCHAR_EPTYP_SHIFT)
@@ -563,7 +589,7 @@
 
 #define OTG_HCINT_XFRC                (1 << 0)  /* Bit 0:  Transfer completed */
 #define OTG_HCINT_CHH                 (1 << 1)  /* Bit 1:  Channel halted */
-                                                  /* Bit 2:  Reserved, must be kept at reset value */
+                                                /* Bit 2:  Reserved, must be kept at reset value */
 #define OTG_HCINT_STALL               (1 << 3)  /* Bit 3:  STALL response received interrupt */
 #define OTG_HCINT_NAK                 (1 << 4)  /* Bit 4:  NAK response received interrupt */
 #define OTG_HCINT_ACK                 (1 << 5)  /* Bit 5:  ACK response received/transmitted interrupt */
@@ -572,7 +598,7 @@
 #define OTG_HCINT_BBERR               (1 << 8)  /* Bit 8:  Babble error */
 #define OTG_HCINT_FRMOR               (1 << 9)  /* Bit 9:  Frame overrun */
 #define OTG_HCINT_DTERR               (1 << 10) /* Bit 10: Data toggle error */
-                                                  /* Bits 11-31 Reserved, must be kept at reset value */
+                                                /* Bits 11-31 Reserved, must be kept at reset value */
 /* Host channel-n interrupt register */
 
 #define OTG_HCTSIZ_XFRSIZ_SHIFT       (0)       /* Bits 0-18: Transfer size */
@@ -586,16 +612,18 @@
 #  define OTG_HCTSIZ_DPID_DATA1       (2 << OTG_HCTSIZ_DPID_SHIFT)
 #  define OTG_HCTSIZ_DPID_MDATA       (3 << OTG_HCTSIZ_DPID_SHIFT) /* Non-control */
 #  define OTG_HCTSIZ_PID_SETUP        (3 << OTG_HCTSIZ_DPID_SHIFT) /* Control */
-                                                  /* Bit 31 Reserved, must be kept at reset value */
+                                                /* Bit 31 Reserved, must be kept at reset value */
 /* Device-mode control and status registers */
 
 /* Device configuration register */
 
 #define OTG_DCFG_DSPD_SHIFT           (0)       /* Bits 0-1: Device speed */
 #define OTG_DCFG_DSPD_MASK            (3 << OTG_DCFG_DSPD_SHIFT)
+#  define OTG_DCFG_DSPD_HS            (0 << OTG_DCFG_DSPD_SHIFT) /* High Speed */
+#  define OTG_DCFG_DSPD_FS_USING_HS   (1 << OTG_DCFG_DSPD_SHIFT) /* Full speed using High Speed*/
 #  define OTG_DCFG_DSPD_FS            (3 << OTG_DCFG_DSPD_SHIFT) /* Full speed */
 #define OTG_DCFG_NZLSOHSK             (1 << 2)  /* Bit 2:  Non-zero-length status OUT handshake */
-                                                  /* Bit 3:  Reserved, must be kept at reset value */
+                                                /* Bit 3:  Reserved, must be kept at reset value */
 #define OTG_DCFG_DAD_SHIFT            (4)       /* Bits 4-10: Device address */
 #define OTG_DCFG_DAD_MASK             (0x7f << OTG_DCFG_DAD_SHIFT)
 #define OTG_DCFG_PFIVL_SHIFT          (11)      /* Bits 11-12: Periodic frame interval */
@@ -604,7 +632,7 @@
 #  define OTG_DCFG_PFIVL_85PCT        (1 << OTG_DCFG_PFIVL_SHIFT) /* 85% of the frame interval */
 #  define OTG_DCFG_PFIVL_90PCT        (2 << OTG_DCFG_PFIVL_SHIFT) /* 90% of the frame interval */
 #  define OTG_DCFG_PFIVL_95PCT        (3 << OTG_DCFG_PFIVL_SHIFT) /* 95% of the frame interval */
-                                                  /* Bits 13-31 Reserved, must be kept at reset value */
+                                                /* Bits 13-31 Reserved, must be kept at reset value */
 /* Device control register */
 
 #define OTG_TESTMODE_DISABLED         (0) /* Test mode disabled */
@@ -631,42 +659,47 @@
 #define OTG_DCTL_SGONAK               (1 << 9)  /* Bit 9:  Set global OUT NAK */
 #define OTG_DCTL_CGONAK               (1 << 10) /* Bit 10: Clear global OUT NAK */
 #define OTG_DCTL_POPRGDNE             (1 << 11) /* Bit 11: Power-on programming done */
-                                                  /* Bits 12-31: Reserved, must be kept at reset value */
+                                                /* Bits 12-31: Reserved, must be kept at reset value */
 /* Device status register */
 
 #define OTG_DSTS_SUSPSTS              (1 << 0)  /* Bit 0: Suspend status */
 #define OTG_DSTS_ENUMSPD_SHIFT        (1)       /* Bits 1-2: Enumerated speed */
 #define OTG_DSTS_ENUMSPD_MASK         (3 << OTG_DSTS_ENUMSPD_SHIFT)
 #  define OTG_DSTS_ENUMSPD_FS         (3 << OTG_DSTS_ENUMSPD_MASK) /* Full speed */
-                                                  /* Bits 4-7: Reserved, must be kept at reset value */
+                                                /* Bits 4-7: Reserved, must be kept at reset value */
 #define OTG_DSTS_EERR                 (1 << 3)  /* Bit 3: Erratic error */
 #define OTG_DSTS_SOFFN_SHIFT          (8)       /* Bits 8-21: Frame number of the received SOF */
 #define OTG_DSTS_SOFFN_MASK           (0x3fff << OTG_DSTS_SOFFN_SHIFT)
 #define OTG_DSTS_SOFFN0               (1 << 8)  /* Bits 8: Frame number even/odd bit */
 #define OTG_DSTS_SOFFN_EVEN           0
 #define OTG_DSTS_SOFFN_ODD            OTG_DSTS_SOFFN0
-                                                  /* Bits 22-31: Reserved, must be kept at reset value */
+                                                /* Bits 22-31: Reserved, must be kept at reset value */
 /* Device IN endpoint common interrupt mask register */
 
 #define OTG_DIEPMSK_XFRCM             (1 << 0)  /* Bit 0: Transfer completed interrupt mask */
 #define OTG_DIEPMSK_EPDM              (1 << 1)  /* Bit 1: Endpoint disabled interrupt mask */
-                                                  /* Bit 2:  Reserved, must be kept at reset value */
+#define OTG_DIEPMSK_AHBERRM           (1 << 2)  /* Bit 2: AHB error mask for USB OTG HS */
 #define OTG_DIEPMSK_TOM               (1 << 3)  /* Bit 3: Timeout condition mask (Non-isochronous endpoints) */
 #define OTG_DIEPMSK_ITTXFEMSK         (1 << 4)  /* Bit 4: IN token received when TxFIFO empty mask */
 #define OTG_DIEPMSK_INEPNMM           (1 << 5)  /* Bit 5: IN token received with EP mismatch mask */
 #define OTG_DIEPMSK_INEPNEM           (1 << 6)  /* Bit 6: IN endpoint NAK effective mask */
-                                                  /* Bits 7-31: Reserved, must be kept at reset value */
+                                                /* Bit 7: Reserved, must be kept at reset value */
+#define OTG_DIEPMSK_TXFURM            (1 << 8)  /* Bit 8: FIFO underrun mask */
+                                                /* Bits 9-12: Reserved, must be kept at reset value */
+#define OTG_DIEPMSK_NAKM              (1 << 13) /* Bit 13: NAK interrupt mask */
+                                                /* Bits 14-31: Reserved, must be kept at reset value */
+
 /* Device OUT endpoint common interrupt mask register */
 
 #define OTG_DOEPMSK_XFRCM             (1 << 0)  /* Bit 0: Transfer completed interrupt mask */
 #define OTG_DOEPMSK_EPDM              (1 << 1)  /* Bit 1: Endpoint disabled interrupt mask */
-                                                  /* Bit 2:  Reserved, must be kept at reset value */
+                                                /* Bit 2:  Reserved, must be kept at reset value */
 #define OTG_DOEPMSK_STUPM             (1 << 3)  /* Bit 3: SETUP phase done mask */
 #define OTG_DOEPMSK_OTEPDM            (1 << 4)  /* Bit 4: OUT token received when endpoint disabled mask */
-                                                  /* Bits 5-31: Reserved, must be kept at reset value */
+                                                /* Bits 5-31: Reserved, must be kept at reset value */
 /* Device all endpoints interrupt and All endpoints interrupt mask registers */
 
-#define OTG_DAINT_IEP_SHIFT           (0)      /* Bits 0-15: IN endpoint interrupt bits */
+#define OTG_DAINT_IEP_SHIFT           (0)       /* Bits 0-15: IN endpoint interrupt bits */
 #define OTG_DAINT_IEP_MASK            (0xffff << OTG_DAINT_IEP_SHIFT)
 #  define OTG_DAINT_IEP(n)            (1 << (n))
 #define OTG_DAINT_OEP_SHIFT           (16)      /* Bits 16-31: OUT endpoint interrupt bits */
@@ -693,20 +726,20 @@
 #  define OTG_DIEPCTL0_MPSIZ_32       (1 << OTG_DIEPCTL0_MPSIZ_SHIFT) /* 32 bytes */
 #  define OTG_DIEPCTL0_MPSIZ_16       (2 << OTG_DIEPCTL0_MPSIZ_SHIFT) /* 16 bytes */
 #  define OTG_DIEPCTL0_MPSIZ_8        (3 << OTG_DIEPCTL0_MPSIZ_SHIFT) /* 8 bytes */
-                                                  /* Bits 2-14: Reserved, must be kept at reset value */
+                                                /* Bits 2-14: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL0_USBAEP           (1 << 15) /* Bit 15: USB active endpoint */
-                                                  /* Bit 16: Reserved, must be kept at reset value */
+                                                /* Bit 16: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL0_NAKSTS           (1 << 17) /* Bit 17: NAK status */
 #define OTG_DIEPCTL0_EPTYP_SHIFT      (18)      /* Bits 18-19: Endpoint type */
 #define OTG_DIEPCTL0_EPTYP_MASK       (3 << OTG_DIEPCTL0_EPTYP_SHIFT)
 #  define OTG_DIEPCTL0_EPTYP_CTRL     (0 << OTG_DIEPCTL0_EPTYP_SHIFT) /* Control (hard-coded) */
-                                                  /* Bit 20: Reserved, must be kept at reset value */
+                                                /* Bit 20: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL0_STALL            (1 << 21) /* Bit 21: STALL handshake */
 #define OTG_DIEPCTL0_TXFNUM_SHIFT     (22)      /* Bits 22-25: TxFIFO number */
 #define OTG_DIEPCTL0_TXFNUM_MASK      (15 << OTG_DIEPCTL0_TXFNUM_SHIFT)
 #define OTG_DIEPCTL0_CNAK             (1 << 26) /* Bit 26: Clear NAK */
 #define OTG_DIEPCTL0_SNAK             (1 << 27) /* Bit 27: Set NAK */
-                                                  /* Bits 28-29: Reserved, must be kept at reset value */
+                                                /* Bits 28-29: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL0_EPDIS            (1 << 30) /* Bit 30: Endpoint disable */
 #define OTG_DIEPCTL0_EPENA            (1 << 31) /* Bit 31: Endpoint enable */
 
@@ -714,7 +747,7 @@
 
 #define OTG_DIEPCTL_MPSIZ_SHIFT       (0)       /* Bits 0-10: Maximum packet size */
 #define OTG_DIEPCTL_MPSIZ_MASK        (0x7ff << OTG_DIEPCTL_MPSIZ_SHIFT)
-                                                  /* Bits 11-14: Reserved, must be kept at reset value */
+                                                /* Bits 11-14: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL_USBAEP            (1 << 15) /* Bit 15: USB active endpoint */
 #define OTG_DIEPCTL_EONUM             (1 << 16) /* Bit 16: Even/odd frame */
 #  define OTG_DIEPCTL_EVEN            (0)
@@ -728,7 +761,7 @@
 #  define OTG_DIEPCTL_EPTYP_ISOC      (1 << OTG_DIEPCTL_EPTYP_SHIFT) /* Isochronous */
 #  define OTG_DIEPCTL_EPTYP_BULK      (2 << OTG_DIEPCTL_EPTYP_SHIFT) /* Bulk */
 #  define OTG_DIEPCTL_EPTYP_INTR      (3 << OTG_DIEPCTL_EPTYP_SHIFT) /* Interrupt */
-                                                  /* Bit 20: Reserved, must be kept at reset value */
+                                                /* Bit 20: Reserved, must be kept at reset value */
 #define OTG_DIEPCTL_STALL             (1 << 21) /* Bit 21: STALL handshake */
 #define OTG_DIEPCTL_TXFNUM_SHIFT      (22)      /* Bits 22-25: TxFIFO number */
 #define OTG_DIEPCTL_TXFNUM_MASK       (15 << OTG_DIEPCTL_TXFNUM_SHIFT)
@@ -744,21 +777,21 @@
 
 #define OTG_DIEPINT_XFRC              (1 << 0)  /* Bit 0:  Transfer completed interrupt */
 #define OTG_DIEPINT_EPDISD            (1 << 1)  /* Bit 1:  Endpoint disabled interrupt */
-                                                  /* Bit 2:  Reserved, must be kept at reset value */
+                                                /* Bit 2:  Reserved, must be kept at reset value */
 #define OTG_DIEPINT_TOC               (1 << 3)  /* Bit 3:  Timeout condition */
 #define OTG_DIEPINT_ITTXFE            (1 << 4)  /* Bit 4:  IN token received when TxFIFO is empty */
-                                                  /* Bit 5:  Reserved, must be kept at reset value */
+                                                /* Bit 5:  Reserved, must be kept at reset value */
 #define OTG_DIEPINT_INEPNE            (1 << 6)  /* Bit 6:  IN endpoint NAK effective */
 #define OTG_DIEPINT_TXFE              (1 << 7)  /* Bit 7:  Transmit FIFO empty */
-                                                  /* Bits 8-31: Reserved, must be kept at reset value */
+                                                /* Bits 8-31: Reserved, must be kept at reset value */
 /* Device IN endpoint 0 transfer size register */
 
 #define OTG_DIEPTSIZ0_XFRSIZ_SHIFT    (0)       /* Bits 0-6: Transfer size */
 #define OTG_DIEPTSIZ0_XFRSIZ_MASK     (0x7f << OTG_DIEPTSIZ0_XFRSIZ_SHIFT)
-                                                  /* Bits 7-18: Reserved, must be kept at reset value */
+                                                /* Bits 7-18: Reserved, must be kept at reset value */
 #define OTG_DIEPTSIZ0_PKTCNT_SHIFT    (19)      /* Bits 19-20: Packet count */
 #define OTG_DIEPTSIZ0_PKTCNT_MASK     (3 << OTG_DIEPTSIZ0_PKTCNT_SHIFT)
-                                                  /* Bits 21-31: Reserved, must be kept at reset value */
+                                                /* Bits 21-31: Reserved, must be kept at reset value */
 /* Device IN endpoint n transfer size register */
 
 #define OTG_DIEPTSIZ_XFRSIZ_SHIFT     (0)       /* Bits 0-18: Transfer size */
@@ -767,7 +800,7 @@
 #define OTG_DIEPTSIZ_PKTCNT_MASK      (0x3ff << OTG_DIEPTSIZ_PKTCNT_SHIFT)
 #define OTG_DIEPTSIZ_MCNT_SHIFT       (29)      /* Bits 29-30: Multi count */
 #define OTG_DIEPTSIZ_MCNT_MASK        (3 << OTG_DIEPTSIZ_MCNT_SHIFT)
-                                                  /* Bit 31: Reserved, must be kept at reset value */
+                                                /* Bit 31: Reserved, must be kept at reset value */
 /* Device OUT endpoint TxFIFO status register */
 
 #define OTG_DTXFSTS_MASK              (0xffff)
@@ -780,19 +813,19 @@
 #  define OTG_DOEPCTL0_MPSIZ_32       (1 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 32 bytes */
 #  define OTG_DOEPCTL0_MPSIZ_16       (2 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 16 bytes */
 #  define OTG_DOEPCTL0_MPSIZ_8        (3 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 8 bytes */
-                                                  /* Bits 2-14: Reserved, must be kept at reset value */
+                                                /* Bits 2-14: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL0_USBAEP           (1 << 15) /* Bit 15: USB active endpoint */
-                                                  /* Bit 16: Reserved, must be kept at reset value */
+                                                /* Bit 16: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL0_NAKSTS           (1 << 17) /* Bit 17: NAK status */
 #define OTG_DOEPCTL0_EPTYP_SHIFT      (18)      /* Bits 18-19: Endpoint type */
 #define OTG_DOEPCTL0_EPTYP_MASK       (3 << OTG_DOEPCTL0_EPTYP_SHIFT)
 #  define OTG_DOEPCTL0_EPTYP_CTRL     (0 << OTG_DOEPCTL0_EPTYP_SHIFT) /* Control (hard-coded) */
 #define OTG_DOEPCTL0_SNPM             (1 << 20) /* Bit 20: Snoop mode */
 #define OTG_DOEPCTL0_STALL            (1 << 21) /* Bit 21: STALL handshake */
-                                                  /* Bits 22-25: Reserved, must be kept at reset value */
+                                                /* Bits 22-25: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL0_CNAK             (1 << 26) /* Bit 26: Clear NAK */
 #define OTG_DOEPCTL0_SNAK             (1 << 27) /* Bit 27: Set NAK */
-                                                  /* Bits 28-29: Reserved, must be kept at reset value */
+                                                /* Bits 28-29: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL0_EPDIS            (1 << 30) /* Bit 30: Endpoint disable */
 #define OTG_DOEPCTL0_EPENA            (1 << 31) /* Bit 31: Endpoint enable */
 
@@ -800,7 +833,7 @@
 
 #define OTG_DOEPCTL_MPSIZ_SHIFT       (0)       /* Bits 0-10: Maximum packet size */
 #define OTG_DOEPCTL_MPSIZ_MASK        (0x7ff << OTG_DOEPCTL_MPSIZ_SHIFT)
-                                                  /* Bits 11-14: Reserved, must be kept at reset value */
+                                                /* Bits 11-14: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL_USBAEP            (1 << 15) /* Bit 15: USB active endpoint */
 #define OTG_DOEPCTL_DPID              (1 << 16) /* Bit 16: Endpoint data PID (interrupt/buld) */
 #  define OTG_DOEPCTL_DATA0           (0)
@@ -817,7 +850,7 @@
 #  define OTG_DOEPCTL_EPTYP_INTR      (3 << OTG_DOEPCTL_EPTYP_SHIFT) /* Interrupt */
 #define OTG_DOEPCTL_SNPM              (1 << 20) /* Bit 20: Snoop mode */
 #define OTG_DOEPCTL_STALL             (1 << 21) /* Bit 21: STALL handshake */
-                                                  /* Bits 22-25: Reserved, must be kept at reset value */
+                                                /* Bits 22-25: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL_CNAK              (1 << 26) /* Bit 26: Clear NAK */
 #define OTG_DOEPCTL_SNAK              (1 << 27) /* Bit 27: Set NAK */
 #define OTG_DOEPCTL_SD0PID            (1 << 28) /* Bit 28: Set DATA0 PID (interrupt/bulk) */
@@ -831,22 +864,22 @@
 
 #define OTG_DOEPINT_XFRC              (1 << 0)  /* Bit 0: Transfer completed interrupt */
 #define OTG_DOEPINT_EPDISD            (1 << 1)  /* Bit 1: Endpoint disabled interrupt */
-                                                  /* Bit 2: Reserved, must be kept at reset value */
+                                                /* Bit 2: Reserved, must be kept at reset value */
 #define OTG_DOEPINT_SETUP             (1 << 3)  /* Bit 3: SETUP phase done */
 #define OTG_DOEPINT_OTEPDIS           (1 << 4)  /* Bit 4: OUT token received when endpoint disabled */
-                                                  /* Bit 5: Reserved, must be kept at reset value */
+                                                /* Bit 5: Reserved, must be kept at reset value */
 #define OTG_DOEPINT_B2BSTUP           (1 << 6)  /* Bit 6: Back-to-back SETUP packets received */
-                                                  /* Bits 7-31: Reserved, must be kept at reset value */
+                                                /* Bits 7-31: Reserved, must be kept at reset value */
 /* Device OUT endpoint-0 transfer size register */
 
 #define OTG_DOEPTSIZ0_XFRSIZ_SHIFT    (0)       /* Bits 0-6: Transfer size */
 #define OTG_DOEPTSIZ0_XFRSIZ_MASK     (0x7f << OTG_DOEPTSIZ0_XFRSIZ_SHIFT)
-                                                  /* Bits 7-18: Reserved, must be kept at reset value */
+                                                /* Bits 7-18: Reserved, must be kept at reset value */
 #define OTG_DOEPTSIZ0_PKTCNT          (1 << 19) /* Bit 19 PKTCNT: Packet count */
-                                                  /* Bits 20-28: Reserved, must be kept at reset value */
+                                                /* Bits 20-28: Reserved, must be kept at reset value */
 #define OTG_DOEPTSIZ0_STUPCNT_SHIFT   (29)      /* Bits 29-30: SETUP packet count */
 #define OTG_DOEPTSIZ0_STUPCNT_MASK    (3 << OTG_DOEPTSIZ0_STUPCNT_SHIFT)
-                                                  /* Bit 31: Reserved, must be kept at reset value */
+                                                /* Bit 31: Reserved, must be kept at reset value */
 /* Device OUT endpoint-n transfer size register */
 
 #define OTG_DOEPTSIZ_XFRSIZ_SHIFT     (0)       /* Bits 0-18: Transfer size */
@@ -866,8 +899,57 @@
 
 #define OTG_PCGCCTL_STPPCLK           (1 << 0)  /* Bit 0: Stop PHY clock */
 #define OTG_PCGCCTL_GATEHCLK          (1 << 1)  /* Bit 1: Gate HCLK */
-                                                  /* Bits 2-3: Reserved, must be kept at reset value */
+                                                /* Bits 2-3: Reserved, must be kept at reset value */
 #define OTG_PCGCCTL_PHYSUSP           (1 << 4)  /* Bit 4: PHY Suspended */
-                                                  /* Bits 5-31: Reserved, must be kept at reset value */
+                                                /* Bits 5-31: Reserved, must be kept at reset value */
+
+/* USB PHYC Registers */
+/* USBPHYC PLL1 control register */
+
+#define USBPHYC_PLL1_EN                 (1 << 0)  /* Bit 0: Enable the PLL1 inside PHY */
+#define USBPHYC_PLL1_SEL_SHIFT          (1)       /* Bits 1-3: Controls the PHY PLL1 input clock frequency selection */
+#define USBPHYC_PLL1_SEL_MASK           (7 << USBPHYC_PLL1SEL_SHIFT)
+#  define USBPHYC_PLL1_SEL_12MHz        (0 << USBPHYC_PLL1_SEL_SHIFT)  /* 12 MHz */
+#  define USBPHYC_PLL1_SEL_12_5MHz      (1 << USBPHYC_PLL1_SEL_SHIFT)  /* 12.5 MHz */
+#  define USBPHYC_PLL1_SEL_12_5bMHz     (2 << USBPHYC_PLL1_SEL_SHIFT)  /* 12.5 MHz */
+#  define USBPHYC_PLL1_SEL_16MHz        (3 << USBPHYC_PLL1_SEL_SHIFT)  /* 16 MHz */
+#  define USBPHYC_PLL1_SEL_24MHz        (4 << USBPHYC_PLL1_SEL_SHIFT)  /* 24 MHz */
+#  define USBPHYC_PLL1_SEL_25MHz        (5 << USBPHYC_PLL1_SEL_SHIFT)  /* 25 MHz */
+#  define USBPHYC_PLL1_SEL_25bMHz       (6 << USBPHYC_PLL1_SEL_SHIFT)  /* 25 MHz */
+
+/* USBPHYC tuning control register */
+
+#define USBPHYC_TUNE_INCURREN           (1 << 0)  /* Bit 0: Controls the current boosting function */
+#define USBPHYC_TUNE_INCURRINT          (1 << 1)  /* Bit 1: Controls PHY current boosting */
+#define USBPHYC_TUNE_LFSCAPEN           (1 << 2)  /* Bit 2: Enables the Low Full Speed feedback capacitor */
+#define USBPHYC_TUNE_HSDRVSLEW          (1 << 3)  /* Bit 3: Controls the HS driver slew rate */
+#define USBPHYC_TUNE_HSDRVDCLEV         (1 << 4)  /* Bit 4: Decreases the HS driver DC level */
+#define USBPHYC_TUNE_HSDRVDCCUR         (1 << 5)  /* Bit 5: Increases the HS Driver DC level. Not applicable
+                                                   *        during the HS Test J and Test K data transfer */
+#define USBPHYC_TUNE_HSDRVCURINCR       (1 << 6)  /* Bit 6: Enable the HS driver current increase feature */
+#define USBPHYC_TUNE_FSDRVRFADJ         (1 << 7)  /* Bit 7: Tuning pin to adjust the full speed rise/fall time */
+#define USBPHYC_TUNE_HSDRVRFRED         (1 << 8)  /* Bit 8: High Speed rise-fall reduction enable */
+#define USBPHYC_TUNE_HSDRVCHKITRM_SHIFT (9)       /* Bits 9-12 : HS Driver current trimming pins for choke compensation */
+#define USBPHYC_TUNE_HSDRVCHKITRM_MASK  (0xF << USBPHYC_TUNE_HSDRVCHKITRM_SHIFT)
+#define USBPHYC_TUNE_HSDRVCHKZTRM_SHIFT (13)       /* Bits 13-14 : Controls the PHY bus HS driver impedance tuning for choke  */
+#define USBPHYC_TUNE_HSDRVCHKZTRM_MASK  (3 << USBPHYC_TUNE_HSDRVCHKZTRM_SHIFT)
+#define USBPHYC_TUNE_SQLCHCTL_SHIFT     (15)       /* Bits 15-16 :  Adjust the squelch DC threshold value */
+#define USBPHYC_TUNE_SQLCHCTL_MASK      (3 << USBPHYC_TUNE_SQLCHCTL_SHIFT)
+#define USBPHYC_TUNE_HDRXGNEQEN         (1 << 17)  /* Bit 17: Enables the HS Rx Gain Equalizer */
+#define USBPHYC_TUNE_STAGSEL            (1 << 18)  /* Bit 18: HS Tx staggering enable */
+#define USBPHYC_TUNE_HSFALLPREEM        (1 << 19)  /* Bit 19: HS Fall time control of single ended signals during pre-emphasis */
+#define USBPHYC_TUNE_HSRXOFF_SHIFT      (20)       /* Bits 20-21 : HS Receiver Offset adjustment  */
+#define USBPHYC_TUNE_HSRXOFF_MASK       (3 << USBPHYC_TUNE_HSRXOFF_SHIFT)
+#define USBPHYC_TUNE_SHTCCTCTLPROT      (1 << 22)  /* Bit 22: Enables the short circuit protection circuitry in LS/FS driver */
+#define USBPHYC_TUNE_SQLBYP             (1 << 23)  /* Bit 23: This pin is used to bypass the squelch inter-locking circuitry */
+
+/* USBPHYC LDO control and status register */
+
+#define USBPHYC_LDO_USED                (1 << 0)  /* Bit 0: Indicates the presence of the LDO in the chip. */
+#define USBPHYC_LDO_STATUS              (1 << 1)  /* Bit 1: Monitors the status of the PHY's LDO. */
+
+/* It looks like they made a mistake, is it ENABLE or DISABLE? */
+
+#define USBPHYC_LDO_ENABLE             (1 << 2)  /* Bit 2: Controls disable of the High Speed PHY's LDO. */
 
 #endif /* __ARCH_ARM_SRC_STM32F7_CHIP_STM32_OTG_H */

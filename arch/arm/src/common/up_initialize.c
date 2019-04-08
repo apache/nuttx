@@ -258,9 +258,11 @@ void up_initialize(void)
   (void)telnet_initialize();
 #endif
 
+#if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
+#endif
 
   /* Initialize the L2 cache if present and selected */
 
