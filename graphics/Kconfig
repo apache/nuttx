@@ -77,11 +77,33 @@ config NX_NOCURSOR
 
 config NX_SWCURSOR
 	bool "Software cursor support"
-	depends on NX_RAMBACKED && !NX_LCDDRIVER && EXPERIMENTAL
+	depends on !NX_LCDDRIVER && NX_DISABLE_1BPP && NX_DISABLE_2BPP && NX_DISABLE_4BPP && !BUILD_KERNEL && EXPERIMENTAL
+	---help---
+		Software cursors are a work in progress hence the EXPERIMENTAL
+		dependency. The other dependencies are due to implemented
+		capabilities.  This assumes that:
+
+		  1. You are using a framebuffer hardware interface.  This is
+		     because the logic to implement this feature on top of the LCD
+		     interface has not been implemented.
+		  2. The pixel depth is greater then or equal to 8-bits (8-bpp,
+		     16-bpp, 24/32/-bpp).  This is because the logic to handle
+		     pixels smaller than 1-byte has not been implemented,
+		  3. For FLAT and PROTECTED builds only.  In those builds, the
+		     cursor image resides in the common application space and is
+		     assumed to pesist as long as needed.  But with the KERNEL
+		     build, the image will lie in a process space and will not be
+		     generally available.  In that case, we could keep the image in
+		     a shared memory region or perhaps copy the image into a kernel
+		     internal buffer.  Neither of  those are implemented.
+		  4. Only a single color plane is supported at present.
 
 config NX_HWCURSOR
 	bool "Software cursor support"
 	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
+	---help---
+		Hardware cursor support has not been implemented, hence the
+		EXPERIMENTAL dependency.
 
 endchoice # Cursor support
 
