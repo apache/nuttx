@@ -464,10 +464,18 @@ void pwfb_copyrectangle_32bpp(FAR struct nxbe_window_s *bwnd,
 struct nxbe_state_s;    /* Forward reference */
 
 #ifdef CONFIG_NX_SWCURSOR
-void nxglib_cursor_draw_8bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_draw_16bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_draw_24bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_draw_32bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_draw_8bpp(FAR struct nxbe_state_s *be,
+                             FAR const struct nxgl_rect_s *bounds,
+                             int planeno);
+void nxglib_cursor_draw_16bpp(FAR struct nxbe_state_s *be,
+                              FAR const struct nxgl_rect_s *bounds,
+                              int planeno);
+void nxglib_cursor_draw_24bpp(FAR struct nxbe_state_s *be,
+                              FAR const struct nxgl_rect_s *bounds,
+                              int planeno);
+void nxglib_cursor_draw_32bpp(FAR struct nxbe_state_s *be,
+                              FAR const struct nxgl_rect_s *bounds,
+                              int planeno);
 #endif
 
 /****************************************************************************
@@ -480,10 +488,18 @@ void nxglib_cursor_draw_32bpp(FAR struct nxbe_state_s *be, int planeno);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_SWCURSOR
-void nxglib_cursor_erase_8bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_erase_16bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_erase_24bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_erase_8bpp(FAR struct nxbe_state_s *be,
+                              FAR const struct nxgl_rect_s *bounds,
+                              int planeno);
+void nxglib_cursor_erase_16bpp(FAR struct nxbe_state_s *be,
+                               FAR const struct nxgl_rect_s *bounds,
+                               int planeno);
+void nxglib_cursor_erase_24bpp(FAR struct nxbe_state_s *be,
+                               FAR const struct nxgl_rect_s *bounds,
+                               int planeno);
+void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be,
+                               FAR const struct nxgl_rect_s *bounds,
+                               int planeno);
 #endif
 
 /****************************************************************************
@@ -496,10 +512,18 @@ void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be, int planeno);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_SWCURSOR
-void nxglib_cursor_backup_8bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_backup_16bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_backup_24bpp(FAR struct nxbe_state_s *be, int planeno);
-void nxglib_cursor_backup_32bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_backup_8bpp(FAR struct nxbe_state_s *be,
+                               FAR const struct nxgl_rect_s *bounds,
+                               int planeno);
+void nxglib_cursor_backup_16bpp(FAR struct nxbe_state_s *be,
+                                FAR const struct nxgl_rect_s *bounds,
+                                int planeno);
+void nxglib_cursor_backup_24bpp(FAR struct nxbe_state_s *be,
+                                FAR const struct nxgl_rect_s *bounds,
+                                int planeno);
+void nxglib_cursor_backup_32bpp(FAR struct nxbe_state_s *be,
+                                FAR const struct nxgl_rect_s *bounds,
+                                int planeno);
 #endif
 
 #undef EXTERN

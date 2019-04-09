@@ -871,7 +871,7 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
 
   DEBUGASSERT(pinfo != NULL && rect != NULL);
 
-  /* Recover the session informatin from the display number in the planeinfo
+  /* Recover the session information from the display number in the planeinfo
    * structure.
    */
 

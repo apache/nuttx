@@ -147,7 +147,26 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
       info.cops.obscured = nxbe_clipnull;
       info.color         = color[i];
 
+      /* Draw the point (if it is visible) */
+
       nxbe_clipper(wnd->above, &rect, NX_CLIPORDER_DEFAULT,
                    &info.cops, &wnd->be->plane[i]);
+
+#ifdef CONFIG_NX_SWCURSOR
+      /* Save the modified cursor pixe at the point.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipfill().  It is here only because the struct nxbe_state_s
+       * (wnd->be) is not available at that point.
+       */
+
+      wnd->be->plane[i].cursor.backup(wnd->be, &rect, i);
+
+      /* Restore the software cursor if if that point is a visible cursor
+       * bit that was overwritten by the above operation.
+       */
+
+      wnd->be->plane[i].cursor.draw(wnd->be, &rect, i);
+#endif
     }
 }

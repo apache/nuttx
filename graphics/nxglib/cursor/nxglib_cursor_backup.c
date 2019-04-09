@@ -63,6 +63,7 @@
  *
  * Input Parameters:
  *   be      - The back-end state structure instance
+ *   bounds  - The region of the display that has been modified.
  *   planeno - The color plane being drawn
  *
  * Returned Value:
@@ -71,16 +72,16 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
-(FAR struct nxbe_state_s *be, int planeno)
+(FAR struct nxbe_state_s *be, FAR const struct nxgl_rect_s *bounds, int planeno)
 {
   struct nxgl_rect_s intersection;
   struct nxgl_point_s origin;
   FAR struct nxbe_plane_s *plane;
   FAR uint8_t *fbmem;
-  FAR uint8_t *sline;
+  FAR const uint8_t *sline;
   FAR uint8_t *dline;
-  FAR NXGL_PIXEL_T *src;
-  FAR NXGL_PIXEL_T *dest;
+  FAR const FAR NXGL_PIXEL_T *src;
+  FAR FAR NXGL_PIXEL_T *dest;
   nxgl_coord_t width;
   nxgl_coord_t height;
   nxgl_coord_t sstride;
@@ -91,6 +92,10 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
   /* Handle the case some or all of the backup image is off of the display. */
 
   nxgl_rectintersect(&intersection, &be->cursor.bounds, &be->bkgd.bounds);
+
+  /* Check if there is anything in the modified region that we need to handle. */
+
+  nxgl_rectintersect(&intersection, &intersection, bounds);
   if (!nxgl_nullrect(&intersection))
     {
       /* Get the width and the height of the images in pixels/rows */

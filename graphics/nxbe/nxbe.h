@@ -155,9 +155,15 @@ struct nxbe_pwfb_vtable_s
 
 struct nxbe_cursorops_s
 {
-  CODE void (*draw)(FAR struct nxbe_state_s *be, int planeno);
-  CODE void (*erase)(FAR struct nxbe_state_s *be, int planeno);
-  CODE void (*backup)(FAR struct nxbe_state_s *be, int planeno);
+  CODE void (*draw)(FAR struct nxbe_state_s *be,
+                    FAR const struct nxgl_rect_s *bounds,
+                    int planeno);
+  CODE void (*erase)(FAR struct nxbe_state_s *be,
+                     FAR const struct nxgl_rect_s *bounds,
+                     int planeno);
+  CODE void (*backup)(FAR struct nxbe_state_s *be,
+                      FAR const struct nxgl_rect_s *bounds,
+                      int planeno);
 };
 #endif
 
@@ -611,33 +617,6 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
                  unsigned int stride);
 
 /****************************************************************************
- * Name: nxbe_sprite_refresh
- *
- * Description:
- *   Prior to calling nxbe_bitmap_dev(), update any "sprites" tht need to
- *   be overlaid on the per-window frambuffer.  This could include such
- *   things as OSD functionality, a software cursor, selection boxes, etc.
- *
- * Input Parameters (same as for nxbe_bitmap_dev):
- *   wnd    - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that was
- *            modified (in device coordinates)
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_RAMBACKED
-#if 0 /* There are none yet */
-void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_rect_s *dest);
-#else
-#  define nxbe_sprite_refresh(wnd, dest)
-#endif
-#endif
-
-/****************************************************************************
  * Name: nxbe_flush
  *
  * Description:
@@ -645,14 +624,13 @@ void nxbe_sprite_refresh(FAR struct nxbe_window_s *wnd,
  *   be written to device graphics memory.  That function is managed by this
  *   simple function.  It does the following:
  *
- *   1) It calls nxbe_sprite_refresh() to update any "sprite" graphics on top
- *      of the RAM framebuffer.   This could include such things as OSD
- *      functionality, a software cursor, selection boxes, etc.
- *   2) Then it calls nxbe_bitmap_dev() to copy the modified per-window
- *      frambuffer into device memory.
- *
- *   This the "sprite" image is always on top of the device display, this
- *   supports flicker-free software sprites.
+ *   1) It calls nxbe_bitmap_dev() to copy the modified per-window
+ *      framebuffer into device graphics memory.
+ *   2) If CONFIG_NX_SWCURSOR is enabled, it calls the cursor "draw"
+ *      renderer to update re-draw the currsor image if any portion of
+ *      graphics display update overwrote the cursor.  Since these
+ *      operations are performed back-to-back, any resulting flicker
+ *      should be minimized.
  *
  * Input Parameters (same as for nxbe_bitmap_dev):
  *   wnd    - The window that will receive the bitmap image

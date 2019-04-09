@@ -321,14 +321,24 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
       /* Update the per-window framebuffer */
 
       nxbe_bitmap_pwfb(wnd, dest, src, origin, stride);
-
-      /* Overlay any update any sprites on the per-window frambuffer */
-
-      nxbe_sprite_refresh(wnd, dest);
     }
 #endif
 
   /* Rend the bitmap directly to the graphics device in any case */
 
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+
+#ifdef CONFIG_NX_SWCURSOR
+  /* Save the modified cursor background region
+   * REVISIT:  Only a single color plane is supported
+   */
+
+  wnd->be->plane[0].cursor.backup(wnd->be, dest, 0);
+
+  /* Restore the software cursor if any part of the cursor was
+   * overwritten by the bitmap copy.
+   */
+
+  wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
+#endif
 }

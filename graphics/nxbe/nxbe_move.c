@@ -180,6 +180,8 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
     {
       struct nxbe_move_s srcinfo;
 
+      /* Move the visible part of window */
+
       srcinfo.cops.visible  = nxbe_clipmovesrc;
       srcinfo.cops.obscured = nxbe_clipmoveobscured;
       srcinfo.offset        = offset;
@@ -211,6 +213,9 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
                                  FAR const struct nxgl_point_s *offset)
 {
   struct nxbe_move_s info;
+#ifdef CONFIG_NX_SWCURSOR
+  struct nxgl_rect_s dest;
+#endif
   int i;
 
   info.cops.visible  = nxbe_clipmovedest;
@@ -260,6 +265,12 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
         }
     }
 
+#ifdef CONFIG_NX_SWCURSOR
+  /* Apply the offsets to the source window to get the destination window */
+
+  nxgl_rectoffset(&dest, rect, offset->x, offset->y);
+#endif
+
   /* Then perform the move */
 
 #if CONFIG_NX_NPLANES > 1
@@ -268,8 +279,35 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
   i = 0;
 #endif
     {
+#ifdef CONFIG_NX_SWCURSOR
+      /* Remove the cursor from the source region */
+
+      wnd->be->plane[i].cursor.erase(wnd->be, rect, i);
+#endif
+
       nxbe_clipper(wnd->above, &info.srcrect, info.order,
                    &info.cops, &wnd->be->plane[i]);
+
+
+#ifdef CONFIG_NX_SWCURSOR
+      /* Save the modified cursor background region at the destination
+       * region.  This would be necessary only for small moves that stay
+       * within the cursor region.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipmovedest().  It is here only because the struct
+       * nxbe_state_s (wnd->be) is not available at that point.  This
+       * result in an excessive number of cursor updates.
+       */
+
+      wnd->be->plane[i].cursor.backup(wnd->be, &dest, i);
+
+      /* Restore the software cursor if any part of the cursor was
+       * overwritten by the fill.
+      */
+
+      wnd->be->plane[i].cursor.draw(wnd->be, &dest, i);
+#endif
     }
 }
 

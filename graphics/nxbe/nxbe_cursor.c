@@ -78,8 +78,13 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
       be->cursor.visible = true;
 
 #ifdef CONFIG_NX_SWCURSOR
-      be->plane[0].cursor.backup(be, 0); /* Save the cursor background image */
-      be->plane[0].cursor.draw(be, 0);   /* Write the new cursor */
+      /* Save the cursor background image */
+
+      be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
+
+      /* Write the new cursor image to device memory */
+
+      be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
 #else
       /* For a hardware cursor, this would require some interaction with the
        * grahics device.
@@ -100,7 +105,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 #ifdef CONFIG_NX_SWCURSOR
       /* Erase the old cursor image by writing the saved background image. */
 
-      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
+      be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
 #else
       /* For a hardware cursor, this would require some interaction with the
        * grahics device.
@@ -151,7 +156,7 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
     {
       /* Erase the old cursor image by writing the saved background image. */
 
-      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
+      be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
     }
 
   /* Has the cursor changed size? */
@@ -191,7 +196,7 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
 
       /* Read in the new background image */
 
-      be->plane[0].cursor.backup(be, 0);
+      be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
     }
 
   /* Save the new colors */
@@ -223,7 +228,7 @@ errout_with_erase:
     {
       /* Write the new cursor image to the device graphics memory. */
 
-      be->plane[0].cursor.draw(be, 0); /* Erase the old cursor */
+      be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
     }
 
 #else
@@ -266,7 +271,7 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
     {
       /* Erase the old cursor image by writing the saved background image. */
 
-      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
+      be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
     }
 
   /* Calculate the cursor movement */
@@ -280,7 +285,7 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
 
   /* Read in the new background image at this offset */
 
-  be->plane[0].cursor.backup(be, 0);
+  be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
 
   /* If the cursor is visible, then put write the new cursor image into
    * device graphics memory now.
@@ -290,7 +295,7 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
     {
       /* Write the new cursor image to the device graphics memory. */
 
-      be->plane[0].cursor.draw(be, 0); /* Erase the old cursor */
+      be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
     }
 
 #else
