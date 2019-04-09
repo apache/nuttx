@@ -40,11 +40,15 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxmu.h>
 #include <nuttx/nx/nxcursor.h>
 
-#ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
 /****************************************************************************
  * Public Functions
@@ -67,7 +71,7 @@
 
 int nxcursor_enable(NXHANDLE hnd, bool enable)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curenable_s outmsg;
   int ret;
 
@@ -81,7 +85,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;
@@ -117,7 +121,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
 int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curimage_s outmsg;
   int ret;
 
@@ -126,12 +130,13 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
   /* Send the new cursor image to the server */
 
   outmsg.msgid        = NX_SVRMSG_CURSOR_IMAGE;
-  outmsg.image.size.x = image->size.x;
-  outmsg.image.size.y = image->size.y;
-  outmsg.image.color1 = image->color1;
-  outmsg.image.color2 = image->color2;
-  outmsg.image.color3 = image->color3;
+  outmsg.image.size.w = image->size.w;
+  outmsg.image.size.h = image->size.h;
   outmsg.image.image  = image->image;  /* The user pointer is sent, no data */
+
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
+  nxgl_colorcopy(outmsg.image.color1, image->color1);
 
   /* We will finish the teardown upon receipt of the DISCONNECTED message */
 
@@ -140,7 +145,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;
@@ -164,7 +169,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
 
 int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)handle;
+  FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curpos_s outmsg;
   int ret;
 
@@ -183,7 +188,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
     {
       gerr("ERROR: nxmu_sendserver() returned %d\n", ret);
       set_errno(-ret);
-      return ERROR
+      return ERROR;
     }
 
   return OK;

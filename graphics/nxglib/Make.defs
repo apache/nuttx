@@ -97,6 +97,19 @@ CSRCS += pwfb_copyrectangle_32bpp.c
 
 endif
 
+ifeq ($(CONFIG_NX_SWCURSOR),y)
+
+CSRCS += nxglib_cursor_draw_8bpp.c nxglib_cursor_draw_16bpp.c
+CSRCS += nxglib_cursor_draw_24bpp.c nxglib_cursor_draw_32bpp.c
+
+CSRCS += nxglib_cursor_erase_8bpp.c nxglib_cursor_erase_16bpp.c
+CSRCS += nxglib_cursor_erase_24bpp.c nxglib_cursor_erase_32bpp.c
+
+CSRCS += nxglib_cursor_backup_8bpp.c nxglib_cursor_backup_16bpp.c
+CSRCS += nxglib_cursor_backup_24bpp.c nxglib_cursor_backup_32bpp.c
+
+endif
+
 DEPPATH += --dep-path nxglib
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
 #VPATH += :nxglib

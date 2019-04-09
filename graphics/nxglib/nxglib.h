@@ -453,6 +453,55 @@ void pwfb_copyrectangle_32bpp(FAR struct nxbe_window_s *bwnd,
                               unsigned int srcstride);
 #endif
 
+/****************************************************************************
+ * Name: nxgl_cursor_draw_*bpp
+ *
+ * Description:
+ *   Draw the cursor image into the specified position in the graphics memory.
+ *
+ ****************************************************************************/
+
+struct nxbe_state_s;    /* Forward reference */
+
+#ifdef CONFIG_NX_SWCURSOR
+void nxglib_cursor_draw_8bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_draw_16bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_draw_24bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_draw_32bpp(FAR struct nxbe_state_s *be, int planeno);
+#endif
+
+/****************************************************************************
+ * Name: nxgl_cursor_erase_*bpp
+ *
+ * Description:
+ *   Erase the cursor by copying the saved background image into the graphics
+ *   memory.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_SWCURSOR
+void nxglib_cursor_erase_8bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_erase_16bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_erase_24bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be, int planeno);
+#endif
+
+/****************************************************************************
+ * Name: nxgl_cursor_backup_*bpp
+ *
+ * Description:
+ *   Save the backgroud image for subsequent use to erase the cursor from the
+ *   device graphics memory.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_SWCURSOR
+void nxglib_cursor_backup_8bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_backup_16bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_backup_24bpp(FAR struct nxbe_state_s *be, int planeno);
+void nxglib_cursor_backup_32bpp(FAR struct nxbe_state_s *be, int planeno);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

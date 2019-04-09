@@ -185,7 +185,7 @@ void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
                     FAR const struct nxgl_point_s *v2);
 
 /****************************************************************************
- * Name: nxgl_vectorsubtract
+ * Name: nxgl_vectsubtract
  *
  * Description:
  *   Add subtract vector v2 from vector v1 and return the result in vector dest

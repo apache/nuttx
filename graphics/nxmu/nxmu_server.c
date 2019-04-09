@@ -380,7 +380,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_CURSOR_ENABLE: /* Enable/disable cursor */
            {
              FAR struct nxsvrmsg_curenable_s *enabmsg = (FAR struct nxsvrmsg_curenable_s *)buffer;
-             nxbe_cursor_enable(&nxwm.be, enabmsg->enable);
+             nxbe_cursor_enable(&nxmu.be, enabmsg->enable);
            }
            break;
 
@@ -388,14 +388,14 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_CURSOR_IMAGE: /* Set cursor image */
            {
              FAR struct nxsvrmsg_curimage_s *imgmsg = (FAR struct nxsvrmsg_curimage_s *)buffer;
-             nxbe_cursor_setimage(&nxwm.be, imgmsg->image);
+             nxbe_cursor_setimage(&nxmu.be, &imgmsg->image);
            }
            break;
 #endif
          case NX_SVRMSG_CURSOR_SETPOS: /* Set cursor position */
            {
              FAR struct nxsvrmsg_curpos_s *posmsg = (FAR struct nxsvrmsg_curpos_s *)buffer;
-             nxbe_cursor_setposition(&nxwm.be, &posmsg->pos);
+             nxbe_cursor_setposition(&nxmu.be, &posmsg->pos);
            }
            break;
 #endif

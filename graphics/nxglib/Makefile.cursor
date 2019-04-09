@@ -1,0 +1,105 @@
+############################################################################
+# graphics/nxglib/Makefile.cursor
+#
+#   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+-include $(TOPDIR)/Make.defs
+
+ifeq ($(NXGLIB_BITSPERPIXEL),8)
+NXGLIB_SUFFIX := _8bpp
+DRAW_CSRC     := nxglib_cursor_draw_8bpp.c
+ERASE_CSRC    := nxglib_cursor_erase_8bpp.c
+BACKUP_CSRC   := nxglib_cursor_backup_8bpp.c
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),16)
+NXGLIB_SUFFIX := _16bpp
+DRAW_CSRC     := nxglib_cursor_draw_16bpp.c
+ERASE_CSRC    := nxglib_cursor_erase_16bpp.c
+BACKUP_CSRC   := nxglib_cursor_backup_16bpp.c
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),24)
+NXGLIB_SUFFIX := _24bpp
+DRAW_CSRC     := nxglib_cursor_draw_24bpp.c
+ERASE_CSRC    := nxglib_cursor_erase_24bpp.c
+BACKUP_CSRC   := nxglib_cursor_backup_24bpp.c
+endif
+ifeq ($(NXGLIB_BITSPERPIXEL),32)
+NXGLIB_SUFFIX := _32bpp
+DRAW_CSRC     := nxglib_cursor_draw_32bpp.c
+ERASE_CSRC    := nxglib_cursor_erase_32bpp.c
+BACKUP_CSRC   := nxglib_cursor_backup_32bpp.c
+endif
+
+CPPFLAGS      += -DNXGLIB_BITSPERPIXEL=$(NXGLIB_BITSPERPIXEL)
+CPPFLAGS      += -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
+
+DRAW_TMP       = $(DRAW_CSRC:.c=.i)
+ERASE_TMP      = $(ERASE_CSRC:.c=.i)
+BACKUP_TMP     = $(BACKUP_CSRC:.c=.i)
+
+GEN_CSRCS      = $(DRAW_CSRC) $(ERASE_CSRC) $(BACKUP_CSRC)
+
+BLITDIR        = cursor
+
+all:    $(GEN_CSRCS)
+.PHONY : clean distclean
+
+$(DRAW_CSRC) : $(BLITDIR)/nxglib_cursor_draw.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, $(BLITDIR)/nxglib_cursor_draw.c, $(DRAW_TMP))
+	$(Q) cat $(DRAW_TMP) | sed -e "/^#/d" >$@
+	$(Q) rm -f  $(DRAW_TMP)
+endif
+
+$(ERASE_CSRC) : $(BLITDIR)/nxglib_cursor_erase.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, $(BLITDIR)/nxglib_cursor_erase.c, $(ERASE_TMP))
+	$(Q) cat $(ERASE_TMP) | sed -e "/^#/d" >$@
+	$(Q) rm -f  $(ERASE_TMP)
+endif
+
+$(BACKUP_CSRC) : $(BLITDIR)/nxglib_cursor_backup.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	$(call PREPROCESS, $(BLITDIR)/nxglib_cursor_backup.c, $(BACKUP_TMP))
+	$(Q) cat $(BACKUP_TMP) | sed -e "/^#/d" >$@
+	$(Q) rm -f  $(BACKUP_TMP)
+endif
+
+clean:
+	$(call DELFILE, *.i)
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, nxglib_cursor_draw_*bpp.c)
+	$(call DELFILE, nxglib_cursor_erase_*bpp.c)
+	$(call DELFILE, nxglib_cursor_backup_*bpp.c)

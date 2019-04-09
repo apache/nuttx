@@ -213,6 +213,12 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           be->plane[i].pwfb.moverectangle = pwfb_moverectangle_8bpp;
           be->plane[i].pwfb.copyrectangle = pwfb_copyrectangle_8bpp;
 #endif
+
+#ifdef CONFIG_NX_SWCURSOR
+          be->plane[i].cursor.draw        = nxglib_cursor_draw_8bpp;
+          be->plane[i].cursor.erase       = nxglib_cursor_erase_8bpp;
+          be->plane[i].cursor.backup      = nxglib_cursor_backup_8bpp;
+#endif
         }
       else
 #endif
@@ -233,6 +239,12 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           be->plane[i].pwfb.filltrapezoid = pwfb_filltrapezoid_16bpp;
           be->plane[i].pwfb.moverectangle = pwfb_moverectangle_16bpp;
           be->plane[i].pwfb.copyrectangle = pwfb_copyrectangle_16bpp;
+#endif
+
+#ifdef CONFIG_NX_SWCURSOR
+          be->plane[i].cursor.draw        = nxglib_cursor_draw_16bpp;
+          be->plane[i].cursor.erase       = nxglib_cursor_erase_16bpp;
+          be->plane[i].cursor.backup      = nxglib_cursor_backup_16bpp;
 #endif
         }
       else
@@ -255,6 +267,12 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           be->plane[i].pwfb.moverectangle = pwfb_moverectangle_24bpp;
           be->plane[i].pwfb.copyrectangle = pwfb_copyrectangle_24bpp;
 #endif
+
+#ifdef CONFIG_NX_SWCURSOR
+          be->plane[i].cursor.draw        = nxglib_cursor_draw_24bpp;
+          be->plane[i].cursor.erase       = nxglib_cursor_erase_24bpp;
+          be->plane[i].cursor.backup      = nxglib_cursor_backup_24bpp;
+#endif
         }
       else
 #endif
@@ -275,6 +293,12 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
           be->plane[i].pwfb.filltrapezoid = pwfb_filltrapezoid_32bpp;
           be->plane[i].pwfb.moverectangle = pwfb_moverectangle_32bpp;
           be->plane[i].pwfb.copyrectangle = pwfb_copyrectangle_32bpp;
+#endif
+
+#ifdef CONFIG_NX_SWCURSOR
+          be->plane[i].cursor.draw        = nxglib_cursor_draw_32bpp;
+          be->plane[i].cursor.erase       = nxglib_cursor_erase_32bpp;
+          be->plane[i].cursor.backup      = nxglib_cursor_backup_32bpp;
 #endif
         }
       else

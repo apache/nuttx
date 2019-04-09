@@ -41,276 +41,12 @@
 
 #include <assert.h>
 
-#include "nxglib_bitblit.h"
+#include <nuttx/kmalloc.h>
+
+#include "nxglib.h"
 #include "nxbe.h"
 
 #if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxbe_map_color
- *
- * Description:
- *   Map a 2-bit cursor pixel value to a device pixel value
- *
- * Input Parameters:
- *   be   - The back-end state structure instance
- *   pixel - Pixel to be mapped
- *
- * Returned Value:
- *   The mapped pixel.
- *
- ****************************************************************************/
-
-static nxgl_mxcolor_t nxbe_map_color(FAR struct nxbe_state_s *be, int plane,
-                                     uint8_t pixel)
-{
-  switch pixel
-    {
-      case 0:
-      default:
-        return 0;  /* Should not happen */
-
-      case 1:
-        return be->cursor.color1[plane];
-        break;
-
-      case 2:
-        return be->cursor.color2[plane];
-        break;
-
-      case 3:
-        return be->cursor.color3[plane];
-        break;
-    }
-}
-
-/****************************************************************************
- * Name: nxbe_cursor_erasedev
- *
- * Description:
- *   Erase the cursor region by writing the saved background to the graphics
- *   device memory.
- *
- *   REVISIT:  This is experimental logic.  Its use is restricted to frame-
- *   buffer device drivers with resolution >= 8 bits-per-pixel.
- *
- * Input Parameters:
- *   be    - The back-end state structure instance
- *   plane - The color plane being drawn
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void nxbe_cursor_erasedev(FAR struct nxbe_state_s *be, int plane)
-{
-  struct nxgl_rect_s intersection;
-  struct nxgl_point_s origin;
-  FAR struct nxbe_plane_s *plane;
-  FAR uint8_t *fbmem;
-  FAR uint8_t *sline;
-  FAR uint8_t *dline;
-  FAR uint8_t *dstart;
-  FAR NXGL_PIXEL_T *src;
-  FAR NXGL_PIXEL_T *dest;
-  nxgl_coord_t width;
-  nxgl_coord_t height;
-  nxgl_coord_t sstride;
-  nxgl_coord_t dstride;
-  int row;
-  int col;
-
-  /* Handle the case some or all of the cursor image is off of the display. */
-
-  nxgl_rectintersect(&intersction, &be->cursor.bounds, &be->backgd.bounds);
-  if (!nxgl_nullrect(&intersection))
-    {
-      /* Get the width and the height of the images in pixels/rows */
-
-      width   = be->cursor.bounds.pt2.x = be->cursor.bounds.pt1.x + 1;
-      height  = be->cursor.bounds.pt2.y = be->cursor.bounds.pt1.xy + 1;
-
-      /* Get the width of the images in bytes. */
-
-      sstride = NXGL_SCALEX(width);
-
-      plane   = &wnd->be->plane[0];
-      dstride = plane->pinfo.stride;
-
-      /* Get the origin position in the baclgroimd image */
-
-      nxgl_vectorsubtract(&origin, &intersectioni.pt1, &be->cursor.bounds.pt1);
-
-      /* Get the source and destination addresses */
-
-      fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
-      sline  = be->cursor.buf + sstride * origin.y + NXGL_SCALEX(origin.y);
-      dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
-                NXGL_SCALEX(be->cursor.bounds.pt1.x);
-
-      /* Erase the old cursor position by copying the previous content */
-
-      /* Loop for each row */
-
-      for (row = 0; row < height; row++)
-        {
-          /* Reset to the beginning of the line */
-
-          src   = (FAR NXGL_PIXEL_T *)sline;
-          dest  = (FAR NXGL_PIXEL_T *)dline;
-
-          /* Loop for each column */
-
-          for (col = 0; col < width; col++)
-            {
-              *dest++ = *src++;
-            }
-
-          /* Update the row addresses to the next row */
-
-          sline += sstride;
-          dline += dstride;
-       }
-    }
-}
-
-/****************************************************************************
- * Name: nxbe_cursor_drawdev
- *
- * Description:
- *   Update the cursor region directly in device memory.
- *
- *   REVISIT:  This is experimental logic.  Its use is restricted to frame-
- *   buffer device drivers with resolution >= 8 bits-per-pixel.
- *
- * Input Parameters:
- *   be    - The back-end state structure instance
- *   plane - The color plane being drawn
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void nxbe_cursor_drawdev(FAR struct nxbe_state_s *be, int plane)
-{
-  struct nxgl_rect_s intersection;
-  struct nxgl_point_s origin;
-  FAR struct nxbe_plane_s *plane;
-  FAR uint8_t *fbmem;
-  FAR uint8_t *src;
-  FAR uint8_t *sline;
-  FAR uint8_t *dline;
-  FAR NXGL_PIXEL_T *dest;
-  nxgl_coord_t width;
-  nxgl_coord_t height;
-  nxgl_coord_t sstride;
-  nxgl_coord_t dstride;
-  nxgl_coord_t sshift;
-  int shift;
-  int row;
-  int col;
-
-  /* Handle the case some or all of the cursor image is off of the display. */
-
-  nxgl_rectintersect(&intersction, &be->cursor.bounds, &be->backgd.bounds);
-  if (!nxgl_nullrect(&intersection))
-    {
-      /* Get the width and the height of the images in pixels/rows */
-
-      width   = be->cursor.bounds.pt2.x = be->cursor.bounds.pt1.x + 1;
-      height  = be->cursor.bounds.pt2.y = be->cursor.bounds.pt1.xy + 1;
-
-      /* Get the width of the images in bytes. */
-
-      sstride = (width + 3) >> 2;  /* 2 bits per pixel, 4 pixels per byte */
-
-      plane   = &wnd->be->plane[0];
-      dstride = plane->pinfo.stride;
-
-      /* Get the origin position in the cursor image */
-
-      nxgl_vectorsubtract(&origin, &intersectioni.pt1, &be->cursor.bounds.pt1);
-
-      /* Update any cursor graphics on top of the device display to include
-       * the modified cursor.
-       *
-       * REVISIT:  This will only work for a single plane and for bits per pixel
-       * greater than or equal to 8.
-       */
-
-      fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
-      sline  = be->cursor.image + sstride * origin.y + (origin.y >> 2);
-      dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
-                NXGL_SCALEX(be->cursor.bounds.pt1.x);
-
-      sshift = (3 - (origin.y & 3)) << 1;    /* MS first {0, 2, 4, 6} */
-
-      /* Loop for each row */
-
-      for (row = 0; row < height; row++)
-        {
-          /* Reset to the beginning of the line */
-
-          src   = sline;
-          dest  = (FAR NXGL_PIXEL_T *)dline;
-          shift = sshift;
-
-          /* Loop for each column */
-
-          for (col = 0; col < width; col++)
-            {
-              /* Extract the 2-bit pixel.  Data is always packed MS first.
-               * Shift for first pixel=6, shift for last pixel=0
-               */
-
-              uint8_t spixel = (*src & >> shift) & 3
-
-              /* Skip over invisible pixels */
-
-              if (pixel != 0)
-                {
-                  *dest = nxbe_map_color(be, 0, spixel);
-                }
-
-              /* Update to the next column */
-
-              col++;
-              dest++;
-
-              /* Was that the last pixel in the byte? */
-
-              if (shift == 0)
-                {
-                  /* Update source column addresses and reset the shift
-                   * value
-                   */
-
-                  src++;
-                  shift = 6;
-                }
-              else
-              {
-                /* The shift value is one of {2, 4, 6}.  Update the shift
-                 * value following this order: 6, 4, 2, 0
-                 */
-
-                shift = (shift - 2) & 6;
-              }
-            }
-
-          /* Update the row addresses to the next row */
-
-          sline += sstride;
-          dline += dstride;
-       }
-    }
-}
 
 /****************************************************************************
  * Public Functions
@@ -340,6 +76,17 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
       /* Mark the cursor visible */
 
       be->cursor.visible = true;
+
+#ifdef CONFIG_NX_SWCURSOR
+      be->plane[0].cursor.backup(be, 0); /* Save the cursor background image */
+      be->plane[0].cursor.draw(be, 0);   /* Write the new cursor */
+#else
+      /* For a hardware cursor, this would require some interaction with the
+       * grahics device.
+       */
+
+#  error Missing logic
+#endif
     }
 
   /* Are we disabling the cursor ? */
@@ -349,26 +96,19 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
       /* Mark the cursor not visible */
 
       be->cursor.visible = false;
-    }
-  else
-    {
-      /* No change in state.. do nothing */
-
-      return;
-    }
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* For the software cursor, we need to update the cursor region */
+      /* Erase the old cursor image by writing the saved background image. */
 
-  nxbe_cursor_erasedev(be, 0);
-  nxbe_cursor_drawdev(be, 0);
+      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
 #else
-  /* For a hardware cursor, this would require some interaction with the
-   * grahics device.
-   */
+      /* For a hardware cursor, this would require some interaction with the
+       * grahics device.
+       */
 
 #  error Missing logic
 #endif
+    }
 }
 
 /****************************************************************************
@@ -386,7 +126,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
  *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
  *
  * Input Parameters:
- *   be  - The back-end state structure instance
+ *   be    - The back-end state structure instance
  *   image - Describes the cursor image in the expected format.
  *
  * Returned Value:
@@ -396,14 +136,108 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
 void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
-                          FAR struct nx_cursorimage_s *image);
+                          FAR struct nx_cursorimage_s *image)
 {
-#warning Missing logic
+#ifdef CONFIG_NX_SWCURSOR
+  struct nxgl_size_s oldsize;
+  size_t allocsize;
+  unsigned int bpp;
+
+  /* If the cursor is visible, then we need to erase the old cursor from the
+   * device graphics memory.
+   */
+
+  if (be->cursor.visible)
+    {
+      /* Erase the old cursor image by writing the saved background image. */
+
+      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
+    }
+
+  /* Has the cursor changed size? */
+
+  oldsize.w = be->cursor.bounds.pt2.x - be->cursor.bounds.pt2.y + 1;
+  oldsize.h = be->cursor.bounds.pt2.y - be->cursor.bounds.pt2.y + 1;
+
+  if (image->size.w != oldsize.w || image->size.h != oldsize.h)
+    {
+      /* Check the size of the allocation we need to hold the backup image. */
+
+      bpp       = be->plane[0].pinfo.bpp;
+      allocsize = (image->size.w * image->size.h * bpp + 7) >> 3;
+
+      /* Reallocate the buffer only if a larger one is needed */
+
+      if (allocsize > be->cursor.allocsize)
+        {
+          FAR void *tmp = kmm_realloc(be->cursor.bkgd, allocsize);
+          if (tmp == NULL)
+            {
+              goto errout_with_erase;
+            }
+
+          /* Save the new allocation information */
+
+          be->cursor.allocsize = allocsize;
+          be->cursor.bkgd      = (FAR nxgl_mxpixel_t *)tmp;
+        }
+
+      /* Calculate the new image bounds.  The position (pt1), does not
+       * change.
+       */
+
+      be->cursor.bounds.pt2.x = be->cursor.bounds.pt1.x + image->size.w - 1;
+      be->cursor.bounds.pt2.y = be->cursor.bounds.pt1.y + image->size.h - 1;
+
+      /* Read in the new background image */
+
+      be->plane[0].cursor.backup(be, 0);
+    }
+
+  /* Save the new colors */
+
+  nxgl_colorcopy(be->cursor.color1, image->color1);
+  nxgl_colorcopy(be->cursor.color1, image->color2);
+  nxgl_colorcopy(be->cursor.color1, image->color3);
+
+  /* Save the new image.  This is a reference to an image in user space.
+   * which we assume will persist while we use it.
+   *
+   * REVISIT:  There is an issue in KERNEL build mode. For FLAT and
+   * PROTECTED builds, the cursor image resides in the common application
+   * space and is assumed to pesist as long as needed.  But with the KERNEL
+   * build, the image will lie in a process space and will not be generally
+   * available.  In that case, we could keep the image in a shared memory
+   * region or perhaps copy the image into a kernel internal buffer.
+   * Neither of those are implemented.
+   */
+
+  be->cursor.image = image->image;
+
+errout_with_erase:
+  /* If the cursor is visible, then put write the new cursor image into
+   * device graphics memory now.
+   */
+
+  if (be->cursor.visible)
+    {
+      /* Write the new cursor image to the device graphics memory. */
+
+      be->plane[0].cursor.draw(be, 0); /* Erase the old cursor */
+    }
+
+#else
+  /* For a hardware cursor, this would require some interaction with the
+   * grahics device.
+   */
+
+#  error Missing logic
+#endif
 }
 #endif
 
 /****************************************************************************
- * Name: nxcursor_setposition
+ * Name: nxbe_cursor_setposition
  *
  * Description:
  *   Move the cursor to the specified position
@@ -417,10 +251,55 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-void nxcursor_setposition(FAR struct nxbe_state_s *be,
-                          FAR const struct nxgl_point_s *pos)
+void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
+                             FAR const struct nxgl_point_s *pos)
 {
-#warning Missing logic
+#ifdef CONFIG_NX_SWCURSOR
+  nxgl_coord_t dx;
+  nxgl_coord_t dy;
+
+  /* If the cursor is visible, then we need to erase the cursor from the
+   * old position in device graphics memory.
+   */
+
+  if (be->cursor.visible)
+    {
+      /* Erase the old cursor image by writing the saved background image. */
+
+      be->plane[0].cursor.erase(be, 0); /* Erase the old cursor */
+    }
+
+  /* Calculate the cursor movement */
+
+  dx = pos->x - be->cursor.bounds.pt1.x;
+  dy = pos->y - be->cursor.bounds.pt1.y;
+
+  /* Calculate the new image bounds. */
+
+  nxgl_rectoffset(&be->cursor.bounds, &be->cursor.bounds, dx, dy);
+
+  /* Read in the new background image at this offset */
+
+  be->plane[0].cursor.backup(be, 0);
+
+  /* If the cursor is visible, then put write the new cursor image into
+   * device graphics memory now.
+   */
+
+  if (be->cursor.visible)
+    {
+      /* Write the new cursor image to the device graphics memory. */
+
+      be->plane[0].cursor.draw(be, 0); /* Erase the old cursor */
+    }
+
+#else
+  /* For a hardware cursor, this would require some interaction with the
+   * grahics device.
+   */
+
+#  error Missing logic
+#endif
 }
 
 #endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */

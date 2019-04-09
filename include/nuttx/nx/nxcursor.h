@@ -63,6 +63,36 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/* The current software cursor implementation is only available under the
+ * following conditions:
+ *
+ * 1. Using a framebuffer hardware interface.  This is because the logic to
+ *    implement this feature on top of the LCD interface has not been
+ *    implemented.
+ * 2. Pixel depth is greater then or equal to 8-bits (8-bpp, 16-bpp,
+ *    24/32/-bpp).  This is because the logic to handle pixels smaller than
+ *    1-byte has not been implemented,
+ * 3. For FLAT and PROTECTED builds only.  In those builds, the cursor
+ *    image resides in the common application space and is assumed to pesist
+ *    as long as needed.  But with the KERNEL build, the image will lie in
+ *    a process space and will not be generally available.  In that case,
+ *    we could keep the image in a shared memory region or perhaps copy the
+ *    image into a kernel internal buffer.  Neither of those are implemented.
+ */
+
+#if (defined(CONFIG_NX_SWCURSOR) && \
+    (defined(CONFIG_NX_LCDDRIVER) || !defined(CONFIG_NX_DISABLE_1BPP) || \
+    !defined(CONFIG_NX_DISABLE_2BPP) || !defined(CONFIG_NX_DISABLE_4BPP) || \
+     defined(CONFIG_BUILD_KERNEL)))
+#  undef CONFIG_NX_NOCURSOR
+#  undef CONFIG_NX_SWCURSOR
+#  define CONFIG_NX_NOCURSOR 1
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /* For cursor controllers that support custem cursor images, this structure
  * is used to provide the cursor image.
  *

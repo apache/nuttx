@@ -10,4 +10,6 @@
 /pwfb_filltrapezoid_*bpp.c
 /pwfb_moverectangle_*bpp.c
 /pwfb_copyrectangle_*bpp.c
-
+/nxglib_cursor_draw_*bpp.c
+/nxglib_cursor_erase_*bpp.c
+/nxglib_cursor_backup_*bpp.c
