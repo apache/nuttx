@@ -70,29 +70,46 @@
 #define STM32_IRQ_EXTI2_3       (STM32_IRQ_EXTINT + 6)  /* 6: EXTI2_3 */
 #define STM32_IRQ_EXTI4_15      (STM32_IRQ_EXTINT + 7)  /* 7: EXTI4_15 */
 #define STM32_IRQ_TSC           (STM32_IRQ_EXTINT + 8)  /* 8: TSC */
-#define STM32_IRQ_DMA_CH1       (STM32_IRQ_EXTINT + 9)  /* 9: DMA_CH1 */
-#define STM32_IRQ_DMA_CH23      (STM32_IRQ_EXTINT + 10) /* 0: DMA_CH2_3 and DMA2_CH1_2 */
-#define STM32_IRQ_DMA_CH4567    (STM32_IRQ_EXTINT + 11) /* 1: DMA_CH4_5_6_7 and DMA2_CH3_4_5 */
-#define STM32_IRQ_ADC_COMP      (STM32_IRQ_EXTINT + 12) /* 2: ADC_COMP */
-#define STM32_IRQ_TIM1_BRK      (STM32_IRQ_EXTINT + 13) /* 3: TIM1_BRK_UP_TRG_COM */
-#define STM32_IRQ_TIM1_CC       (STM32_IRQ_EXTINT + 14) /* 4: TIM1_CC */
-#define STM32_IRQ_TIM2          (STM32_IRQ_EXTINT + 15) /* 5: TIM2 */
-#define STM32_IRQ_TIM3          (STM32_IRQ_EXTINT + 16) /* 6: TIM3 */
-#define STM32_IRQ_TIM6_DAC      (STM32_IRQ_EXTINT + 17) /* 7: TIM6 and DAC */
-#define STM32_IRQ_TIM7          (STM32_IRQ_EXTINT + 18) /* 8: TIM7 */
-#define STM32_IRQ_TIM14         (STM32_IRQ_EXTINT + 19) /* 9: TIM14 */
-#define STM32_IRQ_TIM15         (STM32_IRQ_EXTINT + 20) /* 0: TIM15 */
-#define STM32_IRQ_TIM16         (STM32_IRQ_EXTINT + 21) /* 1: TIM16 */
-#define STM32_IRQ_TIM17         (STM32_IRQ_EXTINT + 22) /* 2: TIM17 */
-#define STM32_IRQ_I2C1          (STM32_IRQ_EXTINT + 23) /* 3: I2C1 */
-#define STM32_IRQ_I2C2          (STM32_IRQ_EXTINT + 24) /* 4: I2C2 */
-#define STM32_IRQ_SPI1          (STM32_IRQ_EXTINT + 25) /* 5: SPI1 */
-#define STM32_IRQ_SPI2          (STM32_IRQ_EXTINT + 26) /* 6: SPI2 */
-#define STM32_IRQ_USART1        (STM32_IRQ_EXTINT + 27) /* 7: USART1 */
-#define STM32_IRQ_USART2        (STM32_IRQ_EXTINT + 28) /* 8: USART2 */
-#define STM32_IRQ_USART345678   (STM32_IRQ_EXTINT + 29) /* 9: USART3_4_5_6_7_8 */
-#define STM32_IRQ_CEC_CAN       (STM32_IRQ_EXTINT + 30) /* 0: HDMI CEC and CAN */
-#define STM32_IRQ_USB           (STM32_IRQ_EXTINT + 31) /* 1: USB */
+#define STM32_IRQ_DMA1CH1       (STM32_IRQ_EXTINT + 9)  /* 9: DMA1_CH1 */
+#define STM32_IRQ_DMA1CH2       (STM32_IRQ_EXTINT + 10) /* 10: DMA1_CH2 */
+#define STM32_IRQ_DMA1CH3       (STM32_IRQ_EXTINT + 10) /* 10: DMA1_CH3 */
+#define STM32_IRQ_DMA2CH1       (STM32_IRQ_EXTINT + 10) /* 10: DMA2_CH1 */
+#define STM32_IRQ_DMA2CH2       (STM32_IRQ_EXTINT + 10) /* 10: DMA2_CH2 */
+#define STM32_IRQ_DMA1CH4       (STM32_IRQ_EXTINT + 11) /* 11: DMA1_CH4 */
+#define STM32_IRQ_DMA1CH5       (STM32_IRQ_EXTINT + 11) /* 11: DMA1_CH5 */
+#define STM32_IRQ_DMA1CH6       (STM32_IRQ_EXTINT + 11) /* 11: DMA1_CH6 */
+#define STM32_IRQ_DMA1CH7       (STM32_IRQ_EXTINT + 11) /* 11: DMA1_CH7 */
+#define STM32_IRQ_DMA2CH3       (STM32_IRQ_EXTINT + 11) /* 11: DMA2_CH3 */
+#define STM32_IRQ_DMA2CH4       (STM32_IRQ_EXTINT + 11) /* 11: DMA2_CH4 */
+#define STM32_IRQ_DMA2CH5       (STM32_IRQ_EXTINT + 11) /* 11: DMA2_CH5 */
+#define STM32_IRQ_ADC           (STM32_IRQ_EXTINT + 12) /* 12: ADC */
+#define STM32_IRQ_COMP          (STM32_IRQ_EXTINT + 12) /* 12: COMP */
+#define STM32_IRQ_TIM1_BRK      (STM32_IRQ_EXTINT + 13) /* 13: TIM1_BRK_UP_TRG_COM */
+#define STM32_IRQ_TIM1_CC       (STM32_IRQ_EXTINT + 14) /* 14: TIM1_CC */
+#define STM32_IRQ_TIM2          (STM32_IRQ_EXTINT + 15) /* 15: TIM2 */
+#define STM32_IRQ_TIM3          (STM32_IRQ_EXTINT + 16) /* 16: TIM3 */
+#define STM32_IRQ_TIM6          (STM32_IRQ_EXTINT + 17) /* 17: TIM6 */
+#define STM32_IRQ_DAC           (STM32_IRQ_EXTINT + 17) /* 17: DAC */
+#define STM32_IRQ_TIM7          (STM32_IRQ_EXTINT + 18) /* 18: TIM7 */
+#define STM32_IRQ_TIM14         (STM32_IRQ_EXTINT + 19) /* 19: TIM14 */
+#define STM32_IRQ_TIM15         (STM32_IRQ_EXTINT + 20) /* 20: TIM15 */
+#define STM32_IRQ_TIM16         (STM32_IRQ_EXTINT + 21) /* 21: TIM16 */
+#define STM32_IRQ_TIM17         (STM32_IRQ_EXTINT + 22) /* 22: TIM17 */
+#define STM32_IRQ_I2C1          (STM32_IRQ_EXTINT + 23) /* 23: I2C1 */
+#define STM32_IRQ_I2C2          (STM32_IRQ_EXTINT + 24) /* 24: I2C2 */
+#define STM32_IRQ_SPI1          (STM32_IRQ_EXTINT + 25) /* 25: SPI1 */
+#define STM32_IRQ_SPI2          (STM32_IRQ_EXTINT + 26) /* 26: SPI2 */
+#define STM32_IRQ_USART1        (STM32_IRQ_EXTINT + 27) /* 27: USART1 */
+#define STM32_IRQ_USART2        (STM32_IRQ_EXTINT + 28) /* 28: USART2 */
+#define STM32_IRQ_USART3        (STM32_IRQ_EXTINT + 29) /* 29: USART3 */
+#define STM32_IRQ_USART4        (STM32_IRQ_EXTINT + 29) /* 29: USART4 */
+#define STM32_IRQ_USART5        (STM32_IRQ_EXTINT + 29) /* 29: USART5 */
+#define STM32_IRQ_USART6        (STM32_IRQ_EXTINT + 29) /* 29: USART6 */
+#define STM32_IRQ_USART7        (STM32_IRQ_EXTINT + 29) /* 29: USART7 */
+#define STM32_IRQ_USART8        (STM32_IRQ_EXTINT + 29) /* 29: USART8 */
+#define STM32_IRQ_CEC           (STM32_IRQ_EXTINT + 30) /* 30: HDMI CEC */
+#define STM32_IRQ_CAN           (STM32_IRQ_EXTINT + 30) /* 30: HDMI CAN */
+#define STM32_IRQ_USB           (STM32_IRQ_EXTINT + 31) /* 31: USB */
 
 #define STM32_IRQ_NEXTINT       (32) /* 32 external interrupts */
 

@@ -251,19 +251,19 @@ static inline void rcc_enableapb1(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0_UART4
+#ifdef CONFIG_STM32F0L0_USART4
   /* USART 4 clock enable */
 
 #ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB1ENR_UART4EN;
+  regval |= RCC_APB1ENR_USART4EN;
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0_UART5
+#ifdef CONFIG_STM32F0L0_USART5
   /* USART 5 clock enable */
 
 #ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB1ENR_UART5EN;
+  regval |= RCC_APB1ENR_USART5EN;
 #endif
 #endif
 
