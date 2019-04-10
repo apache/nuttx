@@ -69,23 +69,36 @@
 
 void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 {
-  /* Are we enabling the cursor */
+  /* Are we enabling the cursor?  Don't allow the cursor to be enabled if no
+   * image has been assigned to the cursor  */
 
   if (enable && !be->cursor.visible)
     {
+#ifdef CONFIG_NX_SWCURSOR
+      /* Don't allow the cursor to be enabled if no image has been assigned
+       * to the cursor
+       */
+
+      if (be->cursor.image != NULL)
+        {
+          /* Save the cursor background image */
+
+          DEBUGASSERT(be->cursor.bkgd != NULL);
+          be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
+
+          /* Write the new cursor image to device memory */
+
+          be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
+
+          /* Mark the cursor visible */
+
+          be->cursor.visible = true;
+        }
+#else
       /* Mark the cursor visible */
 
       be->cursor.visible = true;
 
-#ifdef CONFIG_NX_SWCURSOR
-      /* Save the cursor background image */
-
-      be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
-
-      /* Write the new cursor image to device memory */
-
-      be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
-#else
       /* For a hardware cursor, this would require some interaction with the
        * grahics device.
        */
@@ -105,6 +118,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 #ifdef CONFIG_NX_SWCURSOR
       /* Erase the old cursor image by writing the saved background image. */
 
+      DEBUGASSERT(be->cursor.bkgd != NULL);
       be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
 #else
       /* For a hardware cursor, this would require some interaction with the
@@ -156,6 +170,7 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
     {
       /* Erase the old cursor image by writing the saved background image. */
 
+      DEBUGASSERT(be->cursor.bkgd != NULL);
       be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
     }
 
@@ -283,16 +298,16 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
 
   nxgl_rectoffset(&be->cursor.bounds, &be->cursor.bounds, dx, dy);
 
-  /* Read in the new background image at this offset */
-
-  be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
-
   /* If the cursor is visible, then put write the new cursor image into
    * device graphics memory now.
    */
 
   if (be->cursor.visible)
     {
+      /* Read in the new background image at this offset */
+
+      be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
+
       /* Write the new cursor image to the device graphics memory. */
 
       be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);

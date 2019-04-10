@@ -329,16 +329,21 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Save the modified cursor background region
-   * REVISIT:  Only a single color plane is supported
-   */
+  /* Update the software cursor if it is visible */
 
-  wnd->be->plane[0].cursor.backup(wnd->be, dest, 0);
+  if (wnd->be->cursor.visible)
+    {
+      /* Save the modified cursor background region
+       * REVISIT:  Only a single color plane is supported
+       */
 
-  /* Restore the software cursor if any part of the cursor was
-   * overwritten by the bitmap copy.
-   */
+      wnd->be->plane[0].cursor.backup(wnd->be, dest, 0);
 
-  wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
+      /* Restore the software cursor if any part of the cursor was
+       * overwritten by the bitmap copy.
+       */
+
+      wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
+    }
 #endif
 }

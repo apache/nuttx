@@ -95,11 +95,16 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Restore the software cursor if any part of the cursor was overwritten
-   * by the above copy.
-   */
+  /* Is the software cursor visible? */
 
-  wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
+  if (wnd->be->cursor.visible)
+    {
+      /* Restore the software cursor if any part of the cursor was
+       * overwritten by the above copy.
+       */
+
+      wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
+    }
 #endif
 }
 

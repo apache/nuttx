@@ -280,9 +280,14 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
 #endif
     {
 #ifdef CONFIG_NX_SWCURSOR
-      /* Remove the cursor from the source region */
+      /* Is the cursor visible? */
 
-      wnd->be->plane[i].cursor.erase(wnd->be, rect, i);
+      if (wnd->be->cursor.visible)
+        {
+          /* Remove the cursor from the source region */
+
+          wnd->be->plane[i].cursor.erase(wnd->be, rect, i);
+        }
 #endif
 
       nxbe_clipper(wnd->above, &info.srcrect, info.order,
@@ -290,23 +295,28 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
 
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Save the modified cursor background region at the destination
-       * region.  This would be necessary only for small moves that stay
-       * within the cursor region.
-       *
-       * REVISIT:  This and the following logic belongs in the function
-       * nxbe_clipmovedest().  It is here only because the struct
-       * nxbe_state_s (wnd->be) is not available at that point.  This
-       * result in an excessive number of cursor updates.
-       */
+      /* Update the software cursor if it is visible */
 
-      wnd->be->plane[i].cursor.backup(wnd->be, &dest, i);
+      if (wnd->be->cursor.visible)
+        {
+          /* Save the modified cursor background region at the destination
+           * region.  This would be necessary only for small moves that stay
+           * within the cursor region.
+           *
+           * REVISIT:  This and the following logic belongs in the function
+           * nxbe_clipmovedest().  It is here only because the struct
+           * nxbe_state_s (wnd->be) is not available at that point.  This
+           * result in an excessive number of cursor updates.
+           */
 
-      /* Restore the software cursor if any part of the cursor was
-       * overwritten by the fill.
-      */
+          wnd->be->plane[i].cursor.backup(wnd->be, &dest, i);
 
-      wnd->be->plane[i].cursor.draw(wnd->be, &dest, i);
+          /* Restore the software cursor if any part of the cursor was
+           * overwritten by the fill.
+           */
+
+          wnd->be->plane[i].cursor.draw(wnd->be, &dest, i);
+        }
 #endif
     }
 }
