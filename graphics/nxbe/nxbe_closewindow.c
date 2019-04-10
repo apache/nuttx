@@ -89,7 +89,7 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
        * indicate the modal state.
        */
 
-      DEBUGASSERT(wnd->above == NULL & NXBE_STATE_ISMODAL(be));
+      DEBUGASSERT(wnd->above == NULL && NXBE_STATE_ISMODAL(be));
 
       /* Leave the modal state */
 

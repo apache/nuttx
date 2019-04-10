@@ -119,7 +119,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable)
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image)
+int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image)
 {
   FAR struct nxmu_conn_s *conn = (FAR struct nxmu_conn_s *)hnd;
   struct nxsvrmsg_curimage_s outmsg;

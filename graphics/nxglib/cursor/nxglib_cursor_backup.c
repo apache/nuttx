@@ -100,8 +100,8 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
     {
       /* Get the width and the height of the images in pixels/rows */
 
-      width   = be->cursor.bounds.pt2.x = be->cursor.bounds.pt1.x + 1;
-      height  = be->cursor.bounds.pt2.y = be->cursor.bounds.pt1.y + 1;
+      width   = be->cursor.bounds.pt2.x - be->cursor.bounds.pt1.x + 1;
+      height  = be->cursor.bounds.pt2.y - be->cursor.bounds.pt1.y + 1;
 
       /* Get the width of the images in bytes. */
 

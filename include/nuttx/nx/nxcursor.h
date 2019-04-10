@@ -165,7 +165,7 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  ****************************************************************************/
 
 #if defined(CONFIG_NX_HWCURSORIMAGE) || defined(CONFIG_NX_SWCURSOR)
-int nxcursor_setimage(NXHANDLE hnd, FAR struct nx_cursorimage_s *image);
+int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image);
 #endif
 
 /****************************************************************************
