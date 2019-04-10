@@ -84,15 +84,12 @@ static NXGL_PIXEL_T nxbe_map_color(FAR struct nxbe_state_s *be, int plane,
 
       case 1:
         return be->cursor.color1[plane];
-        break;
 
       case 2:
         return be->cursor.color2[plane];
-        break;
 
       case 3:
         return be->cursor.color3[plane];
-        break;
     }
 }
 
@@ -169,7 +166,7 @@ void NXGL_FUNCNAME(nxglib_cursor_draw, NXGLIB_SUFFIX)
        */
 
       fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
-      sline  = be->cursor.image + sstride * origin.y + (origin.y >> 2);
+      sline  = be->cursor.image + sstride * origin.y + (origin.x >> 2);
       dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
                 NXGL_SCALEX(be->cursor.bounds.pt1.x);
 
@@ -202,9 +199,6 @@ void NXGL_FUNCNAME(nxglib_cursor_draw, NXGLIB_SUFFIX)
                   *dest = nxbe_map_color(be, 0, pixel);
                 }
 
-              /* Update to the next column */
-
-              col++;
               dest++;
 
               /* Was that the last pixel in the byte? */

@@ -217,8 +217,8 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
   /* Save the new colors */
 
   nxgl_colorcopy(be->cursor.color1, image->color1);
-  nxgl_colorcopy(be->cursor.color1, image->color2);
-  nxgl_colorcopy(be->cursor.color1, image->color3);
+  nxgl_colorcopy(be->cursor.color2, image->color2);
+  nxgl_colorcopy(be->cursor.color3, image->color3);
 
   /* Save the new image.  This is a reference to an image in user space.
    * which we assume will persist while we use it.
