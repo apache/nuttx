@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtypes.h>
 
 #ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
