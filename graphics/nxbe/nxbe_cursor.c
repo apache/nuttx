@@ -52,6 +52,13 @@
  * Public Functions
  ****************************************************************************/
 
+void mmcheck(FAR const char *msg, FAR void *raddr) // REMOVE ME
+{ // REMOVE ME
+  struct mallinfo mmcurrent; // REMOVE ME
+_err("%s: LR=%p\n", msg, raddr); // REMOVE ME
+  mmcurrent = mallinfo(); // REMOVE ME
+} // REMOVE ME
+
 /****************************************************************************
  * Name: nxbe_cursor_enable
  *
@@ -70,7 +77,10 @@
 void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 {
   /* Are we enabling the cursor?  Don't allow the cursor to be enabled if no
-   * image has been assigned to the cursor  */
+   * image has been assigned to the cursor.
+   */
+
+  ginfo("enable=%d visible=%u\n", enable, be->cursor.visible);
 
   if (enable && !be->cursor.visible)
     {
@@ -161,6 +171,8 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
   struct nxgl_size_s oldsize;
   size_t allocsize;
   unsigned int bpp;
+
+  ginfo("image=%p\n", image);
 
   /* If the cursor is visible, then we need to erase the old cursor from the
    * device graphics memory.
@@ -277,6 +289,8 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
 #ifdef CONFIG_NX_SWCURSOR
   nxgl_coord_t dx;
   nxgl_coord_t dy;
+
+  ginfo("pos=(%d,%d)\n", pos->x, pos->y);
 
   /* If the cursor is visible, then we need to erase the cursor from the
    * old position in device graphics memory.
