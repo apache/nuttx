@@ -85,6 +85,7 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
   nxgl_coord_t width;
   nxgl_coord_t height;
   nxgl_coord_t sstride;
+  nxgl_coord_t dwidth;
   nxgl_coord_t dstride;
   int row;
   int col;
@@ -98,17 +99,18 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
   nxgl_rectintersect(&intersection, &intersection, bounds);
   if (!nxgl_nullrect(&intersection))
     {
-      /* Get the width and the height of the images in pixels/rows */
+      /* Get the width and the height of the images to copy in pixels/rows */
 
-      width   = be->cursor.bounds.pt2.x - be->cursor.bounds.pt1.x + 1;
-      height  = be->cursor.bounds.pt2.y - be->cursor.bounds.pt1.y + 1;
+      width   = intersection.pt2.x - intersection.pt1.x + 1;
+      height  = intersection.pt2.y - intersection.pt1.y + 1;
 
       /* Get the width of the images in bytes. */
 
       plane   = &be->plane[planeno];
       sstride = plane->pinfo.stride;
 
-      dstride = NXGL_SCALEX(width);
+      dwidth  = be->cursor.bounds.pt2.x - be->cursor.bounds.pt1.x + 1;
+      dstride = NXGL_SCALEX(dwidth);
 
       /* Get the origin position in the background image */
 
