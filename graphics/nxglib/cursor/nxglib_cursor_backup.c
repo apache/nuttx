@@ -122,7 +122,7 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
       sline  = (FAR uint8_t *)fbmem + sstride * be->cursor.bounds.pt1.y +
                 NXGL_SCALEX(be->cursor.bounds.pt1.x);
       dline  = (FAR uint8_t *)be->cursor.bkgd + dstride * origin.y +
-                NXGL_SCALEX(origin.y);
+                NXGL_SCALEX(origin.x);
 
       /* Save the cursor background by copying the device graphics memory */
 

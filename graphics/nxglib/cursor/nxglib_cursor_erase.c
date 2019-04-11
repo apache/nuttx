@@ -119,7 +119,7 @@ void NXGL_FUNCNAME(nxglib_cursor_erase, NXGLIB_SUFFIX)
 
       fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
       sline  = (FAR uint8_t *)be->cursor.bkgd + sstride * origin.y +
-                NXGL_SCALEX(origin.y);
+                NXGL_SCALEX(origin.x);
       dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
                 NXGL_SCALEX(be->cursor.bounds.pt1.x);
 
