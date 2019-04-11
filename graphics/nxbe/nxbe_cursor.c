@@ -52,13 +52,6 @@
  * Public Functions
  ****************************************************************************/
 
-void mmcheck(FAR const char *msg, FAR void *raddr) // REMOVE ME
-{ // REMOVE ME
-  struct mallinfo mmcurrent; // REMOVE ME
-_err("%s: LR=%p\n", msg, raddr); // REMOVE ME
-  mmcurrent = mallinfo(); // REMOVE ME
-} // REMOVE ME
-
 /****************************************************************************
  * Name: nxbe_cursor_enable
  *
