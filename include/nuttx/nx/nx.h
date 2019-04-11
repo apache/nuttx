@@ -239,7 +239,7 @@ struct nx_callback_s
    *     the client and server are fully synchronized.
    *
    * Input Parameters:
-   *   hwnd  - Window handle of the blocked window
+   *   hwnd  - Window handle of window receiving the event
    *   event - The server event
    *   arg1  - User provided argument (see nx_openwindow, nx_requestbkgd,
    *           nxtk_openwindow, or nxtk_opentoolbar)
@@ -441,8 +441,9 @@ int nx_closewindow(NXWINDOW hwnd);
  * Name: nx_block
  *
  * Description:
- *   This is callback will do to things:  (1) any queue a 'blocked' callback
- *   to the window and then (2) block any further window messaging.
+ *   The response to this function call is two things:  (1) any queued
+ *   callback messages to the window are 'blocked' and then (2) also
+ *   subsequent window messaging is blocked.
  *
  *   The 'event' callback with the NXEVENT_BLOCKED event is the response
  *   from nx_block (or nxtk_block).  Those blocking interfaces are used to
@@ -473,7 +474,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  * Name: nx_synch
  *
  * Description:
- *   This interface can be used to syncrhonize the window client with the
+ *   This interface can be used to synchronize the window client with the
  *   NX server.  It really just implements an 'echo':  A synch message is
  *   sent from the window client to the server which then responds
  *   immediately by sending the NXEVENT_SYNCHED back to the windows client.
@@ -503,13 +504,13 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  *           }
  *       }
  *
- *   When the windwo listener thread receives the NXEVENT_SYNCHED event, it
+ *   When the window listener thread receives the NXEVENT_SYNCHED event, it
  *   would set g_synched to true and post g_synch_sem, waking up the above
  *   loop.
  *
  * Input Parameters:
  *   wnd - The window to be synched
- *   arg - An argument that will accompany the block messages (This is arg2
+ *   arg - An argument that will accompany the synch messages (This is arg2
  *         in the event callback).
  *
  * Returned Value:

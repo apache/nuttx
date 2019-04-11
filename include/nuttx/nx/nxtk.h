@@ -158,8 +158,9 @@ int nxtk_closewindow(NXTKWINDOW hfwnd);
  * Name: nxtk_block
  *
  * Description:
- *   This is callback will do to things:  (1) any queue a 'blocked' callback
- *   to the window and then (2) block any further window messaging.
+ *   The response to this function call is two things:  (1) any queued
+ *   callback messages to the window are 'blocked' and then (2) also
+ *   subsequent window messaging is blocked.
  *
  *   The 'event' callback with the NXEVENT_BLOCKED event is the response
  *   from nx_block (or nxtk_block).  Those blocking interfaces are used to

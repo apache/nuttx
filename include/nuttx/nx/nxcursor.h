@@ -124,7 +124,7 @@ struct nx_cursorimage_s
  * Name: nxcursor_enable
  *
  * Description:
- *   Enable/disable presentation of the cursor
+ *   Enable/disable presentation of the cursor.
  *
  * Input Parameters:
  *   hnd    - The server handle returned by nx_connect()
@@ -146,9 +146,9 @@ int nxcursor_enable(NXHANDLE hnd, bool enable);
  *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
  *   is as followings:
  *
- *   00 - The transparent background
- *   01 - Color1:  The main color of the cursor
- *   10 - Color2:  The color of any border
+ *   00 - The transparent background.
+ *   01 - Color1:  The main color of the cursor.
+ *   10 - Color2:  The color of any border.
  *   11 - Color3:  A blend color for better imaging (fake anti-aliasing).
  *
  *   NOTE: The NX logic will reference the user image buffer repeatedly.
@@ -179,7 +179,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image);
  *   pos - The new cursor position
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.
  *
  ****************************************************************************/
 
