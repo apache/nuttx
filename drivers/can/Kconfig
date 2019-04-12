@@ -175,5 +175,10 @@ config MCP2515_CLK_FREQUENCY
 	default 8000000
 	range 1 25000000
 
+config MCP2515_SPI_SCK_FREQUENCY
+	int "MCP2515 SPI SCK Frequency"
+	default 1000000
+	range 100000 10000000
+
 endif # CAN_MCP2515
 endif # CAN

@@ -48,6 +48,7 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
+#include <strings.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -68,6 +69,10 @@
 
 /* MCP2515 Configuration ****************************************************/
 
+#define CAN_FRAME_MAX_DATA_LEN 8
+#define SPI_TRANSFER_BUF_LEN   (6 + CAN_FRAME_MAX_DATA_LEN)
+#define MCP2515_NUM_TX_BUFFERS 3
+
 /* Bit timing */
 
 #define MCP2515_PROPSEG  CONFIG_MCP2515_PROPSEG
@@ -75,7 +80,7 @@
 #define MCP2515_PHSEG2   CONFIG_MCP2515_PHASESEG2
 #define MCP2515_TSEG1    (MCP2515_PROPSEG + MCP2515_PHSEG1)
 #define MCP2515_TSEG2    MCP2515_PHSEG2
-#define MCP2515_BRP      ((uint8_t)(((float) MCP2515_CANCLK_FREQUENCY / \
+#define MCP2515_BRP      ((uint8_t)(((float)(MCP2515_CANCLK_FREQUENCY) / \
                          ((float)(MCP2515_TSEG1 + MCP2515_TSEG2 + 1) * \
                          (float)(2 * CONFIG_MCP2515_BITRATE))) - 1))
 #define MCP2515_SJW      CONFIG_MCP2515_SJW
@@ -108,29 +113,29 @@
 
 /* MCP2515 Filters */
 
-#  ifndef CONFIG_MCP2515_NSTDFILTERS
-#    define CONFIG_MCP2515_NSTDFILTERS 0
-#  endif
+#ifndef CONFIG_MCP2515_NSTDFILTERS
+#  define CONFIG_MCP2515_NSTDFILTERS 0
+#endif
 
-#  if (CONFIG_MCP2515_NSTDFILTERS > 128)
-#    error Invalid MCP25150 number of Standard Filters
-#  endif
+#if (CONFIG_MCP2515_NSTDFILTERS > 128)
+#  error Invalid MCP25150 number of Standard Filters
+#endif
 
-#  ifndef CONFIG_MCP2515_NEXTFILTERS
-#    define CONFIG_MCP2515_NEXTFILTERS 0
-#  endif
+#ifndef CONFIG_MCP2515_NEXTFILTERS
+#  define CONFIG_MCP2515_NEXTFILTERS 0
+#endif
 
-#  if (CONFIG_MCP2515_NEXTFILTERS > 64)
-#    error Invalid MCP25150 number of Extended Filters
-#  endif
+#if (CONFIG_MCP2515_NEXTFILTERS > 64)
+#  error Invalid MCP25150 number of Extended Filters
+#endif
 
-#  define MCP2515_STDFILTER_BYTES \
-      MCP2515_ALIGN_UP(CONFIG_MCP2515_NSTDFILTERS << 2)
-#  define MCP2515_STDFILTER_WORDS (MCP2515_STDFILTER_BYTES >> 2)
+#define MCP2515_STDFILTER_BYTES \
+   MCP2515_ALIGN_UP(CONFIG_MCP2515_NSTDFILTERS << 2)
+#define MCP2515_STDFILTER_WORDS (MCP2515_STDFILTER_BYTES >> 2)
 
-#  define MCP2515_EXTFILTER_BYTES \
-      MCP2515_ALIGN_UP(CONFIG_MCP2515_NEXTFILTERS << 3)
-#  define MCP2515_EXTFILTER_WORDS (MCP2515_EXTFILTER_BYTES >> 2)
+#define MCP2515_EXTFILTER_BYTES \
+   MCP2515_ALIGN_UP(CONFIG_MCP2515_NEXTFILTERS << 3)
+#define MCP2515_EXTFILTER_WORDS (MCP2515_EXTFILTER_BYTES >> 2)
 
 /* MCP25150 TX buffer element size */
 
@@ -169,6 +174,10 @@
  */
 
 #define MCP2515_TXBUFFER_INTS  (MCP2515_INT_TX0 | MCP2515_INT_TX1 | MCP2515_INT_TX2)
+
+/* Helpers ******************************************************************/
+
+#define TXREGVAL(reg) priv->spi_txbuf[reg - MCP2515_TXB0CTRL]
 
 /* Debug ********************************************************************/
 
@@ -213,9 +222,10 @@ struct mcp2515_can_s
   uint32_t olderrors;       /* Used to detect the changes in error states */
 #endif
   uint8_t filters;          /* Standard/Extende filter bit allocator. */
-  uint8_t ntxbufs;          /* Number of allocated TX Buffers */
   uint8_t txbuffers;        /* TX Buffers bit allocator. */
 
+  FAR uint8_t *spi_txbuf;
+  FAR uint8_t *spi_rxbuf;
 #ifdef CONFIG_MCP2515_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
   uint32_t regval;          /* Last value read from the register */
@@ -309,6 +319,22 @@ static const struct can_ops_s g_mcp2515ops =
  * Private Functions
  ****************************************************************************/
 
+static void mcp2515_read_2regs(FAR struct mcp2515_can_s *priv, uint8_t reg,
+                               FAR uint8_t *v1, FAR uint8_t *v2)
+{
+  priv->spi_txbuf[0] = MCP2515_READ;
+  priv->spi_txbuf[1] = reg;
+
+  SPI_LOCK(priv->config->spi, true);
+  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), true);
+  SPI_EXCHANGE(priv->config->spi, priv->spi_txbuf, priv->spi_rxbuf, 4);
+  SPI_SELECT(priv->config->spi, SPIDEV_CANBUS(0), false);
+  SPI_LOCK(priv->config->spi, false);
+
+  *v1 = priv->spi_rxbuf[2];
+  *v2 = priv->spi_rxbuf[3];
+}
+
 /****************************************************************************
  * Name: mcp2515_readregs
  *
@@ -360,6 +386,29 @@ static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
       caninfo("%02x->%02x\n", regaddr, buffer[i]);
     }
 #endif
+}
+
+static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
+{
+  FAR struct mcp2515_config_s *config = priv->config;
+
+  (void)SPI_LOCK(config->spi, true);
+
+  /* Select the MCP2515 */
+
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
+
+  /* Send the READ command */
+
+  SPI_EXCHANGE(config->spi, priv->spi_txbuf, priv->spi_rxbuf, len);
+
+  /* Deselect the MCP2515 */
+
+  SPI_SELECT(config->spi, SPIDEV_CANBUS(0), false);
+
+  /* Unlock bus */
+
+  (void)SPI_LOCK(config->spi, false);
 }
 
 /****************************************************************************
@@ -435,6 +484,10 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
                               uint8_t mask, uint8_t value)
 {
   FAR struct mcp2515_config_s *config = priv->config;
+  uint8_t wr[4]=
+  {
+    MCP2515_BITMOD, regaddr, mask, value
+  };
 
   (void)SPI_LOCK(config->spi, true);
 
@@ -442,21 +495,7 @@ static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
 
   SPI_SELECT(config->spi, SPIDEV_CANBUS(0), true);
 
-  /* Send the Modify command */
-
-  (void)SPI_SEND(config->spi, MCP2515_BITMOD);
-
-  /* Send the register address */
-
-  (void)SPI_SEND(config->spi, regaddr);
-
-  /* Send the mask */
-
-  (void)SPI_SEND(config->spi, mask);
-
-  /* Send the value */
-
-  (void)SPI_SEND(config->spi, value);
+  SPI_SNDBLOCK(config->spi, wr, 4);
 
   /* Deselect the MCP2515 */
 
@@ -539,7 +578,7 @@ static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv)
 
 #ifdef CONFIG_CAN_EXTID
 static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
-                              FAR struct canioc_extfilter_s *extconfig)
+                                 FAR struct canioc_extfilter_s *extconfig)
 {
   FAR struct mcp2515_config_s *config;
   uint8_t regval;
@@ -867,7 +906,7 @@ static int mcp2515_del_extfilter(FAR struct mcp2515_can_s *priv, int ndx)
  ****************************************************************************/
 
 static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
-                              FAR struct canioc_stdfilter_s *stdconfig)
+                                 FAR struct canioc_stdfilter_s *stdconfig)
 {
   FAR struct mcp2515_config_s *config;
   uint8_t regval;
@@ -948,7 +987,7 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
                 break;
 
               case CAN_FILTER_RANGE:
-                /* not supported */
+                /* Not supported */
 
                 break;
             }
@@ -987,7 +1026,7 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
 
               /* Setup the Filter */
 
-              regval = (uint8_t)(((stdconfig->sf_id1) & 0x7f8) >> 3);
+              regval = (uint8_t) (((stdconfig->sf_id1) & 0x7f8) >> 3);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDH + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDH + offset, &regval, 1);
@@ -1166,7 +1205,8 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
    */
 
   nxsem_destroy(&priv->txfsem);
-  nxsem_init(&priv->txfsem, 0, config->ntxbuffers);
+  nxsem_init(&priv->txfsem, 0, MCP2515_NUM_TX_BUFFERS);
+  priv->txbuffers = 0b111;
 
   /* Define the current state and unlock */
 
@@ -1318,18 +1358,17 @@ static void mcp2515_rxint(FAR struct can_dev_s *dev, bool enable)
 
   flags = enter_critical_section();
 
-  mcp2515_readregs(priv, MCP2515_CANINTE, &regval, 1);
-
   if (enable)
     {
-      regval |= priv->rxints | MCP2515_ERROR_INTS;
+      mcp2515_modifyreg(priv, MCP2515_CANINTE,
+                        priv->rxints | MCP2515_ERROR_INTS,
+                        priv->rxints | MCP2515_ERROR_INTS);
     }
   else
     {
-      regval &= ~priv->rxints;
+      mcp2515_modifyreg(priv, MCP2515_CANINTE, priv->rxints, ~priv->rxints);
     }
 
-  mcp2515_writeregs(priv, MCP2515_CANINTE, &regval, 1);
   leave_critical_section(flags);
 }
 
@@ -1360,18 +1399,18 @@ static void mcp2515_txint(FAR struct can_dev_s *dev, bool enable)
   /* Enable/disable the receive interrupts */
 
   flags = enter_critical_section();
-  mcp2515_readregs(priv, MCP2515_CANINTE, &regval, 1);
 
   if (enable)
     {
-      regval |= priv->txints | MCP2515_ERROR_INTS;
+      mcp2515_modifyreg(priv, MCP2515_CANINTE,
+                        priv->txints | MCP2515_ERROR_INTS,
+                        priv->txints | MCP2515_ERROR_INTS);
     }
   else
     {
-      regval &= ~priv->txints;
+      mcp2515_modifyreg(priv, MCP2515_CANINTE, priv->txints, ~priv->txints);
     }
 
-  mcp2515_writeregs(priv, MCP2515_CANINTE, &regval, 1);
   leave_critical_section(flags);
 }
 
@@ -1425,18 +1464,18 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
           DEBUGASSERT(bt != NULL);
 
           mcp2515_readregs(priv, MCP2515_CNF1, &regval, 1);
-          bt->bt_sjw   = ((regval & CNF1_SJW_MASK) >> CNF1_SJW_SHIFT) + 1;
-          brp          = (((regval & CNF1_BRP_MASK) >> CNF1_BRP_SHIFT) + 1) * 2;
+          bt->bt_sjw    = ((regval & CNF1_SJW_MASK) >> CNF1_SJW_SHIFT) + 1;
+          brp           = (((regval & CNF1_BRP_MASK) >> CNF1_BRP_SHIFT) + 1) * 2;
 
           mcp2515_readregs(priv, MCP2515_CNF2, &regval, 1);
-          bt->bt_tseg1 = ((regval & CNF2_PRSEG_MASK) >> CNF2_PRSEG_SHIFT) + 1;
+          bt->bt_tseg1  = ((regval & CNF2_PRSEG_MASK) >> CNF2_PRSEG_SHIFT) + 1;
           bt->bt_tseg1 += ((regval & CNF2_PHSEG1_MASK) >> CNF2_PHSEG1_SHIFT) + 1;
 
           mcp2515_readregs(priv, MCP2515_CNF3, &regval, 1);
-          bt->bt_tseg2 = ((regval & CNF3_PHSEG2_MASK) >> CNF3_PHSEG2_SHIFT) + 1;
+          bt->bt_tseg2  = ((regval & CNF3_PHSEG2_MASK) >> CNF3_PHSEG2_SHIFT) + 1;
 
-          bt->bt_baud  = MCP2515_CANCLK_FREQUENCY / brp /
-                         (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+          bt->bt_baud   = MCP2515_CANCLK_FREQUENCY / brp /
+                          (bt->bt_tseg1 + bt->bt_tseg2 + 1);
           ret = OK;
         }
         break;
@@ -1683,9 +1722,8 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   FAR struct mcp2515_can_s *priv;
   FAR struct mcp2515_config_s *config;
   uint8_t regval;
-  uint8_t offset;
+  uint8_t txbuf;
   unsigned int nbytes;
-  unsigned int i;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -1697,45 +1735,19 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
           config->devid, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
   UNUSED(config);
 
-  /* That that FIFO elements were configured.
-   *
-   * REVISIT: Dedicated TX buffers are not used by this driver.
-   */
-
-  DEBUGASSERT(config->ntxbuffers > 0);
-
-  /* Select one empty transmit buffer */
-
-  mcp2515_readregs(priv, MCP2515_TXB0CTRL, &regval, 1);
-  if ((regval & TXBCTRL_TXREQ) == 0)
-    {
-      offset = MCP2515_TX0_OFFSET;
-    }
-  else
-    {
-      mcp2515_readregs(priv, MCP2515_TXB1CTRL, &regval, 1);
-      if ((regval & TXBCTRL_TXREQ) == 0)
-        {
-          offset = MCP2515_TX1_OFFSET;
-        }
-     else
-       {
-         mcp2515_readregs(priv, MCP2515_TXB2CTRL, &regval, 1);
-         if ((regval & TXBCTRL_TXREQ) == 0)
-           {
-              offset = MCP2515_TX2_OFFSET;
-           }
-         else
-           {
-             canerr("ERROR: No available transmit buffer!\n");
-             return -EBUSY;
-           }
-       }
-    }
-
   /* Get exclusive access to the MCP2515 peripheral */
 
   mcp2515_dev_lock(priv);
+
+  /* Acquire buffer */
+
+  nxsem_wait(&priv->txfsem);
+  DEBUGASSERT(priv->txbuffers != 0);
+
+  txbuf = ffs(priv->txbuffers) - 1;
+  priv->txbuffers &= ~(1 << txbuf);
+
+  /* Select one empty transmit buffer */
 
   /* Setup the MCP2515 TX Buffer with the message to send */
 
@@ -1747,12 +1759,12 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       /* EID7 - EID0 */
 
       regval = (msg->cm_hdr.ch_id & 0xff);
-      mcp2515_writeregs(priv, MCP2515_TXB0EID0 + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0EID0) = regval;
 
       /* EID15 - EID8 */
 
       regval = (msg->cm_hdr.ch_id & 0xff00) >> 8;
-      mcp2515_writeregs(priv, MCP2515_TXB0EID8 + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0EID8) = regval;
 
       /* EID17 and EID16 */
 
@@ -1762,12 +1774,12 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       /* STD2 - STD0 */
 
       regval |= (msg->cm_hdr.ch_id & 0x1c0000) >> 18;
-      mcp2515_writeregs(priv, MCP2515_TXB0SIDL + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0SIDL) = regval;
 
       /* STD10 - STD3 */
 
       regval  = (msg->cm_hdr.ch_id & 0x1fe00000) >> 21;
-      mcp2515_writeregs(priv, MCP2515_TXB0SIDH + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0SIDH) = regval;
     }
   else
 #endif
@@ -1779,12 +1791,12 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       /* STD10 - STD3 */
 
       regval  = (msg->cm_hdr.ch_id & 0x7f8) >> 3;
-      mcp2515_writeregs(priv, MCP2515_TXB0SIDH + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0SIDH) = regval;
 
       /* STD2 - STD0 */
 
       regval  = (msg->cm_hdr.ch_id & 0x007) << 5;
-      mcp2515_writeregs(priv, MCP2515_TXB0SIDL + offset, &regval, 1);
+      TXREGVAL(MCP2515_TXB0SIDL) = regval;
     }
 
   /* Setup the DLC */
@@ -1796,25 +1808,22 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       regval |= TXBDLC_RTR;
     }
 
-  mcp2515_writeregs(priv, MCP2515_TXB0DLC + offset, &regval, 1);
+  TXREGVAL(MCP2515_TXB0DLC) = regval;
 
   /* Fill the data buffer */
 
   nbytes = msg->cm_hdr.ch_dlc;
 
-  for (i = 0; i < nbytes; i++)
-    {
-      /* Little endian is assumed */
+  memcpy(&TXREGVAL(MCP2515_TXB0D0), msg->cm_data, nbytes);
 
-      regval = msg->cm_data[i];
-      mcp2515_writeregs(priv, MCP2515_TXB0D0 + offset + i, &regval, 1);
-    }
+  TXREGVAL(MCP2515_TXB0CTRL) = MCP2515_LOAD_TXB(txbuf);
 
-  /* And request to send the message */
+  mcp2515_transfer(priv, SPI_TRANSFER_BUF_LEN);
 
-  mcp2515_readregs(priv, MCP2515_TXB0CTRL, &regval, 1);
-  regval |= TXBCTRL_TXREQ;
-  mcp2515_writeregs(priv, MCP2515_TXB0CTRL, &regval, 1);
+  /* Request to send */
+
+  priv->spi_txbuf[0] = MCP2515_RTS(txbuf);
+  mcp2515_transfer(priv, 1);
 
   mcp2515_dev_unlock(priv);
 
@@ -1848,55 +1857,12 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 static bool mcp2515_txready(FAR struct can_dev_s *dev)
 {
   FAR struct mcp2515_can_s *priv;
-  uint8_t regval;
-  bool ready;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
   DEBUGASSERT(priv);
 
-  /* That that FIFO elements were configured.
-   *
-   * REVISIT: Dedicated TX buffers are not used by this driver.
-   */
-
-  DEBUGASSERT(priv->config->ntxbuffers > 0);
-
-  /* Get exclusive access to the MCP2515 peripheral */
-
-  mcp2515_dev_lock(priv);
-
-  /* Select one empty transmit buffer */
-
-  mcp2515_readregs(priv, MCP2515_TXB0CTRL, &regval, 1);
-  if ((regval & TXBCTRL_TXREQ) == 0)
-    {
-      ready = true;
-    }
-  else
-    {
-      mcp2515_readregs(priv, MCP2515_TXB1CTRL, &regval, 1);
-      if ((regval & TXBCTRL_TXREQ) == 0)
-        {
-          ready = true;
-        }
-     else
-       {
-         mcp2515_readregs(priv, MCP2515_TXB2CTRL, &regval, 1);
-         if ((regval & TXBCTRL_TXREQ) == 0)
-           {
-              ready = true;
-           }
-         else
-           {
-             ready = false;
-           }
-       }
-    }
-
-  mcp2515_dev_unlock(priv);
-
-  return ready;
+  return priv->txbuffers != 0;
 }
 
 /****************************************************************************
@@ -1920,55 +1886,12 @@ static bool mcp2515_txready(FAR struct can_dev_s *dev)
 static bool mcp2515_txempty(FAR struct can_dev_s *dev)
 {
   FAR struct mcp2515_can_s *priv;
-  uint8_t regval;
-  bool empty;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
   DEBUGASSERT(priv);
 
-  /* That that FIFO elements were configured.
-   *
-   * REVISIT: Dedicated TX buffers are not used by this driver.
-   */
-
-  DEBUGASSERT(priv->config->ntxbuffers > 0);
-
-  /* Get exclusive access to the MCP2515 peripheral */
-
-  mcp2515_dev_lock(priv);
-
-  /* Select one empty transmit buffer */
-
-  mcp2515_readregs(priv, MCP2515_TXB0CTRL, &regval, 1);
-  if ((regval & TXBCTRL_TXREQ) != 0)
-    {
-      empty = false;
-    }
-  else
-    {
-      mcp2515_readregs(priv, MCP2515_TXB1CTRL, &regval, 1);
-      if ((regval & TXBCTRL_TXREQ) != 0)
-        {
-          empty = false;
-        }
-     else
-       {
-         mcp2515_readregs(priv, MCP2515_TXB2CTRL, &regval, 1);
-         if ((regval & TXBCTRL_TXREQ) != 0)
-           {
-              empty = false;
-           }
-         else
-           {
-             empty = true;
-           }
-       }
-    }
-
-  mcp2515_dev_unlock(priv);
-
-  return empty;
+  return priv->txbuffers == (1 << MCP2515_NUM_TX_BUFFERS) - 1;
 }
 
 /****************************************************************************
@@ -2116,23 +2039,23 @@ static void mcp2515_error(FAR struct can_dev_s *dev, uint8_t status,
  *
  ****************************************************************************/
 
+#define RXREGVAL(reg) priv->spi_rxbuf[reg-MCP2515_RXB0CTRL]
+
 static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 {
   FAR struct mcp2515_can_s *priv;
   struct can_hdr_s hdr;
   int ret;
   uint8_t regval;
-  uint8_t data[CAN_MAXDATALEN];
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
   DEBUGASSERT(priv);
 
-  /* Format the CAN header */
+  mcp2515_readregs(priv, MCP2515_RXB0CTRL + offset, priv->spi_rxbuf,
+                   SPI_TRANSFER_BUF_LEN);
 
-  /* Get the CAN identifier. */
-
-  mcp2515_readregs(priv, MCP2515_RXB0SIDL + offset, &regval, 1);
+  regval = RXREGVAL(MCP2515_RXB0SIDL);
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & RXBSIDL_IDE) != 0)
@@ -2141,36 +2064,38 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 
       /* EID7 - EID0 */
 
-      mcp2515_readregs(priv, MCP2515_RXB0EID0 + offset, &regval, 1);
-      hdr.ch_id    = regval ;
+      regval     = RXREGVAL(MCP2515_RXB0EID0);
+      hdr.ch_id  = regval ;
 
       /* EID15 - EID8 */
 
-      mcp2515_readregs(priv, MCP2515_RXB0EID8 + offset, &regval, 1);
-      hdr.ch_id    = hdr.ch_id | (regval << 8);
+      regval     = RXREGVAL(MCP2515_RXB0EID8);
+      hdr.ch_id  = hdr.ch_id | (regval << 8);
 
       /* EID17 and EID16 */
 
-      mcp2515_readregs(priv, MCP2515_RXB0SIDL + offset, &regval, 1);
-      hdr.ch_id    = hdr.ch_id | ((regval & RXBSIDL_EID_MASK) << 16);
+      regval     = RXREGVAL(MCP2515_RXB0SIDL);
+      hdr.ch_id  = hdr.ch_id | ((regval & RXBSIDL_EID_MASK) << 16);
 
       /* STD2 - STD0 */
 
-      hdr.ch_id = hdr.ch_id | ((regval >> 5) << 18);
+      hdr.ch_id  = hdr.ch_id | ((regval >> 5) << 18);
 
       /* STD10 - STD3 */
 
-      mcp2515_readregs(priv, MCP2515_RXB0SIDH + offset, &regval, 1);
-      hdr.ch_id = hdr.ch_id | (regval << 21);
+      regval     = RXREGVAL(MCP2515_RXB0SIDH);
+      hdr.ch_id  = hdr.ch_id | (regval << 21);
+
       hdr.ch_extid = true;
     }
   else
     {
       /* Save the standard ID of the newly received message */
 
-      mcp2515_readregs(priv, MCP2515_RXB0SIDH + offset, &regval, 1);
+      regval = RXREGVAL(MCP2515_RXB0SIDH);
       hdr.ch_id = regval;
-      mcp2515_readregs(priv, MCP2515_RXB0SIDL + offset, &regval, 1);
+
+      regval = RXREGVAL(MCP2515_RXB0SIDL);
       hdr.ch_id = (hdr.ch_id << 3) | (regval >> 5);
       hdr.ch_extid = false;
     }
@@ -2187,9 +2112,9 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 
   /* Save the standard ID of the newly received message */
 
-  mcp2515_readregs(priv, MCP2515_RXB0SIDH + offset, &regval, 1);
+  regval    = RXREGVAL(MCP2515_RXB0SIDH);
   hdr.ch_id = regval;
-  mcp2515_readregs(priv, MCP2515_RXB0SIDL + offset, &regval, 1);
+  regval    = RXREGVAL(MCP2515_RXB0SIDL);
   hdr.ch_id = (hdr.ch_id << 3) | (regval >> 5);
 #endif
 
@@ -2200,19 +2125,17 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 
   /* Extract the RTR bit */
 
-  mcp2515_readregs(priv, MCP2515_RXB0CTRL, &regval, 1);
+  regval = RXREGVAL(MCP2515_RXB0CTRL);
   hdr.ch_rtr = (regval & RXBCTRL_RXRTR) != 0;
 
   /* Get the DLC */
 
-  mcp2515_readregs(priv, MCP2515_RXB0DLC, &regval, 1);
+  regval = RXREGVAL(MCP2515_RXB0DLC);
   hdr.ch_dlc = (regval & RXBDLC_DLC_MASK) >> RXBDLC_DLC_SHIFT;
 
   /* Save the message data */
 
-  mcp2515_readregs(priv, MCP2515_RXB0D0, data, (uint8_t) hdr.ch_dlc);
-
-  ret = can_receive(dev, &hdr, (FAR uint8_t *) data);
+  ret = can_receive(dev, &hdr, (FAR uint8_t *) & RXREGVAL(MCP2515_RXB0D0));
 
   if (ret < 0)
     {
@@ -2242,7 +2165,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
   uint8_t ir;
   uint8_t ie;
   uint8_t pending;
-  bool    handled;
+  uint8_t clrmask;
+  bool handled;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2255,11 +2179,16 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
     {
       /* Get the set of pending interrupts. */
 
-      mcp2515_readregs(priv, MCP2515_CANINTF, &ir, 1);
-      mcp2515_readregs(priv, MCP2515_CANINTE, &ie, 1);
+      mcp2515_read_2regs(priv, MCP2515_CANINTE, &ie, &ir);
 
       pending = (ir & ie);
       handled = false;
+      clrmask = 0;
+
+      if (pending == 0)
+        {
+          return OK;
+        }
 
       /* Check for any errors */
 
@@ -2267,8 +2196,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
         {
           /* Clear interrupt errors */
 
-          mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_ERROR_INTS,
-                            (uint8_t)~MCP2515_ERROR_INTS);
+          pending &= ~MCP2515_ERROR_INTS;
+          clrmask |= MCP2515_ERROR_INTS;
 
 #ifdef CONFIG_CAN_ERRORS
           /* Report errors */
@@ -2307,28 +2236,36 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
 
               /* Clear TX0 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX0,
-                                ~MCP2515_INT_TX0);
+              priv->txbuffers |= (1 << 0);
+              nxsem_post(&priv->txfsem);
+              pending &= ~MCP2515_INT_TX0;
+              clrmask |= MCP2515_INT_TX0;
             }
 
           if (pending & MCP2515_INT_TX1)
             {
               caninfo("TX1 is empty to transmit new message!\n");
 
+              priv->txbuffers |= (1 << 1);
+              nxsem_post(&priv->txfsem);
+
               /* Clear TX1 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX1,
-                                ~MCP2515_INT_TX1);
+              pending &= ~MCP2515_INT_TX1;
+              clrmask |= MCP2515_INT_TX1;
             }
 
           if (pending & MCP2515_INT_TX2)
             {
               caninfo("TX2 is empty to transmit new message!\n");
 
+              priv->txbuffers |= (1 << 2);
+              nxsem_post(&priv->txfsem);
+
               /* Clear TX2 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_TX2,
-                                ~MCP2515_INT_TX2);
+              pending &= ~MCP2515_INT_TX2;
+              clrmask |= MCP2515_INT_TX2;
             }
 
           handled = true;
@@ -2343,11 +2280,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
         }
       else if ((pending & priv->txints) != 0)
         {
-#if 0
           /* Clear unhandled TX events */
 
-          mcp2515_putreg(priv, MCP2515_IR_OFFSET, priv->txints);
-#endif
           handled = true;
         }
 
@@ -2366,8 +2300,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
 
               /* Clear RX0 interrupt */
 
-              mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX0,
-                                ~MCP2515_INT_RX0);
+              pending &= ~MCP2515_INT_RX0;
+              clrmask |= MCP2515_INT_RX0;
             }
           else
             {
@@ -2377,8 +2311,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
 
                   /* Clear RX1 interrupt */
 
-                  mcp2515_modifyreg(priv, MCP2515_CANINTF, MCP2515_INT_RX1,
-                                    ~MCP2515_INT_RX1);
+                  pending &= ~MCP2515_INT_RX1;
+                  clrmask |= MCP2515_INT_RX1;
                 }
             }
 
@@ -2386,6 +2320,8 @@ static int mcp2515_interrupt(FAR struct mcp2515_config_s *config,
 
           handled = true;
         }
+
+      mcp2515_modifyreg(priv, MCP2515_CANINTF, clrmask, pending);
     }
   while (handled);
 
@@ -2545,7 +2481,7 @@ FAR struct mcp2515_can_s *
 
   /* Setup SPI frequency and mode */
 
-  SPI_SETFREQUENCY(config->spi, MCP2515_SPI_FREQUENCY);
+  SPI_SETFREQUENCY(config->spi, CONFIG_MCP2515_SPI_SCK_FREQUENCY);
   SPI_SETMODE(config->spi, MCP2515_SPI_MODE);
   SPI_SETBITS(config->spi, 8);
   (void)SPI_HWFEATURES(config->spi, 0);
@@ -2555,19 +2491,21 @@ FAR struct mcp2515_can_s *
   memset(priv, 0, sizeof(struct mcp2515_can_s));
   priv->config = config;
 
-#if 0
+  priv->spi_txbuf = kmm_zalloc(SPI_TRANSFER_BUF_LEN);
+  priv->spi_rxbuf = kmm_zalloc(SPI_TRANSFER_BUF_LEN);
+
   /* Set the initial bit timing.  This might change subsequently
    * due to IOCTL command processing.
    */
 
-  priv->btp    = config->btp;
-  priv->fbtp   = config->fbtp;
-#endif
-
   /* Initialize semaphores */
 
   nxsem_init(&priv->locksem, 0, 1);
-  nxsem_init(&priv->txfsem, 0, config->ntxbuffers);
+  nxsem_init(&priv->txfsem, 0, MCP2515_NUM_TX_BUFFERS);
+
+  /* Initialize bitmask */
+
+  priv->txbuffers = (1 << MCP2515_NUM_TX_BUFFERS)-1;
 
   /* And put the hardware in the initial state */
 

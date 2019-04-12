@@ -571,7 +571,7 @@ struct can_dev_s
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
   volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
-  struct list_node     cd_readers;
+  struct list_node     cd_readers;       /* Number of readers */
 #ifdef CONFIG_CAN_ERRORS
   uint8_t              cd_error;         /* Flags to indicate internal device errors */
 #endif
