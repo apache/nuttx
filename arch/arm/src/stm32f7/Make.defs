@@ -104,10 +104,16 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_serial.c
-CHIP_CSRCS += stm32_start.c stm32_capture.c stm32_flash.c
+CHIP_CSRCS += stm32_start.c stm32_capture.c stm32_uid.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_timerisr.c
+else
+CHIP_CSRCS += stm32_tickless.c
+endif
+
+ifeq ($(CONFIG_STM32F7_PROGMEM),y)
+CHIP_CSRCS += stm32_flash.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
