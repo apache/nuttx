@@ -328,6 +328,8 @@ config ARCH_CHIP_STM32F7
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M7).
 
