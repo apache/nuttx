@@ -1680,7 +1680,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
       (txbuffer && !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)) ||
-      up_interrupt_context())
+      up_interrupt_context() || nwords < CONFIG_STM32F7_SPI_DMA_THRESHOLD)
     {
       /* Invalid DMA channels, unsupported memory region, or interrupt context, fall back to non-DMA method. */
 
