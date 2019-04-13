@@ -122,7 +122,8 @@
 
 #define STM32_DMA1_BASE      0x40020000     /* 0x40020000-0x400203ff: DMA1  */
 #define STM32_RCC_BASE       0x40021000     /* 0x40021000-0x400213ff: Reset and Clock control RCC */
-#define STM32_FLASHIF_BASE   0x40022000     /* 0x40022000-0x400223ff: Flash memory interface */
+#define STM32_FLASHIF_BASE   0x40022000     /* 0x40022000-0x4002203f: Flash memory I/F (Bank 0) */
+#define STM32_FLASHIF1_BASE  0x40022040     /* 0x40022000-0x400223ff: Flash memory I/F (Bank 1) */
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
 #define STM32_TSC_BASE       0x40024000     /* 0x40024000-0x400243ff: TSC */
 
