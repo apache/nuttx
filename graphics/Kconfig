@@ -77,11 +77,10 @@ config NX_NOCURSOR
 
 config NX_SWCURSOR
 	bool "Software cursor support"
-	depends on !NX_LCDDRIVER && NX_DISABLE_1BPP && NX_DISABLE_2BPP && NX_DISABLE_4BPP && !BUILD_KERNEL && EXPERIMENTAL
+	depends on !NX_LCDDRIVER && NX_DISABLE_1BPP && NX_DISABLE_2BPP && NX_DISABLE_4BPP && !BUILD_KERNEL
 	---help---
-		Software cursors are a work in progress hence the EXPERIMENTAL
-		dependency. The other dependencies are due to implemented
-		capabilities.  This assumes that:
+		Software cursor support has several dependencies are due to un-
+		implemented cursor capabilities.  This assumes the following:
 
 		  1. You are using a framebuffer hardware interface.  This is
 		     because the logic to implement this feature on top of the LCD
@@ -96,7 +95,6 @@ config NX_SWCURSOR
 		     generally available.  In that case, we could keep the image in
 		     a shared memory region or perhaps copy the image into a kernel
 		     internal buffer.  Neither of  those are implemented.
-		  4. Only a single color plane is supported at present.
 
 config NX_HWCURSOR
 	bool "Software cursor support"

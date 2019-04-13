@@ -161,8 +161,8 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
  * Description:
  *   Set the cursor image.
  *
- *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
- *   is as followings:
+ *   The image is provided a a 2-bits-per-pixel image.  The two bit encoding
+ *   is as follows:
  *
  *   00 - The transparent background
  *   01 - Color1:  The main color of the cursor
