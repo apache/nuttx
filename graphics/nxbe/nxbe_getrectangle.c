@@ -202,6 +202,19 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
       else
 #endif
         {
+#ifdef CONFIG_NX_SWCURSOR
+          /* Is the software cursor visible? */
+
+          if (wnd->be->cursor.visible)
+            {
+              /* Erase any portion of the cursor that may be above this
+               * region.
+               * REVISIT:  Only a single color plane is supported
+               */
+
+              wnd->be->plane[0].cursor.erase(wnd->be, &remaining, 0);
+            }
+#endif
           /* Get the rectangle from the graphics device memory.
            * NOTE: Since raw graphic memory is returned, the returned memory
            * content may be the memory of windows above this one and may
@@ -209,6 +222,19 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
            */
 
            nxbe_getrectangle_dev(wnd, rect, plane, dest, deststride);
+
+#ifdef CONFIG_NX_SWCURSOR
+          /* Was the software cursor visible? */
+
+          if (wnd->be->cursor.visible)
+            {
+              /* Restore the software cursor if any part of the cursor was
+               * erased above.
+               */
+
+              wnd->be->plane[0].cursor.draw(wnd->be, &remaining, 0);
+            }
+#endif
         }
     }
 }

@@ -200,7 +200,8 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
  *
  * Input Parameters:
  *   wnd    - The window within which the move is to be done
- *   rect   - Describes the rectangular region to move (absolute positions)
+ *   rect   - Describes the rectangular region to move (absolute device
+ *            positions)
  *   offset - The offset to move the region
  *
  * Returned Value:
@@ -293,30 +294,16 @@ static inline void nxbe_move_dev(FAR struct nxbe_window_s *wnd,
       nxbe_clipper(wnd->above, &info.srcrect, info.order,
                    &info.cops, &wnd->be->plane[i]);
 
-
 #ifdef CONFIG_NX_SWCURSOR
-      /* Update the software cursor if it is visible */
+      /* Backup and redraw the cursor in the modified region.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipfill().  It is here only because the struct nxbe_state_s
+       * (wnd->be) is not available at that point.  This may result in an
+       * excessive number of cursor updates.
+       */
 
-      if (wnd->be->cursor.visible)
-        {
-          /* Save the modified cursor background region at the destination
-           * region.  This would be necessary only for small moves that stay
-           * within the cursor region.
-           *
-           * REVISIT:  This and the following logic belongs in the function
-           * nxbe_clipmovedest().  It is here only because the struct
-           * nxbe_state_s (wnd->be) is not available at that point.  This
-           * result in an excessive number of cursor updates.
-           */
-
-          wnd->be->plane[i].cursor.backup(wnd->be, &dest, i);
-
-          /* Restore the software cursor if any part of the cursor was
-           * overwritten by the fill.
-           */
-
-          wnd->be->plane[i].cursor.draw(wnd->be, &dest, i);
-        }
+      nxbe_cursor_backupdraw_dev(wnd->be, &dest, i);
 #endif
     }
 }

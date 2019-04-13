@@ -72,7 +72,7 @@
  * Input Parameters (same as for nxbe_flush):
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *            the bit map (device corrdinates).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -95,16 +95,11 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Is the software cursor visible? */
+  /* Update cursor backup memory and redraw the cursor in the modified window
+   * region.
+   */
 
-  if (wnd->be->cursor.visible)
-    {
-      /* Restore the software cursor if any part of the cursor was
-       * overwritten by the above copy.
-       */
-
-      wnd->be->plane[0].cursor.draw(wnd->be, dest, 0);
-    }
+  nxbe_cursor_backupdraw_devall(wnd, dest);
 #endif
 }
 

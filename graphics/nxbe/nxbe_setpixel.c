@@ -153,25 +153,15 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
                    &info.cops, &wnd->be->plane[i]);
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Update the software cursor if it is visible */
+      /* Update cursor backup memory and redraw the cursor in the modified
+       * window region.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipfill().  It is here only because the struct
+       * nxbe_state_s (wnd->be) is not available at that point.
+       */
 
-      if (wnd->be->cursor.visible)
-        {
-          /* Save the modified cursor pixe at the point.
-           *
-           * REVISIT:  This and the following logic belongs in the function
-           * nxbe_clipfill().  It is here only because the struct
-           * nxbe_state_s (wnd->be) is not available at that point.
-           */
-
-          wnd->be->plane[i].cursor.backup(wnd->be, &rect, i);
-
-          /* Restore the software cursor if if that point is a visible
-           * cursor bit that was overwritten by the above operation.
-           */
-
-          wnd->be->plane[i].cursor.draw(wnd->be, &rect, i);
-        }
+      nxbe_cursor_backupdraw_dev(wnd->be, &rect, i);
 #endif
     }
 }

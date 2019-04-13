@@ -44,9 +44,9 @@ ifeq ($(CONFIG_NX_RAMBACKED),y)
 CSRCS += nxbe_flush.c
 endif
 
-ifeq ($(CONFIG_NX_HWCURSOR),y)
-CSRCS += nxbe_cursor.c
-else ifeq ($(CONFIG_NX_SWCURSOR),y)
+ifeq ($(CONFIG_NX_SWCURSOR),y)
+CSRCS += nxbe_cursor.c nxbe_cursor_backupdraw.c
+else ifeq ($(CONFIG_NX_HWCURSOR),y)
 CSRCS += nxbe_cursor.c
 endif
 

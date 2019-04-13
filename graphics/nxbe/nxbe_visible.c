@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_redraw.c
+ * graphics/nxbe/nxbe_visible.c
  *
  *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

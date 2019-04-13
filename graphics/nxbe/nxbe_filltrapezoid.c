@@ -159,26 +159,15 @@ static inline void nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
                    &info.cops, &wnd->be->plane[i]);
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Update the software cursor if it is visible */
+      /* Backup and redraw the cursor in the modified region.
+       *
+       * REVISIT:  This and the following logic belongs in the function
+       * nxbe_clipfill().  It is here only because the struct nxbe_state_s
+       * (wnd->be) is not available at that point.  This may result in an
+       * excessive number of cursor updates.
+       */
 
-      if (wnd->be->cursor.visible)
-        {
-          /* Save the modified cursor background region.
-           *
-           * REVISIT:  This and the following logic belongs in the function
-           * nxbe_clipfilltrapezoid().  It is here only because the struct
-           * nxbe_state_s (wnd->be) is not available at that point.  This
-           * result in an excessive number of cursor updates.
-           */
-
-          wnd->be->plane[i].cursor.backup(wnd->be, bounds, i);
-
-          /* Restore the software cursor if any part of the cursor was
-           * overwritten by the fill.
-           */
-
-          wnd->be->plane[i].cursor.draw(wnd->be, bounds, i);
-        }
+      nxbe_cursor_backupdraw_dev(wnd->be, bounds, i);
 #endif
     }
 }

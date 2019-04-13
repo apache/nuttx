@@ -66,8 +66,8 @@ struct nxbe_redraw_s
  ****************************************************************************/
 
 static void nxbe_clipredraw(FAR struct nxbe_clipops_s *cops,
-                           FAR struct nxbe_plane_s *plane,
-                           FAR const struct nxgl_rect_s *rect)
+                            FAR struct nxbe_plane_s *plane,
+                            FAR const struct nxgl_rect_s *rect)
 {
   FAR struct nxbe_window_s *wnd = ((struct nxbe_redraw_s *)cops)->wnd;
   if (wnd)

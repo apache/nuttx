@@ -84,14 +84,25 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 
       if (be->cursor.image != NULL)
         {
-          /* Save the cursor background image */
+          struct nxgl_rect_s bounds;
 
           DEBUGASSERT(be->cursor.bkgd != NULL);
-          be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
 
-          /* Write the new cursor image to device memory */
+          /* Handle the case where some or all of the cursor is off the
+           * display.
+           */
 
-          be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
+          nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
+          if (!nxgl_nullrect(&bounds))
+            {
+              /* Save the cursor background image */
+
+              be->plane[0].cursor.backup(be, &bounds, 0);
+
+              /* Write the new cursor image to device memory */
+
+              be->plane[0].cursor.draw(be, &bounds, 0);
+            }
 
           /* Mark the cursor visible */
 
@@ -114,15 +125,26 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
 
   else if (!enable && be->cursor.visible)
     {
+      struct nxgl_rect_s bounds;
+
       /* Mark the cursor not visible */
 
       be->cursor.visible = false;
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Erase the old cursor image by writing the saved background image. */
-
       DEBUGASSERT(be->cursor.bkgd != NULL);
-      be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
+
+      /* Handle the case where some or all of the cursor is off the display. */
+
+      nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
+      if (!nxgl_nullrect(&bounds))
+        {
+          /* Erase the old cursor image by writing the saved background
+           * image.
+           */
+
+          be->plane[0].cursor.erase(be, &bounds, 0);
+        }
 #else
       /* For a hardware cursor, this would require some interaction with the
        * grahics device.
@@ -162,6 +184,7 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
 {
 #ifdef CONFIG_NX_SWCURSOR
   struct nxgl_size_s oldsize;
+  struct nxgl_rect_s bounds;
   size_t allocsize;
   unsigned int bpp;
 
@@ -173,10 +196,18 @@ void nxbe_cursor_setimage(FAR struct nxbe_state_s *be,
 
   if (be->cursor.visible)
     {
-      /* Erase the old cursor image by writing the saved background image. */
+      /* Handle the case where some or all of the cursor is off the display. */
 
-      DEBUGASSERT(be->cursor.bkgd != NULL);
-      be->plane[0].cursor.erase(be, &be->cursor.bounds, 0);
+      nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
+      if (!nxgl_nullrect(&bounds))
+        {
+          /* Erase the old cursor image by writing the saved background
+           * image.
+           */
+
+          DEBUGASSERT(be->cursor.bkgd != NULL);
+          be->plane[0].cursor.erase(be, &bounds, 0);
+        }
     }
 
   /* Has the cursor changed size? */
@@ -311,13 +342,21 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
 
   if (be->cursor.visible)
     {
-      /* Read in the new background image at this offset */
+      struct nxgl_rect_s bounds;
 
-      be->plane[0].cursor.backup(be, &be->cursor.bounds, 0);
+      /* Handle the case where some or all of the cursor is off the display. */
 
-      /* Write the new cursor image to the device graphics memory. */
+      nxgl_rectintersect(&bounds, &be->cursor.bounds, &be->bkgd.bounds);
+      if (!nxgl_nullrect(&bounds))
+        {
+          /* Read in the new background image at this offset */
 
-      be->plane[0].cursor.draw(be, &be->cursor.bounds, 0);
+          be->plane[0].cursor.backup(be, &bounds, 0);
+
+          /* Write the new cursor image to the device graphics memory. */
+
+          be->plane[0].cursor.draw(be, &bounds, 0);
+        }
     }
 
 #else
