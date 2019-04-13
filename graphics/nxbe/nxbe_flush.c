@@ -71,8 +71,8 @@
  *
  * Input Parameters (same as for nxbe_flush):
  *   wnd    - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map (device corrdinates).
+ *   dest   - Describes the rectangular region in the window that will
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -95,11 +95,11 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
   nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Update cursor backup memory and redraw the cursor in the modified window
-   * region.
+  /* Update cursor backup memory and redraw the cursor in the modified
+   * window region.
    */
 
-  nxbe_cursor_backupdraw_devall(wnd, dest);
+  nxbe_cursor_backupdraw_all(wnd, dest);
 #endif
 }
 

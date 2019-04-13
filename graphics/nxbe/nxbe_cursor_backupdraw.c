@@ -114,7 +114,7 @@ void nxbe_cursor_backupdraw_dev(FAR struct nxbe_state_s *be,
     {
       /* Clip to the limits of the display */
 
-      nxgl_rectintersect(&bounds, &bounds, &be->bkgd.bounds);
+      nxgl_rectintersect(&bounds, rect, &be->bkgd.bounds);
       if (!nxgl_nullrect(&bounds))
         {
           _nxbe_cursor_backupdraw_dev(be, &bounds, plane);
@@ -214,10 +214,10 @@ void nxbe_cursor_backupdraw_all(FAR struct nxbe_window_s *wnd,
 
       /* And then let nxbe_cursor_backupdraw_devall() do the rest */
 
-      nxbe_cursor_backupdraw_all(be, &bounds);
+      nxbe_cursor_backupdraw_all(wnd, &bounds);
     }
 #else
-  nxbe_cursor_backupdraw(wnd->be, rect, 0);
+  nxbe_cursor_backupdraw(wnd, rect, 0);
 #endif
 }
 

@@ -100,7 +100,7 @@ static void bitmap_clipcopy(FAR struct nxbe_clipops_s *cops,
  * Input Parameters:
  *   wnd   - The window that will receive the bitmap image
  *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *            the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -193,7 +193,7 @@ static inline void nxbe_bitmap_pwfb(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -293,7 +293,7 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map.
+ *            receive the the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin

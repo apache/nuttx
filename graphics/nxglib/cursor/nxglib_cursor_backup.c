@@ -119,8 +119,8 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
       /* Get the source and destination addresses */
 
       fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
-      sline  = (FAR uint8_t *)fbmem + sstride * be->cursor.bounds.pt1.y +
-                NXGL_SCALEX(be->cursor.bounds.pt1.x);
+      sline  = (FAR uint8_t *)fbmem + sstride * intersection.pt1.y +
+                NXGL_SCALEX(intersection.pt1.x);
       dline  = (FAR uint8_t *)be->cursor.bkgd + dstride * origin.y +
                 NXGL_SCALEX(origin.x);
 

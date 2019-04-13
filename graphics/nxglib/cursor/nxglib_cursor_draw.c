@@ -169,8 +169,8 @@ void NXGL_FUNCNAME(nxglib_cursor_draw, NXGLIB_SUFFIX)
 
       fbmem  = (FAR uint8_t *)plane->pinfo.fbmem;
       sline  = be->cursor.image + sstride * origin.y + (origin.x >> 2);
-      dline  = (FAR uint8_t *)fbmem + dstride * be->cursor.bounds.pt1.y +
-                NXGL_SCALEX(be->cursor.bounds.pt1.x);
+      dline  = (FAR uint8_t *)fbmem + dstride * intersection.pt1.y +
+                NXGL_SCALEX(intersection.pt1.x);
 
       sshift = (3 - (origin.y & 3)) << 1;    /* MS first {0, 2, 4, 6} */
 

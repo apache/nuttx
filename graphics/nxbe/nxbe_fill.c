@@ -129,7 +129,7 @@ static inline void nxbe_fill_dev(FAR struct nxbe_window_s *wnd,
                    &info.cops, &wnd->be->plane[i]);
 
 #ifdef CONFIG_NX_SWCURSOR
-      /* Backup and redraw the cursor in the affect region.
+      /* Backup and redraw the cursor in the affected region.
        *
        * REVISIT:  This and the following logic belongs in the function
        * nxbe_clipfill().  It is here only because the struct nxbe_state_s
