@@ -262,7 +262,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   sem_lock();
 
-  if ((getreg32(base + STM32_RCC_CR_OFFSET) & RCC_CR_HSION) == 0)
+  if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
       sem_unlock();
       return -EPERM;
@@ -341,7 +341,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   sem_lock();
 
-  if ((getreg32(base + STM32_RCC_CR_OFFSET) & RCC_CR_HSION) == 0)
+  if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
       sem_unlock();
       return -EPERM;
