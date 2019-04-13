@@ -49,7 +49,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtypes.h>
 
-#ifndef defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
+#if defined(CONFIG_NX_SWCURSOR) || defined(CONFIG_NX_HWCURSOR)
 
 #undef EXTERN
 #if defined(__cplusplus)
