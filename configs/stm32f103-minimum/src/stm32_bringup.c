@@ -206,6 +206,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
 #ifdef HAVE_AT24
   /* Initialize the AT24 driver */
 
