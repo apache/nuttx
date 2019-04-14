@@ -80,7 +80,7 @@ static unsigned int g_count   = 0;
  *
  ****************************************************************************/
 
-static void _net_takesem(void)
+static int _net_takesem(void)
 {
   int ret;
 
@@ -94,9 +94,11 @@ static void _net_takesem(void)
        * awakened by a signal.
        */
 
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      DEBUGASSERT(ret == OK || ret == -EINTR || ret == -ECANCELED);
     }
   while (ret == -EINTR);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -126,16 +128,18 @@ void net_lockinitialize(void)
  *   None
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -ECANCELED).
  *
  ****************************************************************************/
 
-void net_lock(void)
+int net_lock(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
 #endif
   pid_t me = getpid();
+  int ret = OK;
 
   /* Does this thread already hold the semaphore? */
 
@@ -149,17 +153,20 @@ void net_lock(void)
     {
       /* No.. take the semaphore (perhaps waiting) */
 
-      _net_takesem();
+      ret = _net_takesem();
+      if (ret >= 0)
+        {
+          /* Now this thread holds the semaphore */
 
-      /* Now this thread holds the semaphore */
-
-      g_holder = me;
-      g_count  = 1;
+          g_holder = me;
+          g_count  = 1;
+        }
     }
 
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
 #endif
+  return ret;
 }
 
 /****************************************************************************
@@ -243,24 +250,34 @@ int net_breaklock(FAR unsigned int *count)
 }
 
 /****************************************************************************
- * Name: net_breaklock
+ * Name: net_restorelock
  *
  * Description:
  *   Restore the locked state
  *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -ECANCELED).
+ *
  ****************************************************************************/
 
-void net_restorelock(unsigned int count)
+int net_restorelock(unsigned int count)
 {
   pid_t me = getpid();
+  int ret;
 
   DEBUGASSERT(g_holder != me);
 
   /* Recover the network lock at the proper count */
 
-  _net_takesem();
-  g_holder = me;
-  g_count  = count;
+  ret = _net_takesem();
+  if (ret >= 0)
+    {
+      g_holder = me;
+      g_count  = count;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

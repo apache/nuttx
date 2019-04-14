@@ -301,11 +301,12 @@ void net_initialize(void);
  *   None
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -ECANCELED).
  *
  ****************************************************************************/
 
-void net_lock(void);
+int net_lock(void);
 
 /****************************************************************************
  * Name: net_unlock

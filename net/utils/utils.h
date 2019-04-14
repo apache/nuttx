@@ -103,9 +103,13 @@ int net_breaklock(FAR unsigned int *count);
  * Description:
  *   Restore the locked state
  *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   failured (probably -ECANCELED).
+ *
  ****************************************************************************/
 
-void net_restorelock(unsigned int count);
+int net_restorelock(unsigned int count);
 
 /****************************************************************************
  * Name: net_dsec2timeval
