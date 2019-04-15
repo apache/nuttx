@@ -461,7 +461,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Verify that a valid LED set was provided */
 
-        if ((ledset & priv->lu_supported) == ledset)
+        if ((ledset & ~priv->lu_supported) == 0)
           {
             /* Update the LED state */
 
