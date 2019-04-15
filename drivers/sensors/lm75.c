@@ -449,7 +449,7 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Wrtie to the configuration register. Arg:  uint8_t value */
+      /* Write to the configuration register. Arg:  uint8_t value */
 
       case SNIOC_WRITECONF:
         ret = lm75_writeconf(priv, (uint8_t)arg);
