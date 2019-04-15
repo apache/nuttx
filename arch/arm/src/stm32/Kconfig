@@ -4335,6 +4335,12 @@ config STM32_TIM8_CH1MODE
 	---help---
 		Specifies the channel mode.
 
+config STM32_TIM8_CH1OUT
+        bool "TIM8 Channel 1 Output"
+        default n
+        ---help---
+                Enables channel 1 output.
+
 config STM32_TIM8_CH1NOUT
 	bool "TIM8 Channel 1 Complementary Output"
 	default n

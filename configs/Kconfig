@@ -1492,7 +1492,7 @@ config ARCH_BOARD_STM32L_DISCOVERY
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32L-Discovery board based on the STMicro STM32L152RBT6 or
-		STM32L1 MCUs.
+		STM32L152RCT6 MCUs.
 
 config ARCH_BOARD_STM32VL_DISCOVERY
 	bool "STMicro STM32VL-Discovery board"
