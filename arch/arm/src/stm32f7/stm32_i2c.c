@@ -1310,24 +1310,22 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
 
 static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequency)
 {
-  uint32_t pe;
   uint8_t presc;
   uint8_t scl_delay;
   uint8_t sda_delay;
   uint8_t scl_h_period;
   uint8_t scl_l_period;
 
+  /* I2C peripheral must be disabled to update clocking configuration.
+   * This will SW reset the device.
+   */
+
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+
   if (frequency != priv->frequency)
     {
-      /* I2C peripheral must be disabled to update clocking configuration */
 
-      pe = (stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_PE);
-      if (pe)
-        {
-          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
-        }
-
-      /*  The Sppeed and timing calculation are based on the following
+      /*  The Speed and timing calculation are based on the following
        *  fI2CCLK = HSI and is 16Mhz
        *  Analog filter is on,
        *  Digital filter off
@@ -1377,14 +1375,12 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
 
       stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
-
-      if (pe)
-        {
-          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
-        }
-
       priv->frequency = frequency;
     }
+
+  /* Enable I2C peripheral */
+
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
 }
 
 /************************************************************************************
@@ -2170,6 +2166,10 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       stm32_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
 
+      /* SW reset device  */
+
+      stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+
       /* If a thread is waiting then inform it transfer is complete */
 
       if (priv->intstate == INTSTATE_WAITING)
@@ -2254,10 +2254,6 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
   priv->frequency = 0;
   stm32_i2c_setclock(priv, 100000);
 
-  /* Enable I2C peripheral */
-
-  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
-
   return OK;
 }
 
@@ -2337,7 +2333,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
   stm32_i2c_tracereset(priv);
 
-  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency toggles I2C_CR1_PE !) */
 
   stm32_i2c_setclock(priv, msgs->frequency);
 
