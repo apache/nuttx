@@ -112,7 +112,7 @@
  *
  *  - Private: Private data of an I2C Hardware
  *
- * High Level Functional Desecription
+ * High Level Functional Description
  *
  * This driver works with I2C "messages" (struct i2c_msg_s), which carry a buffer
  * intended to transfer data to, or store data read from, the I2C bus.
@@ -137,7 +137,7 @@
  * Interrupt mode relies on the following interrupt events:
  *
  *   TXIS  - Transmit interrupt
- *           (data transmitted to bus and acknowedged)
+ *           (data transmitted to bus and acknowledged)
  *   NACKF - Not Acknowledge Received
  *           (data transmitted to bus and NOT acknowledged)
  *   RXNE  - Receive interrupt
@@ -324,8 +324,14 @@
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
-#define I2C_CR1_TXRX (I2C_CR1_RXIE | I2C_CR1_TXIE)
-#define I2C_CR1_ALLINTS (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
+#define I2C_CR1_TXRX      (I2C_CR1_RXIE | I2C_CR1_TXIE)
+#define I2C_CR1_ALLINTS   (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
+
+/* Unused bit in I2c_ISR used to communicate a bad state has occurred in
+ * the isr processing
+*/
+
+#define I2C_INT_BAD_STATE 0x8000000
 
 /* I2C event tracing
  *
@@ -421,7 +427,7 @@ struct stm32_i2c_config_s
 struct stm32_i2c_priv_s
 {
   const struct stm32_i2c_config_s *config; /* Port configuration */
-  int refs;                    /* Referernce count */
+  int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
@@ -1597,9 +1603,9 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
   i2cinfo("ENTER: status = 0x%08x\n", status);
 
-  /* Update private version of the state */
+  /* Update private version of the state assuming a good state */
 
-  priv->status = status;
+  priv->status = status & ~I2C_INT_BAD_STATE;
 
   /* If this is a new transmission set up the trace table accordingly */
 
@@ -1677,7 +1683,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    * interrupt will only fire when the I2C_CR1->TXIE bit is 1.
    *
    * This indicates the transmit data register I2C_TXDR has been emptied
-   * following the successful transmission of a byte and slave acknowledgement.
+   * following the successful transmission of a byte and slave acknowledgment.
    * In this state the I2C_TXDR register is ready to accept another byte for
    * transmission.  The TXIS bit will be cleared automatically when the next
    * byte is written to I2C_TXDR.
@@ -1768,6 +1774,10 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
           i2cerr("ERROR: TXIS Unsupported state detected, dcnt=%i, status 0x%08x\n",
           priv->dcnt, status);
           stm32_i2c_traceevent(priv, I2CEVENT_WRITE_ERROR, 0);
+
+          /* Indicate the bad state, so that on termination HW will be reset */
+
+          priv->status |= I2C_INT_BAD_STATE;
         }
 
       i2cinfo("TXIS: EXIT  dcnt = %i msgc = %i status 0x%08x\n",
@@ -1856,6 +1866,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
           /* Set signals that will terminate ISR and wake waiting thread */
 
+          priv->status |= I2C_INT_BAD_STATE;
           priv->dcnt = -1;
           priv->msgc = 0;
         }
@@ -2101,7 +2112,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
    *
    * We get to this branch only if we can't handle the current state.
    *
-   * This should not happen in interrupt based operation.
+   * This can happen in interrupt based operation on ARLO & BUSY.
    *
    * This will happen during polled operation when the device is not
    * in one of the supported states when polled.
@@ -2120,6 +2131,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       /* set condition to terminate ISR and wake waiting thread */
 
+      priv->status |= I2C_INT_BAD_STATE;
       priv->dcnt = -1;
       priv->msgc = 0;
       stm32_i2c_traceevent(priv, I2CEVENT_STATE_ERROR, 0);
@@ -2150,25 +2162,32 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       priv->intstate = INTSTATE_DONE;
 #else
 
-      status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
-
-      /* Update private state to capture NACK which is used in combination
-       * with the astart flag to report the type of NACK received (address
-       * vs data) to the upper layers once we exit the ISR.
+      /* We will update private state to capture NACK which is used in
+       * combination with the astart flag to report the type of NACK received
+       * (address vs data) to the upper layers once we exit the ISR.
        *
-       * Note: We do this prior to clearing interrupts because the NACKF
-       * flag will naturally be cleared by that process.
+       * Note: status is captured  prior to clearing interrupts because
+       * the NACKF flag will naturally be cleared by that process.
        */
 
-      priv->status = status;
+      status = stm32_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
       /* Clear all interrupts */
 
       stm32_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET, 0, I2C_ICR_CLEARMASK);
 
-      /* SW reset device  */
+      /* Was a bad state detected in the processing? */
 
-      stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+      if (priv->status & I2C_INT_BAD_STATE)
+        {
+          /* SW reset device  */
+
+          stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
+        }
+
+      /* Update private status from above sans I2C_INT_BAD_STATE */
+
+      priv->status = status;
 
       /* If a thread is waiting then inform it transfer is complete */
 
@@ -2333,7 +2352,7 @@ static int stm32_i2c_process(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s 
 
   stm32_i2c_tracereset(priv);
 
-  /* Set I2C clock frequency toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency toggles I2C_CR1_PE performing a SW reset! */
 
   stm32_i2c_setclock(priv, msgs->frequency);
 
