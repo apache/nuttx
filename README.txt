@@ -1959,6 +1959,8 @@ nuttx/
  |   |   `- README.txt
  |   |- skp16c26/
  |   |   `- README.txt
+ |   |- spresense/
+ |   |   `- README.txt
  |   |- stm3210e-eval/
  |   |   |- RIDE/README.txt
  |   |   `- README.txt

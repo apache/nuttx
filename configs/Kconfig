@@ -1713,6 +1713,16 @@ config ARCH_BOARD_ZKITARM
 		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
 		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
 
+config ARCH_BOARD_SPRESENSE
+	bool "Sony Spresense Board"
+	depends on ARCH_CHIP_CXD56XX
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_HAVE_POWEROFF
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	depends on ARCH_SIM
@@ -1959,6 +1969,7 @@ config ARCH_BOARD
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
+	default "spresense"                if ARCH_BOARD_SPRESENSE
 
 comment "Common Board Options"
 
@@ -2483,6 +2494,9 @@ source "configs/zp214xpa/Kconfig"
 endif
 if ARCH_BOARD_ZKITARM
 source "configs/zkit-arm-1769/Kconfig"
+endif
+if ARCH_BOARD_SPRESENSE
+source "configs/spresense/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
