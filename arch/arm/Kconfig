@@ -402,6 +402,18 @@ config ARCH_CHIP_XMC4
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
+config ARCH_CHIP_CXD56XX
+	bool "Sony CXD56xx"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_SDIO if MMCSD
+	---help---
+		Sony CXD56XX (ARM Cortex-M4) architectures
+
 endchoice
 
 config ARCH_ARM7TDMI
@@ -672,6 +684,7 @@ config ARCH_CHIP
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
+	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -916,6 +929,9 @@ source arch/arm/src/tms570/Kconfig
 endif
 if ARCH_CHIP_XMC4
 source arch/arm/src/xmc4/Kconfig
+endif
+if ARCH_CHIP_CXD56XX
+source arch/arm/src/cxd56xx/Kconfig
 endif
 
 endif # ARCH_ARM

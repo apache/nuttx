@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "CXD56xx Configuration Options"
+
+config CXD56_ARCH_OPTS
+	bool
+	default y
+	select ARCH_DMA
+	select SDIO_DMA if MMCSD
+
+menu "CXD56xx Peripheral Support"
+
+config CXD56_UART1
+	bool "UART1"
+	default y
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART interface in the communication subsystem. This doesn't have any
+		hardware flow control, and is mainly used for debug console.
+
+config CXD56_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	---help---
+		UART interface with hardware flow control in the application subsystem.
+
+endmenu
