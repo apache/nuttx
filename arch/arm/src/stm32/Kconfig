@@ -9403,6 +9403,14 @@ config STM32_OTGHS_SOFINTR
 	---help---
 		Enable SOF interrupts.  Why would you ever want to do that?
 
+config STM32_OTGHS_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG HS USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
 endmenu
 
 menu "USB Host Debug Configuration"
