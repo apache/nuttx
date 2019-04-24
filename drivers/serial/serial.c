@@ -302,7 +302,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                * the semaphore.
                */
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
               uart_dmatxavail(dev);
 #endif
               uart_enabletxint(dev);
@@ -485,7 +485,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
                * the semaphore.
                */
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
               uart_dmatxavail(dev);
 #endif
               uart_enabletxint(dev);
@@ -624,7 +624,7 @@ static int uart_open(FAR struct file *filep)
            goto errout_with_sem;
         }
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
       /* Notify DMA that there is free space in the RX buffer */
 
       uart_dmarxfree(dev);
@@ -887,7 +887,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
       else
         {
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
           /* Disable all interrupts and test again...
            * uart_disablerxint() is insufficient for the check in DMA mode.
            */
@@ -910,7 +910,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                * additional data to be received.
                */
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
               /* Notify DMA that there is free space in the RX buffer */
 
               uart_dmarxfree(dev);
@@ -991,7 +991,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
                * the loop.
                */
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
               leave_critical_section(flags);
 #else
               uart_enablerxint(dev);
@@ -1000,7 +1000,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
         }
     }
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_RXDMA
   /* Notify DMA that there is free space in the RX buffer */
 
   flags = enter_critical_section();
@@ -1008,7 +1008,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
   leave_critical_section(flags);
 #endif
 
-#ifndef CONFIG_SERIAL_DMA
+#ifndef CONFIG_SERIAL_RXDMA
   /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
 
   uart_enablerxint(dev);
@@ -1224,7 +1224,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
 
   if (dev->xmit.head != dev->xmit.tail)
     {
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
       uart_dmatxavail(dev);
 #endif
       uart_enabletxint(dev);

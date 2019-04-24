@@ -85,7 +85,11 @@ config SERIAL_OFLOWCONTROL
 	bool
 	default n
 
-config SERIAL_DMA
+config SERIAL_TXDMA
+	bool
+	default n
+
+config SERIAL_RXDMA
 	bool
 	default n
 
@@ -466,10 +470,17 @@ config UART_OFLOWCONTROL
 	---help---
 		Enable UART CTS flow control
 
-config UART_DMA
-	bool "UART DMA support"
+config UART_TXDMA
+	bool "UART Tx DMA support"
 	default n
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	---help---
+		Enable DMA transfers on UART
+
+config UART_RXDMA
+	bool "UART Rx DMA support"
+	default n
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on UART
 

@@ -103,11 +103,13 @@ static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
 static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
                                  bool upper);
 #endif
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev);
+static void u16550_dmatxavail(FAR struct uart_dev_s *dev);
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
 static void u16550_dmareceive(FAR struct uart_dev_s *dev);
 static void u16550_dmarxfree(FAR struct uart_dev_s *dev);
-static void u16550_dmatxavail(FAR struct uart_dev_s *dev);
 #endif
 static void u16550_send(FAR struct uart_dev_s *dev, int ch);
 static void u16550_txint(FAR struct uart_dev_s *dev, bool enable);
@@ -131,10 +133,14 @@ static const struct uart_ops_s g_uart_ops =
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol  = u16550_rxflowcontrol,
 #endif
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
   .dmasend        = u16550_dmasend,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
   .dmareceive     = u16550_dmareceive,
   .dmarxfree      = u16550_dmarxfree,
+#endif
+#ifdef CONFIG_SERIAL_TXDMA
   .dmatxavail     = u16550_dmatxavail,
 #endif
   .send           = u16550_send,
@@ -1164,11 +1170,13 @@ static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SERIAL_DMA
+#ifdef CONFIG_SERIAL_TXDMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev)
 {
 }
+#endif
 
+#ifdef CONFIG_SERIAL_RXDMA
 static void u16550_dmareceive(FAR struct uart_dev_s *dev)
 {
 }
@@ -1176,7 +1184,9 @@ static void u16550_dmareceive(FAR struct uart_dev_s *dev)
 static void u16550_dmarxfree(FAR struct uart_dev_s *dev)
 {
 }
+#endif
 
+#ifdef CONFIG_SERIAL_TXDMA
 static void u16550_dmatxavail(FAR struct uart_dev_s *dev)
 {
 }
