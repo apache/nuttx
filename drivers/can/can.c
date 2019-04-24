@@ -1290,7 +1290,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   FAR struct can_rxfifo_s *fifo;
   FAR uint8_t             *dest;
   FAR struct list_node    *node;
-  FAR struct list_node    *node;
+  FAR struct list_node    *tmp;
   int                      nexttail;
   int                      errcode = -ENOMEM;
   int                      i;
