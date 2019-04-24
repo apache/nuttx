@@ -107,7 +107,7 @@ static struct stm32_mcp2515config_s g_mcp2515config =
 {
   .config =
   {
-    .spi        = NULL;
+    .spi        = NULL,
     .baud       = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
     .btp        = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
     .devid      = 0,
