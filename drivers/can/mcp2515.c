@@ -1343,7 +1343,6 @@ static void mcp2515_rxint(FAR struct can_dev_s *dev, bool enable)
   FAR struct mcp2515_can_s *priv;
   FAR struct mcp2515_config_s *config;
   irqstate_t flags;
-  uint8_t regval;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -1390,7 +1389,6 @@ static void mcp2515_txint(FAR struct can_dev_s *dev, bool enable)
 {
   FAR struct mcp2515_can_s *priv = dev->cd_priv;
   irqstate_t flags;
-  uint8_t regval;
 
   DEBUGASSERT(priv && priv->config);
 
