@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_start.c
- * arch/arm/src/chip/stm32l4_start.c
  *
  *   Copyright (C) 2009, 2011-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,15 +48,12 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "nvic.h"
 
 #include "stm32l4.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_userspace.h"
 #include "stm32l4_start.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions

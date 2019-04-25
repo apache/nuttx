@@ -57,9 +57,7 @@
 #include "efm32_clockconfig.h"
 #include "efm32_start.h"
 
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "nvic.h"
 
 /****************************************************************************
  * Pre-processor Definitions

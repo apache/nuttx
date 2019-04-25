@@ -56,10 +56,6 @@
 #include "xmc4_userspace.h"
 #include "xmc4_start.h"
 
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
-
 /****************************************************************************
  * Private Function prototypes
  ****************************************************************************/

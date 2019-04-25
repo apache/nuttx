@@ -53,9 +53,7 @@
 #include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "nvic.h"
 
 #include "kinetis_start.h"
 
