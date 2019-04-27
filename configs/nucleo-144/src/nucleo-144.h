@@ -256,6 +256,18 @@ void stm32_usbinitialize(void);
 #endif
 
 /************************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/************************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
