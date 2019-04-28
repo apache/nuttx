@@ -74,7 +74,6 @@
 
 int stm32_pca9635_initialize(void)
 {
-
   FAR struct i2c_master_s *i2c;
   int ret;
 
@@ -83,7 +82,7 @@ int stm32_pca9635_initialize(void)
   i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
   if (!i2c)
     {
-      _err("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
+      i2cerr("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
       return -1;
     }
 
@@ -91,7 +90,7 @@ int stm32_pca9635_initialize(void)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register PCA9635 driver: %d\n", ret);
-     return ret;
+      return ret;
     }
 
   return OK;

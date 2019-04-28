@@ -210,6 +210,7 @@ void stm32_usbinitialize(void);
  *
  * Description:
  *   Initialize I2C-based LSM6DSL.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_LSM303AGR
@@ -221,6 +222,7 @@ int stm32_lsm6dsl_initialize(char *devpath);
  *
  * Description:
  *   Initialize I2C-based LSM303AGR.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_LSM6DSL
