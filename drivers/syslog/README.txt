@@ -16,7 +16,7 @@ SYSLOG Interfaces
   Prototypes:
 
     int syslog(int priority, FAR const IPTR char *format, ...);
-    int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
+    void vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 
   Description:
 

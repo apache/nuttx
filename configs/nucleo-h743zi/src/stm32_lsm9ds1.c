@@ -1,7 +1,7 @@
 /*****************************************************************************
- * configs/nucleo-h743zi/src/stm32_lsm6dsl.c
+ * configs/nucleo-h743zi/src/stm32_lsm9ds1.c
  *
- *   Copyright (C) 2018 Greg Nutt. All rights reserved.
+ *   Copyright (C) 2019 Greg Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,55 +45,69 @@
 #include <nuttx/board.h>
 #include "stm32.h"
 #include <nucleo-h743zi.h>
-#include <nuttx/sensors/lsm6dsl.h>
+#include <nuttx/sensors/lsm9ds1.h>
 
 /*****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_STM32H7_I2C1
-#  error "LSM6DSL driver requires CONFIG_STM32H7_I2C1 to be enabled"
+#  error "LSM9DS1 driver requires CONFIG_STM32H7_I2C1 to be enabled"
 #endif
+
+#define LSM9DS1MAG_DEVPATH "/dev/lsm9ds1mag0"
+#define LSM9DS1ACC_DEVPATH "/dev/lsm9ds1acc0"
+#define LSM9DS1GYR_DEVPATH "/dev/lsm9ds1gyr0"
 
 /*****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /*****************************************************************************
- * Name: stm32_lsm6dsl_initialize
+ * Name: stm32_lsm9ds1_initialize
  *
  * Description:
- *   Initialize I2C-based LSM6DSL.
+ *   Initialize I2C-based LSM9DS1.
  ****************************************************************************/
 
-int stm32_lsm6dsl_initialize(char *devpath)
+int stm32_lsm9ds1_initialize(void)
 {
   FAR struct i2c_master_s *i2c;
   int ret = OK;
 
-  sninfo("Initializing LMS6DSL!\n");
-
-  /* Configure the GPIO interrupt */
-
-  stm32_configgpio(GPIO_LPS22HB_INT1);
+  sninfo("Initializing LMS9DS1!\n");
 
 #if defined(CONFIG_STM32H7_I2C1)
-  i2c = stm32_i2cbus_initialize(1);
+  i2c = stm32_i2cbus_initialize(LMS9DS1_I2CBUS);
   if (i2c == NULL)
     {
       return -ENODEV;
     }
 
-  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
+  sninfo("INFO: Initializing LMS9DS1 9DoF sensor over I2C%d\n", LMS9DS1_I2CBUS);
 
-  ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
+  ret = lsm9ds1mag_register(LSM9DS1MAG_DEVPATH, i2c, LSM9DS1MAG_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);
+      snerr("ERROR: Failed to initialize LMS9DS1 mag driver %s\n", LSM9DS1MAG_DEVPATH);
       return -ENODEV;
     }
 
-  sninfo("INFO: LMS6DSL sensor has been initialized successfully\n");
+  ret = lsm9ds1gyro_register(LSM9DS1GYR_DEVPATH, i2c, LSM9DS1GYRO_ADDR1);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize LMS9DS1 gyro driver %s\n", LSM9DS1MAG_DEVPATH);
+      return -ENODEV;
+    }
+
+  ret = lsm9ds1accel_register(LSM9DS1ACC_DEVPATH, i2c, LSM9DS1ACCEL_ADDR1);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize LMS9DS1 accel driver %s\n", LSM9DS1MAG_DEVPATH);
+      return -ENODEV;
+    }
+
+  sninfo("INFO: LMS9DS1 sensor has been initialized successfully\n");
 #endif
 
   return ret;

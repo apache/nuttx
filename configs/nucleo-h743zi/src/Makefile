@@ -60,8 +60,20 @@ ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
 CSRCS += stm32_lsm6dsl.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
+CSRCS += stm32_lsm9ds1.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LSM303AGR),y)
 CSRCS += stm32_lsm303agr.c
+endif
+
+ifeq ($(CONFIG_PCA9635PW),y)
+CSRCS += stm32_pca9635.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+CSRCS += stm32_ssd1306.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

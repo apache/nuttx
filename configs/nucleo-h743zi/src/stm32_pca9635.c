@@ -1,7 +1,7 @@
-/*****************************************************************************
- * configs/nucleo-h743zi/src/stm32_lsm6dsl.c
+/************************************************************************************
+ * configs/nucleo-h743zi/src/stm32_pca9635.c
  *
- *   Copyright (C) 2018 Greg Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,71 +30,69 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- ****************************************************************************/
+ *
+ ************************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#include <errno.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-#include <nuttx/board.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/leds/pca9635pw.h>
+
+#include <arch/irq.h>
+
 #include "stm32.h"
-#include <nucleo-h743zi.h>
-#include <nuttx/sensors/lsm6dsl.h>
+#include "nucleo-h743zi.h"
 
-/*****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_STM32H7_I2C1
-#  error "LSM6DSL driver requires CONFIG_STM32H7_I2C1 to be enabled"
-#endif
-
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
- * Name: stm32_lsm6dsl_initialize
+/****************************************************************************
+ * Name: stm32_pca9635_initialize
  *
  * Description:
- *   Initialize I2C-based LSM6DSL.
+ *   This function is called by board initialization logic to configure the
+ *   LED PWM chip.  This function will register the driver as /dev/leddrv0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-int stm32_lsm6dsl_initialize(char *devpath)
+int stm32_pca9635_initialize(void)
 {
+
   FAR struct i2c_master_s *i2c;
-  int ret = OK;
+  int ret;
 
-  sninfo("Initializing LMS6DSL!\n");
+  /* Get the I2C driver that interfaces with the pca9635 */
 
-  /* Configure the GPIO interrupt */
-
-  stm32_configgpio(GPIO_LPS22HB_INT1);
-
-#if defined(CONFIG_STM32H7_I2C1)
-  i2c = stm32_i2cbus_initialize(1);
-  if (i2c == NULL)
+  i2c = stm32_i2cbus_initialize(PCA9635_I2CBUS);
+  if (!i2c)
     {
-      return -ENODEV;
+      _err("ERROR: Failed to initialize I2C%d\n", PCA9635_I2CBUS);
+      return -1;
     }
 
-  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
-
-  ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
+  ret = pca9635pw_register("/dev/leddrv0", i2c, PCA9635_I2CADDR);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);
-      return -ENODEV;
+      snerr("ERROR: Failed to register PCA9635 driver: %d\n", ret);
+     return ret;
     }
 
-  sninfo("INFO: LMS6DSL sensor has been initialized successfully\n");
-#endif
-
-  return ret;
+  return OK;
 }

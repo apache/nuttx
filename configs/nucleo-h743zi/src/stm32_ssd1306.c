@@ -1,8 +1,8 @@
 /****************************************************************************
-   * config/stm32f103-minimum/src/stm32_ssd1306.c
+ * config/nucleo-h743zi/src/stm32_ssd1306.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,23 +47,16 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "stm32.h"
-#include "stm32_i2c.h"
-#include "stm32f103_minimum.h"
+#include "nucleo-h743zi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_LCD_SSD1306
-#  error "The OLED driver requires CONFIG_LCD_SSD1306 in the configuration"
-#endif
-
 #ifndef CONFIG_LCD_MAXPOWER
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
-
-#define OLED_I2C_PORT         1 /* OLED display connected to I2C1 */
 
 /****************************************************************************
  * Private Data

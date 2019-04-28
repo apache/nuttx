@@ -133,6 +133,19 @@
                             GPIO_OUTPUT_CLEAR | GPIO_PORTF | GPIO_PIN12)
 #define GPIO_NRF24L01_IRQ  (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTD | GPIO_PIN15)
 
+/* LMS9DS1 configuration */
+
+#define LMS9DS1_I2CBUS 1
+
+/* PCA9635 configuration */
+
+#define PCA9635_I2CBUS  1
+#define PCA9635_I2CADDR 0x40
+
+/* Oled configuration */
+
+#define OLED_I2C_PORT   2
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -223,6 +236,28 @@ int stm32_lsm303agr_initialize(char *devpath);
 
 #ifdef CONFIG_WL_NRF24L01
 int stm32_wlinitialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: stm32_lsm9ds1_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM9DS1.
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM9DS1
+int stm32_lsm9ds1_initialize(char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pca9635_initialize
+ *
+ * Description:
+ *   Initialize I2C-based PCA9635PW LED driver.
+ ****************************************************************************/
+
+#ifdef CONFIG_PCA9635PW
+int stm32_pca9635_initialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */

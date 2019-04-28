@@ -321,10 +321,16 @@
 #define GPIO_USART6_RX     GPIO_USART6_RX_2  /* PG9 */
 #define GPIO_USART6_TX     GPIO_USART6_TX_2  /* PG14 */
 
-/* I2C1 Use Nucleo I2C pins */
+/* I2C1 Use Nucleo I2C1 pins */
 
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 */
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 */
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2 /* PB8 - D15 */
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2 /* PB9 - D14 */
+
+/* I2C2 Use Nucleo I2C2 pins */
+
+#define GPIO_I2C2_SCL  GPIO_I2C2_SCL_2  /* PF1 - D69 */
+#define GPIO_I2C2_SDA  GPIO_I2C2_SDA_2  /* PF0 - D68 */
+#define GPIO_I2C2_SMBA GPIO_I2C2_SMBA_2 /* PF2 - D70 */
 
 /* SPI3 */
 
