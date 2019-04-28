@@ -1654,3 +1654,34 @@ Configuration sub-directories
     STATUS:
     2015-03-28: HSMCI TX DMA is disabled.  There are some issues with the TX
       DMA that need to be corrected.
+
+  twm4nx:
+
+    This configuration exercises the port of TWM to NuttX.  A description of
+    that port is available at apps/graphics/twm4nx/README.txt.  This
+    configuration uses the NuttX VNC server to provide a remote desktop for
+    use with VNC client on a PC.  No display, mouse, or keyboard devices are
+    needed.
+
+    NOTES:
+
+    1. Network configuration:  IP address 10.0.0.2.  The is easily changed
+       via 'make menuconfig'.  The VNC server address is 10.0.0.2:5900.
+
+    2. The default (local) framebuffer configuration is 800x600 with 16-bit
+       RGB color.
+
+    3. There are complicated interactions between VNC and the network
+       configuration.  The CONFIG_VNCSERVER_UPDATE_BUFSIZE determines the
+       size of update messages.  That is 1024 bytes in that configuration
+       (the full message with the header will be a little larger).  The
+       CONFIG_NET_ETH_PKTSIZE is set to 590 so that a full update will
+       require several packets.
+
+       Write buffering also effects network performance.  This will break
+       up the large updates into small (196 byte) groups.  When we run out
+       of read-ahead buffers, then partial updates may be sent causing a
+       loss of synchronization.
+
+    STATUS:
+      2019-04-28:  Configuration created.  Not verified.
