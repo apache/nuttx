@@ -142,6 +142,9 @@ CHIP_CSRCS += stm32l4_dma.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
+ifeq ($(CONFIG_STM32L4_USBFS),y)
+CHIP_CSRCS += stm32l4_usbdev.c
+endif
 ifeq ($(CONFIG_STM32L4_OTGFS),y)
 CHIP_CSRCS += stm32l4_otgfsdev.c
 endif

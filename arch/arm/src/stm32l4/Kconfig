@@ -459,6 +459,7 @@ config STM32L4_STM32L4X2
 	bool
 	default n
 	select STM32L4_STM32L4X3
+	select STM32L4_HAVE_USBFS
 
 config STM32L4_STM32L4X3
 	# STM32L4 devices documented in RM0394, regardless of what ST's
@@ -956,6 +957,10 @@ config STM32L4_HAVE_OTGFS
 	bool
 	default n
 
+config STM32L4_HAVE_USBFS
+	bool
+	default n
+
 config STM32L4_HAVE_SAI1
 	bool
 	default n
@@ -1447,6 +1452,12 @@ config STM32L4_LPTIM2
 	default n
 	select STM32L4_LPTIM
 	depends on STM32L4_HAVE_LPTIM2
+
+config STM32L4_USBFS
+	bool "USB FS"
+	default n
+	depends on STM32L4_HAVE_USBFS
+	select USBDEV
 
 comment "APB2 Peripherals"
 
