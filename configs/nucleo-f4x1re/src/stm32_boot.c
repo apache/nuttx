@@ -52,14 +52,6 @@
 #include "nucleo-f4x1re.h"
 
 /************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -99,29 +91,26 @@ void stm32_boardinitialize(void)
 #endif
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: board_late_initialize
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional initialization
+ *   call will be performed in the boot-up sequence to a function called
+ *   board_late_initialize().  board_late_initialize() will be called immediately
+ *   after up_initialize() is called and just before the initial application is
+ *   started.  This additional initialization phase may be used, for example, to
+ *   initialize board-specific device drivers.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+#ifndef CONFIG_LIB_BOARDCTL
+  /* Perform board initialization here instead of from the board_app_initialize(). */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
-  board_app_initialize(0);
+  (void)stm32_bringup();
 #endif
 }
 #endif

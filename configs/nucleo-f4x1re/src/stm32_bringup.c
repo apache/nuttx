@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f4x1re/src/stm32_appinit.c
+ * configs/nucleo-f4x1re/src/stm32_bringup.c
  *
  *   Copyright (C) 2014, 2016, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,19 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include <stm32.h>
+#include <stm32_uart.h>
+
+#include <arch/board/board.h>
 
 #include "nucleo-f4x1re.h"
 
@@ -50,33 +60,89 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int stm32_bringup(void)
 {
-  /* Perform board initialization here */
+  int ret = OK;
 
-  return stm32_bringup();
+#ifdef HAVE_MMCSD
+  /* First, get an instance of the SDIO interface */
+
+  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdio)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDIO slot %d\n",
+             CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Then let's guess and say that there is a card in the slot. There is no
+   * card detect GPIO.
+   */
+
+  sdio_mediachange(g_sdio, true);
+
+  syslog(LOG_INFO, "[boot] Initialized SDIO\n");
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_NUCLEO_F401RE_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_AJOYSTICK
+  /* Initialize and register the joystick driver */
+
+  ret = board_ajoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the joystick driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+  return ret;
 }
