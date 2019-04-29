@@ -204,11 +204,7 @@ static int dac_close(FAR struct file *filep)
 
           while (dev->ad_xmit.af_head != dev->ad_xmit.af_tail)
             {
-#ifndef CONFIG_DISABLE_SIGNALS
                nxsig_usleep(HALF_SECOND_USEC);
-#else
-               up_mdelay(HALF_SECOND_MSEC);
-#endif
             }
 
           /* Free the IRQ and disable the DAC device */

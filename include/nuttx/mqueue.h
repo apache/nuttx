@@ -113,12 +113,10 @@ struct mqueue_inode_s
 #else
   uint16_t maxmsgsize;        /* Max size of message in message queue */
 #endif
-#ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t ntpid;                /* Notification: Receiving Task's PID */
   struct sigevent ntevent;    /* Notification description */
   struct sigwork_s ntwork;    /* Notification work */
-#endif
 };
 
 /* This describes the message queue descriptor that is held in the

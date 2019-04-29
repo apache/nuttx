@@ -82,7 +82,6 @@
 
 /* Timing */
 
-#define POLL_DELAY_MSEC 1
 #define POLL_DELAY_USEC 1000
 
 /************************************************************************************
@@ -516,11 +515,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
             {
               clock_t elapsed;
 
-#ifndef CONFIG_DISABLE_SIGNALS
               nxsig_usleep(POLL_DELAY_USEC);
-#else
-              up_mdelay(POLL_DELAY_MSEC);
-#endif
 
               /* Check for a timeout */
 

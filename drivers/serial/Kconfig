@@ -156,7 +156,7 @@ config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
 	select SIG_SIGKILL_ACTION
-	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
@@ -201,7 +201,7 @@ config TTY_SIGSTP
 	bool "Support SIGSTP"
 	default n
 	select CONFIG_SIG_SIGSTOP_ACTION
-	depends on !DISABLE_SIGNALS && SERIAL_TERMIOS
+	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-z event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit

@@ -100,13 +100,11 @@ struct ajoy_open_s
 
   volatile bool ao_closing;
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Joystick event notification information */
 
   pid_t ao_pid;
   struct ajoy_notify_s ao_notify;
   struct sigwork_s ao_work;
-#endif
 
 #ifndef CONFIG_DISABLE_POLL
   /* Poll event information */
@@ -132,7 +130,7 @@ static inline int ajoy_takesem(sem_t *sem);
 
 /* Sampling and Interrupt handling */
 
-#if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_POLL
 static void    ajoy_enable(FAR struct ajoy_upperhalf_s *priv);
 static void    ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
                               FAR void *arg);
@@ -200,7 +198,7 @@ static inline int ajoy_takesem(sem_t *sem)
  * Name: ajoy_enable
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_POLL
 static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 {
   FAR const struct ajoy_lowerhalf_s *lower;
@@ -245,12 +243,10 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
         }
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
       /* OR in the signal events */
 
       press   |= opriv->ao_notify.an_press;
       release |= opriv->ao_notify.an_release;
-#endif
     }
 
   /* Enable/disable button interrupts */
@@ -278,7 +274,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
  * Name: ajoy_interrupt
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_POLL
 static void ajoy_interrupt(FAR const struct ajoy_lowerhalf_s *lower,
                            FAR void *arg)
 {
@@ -301,7 +297,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
   FAR const struct ajoy_lowerhalf_s *lower;
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t sample;
-#if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_POLL
   ajoy_buttonset_t change;
   ajoy_buttonset_t press;
   ajoy_buttonset_t release;
@@ -328,7 +324,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
   add_ui_randomness(sample);
 
-#if !defined(CONFIG_DISABLE_POLL) || !defined(CONFIG_DISABLE_SIGNALS)
+#ifndef CONFIG_DISABLE_POLL
   /* Determine which buttons have been newly pressed and which have been
    * newly released.
    */
@@ -367,7 +363,6 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
         }
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
       /* Have any signal events occurred? */
 
       if ((press & opriv->ao_notify.an_press)     != 0 ||
@@ -379,7 +374,6 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
           nxsig_notification(opriv->ao_pid, &opriv->ao_notify.an_event,
                              SI_QUEUE, &opriv->ao_work);
         }
-#endif
     }
 
   /* Enable/disable interrupt handling */
@@ -690,7 +684,6 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
     /* Command:     AJOYIOC_REGISTER
      * Description: Register to receive a signal whenever there is a change
      *              in any of the joystick discrete inputs.  This feature,
@@ -723,7 +716,6 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
-#endif
 
     default:
       ierr("ERROR: Unrecognized command: %ld\n", cmd);

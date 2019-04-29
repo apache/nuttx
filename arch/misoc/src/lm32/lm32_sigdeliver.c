@@ -52,8 +52,6 @@
 #include "sched/sched.h"
 #include "lm32.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -139,5 +137,3 @@ void lm32_sigdeliver(void)
 
   DEBUGPANIC();
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */

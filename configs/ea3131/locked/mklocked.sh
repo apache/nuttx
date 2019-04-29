@@ -166,11 +166,7 @@ if [ "$answer" = n ]; then
 	echo "EXTERN(timer_initialize)" >>ld-locked.inc
 fi
 
-answer=$(checkconfig CONFIG_DISABLE_SIGNALS)
-if [ "$answer" = n ]; then
-	echo "EXTERN(nxsig_initialize)" >>ld-locked.inc
-fi
-
+echo "EXTERN(nxsig_initialize)" >>ld-locked.inc
 echo "EXTERN(sem_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_MQUEUE)

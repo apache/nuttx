@@ -123,10 +123,6 @@
 #  endif
 #endif
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
-#endif
-
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
 #endif

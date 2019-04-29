@@ -51,12 +51,8 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* Prerequisites: CONFIG_DISABLE_SIGNALS must not be defined */
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#  undef CONFIG_ARCH_PHY_INTERRUPT
-#endif
+/* Configuration ************************************************************/
 
 /* Maximum number of phy_notify clients */
 

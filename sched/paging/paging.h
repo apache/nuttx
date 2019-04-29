@@ -67,10 +67,6 @@
 #  define CONFIG_PAGING_STACKSIZE  CONFIG_IDLETHREAD_STACKSIZE
 #endif
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Page fill support requires signals"
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

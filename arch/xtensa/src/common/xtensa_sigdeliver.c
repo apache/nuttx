@@ -51,8 +51,6 @@
 #include "sched/sched.h"
 #include "xtensa.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -175,5 +173,3 @@ void xtensa_sig_deliver(void)
   board_autoled_off(LED_SIGNAL);
   xtensa_context_restore(regs);
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */

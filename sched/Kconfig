@@ -32,10 +32,6 @@ config DISABLE_PTHREAD
 	bool "Disable pthread support"
 	default n
 
-config DISABLE_SIGNALS
-	bool "Disable signal support"
-	default n
-
 config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
 	default n
@@ -1336,7 +1332,6 @@ config SIG_EVTHREAD
 menuconfig SIG_DEFAULT
 	bool "Default signal actions"
 	default n
-	depends on !DISABLE_SIGNALS
 	---help---
 		Enable to support default signal actions.
 
@@ -1398,7 +1393,6 @@ config SIG_SIGKILL_ACTION
 endif # SIG_DEFAULT
 
 menu "Signal Numbers"
-	depends on !DISABLE_SIGNALS
 
 comment "Standard Signal Numbers"
 
@@ -1536,7 +1530,6 @@ config SCHED_WORKQUEUE
 #	bool "Enable worker thread"
 	bool
 	default n
-	depends on !DISABLE_SIGNALS
 	---help---
 		Create dedicated "worker" threads to handle delayed or asynchronous
 		processing.
@@ -1554,7 +1547,6 @@ config WQUEUE_NOTIFIER
 config SCHED_HPWORK
 	bool "High priority (kernel) worker thread"
 	default n
-	depends on !DISABLE_SIGNALS
 	select SCHED_WORKQUEUE
 	---help---
 		Create a dedicated high-priority "worker" thread to handle delayed
@@ -1621,7 +1613,6 @@ endif # SCHED_HPWORK
 config SCHED_LPWORK
 	bool "Low priority (kernel) worker thread"
 	default n
-	depends on !DISABLE_SIGNALS
 	select SCHED_WORKQUEUE
 	---help---
 		If SCHED_LPWORK is defined then a lower-priority work queue will

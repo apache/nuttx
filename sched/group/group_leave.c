@@ -148,11 +148,9 @@ static inline void group_release(FAR struct task_group_s *group)
   group_removechildren(group);
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Release pending signals */
 
   nxsig_release(group);
-#endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Release pthread resources */

@@ -260,7 +260,7 @@ config USBHOST_HIDKBD
 	depends on !INT_DISABLE
 	---help---
 		Enable support for the keyboard class driver.  This also depends on
-		SCHED_WORKQUEUE && !DISABLE_SIGNALS
+		SCHED_WORKQUEUE
 
 if  USBHOST_HIDKBD
 
@@ -339,7 +339,7 @@ config USBHOST_HIDMOUSE
 	select MOUSE
 	---help---
 		Enable support for the mouse class driver.  This also depends on
-		SCHED_WORKQUEUE && !DISABLE_SIGNALS
+		SCHED_WORKQUEUE
 
 		NOTE:  This driver checks out on a Labtec and an AOpen mouse, but
 		does not work correctly on a Microsoft mouse.  A little more work

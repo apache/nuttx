@@ -148,7 +148,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
  * configuration.
  */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   SYSCALL_LOOKUP(kill,                     2, STUB_kill)
   SYSCALL_LOOKUP(sigaction,                3, STUB_sigaction)
   SYSCALL_LOOKUP(sigpending,               1, STUB_sigpending)
@@ -158,7 +157,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(sigtimedwait,             3, STUB_sigtimedwait)
   SYSCALL_LOOKUP(sigwaitinfo,              2, STUB_sigwaitinfo)
   SYSCALL_LOOKUP(clock_nanosleep,          4, STUB_clock_nanosleep)
-#endif
 
 /* The following are only defined if the system clock is enabled in the
  * NuttX configuration.
@@ -321,19 +319,17 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setschedparam,    3, STUB_pthread_setschedparam)
   SYSCALL_LOOKUP(pthread_setschedprio,     2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,      2, STUB_pthread_setspecific)
-#  ifdef CONFIG_SMP
+#ifdef CONFIG_SMP
   SYSCALL_LOOKUP(pthread_setaffinity,      3, STUB_pthread_setaffinity)
   SYSCALL_LOOKUP(pthread_getaffinity,      3, STUB_pthread_getaffinity)
-#  endif
-#  ifndef CONFIG_DISABLE_SIGNALS
+#endif
   SYSCALL_LOOKUP(pthread_cond_timedwait,   3, STUB_pthread_cond_timedwait)
   SYSCALL_LOOKUP(pthread_kill,             2, STUB_pthread_kill)
   SYSCALL_LOOKUP(pthread_sigmask,          3, STUB_pthread_sigmask)
-#  endif
-#  ifdef CONFIG_PTHREAD_CLEANUP
+#ifdef CONFIG_PTHREAD_CLEANUP
   SYSCALL_LOOKUP(pthread_cleanup_push,     2, STUB_pthread_cleanup_push)
   SYSCALL_LOOKUP(pthread_cleanup_pop,      1, STUB_pthread_cleanup_pop)
-#  endif
+#endif
 #endif
 
 /* The following are defined only if message queues are enabled */

@@ -44,7 +44,7 @@ CSRCS += lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c
 CSRCS += lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c
 CSRCS += lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c
 CSRCS += lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c
-CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c
+CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
 
 ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
 ifeq ($(CONFIG_MEMCPY_VIK),y)
@@ -56,10 +56,6 @@ endif
 
 ifeq ($(CONFIG_LIBC_LOCALE),y)
 CSRCS += lib_strcoll.c lib_strxfrm.c
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CSRCS += lib_strsignal.c
 endif
 
 # Add the string directory to the build

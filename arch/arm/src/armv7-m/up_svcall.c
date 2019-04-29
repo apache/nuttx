@@ -351,7 +351,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *   R4 = ucontext
        */
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifdef CONFIG_BUILD_PROTECTED
       case SYS_signal_handler:
         {
           struct tcb_s *rtcb   = sched_self();
@@ -389,7 +389,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *   R0 = SYS_signal_handler_return
        */
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
+#ifdef CONFIG_BUILD_PROTECTED
       case SYS_signal_handler_return:
         {
           struct tcb_s *rtcb   = sched_self();

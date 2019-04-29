@@ -119,7 +119,6 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
    */
@@ -151,7 +150,6 @@ struct xcptcontext
 
   uint32_t sigreturn;
 
-# endif
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL

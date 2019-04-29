@@ -164,11 +164,9 @@ volatile dq_queue_t g_pendingtasks;
 
 volatile dq_queue_t g_waitingforsemaphore;
 
-#ifndef CONFIG_DISABLE_SIGNALS
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 volatile dq_queue_t g_waitingforsignal;
-#endif
 
 #ifndef CONFIG_DISABLE_MQUEUE
 /* This is the list of all tasks that are blocked waiting for a message
@@ -290,14 +288,11 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
   {                                              /* TSTATE_WAIT_SEM */
     &g_waitingforsemaphore,
     TLIST_ATTR_PRIORITIZED
-  }
-#ifndef CONFIG_DISABLE_SIGNALS
-  ,
+  },
   {                                              /* TSTATE_WAIT_SIG */
     &g_waitingforsignal,
     0
   }
-#endif
 #ifndef CONFIG_DISABLE_MQUEUE
   ,
   {                                              /* TSTATE_WAIT_MQNOTEMPTY */
@@ -411,9 +406,7 @@ void nx_start(void)
   dq_init(&g_readytorun);
   dq_init(&g_pendingtasks);
   dq_init(&g_waitingforsemaphore);
-#ifndef CONFIG_DISABLE_SIGNALS
   dq_init(&g_waitingforsignal);
-#endif
 #ifndef CONFIG_DISABLE_MQUEUE
   dq_init(&g_waitingformqnotfull);
   dq_init(&g_waitingformqnotempty);
@@ -669,7 +662,6 @@ void nx_start(void)
     }
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Initialize the signal facility (if in link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -678,7 +670,6 @@ void nx_start(void)
     {
       nxsig_initialize();
     }
-#endif
 
 #ifndef CONFIG_DISABLE_MQUEUE
   /* Initialize the named message queue facility (if in link) */

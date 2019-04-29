@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-
 CSRCS += sig_initialize.c
 CSRCS += sig_action.c sig_procmask.c sig_pending.c sig_suspend.c
 CSRCS += sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
@@ -56,5 +54,3 @@ endif
 
 DEPPATH += --dep-path signal
 VPATH += :signal
-
-endif

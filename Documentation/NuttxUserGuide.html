@@ -1476,9 +1476,8 @@ int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr, FAR int *p
 </p>
   <ul><pre>
 #include &lt;spawn.h&gt;
-#ifndef CONFIG_DISABLE_SIGNALS
+
 int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr, FAR sigset_t *sigmask);
-#endif
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -1598,9 +1597,8 @@ int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
 </p>
   <ul><pre>
 #include &lt;spawn.h&gt;
-#ifndef CONFIG_DISABLE_SIGNALS
+
 int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr, FAR const sigset_t *sigmask);
-#endif
 </pre></ul>
 <p>
   <b>Description:</b>

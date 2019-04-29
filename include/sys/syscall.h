@@ -218,20 +218,16 @@
  * configuration.
  */
 
-#ifndef CONFIG_DISABLE_SIGNALS
-#  define SYS_kill                     (__SYS_signals + 0)
-#  define SYS_sigaction                (__SYS_signals + 1)
-#  define SYS_sigpending               (__SYS_signals + 2)
-#  define SYS_sigprocmask              (__SYS_signals + 3)
-#  define SYS_sigqueue                 (__SYS_signals + 4)
-#  define SYS_sigsuspend               (__SYS_signals + 5)
-#  define SYS_sigtimedwait             (__SYS_signals + 6)
-#  define SYS_sigwaitinfo              (__SYS_signals + 7)
-#  define SYS_clock_nanosleep          (__SYS_signals + 8)
-#  define __SYS_clock                  (__SYS_signals + 9)
-#else
-#  define __SYS_clock                  __SYS_signals
-#endif
+#define SYS_kill                       (__SYS_signals + 0)
+#define SYS_sigaction                  (__SYS_signals + 1)
+#define SYS_sigpending                 (__SYS_signals + 2)
+#define SYS_sigprocmask                (__SYS_signals + 3)
+#define SYS_sigqueue                   (__SYS_signals + 4)
+#define SYS_sigsuspend                 (__SYS_signals + 5)
+#define SYS_sigtimedwait               (__SYS_signals + 6)
+#define SYS_sigwaitinfo                (__SYS_signals + 7)
+#define SYS_clock_nanosleep            (__SYS_signals + 8)
+#define __SYS_clock                    (__SYS_signals + 9)
 
 /* The following are only defined if the system clock is enabled in the
  * NuttX configuration.
@@ -296,13 +292,9 @@
 #ifndef CONFIG_DISABLE_POLL
 #  define SYS_poll                   __SYS_poll
 #  define SYS_select                 (__SYS_poll + 1)
-#  ifndef CONFIG_DISABLE_SIGNALS
-#    define SYS_ppoll                (__SYS_poll + 2)
-#    define SYS_pselect              (__SYS_poll + 3)
-#    define __SYS_ifindex            (__SYS_poll + 4)
-#  else
-#    define __SYS_ifindex            (__SYS_poll + 2)
-#  endif
+#  define SYS_ppoll                  (__SYS_poll + 2)
+#  define SYS_pselect                (__SYS_poll + 3)
+#  define __SYS_ifindex              (__SYS_poll + 4)
 #else
 #  define __SYS_ifindex               __SYS_poll
 #endif
@@ -465,14 +457,10 @@
 #    define __SYS_pthread_signals      __SYS_pthread_smp
 #  endif
 
-#  ifndef CONFIG_DISABLE_SIGNALS
-#    define SYS_pthread_cond_timedwait (__SYS_pthread_signals + 0)
-#    define SYS_pthread_kill           (__SYS_pthread_signals + 1)
-#    define SYS_pthread_sigmask        (__SYS_pthread_signals + 2)
-#    define __SYS_pthread_cleanup      (__SYS_pthread_signals + 3)
-#  else
-#    define __SYS_pthread_cleanup      __SYS_pthread_signals
-#  endif
+#  define SYS_pthread_cond_timedwait   (__SYS_pthread_signals + 0)
+#  define SYS_pthread_kill             (__SYS_pthread_signals + 1)
+#  define SYS_pthread_sigmask          (__SYS_pthread_signals + 2)
+#  define __SYS_pthread_cleanup        (__SYS_pthread_signals + 3)
 
 #  ifdef CONFIG_PTHREAD_CLEANUP
 #    define __SYS_pthread_cleanup_push (__SYS_pthread_cleanup + 0)

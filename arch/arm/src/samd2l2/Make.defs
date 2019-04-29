@@ -49,10 +49,8 @@ CMN_CSRCS += up_hardfault.c up_svcall.c up_vectors.c up_vfork.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_task_start.c up_pthread_start.c
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
-endif
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

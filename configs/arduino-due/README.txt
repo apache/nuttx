@@ -845,9 +845,6 @@ Configuration sub-directories
          CONFIG_SAM34_GPIO_IRQ=y           : GPIO interrupt support
          CONFIG_SAM34_GPIOC_IRQ=y          : Enable GPIO interrupts from port C
 
-       RTOS Features:
-         CONFIG_DISABLE_SIGNALS=n          : Signals are required
-
        Library Support:
          CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 

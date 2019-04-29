@@ -108,9 +108,7 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
           msgq->maxmsgsize = MQ_MAX_BYTES;
         }
 
-#ifndef CONFIG_DISABLE_SIGNALS
       msgq->ntpid = INVALID_PROCESS_ID;
-#endif
     }
 
   return msgq;

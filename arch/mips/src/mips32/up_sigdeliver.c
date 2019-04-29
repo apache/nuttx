@@ -53,8 +53,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -140,6 +138,3 @@ void up_sigdeliver(void)
 
   DEBUGPANIC();
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-

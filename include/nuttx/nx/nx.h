@@ -392,11 +392,7 @@ int nx_eventhandler(NXHANDLE handle);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
 int nx_eventnotify(NXHANDLE handle, int signo);
-#else
-#  define nx_eventnotify(handle, signo) (OK)
-#endif
 
 /****************************************************************************
  * Name: nx_openwindow

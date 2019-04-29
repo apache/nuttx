@@ -93,11 +93,7 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem);
 void nxsem_boostpriority(FAR sem_t *sem);
 void nxsem_releaseholder(FAR sem_t *sem);
 void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  ifndef CONFIG_DISABLE_SIGNALS
 void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  else
-#    define nxsem_canceled(stcb, sem)
-#  endif
 #else
 #  define nxsem_initholders()
 #  define nxsem_destroyholder(sem)

@@ -211,13 +211,9 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
    * option to change the signal mask was selected.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   DEBUGASSERT(g_spawn_parms.file_actions ||
               (g_spawn_parms.attr &&
                (g_spawn_parms.attr->flags & POSIX_SPAWN_SETSIGMASK) != 0));
-#else
-  DEBUGASSERT(g_spawn_parms.file_actions);
-#endif
 
   /* Set the attributes and perform the file actions as appropriate */
 
@@ -346,12 +342,8 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
    * task.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   if ((file_actions == NULL || *file_actions == NULL) &&
       (attr == NULL || (attr->flags & POSIX_SPAWN_SETSIGMASK) == 0))
-#else
-  if (file_actions ==  NULL || *file_actions == NULL)
-#endif
     {
       return nxtask_spawn_exec(pid, name, entry, attr, argv);
     }

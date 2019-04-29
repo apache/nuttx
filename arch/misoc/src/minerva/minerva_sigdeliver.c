@@ -53,8 +53,6 @@
 #include "sched/sched.h"
 #include "minerva.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -135,5 +133,3 @@ void minerva_sigdeliver(void)
 
   DEBUGPANIC();
 }
-
-#endif  /* !CONFIG_DISABLE_SIGNALS */

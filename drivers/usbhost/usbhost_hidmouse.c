@@ -87,14 +87,6 @@
 #  warning "Worker thread support is required (CONFIG_SCHED_WORKQUEUE)"
 #endif
 
-/* Signals must not be disabled as they are needed for nxsig_kill.  Need to
- * have CONFIG_DISABLE_SIGNALS=n
- */
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  warning "Signal support is required (CONFIG_DISABLE_SIGNALS)"
-#endif
-
 /* Provide some default values for other configuration settings */
 
 #ifndef CONFIG_HIDMOUSE_XMAX

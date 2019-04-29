@@ -79,7 +79,6 @@ int main(int argc, char *argv[]);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
 static void sig_trampoline(void) naked_function;
 static void sig_trampoline(void)
 {
@@ -97,7 +96,6 @@ static void sig_trampoline(void)
     " svc #0x900001\n"   /* Return from the signal handler */
   );
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -127,13 +125,11 @@ void _start(int argc, FAR char *argv[])
 {
   int ret;
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* Initialize the reserved area at the beginning of the .bss/.data region
    * that is visible to the RTOS.
    */
 
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
-#endif
 
   /* Call C++ constructors */
   /* Setup so that C++ destructors called on task exit */

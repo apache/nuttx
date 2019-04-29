@@ -1129,7 +1129,6 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
 void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
@@ -1140,7 +1139,6 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 
   (void)nxsem_foreachholder(sem, nxsem_restoreholderprioall, stcb);
 }
-#endif
 
 /****************************************************************************
  * Name: sem_enumholders

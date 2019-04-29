@@ -322,16 +322,14 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
 
   /* Check if we need to change the signal mask */
 
-#ifndef CONFIG_DISABLE_SIGNALS
-  if (attr && (attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
+  if (attr != NULL && (attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
     {
       (void)nxsig_procmask(SIG_SETMASK, &attr->sigmask, NULL);
     }
 
   /* Were we also requested to perform file actions? */
 
-  if (file_actions)
-#endif
+  if (file_actions != NULL)
     {
       /* Yes.. Execute each file action */
 

@@ -41,6 +41,7 @@ CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c
 CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_lowputs.c
 CMN_CSRCS += up_mdelay.c up_puts.c up_releasepending.c up_releasestack.c
 CMN_CSRCS += up_reprioritizertr.c up_stackframe.c up_udelay.c
+CMN_CSRCS += sh1_schedulesigaction.c sh1_sigdeliver.c
 CMN_CSRCS += up_unblocktask.c up_usestack.c
 
 CHIP_ASRCS  = sh1_vector.S sh1_saveusercontext.S
@@ -49,10 +50,6 @@ CHIP_CSRCS += sh1_copystate.c sh1_dumpstate.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sh1_timerisr.c
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS += sh1_schedulesigaction.c sh1_sigdeliver.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

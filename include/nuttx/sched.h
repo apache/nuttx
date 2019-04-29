@@ -206,9 +206,7 @@ enum tstate_e
 
   TSTATE_TASK_INACTIVE,       /* BLOCKED      - Initialized but not yet activated */
   TSTATE_WAIT_SEM,            /* BLOCKED      - Waiting for a semaphore */
-#ifndef CONFIG_DISABLE_SIGNALS
   TSTATE_WAIT_SIG,            /* BLOCKED      - Waiting for a signal */
-#endif
 #ifndef CONFIG_DISABLE_MQUEUE
   TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED      - Waiting for a MQ to become not empty. */
   TSTATE_WAIT_MQNOTFULL,      /* BLOCKED      - Waiting for a MQ to become not full. */
@@ -502,14 +500,12 @@ struct task_group_s
   pthread_keyset_t tg_keyset;       /* Set of pthread keys allocated            */
 #endif
 
-#ifndef CONFIG_DISABLE_SIGNALS
   /* POSIX Signal Control Fields ************************************************/
 
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
-#endif
 #endif
 
 #ifndef CONFIG_DISABLE_ENVIRON
@@ -650,13 +646,11 @@ struct tcb_s
 
   /* POSIX Signal Control Fields ************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked            */
   sigset_t   sigwaitmask;                /* Waiting for pending signals         */
   sq_queue_t sigpendactionq;             /* List of pending signal actions      */
   sq_queue_t sigpostedq;                 /* List of posted signals              */
   siginfo_t  sigunbinfo;                 /* Signal info when task unblocked     */
-#endif
 
   /* POSIX Named Message Queue Fields *******************************************/
 

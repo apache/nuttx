@@ -1355,11 +1355,7 @@ int nx_eventhandler(NXHANDLE handle);
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nx.h&gt;
 
-#ifndef CONFIG_DISABLE_SIGNALS
 int nx_eventnotify(NXHANDLE handle, int signo);
-#else
-#  define nx_eventnotify(handle, signo) (OK)
-#endif
 </pre></ul>
 <p>
   <b>Description:</b>

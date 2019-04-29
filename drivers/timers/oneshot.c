@@ -55,14 +55,6 @@
 #ifdef CONFIG_ONESHOT
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "This driver needs SIGNAL support, remove CONFIG_DISABLE_SIGNALS"
-#endif
-
-/****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
 

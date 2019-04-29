@@ -386,10 +386,8 @@ static FAR const char *g_statenames[] =
 #endif
   "Running",
   "Inactive",
-  "Waiting,Semaphore"
-#ifndef CONFIG_DISABLE_SIGNALS
-  , "Waiting,Signal"
-#endif
+  "Waiting,Semaphore",
+  "Waiting,Signal"
 #ifndef CONFIG_DISABLE_MQUEUE
   , "Waiting,MQ empty"
   , "Waiting,MQ full"
@@ -628,14 +626,11 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the signal mask */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08x\n", "SigMask:",
                       tcb->sigprocmask);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
-#endif
-
   return totalsize;
 }
 

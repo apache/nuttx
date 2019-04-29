@@ -560,22 +560,14 @@ static int can_close(FAR struct file *filep)
 
   while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
     {
-#ifndef CONFIG_DISABLE_SIGNALS
        nxsig_usleep(HALF_SECOND_USEC);
-#else
-       up_mdelay(HALF_SECOND_MSEC);
-#endif
     }
 
   /* And wait for the TX hardware FIFO to drain */
 
   while (!dev_txempty(dev))
     {
-#ifndef CONFIG_DISABLE_SIGNALS
       nxsig_usleep(HALF_SECOND_USEC);
-#else
-      up_mdelay(HALF_SECOND_MSEC);
-#endif
     }
 
   /* Free the IRQ and disable the CAN device */

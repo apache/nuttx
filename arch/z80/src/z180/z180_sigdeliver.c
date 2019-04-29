@@ -50,8 +50,6 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -68,7 +66,6 @@
 
 void up_sigdeliver(void)
 {
-#ifndef CONFIG_DISABLE_SIGNALS
   FAR struct tcb_s  *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];
 
@@ -128,7 +125,4 @@ void up_sigdeliver(void)
 
   board_autoled_off(LED_SIGNAL);
   z180_restoreusercontext(regs);
-#endif
 }
-
-#endif /* CONFIG_DISABLE_SIGNALS */
