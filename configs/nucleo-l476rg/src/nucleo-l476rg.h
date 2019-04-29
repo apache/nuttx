@@ -312,7 +312,7 @@ void stm32l4_spiinitialize(void);
 void stm32l4_usbinitialize(void);
 
 /****************************************************************************
- * Name: stm32_gpio_initialize
+ * Name: stm32l4_gpio_initialize
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio
@@ -346,7 +346,7 @@ int stm32l4_can_setup(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PWM
-int stm32_pwm_setup(void);
+int stm32l4_pwm_setup(void);
 #endif
 
 /************************************************************************************
@@ -410,7 +410,7 @@ int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name: stm32_cc1101_initialize
+ * Name: stm32l4_cc1101_initialize
  *
  * Description:
  *   Initialize and register the cc1101 radio driver
@@ -418,7 +418,7 @@ int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_WL_CC1101
-int stm32_cc1101_initialize(void);
+int stm32l4_cc1101_initialize(void);
 #endif
 
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

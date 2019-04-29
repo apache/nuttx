@@ -73,14 +73,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_pwm_setup
+ * Name: stm32l4_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
  ************************************************************************************/
 
-int stm32_pwm_setup(void)
+int stm32l4_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;

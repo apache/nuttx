@@ -1,5 +1,5 @@
 /*****************************************************************************
- * configs/stm32l476rg/src/stm32_lsm6dsl.c
+ * configs/nucleo-l476rg/src/stm32_lsm6dsl.c
  *
  *   Copyright (C) 2018 Greg Nutt. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /*****************************************************************************
- * Name: stm32_lsm6dsl_initialize
+ * Name: stm32l4_lsm6dsl_initialize
  *
  * Description:
  *   Initialize I2C-based LSM6DSL.

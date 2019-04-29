@@ -108,14 +108,14 @@ static void cc1101_pwr(FAR struct cc1101_dev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_cc1101_initialize
+ * Name: stm32l4_cc1101_initialize
  *
  * Description:
  *   Initialize and register the cc1101 radio driver
  *
  ****************************************************************************/
 
-int stm32_cc1101_initialize(void)
+int stm32l4_cc1101_initialize(void)
 {
   FAR struct spi_dev_s *spi    = NULL;
   FAR struct cc1101_dev_s *dev = NULL;

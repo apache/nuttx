@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/nucleo-l476rg/src/stm32_timer.c
+ * configs/nucleo-l476rg/src/stm32_timer.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
