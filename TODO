@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 18, 2019)
+NuttX TODO List (Last updated April 29, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -31,7 +31,7 @@ nuttx/:
 
 apps/ and other Add-Ons:
 
-  (2)  Network Utilities (apps/netutils/)
+  (1)  Network Utilities (apps/netutils/)
   (1)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (1)  Modbus (apps/modbus)
@@ -2719,14 +2719,6 @@ o Network Utilities (apps/netutils/)
                has been tested.
   Status:      Open
   Priority:    Medium
-
-  Title:       NETWORK MONITOR NOT GENERALLY AVAILABLE
-  Description: The NSH network management logic has general applicability
-               but is currently useful only because it is embedded in the NSH
-               module.  It should be moved to apps/system or, better,
-               apps/netutils.
-  Status:      Open
-  Priority:    Low
 
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
