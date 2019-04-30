@@ -2504,7 +2504,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
       /* Enable link up/down interrupts */
 
       ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
-                        (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+                        (MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN));
     }
 
   /* Disable management port (probably) */

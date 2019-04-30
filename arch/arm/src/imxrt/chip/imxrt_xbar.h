@@ -45,6 +45,17 @@
 #include <stdint.h>
 #include "chip/imxrt_memorymap.h"
 
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include "chip/rt102x/imxrt102x_xbar.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include "chip/rt105x/imxrt105x_xbar.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
+#  include "chip/rt106x/imxrt106x_xbar.h"
+#else
+#  error Unrecognized i.MX RT architecture
+#endif
+
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/

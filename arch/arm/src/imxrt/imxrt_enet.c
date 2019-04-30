@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_enet.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -185,6 +185,9 @@
  *    value into a boolean: true=duplex mode, false=half-duplex mode
  *
  * The imxrt1050-evk board uses a KSZ8081 PHY
+ * The Versiboard2 uses a LAN8720 PHY
+ *
+ * ...and further PHY descriptions here.
  */
 
 #if defined(CONFIG_ETH0_PHY_KSZ8081)
@@ -196,6 +199,15 @@
 #  define BOARD_PHY_10BASET(s)  (((s) & MII_PHYCTRL1_MODE_10HDX) != 0)
 #  define BOARD_PHY_100BASET(s) (((s) & MII_PHYCTRL1_MODE_100HDX) != 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s) & MII_PHYCTRL1_MODE_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
+#  define BOARD_PHY_NAME        "LAN8720"
+#  define BOARD_PHYID1          MII_PHYID1_LAN8720
+#  define BOARD_PHYID2          MII_PHYID2_LAN8720
+#  define BOARD_PHY_STATUS      MII_LAN8720_SCSR
+#  define BOARD_PHY_ADDR        (1)
+#  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
+#  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
+#  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -566,8 +578,9 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
  * Function: imxrt_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -627,8 +640,8 @@ static int imxrt_txpoll(struct net_driver_s *dev)
           priv->dev.d_buf =
             (uint8_t *)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet. If
+           * not, return a non-zero value to terminate the poll.
            */
 
           if (imxrt_txringfull(priv))
@@ -976,8 +989,8 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
   uint32_t pending;
 #ifdef CONFIG_NET_MCASTGROUP
-  uint32_t gaurStore;
-  uint32_t galrStore;
+  uint32_t gaurstore;
+  uint32_t galrstore;
 #endif
 
   /* Process pending Ethernet interrupts */
@@ -1017,8 +1030,8 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
        * multicast hash table.
        */
 
-      gaurStore = getreg32(IMXRT_ENET_GAUR);
-      galrStore = getreg32(IMXRT_ENET_GALR);
+      gaurstore = getreg32(IMXRT_ENET_GAUR);
+      galrstore = getreg32(IMXRT_ENET_GALR);
 #endif
 
       (void)imxrt_ifdown(&priv->dev);
@@ -1027,8 +1040,8 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
 #ifdef CONFIG_NET_MCASTGROUP
       /* Now write the multicast table back */
 
-      putreg32(gaurStore, IMXRT_ENET_GAUR);
-      putreg32(galrStore, IMXRT_ENET_GALR);
+      putreg32(gaurstore, IMXRT_ENET_GAUR);
+      putreg32(galrstore, IMXRT_ENET_GALR);
 #endif
 
       /* Then poll the network for new XMIT data */
@@ -1489,8 +1502,8 @@ static void imxrt_txavail_work(FAR void *arg)
 
       if (!imxrt_txringfull(priv))
         {
-          /* No, there is space for another transfer.  Poll the network for new
-           * XMIT data.
+          /* No, there is space for another transfer.  Poll the network for
+           * new XMIT data.
            */
 
           (void)devif_poll(&priv->dev, imxrt_txpoll);
@@ -1558,7 +1571,7 @@ static int imxrt_txavail(struct net_driver_s *dev)
 #ifdef CONFIG_NET_MCASTGROUP
 static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
 {
-  uint32_t crc    = 0xFFFFFFFFU;
+  uint32_t crc    = 0xffffffffu;
   uint32_t count1 = 0;
   uint32_t count2 = 0;
 
@@ -1568,13 +1581,13 @@ static uint32_t imxrt_calcethcrc(const uint8_t *data, size_t length)
     {
       uint8_t c = data[count1];
 
-      for (count2 = 0; count2 < 0x08U; count2++)
+      for (count2 = 0; count2 < 0x08u; count2++)
         {
           if ((c ^ crc) & 1U)
             {
               crc >>= 1U;
               c   >>= 1U;
-              crc  ^= 0xEDB88320U;
+              crc  ^= 0xedb88320u;
             }
           else
             {
@@ -1614,7 +1627,7 @@ static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   crc = imxrt_calcethcrc(mac, 6);
-  hashindex = (crc >> 26) & 0x3F;
+  hashindex = (crc >> 26) & 0x3f;
 
   return hashindex;
 }
@@ -1672,8 +1685,8 @@ static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Function: imxrt_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1747,9 +1760,10 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
     {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
-    {
-          struct mii_ioctl_notify_s *req = (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
+          struct mii_ioctl_notify_s *req =
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
 
           ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
           if (ret == OK)
@@ -1834,7 +1848,7 @@ static int imxrt_phyintenable(struct imxrt_driver_s *priv)
       /* Enable link up/down interrupts */
 
       ret = imxrt_writemii(priv, priv->phyaddr, MII_KSZ8081_INT,
-                           (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+                           (MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN));
     }
 
   return ret;
@@ -2025,7 +2039,8 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
   if (renogphy)
     {
       /* Loop (potentially infinitely?) until we successfully communicate with
-       * the PHY.
+       * the PHY. This is 'standard stuff' that should work for any PHY - we
+       * are not communicating with it's 'special' registers at this point.
        */
 
       ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
@@ -2047,7 +2062,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
       if (retries >= 3)
         {
-          nerr("ERROR: Failed to read %s PHYID1 at address %d\n", phyaddr);
+          nerr("ERROR: Failed to read %s PHYID1 at address %d\n", BOARD_PHY_NAME, phyaddr);
           return -ENOENT;
         }
 
@@ -2086,6 +2101,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
           return -ENXIO;
         }
 
+#ifdef CONFIG_ETH0_PHY_KSZ8081
       /* Reset PHY */
 
       imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
@@ -2115,6 +2131,31 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
       imxrt_writemii(priv, phyaddr, MII_KSZ8081_OMSO,
                      (phydata & ~(1 << 5)));
+
+      /* Set Ethernet led to green = activity and yellow = link and  */
+
+      ret = imxrt_readmii(priv, phyaddr, MII_KSZ8081_PHYCTRL2, &phydata);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read MII_KSZ8081_PHYCTRL2\n");
+          return ret;
+        }
+
+      imxrt_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
+                     (phydata | (1 << 4)));
+
+#elif defined (CONFIG_ETH0_PHY_LAN8720)
+
+        /* Make sure that PHY comes up in correct mode when it's reset */
+
+        imxrt_writemii(priv, phyaddr, MII_LAN8720_MODES,
+               MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
+               MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
+
+        /* ...and reset PHY */
+
+        imxrt_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+#endif
 
       /* Start auto negotiation */
 
@@ -2163,18 +2204,6 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
 
           imxrt_writemii(priv, phyaddr, MII_MCR, 0);
         }
-
-      /* Set Ethernet led to green = activity and yellow = link and  */
-
-      ret = imxrt_readmii(priv, phyaddr, MII_KSZ8081_PHYCTRL2, &phydata);
-      if (ret < 0)
-        {
-          nerr("ERROR: Failed to read MII_KSZ8081_PHYCTRL2\n");
-          return ret;
-        }
-
-      imxrt_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
-                     (phydata | (1 << 4)));
     }
 
   /* When we get here we have a (negotiated) speed and duplex. This is also
@@ -2349,8 +2378,8 @@ static void imxrt_initbuffers(struct imxrt_driver_s *priv)
 
   /* Set the wrap bit in the last descriptors to form a ring */
 
-  priv->txdesc[CONFIG_IMXRT_ENET_NTXBUFFERS-1].status1 |= TXDESC_W;
-  priv->rxdesc[CONFIG_IMXRT_ENET_NRXBUFFERS-1].status1 |= RXDESC_W;
+  priv->txdesc[CONFIG_IMXRT_ENET_NTXBUFFERS - 1].status1 |= TXDESC_W;
+  priv->rxdesc[CONFIG_IMXRT_ENET_NRXBUFFERS - 1].status1 |= RXDESC_W;
 
   /* We start with RX descriptor 0 and with no TX descriptors in use */
 
@@ -2433,19 +2462,7 @@ int imxrt_netinitialize(int intf)
   DEBUGASSERT(intf < CONFIG_IMXRT_ENET_NETHIFS);
   priv = &g_enet[intf];
 
-  /* Init ENET PLL6 */
-
-  regval = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
-           CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ |
-           CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_REF_24M |
-           CCM_ANALOG_PLL_ENET_ENET1_125M_EN;
-  putreg32(regval, IMXRT_CCM_ANALOG_PLL_ENET);
-
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) & CCM_ANALOG_PLL_ENET_LOCK) == 0)
-    {
-    }
-
-  /* Enable ENET1_TX_CLK_DIR */
+  /* Enable ENET1_TX_CLK_DIR (Provides 50MHz clk OUT to PHY) */
 
   regval = getreg32(IMXRT_IOMUXC_GPR_GPR1);
   regval |= GPR_GPR1_ENET1_TX_CLK_OUT_EN;
@@ -2457,25 +2474,18 @@ int imxrt_netinitialize(int intf)
 
   /* Configure all ENET/MII pins */
 
-  imxrt_config_gpio(GPIO_ENET_MDIO_3);
-  imxrt_config_gpio(GPIO_ENET_MDC_3);
-  imxrt_config_gpio(GPIO_ENET_RX_EN_1);
-  imxrt_config_gpio(GPIO_ENET_RX_ER_1);
-  imxrt_config_gpio(GPIO_ENET_RX_DATA00);
-  imxrt_config_gpio(GPIO_ENET_RX_DATA01);
-  imxrt_config_gpio(GPIO_ENET_TX_DATA00);
-  imxrt_config_gpio(GPIO_ENET_TX_DATA01);
-  imxrt_config_gpio(GPIO_ENET_TX_CLK_1);
-  imxrt_config_gpio(GPIO_ENET_TX_EN_1);
-
-  /* Configure daisy chain pins */
-
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_IPG_CLK_RMII_OFFSET);
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_MDIO_OFFSET);
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET0_RXDATA_OFFSET);
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET1_RXDATA_OFFSET);
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_RXEN_OFFSET);
-  putreg32(1, IMXRT_IOMUXC_BASE+IMXRT_INPUT_ENET_RXERR_OFFSET);
+  imxrt_config_gpio(GPIO_ENET_MDIO);
+  imxrt_config_gpio(GPIO_ENET_MDC);
+  imxrt_config_gpio(GPIO_ENET_RX_EN);
+  imxrt_config_gpio(GPIO_ENET_RDATA00);
+  imxrt_config_gpio(GPIO_ENET_RDATA01);
+  imxrt_config_gpio(GPIO_ENET_TDATA00);
+  imxrt_config_gpio(GPIO_ENET_TDATA01);
+  imxrt_config_gpio(GPIO_ENET_TX_CLK);
+  imxrt_config_gpio(GPIO_ENET_TX_EN);
+#ifdef GPIO_ENET_RX_ER
+  imxrt_config_gpio(GPIO_ENET_RX_ER);
+#endif
 
   /* Attach the Ethernet MAC IEEE 1588 timer interrupt handler */
 
@@ -2533,7 +2543,7 @@ int imxrt_netinitialize(int intf)
   mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;
-  uidml &= 0x0000FEFF;
+  uidml &= 0x0000feff;
 
   mac[0] = (uidml & 0x0000ff00) >> 8;
   mac[1] = (uidml & 0x000000ff);

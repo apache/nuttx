@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imxrt/imxrt105x_iomuxc.h
+ * arch/arm/src/imxrt/rt105x/imxrt105x_iomuxc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>

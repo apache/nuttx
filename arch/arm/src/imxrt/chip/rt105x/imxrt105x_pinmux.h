@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- * arch/arm/src/imxrt/chip/imxrt105x_pinmux.h
+ * arch/arm/src/imxrt/chip/rt105x/imxrt105x_pinmux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

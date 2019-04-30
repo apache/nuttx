@@ -43,10 +43,12 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
-#  include "chip/imxrt105x_gpio.h"
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include "chip/rt102x/imxrt102x_gpio.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include "chip/rt105x/imxrt105x_gpio.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
-#  include "chip/imxrt106x_gpio.h"
+#  include "chip/rt106x/imxrt106x_gpio.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif

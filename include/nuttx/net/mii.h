@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/mii.h
  *
- *   Copyright (C) 2008-2010, 2012-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2015, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -369,6 +370,24 @@
 #define MII_LAN8720_SPSCR_ANEGDONE   (1 << 12) /* Bit 12: Autonegotiation complete */
                                                /* Bits 13-15: Reserved */
 
+/* SMSC LAN8720 MODES register bits */
+
+#define MII_LAN8720_MODES_PHYAD_SHIFT (0)      /* Bits 0-4: Phy Address */
+#define MII_LAN8720_MODES_PHYAD_MASK  (0x1f << MII_LAN8720_MODES_PHYAD_SHIFT)
+#define MII_LAN8720_MODES_PHYAD(n)    ((n<<MII_LAN8720_MODES_PHYAD_SHIFT) & MII_LAN8720_MODES_PHYAD_MASK)
+#define MII_LAN8720_MODES_MODE_SHIFT  (5)      /* Bits 5-7: Mode */
+#define MII_LAN8720_MODES_MODE_MASK   (7 << MII_LAN8720_MODES_MODE_SHIFT)
+#define MII_LAN8720_MODES_MODE(n)     (( n << MII_LAN8720_MODES_MODE_SHIFT) & MII_LAN8720_MODES_MODE_MASK)
+#define MII_LAN8720_MODES_10BTHD       MII_LAN8720_MODES_MODE(0)
+#define MII_LAN8720_MODES_10BTFD       MII_LAN8720_MODES_MODE(1)
+#define MII_LAN8720_MODES_100BTHD_TRC  MII_LAN8720_MODES_MODE(2)
+#define MII_LAN8720_MODES_100BTHD_TC   MII_LAN8720_MODES_MODE(3)
+#define MII_LAN8720_MODES_100BTHDA_TRC MII_LAN8720_MODES_MODE(4)
+#define MII_LAN8720_MODES_RPT          MII_LAN8720_MODES_MODE(5)
+#define MII_LAN8720_MODES_PDN          MII_LAN8720_MODES_MODE(6)
+#define MII_LAN8720_MODES_ALL          MII_LAN8720_MODES_MODE(7)
+#define MII_LAN8720_MODES_RESV        (1 << 14) /* Bit 14: Set to 1 */
+
 /* SMSC LAN8740 MII ID1/2 register bits */
 
 #define MII_PHYID1_LAN8740           0x0007    /* ID1 value for LAN8740 */
@@ -546,23 +565,23 @@
                                                /* Bits 0-3: Reserved */
 /* KSZ8041/51/81 Register 0x1b: Interrupt control/status */
 
-#define MII_KSZ80x1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
-#define MII_KSZ80x1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
-#define MII_KSZ80x1_INT_PREN         (1 << 13) /* Page received interrupt enable */
-#define MII_KSZ80x1_INT_PDFEN        (1 << 12) /* Parallel detect fault interrupt enable */
-#define MII_KSZ80x1_INT_LPAEN        (1 << 11) /* Link partner acknowledge interrupt enable */
-#define MII_KSZ80x1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
-#define MII_KSZ80x1_INT_RFEN         (1 << 9)  /* Remote fault interrupt enable */
-#define MII_KSZ80x1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
+#define MII_KSZ80X1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
+#define MII_KSZ80X1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
+#define MII_KSZ80X1_INT_PREN         (1 << 13) /* Page received interrupt enable */
+#define MII_KSZ80X1_INT_PDFEN        (1 << 12) /* Parallel detect fault interrupt enable */
+#define MII_KSZ80X1_INT_LPAEN        (1 << 11) /* Link partner acknowledge interrupt enable */
+#define MII_KSZ80X1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
+#define MII_KSZ80X1_INT_RFEN         (1 << 9)  /* Remote fault interrupt enable */
+#define MII_KSZ80X1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
 
-#define MII_KSZ80x1_INT_J            (1 << 7)  /* Jabber interrupt */
-#define MII_KSZ80x1_INT_RE           (1 << 6)  /* Receive error interrupt */
-#define MII_KSZ80x1_INT_PR           (1 << 5)  /* Page received interrupt */
-#define MII_KSZ80x1_INT_PDF          (1 << 4)  /* Parallel detect fault interrupt */
-#define MII_KSZ80x1_INT_LPA          (1 << 3)  /* Link partner acknowledge interrupt */
-#define MII_KSZ80x1_INT_LD           (1 << 2)  /* Link down fault interrupt */
-#define MII_KSZ80x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
-#define MII_KSZ80x1_INT_LU           (1 << 0)  /* Link up interrupt */
+#define MII_KSZ80X1_INT_J            (1 << 7)  /* Jabber interrupt */
+#define MII_KSZ80X1_INT_RE           (1 << 6)  /* Receive error interrupt */
+#define MII_KSZ80X1_INT_PR           (1 << 5)  /* Page received interrupt */
+#define MII_KSZ80X1_INT_PDF          (1 << 4)  /* Parallel detect fault interrupt */
+#define MII_KSZ80X1_INT_LPA          (1 << 3)  /* Link partner acknowledge interrupt */
+#define MII_KSZ80X1_INT_LD           (1 << 2)  /* Link down fault interrupt */
+#define MII_KSZ80X1_INT_RF           (1 << 1)  /* Remote fault interrupt */
+#define MII_KSZ80X1_INT_LU           (1 << 0)  /* Link up interrupt */
 
 /* KSZ8041 Register 0x1e: PHY Control 1 -- To be provided */
 /* KSZ8041 Register 0x1f: PHY Control 2 */

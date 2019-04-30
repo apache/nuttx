@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/chip/imxrt_dmamux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,33 +32,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_DMAMUX_H
 #define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_DMAMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip/imxrt_memorymap.h"
 
-#if defined(CONFIG_ARCH_FAMILY_IMXRT105x)
-#  include "chip/imxrt105x_dmamux.h"
+#if defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+#  include "chip/rt102x/imxrt102x_dmamux.h"
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT105x)
+#  include "chip/rt105x/imxrt105x_dmamux.h"
 #elif defined(CONFIG_ARCH_FAMILY_IMXRT106x)
-#  include "chip/imxrt106x_dmamux.h"
+#  include "chip/rt106x/imxrt106x_dmamux.h"
 #else
 #  error Unrecognized i.MX RT architecture
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define IMXRT_DMAMUX_NCHAN             32
 
-/* DMAMUX Register Offsets **********************************************************/
+/* DMAMUX Register Offsets **************************************************/
 
 #define IMXRT_DMAMUX_CHCFG_OFFSET(n)   ((uintptr_t)(n) << 2)
 #  define IMXRT_DMAMUX_CHCFG0_OFFSET   0x0000  /* Channel configuration register 0 */
@@ -94,7 +96,7 @@
 #  define IMXRT_DMAMUX_CHCFG30_OFFSET  0x0078  /* Channel configuration register 30 */
 #  define IMXRT_DMAMUX_CHCFG31_OFFSET  0x007c  /* Channel configuration register 31 */
 
-/* DMAMUX Register Addresses ********************************************************/
+/* DMAMUX Register Addresses ************************************************/
 
 #define IMXRT_DMAMUX_CHCFG(n)          (IMXRT_DMAMUX_BASE + IMXRT_DMAMUX_CHCFG_OFFSET(n))
 #  define IMXRT_DMAMUX_CHCFG0          (IMXRT_DMAMUX_BASE + IMXRT_DMAMUX_CHCFG0_OFFSET)
@@ -130,7 +132,7 @@
 #  define IMXRT_DMAMUX_CHCFG30         (IMXRT_DMAMUX_BASE + IMXRT_DMAMUX_CHCFG30_OFFSET)
 #  define IMXRT_DMAMUX_CHCFG31         (IMXRT_DMAMUX_BASE + IMXRT_DMAMUX_CHCFG31_OFFSET)
 
-/* DMAMUX Bit-Field Definitions *****************************************************/
+/* DMAMUX Bit-Field Definitions *********************************************/
 
 /* Channel configuration registers 0-31 */
 

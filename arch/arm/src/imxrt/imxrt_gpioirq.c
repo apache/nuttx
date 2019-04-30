@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_gpioirq.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,13 +123,18 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
   else
 #endif
 #ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
+#ifdef IMXRT_GPIO4_IMR
   if (irq < _IMXRT_GPIO4_0_15_BASE)
+#else
+  if (irq < _IMXRT_GPIO5_0_15_BASE)
+#endif
     {
       *regaddr = IMXRT_GPIO3_IMR;
       *pin     = irq - _IMXRT_GPIO3_16_31_BASE + 16;
     }
   else
 #endif
+#ifdef IMXRT_GPIO4_IMR
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
   if (irq < _IMXRT_GPIO4_16_31_BASE)
     {
@@ -145,6 +150,7 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
       *pin     = irq - _IMXRT_GPIO4_16_31_BASE + 16;
     }
   else
+#endif
 #endif
 #ifdef CONFIG_IMXRT_GPIO5_0_15_IRQ
   if (irq < _IMXRT_GPIO5_16_31_BASE)
@@ -463,6 +469,7 @@ static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context,
 }
 #endif
 
+#ifdef IMXRT_GPIO4_IMR
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
 static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context,
                                       FAR void *arg)
@@ -535,6 +542,7 @@ static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context,
 
   return OK;
 }
+#endif
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO5_0_15_IRQ
@@ -629,7 +637,9 @@ void imxrt_gpioirq_initialize(void)
   putreg32(0, IMXRT_GPIO1_IMR);
   putreg32(0, IMXRT_GPIO2_IMR);
   putreg32(0, IMXRT_GPIO3_IMR);
+#if defined(IMXRT_GPIO4_IMR)
   putreg32(0, IMXRT_GPIO4_IMR);
+#endif
   putreg32(0, IMXRT_GPIO5_IMR);
 
   /* Disable all unconfigured GPIO interrupts at the NVIC */
@@ -652,11 +662,13 @@ void imxrt_gpioirq_initialize(void)
 #ifndef CONFIG_IMXRT_GPIO3_16_31_IRQ
   up_disable_irq(IMXRT_IRQ_GPIO3_16_31);
 #endif
+#ifdef IMXRT_GPIO4_IMR
 #ifndef CONFIG_IMXRT_GPIO4_0_15_IRQ
   up_disable_irq(IMXRT_IRQ_GPIO4_0_15);
 #endif
 #ifndef CONFIG_IMXRT_GPIO4_16_31_IRQ
   up_disable_irq(IMXRT_IRQ_GPIO4_16_31);
+#endif
 #endif
 #ifndef CONFIG_IMXRT_GPIO5_0_15_IRQ
   up_disable_irq(IMXRT_IRQ_GPIO5_0_15);
@@ -705,6 +717,7 @@ void imxrt_gpioirq_initialize(void)
   up_enable_irq(IMXRT_IRQ_GPIO3_16_31);
 #endif
 
+#ifdef IMXRT_GPIO4_IMR
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
   DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO4_0_15,
                          imxrt_gpio4_0_15_interrupt, NULL));
@@ -715,6 +728,7 @@ void imxrt_gpioirq_initialize(void)
   DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO4_16_31,
                          imxrt_gpio4_16_31_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO4_16_31);
+#endif
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO5_0_15_IRQ

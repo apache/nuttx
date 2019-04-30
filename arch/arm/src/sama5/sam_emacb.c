@@ -2982,7 +2982,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
   uint16_t phyval;
   int ret;
 
-  /* Does this MAC support a KSZ80x1 PHY? */
+  /* Does this MAC support a KSZ80X1 PHY? */
 
   if (priv->phytype == SAMA5_PHY_KSZ8051 || priv->phytype == SAMA5_PHY_KSZ8081)
     {
@@ -3001,7 +3001,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
           /* Enable link up/down interrupts */
 
           ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
-                            (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+                            (MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN));
         }
 
       /* Disable management port (probably) */

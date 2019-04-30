@@ -12,6 +12,22 @@ choice
 	default ARCH_CHIP_MIMXRT1052DVL6A
 	depends on ARCH_CHIP_IMXRT
 
+config ARCH_CHIP_MIMXRT1021CAG4A
+	bool "MIMXRT1021CAG4A"
+	select ARCH_FAMILY_MIMXRT1021C
+
+config ARCH_CHIP_MIMXRT1021CAF4A
+	bool "MIMXRT1021CAF4A"
+	select ARCH_FAMILY_MIMXRT1021C
+
+config ARCH_CHIP_MIMXRT1021DAF5A
+	bool "MIMXRT1021DAF5A"
+	select ARCH_FAMILY_MIMXRT1021D
+
+config ARCH_CHIP_MIMXRT1021DAG5A
+	bool "MIMXRT1021DAG5A"
+	select ARCH_FAMILY_MIMXRT1021D
+
 config ARCH_CHIP_MIMXRT1051DVL6A
 	bool "MIMXRT1051DVL6A"
 	select ARCH_FAMILY_MXRT105xDVL6A
@@ -47,6 +63,30 @@ config ARCH_CHIP_MIMXRT1062CVL5A
 endchoice # i.MX RT Chip Selection
 
 # i.MX RT Families
+
+config ARCH_FAMILY_MIMXRT1021D
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT102x
+	---help---
+		i.MX RT1020 Crossover Processors for Consumer Products
+
+config ARCH_FAMILY_MIMXRT1021C
+	bool
+	default n
+	select ARCH_FAMILY_IMXRT102x
+	---help---
+		i.MX RT1020 Crossover Processors for Industrial Products
+
+config ARCH_FAMILY_IMXRT102x
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 
 config ARCH_FAMILY_MXRT105xDVL6A
 	bool
@@ -348,7 +388,7 @@ menuconfig IMXRT_GPIO_IRQ
 if IMXRT_GPIO_IRQ
 
 config IMXRT_GPIO1_0_15_IRQ
-	bool "GPIO1 Pins 8-15 interrupts"
+	bool "GPIO1 Pins 0-15 interrupts"
 	default n
 
 config IMXRT_GPIO1_16_31_IRQ

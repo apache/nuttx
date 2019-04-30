@@ -1577,8 +1577,8 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_USART_CONSOLE
-  struct lpc54_dev_s *priv = (struct lpc54_dev_s *)CONSOLE_DEV.priv;
+#ifdef CONSOLE_DEV
+  struct imxrt_uart_s *priv = (struct imxrt_uart_s *)CONSOLE_DEV.priv;
   uint32_t ie;
 
   imxrt_disableuartint(priv, &ie);
@@ -1589,11 +1589,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      imxrt_lowputc('\r');
     }
 
-  up_lowputc(ch);
-  imxrt_restoreuartint(priv, intset);
+  imxrt_lowputc(ch);
+  imxrt_restoreuartint(priv, ie);
 #endif
 
   return ch;

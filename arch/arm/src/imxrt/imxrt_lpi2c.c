@@ -1617,7 +1617,7 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
   priv->msgc  = count;
   priv->flags = msgs->flags;
 
-  i2cinfo("Flags %d, len %d \n", msgs->flags, msgs->length);
+  i2cinfo("Flags %x, len %d \n", msgs->flags, msgs->length);
 
   /* Reset I2C trace logic */
 
@@ -1651,23 +1651,27 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg
         {
           /* Bus Error */
 
+          i2cerr("Bus error\n");
           ret = -EIO;
         }
       else if (status & LPI2C_MSR_ALF)
         {
           /* Arbitration Lost (master mode) */
 
+          i2cerr("Arbitration lost\n");
           ret = -EAGAIN;
         }
       else if (status & LPI2C_MSR_NDF)
         {
           /* Acknowledge Failure */
 
+          i2cerr("Ack failure\n");
           ret = -ENXIO;
         }
       else
         {
-          ret = -EINTR;
+            i2cerr("Unspecified error\n");
+            ret = -EINTR;
         }
     }
 

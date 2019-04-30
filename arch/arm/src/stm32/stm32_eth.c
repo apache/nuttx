@@ -206,7 +206,7 @@
 #    error missing logic
 #  elif defined( CONFIG_ETH0_PHY_KSZ8081)
 #    define MII_INT_REG    MII_KSZ8081_INT
-#    define MII_INT_SETEN  MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN
+#    define MII_INT_SETEN  MII_KSZ80X1_INT_LDEN | MII_KSZ80X1_INT_LUEN
 #    define MII_INT_CLREN  0
 #  elif defined( CONFIG_ETH0_PHY_KSZ90x1)
 #    error missing logic

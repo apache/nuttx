@@ -164,7 +164,7 @@
 #  define GPIO_ALT2            (2 << GPIO_ALT_SHIFT)  /* Alternate function 2 */
 #  define GPIO_ALT3            (3 << GPIO_ALT_SHIFT)  /* Alternate function 3 */
 #  define GPIO_ALT4            (4 << GPIO_ALT_SHIFT)  /* Alternate function 4 */
-                                                      /* Alternate function 5 is GPIO */
+#  define GPIO_ALT5            (5 << GPIO_ALT_SHIFT)  /* Alternate function 5 is GPIO */
 #  define GPIO_ALT6            (6 << GPIO_ALT_SHIFT)  /* Alternate function 6 */
 #  define GPIO_ALT7            (7 << GPIO_ALT_SHIFT)  /* Alternate function 7 */
 #  define GPIO_ALT8            (8 << GPIO_ALT_SHIFT)  /* Alternate function 8 */
@@ -205,6 +205,7 @@
 #define GPIO_PADMUX_SHIFT      (16)      /* Bits 16-23: Peripheral alternate function */
 #define GPIO_PADMUX_MASK       (0xff << GPIO_PADMUX_SHIFT)
 #  define GPIO_PADMUX(n)       ((uint32_t)(n) << GPIO_PADMUX_SHIFT)
+#define GPIO_PADMUX_GET(n)     ((n&GPIO_PADMUX_MASK)>>GPIO_PADMUX_SHIFT)
 
 /* IOMUX Pin Configuration:
  *

@@ -1,10 +1,11 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_clockconfig.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
  *   Authors:  Janne Rosberg <janne@offcode.fi>
  *             Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *             David Sidrane <david_s5@nscdg.com>
+ *             Dave Marples <dave@marples.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -217,10 +218,123 @@ static void imxrt_lcd_clockconfig(void)
 
   modifyreg32(IMXRT_CCM_CBCMR, CCM_CBCMR_LCDIF_PODF_MASK,
       CCM_CBCMR_LCDIF_PODF(post_divider));
-
 }
 
 #endif
+
+/****************************************************************************
+ * Name: imxrt_pllsetup
+ ****************************************************************************/
+
+static void imxrt_pllsetup(void)
+
+{
+  uint32_t reg;
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined (CONFIG_ARCH_FAMILY_IMXRT106x))
+
+  /* Init Arm PLL1 */
+
+  reg = CCM_ANALOG_PLL_ARM_DIV_SELECT(IMXRT_ARM_PLL_DIV_SELECT) |
+        CCM_ANALOG_PLL_ARM_ENABLE;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_ARM);
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ARM) & CCM_ANALOG_PLL_ARM_LOCK) == 0)
+    {
+    }
+
+  /* Init Sys PLL2 */
+
+  reg = CCM_ANALOG_PLL_SYS_DIV_SELECT(IMXRT_SYS_PLL_SELECT) |
+        CCM_ANALOG_PLL_SYS_ENABLE;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_SYS);
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
+    {
+    }
+
+#ifdef CONFIG_IMXRT_LCD
+  /* Init Video PLL5 */
+
+  imxrt_lcd_clockconfig();
+#endif
+
+  /* Init ENET PLL6 */
+
+  reg    = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ | CCM_ANALOG_PLL_ENET_ENET1_125M_EN |
+           CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN | CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN |
+           CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ;
+
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
+
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) & CCM_ANALOG_PLL_ENET_LOCK) == 0)
+    {
+    }
+
+#elif defined(CONFIG_ARCH_FAMILY_IMXRT102x)
+  /* Init Sys PLL2 */
+  /* First reset its fractional dividers */
+
+  uint32_t pll2reg=getreg32(IMXRT_CCM_ANALOG_PFD_528);
+    putreg32(pll2reg |
+             CCM_ANALOG_PFD_528_PFD0_CLKGATE |
+             CCM_ANALOG_PFD_528_PFD1_CLKGATE |
+             CCM_ANALOG_PFD_528_PFD2_CLKGATE |
+             CCM_ANALOG_PFD_528_PFD3_CLKGATE,
+             IMXRT_CCM_ANALOG_PFD_528 );
+
+  reg = CCM_ANALOG_PLL_SYS_DIV_SELECT(IMXRT_SYS_PLL_DIV_SELECT) |
+        CCM_ANALOG_PLL_SYS_ENABLE;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_SYS);
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
+    {
+    }
+
+  putreg32(pll2reg,IMXRT_CCM_ANALOG_PFD_528);
+
+  /* Init USB PLL3 */
+  /* capture it's original value */
+
+  uint32_t pll3reg=getreg32(IMXRT_CCM_ANALOG_PFD_480);
+  putreg32(pll3reg |
+            CCM_ANALOG_PFD_480_PFD0_CLKGATE |
+            CCM_ANALOG_PFD_480_PFD1_CLKGATE |
+            CCM_ANALOG_PFD_480_PFD2_CLKGATE |
+            CCM_ANALOG_PFD_480_PFD3_CLKGATE,
+            IMXRT_CCM_ANALOG_PFD_480 );
+
+  reg = CCM_ANALOG_PLL_USB1_DIV_SELECT(IMXRT_USB1_PLL_DIV_SELECT) |
+        CCM_ANALOG_PLL_USB1_ENABLE | CCM_ANALOG_PLL_USB1_EN_USB_CLKS |
+        CCM_ANALOG_PLL_USB1_POWER;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB1);
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB1) & CCM_ANALOG_PLL_USB1_LOCK) == 0)
+    {
+    }
+
+  putreg32(pll3reg,IMXRT_CCM_ANALOG_PFD_480);
+
+  /* Init Audio PLL4 */
+
+  reg = CCM_ANALOG_PLL_AUDIO_DIV_SELECT(IMXRT_AUDIO_PLL_DIV_SELECT) |
+        CCM_ANALOG_PLL_AUDIO_ENABLE;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_AUDIO);
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_AUDIO) & CCM_ANALOG_PLL_AUDIO_LOCK) == 0)
+    {
+    }
+
+  /* Init ENET PLL6 */
+
+  reg = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ | CCM_ANALOG_PLL_ENET_ENET1_125M_EN |
+        CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN | CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN;
+
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_ENET);
+
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ENET) & CCM_ANALOG_PLL_ENET_LOCK) == 0)
+    {
+    }
+
+#else
+#error Unrecognised IMXRT family member for clock config
+#endif
+
+}
 
 /****************************************************************************
  * Public Functions
@@ -276,31 +390,9 @@ void imxrt_clockconfig(void)
   reg |= DCDC_REG3_TRG(IMXRT_VDD_SOC);
   putreg32(reg, IMXRT_DCDC_REG3);
 
-  /* Init Arm PLL1 */
+  /* OK, now nothing is depending on us, configure the PLLs */
 
-  reg = CCM_ANALOG_PLL_ARM_DIV_SELECT(IMXRT_ARM_PLL_DIV_SELECT) |
-        CCM_ANALOG_PLL_ARM_ENABLE;
-  putreg32(reg, IMXRT_CCM_ANALOG_PLL_ARM);
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_ARM) & CCM_ANALOG_PLL_ARM_LOCK) == 0)
-    {
-    }
-
-  /* Init Sys PLL2 */
-
-  reg = CCM_ANALOG_PLL_SYS_DIV_SELECT(IMXRT_SYS_PLL_SELECT) |
-        CCM_ANALOG_PLL_SYS_ENABLE;
-  putreg32(reg, IMXRT_CCM_ANALOG_PLL_SYS);
-  while ((getreg32(IMXRT_CCM_ANALOG_PLL_SYS) & CCM_ANALOG_PLL_SYS_LOCK) == 0)
-    {
-    }
-
-#ifdef CONFIG_IMXRT_LCD
-  /* Init Video PLL5 */
-
-  imxrt_lcd_clockconfig();
-#endif
-
-  /* TODO: other pll configs */
+  imxrt_pllsetup();
 
   /* Set Dividers */
 
@@ -325,7 +417,7 @@ void imxrt_clockconfig(void)
   putreg32(reg, IMXRT_CCM_CSCMR1);
 
 #ifndef CONFIG_IMXRT_SEMC_INIT_DONE
-  /* Configure SEMC Clock only if not already done by DCD SDRAM init. */
+  /* Configure SEMC Clock only if not already done by DCD SDR */
 
   reg  = getreg32(IMXRT_CCM_CBCDR);
   reg &= ~CCM_CBCDR_SEMC_PODF_MASK;
@@ -390,7 +482,7 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
-  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5);
+  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(5-1);
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
   while ((getreg32(IMXRT_CCM_CDHIPR) & CCM_CDHIPR_PERIPH_CLK_SEL_BUSY) != 0)

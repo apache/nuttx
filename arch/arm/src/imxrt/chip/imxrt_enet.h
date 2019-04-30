@@ -1,4 +1,4 @@
-/********************************************************************************************
+/*****************************************************************************
  * arch/arm/src/imxrt/chip/imxrt_enet.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_ENET_H
 #define __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_ENET_H
 
-/********************************************************************************************
+/*****************************************************************************
  * Included Files
- ********************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ *****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets **********************************************************/
 
 #define IMXRT_ENET_EIR_OFFSET      0x0004 /* Interrupt Event Register */
 #define IMXRT_ENET_EIMR_OFFSET     0x0008 /* Interrupt Mask Register */
@@ -103,7 +103,7 @@
 #define IMXRT_ENET_TCSR3_OFFSET    0x0620 /* Timer Control Status Register */
 #define IMXRT_ENET_TCCR3_OFFSET    0x0624 /* Timer Compare Capture Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses ********************************************************/
 
 #define IMXRT_ENET_EIR             (IMXRT_ENET_BASE+IMXRT_ENET_EIR_OFFSET)
 #define IMXRT_ENET_EIMR            (IMXRT_ENET_BASE+IMXRT_ENET_EIMR_OFFSET)
@@ -156,7 +156,7 @@
 #define IMXRT_ENET_TCSR3           (IMXRT_ENET_BASE+IMXRT_ENET_TCSR3_OFFSET)
 #define IMXRT_ENET_TCCR3           (IMXRT_ENET_BASE+IMXRT_ENET_TCCR3_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions **************************************************/
 
 /* Interrupt Event Register, Interrupt Mask Register */
                                                /* Bits 0-14: Reserved */
@@ -199,6 +199,7 @@
 #define ENET_ECR_DBSWP               (1 << 8)  /* Bit 8:  Swap bytes */
 #endif
                                                /* Bits 9-31: Reserved */
+#define ECR_RESV_VAL                 (7 << 28) /* Reserve val to write */
 /* MII Management Frame Register */
 
 #define ENET_MMFR_DATA_SHIFT         (0)       /* Bits 0-15: Management frame data */
@@ -453,20 +454,20 @@
                                                /* Bits 8-31: Reserved */
 /* Timer Compare Capture Register (32-bit compare value) */
 
-/* Buffer Descriptors ***********************************************************************/
+/* Buffer Descriptors ********************************************************/
 /* Endian-independent descriptor offsets */
 
-#define DESC_STATUS1_OFFSET         (0)
-#define DESC_LENGTH_OFFSET          (2)
-#define DESC_DATAPTR_OFFSET         (4)
-#define DESC_LEGACY_LEN             (8)
+#define DESC_STATUS1_OFFSET          (0)
+#define DESC_LENGTH_OFFSET           (2)
+#define DESC_DATAPTR_OFFSET          (4)
+#define DESC_LEGACY_LEN              (8)
 
-#define DESC_STATUS2_OFFSET         (8)
-#define DESC_LENPROTO_OFFSET        (12)
-#define DESC_CHECKSUM_OFFSET        (14)
-#define DESC_BDU_OFFSET             (16)
-#define DESC_TIMESTAMP_OFFSET       (20)
-#define DESC_ENHANCED_LEN           (32)
+#define DESC_STATUS2_OFFSET          (8)
+#define DESC_LENPROTO_OFFSET         (12)
+#define DESC_CHECKSUM_OFFSET         (14)
+#define DESC_BDU_OFFSET              (16)
+#define DESC_TIMESTAMP_OFFSET        (20)
+#define DESC_ENHANCED_LEN            (32)
 
 /* Legacy/Common TX Buffer Descriptor Bit Definitions.
  *
@@ -599,10 +600,12 @@
 #  define RXDESC_BDU                 (1 << 7)
 #endif
 
-/********************************************************************************************
+/*****************************************************************************
  * Public Types
- ********************************************************************************************/
-/* Buffer Descriptors ***********************************************************************/
+ *****************************************************************************/
+
+/* Buffer Descriptors ********************************************************/
+
 /* Legacy Buffer Descriptor */
 
 #ifdef CONFIG_ENET_ENHANCEDBD
@@ -658,12 +661,12 @@ struct enet_desc_s
 #endif /* IMXRT_USE_DBSWAP */
 #endif /* CONFIG_ENET_ENHANCEDBD */
 
-/********************************************************************************************
+/*****************************************************************************
  * Public Data
- ********************************************************************************************/
+ *****************************************************************************/
 
-/********************************************************************************************
+/*****************************************************************************
  * Public Functions
- ********************************************************************************************/
+ *****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMXRT_CHIP_IMXRT_ENET_H */
