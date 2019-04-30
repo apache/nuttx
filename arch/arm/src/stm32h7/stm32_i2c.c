@@ -579,8 +579,8 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 static const struct stm32_i2c_config_s stm32_i2c4_config =
 {
   .base          = STM32_I2C4_BASE,
-  .clk_bit       = RCC_APB1LENR_I2C4EN,
-  .reset_bit     = RCC_APB1LRSTR_I2C4RST,
+  .clk_bit       = RCC_APB4ENR_I2C4EN,
+  .reset_bit     = RCC_APB4RSTR_I2C4RST,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
