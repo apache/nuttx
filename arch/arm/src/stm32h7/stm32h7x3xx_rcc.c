@@ -104,7 +104,13 @@ static inline void rcc_reset(void)
   regval  = getreg32(STM32_RCC_CR);
   regval &= ~(RCC_CR_HSEON | RCC_CR_HSI48ON |
               RCC_CR_CSION | RCC_CR_PLL1ON |
-              RCC_CR_PLL2ON | RCC_CR_PLL3ON);
+              RCC_CR_PLL2ON | RCC_CR_PLL3ON |
+              RCC_CR_HSIDIV_MASK);
+
+  /* Set HSI predivider to default (4, 16MHz) */
+
+  regval |= RCC_CR_HSIDIV_4;
+
   putreg32(regval, STM32_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
