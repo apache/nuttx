@@ -125,3 +125,7 @@ endif
 ifeq ($(CONFIG_USBHOST),y)
 CHIP_CSRCS += stm32_otghost.c
 endif
+
+ifeq ($(CONFIG_STM32H7_ETHMAC),y)
+CHIP_CSRCS += stm32_ethernet.c
+endif
