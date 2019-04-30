@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/nucleo-h743zi/include/board.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Simon Laube <simon@leitwert.ch>
  *            Mateusz Szafoni <raiden00@railab.me>
@@ -249,6 +249,19 @@
  */
 
 #define BOARD_FLASH_WAITSTATES 4
+
+/* SDMMC definitions ****************************************************************/
+
+/* Init 400kHz, PLL1Q/(2*250) */
+
+#define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* Just set these to 25 MHz for now, PLL1Q/(2*4), for default speed 12.5MB/s */
+
+#define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+#define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
 
 /* LED definitions ******************************************************************/
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
