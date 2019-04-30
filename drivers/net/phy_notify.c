@@ -329,7 +329,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
 
       client->pid   = pid;
       client->event = *event;
-      snprintf(client->intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1, intf);
+      strncpy(client->intf, intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN + 1);
       client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
 
       /* Attach/re-attach the PHY interrupt */
