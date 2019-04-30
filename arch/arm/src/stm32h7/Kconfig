@@ -195,6 +195,20 @@ config STM32H7_USBHOST_PKTDUMP
 	default n
 	depends on USBHOST
 
+config STM32H7_SDMMC1
+	bool "SDMMC1"
+	default n
+	select STM32H7_SDMMC
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+
+config STM32H7_SDMMC2
+	bool "SDMMC2"
+	default n
+	select STM32H7_SDMMC
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+
 menu "STM32H7 I2C Selection"
 
 config STM32H7_I2C1
@@ -763,6 +777,83 @@ config STM32H7_PM_SERIAL_ACTIVITY
 endif # PM
 endmenu # U[S]ART Configuration
 
+menu "SD/MMC Configuration"
+	depends on STM32H7_SDMMC
+
+config STM32H7_SDMMC_XFRDEBUG
+	bool "SDMMC transfer debug"
+	depends on DEBUG_FS_INFO
+	default n
+	---help---
+		Enable special debug instrumentation analyze SDMMC data transfers.
+		This logic is as non-invasive as possible:  It samples SDMMC
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and CONFIG_DEBUG_INFO.
+
+config STM32H7_SDMMC_IDMA
+	bool "Support IDMA data transfers"
+	default y
+	select STM32H7_SDMMC_DMA
+	depends on STM32H7_DMA
+	---help---
+		Support IDMA data transfers.
+
+menu "SDMMC1 Configuration"
+	depends on STM32H7_SDMMC1
+
+config SDMMC1_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC1"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC1_SDIO_MODE
+	bool "SDIO Card Support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC1_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+endmenu # "SDMMC1 Configuration"
+
+menu "SDMMC2 Configuration"
+	depends on STM32H7_SDMMC2
+
+config SDMMC2_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC2"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC2_SDIO_MODE
+	bool "SDIO Card Support"
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC2_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+endmenu # "SDMMC2 Configuration"
+endmenu # "SD/MMC Configuration"
 config STM32H7_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
 	default n

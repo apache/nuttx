@@ -220,6 +220,12 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_MDMAEN;
 #endif
 
+#ifdef CONFIG_STM32H7_SDMMC1
+  /* SDMMC clock enable */
+
+  regval |= RCC_AHB3ENR_SDMMC1EN;
+#endif
+
   // TODO: ...
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
@@ -396,7 +402,11 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SPI5EN;
 #endif
 
-  // TODO: ...
+#ifdef CONFIG_STM32H7_SDMMC2
+  /* SDMMC2 clock enable */
+
+  regval |= RCC_APB2ENR_SDMMC2EN;
+#endif
 
   putreg32(regval, STM32_RCC_APB2ENR);   /* Enable peripherals */
 }
