@@ -171,7 +171,10 @@ struct nxbe_window_s
                                        */
 #endif
 
-  /* Client state information this is provide in window callbacks */
+  /* Client state information this is provide in window callbacks
+   * Set by nx_openwindow, nx_requestbkgd, nxtk_openwindow, or
+   * nxtk_opentoolbar and persists for the life of the window.
+   */
 
   FAR void *arg;
 };

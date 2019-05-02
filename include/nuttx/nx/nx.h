@@ -149,8 +149,8 @@ struct nx_callback_s
    *            the overall display
    *   bounds - The bounding rectangle that the describes the entire
    *            display
-   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
-   *          nxtk_openwindow, or nxtk_opentoolbar)
+   *   arg    - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *            nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -172,8 +172,8 @@ struct nx_callback_s
    *   hwnd    - Window handle
    *   pos     - The (x,y) position of the mouse
    *   buttons - See NX_MOUSE_* definitions
-   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
-   *          nxtk_openwindow, or nxtk_opentoolbar)
+   *   arg     - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *             nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
