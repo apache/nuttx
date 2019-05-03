@@ -41,20 +41,20 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/battery_gauge.h>
 #include <nuttx/power/battery_ioctl.h>
 
 /* This driver requires:
  *
- * CONFIG_BATTERY - Upper half battery driver support
+ * CONFIG_BATTERY_GAUGE - Upper half battery driver support
  */
 
-#if defined(CONFIG_BATTERY)
+#if defined(CONFIG_BATTERY_GAUGE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,7 +72,7 @@
 
 static int     bat_gauge_open(FAR struct file *filep);
 static int     bat_gauge_close(FAR struct file *filep);
-static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buflen,
+static ssize_t bat_gauge_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t bat_gauge_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
@@ -262,4 +262,4 @@ int battery_gauge_register(FAR const char *devpath,
 
   return ret;
 }
-#endif /* CONFIG_BATTERY */
+#endif /* CONFIG_BATTERY_GAUGE */
