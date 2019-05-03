@@ -653,7 +653,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
           update->whupd = whupd;
           nxgl_rectcopy(&update->rect, &intersection);
 
-          /* Add the upate to the end of the update queue. */
+          /* Add the update to the end of the update queue. */
 
           vnc_add_queue(session, update);
 
@@ -665,7 +665,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
       sched_unlock();
     }
 
-  /* Since we ignore bad rectangles and wait for updata structures, there is
+  /* Since we ignore bad rectangles and wait for update structures, there is
    * really no way a failure can occur.
    */
 

@@ -280,7 +280,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
               ginfo("Received FramebufferUpdateRequest\n");
 
-              /* Read the rest of the SetPixelFormat message */
+              /* Read the rest of the FramebufferUpdateRequest message */
 
               ret = vnc_read_remainder(session,
                                        sizeof(struct rfb_fbupdatereq_s) - 1,
