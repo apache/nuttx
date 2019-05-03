@@ -112,8 +112,25 @@ config VNCSERVER_UPDATE_BUFSIZE
 		example, an update buffers of 32 pixels at 8-bits per pixel and
 		32-rows would yield a buffer size of 1024!
 
-		Ideally, this buffer should fit in one network packet to avoid
-		accessive re-assembly of partial TCP packets.
+		There is a very strong interaction with this setting and the network MTU.
+		Ideally, this buffer should fit in one network packet to avoid accessive
+		re-assembly of partial TCP packets.
+
+		REVISIT:  In fact, if the buffer does not fit in one network packet,
+		then there appears to be reliability issues in the connection.  I am
+		not sure why that is; TCP is a stream so it should not matter how
+		many packets are in a transfer.
+
+		Example:  Negotiated pixel depth = 8 BPP, window width = 800 pixels.
+		CONFIG_VNCSERVER_UPDATE_BUFSIZE needs to be the payload size (MSS)
+		of the transfer or 800 bytes.  The MTU is then:
+
+		  MSS = MTU - sizeof(IP Header) - sizeof(VNC FramebufferUpdate Header)
+
+		For IPv4, the IP Header is 20 bytes; 40 bytes for IPv6.  The
+		FramebufferUpdate header is 16 bytes so.  The desired MSS is 800 bytes
+		so MTU = 836 or 856.  For Ethernet, this is a total packet size of 870
+		bytes.
 
 config VNCSERVER_KBDENCODE
 	bool "Encode keyboard input"

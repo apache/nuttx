@@ -164,7 +164,8 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR lfb_color_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  srcleft = (FAR lfb_color_t *)
+    (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -235,7 +236,8 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR lfb_color_t *)(session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  srcleft = (FAR lfb_color_t *)
+    (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
