@@ -1684,3 +1684,14 @@ Configuration sub-directories
 
     STATUS:
       2019-04-28:  Configuration created.  Not verified.
+      2019-05-04:  Only partially functional.  VNC is a difficult way to
+         debug Twm4Nx because it has its own level of complexities due to
+         networking, mysterious VNC client behavior, and fragile VNC
+         configurations.  I am setting this on the shelf for the time
+         being.  I will stabilize Twm4Nx on another platform first.  Just
+         too many degrees of freedom.
+      2019-05-04:  Testing on hardware reveals that VNC is the source of
+         most of the issues.  Things look good on real, local hardware
+         (see configs/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
+         enough for this kind of usage at this time.
+

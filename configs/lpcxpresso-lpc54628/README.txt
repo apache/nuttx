@@ -508,3 +508,20 @@ Configurations
     graphic (based on the rotating line of apps/examples/nslines).
 
       2019-03-20:  Everything works fine!
+
+  twm4nx:
+
+    This configuration exercises the port of TWM to NuttX.  A description of
+    that port is available at apps/graphics/twm4nx/README.txt.
+
+    NOTES:
+    1. This version uses the on-board display with the touchscreen for
+       positional input (instead of a mouse).  Keyboard input is currently
+       disabled only because (1) there is no Twm4Nx application that needs
+       it, and (2) I will first need to create a USB host driver to support
+       a USB keyboard.
+
+    STATUS:
+    2019-05-04:  Initial display is clean but touchscren input is not yet
+       functional.  Left-click main menu functionality is required to test
+       much more.

@@ -672,6 +672,9 @@ nsh2
      may not even be usable in all of those environments without some "tweaking"
      See discussion below under the nx11 configuration).
 
+     For examples, it expects to be able to include X11/Xlib.h.  That currently
+     fails on my Linux box.
+
 nx
 
   Configures to use apps/examples/nx.
@@ -850,6 +853,11 @@ nxwm
      I think that the above workaround should no longer be necessary.
      However, I will leave the above text in place until I get then
      oppotunity to verify that the new UART simulation fixes the problem.
+
+  2019-05-04:  Something has changed.  Today this configuration failed
+    to build because is requires CONFIG_NX_XYINPUT=y in the configuration.
+    That indicates mouse or touchscreen support.  Apparently, the current
+    NxWM will not build without this support.
 
 ostest
 
