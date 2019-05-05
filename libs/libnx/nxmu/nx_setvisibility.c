@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_visible.c
+ * libs/libnx/nxmu/nx_setvisibility.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,84 +39,44 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
-
-#include "nxbe.h"
-#include "nxmu.h"
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct nxbe_visible_s
-{
-  struct nxbe_clipops_s cops;
-  bool visible;
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxbe_clipvisible
- ****************************************************************************/
-
-static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
-                             FAR struct nxbe_plane_s *plane,
-                             FAR const struct nxgl_rect_s *rect)
-{
-  FAR struct nxbe_visible_s *info = (FAR struct nxbe_visible_s *)cops;
-  info->visible = true;
-}
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_visible
+ * Name: nx_setvisibility
  *
  * Description:
- *   Return true if the point, pt, in window wnd is visible.  pt is in
- *   absolute screen coordinates
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hwnd - The window to be modified
+ *   hide - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-bool nxbe_visible(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_point_s *pos)
+int nx_setvisibility(NXWINDOW hwnd, bool hide)
 {
-  struct nxbe_visible_s info;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_setvisibility_s outmsg;
 
-  /* Check if the absolute position lies within the window */
+  /* Send the MODAL message */
 
-  if (!nxgl_rectinside(&wnd->bounds, pos))
-    {
-      return false;
-    }
+  outmsg.msgid = NX_SVRMSG_SETVISIBILITY;
+  outmsg.wnd   = wnd;
+  outmsg.hide  = hide;
 
-  /* If this is the top window, then the psition is visible */
-
-  if (!wnd->above)
-    {
-      return true;
-    }
-
-  /* The position within the window range, but the window is not at
-   * the top.  We will have to work harder to determine if the point
-   * visible
-   */
-
-  info.cops.visible  = nxbe_clipvisible;
-  info.cops.obscured = nxbe_clipnull;
-  info.visible       = false;
-
-  nxbe_clipper(wnd->above, &wnd->bounds, NX_CLIPORDER_DEFAULT,
-               &info.cops, &wnd->be->plane[0]);
-
-  return info.visible;
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setvisibility_s));
 }

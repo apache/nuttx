@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_lower.c
+ * libs/libnx/nxtk/nxtk_setvisibility.c
  *
- *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,72 +39,37 @@
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
-#include "nxbe.h"
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxtk.h>
+
+#include "nxtk.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_lower
+ * Name: nxtk_setvisibility
  *
  * Description:
- *   Lower the specified window to the bottom of the display.
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be modified
+ *   hide  - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-void nxbe_lower(FAR struct nxbe_window_s *wnd)
+int nxtk_setvisibility(NXTKWINDOW hfwnd, bool hide)
 {
-  FAR struct nxbe_state_s  *be = wnd->be;
-  FAR struct nxbe_window_s *below;
-
-  /* If the window is already at the bottom, then there is nothing to do.
-   * Refuse to lower the background window; Refuse to lower a modal window.
-   * It is impossible to lower a hidden window because it does not exist
-   * in the hiearchy.
-   */
-
-  if (wnd->below == NULL || wnd->below == &be->bkgd ||
-      NXBE_ISMODAL(wnd) || NXBE_ISHIDDEN(wnd))
-    {
-      return;
-    }
-
-  /* Remove the window from its current position in the list */
-
-  wnd->below->above = wnd->above;
-
-  /* Was it at the top of the display? */
-
-  if (wnd->above)
-    {
-      /* No... it was in the middle somewhere */
-
-      wnd->above->below = wnd->below;
-    }
-  else
-    {
-      /* Yes.. set the new top window */
-
-      be->topwnd        = wnd->below;
-      be->topwnd->above = NULL;
-    }
-
-  /* Remember the window that was just below us */
-
-  below = wnd->below;
-
-  /* Then put the lowered window at the bottom (just above the background window) */
-
-  wnd->below     = &be->bkgd;
-  wnd->above     = be->bkgd.above;
-  be->bkgd.above = wnd;
-
-  /* Redraw the windows that were below us (but now are above) */
-
-  nxbe_redrawbelow(be, below, &wnd->bounds);
+  return nx_setvisibility((NXWINDOW)hfwnd, hide);
 }

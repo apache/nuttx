@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxbe/nxbe_lower.c
+ * graphics/nxbe/nxbe_isvisible.c
  *
  *   Copyright (C) 2008-2009, 2011, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,72 +39,92 @@
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nxglib.h>
+
 #include "nxbe.h"
+#include "nxmu.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct nxbe_setvisibility_s
+{
+  struct nxbe_clipops_s cops;
+  bool visible;
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxbe_clipvisible
+ ****************************************************************************/
+
+static void nxbe_clipvisible(FAR struct nxbe_clipops_s *cops,
+                             FAR struct nxbe_plane_s *plane,
+                             FAR const struct nxgl_rect_s *rect)
+{
+  FAR struct nxbe_setvisibility_s *info = (FAR struct nxbe_setvisibility_s *)cops;
+  info->visible = true;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_lower
+ * Name: nxbe_isvisible
  *
  * Description:
- *   Lower the specified window to the bottom of the display.
+ *   Return true if the point, pt, in window wnd is visible.  pt is in
+ *   absolute screen coordinates
  *
  ****************************************************************************/
 
-void nxbe_lower(FAR struct nxbe_window_s *wnd)
+bool nxbe_isvisible(FAR struct nxbe_window_s *wnd,
+                    FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxbe_state_s  *be = wnd->be;
-  FAR struct nxbe_window_s *below;
+  struct nxbe_setvisibility_s info;
 
-  /* If the window is already at the bottom, then there is nothing to do.
-   * Refuse to lower the background window; Refuse to lower a modal window.
-   * It is impossible to lower a hidden window because it does not exist
-   * in the hiearchy.
+  /* Hidden windows are never visible */
+
+  if (NXBE_ISHIDDEN(wnd))
+    {
+      return false;
+    }
+
+  /* Check if the absolute position lies within the window */
+
+  if (!nxgl_rectinside(&wnd->bounds, pos))
+    {
+      return false;
+    }
+
+  /* If this is the top window, then the position is visible */
+
+  if (!wnd->above)
+    {
+      return true;
+    }
+
+  /* The position within the window range, but the window is not at
+   * the top.  We will have to work harder to determine if the point
+   * visible
    */
 
-  if (wnd->below == NULL || wnd->below == &be->bkgd ||
-      NXBE_ISMODAL(wnd) || NXBE_ISHIDDEN(wnd))
-    {
-      return;
-    }
+  info.cops.visible  = nxbe_clipvisible;
+  info.cops.obscured = nxbe_clipnull;
+  info.visible       = false;
 
-  /* Remove the window from its current position in the list */
+  nxbe_clipper(wnd->above, &wnd->bounds, NX_CLIPORDER_DEFAULT,
+               &info.cops, &wnd->be->plane[0]);
 
-  wnd->below->above = wnd->above;
-
-  /* Was it at the top of the display? */
-
-  if (wnd->above)
-    {
-      /* No... it was in the middle somewhere */
-
-      wnd->above->below = wnd->below;
-    }
-  else
-    {
-      /* Yes.. set the new top window */
-
-      be->topwnd        = wnd->below;
-      be->topwnd->above = NULL;
-    }
-
-  /* Remember the window that was just below us */
-
-  below = wnd->below;
-
-  /* Then put the lowered window at the bottom (just above the background window) */
-
-  wnd->below     = &be->bkgd;
-  wnd->above     = be->bkgd.above;
-  be->bkgd.above = wnd;
-
-  /* Redraw the windows that were below us (but now are above) */
-
-  nxbe_redrawbelow(be, below, &wnd->bounds);
+  return info.visible;
 }
+

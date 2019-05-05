@@ -78,10 +78,10 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
 
   /* If this window is already at the top of the display, then do nothing
    * (this covers modal window which must always be at the top).  Don't
-   * raise the background window.
+   * raise the background window and don't raise hidden windows.
    */
 
-  if (wnd->above == NULL || wnd->below == NULL)
+  if (wnd->above == NULL || wnd->below == NULL || NXBE_ISHIDDEN(wnd))
     {
       return;
     }
@@ -118,6 +118,13 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
       wnd->below        = be->topwnd->below;
 
       be->topwnd->below = wnd;
+
+      /* Then redraw this window AND all windows below it. Having moved the
+       * window, we may have exposed previoulsy obscured portions of windows
+       * below this one.
+       */
+
+      nxbe_redrawbelow(be, wnd, &wnd->bounds);
     }
   else
     {
@@ -128,11 +135,11 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
 
       be->topwnd->above = wnd;
       be->topwnd        = wnd;
+
+      /* This window is now at the top of the display, we know, therefore,
+       * that it is not obscured by another window
+       */
+
+      nxmu_redrawreq(wnd, &wnd->bounds);
     }
-
-  /* This window is now at the top of the display, we know, therefore, that
-   * it is not obscured by another window
-   */
-
-  nxmu_redrawreq(wnd, &wnd->bounds);
 }

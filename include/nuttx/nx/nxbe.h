@@ -52,6 +52,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NX_NPLANES
@@ -70,6 +71,7 @@
  * NXBE_WINDOW_FRAMED    - Framed (NxTK) Window
  * NXBE_WINDOW_RAMBACKED - Window is backed by a framebuffer
  * NXBE_WINDOW_MODAL     - Window is in a focused, modal state
+ * NXBE_WINDOW_HIDDEN    - Window is hidden
  */
 
 #define NXBE_WINDOW_BLOCKED   (1 << 0) /* Bit 0: The window is blocked and will
@@ -77,6 +79,7 @@
 #define NXBE_WINDOW_FRAMED    (1 << 1) /* Bit 1: Framed (NxTK) Window */
 #define NXBE_WINDOW_RAMBACKED (1 << 2) /* Bit 2: Window is backed by a framebuffer */
 #define NXBE_WINDOW_MODAL     (1 << 3) /* Bit 3: Window is in a focused, modal state */
+#define NXBE_WINDOW_HIDDEN    (1 << 4) /* Bit 4: Window is hidden */
 
 /* Valid user flags for different window types */
 
@@ -119,6 +122,13 @@
   do { (wnd)->flags |= NXBE_WINDOW_MODAL; } while (0)
 #define NXBE_CLRMODAL(wnd) \
   do { (wnd)->flags &= ~NXBE_WINDOW_MODAL; } while (0)
+
+#define NXBE_ISHIDDEN(wnd) \
+  (((wnd)->flags & NXBE_WINDOW_HIDDEN) != 0)
+#define NXBE_SETHIDDEN(wnd) \
+  do { (wnd)->flags |= NXBE_WINDOW_HIDDEN; } while (0)
+#define NXBE_CLRHIDDEN(wnd) \
+  do { (wnd)->flags &= ~NXBE_WINDOW_HIDDEN; } while (0)
 
 /****************************************************************************
  * Public Types

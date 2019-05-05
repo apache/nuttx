@@ -348,6 +348,25 @@ int nxtk_lower(NXTKWINDOW hfwnd);
 int nxtk_modal(NXTKWINDOW hfwnd, bool modal);
 
 /****************************************************************************
+ * Name: nxtk_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be modified
+ *   hide  - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nxtk_setvisibility(NXTKWINDOW hfwnd, bool hide);
+
+/****************************************************************************
  * Name: nxtk_fillwindow
  *
  * Description:

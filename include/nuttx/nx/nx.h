@@ -85,6 +85,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Handles ******************************************************************/
 
 /* The interface to the NX server is managed using a opaque handle: */
@@ -677,6 +678,25 @@ int nx_lower(NXWINDOW hwnd);
  ****************************************************************************/
 
 int nx_modal(NXWINDOW hwnd, bool modal);
+
+/****************************************************************************
+ * Name: nx_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   hwnd - The window to be modified
+ *   hide - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+int nx_setvisibility(NXWINDOW hwnd, bool hide);
 
 /****************************************************************************
  * Name: nx_setpixel

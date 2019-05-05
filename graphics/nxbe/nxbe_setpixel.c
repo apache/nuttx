@@ -87,10 +87,6 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: nxbe_setpixel
  *
  * Description:
@@ -106,22 +102,20 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
  *
  ****************************************************************************/
 
-void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
-                   FAR const struct nxgl_point_s *pos,
-                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+static void nxbe_setpixel_dev(FAR struct nxbe_window_s *wnd,
+                              FAR const struct nxgl_point_s *pos,
+                              nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   struct nxbe_setpixel_s info;
   struct nxgl_rect_s rect;
   int i;
-
-  DEBUGASSERT(wnd != NULL && pos != NULL);
 
   /* Offset the position by the window origin */
 
   nxgl_vectoradd(&rect.pt1, pos, &wnd->bounds.pt1);
 
   /* Make sure that the point is within the limits of the window
-   * and of the background screen
+   * and of the background screen.
    */
 
   if (!nxgl_rectinside(&wnd->bounds, &rect.pt1) ||
@@ -162,6 +156,58 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
        */
 
       nxbe_cursor_backupdraw_dev(wnd->be, &rect, i);
+#endif
+    }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxbe_setpixel
+ *
+ * Description:
+ *  Fill the specified rectangle in the window with the specified color
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be filled
+ *   col  - The color to use in the fill
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
+                   FAR const struct nxgl_point_s *pos,
+                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+{
+  DEBUGASSERT(wnd != NULL && pos != NULL);
+
+#ifdef CONFIG_NX_RAMBACKED
+  /* If this window supports a pre-window frame buffer then shadow the full,
+   * unclipped bitmap in that framebuffer.
+   * REVISIT:  The logic to set a pixel in the per-window frame buffer is missing
+   */
+
+  DEBUGASSERT(!NXBE_ISRAMBACKED(wnd));
+#endif
+
+  /* Don't update hidden windows */
+
+  if (!NXBE_ISHIDDEN(wnd))
+    {
+      nxbe_setpixel_dev(wnd, pos, color);
+
+#ifdef CONFIG_NX_SWCURSOR
+      /* Was the software cursor visible?
+       * REVISIT: Missing logic for the case where the update clobbers a
+       * single pixel in the cursor image
+       */
+
+      DEBUGASSERT(!wnd->be->cursor.visible);
 #endif
     }
 }

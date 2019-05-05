@@ -40,7 +40,7 @@ ifeq ($(CONFIG_NX),y)
 CSRCS += nxtk_setsubwindows.c nxtk_events.c nxtk_block.c nxtk_synch.c
 CSRCS += nxtk_subwindowclip.c nxtk_containerclip.c nxtk_subwindowmove.c
 CSRCS += nxtk_drawframe.c
-CSRCS += nxtk_raise.c nxtk_lower.c nxtk_modal.c
+CSRCS += nxtk_raise.c nxtk_lower.c nxtk_modal.c nxtk_setvisibility.c
 CSRCS += nxtk_setposition.c nxtk_getposition.c nxtk_setsize.c
 
 CSRCS += nxtk_openwindow.c nxtk_closewindow.c nxtk_fillwindow.c

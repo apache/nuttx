@@ -201,6 +201,9 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
         }
       else
 #endif
+      /* If the window is hidden, then there is no available data source */
+
+      if (!NXBE_ISHIDDEN(wnd))
         {
 #ifdef CONFIG_NX_SWCURSOR
           /* Is the software cursor visible? */

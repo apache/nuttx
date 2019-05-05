@@ -69,7 +69,7 @@
 int nx_modal(NXWINDOW hwnd, bool modal)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_modal_s   outmsg;
+  struct nxsvrmsg_modal_s outmsg;
 
   /* Send the MODAL message */
 

@@ -237,8 +237,13 @@ void nxbe_fill(FAR struct nxbe_window_s *wnd,
         }
 #endif
 
-      /* Rend the bitmap directly to the graphics device in any case */
+      /* Don't update hidden windows */
 
-      nxbe_fill_dev(wnd, &remaining, color);
+      if (!NXBE_ISHIDDEN(wnd))
+        {
+          /* Rend the bitmap directly to the graphics device */
+
+          nxbe_fill_dev(wnd, &remaining, color);
+        }
     }
 }

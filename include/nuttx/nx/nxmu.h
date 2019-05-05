@@ -152,6 +152,7 @@ enum nxmsg_e
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
   NX_SVRMSG_MODAL,            /* Select/de-slect window modal state */
+  NX_SVRMSG_SETVISIBILITY,          /* Show or hide a window */
   NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_GETRECTANGLE,     /* Get a rectangular region in the window */
@@ -395,6 +396,17 @@ struct nxsvrmsg_modal_s
   uint32_t msgid;                  /* NX_SVRMSG_MODAL */
   FAR struct nxbe_window_s *wnd;   /* The window to be modified */
   bool modal;                      /* True: enter modal state; False: leave modal state */
+};
+
+/* This message either (1) hides a visible window, or (2) makes a hidden
+ * window visible.
+ */
+
+struct nxsvrmsg_setvisibility_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_SETVISIBILITY */
+  FAR struct nxbe_window_s *wnd;   /* The window to be modified */
+  bool hide;                       /* True: Hide window; False: show window */
 };
 
 /* Set a single pixel in the window with a color */

@@ -455,6 +455,14 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            }
            break;
 
+         case NX_SVRMSG_SETVISIBILITY: /* Show or hide a window */
+           {
+             FAR struct nxsvrmsg_setvisibility_s *vismsg =
+               (FAR struct nxsvrmsg_setvisibility_s *)buffer;
+             nxbe_setvisibility(vismsg->wnd, vismsg->hide);
+           }
+           break;
+
          case NX_SVRMSG_SETPIXEL: /* Set a single pixel in the window with a color */
            {
              FAR struct nxsvrmsg_setpixel_s *setmsg = (FAR struct nxsvrmsg_setpixel_s *)buffer;

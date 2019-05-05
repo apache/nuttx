@@ -501,6 +501,25 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd);
 void nxbe_modal(FAR struct nxbe_window_s *wnd, bool enable);
 
 /****************************************************************************
+ * Name: nxbe_setvisibility
+ *
+ * Description:
+ *   Select if the window is visible or hidden.  A hidden window is still
+ *   present will will update normally, but will be on the visiable on the
+ *   display until it is unhidden.
+ *
+ * Input Parameters:
+ *   wnd  - The window to be modified
+ *   hide - True: Window will be hidden; false: Window will be visible
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxbe_setvisibility(FAR struct nxbe_window_s *wnd, bool hide);
+
+/****************************************************************************
  * Name: nxbe_setpixel
  *
  * Description:
@@ -737,7 +756,7 @@ void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
                       FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
- * Name: nxbe_visible
+ * Name: nxbe_isvisible
  *
  * Description:
  *   Return true if the point, pt, in window wnd is visible.  pt is in
@@ -745,8 +764,8 @@ void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-bool nxbe_visible(FAR struct nxbe_window_s *wnd,
-                  FAR const struct nxgl_point_s *pos);
+bool nxbe_isvisible(FAR struct nxbe_window_s *wnd,
+                    FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxbe_clipper

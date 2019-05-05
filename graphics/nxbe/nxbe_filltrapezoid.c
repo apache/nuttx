@@ -340,6 +340,9 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
         }
       else
 #endif
+      /* Don't update hidden windows */
+
+      if (!NXBE_ISHIDDEN(wnd))
         {
           /* Update only the graphics device memory. */
 

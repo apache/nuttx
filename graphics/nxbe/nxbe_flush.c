@@ -90,17 +90,22 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
                 FAR const struct nxgl_point_s *origin,
                 unsigned int stride)
 {
-  /* Copy the modified per-window frambuffer into device memory. */
+  /* Don't update hidden windows */
 
-  nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+  if (!NXBE_ISHIDDEN(wnd))
+    {
+      /* Copy the modified per-window frambuffer into device memory. */
+
+      nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Update cursor backup memory and redraw the cursor in the modified
-   * window region.
-   */
+      /* Update cursor backup memory and redraw the cursor in the modified
+       * window region.
+       */
 
-  nxbe_cursor_backupdraw_all(wnd, dest);
+      nxbe_cursor_backupdraw_all(wnd, dest);
 #endif
+    }
 }
 
 #endif  /* CONFIG_NX_RAMBACKED */

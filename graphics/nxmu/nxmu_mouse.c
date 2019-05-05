@@ -138,7 +138,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd)
     {
       /* Yes.. Is the mouse position visible in this window? */
 
-      if (nxbe_visible(wnd, &g_mpos))
+      if (nxbe_isvisible(wnd, &g_mpos))
         {
           /* Yes... Convert the mouse position to window relative
            * coordinates and send it to the client

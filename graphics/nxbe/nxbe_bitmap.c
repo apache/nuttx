@@ -221,6 +221,13 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
   DEBUGASSERT(wnd != NULL && dest != NULL && src != NULL && origin != NULL);
   DEBUGASSERT(wnd->be != NULL && wnd->be->plane != NULL);
 
+  /* Don't update hidden windows */
+
+  if (NXBE_ISHIDDEN(wnd))
+    {
+      return;
+    }
+
   /* Verify that the destination rectangle begins "below" and to the "right"
    * of the origin
    */
@@ -324,15 +331,20 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
     }
 #endif
 
-  /* Rend the bitmap directly to the graphics device in any case */
+  /* Don't update hidden windows */
 
-  nxbe_bitmap_dev(wnd, dest, src, origin, stride);
+  if (!NXBE_ISHIDDEN(wnd))
+    {
+      /* Rend the bitmap directly to the graphics device */
+
+      nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
 #ifdef CONFIG_NX_SWCURSOR
-  /* Update cursor backup memory and redraw the cursor in the modified window
-   * region.
-   */
+      /* Update cursor backup memory and redraw the cursor in the modified window
+       * region.
+       */
 
-  nxbe_cursor_backupdraw_all(wnd, dest);
+      nxbe_cursor_backupdraw_all(wnd, dest);
 #endif
+    }
 }

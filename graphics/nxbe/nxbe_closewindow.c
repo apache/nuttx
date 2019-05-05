@@ -97,36 +97,41 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
       NXBE_STATE_CLRMODAL(be);
     }
 
-  /* Is there a window above the one being closed? */
+  /* A hidden window does not exist in the hiearchy */
 
-  if (wnd->above != NULL)
+  if (!NXBE_ISHIDDEN(wnd))
     {
-      /* Yes, now the window below that one is the window below
-       * the one being closed.
+      /* Is there a window above the one being closed? */
+
+      if (wnd->above != NULL)
+        {
+          /* Yes, now the window below that one is the window below
+           * the one being closed.
+           */
+
+          wnd->above->below = wnd->below;
+        }
+      else
+        {
+          /* No, then the top window is the one below this (which
+           * can never be NULL because the background window is
+           * always at the true bottom of the list
+           */
+
+          be->topwnd = wnd->below;
+        }
+
+      /* There is always a window below the one being closed (because
+       * the background is never closed.  Now, the window above that
+       * is the window above the one that is being closed.
        */
 
-      wnd->above->below = wnd->below;
+      wnd->below->above = wnd->above;
+
+      /* Redraw the windows that were below us (and may now be exposed) */
+
+      nxbe_redrawbelow(be, wnd->below, &wnd->bounds);
     }
-  else
-    {
-      /* No, then the top window is the one below this (which
-       * can never be NULL because the background window is
-       * always at the true bottom of the list
-       */
-
-      be->topwnd = wnd->below;
-    }
-
-  /* There is always a window below the one being closed (because
-   * the background is never closed.  Now, the window above that
-   * is the window above the one that is being closed.
-   */
-
-  wnd->below->above = wnd->above;
-
-  /* Redraw the windows that were below us (and may now be exposed) */
-
-  nxbe_redrawbelow(be, wnd->below, &wnd->bounds);
 
 #ifdef CONFIG_NX_RAMBACKED
   /* Free any allocated, per-window framebuffer */
