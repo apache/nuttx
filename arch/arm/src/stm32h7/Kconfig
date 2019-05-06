@@ -1117,10 +1117,10 @@ if !STM32H7_PWM_MULTICHAN
 config STM32H7_TIM1_CHANNEL
 	int "TIM1 PWM Output Channel"
 	default 1
-	range 1 6
+	range 1 4
 	---help---
 		If TIM1 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,6}
+		channel {1,..,4}
 
 config STM32H7_TIM1_CHMODE
 	int "TIM1 Channel Mode"
@@ -1858,10 +1858,10 @@ if !STM32H7_PWM_MULTICHAN
 config STM32H7_TIM8_CHANNEL
 	int "TIM8 PWM Output Channel"
 	default 1
-	range 1 6
+	range 1 4
 	---help---
 		If TIM8 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,6}
+		channel {1,..,4}
 
 config STM32H7_TIM8_CHMODE
 	int "TIM8 Channel Mode"
@@ -1973,11 +1973,17 @@ config STM32H7_TIM13_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
-config STM32H7_TIM13_CHANNEL
-	default 1
-	depends on STM32H7_TIM13_PWM
-
 if STM32H7_TIM13_PWM
+
+if !STM32H7_PWM_MULTICHAN
+
+config STM32H7_TIM13_CHANNEL
+	int "TIM13 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM13 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
 
 config STM32H7_TIM13_CHMODE
 	int "TIM13 Channel Mode"
@@ -1985,6 +1991,8 @@ config STM32H7_TIM13_CHMODE
 	range 0 5
 	---help---
 		Specifies the channel mode.
+
+endif # !STM32H7_PWM_MULTICHAN
 
 endif # STM32H7_TIM13_PWM
 
@@ -2001,11 +2009,17 @@ config STM32H7_TIM14_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
-config STM32H7_TIM14_CHANNEL
-	default 1
-	depends on STM32H7_TIM14_PWM
-
 if STM32H7_TIM14_PWM
+
+if !STM32H7_PWM_MULTICHAN
+
+config STM32_TIM14_CHANNEL
+	int "TIM14 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM14 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
 
 config STM32H7_TIM14_CHMODE
 	int "TIM14 Channel Mode"
@@ -2013,6 +2027,8 @@ config STM32H7_TIM14_CHMODE
 	range 0 5
 	---help---
 		Specifies the channel mode.
+
+endif # !STM32H7_PWM_MULTICHAN
 
 endif # STM32H7_TIM14_PWM
 
@@ -2072,7 +2088,7 @@ config STM32H7_TIM15_CH2MODE
 		Specifies the channel mode.
 
 config STM32H7_TIM15_CH2OUT
-	bool "TIM12 Channel 2 Output"
+	bool "TIM15 Channel 2 Output"
 	default n
 	---help---
 		Enables channel 2 output.
@@ -2084,7 +2100,7 @@ endif # STM32H7_PWM_MULTICHAN
 if !STM32H7_PWM_MULTICHAN
 
 config STM32H7_TIM15_CHANNEL
-	int "TIM12 PWM Output Channel"
+	int "TIM15 PWM Output Channel"
 	default 1
 	range 1 2
 	---help---
@@ -2115,15 +2131,17 @@ config STM32H7_TIM16_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
-config STM32H7_TIM16_CHANNEL
-	default 1
-	depends on STM32H7_TIM16_PWM
-
-config STM32H7_TIM16_CHANNEL
-	default 1
-	depends on STM32H7_TIM16_PWM
-
 if STM32H7_TIM16_PWM
+
+if !STM32H7_PWM_MULTICHAN
+
+config STM32_TIM16_CHANNEL
+	int "TIM16 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM16 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
 
 config STM32H7_TIM16_CHMODE
 	int "TIM16 Channel Mode"
@@ -2131,6 +2149,8 @@ config STM32H7_TIM16_CHMODE
 	range 0 5
 	---help---
 		Specifies the channel mode.
+
+endif # !STM32H7_PWM_MULTICHAN
 
 endif # STM32H7_TIM16_PWM
 
@@ -2147,18 +2167,26 @@ config STM32H7_TIM17_PWM
 		is defined then THIS following may also be defined to indicate that
 		the timer is intended to be used for pulsed output modulation.
 
-config STM32H7_TIM17_CHANNEL
-	default 1
-	depends on STM32H7_TIM17_PWM
-
 if STM32H7_TIM17_PWM
 
+if !STM32H7_PWM_MULTICHAN
+
+config STM32_TIM17_CHANNEL
+	int "TIM17 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM17 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
 config STM32H7_TIM17_CHMODE
-	int "TIM14 Channel Mode"
+	int "TIM17 Channel Mode"
 	default 0
 	range 0 5
 	---help---
 		Specifies the channel mode.
+
+endif # !STM32H7_PWM_MULTICHAN
 
 endif # STM32H7_TIM17_PWM
 
