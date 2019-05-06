@@ -68,6 +68,10 @@ void nxbe_show_window(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s *be = wnd->be;
 
+  /* Mark the window no longer hidden */
+
+  NXBE_CLRHIDDEN(wnd);
+
   /* Restore the window to the top of the hierarchy.  Exception:  If the top
    * window is a modal window, then only raise it to second highest.
    */
@@ -82,6 +86,10 @@ void nxbe_show_window(FAR struct nxbe_window_s *wnd)
       wnd->below        = be->topwnd->below;
 
       be->topwnd->below = wnd;
+
+     /* Redraw this window and the other that are below us */
+
+      nxbe_redrawbelow(be, wnd, &wnd->bounds);
     }
   else
     {
@@ -99,10 +107,6 @@ void nxbe_show_window(FAR struct nxbe_window_s *wnd)
 
       nxmu_redrawreq(wnd, &wnd->bounds);
     }
-
-  /* Mark the window no longer hidden */
-
-  NXBE_CLRHIDDEN(wnd);
 }
 
 /****************************************************************************

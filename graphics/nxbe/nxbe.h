@@ -65,7 +65,7 @@
 
 /* Server flags and helper macros:
  *
- * NXBE_STATE_MODAL     - One window is in a focused, modal state
+ * NXBE_STATE_MODAL  - One window is in a focused, modal state
  */
 
 #define NXBE_STATE_MODAL     (1 << 0) /* Bit 0: One window is in a focused,
