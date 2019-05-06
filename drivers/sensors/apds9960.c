@@ -1251,7 +1251,7 @@ int apds9960_register(FAR const char *devpath,
   /* Initialize the APDS9960 device structure */
 
   FAR struct apds9960_dev_s *priv =
-    (FAR struct apds9960_dev_s *)kmm_malloc(sizeof(struct apds9960_dev_s));
+    (FAR struct apds9960_dev_s *)kmm_zalloc(sizeof(struct apds9960_dev_s));
 
   if (priv == NULL)
     {
@@ -1260,7 +1260,6 @@ int apds9960_register(FAR const char *devpath,
     }
 
   priv->config         = config;
-  priv->work.worker    = NULL;
   priv->gesture_motion = DIR_NONE;
   nxsem_init(&priv->sample_sem, 0, 0);
 

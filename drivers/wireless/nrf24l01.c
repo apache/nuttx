@@ -1460,7 +1460,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   DEBUGASSERT((spi != NULL) & (cfg != NULL));
 
-  if ((dev = kmm_malloc(sizeof(struct nrf24l01_dev_s))) == NULL)
+  if ((dev = kmm_zalloc(sizeof(struct nrf24l01_dev_s))) == NULL)
     {
       return -ENOMEM;
     }
@@ -1469,16 +1469,9 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
   dev->config     = cfg;
 
   dev->state      = ST_UNKNOWN;
-  dev->en_aa      = 0;
   dev->ce_enabled = false;
 
   nxsem_init(&(dev->devsem), 0, 1);
-  dev->nopens     = 0;
-
-#ifndef CONFIG_DISABLE_POLL
-  dev->pfd        = NULL;
-#endif
-
   nxsem_init(&dev->sem_tx, 0, 0);
   nxsem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
 
@@ -1490,10 +1483,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
     }
 
   dev->rx_fifo         = rx_fifo;
-  dev->nxt_read        = 0;
-  dev->nxt_write       = 0;
-  dev->fifo_len        = 0;
-  dev->irq_work.worker = 0;
 
   nxsem_init(&(dev->sem_fifo), 0, 1);
   nxsem_init(&(dev->sem_rx), 0, 0);

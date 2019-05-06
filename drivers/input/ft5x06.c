@@ -1177,7 +1177,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   priv = (FAR struct ft5x06_dev_s *)kmm_zalloc(sizeof(struct ft5x06_dev_s));
   if (!priv)
     {
-      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
+      ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
       return -ENOMEM;
     }
 
