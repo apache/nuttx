@@ -421,4 +421,16 @@ int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
 int stm32l4_cc1101_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_bmp180initialize
+ *
+ * Description:
+ * Called to configure an I2C and to register BMP180.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMP180
+int stm32_bmp180initialize(FAR const char *devpath);
+#endif
+
 #endif /* __CONFIGS_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */
