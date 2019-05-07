@@ -1497,8 +1497,14 @@ NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags,
     <dd>The handle returned by <a href="#nxconnectinstance"><code>nx_connect()</code></a>.
     <dt><code>flags</code>
     <dd>Optional flags.
-    Must be zero unless <code>CONFIG_NX_RAMBACKED</code> is enabled.
-    In that case, it may be zero or <code>NXBE_WINDOW_RAMBACKED</code>.
+      These include:
+      <ul>
+        <li><code>NXBE_WINDOW_RAMBACKED</code>:  Creates a RAM backed window.
+          This option is only valid if <code>CONFIG_NX_RAMBACKED</code> is enabled.
+        </li>
+        <li><code>NXBE_WINDOW_HIDDEN</code>:  The window is create in the HIDDEN state and can be made visible later with <code>nx_setvisibility()</code>.
+        </li>
+      </ul>
     <dt><code>cb</code>
     <dd>Callbacks used to process window events
     <dt><code>arg</code>
@@ -2312,8 +2318,14 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle, uint8_t flags,
     <dd>The handle returned by <a href="#nxconnectinstance"><code>nx_connect()</code></a>.
     <dt><code>flags</code>
     <dd>Optional flags.
-    Must be zero unless <code>CONFIG_NX_RAMBACKED</code> is enabled.
-    In that case, it may be zero or <code>NXBE_WINDOW_RAMBACKED</code>.
+      These include:
+      <ul>
+        <li><code>NXBE_WINDOW_RAMBACKED</code>:  Creates a RAM backed window.
+          This option is only valid if <code>CONFIG_NX_RAMBACKED</code> is enabled.
+        </li>
+        <li><code>NXBE_WINDOW_HIDDEN</code>:  The window is create in the HIDDEN state and can be made visible later with <code>nxtk_setvisibility()</code>.
+        </li>
+      </ul>
     <dt><code>cb</code>
     <dd>Callbacks used to process window events
     <dt><code>arg</code>

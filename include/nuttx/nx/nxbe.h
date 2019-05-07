@@ -81,17 +81,27 @@
 #define NXBE_WINDOW_MODAL     (1 << 3) /* Bit 3: Window is in a focused, modal state */
 #define NXBE_WINDOW_HIDDEN    (1 << 4) /* Bit 4: Window is hidden */
 
-/* Valid user flags for different window types */
+/* Valid user flags for different window types.  This is the subset of flags
+ * that may be passed with nx_openwindow() or nxtk_openwindow.  Most of the
+ * flags are controlled internally or must be selected via NX interfaces.
+ * These may be selected by the user when the window is created.
+ *
+ * Exception:  NXBE_WINDOW_FRAMED is not user-selectable.  It is
+ * automatically set by nxtk_openwindow() but appears to be a user
+ * setting from the point of view of lower layers.
+ */
 
 #ifdef CONFIG_NX_RAMBACKED
-#  define NX_WINDOW_USER      NXBE_WINDOW_RAMBACKED
-#  define NXTK_WINDOW_USER    (NXBE_WINDOW_FRAMED | NXBE_WINDOW_RAMBACKED)
-#  define NXBE_WINDOW_USER    (NXBE_WINDOW_FRAMED | NXBE_WINDOW_RAMBACKED)
+#  define NX_WINDOW_USER      (NXBE_WINDOW_RAMBACKED | NXBE_WINDOW_HIDDEN)
 #else
-#  define NX_WINDOW_USER      0
-#  define NXTK_WINDOW_USER    NXBE_WINDOW_FRAMED
-#  define NXBE_WINDOW_USER    NXBE_WINDOW_FRAMED
+#  define NX_WINDOW_USER      NXBE_WINDOW_HIDDEN
 #endif
+
+#define NXTK_WINDOW_USER      (NXBE_WINDOW_FRAMED | NX_WINDOW_USER)
+
+/* This is the set of startup flags that could be received in NXBE. */
+
+#define NXBE_WINDOW_USER      (NXBE_WINDOW_FRAMED | NX_WINDOW_USER)
 
 /* Helpful flag macros */
 

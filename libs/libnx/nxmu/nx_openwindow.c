@@ -61,9 +61,11 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   flags  - Optional flags.  Must be zero unless CONFIG_NX_RAMBACKED is
- *            enabled.  In that case, it may be zero or
- *            NXBE_WINDOW_RAMBACKED
+ *   flags  - Optional flags.  These include:
+ *            NXBE_WINDOW_RAMBACKED:  Creates a RAM backed window.  This
+ *              option is only valid if CONFIG_NX_RAMBACKED is enabled.
+ *            NXBE_WINDOW_HIDDEN:  The window is create in the HIDDEN state
+ *             and can be made visible later with nx_setvisibility().
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
