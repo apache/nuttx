@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_usbhost.h
+ * arch/arm/src/lpc54xx/lpc54_usb0_ohci.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
 
 /************************************************************************************
  * Included Files
@@ -42,19 +42,7 @@
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
 #ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -70,7 +58,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: lpc17_usbhost_initialize
+ * Name: lpc54_usbhost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -96,7 +84,7 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller);
+FAR struct usbhost_connection_s *lpc54_usbhost_initialize(int controller);
 #endif
 
 #undef EXTERN
@@ -105,4 +93,4 @@ FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H */

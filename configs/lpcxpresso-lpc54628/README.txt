@@ -115,10 +115,17 @@ STATUS
   2018-10-24:  Dave Marples now has the LPC43 SD/MMC working reliably.  I
     have ported all of Dave's change to the LPC54 but have done no further
     testing as of this writing.  The feature is still marked EXPERIMENTAL.
+  2019-05-08:  I brought in the USB0 OHCI USB host driver from LPC17.  Since
+    OHCI is well standardized, this should work out of the box provided that
+    the peripheral is properly configured, initialized, and clocked.  The
+    clock setup logic is missing as of this writing (the driver is not yet
+    even included in the build and completely unverified).
 
   There is still no support for the Accelerometer, SPIFI, or USB.  There is
   a complete but not entirely functional SD card driver and and tested SPI
-  driver.  There are no on-board devices to support SPI testing.
+  driver.  There is also a partial port of the USB0 OHCI host driver if
+  anyone is ambitious enought to finish that off.  There are no on-board
+  devices to support SPI testing.
 
 Configurations
 ==============
@@ -522,6 +529,15 @@ Configurations
        a USB keyboard.
 
     STATUS:
-    2019-05-04:  Initial display is clean but touchscren input is not yet
-       functional.  Left-click main menu functionality is required to test
-       much more.
+    2019-05-04:  Initial display is clean.
+    2019-05-08:  Logic to iconify and de-iconify the Icon Manager works.
+       I am able to grab the Icon Manager tool bar and move the Icon Manager
+       window.  However, the movement is not smooth.  Analyizing the touch-
+       screen input, I can see that Twm4NX is working okay but the touch-
+       screen driver with its polled operation does not provide rapid or
+       precise touch positions.  So the movement is not smooth.  It is also
+       difficult to grab the toolbar.
+
+       The logic to move the Icon Manager Icon does not work at all.
+
+       Left-click main menu functionality is required to test much more.
