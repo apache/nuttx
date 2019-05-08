@@ -3,7 +3,7 @@
  * 6lowpan HC06 implementation (draft-ietf-6lowpan-hc-06, updated to RFC
  * 6282)
  *
- *   Copyright (C) 2017, Gregory Nutt, all rights reserved
+ *   Copyright (C) 2017, 2019 Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from Contiki:
@@ -503,11 +503,11 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
 #ifdef CONFIG_ENDIAN_BIG
           /* Preserve big-endian, network order */
 
-          ipaddr[destndx - 1] = (uint16_t)(*srcptr) << 8;
+          ipaddr[destndx - 1] = (uint16_t)(*srcptr);
 #else
           /* Preserve big-endian, network order */
 
-          ipaddr[destndx - 1] = (uint16_t)(*srcptr);
+          ipaddr[destndx - 1] = (uint16_t)(*srcptr) << 8;
 #endif
 
           srcptr++;
