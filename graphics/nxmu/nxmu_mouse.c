@@ -54,6 +54,10 @@
  * Private Data
  ****************************************************************************/
 
+/* REVISIT:  These globals will prevent this code from being used in an
+ * environment with more than one display.  FIX ME!
+ */
+
 static struct nxgl_point_s       g_mpos;
 static struct nxgl_point_s       g_mrange;
 static uint8_t                   g_mbutton;
@@ -198,7 +202,7 @@ int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
       y = g_mrange.y - 1;
     }
 
-  /* Look any change in values */
+  /* Look for any change in values */
 
   if (x != g_mpos.x || y != g_mpos.y || buttons != g_mbutton)
     {
@@ -211,13 +215,13 @@ int nxmu_mousein(FAR struct nxmu_state_s *nxmu,
 
       /* If a button is already down, regard this as part of a mouse drag
        * event. Pass all the following events to the window where the drag
-       * started in.
+       * started in, including the final button release event.
        */
 
-      if (oldbuttons)
+      if (oldbuttons != 0)
         {
           g_mwnd = nxmu_revalidate_g_mwnd(nxmu->be.topwnd);
-          if (g_mwnd && g_mwnd->cb->mousein)
+          if (g_mwnd != NULL && g_mwnd->cb->mousein)
             {
               struct nxclimsg_mousein_s outmsg;
               outmsg.msgid   = NX_CLIMSG_MOUSEIN;
