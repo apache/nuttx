@@ -63,7 +63,7 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c # stm32_dma_v1.c
+CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c stm32_dma_v1.c
 CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c stm32_rcc.c
 
 ifeq ($(CONFIG_STM32F0L0_PWR),y)
@@ -106,6 +106,10 @@ ifeq ($(CONFIG_STM32F0L0_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
+ifeq ($(CONFIG_STM32F0L0_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0_ADC),y)
+CHIP_CSRCS += stm32_adc.c
 endif

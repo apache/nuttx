@@ -161,4 +161,16 @@ void stm32_spidev_initialize(void);
 int stm32_lpwaninitialize(void);
 #endif
 
+/************************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 #endif /* __CONFIGS_B_L072Z_LRWAN1_SRC_B_L072Z_LRWAN1_H */

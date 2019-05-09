@@ -60,4 +60,8 @@ ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += stm32_sx127x.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

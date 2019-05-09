@@ -45,9 +45,63 @@
 
 #include "chip.h"
 
+/* STM32 M0 ADC driver:
+ * - no injected channels
+ * - no offset registers
+ * - the F0/L0 family support one sampling time configuration for all channels
+ * - the G0 family support two sampling time configurations
+ */
+
+/* Support for battery voltage */
+
+#if 0
+#  define HAVE_ADC_VBAT
+#else
+#  undef HAVE_ADC_VBAT
+#endif
+
+/* Support for ADC clock prescaler */
+
+#if defined(CONFIG_STM32F0L0_STM32L0) || defined(CONFIG_STM32F0L0_STM32G0)
+#  define HAVE_ADC_PRE
+#else
+#  undef HAVE_ADC_PRE
+#endif
+
+/* Support for LCD voltage */
+
+#ifdef CONFIG_STM32F0L0_HAVE_LCD
+#  define  HAVE_ADC_VLCD
+#else
+#  undef  HAVE_ADC_VLCD
+#endif
+
+/* Supprot for Low frequency mode */
+
+#ifdef CONFIG_STM32F0L0_ENERGYLITE
+#  define  HAVE_ADC_LFM
+#else
+#  undef  HAVE_ADC_LFM
+#endif
+
+#undef ADC_HAVE_INJECTED
+
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
+
+#define STM32_ADC1_OFFSET            0x0000
+#define STM32_ADC2_OFFSET            0x0100
+#define STM32_ADC3_OFFSET            0x0000
+#define STM32_ADC4_OFFSET            0x0100
+#define STM32_ADCCMN_OFFSET          0x0300
+
+#define STM32_ADC1_BASE              (STM32_ADC1_OFFSET+STM32_ADC12_BASE) /* ADC1 Master ADC */
+#define STM32_ADC2_BASE              (STM32_ADC2_OFFSET+STM32_ADC12_BASE) /* ADC2 Slave ADC */
+#define STM32_ADC3_BASE              (STM32_ADC3_OFFSET+STM32_ADC34_BASE) /* ADC3 Master ADC */
+#define STM32_ADC4_BASE              (STM32_ADC4_OFFSET+STM32_ADC34_BASE) /* ADC4 Slave ADC */
+#define STM32_ADC12CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
+#define STM32_ADC34CMN_BASE          (STM32_ADCCMN_OFFSET+STM32_ADC34_BASE) /* ADC3, ADC4 common */
 
 /* Register Offsets *********************************************************************************/
 
@@ -60,20 +114,23 @@
 #define STM32_ADC_TR_OFFSET         0x0020  /* ADC watchdog threshold register */
 #define STM32_ADC_CHSELR_OFFSET     0x0028  /* ADC channel selection register */
 #define STM32_ADC_DR_OFFSET         0x0040  /* ADC regular data register */
-#define STM32_ADC_CCR_OFFSET        0x0308  /* ADC common configuration register */
+
+/* Master and Slave ADC Common Registers */
+
+#define STM32_ADC_CCR_OFFSET         0x0008  /* Common control register */
 
 /* Register Addresses *******************************************************************************/
 
-#define STM32_ADC_ISR              (STM32_ADC_BASE + STM32_ADC_ISR_OFFSET)
-#define STM32_ADC_IER              (STM32_ADC_BASE + STM32_ADC_IER_OFFSET)
-#define STM32_ADC_CR               (STM32_ADC_BASE + STM32_ADC_CR_OFFSET)
-#define STM32_ADC_CFGR1            (STM32_ADC_BASE + STM32_ADC_CFGR1_OFFSET)
-#define STM32_ADC_CFGR2            (STM32_ADC_BASE + STM32_ADC_CFGR2_OFFSET)
-#define STM32_ADC_SMPR             (STM32_ADC_BASE + STM32_ADC_SMPR_OFFSET)
-#define STM32_ADC_TR               (STM32_ADC_BASE + STM32_ADC_TR_OFFSET)
-#define STM32_ADC_CHSELR           (STM32_ADC_BASE + STM32_ADC_CHSELR_OFFSET)
-#define STM32_ADC_DR               (STM32_ADC_BASE + STM32_ADC_DR_OFFSET)
-#define STM32_ADC_CCR              (STM32_ADC_BASE + STM32_ADC_CCR_OFFSET)
+#define STM32_ADC1_ISR              (STM32_ADC1_BASE + STM32_ADC_ISR_OFFSET)
+#define STM32_ADC1_IER              (STM32_ADC1_BASE + STM32_ADC_IER_OFFSET)
+#define STM32_ADC1_CR               (STM32_ADC1_BASE + STM32_ADC_CR_OFFSET)
+#define STM32_ADC1_CFGR1            (STM32_ADC1_BASE + STM32_ADC_CFGR1_OFFSET)
+#define STM32_ADC1_CFGR2            (STM32_ADC1_BASE + STM32_ADC_CFGR2_OFFSET)
+#define STM32_ADC1_SMPR             (STM32_ADC1_BASE + STM32_ADC_SMPR_OFFSET)
+#define STM32_ADC1_TR               (STM32_ADC1_BASE + STM32_ADC_TR_OFFSET)
+#define STM32_ADC1_CHSELR           (STM32_ADC1_BASE + STM32_ADC_CHSELR_OFFSET)
+#define STM32_ADC1_DR               (STM32_ADC1_BASE + STM32_ADC_DR_OFFSET)
+#define STM32_ADC1_CCR              (STM32_ADC1_BASE + STM32_ADC_CCR_OFFSET)
 
 /* Register Bitfield Definitions ************************************************/
 
@@ -92,6 +149,7 @@
 #define ADC_CR_ADDIS                (1 << 1)  /* Bit 1: ADC disable command */
 #define ADC_CR_ADSTART              (1 << 2)  /* Bit 2: ADC start of regular conversion */
 #define ADC_CR_ADSTP                (1 << 4)  /* Bit 4: ADC stop of regular conversion command */
+#define ADC_CR_ADVREGEN             (1 << 28) /* Bit 28: ADC Voltage Regulator Enable */
 #define ADC_CR_ADCAL                (1 << 31) /* Bit 31: ADC calibration */
 
 /* ADC configuration register 1 */
@@ -143,16 +201,21 @@
 
 /* ADC sample time register */
 
-#define ADC_SMPR_SMP_SHIFT          (0)       /* Bits 0-2: Sampling time selection */
-#define ADC_SMPR_SMP_MASK           (7 << ADC_SMPR_SMP_SHIFT)
-#define ADC_SMPR_SMP_1p5            (0 << ADC_SMPR_SMP_SHIFT)  /* 000: 1.5 cycles */
-#define ADC_SMPR_SMP_7p5            (1 << ADC_SMPR_SMP_SHIFT)  /* 001: 7.5 cycles */
-#define ADC_SMPR_SMP_13p5           (2 << ADC_SMPR_SMP_SHIFT)  /* 010: 13.5 cycles */
-#define ADC_SMPR_SMP_28p5           (3 << ADC_SMPR_SMP_SHIFT)  /* 011: 28.5 cycles */
-#define ADC_SMPR_SMP_41p5           (4 << ADC_SMPR_SMP_SHIFT)  /* 100: 41.5 cycles */
-#define ADC_SMPR_SMP_55p5           (5 << ADC_SMPR_SMP_SHIFT)  /* 101: 55.5 cycles */
-#define ADC_SMPR_SMP_71p5           (6 << ADC_SMPR_SMP_SHIFT)  /* 110: 71.5 cycles */
-#define ADC_SMPR_SMP_239p5          (7 << ADC_SMPR_SMP_SHIFT)  /* 111: 239.5 cycles */
+#define ADC_SMPR_1p5                (0)       /* 000: 1.5 cycles */
+#define ADC_SMPR_7p5                (1)       /* 001: 7.5 cycles */
+#define ADC_SMPR_13p5               (2)       /* 010: 13.5 cycles */
+#define ADC_SMPR_28p5               (3)       /* 011: 28.5 cycles */
+#define ADC_SMPR_41p5               (4)       /* 100: 41.5 cycles */
+#define ADC_SMPR_55p5               (5)       /* 101: 55.5 cycles */
+#define ADC_SMPR_71p5               (6)       /* 110: 71.5 cycles */
+#define ADC_SMPR_239p5              (7)       /* 111: 239.5 cycles */
+
+#define ADC_SMPR_SMP1_SHIFT         (0)       /* Bits 0-2: Sampling time selection 1 */
+#define ADC_SMPR_SMP1_MASK          (7 << ADC_SMPR_SMP_SHIFT)
+#define ADC_SMPR_SMP2_SHIFT         (4)       /* Bits 4-6: Sampling time selection 2 */
+#define ADC_SMPR_SMP2_MASK          (7 << ADC_SMPR_SMP_SHIFT)
+#define ADC_SMPR_SMPSEL_SHIFT       (8)       /* Bits 8-26: channel-x sampling time selection */
+#define ADC_SMPR_SMPSEL(ch, smp)    (smp << ADC_SMPR_SMPSEL_SHIFT)
 
 /* ADC watchdog threshold register */
 
@@ -173,23 +236,36 @@
 #define ADC_CHSELR_CHSEL7           (1 << 7)    /* Select channel 7 */
 #define ADC_CHSELR_CHSEL8           (1 << 8)    /* Select channel 8 */
 #define ADC_CHSELR_CHSEL9           (1 << 9)    /* Select channel 9 */
-#define ADC_CHSELR_CHSEL10          (1 << 10)    /* Select channel 10 */
-#define ADC_CHSELR_CHSEL11          (1 << 11)    /* Select channel 11 */
-#define ADC_CHSELR_CHSEL12          (1 << 12)    /* Select channel 12 */
-#define ADC_CHSELR_CHSEL13          (1 << 13)    /* Select channel 13 */
-#define ADC_CHSELR_CHSEL14          (1 << 14)    /* Select channel 14 */
-#define ADC_CHSELR_CHSEL15          (1 << 15)    /* Select channel 15 */
-#define ADC_CHSELR_CHSEL16          (1 << 16)    /* Select channel 16 */
-#define ADC_CHSELR_CHSEL17          (1 << 17)    /* Select channel 17 */
-#define ADC_CHSELR_CHSEL18          (1 << 18)    /* Select channel 18 */
+#define ADC_CHSELR_CHSEL10          (1 << 10)   /* Select channel 10 */
+#define ADC_CHSELR_CHSEL11          (1 << 11)   /* Select channel 11 */
+#define ADC_CHSELR_CHSEL12          (1 << 12)   /* Select channel 12 */
+#define ADC_CHSELR_CHSEL13          (1 << 13)   /* Select channel 13 */
+#define ADC_CHSELR_CHSEL14          (1 << 14)   /* Select channel 14 */
+#define ADC_CHSELR_CHSEL15          (1 << 15)   /* Select channel 15 */
+#define ADC_CHSELR_CHSEL16          (1 << 16)   /* Select channel 16 */
+#define ADC_CHSELR_CHSEL17          (1 << 17)   /* Select channel 17 */
+#define ADC_CHSELR_CHSEL18          (1 << 18)   /* Select channel 18 */
+#define ADC_CHSELR_CHSEL(ch)        (1 << ch)
 
 #define ADC_DR_RDATA_SHIFT          (0)
 #define ADC_DR_RDATA_MASK           (0xffff << ADC_DR_RDATA_SHIFT)
 
 /* Common configuration register */
 
+#ifdef HAVE_ADC_VLCD
+#  define ADC_CCR_PRESC_SHIFT       (18)       /* ADC Prescaler */
+#  define ADC_CCR_PRESC_MASK        (0xf << ADC_CCR_PRESC_SHIFT)
+#endif
 #define ADC_CCR_VREFEN              (1 << 22)  /* Bit 22: VREFINT enable */
 #define ADC_CCR_TSEN                (1 << 23)  /* Bit 23: Temperature sensor enable */
-#define ADC_CCR_VBATEN              (1 << 24)  /* Bit 22: VBAT enable */
+#ifdef HAVE_ADC_VBAT
+#  define ADC_CCR_VBATEN            (1 << 24)  /* Bit 24: VBAT enable */
+#endif
+#ifdef HAVE_ADC_VLCD
+#  define ADC_CCR_VLCDEN            (1 << 24)  /* Bit 24: VLCD enable */
+#endif
+#ifdef HAVE_ADC_LFM
+#  define ADC_CCR_LFMEN             (1 << 25)  /* Bit 25: Low Frequency Mode enable */
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_ADC_H */

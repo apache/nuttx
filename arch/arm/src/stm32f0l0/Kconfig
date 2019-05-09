@@ -697,11 +697,24 @@ endchoice
 config STM32F0L0_STM32F0
 	bool
 	default n
+	select STM32F0L0_HAVE_USART3
+	select STM32F0L0_HAVE_USART4
+	select STM32F0L0_HAVE_TIM1
+	select STM32F0L0_HAVE_TIM2
+	select STM32F0L0_HAVE_TIM3
+	select STM32F0L0_HAVE_TIM6
+	select STM32F0L0_HAVE_TIM7
+	select STM32F0L0_HAVE_TIM14
+	select STM32F0L0_HAVE_TIM15
+	select STM32F0L0_HAVE_TIM16
+	select STM32F0L0_HAVE_TIM17
+	select STM32F0L0_HAVE_ADC1_DMA
 
 config STM32F0L0_STM32L0
 	bool
-	select STM32F0L0_ENERGYLITE
 	default n
+	select STM32F0L0_ENERGYLITE
+	select STM32F0L0_HAVE_ADC1_DMA
 
 config STM32F0L0_STM32F03X
 	bool
@@ -728,41 +741,19 @@ config STM32F0L0_STM32F09X
 	default n
 	select STM32F0L0_STM32F0
 	select STM32F0L0_HAVE_HSI48
+	select STM32F0L0_HAVE_DMA2
 
 config STM32F0L0_VALUELINE
 	bool
 	default n
-	select STM32F0L0_HAVE_USART3
-	select STM32F0L0_HAVE_USART4
 	select STM32F0L0_HAVE_USART5
-	select STM32F0L0_HAVE_TIM1
-	select STM32F0L0_HAVE_TIM2
-	select STM32F0L0_HAVE_TIM3
-	select STM32F0L0_HAVE_TIM6
-	select STM32F0L0_HAVE_TIM7
-	select STM32F0L0_HAVE_TIM14
-	select STM32F0L0_HAVE_TIM15
-	select STM32F0L0_HAVE_TIM16
-	select STM32F0L0_HAVE_TIM17
 	select STM32F0L0_HAVE_SPI2 if STM32F0L0_HIGHDENSITY
 	select STM32F0L0_HAVE_SPI3 if STM32F0L0_HIGHDENSITY
 
 config STM32F0L0_ACCESSLINE
 	bool
 	default n
-	select STM32F0L0_HAVE_USART3
-	select STM32F0L0_HAVE_USART4
 	select STM32F0L0_HAVE_USART5
-	select STM32F0L0_HAVE_TIM1
-	select STM32F0L0_HAVE_TIM2
-	select STM32F0L0_HAVE_TIM3
-	select STM32F0L0_HAVE_TIM6
-	select STM32F0L0_HAVE_TIM7
-	select STM32F0L0_HAVE_TIM14
-	select STM32F0L0_HAVE_TIM15
-	select STM32F0L0_HAVE_TIM16
-	select STM32F0L0_HAVE_TIM17
-	select STM32F0L0_HAVE_ADC2
 	select STM32F0L0_HAVE_CAN1
 	select STM32F0L0_HAVE_SPI2
 	select STM32F0L0_HAVE_SPI3
@@ -770,19 +761,7 @@ config STM32F0L0_ACCESSLINE
 config STM32F0L0_LOWVOLTLINE
 	bool
 	default n
-	select STM32F0L0_HAVE_USART3
-	select STM32F0L0_HAVE_USART4
 	select STM32F0L0_HAVE_USART5
-	select STM32F0L0_HAVE_TIM1
-	select STM32F0L0_HAVE_TIM2
-	select STM32F0L0_HAVE_TIM3
-	select STM32F0L0_HAVE_TIM6
-	select STM32F0L0_HAVE_TIM7
-	select STM32F0L0_HAVE_TIM14
-	select STM32F0L0_HAVE_TIM15
-	select STM32F0L0_HAVE_TIM16
-	select STM32F0L0_HAVE_TIM17
-	select STM32F0L0_HAVE_ADC2
 	select STM32F0L0_HAVE_CAN1
 	select STM32F0L0_HAVE_SPI2
 	select STM32F0L0_HAVE_SPI3
@@ -791,18 +770,6 @@ config STM32F0L0_USBLINE
 	bool
 	default n
 	select STM32F0L0_HAVE_HSI48
-	select STM32F0L0_HAVE_USART3
-	select STM32F0L0_HAVE_USART4
-	select STM32F0L0_HAVE_TIM1
-	select STM32F0L0_HAVE_TIM2
-	select STM32F0L0_HAVE_TIM3
-	select STM32F0L0_HAVE_TIM6
-	select STM32F0L0_HAVE_TIM7
-	select STM32F0L0_HAVE_TIM14
-	select STM32F0L0_HAVE_TIM15
-	select STM32F0L0_HAVE_TIM16
-	select STM32F0L0_HAVE_TIM17
-	select STM32F0L0_HAVE_ADC2
 	select STM32F0L0_HAVE_CAN1
 	select STM32F0L0_HAVE_SPI2
 	select STM32F0L0_HAVE_SPI3
@@ -855,7 +822,6 @@ config STM32F0L0_SYSTICK_CORECLK_DIV16
 
 endchoice
 
-
 menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
@@ -866,6 +832,10 @@ config STM32F0L0_HAVE_CCM
 	default n
 
 config STM32F0L0_HAVE_HSI48
+	bool
+	default n
+
+config STM32F0L0_HAVE_LCD
 	bool
 	default n
 
@@ -941,55 +911,11 @@ config STM32F0L0_HAVE_TSC
 	bool
 	default n
 
-config STM32F0L0_HAVE_ADC2
-	bool
-	default n
-
-config STM32F0L0_HAVE_ADC3
-	bool
-	default n
-
-config STM32F0L0_HAVE_ADC4
-	bool
-	default n
-
 config STM32F0L0_HAVE_ADC1_DMA
 	bool
 	default n
 
-config STM32F0L0_HAVE_ADC2_DMA
-	bool
-	default n
-
-config STM32F0L0_HAVE_ADC3_DMA
-	bool
-	default n
-
-config STM32F0L0_HAVE_ADC4_DMA
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC1
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC2
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC3
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC1_DMA
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC2_DMA
-	bool
-	default n
-
-config STM32F0L0_HAVE_SDADC3_DMA
+config STM32F0L0_HAVE_CEC
 	bool
 	default n
 
@@ -1005,31 +931,11 @@ config STM32F0L0_HAVE_COMP2
        bool
        default n
 
-config STM32F0L0_HAVE_COMP3
-       bool
-       default n
-
-config STM32F0L0_HAVE_COMP4
-       bool
-       default n
-
-config STM32F0L0_HAVE_COMP5
-       bool
-       default n
-
-config STM32F0L0_HAVE_COMP6
-       bool
-       default n
-
-config STM32F0L0_HAVE_COMP7
-       bool
-       default n
-
 config STM32F0L0_HAVE_DAC1
 	bool
 	default n
 
-config STM32F0L0_HAVE_DAC2
+config STM32F0L0_HAVE_DMA2
 	bool
 	default n
 
@@ -1069,6 +975,10 @@ config STM32F0L0_HAVE_SAIPLL
 	bool
 	default n
 
+config STM32F0L0_HAVE_SDIO
+	bool
+	default n
+
 config STM32F0L0_HAVE_I2SPLL
 	bool
 	default n
@@ -1094,47 +1004,8 @@ config STM32F0L0_HAVE_OPAMP4
 config STM32F0L0_ADC1
 	bool "ADC1"
 	default n
+	depends on EXPERIMENTAL
 	select STM32F0L0_ADC
-
-config STM32F0L0_ADC2
-	bool "ADC2"
-	default n
-	select STM32F0L0_ADC
-	depends on STM32F0L0_HAVE_ADC2
-
-config STM32F0L0_ADC3
-	bool "ADC3"
-	default n
-	select STM32F0L0_ADC
-	depends on STM32F0L0_HAVE_ADC3
-
-config STM32F0L0_ADC4
-	bool "ADC4"
-	default n
-	select STM32F0L0_ADC
-	depends on STM32F0L0_HAVE_ADC4
-
-config STM32F0L0_SDADC1
-	bool "SDADC1"
-	default n
-	select STM32F0L0_SDADC
-	depends on STM32F0L0_HAVE_SDADC1
-
-config STM32F0L0_SDADC2
-	bool "SDADC2"
-	default n
-	select STM32F0L0_SDADC
-	depends on STM32F0L0_HAVE_SDADC2
-
-config STM32F0L0_SDADC3
-	bool "SDADC3"
-	default n
-	select STM32F0L0_SDADC
-	depends on STM32F0L0_HAVE_SDADC3
-
-config STM32F0L0_COMP
-	bool "COMP"
-	default n
 
 config STM32F0L0_COMP1
 	bool "COMP1"
@@ -1145,31 +1016,6 @@ config STM32F0L0_COMP2
 	bool "COMP2"
 	default n
 	depends on STM32F0L0_HAVE_COMP2
-
-config STM32F0L0_COMP3
-	bool "COMP3"
-	default n
-	depends on STM32F0L0_HAVE_COMP3
-
-config STM32F0L0_COMP4
-	bool "COMP4"
-	default n
-	depends on STM32F0L0_HAVE_COMP4
-
-config STM32F0L0_COMP5
-	bool "COMP5"
-	default n
-	depends on STM32F0L0_HAVE_COMP5
-
-config STM32F0L0_COMP6
-	bool "COMP6"
-	default n
-	depends on STM32F0L0_HAVE_COMP6
-
-config STM32F0L0_COMP7
-	bool "COMP7"
-	default n
-	depends on STM32F0L0_HAVE_COMP6
 
 config STM32F0L0_BKP
 	bool "BKP"
@@ -1189,7 +1035,7 @@ config STM32F0L0_CAN1
 config STM32F0L0_CEC
 	bool "CEC"
 	default n
-	depends on STM32F0L0_VALUELINE
+	depends on STM32F0L0_HAVE_CEC
 
 config STM32F0L0_CRC
 	bool "CRC"
@@ -1198,7 +1044,7 @@ config STM32F0L0_CRC
 config STM32F0L0_CRYP
 	bool "CRYP"
 	default n
-	depends on STM32F0L0_STM32F207 || STM32F0L0_STM32F40XX
+	depends on STM32F0L0_HAVE_HASH
 
 config STM32F0L0_DMA1
 	bool "DMA1"
@@ -1208,19 +1054,13 @@ config STM32F0L0_DMA1
 config STM32F0L0_DMA2
 	bool "DMA2"
 	default n
+	depends on STM32F0L0_HAVE_DMA2
 	select ARCH_DMA
-	depends on !STM32F0L0_VALUELINE || (STM32F0L0_VALUELINE && STM32F0L0_HIGHDENSITY)
 
 config STM32F0L0_DAC1
 	bool "DAC1"
 	default n
 	depends on STM32F0L0_HAVE_DAC1
-	select STM32F0L0_DAC
-
-config STM32F0L0_DAC2
-	bool "DAC2"
-	default n
-	depends on STM32F0L0_HAVE_DAC2
 	select STM32F0L0_DAC
 
 config STM32F0L0_FSMC
@@ -1231,7 +1071,7 @@ config STM32F0L0_FSMC
 config STM32F0L0_HASH
 	bool "HASH"
 	default n
-	depends on STM32F0L0_STM32F207 || STM32F0L0_STM32F40XX
+	depends on STM32F0L0_HAVE_HASH
 
 config STM32F0L0_I2C1
 	bool "I2C1"
@@ -1263,7 +1103,7 @@ config STM32F0L0_RNG
 config STM32F0L0_SDIO
 	bool "SDIO"
 	default n
-	depends on !STM32F0L0_CONNECTIVITYLINE && !STM32F0L0_VALUELINE
+	depends on STM32F0L0_HAVE_SDIO
 	select ARCH_HAVE_SDIO
 	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
 	select ARCH_HAVE_SDIO_PREFLIGHT
@@ -1414,6 +1254,12 @@ config STM32F0L0_USB
 	depends on STM32F0L0_HAVE_USBDEV
 	select USBDEV
 
+config STM32F0L0_LCD
+	bool "Segment LCD"
+	default n
+	depends on STM32F0L0_HAVE_LCD
+	select USBDEV
+
 config STM32F0L0_IWDG
 	bool "IWDG"
 	default n
@@ -1426,10 +1272,10 @@ config STM32F0L0_WWDG
 
 endmenu
 
-config STM32F0L0_ADC
+config STM32F0L0_COMP
 	bool
 
-config STM32F0L0_SDADC
+config STM32F0L0_ADC
 	bool
 
 config STM32F0L0_DAC
@@ -1568,7 +1414,6 @@ config USART3_RS485_DIR_POLARITY
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
 endif # STM32F0L0_USART3_SERIALDRIVER
-
 
 choice
 	prompt "USART4 Driver Configuration"
@@ -1794,3 +1639,126 @@ config STM32F0L0_PM_SERIAL_ACTIVITY
 endif
 
 endmenu
+
+menu "ADC Configuration"
+	depends on STM32F0L0_ADC
+
+config STM32F0L0_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on STM32F0L0_ADC1
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32F0L0_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
+
+config STM32F0L0_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	default n
+	---help---
+		Do not use default ADC interrupts handlers.
+
+config STM32F0L0_ADC_LL_OPS
+	bool "ADC low-level operations"
+	default n
+	---help---
+		Enable low-level ADC ops.
+
+config STM32F0L0_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	default n
+	depends on STM32F0L0_ADC_LL_OPS
+	---help---
+		Enable ADC sample time configuration (SMPRx registers).
+
+config STM32F0L0_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on STM32F0L0_ADC1 && STM32F0L0_HAVE_ADC1_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32F0L0_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on STM32F0L0_ADC1_DMA && !STM32F0L0_HAVE_IP_ADC_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+endmenu
+
+menu "SPI Configuration"
+	depends on STM32F0L0_SPI
+
+config STM32F0L0_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32F0L0_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F0L0_SPI_INTERRUPT.
+
+config STM32F0L0_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on STM32F0L0_SPI1 && STM32F0L0_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+
+config STM32F0L0_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on STM32F0L0_SPI2 && STM32F0L0_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.
+
+endmenu # SPI Configuration
+
+menu "I2C Configuration"
+	depends on STM32F0L0_I2C
+
+config STM32F0L0_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32F0L0_I2C
+
+config STM32F0L0_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32F0L0_I2C_DYNTIMEO
+
+config STM32F0L0_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32F0L0_I2C_DYNTIMEO
+
+config STM32F0L0_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32F0L0_I2C
+
+config STM32F0L0_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32F0L0_I2C && !STM32F0L0_I2C_DYNTIMEO
+
+config STM32F0L0_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32F0L0_I2C && !STM32F0L0_I2C_DYNTIMEO
+
+endmenu #I2C Configuration

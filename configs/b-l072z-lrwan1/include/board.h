@@ -248,6 +248,6 @@
 /* DMA channels *************************************************************/
 /* ADC */
 
-#define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+#define ADC1_DMA_CHAN DMACHAN_ADC1_1    /* DMA1_CH1 */
 
 #endif /* __CONFIG_NUCLEO_LO73RZ_INCLUDE_BOARD_H */
