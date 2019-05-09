@@ -369,6 +369,27 @@ int nxtk_modal(NXTKWINDOW hfwnd, bool modal);
 int nxtk_setvisibility(NXTKWINDOW hfwnd, bool hide);
 
 /****************************************************************************
+ * Name: nxtk_ishidden
+ *
+ * Description:
+ *   Return true if the window is hidden.
+ *
+ *   NOTE:  There will be a delay between the time that the visibility of
+ *   the window is changed via nxtk_setvisibily() before that new setting is
+ *   reported by nxtk_ishidden().  nxtk_synch() may be used if temporal
+ *   synchronization is required.
+ *
+ * Input Parameters:
+ *   hfwnd - The window to be queried
+ *
+ * Returned Value:
+ *   True: the window is hidden, false: the window is visible
+ *
+ ****************************************************************************/
+
+bool nxtk_ishidden(NXTKWINDOW hfwnd);
+
+/****************************************************************************
  * Name: nxtk_fillwindow
  *
  * Description:

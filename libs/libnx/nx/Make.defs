@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_NX),y)
 
-CSRCS += nx_drawcircle.c nx_drawline.c nx_fillcircle.c
+CSRCS += nx_drawcircle.c nx_drawline.c nx_fillcircle.c nx_ishidden.c
 
 # Add the nx/ directory to the build
 

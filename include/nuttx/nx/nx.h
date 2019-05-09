@@ -701,6 +701,27 @@ int nx_modal(NXWINDOW hwnd, bool modal);
 int nx_setvisibility(NXWINDOW hwnd, bool hide);
 
 /****************************************************************************
+ * Name: nx_ishidden
+ *
+ * Description:
+ *   Return true if the window is hidden.
+ *
+ *   NOTE:  There will be a delay between the time that the visibility of
+ *   the window is changed via nx_setvisibily() before that new setting is
+ *   reported by nx_ishidden().  nx_synch() may be used if temporal
+ *   synchronization is required.
+ *
+ * Input Parameters:
+ *   hwnd - The window to be queried
+ *
+ * Returned Value:
+ *   True: the window is hidden, false: the window is visible
+ *
+ ****************************************************************************/
+
+bool nx_ishidden(NXWINDOW hwnd);
+
+/****************************************************************************
  * Name: nx_setpixel
  *
  * Description:
