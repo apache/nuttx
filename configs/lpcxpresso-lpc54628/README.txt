@@ -537,7 +537,24 @@ Configurations
        screen driver with its polled operation does not provide rapid or
        precise touch positions.  So the movement is not smooth.  It is also
        difficult to grab the toolbar.
+    2019-05-10: A left click on the background brings up the main menu.  At
+       present there are only two options:  "Desktop" which will iconify all
+       windows and "Twm4Nx Icon Manager" which will de-configy and/or raise
+       the Icon Manager window to the top of the hierarchy.  That latter option
+       is only meaningful when the desktop is very crowded.
 
-       The logic to move the Icon Manager Icon does not work at all.
+       Further progress depends upon getting a some additional applications
+       in place in the main menu in place.  NxTerm is needed as is probably
+       a clock.  These would provide good illustrations of how to hook in an
+       arbitrary application.
 
-       Left-click main menu functionality is required to test much more.
+       Some known bugs yet-to-fixed.  Surely there are more as will be revealed
+       by additional testing:
+
+       1. The is a small artifact in the upper lefthand corner.  I am not sure
+          exactly what that is.
+       2. The logic to move an icon on the desk top does not work.
+       3. There is no touscreen calibration but it turns out that touch
+          controller has the same orientation and range as the display.  So it
+          works without calibration.  I am sure that is some loss of touch
+          precision due to the lack of calibration, but it works OK for testing.
