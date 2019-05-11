@@ -58,6 +58,7 @@
 #include <semaphore.h>
 #include <poll.h>
 #include <debug.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -143,6 +144,7 @@ struct nrf24l01_dev_s
 
   nrf24l01_state_t state;   /* Current state of the nRF24L01 */
 
+  bool tx_payload_noack;    /* TX without waiting for ACK */
   uint8_t en_aa;            /* Cache EN_AA register value */
   uint8_t en_pipes;         /* Cache EN_RXADDR register value */
   bool ce_enabled;          /* Cache the value of CE pin */
@@ -843,9 +845,9 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   nrf24l01_flush_tx(dev);
 
-  /* Write payload */
+  /* Write payload - use different command depending on ACK setting */
 
-  nrf24l01_access(dev, MODE_WRITE, NRF24L01_W_TX_PAYLOAD,
+  nrf24l01_access(dev, MODE_WRITE, dev->tx_payload_noack ? NRF24L01_W_TX_PAYLOAD_NOACK : NRF24L01_W_TX_PAYLOAD,
                   (FAR uint8_t *)data, datalen);
 
   dev->tx_pending = true;
@@ -1057,7 +1059,24 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  if (filep->f_oflags & O_NONBLOCK)
+    {
+      /* test if data is ready */
+      int packet_count;
+      ret = nxsem_getvalue(&dev->sem_rx, &packet_count);
+      if (ret)
+        {
+          goto errout; /* getvalue failed */
+        }
+        if (!packet_count)
+        {
+          ret = -EWOULDBLOCK; /* don't wait for packets */
+          goto errout;
+        }
+    }
+
   ret = nrf24l01_recv(dev, (uint8_t *)buffer, buflen, &dev->last_recvpipeno);
+errout:
   nxsem_post(&dev->devsem);
   return ret;
 #endif
@@ -1323,6 +1342,24 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           break;
         }
 
+      case NRF24L01IOC_SETTXPAYLOADNOACK:
+        {
+          FAR uint32_t *tx_payload_noack = (FAR uint32_t *)(arg);
+          DEBUGASSERT(tx_payload_noack != NULL);
+
+          dev->tx_payload_noack = (*tx_payload_noack) > 0;
+          break;
+        }
+
+      case NRF24L01IOC_GETTXPAYLOADNOACK:
+        {
+          FAR uint32_t *tx_payload_noack = (FAR uint32_t *)(arg);
+          DEBUGASSERT(tx_payload_noack != NULL);
+
+          *tx_payload_noack = dev->tx_payload_noack ? 1 : 0;
+          break;
+        }
+
       default:
         ret = -ENOTTY;
         break;
@@ -1527,9 +1564,9 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
 
   nrf24l01_configspi(dev->spi);
 
-  /* Enable features. */
+  /* Enable features in hardware: dynamic payload length + sending without expecting ACK */
 
-  nrf24l01_writeregbyte(dev, NRF24L01_FEATURE, NRF24L01_EN_DPL);
+  nrf24l01_writeregbyte(dev, NRF24L01_FEATURE, NRF24L01_EN_DPL | NRF24L01_EN_DYN_ACK);
   features = nrf24l01_readregbyte(dev, NRF24L01_FEATURE);
   if (0 == features)
     {

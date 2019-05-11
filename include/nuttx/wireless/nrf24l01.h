@@ -80,6 +80,8 @@
 #define NRF24L01IOC_GETSTATE         _WLCIOC(NRF24L01_FIRST+11) /* arg: Pointer to a nrf24l01_state_t value */
 #define NRF24L01IOC_GETLASTXMITCOUNT _WLCIOC(NRF24L01_FIRST+12) /* arg: Pointer to an uint32_t value, retransmission count of the last send operation (NRF24L01_XMIT_MAXRT if no ACK received)*/
 #define NRF24L01IOC_GETLASTPIPENO    _WLCIOC(NRF24L01_FIRST+13) /* arg: Pointer to an uint32_t value, pipe # of the last received packet */
+#define NRF24L01IOC_SETTXPAYLOADNOACK _WLCIOC(NRF24L01_FIRST+14) /* arg: Pointer to an uint32_t, interpreted as bool */
+#define NRF24L01IOC_GETTXPAYLOADNOACK _WLCIOC(NRF24L01_FIRST+15) /* arg: Pointer to an uint32_t, interpreted as bool */
 
 /* Aliased name for these commands */
 
