@@ -36,7 +36,8 @@
 /* Features:
  *   - Fixed length and dynamically sized payloads  (1 - 32 bytes)
  *   - Management of the 6 receiver pipes
- *   - Configuration of each pipe: address, packet length, auto-acknowledge, etc.
+ *   - Configuration of each pipe: address, packet length, auto-acknowledge,
+ *     etc.
  *   - Use a FIFO buffer to store the received packets
  *
  * Todo:
@@ -188,7 +189,7 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi);
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi);
 
 static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
-             nrf24l01_access_mode_t mode, uint8_t cmd, uint8_t *buf,
+             nrf24l01_access_mode_t mode, uint8_t cmd, FAR uint8_t *buf,
              int length);
 static uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev);
 static uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev);
@@ -217,15 +218,16 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
-static void fifoput(struct nrf24l01_dev_s *dev, uint8_t pipeno,
+static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
              FAR uint8_t *buffer, uint8_t buflen);
-static uint8_t fifoget(struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
+static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
              uint8_t buflen, FAR uint8_t *pipeno);
 static void nrf24l01_worker(FAR void *arg);
 #endif
 
 #ifdef CONFIG_DEBUG_WIRELESS
-static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen);
+static void binarycvt(FAR char *deststr, FAR const uint8_t *srcbin,
+                      size_t srclen);
 #endif
 
 /* POSIX API */
@@ -402,7 +404,7 @@ static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
  * Name: nrf24l01_flush_rx
  ****************************************************************************/
 
-static inline uint8_t nrf24l01_flush_rx(struct nrf24l01_dev_s *dev)
+static inline uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev)
 {
   return nrf24l01_access(dev, MODE_WRITE, NRF24L01_FLUSH_RX, NULL, 0);
 }
@@ -411,7 +413,7 @@ static inline uint8_t nrf24l01_flush_rx(struct nrf24l01_dev_s *dev)
  * Name: nrf24l01_flush_tx
  ****************************************************************************/
 
-static inline uint8_t nrf24l01_flush_tx(struct nrf24l01_dev_s *dev)
+static inline uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev)
 {
   return nrf24l01_access(dev, MODE_WRITE, NRF24L01_FLUSH_TX, NULL, 0);
 }
@@ -424,7 +426,7 @@ static inline uint8_t nrf24l01_flush_tx(struct nrf24l01_dev_s *dev)
  *
  ****************************************************************************/
 
-static inline uint8_t nrf24l01_readreg(struct nrf24l01_dev_s *dev,
+static inline uint8_t nrf24l01_readreg(FAR struct nrf24l01_dev_s *dev,
                                        uint8_t reg, FAR uint8_t *value,
                                        int len)
 {
@@ -440,7 +442,7 @@ static inline uint8_t nrf24l01_readreg(struct nrf24l01_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline uint8_t nrf24l01_readregbyte(struct nrf24l01_dev_s *dev,
+static inline uint8_t nrf24l01_readregbyte(FAR struct nrf24l01_dev_s *dev,
                                            uint8_t reg)
 {
   uint8_t val;
@@ -520,7 +522,8 @@ static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
 
       int skiplen = FIFO_PKTLEN(dev) + 1;
 
-      dev->nxt_read = (dev->nxt_read + skiplen) % CONFIG_WL_NRF24L01_RXFIFO_LEN;
+      dev->nxt_read  = (dev->nxt_read + skiplen) %
+                       CONFIG_WL_NRF24L01_RXFIFO_LEN;
       dev->fifo_len -= skiplen;
     }
 
@@ -544,7 +547,7 @@ static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
  ****************************************************************************/
 
 static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
-                       uint8_t buflen, uint8_t *pipeno)
+                       uint8_t buflen, FAR uint8_t *pipeno)
 {
   uint8_t pktlen;
   uint8_t i;
@@ -572,12 +575,14 @@ static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
   for (i = 0; i < pktlen && i < buflen; i++)
     {
       *(buffer++) = dev->rx_fifo[dev->nxt_read];
-      dev->nxt_read = (dev->nxt_read + 1) % CONFIG_WL_NRF24L01_RXFIFO_LEN;
+      dev->nxt_read = (dev->nxt_read + 1) %
+                      CONFIG_WL_NRF24L01_RXFIFO_LEN;
     }
 
   if (i < pktlen)
     {
-      dev->nxt_read = (dev->nxt_read + pktlen - i) % CONFIG_WL_NRF24L01_RXFIFO_LEN;
+      dev->nxt_read = (dev->nxt_read + pktlen - i) %
+                      CONFIG_WL_NRF24L01_RXFIFO_LEN;
     }
 
   /* Adjust fifo bytes count */
@@ -621,8 +626,8 @@ static int nrf24l01_irqhandler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev, xcpt_t isr,
-                                     FAR void *arg)
+static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev,
+                                     xcpt_t isr, FAR void *arg)
 {
   return dev->config->irqattach(isr, arg);
 }
@@ -701,7 +706,8 @@ static void nrf24l01_worker(FAR void *arg)
                * to get actual length.
                */
 
-              nrf24l01_access(dev, MODE_READ, NRF24L01_R_RX_PL_WID, &pktlen, 1);
+              nrf24l01_access(dev, MODE_READ, NRF24L01_R_RX_PL_WID, &pktlen,
+                              1);
             }
 
           if (pktlen > NRF24L01_MAX_PAYLOAD_LEN) /* bad length */
@@ -721,7 +727,8 @@ static void nrf24l01_worker(FAR void *arg)
 #endif
           nxsem_post(&dev->sem_rx);  /* Wake-up any thread waiting in recv */
 
-          status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status, 1);
+          status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status,
+                                    1);
 
           wlinfo("FIFO_STATUS=%02x\n", fifo_status);
           wlinfo("STATUS=%02x\n", status);
@@ -776,7 +783,7 @@ static void nrf24l01_worker(FAR void *arg)
  * Name: nrf24l01_tostate
  ****************************************************************************/
 
-static void nrf24l01_tostate(struct nrf24l01_dev_s *dev,
+static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev,
                              nrf24l01_state_t state)
 {
   nrf24l01_state_t oldstate = dev->state;
@@ -831,6 +838,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 {
   uint8_t status;
   uint8_t obsvalue;
+  uint8_t cmd;
   int ret;
 
   /* Store the current lifecycle state in order to restore it after transmit
@@ -847,8 +855,9 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   /* Write payload - use different command depending on ACK setting */
 
-  nrf24l01_access(dev, MODE_WRITE, dev->tx_payload_noack ? NRF24L01_W_TX_PAYLOAD_NOACK : NRF24L01_W_TX_PAYLOAD,
-                  (FAR uint8_t *)data, datalen);
+  cmd = dev->tx_payload_noack ? NRF24L01_W_TX_PAYLOAD_NOACK :
+        NRF24L01_W_TX_PAYLOAD;
+  nrf24l01_access(dev, MODE_WRITE, cmd, (FAR uint8_t *)data, datalen);
 
   dev->tx_pending = true;
 
@@ -913,7 +922,8 @@ out:
 
   /* Clear interrupt sources */
 
-  nrf24l01_writeregbyte(dev, NRF24L01_STATUS, NRF24L01_TX_DS | NRF24L01_MAX_RT);
+  nrf24l01_writeregbyte(dev, NRF24L01_STATUS, NRF24L01_TX_DS |
+                             NRF24L01_MAX_RT);
 
   /* Clear fifo */
 
@@ -930,16 +940,17 @@ out:
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_WIRELESS
-static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen)
+static void binarycvt(FAR char *deststr, FAR const uint8_t *srcbin,
+                      size_t srclen)
 {
   int i = 0;
   while (i < srclen)
     {
-      sprintf(deststr + i*2, "%02x", srcbin[i]);
+      sprintf(deststr + i * 2, "%02x", srcbin[i]);
       ++i;
     }
 
-  *(deststr + i*2) = '\0';
+  *(deststr + i * 2) = '\0';
 }
 #endif
 
@@ -1061,14 +1072,17 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_oflags & O_NONBLOCK)
     {
-      /* test if data is ready */
       int packet_count;
+
+      /* Test if data is ready */
+
       ret = nxsem_getvalue(&dev->sem_rx, &packet_count);
       if (ret)
         {
           goto errout; /* getvalue failed */
         }
-        if (!packet_count)
+
+      if (!packet_count)
         {
           ret = -EWOULDBLOCK; /* don't wait for packets */
           goto errout;
@@ -1076,6 +1090,7 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
     }
 
   ret = nrf24l01_recv(dev, (uint8_t *)buffer, buflen, &dev->last_recvpipeno);
+
 errout:
   nxsem_post(&dev->devsem);
   return ret;
@@ -1218,7 +1233,8 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case NRF24L01IOC_SETPIPESCFG:
         {
           int i;
-          FAR nrf24l01_pipecfg_t **cfg_array = (FAR nrf24l01_pipecfg_t **)(arg);
+          FAR nrf24l01_pipecfg_t **cfg_array =
+            (FAR nrf24l01_pipecfg_t **)(arg);
 
           DEBUGASSERT(cfg_array != NULL);
           for (i = 0; i < NRF24L01_PIPE_COUNT; i++)
@@ -1234,7 +1250,8 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case NRF24L01IOC_GETPIPESCFG:
         {
           int i;
-          FAR nrf24l01_pipecfg_t **cfg_array = (FAR nrf24l01_pipecfg_t **)(arg);
+          FAR nrf24l01_pipecfg_t **cfg_array =
+            (FAR nrf24l01_pipecfg_t **)(arg);
 
           DEBUGASSERT(cfg_array != NULL);
           for (i = 0; i < NRF24L01_PIPE_COUNT; i++)
@@ -1492,7 +1509,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
   int ret = OK;
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
-  uint8_t *rx_fifo;
+  FAR uint8_t *rx_fifo;
 #endif
 
   DEBUGASSERT((spi != NULL) & (cfg != NULL));
@@ -1564,9 +1581,12 @@ int nrf24l01_init(FAR struct nrf24l01_dev_s *dev)
 
   nrf24l01_configspi(dev->spi);
 
-  /* Enable features in hardware: dynamic payload length + sending without expecting ACK */
+  /* Enable features in hardware: dynamic payload length + sending without
+   * expecting ACK
+   */
 
-  nrf24l01_writeregbyte(dev, NRF24L01_FEATURE, NRF24L01_EN_DPL | NRF24L01_EN_DYN_ACK);
+  nrf24l01_writeregbyte(dev, NRF24L01_FEATURE, NRF24L01_EN_DPL |
+                             NRF24L01_EN_DYN_ACK);
   features = nrf24l01_readregbyte(dev, NRF24L01_FEATURE);
   if (0 == features)
     {
@@ -1710,11 +1730,13 @@ int nrf24l01_getpipeconfig(FAR struct nrf24l01_dev_s *dev,
 
   /* Auto ack */
 
-  pipecfg->en_aa = ((nrf24l01_readregbyte(dev, NRF24L01_EN_AA) & (1 << pipeno)) != 0);
+  pipecfg->en_aa =
+    ((nrf24l01_readregbyte(dev, NRF24L01_EN_AA) & (1 << pipeno)) != 0);
 
   /* Payload config */
 
-  dynlength = ((nrf24l01_readregbyte(dev, NRF24L01_DYNPD) & (1 << pipeno)) != 0);
+  dynlength =
+    ((nrf24l01_readregbyte(dev, NRF24L01_DYNPD) & (1 << pipeno)) != 0);
 
   if (dynlength)
     {
@@ -1722,7 +1744,8 @@ int nrf24l01_getpipeconfig(FAR struct nrf24l01_dev_s *dev,
     }
   else
     {
-      pipecfg->payload_length = nrf24l01_readregbyte(dev, NRF24L01_RX_PW_P0 + pipeno);
+      pipecfg->payload_length =
+        nrf24l01_readregbyte(dev, NRF24L01_RX_PW_P0 + pipeno);
     }
 
   nrf24l01_unlock(dev->spi);
@@ -1965,7 +1988,7 @@ int nrf24l01_setaddrwidth(FAR struct nrf24l01_dev_s *dev, uint32_t width)
              width >= NRF24L01_MIN_ADDR_LEN);
 
   nrf24l01_lock(dev->spi);
-  nrf24l01_writeregbyte(dev, NRF24L01_SETUP_AW, width-2);
+  nrf24l01_writeregbyte(dev, NRF24L01_SETUP_AW, width - 2);
   nrf24l01_unlock(dev->spi);
   dev->addrlen = width;
   return OK;
@@ -1975,7 +1998,8 @@ int nrf24l01_setaddrwidth(FAR struct nrf24l01_dev_s *dev, uint32_t width)
  * Name: nrf24l01_changestate
  ****************************************************************************/
 
-int nrf24l01_changestate(FAR struct nrf24l01_dev_s *dev, nrf24l01_state_t state)
+int nrf24l01_changestate(FAR struct nrf24l01_dev_s *dev,
+                         nrf24l01_state_t state)
 {
   nrf24l01_lock(dev->spi);
   nrf24l01_tostate(dev, state);
@@ -2056,8 +2080,8 @@ int nrf24l01_lastxmitcount(FAR struct nrf24l01_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
-ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
-                      size_t buflen, uint8_t *recvpipe)
+ssize_t nrf24l01_recv(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
+                      size_t buflen, FAR uint8_t *recvpipe)
 {
   int ret = nxsem_wait(&dev->sem_rx);
   if (ret < 0)
@@ -2077,7 +2101,7 @@ ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_WIRELESS
-void nrf24l01_dumpregs(struct nrf24l01_dev_s *dev)
+void nrf24l01_dumpregs(FAR struct nrf24l01_dev_s *dev)
 {
   uint8_t addr[NRF24L01_MAX_ADDR_LEN];
   char addrstr[NRF24L01_MAX_ADDR_LEN * 2 +1];
@@ -2135,7 +2159,7 @@ void nrf24l01_dumpregs(struct nrf24l01_dev_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_WIRELESS) && defined(CONFIG_WL_NRF24L01_RXSUPPORT)
-void nrf24l01_dumprxfifo(struct nrf24l01_dev_s *dev)
+void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev)
 {
   syslog(LOG_INFO, "bytes count: %d\n", dev->fifo_len);
   syslog(LOG_INFO, "next read:   %d,  next write: %d\n",
