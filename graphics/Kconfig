@@ -423,6 +423,21 @@ config NXTERM_NXKBDIN
 		by window callback functions so that keyboard input *only* goes to the
 		top window.
 
+		NOTE: nxterm_kdbin() is an internal OS API.  It can be accessed by
+		applications via the boardctl(BOARDIOC_NXTERM) interface.
+
+		The logic path is complex in this case:  (1) The keyboard input is
+		received by an application listener thread and injected into NX via
+		nx_kbdin().  NX sends (2) the keyboard input to single the NX window
+		that has focus.  That window then (3) gives the keyboard input to the
+		single NxTerm associated with the window via boardctl(BOARDIOC_NXTERM).
+
+		NOTE:  If CONFIG_NXTERM_NXKBDIN not defined, then NxTerm input coming
+		directly from /dev/console.  That works well if there is only a single
+		NxTerm window.  But if there are multiple NxTerm windows, then it is
+		anyone's guess which will receive the keyboard input.  That does not
+		work well in such cases.
+
 config NXTERM_KBDBUFSIZE
 	int "Keyboard Input Buffer Size"
 	default 16

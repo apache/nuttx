@@ -44,9 +44,10 @@
 
 #include "chip.h"
 
-#include "hardware/stm32_adc.h"
-
 #include <nuttx/analog/adc.h>
+#include <arch/chip/chip.h>
+
+#include "hardware/stm32_adc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

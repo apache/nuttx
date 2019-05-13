@@ -548,6 +548,13 @@ Configurations
         terminal does not receive console input.  NxTerm input is via
         /dev/console.
 
+       NOTE:  Since the NxTerm keyboard input comes directly from /dev/console,
+       it goes to whichever task has an outstanding read on the console
+       device.  That works well if there is only a single NxTerm window.
+       But if there are multiple NxTerm windows, then it is anyone's guess
+       which will receive the keyboard input.  That does not work well in
+       such cases.
+
        Some known bugs yet-to-fixed.  Surely there are more as will be revealed
        by additional testing:
 
