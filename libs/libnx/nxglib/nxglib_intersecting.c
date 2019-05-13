@@ -58,7 +58,8 @@
 bool nxgl_intersecting(FAR const struct nxgl_rect_s *rect1,
                        FAR const struct nxgl_rect_s *rect2)
 {
-  return ((rect1->pt2.x > rect2->pt1.x) && (rect1->pt2.y > rect2->pt1.y) &&
-          (rect1->pt1.x < rect2->pt2.x) && (rect1->pt1.y < rect2->pt1.y));
+  return ((ngl_max(rect1->pt1.x, rect2->pt1.x) <=
+           ngl_min(rect1->pt2.x, rect2->pt2.x)) &&
+          (ngl_max(rect1->pt1.y, rect2->pt1.y) <=
+           ngl_min(rect1->pt2.y, rect2->pt2.y)));
 }
-
