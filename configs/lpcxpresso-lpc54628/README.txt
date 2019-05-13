@@ -542,17 +542,16 @@ Configurations
        windows and "Twm4Nx Icon Manager" which will de-configy and/or raise
        the Icon Manager window to the top of the hierarchy.  That latter option
        is only meaningful when the desktop is very crowded.
-
-       Further progress depends upon getting a some additional applications
-       in place in the main menu in place.  NxTerm is needed as is probably
-       a clock.  These would provide good illustrations of how to hook in an
-       arbitrary application.
+    2019-05-13:  Added the NxTerm application.  There will now be a
+       "NuttShell" enty in the Main Menu.  When pressed, this will bring up an
+        NSH session in a Twm4Nx window.  There is an issue, however:  The NSH
+        terminal does not receive console input.  NxTerm input is via
+        /dev/console.
 
        Some known bugs yet-to-fixed.  Surely there are more as will be revealed
        by additional testing:
 
-       1. The is a small artifact in the upper lefthand corner.  I am not sure
-          exactly what that is.
+       1. There is no way to resize a window
        2. The logic to move an icon on the desk top does not work.
        3. There is no touscreen calibration but it turns out that touch
           controller has the same orientation and range as the display.  So it
