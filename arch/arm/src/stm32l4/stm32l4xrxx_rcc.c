@@ -44,6 +44,7 @@
 
 #include "stm32l4_pwr.h"
 #include "stm32l4_flash.h"
+#include "stm32l4_hsi48.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,6 +66,14 @@
 /* HSE divisor to yield ~1MHz RTC clock */
 
 #define HSE_DIVISOR (STM32L4_HSE_FREQUENCY + 500000) / 1000000
+
+/* Determine if board wants to use HSI48 as 48 MHz oscillator. */
+
+#if defined(CONFIG_STM32L4_HAVE_HSI48) && defined(STM32L4_USE_CLK48)
+#  if STM32L4_CLK48_SEL == RCC_CCIPR_CLK48SEL_HSI48
+#    define STM32L4_USE_HSI48
+#  endif
+#endif
 
 /****************************************************************************
  * Private Data
@@ -401,6 +410,12 @@ static inline void rcc_enableapb1(void)
   /* CAN 1 clock enable */
 
   regval |= RCC_APB1ENR1_CAN1EN;
+#endif
+
+#ifdef STM32L4_USE_HSI48
+  /* Clock Recovery System clock enable */
+
+  regval |= RCC_APB1ENR1_CRSEN;
 #endif
 
   /* Power interface clock enable.  The PWR block is always enabled so that
@@ -938,7 +953,7 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_CR_MSIPLLEN;
       putreg32(regval, STM32L4_RCC_CR);
 #  endif
-#endif
+#endif /* STM32L4_USE_LSE */
     }
 }
 #endif
@@ -955,6 +970,10 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb3();
   rcc_enableapb1();
   rcc_enableapb2();
+
+#ifdef STM32L4_USE_HSI48
+  stm32l4_enable_hsi48(SYNCSRC_USB);
+#endif
 }
 
 /****************************************************************************

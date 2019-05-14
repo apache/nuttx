@@ -123,6 +123,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32l4_userspace.c stm32l4_mpuinit.c
 endif
 
+ifeq ($(CONFIG_STM32L4_HAVE_HSI48),y)
+CHIP_CSRCS += stm32l4_hsi48.c
+endif
+
 ifeq ($(CONFIG_STM32L4_ADC),y)
 CHIP_CSRCS += stm32l4_adc.c
 endif

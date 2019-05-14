@@ -475,6 +475,7 @@ config STM32L4_STM32L4X3
 	select STM32L4_HAVE_COMP
 	select STM32L4_HAVE_SAI1
 	select STM32L4_HAVE_LCD if !(STM32L4_STM32L4X1 || STM32L4_STM32L4X2)
+	select STM32L4_HAVE_HSI48
 
 config STM32L4_STM32L4X5
 	# STM32L4 USB OTG Lines (documented in RM0351)
@@ -564,6 +565,7 @@ config STM32L4_STM32L4XR
 	select STM32L4_HAVE_I2C4
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_HSI48
 
 # Chip subfamilies:
 
@@ -680,6 +682,7 @@ config STM32L4_STM32L496XX
 	select STM32L4_HAVE_DCMI
 	select STM32L4_HAVE_DMA2D
 	select STM32L4_HAVE_DFSDM1
+	select STM32L4_HAVE_HSI48
 
 config STM32L4_STM32L4A6XX
 	bool
@@ -930,6 +933,10 @@ config STM32L4_HAVE_FSMC
 	default n
 
 config STM32L4_HAVE_HASH
+	bool
+	default n
+
+config STM32L4_HAVE_HSI48
 	bool
 	default n
 

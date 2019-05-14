@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32f0l0/hardware/stm32_crs.h
+ * arch/arm/src/stm32l4/chip/stm32l4_crs.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Alan Carvalho de Assis <acassis@gmail.com>
  *
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H
+#ifndef __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_CRS_H
+#define __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_CRS_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -43,17 +43,17 @@
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_CRS_CR_OFFSET        0x0000  /* CRS control register */
-#define STM32_CRS_CFGR_OFFSET      0x0004  /* CRS configuration register */
-#define STM32_CRS_ISR_OFFSET       0x0008  /* CRS interrupt and status register */
-#define STM32_CRS_ICR_OFFSET       0x000c  /* CRS interrupt flag clear register */
+#define STM32L4_CRS_CR_OFFSET        0x0000  /* CRS control register */
+#define STM32L4_CRS_CFGR_OFFSET      0x0004  /* CRS configuration register */
+#define STM32L4_CRS_ISR_OFFSET       0x0008  /* CRS interrupt and status register */
+#define STM32L4_CRS_ICR_OFFSET       0x000c  /* CRS interrupt flag clear register */
 
 /* Register Addresses ***************************************************************/
 
-#define STM32_CRS_CR               (STM32_CRS_BASE + STM32_CRS_CR_OFFSET)
-#define STM32_CRS_CFGR             (STM32_CRS_BASE + STM32_CRS_CFGR_OFFSET)
-#define STM32_CRS_ISR              (STM32_CRS_BASE + STM32_CRS_ISR_OFFSET)
-#define STM32_CRS_ICR              (STM32_CRS_BASE + STM32_CRS_ICR_OFFSET)
+#define STM32L4_CRS_CR               (STM32L4_CRS_BASE + STM32L4_CRS_CR_OFFSET)
+#define STM32L4_CRS_CFGR             (STM32L4_CRS_BASE + STM32L4_CRS_CFGR_OFFSET)
+#define STM32L4_CRS_ISR              (STM32L4_CRS_BASE + STM32L4_CRS_ISR_OFFSET)
+#define STM32L4_CRS_ICR              (STM32L4_CRS_BASE + STM32L4_CRS_ICR_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -112,4 +112,4 @@
 #define CRS_ICR_ERRC               (1 << 2)  /* Bit 2: Error clear flag */
 #define CRS_ICR_ESYNCC             (1 << 3)  /* Bit 3: Expected SYNC clear flag */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_CHIP_STM32L4_CRS_H */

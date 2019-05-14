@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f0l0/stm32_hsi48.h
+ * arch/arm/src/stm32l4/stm32l4_hsi48.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_STM32_HSI48_H
-#define __ARCH_ARM_SRC_STM32F0L0_STM32_HSI48_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_HSI48_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_HSI48_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32F0L0_HAVE_HSI48
+#ifdef CONFIG_STM32L4_HAVE_HSI48
 
 /************************************************************************************
  * Public Types
@@ -61,12 +61,12 @@ enum syncsrc_e
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32_enable_hsi48
+ * Name: stm32l4_enable_hsi48
  *
  * Description:
- *   On STM32F04x, STM32F07x and STM32F09x devices only, the HSI48 clock
- *   signal is generated from an internal 48 MHz RC oscillator and can be
- *   used directly as a system clock or divided and be used as PLL input.
+ *   On STM32L4X3, STM32L496xx/4A6xx and STM32L4XR devices only, the HSI48
+ *   clock signal is generated from an internal 48 MHz RC oscillator and can
+ *   be used directly as a system clock or divided and be used as PLL input.
  *
  *   The internal 48MHz RC oscillator is mainly dedicated to provide a high
  *   precision clock to the USB peripheral by means of a special Clock
@@ -87,10 +87,10 @@ enum syncsrc_e
  *
  ****************************************************************************/
 
-void stm32_enable_hsi48(enum syncsrc_e syncsrc);
+void stm32l4_enable_hsi48(enum syncsrc_e syncsrc);
 
 /****************************************************************************
- * Name: stm32_disable_hsi48
+ * Name: stm32l4_disable_hsi48
  *
  * Description:
  *   Disable the HSI48 clock.
@@ -103,7 +103,7 @@ void stm32_enable_hsi48(enum syncsrc_e syncsrc);
  *
  ****************************************************************************/
 
-void stm32_disable_hsi48(void);
+void stm32l4_disable_hsi48(void);
 
-#endif /* CONFIG_STM32F0L0_HAVE_HSI48 */
-#endif /* __ARCH_ARM_SRC_STM32F0L0_STM32_HSI48_H */
+#endif /* CONFIG_STM32L4_HAVE_HSI48 */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_HSI48_H */
