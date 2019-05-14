@@ -3694,6 +3694,10 @@ void up_usbinitialize(void)
   usbtrace(TRACE_DEVINIT, 0);
   stm32l4_checksetup();
 
+  /* Enable Vbus monitoring in the Power control */
+
+  stm32l4_pwr_enableusv(true);
+
   /* Power up the USB controller, but leave it in the reset state */
 
   stm32l4_hwsetup(priv);
@@ -3746,6 +3750,11 @@ void up_usbuninitialize(void)
   /* Put the hardware in an inactive state */
 
   stm32l4_hwshutdown(priv);
+
+  /* Disable Vbus monitoring in the Power control */
+
+  stm32l4_pwr_enableusv(false);
+
   leave_critical_section(flags);
 }
 
