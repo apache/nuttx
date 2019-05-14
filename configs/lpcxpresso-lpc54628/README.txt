@@ -529,38 +529,30 @@ Configurations
        a USB keyboard.
 
     STATUS:
-    2019-05-04:  Initial display is clean.
-    2019-05-08:  Logic to iconify and de-iconify the Icon Manager works.
-       I am able to grab the Icon Manager tool bar and move the Icon Manager
-       window.  However, the movement is not smooth.  Analyizing the touch-
-       screen input, I can see that Twm4NX is working okay but the touch-
-       screen driver with its polled operation does not provide rapid or
-       precise touch positions.  So the movement is not smooth.  It is also
-       difficult to grab the toolbar.
-    2019-05-10: A left click on the background brings up the main menu.  At
-       present there are only two options:  "Desktop" which will iconify all
-       windows and "Twm4Nx Icon Manager" which will de-configy and/or raise
-       the Icon Manager window to the top of the hierarchy.  That latter option
-       is only meaningful when the desktop is very crowded.
-    2019-05-13:  Added the NxTerm application.  There will now be a
-       "NuttShell" enty in the Main Menu.  When pressed, this will bring up an
-        NSH session in a Twm4Nx window.  There is an issue, however:  The NSH
-        terminal does not receive console input.  NxTerm input is via
-        /dev/console.
 
-       NOTE:  Since the NxTerm keyboard input comes directly from /dev/console,
-       it goes to whichever task has an outstanding read on the console
-       device.  That works well if there is only a single NxTerm window.
-       But if there are multiple NxTerm windows, then it is anyone's guess
-       which will receive the keyboard input.  That does not work well in
-       such cases.
+    Refer to apps/graphics/twm4nx/README.txt for an overall status.  Here
+    just some issues/topics unique to the LPCXpresso-LPC54628 and/or this
+    configuration.
 
-       Some known bugs yet-to-fixed.  Surely there are more as will be revealed
-       by additional testing:
+    1. Tthe NxTerm application is available as the "NuttShell" enty in the
+       Main Menu.  When pressed, this will bring up an NSH session in a
+       Twm4Nx window.  There is an issue, however:  The NxTerm gets its
+       input from the console (/dev/console).  Since the NxTerm keyboard 
+       input comes directly from /dev/console, it goes to whichever task has
+       an outstanding read on the console device.  That works well if there
+       is only a single NxTerm window.  But if there are multiple NxTerm
+       windows, then it is anyone's guess  which will receive the keyboard
+       input.  That does not work well in such cases.
 
-       1. There is no way to resize a window
-       2. The logic to move an icon on the desk top does not work.
-       3. There is no touscreen calibration but it turns out that touch
-          controller has the same orientation and range as the display.  So it
-          works without calibration.  I am sure that is some loss of touch
-          precision due to the lack of calibration, but it works OK for testing.
+    2. There is a responsive-ness issue the the FT5x06 touchscreen controller.
+       The pin selected by the board designers will not support interrupts.
+       Therefore, a fallback polled mode is use.  This polled mode has
+       significant inherent delays that effect the user experience when
+       touching buttons or grabbing and moving objects on the desktop.
+
+    3. There is no touchscreen calibration yet.  But fortunately, the FT5x06
+       has the same resolution and orientation as the LCD and so can be used
+       without any calibration.  There are still inaccuracies due to the
+       lack of calibration, however.  These show up especially along the
+       very top of the display where it can be very difficult to touch
+       buttons or grab'n'move object.
