@@ -37,8 +37,8 @@
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32_I2C_H
 
 /* There are 2 main types of I2C IP cores among STM32 chips:
- *   1. STM32 ADC IPv1 - F1, F2, F4 and L1
- *   2. STM32 ADC IPv2 - G0, L0, F0, F3, F7, H7 and L4
+ *   1. STM32 I2C IPv1 - F1, F2, F4 and L1
+ *   2. STM32 I2C IPv2 - G0, L0, F0, F3, F7, H7 and L4
  */
 
 #if defined(CONFIG_STM32_HAVE_IP_I2C_V1)
