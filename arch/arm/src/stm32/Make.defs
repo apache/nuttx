@@ -119,16 +119,16 @@ ifeq ($(CONFIG_STM32_CCM_PROCFS),y)
 CHIP_CSRCS += stm32_procfs_ccm.c
 endif
 
+ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V1),y)
 ifeq ($(CONFIG_STM32_I2C_ALT),y)
 CHIP_CSRCS += stm32_i2c_alt.c
-else ifeq ($(CONFIG_STM32_STM32F30XX),y)
-CHIP_CSRCS += stm32f30xxx_i2c.c
-else ifeq ($(CONFIG_STM32_STM32F37XX),y)
-CHIP_CSRCS += stm32f30xxx_i2c.c
 else ifeq ($(CONFIG_STM32_STM32F4XXX),y)
 CHIP_CSRCS += stm32f40xxx_i2c.c
 else
 CHIP_CSRCS += stm32_i2c.c
+endif
+else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
+CHIP_CSRCS += stm32_i2c_v2.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

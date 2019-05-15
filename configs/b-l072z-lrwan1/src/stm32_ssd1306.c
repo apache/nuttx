@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_i2c.h
+ * config/b-l072z-lrwan1/src/stm32_ssd1306.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,72 +33,92 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_I2C_H
-#define __ARCH_ARM_SRC_STM32_STM32_I2C_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1306.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "chip.h"
-#include "chip/stm32_i2c.h"
+#include "stm32.h"
+#include "b-l072z-lrwan1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If a dynamic timeout is selected, then a non-negative, non-zero micro-
- * seconds per byte value must be provided as well.
- */
+/* Configuration ************************************************************/
 
-#ifdef CONFIG_STM32_I2C_DYNTIMEO
-#  if CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE < 1
-#    warning "Ignoring CONFIG_STM32_I2C_DYNTIMEO because of CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE"
-#    undef CONFIG_STM32_I2C_DYNTIMEO
-#  endif
+#ifndef CONFIG_LCD_MAXPOWER
+#  define CONFIG_LCD_MAXPOWER 1
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
+ ****************************************************************************/
+
+FAR struct i2c_master_s *g_i2c;
+FAR struct lcd_dev_s    *g_lcddev;
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_i2cbus_initialize
- *
- * Description:
- *   Initialize the selected I2C port. And return a unique instance of struct
- *   struct i2c_master_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a
- *   different frequency and slave address.
- *
- * Input Parameters:
- *   Port number (for hardware that has multiple I2C interfaces)
- *
- * Returned Value:
- *   Valid I2C device structure reference on succcess; a NULL on failure
- *
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
-FAR struct i2c_master_s *stm32_i2cbus_initialize(int port);
+int board_lcd_initialize(void)
+{
+  /* Initialize I2C */
+
+  g_i2c = stm32_i2cbus_initialize(OLED_I2C_PORT);
+  if (!g_i2c)
+    {
+      lcderr("ERROR: Failed to initialize I2C port %d\n", OLED_I2C_PORT);
+      return -ENODEV;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
- * Name: stm32_i2cbus_uninitialize
- *
- * Description:
- *   De-initialize the selected I2C port, and power down the device.
- *
- * Input Parameters:
- *   Device structure as returned by the stm32_i2cbus_initialize()
- *
- * Returned Value:
- *   OK on success, ERROR when internal reference count mismatch or dev
- *   points to invalid hardware device.
- *
+ * Name: board_lcd_getdev
  ****************************************************************************/
 
-int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+FAR struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  /* Bind the I2C port to the OLED */
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_I2C_H */
+  g_lcddev = ssd1306_initialize(g_i2c, NULL, devno);
+  if (!g_lcddev)
+    {
+      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d: %d\n", devno);
+    }
+  else
+    {
+      lcdinfo("Bound I2C port %d to OLED %d\n", OLED_I2C_PORT, devno);
+
+      /* And turn the OLED on */
+
+      (void)g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      return g_lcddev;
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: board_lcd_uninitialize
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+  /* TO-FIX */
+}

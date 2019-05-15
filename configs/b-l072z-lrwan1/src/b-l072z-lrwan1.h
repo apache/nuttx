@@ -114,6 +114,10 @@
 #define GPIO_SX127X_CRF2  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN2)
 #define GPIO_SX127X_CRF3  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN1)
 
+/* Oled configuration */
+
+#define OLED_I2C_PORT   1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

@@ -47,17 +47,17 @@
 /* TIM version **************************************************************************************/
 
 /* Chip has extended version of ADV Timers (F3/F7/H7/L4/L4+):
-     - CCMR3, CCR5 and CCR6 registers
-     - OC5 and OC6
-     - 32-bit CCMR register
-     - UIFREMAP bit in CR1 register
-     - TRGO2 configuration in CR2 register
-     - OCCS bit and 4-bit SMS in SMCR register
-
-   Chip has extended version of General Timers 2-5 (F3/F7/H7/L4/L4+):
-     - UIFREMAP bit in CR1 register
-     - 4-bit SMS in SMCR register
-*/
+ *   - CCMR3, CCR5 and CCR6 registers
+ *   - OC5 and OC6
+ *   - 32-bit CCMR register
+ *   - UIFREMAP bit in CR1 register
+ *   - TRGO2 configuration in CR2 register
+ *   - OCCS bit and 4-bit SMS in SMCR register
+ *
+ *  Chip has extended version of General Timers 2-5 (F3/F7/H7/L4/L4+):
+ *   - UIFREMAP bit in CR1 register
+ *   - 4-bit SMS in SMCR register
+ */
 
 #if defined(CONFIG_STM32_HAVE_IP_TIMERS_V2)
 #  define HAVE_IP_TIMERS_V2

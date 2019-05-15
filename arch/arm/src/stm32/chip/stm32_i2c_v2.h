@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f30xxx_i2c.h
+ * arch/arm/src/stm32/chip/stm32_i2c_v2.h
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,11 +33,11 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F30XXX_I2C_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F30XXX_I2C_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_I2C_V2_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_I2C_V2_H
 
-/* This file provide definitions for the STM32 I2C IP core 2 (F0, F3, F7, H7, and
- * L4).
+/* This file provide definitions for the STM32 I2C IP core 2 (G0, L0, F0, F3, F7,
+ * H7, and L4).
  */
 
 /************************************************************************************
@@ -250,5 +250,4 @@
 
 #define I2C_TXDR_MASK             (0xff)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F30XXX_I2C_H */
-
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_I2C_V2_H */

@@ -84,6 +84,10 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
+/* Oled configuration */
+
+#define OLED_I2C_PORT   1
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
