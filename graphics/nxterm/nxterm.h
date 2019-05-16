@@ -226,6 +226,7 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
 #ifdef CONFIG_NXTERM_NXKBDIN
 void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen);
 #endif
+int nxterm_resize(NXTERM handle, FAR const struct nxgl_size_s *size);
 
 /* VT100 Terminal emulation */
 

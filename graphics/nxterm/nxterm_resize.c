@@ -1,7 +1,7 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxterm_redraw.c
+ * nuttx/graphics/nxterm/nxterm_resize.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
@@ -56,34 +55,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxterm_redraw
+ * Name: nxterm_resize
  *
  * Description:
- *   Re-draw a portion of the NX console.  This function should be called
- *   from the appropriate window callback logic.
+ *   This function handles the IOCTL resize command.  It indicates that the
+ *   size of the NxTerm window has changed and needs to be updated.
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
  *     nxtool_register.
- *   rect - The rectangle that needs to be re-drawn (in window relative
- *          coordinates)
- *   more - true:  More re-draw requests will follow
+ *   size   - The new window size
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
+int nxterm_resize(NXTERM handle, FAR const struct nxgl_size_s *size)
 {
   FAR struct nxterm_state_s *priv;
   int ret;
-  int i;
 
-  DEBUGASSERT(handle && rect);
-  ginfo("rect={(%d,%d),(%d,%d)} more=%s\n",
-        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-        more ? "true" : "false");
+  DEBUGASSERT(handle != NULL && size != NULL);
+  ginfo("size={%d,%d)\n", size->w, size->h);
 
   /* Recover our private state structure */
 
@@ -91,39 +85,24 @@ void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
 
   /* Get exclusive access to the state structure */
 
-  do
-    {
-      ret = nxterm_semwait(priv);
-
-      /* Check for errors */
-
-      if (ret < 0)
-        {
-          /* The only expected error is if the wait failed because of it
-           * was interrupted by a signal.
-           */
-
-          DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-        }
-    }
-  while (ret < 0);
-
-  /* Fill the rectangular region with the window background color */
-
-  ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
+  ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gerr("ERROR: fill failed: %d\n", errno);
+      /* The only expected error is if the wait failed because of it was
+       * interrupted by a signal or if the thread was canceled.
+       */
+
+      DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
+      return ret;
     }
 
-  /* Then redraw each character on the display (Only the characters within
-   * the rectangle will actually be redrawn).
+  /* Set the new window size.
+   * REVISIT:  Should other things be reset as well?
    */
 
-  for (i = 0; i < priv->nchars; i++)
-    {
-      nxterm_fillchar(priv, rect, &priv->bm[i]);
-    }
+  priv->wndo.wsize.w = size->w;
+  priv->wndo.wsize.h = size->h;
 
   (void)nxterm_sempost(priv);
+  return true;
 }

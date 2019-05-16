@@ -409,7 +409,6 @@ int nxterm_ioctl_tap(int cmd, uintptr_t arg)
        * ARG:           A reference readable instance of struct
        *                nxtermioc_redraw_s
        * CONFIGURATION: CONFIG_NXTERM
-       * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
        */
 
        case NXTERMIOC_NXTERM_REDRAW:
@@ -427,7 +426,6 @@ int nxterm_ioctl_tap(int cmd, uintptr_t arg)
        * ARG:           A reference readable instance of struct
        *                nxtermioc_kbdin_s
        * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
-       * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
        */
 
        case NXTERMIOC_NXTERM_KBDIN:
@@ -441,6 +439,22 @@ int nxterm_ioctl_tap(int cmd, uintptr_t arg)
 #else
            ret = -ENOSYS;
 #endif
+         }
+         break;
+
+      /* CMD:           NXTERMIOC_NXTERM_RESIZE
+       * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
+       *                changed
+       * ARG:           A reference readable instance of struct nxtermioc_resize_s
+       * CONFIGURATION: CONFIG_NXTERM
+       */
+
+       case NXTERMIOC_NXTERM_RESIZE:
+         {
+           FAR struct nxtermioc_resize_s *resize =
+             (FAR struct nxtermioc_resize_s *)((uintptr_t)arg);
+
+           ret = nxterm_resize(resize->handle, &resize->size);
          }
          break;
 

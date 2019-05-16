@@ -202,19 +202,23 @@
  * ARG:           A reference readable instance of struct
  *                nxtermioc_redraw_s
  * CONFIGURATION: CONFIG_NXTERM
- * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
  *
  * CMD:           NXTERMIOC_NXTERM_KBDIN
  * DESCRIPTION:   Provide NxTerm keyboard input to NX.
- * ARG:           A reference readable instance of struct
- *                nxtermioc_kbdin_s
+ * ARG:           A reference readable instance of struct nxtermioc_kbdin_s
  * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
- * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
+ *
+ * CMD:           NXTERMIOC_NXTERM_RESIZE
+ * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
+ *                changed
+ * ARG:           A reference readable instance of struct nxtermioc_resize_s
+ * CONFIGURATION: CONFIG_NXTERM
  */
 
 #define _NXTERMIOC(nr)    _IOC(_NXTERMBASE,nr)
-#define NXTERMIOC_NXTERM_REDRAW     _NXTERMIOC(0x000c)
-#define NXTERMIOC_NXTERM_KBDIN      _NXTERMIOC(0x000d)
+#define NXTERMIOC_NXTERM_REDRAW     _NXTERMIOC(0x0000)
+#define NXTERMIOC_NXTERM_KBDIN      _NXTERMIOC(0x0001)
+#define NXTERMIOC_NXTERM_RESIZE     _NXTERMIOC(0x0002)
 
 /****************************************************************************
  * Public Types
@@ -256,6 +260,14 @@ struct nxtermioc_kbdin_s
   uint8_t buflen;                           /* Amount of data in buffer */
 };
 #endif
+
+/* Arguments passed with the NXTERMIOC_NXTERM_RESIZE command */
+
+struct nxtermioc_resize_s
+{
+  NXTERM handle;                            /* NxTerm handle */
+  struct nxgl_size_s size;                  /* New Window Size */
+};
 
 /****************************************************************************
  * Public Data
