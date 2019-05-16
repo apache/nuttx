@@ -205,12 +205,27 @@ void nxmu_reportposition(FAR struct nxbe_window_s *wnd);
  * Name: nxmu_redrawreq
  *
  * Description:
- *   Request the client that has this window to redraw the rectangular region.
+ *  Send a message to the client requesting that it to redraw the rectangular
+ *  region in the window.
  *
  ****************************************************************************/
 
 void nxmu_redrawreq(FAR struct nxbe_window_s *wnd,
                     FAR const struct nxgl_rect_s *rect);
+
+/****************************************************************************
+ * Name: nxmu_redraw
+ *
+ * Description:
+ *   Redraw client window data.  This may involve either sending a message
+ *   to the client requesting that it redraw a region of the window.  Or, in
+ *   the base that the window supports a per-window framebuffer, this might
+ *   amount to an immediate redraw from the framebuffer.
+ *
+ ****************************************************************************/
+
+void nxmu_redraw(FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: nxmu_mouseinit

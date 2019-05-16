@@ -105,7 +105,7 @@ void nxbe_show_window(FAR struct nxbe_window_s *wnd)
        * that it is not obscured by another window.  Just redraw it.
        */
 
-      nxmu_redrawreq(wnd, &wnd->bounds);
+      nxmu_redraw(wnd, &wnd->bounds);
     }
 }
 

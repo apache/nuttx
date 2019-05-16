@@ -64,6 +64,10 @@
 #  define MIN(a,b) ((a < b) ? a : b)
 #endif
 
+#ifndef MAX
+#  define MAX(a,b) ((a > b) ? a : b)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -88,9 +92,11 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
   FAR nxgl_mxpixel_t *newfb;
   FAR uint8_t *src;
   FAR uint8_t *dest;
+  struct nxgl_rect_s bounds;
   nxgl_coord_t minheight;
   nxgl_coord_t newwidth;
   nxgl_coord_t newheight;
+  nxgl_coord_t oldwidth;
   nxgl_coord_t oldheight;
   nxgl_coord_t row;
   size_t newfbsize;
@@ -112,10 +118,12 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
 
   if (NXBE_ISRAMBACKED(wnd))
     {
+      oldwidth        = oldbounds->pt2.x - oldbounds->pt1.x + 1;
       oldheight       = oldbounds->pt2.y - oldbounds->pt1.y + 1;
 
       newwidth        = wnd->bounds.pt2.x - wnd->bounds.pt1.x + 1;
       newheight       = wnd->bounds.pt2.y - wnd->bounds.pt1.y + 1;
+
       bpp             = wnd->be->plane[0].pinfo.bpp;
       newstride       = (bpp * newwidth + 7) >> 3;
       newfbsize       = newstride * newheight;
@@ -205,6 +213,42 @@ static void nxbe_realloc(FAR struct nxbe_window_s *wnd,
 #endif
       wnd->stride = newstride;
       wnd->fbmem  = newfb;
+
+      /* If the window became wider, then send a message requesting an update
+       * of the new territory on the right.
+       */
+
+      if (oldwidth < newwidth)
+        {
+          /* Get a bounding box in device coordinates */
+
+          bounds.pt1.x = wnd->bounds.pt1.x + oldwidth;
+          bounds.pt1.y = wnd->bounds.pt1.y;
+          bounds.pt2.x = wnd->bounds.pt2.x;
+          bounds.pt2.y = wnd->bounds.pt2.y + MIN(oldheight, newheight) - 1;
+
+          /* Send the redraw request */
+
+          nxmu_redrawreq(wnd, &bounds);
+        }
+
+      /* If the window became taller, then send a message requesting an update
+       * of the new territory at the bottom.
+       */
+
+      if (oldheight < newheight)
+        {
+          /* Get a bounding box in device coordinates */
+
+          bounds.pt1.x = wnd->bounds.pt1.x;
+          bounds.pt1.y = wnd->bounds.pt1.y + oldheight;
+          bounds.pt2.x = wnd->bounds.pt2.x;
+          bounds.pt2.y = wnd->bounds.pt2.y;
+
+          /* Send the redraw request */
+
+          nxmu_redrawreq(wnd, &bounds);
+        }
     }
 }
 #else
@@ -246,6 +290,12 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
 
   nxgl_rectintersect(&wnd->bounds, &wnd->bounds, &wnd->be->bkgd.bounds);
 
+  /* Report the new size/position.  The application needs to know the new
+   * size before getting redraw requests.
+   */
+
+  nxmu_reportposition(wnd);
+
   /* Re-allocate the per-window framebuffer memory for the new window size. */
 
   nxbe_realloc(wnd, &bounds);
@@ -256,10 +306,6 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
    */
 
   nxgl_rectunion(&bounds, &bounds, &wnd->bounds);
-
-  /* Report the new size/position */
-
-  nxmu_reportposition(wnd);
 
   /* Then redraw this window AND all windows below it. Having resized the
    * window, we may have exposed previoulsy obscured portions of windows

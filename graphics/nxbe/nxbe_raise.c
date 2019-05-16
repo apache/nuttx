@@ -140,6 +140,6 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
        * that it is not obscured by another window
        */
 
-      nxmu_redrawreq(wnd, &wnd->bounds);
+      nxmu_redraw(wnd, &wnd->bounds);
     }
 }

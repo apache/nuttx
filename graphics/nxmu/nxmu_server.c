@@ -551,7 +551,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
          case NX_SVRMSG_REDRAWREQ: /* Request re-drawing of rectangular region */
            {
              FAR struct nxsvrmsg_redrawreq_s *redrawmsg = (FAR struct nxsvrmsg_redrawreq_s *)buffer;
-             nxmu_redrawreq(redrawmsg->wnd, &redrawmsg->rect);
+             nxmu_redraw(redrawmsg->wnd, &redrawmsg->rect);
            }
            break;
 

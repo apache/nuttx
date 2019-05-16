@@ -131,7 +131,7 @@ static void nxbe_clipmoveobscured(FAR struct nxbe_clipops_s *cops,
   struct nxgl_rect_s dst;
 
   nxgl_rectoffset(&dst, rect, info->offset.x, info->offset.y);
-  nxmu_redrawreq(info->wnd, &dst);
+  nxmu_redraw(info->wnd, &dst);
 }
 
 /****************************************************************************
@@ -168,7 +168,7 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
     {
       if (!nxgl_nullrect(&nonintersecting[i]))
         {
-          nxmu_redrawreq(dstdata->wnd, &nonintersecting[i]);
+          nxmu_redraw(dstdata->wnd, &nonintersecting[i]);
         }
     }
 

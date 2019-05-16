@@ -62,7 +62,17 @@ config NX_RAMBACKED
 
 		Redraw requests in other cases are also suppressed:  Changes to window
 		position, size, etc.  As a consequence, some manual updates will be
-		required when certain events occurr (like removing a toolbar from a
+		required when certain events occur (like removing a toolbar from a
+		window).
+
+		An exception is the case when the window is resized to a wider and/or
+		taller size.  In that case, the redraw callback will till occur.
+		It is necessary in that case to provide new graphic content for the
+		extended window area.
+
+		Redraw requests in other cases are also suppressed:  Changes to window
+		position, size, etc.  As a consequence, some manual updates will be
+		required when certain events occur (like removing a toolbar from a
 		window).
 
 		NOTE:  A significant amount of RAM, usually external SDRAM, may be

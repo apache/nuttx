@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: May 9, 2019</p>
+      <p>Last Updated: May 16, 2019</p>
     </td>
   </tr>
 </table>
@@ -3774,6 +3774,11 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
       Those calls normally occur, for example, when a window "above" moves exposing a portion of the window below.
       If this option is selected, then the system will redraw the exposed portion of the window from the backup framebuffer without intervention of the window applications.
       This greatly reduces the complexity of the application and performance of the window at the expense of increased memory usage.
+    </p>
+    <p>
+       An exception is the case when the window is resized to a wider and/or taller size.
+       In that case, the redraw callback will till occur.
+       It is necessary in that case to provide new graphic content for the extended window area.
     </p>
     <p>
       Redraw requests in other cases are also suppressed:  Changes to window position, size, etc.
