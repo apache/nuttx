@@ -138,21 +138,14 @@
  * DEPENDENCIES:  Base NX terminal logic provides nx_register() and
  *                nxtk_register()
  *
- * CMD:           BOARDIOC_NXTERM_REDRAW
- * DESCRIPTION:   Re-draw a portion of the NX console.  This function
- *                should be called from the appropriate window callback
- *                logic.
- * ARG:           A reference readable instance of struct
- *                boardioc_nxterm_redraw_s
+ * CMD:           BOARDIOC_NXTERM_IOCTL
+ * DESCRIPTION:   Create an NX terminal IOCTL command.  Normal IOCTLs
+ *                cannot be be performed in most graphics contexts since
+ *                the depend on the task holding an open file descriptor
+ * ARG:           A reference readable/writable instance of struct
+ *                boardioc_nxterm_ioctl_s
  * CONFIGURATION: CONFIG_NXTERM
- * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
- *
- * CMD:           BOARDIOC_NXTERM_KBDIN
- * DESCRIPTION:   Provide NxTerm keyboard input to NX.
- * ARG:           A reference readable instance of struct
- *                boardioc_nxterm_kbdin_s
- * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
- * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
+ * DEPENDENCIES:  Base NX terminal logic provides nxterm_ioctl_tap()
  *
  * CMD:           BOARDIOC_TESTSET
  * DESCRIPTION:   Access architecture-specific up_testset() operation
@@ -174,9 +167,8 @@
 #define BOARDIOC_NX_START          _BOARDIOC(0x0009)
 #define BOARDIOC_VNC_START         _BOARDIOC(0x000a)
 #define BOARDIOC_NXTERM            _BOARDIOC(0x000b)
-#define BOARDIOC_NXTERM_REDRAW     _BOARDIOC(0x000c)
-#define BOARDIOC_NXTERM_KBDIN      _BOARDIOC(0x000d)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x000e)
+#define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000c)
+#define BOARDIOC_TESTSET           _BOARDIOC(0x000d)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -185,7 +177,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x000f)
+#define BOARDIOC_USER              _BOARDIOC(0x000e)
 
 /****************************************************************************
  * Public Type Definitions
@@ -295,26 +287,11 @@ struct boardioc_nxterm_create_s
                                    * /dev/nxtermN.  0 <= N <= 255 */
 };
 
-/* Arguments passed with the BOARDIOC_NXTERM_REDRAW command */
-
-struct boardioc_nxterm_redraw_s
+struct boardioc_nxterm_ioctl_s
 {
-  NXTERM handle;                            /* NxTerm handle */
-  struct nxgl_rect_s rect;                  /* Rectangle to be re-drawn */
-  bool more;                                /* True: More redraw commands follow */
+ int cmd;                         /* IOCTL command */
+ uintptr_t arg;                   /* IOCTL argument */
 };
-
-#ifdef CONFIG_NXTERM_NXKBDIN
-/* Arguments passed with the BOARDIOC_NXTERM_KBDIN command */
-
-struct boardioc_nxterm_kbdin_s
-{
-  NXTERM handle;                            /* NxTerm handle */
-  FAR const uint8_t *buffer;                /* Buffered keyboard data */
-  uint8_t buflen;                           /* Amount of data in buffer */
-};
-#endif
-
 #endif /* CONFIG_NXTERM */
 
 /****************************************************************************

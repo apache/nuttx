@@ -512,47 +512,25 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         }
         break;
 
-      /* CMD:           BOARDIOC_NXTERM_REDRAW
-       * DESCRIPTION:   Re-draw a portion of the NX console.  This function
-       *                should be called from the appropriate window callback
-       *                logic.
-       * ARG:           A reference readable instance of struct
-       *                boardioc_nxterm_redraw_s
+      /* CMD:           BOARDIOC_NXTERM_IOCTL
+       * DESCRIPTION:   Create an NX terminal IOCTL command.  Normal IOCTLs
+       *                cannot be be performed in most graphics contexts since
+       *                the depend on the task holding an open file descriptor
+       * ARG:           A reference readable/writable instance of struct
+       *                boardioc_nxterm_ioctl_s
        * CONFIGURATION: CONFIG_NXTERM
-       * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
+       * DEPENDENCIES:  Base NX terminal logic provides nxterm_ioctl_tap()
        */
 
-       case BOARDIOC_NXTERM_REDRAW:
-         {
-           FAR struct boardioc_nxterm_redraw_s *redraw =
-             (FAR struct boardioc_nxterm_redraw_s *)((uintptr_t)arg);
+      case BOARDIOC_NXTERM_IOCTL:
+        {
+          FAR struct boardioc_nxterm_ioctl_s *nxterm =
+            (FAR struct boardioc_nxterm_ioctl_s *)arg;
 
-           nxterm_redraw(redraw->handle, &redraw->rect, redraw->more);
-           ret = OK;
-         }
-         break;
+          ret = nxterm_ioctl_tap(nxterm->cmd, nxterm->arg);
+        }
+        break;
 
-      /* CMD:           BOARDIOC_NXTERM_KBDIN
-       * DESCRIPTION:   Provide NxTerm keyboard input to NX.
-       * ARG:           A reference readable instance of struct
-       *                boardioc_nxterm_kbdin_s
-       * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
-       * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
-       */
-
-       case BOARDIOC_NXTERM_KBDIN:
-         {
-#ifdef CONFIG_NXTERM_NXKBDIN
-           FAR struct boardioc_nxterm_kbdin_s *kbdin =
-             (FAR struct boardioc_nxterm_kbdin_s *)((uintptr_t)arg);
-
-           nxterm_kbdin(kbdin->handle, kbdin->buffer, kbdin->buflen);
-           ret = OK;
-#else
-           ret = -ENOSYS;
-#endif
-         }
-         break;
 #endif /* CONFIG_NXTERM */
 
 #ifdef CONFIG_BOARDCTL_TESTSET

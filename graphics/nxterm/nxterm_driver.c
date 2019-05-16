@@ -59,6 +59,8 @@ static int     nxterm_open(FAR struct file *filep);
 static int     nxterm_close(FAR struct file *filep);
 static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
+static int     nxterm_ioctl(FAR struct file *filep, int cmd,
+                            unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     nxterm_unlink(FAR struct inode *inode);
 #endif
@@ -78,7 +80,7 @@ const struct file_operations g_nxterm_drvrops =
   nxterm_read,  /* read */
   nxterm_write, /* write */
   0,            /* seek */
-  0             /* ioctl */
+  nxterm_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   ,
   nxterm_poll   /* poll */
@@ -98,7 +100,7 @@ const struct file_operations g_nxterm_drvrops =
   0,            /* read */
   nxterm_write, /* write */
   0,            /* seek */
-  0             /* ioctl */
+  nxterm_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   ,
   0             /* poll */
@@ -316,6 +318,23 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 }
 
 /****************************************************************************
+ * Name: nxterm_ioctl
+ ****************************************************************************/
+
+static int nxterm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  /* NOTE:  We don't need driver context here because the NXTERM handle
+   * provided within each of the NXTERM IOCTL command data.  Mutual
+   * exclusion is similar managed by the IOCTL cmmand hendler.
+   *
+   * This permits the IOCTL to be called in abnormal context (such as
+   * from boardctl())
+   */
+
+  return nxterm_ioctl_tap(cmd, arg);
+}
+
+/****************************************************************************
  * Name: nxterm_unlink
  ****************************************************************************/
 
@@ -362,3 +381,73 @@ static int nxterm_unlink(FAR struct inode *inode)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: nxterm_ioctl_tap
+ *
+ * Description:
+ *   Execute an NXTERM IOCTL command from an external caller.
+ *
+ * NOTE:  We don't need driver context here because the NXTERM handle
+ * provided within each of the NXTERM IOCTL command data.  Mutual
+ * exclusion is similar managed by the IOCTL cmmand hendler.
+ *
+ * This permits the IOCTL to be called in abnormal context (such as
+ * from boardctl())
+ *
+ ****************************************************************************/
+
+int nxterm_ioctl_tap(int cmd, uintptr_t arg)
+{
+  int ret;
+
+  switch (cmd)
+    {
+      /* CMD:           NXTERMIOC_NXTERM_REDRAW
+       * DESCRIPTION:   Re-draw a portion of the NX console.  This function
+       *                should be called from the appropriate window callback
+       *                logic.
+       * ARG:           A reference readable instance of struct
+       *                nxtermioc_redraw_s
+       * CONFIGURATION: CONFIG_NXTERM
+       * DEPENDENCIES:  Base NX terminal logic provides nxterm_redraw()
+       */
+
+       case NXTERMIOC_NXTERM_REDRAW:
+         {
+           FAR struct nxtermioc_redraw_s *redraw =
+             (FAR struct nxtermioc_redraw_s *)((uintptr_t)arg);
+
+           nxterm_redraw(redraw->handle, &redraw->rect, redraw->more);
+           ret = OK;
+         }
+         break;
+
+      /* CMD:           NXTERMIOC_NXTERM_KBDIN
+       * DESCRIPTION:   Provide NxTerm keyboard input to NX.
+       * ARG:           A reference readable instance of struct
+       *                nxtermioc_kbdin_s
+       * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
+       * DEPENDENCIES:  Base NX terminal logic provides nxterm_kbdin()
+       */
+
+       case NXTERMIOC_NXTERM_KBDIN:
+         {
+#ifdef CONFIG_NXTERM_NXKBDIN
+           FAR struct nxtermioc_kbdin_s *kbdin =
+             (FAR struct nxtermioc_kbdin_s *)((uintptr_t)arg);
+
+           nxterm_kbdin(kbdin->handle, kbdin->buffer, kbdin->buflen);
+           ret = OK;
+#else
+           ret = -ENOSYS;
+#endif
+         }
+         break;
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
+}

@@ -210,11 +210,21 @@ FAR struct nxterm_state_s *nxterm_register(NXTERM handle,
 void nxterm_unregister(FAR struct nxterm_state_s *priv);
 #endif
 
+/* Driver methods */
+
 #ifdef CONFIG_NXTERM_NXKBDIN
 ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len);
 #ifndef CONFIG_DISABLE_POLL
 int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 #endif
+#endif
+
+/* IOCTL handlers */
+
+void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
+                   bool more);
+#ifdef CONFIG_NXTERM_NXKBDIN
+void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen);
 #endif
 
 /* VT100 Terminal emulation */
