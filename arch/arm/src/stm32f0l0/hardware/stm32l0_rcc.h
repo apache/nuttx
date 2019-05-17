@@ -139,9 +139,9 @@
 
 /* Clock recovery RC register */
 
-#define RCC_CRRCR_HSI48ON           (0)       /* Bits 0: 48MHz HSI clock enable */
-#define RCC_CRRCR_HSI48RDY          (1)       /* Bits 1: 48MHz HSI clock ready */
-#define RCC_CRRCR_HSI48DIV6EN       (2)       /* Bits 2: 48MHz HSI clock divided by 6 output enable */
+#define RCC_CRRCR_HSI48ON           (1 << 0)  /* Bits 0: 48MHz HSI clock enable */
+#define RCC_CRRCR_HSI48RDY          (1 << 1)  /* Bits 1: 48MHz HSI clock ready */
+#define RCC_CRRCR_HSI48DIV6EN       (1 << 2)  /* Bits 2: 48MHz HSI clock divided by 6 output enable */
                                               /* Bits 3-7: Reserved */
 #define RCC_CRRCR_HSI48CAL_SHIFT    (8)       /* Bits 8: 48 MHz HSI reset calibration */
 #define RCC_CRRCR_HSI48CAL_MASK     (0xff << RCC_CRRCR_HSI48CAL_SHIFT)
@@ -272,18 +272,18 @@
 
 /* AHB peripheral reset register */
 
-#define RCC_AHBRSTR_DMA1RST         (0)  /* Bit 0: DMA 1 reset */
-                                         /* Bits 1-7: Reserved */
-#define RCC_AHBRSTR_MIFRST          (8)  /* Bit 8: Memory interface reset */
-                                         /* Bits 9-11: Reserved */
-#define RCC_AHBRSTR_CRCRST          (12) /* Bit 12: Memory interface reset */
-                                         /* Bits 13-15: Reserved */
-#define RCC_AHBRSTR_TSCRST          (12) /* Bit 12: Touch sensing reset */
-                                         /* Bits 17-19: Reserved */
-#define RCC_AHBRSTR_RNGRST          (20) /* Bit 20: Random number generator module reset */
-                                         /* Bits 21-23: Reserved */
-#define RCC_AHBRSTR_CRYPRST         (24) /* Bit 24: Crypto module reset */
-                                         /* Bits 25-31: Reserved */
+#define RCC_AHBRSTR_DMA1RST         (1 << 0)  /* Bit 0: DMA 1 reset */
+                                              /* Bits 1-7: Reserved */
+#define RCC_AHBRSTR_MIFRST          (1 << 8)  /* Bit 8: Memory interface reset */
+                                              /* Bits 9-11: Reserved */
+#define RCC_AHBRSTR_CRCRST          (1 << 12) /* Bit 12: Memory interface reset */
+                                              /* Bits 13-15: Reserved */
+#define RCC_AHBRSTR_TSCRST          (1 << 12) /* Bit 12: Touch sensing reset */
+                                              /* Bits 17-19: Reserved */
+#define RCC_AHBRSTR_RNGRST          (1 << 20) /* Bit 20: Random number generator module reset */
+                                              /* Bits 21-23: Reserved */
+#define RCC_AHBRSTR_AESRST          (1 << 24) /* Bit 24: Crypto module (AES) reset */
+                                              /* Bits 25-31: Reserved */
 
 /* APB2 Peripheral reset register */
 
@@ -342,18 +342,18 @@
 
 /* AHB Peripheral Clock enable register */
 
-#define RCC_AHBENR_DMA1EN           (0)  /* Bit 0: DMA 1 clock enable */
-                                         /* Bits 1-7: Reserved */
-#define RCC_AHBENR_MIFEN            (8)  /* Bit 8: Memory interface clock enable */
-                                         /* Bits 9-11: Reserved */
-#define RCC_AHBENR_CRCEN            (12) /* Bit 12: Memory interface clock enable */
-                                         /* Bits 13-15: Reserved */
-#define RCC_AHBENR_TSCEN            (12) /* Bit 12: Touch sensing clock enable */
-                                         /* Bits 17-19: Reserved */
-#define RCC_AHBENR_RNGEN            (20) /* Bit 20: Random number generator module clock enable */
-                                         /* Bits 21-23: Reserved */
-#define RCC_AHBENR_CRYPEN           (24) /* Bit 24: Crypto module clock enable */
-                                         /* Bits 25-31: Reserved */
+#define RCC_AHBENR_DMA1EN           (1 << 0)  /* Bit 0: DMA 1 clock enable */
+                                              /* Bits 1-7: Reserved */
+#define RCC_AHBENR_MIFEN            (1 << 8)  /* Bit 8: Memory interface clock enable */
+                                              /* Bits 9-11: Reserved */
+#define RCC_AHBENR_CRCEN            (1 << 12) /* Bit 12: Memory interface clock enable */
+                                              /* Bits 13-15: Reserved */
+#define RCC_AHBENR_TSCEN            (1 << 12) /* Bit 12: Touch sensing clock enable */
+                                              /* Bits 17-19: Reserved */
+#define RCC_AHBENR_RNGEN            (1 << 20) /* Bit 20: Random number generator module clock enable */
+                                              /* Bits 21-23: Reserved */
+#define RCC_AHBENR_AESEN            (1 << 24) /* Bit 24: Crypto module (AES) clock enable */
+                                               /* Bits 25-31: Reserved */
 
 /* APB2 Peripheral Clock enable register */
 
@@ -412,18 +412,18 @@
 
 /* AHB peripheral clock enable in Sleep mode register */
 
-#define RCC_AHBSMENR_DMA1SMEN           (0)  /* Bit 0: DMA 1 clock enable in Sleep mode */
-                                             /* Bits 1-7: Reserved */
-#define RCC_AHBSMENR_MIFSMEN            (8)  /* Bit 8: Memory interface clock enable in Sleep mode */
-                                             /* Bits 9-11: Reserved */
-#define RCC_AHBSMENR_CRCSMEN            (12) /* Bit 12: Memory interface clock enable in Sleep mode */
-                                             /* Bits 13-15: Reserved */
-#define RCC_AHBSMENR_TSCSMEN            (12) /* Bit 12: Touch sensing clock enable in Sleep mode */
-                                             /* Bits 17-19: Reserved */
-#define RCC_AHBSMENR_RNGSMEN            (20) /* Bit 20: Random number generator module clock enable in Sleep mode */
-                                             /* Bits 21-23: Reserved */
-#define RCC_AHBSMENR_CRYPSMEN           (24) /* Bit 24: Crypto module clock enable in Sleep mode */
-                                             /* Bits 25-31: Reserved */
+#define RCC_AHBSMENR_DMA1SMEN           (1 << 0)  /* Bit 0: DMA 1 clock enable in Sleep mode */
+                                                  /* Bits 1-7: Reserved */
+#define RCC_AHBSMENR_MIFSMEN            (1 << 8)  /* Bit 8: Memory interface clock enable in Sleep mode */
+                                                  /* Bits 9-11: Reserved */
+#define RCC_AHBSMENR_CRCSMEN            (1 << 12) /* Bit 12: Memory interface clock enable in Sleep mode */
+                                                  /* Bits 13-15: Reserved */
+#define RCC_AHBSMENR_TSCSMEN            (1 << 12) /* Bit 12: Touch sensing clock enable in Sleep mode */
+                                                  /* Bits 17-19: Reserved */
+#define RCC_AHBSMENR_RNGSMEN            (1 << 20) /* Bit 20: Random number generator module clock enable in Sleep mode */
+                                                  /* Bits 21-23: Reserved */
+#define RCC_AHBSMENR_AESSMEN            (1 << 24) /* Bit 24: Crypto module (AES) clock enable in Sleep mode */
+                                                  /* Bits 25-31: Reserved */
 
 /* APB2 peripheral clock enable in Sleep mode register */
 
@@ -509,46 +509,46 @@
 #  define RCC_CCIPR_LPTIM1SEL_HSI16     (2 << RCC_CCIPR_LPTIM1SEL_SHIFT)
 #  define RCC_CCIPR_LPTIM1SEL_LSE       (3 << RCC_CCIPR_LPTIM1SEL_SHIFT)
                                               /* Bits 20-25: Reserved */
-#define RCC_CCIPR_HSI48SEL_SHIFT        (26)  /* Bit 26: HSI48 clock source selection */
-#define RCC_CCIPR_HSI48SEL_MASK         (1 << RCC_CCIPR_HSI48SEL_SHIFT)
-#  define RCC_CCIPR_HSI48SEL_PLL        (0 << RCC_CCIPR_HSI48SEL_SHIFT)
-#  define RCC_CCIPR_HSI48SEL_RC48       (1 << RCC_CCIPR_HSI48SEL_SHIFT)
+#define RCC_CCIPR_CLK48SEL_SHIFT        (26)  /* Bit 26: HSI48 clock source selection */
+#define RCC_CCIPR_CLK48SEL_MASK         (1 << RCC_CCIPR_CLK48SEL_SHIFT)
+#  define RCC_CCIPR_CLK48SEL_PLL        (0 << RCC_CCIPR_CLK48SEL_SHIFT)
+#  define RCC_CCIPR_CLK48SEL_HSI48      (1 << RCC_CCIPR_CLK48SEL_SHIFT)
                                               /* Bits 27-31: Reserved */
 
 /* Control/status register */
 
-#define RCC_CSR_LSION                   (0)  /* Bit 0: LSI enable */
-#define RCC_CSR_LSIRDY                  (1)  /* Bit 1: ready */
-                                             /* Bits 3-7: Reserved */
-#define RCC_CSR_LSEON                   (8)  /* Bit 8: LSE enable */
-#define RCC_CSR_LSERDY                  (9)  /* Bit 9: LSE ready */
-#define RCC_CSR_LSEBPY                  (10) /* Bit 10: LSE bypass */
-#define RCC_CSR_LSEDRV_SHIFT            (11) /* Bits 11-12: LSE driving capability */
+#define RCC_CSR_LSION                   (1 << 0)  /* Bit 0: LSI enable */
+#define RCC_CSR_LSIRDY                  (1 << 1)  /* Bit 1: ready */
+                                                  /* Bits 3-7: Reserved */
+#define RCC_CSR_LSEON                   (1 << 8)  /* Bit 8: LSE enable */
+#define RCC_CSR_LSERDY                  (1 << 9)  /* Bit 9: LSE ready */
+#define RCC_CSR_LSEBPY                  (1 << 10) /* Bit 10: LSE bypass */
+#define RCC_CSR_LSEDRV_SHIFT            (11)      /* Bits 11-12: LSE driving capability */
 #define RCC_CSR_LSEDRV_MASK             (3 << RCC_CSR_LSEDRV_SHIFT)
 #  define RCC_CSR_LSEDRV_LOW            (0 << RCC_CSR_LSEDRV_SHIFT)
 #  define RCC_CSR_LSEDRV_MEDLOW         (1 << RCC_CSR_LSEDRV_SHIFT)
 #  define RCC_CSR_LSEDRV_MEDHGIH        (2 << RCC_CSR_LSEDRV_SHIFT)
 #  define RCC_CSR_LSEDRV_HIGH           (3 << RCC_CSR_LSEDRV_SHIFT)
-#define RCC_CSR_CSSLSEON                (13) /* Bit 13: CSS on LSE enable */
-#define RCC_CSR_CSSLSED                 (14) /* Bit 14: CSS on LSE failure detection flag */
-                                             /* Bit 15: Reserved */
-#define RCC_CSR_RTCSEL_SHIFT            (16) /* Bits 16-17: RTC clock source selection */
+#define RCC_CSR_CSSLSEON                (1 << 13) /* Bit 13: CSS on LSE enable */
+#define RCC_CSR_CSSLSED                 (1 << 14) /* Bit 14: CSS on LSE failure detection flag */
+                                                 /* Bit 15: Reserved */
+#define RCC_CSR_RTCSEL_SHIFT            (16)     /* Bits 16-17: RTC clock source selection */
 #define RCC_CSR_RTCSEL_MASK             (3 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_NOCLK          (0 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_LSE            (1 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_LSI            (2 << RCC_CSR_RTCSEL_SHIFT)
 #  define RCC_CSR_RTCSEL_HSE            (3 << RCC_CSR_RTCSEL_SHIFT)
-#define RCC_CSR_RTCEN                   (18) /* Bit 18: RTC clock enable */
-#define RCC_CSR_RTCRST                  (19) /* Bit 19: RTC software reset */
-                                             /* Bits 20-22: Reserved */
-#define RCC_CSR_RMVF                    (23) /* Bit 23: Remove reset flag */
-#define RCC_CSR_FWRSTF                  (24) /* Bit 24: Firewall reset flag */
-#define RCC_CSR_OBLRSTF                 (25) /* Bit 25: Options bytes loading reset flag */
-#define RCC_CSR_PINRSTF                 (26) /* Bit 26: PIN reset flag */
-#define RCC_CSR_PORRSTF                 (27) /* Bit 27: POR/PDR reset flag */
-#define RCC_CSR_SFTRSTF                 (28) /* Bit 28: software reset flag */
-#define RCC_CSR_IWDGRSTF                (29) /* Bit 29: IWDG reset flag */
-#define RCC_CSR_WWDGRSTF                (30) /* Bit 30: WWDG reset flag */
-#define RCC_CSR_LPWRRSTF                (31) /* Bit 31: Low-power reset flag */
+#define RCC_CSR_RTCEN                   (1 << 18) /* Bit 18: RTC clock enable */
+#define RCC_CSR_RTCRST                  (1 << 19) /* Bit 19: RTC software reset */
+                                                  /* Bits 20-22: Reserved */
+#define RCC_CSR_RMVF                    (1 << 23) /* Bit 23: Remove reset flag */
+#define RCC_CSR_FWRSTF                  (1 << 24) /* Bit 24: Firewall reset flag */
+#define RCC_CSR_OBLRSTF                 (1 << 25) /* Bit 25: Options bytes loading reset flag */
+#define RCC_CSR_PINRSTF                 (1 << 26) /* Bit 26: PIN reset flag */
+#define RCC_CSR_PORRSTF                 (1 << 27) /* Bit 27: POR/PDR reset flag */
+#define RCC_CSR_SFTRSTF                 (1 << 28) /* Bit 28: software reset flag */
+#define RCC_CSR_IWDGRSTF                (1 << 29) /* Bit 29: IWDG reset flag */
+#define RCC_CSR_WWDGRSTF                (1 << 30) /* Bit 30: WWDG reset flag */
+#define RCC_CSR_LPWRRSTF                (1 << 31) /* Bit 31: Low-power reset flag */
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32L0_RCC_H */

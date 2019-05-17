@@ -52,10 +52,22 @@
 #include "hardware/stm32_flash.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
+#include "stm32_hsi48.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_STM32F0L0_RNG
+#  ifndef STM32_USE_CLK48
+#    error RNG requires CLK48 enabled
+#  endif
+#endif
+#ifdef CONFIG_STM32F0L0_USB
+#  ifndef STM32_USE_CLK48
+#    error USB requires CLK48 enabled
+#  endif
+#endif
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are

@@ -51,6 +51,7 @@
 
 #define STM32_SYSCFG_CFGR1_OFFSET      0x0000 /* SYSCFG configuration register 1 */
 #define STM32_SYSCFG_CFGR2_OFFSET      0x0004 /* SYSCFG configuration register 2 */
+#define STM32_SYSCFG_CFGR3_OFFSET      0x0020 /* SYSCFG configuration register 3 */
 
 #define STM32_SYSCFG_EXTICR_OFFSET(p)  (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
 #define STM32_SYSCFG_EXTICR1_OFFSET    0x0008 /* SYSCFG external interrupt configuration register 1 */
@@ -64,6 +65,7 @@
 
 #define STM32_SYSCFG_CFGR1             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR1_OFFSET)
 #define STM32_SYSCFG_CFGR2             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR2_OFFSET)
+#define STM32_SYSCFG_CFGR3             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR3_OFFSET)
 
 #define STM32_SYSCFG_EXTICR(p)         (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR_OFFSET(p))
 #define STM32_SYSCFG_EXTICR1           (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR1_OFFSET)
@@ -80,6 +82,20 @@
 /* TODO: SYSCFG configuration register 2 */
 
 /* TODO: SYSCFG configuration register 3 */
+
+#define SYSCFG_CFGR3_ENVREFINT        (1 << 0)   /* Bit 0: VREFINT enable and scaler control for COMP2 enable */
+                                                 /* Bits 1-3: Reserved */
+#define SYSCFG_CFGR3_SELVREFOUT_SHIFT (4)        /* Bits 4-5: VREFINT_ADC connection */
+#define SYSCFG_CFGR3_SELVREFOUT_MASK  (3 << SYSCFG_CFGR3_SELVREFOUT_SHIFT)
+                                                 /* Bits 6-7: Reserved */
+#define SYSCFG_CFGR3_ENBUFVREFADC     (1 << 8)   /* Bit 8: VREFINT reference for ADC enable */
+#define SYSCFG_CFGR3_ENBUFSENSORADC   (1 << 9)   /* Bit 9: Temperature sensor reference for ADC enable */
+                                                 /* Bits 10-11: Reserved */
+#define SYSCFG_CFGR3_ENBUFVREFINTCOMP2 (1 << 12) /* Bit 12: VREFINT reference for COMP2 scaler enable */
+#define SYSCFG_CFGR3_ENBUFVREFINTHSI48 (1 << 13) /* Bit 13: VREFINT reference for HSI48 scaler enable */
+                                                 /* Bits 14-29: Reserved */
+#define SYSCFG_CFGR3_VREFINTRDYF       (1 << 30) /* Bit 30: VREFINT ready flag */
+#define SYSCFG_CFGR3_REFLOCK           (1 << 31) /* Bit 31: SYSCFG_CFG3 lock bit */
 
 /* SYSCFG external interrupt configuration register 1-4 */
 

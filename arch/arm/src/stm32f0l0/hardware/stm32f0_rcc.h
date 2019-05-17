@@ -363,6 +363,8 @@
 #  define RCC_CFGR3_USART1SW_HSI    (3 << RCC_CFGR3_USART1SW_SHIFT) /* HSI is USART1 clock */
 #define RCC_CFGR3_CECSW             (1 << 6)  /* Bit 6: HDMI CEC clock source selection */
 #define RCC_CFGR3_USBSW             (1 << 7)  /* Bit 7: USB clock source selection */
+#define RCC_CFGR3_CLK48_HSI48       0
+#define RCC_CFGR3_CLK48_PLL         (1 << 7)
 #define RCC_CFGR3_ADCSW             (1 << 8)  /* Bit 8: ADC clock source selection */
 #define RCC_CFGR3_USART2SW_SHIFT    (16)      /* Bits 16-17: USART2 clock source selection */
 #define RCC_CFGR3_USART2SW_MASK     (3 << RCC_CFGR3_USART2SW_SHIFT)

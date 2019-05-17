@@ -46,6 +46,22 @@
 
 #include "stm32_hsi48.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_STM32F0)
+#  define STM32_HSI48_REG STM32_RCC_CR2
+#  define STM32_HSI48ON   RCC_CR2_HSI48ON
+#  define STM32_HSI48RDY  RCC_CR2_HSI48RDY
+#elif defined(CONFIG_ARCH_CHIP_STM32L0)
+#  define STM32_HSI48_REG STM32_RCC_CRRCR
+#  define STM32_HSI48ON   RCC_CRRCR_HSI48ON
+#  define STM32_HSI48RDY  RCC_CRRCR_HSI48RDY
+#else
+#  error "Unsupported STM32F0/L0 HSI48"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -93,23 +109,20 @@ void stm32_enable_hsi48(enum syncsrc_e syncsrc)
    * enabled.
    */
 
-  regval  = getreg32(STM32_RCC_CR2);
-  regval |= RCC_CR2_HSI48ON;
-  putreg32(regval, STM32_RCC_CR2);
-
-  if (syncsrc == SYNCSRC_USB)
-    {
-      /* Select the HSI48 as the USB clock source */
-
-      regval  = getreg32(STM32_RCC_CFGR3);
-      regval &= ~RCC_CFGR3_USBSW;
-      putreg32(regval, STM32_RCC_CFGR3);
-    }
+  regval  = getreg32(STM32_HSI48_REG);
+  regval |= STM32_HSI48ON;
+  putreg32(regval, STM32_HSI48_REG);
 
   /* Wait for the HSI48 clock to stabilize */
 
-  while ((getreg32(STM32_RCC_CR2) & RCC_CR2_HSI48RDY) == 0);
+  while ((getreg32(STM32_HSI48_REG) & STM32_HSI48RDY) == 0);
 
+  /* Return if no synchronization */
+
+  if (syncsrc == SYNCSRC_NONE)
+    {
+      return;
+    }
 
   /* The CRS synchronization (SYNC) source, selectable through the CRS_CFGR
    * register, can be the signal from the external CRS_SYNC pin, the LSE
@@ -167,9 +180,9 @@ void stm32_disable_hsi48(void)
 
   /* Disable the HSI48 clock */
 
-  regval  = getreg32(STM32_RCC_CR2);
-  regval &= ~RCC_CR2_HSI48ON;
-  putreg32(regval, STM32_RCC_CR2);
+  regval  = getreg32(STM32_HSI48_REG);
+  regval &= ~STM32_HSI48ON;
+  putreg32(regval, STM32_HSI48_REG);
 
   /* Set other registers to the default settings. */
 

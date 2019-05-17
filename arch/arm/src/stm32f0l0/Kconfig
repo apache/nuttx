@@ -714,6 +714,7 @@ config STM32F0L0_STM32L0
 	bool
 	default n
 	select STM32F0L0_ENERGYLITE
+	select STM32F0L0_HAVE_VREFINT
 	select STM32F0L0_HAVE_ADC1_DMA
 
 config STM32F0L0_STM32F03X
@@ -782,11 +783,15 @@ config STM32F0L0_ENERGYLITE
 config ARCH_CHIP_STM32L071XX
 	bool
 	select STM32F0L0_STM32L0
+	select STM32F0L0_HAVE_RNG
+	select STM32F0L0_HAVE_HSI48
 	select STM32F0L0_HAVE_USART4
 
 config ARCH_CHIP_STM32L072XX
 	bool
 	select STM32F0L0_STM32L0
+	select STM32F0L0_HAVE_RNG
+	select STM32F0L0_HAVE_HSI48
 	select STM32F0L0_HAVE_USART4
 	select STM32F0L0_HAVE_USART5
 	select STM32F0L0_HAVE_I2C2
@@ -795,6 +800,8 @@ config ARCH_CHIP_STM32L072XX
 config ARCH_CHIP_STM32L073XX
 	bool
 	select STM32F0L0_STM32L0
+	select STM32F0L0_HAVE_RNG
+	select STM32F0L0_HAVE_HSI48
 	select STM32F0L0_HAVE_USART4
 	select STM32F0L0_HAVE_USART5
 	select STM32F0L0_HAVE_SPI2
@@ -826,6 +833,14 @@ menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine is a peripheral option is available for the
 # selection MCU
+
+config STM32F0L0_HAVE_AES
+	bool
+	default n
+
+config STM32F0L0_HAVE_VREFINT
+	bool
+	default n
 
 config STM32F0L0_HAVE_CCM
 	bool
@@ -1031,6 +1046,18 @@ config STM32F0L0_CAN1
 	select CAN
 	select STM32F0L0_CAN
 	depends on STM32F0L0_HAVE_CAN1
+
+config STM32F0L0_AES
+	bool "128-bit AES"
+	default n
+	depends on STM32F0L0_HAVE_AES
+	select CRYPTO_AES192_DISABLE if CRYPTO_ALGTEST
+	select CRYPTO_AES256_DISABLE if CRYPTO_ALGTEST
+
+config STM32F0L0_VREFINT
+	bool "Enable VREFINT"
+	default n
+	depends on STM32F0L0_HAVE_VREFINT
 
 config STM32F0L0_CEC
 	bool "CEC"
