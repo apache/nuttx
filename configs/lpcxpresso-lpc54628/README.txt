@@ -534,7 +534,7 @@ Configurations
     just some issues/topics unique to the LPCXpresso-LPC54628 and/or this
     configuration.
 
-    1. Tthe NxTerm application is available as the "NuttShell" enty in the
+    1. The NxTerm application is available as the "NuttShell" entry in the
        Main Menu.  When pressed, this will bring up an NSH session in a
        Twm4Nx window.  There is an issue, however:  The NxTerm gets its
        input from the console (/dev/console).  Since the NxTerm keyboard 
@@ -556,3 +556,4 @@ Configurations
        lack of calibration, however.  These show up especially along the
        very top of the display where it can be very difficult to touch
        buttons or grab'n'move object.
+
