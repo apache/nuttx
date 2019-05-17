@@ -1,10 +1,11 @@
 /****************************************************************************
- * drivers/usbmisc/fusb301.c
+ * drivers/usbmisc/fusb303.c
  *
- * FUSB301 USB-C controller driver
+ * FUSB303 USB-C controller driver
  *
- *   Copyright (C) 2016-2017 Haltian Ltd. All rights reserved.
+ *   Copyright (C) 2019 Haltian Ltd. All rights reserved.
  *   Authors: Harri Luhtala <harri.luhtala@haltian.com>
+ *            Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,50 +41,80 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <poll.h>
 #include <debug.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/usb/fusb301.h>
+#include <nuttx/usb/fusb303.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FUSB301
-#  define fusb301_err(x, ...)        _err(x, ##__VA_ARGS__)
-#  define fusb301_info(x, ...)       _info(x, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_FUSB303
+#  define fusb303_err(x, ...)        _err(x, ##__VA_ARGS__)
+#  define fusb303_info(x, ...)       _info(x, ##__VA_ARGS__)
 #else
-#  define fusb301_err(x, ...)        uerr(x, ##__VA_ARGS__)
-#  define fusb301_info(x, ...)       uinfo(x, ##__VA_ARGS__)
+#  define fusb303_err(x, ...)        uerr(x, ##__VA_ARGS__)
+#  define fusb303_info(x, ...)       uinfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_FUSB301_I2C_FREQUENCY
-#  define CONFIG_FUSB301_I2C_FREQUENCY 400000
+#ifndef CONFIG_FUSB303_I2C_FREQUENCY
+#  define CONFIG_FUSB303_I2C_FREQUENCY 400000
 #endif
 
 /* Other macros */
 
-#define FUSB301_I2C_RETRIES  10
+#define FUSB303_I2C_RETRIES  10
+
+#define FUSB303_ALL_INTR     (INTERRUPT_ATTACH | INTERRUPT_DETACH | \
+                              INTERRUPT_BC_LVL | INTERRUPT_AUTOSNK | \
+                              INTERRUPT_VBUS_CHG | INTERRUPT_FAULT | \
+                              INTERRUPT_ORIENT)
+
+#define FUSB303_ALL_INTR1    (INTERRUPT1_REMEDY | INTERRUPT1_FRC_SUCC | \
+                              INTERRUPT1_FRC_FAIL | INTERRUPT1_REM_FAIL | \
+                              INTERRUPT1_REM_VBON | INTERRUPT1_REM_VBOFF)
+
+/* Debug */
+
+#ifdef CONFIG_DEBUG_FUSB303
+#  define DUMPREG(priv, x) \
+    do \
+      { \
+        int ret = fusb303_getreg((priv), (x)); \
+        if (ret < 0) \
+          { \
+           fusb303_err("ERROR: Failed to read %s(0x%02X)\n", #x, (x)); \
+          } \
+        else \
+          { \
+            fusb303_info("%s(0x%02X): 0x%02X\n", #x, (x), ret); \
+          } \
+      } \
+    while(0)
+#endif
 
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
 
-struct fusb301_dev_s
+struct fusb303_dev_s
 {
   FAR struct i2c_master_s *i2c;         /* I2C interface */
   uint8_t addr;                         /* I2C address */
   volatile bool int_pending;            /* Interrupt received but handled */
   sem_t devsem;                         /* Manages exclusive access */
-  FAR struct fusb301_config_s *config;  /* Platform specific configuration */
+  FAR struct fusb303_config_s *config;  /* Platform specific configuration */
 #ifndef CONFIG_DISABLE_POLL
-  FAR struct pollfd *fds[CONFIG_FUSB301_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_FUSB303_NPOLLWAITERS];
 #endif
 };
 
@@ -91,32 +122,35 @@ struct fusb301_dev_s
  * Private Function prototypes
  ****************************************************************************/
 
-static int fusb301_open(FAR struct file *filep);
-static int fusb301_close(FAR struct file *filep);
-static ssize_t fusb301_read(FAR struct file *, FAR char *, size_t);
-static ssize_t fusb301_write(FAR struct file *filep, FAR const char *buffer,
+#ifdef CONFIG_DEBUG_FUSB303
+static int fusb303_dumpregs(FAR struct fusb303_dev_s *priv);
+#endif
+static int fusb303_open(FAR struct file *filep);
+static int fusb303_close(FAR struct file *filep);
+static ssize_t fusb303_read(FAR struct file *, FAR char *, size_t);
+static ssize_t fusb303_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int fusb303_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-static void fusb301_notify(FAR struct fusb301_dev_s *priv);
+static void fusb303_notify(FAR struct fusb303_dev_s *priv);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_fusb301ops =
+static const struct file_operations g_fusb303ops =
 {
-  fusb301_open,  /* open */
-  fusb301_close, /* close */
-  fusb301_read,  /* read */
-  fusb301_write, /* write */
+  fusb303_open,  /* open */
+  fusb303_close, /* close */
+  fusb303_read,  /* read */
+  fusb303_write, /* write */
   NULL,          /* seek */
-  fusb301_ioctl  /* ioctl */
+  fusb303_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , fusb301_poll /* poll */
+  , fusb303_poll /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
@@ -128,20 +162,21 @@ static const struct file_operations g_fusb301ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fusb301_getreg
+ * Name: fusb303_getreg
  *
  * Description:
- *   Read from an 8-bit FUSB301 register
+ *   Read from an 8-bit FUSB303 register
  *
  * Input Parameters:
- *   priv   - pointer to FUSB301 Private Structure
+ *   priv   - pointer to FUSB303 Private Structure
  *   reg    - register to read
  *
  * Returned Value:
  *   Returns positive register value in case of success, otherwise ERROR
+ *
  ****************************************************************************/
 
-static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
+static int fusb303_getreg(FAR struct fusb303_dev_s *priv, uint8_t reg)
 {
   int ret = -EIO;
   int retries;
@@ -150,13 +185,13 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
 
   DEBUGASSERT(priv);
 
-  msg[0].frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg[0].frequency = CONFIG_FUSB303_I2C_FREQUENCY;
   msg[0].addr      = priv->addr;
   msg[0].flags     = 0;
   msg[0].buffer    = &reg;
   msg[0].length    = 1;
 
-  msg[1].frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg[1].frequency = CONFIG_FUSB303_I2C_FREQUENCY;
   msg[1].addr      = priv->addr;
   msg[1].flags     = I2C_M_READ;
   msg[1].buffer    = &regval;
@@ -164,12 +199,12 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
 
   /* Perform the transfer */
 
-  for (retries = 0; retries < FUSB301_I2C_RETRIES; retries++)
+  for (retries = 0; retries < FUSB303_I2C_RETRIES; retries++)
     {
       ret = I2C_TRANSFER(priv->i2c, msg, 2);
       if (ret >= 0)
         {
-          fusb301_info("reg:%02X, value:%02X\n", reg, regval);
+          fusb303_info("reg:%02X, value:%02X\n", reg, regval);
           return regval;
         }
       else
@@ -177,7 +212,7 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
           /* Some error. Try to reset I2C bus and keep trying. */
 
 #ifdef CONFIG_I2C_RESET
-          if (retries == FUSB301_I2C_RETRIES - 1)
+          if (retries == FUSB303_I2C_RETRIES - 1)
             {
               break;
             }
@@ -185,33 +220,34 @@ static int fusb301_getreg(FAR struct fusb301_dev_s *priv, uint8_t reg)
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              fusb301_err("ERROR: I2C_RESET failed: %d\n", ret);
+              fusb303_err("ERROR: I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif
         }
     }
 
-  fusb301_info("reg:%02X, error:%d\n", reg, ret);
+  fusb303_info("reg:%02X, error:%d\n", reg, ret);
   return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_putreg
+ * Name: fusb303_putreg
  *
  * Description:
- *   Write a value to an 8-bit FUSB301 register
+ *   Write a value to an 8-bit FUSB303 register
  *
  * Input Parameters:
- *   priv    - pointer to FUSB301 Private Structure
+ *   priv    - pointer to FUSB303 Private Structure
  *   regaddr - register to read
  *   regval  - value to be written
  *
  * Returned Value:
  *   None
+ *
  ****************************************************************************/
 
-static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
+static int fusb303_putreg(FAR struct fusb303_dev_s *priv, uint8_t regaddr,
                           uint8_t regval)
 {
   int ret = -EIO;
@@ -221,12 +257,12 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
 
   /* Setup to the data to be transferred (register address and data). */
 
-  txbuffer[0] = regaddr;
-  txbuffer[1] = regval;
+  txbuffer[0]   = regaddr;
+  txbuffer[1]   = regval;
 
-  /* Setup 8-bit FUSB301 address write message */
+  /* Setup 8-bit FUSB303 address write message */
 
-  msg.frequency = CONFIG_FUSB301_I2C_FREQUENCY;
+  msg.frequency = CONFIG_FUSB303_I2C_FREQUENCY;
   msg.addr      = priv->addr;
   msg.flags     = 0;
   msg.buffer    = txbuffer;
@@ -234,12 +270,12 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
 
   /* Perform the transfer */
 
-  for (retries = 0; retries < FUSB301_I2C_RETRIES; retries++)
+  for (retries = 0; retries < FUSB303_I2C_RETRIES; retries++)
     {
       ret = I2C_TRANSFER(priv->i2c, &msg, 1);
       if (ret == OK)
         {
-          fusb301_info("reg:%02X, value:%02X\n", regaddr, regval);
+          fusb303_info("reg:%02X, value:%02X\n", regaddr, regval);
 
           return OK;
         }
@@ -248,7 +284,7 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
           /* Some error. Try to reset I2C bus and keep trying. */
 
 #ifdef CONFIG_I2C_RESET
-          if (retries == FUSB301_I2C_RETRIES - 1)
+          if (retries == FUSB303_I2C_RETRIES - 1)
             {
               break;
             }
@@ -256,58 +292,116 @@ static int fusb301_putreg(FAR struct fusb301_dev_s *priv, uint8_t regaddr,
           ret = I2C_RESET(priv->i2c);
           if (ret < 0)
             {
-              fusb301_err("ERROR: I2C_RESET failed: %d\n", ret);
+              fusb303_err("ERROR: I2C_RESET failed: %d\n", ret);
               return ret;
             }
 #endif
         }
     }
 
-  fusb301_err("ERROR: failed reg:%02X, value:%02X, error:%d\n",
+  fusb303_err("ERROR: failed reg:%02X, value:%02X, error:%d\n",
               regaddr, regval, ret);
   return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_read_device_id
+ * Name: fusb303_dumpregs
  *
  * Description:
- *   Read device version and revision IDs
+ *   Dump FUSB303 registers
+ *
+ * Input Parameters:
+ *   priv    - pointer to FUSB303 Private Structure
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-static int fusb301_read_device_id(FAR struct fusb301_dev_s * priv,
-                                  FAR uint8_t * arg)
+#ifdef CONFIG_DEBUG_FUSB303
+static int noinline_function fusb303_dumpregs(FAR struct fusb303_dev_s *priv)
+{
+  DUMPREG(priv, FUSB303_DEV_ID_REG);
+  DUMPREG(priv, FUSB303_DEV_TYPE_REG);
+  DUMPREG(priv, FUSB303_PORTROLE_REG);
+  DUMPREG(priv, FUSB303_CONTROL_REG);
+  DUMPREG(priv, FUSB303_CONTROL1_REG);
+  DUMPREG(priv, FUSB303_MANUAL_REG);
+  DUMPREG(priv, FUSB303_RESET_REG);
+  DUMPREG(priv, FUSB303_MASK_REG);
+  DUMPREG(priv, FUSB303_MASK1_REG);
+  DUMPREG(priv, FUSB303_STATUS_REG);
+  DUMPREG(priv, FUSB303_STATUS1_REG);
+  DUMPREG(priv, FUSB303_TYPE_REG);
+  DUMPREG(priv, FUSB303_INTERRUPT_REG);
+  DUMPREG(priv, FUSB303_INTERRUPT1_REG);
+  return OK;
+}
+#endif /* CONFIG_DEBUG_FUSB303 */
+
+/****************************************************************************
+ * Name: fusb303_read_device_id
+ *
+ * Description:
+ *   Read device version, revision ID and type.
+ *
+ ****************************************************************************/
+
+static int fusb303_read_device_id(FAR struct fusb303_dev_s *priv,
+                                  FAR uint8_t *dev_id, FAR uint8_t *dev_type)
 {
   int ret;
 
-  ret = fusb301_getreg(priv, FUSB301_DEV_ID_REG);
+  ret = fusb303_getreg(priv, FUSB303_DEV_ID_REG);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to read device ID\n");
+      fusb303_err("ERROR: Failed to read device ID\n");
       return -EIO;
     }
 
-  *arg = ret;
-  return OK;
+  if (dev_id != NULL)
+    {
+      *dev_id = ret;
+    }
+
+  ret = fusb303_getreg(priv, FUSB303_DEV_TYPE_REG);
+  if (ret < 0)
+    {
+      fusb303_err("ERROR: Failed to read device type\n");
+      return -EIO;
+    }
+
+  if (dev_type != NULL)
+    {
+      *dev_type = ret;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_clear_interrupts
+ * Name: fusb303_clear_interrupts
  *
  * Description:
- *   Clear interrupts from FUSB301 chip
+ *   Clear interrupts from FUSB303 chip
  *
  ****************************************************************************/
 
-static int fusb301_clear_interrupts(FAR struct fusb301_dev_s *priv)
+static int fusb303_clear_interrupts(FAR struct fusb303_dev_s *priv)
 {
-  int ret = OK;
+  int ret;
 
-  ret = fusb301_getreg(priv, FUSB301_INTERRUPT_REG);
+  ret = fusb303_putreg(priv, FUSB303_INTERRUPT_REG, FUSB303_ALL_INTR);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to clear interrupts\n");
+      fusb303_err("ERROR: Failed to clear interrupts\n");
+      return -EIO;
+    }
+
+  ret = fusb303_putreg(priv, FUSB303_INTERRUPT1_REG, FUSB303_ALL_INTR1);
+  if (ret < 0)
+    {
+      fusb303_err("ERROR: Failed to clear interrupts\n");
       return -EIO;
     }
 
@@ -315,63 +409,125 @@ static int fusb301_clear_interrupts(FAR struct fusb301_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: fusb301_setup
+ * Name: fusb303_setup
  *
  * Description:
- *   Setup FUSB301 chip
+ *   Setup FUSB303 chip
  *
  ****************************************************************************/
 
-static int fusb301_setup(FAR struct fusb301_dev_s *priv,
-                         struct fusb301_setup_s *setup)
+static int fusb303_setup(FAR struct fusb303_dev_s *priv,
+                         struct fusb303_setup_s *setup)
 {
   int ret = OK;
+  uint8_t regval;
 
-  fusb301_info("drp_tgl:%02X, host_curr:%02X, global_int:%X, mask:%02X\n",
-    setup->drp_toggle_timing, setup->host_current, setup->global_int_mask,
-    setup->int_mask);
+  fusb303_info("drp_tgl:%02X, host_curr:%02X\n"
+               "dcable_en: %d, remedy_en: %d, auto_snk_en: %d\n"
+               "global_int: %d, mask: %02X, mask1: %02X\n",
+               setup->drp_toggle_timing, setup->host_current,
+               (int)setup->dcable_en, (int)setup->remedy_en,
+               (int)setup->auto_snk_en, (int)setup->global_int_mask,
+               setup->int_mask, setup->int_mask1);
 
-  ret = fusb301_putreg(priv, FUSB301_CONTROL_REG, setup->drp_toggle_timing |
-    setup->host_current | setup->global_int_mask);
+  /* Enable chip in I2C mode. */
 
+  ret = fusb303_getreg(priv, FUSB303_CONTROL1_REG);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to write control register\n");
+      fusb303_err("ERROR: Failed to enable chip\n");
       goto err_out;
     }
 
-  ret = fusb301_putreg(priv, FUSB301_MASK_REG, setup->int_mask);
+  /* TODO: no way to change AUTO_SNK_TH or TCCDEB at the moment. */
+
+  regval = (uint8_t)ret | CONTROL1_ENABLE;
+  if (setup->auto_snk_en)
+    {
+      regval |= CONTROL1_AUTO_SNK_EN;
+    }
+  else
+    {
+      regval &= ~CONTROL1_AUTO_SNK_EN;
+    }
+
+  if (setup->remedy_en)
+    {
+      regval |= CONTROL1_REMEDY_EN;
+    }
+  else
+    {
+      regval &= ~CONTROL1_REMEDY_EN;
+    }
+
+  ret = fusb303_putreg(priv, FUSB303_CONTROL1_REG, regval);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to write mask register\n");
+      fusb303_err("ERROR: Failed to enable chip\n");
+      goto err_out;
+    }
+
+  /* Setup the interrupt masks and remaining settings. */
+
+  ret = fusb303_putreg(priv, FUSB303_MASK_REG, setup->int_mask);
+  if (ret < 0)
+    {
+      fusb303_err("ERROR: Failed to write mask register\n");
+      goto err_out;
+    }
+
+  ret = fusb303_putreg(priv, FUSB303_MASK1_REG, setup->int_mask1);
+  if (ret < 0)
+    {
+      fusb303_err("ERROR: Failed to write mask register\n");
+      goto err_out;
+    }
+
+  /* Interrupts can happen only after unmasking global_int_mask */
+
+  regval = setup->drp_toggle_timing | setup->host_current |
+           setup->global_int_mask;
+  if (setup->dcable_en)
+    {
+      regval |= CONTROL_DCABLE_EN;
+    }
+
+  ret = fusb303_putreg(priv, FUSB303_CONTROL_REG, regval);
+  if (ret < 0)
+    {
+      fusb303_err("ERROR: Failed to write control register\n");
+      goto err_out;
     }
 
 err_out:
+#ifdef CONFIG_DEBUG_FUSB303
+  fusb303_dumpregs(priv);
+#endif
   return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_set_mode
+ * Name: fusb303_set_mode
  *
  * Description:
  *   Configure supported device modes (sink, source, DRP, accessory)
  *
  ****************************************************************************/
 
-static int fusb301_set_mode(FAR struct fusb301_dev_s *priv,
-                            enum fusb301_mode_e mode)
+static int fusb303_set_mode(FAR struct fusb303_dev_s *priv,
+                            enum fusb303_mode_e mode)
 {
-  int ret = OK;
+  int ret;
 
-  if (mode > MODE_DRP_ACC)
+  if (mode > MODE_ORIENTDEB)
     {
       return -EINVAL;
     }
 
-  ret = fusb301_putreg(priv, FUSB301_MODE_REG, mode);
+  ret = fusb303_putreg(priv, FUSB303_PORTROLE_REG, mode);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to write mode register\n");
+      fusb303_err("ERROR: Failed to set portrole\n");
       ret = -EIO;
     }
 
@@ -379,27 +535,27 @@ static int fusb301_set_mode(FAR struct fusb301_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: fusb301_set_state
+ * Name: fusb303_set_state
  *
  * Description:
  *   Force device in specified state
  *
  ****************************************************************************/
 
-static int fusb301_set_state(FAR struct fusb301_dev_s *priv,
-                             enum fusb301_manual_e state)
+static int fusb303_set_state(FAR struct fusb303_dev_s *priv,
+                             enum fusb303_manual_e state)
 {
-  int ret = OK;
+  int ret;
 
-  if (state > MANUAL_UNATT_SNK)
+  if (state > MANUAL_FORCE_SRC)
     {
       return -EINVAL;
     }
 
-  ret = fusb301_putreg(priv, FUSB301_MANUAL_REG, state);
+  ret = fusb303_putreg(priv, FUSB303_MANUAL_REG, state);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to write manual register\n");
+      fusb303_err("ERROR: Failed to set state\n");
       ret = -EIO;
     }
 
@@ -407,22 +563,22 @@ static int fusb301_set_state(FAR struct fusb301_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: fusb301_read_status
+ * Name: fusb303_read_status
  *
  * Description:
  *   Read status register
  *
  ****************************************************************************/
 
-static int fusb301_read_status(FAR struct fusb301_dev_s *priv,
+static int fusb303_read_status(FAR struct fusb303_dev_s *priv,
                                FAR uint8_t *arg)
 {
   int ret;
 
-  ret = fusb301_getreg(priv, FUSB301_STATUS_REG);
+  ret = fusb303_getreg(priv, FUSB303_STATUS_REG);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to read status\n");
+      fusb303_err("ERROR: Failed to read status\n");
       return -EIO;
     }
 
@@ -431,22 +587,22 @@ static int fusb301_read_status(FAR struct fusb301_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: fusb301_read_devtype
+ * Name: fusb303_read_devtype
  *
  * Description:
  *   Read type of attached device
  *
  ****************************************************************************/
 
-static int fusb301_read_devtype(FAR struct fusb301_dev_s *priv,
+static int fusb303_read_devtype(FAR struct fusb303_dev_s *priv,
                                 FAR uint8_t *arg)
 {
   int ret;
 
-  ret = fusb301_getreg(priv, FUSB301_TYPE_REG);
+  ret = fusb303_getreg(priv, FUSB303_TYPE_REG);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to read type\n");
+      fusb303_err("ERROR: Failed to read type\n");
       return -EIO;
     }
 
@@ -455,100 +611,122 @@ static int fusb301_read_devtype(FAR struct fusb301_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: fusb301_reset
+ * Name: fusb303_reset
  *
  * Description:
- *   Reset FUSB301 HW and clear I2C registers
+ *   Reset FUSB303 HW and clear I2C registers
  *
  ****************************************************************************/
 
-static int fusb301_reset(FAR struct fusb301_dev_s *priv)
+static int fusb303_reset(FAR struct fusb303_dev_s *priv)
 {
-  int ret = OK;
+  int ret;
 
-  ret = fusb301_putreg(priv, FUSB301_RESET_REG, RESET_SW_RES);
+  ret = fusb303_putreg(priv, FUSB303_RESET_REG, RESET_SW_RES);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to write reset register\n");
+      fusb303_err("ERROR: Failed to reset chip\n");
       ret = -EIO;
     }
+
+  /* tRESET max 100 ms. */
+
+  up_mdelay(100);
 
   return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_open
+ * Name: fusb303_open
  *
  * Description:
- *   This function is called whenever the FUSB301 device is opened.
+ *   This function is called whenever the FUSB303 device is opened.
  *
  ****************************************************************************/
 
-static int fusb301_open(FAR struct file *filep)
+static int fusb303_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct fusb301_dev_s *priv = inode->i_private;
-  int ret = OK;
+  FAR struct fusb303_dev_s *priv = inode->i_private;
+  uint8_t dev_id;
+  uint8_t dev_type;
+  int ret;
+
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Probe device */
 
-  ret = fusb301_getreg(priv, FUSB301_DEV_ID_REG);
+  ret = fusb303_read_device_id(priv, &dev_id, &dev_type);
   if (ret < 0)
     {
-      fusb301_err("ERROR: No response at given address 0x%02X\n", priv->addr);
+      fusb303_err("ERROR: No response at given address 0x%02X\n", priv->addr);
       ret = -EFAULT;
     }
   else
     {
-      fusb301_info("device id: 0x%02X\n", ret);
+      fusb303_info("device id: 0x%02X type: 0x%02X\n", dev_id, dev_type);
 
-      (void)fusb301_clear_interrupts(priv);
+      (void)fusb303_clear_interrupts(priv);
       priv->config->irq_enable(priv->config, true);
     }
 
-  /* Error exit */
-
+  nxsem_post(&priv->devsem);
   return ret;
 }
 
 /****************************************************************************
- * Name: fusb301_close
+ * Name: fusb303_close
  *
  * Description:
- *   This routine is called when the FUSB301 device is closed.
+ *   This routine is called when the FUSB303 device is closed.
  *
  ****************************************************************************/
 
-static int fusb301_close(FAR struct file *filep)
+static int fusb303_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct fusb301_dev_s *priv = inode->i_private;
+  FAR struct fusb303_dev_s *priv = inode->i_private;
+  int ret;
+
+  ret = nxsem_wait(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   priv->config->irq_enable(priv->config, false);
 
+  nxsem_post(&priv->devsem);
   return OK;
 }
 
 /****************************************************************************
- * Name: fusb301_read
+ * Name: fusb303_read
+ *
  * Description:
- *   This routine is called when the FUSB301 device is read.
+ *   This routine is called when the FUSB303 device is read.
+ *
  ****************************************************************************/
 
-static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t fusb303_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct fusb301_dev_s *priv = inode->i_private;
-  FAR struct fusb301_result_s *ptr;
+  FAR struct fusb303_dev_s *priv = inode->i_private;
+  FAR struct fusb303_result_s *ptr;
   irqstate_t flags;
   int ret;
 
-  if (buflen < sizeof(struct fusb301_result_s))
+  if (buflen < sizeof(struct fusb303_result_s))
     {
       return 0;
     }
 
-  ptr = (struct fusb301_result_s *)buffer;
+  ptr = (struct fusb303_result_s *)buffer;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -560,22 +738,29 @@ static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buf
   priv->int_pending = false;
   leave_critical_section(flags);
 
-  (void)fusb301_clear_interrupts(priv);
+  ptr->status = fusb303_getreg(priv, FUSB303_STATUS_REG);
+  ptr->status1 = fusb303_getreg(priv, FUSB303_STATUS1_REG);
+  ptr->dev_type = fusb303_getreg(priv, FUSB303_TYPE_REG);
 
-  ptr->status = fusb301_getreg(priv, FUSB301_STATUS_REG);
-  ptr->dev_type = fusb301_getreg(priv, FUSB301_TYPE_REG);
+#ifdef CONFIG_DEBUG_FUSB303
+  fusb303_dumpregs(priv);
+#endif
+
+  (void)fusb303_clear_interrupts(priv);
 
   nxsem_post(&priv->devsem);
-  return sizeof(struct fusb301_result_s);
+  return sizeof(struct fusb303_result_s);
 }
 
 /****************************************************************************
- * Name: fusb301_write
+ * Name: fusb303_write
+ *
  * Description:
- *   This routine is called when the FUSB301 device is written to.
+ *   This routine is called when the FUSB303 device is written to.
+ *
  ****************************************************************************/
 
-static ssize_t fusb301_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t fusb303_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
 {
   ssize_t length = 0;
@@ -584,16 +769,18 @@ static ssize_t fusb301_write(FAR struct file *filep, FAR const char *buffer,
 }
 
 /****************************************************************************
- * Name: fusb301_ioctl
+ * Name: fusb303_ioctl
+ *
  * Description:
  *   This routine is called when ioctl function call is performed for
- *   the FUSB301 device.
+ *   the FUSB303 device.
+ *
  ****************************************************************************/
 
-static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int fusb303_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct fusb301_dev_s *priv = inode->i_private;
+  FAR struct fusb303_dev_s *priv = inode->i_private;
   int ret;
 
   ret = nxsem_wait(&priv->devsem);
@@ -602,55 +789,55 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  fusb301_info("cmd: 0x%02X, arg:%lu\n", cmd, arg);
+  fusb303_info("cmd: 0x%02X, arg:%lu\n", cmd, arg);
 
   switch (cmd)
   {
   case USBCIOC_READ_DEVID:
     {
-      ret = fusb301_read_device_id(priv, (uint8_t *)arg);
+      ret = fusb303_read_device_id(priv, (uint8_t *)arg, NULL);
     }
     break;
 
   case USBCIOC_SETUP:
     {
-      ret = fusb301_setup(priv, (struct fusb301_setup_s *)arg);
+      ret = fusb303_setup(priv, (struct fusb303_setup_s *)arg);
     }
     break;
 
   case USBCIOC_SET_MODE:
     {
-      ret = fusb301_set_mode(priv, (uint8_t)arg);
+      ret = fusb303_set_mode(priv, (uint8_t)arg);
     }
     break;
 
   case USBCIOC_SET_STATE:
     {
-      ret = fusb301_set_state(priv, (uint8_t)arg);
+      ret = fusb303_set_state(priv, (uint8_t)arg);
     }
     break;
 
   case USBCIOC_READ_STATUS:
     {
-      ret = fusb301_read_status(priv, (uint8_t *)arg);
+      ret = fusb303_read_status(priv, (uint8_t *)arg);
     }
     break;
 
   case USBCIOC_READ_DEVTYPE:
     {
-      ret = fusb301_read_devtype(priv, (uint8_t *)arg);
+      ret = fusb303_read_devtype(priv, (uint8_t *)arg);
     }
     break;
 
   case USBCIOC_RESET:
     {
-      ret = fusb301_reset(priv);
+      ret = fusb303_reset(priv);
     }
     break;
 
   default:
     {
-      fusb301_err("ERROR: Unrecognized cmd: %d\n", cmd);
+      fusb303_err("ERROR: Unrecognized cmd: %d\n", cmd);
       ret = -ENOTTY;
     }
     break;
@@ -661,16 +848,19 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: fusb301_poll
+ * Name: fusb303_poll
+ *
  * Description:
- *   This routine is called during FUSB301 device poll
+ *   This routine is called during FUSB303 device poll
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                        bool setup)
 {
   FAR struct inode *inode;
-  FAR struct fusb301_dev_s *priv;
+  FAR struct fusb303_dev_s *priv;
   irqstate_t flags;
   int ret = OK;
   int i;
@@ -679,7 +869,7 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv = (FAR struct fusb301_dev_s *)inode->i_private;
+  priv = (FAR struct fusb303_dev_s *)inode->i_private;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -701,7 +891,7 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
        * slot for the poll structure reference.
        */
 
-      for (i = 0; i < CONFIG_FUSB301_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_FUSB303_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -715,7 +905,7 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
             }
         }
 
-      if (i >= CONFIG_FUSB301_NPOLLWAITERS)
+      if (i >= CONFIG_FUSB303_NPOLLWAITERS)
         {
           fds->priv = NULL;
           ret = -EBUSY;
@@ -725,7 +915,7 @@ static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool set
       flags = enter_critical_section();
       if (priv->int_pending)
         {
-          fusb301_notify(priv);
+          fusb303_notify(priv);
         }
 
       leave_critical_section(flags);
@@ -749,32 +939,32 @@ out:
 }
 
 /****************************************************************************
- * Name: fusb301_notify
+ * Name: fusb303_notify
  *
  * Description:
  *   Notify thread about data to be available
  *
  ****************************************************************************/
 
-static void fusb301_notify(FAR struct fusb301_dev_s *priv)
+static void fusb303_notify(FAR struct fusb303_dev_s *priv)
 {
-  DEBUGASSERT(priv != NULL);
-
   int i;
 
-  /* If there are threads waiting on poll() for FUSB301 data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  DEBUGASSERT(priv != NULL);
+
+  /* If there are threads waiting on poll() for FUSB303 data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.  If they all try to
+   * read the data, then some make end up blocking after all.
    */
 
-  for (i = 0; i < CONFIG_FUSB301_NPOLLWAITERS; i++)
+  for (i = 0; i < CONFIG_FUSB303_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
       if (fds)
         {
           fds->revents |= POLLIN;
-          fusb301_info("Report events: %02x\n", fds->revents);
+          fusb303_info("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -782,16 +972,16 @@ static void fusb301_notify(FAR struct fusb301_dev_s *priv)
 #endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
- * Name: fusb301_callback
+ * Name: fusb303_callback
  *
  * Description:
- *   FUSB301 interrupt handler
+ *   FUSB303 interrupt handler
  *
  ****************************************************************************/
 
-static int fusb301_int_handler(int irq, FAR void *context, FAR void *arg)
+static int fusb303_int_handler(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct fusb301_dev_s *priv = (FAR struct fusb301_dev_s *)arg;
+  FAR struct fusb303_dev_s *priv = (FAR struct fusb303_dev_s *)arg;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
@@ -800,7 +990,7 @@ static int fusb301_int_handler(int irq, FAR void *context, FAR void *arg)
   priv->int_pending = true;
 
 #ifndef CONFIG_DISABLE_POLL
-  fusb301_notify(priv);
+  fusb303_notify(priv);
 #endif
   leave_critical_section(flags);
 
@@ -811,20 +1001,20 @@ static int fusb301_int_handler(int irq, FAR void *context, FAR void *arg)
  * Public Functions
  ****************************************************************************/
 
-int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
-                     uint8_t addr, FAR struct fusb301_config_s *config)
+int fusb303_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+                     uint8_t addr, FAR struct fusb303_config_s *config)
 {
-  FAR struct fusb301_dev_s *priv;
+  FAR struct fusb303_dev_s *priv;
   int ret;
 
   DEBUGASSERT(devpath != NULL && i2c != NULL && config != NULL);
 
-  /* Initialize the FUSB301 device structure */
+  /* Initialize the FUSB303 device structure */
 
-  priv = (FAR struct fusb301_dev_s *)kmm_zalloc(sizeof(struct fusb301_dev_s));
+  priv = (FAR struct fusb303_dev_s *)kmm_zalloc(sizeof(struct fusb303_dev_s));
   if (!priv)
     {
-      fusb301_err("ERROR: Failed to allocate instance\n");
+      fusb303_err("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -839,10 +1029,10 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_fusb301ops, 0666, priv);
+  ret = register_driver(devpath, &g_fusb303ops, 0666, priv);
   if (ret < 0)
     {
-      fusb301_err("ERROR: Failed to register driver: %d\n", ret);
+      fusb303_err("ERROR: Failed to register driver: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -853,7 +1043,7 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       priv->config->irq_clear(config);
     }
 
-  priv->config->irq_attach(config, fusb301_int_handler, priv);
+  priv->config->irq_attach(config, fusb303_int_handler, priv);
   priv->config->irq_enable(config, false);
 
   return OK;
