@@ -63,7 +63,6 @@
 #include "up_internal.h"
 #include "hardware/stm32_rcc.h"
 #include "hardware/stm32_usbdev.h"
-#include "stm32_hsi48.h"
 #include "stm32_gpio.h"
 #include "stm32_usbdev.h"
 
@@ -3659,20 +3658,14 @@ void up_usbinitialize(void)
 
   /* Configure USB GPIO alternate function pins */
 
-#ifdef CONFIG_STM32F0L0_STM32F30XX
   (void)stm32_configgpio(GPIO_USB_DM);
   (void)stm32_configgpio(GPIO_USB_DP);
-#endif
 
   /* Enable clocking to the USB peripheral */
 
   regval  = getreg32(STM32_RCC_APB1RSTR);
   regval &= ~RCC_APB1ENR_USBEN;
   putreg32(regval, STM32_RCC_APB1RSTR);
-
-  /* Enable HSI48 clocking to to support USB transfers */
-
-  stm32_enable_hsi48(SYNCSRC_USB);
 
   /* Power up the USB controller, but leave it in the reset state */
 

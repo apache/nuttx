@@ -54,6 +54,18 @@
 #include "hardware/stm32_gpio.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Determine if board wants to use HSI48 as 48 MHz oscillator. */
+
+#if defined(CONFIG_STM32F0L0_HAVE_HSI48) && defined(STM32_USE_CLK48)
+#  if STM32_CLK48_SEL == RCC_CFGR3_CLK48_HSI48
+#    define STM32_USE_HSI48
+#  endif
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -490,6 +502,14 @@ static void stm32_stdclockconfig(void)
   regval |= RCC_CFGR_SW_PLL;
   putreg32(regval, STM32_RCC_CFGR);
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SW_MASK) != RCC_CFGR_SW_PLL);
+
+#ifdef STM32_USE_CLK48
+  /* Select the HSI48 clock source (USB clock source) */
+
+  regval  = getreg32(STM32_RCC_CFGR3);
+  regval |= STM32_CLK48_SEL;
+  putreg32(regval, STM32_RCC_CFGR3);
+#endif
 }
 #endif
 
@@ -503,4 +523,10 @@ static inline void rcc_enableperipherals(void)
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
+
+#ifdef STM32_USE_HSI48
+  /* Enable HSI48 clocking to to support USB transfers or RNG */
+
+  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
+#endif
 }

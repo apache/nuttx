@@ -39,6 +39,8 @@
 
 #include "stm32_pwr.h"
 
+#include "hardware/stm32_syscfg.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -54,6 +56,17 @@
 /* HSE divisor to yield ~1MHz RTC clock (valid for HSE = 8MHz) */
 
 #define HSE_DIVISOR RCC_CR_RTCPRE_HSEd8
+
+/* Determine if board wants to use HSI48 as 48 MHz oscillator. */
+
+#if defined(CONFIG_STM32F0L0_HAVE_HSI48) && defined(STM32_USE_CLK48)
+#  if STM32_CLK48_SEL == RCC_CCIPR_CLK48SEL_HSI48
+#    define STM32_USE_HSI48
+#    ifndef CONFIG_STM32F0L0_VREFINT
+#      error VREFINT must be enabled if HSI48 used
+#    endif
+#  endif
+#endif
 
 /****************************************************************************
  * Private Data
@@ -156,12 +169,6 @@ static inline void rcc_enableahb(void)
   /* Random number generator clock enable */
 
   regval |= RCC_AHBENR_RNGEN;
-#endif
-
-#ifdef CONFIG_STM32F0L0_CRYP
-  /* Cryptographic modules clock enable */
-
-  regval |= RCC_AHBENR_CRYPEN;
 #endif
 
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
@@ -391,6 +398,32 @@ static inline void rcc_enableapb2(void)
 #endif
 
   putreg32(regval, STM32_RCC_APB2ENR);
+}
+
+/****************************************************************************
+ * Name: rcc_enableccip
+ *
+ * Description:
+ *   Set peripherals independent clock configuration.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableccip(void)
+{
+  uint32_t regval;
+
+  /* Certain peripherals have no clock selected even when their enable bit is
+   * set. Set some defaults in the CCIPR register so those peripherals
+   * will at least have a clock.
+   */
+
+  regval = getreg32(STM32_RCC_CCIPR);
+
+#if defined(STM32_USE_CLK48)
+  regval |= STM32_CLK48_SEL;
+#endif
+
+  putreg32(regval, STM32_RCC_CCIPR);
 }
 
 /****************************************************************************
@@ -712,6 +745,41 @@ static void stm32_stdclockconfig(void)
 
   stm32_rcc_enablelse();
 #endif
+
+}
+#endif
+
+/****************************************************************************
+ * Name: vrefint_enable
+ *
+ * Description:
+ *   Enable and configure internal voltage reference (VREFINT)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F0L0_VREFINT
+static void vrefint_enable(void)
+{
+  uint32_t regval = 0;
+
+  /* The HSI48 requires VREFINT and its reference to HSI48  */
+
+  regval = getreg32(STM32_SYSCFG_CFGR3);
+
+  /* Enable VREFINT */
+
+  regval |= SYSCFG_CFGR3_ENVREFINT;
+  putreg32(regval, STM32_SYSCFG_CFGR3);
+
+#ifdef STM32_USE_HSI48
+  /* Enable VREFINT reference to HSI48 */
+
+  regval |= SYSCFG_CFGR3_ENBUFVREFINTHSI48;
+#endif
+
+  /* Wait for VREFINT ready */
+
+  while ((getreg32(STM32_SYSCFG_CFGR3) & SYSCFG_CFGR3_VREFINTRDYF) == 0);
 }
 #endif
 
@@ -721,10 +789,20 @@ static void stm32_stdclockconfig(void)
 
 static inline void rcc_enableperipherals(void)
 {
+  rcc_enableccip();
   rcc_enableio();
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
+#ifdef CONFIG_STM32F0L0_VREFINT
+  vrefint_enable();
+#endif
+
+#ifdef STM32_USE_HSI48
+  /* Enable HSI48 clocking to to support USB transfers or RNG */
+
+  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
+#endif
 }
 
 /****************************************************************************

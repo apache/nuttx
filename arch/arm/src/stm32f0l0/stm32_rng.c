@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_rng.c
+ * arch/arm/src/stm32f0l0/stm32_rng.c
  *
  *   Copyright (C) 2012 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
@@ -51,10 +51,10 @@
 #include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
-#include "chip/stm32_rng.h"
+#include "hardware/stm32_rng.h"
 #include "up_internal.h"
 
-#if defined(CONFIG_STM32_RNG)
+#if defined(CONFIG_STM32F0L0_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
@@ -334,4 +334,4 @@ void devurandom_register(void)
 #endif
 
 #endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
-#endif /* CONFIG_STM32_RNG */
+#endif /* CONFIG_STM32F0L0_RNG */

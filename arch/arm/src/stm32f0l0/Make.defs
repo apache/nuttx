@@ -113,3 +113,11 @@ endif
 ifeq ($(CONFIG_STM32F0L0_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
+
+ifeq ($(CONFIG_STM32F0L0_AES),y)
+CHIP_CSRCS += stm32_aes.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0_RNG),y)
+CHIP_CSRCS += stm32_rng.c
+endif

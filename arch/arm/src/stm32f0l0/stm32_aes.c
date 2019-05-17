@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_aes.c
+ * arch/arm/src/stm32f0l0/stm32_aes.c
  *
  *   Copyright (C) 2015 Haltian Ltd. All rights reserved.
  *   Author:  Juha Niskanen <juha.niskanen@haltian.com>
