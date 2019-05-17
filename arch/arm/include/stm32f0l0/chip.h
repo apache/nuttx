@@ -62,6 +62,7 @@
 #  define STM32_NCAN            0  /* No CAN controllers */
 #  define STM32_NUSBDEV         1  /* One USB full-speed device controller */
 #  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NADC            1  /* One 12-bit module */
 #  define STM32_NDAC            1  /* One DAC channel */
 #  define STM32_NCOMP           2  /* Two Analog Comparators */
 #  define STM32_NCAP            13 /* Capacitive sensing channels (14 on UFQFPN32)) */
