@@ -3609,7 +3609,7 @@
 	  NuttX OS test, but configured to build natively on Windows.  Its only
 	  real purpose is to very the native Windows build logic.
 	* tools/mkdeps.bat and tools/mkdeps.c:  mkdeps.bat is a failed attempt
-	  to leverage mkdeps.sh to CMD.exe.  It fails because the are certain
+	  to leverage mkdeps.sh to CMD.exe.  It fails because there are certain
 	  critical CFLAG values that cannot be passed on the CMD.exe command line
 	  (like '=').  mkdeps.c is a work in progress that will, hopefully,
 	  replace both mkdeps.sh and mkdeps.bat.
@@ -23789,7 +23789,7 @@
 	* graphics/ and libs/libnx:  Implement new interfaces nx_synch() and
 	  nxtk_synch().  This are used to synchronize the NX server with the window
 	  client.  Currently most of the logic is equivalent to nx_block() and
-	  nxtk_block(), but with slightly different semantics.  The are separate
+	  nxtk_block(), but with slightly different semantics.  They are separate
 	  now because they are likely to diverge in the future.  From Gregory Nutt
 	  (2019-03-25).
 	* configs/stm32f103-minimum/src/:  USB reset was not working appropriately
@@ -23842,8 +23842,8 @@
 	  OTGHS from working.  From Anthony Merlino (2019-04-03).
 	* arch/arm/src/nrf52/nrf52832_errdata.c: Fix compiler error when following
 	  C89.  From Erik Englund (2019-04-03).
-	* The commit corrects the gpioirq when mismatch mode is selected and adds
-	  support for edge detect mode.  Slew Rate was also added for
+	* PIC32MZ:  The commit corrects the gpioirq when mismatch mode is selected
+	  and add support for edge detect mode.  Slew Rate was also added for
 	  completeness.  From Abdelatif Guettouche (2019-04-03).
 	* libs/libc/stdio/lib_libvsprintf.c:  Restore support for printing NULL
 	  string as "(null)".  Legacy printf supported printing "(null)" in place
@@ -23912,7 +23912,7 @@
 	  Koch (2019-04-08).
 	* arch/arm/src/stm32f7: Ported the PWM from F4 to F7.  From Eduard Niesner
 	  (2019-04-08).
-	* graphics/nxbe:  Correct some experimental cursor drawing algorithms. 
+	* graphics/nxbe:  Correct some experimental cursor drawing algorithms.
 	  From Gregory Nutt (2019-04-08).
 	* grahics/nxglib/nxglib.h:  Move internal function prototypes from
 	  include/nuttx/nx/nxglib.h to graphics/nxglib/nxglib.h.  From Gregory Nutt
@@ -24060,7 +24060,7 @@
 	  returns nothing.  From Mateusz Szafoni (2019-04-28).
 	* configs/same70-xplained/twm4nx:  Add a configuration for test Twm4Nx
 	  using VNC.  From Gregory Nutt (2019-04-28).
-	* configs/nucleo-l476rg/src:  Make naming of functions consistent: 
+	* configs/nucleo-l476rg/src:  Make naming of functions consistent:
 	  stm32l4_ no stm32_.  Inconsistency noted by Phil Coval in Bitbucket PR
 	  864.  This commit takes a different approach to resolving the naming
 	  inconsistency, however.  From Gregory Nutt (2019-04-29).
@@ -24074,7 +24074,7 @@
 	  crashes thereafter.  But that is a start.  From Gregory Nutt (2019-04-29).
 	* In many files:  Remove references to CONFIG_DISABLE_SIGNALS.  Signals can
 	  no longer be disabled.  From Gregory Nutt (2019-04-29).
-	* net/socket/getsockname.c: Fix addrlen check in socket debug features. 
+	* net/socket/getsockname.c: Fix addrlen check in socket debug features.
 	  Getsockname checked erroneously a pointer agains 0, where the intention
 	  was to dereference the pointer and to check the length.  This causes also
 	  a compilation failure if the code is compiled with CONFIG_DEBUG_FEATURES
@@ -24131,20 +24131,20 @@
 	  for the 1060 both compile correctly, so if I did break anything it's
 	  going to be properly evil and difficult to find.
 
-	  - include/nuttx/usb/hid.h:  The usbhid_descriptor_s struct defined in
-	  hid.h included some optional fields that should not be hard-defined as
-	  part of that structure.  An arbitrary number of optional entries could be
-	  included in the descriptor, but that is not properly represented.  No
-	  code on NuttX currently depends on the structure definition with an
-	  optional descriptor so it is safe to remove.
-
 	  - Directory re-arrangement and splitting of each imxrt family variant
 	  - Prevent intermittent SDCard timeouts by increasing timer in line with
 	    spec.
 	  - Support data dump on Hardfault
 	  - Fix missing ccm definitions and wrong iomux offset
 	  - Prevent hardfault when can't read from ENET PHY
-	  - More consistent Ethernet pinmux  From Dave Marples (2019-04-30).
+	  - More consistent Ethernet pinmux.
+      From Dave Marples (2019-04-30).
+	* include/nuttx/usb/hid.h:  The usbhid_descriptor_s struct defined in
+	  hid.h included some optional fields that should not be hard-defined as
+	  part of that structure.  An arbitrary number of optional entries could be
+	  included in the descriptor, but that is not properly represented.  No
+	  code on NuttX currently depends on the structure definition with an
+	  optional descriptor so it is safe to remove.
 	* Documentation/NuttShell.html: Command date is misspelled as data in
 	  chapter 2.12 Show or set the date and time (date).  From Michał Łyszczek
 	  (2019-05-01).
@@ -24152,8 +24152,9 @@
 	  From Gregory Nutt (2019-05-03).
 	* Fix build for battery gauge  From Tom Kopriva (2019-05-03).
 	* configs/same70-xplained/twm4nx/defconfig:  Switch to 8BPP.  That is the
-	  negotiated size requested by the VNC client anyway. 
-	  graphics/vnc/server/vnc_color.c:  Fix an error in color conversion.  From
+	  negotiated size requested by the VNC client anyway.  From Gregory Nutt
+	  (2019-05-03).
+	* graphics/vnc/server/vnc_color.c:  Fix an error in color conversion.  From
 	  Gregory Nutt (2019-05-03).
 	* configs/lpcxpresso-lpc54628:  Add a Twm4Nx configuration.  From Gregory
 	  Nutt (2019-05-04).
@@ -24166,7 +24167,7 @@
 	  cannot affect the display content.
 
 	  Conversely, when the icon is clicked, the icon needs to be hidden on
-	  the backgound and the window needs to be restored in its current state
+	  the background and the window needs to be restored in its current state
 	  (which may be different than the state of the window at the time it
 	  was iconified.
 	  From Gregory Nutt (2019-05-05).
@@ -24176,8 +24177,7 @@
 	* configs/nucleo-h743zi/include/board.h:  Add the input clock frequency
 	  definitions for all the drivers. Assumes internal clock source for all
 	  the timers.  From Jukka Laitinen (2019-05-05).
-	* arch/arm/src/stm32h7/Kconfig: fix warnings;
-	  arch/arm/src/stm32h7/stm32_tim.c: don't use hardcoded UIF interrupt
+	* arch/arm/src/stm32h7/stm32_tim.c: don't use hardcoded UIF interrupt
 	  From Mateusz Szafoni (2019-05-06).
 	* Add missing files of BMP180 example for nucleo-l476rg  From Fabian Justi
 	  (2019-05-06).
@@ -24204,7 +24204,7 @@
 	* Documentation/NXGraphicsSubsystem.html:  Add documentation for new
 	  nx[tk]_modal() and nx[tk]_setvisibility() interfaces.  From Gregory Nutt
 	  (2019-05-08).
-	* arch/arm/src/stm32f0l0:  Initial ADC support and some improvemnets for
+	* arch/arm/src/stm32f0l0:  Initial ADC support and some improvements for
 	  the STM32 M0  From Mateusz Szafoni (2019-05-09).
 	* configs/b-l072z-lrwan1: add ADC example  From Mateusz Szafoni (2019-05-09).
 	* graphics/:  Add new NX interfaces to query if a window is hidden or not.
@@ -24218,7 +24218,7 @@
 	* nrf24l01: don't block in read if file descriptor is O_NONBLOCK.  Add
 	  support for "multicast" TX mode - no waiting for ACK (needs to be enabled
 	  with fcntl SETTXPAYLOADNOACK)  From Leif Jakob (2019-05-11).
-	* libs/libnx/nxmu/:  Add a few bad input parameter checks. 
+	* libs/libnx/nxmu/:  Add a few bad input parameter checks.
 	  configs/lpcxpresso-lpc54628/twm4nx/defconfig:  Need to enable the NX
 	  library.  From Gregory Nutt (2019-05-12).
 	* libs/libnx/nxglib/nxglib_intersecting.c:  Correct bogus logic in
@@ -24253,7 +24253,7 @@
 	  calling exit() conditionally when, for example, Ctrl-C is sent to a
 	  task.  The abnormal termination handler must obey the rules of
 	  cancellation points:  If cancelation is disabled, then the abnormal
-	  termintion logic must wait for cancelation to be re-enabled; If
+	  termination logic must wait for cancelation to be re-enabled; If
 	  cancellation is deffered then the abnormal termination logic may have to
 	  wait for the victim task to enter or exit a cancellation point.  From
 	  Gregory Nutt (2019-05-17).
