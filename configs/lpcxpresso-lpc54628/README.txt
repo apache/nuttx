@@ -516,10 +516,14 @@ Configurations
 
       2019-03-20:  Everything works fine!
 
-  twm4nx:
+  twm4nx1 and twmnx2:
 
-    This configuration exercises the port of TWM to NuttX.  A description of
-    that port is available at apps/graphics/twm4nx/README.txt.
+    These configuration exercises the port of TWM to NuttX.  A description of
+    that port is available at apps/graphics/twm4nx/README.txt.  The two
+    configurations are identical, differing on in the "theme" of the UI.
+    twm4nx1 uses framed windows in dark, bright primary colors reminiscent of
+    Windows98. twm4nx2 uses border-less windows in pastel shades for a more
+    contemporary look.
 
     NOTES:
     1. This version uses the on-board display with the touchscreen for
@@ -556,4 +560,10 @@ Configurations
        lack of calibration, however.  These show up especially along the
        very top of the display where it can be very difficult to touch
        buttons or grab'n'move object.
+
+    4. Color artifacts:  In the CLASSIC configuration, the background of the
+       cental NX image is a slightly different hue of blue.  For the
+       CONTEMPORARY configuration, the toolbar buttons are supposed to be
+       borderless.  There is however, a fine border around each toolbar
+       widget with ruins the feel that the theme was trying for.
 

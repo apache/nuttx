@@ -173,7 +173,6 @@
 #define GPIO_QSPI_IO3 (GPIO_QSPI_BK1_IO3_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 #define GPIO_QSPI_SCK (GPIO_QSPI_CLK_2     | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz)
 
-
 /************************************************************************************
  * Public Data
  ************************************************************************************/
