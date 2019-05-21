@@ -97,17 +97,16 @@ void stm32l4_enable_hsi48(enum syncsrc_e syncsrc)
   regval |= RCC_CRRCR_HSI48ON;
   putreg32(regval, STM32L4_RCC_CRRCR);
 
-  if (syncsrc == SYNCSRC_USB)
-    {
-      /* Select the HSI48 as the USB clock source */
-
-      /* For the STM32L4, this is done in RCC. */
-    }
-
   /* Wait for the HSI48 clock to stabilize */
 
   while ((getreg32(STM32L4_RCC_CRRCR) & RCC_CRRCR_HSI48RDY) == 0);
 
+  /* Return if no synchronization */
+
+  if (syncsrc == SYNCSRC_NONE)
+    {
+      return;
+    }
 
   /* The CRS synchronization (SYNC) source, selectable through the CRS_CFGR
    * register, can be the signal from the external CRS_SYNC pin, the LSE

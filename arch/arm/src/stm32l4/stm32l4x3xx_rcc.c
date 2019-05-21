@@ -370,9 +370,12 @@ static inline void rcc_enableapb1(void)
 #endif
 
 #ifdef STM32L4_USE_HSI48
-  /* Clock Recovery System clock enable */
+  if (STM32L4_HSI48_SYNCSRC != SYNCSRC_NONE)
+    {
+      /* Clock Recovery System clock enable */
 
-  regval |= RCC_APB1ENR1_CRSEN;
+      regval |= RCC_APB1ENR1_CRSEN;
+    }
 #endif
 
   /* Power interface clock enable.  The PWR block is always enabled so that
@@ -911,7 +914,9 @@ static inline void rcc_enableperipherals(void)
   rcc_enableapb2();
 
 #ifdef STM32L4_USE_HSI48
-  stm32l4_enable_hsi48(SYNCSRC_USB);
+  /* Enable HSI48 clocking to to support USB transfers or RNG */
+
+  stm32l4_enable_hsi48(STM32L4_HSI48_SYNCSRC);
 #endif
 }
 

@@ -145,8 +145,11 @@
 
 /* CLK48 will come from PLLSAI1 (implicitly Q) */
 
-#define STM32L4_USE_CLK48         1
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32L4_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* Enable the LSE oscillator, used automatically trim the MSI, and for RTC */
 
@@ -248,8 +251,11 @@
 
 /* Enable CLK48; get it from PLLSAI1 */
 
-#define STM32L4_USE_CLK48         1
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32L4_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* Enable LSE (for the RTC) */
 
@@ -338,8 +344,11 @@
 
 /* Enable CLK48; get it from PLLSAI1 */
 
-#define STM32L4_USE_CLK48         1
-#define STM32L4_CLK48_SEL         RCC_CCIPR_CLK48SEL_PLLSAI1
+#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32L4_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#  define STM32L4_USE_CLK48       1
+#  define STM32L4_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
+#  define STM32L4_HSI48_SYNCSRC   SYNCSRC_NONE
+#endif
 
 /* Enable LSE (for the RTC) */
 
