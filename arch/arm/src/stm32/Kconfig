@@ -4825,7 +4825,7 @@ config STM32_TIM12_CHANNEL
 		If TIM12 is enabled for PWM usage, you also need specifies the timer output
 		channel {1,2}
 
-if STM32_TIM9_CHANNEL = 1
+if STM32_TIM12_CHANNEL = 1
 
 config STM32_TIM12_CH1OUT
 	bool "TIM12 Channel 1 Output"
@@ -4911,7 +4911,7 @@ config STM32_TIM13_CHANNEL
 		If TIM13 is enabled for PWM usage, you also need specifies the timer output
 		channel {1}
 
-if STM32_TIM14_CHANNEL = 1
+if STM32_TIM13_CHANNEL = 1
 
 config STM32_TIM13_CH1OUT
 	bool "TIM13 Channel 1 Output"
