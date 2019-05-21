@@ -5,8 +5,8 @@
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is a leverage of similar logic from uIP which has a compatible BSD
- * license:
+ * This dervies remotely from some Telnet logic from uIP which has a
+ * compatible BSD license:
  *
  *   Author: Adam Dunkels <adam@sics.se>
  *   Copyright (c) 2003, Adam Dunkels.
@@ -61,6 +61,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/telnet.h>
@@ -79,6 +81,27 @@
 
 #ifndef CONFIG_TELNET_TXBUFFER_SIZE
 #  define CONFIG_TELNET_TXBUFFER_SIZE 256
+#endif
+
+#ifndef CONFIG_TELNET_MAXLCLIENTS
+#  define CONFIG_TELNET_MAXLCLIENTS 8
+#endif
+
+#ifndef CONFIG_TELNET_IOTHREAD_PRIORITY
+#  define CONFIG_TELNET_IOTHREAD_PRIORITY 100
+#endif
+
+#ifndef CONFIG_TELNET_IOTHREAD_STACKSIZE
+#  define CONFIG_TELNET_IOTHREAD_STACKSIZE 1024
+#endif
+
+#undef HAVE_SIGNALS
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#  define HAVE_SIGNALS
+#endif
+
+#ifdef CONFIG_DISABLE_POLL
+#  error poll() is required by this driver (de-select CONFIG_DISABLE_POLL)
 #endif
 
 /* Telnet protocol stuff ****************************************************/
@@ -146,6 +169,10 @@ struct telnet_dev_s
   uint16_t          td_cols;      /* Number of NAWS cols */
   int               td_sb_count;  /* Count of TELNET_SB bytes received */
 #endif
+#ifdef HAVE_SIGNALS
+  pid_t             pid;
+#endif
+  struct pollfd     fds;
   FAR struct socket td_psock;     /* A clone of the internal socket structure */
   char td_rxbuffer[CONFIG_TELNET_RXBUFFER_SIZE];
   char td_txbuffer[CONFIG_TELNET_TXBUFFER_SIZE];
@@ -182,6 +209,7 @@ static bool    telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                  int *nwritten);
 static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                  uint8_t value);
+static int     telnet_io_main(int argc, char** argv);
 
 /* Telnet character driver methods */
 
@@ -245,13 +273,23 @@ static const struct file_operations g_factory_fops =
 #endif
 };
 
-/* Global information shared amongst telnet driver instanaces. */
+/* Global information shared amongst telnet driver instances. */
 
 static struct telnet_common_s g_telnet_common =
 {
   SEM_INITIALIZER(1),
   0
 };
+
+/* This is an global data set of all of all active Telnet drivers.  This
+ * additional logic in included to handle killing of task via control
+ * characters received via Telenet (via Ctrl-C SIGINT, in particular).
+ */
+
+static pid_t                g_telnet_io_kthread;
+static struct telnet_dev_s *g_telnet_clients[CONFIG_TELNET_MAXLCLIENTS];
+static sem_t                g_iosem       = SEM_INITIALIZER(0);
+static sem_t                g_clients_sem = SEM_INITIALIZER(1);
 
 /****************************************************************************
  * Private Functions
@@ -275,6 +313,64 @@ static inline void telnet_dumpbuffer(FAR const char *msg,
    */
 
   ninfodumpbuffer(msg, (FAR const uint8_t *)buffer, nbytes);
+}
+#endif
+
+/****************************************************************************
+ * Name: telnet_check_ctrl_char
+ *
+ * Description:
+ *   Check if an incoming control character should generate a signal.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SIGNALS
+static void telnet_check_ctrl_char (FAR struct telnet_dev_s *priv,
+                                    uint8_t ch)
+{
+  int signo = 0;
+
+#ifdef CONFIG_TTY_SIGINT
+  /* Is this the special character that will generate the SIGINT signal? */
+
+  if (priv->pid >= 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+    {
+      /* Yes.. note that the kill is needed and do not put the character
+       * into the Rx buffer.  It should not be read as normal data.
+       */
+
+      signo = SIGINT;
+    }
+  else
+#endif
+#ifdef CONFIG_TTY_SIGSTP
+  /* Is this the special character that will generate the SIGSTP signal? */
+
+  if (priv->pid >= 0 && ch == CONFIG_TTY_SIGSTP_CHAR)
+    {
+#ifdef CONFIG_TTY_SIGINT
+      /* Give precedence to SIGINT */
+
+      if (signo == 0)
+#endif
+        {
+          /* Note that the kill is needed and do not put the character
+           * into the Rx buffer.  It should not be read as normal data.
+           */
+
+          signo = SIGSTP;
+        }
+    }
+#endif
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+  /* Send the signal if necessary */
+
+  if (signo != 0)
+    {
+      kill(priv->pid, signo);
+    }
+#endif
 }
 #endif
 
@@ -449,7 +545,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
             break;
 
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
-          /* Handle Telnet Sub negotation request */
+          /* Handle Telnet Sub negotiation request */
 
           case STATE_SB:
             switch (ch)
@@ -663,6 +759,7 @@ static int telnet_close(FAR struct file *filep)
   FAR struct telnet_dev_s *priv = inode->i_private;
   FAR char *devpath;
   int ret;
+  int i;
 
   ninfo("td_crefs: %d\n", priv->td_crefs);
 
@@ -720,6 +817,32 @@ static int telnet_close(FAR struct file *filep)
 
           free(devpath);
         }
+
+      /* Remove ourself from the clients list */
+
+      nxsem_wait(&g_clients_sem);
+      for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
+        {
+          if (g_telnet_clients[i] == priv)
+            {
+              g_telnet_clients[i] = 0;
+              break;
+            }
+        }
+
+      if (priv->fds.events)
+        {
+          /* Tear down the poll */
+
+          psock_poll(&priv->td_psock, &priv->fds, FALSE);
+          priv->fds.events = 0;
+        }
+
+      nxsem_post(&g_clients_sem);
+
+      /* Notify the I/O thread */
+
+      nxsem_post(&g_iosem);
 
       /* Close the socket */
 
@@ -862,7 +985,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
        * next largest character sequence ("\r\n\0")?
        */
 
-      if (eol || ncopied > CONFIG_TELNET_TXBUFFER_SIZE-3)
+      if (eol || ncopied > CONFIG_TELNET_TXBUFFER_SIZE - 3)
         {
           /* Yes... send the data now */
 
@@ -926,10 +1049,11 @@ static int telnet_session(FAR struct telnet_session_s *session)
   struct stat statbuf;
   uint16_t start;
   int ret;
+  int i;
 
   /* Allocate instance data for this driver */
 
-  priv = (FAR struct telnet_dev_s *)malloc(sizeof(struct telnet_dev_s));
+  priv = (FAR struct telnet_dev_s *)zalloc(sizeof(struct telnet_dev_s));
   if (!priv)
     {
       nerr("ERROR: Failed to allocate the driver data structure\n");
@@ -944,6 +1068,9 @@ static int telnet_session(FAR struct telnet_session_s *session)
   priv->td_crefs     = 0;
   priv->td_pending   = 0;
   priv->td_offset    = 0;
+#ifdef HAVE_SIGNALS
+  priv->pid          = -1;
+#endif
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   priv->td_rows      = 25;
   priv->td_cols      = 80;
@@ -1031,6 +1158,38 @@ static int telnet_session(FAR struct telnet_session_s *session)
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   telnet_sendopt(priv, TELNET_DO, TELNET_NAWS);
 #endif
+
+  /* Has the I/O thread been started? */
+
+  if (g_telnet_io_kthread == (pid_t)0)
+    {
+      /* g_iosem is used for signaling and, hence, must not participate in
+       * priority inheritance.
+       */
+
+      sem_setprotocol(&g_iosem, SEM_PRIO_NONE);
+
+      /* Start the I/O thread */
+
+      g_telnet_io_kthread =
+        kthread_create("telnet_io",CONFIG_TELNET_IOTHREAD_PRIORITY,
+                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main, 0);
+    }
+
+  /* Save ourself in the list of Telnet client threads */
+
+  nxsem_wait(&g_clients_sem);
+  for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
+    {
+      if (g_telnet_clients[i] == NULL)
+        {
+          g_telnet_clients[i] = priv;
+          break;
+        }
+    }
+
+  nxsem_post(&g_clients_sem);
+  nxsem_post(&g_iosem);
 
   /* Return the path to the new telnet driver */
 
@@ -1123,15 +1282,114 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #endif
 
 /****************************************************************************
+ * Name: telnet_io_main
+ ****************************************************************************/
+
+static int telnet_io_main(int argc, FAR char** argv)
+{
+  FAR struct telnet_dev_s *priv;
+  FAR char *buffer;
+  int i;
+#ifdef HAVE_SIGNALS
+  int c;
+#endif
+  int ret;
+
+  while (1)
+    {
+      nxsem_reset(&g_iosem, 0);
+
+      /* Poll each client in the g_telnet_clients[] array. */
+
+      nxsem_wait(&g_clients_sem);
+      for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
+        {
+          if (g_telnet_clients[i] != 0)
+            {
+              priv              = g_telnet_clients[i];
+              priv->fds.sem     = &g_iosem;
+              priv->fds.events  = POLLIN | POLLHUP | POLLERR;
+              priv->fds.revents = 0;
+
+              (void)psock_poll(&priv->td_psock, &priv->fds, TRUE);
+            }
+        }
+
+      nxsem_post(&g_clients_sem);
+
+      /* Wait for any Telnet client to exit and close the Telenet driver. */
+
+      (void)nxsem_wait(&g_iosem);
+
+      /* Revisit each client in the g_telnet_clients[] array */
+
+      nxsem_wait(&g_clients_sem);
+      for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
+        {
+          if (g_telnet_clients[i] != 0)
+            {
+              /* Check for a pending poll() */
+
+              priv = g_telnet_clients[i];
+              if (priv->fds.revents & POLLIN)
+                {
+                  if (priv->td_pending < CONFIG_TELNET_RXBUFFER_SIZE)
+                    {
+                      buffer = priv->td_rxbuffer + priv->td_pending +
+                               priv->td_offset;
+
+                      ret = psock_recv(&priv->td_psock, buffer,
+                                       CONFIG_TELNET_RXBUFFER_SIZE -
+                                       priv->td_pending - priv->td_offset,
+                                       0);
+
+                      priv->td_pending += ret;
+
+#ifdef HAVE_SIGNALS
+                      /* Check if any of the received characters is a
+                       * control that should generate a signal.
+                       */
+
+                      for (c = 0; c < ret; c++)
+                        {
+                          telnet_check_ctrl_char(priv, buffer[c]);
+                        }
+#endif
+                    }
+                }
+
+              /* Check for driver events.. POLLHUP in particular */
+
+              if (priv->fds.events)
+                {
+                  psock_poll(&priv->td_psock, &priv->fds, FALSE);
+                  priv->fds.events = 0;
+                }
+
+              /* POLLHUP (or POLLERR) indicates that this session has terminated. */
+
+              if (priv->fds.revents & (POLLHUP | POLLERR))
+                {
+                  g_telnet_clients[i] = 0;
+                }
+            }
+        }
+
+      nxsem_post(&g_clients_sem);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: common_ioctl
  ****************************************************************************/
 
 static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-#ifdef CONFIG_TELNET_SUPPORT_NAWS
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
-#endif
+
   int ret;
 
   switch (cmd)
@@ -1145,8 +1403,8 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case SIOCTELNET:
       {
-         FAR struct telnet_session_s *session =
-           (FAR struct telnet_session_s *)((uintptr_t)arg);
+        FAR struct telnet_session_s *session =
+            (FAR struct telnet_session_s *)((uintptr_t) arg);
 
         if (session == NULL)
           {
@@ -1159,18 +1417,38 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-#ifdef CONFIG_TELNET_SUPPORT_NAWS
-    case TIOCGWINSZ:
+#ifdef HAVE_SIGNALS
+      /* Make the given terminal the controlling terminal of the calling process */
+
+    case TIOCSCTTY:
       {
-         FAR struct winsize *pW = (FAR struct winsize *)((uintptr_t)arg);
+        /* Check if the ISIG flag is set in the termios c_lflag to enable
+         * this feature.  This flag is set automatically for a serial console
+         * device.
+         */
 
-         /* Get row/col from the private data */
+        /* Save the PID of the recipient of the SIGINT signal. */
 
-         pW->ws_row = priv->td_rows;
-         pW->ws_col = priv->td_cols;
+        priv->pid = (pid_t)arg;
+        DEBUGASSERT((unsigned long)(priv->pid) == arg);
 
-         ret = OK;
+        ret = OK;
       }
+      break;
+#endif
+
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
+      case TIOCGWINSZ:
+        {
+          FAR struct winsize *pw = (FAR struct winsize *)((uintptr_t)arg);
+
+          /* Get row/col from the private data */
+
+          pw->ws_row = priv->td_rows;
+          pw->ws_col = priv->td_cols;
+
+          ret = OK;
+        }
       break;
 #endif
 
@@ -1179,6 +1457,7 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
+  UNUSED(priv);  /* Avoid warning if not used */
   return ret;
 }
 
