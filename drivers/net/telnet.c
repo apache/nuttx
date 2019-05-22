@@ -155,6 +155,7 @@ enum telnet_state_e
 struct telnet_dev_s
 {
   sem_t             td_exclsem;   /* Enforces mutually exclusive access */
+  sem_t             td_iosem;     /* I/O thread will notify that data is available */
   uint8_t           td_state;     /* (See telnet_state_e) */
   uint8_t           td_pending;   /* Number of valid, pending bytes in the rxbuffer */
   uint8_t           td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
@@ -820,6 +821,8 @@ static int telnet_close(FAR struct file *filep)
             }
         }
 
+      /* If the socket is still polling */
+
       if (priv->fds.events)
         {
           /* Tear down the poll */
@@ -830,7 +833,7 @@ static int telnet_close(FAR struct file *filep)
 
       nxsem_post(&g_clients_sem);
 
-      /* Notify the I/O thread */
+      /* Notify the I/O thread that a client was removed */
 
       nxsem_post(&g_iosem);
 
@@ -881,55 +884,49 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
   /* First, handle the case where there are still valid bytes left in the
    * I/O buffer from the last time that read was called.  NOTE:  Much of
    * what we read may be protocol stuff and may not correspond to user
-   * data.  Hence we need the loop and we need may need to call psock_recv()
+   * data.  Hence we need the loop and we need may need to wait for data
    * multiple times in order to get data that the client is interested in.
    */
 
   do
     {
-      if (priv->td_pending > 0)
+      if (priv->td_pending == 0)
         {
-          /* Process the buffered telnet data */
-
-          FAR const char *src = &priv->td_rxbuffer[priv->td_offset];
-          ret = telnet_receive(priv, src, priv->td_pending, buffer, len);
-        }
-
-      /* Read a buffer of data from the telnet client */
-
-      else
-        {
-          /* Test for non-blocking read */
-
           if (filep->f_oflags & O_NONBLOCK)
             {
               return 0;
             }
 
-          ret = psock_recv(&priv->td_psock, priv->td_rxbuffer,
-                           CONFIG_TELNET_RXBUFFER_SIZE, 0);
-
-          /* Did we receive anything? */
-
-          if (ret > 0)
+          do
             {
-              /* Yes.. Process the newly received telnet data */
+              /* Wait for new data (or error) */
 
-              telnet_dumpbuffer("Received buffer", priv->td_rxbuffer, ret);
-              ret = telnet_receive(priv, priv->td_rxbuffer, ret, buffer, len);
-           }
+              ret = nxsem_wait(&priv->td_iosem);
+            }
+          while (ret == -EINTR);
 
-          /* Otherwise the peer closed the connection (ret == 0) or an error
-           * occurred (ret < 0).
-           */
+          /* poll fds.revents contains last poll status in case of error */
 
-          else
+          if ((priv->fds.revents & (POLLHUP | POLLERR)) != 0)
             {
-              break;
+              return -EPIPE;
             }
         }
+
+      /* Take exclusive access to data buffer */
+
+      (void)nxsem_wait(&priv->td_exclsem);
+
+      /* Process the buffered telnet data */
+
+      FAR const char *src = &priv->td_rxbuffer[priv->td_offset];
+      ret = telnet_receive(priv, src, priv->td_pending, buffer, len);
+
+      nxsem_post(&priv->td_exclsem);
     }
   while (ret == 0);
+
+  return ret;
 
   /* Returned Value:
    *
@@ -1053,6 +1050,13 @@ static int telnet_session(FAR struct telnet_session_s *session)
   /* Initialize the allocated driver instance */
 
   nxsem_init(&priv->td_exclsem, 0, 1);
+  nxsem_init(&priv->td_iosem, 0, 0);
+
+  /* td_iosem is used for signaling and, hence, must not participate in
+   * priority inheritance.
+   */
+
+  sem_setprotocol(&priv->td_iosem, SEM_PRIO_NONE);
 
   priv->td_state     = STATE_NORMAL;
   priv->td_crefs     = 0;
@@ -1162,7 +1166,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
       /* Start the I/O thread */
 
       g_telnet_io_kthread =
-        kthread_create("telnet_io",CONFIG_TELNET_IOTHREAD_PRIORITY,
+        kthread_create("telnet_io", CONFIG_TELNET_IOTHREAD_PRIORITY,
                        CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main, 0);
     }
 
@@ -1305,7 +1309,9 @@ static int telnet_io_main(int argc, FAR char** argv)
 
       nxsem_post(&g_clients_sem);
 
-      /* Wait for any Telnet client to exit and close the Telenet driver. */
+      /* Wait for any Telnet connect/disconnect events to
+       * to include/remove client sockets from polling
+       */
 
       (void)nxsem_wait(&g_iosem);
 
@@ -1323,6 +1329,9 @@ static int telnet_io_main(int argc, FAR char** argv)
                 {
                   if (priv->td_pending < CONFIG_TELNET_RXBUFFER_SIZE)
                     {
+                      /* Take exclusive access to data buffer */
+
+                      nxsem_wait(&priv->td_exclsem);
                       buffer = priv->td_rxbuffer + priv->td_pending +
                                priv->td_offset;
 
@@ -1332,6 +1341,11 @@ static int telnet_io_main(int argc, FAR char** argv)
                                        0);
 
                       priv->td_pending += ret;
+                      nxsem_post(&priv->td_exclsem);
+
+                      /* Notify the client thread that data is available */
+
+                      nxsem_post(&priv->td_iosem);
 
 #ifdef HAVE_SIGNALS
                       /* Check if any of the received characters is a
@@ -1346,7 +1360,7 @@ static int telnet_io_main(int argc, FAR char** argv)
                     }
                 }
 
-              /* Check for driver events.. POLLHUP in particular */
+              /* If poll was setup previously (events != 0), tear it down */
 
               if (priv->fds.events)
                 {
@@ -1354,11 +1368,17 @@ static int telnet_io_main(int argc, FAR char** argv)
                   priv->fds.events = 0;
                 }
 
-              /* POLLHUP (or POLLERR) indicates that this session has terminated. */
+              /* POLLHUP (or POLLERR) indicates that this session has
+               * terminated.
+               */
 
               if (priv->fds.revents & (POLLHUP | POLLERR))
                 {
                   g_telnet_clients[i] = 0;
+
+                  /* notify the client thread */
+
+                  nxsem_post(&priv->td_iosem);
                 }
             }
         }
