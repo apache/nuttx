@@ -90,7 +90,7 @@ static const struct file_operations g_batteryops =
   bat_gauge_read,
   bat_gauge_write,
   NULL,
-  bat_gauge_ioctl.
+  bat_gauge_ioctl,
   NULL
 };
 
