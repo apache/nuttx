@@ -1,18 +1,11 @@
 <html>
 <head>
 <title>NuttX</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body background="backgd.gif">
-<hr><hr>
-<table width ="100%">
-  <tr align="center" bgcolor="#e4e4e4">
-    <td>
-      <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 19, 2019</p>
-    </td>
-  </tr>
-</table>
-<hr><hr>
+<div class="container">
+<div class="toc">
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
@@ -21,7 +14,7 @@
   </tr>
 </table>
 
-<center><table width ="80%">
+<table width ="80%" class="toc_table">
 <tr>
 <td>
 <table>
@@ -102,7 +95,20 @@
 </table>
 </td>
 </tr>
-</table></center>
+</table>
+</div>
+
+<div class="main">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
+      <p>Last Updated: May 19, 2019</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -7108,5 +7114,7 @@ if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
 </p>
 </small>
 
+</div>
+</div>
 </body>
 </html>

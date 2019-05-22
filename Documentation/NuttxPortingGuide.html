@@ -2,22 +2,13 @@
 <head>
 <title>NuttX Porting Guide</title>
 <meta name="author" content="Gregory Nutt">
+<link rel="stylesheet" href="style.css">
 </head>
 
-<body background="backgd.gif">
-<hr><hr>
-<table width ="100%">
-  <tr align="center" bgcolor="#e4e4e4">
-    <td>
-      <h1><big><font color="#3c34ec">
-        <i>NuttX RTOS Porting Guide</i>
-      </font></big></h1>
-      <p>Last Updated: February 18, 2019</p>
-    </td>
-  </tr>
-</table>
-<hr><hr>
+<body>
 
+<div class="container">
+<div class="toc">
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
@@ -238,6 +229,22 @@
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
   <a href="#apndxtrademarks">Appendix B:  Trademarks</a>
 </ul>
+</div>
+
+<div class="main">
+
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec">
+        <i>NuttX RTOS Porting Guide</i>
+      </font></big></h1>
+      <p>Last Updated: February 18, 2019</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -7296,6 +7303,9 @@ void (*notify)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate
   NOTE: NuttX is <i>not</i> licensed to use the POSIX trademark.  NuttX uses the POSIX
   standard as a development guideline only.
 </p>
+
+</div>
+</div>
 
 </body>
 </html>
