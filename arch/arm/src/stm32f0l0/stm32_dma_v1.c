@@ -294,7 +294,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
     }
   else
 #if STM32_NDMA > 1
-  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
+  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
     {
       chndx = irq - STM32_IRQ_DMA2CH1 + DMA1_NCHANNELS;
     }
