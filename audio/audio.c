@@ -123,7 +123,7 @@ static const struct file_operations g_audioops =
   audio_read,  /* read */
   audio_write, /* write */
   NULL,        /* seek */
-  audio_ioctl  /* ioctl */
+  audio_ioctl, /* ioctl */
   NULL         /* poll */
 };
 
