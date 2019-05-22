@@ -80,7 +80,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
- 
+
 /* Configuration ************************************************************/
 
 /* This determines how often the USB keyboard will be polled in units of
@@ -344,8 +344,8 @@ static const struct usbhost_id_s g_hidkbd_id =
   USB_CLASS_HID,            /* base     */
   USBHID_SUBCLASS_BOOTIF,   /* subclass */
   USBHID_PROTOCOL_KEYBOARD, /* proto    */
-  NULL,                     /* vid      */
-  NULL                      /* pid      */
+  0,                        /* vid      */
+  0                         /* pid      */
 };
 
 /* This is the USB host storage class's registry entry */

@@ -78,7 +78,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
- 
+
 /* Configuration ************************************************************/
 
 /* Worker thread is needed, unfortunately, to handle some cornercase failure
@@ -396,8 +396,8 @@ static const const struct usbhost_id_s g_hidmouse_id =
   USB_CLASS_HID,           /* base     */
   USBHID_SUBCLASS_BOOTIF,  /* subclass */
   USBHID_PROTOCOL_MOUSE,   /* proto    */
-  NULL,                    /* vid      */
-  NULL                     /* pid      */
+  0,                       /* vid      */
+  0                        /* pid      */
 };
 
 /* This is the USB host storage class's registry entry */
