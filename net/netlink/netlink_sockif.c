@@ -70,10 +70,8 @@ static int  netlink_connect(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
 static int  netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               FAR socklen_t *addrlen, FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
-#endif
 static ssize_t netlink_send(FAR struct socket *psock,
               FAR const void *buf, size_t len, int flags);
 static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -99,9 +97,7 @@ const struct sock_intf_s g_netlink_sockif =
   netlink_listen,       /* si_listen */
   netlink_connect,      /* si_connect */
   netlink_accept,       /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   netlink_poll,         /* si_poll */
-#endif
   netlink_send,         /* si_send */
   netlink_sendto,       /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -426,14 +422,12 @@ static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
 #warning Missing logic for NETLINK poll
   return -EOPNOTSUPP;
 }
-#endif
 
 /****************************************************************************
  * Name: netlink_send

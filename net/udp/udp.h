@@ -67,7 +67,7 @@
 
 /* Conditions for support UDP poll/select operations */
 
-#if !defined(CONFIG_DISABLE_POLL) && defined(CONFIG_NET_UDP_READAHEAD)
+#ifdef CONFIG_NET_UDP_READAHEAD
 #  define HAVE_UDP_POLL
 #endif
 

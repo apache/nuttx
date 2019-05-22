@@ -797,10 +797,8 @@ static const struct file_operations hrtim_fops =
   NULL,               /* read */
   NULL,               /* write */
   NULL,               /* seek */
-  stm32_hrtim_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL              /* poll */
-#endif
+  stm32_hrtim_ioctl,  /* ioctl */
+  NULL                /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL              /* unlink */
 #endif

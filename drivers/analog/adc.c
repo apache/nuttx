@@ -76,9 +76,7 @@ static int     adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int     adc_receive(FAR struct adc_dev_s *dev, uint8_t ch,
                            int32_t data);
 static void    adc_notify(FAR struct adc_dev_s *dev);
-#ifndef CONFIG_DISABLE_POLL
 static int     adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -91,10 +89,8 @@ static const struct file_operations g_adc_fops =
   adc_read,     /* read */
   0,            /* write */
   0,            /* seek */
-  adc_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , adc_poll    /* poll */
-#endif
+  adc_ioctl,    /* ioctl */
+  adc_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif
@@ -461,7 +457,6 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
  * Name: adc_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void adc_pollnotify(FAR struct adc_dev_s *dev, uint32_t type)
 {
   int i;
@@ -476,7 +471,6 @@ static void adc_pollnotify(FAR struct adc_dev_s *dev, uint32_t type)
         }
     }
 }
-#endif
 
 /****************************************************************************
  * Name: adc_notify
@@ -499,16 +493,13 @@ static void adc_notify(FAR struct adc_dev_s *dev)
    * then wake them up now.
    */
 
-#ifndef CONFIG_DISABLE_POLL
    adc_pollnotify(dev, POLLIN);
-#endif
 }
 
 /************************************************************************************
  * Name: adc_poll
  ************************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 {
   FAR struct inode     *inode = filep->f_inode;
@@ -581,7 +572,6 @@ return_with_irqdisabled:
   leave_critical_section(flags);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

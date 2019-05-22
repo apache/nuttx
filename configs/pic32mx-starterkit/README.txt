@@ -1081,7 +1081,6 @@ Where <subdir> is one of the following:
        c. This example can support an FTP server.  In order to build in FTP server
           support simply add the following to the Nuttx configuration file:
 
-         CONFIG_DISABLE_POLL=n
          CONFIG_NETUTILS_FTPD=y
          CONFIG_EXAMPLES_FTPD=y
 

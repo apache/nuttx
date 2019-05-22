@@ -126,10 +126,8 @@ static ssize_t hts221_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t hts221_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
-#endif
 
 /****************************************************************************
 * Private Types
@@ -142,9 +140,7 @@ struct hts221_dev_s
   hts221_config_t *config;
   sem_t devsem;
   volatile bool int_pending;
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_HTS221_NPOLLWAITERS];
-#endif
   struct
   {
     int16_t t0_out;
@@ -169,10 +165,8 @@ static const struct file_operations g_humidityops =
   hts221_read,   /* read */
   hts221_write,  /* write */
   NULL,          /* seek */
-  hts221_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , hts221_poll  /* poll */
-#endif
+  hts221_ioctl,  /* ioctl */
+  hts221_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -1056,7 +1050,6 @@ static int hts221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-#ifndef CONFIG_DISABLE_POLL
 static bool hts221_sample(FAR struct hts221_dev_s *priv)
 {
   int ret;
@@ -1188,7 +1181,6 @@ out:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 static int hts221_int_handler(int irq, FAR void *context, FAR void *arg)
 {
@@ -1198,9 +1190,7 @@ static int hts221_int_handler(int irq, FAR void *context, FAR void *arg)
 
   priv->int_pending = true;
   hts221_dbg("Hts221 interrupt\n");
-#ifndef CONFIG_DISABLE_POLL
   hts221_notify(priv);
-#endif
 
   return OK;
 }

@@ -274,12 +274,10 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
 {
   return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_pending));
 }
-#endif
 
 /****************************************************************************
  * Name: tcp_backlogremove

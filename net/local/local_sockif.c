@@ -79,10 +79,8 @@ static int        local_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
 #endif
-#ifndef CONFIG_DISABLE_POLL
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    local_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -105,9 +103,7 @@ const struct sock_intf_s g_local_sockif =
   local_listen,      /* si_listen */
   local_connect,     /* si_connect */
   local_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   local_poll,        /* si_poll */
-#endif
   local_send,        /* si_send */
   local_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -638,7 +634,6 @@ static int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                       bool setup)
 {
@@ -661,7 +656,6 @@ static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
     }
 #endif /* HAVE_LOCAL_POLL */
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: local_send

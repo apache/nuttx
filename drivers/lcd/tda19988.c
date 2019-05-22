@@ -162,10 +162,8 @@ static ssize_t tda19988_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static off_t   tda19988_seek(FAR struct file *filep, off_t offset, int whence);
 static int     tda19988_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     tda19988_unlink(FAR struct inode *inode);
 #endif
@@ -190,10 +188,8 @@ static const struct file_operations tda19988_fops =
   tda19988_read,     /* read */
   tda19988_write,    /* write */
   tda19988_seek,     /* seek */
-  tda19988_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , tda19988_poll    /* poll */
-#endif
+  tda19988_ioctl,    /* ioctl */
+  tda19988_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , tda19988_unlink  /* unlink */
 #endif
@@ -1176,7 +1172,6 @@ static int tda19988_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
@@ -1212,7 +1207,6 @@ static int tda19988_poll(FAR struct file *filep, FAR struct pollfd *fds,
   nxsem_post(&priv->exclsem);
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: tda19988_unlink

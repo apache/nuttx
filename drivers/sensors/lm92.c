@@ -117,10 +117,8 @@ static const struct file_operations g_lm92fops =
   lm92_read,
   lm92_write,
   NULL,
-  lm92_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lm92_ioctl,
+  NULL
 };
 
 /****************************************************************************

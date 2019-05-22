@@ -302,9 +302,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
 static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -319,10 +317,8 @@ static const struct file_operations g_slcdops =
   slcd_read,     /* read */
   slcd_write,    /* write */
   0,             /* seek */
-  slcd_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , slcd_poll    /* poll */
-#endif
+  slcd_ioctl,    /* ioctl */
+  slcd_poll      /* poll */
 };
 
 /* LCD state data */
@@ -1434,7 +1430,6 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: slcd_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1451,7 +1446,6 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -496,9 +496,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Name: usrsock_sendto

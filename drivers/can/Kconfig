@@ -119,7 +119,6 @@ config CAN_LOOPBACK
 config CAN_NPOLLWAITERS
 	int "Number of poll waiters"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		The maximum number of threads that may be waiting on the
 		poll method.

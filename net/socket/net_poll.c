@@ -46,8 +46,6 @@
 
 #include "socket/socket.h"
 
-#if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_POLL)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -119,4 +117,3 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup)
   return psock_poll(psock, fds, setup);
 }
 
-#endif /* CONFIG_NET && !CONFIG_DISABLE_POLL */

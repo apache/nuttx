@@ -976,10 +976,6 @@ Where <subdir> is one of the following:
        CONFIG_NETUTILS_FTPD=y
        CONFIG_EXAMPLES_FTPD=y
 
-       And enable poll() support in the NuttX configuration file:
-
-       CONFIG_DISABLE_POLL=n
-
     8. This example supports the watchdog timer test (apps/examples/watchdog)
        but this must be manually enabled by selecting:
 

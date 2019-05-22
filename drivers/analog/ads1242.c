@@ -122,10 +122,8 @@ static const struct file_operations g_ads1242_fops =
   ads1242_read,
   ads1242_write,
   NULL,
-  ads1242_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  ads1242_ioctl,
+  NULL
 };
 
 /****************************************************************************

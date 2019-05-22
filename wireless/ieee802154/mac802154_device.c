@@ -158,10 +158,8 @@ static const struct file_operations mac802154dev_fops =
   mac802154dev_read , /* read */
   mac802154dev_write, /* write */
   NULL,               /* seek */
-  mac802154dev_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL              /* poll */
-#endif
+  mac802154dev_ioctl, /* ioctl */
+  NULL                /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL               /* unlink */
 #endif

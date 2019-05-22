@@ -60,11 +60,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef HAVE_LOCAL_POLL
-#ifndef CONFIG_DISABLE_POLL
-#  define HAVE_LOCAL_POLL 1
-#  define LOCAL_ACCEPT_NPOLLWAITERS 2
-#endif
+#define HAVE_LOCAL_POLL 1
+#define LOCAL_ACCEPT_NPOLLWAITERS 2
 
 /* Packet format in FIFO:
  *

@@ -72,7 +72,7 @@ config STANDARD_SERIAL
 config SERIAL_NPOLLWAITERS
 	int "Number of poll threads"
 	default 2
-	depends on !DISABLE_POLL && STANDARD_SERIAL
+	depends on STANDARD_SERIAL
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2

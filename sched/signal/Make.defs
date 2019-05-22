@@ -41,13 +41,10 @@ CSRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
 CSRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
 CSRCS += sig_notification.c sig_cleanup.c sig_dispatch.c sig_deliver.c
 CSRCS += sig_pause.c sig_nanosleep.c sig_usleep.c sig_sleep.c
+CSRCS += sig_ppoll.c sig_pselect.c
 
 ifeq ($(CONFIG_SIG_DEFAULT),y)
 CSRCS += sig_default.c
-endif
-
-ifneq ($(CONFIG_DISABLE_POLL),y)
-CSRCS += sig_ppoll.c sig_pselect.c
 endif
 
 # Include signal build support

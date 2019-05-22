@@ -96,10 +96,8 @@ static const struct file_operations fb_fops =
   fb_read,       /* read */
   fb_write,      /* write */
   fb_seek,       /* seek */
-  fb_ioctl       /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
-#endif
+  fb_ioctl,      /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif

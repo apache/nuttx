@@ -56,8 +56,6 @@
 
 #include "inode/inode.h"
 
-#ifndef CONFIG_DISABLE_POLL
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -542,4 +540,3 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   return count;
 }
 
-#endif /* CONFIG_DISABLE_POLL */

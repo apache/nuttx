@@ -74,10 +74,8 @@ static int        icmp_connect(FAR struct socket *psock,
 static int        icmp_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        icmp_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    icmp_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static int        icmp_close(FAR struct socket *psock);
@@ -97,9 +95,7 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_listen,      /* si_listen */
   icmp_connect,     /* si_connect */
   icmp_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   icmp_netpoll,     /* si_poll */
-#endif
   icmp_send,        /* si_send */
   icmp_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -446,7 +442,6 @@ int icmp_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -469,7 +464,6 @@ static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
   return -ENOSYS;
 #endif /* CONFIG_MM_IOB */
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: icmp_send

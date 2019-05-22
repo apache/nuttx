@@ -353,9 +353,7 @@ static ssize_t mx7_debug_write(FAR struct file *filep,
 
 static const struct file_operations g_mx7_fops =
 {
-#ifndef CONFIG_DISABLE_POLL
   .poll   = NULL,
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = NULL,
 #endif
@@ -372,9 +370,7 @@ static const struct file_operations g_mx7_fops =
 
 static const struct file_operations g_mx7_debug_fops =
 {
-#ifndef CONFIG_DISABLE_POLL
   .poll   = NULL,
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = NULL,
 #endif

@@ -165,10 +165,8 @@ static const struct file_operations g_lsm330a_fops =
   lsm330acl_read,
   lsm330acl_write,
   lsm330acl_seek,
-  lsm330_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lsm330_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif
@@ -181,10 +179,8 @@ static const struct file_operations g_lsm330g_fops =
   lsm330gyro_read,
   lsm330gyro_write,
   lsm330gyro_seek,
-  lsm330_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lsm330_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

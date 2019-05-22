@@ -125,11 +125,9 @@ static const struct file_operations g_zcops =
   zc_close,  /* close */
   zc_read,   /* read */
   zc_write,  /* write */
-  0,         /* seek */
-  zc_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
-#endif
+  NULL,      /* seek */
+  zc_ioctl,  /* ioctl */
+  NULL       /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , 0        /* unlink */
 #endif

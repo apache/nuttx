@@ -138,13 +138,11 @@ static const struct file_operations g_mfrc522fops =
   mfrc522_close,
   mfrc522_read,
   mfrc522_write,
-  0,
-  mfrc522_ioctl
-#ifndef CONFIG_DISABLE_POLL
-    , 0
-#endif
+  NULL,
+  mfrc522_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    , 0
+  , NULL
 #endif
 };
 

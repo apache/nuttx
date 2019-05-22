@@ -98,11 +98,9 @@ static const struct file_operations g_qeops =
   qe_close, /* close */
   qe_read,  /* read */
   qe_write, /* write */
-  0,         /* seek */
-  qe_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
-#endif
+  NULL,     /* seek */
+  qe_ioctl, /* ioctl */
+  NULL      /* poll */
 };
 
 /****************************************************************************

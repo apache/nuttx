@@ -79,10 +79,8 @@ static int        inet_connect(FAR struct socket *psock,
 static int        inet_accept(FAR struct socket *psock,
                     FAR struct sockaddr *addr, FAR socklen_t *addrlen,
                     FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        inet_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags);
 static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -108,9 +106,7 @@ static const struct sock_intf_s g_inet_sockif =
   inet_listen,      /* si_listen */
   inet_connect,     /* si_connect */
   inet_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   inet_poll,        /* si_poll */
-#endif
   inet_send,        /* si_send */
   inet_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -1042,7 +1038,6 @@ static inline int inet_pollteardown(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                      bool setup)
 {
@@ -1068,7 +1063,6 @@ static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
     }
 #endif /* HAVE_TCP_POLL || !HAVE_UDP_POLL */
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: inet_send

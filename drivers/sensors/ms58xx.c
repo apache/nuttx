@@ -180,10 +180,8 @@ static const struct file_operations g_fops =
   ms58xx_read,
   ms58xx_write,
   NULL,
-  ms58xx_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  ms58xx_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

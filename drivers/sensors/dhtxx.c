@@ -133,10 +133,8 @@ static const struct file_operations g_dhtxxfops =
   dhtxx_read,   /* read */
   dhtxx_write,  /* write */
   NULL,         /* seek */
-  dhtxx_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL        /* poll */
-#endif
+  dhtxx_ioctl,  /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif

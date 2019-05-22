@@ -79,12 +79,9 @@ const struct file_operations g_nxterm_drvrops =
   nxterm_close, /* close */
   nxterm_read,  /* read */
   nxterm_write, /* write */
-  0,            /* seek */
-  nxterm_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  ,
+  NULL,         /* seek */
+  nxterm_ioctl, /* ioctl */
   nxterm_poll   /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   ,
   nxterm_unlink /* unlink */
@@ -97,14 +94,11 @@ const struct file_operations g_nxterm_drvrops =
 {
   nxterm_open,  /* open */
   nxterm_close, /* close */
-  0,            /* read */
+  NULL,         /* read */
   nxterm_write, /* write */
-  0,            /* seek */
-  nxterm_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  ,
-  0             /* poll */
-#endif
+  NULL,         /* seek */
+  nxterm_ioctl, /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   ,
   nxterm_unlink /* unlink */

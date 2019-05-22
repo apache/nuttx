@@ -92,11 +92,9 @@ static const struct file_operations dac_fops =
   dac_close,
   dac_read,
   dac_write,
-  0,
-  dac_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , 0
-#endif
+  NULL,
+  dac_ioctl,
+  NULL
 };
 
 /****************************************************************************

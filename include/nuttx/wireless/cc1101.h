@@ -305,9 +305,7 @@ struct cc1101_dev_s
   sem_t sem_rx_buffer;    /* Protect access to rx fifo */
   sem_t sem_rx;           /* Wait for availability of received data */
   sem_t sem_tx;           /* Wait for availability of send data */
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd *pfd; /* Polled file descr  (or NULL if any) */
-#endif
 };
 
 /* The RF Settings includes only those fields required to configure

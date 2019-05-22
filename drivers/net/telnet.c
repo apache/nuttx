@@ -100,10 +100,6 @@
 #  define HAVE_SIGNALS
 #endif
 
-#ifdef CONFIG_DISABLE_POLL
-#  error poll() is required by this driver (de-select CONFIG_DISABLE_POLL)
-#endif
-
 /* Telnet protocol stuff ****************************************************/
 
 #define ISO_nl                0x0a
@@ -219,10 +215,8 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
                  size_t len);
 static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
                  size_t len);
-#ifndef CONFIG_DISABLE_POLL
 static int     telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
-#endif
 
 /* Telnet session creation */
 
@@ -248,10 +242,8 @@ static const struct file_operations g_telnet_fops =
   telnet_read,   /* read */
   telnet_write,  /* write */
   NULL,          /* seek */
-  common_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , telnet_poll  /* poll */
-#endif
+  common_ioctl,  /* ioctl */
+  telnet_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -264,10 +256,8 @@ static const struct file_operations g_factory_fops =
   factory_read,  /* read */
   factory_write, /* write */
   NULL,          /* seek */
-  common_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , telnet_poll  /* poll */
-#endif
+  common_ioctl,  /* ioctl */
+  telnet_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -1245,7 +1235,6 @@ static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -1279,7 +1268,6 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return psock_poll(psock, fds, setup);
 }
-#endif
 
 /****************************************************************************
  * Name: telnet_io_main

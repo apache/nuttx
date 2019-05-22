@@ -93,10 +93,7 @@ struct usrsockdev_s
 
   FAR struct usrsock_conn_s *datain_conn; /* Connection instance to receive
                                            * data buffers. */
-
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *pollfds[CONFIG_NET_USRSOCKDEV_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -118,10 +115,8 @@ static int usrsockdev_open(FAR struct file *filep);
 
 static int usrsockdev_close(FAR struct file *filep);
 
-#ifndef CONFIG_DISABLE_POLL
 static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -134,10 +129,8 @@ static const struct file_operations g_usrsockdevops =
   usrsockdev_read,    /* read */
   usrsockdev_write,   /* write */
   usrsockdev_seek,    /* seek */
-  NULL                /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , usrsockdev_poll   /* poll */
-#endif
+  NULL,               /* ioctl */
+  usrsockdev_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL              /* unlink */
 #endif
@@ -345,7 +338,6 @@ static bool usrsockdev_is_opened(FAR struct usrsockdev_s *dev)
 static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
                                   pollevent_t eventset)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
   for (i = 0; i < ARRAY_SIZE(dev->pollfds); i++)
     {
@@ -360,7 +352,6 @@ static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
             }
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1081,7 +1072,6 @@ static int usrsockdev_close(FAR struct file *filep)
  * Name: usrsockdev_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup)
 {
@@ -1176,7 +1166,6 @@ errout:
   usrsockdev_semgive(&dev->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -51,7 +51,6 @@ config TSC2007_MULTIPLE
 config TSC2007_NPOLLWAITERS
 	int "Number TSC2007 poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
@@ -125,7 +124,6 @@ endif # FT5X06_SINGLEPOINT
 config FT5X06_NPOLLWAITERS
 	int "Number FT5336/FT5x06 poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
@@ -151,7 +149,6 @@ config ADS7843E_MULTIPLE
 config ADS7843E_NPOLLWAITERS
 	int "Number poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
@@ -246,7 +243,6 @@ config MXT_THRESHY
 config MXT_NPOLLWAITERS
 	int "Number poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
@@ -320,7 +316,6 @@ config STMPE811_MULTIPLE
 config STMPE811_NPOLLWAITERS
 	int "Number poll waiters"
 	default 4
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
@@ -459,7 +454,6 @@ config BUTTONS_LOWER
 config BUTTONS_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
-	depends on !DISABLE_POLL
 
 endif # BUTTONS
 
@@ -478,7 +472,6 @@ if DJOYSTICK
 config DJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
-	depends on !DISABLE_POLL
 
 endif # DJOYSTICK
 
@@ -497,7 +490,6 @@ if AJOYSTICK
 config AJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
-	depends on !DISABLE_POLL
 
 endif # AJOYSTICK
 
@@ -516,6 +508,5 @@ if INPUT_NUNCHUCK
 config NUNCHUCK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
-	depends on !DISABLE_POLL
 
 endif # INPUT_NUNCHUCK

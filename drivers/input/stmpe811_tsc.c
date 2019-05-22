@@ -125,10 +125,8 @@ static ssize_t  stmpe811_read(FAR struct file *filep, FAR char *buffer,
                   size_t len);
 static int      stmpe811_ioctl(FAR struct file *filep, int cmd,
                   unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int      stmpe811_poll(FAR struct file *filep, struct pollfd *fds,
                   bool setup);
-#endif
 
 /* Initialization logic */
 
@@ -145,12 +143,10 @@ static const struct file_operations g_stmpe811fops =
   stmpe811_open,    /* open */
   stmpe811_close,   /* close */
   stmpe811_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  stmpe811_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , stmpe811_poll   /* poll */
-#endif
+  NULL,             /* write */
+  NULL,             /* seek */
+  stmpe811_ioctl,   /* ioctl */
+  stmpe811_poll     /* poll */
 };
 
 /****************************************************************************
@@ -167,9 +163,7 @@ static const struct file_operations g_stmpe811fops =
 
 static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -190,7 +184,6 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_STMPE811_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -201,7 +194,6 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -644,7 +636,6 @@ static int stmpe811_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
@@ -733,7 +724,6 @@ errout:
   nxsem_post(&priv->exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: stmpe811_timeoutworker

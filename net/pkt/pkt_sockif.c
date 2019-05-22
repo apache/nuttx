@@ -76,10 +76,8 @@ static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen, FAR struct socket *newsock);
-#ifndef CONFIG_DISABLE_POLL
 static int        pkt_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-#endif
 static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
                    size_t len, int flags);
 static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
@@ -102,9 +100,7 @@ const struct sock_intf_s g_pkt_sockif =
   pkt_listen,      /* si_listen */
   pkt_connect,     /* si_connect */
   pkt_accept,      /* si_accept */
-#ifndef CONFIG_DISABLE_POLL
   pkt_poll_local,  /* si_poll */
-#endif
   pkt_send,        /* si_send */
   pkt_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -517,13 +513,11 @@ int pkt_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
                           bool setup)
 {
   return -ENOSYS;
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: pkt_send

@@ -173,9 +173,7 @@ struct nrf24l01_dev_s
 
   uint8_t nopens;           /* Number of times the device has been opened */
   sem_t devsem;             /* Ensures exclusive access to this structure */
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd *pfd;   /* Polled file descr  (or NULL if any) */
-#endif
 };
 
 /****************************************************************************
@@ -240,10 +238,8 @@ static ssize_t nrf24l01_write(FAR struct file *filep,
              FAR const char *buffer, size_t buflen);
 static int nrf24l01_ioctl(FAR struct file *filep, int cmd,
              unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
              bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -256,10 +252,8 @@ static const struct file_operations nrf24l01_fops =
   nrf24l01_read,    /* read */
   nrf24l01_write,   /* write */
   NULL,             /* seek */
-  nrf24l01_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , nrf24l01_poll   /* poll */
-#endif
+  nrf24l01_ioctl,   /* ioctl */
+  nrf24l01_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */
 #endif
@@ -671,9 +665,7 @@ static void nrf24l01_worker(FAR void *arg)
       /* Put CE low */
 
       bool ce = nrf24l01_chipenable(dev, false);
-#ifndef CONFIG_DISABLE_POLL
       bool has_data = false;
-#endif
 
       wlinfo("RX_DR is set!\n");
 
@@ -722,9 +714,7 @@ static void nrf24l01_worker(FAR void *arg)
           nrf24l01_access(dev, MODE_READ, NRF24L01_R_RX_PAYLOAD, buf, pktlen);
 
           fifoput(dev, pipeno, buf, pktlen);
-#ifndef CONFIG_DISABLE_POLL
           has_data = true;
-#endif
           nxsem_post(&dev->sem_rx);  /* Wake-up any thread waiting in recv */
 
           status = nrf24l01_readreg(dev, NRF24L01_FIFO_STATUS, &fifo_status,
@@ -735,7 +725,6 @@ static void nrf24l01_worker(FAR void *arg)
         }
       while ((fifo_status & NRF24L01_RX_EMPTY) == 0);
 
-#ifndef CONFIG_DISABLE_POLL
       if (dev->pfd && has_data)
         {
           dev->pfd->revents |= POLLIN;  /* Data available for input */
@@ -743,7 +732,6 @@ static void nrf24l01_worker(FAR void *arg)
           wlinfo("Wake up polled fd\n");
           nxsem_post(dev->pfd->sem);
         }
-#endif
 
       /* Clear interrupt sources */
 
@@ -1390,7 +1378,6 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: nrf24l01_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
@@ -1470,7 +1457,6 @@ errout:
   return ret;
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: nrf24l01_unregister

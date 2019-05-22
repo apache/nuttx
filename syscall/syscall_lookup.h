@@ -204,12 +204,10 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(aio_fsync,                2, STUB_aio_fsync)
   SYSCALL_LOOKUP(aio_cancel,               2, STUB_aio_cancel)
 #endif
-#ifndef CONFIG_DISABLE_POLL
   SYSCALL_LOOKUP(poll,                     3, STUB_poll)
   SYSCALL_LOOKUP(select,                   5, STUB_select)
   SYSCALL_LOOKUP(ppoll,                    4, STUB_ppoll)
   SYSCALL_LOOKUP(pselect,                  6, STUB_pselect)
-#endif
 #ifdef CONFIG_NETDEV_IFINDEX
   SYSCALL_LOOKUP(if_indextoname,           2, STUB_if_indextoname)
   SYSCALL_LOOKUP(if_nametoindex,           1, STUB_if_nametoindex)

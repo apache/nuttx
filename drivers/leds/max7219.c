@@ -102,11 +102,9 @@ static const struct file_operations g_max7219fops =
   max7219_close,  /* close */
   max7219_read,   /* read */
   max7219_write,  /* write */
-  0,              /* seek */
-  0,              /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,              /* poll */
-#endif
+  NULL,           /* seek */
+  NULL,           /* ioctl */
+  NULL,           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL            /* unlink */
 #endif

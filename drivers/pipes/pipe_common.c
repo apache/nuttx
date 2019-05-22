@@ -117,7 +117,6 @@ static void pipecommon_semtake(FAR sem_t *sem)
  * Name: pipecommon_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
                                   pollevent_t eventset)
 {
@@ -151,9 +150,6 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
         }
     }
 }
-#else
-#  define pipecommon_pollnotify(dev,event)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -665,7 +661,6 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
  * Name: pipecommon_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
@@ -783,7 +778,6 @@ errout:
   nxsem_post(&dev->d_bfsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: pipecommon_ioctl

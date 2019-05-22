@@ -60,8 +60,8 @@
  * Name: nxterm_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
-static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t eventset)
+static void nxterm_pollnotify(FAR struct nxterm_state_s *priv,
+                              pollevent_t eventset)
 {
   FAR struct pollfd *fds;
   irqstate_t flags;
@@ -85,9 +85,6 @@ static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t event
       leave_critical_section(flags);
     }
 }
-#else
-#  define nxterm_pollnotify(priv,event)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -240,12 +237,10 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
 errout_without_sem:
 
-#ifndef CONFIG_DISABLE_POLL
   if (nread > 0)
     {
       nxterm_pollnotify(priv, POLLOUT);
     }
-#endif
 
   /* Return the number of characters actually read */
 
@@ -256,7 +251,6 @@ errout_without_sem:
  * Name: nxterm_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -355,7 +349,6 @@ errout:
   nxterm_sempost(priv);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: nxterm_kbdin
@@ -466,9 +459,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 
       /* Notify all poll/select waiters that they can write to the FIFO */
 
-#ifndef CONFIG_DISABLE_POLL
       nxterm_pollnotify(priv, POLLIN);
-#endif
       sched_unlock();
     }
 

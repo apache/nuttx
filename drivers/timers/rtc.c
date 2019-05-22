@@ -135,16 +135,14 @@ static const struct file_operations rtc_fops =
   rtc_open,      /* open */
   rtc_close,     /* close */
 #else
-  0,             /* open */
-  0,             /* close */
+  NULL,          /* open */
+  NULL,          /* close */
 #endif
   rtc_read,      /* read */
   rtc_write,     /* write */
-  0,             /* seek */
+  NULL,          /* seek */
   rtc_ioctl,     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,             /* poll */
-#endif
+  NULL,          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   rtc_unlink     /* unlink */
 #endif

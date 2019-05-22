@@ -291,7 +291,6 @@ config HIDKBD_BUFSIZE
 config HIDKBD_NPOLLWAITERS
 	int "Max Number of Waiters for Poll Event"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		If the poll() method is enabled, this defines the maximum number
 		of threads that can be waiting for keyboard events.  Default: 2.
@@ -384,7 +383,6 @@ config HIDMOUSE_BUFSIZE
 config HIDMOUSE_NPOLLWAITERS
 	int "Max Number of Waiters for Poll Event"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		If the poll() method is enabled, this defines the maximum number
 		of threads that can be waiting for mouse events.  Default: 2.
@@ -546,7 +544,6 @@ config XBOXCONTROLLER_STACKSIZE
 config XBOXCONTROLLER_NPOLLWAITERS
 	int "Max Number of Waiters for Poll Event"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		If the poll() method is enabled, this defines the maximum number
 		of threads that can be waiting for mouse events.  Default: 2.

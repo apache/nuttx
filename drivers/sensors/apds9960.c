@@ -144,10 +144,8 @@ static const struct file_operations g_apds9960_fops =
   apds9960_read,   /* read */
   apds9960_write,  /* write */
   NULL,            /* seek */
-  NULL             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL           /* poll */
-#endif
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
 #endif

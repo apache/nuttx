@@ -310,9 +310,7 @@ struct uart_dev_s
   sem_t                closesem;     /* Locks out new open while close is in progress */
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
-#ifndef CONFIG_DISABLE_POLL
   sem_t                pollsem;      /* Manages exclusive access to fds[] */
-#endif
 
   /* I/O buffers */
 
@@ -338,9 +336,7 @@ struct uart_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
-#endif
 };
 
 typedef struct uart_dev_s uart_dev_t;

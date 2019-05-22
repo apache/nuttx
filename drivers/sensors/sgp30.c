@@ -166,10 +166,8 @@ static const struct file_operations g_sgp30fops =
   sgp30_read,     /* read */
   sgp30_write,    /* write */
   NULL,           /* seek */
-  sgp30_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL          /* poll */
-#endif
+  sgp30_ioctl,    /* ioctl */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , sgp30_unlink /* unlink */
 #endif

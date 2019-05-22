@@ -69,12 +69,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifdef CONFIG_DISABLE_POLL
-#  undef CONFIG_SIM_TCNWAITERS
-#else
-#  ifndef CONFIG_SIM_TCNWAITERS
-#    define CONFIG_SIM_TCNWAITERS 4
-#  endif
+#ifndef CONFIG_SIM_TCNWAITERS
+#  define CONFIG_SIM_TCNWAITERS 4
 #endif
 
 /* Driver support ***********************************************************/
@@ -127,9 +123,7 @@ struct up_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_SIM_TCNWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -148,9 +142,7 @@ static int up_open(FAR struct file *filep);
 static int up_close(FAR struct file *filep);
 static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len);
 static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int up_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -163,12 +155,10 @@ static const struct file_operations up_fops =
   up_open,    /* open */
   up_close,   /* close */
   up_read,    /* read */
-  0,          /* write */
-  0,          /* seek */
-  up_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , up_poll   /* poll */
-#endif
+  NULL,       /* write */
+  NULL,       /* seek */
+  up_ioctl,   /* ioctl */
+  up_poll     /* poll */
 };
 
 /* Only one simulated touchscreen is supported so the driver state
@@ -187,9 +177,7 @@ static struct up_dev_s g_simtouchscreen;
 
 static void up_notify(FAR struct up_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -211,7 +199,6 @@ static void up_notify(FAR struct up_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_SIM_TCNWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -222,7 +209,6 @@ static void up_notify(FAR struct up_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -530,7 +516,6 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: up_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
                    bool setup)
 {
@@ -616,7 +601,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

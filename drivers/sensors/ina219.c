@@ -132,10 +132,8 @@ static const struct file_operations g_ina219fops =
   ina219_read,
   ina219_write,
   NULL,
-  ina219_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  ina219_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

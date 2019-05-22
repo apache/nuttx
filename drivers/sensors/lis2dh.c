@@ -114,9 +114,7 @@ struct lis2dh_dev_s
 #else
   volatile bool              int_pending; /* Interrupt received but data not read, yet */
 #endif
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd              *fds[CONFIG_LIS2DH_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -136,11 +134,9 @@ static int            lis2dh_get_reading(FAR struct lis2dh_dev_s *dev,
                         FAR struct lis2dh_vector_s *res, bool force_read);
 static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
-#ifndef CONFIG_DISABLE_POLL
 static int            lis2dh_poll(FAR struct file *filep,
                         FAR struct pollfd *fds, bool setup);
 static void           lis2dh_notify(FAR struct lis2dh_dev_s *priv);
-#endif
 static int            lis2dh_int_handler(int irq, FAR void *context,
                         FAR void *arg);
 static int            lis2dh_setup(FAR struct lis2dh_dev_s *dev,
@@ -174,10 +170,8 @@ static const struct file_operations g_lis2dhops =
   lis2dh_read,   /* read */
   lis2dh_write,  /* write */
   NULL,          /* seek */
-  lis2dh_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , lis2dh_poll  /* poll */
-#endif
+  lis2dh_ioctl,  /* ioctl */
+  lis2dh_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -457,10 +451,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
           priv->int_pending = true;
 #endif
 
-#ifndef CONFIG_DISABLE_POLL
           lis2dh_notify(priv);
-#endif
-
           leave_critical_section(flags);
         }
       else if (fifo_mode != LIS2DH_STREAM_MODE && priv->fifo_stopped)
@@ -675,7 +666,6 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -777,7 +767,6 @@ static void lis2dh_notify(FAR struct lis2dh_dev_s *priv)
         }
     }
 }
-#endif /* !CONFIG_DISABLE_POLL */
 
 /****************************************************************************
  * Name: lis2dh_callback
@@ -802,10 +791,7 @@ static int lis2dh_int_handler(int irq, FAR void *context, FAR void *arg)
   priv->int_pending = true;
 #endif
 
-#ifndef CONFIG_DISABLE_POLL
   lis2dh_notify(priv);
-#endif
-
   leave_critical_section(flags);
 
   return OK;

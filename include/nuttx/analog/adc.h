@@ -195,10 +195,7 @@ struct adc_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#if !defined(CONFIG_DISABLE_POLL)
   struct pollfd *fds[CONFIG_ADC_NPOLLWAITERS];
-#endif
-
 #endif /* CONFIG_ADC */
 
   /* Fields provided by lower half ADC logic */

@@ -106,7 +106,6 @@ struct djoy_open_s
   struct djoy_notify_s do_notify;
   struct sigwork_s do_work;
 
-#ifndef CONFIG_DISABLE_POLL
   /* Poll event information */
 
   struct djoy_pollevents_s do_pollevents;
@@ -116,7 +115,6 @@ struct djoy_open_s
    */
 
   FAR struct pollfd *do_fds[CONFIG_DJOYSTICK_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -130,11 +128,9 @@ static inline int djoy_takesem(sem_t *sem);
 
 /* Sampling and Interrupt handling */
 
-#ifndef CONFIG_DISABLE_POLL
 static void    djoy_enable(FAR struct djoy_upperhalf_s *priv);
 static void    djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
                               FAR void *arg);
-#endif
 
 /* Sampling */
 
@@ -148,10 +144,8 @@ static ssize_t djoy_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static int     djoy_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -164,10 +158,8 @@ static const struct file_operations djoy_fops =
   djoy_read,  /* read */
   0,          /* write */
   0,          /* seek */
-  djoy_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , djoy_poll /* poll */
-#endif
+  djoy_ioctl, /* ioctl */
+  djoy_poll   /* poll */
 };
 
 /****************************************************************************
@@ -198,7 +190,6 @@ static inline int djoy_takesem(sem_t *sem)
  * Name: djoy_enable
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 {
   FAR const struct djoy_lowerhalf_s *lower;
@@ -206,9 +197,7 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
   djoy_buttonset_t press;
   djoy_buttonset_t release;
   irqstate_t flags;
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   DEBUGASSERT(priv);
   lower = priv->du_lower;
@@ -227,7 +216,6 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 
   for (opriv = priv->du_open; opriv; opriv = opriv->do_flink)
     {
-#ifndef CONFIG_DISABLE_POLL
       /* Are there any poll waiters? */
 
       for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
@@ -241,7 +229,6 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
               break;
             }
         }
-#endif
 
       /* OR in the signal events */
 
@@ -268,13 +255,11 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
 
   leave_critical_section(flags);
 }
-#endif
 
 /****************************************************************************
  * Name: djoy_interrupt
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
                            FAR void *arg)
 {
@@ -286,7 +271,6 @@ static void djoy_interrupt(FAR const struct djoy_lowerhalf_s *lower,
 
   djoy_sample(priv);
 }
-#endif
 
 /****************************************************************************
  * Name: djoy_sample
@@ -297,15 +281,11 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
   FAR const struct djoy_lowerhalf_s *lower;
   FAR struct djoy_open_s *opriv;
   djoy_buttonset_t sample;
-#ifndef CONFIG_DISABLE_POLL
   djoy_buttonset_t change;
   djoy_buttonset_t press;
   djoy_buttonset_t release;
-#endif
   irqstate_t flags;
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   DEBUGASSERT(priv);
   lower = priv->du_lower;
@@ -324,7 +304,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
   add_ui_randomness(sample);
 
-#ifndef CONFIG_DISABLE_POLL
   /* Determine which buttons have been newly pressed and which have been
    * newly released.
    */
@@ -339,7 +318,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
   for (opriv = priv->du_open; opriv; opriv = opriv->do_flink)
     {
-#ifndef CONFIG_DISABLE_POLL
       /* Have any poll events occurred? */
 
       if ((press & opriv->do_pollevents.dp_press)     != 0 ||
@@ -361,7 +339,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
                 }
             }
         }
-#endif
 
       /* Have any signal events occurred? */
 
@@ -379,7 +356,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
   /* Enable/disable interrupt handling */
 
   djoy_enable(priv);
-#endif
 
   priv->du_sample = sample;
   leave_critical_section(flags);
@@ -394,10 +370,8 @@ static int djoy_open(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct djoy_upperhalf_s *priv;
   FAR struct djoy_open_s *opriv;
-#ifndef CONFIG_DISABLE_POLL
   FAR const struct djoy_lowerhalf_s *lower;
   djoy_buttonset_t supported;
-#endif
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
@@ -426,14 +400,12 @@ static int djoy_open(FAR struct file *filep)
 
   /* Initialize the open structure */
 
-#ifndef CONFIG_DISABLE_POLL
   lower = priv->du_lower;
   DEBUGASSERT(lower && lower->dl_supported);
   supported = lower->dl_supported(lower);
 
   opriv->do_pollevents.dp_press   = supported;
   opriv->do_pollevents.dp_release = supported;
-#endif
 
   /* Attach the open structure to the device */
 
@@ -648,7 +620,6 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-#ifndef CONFIG_DISABLE_POLL
     /* Command:     DJOYIOC_POLLEVENTS
      * Description: Specify the set of button events that can cause a poll()
      *              to awaken.  The default is all button depressions and
@@ -678,7 +649,6 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
-#endif
 
     /* Command:     DJOYIOC_REGISTER
      * Description: Register to receive a signal whenever there is a change
@@ -727,7 +697,6 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: djoy_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup)
 {
@@ -807,7 +776,6 @@ errout_with_dusem:
   djoy_givesem(&priv->du_exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

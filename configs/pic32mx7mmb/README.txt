@@ -708,10 +708,6 @@ Where <subdir> is one of the following:
          CONFIG_NETUTILS_FTPD=y
          CONFIG_SYSTEM_FTPD=y
 
-          And enable poll() support in the NuttX configuration file:
-
-          CONFIG_DISABLE_POLL=n
-
     6. Using a RAM disk and the USB MSC device to the nsh configuration
 
        Here is an experimental change to examples/nsh that will create a RAM

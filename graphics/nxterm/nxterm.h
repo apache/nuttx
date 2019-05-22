@@ -173,9 +173,7 @@ struct nxterm_state_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_NXTERM_NPOLLWAITERS];
-#endif
 #endif /* CONFIG_NXTERM_NXKBDIN */
 };
 
@@ -214,9 +212,7 @@ void nxterm_unregister(FAR struct nxterm_state_s *priv);
 
 #ifdef CONFIG_NXTERM_NXKBDIN
 ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len);
-#ifndef CONFIG_DISABLE_POLL
 int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-#endif
 #endif
 
 /* IOCTL handlers */

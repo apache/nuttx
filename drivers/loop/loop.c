@@ -65,15 +65,13 @@ static int     loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_loop_fops =
 {
-  0,             /* open */
-  0,             /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   loop_read,     /* read */
   loop_write,    /* write */
-  0,             /* seek */
-  loop_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0            /* poll */
-#endif
+  NULL,          /* seek */
+  loop_ioctl,    /* ioctl */
+  NULL           /* poll */
 };
 
 /****************************************************************************

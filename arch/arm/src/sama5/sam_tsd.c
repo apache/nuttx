@@ -185,9 +185,7 @@ struct sam_tsd_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_SAMA5_TSD_NPOLLWAITERS];
-#endif
 };
 
 /****************************************************************************
@@ -210,9 +208,7 @@ static int  sam_tsd_open(struct file *filep);
 static int  sam_tsd_close(struct file *filep);
 static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len);
 static int  sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int  sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /* Initialization and configuration */
 
@@ -234,12 +230,10 @@ static const struct file_operations g_tsdops =
   sam_tsd_open,    /* open */
   sam_tsd_close,   /* close */
   sam_tsd_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  sam_tsd_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , sam_tsd_poll   /* poll */
-#endif
+  NULL,            /* write */
+  NULL,            /* seek */
+  sam_tsd_ioctl,   /* ioctl */
+  sam_tsd_poll     /* poll */
 };
 
 /* The driver state structure is pre-allocated. */
@@ -256,9 +250,7 @@ static struct sam_tsd_s g_tsd;
 
 static void sam_tsd_notify(struct sam_tsd_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -279,7 +271,6 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_SAMA5_TSD_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -290,7 +281,6 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1071,7 +1061,6 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: sam_tsd_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
 {
   struct inode *inode;
@@ -1151,7 +1140,6 @@ errout:
   sam_adc_unlock(priv->adc);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Initialization and Configuration

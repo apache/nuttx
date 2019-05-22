@@ -592,9 +592,7 @@ static const struct file_operations g_fops =
   lsm9ds1_write,
   NULL,
   lsm9ds1_ioctl,
-#ifndef CONFIG_DISABLE_POLL
   NULL,
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL,
 #endif

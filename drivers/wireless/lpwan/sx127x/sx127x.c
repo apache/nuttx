@@ -303,9 +303,7 @@ struct sx127x_dev_s
 
   uint8_t nopens;                 /* Number of times the device has been opened */
   sem_t   dev_sem;                /* Ensures exclusive access to this structure */
-#ifndef CONFIG_DISABLE_POLL
   FAR struct pollfd *pfd;         /* Polled file descr  (or NULL if any) */
-#endif
 };
 
 /****************************************************************************
@@ -445,10 +443,8 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -467,10 +463,8 @@ static const struct file_operations sx127x_fops =
   sx127x_read,    /* read */
   sx127x_write,   /* write */
   NULL,           /* seek */
-  sx127x_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , sx127x_poll   /* poll */
-#endif
+  sx127x_ioctl,   /* ioctl */
+  sx127x_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */
 #endif
@@ -1205,7 +1199,6 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -1285,7 +1278,6 @@ errout:
   return ret;
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: sx127x_lora_isr0_process
@@ -1350,7 +1342,6 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
               ret = sx127x_lora_rxhandle(dev);
               if (ret > 0)
                 {
-#ifndef CONFIG_DISABLE_POLL
                   if (dev->pfd)
                     {
                       /* Data available for input */
@@ -1360,7 +1351,6 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
                       wlinfo("Wake up polled fd\n");
                       nxsem_post(dev->pfd->sem);
                     }
-#endif  /* CONFIG_DISABLE_POLL */
 
                   /* Wake-up any thread waiting in recv */
 
@@ -1487,7 +1477,6 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
               ret = sx127x_fskook_rxhandle(dev);
               if (ret > 0)
                 {
-#ifndef CONFIG_DISABLE_POLL
                   if (dev->pfd)
                     {
                       /* Data available for input */
@@ -1497,7 +1486,6 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
                       wlinfo("Wake up polled fd\n");
                       nxsem_post(dev->pfd->sem);
                     }
-#endif  /* CONFIG_DISABLE_POLL */
 
                   /* Wake-up any thread waiting in recv */
 
@@ -4587,9 +4575,7 @@ int sx127x_register(FAR struct spi_dev_s *spi,
 
   /* Polled file decr */
 
-#ifndef CONFIG_DISABLE_POLL
   dev->pfd        = NULL;
-#endif
 
   /* Initialize sem */
 

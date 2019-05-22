@@ -180,13 +180,11 @@ static const struct file_operations g_toneops =
   tone_close,                   /* close */
   tone_read,                    /* read */
   tone_write,                   /* write */
-  0,                            /* seek */
-  0                             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0                           /* poll */
-#endif
+  NULL,                         /* seek */
+  NULL,                         /* ioctl */
+  NULL                          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0                           /* unlink */
+  , NULL                        /* unlink */
 #endif
 };
 

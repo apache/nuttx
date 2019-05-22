@@ -53,8 +53,6 @@
  *
  * CONFIG_SCHED_WORKQUEUE - Work queue support is required
  *
- * Settings that effect the driver: CONFIG_DISABLE_POLL
- *
  * CONFIG_SENSORS_ADXL345
  *   Enables support for the ADXL345 driver
  * CONFIG_ADXL345_SPI

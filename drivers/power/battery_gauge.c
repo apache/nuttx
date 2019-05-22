@@ -89,11 +89,9 @@ static const struct file_operations g_batteryops =
   bat_gauge_close,
   bat_gauge_read,
   bat_gauge_write,
-  0,
-  bat_gauge_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , 0
-#endif
+  NULL,
+  bat_gauge_ioctl.
+  NULL
 };
 
 /****************************************************************************

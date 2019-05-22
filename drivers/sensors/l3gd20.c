@@ -123,10 +123,8 @@ static const struct file_operations g_l3gd20_fops =
   l3gd20_read,
   l3gd20_write,
   NULL,
-  l3gd20_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  l3gd20_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

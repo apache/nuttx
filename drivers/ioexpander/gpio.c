@@ -73,17 +73,15 @@ static int     gpio_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_gpio_drvrops =
 {
-  gpio_open,  /* open */
-  gpio_close, /* close */
-  gpio_read,  /* read */
-  gpio_write, /* write */
-  gpio_seek,  /* seek */
-  gpio_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL      /* poll */
-#endif
+  gpio_open,   /* open */
+  gpio_close,  /* close */
+  gpio_read,   /* read */
+  gpio_write,  /* write */
+  gpio_seek,   /* seek */
+  gpio_ioctl,  /* ioctl */
+  NULL         /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL      /* unlink */
+  , NULL       /* unlink */
 #endif
 };
 

@@ -231,9 +231,7 @@ struct tc_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_TOUCHSCREEN_NPOLLWAITERS];
-#endif
 };
 
 /************************************************************************************
@@ -260,9 +258,7 @@ static int tc_open(FAR struct file *filep);
 static int tc_close(FAR struct file *filep);
 static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len);
 static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int tc_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -277,10 +273,8 @@ static const struct file_operations tc_fops =
   tc_read,    /* read */
   0,          /* write */
   0,          /* seek */
-  tc_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , tc_poll   /* poll */
-#endif
+  tc_ioctl,   /* ioctl */
+  tc_poll     /* poll */
 };
 
 /* If only a single touchscreen device is supported, then the driver state
@@ -581,9 +575,7 @@ static inline bool tc_valid_sample(uint16_t sample)
 
 static void tc_notify(FAR struct tc_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If no threads have the driver open, then just dump the state */
 
@@ -616,7 +608,6 @@ static void tc_notify(FAR struct tc_dev_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_TOUCHSCREEN_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
@@ -627,7 +618,6 @@ static void tc_notify(FAR struct tc_dev_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -1379,7 +1369,6 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: tc_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1467,7 +1456,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /************************************************************************************
  * Public Functions

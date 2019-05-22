@@ -178,9 +178,8 @@ static const struct file_operations g_t67xxfops =
   t67xx_read,     /* read */
   t67xx_write,    /* write */
   NULL,           /* seek */
-  t67xx_ioctl     /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL          /* poll */
+  t67xx_ioctl,    /* ioctl */
+  NULL            /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */

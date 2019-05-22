@@ -207,9 +207,7 @@ static const struct file_operations ee24xx_fops =
   ee24xx_write, /* write */
   ee24xx_seek,  /* seek */
   ee24xx_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0           /* poll */
-#endif
+  NULL          /* poll */
 };
 
 /****************************************************************************

@@ -105,10 +105,8 @@ static const struct file_operations g_ltc4151fops =
   ltc4151_read,
   ltc4151_write,
   NULL,
-  ltc4151_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  ltc4151_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

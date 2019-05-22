@@ -38,8 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_USRSOCK) && \
-    !defined(CONFIG_DISABLE_POLL)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_USRSOCK)
 
 #include <stdint.h>
 #include <string.h>
@@ -386,4 +385,4 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
     }
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_USRSOCK && !CONFIG_DISABLE_POLL */
+#endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

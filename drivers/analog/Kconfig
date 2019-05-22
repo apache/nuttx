@@ -36,7 +36,6 @@ config ADC_FIFOSIZE
 config ADC_NPOLLWAITERS
 	int "Number of poll waiters"
 	default 2
-	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll.
 

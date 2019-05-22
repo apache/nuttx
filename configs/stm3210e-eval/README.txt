@@ -716,7 +716,6 @@ Where <subdir> is one of the following:
 
           Pre-requisites:
 
-            CONFIG_DISABLE_POLL=n      # Don't disable poll()
             CONFIG_BUILTIN=y           # Enable support for built-in applications
             CONFIG_NSH_BUILTIN_APPS=y  # Enable NSH built-in applications
 

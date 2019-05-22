@@ -90,15 +90,13 @@ static struct rng_dev_s g_rngdev;
 
 static const struct file_operations g_rngops =
 {
-  0,               /* open */
-  0,               /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   stm32l4_rngread, /* read */
-  0,               /* write */
-  0,               /* seek */
-  0                /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0              /* poll */
-#endif
+  NULL,            /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , 0              /* unlink */
 #endif

@@ -120,10 +120,8 @@ static int            can_takesem(FAR sem_t *sem);
 
 /* Poll helpers */
 
-#ifndef CONFIG_DISABLE_POLL
 static void           can_pollnotify(FAR struct can_dev_s *dev,
                                      pollevent_t eventset);
-#endif
 
 /* CAN helpers */
 
@@ -148,10 +146,8 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
                                   FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
                                 unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int            can_poll(FAR struct file *filep, FAR struct pollfd *fds,
                                bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -164,10 +160,8 @@ static const struct file_operations g_canops =
   can_read,  /* read */
   can_write, /* write */
   NULL,      /* seek */
-  can_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , can_poll /* poll */
-#endif
+  can_ioctl, /* ioctl */
+  can_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL     /* unlink */
 #endif
@@ -207,7 +201,6 @@ static int can_takesem(FAR sem_t *sem)
  * Name: can_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
 {
   FAR struct pollfd *fds;
@@ -227,9 +220,6 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
         }
     }
 }
-#else
-#  define can_pollnotify(dev, eventset)
-#endif
 
 /****************************************************************************
  * Name: can_dlc2bytes
@@ -1042,7 +1032,6 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: can_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
@@ -1200,7 +1189,6 @@ errout:
   can_givesem(&dev->cd_pollsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -1232,9 +1220,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
 
   nxsem_init(&dev->cd_xmit.tx_sem, 0, 1);
   nxsem_init(&dev->cd_closesem,    0, 1);
-#ifndef CONFIG_DISABLE_POLL
   nxsem_init(&dev->cd_pollsem,     0, 1);
-#endif
 
   for (i = 0; i < CONFIG_CAN_NPENDINGRTR; i++)
     {

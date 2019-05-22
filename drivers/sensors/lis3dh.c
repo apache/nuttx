@@ -124,10 +124,8 @@ static const struct file_operations g_lis3dh_fops =
   lis3dh_read,
   lis3dh_write,
   NULL,
-  lis3dh_ioctl
-#ifndef CONFIG_DISABLE_POLL
-  , NULL
-#endif
+  lis3dh_ioctl,
+  NULL
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL
 #endif

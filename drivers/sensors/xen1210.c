@@ -79,10 +79,8 @@ static const struct file_operations g_xen1210fops =
   xen1210_read,    /* read */
   NULL,            /* write */
   NULL,            /* seek */
-  NULL             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL           /* poll */
-#endif
+  NULL,            /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
 #endif

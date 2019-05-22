@@ -119,10 +119,8 @@ static off_t pcf8574_lcd_seek(FAR struct file *filep, off_t offset,
                               int whence);
 static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pcf8574_lcd_unlink(FAR struct inode *inode);
 #endif
@@ -139,9 +137,7 @@ static const struct file_operations g_pcf8574_lcd_fops =
   pcf8574_lcd_write,            /* write */
   pcf8574_lcd_seek,             /* seek */
   pcf8574_lcd_ioctl,            /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
   pcf8574lcd_poll,              /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pcf8574_lcd_unlink            /* unlink */
 #endif
@@ -1567,7 +1563,6 @@ static int pcf8574_lcd_ioctl(FAR struct file *filep, int cmd,
  * Name: pcf8574lcd_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup)
 {
@@ -1584,7 +1579,6 @@ static int pcf8574lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: pcf8574_lcd_unlink

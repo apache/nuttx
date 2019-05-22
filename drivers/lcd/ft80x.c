@@ -143,10 +143,8 @@ static const struct file_operations g_ft80x_fops =
   ft80x_read,    /* read */
   ft80x_write,   /* write */
   NULL,          /* seek */
-  ft80x_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL         /* poll */
-#endif
+  ft80x_ioctl,   /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , ft80x_unlink /* unlink */
 #endif

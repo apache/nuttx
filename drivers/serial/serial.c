@@ -93,9 +93,7 @@
  ************************************************************************************/
 
 static int     uart_takesem(FAR sem_t *sem, bool errout);
-#ifndef CONFIG_DISABLE_POLL
 static void    uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset);
-#endif
 
 /* Write support */
 
@@ -111,9 +109,7 @@ static int     uart_close(FAR struct file *filep);
 static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int     uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-#endif
 
 /************************************************************************************
  * Private Data
@@ -126,10 +122,8 @@ static const struct file_operations g_serialops =
   uart_read,  /* read */
   uart_write, /* write */
   0,          /* seek */
-  uart_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , uart_poll /* poll */
-#endif
+  uart_ioctl, /* ioctl */
+  uart_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL      /* unlink */
 #endif
@@ -185,7 +179,6 @@ static int uart_takesem(FAR sem_t *sem, bool errout)
  * Name: uart_pollnotify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 {
   int i;
@@ -208,9 +201,6 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
         }
     }
 }
-#else
-#  define uart_pollnotify(dev,event)
-#endif
 
 /************************************************************************************
  * Name: uart_putxmitchar
@@ -1454,7 +1444,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: uart_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -1590,7 +1579,6 @@ errout:
   uart_givesem(&dev->pollsem);
   return ret;
 }
-#endif
 
 /************************************************************************************
  * Public Functions
@@ -1634,9 +1622,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxsem_init(&dev->closesem, 0, 1);
   nxsem_init(&dev->xmitsem,  0, 0);
   nxsem_init(&dev->recvsem,  0, 0);
-#ifndef CONFIG_DISABLE_POLL
   nxsem_init(&dev->pollsem,  0, 1);
-#endif
 
   /* The recvsem and xmitsem are used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -1797,7 +1783,6 @@ void uart_reset_sem(FAR uart_dev_t *dev)
   nxsem_reset(&dev->recvsem,  0);
   nxsem_reset(&dev->xmit.sem, 1);
   nxsem_reset(&dev->recv.sem, 1);
-#ifndef CONFIG_DISABLE_POLL
   nxsem_reset(&dev->pollsem,  1);
-#endif
 }
+

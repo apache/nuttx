@@ -222,7 +222,7 @@ endif # SIM_X11FB && INPUT
 config SIM_TCNWAITERS
 	bool "Maximum number poll() waiters"
 	default 4
-	depends on !POLL_DISABLE && SIM_TOUCHSCREEN
+	depends on SIM_TOUCHSCREEN
 	---help---
 		The maximum number of threads that can be waiting on poll() for a
 		touchscreen event. Default: 4

@@ -82,9 +82,7 @@ static const struct file_operations pipe_fops =
   pipecommon_write,  /* write */
   0,                 /* seek */
   pipecommon_ioctl,  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
   pipecommon_poll,   /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pipecommon_unlink  /* unlink */
 #endif

@@ -75,10 +75,8 @@ static const struct file_operations g_consoleops =
   lowconsole_read,  /* read */
   lowconsole_write, /* write */
   NULL,             /* seek */
-  lowconsole_ioctl  /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL            /* poll */
-#endif
+  lowconsole_ioctl, /* ioctl */
+  NULL              /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL            /* unlink */
 #endif

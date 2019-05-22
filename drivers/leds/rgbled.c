@@ -104,13 +104,11 @@ static const struct file_operations g_rgbledops =
   rgbled_close, /* close */
   rgbled_read,  /* read */
   rgbled_write, /* write */
-  0,            /* seek */
-  0             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0           /* poll */
-#endif
+  NULL,         /* seek */
+  NULL,         /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0           /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 

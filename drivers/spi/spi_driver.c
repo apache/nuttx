@@ -106,16 +106,14 @@ static const struct file_operations spidrvr_fops =
   spidrvr_open,    /* open */
   spidrvr_close,   /* close */
 #else
-  0,               /* open */
-  0,               /* close */
+  NULL,            /* open */
+  NULL,            /* close */
 #endif
   spidrvr_read,    /* read */
   spidrvr_write,   /* write */
-  0,               /* seek */
-  spidrvr_ioctl    /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , 0              /* poll */
-#endif
+  NULL,            /* seek */
+  spidrvr_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , spidrvr_unlink /* unlink */
 #endif

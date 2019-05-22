@@ -84,6 +84,7 @@
 #endif
 
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/xbox[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -254,10 +255,8 @@ static ssize_t usbhost_read(FAR struct file *filep,
 static ssize_t usbhost_write(FAR struct file *filep,
                              FAR const char *buffer, size_t len);
 static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -274,16 +273,18 @@ static const const struct usbhost_id_s g_xboxcontroller_id[] =
     USB_CLASS_VENDOR_SPEC,  /* base -- Must be one of the USB_CLASS_* definitions in usb.h */
     0x0047,  /* subclass -- depends on the device */
     0x00d0,  /* proto -- depends on the device    */
-    0x045E,  /* vid      */
-    0x02DD   /* pid      */
+    0x045e,  /* vid      */
+    0x02dd   /* pid      */
   },
+
   /* XBox One S controller */
+
   {
     USB_CLASS_VENDOR_SPEC,  /* base -- Must be one of the USB_CLASS_* definitions in usb.h */
     0x0047,  /* subclass -- depends on the device */
     0x00d0,  /* proto -- depends on the device    */
-    0x045E,  /* vid      */
-    0x02EA   /* pid      */
+    0x045e,  /* vid      */
+    0x02ea   /* pid      */
   }
 };
 
@@ -305,11 +306,9 @@ static const struct file_operations g_xboxcontroller_fops =
   usbhost_close,           /* close     */
   usbhost_read,            /* read      */
   usbhost_write,           /* write     */
-  0,                       /* seek      */
-  usbhost_ioctl            /* ioctl     */
-#ifndef CONFIG_DISABLE_POLL
-  , usbhost_poll           /* poll      */
-#endif
+  NULL,                    /* seek      */
+  usbhost_ioctl,           /* ioctl     */
+  usbhost_poll             /* poll      */
 };
 
 /* This is a bitmap that is used to allocate device names /dev/xboxa-z. */
@@ -544,9 +543,7 @@ static void usbhost_destroy(FAR void *arg)
 
 static void usbhost_notify(FAR struct usbhost_state_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
   int i;
-#endif
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -563,7 +560,6 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
    * then some make end up blocking after all.
    */
 
-#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_XBOXCONTROLLER_NPOLLWAITERS; i++)
     {
       FAR struct pollfd *fds = priv->fds[i];
@@ -574,7 +570,6 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
           nxsem_post(fds->sem);
         }
     }
-#endif
 }
 
 /****************************************************************************
@@ -2107,7 +2102,6 @@ errout:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -2191,7 +2185,6 @@ errout:
   nxsem_post(&priv->exclsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Public Functions

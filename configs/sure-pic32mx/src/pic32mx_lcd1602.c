@@ -184,9 +184,7 @@ static void lcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t lcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t lcd_write(FAR struct file *, FAR const char *, size_t);
 static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -201,10 +199,8 @@ static const struct file_operations g_lcdops =
   lcd_read,      /* read */
   lcd_write,     /* write */
   0,             /* seek */
-  lcd_ioctl      /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , lcd_poll     /* poll */
-#endif
+  lcd_ioctl,     /* ioctl */
+  lcd_poll       /* poll */
 };
 
 /* This is the driver state structure */
@@ -1016,7 +1012,6 @@ static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: lcd_poll
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
@@ -1032,7 +1027,6 @@ static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
