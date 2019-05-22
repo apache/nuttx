@@ -861,7 +861,7 @@ Where <subdir> is one of the following:
 
        CONFIG_NSH_NOMAC=y
        CONFIG_NSH_SWMAC=y
-       CONFIG_NSH_MACADDR=0x00e0deadbeef
+       CONFIG_NETINIT_MACADDR=0x00e0deadbeef
 
   nsh:
   ---
