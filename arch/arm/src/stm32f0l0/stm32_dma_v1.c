@@ -161,12 +161,12 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
     .chan     = 3,
-    .irq      = STM32_IRQ_DMA2CH45,
+    .irq      = STM32_IRQ_DMA2CH4,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
   },
   {
     .chan     = 4,
-    .irq      = STM32_IRQ_DMA2CH45,
+    .irq      = STM32_IRQ_DMA2CH5,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
   },
 #endif
