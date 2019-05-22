@@ -1,0 +1,84 @@
+body
+{
+    background: none;
+    font-family: sans-serif;
+    height: 100%;
+}
+
+a
+{
+    color: #dd2f2f;
+    text-decoration: none;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+
+code
+{
+    font-family: "Bitstream Vera Sans Mono";
+    color: #2b4893;
+    background: #f4f4f4;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+}
+
+pre
+{
+    font-family: "Bitstream Vera Sans Mono";
+    background: #f4f4f4;
+    padding: 1em;
+}
+
+.container
+{
+  overflow-x: hidden;
+}
+
+.toc
+{
+    top: 0;
+    left: 0;
+    float: left;
+    width: 22%;
+    font-size: 80%;
+    overflow-y: scroll;
+    height: 100%;
+    position: fixed;
+}
+
+.toc tbody
+{
+    font-size: 80%;
+}
+
+.toc .toc_table
+{
+    margin-left: 1em;
+}
+
+.toc  ul
+{
+    padding-left: 1.5em;
+}
+
+.toc > ul
+{
+    padding-left: 1.0em;
+}
+
+.toc h1
+{
+    padding-left: 0.5em;
+    padding-top: 0.5em;
+}
+
+.main
+{
+    padding-left: 1em;
+    padding-right: 1em;
+    width: 75%;
+    float: right;
+}
