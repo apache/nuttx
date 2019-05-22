@@ -110,7 +110,7 @@ static const struct file_operations g_pwmops =
   pwm_read,  /* read */
   pwm_write, /* write */
   NULL,      /* seek */
-  pwm_ioctl  /* ioctl */
+  pwm_ioctl, /* ioctl */
   NULL       /* poll */
 };
 

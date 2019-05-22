@@ -206,7 +206,7 @@ static const struct file_operations ee24xx_fops =
   ee24xx_read,  /* read */
   ee24xx_write, /* write */
   ee24xx_seek,  /* seek */
-  ee24xx_ioctl  /* ioctl */
+  ee24xx_ioctl, /* ioctl */
   NULL          /* poll */
 };
 
