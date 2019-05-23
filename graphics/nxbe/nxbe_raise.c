@@ -110,17 +110,24 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
 
   if (NXBE_STATE_ISMODAL(be) && be->topwnd->below != NULL)
     {
+      FAR struct nxbe_window_s *above;
+      FAR struct nxbe_window_s *below;
+
       /* We are in a modal state.  The topwnd is not the background and it
        * has focus.
        */
 
-      wnd->above        = be->topwnd;
-      wnd->below        = be->topwnd->below;
+      above             = be->topwnd;
+      below             = be->topwnd->below;
 
-      be->topwnd->below = wnd;
+      wnd->above        = above;
+      wnd->below        = below;
+
+      above->below      = wnd;
+      below->above      = wnd;
 
       /* Then redraw this window AND all windows below it. Having moved the
-       * window, we may have exposed previoulsy obscured portions of windows
+       * window, we may have exposed previously obscured portions of windows
        * below this one.
        */
 

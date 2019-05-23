@@ -98,7 +98,9 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd)
 
   below = wnd->below;
 
-  /* Then put the lowered window at the bottom (just above the background window) */
+  /* Then put the lowered window at the bottom (just above the background
+   * window).
+   */
 
   wnd->below     = &be->bkgd;
   wnd->above     = be->bkgd.above;
