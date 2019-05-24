@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am335x_uart.h
+ * arch/arm/src/am335x/hardware/am335x_uart.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_UART_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_UART_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -401,5 +401,5 @@
 #define UART_EFR_AUTORTSEN           (1 << 6)  /* Bit 6: Enable Auto-RTS */
 #define UART_EFR_AUTOCTSEN           (1 << 7)  /* Bit 7: Enable Auto-CTS */
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_UART_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H */
 

@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/am335x/chip/am335x_control.h
+ * arch/arm/src/am335x/hardware/am335x_control.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_CONTROL_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_CONTROL_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CONTROL_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CONTROL_H
 
 /********************************************************************************************
  * Included Files
@@ -643,4 +643,4 @@
 #define PADCTL_RXACTIVE         (1 << 5) /* Bit 5: Receiver enabled */
 #define PADCTL_SLEWCTRL         (1 << 6) /* Bit 6: Select between faster or slower slew rate */
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_CONTROL_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_CONTROL_H */

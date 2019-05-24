@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am335x_wdog.h
+ * arch/arm/src/am335x/hardware/am335x_wdog.h
  *
  *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_WDOG_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_WDOG_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -129,5 +129,5 @@
 #define WDT_WSPR_STOP_FEED_A            (0x0000aaaa)
 #define WDT_WSPR_STOP_FEED_B            (0x00005555)
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_WDOG_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H */
 

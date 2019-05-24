@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/am335x_pinmux.h"
+#include "hardware/am335x_pinmux.h"
 
 /************************************************************************************
  * Pre-processor Definitions

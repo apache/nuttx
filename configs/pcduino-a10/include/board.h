@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/a1x_piocfg.h"
+#include "hardware/a1x_piocfg.h"
 
 /************************************************************************************
  * Pre-processor Definitions

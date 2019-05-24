@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am3358_memorymap.h
+ * arch/arm/src/am335x/hardware/am3358_memorymap.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM3358_MEMORYMAP_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM3358_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -614,4 +614,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM3358_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H */

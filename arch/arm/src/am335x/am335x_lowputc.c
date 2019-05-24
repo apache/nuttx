@@ -50,7 +50,7 @@
 #include "am335x_config.h"
 #include "am335x_gpio.h"
 #include "am335x_pinmux.h"
-#include "chip/am335x_uart.h"
+#include "hardware/am335x_uart.h"
 
 /**************************************************************************
  * Pre-processor Definitions

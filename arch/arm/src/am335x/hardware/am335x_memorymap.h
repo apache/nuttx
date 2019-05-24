@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am335x_pinmux.h
+ * arch/arm/src/am335x/hardware/am335x_memorymap.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_PINMUX_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_PINMUX_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -44,9 +44,9 @@
 #include <arch/am335x/chip.h>
 
 #if defined(CONFIG_ARCH_CHIP_AM3358)
-#  include "chip/am3358_pinmux.h"
+#  include "hardware/am3358_memorymap.h"
 #else
 #  error Unrecognized AM335X architecture
 #endif
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_MEMORYMAP_H */

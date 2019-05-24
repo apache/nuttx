@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/am335x_gpio.h
+ * arch/arm/src/am335x/hardware/am335x_gpio.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_GPIO_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_GPIO_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_GPIO_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -241,4 +241,4 @@
 #define GPIO_ICR_MASK(n)         (3 << GPIO_ICR_SHIFT(n))
 #define GPIO_ICR(i,n)            ((uint32_t)(n) << GPIO_ICR_SHIFT(n))
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_GPIO_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_GPIO_H */

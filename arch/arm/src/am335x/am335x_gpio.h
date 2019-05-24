@@ -45,8 +45,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/am335x_control.h"
-#include "chip/am335x_gpio.h"
+#include "hardware/am335x_control.h"
+#include "hardware/am335x_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

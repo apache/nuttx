@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am3358_pinmux.h
+ * arch/arm/src/am335x/hardware/am3358_pinmux.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchneko@gmail.com>
@@ -33,15 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM3358_PINMUX_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM3358_PINMUX_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_PINMUX_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_PINMUX_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -859,4 +859,4 @@
 
 #define GPIO_USB1_DRVVBUS             (GPIO_PERIPH | GPIO_PADCTL(AM335X_PADCTL_USB1_DRVVBUS_INDEX) | PINMUX_MODE0)
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM3358_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_PINMUX_H */

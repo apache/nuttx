@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am335x_timer.h
+ * arch/arm/src/am335x/hardware/am335x_timer.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_TIMER_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_TIMER_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_TIMER_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_TIMER_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -213,4 +213,4 @@
 
 #define TMR1MS_TOWR_MASK                (0xffffff)
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_TIMER_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_TIMER_H */

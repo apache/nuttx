@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/am335x/chip/am335x_intc.h
+ * arch/arm/src/am335x/hardware/am335x_intc.h
  *
  *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
  *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AM335X_CHIP_AM335X_INTC_H
-#define __ARCH_ARM_SRC_AM335X_CHIP_AM335X_INTC_H
+#ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_INTC_H
+#define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_INTC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/am335x_memorymap.h"
+#include "hardware/am335x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -268,4 +268,4 @@
 #define INTC_ILR_PRIO_MASK              (127)  /* Bits 2..7:  Interrupt Priority */
 #  define INTC_ILR_PRIO(p)              (((p) & INTC_ILR_PRIO_MASK) << INTC_ILR_PRIO_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_AM335X_CHIP_AM335X_INTC_H */
+#endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_INTC_H */
