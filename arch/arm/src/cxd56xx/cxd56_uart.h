@@ -44,7 +44,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/cxd56_uart.h"
+#include "hardware/cxd56_uart.h"
 
 /****************************************************************************
  * Pre-processor Definitions

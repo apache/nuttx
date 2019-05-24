@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/chip/cxd56_uart.h
+ * arch/arm/src/cxd56xx/hardware/cxd56_uart.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UART_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UART_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UART_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UART_H
 
 /****************************************************************************
  * Included Files
@@ -131,4 +131,5 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UART_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UART_H */
+

@@ -48,7 +48,7 @@
 
 #define  ARMV7M_PERIPHERAL_INTERRUPTS 128
 
-#include "chip/cxd5602_memorymap.h"
+#include "hardware/cxd5602_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

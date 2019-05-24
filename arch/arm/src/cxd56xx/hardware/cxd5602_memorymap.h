@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/chip/cxd5602_memorymap.h
+ * arch/arm/src/cxd56xx/hardware/cxd5602_memorymap.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_MEMORYMAP_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_MEMORYMAP_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -120,4 +120,5 @@
 #define CXD56_EMMC_BASE           (CXD56_ADSP_BASE  + 0x02201000)
 #define CXD56_SDIO_BASE           (CXD56_ADSP_BASE  + 0x02202000)
 
-#endif
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_MEMORYMAP_H */
+
