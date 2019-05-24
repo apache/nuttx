@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/kinetis/hardware/kinetis_mpu.h
+ * arch/arm/src/kinetis/hardware/kinetis_k20k40k60mpu.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MPU_H
-#define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MPU_H
+#ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H
+#define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H
 
 /****************************************************************************************************
  * Included Files
@@ -395,4 +395,4 @@
  * Public Functions
  ****************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MPU_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20K40K60MPU_H */
