@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_usic.h
+ * arch/arm/src/xmc4/hardware/xmc4_usic.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +49,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_USIC_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_USIC_H
 
 /************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1098,4 +1098,4 @@
 #define USIC_IN_TDATA_SHIFT         (0)      /* Bits 0-15: Transmit Data */
 #define USIC_IN_TDATA_MASK          (0xffff << USIC_IN_TDATA_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_USIC_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_USIC_H */

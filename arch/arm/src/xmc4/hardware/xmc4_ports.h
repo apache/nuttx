@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_ports.h
+ * arch/arm/src/xmc4/hardware/xmc4_ports.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +49,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PORTS_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PORTS_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PORTS_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PORTS_H
 
 /************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -507,4 +507,4 @@
 #define PORT_HWSEL_HW15_MASK        (3 << PORT_HWSEL_HW15_SHIFT)
 #  define PORT_HWSEL_HW15(n)        ((uint32_t)(n) << PORT_HWSEL_HW15_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PORTS_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PORTS_H */

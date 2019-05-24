@@ -49,7 +49,7 @@
 #include "nvic.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "chip/xmc4_flash.h"
+#include "hardware/xmc4_flash.h"
 
 #include "xmc4_clockconfig.h"
 #include "xmc4_lowputc.h"

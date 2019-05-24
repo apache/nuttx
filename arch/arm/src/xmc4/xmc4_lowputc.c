@@ -50,9 +50,9 @@
 #include <debug.h>
 
 #include "xmc4_config.h"
-#include "chip/xmc4_usic.h"
-#include "chip/xmc4_ports.h"
-#include "chip/xmc4_pinmux.h"
+#include "hardware/xmc4_usic.h"
+#include "hardware/xmc4_ports.h"
+#include "hardware/xmc4_pinmux.h"
 #include "xmc4_usic.h"
 #include "xmc4_gpio.h"
 #include "xmc4_lowputc.h"

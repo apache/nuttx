@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_scu.h
+ * arch/arm/src/xmc4/hardware/xmc4_scu.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,15 +49,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_SCU_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_SCU_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1119,4 +1119,4 @@
 #  define SCU_CLKMXSTAT_SYSCLKMUX_OFI (1 << SCU_CLKMXSTAT_SYSCLKMUX_SHIFT)
 #  define SCU_CLKMXSTAT_SYSCLKMUX_PLL (2 << SCU_CLKMXSTAT_SYSCLKMUX_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_SCU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_SCU_H */

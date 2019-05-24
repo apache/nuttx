@@ -48,7 +48,7 @@
 
 #include <arch/irq.h>
 #include <arch/xmc4/chip.h>
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /* If the common ARMv7-M vector handling logic is used, then it expects the
  * following definition in this file that provides the number of supported external

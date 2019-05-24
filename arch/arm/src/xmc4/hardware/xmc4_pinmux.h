@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_pinmux.h
+ * arch/arm/src/xmc4/hardware/xmc4_pinmux.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -35,8 +35,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PINMUX_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PINMUX_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PINMUX_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PINMUX_H
 
 /************************************************************************************
  * Included Files
@@ -801,4 +801,4 @@
 #define GPIO_WWDT_SERVICEOUT_1   (GPIO_OUTPUT_ALT1 | GPIO_PORT0 | GPIO_PIN7)
 #define GPIO_WWDT_SERVICEOUT_2   (GPIO_OUTPUT_ALT1 | GPIO_PORT1 | GPIO_PIN4)
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_PINMXU_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PINMXU_H */

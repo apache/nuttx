@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_memorymap.h
+ * arch/arm/src/xmc4/hardware/xmc4_memorymap.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +49,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_MEMORYMAP_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_MEMORYMAP_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -240,4 +240,4 @@
 
 #define XMC4_PPB_BASE               0xe000e000
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_MEMORYMAP_H */

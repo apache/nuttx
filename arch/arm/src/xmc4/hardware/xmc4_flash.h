@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_flash.h
+ * arch/arm/src/xmc4/hardware/xmc4_flash.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +49,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_FLASH_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_FLASH_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_FLASH_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_FLASH_H
 
 /************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -202,4 +202,4 @@
 #define FLASH_PROCON2_S12_S13ROM    (1 << 11) /* Bit 11: Sectors 12 and 13 Locked Forever by User 2 */
 #define FLASH_PROCON2_S14_S15ROM    (1 << 12) /* Bit 12: Sectors 14 and 15 Locked Forever by User 2 */
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_FLASH_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_FLASH_H */

@@ -59,7 +59,7 @@
 
 #include "chip.h"
 #include "xmc4_config.h"
-#include "chip/xmc4_usic.h"
+#include "hardware/xmc4_usic.h"
 #include "xmc4_lowputc.h"
 
 /****************************************************************************

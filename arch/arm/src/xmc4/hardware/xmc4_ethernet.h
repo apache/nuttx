@@ -1,5 +1,5 @@
 /********************************************************************************************************************
- * arch/arm/src/xmc4/chip/xmc4_ethernet.h
+ * arch/arm/src/xmc4/hardware/xmc4_ethernet.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +49,8 @@
  *
  ********************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_XMC4_CHIP_XMC4_ETHERNET_H
-#define __ARCH_ARM_SRC_XMC4_CHIP_XMC4_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_ETHERNET_H
+#define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_ETHERNET_H
 
 /********************************************************************************************************************
  * Included Files
@@ -58,7 +58,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/xmc4_memorymap.h"
+#include "hardware/xmc4_memorymap.h"
 
 /********************************************************************************************************************
  * Pre-processor Definitions
@@ -647,4 +647,4 @@
 /* HW Feature Register */
 #define ETH_HW_FEATURE_
 
-#endif /* __ARCH_ARM_SRC_XMC4_CHIP_XMC4_ETHERNET_H */
+#endif /* __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_ETHERNET_H */

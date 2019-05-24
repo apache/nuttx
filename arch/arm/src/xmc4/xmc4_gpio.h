@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/xmc4_ports.h"
+#include "hardware/xmc4_ports.h"
 
 /****************************************************************************
  * Preprocessor Definitions

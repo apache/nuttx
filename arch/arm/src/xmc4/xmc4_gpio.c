@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/xmc4_ports.h"
+#include "hardware/xmc4_ports.h"
 #include "xmc4_gpio.h"
 
 /****************************************************************************

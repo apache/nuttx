@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/xmc4_usic.h"
+#include "hardware/xmc4_usic.h"
 
 /****************************************************************************
  * Pre-processor Definitions

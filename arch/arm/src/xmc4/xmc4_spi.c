@@ -66,9 +66,9 @@
 #include "xmc4_gpio.h"
 #include "xmc4_spi.h"
 #include "xmc4_usic.h"
-#include "chip/xmc4_spi.h"
-#include "chip/xmc4_usic.h"
-#include "chip/xmc4_pinmux.h"
+#include "hardware/xmc4_spi.h"
+#include "hardware/xmc4_usic.h"
+#include "hardware/xmc4_pinmux.h"
 
 #if defined(CONFIG_XMC4_SPI0) || defined(CONFIG_XMC4_SPI1) || \
     defined(CONFIG_XMC4_SPI2) || defined(CONFIG_XMC4_SPI3) || \
