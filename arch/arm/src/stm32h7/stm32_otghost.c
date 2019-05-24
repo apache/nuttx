@@ -69,7 +69,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/stm32_pwr.h"
+#include "hardware/stm32_pwr.h"
 #include "stm32_gpio.h"
 #include "stm32_otg.h"
 #include "stm32_usbhost.h"

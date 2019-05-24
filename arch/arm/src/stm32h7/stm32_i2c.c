@@ -223,7 +223,7 @@
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
 #include "stm32_gpio.h"
-#include "chip/stm32_pinmap.h"
+#include "hardware/stm32_pinmap.h"
 
 /* At least one I2C peripheral must be enabled */
 

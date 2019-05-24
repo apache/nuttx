@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <nuttx/serial/serial.h>
 
-#include "chip/stm32_uart.h"
+#include "hardware/stm32_uart.h"
 
 /************************************************************************************
  * Pre-processor Definitions

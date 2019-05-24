@@ -58,7 +58,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "chip/stm32_pwr.h"
+#include "hardware/stm32_pwr.h"
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"

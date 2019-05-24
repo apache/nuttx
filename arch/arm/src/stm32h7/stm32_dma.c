@@ -53,9 +53,9 @@
 #include "up_internal.h"
 #include "sched/sched.h"
 #include "stm32_dma.h"
-#include "chip/stm32_bdma.h"
-#include "chip/stm32_mdma.h"
-#include "chip/stm32_dmamux.h"
+#include "hardware/stm32_bdma.h"
+#include "hardware/stm32_mdma.h"
+#include "hardware/stm32_dmamux.h"
 
 /****************************************************************************
  * Pre-processor Definitions

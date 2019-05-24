@@ -44,7 +44,7 @@
 
 #include "up_arch.h"
 
-#include "chip/stm32_rcc.h"
+#include "hardware/stm32_rcc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

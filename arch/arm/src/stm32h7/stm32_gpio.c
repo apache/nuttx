@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 
-#include "chip/stm32_syscfg.h"
+#include "hardware/stm32_syscfg.h"
 #include "stm32_gpio.h"
 
 /* Content of this file requires verification before it is used with other

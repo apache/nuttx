@@ -47,7 +47,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/stm32_spi.h"
+#include "hardware/stm32_spi.h"
 
 /************************************************************************************
  * Public Functions

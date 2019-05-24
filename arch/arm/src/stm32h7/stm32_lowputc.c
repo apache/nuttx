@@ -46,7 +46,7 @@
 
 #include "chip.h"
 
-#include "chip/stm32_pinmap.h"
+#include "hardware/stm32_pinmap.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_uart.h"

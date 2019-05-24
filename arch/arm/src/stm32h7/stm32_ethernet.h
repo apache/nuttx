@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/stm32_ethernet.h"
+#include "hardware/stm32_ethernet.h"
 
 #if STM32H7_NETHERNET > 0
 #ifndef __ASSEMBLY__

@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32h7/chip.h
+ * arch/arm/src/stm32h7/hardware/stm32_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,51 +33,20 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_CHIP_H
-#define __ARCH_ARM_SRC_STM32H7_CHIP_H
+#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_GPIO_H
+#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_GPIO_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip.h"
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#  include "hardware/stm32h7x3xx_gpio.h"
+#else
+#  error "Unsupported STM32 H7 part"
+#endif
 
-#include <arch/irq.h>
-#include <arch/stm32h7/chip.h>
-#include "hardware/stm32_pinmap.h"
-#include "hardware/stm32_memorymap.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/* If the common ARMv7-M vector handling logic is used, then it expects the
- * following definition in this file that provides the number of supported external
- * interrupts which, for this architecture, is provided in the arch/stm32h7/chip.h
- * header file.
- */
-
-#define ARMV7M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
-
-/* Cache line sizes (in bytes)for the STM32H7 */
-
-#define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
-#define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_STM32H7_CHIP_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_GPIO_H */
