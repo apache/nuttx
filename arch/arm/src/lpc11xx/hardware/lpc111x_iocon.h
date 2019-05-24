@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11xx/chip/lpc111x_iocon.h
+ * arch/arm/src/lpc11xx/hardware/lpc111x_iocon.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Rommel Marcelo
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_CHIP_LPC111X_IOCON_H
-#define __ARCH_ARM_SRC_LPC11XX_CHIP_LPC111X_IOCON_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_IOCON_H
+#define __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_IOCON_H
 
 /************************************************************************************
  * Included Files
@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/lpc11_memorymap.h"
+#include "hardware/lpc11_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -266,4 +266,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC118X_IOCON_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC118X_IOCON_H */

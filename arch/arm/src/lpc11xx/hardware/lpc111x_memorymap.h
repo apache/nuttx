@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11xx/lpc111x_memorymap.h
+ * arch/arm/src/lpc11xx/hardware/lpc111x_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_LPC111X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_LPC11XX_LPC111X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -104,4 +104,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC11XX_LPC116X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC116X_MEMORYMAP_H */

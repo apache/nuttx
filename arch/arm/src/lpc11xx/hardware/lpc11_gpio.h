@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11xx/chip/lpc11_gpio.h
+ * arch/arm/src/lpc11xx/hardware/lpc11_gpio.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_LPC11_CHIP_GPIO_H
-#define __ARCH_ARM_SRC_LPC11XX_LPC11_CHIP_GPIO_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_CHIP_GPIO_H
+#define __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_CHIP_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/lpc11_memorymap.h"
+#include "hardware/lpc11_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -143,4 +143,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC11XX_LPC11_CHIP_GPIO_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_CHIP_GPIO_H */

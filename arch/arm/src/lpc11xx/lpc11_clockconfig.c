@@ -48,9 +48,9 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "lpc11_clockconfig.h"
-#include "chip/lpc11_syscon.h"
-#include "chip/lpc111x_iocon.h"
-#include "chip/lpc11_gpio.h"
+#include "hardware/lpc11_syscon.h"
+#include "hardware/lpc111x_iocon.h"
+#include "hardware/lpc11_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -43,8 +43,8 @@
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 
-#include "chip/lpc11_uart.h"
-#include "chip/lpc11_syscon.h"
+#include "hardware/lpc11_uart.h"
+#include "hardware/lpc11_syscon.h"
 
 #include "lpc11_gpio.h"
 

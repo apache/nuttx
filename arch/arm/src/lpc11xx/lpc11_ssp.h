@@ -44,7 +44,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "chip/lpc11_ssp.h"
+#include "hardware/lpc11_ssp.h"
 
 #if defined(CONFIG_LPC11_SSP0) || defined(CONFIG_LPC11_SSP1)
 

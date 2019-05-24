@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11xx/chip/lpc111x_pinconfig.h
+ * arch/arm/src/lpc11xx/hardware/lpc111x_pinconfig.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_CHIP_LPC111X_PINCONFIG_H
-#define __ARCH_ARM_SRC_LPC11XX_CHIP_LPC111X_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_PINCONFIG_H
+#define __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC111X_PINCONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -119,4 +119,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC116X_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC116X_PINCONFIG_H */

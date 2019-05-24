@@ -70,7 +70,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/lpc11_syscon.h"
+#include "hardware/lpc11_syscon.h"
 #include "lpc11_gpio.h"
 #include "lpc11_i2c.h"
 

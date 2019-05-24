@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc11xx/chip/lpc11_pinconfig.h
+ * arch/arm/src/lpc11xx/hardware/lpc11_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC11XX_CHIP_LPC11_PINCONFIG_H
-#define __ARCH_ARM_SRC_LPC11XX_CHIP_LPC11_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_MEMORYMAP_H
+#define __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -42,14 +42,14 @@
 
 #include <nuttx/config.h>
 
-/* This file is only a thin shell that includes the correct pin configuration
- * definitions for the selected LPC11xx family.
+/* This file is only a thin shell that includes the correct memory map definitions
+ * for the selected LPC11xx family.
  */
 
 #include <arch/lpc11xx/chip.h>
 
 #if defined(LPC111x)
-#  include "chip/lpc111x_pinconfig.h"
+#  include "hardware/lpc111x_memorymap.h"
 #else
 #  error "Unrecognized LPC11xx family"
 #endif
@@ -70,4 +70,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC11XX_CHIP_LPC11_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC11XX_HARDWARE_LPC11_MEMORYMAP_H */

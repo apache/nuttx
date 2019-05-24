@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/lpc111x_iocon.h"
+#include "hardware/lpc111x_iocon.h"
 #include "lpc11_gpio.h"
 
 /****************************************************************************
