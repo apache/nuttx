@@ -55,7 +55,7 @@
  * this file for the proper setup.
  */
 
-#include "chip/lpc17_memorymap.h"
+#include "hardware/lpc17_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

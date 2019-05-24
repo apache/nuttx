@@ -44,7 +44,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "chip/lpc17_spi.h"
+#include "hardware/lpc17_spi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

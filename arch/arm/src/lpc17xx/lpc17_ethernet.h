@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc17_ethernet.h"
+#include "hardware/lpc17_ethernet.h"
 
 /************************************************************************************
  * Pre-processor Definitions

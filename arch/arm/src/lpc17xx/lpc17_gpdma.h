@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc17_gpdma.h"
+#include "hardware/lpc17_gpdma.h"
 
 /****************************************************************************
  * Pre-processor Definitions

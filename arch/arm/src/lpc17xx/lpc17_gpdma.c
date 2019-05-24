@@ -55,7 +55,7 @@
 
 #include "chip.h"
 
-#include "chip/lpc17_syscon.h"
+#include "hardware/lpc17_syscon.h"
 #include "lpc17_gpdma.h"
 
 #ifdef CONFIG_LPC17_GPDMA

@@ -49,9 +49,9 @@
 
 #include <arch/lpc17xx/chip.h>
 
-#include "chip/lpc17_gpio.h"
-#include "chip/lpc17_pinconn.h"
-#include "chip/lpc17_pinconfig.h"
+#include "hardware/lpc17_gpio.h"
+#include "hardware/lpc17_pinconn.h"
+#include "hardware/lpc17_pinconfig.h"
 
 /* Include the GPIO definitions for the selected LPC17xx family. */
 

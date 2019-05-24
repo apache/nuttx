@@ -45,7 +45,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/imx_memory.map"
+#include "hardware/imx_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

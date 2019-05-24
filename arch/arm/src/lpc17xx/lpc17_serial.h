@@ -43,8 +43,8 @@
 #include <nuttx/config.h>
 #include <arch/board/board.h>
 
-#include "chip/lpc17_uart.h"
-#include "chip/lpc17_syscon.h"
+#include "hardware/lpc17_uart.h"
+#include "hardware/lpc17_syscon.h"
 
 #include "lpc17_gpio.h"
 

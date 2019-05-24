@@ -62,8 +62,8 @@
 
 #include "chip.h"
 
-#include "chip/lpc17_syscon.h"
-#include "chip/lpc17_pinconfig.h"
+#include "hardware/lpc17_syscon.h"
+#include "hardware/lpc17_pinconfig.h"
 #include "lpc17_gpio.h"
 #include "lpc17_dac.h"
 

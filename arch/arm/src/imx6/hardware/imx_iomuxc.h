@@ -45,7 +45,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/imx_memory.map"
+#include "hardware/imx_memorymap.h"
 
 /* These definitions derive from specifications for the i.MX 6Quad/6Dual and require
  * review and modification in order to support other family members.
