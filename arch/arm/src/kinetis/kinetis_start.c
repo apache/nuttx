@@ -49,7 +49,7 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_smc.h"
+#include "hardware/kinetis_smc.h"
 #include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 

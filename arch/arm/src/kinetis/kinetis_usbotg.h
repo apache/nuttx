@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/kinetis_usbotg.h"
+#include "hardware/kinetis_usbotg.h"
 
 /************************************************************************************
  * Public Types

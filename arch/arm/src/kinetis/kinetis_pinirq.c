@@ -51,7 +51,7 @@
 #include "up_internal.h"
 
 #include "kinetis.h"
-#include "chip/kinetis_port.h"
+#include "hardware/kinetis_port.h"
 
 #ifdef CONFIG_KINETIS_GPIOIRQ
 

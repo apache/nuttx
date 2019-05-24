@@ -66,9 +66,9 @@
 
 #include "kinetis_config.h"
 #include "chip.h"
-#include "chip/kinetis_dmamux.h"
-#include "chip/kinetis_uart.h"
-#include "chip/kinetis_pinmux.h"
+#include "hardware/kinetis_dmamux.h"
+#include "hardware/kinetis_uart.h"
+#include "hardware/kinetis_pinmux.h"
 #include "kinetis.h"
 #include "kinetis_dma.h"
 #include "kinetis_uart.h"

@@ -58,8 +58,8 @@
 #include "kinetis_config.h"
 #include "chip.h"
 #include "kinetis_dma.h"
-#include "chip/kinetis_dmamux.h"
-#include "chip/kinetis_sim.h"
+#include "hardware/kinetis_dmamux.h"
+#include "hardware/kinetis_sim.h"
 
 /****************************************************************************
  * Pre-processor Definitions

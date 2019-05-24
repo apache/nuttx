@@ -53,8 +53,8 @@
 
 #include "kinetis_config.h"
 #include "chip.h"
-#include "chip/kinetis_rtc.h"
-#include "chip/kinetis_sim.h"
+#include "hardware/kinetis_rtc.h"
+#include "hardware/kinetis_sim.h"
 #include "kinetis.h"
 #include "kinetis_alarm.h"
 

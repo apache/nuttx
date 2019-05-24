@@ -43,7 +43,7 @@
 
 #include "up_arch.h"
 #include "kinetis.h"
-#include "chip/kinetis_wdog.h"
+#include "hardware/kinetis_wdog.h"
 
 /****************************************************************************
  * Private Functions

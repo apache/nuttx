@@ -45,7 +45,7 @@
 
 #include "mpu.h"
 #include "kinetis_mpuinit.h"
-#include "chip/kinetis_mpu.h"
+#include "hardware/kinetis_mpu.h"
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARM_MPU)
 
