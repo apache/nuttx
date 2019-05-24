@@ -61,9 +61,9 @@
 
 #include <nuttx/init.h>
 
-#include "chip/tms570_sys.h"
-#include "chip/tms570_esm.h"
-#include "chip/tms570_pbist.h"
+#include "hardware/tms570_sys.h"
+#include "hardware/tms570_esm.h"
+#include "hardware/tms570_pbist.h"
 #include "tms570_clockconfig.h"
 #include "tms570_selftest.h"
 #include "tms570_gio.h"

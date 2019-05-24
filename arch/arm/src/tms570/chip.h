@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <arch/tms570/chip.h>
 
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

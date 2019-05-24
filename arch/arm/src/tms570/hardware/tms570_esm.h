@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570_esm.h
+ * arch/arm/src/tms570/hardware/tms570_esm.h
  * Error Signalling Module Error Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -39,15 +39,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570_ESM_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570_ESM_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_ESM_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_ESM_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -208,4 +208,4 @@
 
 #define ESM_ILCR4_CHAN(n)         (1 << (n)) /* Bit n: Maps channel n low level interrupt */
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_ESM_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_ESM_H */

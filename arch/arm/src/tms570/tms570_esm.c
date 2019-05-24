@@ -55,7 +55,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/tms570_esm.h"
+#include "hardware/tms570_esm.h"
 #include "tms570_esm.h"
 
 /****************************************************************************

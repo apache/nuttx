@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570_vim.h
+ * arch/arm/src/tms570/hardware/tms570_vim.h
  * Vector Intererrupt Manager (VIM) Register Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -39,15 +39,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570_VIM_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570_VIM_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -215,4 +215,4 @@
 #define VIM_CHANCTRL_MASK(n)            (0xff << VIM_CHANCTRL_SHIFT(n))
 #  define VIM_CHANCTRL(n,v)             ((uint32_t)(v) << VIM_CHANCTRL_SHIFT(n))
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_VIM_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H */

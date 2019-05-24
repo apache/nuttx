@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570ls04x03x_memorymap.h
+ * arch/arm/src/tms570/hardware/tms570ls04x03x_memorymap.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_MEMORYMAP_H
 
 /****************************************************************************************************
  * Included Files
@@ -128,4 +128,4 @@
 #define TMS570_VIM_BASE           0xfffffe00 /* 0xfffffe00-0xfffffeff: VIM */
 #define TMS570_SYS_BASE           0xffffff00 /* 0xffffff00-0xffffffff: System Module - Frame 1 */
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_MEMORYMAP_H */

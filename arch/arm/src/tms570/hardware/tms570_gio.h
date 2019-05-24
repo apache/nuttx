@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570_gio.h
+ * arch/arm/src/tms570/hardware/tms570_gio.h
  * Secondary System Control Register Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -39,15 +39,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570_GIO_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570_GIO_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -442,4 +442,4 @@
 
 #define GIO_PIN(n)                     (1 << (n)) /* Bit n:  Corresponds to pin n */
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_GIO_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H */

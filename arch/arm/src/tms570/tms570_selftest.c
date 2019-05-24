@@ -52,8 +52,8 @@
 
 #include "up_arch.h"
 
-#include "chip/tms570_sys.h"
-#include "chip/tms570_pbist.h"
+#include "hardware/tms570_sys.h"
+#include "hardware/tms570_pbist.h"
 #include "tms570_selftest.h"
 
 #ifdef CONFIG_TMS570_SELFTEST

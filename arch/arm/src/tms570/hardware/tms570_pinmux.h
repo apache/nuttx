@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570_memorymap.h
+ * arch/arm/src/tms570/hardware/tms570_pinmux.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PINMUX_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PINMUX_H
 
 /****************************************************************************************************
  * Included Files
@@ -43,23 +43,36 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_TMS570LS0232PZ)
-#  error No memory map for the TMS570LS0232PZ
+#  error No pin multiplexing for the TMS570LS0232PZ
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0332PZ)
-#  include "chip/tms570ls04x03x_memorymap.h"
+#  include "hardware/tms570ls04x03x_pinmux.h"
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0432PZ)
-#  include "chip/tms570ls04x03x_memorymap.h"
+#  include "hardware/tms570ls04x03x_pinmux.h"
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PZ)
-#  error No memory map for the TMS570LS0714PZ
+#  error No pin multiplexing for the TMS570LS0714PZ
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PGE)
-#  error No memory map for the TMS570LS0714PGE
+#  error No pin multiplexing for the TMS570LS0714PGE
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0714ZWT)
-#  error No memory map for the TMS570LS0714ZWT
+#  error No pin multiplexing for the TMS570LS0714ZWT
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS1227ZWT)
-#  error No memory map for the TMS570LS1227ZWT
+#  error No pin multiplexing for the TMS570LS1227ZWT
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
-#  include "chip/tms570ls31xx_memorymap.h"
+#  include "hardware/tms570ls04x03x_pinmux.h"
 #else
 #  error "Unrecognized Hercules chip"
 #endif
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_MEMORYMAP_H */
+/****************************************************************************************************
+ * Pulbic Type Definitions
+ ****************************************************************************************************/
+
+/* Each chip-specific pinmux header file defines initializers for a type like: */
+
+struct tms570_pinmux_s
+{
+  uint8_t mmrndx;  /* Index to the PINMMR register, 0-30 */
+  uint8_t shift;   /* Shift value to isolate the pin field in the PINMMR register */
+  uint8_t value;   /* The new value for the pin field in the PINMMR register */
+};
+
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PINMUX_H */

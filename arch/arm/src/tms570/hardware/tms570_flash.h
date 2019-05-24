@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570_flash.h
+ * arch/arm/src/tms570/hardware/tms570_flash.h
  * FLASH Module Controller Register Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -39,15 +39,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570_FLASH_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570_FLASH_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_FLASH_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_FLASH_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -268,4 +268,4 @@
 /* Flash Bank Configuration Register */
 #define FLASH_FCFGBANK_
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570_FLASH_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_FLASH_H */

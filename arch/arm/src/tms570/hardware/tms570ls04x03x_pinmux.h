@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/tms570/chip/tms570ls04x03x_pinmux.h
+ * arch/arm/src/tms570/hardware/tms570ls04x03x_pinmux.h
  * Secondary System Control Register Definitions
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -39,15 +39,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_PINMUX_H
-#define __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_PINMUX_H
+#ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_PINMUX_H
+#define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_PINMUX_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/tms570_memorymap.h"
+#include "hardware/tms570_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -254,4 +254,4 @@
 #define PINMUX_N2HET17_VALUE      4
 #define PINMUX_N2HET17_PIN        {PINMUX_N2HET17_PINMMR, PINMUX_N2HET17_SHIFT, PINMUX_N2HET17_VALUE}
 
-#endif /* __ARCH_ARM_SRC_TMS570_CHIP_TMS570LS04X03X_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570LS04X03X_PINMUX_H */
