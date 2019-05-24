@@ -49,8 +49,8 @@
 
 #include "chip.h"
 #include "nuc_config.h"
-#include "hardware/chip/nuc_clk.h"
-#include "hardware/chip/nuc_uart.h"
+#include "hardware/nuc_clk.h"
+#include "hardware/nuc_uart.h"
 
 #include "hardware/nuc_gcr.h"
 #include "nuc_lowputc.h"
