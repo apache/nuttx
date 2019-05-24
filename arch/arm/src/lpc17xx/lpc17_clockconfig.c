@@ -56,9 +56,9 @@
 #include <arch/lpc17xx/chip.h>
 
 #if defined(LPC176x)
-#  include "hardware/lpc176x_clockconfig.c"
+#  include "chip/lpc176x_clockconfig.c"
 #elif defined(LPC178x)
-#  include "hardware/lpc178x_clockconfig.c"
+#  include "chip/lpc178x_clockconfig.c"
 #else
 #  error "Unrecognized LPC17xx family"
 #endif

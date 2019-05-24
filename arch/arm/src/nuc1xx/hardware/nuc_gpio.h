@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/nuc1xx/chip/nuc_gpio.h
+ * arch/arm/src/nuc1xx/hardware/nuc_gpio.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_GPIO_H
-#define __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_GPIO_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GPIO_H
+#define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GPIO_H
 
 /********************************************************************************************
  * Included Files
@@ -553,4 +553,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_GPIO_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_GPIO_H */

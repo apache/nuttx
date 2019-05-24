@@ -51,8 +51,8 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/nuc_clk.h"
-#include "chip/nuc_gcr.h"
+#include "hardware/nuc_clk.h"
+#include "hardware/nuc_gcr.h"
 
 /****************************************************************************
  * Pre-processor Definitions

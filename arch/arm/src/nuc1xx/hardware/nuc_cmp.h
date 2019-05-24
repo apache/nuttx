@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/nuc1xx/chip/nuc_wdt.h
+ * arch/arm/src/nuc1xx/hardware/nuc_cmp.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_WDT_H
-#define __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_WDT_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CMP_H
+#define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CMP_H
 
 /********************************************************************************************
  * Included Files
@@ -68,4 +68,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_WDT_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_CMP_H */

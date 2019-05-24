@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "nuc_config.h"
-#include "chip/nuc_uart.h"
+#include "hardware/nuc_uart.h"
 
 /************************************************************************************
  * Pre-processor Definitions

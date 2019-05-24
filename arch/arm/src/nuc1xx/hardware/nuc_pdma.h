@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/nuc1xx/chip/nuc_ebi.h
+ * arch/arm/src/nuc1xx/hardware/nuc_pdma.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_EBI_H
-#define __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_EBI_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_PDMA_H
+#define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_PDMA_H
 
 /********************************************************************************************
  * Included Files
@@ -68,4 +68,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_NUC1XX_CHIP_NUC_EBI_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_PDMA_H */
