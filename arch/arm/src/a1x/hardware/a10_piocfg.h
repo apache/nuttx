@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a10_piocfg.h
+ * arch/arm/src/a1x/hardware/a10_piocfg.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A10_PIOCFG_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A10_PIOCFG_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A10_PIOCFG_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A10_PIOCFG_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/a1x_memorymap.h"
+#include "hardware/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -609,4 +609,4 @@
 #define PIO_UART7_TX_1    (PIO_PERIPH3 | PIO_PORT_PIOI | PIO_PIN20)
 #define PIO_UART7_TX_2    (PIO_PERIPH3 | PIO_PORT_PIOA | PIO_PIN14)
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A10_PIOCFG_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A10_PIOCFG_H */

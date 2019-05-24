@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a1x_uart.h
+ * arch/arm/src/a1x/hardware/a1x_uart.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_UART_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_UART_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/a1x_memorymap.h"
+#include "hardware/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -357,4 +357,4 @@
 #define UART_HALT_SIR_TX_INVERT   (1 << 4)  /* Bit 4:  SIR Transmit Pulse Polarity Invert */
 #define UART_HALT_SIR_RX_INVERT   (1 << 5)  /* Bit 5:  SIR Receiver Pulse Polarity Invert */
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_UART_H */

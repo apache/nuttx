@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 #include "a1x_config.h"
-#include "chip/a1x_uart.h"
+#include "hardware/a1x_uart.h"
 #include "a1x_pio.h"
 
 /****************************************************************************

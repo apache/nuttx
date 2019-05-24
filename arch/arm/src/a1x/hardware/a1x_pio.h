@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a1x_pio.h
+ * arch/arm/src/a1x/hardware/a1x_pio.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_PIO_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_PIO_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/a1x_memorymap.h"
+#include "hardware/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -217,4 +217,4 @@
 /* SDRAM Pad Pull Register */
 /* REVISIT: Missing register bit definitions */
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_PIO_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIO_H */

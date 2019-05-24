@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a1x_intc.h
+ * arch/arm/src/a1x/hardware/a1x_intc.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_INTC_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_INTC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/a1x_memorymap.h"
+#include "hardware/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -203,4 +203,4 @@
 #define INTC_PRIO_MASK(n)            (3 << INTC_PRIO_SHIFT(n))
 #  define INTC_PRIO(n,p)             ((uint32_t)(p) << INTC_PRIO_SHIFT(n))
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_INTC_H */

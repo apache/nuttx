@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a1x_timer.h
+ * arch/arm/src/a1x/hardware/a1x_timer.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_TIMER_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_TIMER_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_TIMER_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_TIMER_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/a1x_memorymap.h"
+#include "hardware/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -376,4 +376,4 @@
 #define CPU_CFG_L2DCACHE_INVEN     (1 << 0)  /* Bit 0:  Enable L2 data cache invalidation at reset */
 #define CPU_CFG_L1DCACHE_INVAEN    (1 << 1)  /* Bit 1:  Enable L1 data cache invalidation at reset */
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_TIMER_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_TIMER_H */

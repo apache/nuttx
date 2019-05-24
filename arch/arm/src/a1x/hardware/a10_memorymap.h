@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/a10_memorymap.h
+ * arch/arm/src/a1x/hardware/a10_memorymap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A10_MEMORYMAP_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A10_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -615,4 +615,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A10_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A10_MEMORYMAP_H */

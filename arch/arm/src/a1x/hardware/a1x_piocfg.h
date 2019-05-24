@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/a1x/chip/a1x_memorymap.h
+ * arch/arm/src/a1x/hardware/a1x_piocfg.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIOCFG_H
+#define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIOCFG_H
 
 /************************************************************************************
  * Included Files
@@ -44,9 +44,9 @@
 #include <arch/a1x/chip.h>
 
 #if defined(CONFIG_ARCH_CHIP_A10)
-#  include "chip/a10_memorymap.h"
+#  include "hardware/a10_piocfg.h"
 #else
 #  error Unrecognized A1X architecture
 #endif
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_A1X_HARDWARE_A1X_PIOCFG_H */

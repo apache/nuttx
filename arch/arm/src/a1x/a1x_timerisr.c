@@ -49,7 +49,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/a1x_timer.h"
+#include "hardware/a1x_timer.h"
 
 /****************************************************************************
  * Pre-processor Definitions
