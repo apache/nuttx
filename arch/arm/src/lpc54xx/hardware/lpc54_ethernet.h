@@ -33,15 +33,15 @@
  *
  ************************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ETHERNET_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ETHERNET_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ETHERNET_H
 
 /************************************************************************************************************
  * Included Files
  ************************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************************************
  * Pre-processor Definitions
@@ -863,4 +863,4 @@ struct enet_txdesc_s
   uint32_t ctrlstat;  /* TDES3 Control and status word */
 };
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ETHERNET_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ETHERNET_H */

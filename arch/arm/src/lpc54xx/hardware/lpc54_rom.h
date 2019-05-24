@@ -33,15 +33,15 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ROM_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ROM_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ROM_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ROM_H
 
 /********************************************************************************************
  * Included Files
  ********************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -110,4 +110,4 @@ typedef CODE unsigned int (*rng_read_t)(void);
 
 #define LPC54_RNG_READ ((rng_read_t)(lpc54_otg_vtable[LPC54_OTP_API_RNGREAD_OFFSET >> 2]))
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_ROM_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_ROM_H */

@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_RIT_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_RIT_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_RIT_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_RIT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -84,4 +84,4 @@
 /* LS 48-bit counter (Bits 0-31: 48-bit up counter) */
 /* MS 48-bit counter (Bits 32-47: 48-bit up counter) */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_RIT_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_RIT_H */

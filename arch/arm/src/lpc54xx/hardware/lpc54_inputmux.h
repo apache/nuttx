@@ -33,15 +33,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_INPUTMUX_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_INPUTMUX_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_INPUTMUX_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_INPUTMUX_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -295,4 +295,4 @@
 #  define MUX_FREQMEAS_TARGET_GPIOCLKA      (6 << MUX_FREQMEAS_TARGET_SHIFT) /* FREQME_GPIO_CLK_A */
 #  define MUX_FREQMEAS_TARGET_ PIOCLKB      (7 << MUX_FREQMEAS_TARGET_SHIFT) /* FREQME_GPIO_CLK_B */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_INPUTMUX_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_INPUTMUX_H */

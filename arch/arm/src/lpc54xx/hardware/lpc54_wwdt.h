@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WWDT_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WWDT_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_WWDT_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_WWDT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -98,4 +98,4 @@
 #define WWDT_WINDOW_MASK            0x00ffffff /* Bits 0-23: Watchdog window value */
                                                /* Bits 24-31: Reserved */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WWDT_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_WWDT_H */

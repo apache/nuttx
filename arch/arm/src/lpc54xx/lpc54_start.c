@@ -47,7 +47,7 @@
 #include "up_internal.h"
 #include "nvic.h"
 
-#include "chip/lpc54_syscon.h"
+#include "hardware/lpc54_syscon.h"
 #include "lpc54_clockconfig.h"
 #include "lpc54_userspace.h"
 #include "lpc54_lowputc.h"

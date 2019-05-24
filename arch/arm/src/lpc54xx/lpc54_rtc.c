@@ -54,7 +54,7 @@
 
 #include "up_arch.h"
 
-#include "chip/lpc54_rtc.h"
+#include "hardware/lpc54_rtc.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_rtc.h"
 

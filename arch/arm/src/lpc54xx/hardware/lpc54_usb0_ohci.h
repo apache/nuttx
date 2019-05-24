@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USB0_OHCI_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USB0_OHCI_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USB0_OHCI_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USB0_OHCI_H
 
 /************************************************************************************
  * Included Files
@@ -44,7 +44,7 @@
 #include <nuttx/usb/ohci.h>
 
 #include "chip.h"
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -126,4 +126,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USB0_OHCI_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USB0_OHCI_H */

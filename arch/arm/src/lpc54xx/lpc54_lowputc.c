@@ -51,11 +51,11 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/lpc54_memorymap.h"
-#include "chip/lpc54_syscon.h"
-#include "chip/lpc54_flexcomm.h"
-#include "chip/lpc54_pinmux.h"
-#include "chip/lpc54_usart.h"
+#include "hardware/lpc54_memorymap.h"
+#include "hardware/lpc54_syscon.h"
+#include "hardware/lpc54_flexcomm.h"
+#include "hardware/lpc54_pinmux.h"
+#include "hardware/lpc54_usart.h"
 
 #include "lpc54_config.h"
 #include "lpc54_enableclk.h"

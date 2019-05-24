@@ -33,15 +33,15 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_LCD_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_LCD_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_LCD_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_LCD_H
 
 /************************************************************************************************
  * Included Files
  ************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************************
  * Pre-processor Definitions
@@ -332,4 +332,4 @@
 #define LCD_CRSR_INTSTAT_CRSRMIS        (1 << 0)  /* Bit 0: Cursor mask interrupt status */
                                                   /* Bits 1-31: Reserved */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_LCD_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_LCD_H */

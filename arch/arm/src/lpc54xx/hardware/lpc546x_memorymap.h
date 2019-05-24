@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_MEMORYMAP_H
 
 /****************************************************************************************************
  * Included Files
@@ -141,5 +141,5 @@
 #define LPC54_CTIMER3_BASE   0x40048000  /* CTIMER3 */
 #define LPC54_CTIMER4_BASE   0x40049000  /* CTIMER4 */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_MEMORYMAP_H */
 

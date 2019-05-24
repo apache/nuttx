@@ -33,15 +33,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_EMC_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_EMC_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_EMC_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_EMC_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -340,4 +340,4 @@
 #define EMC_STATWAITTURN_MASK             (15 << EMC_STATWAITTURN_SHIFT)
 #  define EMC_STATWAITTURN(n)             ((uint32_t)((n)-1) << EMC_STATWAITTURN_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_EMC_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_EMC_H */

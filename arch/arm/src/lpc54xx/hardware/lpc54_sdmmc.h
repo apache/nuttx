@@ -33,15 +33,15 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SDMMC_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SDMMC_H
 
 /************************************************************************************************
  * Included Files
  ************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /************************************************************************************************
  * Pre-processor Definitions
@@ -398,4 +398,4 @@
 
 #define SDMMC_BACKENDPWRL                 (1 << 0)  /* Bit 0: Back-end Power control for card application. */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SDMMC_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SDMMC_H */

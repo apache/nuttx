@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/lpc54_syscon.h>
+#include "hardware/lpc54_syscon.h"
 
 /****************************************************************************
  * Pre-processor Definitions

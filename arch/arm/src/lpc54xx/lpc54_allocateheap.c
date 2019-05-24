@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 #include "lpc54_mpuinit.h"
 
 #include <arch/board/board.h>

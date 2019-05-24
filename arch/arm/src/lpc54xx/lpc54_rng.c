@@ -46,7 +46,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "chip/lpc54_rom.h"
+#include "hardware/lpc54_rom.h"
 
 #if defined(CONFIG_LPC54_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)

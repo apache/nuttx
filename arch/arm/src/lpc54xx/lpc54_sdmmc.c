@@ -69,8 +69,8 @@
 #include <nuttx/irq.h>
 
 #include "up_arch.h"
-#include "chip/lpc54_pinmux.h"
-#include "chip/lpc54_syscon.h"
+#include "hardware/lpc54_pinmux.h"
+#include "hardware/lpc54_syscon.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_gpio.h"
 #include "lpc54_sdmmc.h"

@@ -33,15 +33,15 @@
  *
  *****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USART_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USART_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USART_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USART_H
 
 /*****************************************************************************************************
  * Included Files
  *****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /*****************************************************************************************************
  * Pre-processor Definitions
@@ -417,4 +417,4 @@
 #define USART_ID_ID_SHIFT               (16)      /* Bits 16-31: ID Unique module identifier for this IP block */
 #define USART_ID_ID_MASKX               (0xffff << USART_ID_ID_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_USART_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USART_H */

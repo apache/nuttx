@@ -65,8 +65,8 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/lpc54_usb.h"
-#include "chip/lpc54_syscon.h"
+#include "hardware/lpc54_usb.h"
+#include "hardware/lpc54_syscon.h"
 #include "lpc54_gpio.h"
 #include "lpc54_ohciram.h"
 

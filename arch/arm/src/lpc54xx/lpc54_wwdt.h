@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WDT_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WDT_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_WDT_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_WDT_H
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/lpc54_wdt.h"
+#include "hardware/lpc54_wdt.h"
 
 #ifdef CONFIG_WATCHDOG
 
@@ -94,4 +94,4 @@ void lpc54_wwdt_initialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_WDT_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_WDT_H */

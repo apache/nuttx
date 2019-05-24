@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_PINMUX_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_PINMUX_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_PINMUX_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_PINMUX_H
 
 /************************************************************************************
  * Included Files
@@ -904,4 +904,4 @@
 #define GPIO_UTICK_CAP3_3            (GPIO_ALT3 | GPIO_MODE_DIGITAL | GPIO_PORT3 | GPIO_PIN23) /* Type D+I */
 #define GPIO_UTICK_CAP3_5            (GPIO_ALT5 | GPIO_MODE_DIGITAL | GPIO_PORT5 | GPIO_PIN10)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC546X_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC546X_PINMUX_H */

@@ -55,7 +55,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/lpc54_syscon.h"
+#include "hardware/lpc54_syscon.h"
 #include "lpc54_power.h"
 #include "lpc54_clockconfig.h"
 

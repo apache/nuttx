@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/lpc54_pinmux.h"
+#include "hardware/lpc54_pinmux.h"
 #include "lpc54_gpio.h"
 #include "lpc54_emc.h"
 #include "lpcxpresso-lpc54628.h"

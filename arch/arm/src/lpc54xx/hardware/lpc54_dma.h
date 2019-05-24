@@ -33,15 +33,15 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_DMA_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_DMA_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_DMA_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_DMA_H
 
 /********************************************************************************************
  * Included Files
  ********************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -275,4 +275,4 @@ struct lpc54_dmachan_desc_s
   uint32_t link;      /* Link to next descriptor */
 };
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_DMA_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_DMA_H */

@@ -33,15 +33,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_GINT_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_GINT_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_GINT_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_GINT_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -87,4 +87,4 @@
 #define GINT_PORT_ENA0(n)              (1 << (n)) /* Enable port0 pin for group interrupt */
 #define GINT_PORT_ENA1(n)              (1 << (n)) /* Enable port1 pin for group interrupt */
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_GINT_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_GINT_H */

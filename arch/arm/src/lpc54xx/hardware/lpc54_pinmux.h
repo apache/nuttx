@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc54_memorymap.h
+ * arch/arm/src/lpc54xx/chip/lpc54_pinmux.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,20 +33,21 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_MEMORYMAP_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINMUX_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINMUX_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "lpc54_gpio.h"
 
 #if defined(CONFIG_ARCH_FAMILY_LPC546XX)
-#  include "chip/lpc546x_memorymap.h"
+#  include "hardware/lpc546x_pinmux.h"
 #else
 #  error "Unsupported LPC54 family"
 #endif
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINMUX_H */
 

@@ -52,8 +52,8 @@
 
 #include "up_arch.h"
 
-#include "chip/lpc54_syscon.h"
-#include "chip/lpc54_emc.h"
+#include "hardware/lpc54_syscon.h"
+#include "hardware/lpc54_emc.h"
 #include "lpc54_config.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_reset.h"

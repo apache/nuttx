@@ -33,15 +33,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SPI_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SPI_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SPI_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SPI_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -402,4 +402,4 @@
 #define SPI_ID_ID_SHIFT               (15)      /* Bits 16-31: Unique module identifier for this IP block */
 #define SPI_ID_ID_MASK                (0xffff << SPI_ID_ID_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_SPI_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_SPI_H */

@@ -33,15 +33,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_PINT_H
-#define __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_PINT_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINT_H
+#define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINT_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc54_memorymap.h"
+#include "hardware/lpc54_memorymap.h"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -197,4 +197,4 @@
 #define PINT_PMCFG_CFG7_MASK      (7 << PINT_PMCFG_CFG7_SHIFT)
 #  define PINT_PMCFG_CFG7(n)      ((uint32_t)(n) << PINT_PMCFG_CFG7_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_CHIP_LPC54_PINT_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_PINT_H */
