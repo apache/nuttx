@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/kl/kl_tpm.h
+ * arch/arm/src/kl/hardware/kl_tpm.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KL_TPM_H
-#define __ARCH_ARM_SRC_KL_KL_TPM_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_TPM_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_TPM_H
 
 /****************************************************************************
  * Included Files
@@ -208,4 +208,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_KL_TPM_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_TPM_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kl/chip/kl_gpio.h
+ * arch/arm/src/kl/hardware/kl_gpio.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_CHIP_KL_GPIO_H
-#define __ARCH_ARM_SRC_KL_CHIP_KL_GPIO_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_GPIO_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -159,4 +159,4 @@ extern "C"
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_CHIP_KL_GPIO_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_GPIO_H */

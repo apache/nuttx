@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/kl/chip/kl_i2c.h
+ * arch/arm/src/kl/hardware/kl_i2c.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_CHIP_KL_I2C_H
-#define __ARCH_ARM_SRC_KL_CHIP_KL_I2C_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H
 
 /********************************************************************************************
  * Included Files
@@ -185,4 +185,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_CHIP_KL_I2C_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_I2C_H */

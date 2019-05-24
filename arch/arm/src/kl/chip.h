@@ -54,7 +54,7 @@
  * this file for the proper setup.
  */
 
-#include "chip/kl_memorymap.h"
+#include "hardware/kl_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

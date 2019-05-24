@@ -47,8 +47,8 @@
 #include <nuttx/irq.h>
 
 #include "kl_config.h"
-#include "chip/kl_gpio.h"
-#include "chip/kl_port.h"
+#include "hardware/kl_gpio.h"
+#include "hardware/kl_port.h"
 
 /****************************************************************************
  * Pre-processor Declarations

@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 
-#include "chip/kl_port.h"
+#include "hardware/kl_port.h"
 #include "kl_gpio.h"
 
 #ifdef CONFIG_KL_GPIOIRQ

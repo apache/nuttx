@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kl/kl_fmc.h
+ * arch/arm/src/kl/hardware/kl_fmc.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KL_FMC_H
-#define __ARCH_ARM_SRC_KL_KL_FMC_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_FMC_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_FMC_H
 
 /************************************************************************************
  * Included Files
@@ -386,4 +386,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_KL_FMC_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_FMC_H */

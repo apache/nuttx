@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kl/chip/kl_tsi.h
+ * arch/arm/src/kl/hardware/kl_tsi.h
  *
  *   Copyright (C) 2013 Alan Carvalho de Assis
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_CHIP_KL_TSI_H
-#define __ARCH_ARM_SRC_KL_CHIP_KL_TSI_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H
 
 /************************************************************************************
  * Included Files
@@ -151,4 +151,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_CHIP_KL_TSI_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_TSI_H */

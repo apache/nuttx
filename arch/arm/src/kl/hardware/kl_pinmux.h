@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/kl/kl_osc.h
+ * arch/arm/src/kl/hardware/kl_pinmux.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KL_OSC_H
-#define __ARCH_ARM_SRC_KL_KL_OSC_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_PINMUX_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_PINMUX_H
 
 /********************************************************************************************
  * Included Files
@@ -44,30 +44,15 @@
 
 #include "chip.h"
 
+/* This file is just a wrapper around pin muxing header files for the Kinetis family selected
+ * by the logic in chip.h.
+ */
+
+#include "k25z128_pinmux.h"
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-
-/* Register Offsets *************************************************************************/
-
-#define KL_OSC_CR_OFFSET       0x0000 /* OSC Control Register */
-
-/* Register Addresses ***********************************************************************/
-
-#define KL_OSC_CR              (KL_OSC_BASE+KL_OSC_CR_OFFSET)
-
-/* Register Bit Definitions *****************************************************************/
-
-/* OSC Control Register (8-bit) */
-
-#define OSC_CR_ERCLKEN         (1 << 7)  /* Bit 7:  External Reference Enable */
-                                         /* Bit 6:  Reserved */
-#define OSC_CR_EREFSTEN        (1 << 5)  /* Bit 5:  External Reference Stop Enable */
-                                         /* Bit 4:  Reserved */
-#define OSC_CR_SC2P            (1 << 3)  /* Bit 3:  Oscillator 2 pF Capacitor Load Configure */
-#define OSC_CR_SC4P            (1 << 2)  /* Bit 2:  Oscillator 4 pF Capacitor Load Configure */
-#define OSC_CR_SC8P            (1 << 1)  /* Bit 1:  Oscillator 8 pF Capacitor Load Configure */
-#define OSC_CR_SC16P           (1 << 0)  /* Bit 0:  Oscillator 16 pF Capacitor Load Configure */
 
 /********************************************************************************************
  * Public Types
@@ -81,4 +66,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_KL_OSC_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_PINMUX_H */

@@ -54,10 +54,10 @@
 #include "up_arch.h"
 #include "kl_spi.h"
 #include "kl_gpio.h"
-#include "chip/kl_memorymap.h"
-#include "chip/kl_sim.h"
-#include "chip/kl_spi.h"
-#include "chip/kl_pinmux.h"
+#include "hardware/kl_memorymap.h"
+#include "hardware/kl_sim.h"
+#include "hardware/kl_spi.h"
+#include "hardware/kl_pinmux.h"
 
 #if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 

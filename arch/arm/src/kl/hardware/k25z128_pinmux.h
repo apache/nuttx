@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/kl/k25z128_pinmux.h
+ * arch/arm/src/kl/hardware/k25z128_pinmux.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -336,4 +336,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_K40PINMUX_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_K25PINMUX_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/kl/kl_llwu.h
+ * arch/arm/src/kl/hardware/kl_llwu.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KL_LLWU_H
-#define __ARCH_ARM_SRC_KL_KL_LLWU_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_KL_LLWU_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_KL_LLWU_H
 
 /************************************************************************************
  * Included Files
@@ -249,4 +249,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_KL_LLWU_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_KL_LLWU_H */

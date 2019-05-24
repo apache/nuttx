@@ -48,7 +48,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/kl_sim.h"
+#include "hardware/kl_sim.h"
 
 #include "kl_config.h"
 #include "kl_gpio.h"
