@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "chip/imx_gpio.h"
+#include "hardware/imx_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/imx_gpio.h
+ * arch/arm/src/imx6/hardware/imx_gpio.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPIO_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPIO_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPIO_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPIO_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/imx_memorymap.h>
+#include "hardware/imx_memory.map"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -167,4 +167,4 @@
 #define GPIO_ICR_MASK(n)         (3 << GPIO_ICR_SHIFT(n))
 #define GPIO_ICR(i,n)            ((uint32_t)(i) << GPIO_ICR_SHIFT(n))
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPIO_H */

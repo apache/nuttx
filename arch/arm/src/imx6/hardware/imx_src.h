@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/imx6/imx_src.h
+ * arch/arm/src/imx6/hardware/imx_src.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,15 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_SRC_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_SRC_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_SRC_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_SRC_H
 
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/imx_memorymap.h>
+#include "hardware/imx_memory.map"
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -209,4 +209,4 @@
 #define SRC_GPR10_RW2_MASK           (15 << SRC_GPR10_RW2_SHIFT)
 #  define SRC_GPR10_RW2(n)           ((uint32_t)(n) << SRC_GPR10_RW2_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_SRC_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_SRC_H */

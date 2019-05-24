@@ -41,7 +41,7 @@
 
 #include "mmu.h"
 
-#include "chip/imx_memorymap.h"
+#include "hardware/imx_memorymap.h"
 #include "imx_memorymap.h"
 
 /****************************************************************************

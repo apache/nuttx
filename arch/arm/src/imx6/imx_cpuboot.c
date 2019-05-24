@@ -48,7 +48,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/imx_src.h"
+#include "hardware/imx_src.h"
 #include "sctlr.h"
 #include "smp.h"
 #include "scu.h"

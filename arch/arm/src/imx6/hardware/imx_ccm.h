@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/imx_ccm.h
+ * arch/arm/src/imx6/hardware/imx_ccm.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_CCM_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_CCM_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/imx_memorymap.h>
+#include "hardware/imx_memory.map"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -1032,4 +1032,4 @@
 #define CCM_CMEOR_MOD_EN_OV_CAN2_CPI    (1 << 28) /* Bit 28: Overide clock enable signal from CAN2 */
 #define CCM_CMEOR_MOD_EN_OV_CAN1_CPI    (1 << 30) /* Bit 30: Overide clock enable signal from CAN1 */
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_CCM_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H */

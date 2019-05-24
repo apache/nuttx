@@ -47,8 +47,8 @@
 
 #include "up_arch.h"
 #include "gic.h"
-#include "chip/imx_ccm.h"
-#include "chip/imx_gpt.h"
+#include "hardware/imx_ccm.h"
+#include "hardware/imx_gpt.h"
 
 /****************************************************************************
  * Pre-processor Definitions

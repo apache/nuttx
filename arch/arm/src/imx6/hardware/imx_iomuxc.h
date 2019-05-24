@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/chip/imx_iomuxc.h
+ * arch/arm/src/imx6/hardware/imx_iomuxc.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_IOMUXC_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_IOMUXC_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_IOMUXC_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_IOMUXC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/imx_memorymap.h>
+#include "hardware/imx_memory.map"
 
 /* These definitions derive from specifications for the i.MX 6Quad/6Dual and require
  * review and modification in order to support other family members.
@@ -2271,4 +2271,4 @@
 /* Select Input Registers */
 
 #endif /* CONFIG_ARCH_CHIP_IMX6_6QUAD || CONFIG_ARCH_CHIP_IMX6_6DUAL */
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_IOMUXC_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_IOMUXC_H */

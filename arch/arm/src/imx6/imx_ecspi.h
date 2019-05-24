@@ -46,7 +46,7 @@
 #include <stdbool.h>
 #include <nuttx/spi/spi.h>
 
-#include "chip/imx_ecspi.h"
+#include "hardware/imx_ecspi.h"
 
 /************************************************************************************
  * Pre-processor Definitions

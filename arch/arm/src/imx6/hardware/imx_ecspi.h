@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/imx_ecspi.h
+ * arch/arm/src/imx6/hardware/imx_ecspi.h
  *
  *   Copyright (C) 2009-2010, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_IMX6_CHIP_ECSPI_H
-#define __ARCH_ARM_IMX6_CHIP_ECSPI_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/imx_memorymap.h"
+#include "hardware/imx_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -287,4 +287,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX6_CHIP_ECSPI_H */
+#endif  /* __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H */

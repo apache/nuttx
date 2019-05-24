@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/chip/imx_memorymap.h
+ * arch/arm/src/imx6/hardware/imx_memorymap.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -1043,4 +1043,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H */

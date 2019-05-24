@@ -59,7 +59,7 @@
 #include "up_internal.h"
 
 #include "gic.h"
-#include "chip/imx_uart.h"
+#include "hardware/imx_uart.h"
 #include "imx_config.h"
 #include "imx_lowputc.h"
 

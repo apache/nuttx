@@ -1,5 +1,5 @@
 /*****************************************************************************************************
- * arch/arm/src/imx6/imx_pinmux.h
+ * arch/arm/src/imx6/hardware/imx_pinmux.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  *
  *****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_PINMUX_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_PINMUX_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_PINMUX_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_PINMUX_H
 
 /*****************************************************************************************************
  * Pre-processor Definitions
@@ -964,4 +964,4 @@
 #define GPIO_XTALOSC_REF_CLK_24M_2    (GPIO_PERIPH | GPIO_ALT7 | GPIO_PADMUX(IMX_PADMUX_RGMII_TXC_INDEX))
 #define GPIO_XTALOSC_REF_CLK_32K      (GPIO_PERIPH | GPIO_ALT1 | GPIO_PADMUX(IMX_PADMUX_GPIO08_INDEX))
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_PINMUX_H */

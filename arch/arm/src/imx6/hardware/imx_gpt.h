@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/imx6/imx_gpt.h
+ * arch/arm/src/imx6/hardware/imx_gpt.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,15 +37,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPT_H
-#define __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPT_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPT_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <chip/imx_memorymap.h>
+#include "hardware/imx_memory.map"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -154,4 +154,4 @@
 /* GPT Input Capture Register 1,2 -- 32-bit capture registers */
 /* GPT Counter Register -- 32-bit counter */
 
-#endif /* __ARCH_ARM_SRC_IMX6_CHIP_IMX_GPT_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_GPT_H */

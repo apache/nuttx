@@ -44,7 +44,7 @@
 
 #include <stdint.h>
 
-#include "chip/imx_iomuxc.h"
+#include "hardware/imx_iomuxc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
