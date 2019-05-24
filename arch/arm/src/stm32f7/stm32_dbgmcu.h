@@ -43,6 +43,6 @@
 
 #include <nuttx/config.h>
 
-#include "chip/stm32_dbgmcu.h"
+#include "hardware/stm32_dbgmcu.h"
 
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_DBGMCU_H */

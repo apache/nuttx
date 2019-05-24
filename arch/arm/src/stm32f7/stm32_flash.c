@@ -60,7 +60,7 @@
 
 #include "barriers.h"
 
-#include "chip/stm32_flash.h"
+#include "hardware/stm32_flash.h"
 #include "up_arch.h"
 
 /****************************************************************************

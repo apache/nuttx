@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/stm32_sdmmc.h"
+#include "hardware/stm32_sdmmc.h"
 
 
 /************************************************************************************

@@ -50,7 +50,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "chip/stm32_gpio.h"
+#include "hardware/stm32_gpio.h"
 
 /************************************************************************************
  * Pre-Processor Declarations

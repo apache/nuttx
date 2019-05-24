@@ -52,7 +52,7 @@
 #include <nuttx/drivers/drivers.h>
 
 #include "up_arch.h"
-#include "chip/stm32_rng.h"
+#include "hardware/stm32_rng.h"
 #include "up_internal.h"
 
 #if defined(CONFIG_STM32F7_RNG)

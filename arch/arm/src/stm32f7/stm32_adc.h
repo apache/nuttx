@@ -46,7 +46,7 @@
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
-#include "chip/stm32_adc.h"
+#include "hardware/stm32_adc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -128,7 +128,7 @@
     defined(CONFIG_STM32F7_TIM17_PWM)
 
 #include <arch/board/board.h>
-#include "chip/stm32_tim.h"
+#include "hardware/stm32_tim.h"
 
 #ifdef CONFIG_PWM_MULTICHAN
 

@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <chip/stm32_memorymap.h>
+#include "hardware/stm32_memorymap.h"
 
 #include "stm32_uid.h"
 

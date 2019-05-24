@@ -48,7 +48,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_tim.h"
+#include "hardware/stm32_tim.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/stm32_otg.h"
+#include "hardware/stm32_otg.h"
 
 #if defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGFSHS)
 

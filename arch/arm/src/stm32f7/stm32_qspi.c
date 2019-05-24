@@ -68,7 +68,7 @@
 #include "stm32_gpio.h"
 #include "stm32_dma.h"
 #include "stm32_rcc.h"
-#include "chip/stm32_qspi.h"
+#include "hardware/stm32_qspi.h"
 
 #ifdef CONFIG_STM32F7_QUADSPI
 
