@@ -46,7 +46,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/sam_spi.h"
+#include "hardware/sam_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions

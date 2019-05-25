@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_tc.h"
+#include "hardware/sam_tc.h"
 
 #ifdef CONFIG_TIMER
 

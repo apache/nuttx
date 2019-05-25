@@ -57,8 +57,8 @@
 
 #include "sam_dmac.h"
 #include "sam_periphclks.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_dmac.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions

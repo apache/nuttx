@@ -61,7 +61,7 @@
 #include "up_arch.h"
 #include "sam_gpio.h"
 #include "sam4l_periphclks.h"
-#include "chip/sam4l_lcdca.h"
+#include "hardware/sam4l_lcdca.h"
 
 #include "sam4l-xplained.h"
 

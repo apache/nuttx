@@ -50,11 +50,11 @@
 #include "up_arch.h"
 
 #include "up_internal.h"
-#include "chip/sam4l_pm.h"
-#include "chip/sam4l_scif.h"
-#include "chip/sam4l_bpm.h"
-#include "chip/sam4l_bscif.h"
-#include "chip/sam4l_flashcalw.h"
+#include "hardware/sam4l_pm.h"
+#include "hardware/sam4l_scif.h"
+#include "hardware/sam4l_bpm.h"
+#include "hardware/sam4l_bscif.h"
+#include "hardware/sam4l_flashcalw.h"
 
 #include "sam4l_periphclks.h"
 #include "sam_clockconfig.h"

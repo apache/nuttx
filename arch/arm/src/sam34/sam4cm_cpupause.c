@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "sched/sched.h"
 #include "up_internal.h"
-#include "chip/sam4cm_ipc.h"
+#include "hardware/sam4cm_ipc.h"
 
 #ifdef CONFIG_SMP
 

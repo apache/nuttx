@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "sam_gpio.h"
-#include "chip/sam3u_pio.h"
+#include "hardware/sam3u_pio.h"
 
 #include "arduino-due.h"
 

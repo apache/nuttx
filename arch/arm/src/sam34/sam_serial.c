@@ -67,9 +67,9 @@
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4CM) || \
     defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
-#  include "chip/sam_uart.h"
+#  include "hardware/sam_uart.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#  include "chip/sam4l_usart.h"
+#  include "hardware/sam4l_usart.h"
 #else
 #  error Unknown UART
 #endif

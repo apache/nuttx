@@ -47,7 +47,7 @@
  */
 
 #include <arch/sam34/chip.h>
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /* Include the chip interrupt definition file */
 

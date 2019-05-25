@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_emac.h"
+#include "hardware/sam_emac.h"
 
 #ifdef CONFIG_SAM34_EMAC
 

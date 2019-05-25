@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam4l_pm.h"
+#include "hardware/sam4l_pm.h"
 
 #ifdef CONFIG_ARCH_CHIP_SAM4L
 

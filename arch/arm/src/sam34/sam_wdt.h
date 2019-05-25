@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_wdt.h"
+#include "hardware/sam_wdt.h"
 
 #ifdef CONFIG_WATCHDOG
 

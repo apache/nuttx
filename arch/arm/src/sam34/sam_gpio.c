@@ -58,11 +58,11 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
-#  include "chip/sam3u_pio.h"
+#  include "hardware/sam3u_pio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4E)
-#  include "chip/sam4e_pio.h"
+#  include "hardware/sam4e_pio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
-#  include "chip/sam4s_pio.h"
+#  include "hardware/sam4s_pio.h"
 #else
 #  error Unrecognized SAM architecture
 #endif

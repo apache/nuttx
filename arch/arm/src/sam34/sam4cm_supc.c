@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/sam_supc.h"
+#include "hardware/sam_supc.h"
 
 #include "sam4cm_supc.h"
 
