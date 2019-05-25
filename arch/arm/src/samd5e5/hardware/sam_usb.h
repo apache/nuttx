@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_usb.h
+ * arch/arm/src/samd5e5/hardware/sam_usb.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  ********************************************************************************************/
 
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_USB_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_USB_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_USB_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_USB_H
 
 /********************************************************************************************
  * Included Files
@@ -630,4 +630,4 @@ struct usbhost_pipedesc_s
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_USB_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_USB_H */

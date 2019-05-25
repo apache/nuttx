@@ -58,7 +58,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_gclk.h"
 #include "sam_port.h"
 #include "sam_sercom.h"

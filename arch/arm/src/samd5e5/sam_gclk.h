@@ -47,7 +47,7 @@
 
 #include "up_arch.h"
 #include "sam_config.h"
-#include "chip/sam_gclk.h"
+#include "hardware/sam_gclk.h"
 
 /****************************************************************************
  * Pre-processor Definitions

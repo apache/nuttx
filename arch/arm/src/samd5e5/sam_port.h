@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 
-#include "chip/sam_port.h"
+#include "hardware/sam_port.h"
 
 /****************************************************************************
  * Pre-processor Declarations

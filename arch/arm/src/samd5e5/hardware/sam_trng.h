@@ -1,7 +1,7 @@
 /********************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_rstc.h
+ * arch/arm/src/samd5e5/hardware/sam_trng.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_RSTC_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_RSTC_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TRNG_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TRNG_H
 
 /********************************************************************************************
  * Included Files
@@ -42,39 +42,44 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* RSTC register offsets ********************************************************************/
 
-#define SAM_RSTC_RCAUSE_OFFSET         0x0000  /* Reset cause */
-#define SAM_RSTC_BKUPEXIT_OFFSET       0x0002  /* Backup exit source */
+/* TRNG register offsets ********************************************************************/
 
-/* RSTC register addresses ******************************************************************/
+#define SAM_TRNG_CTRLA_OFFSET       0x0000  /* Control A register */
+#define SAM_TRNG_EVCTRL_OFFSET      0x0004  /* Event control register */
+#define SAM_TRNG_INTENCLR_OFFSET    0x0008  /* Interrupt enable clear register */
+#define SAM_TRNG_INTENSET_OFFSET    0x0009  /* Interrupt enable set register */
+#define SAM_TRNG_INTFLAG_OFFSET     0x000a  /* Interrupt flag and status clear register */
+#define SAM_TRNG_DATA_OFFSET        0x0020  /* Output data register */
 
-#define SAM_RSTC_RCAUSE                (SAM_RSTC_BASE + SAM_RSTC_RCAUSE_OFFSET)
-#define SAM_RSTC_BKUPEXIT              (SAM_RSTC_BASE + SAM_RSTC_BKUPEXIT_OFFSET)
+/* TRNG register addresses ******************************************************************/
 
-/* RSTC register bit definitions ************************************************************/
+#define SAM_TRNG_CTRLA              (SAM_TRNG_BASE+SAM_TRNG_CTRLA_OFFSET)
+#define SAM_TRNG_EVCTRL             (SAM_TRNG_BASE+SAM_TRNG_EVCTRL_OFFSET)
+#define SAM_TRNG_INTENCLR           (SAM_TRNG_BASE+SAM_TRNG_INTENCLR_OFFSET)
+#define SAM_TRNG_INTENSET           (SAM_TRNG_BASE+SAM_TRNG_INTENSET_OFFSET)
+#define SAM_TRNG_INTFLAG            (SAM_TRNG_BASE+SAM_TRNG_INTFLAG_OFFSET)
+#define SAM_TRNG_DATA               (SAM_TRNG_BASE+SAM_TRNG_DATA_OFFSET)
 
-/* Reset cause */
+/* TRNG register bit definitions ************************************************************/
 
-#define RSTC_RCAUSE_POR                (1 << 0)  /* Bit 0: Power on reset */
-#define RSTC_RCAUSE_BOD12              (1 << 1)  /* Bit 1: Brown out 12 detector reset */
-#define RSTC_RCAUSE_BOD33              (1 << 2)  /* Bit 2: Brown out 33 detector reset */
-#define RSTC_RCAUSE_NVM                (1 << 3)  /* Bit 3: External reset */
-#define RSTC_RCAUSE_EXT                (1 << 4)  /* Bit 4: External reset */
-#define RSTC_RCAUSE_WDT                (1 << 5)  /* Bit 5: Watchdog reset */
-#define RSTC_RCAUSE_SYST               (1 << 6)  /* Bit 6: System reset request */
-#define RSTC_RCAUSE_BACKUP             (1 << 7)  /* Bit 7: Backup reset*/
+/* Control register */
 
-/* Backup exit source */
+#define TRNG_CTRLA_ENABLE            (1 << 1)  /* Bit 1:  Enable */
+#define TRNG_CTRLA_RUNSTDBY          (1 << 6)  /* Bit 6:  Run in standby */
 
-#define RSTC_BKUPEXIT_RTC              (1 << 1)  /* Bit 1: Real time counter interrupt */
-#define RSTC_BKUPEXIT_BBPS             (1 << 2)  /* Bit 2: Battery backup power switch */
-#define RSTC_BKUPEXIT_HIB              (1 << 7)  /* Bit 7: Hibernate */
+/* Event control register, Interrupt enable clear, interrupt enable set register, interrupt
+ * flag status registers.
+ */
+
+#define TRNG_EVCTRL_DATARDYEO        (1 << 0)  /* Bit 0:  Data ready event output */
+
+/* Data register (32-bit data) */
 
 /********************************************************************************************
  * Public Types
@@ -88,4 +93,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_RSTC_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TRNG_H */

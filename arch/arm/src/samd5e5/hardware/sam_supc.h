@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_supc.h
+ * arch/arm/src/samd5e5/hardware/sam_supc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_SUPC_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_SUPC_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H
 
 /********************************************************************************************
  * Included Files
@@ -228,4 +228,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_SUPC_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_SUPC_H */

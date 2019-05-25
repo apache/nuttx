@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_cmcc.h
+ * arch/arm/src/samd5e5/hardware/sam_cmcc.h
  * Cortex M Cache Controller (CMCC) for the SAMD5/E5
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_CMCC_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_CMCC_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -193,4 +193,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_CMCC_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_CMCC_H */

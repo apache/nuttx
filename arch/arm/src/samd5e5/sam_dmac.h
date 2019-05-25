@@ -44,7 +44,7 @@
 
 #include <stdint.h>
 
-#include "chip/sam_dmac.h"
+#include "hardware/sam_dmac.h"
 
 /************************************************************************************
  * Pre-processor Definitions

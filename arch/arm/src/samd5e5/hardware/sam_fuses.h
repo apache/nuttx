@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_fuses.h
+ * arch/arm/src/samd5e5/hardware/sam_fuses.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_FUSES_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_FUSES_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H
 
 /********************************************************************************************
  * Included Files
@@ -273,4 +273,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_FUSES_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_FUSES_H */

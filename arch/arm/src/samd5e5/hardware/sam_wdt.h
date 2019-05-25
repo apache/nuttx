@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_wdt.h
+ * arch/arm/src/samd5e5/hardware/sam_wdt.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_WDT_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_WDT_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H
 
 /********************************************************************************************
  * Included Files
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -157,4 +157,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_WDT_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_WDT_H */

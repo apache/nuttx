@@ -44,7 +44,7 @@
 #include <assert.h>
 
 #include "up_arch.h"
-#include "chip/sam_cmcc.h"
+#include "hardware/sam_cmcc.h"
 #include "sam_cmcc.h"
 
 #ifdef CONFIG_SAMD5E5_CMCC

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/samd5e5/chip/sam_memorymap.h
+ * arch/arm/src/samd5e5/hardware/sam_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -43,9 +43,9 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_SAMD5X) || defined(ARCH_CHIP_SAME5X)
-#  include "chip/samd5e5_pinmap.h"
+#  include "hardware/samd5e5_pinmap.h"
 #else
 #  error "Unsupported SAMD5/E5 family"
 #endif
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAM_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_PINMAP_H */
