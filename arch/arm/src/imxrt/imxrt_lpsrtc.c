@@ -54,7 +54,7 @@
 
 #include "up_arch.h"
 
-#include "chip/imxrt_snvs.h"
+#include "hardware/imxrt_snvs.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_hprtc.h"
 #include "imxrt_lpsrtc.h"

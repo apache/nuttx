@@ -86,10 +86,10 @@
 
 #include "imxrt_lpspi.h"
 #include "imxrt_gpio.h"
-#include "chip/imxrt_pinmux.h"
-#include "chip/imxrt_lpspi.h"
-#include "chip/imxrt_ccm.h"
-#include "chip/imxrt_periphclks.h"
+#include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_lpspi.h"
+#include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_periphclks.h"
 
 #if defined(CONFIG_IMXRT_LPSPI1) || defined(CONFIG_IMXRT_LPSPI2) || \
     defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4)

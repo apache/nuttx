@@ -65,9 +65,9 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/imxrt_lpuart.h"
+#include "hardware/imxrt_lpuart.h"
 #include "imxrt_gpio.h"
-#include "chip/imxrt_pinmux.h"
+#include "hardware/imxrt_pinmux.h"
 #include "imxrt_config.h"
 #include "imxrt_lowputc.h"
 

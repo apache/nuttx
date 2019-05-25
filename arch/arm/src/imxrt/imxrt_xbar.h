@@ -43,8 +43,8 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include "chip/imxrt_xbar.h"
-#include "chip/imxrt_memorymap.h"
+#include "hardware/imxrt_xbar.h"
+#include "hardware/imxrt_memorymap.h"
 
 /**************************************************************************************************************************************************
  * Pre-processor Definitions
@@ -114,7 +114,7 @@
 #define IMXRT_SIDE(six)                                  ((six) & IMXRT_XBARA_SIDE_MASK)  >> IMXRT_XBARA_SIDE_SHIFTS
 
 /* Collect correct XBAR definitions from chip file */
-#include "chip/imxrt_xbar.h"
+#include "hardware/imxrt_xbar.h"
 
 /**************************************************************************************************************************************************
  * Public Functions

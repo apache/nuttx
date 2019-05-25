@@ -62,8 +62,8 @@
 #include "sched/sched.h"
 
 #include "chip.h"
-#include "chip/imxrt_edma.h"
-#include "chip/imxrt_dmamux.h"
+#include "hardware/imxrt_edma.h"
+#include "hardware/imxrt_dmamux.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_edma.h"
 
@@ -886,7 +886,7 @@ void weak_function up_dma_initialize(void)
  *
  * Input Parameters:
  *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
- *            bit-field definitions in chip/imxrt_dmamux.h.  Settings include:
+ *            bit-field definitions in hardware/imxrt_dmamux.h.  Settings include:
  *
  *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
  *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
@@ -896,7 +896,7 @@ void weak_function up_dma_initialize(void)
  *            A value of zero will disable the DMAMUX channel.
  *   dchpri - DCHPRI channel priority configuration.  See DCHPRI channel
  *            configuration register bit-field definitions in
- *            chip/imxrt_edma.h.  Meaningful settings include:
+ *            hardware/imxrt_edma.h.  Meaningful settings include:
  *
  *            EDMA_DCHPRI_CHPRI       Channel Arbitration Priority
  *            DCHPRI_DPA              Disable Preempt Ability

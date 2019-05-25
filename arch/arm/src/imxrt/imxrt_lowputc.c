@@ -45,10 +45,10 @@
 
 #include "up_arch.h"
 
-#include "chip/imxrt_iomuxc.h"
-#include "chip/imxrt_pinmux.h"
-#include "chip/imxrt_ccm.h"
-#include "chip/imxrt_lpuart.h"
+#include "hardware/imxrt_iomuxc.h"
+#include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_lpuart.h"
 #include "imxrt_config.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_iomuxc.h"

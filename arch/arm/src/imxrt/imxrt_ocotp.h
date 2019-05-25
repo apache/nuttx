@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/imxrt_ocotp.h"
+#include "hardware/imxrt_ocotp.h"
 
 #include <sys/types.h>
 #include <stdint.h>
