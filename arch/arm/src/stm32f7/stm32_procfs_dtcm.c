@@ -69,7 +69,8 @@
 
 #include "stm32_dtcm.h"
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
+     defined(CONFIG_FS_PROCFS_REGISTER) && defined(CONFIG_STM32F7_DTCM_PROCFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,7 +121,7 @@ static int     dtcm_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations dtcm_procfsoperations =
+static const struct procfs_operations dtcm_procfsoperations =
 {
   dtcm_open,       /* open */
   dtcm_close,      /* close */
@@ -132,6 +133,12 @@ const struct procfs_operations dtcm_procfsoperations =
   NULL,            /* readdir */
   NULL,            /* rewinddir */
   dtcm_stat        /* stat */
+};
+
+static const struct procfs_entry_s g_procfs_dtcm =
+{
+  "dtcm",
+  &dtcm_procfsoperations
 };
 
 /****************************************************************************
@@ -320,4 +327,22 @@ static int dtcm_stat(const char *relpath, struct stat *buf)
   return OK;
 }
 
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dtcm_procfs_register
+ *
+ * Description:
+ *   Register the DTCM procfs file system entry
+ *
+ ****************************************************************************/
+
+int dtcm_procfs_register(void)
+{
+  return procfs_register(&g_procfs_dtcm);
+}
+
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&
+        * CONFIG_FS_PROCFS_REGISTER && CONFIG_STM32F7_DTCM_PROCFS */
