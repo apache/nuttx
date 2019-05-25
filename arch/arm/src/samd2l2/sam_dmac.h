@@ -46,14 +46,14 @@
 
 #include "chip.h"
 
-#include "chip/sam_dmac.h"
+#include "hardware/sam_dmac.h"
 
 #ifdef CONFIG_SAMD2L2_DMAC
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_dmac.h"
+#  include "hardware/samd_dmac.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_dmac.h"
+#  include "hardware/saml_dmac.h"
 #else
 #  error Unrecognized SAMD/L architecture
 #endif

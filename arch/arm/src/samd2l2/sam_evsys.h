@@ -49,9 +49,9 @@
 #include "sam_port.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_evsys.h"
+#  include "hardware/samd_evsys.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_evsys.h"
+#  include "hardware/saml_evsys.h"
 #else
 #  error Unrecognized SAMD/L architecture
 #endif

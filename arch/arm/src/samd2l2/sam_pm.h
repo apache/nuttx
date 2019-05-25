@@ -45,9 +45,9 @@
 #include "sam_config.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_pm.h"
+#  include "hardware/samd_pm.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_pm.h"
+#  include "hardware/saml_pm.h"
 #endif
 
 /****************************************************************************

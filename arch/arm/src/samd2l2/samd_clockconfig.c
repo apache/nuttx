@@ -56,10 +56,10 @@
 
 #include "up_arch.h"
 
-#include "chip/samd_pm.h"
-#include "chip/samd_sysctrl.h"
-#include "chip/samd_gclk.h"
-#include "chip/samd_nvmctrl.h"
+#include "hardware/samd_pm.h"
+#include "hardware/samd_sysctrl.h"
+#include "hardware/samd_gclk.h"
+#include "hardware/samd_nvmctrl.h"
 #include "sam_fuses.h"
 #include "sam_gclk.h"
 

@@ -50,9 +50,9 @@
 #include "up_arch.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
-#  include "chip/samd_usart.h"
+#  include "hardware/samd_usart.h"
 #elif defined(CONFIG_ARCH_FAMILY_SAML21)
-#  include "chip/saml_usart.h"
+#  include "hardware/saml_usart.h"
 #endif
 
 #include "sam_config.h"

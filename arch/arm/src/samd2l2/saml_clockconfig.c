@@ -56,12 +56,12 @@
 
 #include "up_arch.h"
 
-#include "chip/saml_pm.h"
-#include "chip/saml_supc.h"
-#include "chip/saml_oscctrl.h"
-#include "chip/saml_osc32kctrl.h"
-#include "chip/saml_gclk.h"
-#include "chip/saml_nvmctrl.h"
+#include "hardware/saml_pm.h"
+#include "hardware/saml_supc.h"
+#include "hardware/saml_oscctrl.h"
+#include "hardware/saml_osc32kctrl.h"
+#include "hardware/saml_gclk.h"
+#include "hardware/saml_nvmctrl.h"
 #include "sam_gclk.h"
 
 #include <arch/board/board.h>
