@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #include <nuttx/can/can.h>
 
-#include "chip/lpc43_can.h"
+#include "hardware/lpc43_can.h"
 
 #ifndef __ASSEMBLY__
 

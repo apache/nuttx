@@ -44,8 +44,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/lpc43_timer.h"
-#include "chip/lpc43_ccu.h"
+#include "hardware/lpc43_timer.h"
+#include "hardware/lpc43_ccu.h"
 
 #ifdef CONFIG_TIMER
 

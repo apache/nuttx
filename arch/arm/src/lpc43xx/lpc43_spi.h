@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
-#include "chip/lpc43_spi.h"
+#include "hardware/lpc43_spi.h"
 
 #ifdef CONFIG_LPC43_SPI
 

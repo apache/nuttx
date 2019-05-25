@@ -44,7 +44,7 @@
 
 #include "chip.h"
 
-#include "chip/lpc43_ethernet.h"
+#include "hardware/lpc43_ethernet.h"
 
 #ifndef __ASSEMBLY__
 

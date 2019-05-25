@@ -66,7 +66,7 @@
 #include "up_internal.h"
 #include "nvic.h"
 
-#include "chip/lpc43_creg.h"
+#include "hardware/lpc43_creg.h"
 
 #include "lpc43_rgu.h"
 #include "lpc43_cgu.h"

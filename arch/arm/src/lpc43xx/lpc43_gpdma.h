@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc43_gpdma.h"
+#include "hardware/lpc43_gpdma.h"
 
 #ifdef CONFIG_LPC43_GPDMA
 

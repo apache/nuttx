@@ -56,7 +56,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/lpc43_rit.h"
+#include "hardware/lpc43_rit.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 

@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
-#include "chip/lpc43_adc.h"
+#include "hardware/lpc43_adc.h"
 
 #ifdef CONFIG_LPC43_ADC0
 

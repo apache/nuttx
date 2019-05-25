@@ -44,7 +44,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "chip.h"
-#include "chip/lpc43_spifi.h"
+#include "hardware/lpc43_spifi.h"
 
 #ifdef CONFIG_LPC43_SPIFI
 

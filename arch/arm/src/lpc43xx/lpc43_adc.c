@@ -74,8 +74,8 @@
 #include "lpc43_ccu.h"
 #include "lpc43_creg.h"
 
-#include "chip/lpc43_gima.h"
-#include "chip/lpc43_timer.h"
+#include "hardware/lpc43_gima.h"
+#include "hardware/lpc43_timer.h"
 
 #include "lpc43_pinconfig.h"
 

@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "chip/lpc43_cgu.h"
+#include "hardware/lpc43_cgu.h"
 
 /************************************************************************************
  * Pre-processor Definitions

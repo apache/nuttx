@@ -65,7 +65,7 @@
 
 #include "up_arch.h"
 
-#include "chip/lpc43_pinconfig.h"
+#include "hardware/lpc43_pinconfig.h"
 #include "lpc43_cgu.h"
 #include "lpc43_ccu.h"
 #include "lpc43_gpio.h"
