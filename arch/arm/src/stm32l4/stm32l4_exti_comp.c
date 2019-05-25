@@ -45,7 +45,7 @@
 #include "up_arch.h"
 #include "stm32l4_comp.h"
 #include "stm32l4_exti.h"
-#include "chip/stm32l4_exti.h"
+#include "hardware/stm32l4_exti.h"
 
 /****************************************************************************
  * Private Types

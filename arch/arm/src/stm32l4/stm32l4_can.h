@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32l4_can.h"
+#include "hardware/stm32l4_can.h"
 
 #include <nuttx/can/can.h>
 

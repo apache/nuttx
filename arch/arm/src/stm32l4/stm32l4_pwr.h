@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/stm32l4_pwr.h"
+#include "hardware/stm32l4_pwr.h"
 
 /************************************************************************************
  * Pre-processor Definitions

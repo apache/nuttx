@@ -104,7 +104,7 @@
     defined(CONFIG_STM32L4_TIM17_PWM)
 
 #include <arch/board/board.h>
-#include "chip/stm32l4_tim.h"
+#include "hardware/stm32l4_tim.h"
 
 #ifdef CONFIG_PWM_MULTICHAN
 

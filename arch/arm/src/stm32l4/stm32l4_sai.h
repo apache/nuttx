@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32l4_sai.h"
+#include "hardware/stm32l4_sai.h"
 
 #include <nuttx/audio/i2s.h>
 

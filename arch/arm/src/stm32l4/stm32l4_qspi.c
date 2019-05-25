@@ -66,8 +66,8 @@
 #include "stm32l4_dma.h"
 #include "stm32l4_qspi.h"
 #include "stm32l4_rcc.h"
-#include "chip/stm32l4_qspi.h"
-#include "chip/stm32l4_pinmap.h"
+#include "hardware/stm32l4_qspi.h"
+#include "hardware/stm32l4_pinmap.h"
 
 #ifdef CONFIG_STM32L4_QSPI
 

@@ -52,7 +52,7 @@
 
 #include "up_arch.h"
 #include "stm32l4_rcc.h"
-#include "chip/stm32l4_dbgmcu.h"
+#include "hardware/stm32l4_dbgmcu.h"
 #include "stm32l4_wdg.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32L4_IWDG)

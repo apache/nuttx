@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
-#include "chip/stm32l4_syscfg.h"
+#include "hardware/stm32l4_syscfg.h"
 
 #include "stm32l4_firewall.h"
 

@@ -44,7 +44,7 @@
 
 #include <stdbool.h>
 
-#include "chip/stm32l4_comp.h"
+#include "hardware/stm32l4_comp.h"
 
 /************************************************************************************
  * Public Types

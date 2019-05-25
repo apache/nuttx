@@ -50,7 +50,7 @@
 
 #include "stm32l4_gpio.h"
 #include "stm32l4_adc.h"
-#include "chip/stm32l4_adc.h"
+#include "hardware/stm32l4_adc.h"
 #include "nucleo-l476rg.h"
 
 /****************************************************************************

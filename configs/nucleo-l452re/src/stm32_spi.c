@@ -47,7 +47,7 @@
 #include <nuttx/spi/spi.h>
 
 #include <up_arch.h>
-#include <chip.h>
+#include "chip.h"
 #include <stm32l4.h>
 
 #include "nucleo-l452re.h"

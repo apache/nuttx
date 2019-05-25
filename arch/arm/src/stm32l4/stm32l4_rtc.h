@@ -48,7 +48,7 @@
 
 #include "chip.h"
 
-#include "chip/stm32l4_rtcc.h"
+#include "hardware/stm32l4_rtcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -41,8 +41,8 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "chip/stm32l4_rcc.h"
-#include "chip/stm32l4_crs.h"
+#include "hardware/stm32l4_rcc.h"
+#include "hardware/stm32l4_crs.h"
 
 #include "stm32l4_hsi48.h"
 
