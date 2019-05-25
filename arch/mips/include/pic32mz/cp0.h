@@ -421,10 +421,6 @@
  *   See arch/mips/include/mips32/cp0.h
  */
 
-#define CP0_CONFIG3_SP              (1 << 4)  /* Bit 4: Support page bit */
-#define CP0_CONFIG3_VINT            (1 << 5)  /* Bit 5: Vector interrupt bit */
-#define CP0_CONFIG3_VEIC            (1 << 6)  /* Bit 6: External interrupt controller supported */
-
 /* Register Number: 16 Sel: 4 Name: Config4
  * To be provided
  */

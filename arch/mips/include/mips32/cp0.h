@@ -417,11 +417,37 @@
 #define CP0_CONFIG2_M               (1 << 31) /* Bit 31: Config3 register is present */
 
 /* Register Number: 16 Sel: 3 Name: Config3
- * Function: Configuration register 3
+ * Function: Configuration register 3 (Section 50: "CPU for Devices with MIPS32
+ *            microAptive and M-Class Cores")
  * Compliance Level: Optional.
  */
-#define CP0_CONFIG3_TL              (1 << 0)  /* Bit 0: Trace Logic implemented */
-#define CP0_CONFIG3_SM              (1 << 1)  /* Bit 1: SmartMIPS™ ASE implemented */
+
+#define CP0_CONFIG3_TL              (1 << 0)  /* Bit 0:  Trace Logic implemented */
+#define CP0_CONFIG3_SM              (1 << 1)  /* Bit 1:  SmartMIPS™ ASE implemented */
+#define CP0_CONFIG3_CDMM            (1 << 3)  /* Bit 3:  Common Device Memory Map */
+#define CP0_CONFIG3_SP              (1 << 4)  /* Bit 4:  Small page bit */
+#define CP0_CONFIG3_VINT            (1 << 5)  /* Bit 5:  Vector interrupt bit */
+#define CP0_CONFIG3_VEIC            (1 << 6)  /* Bit 6:  External interrupt controller supported */
+#define CP0_CONFIG3_ITL             (1 << 8)  /* Bit 8:  Flowtrace® Hardware bit */
+#define CP0_CONFIG3_DSPP            (1 << 10) /* Bit 10: MIPS DSP ASE Presence bit */
+#define CP0_CONFIG3_DSP2            (1 << 11) /* Bit 11: MIPS DSP ASE Revision 2 Presence bit */
+#define CP0_CONFIG3_RXI             (1 << 12) /* Bit 12: RIE and XIE Implemented in PageGrain bit */
+#define CP0_CONFIG3_ULRI            (1 << 13) /* Bit 13: UserLocal register implemented bit */
+#define CP0_CONFIG3_ISA_SHIFT       (14)      /* Bits 14-15: Indicates Instruction Set Availability */
+#define CP0_CONFIG3_ISA_MASK        (3 << CP0_CONFIG3_ISA_SHIFT)
+#  define CP0_CONFIG3_ISA_MIPS32    (0 << CP0_CONFIG3_ISA_SHIFT) /* Only MIPS32 is implemented */
+#  define CP0_CONFIG3_ISA_MICROMIPS (1 << CP0_CONFIG3_ISA_SHIFT) /* Only microMIPS is implemented */
+#  define CP0_CONFIG3_ISA_BOTHMIP32 (2 << CP0_CONFIG3_ISA_SHIFT) /* Both supported, MIPS32 on reset */
+#  define CP0_CONFIG3_ISA_BOTHUMIPS (3 << CP0_CONFIG3_ISA_SHIFT) /* Both supported, microMIPS on reset */
+#define CP0_CONFIG3_ISAONEXC        (1 << 16) /* Bit 16: ISA on Exception bit */
+#define CP0_CONFIG3_MCU             (1 << 17) /* Bit 17: MIPS MCU ASE Implemented bit */
+#define CP0_CONFIG3_MMAR_SHIFT      (18)      /* Bits 18-20: microMIPS Architecture Revision level bits */
+#define CP0_CONFIG3_MMAR_MASK       (7 << CP0_CONFIG3_MMAR_SHIFT)
+#  define CP0_CONFIG3_MMAR_REL1     (0 << CP0_CONFIG3_MMAR_SHIFT) /* Release 1 */
+#define CP0_CONFIG3_IPLW_SHIFT      (21)      /* Bits 21-22: Width of the Status IPL and Cause RIPL bits */
+#define CP0_CONFIG3_IPLW_MASK       (3 << CP0_CONFIG3_IPLW_SHIFT)
+#  define CP0_CONFIG3_IPLW_6BITS    (0 << CP0_CONFIG3_IPLW_SHIFT) /* 6 bits */
+#  define CP0_CONFIG3_IPLW_8BITS    (1 << CP0_CONFIG3_IPLW_SHIFT) /* 8 bits */
 #define CP0_CONFIG3_M               (1 << 31) /* Bit 31: Config4 register is present */
 
 /* Register Number: 16 Sel: 6-7 (Available for implementation dependent use) */
