@@ -46,8 +46,8 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/stm32fxxxxx_otgfs.h"
-#include "chip/stm32_otghs.h"
+#include "hardware/stm32fxxxxx_otgfs.h"
+#include "hardware/stm32_otghs.h"
 
 #if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && defined(CONFIG_USBHOST)
 

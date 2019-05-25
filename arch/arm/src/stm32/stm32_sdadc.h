@@ -47,7 +47,7 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32F37XX)
-#  include "chip/stm32f37xxx_sdadc.h"
+#  include "hardware/stm32f37xxx_sdadc.h"
 #else
 /* No generic chip/stm32_sdadc.h yet */
 

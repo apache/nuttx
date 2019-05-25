@@ -58,8 +58,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "chip/stm32_ltdc.h"
-#include "chip/stm32_dma2d.h"
+#include "hardware/stm32_ltdc.h"
+#include "hardware/stm32_dma2d.h"
 #include "stm32_ltdc.h"
 #include "stm32_dma2d.h"
 

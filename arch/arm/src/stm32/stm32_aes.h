@@ -51,7 +51,7 @@
  */
 
 #ifdef CONFIG_STM32_STM32L15XX
-#  include "chip/stm32l15xxx_aes.h"
+#  include "hardware/stm32l15xxx_aes.h"
 #else
 #  error "Unknown chip for AES"
 #endif

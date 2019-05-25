@@ -50,9 +50,9 @@
 
 #include "chip.h"
 #ifdef CONFIG_STM32_STM32F10XX
-#  include "chip/stm32_bkp.h"
+#  include "hardware/stm32_bkp.h"
 #else
-#  include "chip/stm32_rtcc.h"
+#  include "hardware/stm32_rtcc.h"
 #endif
 
 /************************************************************************************

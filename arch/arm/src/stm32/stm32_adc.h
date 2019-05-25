@@ -46,7 +46,7 @@
 
 #include "chip.h"
 
-#include "chip/stm32_adc.h"
+#include "hardware/stm32_adc.h"
 
 #include <nuttx/analog/adc.h>
 

@@ -52,11 +52,11 @@
 
 /* Include the chip memory map */
 
-#include "chip/stm32_memorymap.h"
+#include "hardware/stm32_memorymap.h"
 
 /* Include the chip pinmap */
 
-#include "chip/stm32_pinmap.h"
+#include "hardware/stm32_pinmap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -49,8 +49,8 @@
 #ifdef CONFIG_STM32_HRTIM1
 
 #if defined(CONFIG_STM32_STM32F33XX)
-#  include "chip/stm32f33xxx_hrtim.h"
-#  include "chip/stm32f33xxx_rcc.h"
+#  include "hardware/stm32f33xxx_hrtim.h"
+#  include "hardware/stm32f33xxx_rcc.h"
 #else
 #  error
 #endif

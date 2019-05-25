@@ -121,7 +121,7 @@
 #ifdef CONFIG_STM32_PWM
 
 #include <arch/board/board.h>
-#include "chip/stm32_tim.h"
+#include "hardware/stm32_tim.h"
 
 /* Configuration needed by upper-half PWM driver */
 

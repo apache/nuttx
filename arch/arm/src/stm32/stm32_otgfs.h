@@ -46,7 +46,7 @@
 
 #include "stm32.h"
 
-#include "chip/stm32fxxxxx_otgfs.h"
+#include "hardware/stm32fxxxxx_otgfs.h"
 
 #if defined(CONFIG_STM32_OTGFS)
 

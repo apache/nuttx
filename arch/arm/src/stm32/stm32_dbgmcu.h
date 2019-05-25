@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_dbgmcu.h"
+#include "hardware/stm32_dbgmcu.h"
 
 /************************************************************************************
  * Pre-processor Definitions

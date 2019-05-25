@@ -51,8 +51,8 @@
  */
 
 #if defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32_rtc.h"
-#  include "chip/stm32_bkp.h"
+#  include "hardware/stm32_rtc.h"
+#  include "hardware/stm32_bkp.h"
 
 /* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
  * broken-out data/time in BCD format.  The backup registers are integrated into
@@ -61,7 +61,7 @@
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  include "chip/stm32_rtcc.h"
+#  include "hardware/stm32_rtcc.h"
 #endif
 
 /* Alarm function differs from part to part */

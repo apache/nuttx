@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/stm32_usbdev.h"
+#include "hardware/stm32_usbdev.h"
 
 /************************************************************************************
  * Public Functions
