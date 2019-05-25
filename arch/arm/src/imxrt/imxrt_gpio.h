@@ -47,7 +47,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "hardware/imxrt_gpio.h"
+#include "chip/imxrt_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions
