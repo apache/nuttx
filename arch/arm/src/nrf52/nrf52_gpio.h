@@ -48,7 +48,7 @@
 #endif
 
 #include <arch/nrf52/chip.h>
-#include "chip/nrf52_gpio.h"
+#include "hardware/nrf52_gpio.h"
 
 /************************************************************************************
  * Pre-processor Definitions

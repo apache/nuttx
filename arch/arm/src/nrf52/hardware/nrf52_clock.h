@@ -1,5 +1,5 @@
 /************************************************************************************************
- * arch/arm/src/nrf52/chip/nrf52_clock.h
+ * arch/arm/src/nrf52/hardware/nrf52_clock.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_CLOCK_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_CLOCK_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_CLOCK_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_CLOCK_H
 
 /************************************************************************************************
  * Included Files
  ************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/nrf52_memorymap.h"
+#include "hardware/nrf52_memorymap.h"
 
 /************************************************************************************************
  * Pre-processor Definitions
@@ -97,4 +97,4 @@
 
 /* Register Bitfield Definitions ****************************************************************/
 
-#endif /* __ARCH_ARM_SRC_NRF52_CHIP_NRF52_LCD_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_LCD_H */

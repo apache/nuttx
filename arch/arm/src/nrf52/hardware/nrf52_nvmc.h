@@ -1,5 +1,5 @@
 /***************************************************************************************************
- * arch/arm/src/nrf52/chip/nrf52_nvmc.h
+ * arch/arm/src/nrf52/hardware/nrf52_nvmc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Alan Carvalho de Assis <acassis@gmail.com>
@@ -33,15 +33,15 @@
  *
  ***************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_NVMC_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_NVMC_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NVMC_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NVMC_H
 
 /***************************************************************************************************
  * Included Files
  ***************************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/nrf52_memorymap.h"
+#include "hardware/nrf52_memorymap.h"
 
 /***************************************************************************************************
  * Pre-processor Definitions
@@ -96,4 +96,4 @@
 
 /* INTENSET Register */
 
-#endif /* __ARCH_ARM_SRC_NRF52_CHIP_NRF52_NVMC_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NVMC_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/nrf52/chip/nrf52_gpio.h
+ * arch/arm/src/nrf52/hardware/nrf52_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_GPIO_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_GPIO_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include "chip/nrf52_memorymap.h"
+#include "hardware/nrf52_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -84,4 +84,4 @@
 #  define NRF52_GPIO_CNF_PULL_DOWN      (1 << NRF52_GPIO_CNF_PULL_SHIFT)
 #  define NRF52_GPIO_CNF_PULL_UP        (3 << NRF52_GPIO_CNF_PULL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_NRF52_CHIP_NRF52_GPIO_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H */

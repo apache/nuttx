@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/chip/nrf52_memorymap.h
+ * arch/arm/src/nrf52/hardware/nrf52_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author:  Janne Rosberg <janne@offcode.fi>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_MEMORYMAP_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_MEMORYMAP_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -130,4 +130,4 @@
 #define NRF52_GPIO_P0_BASE  0x50000000
 #define NRF52_GPIO_P1_BASE  0x50003000
 
-#endif /* __ARCH_ARM_SRC_NRF52_CHIP_NRF52_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_MEMORYMAP_H */

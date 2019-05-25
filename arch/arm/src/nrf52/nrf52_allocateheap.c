@@ -52,7 +52,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/nrf52_memorymap.h"
+#include "hardware/nrf52_memorymap.h"
 
 #include <arch/board/board.h>
 

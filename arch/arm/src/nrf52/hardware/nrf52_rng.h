@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/nrf52/chip/nrf52_rng.h
+ * arch/arm/src/nrf52/hardware/nrf52_rng.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Zhiqiang Li <levin.li@outlook.com>
@@ -33,15 +33,15 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_RNG_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_RNG_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RNG_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RNG_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/nrf52_memorymap.h"
+#include "hardware/nrf52_memorymap.h"
 #include "chip.h"
 
 /************************************************************************************
@@ -78,4 +78,4 @@
 
 #define NRF52_RNG_INT_EVENT_RDY         (1<<0)
 
-#endif  /* __ARCH_ARM_SRC_NRF52_CHIP_STM32_RNG_H */
+#endif  /* __ARCH_ARM_SRC_NRF52_HARDWARE_STM32_RNG_H */

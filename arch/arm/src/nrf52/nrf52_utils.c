@@ -45,7 +45,7 @@
 #include "up_arch.h"
 
 #include "nrf52_irq.h"
-#include "chip/nrf52_utils.h"
+#include "hardware/nrf52_utils.h"
 
 /****************************************************************************
  * Public Functions

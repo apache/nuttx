@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_utils.h
+ * arch/arm/src/nrf52/hardware/nrf52_utils.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Zhiqiang Li <levin.li@outlook.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_CHIP_NRF52_UTILS_H
-#define __ARCH_ARM_SRC_NRF52_CHIP_NRF52_UTILS_H
+#ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UTILS_H
+#define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UTILS_H
 
 /****************************************************************************
  * Included Files
@@ -122,5 +122,5 @@ static inline void nrf52_interrupt_disable(uint32_t reg_intenclr,
   putreg32(bitfield, reg_intenclr);
 }
 
-#endif /* __ARCH_ARM_SRC_NRF52_CHIP_NRF52_UTILS_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UTILS_H */
 

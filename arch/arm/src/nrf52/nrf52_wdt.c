@@ -54,7 +54,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/nrf52_wdt.h"
+#include "hardware/nrf52_wdt.h"
 #include "nrf52_wdt.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_NRF52_WDT)
