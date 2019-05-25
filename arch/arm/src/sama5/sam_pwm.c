@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/drivers/pwm.h>
 
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 #include <arch/board/board.h>
 
 #include "up_internal.h"

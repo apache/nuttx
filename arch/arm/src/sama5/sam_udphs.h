@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "chip/sam_udphs.h"
+#include "hardware/sam_udphs.h"
 
 /************************************************************************************
  * Public Functions

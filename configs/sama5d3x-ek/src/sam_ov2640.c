@@ -53,7 +53,7 @@
 #include "sam_pck.h"
 #include "sam_twi.h"
 #include "sam_pio.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 
 #include "sama5d3x-ek.h"
 

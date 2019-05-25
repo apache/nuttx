@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/sam_adc.h"
+#include "hardware/sam_adc.h"
 
 #if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TSD)
 

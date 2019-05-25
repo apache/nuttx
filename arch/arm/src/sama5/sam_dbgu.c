@@ -59,8 +59,8 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/sam_dbgu.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_dbgu.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_pio.h"
 #include "sam_dbgu.h"
 

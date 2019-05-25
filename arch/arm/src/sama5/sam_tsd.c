@@ -72,7 +72,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/sam_adc.h"
+#include "hardware/sam_adc.h"
 #include "sam_adc.h"
 #include "sam_tsd.h"
 

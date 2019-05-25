@@ -45,7 +45,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "chip/sam_sckc.h"
+#include "hardware/sam_sckc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

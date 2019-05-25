@@ -66,10 +66,10 @@
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "sam_hsmci.h"
-#include "chip/sam_dmac.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_hsmci.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_dmac.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_hsmci.h"
+#include "hardware/sam_pinmap.h"
 
 #if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1) || \
     defined(CONFIG_SAMA5_HSMCI2)

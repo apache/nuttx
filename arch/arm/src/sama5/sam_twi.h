@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
-#include "chip/sam_twi.h"
+#include "hardware/sam_twi.h"
 
 /****************************************************************************
  * Public Function Prototypes

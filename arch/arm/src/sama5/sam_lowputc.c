@@ -52,10 +52,10 @@
 #include "sam_dbgu.h"
 #include "sam_lowputc.h"
 
-#include "chip/sam_uart.h"
-#include "chip/sam_flexcom.h"
-#include "chip/sam_dbgu.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_uart.h"
+#include "hardware/sam_flexcom.h"
+#include "hardware/sam_dbgu.h"
+#include "hardware/sam_pinmap.h"
 
 #include <arch/board/board.h>
 

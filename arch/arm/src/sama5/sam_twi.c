@@ -65,8 +65,8 @@
 
 #include "up_arch.h"
 
-#include "chip/sam_pmc.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_pinmap.h"
 
 #include "sam_periphclks.h"
 #include "sam_pio.h"

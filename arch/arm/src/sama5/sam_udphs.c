@@ -69,7 +69,7 @@
 
 #include "sam_periphclks.h"
 #include "sam_memories.h"
-#include "chip/sam_udphs.h"
+#include "hardware/sam_udphs.h"
 #include "sam_udphs.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_SAMA5_UDPHS)

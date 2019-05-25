@@ -79,7 +79,7 @@
 #include "up_internal.h"
 
 #include "chip.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 #include "sam_pio.h"
 #include "sam_periphclks.h"
 #include "sam_memories.h"

@@ -49,7 +49,7 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pinmap.h"
 
 /************************************************************************************
  * Pre-processor Definitions

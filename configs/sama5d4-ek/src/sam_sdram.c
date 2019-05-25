@@ -147,11 +147,11 @@
 #include "up_arch.h"
 
 #include "sam_periphclks.h"
-#include "chip/sam_memorymap.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_sfr.h"
-#include "chip/sam_matrix.h"
-#include "chip/sam_mpddrc.h"
+#include "hardware/sam_memorymap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_sfr.h"
+#include "hardware/sam_matrix.h"
+#include "hardware/sam_mpddrc.h"
 
 #include "sama5d4-ek.h"
 

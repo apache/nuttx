@@ -72,9 +72,9 @@
 #include "sam_memories.h"
 #include "sam_periphclks.h"
 #include "sam_spi.h"
-#include "chip/sam_pmc.h"
-#include "chip/sam_spi.h"
-#include "chip/sam_pinmap.h"
+#include "hardware/sam_pmc.h"
+#include "hardware/sam_spi.h"
+#include "hardware/sam_pinmap.h"
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 

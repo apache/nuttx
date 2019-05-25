@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 #include "sam_periphclks.h"
-#include "chip/sam_hsmc.h"
+#include "hardware/sam_hsmc.h"
 
 #include "sama5d3x-ek.h"
 

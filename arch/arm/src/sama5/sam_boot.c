@@ -57,9 +57,9 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/sam_wdt.h"
-#include "chip/sam_aximx.h"
-#include "chip/sam_sfr.h"
+#include "hardware/sam_wdt.h"
+#include "hardware/sam_aximx.h"
+#include "hardware/sam_sfr.h"
 
 #include "sam_clockconfig.h"
 #include "sam_memorymap.h"
