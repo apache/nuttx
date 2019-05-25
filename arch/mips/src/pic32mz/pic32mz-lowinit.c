@@ -47,9 +47,9 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/pic32mz-features.h"
-#include "chip/pic32mz-prefetch.h"
-#include "chip/pic32mz-osc.h"
+#include "hardware/pic32mz-features.h"
+#include "hardware/pic32mz-prefetch.h"
+#include "hardware/pic32mz-osc.h"
 
 #include "pic32mz-config.h"
 #include "pic32mz-lowconsole.h"

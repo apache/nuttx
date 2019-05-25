@@ -51,8 +51,8 @@
 #include "up_arch.h"
 
 #include "pic32mz-config.h"
-#include "chip/pic32mz-timer.h"
-#include "chip/pic32mz-int.h"
+#include "hardware/pic32mz-timer.h"
+#include "hardware/pic32mz-int.h"
 
 /****************************************************************************
  * Pre-processor Definitions

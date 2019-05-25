@@ -60,7 +60,7 @@
 #include "stm32.h"
 #include "hardware/stm32_ltdc.h"
 #include "hardware/stm32_dma2d.h"
-#include "hardware/stm32_ccm.h"
+#include "stm32_ccm.h"
 #include "stm32_dma2d.h"
 
 /****************************************************************************

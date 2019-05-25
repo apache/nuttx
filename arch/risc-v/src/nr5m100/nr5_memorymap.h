@@ -36,7 +36,7 @@
 //#include <stdint.h>
 
 #ifdef CONFIG_NR5_NR5MXXX
-#include "chip/nr5m1xx_memorymap.h"
+#include "hardware/nr5m1xx_memorymap.h"
 #endif
 
 #endif  /* _ARCH_RISCV_SRC_NR5M100_NR5_MEMORYMAP_H */

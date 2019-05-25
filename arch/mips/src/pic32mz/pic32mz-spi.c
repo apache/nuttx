@@ -54,8 +54,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/pic32mz-spi.h"
-#include "chip/pic32mz-pps.h"
+#include "hardware/pic32mz-spi.h"
+#include "hardware/pic32mz-pps.h"
 #include "pic32mz-spi.h"
 
 #ifdef CONFIG_PIC32MZ_SPI

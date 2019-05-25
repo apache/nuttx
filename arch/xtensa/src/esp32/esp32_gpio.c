@@ -39,8 +39,8 @@
 #include <arch/irq.h>
 
 #include "xtensa.h"
-#include "chip/esp32_iomux.h"
-#include "chip/esp32_gpio.h"
+#include "hardware/esp32_iomux.h"
+#include "hardware/esp32_gpio.h"
 #include "esp32_cpuint.h"
 #include "esp32_gpio.h"
 

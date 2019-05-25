@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/nr5m1xx_timer.h"
+#include "hardware/nr5m1xx_timer.h"
 
 /************************************************************************************
  * Pre-processor Definitions

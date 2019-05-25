@@ -43,7 +43,7 @@
 #include <arch/pic32mz/cp0.h>
 
 #include "pic32mz-config.h"
-#include "chip/pic32mz-features.h"
+#include "hardware/pic32mz-features.h"
 #include "pic32mz-excptmacros.h"
 
 /****************************************************************************

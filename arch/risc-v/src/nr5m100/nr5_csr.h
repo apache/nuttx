@@ -47,7 +47,7 @@
 #endif
 
 #if defined(CONFIG_NR5_NR5M1XX)
-#  include "chip/nr5m1xx_epic.h"
+#  include "hardware/nr5m1xx_epic.h"
 #endif
 
 #include <arch/rv32im/csr.h>

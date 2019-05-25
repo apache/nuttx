@@ -59,7 +59,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "chip/pic32mz-timer.h"
+#include "hardware/pic32mz-timer.h"
 #include "pic32mz-timer.h"
 #include "pic32mz-gpio.h"
 

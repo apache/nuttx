@@ -60,10 +60,10 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
-#include "chip/esp32_soc.h"
-#include "chip/esp32_iomux.h"
-#include "chip/esp32_gpio_sigmap.h"
-#include "chip/esp32_uart.h"
+#include "hardware/esp32_soc.h"
+#include "hardware/esp32_iomux.h"
+#include "hardware/esp32_gpio_sigmap.h"
+#include "hardware/esp32_uart.h"
 #include "rom/esp32_gpio.h"
 #include "esp32_config.h"
 #include "esp32_gpio.h"

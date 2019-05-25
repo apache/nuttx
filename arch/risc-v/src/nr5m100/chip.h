@@ -45,7 +45,7 @@
 
 #ifdef CONFIG_RV32IM_CMNVECTOR
 #  if defined(CONFIG_NR5_NR5M1XX)
-#    include "chip/nr5m1xx_vectors.h"
+#    include "hardware/nr5m1xx_vectors.h"
 #  else
 #    error "No vector file for this NanoRisc5 family"
 #  endif

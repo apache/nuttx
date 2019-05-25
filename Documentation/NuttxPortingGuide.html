@@ -240,7 +240,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 18, 2019</p>
+      <p>Last Updated: May 25, 2019</p>
     </td>
   </tr>
 </table>
@@ -488,7 +488,7 @@
 
 <p>
   <b>Configuration Files</b>.
-  The NuttX configuration consists of logic in processor architecture directories, chip/SoC directories, and board configuration directories.
+  The NuttX configuration consists of logic in processor architecture directories, <i>chip/SoC</i> directories, and board configuration directories.
   The complete configuration is specified by several settings in the NuttX configuration file.
 </p>
 <ul>
@@ -1780,7 +1780,7 @@ The specific environmental definitions are unique for each board but should incl
       This strict layering is enforced in the NuttX build system by controlling the compiler include paths:  Higher level code can never include header files from either; of the platform-specific source directories;  microcontroller-specific code can never include header files from the board-specific source directories.  The board-specific directories are, then, at the bottom of the layered hierarchy.
     </p>
     <p>
-      An exception to these inclusion restrictions is the platform-specific <i>include/</i>.  These are made available to higher level OS logic.  The microcontroller-specific include directory will be linked at <code>include/arch/chip</code> and, hence, can be included like <code>#include &lt;arch/chip/chip.h</code>.
+      An exception to these inclusion restrictions is the platform-specific <i>include/</i>.  These are made available to higher level OS logic.  The microcontroller-specific include directory will be linked at <code>include/arch/chip</code> and, hence, can be included like <code>#include &lt;arch/hardware/chip.h</code>.
       Similarly, the board-specific include directory will be linked at <code>include/arch/board</code> and, hence, can be included like <code>#include &lt;arch/board/board.h</code>.
     </p>
     <p>
@@ -5171,7 +5171,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
   <li>
     <p>
     <b>Examples</b>:
-    <code>arch/arm/src/chip/lm_serial.c</code>, <code>arch/arm/src/lpc214x/lpc214x_serial.c</code>, <code>arch/z16/src/z16f/z16f_serial.c</code>, etc.
+    <code>arch/arm/src/stm32/stm32_serial.c</code>, <code>arch/arm/src/lpc214x/lpc214x_serial.c</code>, <code>arch/z16/src/z16f/z16f_serial.c</code>, etc.
     </p>
   </li>
 </ul>
@@ -5204,7 +5204,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     The controller-specific, &quot;upper half&quot; touchscreen drivers reside in the directory <code>drivers/input</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific touchscreen drivers reside in either: (1) The <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the processor architectures that have build in touchscreen controllers or (2) the <code>configs/</code><i>&lt;board&gt;</i><code>/src/</code> directory for boards that use an external touchscreen controller chip.
+    Platform-specific touchscreen drivers reside in either: (1) The <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the processor architectures that have build in touchscreen controllers or (2) the <code>configs/</code><i>&lt;board&gt;</i><code>/src/</code> directory for boards that use an external touchscreen controller chip.
   </li>
 </ul>
 
@@ -5229,7 +5229,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     Common analog logic and share-able analog drivers reside in the <code>drivers/analog/</code>.
   </li>
   <li>
-    Platform-specific drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> analog peripheral devices.
+    Platform-specific drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> analog peripheral devices.
   </li>
 </ul>
 
@@ -5315,7 +5315,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     The generic, &quot;upper half&quot; PWM driver resides at <code>drivers/pwm.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific PWM drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> PWM peripheral devices.
+    Platform-specific PWM drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> PWM peripheral devices.
   </li>
 </ul>
 
@@ -5346,7 +5346,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
     The generic, &quot;upper half&quot; CAN driver resides at <code>drivers/can.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific CAN drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> CAN peripheral devices.
+    Platform-specific CAN drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> CAN peripheral devices.
   </li>
 </ul>
 <p>
@@ -5414,7 +5414,7 @@ for (i = 0; i &lt;= nread - CAN_MSGLEN(0); i += msglen)
     The generic, &quot;upper half&quot; Quadrature Encoder driver resides at <code>drivers/sensors/qencoder.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific Quadrature Encoder drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> Quadrature Encoder peripheral devices.
+    Platform-specific Quadrature Encoder drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> Quadrature Encoder peripheral devices.
   </li>
 </ul>
 
@@ -5443,7 +5443,7 @@ for (i = 0; i &lt;= nread - CAN_MSGLEN(0); i += msglen)
     The generic, &quot;upper half&quot; timer driver resides at <code>drivers/timers/timer.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> timer peripheral devices.
+    Platform-specific timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> timer peripheral devices.
   </li>
 </ul>
 
@@ -5472,7 +5472,7 @@ for (i = 0; i &lt;= nread - CAN_MSGLEN(0); i += msglen)
     The generic, &quot;upper half&quot; RTC driver resides at <code>drivers/timers/rtc.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific RTC drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> RTC peripheral devices.
+    Platform-specific RTC drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> RTC peripheral devices.
   </li>
 </ul>
 
@@ -5501,7 +5501,7 @@ for (i = 0; i &lt;= nread - CAN_MSGLEN(0); i += msglen)
     The generic, &quot;upper half&quot; watchdog timer driver resides at <code>drivers/timers/watchdog.c</code>.
   </li>
   <li><b>&quot;Lower Half&quot; Drivers</b>.
-    Platform-specific watchdog timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> watchdog timer peripheral devices.
+    Platform-specific watchdog timer drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;hardware&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> watchdog timer peripheral devices.
   </li>
 </ul>
 
