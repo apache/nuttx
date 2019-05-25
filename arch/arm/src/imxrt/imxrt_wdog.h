@@ -49,7 +49,7 @@
 
 #include "up_internal.h"
 #include "chip.h"
-#include "chip/imxrt_wdog.h"
+#include "hardware/imxrt_wdog.h"
 
 /****************************************************************************
  * Public Types

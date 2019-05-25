@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/imxrt_enet.h"
+#include "hardware/imxrt_enet.h"
 
 #ifdef CONFIG_IMXRT_ENET
 

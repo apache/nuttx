@@ -44,11 +44,11 @@
 
 #include "up_arch.h"
 #include <arch/board/board.h>
-#include "chip/imxrt_ccm.h"
-#include "chip/imxrt_dcdc.h"
+#include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_dcdc.h"
 #include "imxrt_clockconfig.h"
 #include "imxrt_lcd.h"
-#include "chip/imxrt_memorymap.h"
+#include "hardware/imxrt_memorymap.h"
 
 #include <stdlib.h>
 

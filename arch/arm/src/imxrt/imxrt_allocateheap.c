@@ -54,7 +54,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/imxrt_memorymap.h"
+#include "hardware/imxrt_memorymap.h"
 #include "imxrt_mpuinit.h"
 
 #include <arch/board/board.h>

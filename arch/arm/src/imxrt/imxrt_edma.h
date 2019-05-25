@@ -100,7 +100,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include "chip/imxrt_edma.h"
+#include "hardware/imxrt_edma.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -145,7 +145,7 @@ struct imxrt_edma_xfrconfig_s
     int16_t  doff;       /* Sign-extended offset for current destination address. */
     uint16_t iter;       /* Major loop iteration count. */
     uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
-    uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in chip/. */
+    uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
     uint8_t  dsize;      /* Destination data transfer size. */
     uint8_t  ttype;      /* Transfer type (see enum imxrt_edma_xfrtype_e). */
 #ifdef CONFIG_IMXRT_EDMA_EMLIM
@@ -231,7 +231,7 @@ extern "C"
  *
  * Input Parameters:
  *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
- *            bit-field definitions in chip/imxrt_dmamux.h.  Settings include:
+ *            bit-field definitions in hardware/imxrt_dmamux.h.  Settings include:
  *
  *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
  *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
@@ -241,7 +241,7 @@ extern "C"
  *            A value of zero will disable the DMAMUX channel.
  *   dchpri - DCHPRI channel priority configuration.  See DCHPRI channel
  *            configuration register bit-field definitions in
- *            chip/imxrt_edma.h.  Meaningful settings include:
+ *            hardware/imxrt_edma.h.  Meaningful settings include:
  *
  *            EDMA_DCHPRI_CHPRI       Channel Arbitration Priority
  *            DCHPRI_DPA              Disable Preempt Ability

@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
-#include "chip/imxrt_daisy.h"
+#include "hardware/imxrt_daisy.h"
 
 /****************************************************************************
  * Pre-processor Definitions

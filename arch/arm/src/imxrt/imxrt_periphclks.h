@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include "chip/imxrt_ccm.h"
+#include "hardware/imxrt_ccm.h"
 
 /********************************************************************************************
  * Pre-processor Definitions

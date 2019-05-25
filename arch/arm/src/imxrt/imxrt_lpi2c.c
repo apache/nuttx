@@ -61,9 +61,9 @@
 #include "imxrt_lpi2c.h"
 #include "imxrt_gpio.h"
 
-#include "chip/imxrt_pinmux.h"
-#include "chip/imxrt_ccm.h"
-#include "chip/imxrt_periphclks.h"
+#include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_ccm.h"
+#include "hardware/imxrt_periphclks.h"
 
 /* At least one I2C peripheral must be enabled */
 
