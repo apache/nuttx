@@ -229,7 +229,6 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
               break;
             }
         }
-#endif
 
       /* OR in the signal events */
 

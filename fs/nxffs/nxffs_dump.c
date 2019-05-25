@@ -76,8 +76,10 @@ struct nxffs_blkinfo_s
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
 static const char g_hdrformat[] = "  BLOCK:OFFS  TYPE  STATE   LENGTH\n";
 static const char g_format[]    = "  %5d:%-5d %s %s %5d\n";
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -351,7 +353,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
              blkinfo->geo.blocksize);
     }
 
-  /* Serach for Inode and data block headers.  */
+  /* Search for Inode and data block headers.  */
 
   inndx = 0;
   datndx = 0;
