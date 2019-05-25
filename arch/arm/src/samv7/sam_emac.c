@@ -84,8 +84,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/sam_pinmap.h"
-#include "chip/sam_chipid.h"
+#include "hardware/sam_pinmap.h"
+#include "hardware/sam_chipid.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_ethernet.h"

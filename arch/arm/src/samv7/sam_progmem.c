@@ -49,7 +49,7 @@
 #include "up_arch.h"
 #include "barriers.h"
 
-#include "chip/sam_memorymap.h"
+#include "hardware/sam_memorymap.h"
 
 #include "sam_progmem.h"
 

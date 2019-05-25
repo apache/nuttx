@@ -53,8 +53,8 @@
 #include "up_arch.h"
 
 #include "sam_gpio.h"
-#include "chip/sam_pio.h"
-#include "chip/sam_matrix.h"
+#include "hardware/sam_pio.h"
+#include "hardware/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions

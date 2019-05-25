@@ -48,7 +48,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "chip/sam_hsmci.h"
+#include "hardware/sam_hsmci.h"
 #include "sam_hsmci.h"
 
 #ifdef CONFIG_SAMV7_HSMCI0

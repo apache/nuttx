@@ -62,7 +62,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "sam_config.h"
-#include "chip/sam_uart.h"
+#include "hardware/sam_uart.h"
 
 /****************************************************************************
  * Pre-processor Definitions
