@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/efm32_rmu.h"
+#include "hardware/efm32_rmu.h"
 
 #ifdef CONFIG_EFM32_RMU
 

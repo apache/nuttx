@@ -44,11 +44,11 @@
 #include "chip.h"
 
 #if defined(CONFIG_EFM32_EFM32TG)
-#  include "chip/efm32tg_memorymap.h"
+#  include "hardware/efm32tg_memorymap.h"
 #elif defined(CONFIG_EFM32_EFM32G)
-#  include "chip/efm32g_memorymap.h"
+#  include "hardware/efm32g_memorymap.h"
 #elif defined(CONFIG_EFM32_EFM32GG)
-#  include "chip/efm32gg_memorymap.h"
+#  include "hardware/efm32gg_memorymap.h"
 #else
 #  error "Unsupported EFM32 memory map"
 #endif

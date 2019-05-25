@@ -82,7 +82,7 @@
     defined(CONFIG_EFM32_TIMER3_PWM)
 
 #include <arch/board/board.h>
-#include "chip/efm32_timer.h"
+#include "hardware/efm32_timer.h"
 
 /* For each timer that is enabled for PWM usage, we need the following additional
  * configuration settings:

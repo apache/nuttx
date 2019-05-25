@@ -50,8 +50,8 @@
 #include <nuttx/arch.h>
 
 #include "up_arch.h"
-#include "chip/efm32_cmu.h"
-#include "chip/efm32_dma.h"
+#include "hardware/efm32_cmu.h"
+#include "hardware/efm32_dma.h"
 #include "efm32_dma.h"
 
 /****************************************************************************

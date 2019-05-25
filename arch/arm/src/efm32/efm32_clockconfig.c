@@ -50,9 +50,9 @@
 #include "chip.h"
 #include "itm_syslog.h"
 #include "efm32_gpio.h"
-#include "chip/efm32_msc.h"
-#include "chip/efm32_cmu.h"
-#include "chip/efm32_gpio.h"
+#include "hardware/efm32_msc.h"
+#include "hardware/efm32_cmu.h"
+#include "hardware/efm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

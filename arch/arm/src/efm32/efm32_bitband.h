@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "chip/efm32_memorymap.h"
+#include "hardware/efm32_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

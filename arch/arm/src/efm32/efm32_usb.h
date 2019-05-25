@@ -44,7 +44,7 @@
 
 #include <stdint.h>
 
-#include "chip/efm32_usb.h"
+#include "hardware/efm32_usb.h"
 
 #if defined(CONFIG_EFM32_OTGFS)
 

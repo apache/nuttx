@@ -51,7 +51,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/efm32_timer.h"
+#include "hardware/efm32_timer.h"
 #include "efm32_config.h"
 #include "efm32_gpio.h"
 

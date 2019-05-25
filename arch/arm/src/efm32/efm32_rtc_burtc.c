@@ -53,7 +53,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/efm32_burtc.h"
+#include "hardware/efm32_burtc.h"
 
 #include "efm32_rmu.h"
 #include "efm32_rtc.h"

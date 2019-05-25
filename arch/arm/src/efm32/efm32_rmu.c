@@ -50,8 +50,8 @@
 
 #include "up_arch.h"
 
-#include "chip/efm32_emu.h"
-#include "chip/efm32_rmu.h"
+#include "hardware/efm32_emu.h"
+#include "hardware/efm32_rmu.h"
 
 #include "efm32_rmu.h"
 

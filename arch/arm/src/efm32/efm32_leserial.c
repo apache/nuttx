@@ -57,7 +57,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "chip/efm32_leuart.h"
+#include "hardware/efm32_leuart.h"
 #include "efm32_config.h"
 #include "efm32_lowputc.h"
 

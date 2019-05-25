@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/efm32_timer.h"
+#include "hardware/efm32_timer.h"
 
 /****************************************************************************
  * Pre-processor Definitions
