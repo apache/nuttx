@@ -1044,7 +1044,7 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
     {
-      /* This should only happen if the wait was cancelled by an signal */
+      /* This should only happen if the wait was canceled by an signal */
 
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
       DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);

@@ -1456,7 +1456,7 @@ static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   /* Some sanity checking */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  if (!dev || !fds)
+  if (dev == NULL || fds == NULL)
     {
       return -ENODEV;
     }
@@ -1555,11 +1555,11 @@ static int uart_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
         }
 
     }
-  else if (fds->priv)
+  else if (fds->priv != NULL)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)

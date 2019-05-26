@@ -457,7 +457,7 @@ void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
           nxsem_post(&priv->waitsem);
         }
 
-      /* Notify all poll/select waiters that they can write to the FIFO */
+      /* Notify all poll/select waiters that they can read from the FIFO */
 
       nxterm_pollnotify(priv, POLLIN);
       sched_unlock();
