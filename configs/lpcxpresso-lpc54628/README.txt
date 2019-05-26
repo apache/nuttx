@@ -538,30 +538,30 @@ Configurations
     just some issues/topics unique to the LPCXpresso-LPC54628 and/or this
     configuration.
 
-    1. The NxTerm application is available as the "NuttShell" entry in the
-       Main Menu.  When pressed, this will bring up an NSH session in a
-       Twm4Nx window.  There is an issue, however:  The NxTerm gets its
-       input from the console (/dev/console).  Since the NxTerm keyboard 
-       input comes directly from /dev/console, it goes to whichever task has
-       an outstanding read on the console device.  That works well if there
-       is only a single NxTerm window.  But if there are multiple NxTerm
-       windows, then it is anyone's guess  which will receive the keyboard
-       input.  That does not work well in such cases.
-
-    2. There is a responsive-ness issue the the FT5x06 touchscreen controller.
+    1. There is a responsive-ness issue the the FT5x06 touchscreen controller.
        The pin selected by the board designers will not support interrupts.
        Therefore, a fallback polled mode is use.  This polled mode has
        significant inherent delays that effect the user experience when
        touching buttons or grabbing and moving objects on the desktop.
 
-    3. There is no touchscreen calibration yet.  But fortunately, the FT5x06
-       has the same resolution and orientation as the LCD and so can be used
-       without any calibration.  There are still inaccuracies due to the
-       lack of calibration, however.  These show up especially along the
-       very top of the display where it can be very difficult to touch
-       buttons or grab'n'move object.
+    2. The NxTerm application is available as the "NuttShell" entry in the
+       Main Menu.  When pressed, this will bring up an NSH session in a
+       Twm4Nx window.  There is a performance issue, however, due to another
+       issue with the polled mode in the ft5x06 driver.  When that driver
+       runs in polled mode, it samples the touch data at a high rate.  Each
+       sample is sufficient to wake up the Twm4Nx poll() with POLLIN data
+       availability.  But when Twm4Nx tries to read the data, it falls under
+       the FT5x06.c there threshold and no data is returned.
 
-    4. Color artifacts:  In the CLASSIC configuration, the background of the
+       The actual delay various dynamically from 50 to 200 millisecond
+       intervals.
+
+       A possible solution might be to beef up the POLLIN notification logic
+       in FT5x06.c to avoid these false poll() wake-ups.  That, however, is
+       non-trivial since it would have to support the polled as well as the
+       non-polled mode.
+
+    3. Color artifacts:  In the CLASSIC configuration, the background of the
        cental NX image is a slightly different hue of blue.  For the
        CONTEMPORARY configuration, the toolbar buttons are supposed to be
        borderless.  There is however, a fine border around each toolbar
