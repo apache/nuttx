@@ -119,7 +119,7 @@ void stm32_selectnor(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration */
 

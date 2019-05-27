@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm3210e-eval/src/stm32_deselectlcd.c
+ * arch/arm/src/stm32/stm32_fsmc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,58 +39,60 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include "up_arch.h"
 #include "stm32.h"
-#include "stm3210e-eval.h"
 
-#ifdef CONFIG_STM32_FSMC
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Data
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#if defined(CONFIG_STM32_FSMC)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: stm32_deselectlcd
+/****************************************************************************
+ * Name: stm32_fsmc_enable
  *
  * Description:
- *   Disable the LCD
+ *   Enable clocking to the FSMC.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void stm32_deselectlcd(void)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX)
+
+void stm32_fsmc_enable(void)
 {
-  /* Restore registers to their power up settings */
-
-  putreg32(0xffffffff, STM32_FSMC_BCR4);
-
-  /* Bank1 NOR/SRAM timing register configuration */
-
-  putreg32(0x0fffffff, STM32_FSMC_BTR4);
-
-  /* Disable AHB clocking to the FSMC */
-
-  stm32_fsmc_disable();
+  modifyreg32(STM32_RCC_AHBENR, 0, RCC_AHBENR_FSMCEN);
 }
 
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+
+void stm32_fsmc_enable(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, 0, RCC_AHB3ENR_FSMCEN);
+}
+
+#endif
+
+/****************************************************************************
+ * Name: stm32_fsmc_disable
+ *
+ * Description:
+ *   Disable clocking to the FSMC.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX)
+
+void stm32_fsmc_disable(void)
+{
+  modifyreg32(STM32_RCC_AHBENR, RCC_AHBENR_FSMCEN, 0);
+}
+
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+
+void stm32_fsmc_disable(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, RCC_AHB3ENR_FSMCEN, 0);
+}
+
+#endif
+
 #endif /* CONFIG_STM32_FSMC */
-
-
-

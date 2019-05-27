@@ -96,8 +96,8 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#ifdef CONFIG_STM32_FSMC
-  stm32_enablefsmc();
+#ifdef CONFIG_STM32_FMC
+  stm32_sdram_initialize();
 #endif
 
 #ifdef HAVE_CCM_HEAP

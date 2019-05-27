@@ -233,7 +233,7 @@ select CAN1 or CAN2 if fitted; neither if not fitted.
 The on-board SRAM can be configured by setting
 
   CONFIG_STM32_FSMC=y
-  CONFIG_STM32_FSMC_SRAM=y
+  CONFIG_STM32_EXTERNAL_RAM=y
   CONFIG_HEAP2_BASE=0x64000000
   CONFIG_HEAP2_SIZE=2097152
   CONFIG_MM_REGIONS=2 (or =3, see below)
@@ -251,15 +251,15 @@ In addition to internal SRAM, SRAM may also be available through the FSMC.
 In order to use FSMC SRAM, the following additional things need to be
 present in the NuttX configuration file:
 
-  CONFIG_STM32_FSMC=y        : Enables the FSMC
-  CONFIG_STM32_FSMC_SRAM=y   : Indicates that SRAM is available via the
-                               FSMC (as opposed to an LCD or FLASH).
-  CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
+  CONFIG_STM32_FSMC=y         : Enables the FSMC
+  CONFIG_STM32_EXTERNAL_RAM=y : Indicates that SRAM is available via the
+                                FSMC (as opposed to an LCD or FLASH).
+  CONFIG_HEAP2_BASE           : The base address of the SRAM in the FSMC
                                address space
-  CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
-                               address space
-  CONFIG_MM_REGIONS          : Must be set to a large enough value to
-                               include the FSMC SRAM
+  CONFIG_HEAP2_SIZE           : The size of the SRAM in the FSMC
+                                address space
+  CONFIG_MM_REGIONS           : Must be set to a large enough value to
+                                include the FSMC SRAM
 
 SRAM Configurations
 -------------------
@@ -267,19 +267,19 @@ There are 4 possible SRAM configurations:
 
   Configuration 1. System SRAM (only)
                    CONFIG_MM_REGIONS == 1
-                   CONFIG_STM32_FSMC_SRAM NOT defined
+                   CONFIG_STM32_EXTERNAL_RAM NOT defined
                    CONFIG_STM32_CCMEXCLUDE defined
   Configuration 2. System SRAM and CCM SRAM
                    CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM NOT defined
+                   CONFIG_STM32_EXTERNAL_RAM NOT defined
                    CONFIG_STM32_CCMEXCLUDE NOT defined
   Configuration 3. System SRAM and FSMC SRAM
                    CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM defined
+                   CONFIG_STM32_EXTERNAL_RAM defined
                    CONFIG_STM32_CCMEXCLUDE defined
   Configuration 4. System SRAM, CCM SRAM, and FSMC SRAM
                    CONFIG_MM_REGIONS == 3
-                   CONFIG_STM32_FSMC_SRAM defined
+                   CONFIG_STM32_ETXERNAL_RAM defined
                    CONFIG_STM32_CCMEXCLUDE NOT defined
 I/O Expanders
 =============
@@ -372,7 +372,7 @@ STM3240G-EVAL-specific Configuration Options
     In order to use FSMC SRAM, the following additional things need to be
     present in the NuttX configuration file:
 
-    CONFIG_STM32_FSMC_SRAM - Indicates that SRAM is available via the
+    CONFIG_STM32_EXTERNAL_RAM - Indicates that SRAM is available via the
       FSMC (as opposed to an LCD or FLASH).
 
     CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)

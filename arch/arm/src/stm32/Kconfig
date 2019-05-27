@@ -1662,7 +1662,7 @@ config STM32_STM32F407
 config STM32_STM32F427
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
@@ -1704,7 +1704,7 @@ config STM32_STM32F427
 config STM32_STM32F429
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
@@ -1782,7 +1782,7 @@ config STM32_STM32F446
 config STM32_STM32F469
 	bool
 	default n
-	select STM32_HAVE_FSMC
+	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
@@ -1851,6 +1851,10 @@ config STM32_HAVE_USBDEV
 	default n
 
 config STM32_HAVE_OTGFS
+	bool
+	default n
+
+config STM32_HAVE_FMC
 	bool
 	default n
 
@@ -2373,6 +2377,11 @@ config STM32_FSMC
 	bool "FSMC"
 	default n
 	depends on STM32_HAVE_FSMC
+
+config STM32_FMC
+	bool "FMC"
+	default n
+	depends on STM32_HAVE_FMC
 
 config STM32_HASH
 	bool "HASH"
@@ -3102,13 +3111,13 @@ config STM32_DMACAPABLE
 		Drivers then may use this information to determine if they should
 		attempt the DMA or fall back to a different transfer method.
 
-config STM32_FSMC_SRAM
-	bool "External SRAM on FSMC"
+config STM32_EXTERNAL_RAM
+	bool "External RAM on FSMC/FMC"
 	default n
-	depends on STM32_FSMC
+	depends on STM32_FSMC || STM32_FMC
 	select ARCH_HAVE_HEAP2
 	---help---
-		In addition to internal SRAM, SRAM may also be available through the FSMC.
+		In addition to internal SRAM, external RAM may be available through the FSMC/FMC.
 
 menu "Timer Configuration"
 	depends on STM32_TIM
@@ -9460,7 +9469,7 @@ config STM32_LTDC_FB_BASE
 	---help---
 		If you are using the LTDC, then you must provide the address
 		of the start of the framebuffer.  This address will typically
-		be in the SRAM or SDRAM memory region of the FSMC.
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
 
 config STM32_LTDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
@@ -9634,7 +9643,7 @@ config STM32_DMA2D_FB_BASE
 	---help---
 		If you are using the DMA2D, then you must provide the address
 		of the start of the DMA2D overlays framebuffer. This address will typically
-		be in the SRAM or SDRAM memory region of the FSMC.
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
 
 config STM32_DMA2D_FB_SIZE
 	int "Framebuffer memory size (bytes)"

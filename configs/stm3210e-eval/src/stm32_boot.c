@@ -71,9 +71,9 @@
 
 void stm32_boardinitialize(void)
 {
-  /* If the FSMC and FSMC_SRAM are selected, then enable SRAM access */
+  /* If the FSMC and external RAM are selected, then enable SRAM access */
 
-#if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_FSMC_SRAM)
+#if defined(CONFIG_STM32_FSMC) && defined(CONFIG_STM32_EXTERNAL_RAM)
   stm32_selectsram();
 #endif
 

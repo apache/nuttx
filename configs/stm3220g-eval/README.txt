@@ -163,7 +163,7 @@ select CAN1 or CAN2 if fitted; neither if not fitted.
 The on-board SRAM can be configured by setting
 
   CONFIG_STM32_FSMC=y
-  CONFIG_STM32_FSMC_SRAM=y
+  CONFIG_STM32_EXTERNAL_RAM=y
   CONFIG_HEAP2_BASE=0x64000000
   CONFIG_HEAP2_SIZE=2097152
   CONFIG_MM_REGIONS=2
@@ -176,15 +176,15 @@ to internal SRAM, SRAM may also be available through the FSMC.  In order to
 use FSMC SRAM, the following additional things need to be present in the
 NuttX configuration file:
 
-  CONFIG_STM32_FSMC=y        : Enables the FSMC
-  CONFIG_STM32_FSMC_SRAM=y   : Indicates that SRAM is available via the
-                               FSMC (as opposed to an LCD or FLASH).
-  CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
-                               address space
-  CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
-                               address space
-  CONFIG_MM_REGIONS          : Must be set to a large enough value to
-                               include the FSMC SRAM
+  CONFIG_STM32_FSMC=y         : Enables the FSMC
+  CONFIG_STM32_EXTERNAL_RAM=y : Indicates that SRAM is available via the
+                                FSMC (as opposed to an LCD or FLASH).
+  CONFIG_HEAP2_BASE           : The base address of the SRAM in the FSMC
+                                address space
+  CONFIG_HEAP2_SIZE           : The size of the SRAM in the FSMC
+                                address space
+  CONFIG_MM_REGIONS           : Must be set to a large enough value to
+                                include the FSMC SRAM
 
 SRAM Configurations
 -------------------
@@ -194,7 +194,7 @@ There are 2 possible SRAM configurations:
                    CONFIG_MM_REGIONS == 1
   Configuration 2. System SRAM and FSMC SRAM
                    CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM defined
+                   CONFIG_STM32_EXTERNAL_RAM defined
 
 I/O Expanders
 =============
@@ -285,7 +285,7 @@ STM3220G-EVAL-specific Configuration Options
     In order to use FSMC SRAM, the following additional things need to be
     present in the NuttX configuration file:
 
-    CONFIG_STM32_FSMC_SRAM - Indicates that SRAM is available via the
+    CONFIG_STM32_EXTERNAL_RAM - Indicates that SRAM is available via the
       FSMC (as opposed to an LCD or FLASH).
 
     CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)

@@ -64,6 +64,7 @@
 #include "stm32_dac.h"
 #include "stm32_exti.h"
 #include "stm32_flash.h"
+#include "stm32_fmc.h"
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"

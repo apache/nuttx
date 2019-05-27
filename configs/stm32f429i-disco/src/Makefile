@@ -56,7 +56,7 @@ ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += stm32_idle.c
 endif
 
-ifeq ($(CONFIG_STM32_FSMC),y)
+ifeq ($(CONFIG_STM32_FMC),y)
 CSRCS += stm32_extmem.c
 endif
 

@@ -274,30 +274,16 @@ int stm32_usbhost_initialize(void);
 int stm32_tsc_setup(int minor);
 #endif
 
-/****************************************************************************
-
- * Name: stm32_enablefsmc
+/************************************************************************************
+ * Name: stm32_sdram_initialize
  *
  * Description:
- *  enable clocking to the FSMC module
+ *   Called from stm32_bringup to initialize external SDRAM access.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_STM32_FSMC
-void stm32_enablefsmc(void);
-#endif
-
-/****************************************************************************
-
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_FSMC
-void stm32_disablefsmc(void);
+#ifdef CONFIG_STM32_FMC
+void stm32_sdram_initialize(void);
 #endif
 
 /****************************************************************************

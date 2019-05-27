@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_fsmc.h
+ * arch/arm/src/stm32/stm32_fmc.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H
+#ifndef __ARCH_ARM_STC_STM32_STM32_FMC_H
+#define __ARCH_ARM_STC_STM32_STM32_FMC_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "hardware/stm32_fsmc.h"
+#include "hardware/stm32_fmc.h"
 
 /************************************************************************************
  * Public Functions
@@ -61,24 +61,84 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32_fsmc_enable
+ * Name: stm32_fmc_sdram_wait
  *
  * Description:
- *   Enable clocking to the FSMC.
+ *   Wait for the SDRAM controller to be ready.
  *
  ****************************************************************************/
 
-void stm32_fsmc_enable(void);
+void stm32_fmc_sdram_wait(void);
 
 /****************************************************************************
- * Name: stm32_fsmc_disable
+ * Name: stm32_fmc_enable
  *
  * Description:
- *   Disable clocking to the FSMC.
+ *   Enable clocking to the FMC.
  *
  ****************************************************************************/
 
-void stm32_fsmc_disable(void);
+void stm32_fmc_enable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_disable
+ *
+ * Description:
+ *   Disable clocking to the FMC.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_disable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_write_protect
+ *
+ * Description:
+ *   Enable/Disable writes to an SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_write_protect(int bank, bool state);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_refresh_rate
+ *
+ * Description:
+ *   Set the SDRAM refresh rate.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_refresh_rate(int count);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_timing
+ *
+ * Description:
+ *   Set the SDRAM timing parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_control
+ *
+ * Description:
+ *   Set the SDRAM control parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_command
+ *
+ * Description:
+ *   Send a command to the SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_command(uint32_t cmd);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -86,4 +146,4 @@ void stm32_fsmc_disable(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H */
+#endif /* __ARCH_ARM_STC_STM32_STM32_FMC_H */

@@ -122,7 +122,7 @@ void stm32_selectlcd(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank4 NOR/SRAM control register configuration */
 

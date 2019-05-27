@@ -76,24 +76,23 @@
  *
  * CONFIG_STM32_CCMEXCLUDE    : Exclude CCM SRAM from the HEAP
  *
- * In addition to internal SRAM, SRAM may also be available through the FSMC.
- * In order to use FSMC SRAM, the following additional things need to be
- * present in the NuttX configuration file:
+ * In addition to internal SRAM, external RAM may also be available through the
+ * FMC/FSMC. To use external RAM, the following things need to be present in
+ * the NuttX configuration file:
  *
- * CONFIG_STM32_FSMC=y        : Enables the FSMC
- * CONFIG_STM32_FSMC_SRAM=y   : Indicates that SRAM is available via the
- *                              FSMC (as opposed to an LCD or FLASH).
- * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
- *                              address space
- * CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
- *                              address space
- * CONFIG_MM_REGIONS          : Must be set to a large enough value to
- *                              include the FSMC SRAM (as determined by
- *                              the rules provided below)
+ * CONFIG_STM32_FSMC=y         : Enables the FSMC
+ * CONFIG_STM32_FMC=y          : Enables the FMC
+ * CONFIG_STM32_EXTERNAL_RAM=y : Indicates external RAM is available via the
+ *                               FMC/FSMC (as opposed to an LCD or FLASH).
+ * CONFIG_HEAP2_BASE           : The base address of the external RAM
+ * CONFIG_HEAP2_SIZE           : The size of the external RAM
+ * CONFIG_MM_REGIONS           : Must be set to a large enough value to
+ *                               include the external RAM (as determined by
+ *                               the rules provided below)
  */
 
-#ifndef CONFIG_STM32_FSMC
-#  undef CONFIG_STM32_FSMC_SRAM
+#if !defined(CONFIG_STM32_FSMC) && !defined(CONFIG_STM32_FMC)
+#  undef CONFIG_STM32_EXTERNAL_RAM
 #endif
 
 /* The STM32L15xxx family has only internal SRAM.  The heap is in one contiguous
@@ -108,7 +107,7 @@
 
    /* There is no FSMC (Other EnergyLite STM32's do have an FSMC, but not the STM32L15X */
 
-#  undef CONFIG_STM32_FSMC_SRAM
+#  undef CONFIG_STM32_EXTERNAL_RAM
 
    /* The STM32L EnergyLite family has no CCM SRAM */
 
@@ -134,10 +133,10 @@
 
    /* Check if external FSMC SRAM is provided */
 
-#  ifdef CONFIG_STM32_FSMC_SRAM
+#  ifdef CONFIG_STM32_EXTERNAL_RAM
 #    if CONFIG_MM_REGIONS < 2
 #      warning "FSMC SRAM not included in the heap"
-#      undef CONFIG_STM32_FSMC_SRAM
+#      undef CONFIG_STM32_EXTERNAL_RAM
 #    elif CONFIG_MM_REGIONS > 2
 #      error "CONFIG_MM_REGIONS > 2 but I don't know what some of the region(s) are"
 #      undef CONFIG_MM_REGIONS
@@ -173,7 +172,7 @@
 
    /* There is no FSMC */
 
-#  undef CONFIG_STM32_FSMC_SRAM
+#  undef CONFIG_STM32_EXTERNAL_RAM
 
    /* There are 2 possible SRAM configurations:
     *
@@ -243,7 +242,7 @@
 
    /* There is no FSMC */
 
-#  undef CONFIG_STM32_FSMC_SRAM
+#  undef CONFIG_STM32_EXTERNAL_RAM
 
    /* There are 2 possible SRAM configurations:
     *
@@ -305,7 +304,7 @@
 
    /* There is no FSMC */
 
-#  undef CONFIG_STM32_FSMC_SRAM
+#  undef CONFIG_STM32_EXTERNAL_RAM
 
    /* The STM32 F37xx has no CCM SRAM */
 
@@ -389,26 +388,26 @@
     *
     * Configuration 1. System SRAM (only)
     *                  CONFIG_MM_REGIONS == 1
-    *                  CONFIG_STM32_FSMC_SRAM NOT defined
+    *                  CONFIG_STM32_EXTERNAL_RAM NOT defined
     *                  CONFIG_STM32_CCMEXCLUDE defined
     * Configuration 2. System SRAM and CCM SRAM
     *                  CONFIG_MM_REGIONS == 2
-    *                  CONFIG_STM32_FSMC_SRAM NOT defined
+    *                  CONFIG_STM32_EXTERNAL_RAM NOT defined
     *                  CONFIG_STM32_CCMEXCLUDE NOT defined
     * Configuration 3. System SRAM and FSMC SRAM
     *                  CONFIG_MM_REGIONS == 2
-    *                  CONFIG_STM32_FSMC_SRAM defined
+    *                  CONFIG_STM32_EXTERNAL_RAM defined
     *                  CONFIG_STM32_CCMEXCLUDE defined
     * Configuration 4. System SRAM, CCM SRAM, and FSMC SRAM
     *                  CONFIG_MM_REGIONS == 3
-    *                  CONFIG_STM32_FSMC_SRAM defined
+    *                  CONFIG_STM32_EXTERNAL_RAM defined
     *                  CONFIG_STM32_CCMEXCLUDE NOT defined
     *
     * Let's make sure that all definitions are consistent before doing
     * anything else
     */
 
-#  if defined(CONFIG_STM32_FSMC_SRAM)
+#  if defined(CONFIG_STM32_EXTERNAL_RAM)
 
    /* Configuration 3 or 4. External SRAM is available.  CONFIG_MM_REGIONS
     * should be at least 2.
@@ -419,7 +418,7 @@
        /* Only one memory region.  Force Configuration 1 */
 
 #      warning "FSMC SRAM (and CCM SRAM) excluded from the heap"
-#      undef CONFIG_STM32_FSMC_SRAM
+#      undef CONFIG_STM32_EXTERNAL_RAM
 #      undef CONFIG_STM32_CCMEXCLUDE
 #      define CONFIG_STM32_CCMEXCLUDE 1
 
@@ -497,10 +496,10 @@
  * configuration (as CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE).
  */
 
-#ifdef CONFIG_STM32_FSMC_SRAM
+#ifdef CONFIG_STM32_EXTERNAL_RAM
 #  if !defined(CONFIG_HEAP2_BASE) || !defined(CONFIG_HEAP2_SIZE)
 #    error "CONFIG_HEAP2_BASE and CONFIG_HEAP2_SIZE must be provided"
-#    undef CONFIG_STM32_FSMC_SRAM
+#    undef CONFIG_STM32_EXTERNAL_RAM
 #  endif
 #endif
 
@@ -688,7 +687,7 @@ void up_addregion(void)
   kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
 #endif
 
-#ifdef CONFIG_STM32_FSMC_SRAM
+#ifdef CONFIG_STM32_EXTERNAL_RAM
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */

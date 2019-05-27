@@ -269,26 +269,6 @@ void stm32_extcontextrestore(struct extmem_save_s *restore);
 void stm32_extmemgpios(const uint16_t *gpios, int ngpios);
 
 /************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_enablefsmc(void);
-
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_disablefsmc(void);
-
-/************************************************************************************
  * Name: stm32_selectnor
  *
  * Description:

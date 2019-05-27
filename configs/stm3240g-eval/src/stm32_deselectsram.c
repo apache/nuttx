@@ -42,7 +42,7 @@
 #include <debug.h>
 
 #include "up_arch.h"
-#include "stm32_fsmc.h"
+#include "stm32.h"
 #include "stm3240g-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
@@ -87,10 +87,7 @@ void stm32_deselectsram(void)
 
   /* Disable AHB clocking to the FSMC */
 
-  stm32_disablefsmc();
+  stm32_fsmc_disable();
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-
-

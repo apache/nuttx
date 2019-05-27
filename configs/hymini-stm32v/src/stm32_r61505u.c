@@ -64,6 +64,10 @@
  * Pre-processor Definitions
  **************************************************************************************/
 
+#ifndef CONFIG_STM32_FSMC
+#  error CONFIG_STM32_FSMC is required for LCD support
+#endif
+
 /* Color depth and format */
 
 #define LCD_BPP          16
@@ -279,48 +283,6 @@ static inline void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
 }
 
 /************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-#ifndef CONFIG_STM32_FSMC
-#  error CONFIG_STM32_FSMC is required for LCD support
-#endif
-
-static void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
-
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-static void stm32_disablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval &= ~RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
-
-/************************************************************************************
  * Name: stm32_selectlcd
  *
  * Description:
@@ -336,7 +298,7 @@ static void stm32_selectlcd(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration */
 
@@ -379,7 +341,7 @@ static void stm32_deselectlcd(void)
 
   /* Disable AHB clocking to the FSMC */
 
-  stm32_disablefsmc();
+  stm32_fsmc_disable();
 }
 
 /**************************************************************************************

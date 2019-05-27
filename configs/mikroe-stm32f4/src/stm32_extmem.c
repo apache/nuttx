@@ -48,7 +48,6 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
 #include "mikroe-stm32f4.h"
@@ -148,40 +147,3 @@ void stm32_extmemdata(int ndata)
   stm32_extmemgpios(g_dataconfig, ndata);
 }
 
-/************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHB3ENR);
-  regval |= RCC_AHB3ENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}
-
-/************************************************************************************
- * Name: stm32_disablefsmc
- *
- * Description:
- *  enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-void stm32_disablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Disable AHB clocking to the FSMC */
-
-  regval  = getreg32(STM32_RCC_AHB3ENR);
-  regval &= ~RCC_AHB3ENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}

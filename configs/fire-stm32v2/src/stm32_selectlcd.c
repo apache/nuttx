@@ -49,7 +49,6 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
 #include "fire-stm32v2.h"
@@ -141,25 +140,6 @@ static const uint16_t g_lcdconfig[NCOMMON_CONFIG] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_enablefsmc
- *
- * Description:
- *  Enable clocking to the FSMC module
- *
- ************************************************************************************/
-
-static inline void stm32_enablefsmc(void)
-{
-  uint32_t regval;
-
-  /* Enable AHB clocking to the FSMC */
-
-  regval  = getreg32( STM32_RCC_AHBENR);
-  regval |= RCC_AHBENR_FSMCEN;
-  putreg32(regval, STM32_RCC_AHBENR);
-}
-
-/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -186,7 +166,7 @@ void stm32_selectlcd(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration */
 

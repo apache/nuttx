@@ -122,7 +122,7 @@ void stm32_selectsram(void)
 
   /* Enable AHB clocking to the FSMC */
 
-  stm32_enablefsmc();
+  stm32_fsmc_enable();
 
   /* Bank1 NOR/SRAM control register configuration */
 

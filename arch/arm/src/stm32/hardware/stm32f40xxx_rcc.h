@@ -448,6 +448,7 @@
 /* AHB3 Peripheral Clock enable register */
 
 #define RCC_AHB3ENR_FSMCEN          (1 << 0)  /* Bit 0: Flexible static memory controller module clock enable */
+#define RCC_AHB3ENR_FMCEN           (1 << 0)  /* Bit 0: Flexible memory controller module clock enable */
 #if defined(CONFIG_STM32_STM32F446)
 #  define RCC_AHB3ENR_QSPIEN        (1 << 1)  /* Bit 1: QUADSPI memory controller module clock enable */
 #endif
