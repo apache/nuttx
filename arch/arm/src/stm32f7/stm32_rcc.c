@@ -77,7 +77,7 @@
 /* Include chip-specific clocking initialization logic */
 
 #if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
-#  include "hardware/stm32f72xx73xx_rcc.c"
+#  include "stm32f72xx73xx_rcc.c"
 #elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
 #  include "stm32f74xx75xx_rcc.c"
 #elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
