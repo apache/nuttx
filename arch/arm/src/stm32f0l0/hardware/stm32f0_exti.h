@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_EXTI_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_EXTI_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_EXTI_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_EXTI_H
 
 /************************************************************************************
  * Included Files
@@ -128,4 +128,4 @@
 #define EXTI_PR_SHIFT            (0)                /* Bits 0-X: Pending bit for all lines */
 #define EXTI_PR_MASK             STM32_EXTI_MASK
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_EXTI_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_EXTI_H */

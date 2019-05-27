@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_FLASH_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_FLASH_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_FLASH_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_FLASH_H
 
 /************************************************************************************
  * Included Files
@@ -105,4 +105,4 @@
 
 #define FLASH_OBR_                            /* To be provided */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_FLASH_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_FLASH_H */

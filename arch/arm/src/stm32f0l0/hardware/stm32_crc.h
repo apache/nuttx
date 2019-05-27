@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRC_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRC_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRC_H
 
 /************************************************************************************
  * Included Files
@@ -87,4 +87,4 @@
 #  define CRC_CR_REVIN_WORD     (3 << CRC_CR_REVIN_SHIFT) /* 11: reversal done by word */
 #define CRC_CR_REVOUT           (1 << 7)  /* This bit controls the reversal of the bit order of the output data */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRC_H */

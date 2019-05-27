@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F09X_PINMAP_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F09X_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F09X_PINMAP_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F09X_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -427,4 +427,4 @@
 #define GPIO_USART8_RX_3         (GPIO_ALT | GPIO_AF0 | GPIO_PORTD | GPIO_PIN13)
 #define GPIO_USART8_CK_RST       (GPIO_ALT | GPIO_AF2 | GPIO_PORTD | GPIO_PIN14)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F09X_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F09X_PINMAP_H */

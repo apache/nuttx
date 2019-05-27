@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_I2C_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_I2C_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_I2C_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_I2C_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -235,4 +235,4 @@
 
 #define I2C_TXDR_MASK             (0xff)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_I2C_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_I2C_H */

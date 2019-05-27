@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -55,4 +55,4 @@
 #  error "Unsupported STM32 M0 memory map"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_MEMORYMAP_H */

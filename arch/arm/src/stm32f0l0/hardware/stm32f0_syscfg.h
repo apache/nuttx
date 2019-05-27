@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_SYSCFG_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_SYSCFG_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_SYSCFG_H
 
 /****************************************************************************************************
  * Included Files
@@ -388,4 +388,4 @@
 #define SYSCFG_ITLINE30_CEC            (1 << 0)  /* Bit 0: CEC interrupt request pending, combined with EXTI line 27 */
 #define SYSCFG_ITLINE30_CAN            (1 << 1)  /* Bit 1: CAN interrupt request pending */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_SYSCFG_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_SYSCFG_H */

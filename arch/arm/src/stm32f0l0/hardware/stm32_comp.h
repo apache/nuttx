@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_COMP_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_COMP_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_COMP_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_COMP_H
 
 /************************************************************************************
  * Included Files
@@ -135,4 +135,4 @@
 #define COMP_CSR_COMP2OUT             (1 << 14)   /* Bit 14: Comparator 1 output */
 #define COMP_CSR_COMP2LOCK            (1 << 15)   /* Bit 15: Comparator 1 lock */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_COMP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_COMP_H */

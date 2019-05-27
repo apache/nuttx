@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_TIM_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_TIM_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_TIM_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_TIM_H
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -49,4 +49,4 @@
 
 /* Register Bitfield Definitions ********************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_TIM_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_TIM_H */

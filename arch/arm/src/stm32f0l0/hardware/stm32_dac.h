@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_DAC_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_DAC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DAC_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DAC_H
 
 /************************************************************************************
  * Included Files
@@ -215,4 +215,4 @@
 #define DAC_SR_DMAUDR1            (1 << 13)  /* Bit 13: DAC channel 1 DMA underrun flag */
 #define DAC_SR_DMAUDR2            (1 << 29)  /* Bit 29: DAC channel 2 DMA underrun flag */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_DAC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DAC_H */

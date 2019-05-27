@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_FLASH_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_FLASH_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_FLASH_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_FLASH_H
 
 /************************************************************************************
  * Included Files
@@ -53,4 +53,4 @@
 #  error "Unsupported STM32 M0 FLASH"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_FLASH_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_FLASH_H */

@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_RTCC_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_RTCC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_RTCC_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_RTCC_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -321,4 +321,4 @@
 #define RTC_ALRMSSR_MASKSS_SHIFT  (24)  /* Bits 24-27:  Mask the most-significant bits starting at this bit */
 #define RTC_ALRMSSR_MASKSS_MASK   (0xf << RTC_ALRMSSR_MASKSS_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_RTCC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_RTCC_H */

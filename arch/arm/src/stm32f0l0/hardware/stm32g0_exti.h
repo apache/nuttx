@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32G0_EXTI_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32G0_EXTI_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32G0_EXTI_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32G0_EXTI_H
 
 /************************************************************************************
  * Included Files
@@ -100,4 +100,4 @@
 
 /* TODO */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32G0_EXTI_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32G0_EXTI_H */

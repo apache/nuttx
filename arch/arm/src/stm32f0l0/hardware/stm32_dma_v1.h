@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_HEARDWARE_STM32_DMA_V1_H
-#define __ARCH_ARM_SRC_STM32F0L0_HEARDWARE_STM32_DMA_V1_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DMA_V1_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DMA_V1_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -550,4 +550,4 @@
 #  error "Unknown DMA channel assignments"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_HEARDWARE_STM32_DMA_V1_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_DMA_V1_H */

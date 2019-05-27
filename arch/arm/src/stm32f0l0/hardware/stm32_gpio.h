@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_GPIO_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_GPIO_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_GPIO_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -355,4 +355,4 @@
 
 #define GPIO_BRR(n)                (1 << (n))
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_GPIO_H */

@@ -34,8 +34,8 @@
  *
  ********************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_ADC_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_ADC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_ADC_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_ADC_H
 
 /********************************************************************************
  * Included Files
@@ -268,4 +268,4 @@
 #  define ADC_CCR_LFMEN             (1 << 25)  /* Bit 25: Low Frequency Mode enable */
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_ADC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_ADC_H */

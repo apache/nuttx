@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F07X_PINMAP_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F07X_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F07X_PINMAP_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F07X_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -397,4 +397,4 @@
 
 #define GPIO_USB_NOE             (GPIO_ALT | GPIO_AF2 | GPIO_PORTA | GPIO_PIN13)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F07X_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F07X_PINMAP_H */

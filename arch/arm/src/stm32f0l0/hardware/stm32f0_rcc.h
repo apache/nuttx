@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_RCC_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_RCC_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_RCC_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -393,4 +393,4 @@
 #define RCC_CR2_HSI48CAL_SHIFT      (24)      /* Bits 24-31: HSI48 factory clock calibration */
 #define RCC_CR2_HSI48CAL_MASK       (0xff << RCC_CR2_HSI48CAL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_RCC_H */

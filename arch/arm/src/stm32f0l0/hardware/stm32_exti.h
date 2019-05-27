@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_EXTI_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_EXTI_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_EXTI_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_EXTI_H
 
 /************************************************************************************
  * Included Files
@@ -54,4 +54,4 @@
 #  error "Unrecognized STM32 M0 EXTI"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_EXTI_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_EXTI_H */

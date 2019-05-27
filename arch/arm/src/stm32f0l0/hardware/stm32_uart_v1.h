@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V1_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V1_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_UART_V1_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_UART_V1_H
 
 /************************************************************************************
  * Included Files
@@ -313,4 +313,4 @@
 #define USART_TDR_SHIFT           (0)       /* Bits 8:0: Data value */
 #define USART_TDR_MASK            (0xff << USART_TDR_SHIFT)
 
-#endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_V1_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_UART_V1_H */

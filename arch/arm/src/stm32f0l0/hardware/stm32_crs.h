@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRS_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRS_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -112,4 +112,4 @@
 #define CRS_ICR_ERRC               (1 << 2)  /* Bit 2: Error clear flag */
 #define CRS_ICR_ESYNCC             (1 << 3)  /* Bit 3: Expected SYNC clear flag */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CRS_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CRS_H */

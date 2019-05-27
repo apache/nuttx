@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V2_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V2_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_UART_V2_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32F0_UART_V2_H
 
 /************************************************************************************
  * Included Files
@@ -360,4 +360,4 @@
 # define USART_PRESC_DIV128       (10 << USART_PRESC_SHIFT) /* Input clock divided by 128 */
 # define USART_PRESC_DIV256       (11 << USART_PRESC_SHIFT) /* Input clock divided by 256 */
 
-#endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_V2_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_UART_V2_H */

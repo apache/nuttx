@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_USBDEV_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_USBDEV_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_USBDEV_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_USBDEV_H
 
 /************************************************************************************
  * Included Files
@@ -261,4 +261,4 @@
 #define USB_COUNT_RX_MASK              (0x03ff << USB_COUNT_RX_SHIFT)
 
 #endif /* CONFIG_STM32F0L0_HAVE_USBDEV */
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_USBDEV_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_USBDEV_H */

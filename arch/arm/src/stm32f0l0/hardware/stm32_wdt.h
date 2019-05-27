@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_WDG_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_WDG_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_WDG_H
 
 /************************************************************************************
  * Included Files
@@ -139,4 +139,4 @@
 
 #define WWDG_SR_EWIF           (1 << 0)  /* Bit 0: Early Wakeup Interrupt Flag */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_WDG_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_WDG_H */

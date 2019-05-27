@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CAN_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CAN_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CAN_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CAN_H
 
 /************************************************************************************
  * Included Files
@@ -466,4 +466,4 @@
 #define CAN_FA1R_FACT_SHIFT       (0)      /* Bits 13:0: Filter Active */
 #define CAN_FA1R_FACT_MASK        (0x3fff << CAN_FA1R_FACT_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_CAN_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_CAN_H */

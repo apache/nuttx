@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_UART_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_UART_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_UART_H
+#define __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_UART_H
 
 /************************************************************************************
  * Included Files
@@ -52,4 +52,4 @@
 #  error "Unsupported STM32 M0 USART"
 #endif
 
-#endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_UART_H */
