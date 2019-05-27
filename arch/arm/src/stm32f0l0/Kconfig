@@ -3,13 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "STM32F0/L0 Configuration Options"
+comment "STM32F0/L0/G0 Configuration Options"
 
 choice
-	prompt "ST STM32F0/L0 Chip Selection"
+	prompt "ST STM32F0/L0/G0 Chip Selection"
 	default ARCH_CHIP_STM32F051R8 if ARCH_CHIP_STM32F0
-	default ARCH_CHIP_STM32L073RZ if !ARCH_CHIP_STM32F0 && ARCH_CHIP_STM32L0
-	depends on ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
+	default ARCH_CHIP_STM32L073RZ if ARCH_CHIP_STM32L0
+	default ARCH_CHIP_STM32G071RB if ARCH_CHIP_STM32G0
+	depends on ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32F030C6
 	bool "STM32F030C6"
@@ -449,6 +450,71 @@ config ARCH_CHIP_STM32F098VC
 	select STM32F0L0_LOWVOLTLINE
 	depends on ARCH_CHIP_STM32F0
 
+config ARCH_CHIP_STM32G071EB
+	bool "STM32G071EB"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071G8
+	bool "STM32G071G8"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071GB
+	bool "STM32G071GB"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071G8XN
+	bool "STM32G071G8XN"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071GBXN
+	bool "STM32G071GBXN"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071K8
+	bool "STM32G071K8"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071KB
+	bool "STM32G071KB"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071K8XN
+	bool "STM32G071K8XN"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071KBXN
+	bool "STM32G071KBXN"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071C8
+	bool "STM32G071C8"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071CB
+	bool "STM32G071CB"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071R8
+	bool "STM32G071R8"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G071RB
+	bool "STM32G071RB"
+	select STM32F0L0_STM32G0
+	depends on ARCH_CHIP_STM32G0
+
 config ARCH_CHIP_STM32L071K8
 	bool "STM32L071K8"
 	select ARCH_CHIP_STM32L071XX
@@ -624,9 +690,6 @@ config ARCH_CHIP_STM32L073RZ
 
 endchoice # ST STM32F0/L0 Chip Selection
 
-config ARCH_FAMILY_STM32F0XX
-	bool
-
 choice
 	prompt "Override Flash Size Designator"
 	default STM32F0L0_FLASH_CONFIG_DEFAULT
@@ -709,6 +772,15 @@ config STM32F0L0_STM32F0
 	select STM32F0L0_HAVE_TIM16
 	select STM32F0L0_HAVE_TIM17
 	select STM32F0L0_HAVE_ADC1_DMA
+	select STM32F0L0_HAVE_IP_USART_V1
+	select STM32F0L0_HAVE_IP_EXTI_V1
+
+config STM32F0L0_STM32G0
+	bool
+	default n
+	select STM32F0L0_HAVE_DMAMUX
+	select STM32F0L0_HAVE_IP_USART_V2
+	select STM32F0L0_HAVE_IP_EXTI_V2
 
 config STM32F0L0_STM32L0
 	bool
@@ -716,6 +788,8 @@ config STM32F0L0_STM32L0
 	select STM32F0L0_ENERGYLITE
 	select STM32F0L0_HAVE_VREFINT
 	select STM32F0L0_HAVE_ADC1_DMA
+	select STM32F0L0_HAVE_IP_USART_V1
+	select STM32F0L0_HAVE_IP_EXTI_V1
 
 config STM32F0L0_STM32F03X
 	bool
@@ -950,6 +1024,10 @@ config STM32F0L0_HAVE_DAC1
 	bool
 	default n
 
+config STM32F0L0_HAVE_DMAMUX
+	bool
+	default n
+
 config STM32F0L0_HAVE_DMA2
 	bool
 	default n
@@ -1014,6 +1092,24 @@ config STM32F0L0_HAVE_OPAMP4
        bool
        default n
 
+# These are STM32 peripherals IP blocks
+
+config STM32F0L0_HAVE_IP_USART_V1
+	bool
+	default n
+
+config STM32F0L0_HAVE_IP_USART_V2
+	bool
+	default n
+
+config STM32F0L0_HAVE_IP_EXTI_V1
+	bool
+	default n
+
+config STM32F0L0_HAVE_IP_EXTI_V2
+	bool
+	default n
+
 # These are the peripheral selections proper
 
 config STM32F0L0_ADC1
@@ -1077,12 +1173,14 @@ config STM32F0L0_DMA1
 	bool "DMA1"
 	default n
 	select ARCH_DMA
+	select STM32F0L0_DMA
 
 config STM32F0L0_DMA2
 	bool "DMA2"
 	default n
 	depends on STM32F0L0_HAVE_DMA2
 	select ARCH_DMA
+	select STM32F0L0_DMA
 
 config STM32F0L0_DAC1
 	bool "DAC1"
@@ -1308,6 +1406,9 @@ config STM32F0L0_ADC
 config STM32F0L0_DAC
 	bool
 
+config STM32F0L0_DMA
+	bool
+
 config STM32F0L0_SPI
 	bool
 
@@ -1350,6 +1451,25 @@ endchoice # USART1 Driver Configuration
 
 if STM32F0L0_USART1_SERIALDRIVER
 
+config USART1_RXFIFO_THRES
+	int "USART1 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	depends on STM32F0L0_HAVE_IP_USART_V2
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
 config USART1_RS485
 	bool "RS-485 on USART1"
 	default n
@@ -1386,6 +1506,25 @@ config STM32F0L0_USART2_1WIREDRIVER
 endchoice # USART2 Driver Configuration
 
 if STM32F0L0_USART2_SERIALDRIVER
+
+config USART2_RXFIFO_THRES
+	int "USART2 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	depends on STM32F0L0_HAVE_IP_USART_V2
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
 
 config USART2_RS485
 	bool "RS-485 on USART2"

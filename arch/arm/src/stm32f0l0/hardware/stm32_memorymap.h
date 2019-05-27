@@ -49,8 +49,10 @@
 #  include "hardware/stm32f05xf07xf09x_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "hardware/stm32l0_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  include "hardware/stm32g0_memorymap.h"
 #else
-#  error "Unsupported STM32F0/L0 memory map"
+#  error "Unsupported STM32 M0 memory map"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_MEMORYMAP_H */

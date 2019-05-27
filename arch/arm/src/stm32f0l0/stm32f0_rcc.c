@@ -525,7 +525,7 @@ static inline void rcc_enableperipherals(void)
   rcc_enableapb1();
 
 #ifdef STM32_USE_HSI48
-  /* Enable HSI48 clocking to to support USB transfers or RNG */
+  /* Enable HSI48 clocking to support USB transfers or RNG */
 
   stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
 #endif

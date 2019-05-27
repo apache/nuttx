@@ -48,8 +48,10 @@
 #  include "hardware/stm32f0_syscfg.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "hardware/stm32l0_syscfg.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  include "hardware/stm32g0_syscfg.h"
 #else
-#  error "Unsupported STM32F0/L0 SYSCFG"
+#  error "Unsupported STM32 M0 SYSCFG"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32_SYSCFG_H */

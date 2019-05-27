@@ -54,7 +54,11 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 
-#include "hardware/stm32_syscfg.h"
+#if defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V1)
+#  include "hardware/stm32_syscfg.h"
+#elif defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V2)
+#  include "hardware/stm32_exti.h"
+#endif
 
 /****************************************************************************
  * Public Data
@@ -70,18 +74,19 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
   STM32_GPIOB_BASE,   /* Two GPIO ports, GPIOA-B */
 #endif
 #if STM32_NPORTS > 2
-  STM32_GPIOC_BASE,   /* Three GPIO ports, GPIOA-D*/
+  STM32_GPIOC_BASE,   /* Three GPIO ports, GPIOA-C*/
 #endif
 #if STM32_NPORTS > 3
   STM32_GPIOD_BASE,   /* Four GPIO ports, GPIOA-D */
 #endif
-#if STM32_NPORTS > 4
-  STM32_GPIOE_BASE,   /* Five GPIO ports, GPIOA-E */
+#if defined(STM32_GPIOE_BASE)
+  STM32_GPIOE_BASE,   /* GPIOE */
 #endif
-#if STM32_NPORTS > 5 && defined(STM32_HAVE_PORTF)
-  STM32_GPIOF_BASE,   /* Six GPIO ports, GPIOA-F */
-#elif STM32_NPORTS > 5 && !defined(STM32_HAVE_PORTF)
-  STM32_GPIOH_BASE,   /* Six GPIO ports, GPIOA-E, H */
+#if defined(STM32_GPIOF_BASE)
+  STM32_GPIOF_BASE,   /* GPIOF */
+#endif
+#if defined(STM32_GPIOH_BASE)
+  STM32_GPIOH_BASE,   /* GPIOH */
 #endif
 };
 
@@ -252,32 +257,32 @@ int stm32_configgpio(uint32_t cfgset)
         {
           default:
 #if defined(STM32_GPIO_VERY_LOW_SPEED)
-          case GPIO_SPPED_VERYLOW: /* 400KHz Very Low speed output */
-            setting = GPIO_OSPEED_2MHz;
+          case GPIO_SPPED_VERYLOW: /* Very Low speed output */
+            setting = GPIO_OSPEED_VERYLOW;
             break;
 
-          case GPIO_SPEED_LOW:     /* 2 MHz Low speed output */
-            setting = GPIO_OSPEED_2MHz;
+          case GPIO_SPEED_LOW:     /* Low speed output */
+            setting = GPIO_OSPEED_LOW;
             break;
 
-          case GPIO_SPEED_MEDIUM:  /* 10 MHz Medium speed output */
-            setting = GPIO_OSPEED_10MHz;
+          case GPIO_SPEED_MEDIUM:  /* Medium speed output */
+            setting = GPIO_OSPEED_MEDIUM;
             break;
 
-          case GPIO_SPEED_HIGH:    /* 40 MHz High speed output  */
-            setting = GPIO_OSPEED_40MHz;
+          case GPIO_SPEED_HIGH:    /* High speed output  */
+            setting = GPIO_OSPEED_HIGH;
             break;
 #else
-          case GPIO_SPEED_LOW:     /* 2 MHz Low speed output */
-            setting = GPIO_OSPEED_2MHz;
+          case GPIO_SPEED_LOW:     /* Low speed output */
+            setting = GPIO_OSPEED_LOW;
             break;
 
-          case GPIO_SPEED_MEDIUM:  /* 10 MHz Medium speed output */
-            setting = GPIO_OSPEED_10MHz;
+          case GPIO_SPEED_MEDIUM:  /* Medium speed output */
+            setting = GPIO_OSPEED_MEDIUM;
             break;
 
-          case GPIO_SPEED_HIGH:    /* 50 MHz High speed output  */
-            setting = GPIO_OSPEED_50MHz;
+          case GPIO_SPEED_HIGH:    /* High speed output  */
+            setting = GPIO_OSPEED_HIGH;
             break;
 #endif
         }
@@ -313,19 +318,10 @@ int stm32_configgpio(uint32_t cfgset)
 
   if ((cfgset & GPIO_EXTI) != 0)
     {
-      /* "In STM32 F1 the selection of the EXTI line source is performed through
-       *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
-       *  selection is done through the EXTIx bits in the SYSCFG_EXTICRx registers.
-       *
-       * "Only the mapping of the EXTICRx registers has been changed, without any
-       *  changes to the meaning of the EXTIx bits. However, the range of EXTI
-       *  bits values has been extended to 0b1000 to support the two ports added
-       *  in F2, port H and I (in F1 series the maximum value is 0b0110)."
-       */
-
       uint32_t regaddr;
       int shift;
 
+#if defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V1)
       /* Set the bits in the SYSCFG EXTICR register */
 
       regaddr = STM32_SYSCFG_EXTICR(pin);
@@ -335,6 +331,19 @@ int stm32_configgpio(uint32_t cfgset)
       regval |= (((uint32_t)port) << shift);
 
       putreg32(regval, regaddr);
+#elif defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V2)
+      /* Set the bits in the EXTI EXTICR register */
+
+      regaddr = STM32_EXTI_EXTICR(pin);
+      regval  = getreg32(regaddr);
+      shift   = EXTI_EXTICR_EXTI_SHIFT(pin);
+      regval &= ~(EXTI_EXTICR_PORT_MASK << shift);
+      regval |= (((uint32_t)port) << shift);
+
+      putreg32(regval, regaddr);
+#else
+#  error unknown EXTI IP core
+#endif
     }
 
   leave_critical_section(flags);

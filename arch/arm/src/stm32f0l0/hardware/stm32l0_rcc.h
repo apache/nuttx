@@ -263,12 +263,12 @@
 /* GPIO reset register */
 
 #define RCC_IOPRSTR_IOPARST         (1 << 0)  /* Bit 0: IO port A reset */
-#define RCC_IOPRSTR_IOPBRST         (1 << 1)  /* Bit 0: IO port B reset */
-#define RCC_IOPRSTR_IOPCRST         (1 << 2)  /* Bit 0: IO port C reset */
-#define RCC_IOPRSTR_IOPDRST         (1 << 3)  /* Bit 0: IO port D reset */
-#define RCC_IOPRSTR_IOPERST         (1 << 4)  /* Bit 0: IO port E reset */
+#define RCC_IOPRSTR_IOPBRST         (1 << 1)  /* Bit 1: IO port B reset */
+#define RCC_IOPRSTR_IOPCRST         (1 << 2)  /* Bit 3: IO port C reset */
+#define RCC_IOPRSTR_IOPDRST         (1 << 3)  /* Bit 4: IO port D reset */
+#define RCC_IOPRSTR_IOPERST         (1 << 4)  /* Bit 4: IO port E reset */
                                               /* Bits 5-6: Reserved */
-#define RCC_IOPRSTR_IOPHRST         (1 << 7)  /* Bit 0: IO port H reset */
+#define RCC_IOPRSTR_IOPHRST         (1 << 7)  /* Bit 5: IO port H reset */
 
 /* AHB peripheral reset register */
 
@@ -278,7 +278,7 @@
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBRSTR_CRCRST          (1 << 12) /* Bit 12: Memory interface reset */
                                               /* Bits 13-15: Reserved */
-#define RCC_AHBRSTR_TSCRST          (1 << 12) /* Bit 12: Touch sensing reset */
+#define RCC_AHBRSTR_TSCRST          (1 << 16) /* Bit 16: Touch sensing reset */
                                               /* Bits 17-19: Reserved */
 #define RCC_AHBRSTR_RNGRST          (1 << 20) /* Bit 20: Random number generator module reset */
                                               /* Bits 21-23: Reserved */
@@ -333,12 +333,12 @@
 /* GPIO clock enable register */
 
 #define RCC_IOPENR_IOPAEN           (1 << 0)  /* Bit 0: IO port A clock enable */
-#define RCC_IOPENR_IOPBEN           (1 << 1)  /* Bit 0: IO port B clock enable */
-#define RCC_IOPENR_IOPCEN           (1 << 2)  /* Bit 0: IO port C clock enable */
-#define RCC_IOPENR_IOPDEN           (1 << 3)  /* Bit 0: IO port D clock enable */
-#define RCC_IOPENR_IOPEEN           (1 << 4)  /* Bit 0: IO port E clock enable */
+#define RCC_IOPENR_IOPBEN           (1 << 1)  /* Bit 1: IO port B clock enable */
+#define RCC_IOPENR_IOPCEN           (1 << 2)  /* Bit 2: IO port C clock enable */
+#define RCC_IOPENR_IOPDEN           (1 << 3)  /* Bit 3: IO port D clock enable */
+#define RCC_IOPENR_IOPEEN           (1 << 4)  /* Bit 4: IO port E clock enable */
                                               /* Bits 5-6: Reserved */
-#define RCC_IOPENR_IOPHEN           (1 << 7)  /* Bit 0: IO port H clock enable */
+#define RCC_IOPENR_IOPHEN           (1 << 7)  /* Bit 5: IO port H clock enable */
 
 /* AHB Peripheral Clock enable register */
 
@@ -403,12 +403,12 @@
 /* GPIO clock enable in Sleep mode register */
 
 #define RCC_IOPSMENR_IOPASMEN          (1 << 0)  /* Bit 0: IO port A clock enable during Sleep mode */
-#define RCC_IOPSMENR_IOPBSMEN          (1 << 1)  /* Bit 0: IO port B clock enable during Sleep mode */
-#define RCC_IOPSMENR_IOPCSMEN          (1 << 2)  /* Bit 0: IO port C clock enable during Sleep mode */
-#define RCC_IOPSMENR_IOPDSMEN          (1 << 3)  /* Bit 0: IO port D clock enable during Sleep mode */
-#define RCC_IOPSMENR_IOPESMEN          (1 << 4)  /* Bit 0: IO port E clock enable during Sleep mode */
+#define RCC_IOPSMENR_IOPBSMEN          (1 << 1)  /* Bit 1: IO port B clock enable during Sleep mode */
+#define RCC_IOPSMENR_IOPCSMEN          (1 << 2)  /* Bit 2: IO port C clock enable during Sleep mode */
+#define RCC_IOPSMENR_IOPDSMEN          (1 << 3)  /* Bit 3: IO port D clock enable during Sleep mode */
+#define RCC_IOPSMENR_IOPESMEN          (1 << 4)  /* Bit 4: IO port E clock enable during Sleep mode */
                                                  /* Bits 5-6: Reserved */
-#define RCC_IOPSMENR_IOPHSMEN          (1 << 7)  /* Bit 0: IO port H clock enable during Sleep mode */
+#define RCC_IOPSMENR_IOPHSMEN          (1 << 7)  /* Bit 7: IO port H clock enable during Sleep mode */
 
 /* AHB peripheral clock enable in Sleep mode register */
 
@@ -484,7 +484,7 @@
 #  define RCC_CCIPR_USART2SEL_SYSCLK    (1 << RCC_CCIPR_USART2SEL_SHIFT)
 #  define RCC_CCIPR_USART2SEL_HSI16     (2 << RCC_CCIPR_USART2SEL_SHIFT)
 #  define RCC_CCIPR_USART2SEL_LSE       (3 << RCC_CCIPR_USART2SEL_SHIFT)
-                                             /* Bits 4-9: Reserved */
+                                              /* Bits 4-9: Reserved */
 #define RCC_CCIPR_LPUART1SEL_SHIFT      (10)  /* Bits 10-11: LPUART1 clock source selection */
 #define RCC_CCIPR_LPUART1SEL_MASK       (3 << RCC_CCIPR_LPUART1SEL_SHIFT)
 #  define RCC_CCIPR_LPUART1SEL_APB      (0 << RCC_CCIPR_LPUART1SEL_SHIFT)
@@ -519,7 +519,7 @@
 
 #define RCC_CSR_LSION                   (1 << 0)  /* Bit 0: LSI enable */
 #define RCC_CSR_LSIRDY                  (1 << 1)  /* Bit 1: ready */
-                                                  /* Bits 3-7: Reserved */
+                                                  /* Bits 2-7: Reserved */
 #define RCC_CSR_LSEON                   (1 << 8)  /* Bit 8: LSE enable */
 #define RCC_CSR_LSERDY                  (1 << 9)  /* Bit 9: LSE ready */
 #define RCC_CSR_LSEBPY                  (1 << 10) /* Bit 10: LSE bypass */

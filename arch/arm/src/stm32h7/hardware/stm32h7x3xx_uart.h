@@ -282,7 +282,7 @@
 #define USART_CR3_RTSE            (1 << 8)  /* Bit 8:  RTS Enable */
 #define USART_CR3_CTSE            (1 << 9)  /* Bit 9:  CTS Enable */
 #define USART_CR3_CTSIE           (1 << 10) /* Bit 10: CTS Interrupt Enable */
-#define USART_CR1_ONEBIT          (1 << 11) /* Bit 11: One sample bit method enable */
+#define USART_CR3_ONEBIT          (1 << 11) /* Bit 11: One sample bit method enable */
 #define USART_CR3_OVRDIS          (1 << 12) /* Bit 12: Overrun Disable */
 #define USART_CR3_DDRE            (1 << 13) /* Bit 13: DMA Disable on Reception Error */
 #define USART_CR3_DEM             (1 << 14) /* Bit 14: Driver enable mode */

@@ -44,12 +44,12 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_uart.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_uart.h"
+#if defined(CONFIG_STM32F0L0_HAVE_IP_USART_V1)
+#  include "hardware/stm32_uart_v1.h"
+#elif defined(CONFIG_STM32F0L0_HAVE_IP_USART_V2)
+#  include "hardware/stm32_uart_v2.h"
 #else
-#  error "Unsupported STM32F0/L0 UART"
+#  error "Unsupported STM32 M0 USART"
 #endif
 
 #endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_H */

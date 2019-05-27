@@ -64,6 +64,10 @@
  * the DMA requests for each channel.
  */
 
+#ifdef CONFIG_STM32F0L0_HAVE_DMAMUX
+#  error DMAMUX not supported yet
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

@@ -55,6 +55,17 @@
 #include "stm32_gpio.h"
 #include "stm32_exti.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V2)
+#  define STM32_EXTI_FTSR             STM32_EXTI_FTSR1
+#  define STM32_EXTI_RTSR             STM32_EXTI_RTSR1
+#  define STM32_EXTI_IMR              STM32_EXTI_IMR1
+#  define STM32_EXTI_EMR              STM32_EXTI_EMR1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -81,6 +92,7 @@ static struct gpio_callback_s g_gpio_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
+#if defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V1)
 static int stm32_exti_multiisr(int irq, void *context, void *arg,
                                int first, int last)
 {
@@ -124,6 +136,56 @@ static int stm32_exti_multiisr(int irq, void *context, void *arg,
 
   return ret;
 }
+#elif defined(CONFIG_STM32F0L0_HAVE_IP_EXTI_V2)
+static int stm32_exti_multiisr(int irq, void *context, void *arg,
+                               int first, int last)
+{
+  uint32_t rpr;
+  uint32_t fpr;
+  int pin;
+  int ret = OK;
+
+  /* Examine the state of each pin in the group.
+   * NOTE: We don't distinguish rising/falling edge!
+   */
+
+  rpr = getreg32(STM32_EXTI_RPR1);
+  fpr = getreg32(STM32_EXTI_FPR1);
+
+  /* And dispatch the interrupt to the handler */
+
+  for (pin = first; pin <= last; pin++)
+    {
+      /* Is an interrupt pending on this pin? */
+
+      uint32_t mask = (1 << pin);
+      if (((rpr & mask) != 0) || ((fpr & mask) != 0))
+        {
+          /* Clear the pending interrupt */
+
+          putreg32(mask, STM32_EXTI_RPR1);
+          putreg32(mask, STM32_EXTI_FPR1);
+
+          /* And dispatch the interrupt to the handler */
+
+          if (g_gpio_callbacks[pin].callback != NULL)
+            {
+              xcpt_t callback = g_gpio_callbacks[pin].callback;
+              void  *cbarg    = g_gpio_callbacks[pin].arg;
+              int tmp;
+
+              tmp = callback(irq, context, cbarg);
+              if (tmp < 0)
+                {
+                  ret = tmp;
+                }
+            }
+        }
+    }
+
+  return ret;
+}
+#endif
 
 static int stm32_exti01_isr(int irq, void *context, void *arg)
 {
@@ -240,6 +302,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
 
   stm32_configgpio(pinset);
+
 
   /* Configure rising/falling edges */
 

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32f0l0/hardware/stm32f0_uart.h
+ * arch/arm/src/stm32f0l0/hardware/stm32_uart_v1.h
  *
  *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_H
-#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V1_H
+#define __ARCH_ARM_SRC_STM32F0L0_CHIP_STM32F0_UART_V1_H
 
 /************************************************************************************
  * Included Files
@@ -313,4 +313,4 @@
 #define USART_TDR_SHIFT           (0)       /* Bits 8:0: Data value */
 #define USART_TDR_MASK            (0xff << USART_TDR_SHIFT)
 
-#endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_H */
+#endif /* __ARCH_ARM_STC_STM32F0L0_CHIP_STM32_UART_V1_H */

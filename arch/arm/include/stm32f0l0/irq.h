@@ -82,6 +82,8 @@
 #  include <arch/stm32f0l0/stm32f0_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include <arch/stm32f0l0/stm32l0_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  include <arch/stm32f0l0/stm32g0_irq.h>
 #else
 #  error Unrecognized STM32 Cortex M0 family
 #endif

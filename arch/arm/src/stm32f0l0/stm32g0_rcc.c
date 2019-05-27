@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0/stm32l0_rcc.c
+ * arch/arm/src/stm32f0l0/stm32g0_rcc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@
 
 #include "stm32_pwr.h"
 
-#include "hardware/stm32_syscfg.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -56,17 +54,6 @@
 /* HSE divisor to yield ~1MHz RTC clock (valid for HSE = 8MHz) */
 
 #define HSE_DIVISOR RCC_CR_RTCPRE_HSEd8
-
-/* Determine if board wants to use HSI48 as 48 MHz oscillator. */
-
-#if defined(CONFIG_STM32F0L0_HAVE_HSI48) && defined(STM32_USE_CLK48)
-#  if STM32_CLK48_SEL == RCC_CCIPR_CLK48SEL_HSI48
-#    define STM32_USE_HSI48
-#    ifndef CONFIG_STM32F0L0_VREFINT
-#      error VREFINT must be enabled if HSI48 used
-#    endif
-#  endif
-#endif
 
 /****************************************************************************
  * Private Data
@@ -88,19 +75,15 @@ static inline void rcc_reset(void)
 {
   uint32_t regval;
 
-  /* Set the appropriate bits in the APB2ENR register to enabled the
-   * selected APB2 peripherals.
-   */
-
-  regval = getreg32(STM32_RCC_APB2ENR);
+  regval = getreg32(STM32_RCC_APB1ENR);
 
 #if 1
   /* DBG clock enable */
 
-  regval |= RCC_APB2ENR_DBGEN;
+  regval |= RCC_APB1ENR_DBGEN;
 #endif
 
-  putreg32(regval, STM32_RCC_APB2ENR);
+  putreg32(regval, STM32_RCC_APB1ENR);
 }
 
 /****************************************************************************
@@ -118,7 +101,7 @@ static inline void rcc_enableio(void)
   /* REVISIT: */
 
   regval |= (RCC_IOPENR_IOPAEN | RCC_IOPENR_IOPBEN | RCC_IOPENR_IOPCEN | \
-             RCC_IOPENR_IOPDEN | RCC_IOPENR_IOPEEN | RCC_IOPENR_IOPHEN);
+             RCC_IOPENR_IOPDEN | RCC_IOPENR_IOPFEN);
 
   putreg32(regval, STM32_RCC_IOPENR);   /* Enable GPIO */
 }
@@ -159,16 +142,16 @@ static inline void rcc_enableahb(void)
   regval |= RCC_AHBENR_CRCEN;
 #endif
 
-#ifdef CONFIG_STM32F0L0_TSC
-  /* TSC clock enable */
-
-  regval |= RCC_AHBENR_TSCEN;
-#endif
-
 #ifdef CONFIG_STM32F0L0_RNG
   /* Random number generator clock enable */
 
   regval |= RCC_AHBENR_RNGEN;
+#endif
+
+#ifdef CONFIG_STM32F0L0_AES
+  /* AES modules clock enable */
+
+  regval |= RCC_AHBENR_AESEN;
 #endif
 
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
@@ -224,18 +207,6 @@ static inline void rcc_enableapb1(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0_LCD
-  /* LCD clock enable */
-
-  regval |= RCC_APB1ENR_LCDEN;
-#endif
-
-#ifdef CONFIG_STM32F0L0_WWDG
-  /* Window Watchdog clock enable */
-
-  regval |= RCC_APB1ENR_WWDGEN;
-#endif
-
 #ifdef CONFIG_STM32F0L0_SPI2
   /* SPI 2 clock enable */
 
@@ -266,11 +237,11 @@ static inline void rcc_enableapb1(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0_USART5
+#ifdef CONFIG_STM32F0L0_LPUSART1
   /* USART 5 clock enable */
 
 #ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB1ENR_USART5EN;
+  regval |= RCC_APB1ENR_LPUSART1EN;
 #endif
 #endif
 
@@ -289,19 +260,6 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_I2C2EN;
 #endif
 #endif
-
-#ifdef CONFIG_STM32F0L0_USB
-  /* USB clock enable */
-
-  regval |= RCC_APB1ENR_USBEN;
-#endif
-
-#ifdef CONFIG_STM32F0L0_CRS
-  /*  Clock recovery system clock enable */
-
-  regval |= RCC_APB1ENR_CRSEN;
-#endif
-
 #ifdef CONFIG_STM32F0L0_PWR
   /*  Power interface clock enable */
 
@@ -314,18 +272,16 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_DAC1EN;
 #endif
 
-#ifdef CONFIG_STM32F0L0_I2C3
-  /* I2C 3 clock enable */
-
-#ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB1ENR_I2C4EN;
-#endif
-#endif
-
 #ifdef CONFIG_STM32F0L0_LPTIM1
   /* LPTIM1 clock enable */
 
   regval |= RCC_APB1ENR_LPTIM1EN;
+#endif
+
+#ifdef CONFIG_STM32F0L0_LPTIM2
+  /* LPTIM2 clock enable */
+
+  regval |= RCC_APB1ENR_LPTIM2EN;
 #endif
 
   putreg32(regval, STM32_RCC_APB1ENR);
@@ -355,26 +311,12 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SYSCFGEN;
 #endif
 
-#ifdef CONFIG_STM32F0L0_TIM21
-  /* TIM21 Timer clock enable */
+#ifdef CONFIG_STM32F0L0_TIM1
+  /* TIM1 Timer clock enable */
 
 #ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB2ENR_TIM21EN;
+  regval |= RCC_APB2ENR_TIM1EN;
 #endif
-#endif
-
-#ifdef CONFIG_STM32F0L0_TIM22
-  /* TIM22 Timer clock enable */
-
-#ifdef CONFIG_STM32F0L0_FORCEPOWER
-  regval |= RCC_APB2ENR_TIM10EN;
-#endif
-#endif
-
-#ifdef CONFIG_STM32F0L0_ADC1
-  /* ADC 1 clock enable */
-
-  regval |= RCC_APB2ENR_ADC1EN;
 #endif
 
 #ifdef CONFIG_STM32F0L0_SPI1
@@ -391,39 +333,45 @@ static inline void rcc_enableapb2(void)
 #endif
 #endif
 
-#if 0
-  /* DBG clock enable */
+#ifdef CONFIG_STM32F0L0_TIM14
+  /* TIM14 Timer clock enable */
 
-  regval |= RCC_APB2ENR_DBGEN;
+#ifdef CONFIG_STM32F0L0_FORCEPOWER
+  regval |= RCC_APB2ENR_TIM14EN;
+#endif
+#endif
+
+#ifdef CONFIG_STM32F0L0_TIM15
+  /* TIM5 Timer clock enable */
+
+#ifdef CONFIG_STM32F0L0_FORCEPOWER
+  regval |= RCC_APB2ENR_TIM15EN;
+#endif
+#endif
+
+#ifdef CONFIG_STM32F0L0_TIM16
+  /* TIM16 Timer clock enable */
+
+#ifdef CONFIG_STM32F0L0_FORCEPOWER
+  regval |= RCC_APB2ENR_TIM16EN;
+#endif
+#endif
+
+#ifdef CONFIG_STM32F0L0_TIM17
+  /* TIM17 Timer clock enable */
+
+#ifdef CONFIG_STM32F0L0_FORCEPOWER
+  regval |= RCC_APB2ENR_TIM17EN;
+#endif
+#endif
+
+#ifdef CONFIG_STM32F0L0_ADC1
+  /* ADC 1 clock enable */
+
+  regval |= RCC_APB2ENR_ADC1EN;
 #endif
 
   putreg32(regval, STM32_RCC_APB2ENR);
-}
-
-/****************************************************************************
- * Name: rcc_enableccip
- *
- * Description:
- *   Set peripherals independent clock configuration.
- *
- ****************************************************************************/
-
-static inline void rcc_enableccip(void)
-{
-  uint32_t regval;
-
-  /* Certain peripherals have no clock selected even when their enable bit is
-   * set. Set some defaults in the CCIPR register so those peripherals
-   * will at least have a clock.
-   */
-
-  regval = getreg32(STM32_RCC_CCIPR);
-
-#if defined(STM32_USE_CLK48)
-  regval |= STM32_CLK48_SEL;
-#endif
-
-  putreg32(regval, STM32_RCC_CCIPR);
 }
 
 /****************************************************************************
@@ -434,7 +382,7 @@ static inline void rcc_enableccip(void)
  *
  ****************************************************************************/
 
-#if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
+#if (STM32_PLLCFG_PLLSRC == RCC_PLLCFG_PLLSRC_HSE) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
 static inline bool stm32_rcc_enablehse(void)
 {
   uint32_t regval;
@@ -500,44 +448,8 @@ static void stm32_stdclockconfig(void)
   regval |= RCC_APB1ENR_PWREN;
   putreg32(regval, STM32_RCC_APB1ENR);
 
-  /* Go to the high performance voltage range 1 if necessary.  In this mode,
-   * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
-   *
-   * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
-   * Range 2: PLLVCO up to 48MHz in range 2 (1.5V) (default)
-   * Range 3: PLLVCO up to 24MHz in range 3 (1.2V)
-   *
-   * Range 1: SYSCLK up to 32Mhz
-   * Range 2: SYSCLK up to 16Mhz
-   * Range 3: SYSCLK up to 4.2Mhz
-   *
-   * Range 1: Flash 1WS if SYSCLK > 16Mhz
-   * Range 2: Flash 1WS if SYSCLK > 8Mhz
-   * Range 3: Flash 1WS if SYSCLK > 2.1Mhz
-   */
-
-  pwr_vos   = PWR_CR_VOS_SCALE_2;
-  flash_1ws = false;
-
-#ifdef STM32_PLL_FREQUENCY
-  if (STM32_PLL_FREQUENCY > 48000000)
-    {
-      pwr_vos = PWR_CR_VOS_SCALE_1;
-    }
-#endif
-
-  if (STM32_SYSCLK_FREQUENCY > 16000000)
-    {
-      pwr_vos = PWR_CR_VOS_SCALE_1;
-    }
-
-  if ((pwr_vos == PWR_CR_VOS_SCALE_1 && STM32_SYSCLK_FREQUENCY > 16000000) ||
-      (pwr_vos == PWR_CR_VOS_SCALE_2 && STM32_SYSCLK_FREQUENCY > 8000000))
-    {
-      flash_1ws = true;
-    }
-
-  stm32_pwr_setvos(pwr_vos);
+#warning TODO: configure VOS range
+  UNUSED(pwr_vos);
 
 #if defined(CONFIG_STM32F0L0_RTC_HSECLOCK) || defined(CONFIG_LCD_HSECLOCK)
   /* If RTC / LCD selects HSE as clock source, the RTC prescaler
@@ -578,7 +490,7 @@ static void stm32_stdclockconfig(void)
   /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI. */
 
 #if (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE) || \
-    ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC))
+    ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && (STM32_PLLCFG_PLLSRC == RCC_PLLCFG_PLLSRC_HSE))
 
   /* The PLL is using the HSE, or the HSE is the system clock.  In either
    * case, we need to enable HSE clocking.
@@ -613,64 +525,14 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-#if (STM32_SYSCLK_SW != RCC_CFGR_SW_MSI)
-  /* Increasing the CPU frequency (in the same voltage range):
-   *
-   * After reset, the used clock is the MSI (2 MHz) with 0 WS configured in the
-   * FLASH_ACR register. 32-bit access is enabled and prefetch is disabled.
-   * ST strongly recommends to use the following software sequences to tune the
-   * number of wait states needed to access the Flash memory with the CPU
-   * frequency.
-   *
-   *   - Program the 64-bit access by setting the ACC64 bit in Flash access
-   *     control register (FLASH_ACR)
-   *   - Check that 64-bit access is taken into account by reading FLASH_ACR
-   *   - Program 1 WS to the LATENCY bit in FLASH_ACR
-   *   - Check that the new number of WS is taken into account by reading FLASH_ACR
-   *   - Modify the CPU clock source by writing to the SW bits in the Clock
-   *     configuration register (RCC_CFGR)
-   *   - If needed, modify the CPU clock prescaler by writing to the HPRE bits in
-   *     RCC_CFGR
-   *   - Check that the new CPU clock source or/and the new CPU clock prescaler
-   *     value is/are taken into account by reading the clock source status (SWS
-   *     bits) or/and the AHB prescaler value (HPRE bits), respectively, in the
-   *     RCC_CFGR register
-   */
-
-  regval = getreg32(STM32_FLASH_ACR);
-  regval |= FLASH_ACR_ACC64;          /* 64-bit access mode */
-  putreg32(regval, STM32_FLASH_ACR);
-
-  if (flash_1ws)
-    {
-      regval |= FLASH_ACR_LATENCY;    /* One wait state */
-    }
-  else
-    {
-      regval &= ~FLASH_ACR_LATENCY;   /* Zero wait state */
-    }
-
-  putreg32(regval, STM32_FLASH_ACR);
-
-  /* Enable FLASH prefetch */
-
-  regval |= FLASH_ACR_PRFTEN;
-  putreg32(regval, STM32_FLASH_ACR);
-
-#endif /* STM32_SYSCLK_SW != RCC_CFGR_SW_MSI */
+#warning TODO: cofnigure flash latency
+  UNUSED(flash_1ws);
 
   /* Set the HCLK source/divider */
 
   regval = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_HPRE_MASK;
   regval |= STM32_RCC_CFGR_HPRE;
-  putreg32(regval, STM32_RCC_CFGR);
-
-  /* Set the PCLK2 divider */
-
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~RCC_CFGR_PPRE2_MASK;
-  regval |= STM32_RCC_CFGR_PPRE2;
   putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PCLK1 divider */
@@ -684,26 +546,21 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
-  /* Set the PLL divider and multiplier.  NOTE:  The PLL needs to be disabled
-   * to do these operation.  We know this is the case here because pll_reset()
-   * was previously called by stm32_clockconfig().
-   */
+  /* Configure PLLs */
 
-  regval  = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLMUL_MASK | RCC_CFGR_PLLDIV_MASK);
-  regval |= (STM32_CFGR_PLLSRC | STM32_CFGR_PLLMUL | STM32_CFGR_PLLDIV);
-  putreg32(regval, STM32_RCC_CFGR);
+  regval = STM32_PLLCFG_PLLSRC | STM32_PLLCFG_PLLCFG;
 
-  /* Enable the PLL */
+  /* Configure PLL clock input */
 
-  regval = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32_RCC_CR);
+  regval |= STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN;
 
-  /* Wait until the PLL is ready */
+  /* Configure PLL clock outputs division */
 
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+  regval |= STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLQ | STM32_PLLCFG_PLLR;
 
+  /* Write PLLCFG register */
+
+  putreg32(regval, STM32_RCC_PLLCFG);
 #endif
 
   /* Select the system clock source (probably the PLL) */
@@ -745,41 +602,6 @@ static void stm32_stdclockconfig(void)
 
   stm32_rcc_enablelse();
 #endif
-
-}
-#endif
-
-/****************************************************************************
- * Name: vrefint_enable
- *
- * Description:
- *   Enable and configure internal voltage reference (VREFINT)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F0L0_VREFINT
-static void vrefint_enable(void)
-{
-  uint32_t regval = 0;
-
-  /* The HSI48 requires VREFINT and its reference to HSI48  */
-
-  regval = getreg32(STM32_SYSCFG_CFGR3);
-
-  /* Enable VREFINT */
-
-  regval |= SYSCFG_CFGR3_ENVREFINT;
-  putreg32(regval, STM32_SYSCFG_CFGR3);
-
-#ifdef STM32_USE_HSI48
-  /* Enable VREFINT reference to HSI48 */
-
-  regval |= SYSCFG_CFGR3_ENBUFVREFINTHSI48;
-#endif
-
-  /* Wait for VREFINT ready */
-
-  while ((getreg32(STM32_SYSCFG_CFGR3) & SYSCFG_CFGR3_VREFINTRDYF) == 0);
 }
 #endif
 
@@ -789,20 +611,10 @@ static void vrefint_enable(void)
 
 static inline void rcc_enableperipherals(void)
 {
-  rcc_enableccip();
   rcc_enableio();
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
-#ifdef CONFIG_STM32F0L0_VREFINT
-  vrefint_enable();
-#endif
-
-#ifdef STM32_USE_HSI48
-  /* Enable HSI48 clocking to support USB transfers or RNG */
-
-  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
-#endif
 }
 
 /****************************************************************************

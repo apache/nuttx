@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define STM32_NEXTI              31      /* REVISIT: Taken from the F0, probably incorrect */
+#define STM32_NEXTI              29
 #define STM32_EXTI_MASK          0xffffffff
 
 #define STM32_EXTI_BIT(n)        (1 << (n))

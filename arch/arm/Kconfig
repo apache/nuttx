@@ -317,6 +317,13 @@ config ARCH_CHIP_STM32L0
 	---help---
 		STMicro STM32L0 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_STM32G0
+	bool "STMicro STM32 G0"
+	select ARCH_CORTEXM0
+	depends on EXPERIMENTAL
+	---help---
+		STMicro STM32G0 architectures (ARM Cortex-M0).
+
 config ARCH_CHIP_STM32F7
 	bool "STMicro STM32 F7"
 	select ARCH_CORTEXM7
@@ -677,7 +684,7 @@ config ARCH_CHIP
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
 	default "stm32"		if ARCH_CHIP_STM32
-	default "stm32f0l0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
+	default "stm32f0l0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
@@ -909,7 +916,7 @@ endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
 endif
-if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0
+if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
 source arch/arm/src/stm32f0l0/Kconfig
 endif
 if ARCH_CHIP_STM32F7

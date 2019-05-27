@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/include/stm32f0l0/stm32_irq.h
+ * arch/arm/include/stm32f0l0/stm32l0_irq.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Mateusz Szafoni <raiden00@railab.me>

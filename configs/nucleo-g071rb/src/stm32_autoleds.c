@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0/stm32_lowputc.c
+ * configs/nucleo-g071rb/src/stm32_autoleds.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *   Authors: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,16 +38,57 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+
+#include "stm32_gpio.h"
+#include "nucleo-g071rb.h"
+
+#include <arch/board/board.h>
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0_HAVE_IP_USART_V1)
-#  include "stm32_lowputc_v1.c"
-#elif defined(CONFIG_STM32F0L0_HAVE_IP_USART_V2)
-#  include "stm32_lowputc_v2.c"
-#else
-#  error "Unsupported STM32 M0 serial"
-#endif
+/****************************************************************************
+ * Name: board_autoled_initialize
+ ****************************************************************************/
+
+void board_autoled_initialize(void)
+{
+  /* Configure LED1 GPIO for output */
+
+  stm32_configgpio(GPIO_LED1);
+}
+
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LED1, true);
+    }
+}
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  if (led == BOARD_LED1)
+    {
+      stm32_gpiowrite(GPIO_LED1, false);
+    }
+}
+
+#endif /* CONFIG_ARCH_LEDS */

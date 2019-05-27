@@ -51,8 +51,10 @@
 #  include "hardware/stm32f09x_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "hardware/stm32l0_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  include "hardware/stm32g0_pinmap.h"
 #else
-#  error "Unsupported STM32F0/L0 pin map"
+#  error "Unsupported STM32 M0 pin map"
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0_HARDWARE_STM32_PINMAP_H */
