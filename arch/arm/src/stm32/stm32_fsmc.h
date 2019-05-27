@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_FSMC_H
+#define __ARCH_ARM_SRC_STM32_STM32_FSMC_H
 
 /************************************************************************************
  * Included Files
@@ -86,4 +86,4 @@ void stm32_fsmc_disable(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FSMC_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_FSMC_H */
