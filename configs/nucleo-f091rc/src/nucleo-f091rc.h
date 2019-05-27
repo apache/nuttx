@@ -55,14 +55,14 @@
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
-#  undef CONFIG_STM32F0L0_SPI1
-#  undef CONFIG_STM32F0L0_SPI2
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI1
+#  undef CONFIG_STM32F0L0G0_SPI2
+#  undef CONFIG_STM32F0L0G0_SPI3
 #elif STM32_NSPI < 2
-#  undef CONFIG_STM32F0L0_SPI2
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI2
+#  undef CONFIG_STM32F0L0G0_SPI3
 #elif STM32_NSPI < 3
-#  undef CONFIG_STM32F0L0_SPI3
+#  undef CONFIG_STM32F0L0G0_SPI3
 #endif
 
 /* Nucleo-F091RC GPIOs ******************************************************/
@@ -139,7 +139,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0_SPI
+#ifdef CONFIG_STM32F0L0G0_SPI
 void stm32_spidev_initialize(void);
 #endif
 

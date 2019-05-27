@@ -101,7 +101,7 @@
 
 /* 48MHz clock configuration */
 
-#if defined(CONFIG_STM32F0L0_USB) || defined(CONFIG_STM32F0L0_RNG)
+#if defined(CONFIG_STM32F0L0G0_USB) || defined(CONFIG_STM32F0L0G0_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
