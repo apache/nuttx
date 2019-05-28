@@ -57,7 +57,7 @@
  *
  * #define GPIO_I2C1_SCL GPIO_I2C1_SCL_1
  *
- * The driver will then automatically configre PB6 as the I2C1 SCL pin.
+ * The driver will then automatically configure PB6 as the I2C1 SCL pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

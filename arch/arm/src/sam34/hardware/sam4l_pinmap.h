@@ -58,7 +58,7 @@
  *
  * #define GPIO_SPI_MISO GPIO_SPI_MISO_1
  *
- * The driver will then automatically configre PA21 as the SPI MISO pin.
+ * The driver will then automatically configure PA21 as the SPI MISO pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

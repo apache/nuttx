@@ -59,7 +59,7 @@
  *
  * #define GPIO_USART1_TX GPIO_USART1_TX_1
  *
- * The driver will then automatically configre PD0 as the CAN1 RX pin.
+ * The driver will then automatically configure PD0 as the CAN1 RX pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

@@ -58,7 +58,7 @@
  *
  * #define GPIO_CAN_N2TXD GPIO_CAN_N2TXD_1
  *
- * The driver will then automatically configre PA11 as the CAN1 RX pin.
+ * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

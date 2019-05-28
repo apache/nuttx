@@ -55,7 +55,7 @@
  *
  * #define GPIO_CAN0_RD GPIO_CAN0_RD_1
  *
- * The driver will then automatically configre P0.4 as the CAN0 RX pin.
+ * The driver will then automatically configure P0.4 as the CAN0 RX pin.
  *
  * All pins are Type D unless otherwise noted.
  */

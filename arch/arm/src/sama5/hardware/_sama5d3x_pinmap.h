@@ -59,7 +59,7 @@
  *
  *   #define PIO_LCD_DAT16 PIO_LCD_DAT16_1
  *
- * The LCD driver will then automatically configre PA16 as the DAT16 pin.
+ * The LCD driver will then automatically configure PA16 as the DAT16 pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

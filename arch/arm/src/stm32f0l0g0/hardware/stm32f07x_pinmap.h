@@ -58,7 +58,7 @@
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
- * The driver will then automatically configre PD0 as the CAN1 RX pin.
+ * The driver will then automatically configure PD0 as the CAN1 RX pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

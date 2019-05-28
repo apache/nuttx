@@ -60,7 +60,7 @@
  *
  * #define GPIO_PWM0_H GPIO_PWM0_H_1
  *
- * The driver will then automatically configre RE15 as the PWM0 H pin.
+ * The driver will then automatically configure RE15 as the PWM0 H pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

@@ -66,7 +66,7 @@
  *
  *    #define PINCONF_CAN1_RD PINCONF_CAN1_RD_1
  *
- *    The driver will then automatically configre Pins1[18] as the CAN1 RD pin.
+ *    The driver will then automatically configure Pins1[18] as the CAN1 RD pin.
  */
 
 #define PINCONF_ADC0p0           (PINCONF_FUNC0|PINCONF_PINS4|PINCONF_PIN_3)
