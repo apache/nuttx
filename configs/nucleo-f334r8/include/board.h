@@ -284,8 +284,6 @@
 
 /* TIM1 PWM configuration ***************************************************/
 
-#    define PWM_TIM1_NCHANNELS 4
-
 #    define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_1 /* TIM1 CH1  - PA8 */
 #    define GPIO_TIM1_CH1NOUT  GPIO_TIM1_CH1N_3   /* TIM1 CH1N - PA7 */
                                                   /* TIM1 CH2  - PA9 */

@@ -389,9 +389,9 @@ int highpri_main(int argc, char *argv[])
 
   PWM_CCR_UPDATE(pwm1, 1, 0x0f00);
 
-  /* Enable TIM1 CHAN1 */
+  /* Enable TIM1 OUT1 */
 
-  PWM_OUTPUTS_ENABLE(pwm1, STM32_CHAN1, true);
+  PWM_OUTPUTS_ENABLE(pwm1, STM32_PWM_OUT1, true);
 #else
 #  error T1CC1 only supported for now
 #endif

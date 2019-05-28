@@ -3230,11 +3230,11 @@ if STM32_TIM1_CHANNEL1
 
 config STM32_TIM1_CH1MODE
 	int "TIM1 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH1OUT
 	bool "TIM1 Channel 1 Output"
@@ -3260,11 +3260,11 @@ if STM32_TIM1_CHANNEL2
 
 config STM32_TIM1_CH2MODE
 	int "TIM1 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH2OUT
 	bool "TIM1 Channel 2 Output"
@@ -3290,11 +3290,11 @@ if STM32_TIM1_CHANNEL3
 
 config STM32_TIM1_CH3MODE
 	int "TIM1 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH3OUT
 	bool "TIM1 Channel 3 Output"
@@ -3320,11 +3320,11 @@ if STM32_TIM1_CHANNEL4
 
 config STM32_TIM1_CH4MODE
 	int "TIM1 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH4OUT
 	bool "TIM1 Channel 4 Output"
@@ -3345,10 +3345,10 @@ if STM32_TIM1_CHANNEL5
 
 config STM32_TIM1_CH5MODE
 	int "TIM1 Channel 5 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH5OUT
 	bool "TIM1 Channel 5 Output"
@@ -3369,10 +3369,10 @@ if STM32_TIM1_CHANNEL6
 
 config STM32_TIM1_CH6MODE
 	int "TIM1 Channel 6 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM1_CH6OUT
 	bool "TIM1 Channel 6 Output"
@@ -3454,11 +3454,11 @@ endif # STM32_TIM1_CHANNEL = 4
 
 config STM32_TIM1_CHMODE
 	int "TIM1 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3499,11 +3499,11 @@ if STM32_TIM2_CHANNEL1
 
 config STM32_TIM2_CH1MODE
 	int "TIM2 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH1OUT
 	bool "TIM2 Channel 1 Output"
@@ -3523,11 +3523,11 @@ if STM32_TIM2_CHANNEL2
 
 config STM32_TIM2_CH2MODE
 	int "TIM2 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH2OUT
 	bool "TIM2 Channel 2 Output"
@@ -3547,11 +3547,11 @@ if STM32_TIM2_CHANNEL3
 
 config STM32_TIM2_CH3MODE
 	int "TIM2 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH3OUT
 	bool "TIM2 Channel 3 Output"
@@ -3571,11 +3571,11 @@ if STM32_TIM2_CHANNEL4
 
 config STM32_TIM2_CH4MODE
 	int "TIM2 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM2_CH4OUT
 	bool "TIM2 Channel 4 Output"
@@ -3639,11 +3639,11 @@ endif # STM32_TIM2_CHANNEL = 4
 
 config STM32_TIM2_CHMODE
 	int "TIM2 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3684,11 +3684,11 @@ if STM32_TIM3_CHANNEL1
 
 config STM32_TIM3_CH1MODE
 	int "TIM3 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH1OUT
 	bool "TIM3 Channel 1 Output"
@@ -3708,11 +3708,11 @@ if STM32_TIM3_CHANNEL2
 
 config STM32_TIM3_CH2MODE
 	int "TIM3 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH2OUT
 	bool "TIM3 Channel 2 Output"
@@ -3732,11 +3732,11 @@ if STM32_TIM3_CHANNEL3
 
 config STM32_TIM3_CH3MODE
 	int "TIM3 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH3OUT
 	bool "TIM3 Channel 3 Output"
@@ -3756,11 +3756,11 @@ if STM32_TIM3_CHANNEL4
 
 config STM32_TIM3_CH4MODE
 	int "TIM3 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM3_CH4OUT
 	bool "TIM3 Channel 4 Output"
@@ -3824,11 +3824,11 @@ endif # STM32_TIM3_CHANNEL = 4
 
 config STM32_TIM3_CHMODE
 	int "TIM3 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -3869,11 +3869,11 @@ if STM32_TIM4_CHANNEL1
 
 config STM32_TIM4_CH1MODE
 	int "TIM4 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH1OUT
 	bool "TIM4 Channel 1 Output"
@@ -3893,11 +3893,11 @@ if STM32_TIM4_CHANNEL2
 
 config STM32_TIM4_CH2MODE
 	int "TIM4 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH2OUT
 	bool "TIM4 Channel 2 Output"
@@ -3917,11 +3917,11 @@ if STM32_TIM4_CHANNEL3
 
 config STM32_TIM4_CH3MODE
 	int "TIM4 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH3OUT
 	bool "TIM4 Channel 3 Output"
@@ -3941,11 +3941,11 @@ if STM32_TIM4_CHANNEL4
 
 config STM32_TIM4_CH4MODE
 	int "TIM4 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM4_CH4OUT
 	bool "TIM4 Channel 4 Output"
@@ -4009,11 +4009,11 @@ endif # STM32_TIM4_CHANNEL = 4
 
 config STM32_TIM4_CHMODE
 	int "TIM4 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4054,11 +4054,11 @@ if STM32_TIM5_CHANNEL1
 
 config STM32_TIM5_CH1MODE
 	int "TIM5 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH1OUT
 	bool "TIM5 Channel 1 Output"
@@ -4078,11 +4078,11 @@ if STM32_TIM5_CHANNEL2
 
 config STM32_TIM5_CH2MODE
 	int "TIM5 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH2OUT
 	bool "TIM5 Channel 2 Output"
@@ -4102,11 +4102,11 @@ if STM32_TIM5_CHANNEL3
 
 config STM32_TIM5_CH3MODE
 	int "TIM5 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH3OUT
 	bool "TIM5 Channel 3 Output"
@@ -4126,11 +4126,11 @@ if STM32_TIM5_CHANNEL4
 
 config STM32_TIM5_CH4MODE
 	int "TIM5 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM5_CH4OUT
 	bool "TIM5 Channel 4 Output"
@@ -4194,11 +4194,11 @@ endif # STM32_TIM5_CHANNEL = 4
 
 config STM32_TIM5_CHMODE
 	int "TIM5 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4260,11 +4260,11 @@ if STM32_TIM8_CHANNEL1
 
 config STM32_TIM8_CH1MODE
 	int "TIM8 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH1OUT
         bool "TIM8 Channel 1 Output"
@@ -4290,11 +4290,11 @@ if STM32_TIM8_CHANNEL2
 
 config STM32_TIM8_CH2MODE
 	int "TIM8 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH2OUT
 	bool "TIM8 Channel 2 Output"
@@ -4320,11 +4320,11 @@ if STM32_TIM8_CHANNEL3
 
 config STM32_TIM8_CH3MODE
 	int "TIM8 Channel 3 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH3OUT
 	bool "TIM8 Channel 3 Output"
@@ -4350,11 +4350,11 @@ if STM32_TIM8_CHANNEL4
 
 config STM32_TIM8_CH4MODE
 	int "TIM8 Channel 4 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH4OUT
 	bool "TIM8 Channel 4 Output"
@@ -4375,10 +4375,10 @@ if STM32_TIM8_CHANNEL5
 
 config STM32_TIM8_CH5MODE
 	int "TIM8 Channel 5 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH5OUT
 	bool "TIM8 Channel 5 Output"
@@ -4399,10 +4399,10 @@ if STM32_TIM8_CHANNEL6
 
 config STM32_TIM8_CH6MODE
 	int "TIM8 Channel 6 Mode"
-	default 0
-	range 0 5
+	default 6
+	range 0 11
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM8_CH6OUT
 	bool "TIM8 Channel 6 Output"
@@ -4484,11 +4484,11 @@ endif # STM32_TIM8_CHANNEL = 4
 
 config STM32_TIM8_CHMODE
 	int "TIM8 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4522,11 +4522,11 @@ if STM32_TIM9_CHANNEL1
 
 config STM32_TIM9_CH1MODE
 	int "TIM9 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM9_CH1OUT
 	bool "TIM9 Channel 1 Output"
@@ -4546,11 +4546,11 @@ if STM32_TIM9_CHANNEL2
 
 config STM32_TIM9_CH2MODE
 	int "TIM9 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM9_CH2OUT
 	bool "TIM9 Channel 2 Output"
@@ -4594,11 +4594,11 @@ endif # STM32_TIM9_CHANNEL = 2
 
 config STM32_TIM9_CHMODE
 	int "TIM9 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4632,11 +4632,11 @@ if STM32_TIM10_CHANNEL1
 
 config STM32_TIM10_CH1MODE
 	int "TIM10 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM10_CH1OUT
 	bool "TIM10 Channel 1 Output"
@@ -4670,11 +4670,11 @@ endif # STM32_TIM10_CHANNEL = 1
 
 config STM32_TIM10_CHMODE
 	int "TIM10 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4708,11 +4708,11 @@ if STM32_TIM11_CHANNEL1
 
 config STM32_TIM11_CH1MODE
 	int "TIM11 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM11_CH1OUT
 	bool "TIM11 Channel 1 Output"
@@ -4746,11 +4746,11 @@ endif # STM32_TIM11_CHANNEL = 1
 
 config STM32_TIM11_CHMODE
 	int "TIM11 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4784,11 +4784,11 @@ if STM32_TIM12_CHANNEL1
 
 config STM32_TIM12_CH1MODE
 	int "TIM12 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM12_CH1OUT
 	bool "TIM12 Channel 1 Output"
@@ -4808,11 +4808,11 @@ if STM32_TIM12_CHANNEL2
 
 config STM32_TIM12_CH2MODE
 	int "TIM12 Channel 2 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM12_CH2OUT
 	bool "TIM12 Channel 2 Output"
@@ -4856,11 +4856,11 @@ endif # STM32_TIM12_CHANNEL = 2
 
 config STM32_TIM12_CHMODE
 	int "TIM12 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4894,11 +4894,11 @@ if STM32_TIM13_CHANNEL1
 
 config STM32_TIM13_CH1MODE
 	int "TIM13 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM13_CH1OUT
 	bool "TIM13 Channel 1 Output"
@@ -4932,11 +4932,11 @@ endif # STM32_TIM13_CHANNEL = 1
 
 config STM32_TIM13_CHMODE
 	int "TIM13 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -4970,11 +4970,11 @@ if STM32_TIM14_CHANNEL1
 
 config STM32_TIM14_CH1MODE
 	int "TIM14 Channel 1 Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM14_CH1OUT
 	bool "TIM14 Channel 1 Output"
@@ -5008,11 +5008,11 @@ endif # STM32_TIM14_CHANNEL = 1
 
 config STM32_TIM14_CHMODE
 	int "TIM14 Channel Mode"
-	default 0
-	range 0 5 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 11 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5066,11 +5066,11 @@ if STM32_TIM15_CHANNEL1
 
 config STM32_TIM15_CH1MODE
 	int "TIM15 Channel 1 Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM15_CH1OUT
 	bool "TIM15 Channel 1 Output"
@@ -5096,11 +5096,11 @@ if STM32_TIM15_CHANNEL2
 
 config STM32_TIM15_CH2MODE
 	int "TIM15 Channel 2 Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM15_CH2OUT
 	bool "TIM15 Channel 2 Output"
@@ -5156,11 +5156,11 @@ endif # STM32_TIM15_CHANNEL = 2
 
 config STM32_TIM15_CHMODE
 	int "TIM15 Channel Mode"
-	default 0
-	range 0 3 if STM32_HAVE_IP_TIMERS_V2
-	range 0 1 if !STM32_HAVE_IP_TIMERS_V2
+	default 6
+	range 0 9 if STM32_HAVE_IP_TIMERS_V2
+	range 0 7 if !STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5214,10 +5214,10 @@ if STM32_TIM16_CHANNEL1
 
 config STM32_TIM16_CH1MODE
 	int "TIM16 Channel 1 Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM16_CH1OUT
 	bool "TIM16 Channel 1 Output"
@@ -5251,10 +5251,10 @@ endif # STM32_TIM16_CHANNEL = 1
 
 config STM32_TIM16_CHMODE
 	int "TIM16 Channel Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5308,10 +5308,10 @@ if STM32_TIM17_CHANNEL1
 
 config STM32_TIM17_CH1MODE
 	int "TIM17 Channel 1 Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 config STM32_TIM17_CH1OUT
 	bool "TIM17 Channel 1 Output"
@@ -5345,10 +5345,10 @@ endif # STM32_TIM17_CHANNEL = 1
 
 config STM32_TIM17_CHMODE
 	int "TIM17 Channel Mode"
-	default 0
-	range 0 1
+	default 6
+	range 0 7
 	---help---
-		Specifies the channel mode.
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
 
 endif # !STM32_PWM_MULTICHAN
 
@@ -5369,38 +5369,6 @@ config STM32_PWM_TRGO
 	depends on STM32_PWM
 	---help---
 		Enable TRGO support for PWM driver
-
-config STM32_TIM1_PWM_ADC
-	bool "TIM1 PWM ADC "
-	default n
-	depends on STM32_TIM1 && STM32_ADC && STM32_TIM1_PWM
-	---help---
-		ADC trigger with TIM1 configured as PWM source
-
-choice
-	prompt "Select TIM1 PWM ADC channel"
-	default STM32_TIM1_PWM_ADC1
-	depends on STM32_TIM1_PWM_ADC
-
-config STM32_TIM1_PWM_ADC1
-	bool "TIM1 PWM ADC1"
-	depends on STM32_ADC1
-	---help---
-		Trigger ADC1 with PWM configured TIM1
-
-config STM32_TIM1_PWM_ADC2
-	bool "TIM1 PWM ADC2"
-	depends on STM32_ADC2
-	---help---
-		Trigger ADC2 with PWM configured TIM1
-
-config STM32_TIM1_PWM_ADC3
-	bool "TIM1 PWM ADC3"
-	depends on STM32_ADC3
-	---help---
-		Trigger ADC3 with PWM configured TIM1
-
-endchoice
 
 config STM32_TIM1_ADC
 	bool "TIM1 ADC"
@@ -5663,6 +5631,9 @@ config STM32_HAVE_ADC2_TIMER
 config STM32_HAVE_ADC3_TIMER
 	bool
 
+config STM32_HAVE_ADC4_TIMER
+	bool
+
 config STM32_ADC1_SAMPLE_FREQUENCY
 	int "ADC1 Sampling Frequency"
 	default 100
@@ -5674,7 +5645,7 @@ config STM32_ADC1_TIMTRIG
 	int "ADC1 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC1_TIMER || STM32_TIM1_PWM_ADC1
+	depends on STM32_HAVE_ADC1_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
@@ -5689,7 +5660,7 @@ config STM32_ADC2_TIMTRIG
 	int "ADC2 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC2_TIMER || STM32_TIM1_PWM_ADC2
+	depends on STM32_HAVE_ADC2_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
@@ -5704,7 +5675,7 @@ config STM32_ADC3_TIMTRIG
 	int "ADC3 Timer Trigger"
 	default 0
 	range 0 4
-	depends on STM32_HAVE_ADC3_TIMER || STM32_TIM1_PWM_ADC3
+	depends on STM32_HAVE_ADC3_TIMER
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
