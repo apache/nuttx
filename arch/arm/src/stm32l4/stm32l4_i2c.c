@@ -1330,133 +1330,125 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
           stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
         }
 
-      /*  The Speed and timing calculation are based on the following
-       *  fI2CCLK = PCLK and is 80Mhz
-       *  Analog filter is on,
-       *  Digital filter off
-       *  Rise Time is 120 ns and fall is 10ns
-       *  Mode is FastMode
-       */
-
-      i2cclk_mhz = 80;
+#if defined(STM32L4_I2C_USE_HSI16) || (STM32L4_PCLK1_FREQUENCY == 16000000)
+      i2cclk_mhz = 16;
+#elif STM32L4_PCLK1_FREQUENCY == 80000000
+      i2cclk_mhz = 80
+#elif STM32L4_PCLK1_FREQUENCY == 120000000
+      i2cclk_mhz = 120;
+#else
+#   warning STM32_I2C_INIT: Peripheral clock is PCLK and the speed/timing calculations need to be redone.
+#endif
 
       if (i2cclk_mhz == 80)
         {
-          uint8_t h_time;
-          uint8_t s_time;
+          /* Default timing calculations from original STM32L4 driver: */
 
-          /* Default timing calculations from original STM32L4 driver,
-           * fI2CCLK = PCLK, 80 Mhz */
+          /*  The Speed and timing calculation are based on the following
+           *  fI2CCLK = PCLK and is 80 Mhz
+           *  Analog filter is on,
+           *  Digital filter off
+           *  Rise Time is 120 ns and fall is 10 ns
+           *  Mode is FastMode
+           */
 
           if (frequency == 100000)
             {
-              /* 100 KHz values from I2C timing tool with clock 80mhz */
+              /* 100 KHz values from I2C timing tool with clock 80 MHz */
 
               presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
               scl_l_period = 0xe7;    /* SCLL - SCL low period in master mode */
               scl_h_period = 0x9b;    /* SCLH - SCL high period in master mode */
-              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-              s_time       = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+              sda_delay    = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              scl_delay    = 0x0d;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
             }
           else if (frequency == 400000)
              {
-              /* 400 KHz values from I2C timing tool for clock of 80mhz */
+              /* 400 KHz values from I2C timing tool for clock of 80 MHz */
 
               presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
               scl_l_period = 0x43;    /* SCLL - SCL low period in master mode */
               scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
-              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-              s_time       = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+              sda_delay    = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              scl_delay    = 0x07;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
              }
           else if (frequency == 1000000)
              {
-              /* 1000 KHhz values from I2C timing tool for clock of 80mhz */
+              /* 1000 KHz values from I2C timing tool for clock of 80 MHz */
 
               presc        = 0x01;    /* PRESC - (+1) prescale I2CCLK */
               scl_l_period = 0x14;    /* SCLL - SCL low period in master mode */
               scl_h_period = 0x13;    /* SCLH - SCL high period in master mode */
-              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-              s_time       = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
-
-              frequency = 1000000;
+              sda_delay    = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              scl_delay    = 0x05;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
              }
           else
             {
-              /* 10 KHz values from I2C timing tool with clock 80mhz */
+              /* 10 KHz values from I2C timing tool with clock 80 MHz */
 
               presc        = 0x0b;    /* PRESC - (+1) prescale I2CCLK */
               scl_l_period = 0xff;    /* SCLL - SCL low period in master mode */
               scl_h_period = 0xba;    /* SCLH - SCL high period in master mode */
-              h_time       = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
-              s_time       = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+              sda_delay    = 0x00;    /* SDADEL - (+1) data hold time after SCL falling edge */
+              scl_delay    = 0x01;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
             }
-
-          scl_delay = s_time;
-          sda_delay = h_time;
         }
-
-#if 0
-      /* TODO: Alternative clock configurations. Through Kconfig?
-       *       Or auto-detect? */
-
-      else if (i2cclk_mhz == 8)
+      else if (i2cclk_mhz == 120)
         {
-          uint8_t h_time;
-          uint8_t s_time;
-
-          /* Alternative timing calculations from original STM32L4 driver,
-           * fI2CCLK = PCLK, 8 Mhz */
+          /*  The Speed and timing calculation are based on the following
+           *  fI2CCLK = PCLK and is 120 Mhz
+           *  Analog filter is on,
+           *  Digital filter off
+           *  Rise Time is 120 ns and fall is 25 ns
+           *  Mode is FastMode
+           */
 
           if (frequency == 100000)
             {
-              /* 100 KHz values from datasheet with clock 8mhz */
+              /* 100 KHz values from I2C timing tool with clock 120 MHz */
 
-              presc        = 0x01;
-              scl_l_period = 0x13;
-              scl_h_period = 0x0f;
-              h_time       = 0x02;
-              s_time       = 0x04;
+              presc        = 2;
+              scl_delay    = 14;
+              sda_delay    = 0;
+              scl_h_period = 157;
+              scl_l_period = 230;
             }
           else if (frequency == 400000)
              {
-              /* 400 KHz values from datasheet for clock of 8mhz */
+              /* 400 KHz values from I2C timing tool for clock of 120 MHz */
 
-              presc        = 0x00;
-              scl_l_period = 0x09;
-              scl_h_period = 0x03;
-              h_time       = 0x01;
-              s_time       = 0x03;
+               presc        = 2;
+               scl_delay    = 8;
+               sda_delay    = 0;
+               scl_h_period = 21;
+               scl_l_period = 66;
              }
           else if (frequency == 1000000)
              {
-              /* 500 KHhz values from datasheet for clock of 8mhz */
+              /* 1000 KHz values from I2C timing tool for clock of 120 MHz */
 
-              presc        = 0x00;
-              scl_l_period = 0x06;
-              scl_h_period = 0x03;
-              h_time       = 0x00;
-              s_time       = 0x01;
-
-              frequency = 500000;
+              presc        = 2;
+              scl_delay    = 6;
+              sda_delay    = 0;
+              scl_h_period = 7;
+              scl_l_period = 20;
              }
           else
             {
-              /* 10 KHz values from I2C timing tool with clock 8mhz */
+              /* 10 KHz values not supported */
 
-              presc        = 0x03;    /* PRESC - (+1) prescale I2CCLK */
-              scl_l_period = 0xc7;    /* SCLL - SCL low period in master mode */
-              scl_h_period = 0xc3;    /* SCLH - SCL high period in master mode */
-              h_time       = 0x02;    /* SDADEL - (+1) data hold time after SCL falling edge */
-              s_time       = 0x04;    /* SCLDEL - (+1) data setup time from SDA edge to SCL rising edge */
+              DEBUGPANIC();
             }
-
-          scl_delay = s_time;
-          sda_delay = h_time;
         }
-
       else if (i2cclk_mhz == 16)
         {
-          /* Timing calculations from STM32F7 driver, fI2CCLK = HSI 16 MHz */
+          /*  The Speed and timing calculation are based on the following
+           *  fI2CCLK = HSI and is 16Mhz
+           *  Analog filter is on,
+           *  Digital filter off
+           *  Rise Time is 120 ns and fall is 10ns
+           *  Mode is FastMode
+           */
 
           if (frequency == 100000)
             {
@@ -1465,24 +1457,23 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
               sda_delay    = 0;
               scl_h_period = 61;
               scl_l_period = 89;
-
             }
           else if (frequency == 400000)
-             {
-               presc        = 0;
-               scl_delay    = 3;
-               sda_delay    = 0;
-               scl_h_period = 6;
-               scl_l_period = 24;
-             }
+            {
+              presc        = 0;
+              scl_delay    = 3;
+              sda_delay    = 0;
+              scl_h_period = 6;
+              scl_l_period = 24;
+            }
           else if (frequency == 1000000)
-             {
-               presc        = 0;
-               scl_delay    = 2;
-               sda_delay    = 0;
-               scl_h_period = 1;
-               scl_l_period = 5;
-             }
+            {
+              presc        = 0;
+              scl_delay    = 2;
+              sda_delay    = 0;
+              scl_h_period = 1;
+              scl_l_period = 5;
+            }
           else
             {
               presc        = 7;
@@ -1492,7 +1483,6 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
               scl_l_period = 162;
             }
         }
-#endif
       else
         {
           DEBUGPANIC();
@@ -2915,11 +2905,6 @@ FAR struct i2c_master_s *stm32l4_i2cbus_initialize(int port)
   irqstate_t irqs;
 #ifdef CONFIG_PM
   int ret;
-#endif
-
-#if STM32L4_PCLK1_FREQUENCY != 80000000
-#   warning STM32_I2C_INIT: Peripheral clock is PCLK and it must be 80mHz or the speed/timing calculations need to be redone.
-    return NULL;
 #endif
 
   /* Get I2C private structure */

@@ -84,6 +84,7 @@
 #define STM32L4_RCC_BDCR_OFFSET       0x0090  /* Backup domain control register */
 #define STM32L4_RCC_CSR_OFFSET        0x0094  /* Control/status register */
 #define STM32L4_RCC_CRRCR_OFFSET      0x0098  /* Clock recovery RC register */
+#define STM32L4_RCC_CCIPR2_OFFSET     0x009c  /* Peripherals independent clock configuration register 2 */
 
 /* Register Addresses *******************************************************************************/
 
@@ -118,6 +119,7 @@
 #define STM32L4_RCC_BDCR              (STM32L4_RCC_BASE+STM32L4_RCC_BDCR_OFFSET)
 #define STM32L4_RCC_CSR               (STM32L4_RCC_BASE+STM32L4_RCC_CSR_OFFSET)
 #define STM32L4_RCC_CRRCR             (STM32L4_RCC_BASE+STM32L4_RCC_CRRCR_OFFSET)
+#define STM32L4_RCC_CCIPR2            (STM32L4_RCC_BASE+STM32L4_RCC_CCIPR2_OFFSET)
 
 /* Register Bitfield Definitions ********************************************************************/
 
@@ -217,24 +219,24 @@
 #  define RCC_CFGR_STOPWUCK_MSI     (0 << 15) /* 0: MSI */
 #  define RCC_CFGR_STOPWUCK_HSI     (1 << 15) /* 0: HSI */
 
-#define RCC_CFGR_MCO_SHIFT         (24)      /* Bits 24-26: Microcontroller Clock Output */
-#define RCC_CFGR_MCO_MASK          (7 << RCC_CFGR_MCO_SHIFT)
-#  define RCC_CFGR_MCO_NONE        (0 << RCC_CFGR_MCO_SHIFT) /* 000: Disabled */
-#  define RCC_CFGR_MCO_SYSCLK      (1 << RCC_CFGR_MCO_SHIFT) /* 001: SYSCLK system clock selected */
-#  define RCC_CFGR_MCO_MSI         (2 << RCC_CFGR_MCO_SHIFT) /* 010: MSI clock selected */
-#  define RCC_CFGR_MCO_HSI         (3 << RCC_CFGR_MCO_SHIFT) /* 011: HSI clock selected */
-#  define RCC_CFGR_MCO_HSE         (4 << RCC_CFGR_MCO_SHIFT) /* 100: HSE clock selected */
-#  define RCC_CFGR_MCO_PLL         (5 << RCC_CFGR_MCO_SHIFT) /* 101: Main PLL selected  */
-#  define RCC_CFGR_MCO_LSI         (6 << RCC_CFGR_MCO_SHIFT) /* 110: LSI clock selected */
-#  define RCC_CFGR_MCO_LSE         (7 << RCC_CFGR_MCO_SHIFT) /* 111: LSE clock selected */
+#define RCC_CFGR_MCO_SHIFT          (24)      /* Bits 24-26: Microcontroller Clock Output */
+#define RCC_CFGR_MCO_MASK           (7 << RCC_CFGR_MCO_SHIFT)
+#  define RCC_CFGR_MCO_NONE         (0 << RCC_CFGR_MCO_SHIFT) /* 000: Disabled */
+#  define RCC_CFGR_MCO_SYSCLK       (1 << RCC_CFGR_MCO_SHIFT) /* 001: SYSCLK system clock selected */
+#  define RCC_CFGR_MCO_MSI          (2 << RCC_CFGR_MCO_SHIFT) /* 010: MSI clock selected */
+#  define RCC_CFGR_MCO_HSI          (3 << RCC_CFGR_MCO_SHIFT) /* 011: HSI clock selected */
+#  define RCC_CFGR_MCO_HSE          (4 << RCC_CFGR_MCO_SHIFT) /* 100: HSE clock selected */
+#  define RCC_CFGR_MCO_PLL          (5 << RCC_CFGR_MCO_SHIFT) /* 101: Main PLL selected  */
+#  define RCC_CFGR_MCO_LSI          (6 << RCC_CFGR_MCO_SHIFT) /* 110: LSI clock selected */
+#  define RCC_CFGR_MCO_LSE          (7 << RCC_CFGR_MCO_SHIFT) /* 111: LSE clock selected */
 
-#define RCC_CFGR_MCOPRE_SHIFT      (28)      /* Bits 28-30: MCO prescaler */
-#define RCC_CFGR_MCOPRE_MASK       (7 << RCC_CFGR_MCOPRE_SHIFT)
-#  define RCC_CFGR_MCOPRE_NONE     (0 << RCC_CFGR_MCOPRE_SHIFT) /* 000: no division */
-#  define RCC_CFGR_MCOPRE_DIV2     (1 << RCC_CFGR_MCOPRE_SHIFT) /* 001: division by 2 */
-#  define RCC_CFGR_MCOPRE_DIV4     (2 << RCC_CFGR_MCOPRE_SHIFT) /* 010: division by 4 */
-#  define RCC_CFGR_MCOPRE_DIV8     (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: division by 8 */
-#  define RCC_CFGR_MCOPRE_DIV16    (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: division by 16 */
+#define RCC_CFGR_MCOPRE_SHIFT       (28)      /* Bits 28-30: MCO prescaler */
+#define RCC_CFGR_MCOPRE_MASK        (7 << RCC_CFGR_MCOPRE_SHIFT)
+#  define RCC_CFGR_MCOPRE_NONE      (0 << RCC_CFGR_MCOPRE_SHIFT) /* 000: no division */
+#  define RCC_CFGR_MCOPRE_DIV2      (1 << RCC_CFGR_MCOPRE_SHIFT) /* 001: division by 2 */
+#  define RCC_CFGR_MCOPRE_DIV4      (2 << RCC_CFGR_MCOPRE_SHIFT) /* 010: division by 4 */
+#  define RCC_CFGR_MCOPRE_DIV8      (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: division by 8 */
+#  define RCC_CFGR_MCOPRE_DIV16     (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: division by 16 */
 
 /* PLL configuration register */
 
@@ -785,5 +787,14 @@
 #define RCC_CRRCR_HSI48ON           (1 << 0)  /* Bit 0: HSI48 clock enable */
 #define RCC_CRRCR_HSI48RDY          (1 << 1)  /* Bit 1: HSI48 clock ready flag */
 
+/* Peripheral Independent Clock Configuration 2 register (only on STM32L45x and STM32L46x) */
+
+#define RCC_CCIPR2_I2C4SEL_SHIFT    (0)    /* Bits 0-1: I2C4 clock source selection */
+#define RCC_CCIPR2_I2C4SEL_MASK     (3 << RCC_CCIPR2_I2C4SEL_SHIFT)
+#  define RCC_CCIPR2_I2C4SEL_PCLK   (0 << RCC_CCIPR2_I2C4SEL_SHIFT)
+#  define RCC_CCIPR2_I2C4SEL_SYSCLK (1 << RCC_CCIPR2_I2C4SEL_SHIFT)
+#  define RCC_CCIPR2_I2C4SEL_HSI    (2 << RCC_CCIPR2_I2C4SEL_SHIFT)
+
 #endif /* CONFIG_STM32L4_STM32L4X3 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_RCC_H */
+
