@@ -73,8 +73,8 @@ void stm32l4_board_initialize(void)
    * stm32_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  stm32l4_spiinitialize();
+#ifdef CONFIG_STM32L4_SPI
+  stm32_spiinitialize();
 #endif
 
 #ifdef CONFIG_STM32L4_OTGFS

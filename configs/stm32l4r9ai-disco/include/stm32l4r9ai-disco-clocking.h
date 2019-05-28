@@ -155,6 +155,10 @@
 
 #define STM32L4_USE_LSE           1
 
+/* HSI16 used as I2C clock */
+
+#define STM32L4_I2C_USE_HSI16     1
+
 /* AHB clock (HCLK) is SYSCLK (120 MHz) */
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
@@ -261,6 +265,10 @@
 
 #define STM32L4_USE_LSE           1
 
+/* HSI16 used as I2C clock */
+
+#define STM32L4_I2C_USE_HSI16     1
+
 /* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
@@ -353,6 +361,10 @@
 /* Enable LSE (for the RTC) */
 
 #define STM32L4_USE_LSE           1
+
+/* HSI16 used as I2C clock */
+
+#define STM32L4_I2C_USE_HSI16     1
 
 /* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
 
