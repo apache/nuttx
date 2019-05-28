@@ -74,6 +74,9 @@
 #define STM32L4_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
 #define STM32L4_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
 #define STM32L4_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define STM32L4_PWR_CR5_OFFSET 0x0080  /* Power control register 5 */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -102,6 +105,9 @@
 #define STM32L4_PWR_PDCRH        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRH_OFFSET)
 #define STM32L4_PWR_PUCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRI_OFFSET)
 #define STM32L4_PWR_PDCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRI_OFFSET)
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define STM32L4_PWR_CR5        (STM32L4_PWR_BASE+STM32L4_PWR_CR5_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -114,6 +120,9 @@
 #  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode */
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define PWR_CR1_RRSTP          (1 <<  4) /* Bit  4: SRAM3 retention in Stop 2 mode */
+#endif
 #define PWR_CR1_DBP              (1 <<  8) /* Bit  8: Disable Backup domain write protection */
 #define PWR_CR1_VOS_SHIFT        9
 #define PWR_CR1_VOS_MASK         (3 << PWR_CR1_VOS_SHIFT) /* Bits 9-10: Voltage scaling range selection */
@@ -154,6 +163,9 @@
 #define PWR_CR3_EWUP5            (1 <<  4) /* Bit  4: Enable Wakeup pin WKUP5 */
 #define PWR_CR3_RRS              (1 <<  8) /* Bit  8: SRAM2 retention in Standby mode */
 #define PWR_CR3_APC              (1 << 10) /* Bit 10: Apply pull-up and pull-down configuration */
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define PWR_CR3_DSIPDEN        (1 << 12) /* Bit 12: Enable Pull-down activation on DSI pins */
+#endif
 #define PWR_CR3_EIWUL            (1 << 15) /* Bit 15: Enable internal wakeup line */
 
 /* Power control register 4 */
@@ -201,5 +213,11 @@
 #define PWR_SCR_CSBF             (1 <<  8) /* Bit  8: Clear standby flag */
 
 /* Port X pull-up/down registers have one bit per port line, with a few exceptions */
+
+/* Power control register 5 */
+
+#if defined(CONFIG_STM32L4_STM32L4XR)
+#  define PWR_CR5_R1MODE         (1 <<  8) /* Bit  8: Main regulator in Range 1 normal mode. */
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_PWR_H */
