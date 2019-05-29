@@ -560,7 +560,7 @@ o SMP
                This would also be an essential part of a high priority,
                nested interrupt implementation (unrelated).
   Status:      Open
-  Priority:    Low.  There are no know issues with the current non-maskable
+  Priority:    Low.  There are no known issues with the current non-maskable
                SGI implementation.  This change would, however, lead to
                simplification in the design and permit commonality with
                other, non-GIC implementations.
