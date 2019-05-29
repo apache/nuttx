@@ -185,24 +185,33 @@ bool stm32l4_pwr_enablebkp(bool writable)
 
 bool stm32l4_pwr_enableusv(bool set)
 {
-  uint16_t regval;
-  bool wasset;
+  uint32_t regval;
+  bool was_set;
+  bool was_clk_enabled;
+
+  regval = getreg32(STM32L4_RCC_APB1ENR1);
+  was_clk_enabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
+
+  if (!was_clk_enabled)
+    {
+      stm32l4_pwr_enableclk(true);
+    }
 
   /* Get the current state of the STM32L4 PWR control register 2 */
 
-  regval      = stm32l4_pwr_getreg(STM32L4_PWR_CR2_OFFSET);
-  wasset = ((regval & PWR_CR2_USV) != 0);
+  regval  = stm32l4_pwr_getreg(STM32L4_PWR_CR2_OFFSET);
+  was_set = ((regval & PWR_CR2_USV) != 0);
 
   /* Enable or disable the ability to write */
 
-  if (wasset && !set)
+  if (was_set && !set)
     {
       /* Disable the Vddusb monitoring */
 
       regval &= ~PWR_CR2_USV;
       stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
     }
-  else if (!wasset && set)
+  else if (!was_set && set)
     {
       /* Enable the Vddusb monitoring */
 
@@ -210,5 +219,10 @@ bool stm32l4_pwr_enableusv(bool set)
       stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
     }
 
-  return wasset;
+  if (!was_clk_enabled)
+    {
+      stm32l4_pwr_enableclk(false);
+    }
+
+  return was_set;
 }
