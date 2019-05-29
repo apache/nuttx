@@ -1333,7 +1333,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
 #if defined(STM32L4_I2C_USE_HSI16) || (STM32L4_PCLK1_FREQUENCY == 16000000)
       i2cclk_mhz = 16;
 #elif STM32L4_PCLK1_FREQUENCY == 80000000
-      i2cclk_mhz = 80
+      i2cclk_mhz = 80;
 #elif STM32L4_PCLK1_FREQUENCY == 120000000
       i2cclk_mhz = 120;
 #else

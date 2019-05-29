@@ -180,7 +180,6 @@ static const struct file_operations g_t67xxfops =
   NULL,           /* seek */
   t67xx_ioctl,    /* ioctl */
   NULL            /* poll */
-#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL          /* unlink */
 #endif
