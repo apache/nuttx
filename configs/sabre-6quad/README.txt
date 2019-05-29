@@ -4,6 +4,12 @@ README.txt
 This directory holds a port of NuttX to the NXP/Freescale Sabre board
 featuring the iMX 6Quad CPU.
 
+This is a minimal port, used primarily for verifying SMP operation.  More
+recently, a port to the i.MX RT was added.  This port has gotten more
+support since it is better aligned with usage in embedded systems.  The
+i.MX6 and the i.MX6 share IOMUXing and some peripherals.  It ought to be
+a simple matter to backport some of the common drivers from i.MXRT to i.MX6.
+
 Contents
 ========
 

@@ -68,6 +68,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/net/net.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -1175,7 +1176,20 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
+          int count;
+          int blresult;
+
+          /* iob_copyin might wait for buffers to be freed, but if network is
+           * locked this might never happen, since network driver is also locked,
+           * therefore we need to break the lock
+           */
+
+          blresult = net_breaklock(&count);
           result = TCP_WBCOPYIN(wrb, (FAR uint8_t *)buf, len);
+          if (blresult >= 0)
+            {
+              net_restorelock(count);
+            }
         }
 
       /* Dump I/O buffer chain */
