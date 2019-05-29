@@ -80,7 +80,7 @@
 #define STM32L4_USB_ADDR_RX_WOFFSET   (4)    /* Reception buffer address n (16-bits) */
 #define STM32L4_USB_COUNT_RX_WOFFSET  (6)    /* Reception byte count n (16-bits) */
 
-#define STM32L4_USB_BTABLE_RADDR(ep,o) ((((uint32_t)getreg16(STM32L4_USB_BTABLE) + ((ep) << 3)) + (o)) << 1)
+#define STM32L4_USB_BTABLE_RADDR(ep,o)  (((uint32_t)getreg16(STM32L4_USB_BTABLE) + ((ep) << 3)) + (o))
 #define STM32L4_USB_ADDR_TX_OFFSET(ep)  STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_ADDR_TX_WOFFSET)
 #define STM32L4_USB_COUNT_TX_OFFSET(ep) STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_COUNT_TX_WOFFSET)
 #define STM32L4_USB_ADDR_RX_OFFSET(ep)  STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_ADDR_RX_WOFFSET)

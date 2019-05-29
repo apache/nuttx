@@ -766,7 +766,7 @@ static void stm32l4_checksetup(void)
 
 static inline void stm32l4_seteptxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32L4_USB_COUNT_TX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32L4_USB_COUNT_TX(epno);
   *epaddr = count;
 }
 
@@ -776,7 +776,7 @@ static inline void stm32l4_seteptxcount(uint8_t epno, uint16_t count)
 
 static inline void stm32l4_seteptxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *txaddr = (uint32_t *)STM32L4_USB_ADDR_TX(epno);
+  volatile uint16_t *txaddr = (uint16_t *)STM32L4_USB_ADDR_TX(epno);
   *txaddr = addr;
 }
 
@@ -786,7 +786,7 @@ static inline void stm32l4_seteptxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32l4_geteptxaddr(uint8_t epno)
 {
-  volatile uint32_t *txaddr = (uint32_t *)STM32L4_USB_ADDR_TX(epno);
+  volatile uint16_t *txaddr = (uint16_t *)STM32L4_USB_ADDR_TX(epno);
   return (uint16_t)*txaddr;
 }
 
@@ -796,7 +796,7 @@ static inline uint16_t stm32l4_geteptxaddr(uint8_t epno)
 
 static void stm32l4_seteprxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32L4_USB_COUNT_RX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32L4_USB_COUNT_RX(epno);
   uint32_t rxcount = 0;
   uint16_t nblocks;
 
@@ -844,7 +844,7 @@ static void stm32l4_seteprxcount(uint8_t epno, uint16_t count)
 
 static inline uint16_t stm32l4_geteprxcount(uint8_t epno)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32L4_USB_COUNT_RX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32L4_USB_COUNT_RX(epno);
   return (*epaddr) & USB_COUNT_RX_MASK;
 }
 
@@ -854,7 +854,7 @@ static inline uint16_t stm32l4_geteprxcount(uint8_t epno)
 
 static inline void stm32l4_seteprxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *rxaddr = (uint32_t *)STM32L4_USB_ADDR_RX(epno);
+  volatile uint16_t *rxaddr = (uint16_t *)STM32L4_USB_ADDR_RX(epno);
   *rxaddr = addr;
 }
 
@@ -864,7 +864,7 @@ static inline void stm32l4_seteprxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32l4_geteprxaddr(uint8_t epno)
 {
-  volatile uint32_t *rxaddr = (uint32_t *)STM32L4_USB_ADDR_RX(epno);
+  volatile uint16_t *rxaddr = (uint16_t *)STM32L4_USB_ADDR_RX(epno);
   return (uint16_t)*rxaddr;
 }
 
@@ -1099,15 +1099,15 @@ static inline bool stm32l4_eprxstalled(uint8_t epno)
 static void stm32l4_copytopma(const uint8_t *buffer, uint16_t pma,
                               uint16_t nbytes)
 {
-  uint16_t *dest;
-  uint16_t  ms;
-  uint16_t  ls;
+  volatile uint16_t *dest;
+  uint16_t ms;
+  uint16_t ls;
   int     nwords = (nbytes + 1) >> 1;
   int     i;
 
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
-  dest = (uint16_t *)(STM32L4_USB_SRAM_BASE + ((uint32_t)pma << 1));
+  dest = (volatile uint16_t *)(STM32L4_USB_SRAM_BASE + (uint32_t)pma);
   for (i = nwords; i != 0; i--)
     {
       /* Read two bytes and pack into on 16-bit word */
@@ -1117,10 +1117,10 @@ static void stm32l4_copytopma(const uint8_t *buffer, uint16_t pma,
       *dest = ms << 8 | ls;
 
       /* Source address increments by 2*sizeof(uint8_t) = 2; Dest address
-       * increments by 2*sizeof(uint16_t) = 4.
+       * increments by 1*sizeof(uint16_t) = 2.
        */
 
-      dest += 2;
+      dest += 1;
     }
 }
 
@@ -1131,20 +1131,20 @@ static void stm32l4_copytopma(const uint8_t *buffer, uint16_t pma,
 static inline void
 stm32l4_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 {
-  uint32_t *src;
-  int     nwords = (nbytes + 1) >> 1;
-  int     i;
+  volatile uint16_t *src;
+  int nwords = (nbytes + 1) >> 1;
+  int i;
 
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
-  src = (uint32_t *)(STM32L4_USB_SRAM_BASE + ((uint32_t)pma << 1));
+  src = (volatile uint16_t *)(STM32L4_USB_SRAM_BASE + (uint32_t)pma);
   for (i = nwords; i != 0; i--)
     {
       /* Copy 16-bits from packet memory to user buffer. */
 
       *(uint16_t *)buffer = *src++;
 
-      /* Source address increments by 1*sizeof(uint32_t) = 4; Dest address
+      /* Source address increments by 1*sizeof(uint16_t) = 2; Dest address
        * increments by 2*sizeof(uint8_t) = 2.
        */
 
