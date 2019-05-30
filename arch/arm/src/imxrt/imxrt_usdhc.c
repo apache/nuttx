@@ -66,7 +66,7 @@
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_ccm.h"
-#include "hardware/imxrt_periphclks.h"
+#include "imxrt_periphclks.h"
 #include "hardware/imxrt_usdhc.h"
 
 #ifdef CONFIG_IMXRT_USDHC

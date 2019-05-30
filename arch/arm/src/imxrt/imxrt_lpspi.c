@@ -89,7 +89,7 @@
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_lpspi.h"
 #include "hardware/imxrt_ccm.h"
-#include "hardware/imxrt_periphclks.h"
+#include "imxrt_periphclks.h"
 
 #if defined(CONFIG_IMXRT_LPSPI1) || defined(CONFIG_IMXRT_LPSPI2) || \
     defined(CONFIG_IMXRT_LPSPI3) || defined(CONFIG_IMXRT_LPSPI4)

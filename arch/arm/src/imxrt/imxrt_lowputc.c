@@ -235,7 +235,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART1_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART1_CTS);
 #endif
-#ifdef CONFIG_LPUART1_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART1_RTS);
 #endif
 #endif
@@ -251,7 +252,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART2_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART2_CTS);
 #endif
-#ifdef CONFIG_LPUART2_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART2_RTS);
 #endif
 #endif
@@ -267,7 +269,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART3_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART3_CTS);
 #endif
-#ifdef CONFIG_LPUART3_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART3_RTS);
 #endif
 #endif
@@ -283,7 +286,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART4_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART4_CTS);
 #endif
-#ifdef CONFIG_LPUART4_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART4_RTS);
 #endif
 #endif
@@ -299,7 +303,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART5_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART5_CTS);
 #endif
-#ifdef CONFIG_LPUART5_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART5_RTS);
 #endif
 #endif
@@ -315,7 +320,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART6_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART6_CTS);
 #endif
-#ifdef CONFIG_LPUART6_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART6_RTS);
 #endif
 #endif
@@ -331,7 +337,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART7_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART7_CTS);
 #endif
-#ifdef CONFIG_LPUART7_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART7_RTS);
 #endif
 #endif
@@ -347,7 +354,8 @@ void imxrt_lowsetup(void)
 #ifdef CONFIG_LPUART8_OFLOWCONTROL
   (void)imxrt_config_gpio(GPIO_LPUART8_CTS);
 #endif
-#ifdef CONFIG_LPUART8_IFLOWCONTROL
+#if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
+     (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
   (void)imxrt_config_gpio(GPIO_LPUART8_RTS);
 #endif
 #endif
@@ -476,6 +484,36 @@ int imxrt_lpuart_configure(uint32_t base,
 
   regval &= ~LPUART_GLOBAL_RST;
   putreg32(regval, base + IMXRT_LPUART_GLOBAL_OFFSET);
+
+  /* Construct MODIR register */
+
+  regval = 0;
+
+  if (config->userts)
+    {
+      regval |= LPUART_MODIR_RXRTSE;
+    }
+  else if (config->users485)
+    {
+      /* Both TX and RX side can't control RTS, so this gives
+       * the RX side precidence. This should have been filtered
+       * in layers above anyway, but it's just a precaution.
+       */
+
+      regval |= LPUART_MODIR_TXRTSE;
+    }
+
+  if (config->usects)
+    {
+      regval |= LPUART_MODIR_TXCTSE;
+    }
+
+  if (config->invrts)
+    {
+      regval |= LPUART_MODIR_TXRTSPOL;
+    }
+
+  putreg32(regval, base + IMXRT_LPUART_MODIR_OFFSET);
 
   regval = 0;
 
