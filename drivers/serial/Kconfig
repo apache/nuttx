@@ -81,6 +81,12 @@ config SERIAL_IFLOWCONTROL
 	bool
 	default n
 
+config SERIAL_RS485CONTROL
+	bool
+	default n
+	---help---
+		Use RTS pin to control RS485 direction (Asserted while transmitting).
+
 config SERIAL_OFLOWCONTROL
 	bool
 	default n

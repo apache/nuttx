@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_lowputc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,8 @@
 #endif
 
 /* Clocking *****************************************************************/
-/* the UART module receives two clocks, a peripheral_clock (ipg_clk) and the
+
+/* The UART module receives two clocks, a peripheral_clock (ipg_clk) and the
  * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
  * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
  * control input pins. It must always be running when UART is enabled.
@@ -458,12 +459,12 @@ int imxrt_lpuart_configure(uint32_t base,
 
   if (baud_diff > ((config->baud / 100) * 3))
     {
-      /* Unacceptable baud rate difference of more than 3%*/
+      /* Unacceptable baud rate difference of more than 3% */
 
       return ERROR;
     }
 
-  /* Enable lpuart clock*/
+  /* Enable lpuart clock */
 
   imxrt_lpuart_clock_enable(base);
 
@@ -471,10 +472,10 @@ int imxrt_lpuart_configure(uint32_t base,
 
   regval  = getreg32(base + IMXRT_LPUART_GLOBAL_OFFSET);
   regval |= LPUART_GLOBAL_RST;
-  putreg32(regval,base + IMXRT_LPUART_GLOBAL_OFFSET);
+  putreg32(regval, base + IMXRT_LPUART_GLOBAL_OFFSET);
 
   regval &= ~LPUART_GLOBAL_RST;
-  putreg32(regval,base + IMXRT_LPUART_GLOBAL_OFFSET);
+  putreg32(regval, base + IMXRT_LPUART_GLOBAL_OFFSET);
 
   regval = 0;
 
@@ -524,20 +525,21 @@ int imxrt_lpuart_configure(uint32_t base,
 }
 #endif /* HAVE_LPUART_DEVICE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from U-
+ *   Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(HAVE_LPUART_DEVICE) && defined(CONFIG_DEBUG_FEATURES)
 void imxrt_lowputc(int ch)
 {
-  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+         LPUART_STAT_TDRE) == 0)
     {
     }
 
@@ -549,11 +551,12 @@ void imxrt_lowputc(int ch)
 
       putreg32((uint32_t)'\r', IMXRT_CONSOLE_BASE + IMXRT_LPUART_DATA_OFFSET);
 
-      /* Wait for the transmit register to be emptied. When the TXFE bit is non-zero,
-       * the TX Buffer FIFO is empty.
+      /* Wait for the transmit register to be emptied. When the TXFE bit is
+       * non-zero, the TX Buffer FIFO is empty.
        */
 
-      while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+      while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+             LPUART_STAT_TDRE) == 0)
         {
         }
     }
@@ -562,11 +565,12 @@ void imxrt_lowputc(int ch)
 
   putreg32((uint32_t)ch, IMXRT_CONSOLE_BASE + IMXRT_LPUART_DATA_OFFSET);
 
-  /* Wait for the transmit register to be emptied. When the TXFE bit is non-zero,
-   * the TX Buffer FIFO is empty.
+  /* Wait for the transmit register to be emptied. When the TXFE bit is
+   * non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0)
+  while ((getreg32(IMXRT_CONSOLE_BASE + IMXRT_LPUART_STAT_OFFSET) &
+         LPUART_STAT_TDRE) == 0)
     {
     }
 }

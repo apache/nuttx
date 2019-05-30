@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_serial.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
  *   Author: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -315,18 +315,6 @@
 #  define PM_IDLE_DOMAIN      0 /* Revisit */
 #endif
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-#  define IFLOW  1
-#else
-#  define IFLOW  0
-#endif
-
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-#  define OFLOW  1
-#else
-#  define OFLOW  0
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -339,7 +327,8 @@ struct imxrt_uart_s
   uint8_t  irq;         /* IRQ associated with this UART */
   uint8_t  parity;      /* 0=none, 1=odd, 2=even */
   uint8_t  bits;        /* Number of bits (7 or 8) */
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
+  uint8_t  inviflow:1;  /* Invert RTS sense */
   const uint32_t rts_gpio;  /* U[S]ART RTS GPIO pin configuration */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
@@ -353,7 +342,9 @@ struct imxrt_uart_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   uint8_t  oflow:1;     /* output flow control (CTS) enabled */
 #endif
-  uint8_t  reserved:(7 - IFLOW + OFLOW);
+#ifdef CONFIG_SERIAL_RS485CONTROL
+  uint8_t rs485mode:1;  /* We are in RS485 (RTS on TX) mode */
+#endif
 };
 
 /****************************************************************************
@@ -474,7 +465,19 @@ static struct imxrt_uart_s g_uart1priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART1_RTS,
+#endif
+
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART1_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART1_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -512,7 +515,18 @@ static struct imxrt_uart_s g_uart2priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART2_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART2_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART2_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART2_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -548,7 +562,18 @@ static struct imxrt_uart_s g_uart3priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART3_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART3_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART3_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART3_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -584,7 +609,18 @@ static struct imxrt_uart_s g_uart4priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART4_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART4_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -620,7 +656,18 @@ static struct imxrt_uart_s g_uart5priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART5_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART5_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART5_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART5_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -656,7 +703,18 @@ static struct imxrt_uart_s g_uart6priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART6_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART6_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART6_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART6_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -692,7 +750,18 @@ static struct imxrt_uart_s g_uart7priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART7_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART7_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART7_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART7_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -728,7 +797,18 @@ static struct imxrt_uart_s g_uart8priv =
 #endif
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)
   .iflow        = 1,
+#endif
+# if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) \
+   || (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
   .rts_gpio     = GPIO_LPUART8_RTS,
+#endif
+#if (((defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL))) \
+    && defined(CONFIG_LPUART8_INVERTIFLOWCONTROL))
+  .inviflow     = 1,
+#endif
+
+#if defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)
+  .rs485mode    = 1,
 #endif
 };
 
@@ -842,7 +922,10 @@ static int imxrt_setup(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
-  struct uart_config_s config;
+  struct uart_config_s config =
+  {
+    0
+  };
   int ret;
 
   /* Configure the UART */
@@ -851,6 +934,18 @@ static int imxrt_setup(struct uart_dev_s *dev)
   config.parity     = priv->parity;     /* 0=none, 1=odd, 2=even */
   config.bits       = priv->bits;       /* Number of bits (5-9) */
   config.stopbits2  = priv->stopbits2;  /* true: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  config.usects     = priv->iflow;      /* Flow control on inbound side */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  config.userts     = priv->oflow;      /* Flow control on outbound side */
+#endif
+#ifdef CONFIG_SERIAL_RS485CONTROL
+  config.users485   = priv->rs485mode;  /* Switch into RS485 mode */
+#endif
+#if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
+  config.invrts     = priv->inviflow;   /* Inversion of outbound flow control */
+#endif
 
   ret = imxrt_lpuart_configure(priv->uartbase, &config);
 
@@ -1436,6 +1531,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
       default:
         /* Should not get here */
+
         break;
     }
 }
