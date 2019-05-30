@@ -111,6 +111,8 @@
 #define RCC_CR_PLLRDY               (1 << 25) /* Bit 25: PLL clock ready flag */
                                               /* Bits 26-27: Reserved */
 
+#define RCC_CR_RESET                 0x00000500
+
 /* Internal clock sources calibration register */
 
 #define RCC_ICSCR_HSICAL_SHIFT      (0)       /* Bits 0-7:  Internal high speed clock calibration */
@@ -159,6 +161,8 @@
 #define RCC_CFGR_MCOPRE_SHIFT       (28)      /* Bits 28-30: Microcontroller clock output selection */
 #define RCC_CFGR_MCOPRE_MASK        (7 << RCC_CFGR_MCOPRE_SHIFT)
 
+#define RCC_CFGR_RESET              0x00000000
+
 /* PLL clock configuration register */
 
 #define RCC_PLLCFG_PLLSRC_SHIFT    (0)      /* Bits 0-1: PLL entry clock source */
@@ -169,7 +173,7 @@
                                             /* Bits 2-3: Reserved */
 #define RCC_PLLCFG_PLLM_SHIFT      (4)      /* Bits 4-6: Division factor M of the PLL input clock divider */
 #define RCC_PLLCFG_PLLM_MASK       (7 << RCC_PLLCFG_PLLM_SHIFT)
-#define RCC_PLLCFG_PLLM(n)         ((n) << RCC_PLLCFG_PLLM_SHIFT)
+#define RCC_PLLCFG_PLLM(n)         ((n-1) << RCC_PLLCFG_PLLM_SHIFT)
                                              /* Bit 7: Reserved */
 #define RCC_PLLCFG_PLLN_SHIFT      (8)       /* Bits 8-14: PLL frequency multiplication factor N */
 #define RCC_PLLCFG_PLLN_MASK       (0x7f << RCC_PLLCFG_PLLN_SHIFT)
@@ -178,16 +182,18 @@
 #define RCC_PLLCFG_PLLPEN          (1 << 16) /* Bit 16: PLLPCLK clock output enable */
 #define RCC_PLLCFG_PLLP_SHIFT      (17)      /* Bits 17-21: PLL VCO division factor P for PLLPCLK clock output */
 #define RCC_PLLCFG_PLLP_MASK       (0x1f << RCC_PLLCFG_PLLP_SHIFT)
-#define RCC_PLLCFG_PLLP(n)         ((n+1) << RCC_PLLCFG_PLLP_SHIFT) /* n=2,...,32 */
+#define RCC_PLLCFG_PLLP(n)         ((n-1) << RCC_PLLCFG_PLLP_SHIFT) /* n=2,...,32 */
                                              /* Bits 22-23: Reserved */
 #define RCC_PLLCFG_PLLQEN          (1 << 24) /* Bit 24: PLLQCLK clock output enable */
 #define RCC_PLLCFG_PLLQ_SHIFT      (25)      /* Bits 25-27: Division factor Q of the PLL input clock divider */
 #define RCC_PLLCFG_PLLQ_MASK       (7 << RCC_PLLCFG_PLLQ_SHIFT)
-#define RCC_PLLCFG_PLLQ(n)         ((n) << RCC_PLLCFG_PLLQ_SHIFT)
+#define RCC_PLLCFG_PLLQ(n)         ((n-1) << RCC_PLLCFG_PLLQ_SHIFT)
 #define RCC_PLLCFG_PLLREN          (1 << 28) /* Bit 28: PLLRCLK clock output enable */
 #define RCC_PLLCFG_PLLR_SHIFT      (29)      /* Bits 29-31: Division factor R of the PLL input clock divider */
 #define RCC_PLLCFG_PLLR_MASK       (7 << RCC_PLLCFG_PLLR_SHIFT)
-#define RCC_PLLCFG_PLLR(n)         ((n) << RCC_PLLCFG_PLLR_SHIFT)
+#define RCC_PLLCFG_PLLR(n)         ((n-1) << RCC_PLLCFG_PLLR_SHIFT)
+
+#define RCC_PLLCFGR_RESET           0x00001000
 
 /* TODO: Clock Source Interrupt enable register */
 

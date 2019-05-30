@@ -75,7 +75,17 @@ static inline void rcc_reset(void)
 {
   uint32_t regval;
 
-  regval = getreg32(STM32_RCC_APB1ENR);
+  /* Reset CFGR register */
+
+  putreg32(RCC_CFGR_RESET, STM32_RCC_CFGR);
+
+  /* Reset CR register */
+
+  putreg32(RCC_CR_RESET, STM32_RCC_CR);
+
+  /* Reset PLLCFGR register */
+
+  putreg32(RCC_PLLCFGR_RESET, STM32_RCC_PLLCFG);
 
 #if 1
   /* DBG clock enable */
@@ -561,6 +571,12 @@ static void stm32_stdclockconfig(void)
   /* Write PLLCFG register */
 
   putreg32(regval, STM32_RCC_PLLCFG);
+
+  /* Enable PLL */
+
+  regval = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_PLLON;
+  putreg32(regval, STM32_RCC_CR);
 #endif
 
   /* Select the system clock source (probably the PLL) */

@@ -123,11 +123,11 @@
 
 /* AHB2 Base Addresses **************************************************************/
 
-#define STM32_GPIOA_BASE     0x48000000     /* 0x48000000-0x480003ff: GPIO Port A */
-#define STM32_GPIOB_BASE     0x48000400     /* 0x48000400-0x480007ff: GPIO Port B */
-#define STM32_GPIOC_BASE     0x48000800     /* 0x48000800-0x48000bff: GPIO Port C */
-#define STM32_GPIOD_BASE     0X48000C00     /* 0x48000c00-0x48000fff: GPIO Port D */
-#define STM32_GPIOF_BASE     0x48001400     /* 0x48001400-0x480017ff: GPIO Port F */
+#define STM32_GPIOA_BASE     0x50000000     /* 0x50000000-0x500003ff: GPIO Port A */
+#define STM32_GPIOB_BASE     0x50000400     /* 0x50000400-0x500007ff: GPIO Port B */
+#define STM32_GPIOC_BASE     0x50000800     /* 0x50000800-0x50000bff: GPIO Port C */
+#define STM32_GPIOD_BASE     0X50000C00     /* 0x50000c00-0x50000fff: GPIO Port D */
+#define STM32_GPIOF_BASE     0x50001400     /* 0x50001400-0x500017ff: GPIO Port F */
 
 /* Cortex-M4 Base Addresses *********************************************************/
 /* Other registers -- see armv7-m/nvic.h for standard Cortex-M4 registers in this

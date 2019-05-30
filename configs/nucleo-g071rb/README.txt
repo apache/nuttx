@@ -30,3 +30,5 @@ STATUS
 
   2019-05-27: Brings in initial WIP support for the STM32 G0.
               Not tested on hardware.
+
+  2019-05-30: The basic NSH configuration is now functional.

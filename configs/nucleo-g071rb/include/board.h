@@ -54,22 +54,22 @@
 
 /* Clocking *****************************************************************/
 
-/* HSI - Internal 8 MHz RC Oscillator
+/* HSI - Internal 16 MHz RC Oscillator
  * LSI - 32 KHz RC
- * HSE - 8 MHz from MCO output of ST-LINK
+ * HSE - 8 MHz from MCO output of ST-LINK (disabled by default)
  * LSE - 32.768 kHz
  */
 
 #define STM32_BOARD_XTAL        8000000ul
 
-#define STM32_HSI_FREQUENCY     8000000ul
+#define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000            /* Between 30kHz and 60kHz */
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
 /* Main PLL Configuration.
  *
- * PLL source is HSE = 8,000,000
+ * PLL source is HSI = 16,000,000
  *
  * PLL_VCOx = (STM32_HSE_FREQUENCY / PLLM) * PLLN
  * Subject to:
@@ -82,33 +82,34 @@
  *
  */
 
-#define STM32_BOARD_USEHSE
-#define STM32_HSEBYP_ENABLE
-
-/* PLL source is HSE, PLLN=50, PLLM=2
+/* PLL source is HSI, PLLN=50, PLLM=4
  * PLLP enable, PLLQ enable, PLLR enable
+ *
+ *   2 <= PLLP <= 32
+ *   2 <= PLLQ <= 8
+ *   2 <= PLLR <= 8
  *
  *   PLLR <= 64MHz
  *   PLLQ <= 128MHz
  *   PLLP <= 128MHz
  *
- *   PLL_VCO = (8,000,000 / 2) * 50 = 200 MHz
+ *   PLL_VCO = (16,000,000 / 4) * 50 = 200 MHz
  *
  *   PLLP = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
  *   PLLQ = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
  *   PLLR = PLL_VCO/4 = 200 MHz / 4 = 40 MHz
  */
 
-#define STM32_PLLCFG_PLLSRC     RCC_PLLCFG_PLLSRC_HSE
+#define STM32_PLLCFG_PLLSRC     RCC_PLLCFG_PLLSRC_HSI
 #define STM32_PLLCFG_PLLCFG     (RCC_PLLCFG_PLLPEN | \
                                  RCC_PLLCFG_PLLQEN | \
                                  RCC_PLLCFG_PLLREN)
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(2)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(4)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(50)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP(4)
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(8)
-#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLQ(8)
+#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(4)
+#define STM32_PLLCFG_PLLR       RCC_PLLCFG_PLLR(4)
 
 #define STM32_VCO_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 50)
 #define STM32_PLLP_FREQUENCY    (STM32_VCO_FREQUENCY / 4)

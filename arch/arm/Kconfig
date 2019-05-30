@@ -320,7 +320,6 @@ config ARCH_CHIP_STM32L0
 config ARCH_CHIP_STM32G0
 	bool "STMicro STM32 G0"
 	select ARCH_CORTEXM0
-	depends on EXPERIMENTAL
 	---help---
 		STMicro STM32G0 architectures (ARM Cortex-M0).
 
