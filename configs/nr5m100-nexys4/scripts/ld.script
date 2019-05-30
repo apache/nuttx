@@ -225,10 +225,12 @@ SECTIONS
   /*--------------------------------------------------------------------*/
 
   /* Start of initialized data segment */
+
   . = ALIGN(16);
    _fdata = .;
 
   /* data: Writable data */
+
   _sdata = .;
   .data :
   {
@@ -242,16 +244,18 @@ SECTIONS
   _edata = .;
 
   /* Have _gp point to middle of sdata/sbss to maximize displacement range */
+
   . = ALIGN(16);
   _gp = . + 0x7FF0;
 
   /* Writable small data segment */
+
   .sdata :
   {
     *(.sdata)
     *(.sdata.*)
     *(.srodata.*)
-  . = ALIGN(16);
+    . = ALIGN(16);
     *(.gnu.linkonce.s.*)
   }
 
@@ -260,10 +264,12 @@ SECTIONS
   /*--------------------------------------------------------------------*/
 
   /* Start of uninitialized data segment */
+
   . = ALIGN(8);
   _fbss = .;
 
   /* Writable uninitialized small data segment */
+
   .sbss :
   {
     *(.sbss)
@@ -272,6 +278,7 @@ SECTIONS
   }
 
   /* bss: Uninitialized writeable data section */
+
   . = .;
   _bss_start = .;
   .bss :
@@ -285,21 +292,22 @@ SECTIONS
   _ebss = .;
 
   /* End of uninitialized data segment (used by syscalls.c for heap) */
+
   . = ALIGN(16);
   PROVIDE( end = . );
   _end = ALIGN(16);
 
-	/* Stabs debugging sections. */
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+        /* Stabs debugging sections. */
+        .stab 0 : { *(.stab) }
+        .stabstr 0 : { *(.stabstr) }
+        .stab.excl 0 : { *(.stab.excl) }
+        .stab.exclstr 0 : { *(.stab.exclstr) }
+        .stab.index 0 : { *(.stab.index) }
+        .stab.indexstr 0 : { *(.stab.indexstr) }
+        .comment 0 : { *(.comment) }
+        .debug_abbrev 0 : { *(.debug_abbrev) }
+        .debug_info 0 : { *(.debug_info) }
+        .debug_line 0 : { *(.debug_line) }
+        .debug_pubnames 0 : { *(.debug_pubnames) }
+        .debug_aranges 0 : { *(.debug_aranges) }
 }

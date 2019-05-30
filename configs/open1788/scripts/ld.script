@@ -74,6 +74,7 @@ SECTIONS
         _etext = ABSOLUTE(.);
     } > FLASH
 
+    . = ALIGN(4);
     .init_section : {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
@@ -84,6 +85,7 @@ SECTIONS
         *(.ARM.extab*)
     } > FLASH
 
+    . = ALIGN(4);
     __exidx_start = ABSOLUTE(.);
     .ARM.exidx : {
         *(.ARM.exidx*)
@@ -93,6 +95,7 @@ SECTIONS
 
     _eronly = ABSOLUTE(.);
 
+    . = ALIGN(4);
     .data : {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
