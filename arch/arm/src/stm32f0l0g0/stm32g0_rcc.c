@@ -87,12 +87,9 @@ static inline void rcc_reset(void)
 
   putreg32(RCC_PLLCFGR_RESET, STM32_RCC_PLLCFG);
 
-#if 1
   /* DBG clock enable */
 
-  regval |= RCC_APB1ENR_DBGEN;
-#endif
-
+  regval = RCC_APB1ENR_DBGEN;
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
@@ -517,7 +514,7 @@ static void stm32_stdclockconfig(void)
     }
 
 #elif (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI) || \
-      ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && STM32_CFGR_PLLSRC == 0)
+      ((STM32_SYSCLK_SW == RCC_CFGR_SW_PLL) && STM32_PLLCFG_PLLSRC == RCC_PLLCFG_PLLSRC_HSI)
 
   /* The PLL is using the HSI, or the HSI is the system clock.  In either
    * case, we need to enable HSI clocking.
@@ -535,7 +532,7 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
-#warning TODO: cofnigure flash latency
+#warning TODO: configure flash latency
   UNUSED(flash_1ws);
 
   /* Set the HCLK source/divider */
