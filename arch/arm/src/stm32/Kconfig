@@ -1321,6 +1321,10 @@ config STM32_USBACCESSLINE
 	select STM32_HAVE_USART3
 	select STM32_HAVE_SPI2
 
+config STM32_MEDIUMPLUSDENSITY
+	bool
+	default n
+
 config STM32_HIGHDENSITY
 	bool
 	default n
