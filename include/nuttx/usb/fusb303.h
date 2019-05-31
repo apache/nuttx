@@ -183,7 +183,7 @@ enum fusb303_reset_e
 
 enum fusb303_int_mask_e
 {
-  INT_MASK_ATTACK   = (1 << 0),
+  INT_MASK_ATTACH   = (1 << 0),
   INT_MASK_DETACH   = (1 << 1),
   INT_MASK_BC_LVL   = (1 << 2),
   INT_MASK_AUTOSNK  = (1 << 3),
