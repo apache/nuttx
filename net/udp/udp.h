@@ -353,7 +353,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  ****************************************************************************/
 
 int psock_udp_cansend(FAR struct socket *psock);
-;
+
 /****************************************************************************
  * Name: udp_send
  *

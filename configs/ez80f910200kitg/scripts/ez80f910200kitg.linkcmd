@@ -1,8 +1,8 @@
 /****************************************************************************/
-/* configs/ez80f910200kitg/ostest/ostest.linkcmd                             */
+/* configs/ez80f910200kitg/scripts/ez80f910200kitg.linkcmd                  */
 /*                                                                          */
 /*   Copyright (C) 2008 Gregory Nutt. All rights reserved.                  */
-/*   Author: Gregory Nutt <gnutt@nuttx.org>                          */
+/*   Author: Gregory Nutt <gnutt@nuttx.org>                                 */
 /*                                                                          */
 /* Redistribution and use in source and binary forms, with or without       */
 /* modification, are permitted provided that the following conditions       */

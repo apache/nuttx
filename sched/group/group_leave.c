@@ -142,9 +142,9 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Free all un-reaped child exit status */
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   group_removechildren(group);
 #endif
 
@@ -170,7 +170,6 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Free resource held by the stream list */
 
   lib_stream_release(group);
-
 #endif /* CONFIG_NFILE_STREAMS */
 
 #ifdef CONFIG_NET

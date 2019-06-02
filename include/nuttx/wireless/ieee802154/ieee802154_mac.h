@@ -677,16 +677,20 @@ union ieee802154_phyattr_u
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
+#if 0  /* Empty union causes errors on some compilers */
 union ieee802154_secattr_u
 {
   /* TODO: Fill this out as we implement supported get/set commands */
 };
+#endif
 
 union ieee802154_attr_u
 {
   union ieee802154_macattr_u mac;
   union ieee802154_phyattr_u phy;
+#if 0  /* Empty union causes errors on some compilers */
   union ieee802154_secattr_u sec;
+#endif
 };
 
 struct ieee802154_gts_info_s

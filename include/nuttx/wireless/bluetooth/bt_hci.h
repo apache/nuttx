@@ -46,7 +46,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
+
+#ifdef CONFIG_WIRELESS_BLUETOOTH
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -465,4 +469,5 @@ begin_packed_struct struct bt_hci_evt_le_ltk_request_s
   uint16_t ediv;
 } end_packed_struct;
 
+#endif /* CONFIG_WIRELESS_BLUETOOTH */
 #endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_HCI_H */
