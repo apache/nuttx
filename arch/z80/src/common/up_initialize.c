@@ -48,6 +48,7 @@
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
+#include <nuttx/net/telnet.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
