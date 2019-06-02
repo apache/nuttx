@@ -78,6 +78,7 @@
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
