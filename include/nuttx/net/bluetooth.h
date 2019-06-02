@@ -40,7 +40,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
+
+#ifdef CONFIG_NET_BLUETOOTH
 
 /****************************************************************************
  * Public Function Prototypes
@@ -144,4 +147,5 @@ int bluetooth_input(FAR struct radio_driver_s *radio,
                      FAR struct iob_s *framelist,
                      FAR struct bluetooth_frame_meta_s *meta);
 
+#endif /* CONFIG_NET_BLUETOOTH */
 #endif /*  __INCLUDE_NUTTX_NET_BLUETOOTH_H */
