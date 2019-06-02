@@ -183,6 +183,10 @@ configs/avr32dev1
   Atmel website.  STATUS: This port is functional but very basic.  There
   are configurations for NSH and the OS test.
 
+configs/axoloti
+  Support for the Axoloti synthesizer board based on the STMicro
+  STM32F427IGH6 MCU.  See: http://www.axoloti.com/
+
 configs/b-l072z-lrwan1
   STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 

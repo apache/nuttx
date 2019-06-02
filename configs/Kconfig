@@ -49,6 +49,16 @@ config ARCH_BOARD_AVR32DEV1
 		Atmel website.  STATUS: This port is functional but very basic.  There
 		are configurations for NSH and the OS test.
 
+config ARCH_BOARD_AXOLOTI
+	bool "Axoloti board"
+	depends on ARCH_CHIP_STM32F427I
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Axoloti synthesizer board based on the STMicro STM32F427IGH6 MCU.
+		See: http://www.axoloti.com/
+
 config ARCH_BOARD_C5471EVM
 	bool "Spectrum Digital C5471 evaluation board"
 	depends on ARCH_CHIP_C5471
@@ -1814,6 +1824,7 @@ config ARCH_BOARD
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
+	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32

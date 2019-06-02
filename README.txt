@@ -1738,6 +1738,8 @@ nuttx/
  |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
+ |   |- axoloti/
+ |   |   `- README.txt
  |   |- b-l475e-iot01a/
  |   |   `- README.txt
  |   |- bambino-200e/
