@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libsscanf.c
  *
- *   Copyright (C) 2007, 2008, 2011-2014, 2016, 2019 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007, 2008, 2011-2014, 2016, 2019 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Johannes Schock
  *
@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/streams.h>
 
 #include "libc.h"
@@ -59,6 +60,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
+ * support long long types.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_LIBC_LONG_LONG
+#endif
 
 #define MAXLN   128
 
