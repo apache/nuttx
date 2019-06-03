@@ -294,16 +294,12 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
 #ifdef CONFIG_SMP
   irqstate_t flags = enter_critical_section();
 #endif
-#if defined(CONFIG_DEBUG_ASSERTIONS) || \
-   (defined(MONITOR_MM_SEMAPHORE) && defined(CONFIG_DEBUG_INFO))
-  pid_t my_pid = getpid();
-#endif
 
   /* The current task should be holding at least one reference to the
    * semaphore.
    */
 
-  DEBUGASSERT(heap->mm_holder == my_pid);
+  DEBUGASSERT(heap->mm_holder == getpid());
 
   /* Does the current task hold multiple references to the semaphore */
 
@@ -319,7 +315,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
     {
       /* Nope, this is the last reference held by the current task. */
 
-      mseminfo("PID=%d giving\n", my_pid);
+      mseminfo("PID=%d giving\n", getpid());
 
       heap->mm_holder      = NO_HOLDER;
       heap->mm_counts_held = 0;

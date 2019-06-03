@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdarg.h>
 #include <syslog.h>
 
 #include <nuttx/syslog/syslog.h>
@@ -110,3 +111,4 @@ void syslog(int priority, FAR const IPTR char *fmt, ...)
   vsyslog(priority, fmt, ap);
   va_end(ap);
 }
+
