@@ -53,7 +53,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_SCHED_WORKQUEUE.  Not selectable.  Set by the configuration system
  *   if either CONFIG_SCHED_HPWORK or CONFIG_SCHED_LPWORK are selected.
  * CONFIG_SCHED_HPWORK.  Create a dedicated "worker" thread to
@@ -133,8 +135,6 @@
 
 #  undef CONFIG_LIB_USRWORK
 #endif
-
-#if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_LIB_USRWORK)
 
 /* High priority, kernel work queue configuration ***************************/
 
@@ -580,5 +580,4 @@ void work_notifier_signal(enum work_evtype_e evtype,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_SCHED_WORKQUEUE || CONFIG_LIB_USRWORK */
 #endif /* __INCLUDE_NUTTX_WQUEUE_H */
