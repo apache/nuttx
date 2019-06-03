@@ -130,6 +130,10 @@ ifeq ($(CONFIG_STM32H7_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
+ifeq ($(CONFIG_STM32H7_PWM),y)
+CHIP_CSRCS += stm32_pwm.c
+endif
+
 ifeq ($(CONFIG_STM32H7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif

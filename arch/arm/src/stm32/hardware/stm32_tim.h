@@ -129,13 +129,6 @@
 
 #define STM32_GTIM_OR_OFFSET       0x0050  /* Timer 2/5/11/16 option register */
 
-/* TIM16, and 17 only.
- * Only available in the STM32 F1 Value Line and the STM32 F3 family.
- */
-
-#define STM32_GTIM_RCR_OFFSET      0x0030  /* Repetition counter register (TIM16/TIM17) */
-#define STM32_GTIM_BDTR_OFFSET     0x0044  /* Break and dead-time register (TIM16/TIM17) */
-
 /* Advanced Timers - TIM1 and TIM8 */
 
 #define STM32_ATIM_CR1_OFFSET      0x0000  /* Control register 1 (16-bit) */
@@ -1241,48 +1234,6 @@
 #ifdef HAVE_IP_TIMERS_V2
 #  define GTIM_CCER_UIFCPY        (1 << 31) /* Bit 31: UIF copy */
 #endif
-
-/* Repitition counter (TIM15-17 only) */
-
-#define GTIM_RCR_REP_SHIFT        (0)       /* Bits 0-7: Repetition Counter Value */
-#define GTIM_RCR_REP_MASK         (0xff << GTIM_RCR_REP_SHIFT)
-
-#define GTIM_RCR_REP_MAX          128
-
-/* Break and dead-time register (TIM15-17 only) */
-
-#define GTIM_BDTR_DTG_SHIFT       (0)       /* Bits 7:0 [7:0]: Dead-Time Generator set-up */
-#define GTIM_BDTR_DTG_MASK        (0xff << GTIM_BDTR_DTG_SHIFT)
-#define GTIM_BDTR_LOCK_SHIFT      (8)       /* Bits 9:8 [1:0]: Lock Configuration */
-#define GTIM_BDTR_LOCK_MASK       (3 << GTIM_BDTR_LOCK_SHIFT)
-#  define GTIM_BDTR_LOCKOFF       (0 << GTIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
-#  define GTIM_BDTR_LOCK1         (1 << GTIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
-#  define GTIM_BDTR_LOCK2         (2 << GTIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
-#  define GTIM_BDTR_LOCK3         (3 << GTIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
-#define GTIM_BDTR_OSSI            (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
-#define GTIM_BDTR_OSSR            (1 << 11) /* Bit 11: Off-State Selection for Run mode */
-#define GTIM_BDTR_BKE             (1 << 12) /* Bit 12: Break enable */
-#define GTIM_BDTR_BKP             (1 << 13) /* Bit 13: Break Polarity */
-#define GTIM_BDTR_AOE             (1 << 14) /* Bit 14: Automatic Output enable */
-#define GTIM_BDTR_MOE             (1 << 15) /* Bit 15: Main Output enable */
-#define GTIM_BDTR_BKF_SHIFT       (16)      /* Bits 16-19: Break filter */
-#define GTIM_BDTR_BKF_MASK        (15 << GTIM_BDTR_BKF_SHIFT)
-#  define GTIM_BDTR_BKF_NOFILT    (0 << GTIM_BDTR_BKF_SHIFT)   /* 0000: No filter, BRK acts asynchronously */
-#  define GTIM_BDTR_BKF_FCKINT2   (1 << GTIM_BDTR_BKF_SHIFT)   /* 0001: fSAMPLING=fCK_INT, N=2 */
-#  define GTIM_BDTR_BKF_FCKINT4   (2 << GTIM_BDTR_BKF_SHIFT)   /* 0010: fSAMPLING=fCK_INT, N=4 */
-#  define GTIM_BDTR_BKF_FCKINT8   (3 << GTIM_BDTR_BKF_SHIFT)   /* 0011: fSAMPLING=fCK_INT, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd26   (4 << GTIM_BDTR_BKF_SHIFT)   /* 0100: fSAMPLING=fDTS/2, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd28   (5 << GTIM_BDTR_BKF_SHIFT)   /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd36   (6 << GTIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd38   (7 << GTIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd86   (8 << GTIM_BDTR_BKF_SHIFT)   /* 1000: fSAMPLING=fDTS/8, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd88   (9 << GTIM_BDTR_BKF_SHIFT)   /* 1001: fSAMPLING=fDTS/8, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd165  (10 << GTIM_BDTR_BKF_SHIFT)  /* 1010: fSAMPLING=fDTS/16, N=5 */
-#  define GTIM_BDTR_BKF_FDTSd166  (11 << GTIM_BDTR_BKF_SHIFT)  /* 1011: fSAMPLING=fDTS/16, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd168  (12 << GTIM_BDTR_BKF_SHIFT)  /* 1100: fSAMPLING=fDTS/16, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd325  (13 << GTIM_BDTR_BKF_SHIFT)  /* 1101: fSAMPLING=fDTS/32, N=5 */
-#  define GTIM_BDTR_BKF_FDTSd326  (14 << GTIM_BDTR_BKF_SHIFT)  /* 1110: fSAMPLING=fDTS/32, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd328  (15 << GTIM_BDTR_BKF_SHIFT)  /* 1111: fSAMPLING=fDTS/32, N=8 */
 
 /* DMA control register */
 

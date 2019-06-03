@@ -380,6 +380,16 @@
 #define GPIO_SPI3_SCK  GPIO_SPI3_SCK_1  /* PB3 */
 #define GPIO_SPI3_NSS  GPIO_SPI3_NSS_2  /* PA4 */
 
+/* TIM1 */
+
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PE9  - D6 */
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1NOUT_3 /* PE8  - D42 */
+#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PE11 - D5 */
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2NOUT_3 /* PE10 - D40 */
+#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PE13 - D3 */
+#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_3 /* PE12 - D39 */
+#define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PE14 - D38 */
+
 /* DMA ******************************************************************************/
 
 #define DMAMAP_SPI3_RX DMAMAP_DMA12_SPI3RX_0 /* DMA1 */
