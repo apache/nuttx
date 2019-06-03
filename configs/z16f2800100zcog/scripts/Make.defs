@@ -189,9 +189,8 @@ define ASSEMBLE
 endef
 
 define MOVEOBJ
-	$(Q) $(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(Q) $(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	-$(Q) $(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
 endef
 
 define ARCHIVE
@@ -224,9 +223,8 @@ define ASSEMBLE
 endef
 
 define MOVEOBJ
-	$(Q) $(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(Q) $(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	-$(Q) $(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
 endef
 
 define ARCHIVE

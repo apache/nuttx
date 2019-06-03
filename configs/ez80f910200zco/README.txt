@@ -62,7 +62,9 @@ Version 5.2.1
 
 Version 5.3.0
 
-  I started verification using 5.30 on June 2, 2019.  To you this toolchain, I had to suppress the gmtime() and gmtimer() because these were causing an internal compiler error:
+  I started verification using 5.30 on June 2, 2019.  To use this toolchain,
+  I had to suppress the gmtime() and gmtimer() because these were causing an
+  internal compiler error:
 
     time\lib_gmtimer.c
     P2: Internal Error(0xB47E59):
@@ -86,6 +88,9 @@ Version 5.3.0
 
   The consequence is, of course, that these interfaces will not be available
   to applications.
+
+  Another issue is that the ZDS-II version of stdarg.h does not provide
+  va_copy().  This affects libs/libc/lib_sysloc.c.
 
 Other Versions
   If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or

@@ -69,8 +69,36 @@ Version 5.0.1
   in those that file and your PATH environment variable.
 
 Version 5.2.1
-  On June 2, 2019, support for the 5.2.1 ZDS-II toolchain was added.  That
-  toolchain is unverified as of tis writing.
+  On June 2, 2019, support for the 5.2.1 ZDS-II toolchain was added.
+  I started verification using 5.30 on June 2, 2019.  To use this toolchain,
+  I had to suppress the gmtime() and gmtimer() because these were causing an
+  internal compiler error:
+
+    time\lib_gmtimer.c
+    P2: Internal Error(0xB47E59):
+            Please contact Technical Support
+
+  This is the change to suppress building these files:
+
+    diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
+    index 5c9b746778..8327e287f4 100644
+    --- a/libs/libc/time/Make.defs
+    +++ b/libs/libc/time/Make.defs
+    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
+     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+     else
+    -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
+    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
+     ifdef CONFIG_TIME_EXTENDED
+     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+
+  The consequence is, of course, that these interfaces will not be available
+  to applications.
+
+  Another issue is that the ZDS-II version of stdarg.h does not provide
+  va_copy().  This affects libs/libc/lib_sysloc.c.
 
 Other Versions
 

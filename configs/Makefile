@@ -83,8 +83,8 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 CXXSRCS = $(CONFIG_CXXSRCS)
 CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS)
+OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
 
 BIN = libconfigs$(LIBEXT)
 
@@ -100,10 +100,11 @@ $(COBJS): %$(OBJEXT): %.c
 $(CXXOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
-$(BIN): $(OBJS) $(CXXOBJS)
-	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
+$(BIN): $(OBJS)
+	$(Q) touch $(BIN)  # Archive may not exist
+	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS) $(CXXSRCS)
+.depend: Makefile $(SRCS)
 ifneq ($(SRCS),)
 	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
