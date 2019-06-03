@@ -813,6 +813,19 @@ config ARM_SEMIHOSTING_HOSTFS
 	---help---
 		Mount HostFS through semihosting.
 
+config ARM_LWL_CONSOLE
+	bool "Lightweight Link Console Support"
+	default n
+	depends on DEV_CONSOLE && ARCH_CHIP_STM32
+	---help---
+		Use the lightweight link console which provides console over a
+		debug channel by means of shared memory.  A terminal application
+		for openocd as the debugger is available in tools/ocdconsole.py.
+
+		Currently only available for STM32 architectures, but easily
+		added to other ARM architectures be addd up_low_console.c to the
+		architecture Make.defs file.
+
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif

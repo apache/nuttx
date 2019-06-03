@@ -204,7 +204,9 @@ void up_initialize(void)
    * serial driver).
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
+#if defined (CONFIG_ARM_LWL_CONSOLE)
+  lwlconsole_init();
+#elif defined(CONFIG_DEV_LOWCONSOLE)
   lowconsole_init();
 #elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();

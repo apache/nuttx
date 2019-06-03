@@ -6,8 +6,7 @@
 config DEV_LOWCONSOLE
 	bool "Low-level console support"
 	default n
-	depends on ARCH_LOWPUTC
-	depends on DEV_CONSOLE
+	depends on ARCH_LOWPUTC && DEV_CONSOLE
 	---help---
 		Use the simple, low-level, write-only serial console driver (minimal support)
 
