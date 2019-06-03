@@ -63,11 +63,9 @@
 
 struct sigwork_s
 {
-#ifdef CONFIG_SIG_EVTHREAD
   struct work_s work;           /* Work queue structure */
   union sigval value;           /* Data passed with notification */
   sigev_notify_function_t func; /* Notification function */
-#endif
 };
 
 /****************************************************************************
@@ -469,7 +467,8 @@ int nxsig_usleep(useconds_t usec);
  *   event - The instance of struct sigevent that describes how to signal
  *           the client.
  *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
- *   work  - The work structure to queue
+ *   work  - The work structure to queue.  Must be non-NULL if
+ *           event->sigev_notify == SIGEV_THREAD
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.

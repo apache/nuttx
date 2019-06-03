@@ -92,7 +92,7 @@ static void nxsig_notification_worker(FAR void *arg)
  * Name: nxsig_notification
  *
  * Description:
- *   Notify a client an event via either a singal or function call
+ *   Notify a client an event via either a signal or function call
  *   base on the sigev_notify field.
  *
  * Input Parameters:
@@ -100,7 +100,8 @@ static void nxsig_notification_worker(FAR void *arg)
  *   event - The instance of struct sigevent that describes how to signal
  *           the client.
  *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
- *   work  - The work structure to queue
+ *   work  - The work structure to queue.  Must be non-NULL if
+ *           event->sigev_notify == SIGEV_THREAD
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
