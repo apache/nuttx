@@ -44,6 +44,10 @@ Other Versions
   the configs/z8f64200100kit/*/Make.defs file and also your PATH environment
   variable.
 
+  It has been a long time since the z8 port has been used.  A lot has
+  changed so it would most likely require a modest effort to get the
+  compilation working again.
+
 Configuration Subdirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

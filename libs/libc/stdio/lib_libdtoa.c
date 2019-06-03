@@ -46,6 +46,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
@@ -158,7 +159,7 @@ static void lib_dtoa_string(FAR struct lib_outstream_s *obj, const char *str)
  ****************************************************************************/
 
 static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
-                     uint16_t flags, double value)
+                     uint16_t flags, double_t value)
 {
   FAR char *digits;     /* String returned by __dtoa */
   FAR char *rve;        /* Points to the end of the return value */

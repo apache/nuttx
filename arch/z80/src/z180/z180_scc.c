@@ -53,7 +53,7 @@
 #include <nuttx/serial/serial.h>
 #include <arch/io.h>
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "up_internal.h"
 
 #include "z180_config.h"

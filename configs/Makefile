@@ -65,7 +65,7 @@ BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
 # Basic
 
 CONFIG_ASRCS =
-CONFIG_CSRCS =
+CONFIG_CSRCS = dummy.c
 CONFIG_CXXSRCS =
 
 # boardctl support
@@ -101,7 +101,6 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 $(BIN): $(OBJS)
-	$(Q) touch $(BIN)  # Archive may not exist
 	$(call ARCHIVE, $@, $(OBJS))
 
 .depend: Makefile $(SRCS)

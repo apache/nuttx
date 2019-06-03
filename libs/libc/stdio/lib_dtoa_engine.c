@@ -37,6 +37,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/types.h>
 #include <math.h>
 
 #include "lib_dtoa_engine.h"
@@ -63,7 +64,7 @@
  * Public Functions
  ****************************************************************************/
 
-int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
+int __dtoa_engine(double_t x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals)
 {
   int32_t exp = 0;
@@ -92,7 +93,7 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
     }
   else
     {
-      double y;
+      double_t y;
 
       exp = MIN_MANT_EXP;
 

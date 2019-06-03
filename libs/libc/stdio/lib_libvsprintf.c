@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,7 +132,7 @@ struct arg
 #ifdef CONFIG_LIBC_LONG_LONG
     unsigned long long ull;
 #endif
-    double d;
+    double_t d;
     FAR char *cp;
   } value;
 };
@@ -493,7 +494,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
         }
       else if (c >= 'e' && c <= 'g')
         {
-          double value;
+          double_t value;
           int exp;              /* Exponent of master decimal digit */
           int n;
           uint8_t sign;         /* Sign character (or 0) */
@@ -542,14 +543,14 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
             }
           else
             {
-              value = va_arg(ap, double);
+              value = va_arg(ap, double_t);
             }
 #else
-          value = va_arg(ap, double);
+          value = va_arg(ap, double_t);
 #endif
 
           ndigs = __dtoa_engine(value, &_dtoa, ndigs,
-              ndecimal);
+                                ndecimal);
           exp = _dtoa.exp;
 
           sign = 0;
@@ -812,7 +813,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
-          (void)va_arg(ap, double);
+          (void)va_arg(ap, double_t);
           pnt  = "*float*";
           size = sizeof("*float*") - 1;
           goto str_lpad;
@@ -1228,7 +1229,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           break;
 
         case TYPE_DOUBLE:
-          arglist[i].value.d = va_arg(ap, double);
+          arglist[i].value.d = va_arg(ap, double_t);
           break;
 
         case TYPE_CHAR_POINTER:

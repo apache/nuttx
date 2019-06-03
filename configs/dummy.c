@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_initialstate.c
+ * configs/dummy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,58 +34,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <string.h>
-#include <nuttx/arch.h>
-
-#include "chip.h"
-#include "up_internal.h"
-#include "up_arch.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
+ * Name: __configs_dummy
  *
  * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
+ *   This is a dummy C file.  It is used to generate a useless object.  The
+ *   purpose of the useless object is to assure that libconfigs.a/lib is
+ *   created.  Some archivers (ZDS-II, SDCC) require a non-empty library or
+ *   they will generate errors
  *
- *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void up_initial_state(struct tcb_s *tcb)
+void __configs_dummy(void)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
-
-  /* Initialize the initial exception register context structure */
-
-  memset(xcp, 0, sizeof(struct xcptcontext));
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_PV_FLAG; /* Parity flag will enable interrupts */
-#endif
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
 }
