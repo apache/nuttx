@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <arch/board/board.h>
-#include "chip/chip.h"
+#include "chip.h"
 
 /************************************************************************************
  * Pre-processor Definitions

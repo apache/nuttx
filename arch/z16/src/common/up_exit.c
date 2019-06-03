@@ -49,7 +49,7 @@
 #  include <nuttx/fs/fs.h>
 #endif
 
-#include "chip/chip.h"
+#include "chip.h"
 #include "task/task.h"
 #include "sched/sched.h"
 #include "up_internal.h"

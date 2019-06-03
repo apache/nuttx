@@ -40,14 +40,14 @@ COMPILER = ${shell basename "$(CC)"}
 ARCHSRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  USRINCLUDES = -usrinc:'.;$(TOPDIR)/sched;$(ARCHSRCDIR);$(ARCHSRCDIR)/common'
+  USRINCLUDES = -usrinc:'.;$(TOPDIR)/sched;$(ARCHSRCDIR)$(DELIM)chip;$(ARCHSRCDIR)$(DELIM)common'
 else
 ifeq ($(COMPILER),zneocc.exe)
   WARCHSRCDIR := ${shell cygpath -w $(ARCHSRCDIR)}
-  USRINCLUDES = -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR);$(WARCHSRCDIR)\common'
+  USRINCLUDES = -usrinc:'.;$(WTOPDIR)\sched;$(WARCHSRCDIR)$(DELIM)chip;$(WARCHSRCDIR)$(DELIM)common'
 else
   WARCHSRCDIR = $(ARCHSRCDIR)
-  USRINCLUDES = -I$(TOPDIR)/sched -I$(ARCHSRCDIR) -I$(ARCHSRCDIR)/common
+  USRINCLUDES = -I$(TOPDIR)/sched -I$(ARCHSRCDIR)$(DELIM)chip -I$(ARCHSRCDIR)$(DELIM)common
 endif
 endif
 

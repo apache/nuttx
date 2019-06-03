@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
-#include "chip/chip.h"
+#include "chip.h"
 
 /*************************************************************************
  * External References / External Definitions
