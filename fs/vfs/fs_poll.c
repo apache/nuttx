@@ -128,7 +128,8 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
  *
  ****************************************************************************/
 
-static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
+static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
+                             FAR sem_t *sem)
 {
   unsigned int i;
   unsigned int j;
