@@ -942,7 +942,7 @@ static int usrsockdev_open(FAR struct file *filep)
 
   usrsockdev_semtake(&dev->devsem);
 
-  ninfo("opening /usr/usrsock\n");
+  ninfo("opening /dev/usrsock\n");
 
   /* Increment the count of references to the device. */
 
@@ -1186,14 +1186,13 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
     {
       /* Setup conn for new usrsock device. */
 
-      DEBUGASSERT(req_head->reqid == USRSOCK_REQUEST_SOCKET);
       dev = &g_usrsockdev;
       conn->dev = dev;
     }
 
   if (!usrsockdev_is_opened(dev))
     {
-      ninfo("usockid=%d; daemon has closed /usr/usrsock.\n", conn->usockid);
+      ninfo("usockid=%d; daemon has closed /dev/usrsock.\n", conn->usockid);
 
       return -ENETDOWN;
     }
@@ -1237,7 +1236,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
     }
   else
     {
-      ninfo("usockid=%d; daemon abruptly closed /usr/usrsock.\n",
+      ninfo("usockid=%d; daemon abruptly closed /dev/usrsock.\n",
             conn->usockid);
       ret = -ESHUTDOWN;
     }
