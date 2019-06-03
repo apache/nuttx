@@ -60,12 +60,20 @@ Version 5.2.1
   however, I encountered compiler internal errors.  I did not pursue that
   build any further.
 
+Version 5.3.0
+
+  I started verification using 5.30 on June 2, 2019.  There are lots of
+  compile issues; most look like compiler problems (but only a single
+  internal error).  Other errors are the consequence of commits to the
+  OS that did not follow C89.  It will take some time to get a clean
+  compile again.
+
 Other Versions
-  If you use any version of ZDS-II other than 5.1.1 or 5.2.1 or if you install
-  ZDS-II at any location other than the default location, you will have to
-  modify one or two files:  (1) configs/ez80f910200kitg/*/Make.defs and
-  (2) arch/z80/src/ez80/Toolchain.defs.  You probably have to modify the
-  path to your toolchain in the PATH environment variable.
+  If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or
+  if you install ZDS-II at any location other than the default location,
+  you will have to modify one or three files:  (1) arch/arm/z80/src/ez80Kconfig,
+  (2) configs/ez80f910200kitg/scripts/Make.defs and, perhaps, (3)
+  arch/z80/src/ez80/Toolchain.defs.
 
 Configuration Subdirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -46,7 +46,7 @@
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
 #endif
-#include "common/up_internal.h"
+#include "up_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions

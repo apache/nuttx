@@ -47,7 +47,7 @@
 #include <nuttx/sched.h>
 
 #include "chip.h"
-#include "common/up_internal.h"
+#include "up_internal.h"
 
 #ifdef USE_LOWSERIALINIT
 

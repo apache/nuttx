@@ -138,7 +138,7 @@ _nmi:
 					;----------------- --- ----- -----
 _ez80_handlers:
 	irqhandler	 0		; EZ80_EMACRX_IRQ   0    0   0x040
-	handlersize equ $-_ez80handlers
+	handlersize equ $-_ez80_handlers
 	irqhandler	 1		; EZ80_EMACTX_IRQ   1    1   0x044
 	irqhandler	 2		; EZ80_EMACSYS_IRQ  2    2   0x048
 	irqhandler	 3		; EZ80_PLL_IRQ      3    3   0x04c
