@@ -41,11 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/wqueue.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
 #include <signal.h>
+
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -281,7 +282,7 @@ int nxsig_kill(pid_t pid, int signo);
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sigwaitinfo() except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  * Input Parameters:
@@ -403,7 +404,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
  *   This is an internal OS interface.  It is functionally equivalent to
  *   the standard sleep() application interface except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - There is no check that the action of the signal is to invoke a
  *     signal-catching function or to terminate the process.
  *
@@ -437,7 +438,7 @@ unsigned int nxsig_sleep(unsigned int seconds);
  *   This is an internal OS interface.  It is functionally equivalent to
  *   the standard nxsig_usleep() application interface except that:
  *
- *   - It is not a cancellaction point, and
+ *   - It is not a cancellation point, and
  *   - It does not modify the errno value.
  *
  *   See the description of usleep() for additional information that is not

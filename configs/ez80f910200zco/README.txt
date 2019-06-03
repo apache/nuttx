@@ -62,11 +62,30 @@ Version 5.2.1
 
 Version 5.3.0
 
-  I started verification using 5.30 on June 2, 2019.  There are lots of
-  compile issues; most look like compiler problems (but only a single
-  internal error).  Other errors are the consequence of commits to the
-  OS that did not follow C89.  It will take some time to get a clean
-  compile again.
+  I started verification using 5.30 on June 2, 2019.  To you this toolchain, I had to suppress the gmtime() and gmtimer() because these were causing an internal compiler error:
+
+    time\lib_gmtimer.c
+    P2: Internal Error(0xB47E59):
+            Please contact Technical Support
+
+  This is the change to suppress building these files:
+
+    diff --git a/libs/libc/time/Make.defs b/libs/libc/time/Make.defs
+    index 5c9b746778..8327e287f4 100644
+    --- a/libs/libc/time/Make.defs
+    +++ b/libs/libc/time/Make.defs
+    @@ -44,7 +44,7 @@ ifdef CONFIG_LIBC_LOCALTIME
+     CSRCS += lib_localtime.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+     else
+    -CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
+    +CSRCS += lib_mktime.c # lib_gmtime.c lib_gmtimer.c
+     ifdef CONFIG_TIME_EXTENDED
+     CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
+     CSRCS += lib_ctimer.c
+
+  The consequence is, of course, that these interfaces will not be available
+  to applications.
 
 Other Versions
   If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or

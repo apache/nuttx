@@ -475,8 +475,8 @@ int pthread_attr_getstack(FAR pthread_attr_t *attr,
 
 /* Get run-time stack address and size */
 
-FAR void *pthread_get_stackaddr_np(FAR pthread_t thread);
-ssize_t pthread_get_stacksize_np(FAR pthread_t thread);
+FAR void *pthread_get_stackaddr_np(pthread_t thread);
+ssize_t pthread_get_stacksize_np(pthread_t thread);
 
 /* To create a thread object and runnable thread, a routine must be specified
  * as the new thread's start routine.  An argument may be passed to this
