@@ -68,13 +68,16 @@ Version 5.0.1
   on a different platform, you will need to change the path in the ZDS binaries
   in those that file and your PATH environment variable.
 
+Version 5.2.1
+  On June 2, 2019, support for the 5.2.1 ZDS-II toolchain was added.  That
+  toolchain is unverified as of tis writing.
+
 Other Versions
 
-  If you use any version of ZDS-II other than 5.0.1 or if you install ZDS-II
-  at any location other than the default location, you will have to modify
-  configs/z16f2800100zcog/*/Make.defs.  Simply edit that file, changing
-  5.0.1 to whatever.  Also make sure that your PATH environment variable
-  includes th correct path to the toolchain.
+  If you use any version of ZDS-II or if you install ZDS-II at any location
+  other than the default location, you will have to modify
+  arch/z16/src/z16f/Kconfig and configs/z16f2800100zcog/scripts/Make.defs.
+  Simply edit that file, changing 5.0.1 to whatever.
 
 Patches
 =======
