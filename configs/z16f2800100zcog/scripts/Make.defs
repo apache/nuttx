@@ -36,19 +36,28 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
-# These are the directories where the ZDS-II toolchain is installed.  NOTE
-# that short 8.3 path names are used in order to avoid spaces.  On my machine
-# I have:
+# These are the default directories where the ZDS-II toolchain is installed.
+# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
+# machine I have:
 #
-# C:\PROGRA~1\ = C:\Profram Files\
-# C:\PROGRA~2\ = C:\Program Files (x86)\
+# Versions 5.0.1
+#   C:\PROGRA~1\ = C:\Program Files\
+#   C:\PROGRA~2\ = C:\Program Files (x86)\
 #
 # Your PC may be configured differently.
+#
+# Version 5.2.1, the default install location is C:\ZiLOG
 
-ZDSVERSION = 5.0.1
+ifeq ($(CONFIG_Z16F_ZDSII_V511),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
+ZDSVERSION := 5.0.1
+else ifeq ($(CONFIG_Z16F_ZDSII_V521),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.2.1
+endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
+  ZDSINSTALLDIR = $(INSTALLROOT)/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
   INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
   ZDSBINDIR = $(INSTALLDIR)\bin
   ZDSSTDINCDIR = $(INSTALLDIR)\include\std
@@ -64,7 +73,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCHUSRINCLUDES = -usrinc:.
 else
   WINTOOL = y
-  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
+  ZDSINSTALLDIR = $(INSTALLROOT)/ZiLOG/ZDSII_ZNEO_$(ZDSVERSION)
   INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
   ZDSBINDIR = $(INSTALLDIR)/bin
   ZDSSTDINCDIR = $(INSTALLDIR)/include/std

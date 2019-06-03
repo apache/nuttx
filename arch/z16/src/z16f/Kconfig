@@ -36,4 +36,21 @@ config Z16F_ESPI_REGDEBUG
 	depends on DEBUG_FEATURES
 
 endmenu # Z16F ESPI Configuration
+
+# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
+# the ZNeo.
+#
+
+choice
+	prompt "ZDS-II Toolchain version"
+	default Z16F_ZDSII_V521
+
+config Z16F_ZDSII_V501
+	bool "ZDS-II 5.0.1"
+
+config Z16F_ZDSII_V521
+	bool "ZDS-II 5.2.1"
+
+endchoice # ZDS-II Toolchain version
+
 endif # ARCH_CHIP_Z16F
