@@ -278,7 +278,7 @@ struct sporadic_s;
 struct replenishment_s
 {
   FAR struct tcb_s *tcb;            /* The parent TCB structure                 */
-  struct wdog_s timer;              /* Timer dedicated to this interval         */
+  WDOG_ID timer;                    /* Timer dedicated to this interval         */
   uint32_t budget;                  /* Current budget time                      */
   uint8_t  flags;                   /* See SPORADIC_FLAG_* definitions          */
 };
@@ -571,8 +571,6 @@ struct task_group_s
  * that includes these common definitions.
  */
 
-FAR struct wdog_s;                       /* Forward reference                   */
-
 struct tcb_s
 {
   /* Fields used to support list management *************************************/
@@ -622,7 +620,7 @@ struct tcb_s
   FAR struct sporadic_s *sporadic;       /* Sporadic scheduling parameters      */
 #endif
 
-  FAR struct wdog_s *waitdog;            /* All timed waits use this timer      */
+  WDOG_ID waitdog;                       /* All timed waits use this timer      */
 
   /* Stack-Related Fields *******************************************************/
 
