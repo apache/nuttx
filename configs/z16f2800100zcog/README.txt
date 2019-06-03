@@ -100,6 +100,9 @@ Version 5.2.1
   Another issue is that the ZDS-II version of stdarg.h does not provide
   va_copy().  This affects libs/libc/lib_sysloc.c.
 
+  There are a few outstanding build issues, but it seems close enough for
+  the time being.
+
 Other Versions
 
   If you use any version of ZDS-II or if you install ZDS-II at any location
