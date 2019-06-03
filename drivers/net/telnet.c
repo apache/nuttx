@@ -890,6 +890,8 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
   do
     {
+      FAR const char *src;
+
       if (priv->td_pending == 0)
         {
           if (filep->f_oflags & O_NONBLOCK)
@@ -919,7 +921,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
       /* Process the buffered telnet data */
 
-      FAR const char *src = &priv->td_rxbuffer[priv->td_offset];
+      src = &priv->td_rxbuffer[priv->td_offset];
       ret = telnet_receive(priv, src, priv->td_pending, buffer, len);
 
       nxsem_post(&priv->td_exclsem);

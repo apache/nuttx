@@ -468,7 +468,8 @@ int nxsig_usleep(useconds_t usec);
  *           the client.
  *   code  - Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ
  *   work  - The work structure to queue.  Must be non-NULL if
- *           event->sigev_notify == SIGEV_THREAD
+ *           event->sigev_notify == SIGEV_THREAD.  Ignored if
+ *           CONFIG_SIG_EVTHREAD is not defined.
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
