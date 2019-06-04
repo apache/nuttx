@@ -103,14 +103,14 @@ UARTs
 
     eZ80 PIN        BOARD SIGNAL CN1 ACCESS
     =======================================
-    PD0/TXD1/IR_IXD CN1_TX0      Pin 61
-    PD1/RXD1/IR_RXD CN1_RX0      Pin 59
-    PD2/RTS1        CN1_RTS0     Pin 63
-    PD3/CTS1        CN1_CTS0     Pin 65
-    PD4/DTR1        CN1_DTR0     Pin 67
-    PD5/DSR1        CN1_DSR0     Pin 69
-    PD6/DCD1        CN1_DCD0     Pin 71
-    PD7/RIO1        CN1_RI0      Pin 73
+    PD0/TXD0/IR_IXD CN1_TX0      Pin 61
+    PD1/RXD0/IR_RXD CN1_RX0      Pin 59
+    PD2/RTS0        CN1_RTS0     Pin 63
+    PD3/CTS0        CN1_CTS0     Pin 65
+    PD4/DTR0        CN1_DTR0     Pin 67
+    PD5/DSR0        CN1_DSR0     Pin 69
+    PD6/DCD0        CN1_DCD0     Pin 71
+    PD7/RIO0        CN1_RI0      Pin 73
 
   UART 0:  All of Port C pins can support UART1 functions when configured
   for the alternate function 7.  For typical configurations only RXD and TXD
@@ -127,14 +127,73 @@ UARTs
     PC6/DCD1        CN1_DCD1     Pin 72
     PC7/RIO1        CN1_RI1      Pin 74
 
+  For use with a host terminal emulation, it will be necessary to connect
+  either a TTL-to-RS232 or a TTL-to-USB Serial adapter to CN1 pins 59 and
+  61, and 60 and 62, depending on the selected UART.
+
 Serial Keyboard and VGA Display
 -------------------------------
 
   The serial console can also be implemented using the MakerLisp USB
   Keyboard Controller Board and VGA Display Controller.  These are accessed
-  via the two UART ports.
+  via the one UART port, UART0.
 
-  [more to be provided]
+  In the default MakerLisp configuration.  These boards are connected as
+  follows:
+
+  1. VGA display controller connections (UART0 TX)
+
+     Board interface header
+     5  – 5V regulated power input
+     RX – VGA Display Controller serial input
+     C  – VGA Display Controller ready output
+     TX – VGA Display Controller serial output
+     G  – GND
+
+     Connections:
+
+     a. 5V '5' pin on VGA board to expansion board power distribution 5V.
+     b. Ground 'G' pin on VGA board to expansion board power distribution
+        ground.
+     c. Receive 'RX' pin on VGA board to expansion board GPIO PD0 (TXD0).
+     d. Communication, terminal ready indicator 'C' pin on VGA board to
+        expansion board GPIO PB1.
+     e. Transmit 'TX' pin on VGA board to USB keyboard controller 'R'
+
+     TBD:  Beyond the simple UART interface, what additional support for the
+           ready pin 'C' is required.
+
+  2. USB keyboard controller (UART0 RX)
+
+     Board interface header
+
+     5 – 5V regulated power input
+     R – USB Keyboard Controller serial input
+     T – USB Keyboard Controller serial output
+     G – GND
+
+     Connections:
+
+     a. 5V '5' pin on USB board to (other) expansion board power
+        distribution 5V.
+     b. Ground 'G' pin on USB board to (other) expansion board power
+        distribution ground.
+     c. Receive 'R' pin on USB board to VGA board 'TX' (see above).
+     d. Transmit 'T' pin on USB board to expansion board GPIO PD1 (RXD0).
+
+     If your keyboard does not seem to be doing anything, check the 'RX'
+     jumper on the expansion board. For input from a USB keyboard, and NOT
+     the USB/UART connection, you want this jumper REMOVED, not bridging the
+     two header pins front to back.
+
+  TBD:  What is the UART configuration when used with the VGA and Keyboard
+        adapters?
+
+Default Serial Console
+----------------------
+
+  UART0 is the default serial console in all configurations unless
+  otherwise noted in the description of the configuration.
 
 LEDs and Buttons
 ================
@@ -222,6 +281,15 @@ Configuration Subdirectories
 
     NOTES:
 
-    1. A serial console is provided on UART0.  It will be necessary to
-       connect either a TTL-to-RS232 or a TTL-to-USB Serial adapter to CN1
-       pins 59 and 61.
+    1. A serial console is provided on UART0.  This configuration may work
+       with or without the the VGA and Keyboard adapter boards.  For use
+       with a host terminal emulation without the accessory boards, it will
+       be necessary to connect either a TTL-to-RS232 or a TTL-to-USB Serial
+       adapter to CN1 pins 59 and 61.
+
+       The default baud setting is 57600N1.
+
+       TBD:  Although the UART0 is the same with the VGA and Keyboard
+             controller boards, this configuration may not compatible with
+             those accessories.  Those may require additional support for
+             the VGA data ready pin.  A BAUD mismatch is also likely.
