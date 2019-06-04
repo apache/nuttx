@@ -48,4 +48,3 @@
 #include <arch/chip/irq.h>
 
 #endif /* __ARCH_Z80_INCLUDE_IRQ_H */
-

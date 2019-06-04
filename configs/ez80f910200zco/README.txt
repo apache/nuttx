@@ -86,6 +86,14 @@ Version 5.3.0
      CSRCS += lib_dayofweek.c lib_asctime.c lib_asctimer.c lib_ctime.c
      CSRCS += lib_ctimer.c
 
+  And this:
+
+     stdlib\lib_strtof.c
+     stdlib\lib_strtof.c     (76,36) :       WARNING (32) Division by zero encountered
+     stdlib\lib_strtof.c     (102,36) :      WARNING (32) Division by zero encountered
+
+   Which can be worked around by removing it from the build
+
   The consequence is, of course, that these interfaces will not be available
   to applications.
 
