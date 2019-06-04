@@ -160,8 +160,9 @@ Serial Keyboard and VGA Display
         expansion board GPIO PB1.
      e. Transmit 'TX' pin on VGA board to USB keyboard controller 'R'
 
-     TBD:  Beyond the simple UART interface, what additional support for the
-           ready pin 'C' is required.
+     To use the VGA display controller with stdout and stderr, you also
+     need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
+     enables a required VGA initialization sequence.
 
   2. USB keyboard controller (UART0 RX)
 
@@ -289,7 +290,9 @@ Configuration Subdirectories
 
        The default baud setting is 57600N1.
 
-       TBD:  Although the UART0 is the same with the VGA and Keyboard
-             controller boards, this configuration may not compatible with
-             those accessories.  Those may require additional support for
-             the VGA data ready pin.  A BAUD mismatch is also likely.
+       To use the VGA display controller with stdout and stderr, you also
+       need to selection CONFIG_MAKERLISP_VGA=y in your configuration.  This
+       enables a required VGA initialization sequence.
+
+       TBD:  What is the UART configuration when used with the VGA and
+       Keyboard controllers?

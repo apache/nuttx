@@ -68,11 +68,10 @@ int ez80_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      serr("ERROR: Failed to mount procfs at %s: %d\n",
-           STM32_PROCFS_MOUNTPOINT, ret);
+      serr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
 

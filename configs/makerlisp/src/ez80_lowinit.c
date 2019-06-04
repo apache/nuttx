@@ -4,7 +4,8 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Based upon sample code included with the Zilog ZDS-II toolchain.
+ * Parts of this file are based on MakerLisp sample code by Luther Johnson
+ * which has a compatible MIT license
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,6 +48,7 @@
 #include <arch/chip/io.h>
 
 #include "chip.h"
+#include "up_internal.h"
 #include "makerlisp.h"
 
 /****************************************************************************
@@ -54,6 +56,66 @@
  ****************************************************************************/
 
 bool g_ebpresent = false;  /* True:  I/O Expansion board is present */
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define VGA_MAX_DELAY 2000000
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ez80_vga_initialize
+ *
+ * Description:
+ *   If CONFIG_MAKERLISP_VGA is defined and the I/O controller is attached,
+ *   then initialize the VGA interface.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MAKERLISP_VGA
+static void ez80_vga_initialize(void)
+{
+  /* I/O Expansion board attached? */
+
+  if (g_ebpresent)
+    {
+      bool vgapresent = false;
+      int delay;
+
+      /* Wait for VGA ready */
+
+      for (delay = 0; delay < VGA_MAX_DELAY; delay++)
+       {
+          if *(inp(EZ80_PB_DR) & EZ80_GPIOD1) != 0)
+            {
+              vgapresent = true;
+              break;
+            }
+        }
+
+      /* Is VGA ready (and, hence, present)? */
+
+      if (vgapresent)
+        {
+          /* Yes.. set newline mode, graphic attributes:
+           *
+           * \033 = ESCAPE character
+           * Assumption:  VGA is on the console UART.
+           */
+
+          up_puts("\033[20h\033[0m");
+
+          /* Clear, home cursor, beep */
+
+          up_puts("\033[2J\033[H\a");
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -136,6 +198,15 @@ void ez80_lowinit(void)
   /* Wait for the SD card to power up */
 
   up_udelay(750);
+
+#ifdef CONFIG_MAKERLISP_VGA
+  /* Initialize the VGA interface.  We want to do this as early as possible
+   * in the boot-up sequence.  Debug output prior initializing VGA will be
+   * lost.
+   */
+
+  ez80_vga_initialize();
+#endif
 }
 
 /****************************************************************************
