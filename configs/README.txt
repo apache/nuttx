@@ -368,6 +368,12 @@ configs/lpc4370-link2
   LPC4370FET100 MCU.  Based on the LPC4300 Xplorer port and provided by
   Lok Tep.
 
+configs/makerlisp
+  This port use the MakerLips machine based on an eZ80F091 ez80Acclaim!
+  Microcontroller, and the Zilog ZDS-II Windows command line tools.  The
+  development environment is Cygwin under Windows. A Windows native
+  development environment is available but has not been verified.
+
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
   are based on the STM32F103RBT6 chip for the standard version and on the

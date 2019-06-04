@@ -1,8 +1,7 @@
 /****************************************************************************
- * libs/libc/syslog/lib_syslog.c
+ * arch/makerlisp/include/board.h
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,78 +33,69 @@
  *
  ****************************************************************************/
 
+#ifndef __CONFIGS_MAKERLISP_INCLUDE_BOARD_H
+#define __CONFIGS_MAKERLISP_INCLUDE_BOARD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdint.h>
 
-#include <stdarg.h>
-#include <syslog.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#include <nuttx/syslog/syslog.h>
+/* Clocking */
 
-#include "syslog/syslog.h"
+#define EZ80_SYS_CLK_FREQ           50000000
+
+/* LEDs */
+
+/* The D3 GREEN LED is driven by an eZ80 GPI/O pin.  However, it has some
+ * additional properties:
+ *
+ * 1. On input, it will be '1' if the I/O expansion board is present.
+ * 2. Setting it to an output of '0' will generate a system reset.
+ * 3. Setting it to an output of '1' will not only illuminate the LED
+ *    take the card out of reset and enable power to the SD card slot.
+ *
+ * As a consequence, the GREEN LED will not be illuminated if SD card
+ * support or SPI is disabled.  The only effect of CONFIG_ARCH_LEDS is that
+ * the GREEN LED will turned off in the event of a crash.
+ */
+
+#define LED_STARTED                 0
+#define LED_HEAPALLOCATE            0
+#define LED_IRQSENABLED             0
+#define LED_STACKCREATED            0
+#define LED_IDLE                    0
+#define LED_INIRQ                   0
+#define LED_ASSERTION               1
+#define LED_SIGNAL                  0
+#define LED_PANIC                   1
+
+/* Button definitions
+ * The MakerLisp CPU board has no on-board buttons that can be sensed by the
+ * eZ80.
+ */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: vsyslog
- *
- * Description:
- *   The function vsyslog() performs the same task as syslog() with the
- *   difference that it takes a set of arguments which have been obtained
- *   using the stdarg variable argument list macros.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  /* Check if this priority is enabled */
+#else
+#define EXTERN extern
+#endif
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
-    {
-      /* Yes.. Perform the nx_vsyslog system call.
-       *
-       * NOTE:  The va_list parameter is passed by reference.  That is
-       * because the va_list is a structure in some compilers and passing
-       * of structures in the NuttX syscalls does not work.
-       */
-
-      (void)nx_vsyslog(priority, fmt, &ap);
-    }
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-/****************************************************************************
- * Name: syslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   The NuttX implementation does not support any special formatting
- *   characters beyond those supported by printf.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void syslog(int priority, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the work */
-
-  va_start(ap, fmt);
-  vsyslog(priority, fmt, ap);
-  va_end(ap);
-}
-
+#endif  /* __CONFIGS_MAKERLISP_INCLUDE_BOARD_H */

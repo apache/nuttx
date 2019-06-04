@@ -1833,6 +1833,8 @@ nuttx/
  |   |   `- README.txt
  |   |- lpcxpresso-lpc54628/
  |   |   `- README.txt
+ |   |- makerlisp/
+ |   |   `- README.txt
  |   |- maple/
  |   |   `- README.txt
  |   |- max32660-evsys/

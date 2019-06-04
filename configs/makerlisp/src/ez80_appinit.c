@@ -1,8 +1,7 @@
 /****************************************************************************
- * libs/libc/syslog/lib_syslog.c
+ * config/makerlisp/src/ez80_appinit.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,72 +39,56 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <syslog.h>
+#include <nuttx/board.h>
 
-#include <nuttx/syslog/syslog.h>
+#include "makerlisp.h"
 
-#include "syslog/syslog.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef OK
+#  define OK 0
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vsyslog
+ * Name: board_app_initialize
  *
  * Description:
- *   The function vsyslog() performs the same task as syslog() with the
- *   difference that it takes a set of arguments which have been obtained
- *   using the stdarg variable argument list macros.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value cold be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+int board_app_initialize(uintptr_t arg)
 {
-  /* Check if this priority is enabled */
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
-    {
-      /* Yes.. Perform the nx_vsyslog system call.
-       *
-       * NOTE:  The va_list parameter is passed by reference.  That is
-       * because the va_list is a structure in some compilers and passing
-       * of structures in the NuttX syscalls does not work.
-       */
+  return OK;
+#else
+  /* Perform board-specific initialization */
 
-      (void)nx_vsyslog(priority, fmt, &ap);
-    }
+  return ez80_bringup();
+#endif
 }
-
-/****************************************************************************
- * Name: syslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   The NuttX implementation does not support any special formatting
- *   characters beyond those supported by printf.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void syslog(int priority, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the work */
-
-  va_start(ap, fmt);
-  vsyslog(priority, fmt, ap);
-  va_end(ap);
-}
-

@@ -1,7 +1,7 @@
 ############################################################################
-# arch/z80/src/ez80/Make.defs
+# configs/makerlisp/Makefile
 #
-#   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2019 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,38 +33,23 @@
 #
 ############################################################################
 
-HEAD_ASRC = ez80_vectors.asm
-HEAD_SSRC =
+-include $(TOPDIR)/Make.defs
 
-CMN_SSRCS  =
-CMN_CSRCS  = up_initialize.c up_allocateheap.c up_createstack.c
-CMN_CSRCS += up_releasestack.c up_interruptcontext.c up_blocktask.c
-CMN_CSRCS += up_unblocktask.c up_exit.c up_releasepending.c
-CMN_CSRCS += up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c
-CMN_CSRCS += up_mdelay.c up_stackframe.c up_udelay.c up_usestack.c
-CMN_CSRCS += up_puts.c
+ASRCS =
+CSRCS = ez80_lowinit.c ez80_bringup.c
 
-CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
-CHIP_ASRCS += ez80_saveusercontext.asm ez80_restorecontext.asm
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-CHIP_ASRCS += ez80f91_init.asm
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += ez80_appinit.c
 endif
 
-CHIP_SSRCS  =
-CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
-CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c ez80_lowuart.c
-CHIP_CSRCS += ez80_timerisr.c ez80_serial.c ez80_registerdump.c
-
-ifneq ($(CONFIG_EZ80_I2C),y)
-CHIP_CSRCS += ez80_i2c.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += ez80_leds.c
 endif
 
-ifneq ($(CONFIG_EZ80_SPI),y)
-CHIP_CSRCS += ez80_spi.c
+ifeq ($(CONFIG_MMCSD_SPI),y)
+ifeq ($(CONFIG_EZ80_SPI),y)
+CSRCS += ez80_spimmcsd.c
+endif
 endif
 
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-ifeq ($(CONFIG_EZ80_EMAC),y)
-CHIP_CSRCS += ez80_emac.c
-endif
-endif
+include $(TOPDIR)/configs/Board.mk

@@ -1,8 +1,7 @@
 /****************************************************************************
- * libs/libc/syslog/lib_syslog.c
+ * configs/makerlisp/src/ez80_leds.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,78 +33,66 @@
  *
  ****************************************************************************/
 
+/* The D3 GREEN LED is driven by an eZ80 GPI/O pin.  However, it has some
+ * additional properties:
+ *
+ * 1. On input, it will be '1' if the I/O expansion board is present.
+ * 2. Setting it to an output of '0' will generate a system reset.
+ * 3. Setting it to an output of '1' will not only illuminate the LED
+ *    take the card out of reset and enable power to the SD card slot.
+ *
+ * As a consequence, the GREEN LED will not be illuminated if SD card
+ * support or SPI is disabled.  The only effect of CONFIG_ARCH_LEDS is that
+ * the GREEN LED will turned off in the event of a crash.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <syslog.h>
+#include <stdint.h>
 
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#include "syslog/syslog.h"
+#include "up_internal.h"
+#include "makerlisp.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vsyslog
- *
- * Description:
- *   The function vsyslog() performs the same task as syslog() with the
- *   difference that it takes a set of arguments which have been obtained
- *   using the stdarg variable argument list macros.
- *
- * Returned Value:
- *   None.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+void board_autoled_initialize(void)
 {
-  /* Check if this priority is enabled */
+}
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+/****************************************************************************
+ * Name: board_autoled_on
+ ****************************************************************************/
+
+void board_autoled_on(int led)
+{
+  if (led != 0)  /* LED_ASSERTION or LED_PANIC */
     {
-      /* Yes.. Perform the nx_vsyslog system call.
-       *
-       * NOTE:  The va_list parameter is passed by reference.  That is
-       * because the va_list is a structure in some compilers and passing
-       * of structures in the NuttX syscalls does not work.
-       */
-
-      (void)nx_vsyslog(priority, fmt, &ap);
+      /* To be provided */
     }
 }
 
 /****************************************************************************
- * Name: syslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   The NuttX implementation does not support any special formatting
- *   characters beyond those supported by printf.
- *
- * Returned Value:
- *   None.
- *
+ * Name: board_autoled_off
  ****************************************************************************/
 
-void syslog(int priority, FAR const IPTR char *fmt, ...)
+void board_autoled_off(int led)
 {
-  va_list ap;
-
-  /* Let vsyslog do the work */
-
-  va_start(ap, fmt);
-  vsyslog(priority, fmt, ap);
-  va_end(ap);
+  /* Ignored */
 }
 
+#endif /* CONFIG_ARCH_LEDS */

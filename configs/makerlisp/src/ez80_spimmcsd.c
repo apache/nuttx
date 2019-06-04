@@ -1,8 +1,7 @@
-/****************************************************************************
- * libs/libc/syslog/lib_syslog.c
+/*****************************************************************************
+ * configs/makerlisp/src/ez80_spimmcsd.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Greg Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,81 +30,92 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
  ****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <syslog.h>
+#include <pthread.h>
+#include <sched.h>
+#include <semaphore.h>
+#include <time.h>
+#include <unistd.h>
+#include <debug.h>
 
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
 
-#include "syslog/syslog.h"
+#include "chip.h"
+#include "ez80f91_spi.h"
+#include "makerlisp.h"
 
-/****************************************************************************
+#ifdef HAVE_MMCSD
+
+/*****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* NOTE:  We are using a SDCard adapter/module without Card Detect pin!
+ * Then we don't need to Card Detect callback here.
+ */
+
+/*****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: vsyslog
+/*****************************************************************************
+ * Name: ez80_spi1register
  *
  * Description:
- *   The function vsyslog() performs the same task as syslog() with the
- *   difference that it takes a set of arguments which have been obtained
- *   using the stdarg variable argument list macros.
- *
- * Returned Value:
- *   None.
+ *   Registers media change callback
  *
  ****************************************************************************/
 
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+int ez80_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                      void *arg)
 {
-  /* Check if this priority is enabled */
+  spiinfo("INFO: Registering spi1 device\n");
+  return OK;
+}
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+/*****************************************************************************
+ * Name: ez80_mmcsd_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card.
+ *
+ ****************************************************************************/
+
+int ez80_mmcsd_initialize(void)
+{
+  struct spi_dev_s *spi;
+  int ret;
+
+  mcinfo("INFO: Initializing mmcsd card\n");
+
+  /* Get/initialize the SPI interface */
+
+  spi = ez80_spibus_initialize(1);
+  if (spi == NULL)
     {
-      /* Yes.. Perform the nx_vsyslog system call.
-       *
-       * NOTE:  The va_list parameter is passed by reference.  That is
-       * because the va_list is a structure in some compilers and passing
-       * of structures in the NuttX syscalls does not work.
-       */
-
-      (void)nx_vsyslog(priority, fmt, &ap);
+      mcerr("ERROR: Failed to initialize SPI\n");
+      return -ENODEV;
     }
+
+  /* Register the MMC/SD block driver for slot 0 with device minor number 0. */
+
+  ret = mmcsd_spislotinitialize(0, 0, spi);
+  if (ret < 0)
+    {
+      mcerr("ERROR: Failed to bind SPI to SD slot 0\n");
+      return ret;
+    }
+
+  mcinfo("INFO: mmcsd card has been initialized successfully\n");
+  return OK;
 }
 
-/****************************************************************************
- * Name: syslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   The NuttX implementation does not support any special formatting
- *   characters beyond those supported by printf.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void syslog(int priority, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the work */
-
-  va_start(ap, fmt);
-  vsyslog(priority, fmt, ap);
-  va_end(ap);
-}
-
+#endif /* HAVE_MMCSD */

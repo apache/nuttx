@@ -97,13 +97,17 @@ Version 5.3.0
   The consequence is, of course, that these interfaces will not be available
   to applications.
 
-  Another issue is that the ZDS-II version of stdarg.h does not provide
-  va_copy().  This affects libs/libc/lib_sysloc.c.
+  Alternatively, you can use 'make -i' to build the system.  The above
+  errors will occur, but will not stop the build (unless the failed build
+  objects are brought into the link).  The has the negative side effects
+  that (1) the archives will always be rebuild in the directories where
+  the error occur, and (2) you might miss other, real compilation error
+  since these will no longer stop the compilation.
 
 Other Versions
   If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or
   if you install ZDS-II at any location other than the default location,
-  you will have to modify one or three files:  (1) arch/arm/z80/src/ez80Kconfig,
+  you will have to modify three files:  (1) arch/arm/z80/src/ez80/Kconfig,
   (2) configs/ez80f910200zco/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
 

@@ -611,6 +611,17 @@ config ARCH_BOARD_LPC1766STK
 		This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
 		Linux or Cygwin.  STATUS: Complete and mature.
 
+config ARCH_BOARD_MAKERLISP
+	bool "MakerLisp"
+	depends on ARCH_CHIP_EZ80F91
+	select ARCH_HAVE_LEDS
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the MakerLips machine
+		based on an eZ80F091 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under Windows. A
+		Windows native development environment is available but has not
+		been verified.
+
 config ARCH_BOARD_MAPLE
 	bool "maple board"
 	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
@@ -1870,6 +1881,7 @@ config ARCH_BOARD
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
 	default "maple"                    if ARCH_BOARD_MAPLE
+	default "makerlisp"                if ARCH_BOARD_MAKERLISP
 	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
 	default "mbed"                     if ARCH_BOARD_MBED
 	default "mcb1700"                  if ARCH_BOARD_MCB1700
@@ -2168,6 +2180,9 @@ source "configs/lpcxpresso-lpc1768/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO_LPC54628
 source "configs/lpcxpresso-lpc54628/Kconfig"
+endif
+if ARCH_BOARD_MAKERLISP
+source "configs/makerlisp/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
 source "configs/maple/Kconfig"

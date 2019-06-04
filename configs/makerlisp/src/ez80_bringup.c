@@ -1,8 +1,7 @@
 /****************************************************************************
- * libs/libc/syslog/lib_syslog.c
+ * config/makerlisp/src/ez80_bringup.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,72 +39,53 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <syslog.h>
-
-#include <nuttx/syslog/syslog.h>
-
-#include "syslog/syslog.h"
+#include <sys/types.h>
+#include <sys/mount.h>
+#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: vsyslog
+ * Name: ez80_bringup
  *
  * Description:
- *   The function vsyslog() performs the same task as syslog() with the
- *   difference that it takes a set of arguments which have been obtained
- *   using the stdarg variable argument list macros.
+ *   Perform architecture-specific initialization
  *
- * Returned Value:
- *   None.
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+int ez80_bringup(void)
 {
-  /* Check if this priority is enabled */
+  int ret = OK;
 
-  if ((g_syslog_mask & LOG_MASK(priority)) != 0)
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
     {
-      /* Yes.. Perform the nx_vsyslog system call.
-       *
-       * NOTE:  The va_list parameter is passed by reference.  That is
-       * because the va_list is a structure in some compilers and passing
-       * of structures in the NuttX syscalls does not work.
-       */
-
-      (void)nx_vsyslog(priority, fmt, &ap);
+      serr("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
     }
+#endif
+
+#ifdef HAVE_MMCSD
+  /* Initialize SPI-based SD card slot */
+
+  ret = ez80_mmcsd_initialize(void);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize SD card: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+  return ret;
 }
-
-/****************************************************************************
- * Name: syslog
- *
- * Description:
- *   syslog() generates a log message. The priority argument is formed by
- *   ORing the facility and the level values (see include/syslog.h). The
- *   remaining arguments are a format, as in printf and any arguments to the
- *   format.
- *
- *   The NuttX implementation does not support any special formatting
- *   characters beyond those supported by printf.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void syslog(int priority, FAR const IPTR char *fmt, ...)
-{
-  va_list ap;
-
-  /* Let vsyslog do the work */
-
-  va_start(ap, fmt);
-  vsyslog(priority, fmt, ap);
-  va_end(ap);
-}
-
