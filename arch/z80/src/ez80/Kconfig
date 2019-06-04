@@ -22,6 +22,14 @@ config EZ80_UART2
 	select UART2_SERIALDRIVER
 	default n
 
+config EZ80_I2C
+	bool "I2C"
+	default n
+
+config EZ80_SPI
+	bool "SPI"
+	default n
+
 config EZ80_EMAC
 	bool "Ethernet MAC"
 	default n
