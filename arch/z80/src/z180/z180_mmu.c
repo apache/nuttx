@@ -44,9 +44,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/mm/gran.h>
 
-#include <nuttx/irq.h>
+#include <arch/irq.h>
 #include <arch/io.h>
 
 #include "up_internal.h"
@@ -273,7 +274,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Now allocate the physical memory to back up the address environment */
 
-  alloc = (uintptr_t)gran_alloc(npages);
+  alloc = (uintptr_t)gran_alloc(g_physhandle, npages);
   if (alloc == NULL)
     {
       serr("ERROR: Failed to allocate %d pages\n", npages);
@@ -522,7 +523,7 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
  ****************************************************************************/
 
 int up_addrenv_clone(FAR const group_addrenv_t *src,
-                     FAR group_addrenv_t *dest);
+                     FAR group_addrenv_t *dest)
 {
   DEBUGASSERT(src && dest);
 
@@ -582,7 +583,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
+int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
   /* There is nothing that needs to be done */
 

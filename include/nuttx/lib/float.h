@@ -140,7 +140,9 @@
  * representable finite floating-point number, emax.
  */
 
-#define FLT_MAX_EXP 128
+#ifndef FLT_MAX_EXP         /* May be defined in system header */
+#  define FLT_MAX_EXP 128
+#endif
 
 #ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX_EXP 1024
@@ -158,7 +160,9 @@
  * representable finite floating-point numbers.
  */
 
-#define FLT_MAX_10_EXP 38  /* 37 */
+#ifndef FLT_MAX_10_EXP       /* May be defined in system header */
+#  define FLT_MAX_10_EXP 38  /* 37 */
+#endif
 
 #ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX_10_EXP 308  /* 37 */
@@ -174,7 +178,9 @@
 
 /* Maximum representable finite floating-point number. */
 
-#define FLT_MAX 3.40282347e+38F  /* 1E+37 */
+#ifndef FLT_MAX_EXP                /* May be defined in system header */
+#  define FLT_MAX 3.40282347e+38F  /* 1E+37 */
+#endif
 
 #ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_MAX 1.7976931348623157e+308  /* 1E+37 */
@@ -192,7 +198,9 @@
  * representable in the given floating-point type, b1-p.
  */
 
-#define FLT_EPSILON 1.1920929e-07F  /* 1E-5 */
+#ifndef FLT_EPSILON                   /* May be defined in system header */
+#  define FLT_EPSILON 1.1920929e-07F  /* 1E-5 */
+#endif
 
 #ifdef CONFIG_HAVE_DOUBLE
 #  define DBL_EPSILON 2.2204460492503131e-16  /* 1E-9 */
@@ -208,10 +216,12 @@
 
 /* Minimum normalized positive floating-point number, bemin -1. */
 
-#define FLT_MIN 1.17549435e-38F  /* 1E-37 */
+#ifndef FLT_EPSILON                /* May be defined in system header */
+#  define FLT_MIN 1.17549435e-38F  /* 1E-37 */
+#endif
 
 #ifdef CONFIG_HAVE_DOUBLE
-#define DBL_MIN 2.2250738585072014e-308  /* 1E-37 */
+#  define DBL_MIN 2.2250738585072014e-308  /* 1E-37 */
 #else
 #  define DBL_MIN FLT_MIN
 #endif

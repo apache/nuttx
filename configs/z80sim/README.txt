@@ -232,3 +232,5 @@ Known compilation problems:
 
   Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
 
+  In arch/z80/src/z180:  error 26: '_cbr' not a structure/union member
+

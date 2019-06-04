@@ -44,9 +44,12 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/irq.h>
 
-#include "chip/switch.h"
+#include <arch/irq.h>
+
+#include "switch.h"
 #include "sched/sched.h"
 #include "up_internal.h"
 
@@ -58,7 +61,8 @@
  * Name: z180_sigsetup
  ****************************************************************************/
 
-static void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+static void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
+                          FAR chipreg_t *regs)
 {
   /* Save the return address and interrupt state. These will be restored by
    * the signal trampoline after the signals have been delivered.
