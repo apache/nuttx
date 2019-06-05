@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/z8f64200100kit/src/z8_lowinit.c
+ * configs/z8f64200100kit/src/z8_boot.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@ static void z8_gpioinit(void)
  * Public Functions
  ****************************************************************************/
 
-void z8_lowinit(void)
+void z8_board_initialize(void)
 {
   z8_gpioinit();
 }

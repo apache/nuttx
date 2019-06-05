@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/makerlisp/src/ez80_lowinit.c
+ * configs/makerlisp/src/ez80_boot.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -122,7 +122,7 @@ static void ez80_vga_initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ez80_lowinit
+ * Name: ez80_board_initialize
  *
  * Description:
  *   All eZ80 architectures must provide the following entry point.  This
@@ -131,7 +131,7 @@ static void ez80_vga_initialize(void)
  *
  ****************************************************************************/
 
-void ez80_lowinit(void)
+void ez80_board_initialize(void)
 {
   register uint8_t regval;
 

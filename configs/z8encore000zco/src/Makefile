@@ -36,6 +36,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = z8_lowinit.c z8_leds.c
+CSRCS = z8_boot.c z8_leds.c
 
 include $(TOPDIR)/configs/Board.mk

@@ -36,6 +36,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = z16f_lowinit.c z16f_leds.c
+CSRCS = z16f_boot.c z16f_leds.c
 
 include $(TOPDIR)/configs/Board.mk

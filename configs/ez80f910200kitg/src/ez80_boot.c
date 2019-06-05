@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ez80f910200zco/src/ez80_lowinit.c
+ * configs/ez80f910200kitg/src/ez80_boot.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +59,7 @@ static void ez80_gpioinit(void)
  * Public Functions
  ****************************************************************************/
 
-void ez80_lowinit(void)
+void ez80_board_initialize(void)
 {
   ez80_gpioinit();
 }

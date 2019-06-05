@@ -36,7 +36,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = ez80_lowinit.c ez80_bringup.c
+CSRCS = ez80_boot.c ez80_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += ez80_appinit.c

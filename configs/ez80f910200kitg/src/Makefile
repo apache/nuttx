@@ -36,6 +36,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = ez80_lowinit.c ez80_leds.c
+CSRCS = ez80_boot.c ez80_leds.c
 
 include $(TOPDIR)/configs/Board.mk

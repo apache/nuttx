@@ -52,7 +52,7 @@
  **************************************************************************/
 
 	xref	_z16f_clkinit:EROM
-	xref	_z16f_lowinit:EROM
+	xref	_z16f_board_initialize:EROM
 #ifdef CONFIG_ARCH_LEDS
 	xref	_board_autoled_initialize:EROM
 #endif
@@ -84,43 +84,43 @@
  * Flash Option Byte Setup
  **************************************************************************/
 
-	define FOPTIONSEG, SPACE=ROM, ORG=0
-	segment FOPTIONSEG
-	db BOARD_FLOPTION0
-	db BOARD_FLOPTION1
-	db BOARD_FLOPTION2
-	db BOARD_FLOPTION3
+	define	FOPTIONSEG, SPACE=ROM, ORG=0
+	segment	FOPTIONSEG
+	db		BOARD_FLOPTION0
+	db		BOARD_FLOPTION1
+	db		BOARD_FLOPTION2
+	db		BOARD_FLOPTION3
 
 /**************************************************************************
  * vectors
  **************************************************************************/
 
-	vector RESET=_z16f_reset
-	vector SYSEXC=_sysexc_isr
-	vector TIMER2=_timer2_isr
-	vector TIMER1=_timer1_isr
-	vector TIMER0=_timer0_isr
-	vector UART0_RX=_uart0rx_isr
-	vector UART0_TX=_uart0tx_isr
-	vector I2C=_i2c_isr
-	vector SPI=_spi_isr
-	vector ADC=_adc_isr
-	vector P7AD=_p7ad_isr
-	vector P6AD=_p6ad_isr
-	vector P5AD=_p5ad_isr
-	vector P4AD=_p4ad_isr
-	vector P3AD=_p3ad_isr
-	vector P2AD=_p2ad_isr
-	vector P1AD=_p1ad_isr
-	vector P0AD=_p0ad_isr
-	vector PWM_TIMER=_pwmtimer_isr
-	vector UART1_RX=_uart1rx_isr
-	vector UART1_TX=_uart1tx_isr
-	vector PWM_FAULT=_pwmfault_isr
-	vector C3=_c3_isr
-	vector C2=_c3_isr
-	vector C1=_c2_isr
-	vector C0=_c0_isr
+	vector	RESET=_z16f_reset
+	vector	SYSEXC=_sysexc_isr
+	vector	TIMER2=_timer2_isr
+	vector	TIMER1=_timer1_isr
+	vector	TIMER0=_timer0_isr
+	vector	UART0_RX=_uart0rx_isr
+	vector	UART0_TX=_uart0tx_isr
+	vector	I2C=_i2c_isr
+	vector	SPI=_spi_isr
+	vector	ADC=_adc_isr
+	vector	P7AD=_p7ad_isr
+	vector	P6AD=_p6ad_isr
+	vector	P5AD=_p5ad_isr
+	vector	P4AD=_p4ad_isr
+	vector	P3AD=_p3ad_isr
+	vector	P2AD=_p2ad_isr
+	vector	P1AD=_p1ad_isr
+	vector	P0AD=_p0ad_isr
+	vector	PWM_TIMER=_pwmtimer_isr
+	vector	UART1_RX=_uart1rx_isr
+	vector	UART1_TX=_uart1tx_isr
+	vector	PWM_FAULT=_pwmfault_isr
+	vector	C3=_c3_isr
+	vector	C2=_c3_isr
+	vector	C1=_c2_isr
+	vector	C0=_c0_isr
 
 /**************************************************************************
  * Equates
@@ -134,8 +134,8 @@
  * Code
  **************************************************************************/
 
-	define CODESEG, SPACE=EROM
-	segment CODESEG
+	define	CODESEG, SPACE=EROM
+	segment	CODESEG
 
 /**************************************************************************
  * Name: _z16f_reset
@@ -213,7 +213,7 @@ _z16f_reset8:
 
 	/* Perform low-level hardware initialization */
 
-	call	_z16f_lowinit			/* Perform low-level hardware initialization */
+	call	_z16f_board_initialize	/* Perform low-level hardware initialization */
 
 #ifdef USE_EARLYSERIALINIT
 	/* Perform early serial initialization */
