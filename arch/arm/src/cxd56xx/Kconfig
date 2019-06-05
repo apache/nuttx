@@ -11,7 +11,30 @@ config CXD56_ARCH_OPTS
 	select ARCH_DMA
 	select SDIO_DMA if MMCSD
 
+comment "Basic Options"
+
+config CXD56_XOSC_CLOCK
+	int
+	default 26000000
+
+config CXD56_PMIC
+	bool
+	default y
+
+config CXD56_CPUFIFO
+	bool
+
+config CXD56_ICC
+	bool
+	default y
+
 menu "CXD56xx Peripheral Support"
+
+config CXD56_GPIO_IRQ
+	bool "GPIO interrupt"
+	default y
+	---help---
+		Enable support for GPIO interrupts
 
 config CXD56_UART1
 	bool "UART1"

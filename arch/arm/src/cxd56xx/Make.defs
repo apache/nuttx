@@ -87,3 +87,13 @@ CHIP_CSRCS  = cxd56_allocateheap.c cxd56_idle.c
 CHIP_CSRCS += cxd56_serial.c cxd56_uart.c cxd56_irq.c
 CHIP_CSRCS += cxd56_start.c
 CHIP_CSRCS += cxd56_timerisr.c
+CHIP_CSRCS += cxd56_pinconfig.c
+CHIP_CSRCS += cxd56_clock.c
+CHIP_CSRCS += cxd56_gpio.c
+CHIP_CSRCS += cxd56_pmic.c
+CHIP_CSRCS += cxd56_cpufifo.c
+CHIP_CSRCS += cxd56_icc.c
+
+ifeq ($(CONFIG_CXD56_GPIO_IRQ),y)
+CHIP_CSRCS += cxd56_gpioint.c
+endif
