@@ -157,6 +157,18 @@ int ez80_bringup(void);
 int ez80_mmcsd_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: ez80_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the MakerLisp board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_EZ80_SPI
+void ez80_spidev_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

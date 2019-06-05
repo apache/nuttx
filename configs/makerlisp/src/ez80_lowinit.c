@@ -157,35 +157,13 @@ void ez80_lowinit(void)
   regval &= ~EZ80_GPIOD5;
   outp(EZ80_PB_DDR, regval);
 
-  /* Set port B pins 7 (MOSI), 6 (MISO), 3 (SCK), 2 (/SS) to SPI */
+#ifdef CONFIG_EZ80_SPI
+  /* Initialize SPI chip selects */
 
-  regval  = inp(EZ80_PB_ALT1);
-  regval &= ~(EZ80_GPIOD2 | EZ80_GPIOD3 | EZ80_GPIOD6 | EZ80_GPIOD7);
-  outp(EZ80_PB_ALT1, regval);
+  ez80_spidev_initialize();
+#endif
 
-  regval  = inp(EZ80_PB_ALT2);
-  regval &= ~(EZ80_GPIOD2 | EZ80_GPIOD3 | EZ80_GPIOD6 | EZ80_GPIOD7);
-  outp(EZ80_PB_ALT2, regval);
-
-  /* Set port B pin 4 as output, high - use for /CS */
-
-  regval  = inp(EZ80_PB_DR);
-  regval |= EZ80_GPIOD4;
-  outp(EZ80_PB_DR, regval);
-
-  regval  = inp(EZ80_PB_ALT1);
-  regval &= ~EZ80_GPIOD4;
-  outp(EZ80_PB_ALT1, regval);
-
-  regval  = inp(EZ80_PB_ALT2);
-  regval &= ~EZ80_GPIOD4;
-  outp(EZ80_PB_ALT2, regval);
-
-  regval  = inp(EZ80_PB_DDR);
-  regval &= ~EZ80_GPIOD4;
-  outp(EZ80_PB_DDR, regval);
-
-  /* Leave /sysreset asserted for a while */
+  /* Leave /sysreset asserted for awhile longer */
 
   up_udelay(150);
 
