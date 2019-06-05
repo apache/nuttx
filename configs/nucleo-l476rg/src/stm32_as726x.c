@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/nucleo-l476rg/src/stm32_bmp180.c
+ * configs/nucleo-l476rg/src/stm32_as726x.c
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2019 Fabian Justi. All rights reserved.
+ *   Author: Fabian Justi <Fabian.Justi@gmx.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,57 +43,61 @@
 #include <debug.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/sensors/bmp180.h>
+#include <nuttx/sensors/as726x.h>
 
 #include "stm32l4.h"
 #include "stm32l4_i2c.h"
 #include "nucleo-l476rg.h"
 
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_AS726X)
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_bmp180initialize
+ * Name: stm32_as726xinitialize
  *
  * Description:
- *   Initialize and register the MPL115A Pressure Sensor driver.
+ *   Initialize and register the AS726X Spectral sensor.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/press0"
+ *   devpath - The full path to the driver to register. E.g., "/dev/spectr0"
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-int stm32_bmp180initialize(FAR const char *devpath)
+int stm32_as726xinitialize(FAR const char *devpath)
 {
   FAR struct i2c_master_s *i2c;
   int ret;
 
-  sninfo("Initializing BMP180!\n");
+  sninfo("Initializing AS726X!\n");
 
   /* Initialize I2C */
 
-  i2c = stm32l4_i2cbus_initialize(BMP180_I2C_PORTNO);
+  i2c = stm32l4_i2cbus_initialize(AS726X_I2C_PORTNO);
 
   if (!i2c)
     {
       return -ENODEV;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the light sensor */
 
-  ret = bmp180_register(devpath, i2c);
+  ret = as726x_register(devpath, i2c);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      snerr("ERROR: Error registering AS726X\n");
     }
 
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_SENSORS_BMP180 */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_AS726X && CONFIG_STM32_I2C1 */

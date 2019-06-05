@@ -422,6 +422,18 @@ int stm32l4_cc1101_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_as726xinitialize
+ *
+ * Description:
+ * Called to configure an I2C and to register AS726X.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_AS726X
+int stm32_as726xinitialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
  * Name: stm32_bmp180initialize
  *
  * Description:
