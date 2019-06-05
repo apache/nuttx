@@ -97,3 +97,7 @@ CHIP_CSRCS += cxd56_icc.c
 ifeq ($(CONFIG_CXD56_GPIO_IRQ),y)
 CHIP_CSRCS += cxd56_gpioint.c
 endif
+
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += cxd56_usbdev.c
+endif
