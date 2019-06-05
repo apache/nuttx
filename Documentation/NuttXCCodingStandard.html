@@ -17,7 +17,9 @@
 </table>
 
 <ul>
-  <b>1.0 <a href="#general">General Conventions</a></b>
+  <p>
+    <b>1.0 <a href="#general">General Conventions</a></b>
+  </p>
   <ul>
     1.1 <a href="#fileorganization">File Organization</a></br>
     1.2 <a href="#lines">Lines</a><br>
@@ -26,7 +28,9 @@
     1.5 <a href="#indentation">Indentation</a><br>
     1.6 <a href="#parentheses">Parentheses</a><br>
   </ul>
-  <b>2.0 <a href="#datatypes">Data and Type Definitions</a></b>
+  <p>
+    <b>2.0 <a href="#datatypes">Data and Type Definitions</a></b>
+  </p>
   <ul>
     2.1 <a href="#onedatperline">One Definition/Declaration Per Line</a><br>
     2.2 <a href="#globalvariable">Global Variables</a><br>
@@ -39,7 +43,9 @@
     2.9 <a href="#pointers">Pointer Variables</a><br>
     2.10 <a href="#initializers">Initializers</a>
   </ul>
-  <b>3.0 <a href="#functions">Functions</a></b>
+  <p>
+    <b>3.0 <a href="#functions">Functions</a></b>
+  </p>
   <ul>
     3.1 <a href="#funcheaders">Function Headers</a><br>
     3.2 <a href="#funcname">Function Names</a><br>
@@ -47,7 +53,9 @@
     3.4 <a href="#funcbody">Function Body</a><br>
     3.5 <a href="#retvalues">Returned Values</a>
   </ul>
-  <b>4.0 <a href="#statements">Statements</a></b>
+  <p>
+    <b>4.0 <a href="#statements">Statements</a></b>
+  </p>
   <ul>
     4.1 <a href="#onestatement">One Statement Per Line</a><br>
     4.2 <a href="#casts">Casts</a><br>
@@ -58,7 +66,12 @@
     4.7 <a href="#dowhile"><code>do while</code> Statement</a><br>
     4.8 <a href="#goto">Use of <code>goto</code></a>
   </ul>
-  <b><a href="#appndxa">Appendix A</a></b>
+  <p>
+    <b>5.0 <a href="#cplusplus">C++</a></b>
+  </p>
+  <p>
+    <b><a href="#appndxa">Appendix A</a></b>
+  </p>
   <ul>
     <a href="#cfilestructure">A.1 C Source File Structure</a><br>
     <a href="#hfilestructure">A.2 C Header File Structure</a>
@@ -74,7 +87,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: February 5, 2019</p>
+      <p>Last Updated: June 5, 2019</p>
     </td>
   </tr>
 </table>
@@ -2719,6 +2732,112 @@ error:
   <b>NOTE</b>:
   See the discussion of <a href="#farnear">pointers</a> for information about the <code>FAR</code> qualifier used above.
 </p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>5.0 <a name="cplusplus">C++</a></h1>
+    </td>
+  </tr>
+</table>
+
+<p>
+  There is no existing document that provides a complete coding standard for NuttX C++ files.
+  This section is included here to provide some minimal guidance in C++ code development.
+  In most details like indentation, spacing, and file organization, it is identical to the C coding standard.
+  But there are significant differences in the acceptable standard beyond that.
+  The primary differences are as follows:
+</p>
+<ol>
+  <li>
+    <p>
+      C++ style comments are not only permissible but are required (other than for the following exception).
+      This includes the block comments of in the <i>Source File Structure</i> described in an <a href="#appndxa">Appendix</a> to this standard.
+    </p>
+  </li>
+  <li>
+    <p>
+      Deoxygen tags are acceptable.  As are C style comments when needed to provide DOxygen tags.
+    </p>
+  </li>
+  <li>
+    <p>
+      There is currently no requirement to conform any specific C++ version.
+      However, for portability reasons, conformance to older, pre-C++11 standards is encouraged where reasonable.
+    </p>
+  <li>
+    <p>
+      All naming must use <i>CamelCase</i>.
+      Use of the underbar character, '_' is discouraged.
+      This includes variables, classes, structures, ..., etc.:  All user-nameable C++ elements.
+      Pre-processor definitions are still required to be all upper case.
+    </p>
+  </li>
+  <li>
+    <p>
+      Local variable, method names, and function names must all begin with a lower case letter.
+      As examples, <code>myLocalVariable</code> would be a compliant name for a local variable;
+      <code>myMethod</code> would be a compliant name for a method;
+    </p>
+  <li>
+    <p>
+      Namespaces, global variable, class, structure, template, and enumeration names begin with a capital letter identifying what is being named:
+    </p>
+  </li>
+  <p><ul>
+    <dl>
+      <dt>
+        <i>Namespace Names</i>
+      </dt>
+      <dd>
+        Namespaces begin with an upper case character but no particular character is specified.
+        As an example, <code>MyNamespace</code> is fully compliant.
+      </dd>
+      <dt>
+        <i>Global Variable Names</i>
+      </dt>
+      <dd>
+        Global variables and singletons begin with an upper case '<b>G</b>'.
+        For example, <code>GMyGlobalVariable</code>.
+      </dd>
+      <dt>
+        <i>Implementation Class Names</i>
+      </dt>
+      <dd>
+        Classes that implement methods begin with an upper case '<b>C</b>'.
+        For example, <code>CMyClass</code>.
+        A fully qualified method of <code>CMyClass</code> could be <code>MyNamespace::CMyClass::myMethod</code>
+      </dd>
+      <dt>
+        <i>Pure Virtual Base Class Names</i>
+      </dt>
+      <dd>
+        Such base classes begin with an upper case '<b>I</b>'.
+        For example, <code>IMyInterface</code>.
+      </dd>
+      <dt>
+        <i>Template Class Names</i>
+      </dt>
+      <dd>
+        Template classes begin with an upper case '<b>T</b>'.
+        For example, <code>TMyTemplate</code>.
+      </dd>
+      <dt>
+        <i>Structure Names</i>
+      </dt>
+      <dd>
+        Structures begin with an upper case '<b>S</b>'.
+        For example, <code>SMyStructure</code>.
+      </dd>
+      <dt>
+        <i>Enumerations Names</i>
+      </dt>
+      <dd>
+        Enumerations begin with an upper case '<b>E</b>'.
+        For example, <code>EMyEnumeration</code>.
+    </ul></p>
+  </dl>
+</ol>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
