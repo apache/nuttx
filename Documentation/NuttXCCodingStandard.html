@@ -260,7 +260,7 @@
 <p>
   <b>Forming Guard Names</b>.
   Then pre-processor macro name used in the guard is formed from the full, relative path to the header for from the top-level, controlled directory.
-  That pat is preceded by <code>__</code> and <code>_</code> replaces each character that would otherwise be invalid in a macro name.
+  That path is preceded by <code>__</code> and <code>_</code> replaces each character that would otherwise be invalid in a macro name.
   So, for example, __INCLUDE_NUTTX_ARCH_H corresponds to the header file <code>include/nuttx/arch.h</code>
 </p>
 
@@ -2799,6 +2799,7 @@ error:
       <dd>
         Global variables and singletons begin with an upper case '<b>G</b>'.
         For example, <code>GMyGlobalVariable</code>.
+        The prefix <code>g_</code> is never used.
       </dd>
       <dt>
         <i>Implementation Class Names</i>
@@ -2823,11 +2824,20 @@ error:
         For example, <code>TMyTemplate</code>.
       </dd>
       <dt>
+        <i><code>typedef</code>'d Type Names</i>
+      </dt>
+      <dd>
+        Currently all such types also begin with an upper case '<b>T</b>'.
+        That probably needs some resolution to distinguish for template names.
+        The suffix <code>_t</code> is never used.
+      </dd>
+      <dt>
         <i>Structure Names</i>
       </dt>
       <dd>
         Structures begin with an upper case '<b>S</b>'.
         For example, <code>SMyStructure</code>.
+        The suffix <code>_s</code> is never used.
       </dd>
       <dt>
         <i>Enumerations Names</i>
@@ -2835,6 +2845,7 @@ error:
       <dd>
         Enumerations begin with an upper case '<b>E</b>'.
         For example, <code>EMyEnumeration</code>.
+        The suffix <code>_e</code> is never used.
     </ul></p>
   </dl>
 </ol>
